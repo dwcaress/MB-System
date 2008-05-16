@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_navnetcdf.h	5/4/2002
- *	$Id: mbsys_navnetcdf.h,v 5.2 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbsys_navnetcdf.h,v 5.3 2008-05-16 22:56:24 caress Exp $
  *
- *    Copyright (c) 2002, 2003 by
+ *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -16,13 +16,16 @@
  * mbsys_navnetcdf.h defines the data structures used by MBIO functions
  * to store data from the IFREMER netCDF navigation format.
  * The MBIO format id is:
- *      MBF_MBNAVNETCDF : MBIO ID 75
+ *      MBF_NVNETCDF : MBIO ID 167
  *
  *
  * Author:	D. W. Caress
  * Date:	May 4, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.1  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

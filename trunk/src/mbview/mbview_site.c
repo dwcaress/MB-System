@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.8 2007-06-17 23:27:30 caress Exp $
+ *    $Id: mbview_site.c,v 5.9 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003, 2004, 2005 by
+ *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2007/06/17 23:27:30  caress
+ * Added NBeditviz.
+ *
  * Revision 5.7  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -104,7 +107,7 @@ static Arg      	args[256];
 static char	value_string[MB_PATH_MAXLINE];
 static char	value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.8 2007-06-17 23:27:30 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 5.9 2008-05-16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,
@@ -188,17 +191,17 @@ int mbview_allocsitearrays(int verbose,
 		}
 
 	/* allocate the arrays using mb_realloc */
-	status = mb_realloc(verbose,nsite*sizeof(double),sitelon,error);
+	status = mb_reallocd(verbose,__FILE__,__LINE__,nsite*sizeof(double),(void **)sitelon,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,nsite*sizeof(double),sitelat,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,nsite*sizeof(double),(void **)sitelat,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,nsite*sizeof(double),sitetopo,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,nsite*sizeof(double),(void **)sitetopo,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,nsite*sizeof(int),sitecolor,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,nsite*sizeof(int),(void **)sitecolor,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,nsite*sizeof(int),sitesize,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,nsite*sizeof(int),(void **)sitesize,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,nsite*sizeof(mb_path),sitename,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,nsite*sizeof(mb_path),(void **)sitename,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -255,12 +258,12 @@ int mbview_freesitearrays(int verbose,
 		}
 
 	/* free the arrays using mb_free */
-	status = mb_free(verbose,sitelon,error);
-	status = mb_free(verbose,sitelat,error);
-	status = mb_free(verbose,sitetopo,error);
-	status = mb_free(verbose,sitecolor,error);
-	status = mb_free(verbose,sitesize,error);
-	status = mb_free(verbose,sitename,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)sitelon,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)sitelat,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)sitetopo,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)sitecolor,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)sitesize,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)sitename,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -344,9 +347,9 @@ int mbview_addsites(int verbose, int instance,
 fprintf(stderr,"Have %d sites allocated but need %d + %d = %d\n",
 shared.shareddata.nsite_alloc, shared.shareddata.nsite, nsite, shared.shareddata.nsite + nsite);
 		shared.shareddata.nsite_alloc = shared.shareddata.nsite + nsite;
-		status = mb_realloc(mbv_verbose, 
+		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 			    	shared.shareddata.nsite_alloc * sizeof(struct mbview_site_struct),
-			    	&(shared.shareddata.sites), &error);
+			    	(void **)&(shared.shareddata.sites), error);
 		if (status == MB_FAILURE)
 			{
 			shared.shareddata.nsite_alloc = 0;
@@ -864,9 +867,9 @@ int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel)
 			if (shared.shareddata.nsite_alloc < shared.shareddata.nsite + 1)
 				{
 				shared.shareddata.nsite_alloc += MBV_ALLOC_NUM;
-				status = mb_realloc(mbv_verbose, 
+				status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 			    			shared.shareddata.nsite_alloc * sizeof(struct mbview_site_struct),
-			    			&(shared.shareddata.sites), &error);
+			    			(void **)&(shared.shareddata.sites), &error);
 				if (status == MB_FAILURE)
 					{
 					shared.shareddata.nsite_alloc = 0;

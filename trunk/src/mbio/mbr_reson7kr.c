@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.18 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.19 2008-05-16 22:56:24 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.17  2008/01/14 18:11:55  caress
  * Fixes to handling beamflagging following upgrades to Reson 7k multibeams.
  *
@@ -217,7 +220,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.18 2008-03-01 09:14:03 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.19 2008-05-16 22:56:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -515,11 +518,11 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 	/* allocate memory if necessary */
 	if (status == MB_SUCCESS)
 		{
-		status = mb_realloc(verbose, MBSYS_RESON7K_BUFFER_STARTSIZE,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, MBSYS_RESON7K_BUFFER_STARTSIZE,
+					(void **)bufferptr, error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, MBSYS_RESON7K_BUFFER_STARTSIZE,
-					buffersaveptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, MBSYS_RESON7K_BUFFER_STARTSIZE,
+					(void **)buffersaveptr, error);
 		if (status == MB_SUCCESS)
 			*bufferalloc = MBSYS_RESON7K_BUFFER_STARTSIZE;
 		}
@@ -576,8 +579,8 @@ int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error)
 	bufferalloc = (int *) &mb_io_ptr->save6;
 	buffersaveptr = (char **) &mb_io_ptr->save7;
 	buffersave = (char *) *buffersaveptr;
-	status = mb_free(verbose,bufferptr,error);
-	status = mb_free(verbose,buffersaveptr,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)bufferptr,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)buffersaveptr,error);
 	*bufferalloc = 0;
 
 	/* print output debug statements */
@@ -604,6 +607,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_reson7k_struct *store;
 	s7kr_position 		*position;
 	s7kr_attitude 		*attitude;
+	s7kr_rollpitchheave	*rollpitchheave;
+	s7kr_customattitude	*customattitude;
 	s7kr_volatilesettings	*volatilesettings;
 	s7kr_beamgeometry	*beamgeometry;
 	s7kr_bathymetry		*bathymetry;
@@ -667,8 +672,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		position = &(store->position);
 		mb_navint_add(verbose, mbio_ptr, 
 				store->time_d, 
-				position->longitude, 
-				position->latitude, 
+				(double)(RTD * position->longitude), 
+				(double)(RTD * position->latitude), 
 				error);
 		}
 
@@ -716,9 +721,10 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 			}
 		}
 
-	/* save attitude if attitude data */
+	/* save attitude if attitude record */
 	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_ATTITUDE)
+		&& store->kind == MB_DATA_ATTITUDE
+		&& store->type == R7KRECID_Attitude)
 		{
 		/* get attitude structure */
 		attitude = &(store->attitude);
@@ -729,12 +735,53 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 			mb_attint_add(verbose, mbio_ptr,
 				(double)(store->time_d + 0.001 * ((double)attitude->delta_time[i])),
 				(double)(attitude->heave[i]),
-				(double)(attitude->roll[i]),
-				(double)(attitude->pitch[i]),
+				(double)(RTD * attitude->roll[i]),
+				(double)(RTD * attitude->pitch[i]),
 				error);
 			mb_hedint_add(verbose, mbio_ptr,
 				(double)(store->time_d + 0.001 * ((double)attitude->delta_time[i])),
-				(double)(attitude->heading[i]),
+				(double)(RTD * attitude->heading[i]),
+				error);
+			}
+		}
+
+	/* else save attitude if rollpitchheave record */
+	else if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_ATTITUDE
+		&& store->type == R7KRECID_RollPitchHeave)
+		{
+		/* get attitude structure */
+		rollpitchheave = &(store->rollpitchheave);
+		
+		/* add latest attitude samples */
+		mb_attint_add(verbose, mbio_ptr,
+				(double)(store->time_d),
+				(double)(rollpitchheave->heave),
+				(double)(RTD * rollpitchheave->roll),
+				(double)(RTD * rollpitchheave->pitch),
+				error);
+		}
+
+	/* else save attitude if customattitude record */
+	else if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_ATTITUDE
+		&& store->type == R7KRECID_CustomAttitude)
+		{
+		/* get attitude structure */
+		customattitude = &(store->customattitude);
+		
+		/* add latest attitude samples */
+		for (i=0;i<customattitude->n;i++)
+			{
+			mb_attint_add(verbose, mbio_ptr,
+				(double)(store->time_d + ((double)i) / ((double)customattitude->frequency)),
+				(double)(customattitude->heave[i]),
+				(double)(RTD * customattitude->roll[i]),
+				(double)(RTD * customattitude->pitch[i]),
+				error);
+			mb_hedint_add(verbose, mbio_ptr,
+				(double)(store->time_d + ((double)i) / ((double)customattitude->frequency)),
+				(double)(RTD * customattitude->heading[i]),
 				error);
 			}
 		}
@@ -769,7 +816,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		&& store->kind == MB_DATA_DATA
 		&& bathymetry->optionaldata == MB_NO)
 		{
-		/* get navigation, etc */
+		/* get navigation */
 		speed = 0.0;
 		interp_status = mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 				    &heading, error);
@@ -782,23 +829,28 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		if (interp_status == MB_SUCCESS)
 		interp_status = mb_altint_interp(verbose, mbio_ptr, store->time_d,  
 				    &sonar_altitude, error);
-		if (interp_status == MB_SUCCESS)
-		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d,  
-				    &heave, &roll, &pitch, error);
 				    
 		/* if the optional data are not all available, this ping
 			is not useful. Just use null values here and catch
 			this condition with mb7kpreprocess */
 		if (interp_status == MB_FAILURE)
 			{
-			/* set nav & attitude data to zero */
+			/* set nav data to zero */
 			longitude = 0.0;
 			latitude = 0.0;
 			heading = 0.0;
+			sonar_depth = 0.0;
+			}
+
+		/* get attitude */
+		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d,  
+				    &heave, &roll, &pitch, error);
+		if (interp_status == MB_FAILURE)
+			{
+			/* set nav & attitude data to zero */
 			roll = 0.0;
 			pitch = 0.0;
 			heave = 0.0;
-			sonar_depth = 0.0;
 			}
 			
 		/* calculate the optional values in the bathymetry record */
@@ -1073,11 +1125,11 @@ Have a nice day...\n");
 			/* allocate memory to read rest of record if necessary */
 			if (*bufferalloc < *size)
 				{
-				status = mb_realloc(verbose, *size,
-							bufferptr, error);
+				status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+							(void **)bufferptr, error);
 				if (status == MB_SUCCESS)
-				status = mb_realloc(verbose, *size,
-							buffersaveptr, error);
+				status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+							(void **)buffersaveptr, error);
 				if (status != MB_SUCCESS)
 					{
 					*bufferalloc = 0;
@@ -2584,21 +2636,21 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
 	if (customattitude->nalloc < customattitude->n)
 		{
 		data_size = customattitude->n * sizeof(float);
-		status = mb_realloc(verbose, data_size, &(customattitude->pitch), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(customattitude->pitch), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(customattitude->roll), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(customattitude->roll), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(customattitude->heading), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(customattitude->heading), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(customattitude->heave), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(customattitude->heave), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(customattitude->pitchrate), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(customattitude->pitchrate), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(customattitude->rollrate), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(customattitude->rollrate), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(customattitude->headingrate), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(customattitude->headingrate), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(customattitude->heaverate), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(customattitude->heaverate), error);
 		if (status == MB_SUCCESS)
 			{
 			customattitude->nalloc = customattitude->n;
@@ -2927,17 +2979,17 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
 	if (motion->nalloc < motion->n)
 		{
 		data_size = motion->n * sizeof(float);
-		status = mb_realloc(verbose, data_size, &(motion->x), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(motion->x), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(motion->y), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(motion->y), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(motion->z), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(motion->z), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(motion->xa), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(motion->xa), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(motion->ya), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(motion->ya), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(motion->za), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(motion->za), error);
 		if (status == MB_SUCCESS)
 			{
 			motion->nalloc = motion->n;
@@ -3165,9 +3217,9 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error)
 	if (svp->nalloc < svp->n)
 		{
 		data_size = svp->n * sizeof(float);
-		status = mb_realloc(verbose, data_size, &(svp->depth), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(svp->depth), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(svp->sound_velocity), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(svp->sound_velocity), error);
 		if (status == MB_SUCCESS)
 			{
 			svp->nalloc = svp->n;
@@ -3287,15 +3339,15 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error)
 	if (ctd->nalloc < ctd->n)
 		{
 		data_size = ctd->n * sizeof(float);
-		status = mb_realloc(verbose, data_size, &(ctd->conductivity_salinity), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(ctd->conductivity_salinity), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(ctd->temperature), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(ctd->temperature), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(ctd->pressure_depth), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(ctd->pressure_depth), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(ctd->sound_velocity), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(ctd->sound_velocity), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(ctd->absorption), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(ctd->absorption), error);
 		if (status == MB_SUCCESS)
 			{
 			ctd->nalloc = ctd->n;
@@ -3712,16 +3764,16 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
 	if (attitude->nalloc < attitude->n)
 		{
 		data_size = attitude->n * sizeof(unsigned short);
-		status = mb_realloc(verbose, data_size, &(attitude->delta_time), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(attitude->delta_time), error);
 		data_size = attitude->n * sizeof(float);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(attitude->roll), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(attitude->roll), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(attitude->pitch), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(attitude->pitch), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(attitude->heave), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(attitude->heave), error);
 		if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(attitude->heading), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(attitude->heading), error);
 		if (status == MB_SUCCESS)
 			{
 			attitude->nalloc = attitude->n;
@@ -3846,7 +3898,7 @@ unsigned short *urptr,*usptr;
 	data_size = fsdwchannel->bytespersample * fsdwchannel->number_samples;
 	if (fsdwchannel->data_alloc < data_size)
 		{
-		status = mb_realloc(verbose, data_size, &(fsdwchannel->data), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(fsdwchannel->data), error);
 		if (status != MB_SUCCESS)
 			fsdwchannel->data_alloc = 0;
 		else
@@ -5335,7 +5387,7 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
 		if (device->info_alloc < device->info_length)
 			{
 			data_size = device->info_length + 1;
-			status = mb_realloc(verbose, data_size, &(device->info), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(device->info), error);
 			if (status == MB_SUCCESS)
 				{
 				device->info_alloc = device->info_length;
@@ -5923,9 +5975,9 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 	data_size = backscatter->number_samples * backscatter->sample_size;
 	if (backscatter->nalloc < data_size)
 		{
-		status = mb_realloc(verbose, data_size, &(backscatter->port_data), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(backscatter->port_data), error);
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, data_size, &(backscatter->stbd_data), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(backscatter->stbd_data), error);
 		if (status == MB_SUCCESS)
 			{
 			backscatter->nalloc = data_size;
@@ -6145,11 +6197,11 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 			{
 			snippet->nalloc = nalloc;
 			if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, snippet->nalloc,
-						(char **) &(snippet->amplitude), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, snippet->nalloc,
+						(void **) &(snippet->amplitude), error);
 			if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, snippet->nalloc,
-						(char **) &(snippet->phase), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, snippet->nalloc,
+						(void **) &(snippet->phase), error);
 			if (status != MB_SUCCESS)
 				{
 				snippet->nalloc = 0;
@@ -6463,8 +6515,8 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 		{
 		image->nalloc = nalloc;
 		if (status == MB_SUCCESS)
-		status = mb_realloc(verbose, image->nalloc,
-					(char **) &(image->image), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, image->nalloc,
+					(void **)&(image->image), error);
 		if (status != MB_SUCCESS)
 			{
 			image->nalloc = 0;
@@ -6847,7 +6899,7 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
 	if (systemeventmessage->message_alloc < systemeventmessage->message_length)
 		{
 		data_size = systemeventmessage->message_length + 1;
-		status = mb_realloc(verbose, data_size, &(systemeventmessage->message), error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(systemeventmessage->message), error);
 		if (status == MB_SUCCESS)
 			{
 			systemeventmessage->message_alloc = systemeventmessage->message_length;
@@ -8003,8 +8055,8 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -8113,8 +8165,8 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -8226,8 +8278,8 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -8339,8 +8391,8 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -8472,8 +8524,8 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -8624,8 +8676,8 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -8742,8 +8794,8 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -8855,8 +8907,8 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -8997,8 +9049,8 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -9110,8 +9162,8 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -9230,8 +9282,8 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -9359,8 +9411,8 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -9508,8 +9560,8 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -9617,8 +9669,8 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -9724,8 +9776,8 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -10198,8 +10250,8 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -10348,8 +10400,8 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -10502,8 +10554,8 @@ fsdwchannel->sample_interval,fsdwsegyheader->sampleInterval);
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -10621,8 +10673,8 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -10803,8 +10855,8 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -10957,8 +11009,8 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -11085,8 +11137,8 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -11199,8 +11251,8 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -11328,8 +11380,8 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -11459,8 +11511,8 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -11622,8 +11674,8 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -11669,9 +11721,9 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 		data_size = backscatter->number_samples * backscatter->sample_size;
 		if (backscatter->nalloc < data_size)
 			{
-			status = mb_realloc(verbose, data_size, &(backscatter->port_data), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(backscatter->port_data), error);
 			if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, data_size, &(backscatter->stbd_data), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(backscatter->stbd_data), error);
 			if (status == MB_SUCCESS)
 				{
 				backscatter->nalloc = data_size;
@@ -11871,8 +11923,8 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -11923,11 +11975,11 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 				{
 				snippet->nalloc = nalloc;
 				if (status == MB_SUCCESS)
-				status = mb_realloc(verbose, snippet->nalloc,
-							(char **) &(snippet->amplitude), error);
+				status = mb_reallocd(verbose, __FILE__, __LINE__, snippet->nalloc,
+							(void **)&(snippet->amplitude), error);
 				if (status == MB_SUCCESS)
-				status = mb_realloc(verbose, snippet->nalloc,
-							(char **) &(snippet->phase), error);
+				status = mb_reallocd(verbose, __FILE__, __LINE__, snippet->nalloc,
+							(void **) &(snippet->phase), error);
 				if (status != MB_SUCCESS)
 					{
 					snippet->nalloc = 0;
@@ -12117,8 +12169,8 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -12247,8 +12299,8 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -12286,8 +12338,8 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 			{
 			image->nalloc = nalloc;
 			if (status == MB_SUCCESS)
-			status = mb_realloc(verbose, image->nalloc,
-						(char **) &(image->image), error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, image->nalloc,
+						(void **)&(image->image), error);
 			if (status != MB_SUCCESS)
 				{
 				image->nalloc = 0;
@@ -12406,8 +12458,8 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -12595,8 +12647,8 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -12739,8 +12791,8 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -12857,8 +12909,8 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -13001,8 +13053,8 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -13110,8 +13162,8 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -13219,8 +13271,8 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -13328,8 +13380,8 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;
@@ -13437,8 +13489,8 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
-		status = mb_realloc(verbose, *size,
-					bufferptr, error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
 		if (status != MB_SUCCESS)
 			{
 			*bufferalloc = 0;

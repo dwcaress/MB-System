@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_secondary.c	9/25/2003
- *    $Id: mbview_secondary.c,v 5.9 2007-10-08 16:32:08 caress Exp $
+ *    $Id: mbview_secondary.c,v 5.10 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2007/10/08 16:32:08  caress
+ * Code status as of 8 October 2007.
+ *
  * Revision 5.8  2007/06/17 23:27:30  caress
  * Added NBeditviz.
  *
@@ -98,7 +101,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_secondary.c,v 5.9 2007-10-08 16:32:08 caress Exp $";
+static char rcs_id[]="$Id: mbview_secondary.c,v 5.10 2008-05-16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setsecondarygrid(int verbose, int instance,
@@ -174,8 +177,8 @@ int mbview_setsecondarygrid(int verbose, int instance,
         data->secondary_dy = secondary_dy;
 	
 	/* allocate required arrays */
-    	status = mb_malloc(verbose, sizeof(float) * data->secondary_nxy, 
-    				&data->secondary_data, error);
+    	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(float) * data->secondary_nxy, 
+    				(void **)&data->secondary_data, error);
 	if (status != MB_SUCCESS)
 	    {
 	    fprintf(stderr,"\nUnable to allocate memory to store secondary grid data\n");
@@ -221,7 +224,7 @@ view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id
 				message);
 			fprintf(stderr,"\nProgram terminated in <%s>\n",
 				function_name);
-			mb_memory_clear(mbv_verbose, &error);
+			mb_memory_clear(mbv_verbose, error);
 			exit(*error);
 			}
 		}

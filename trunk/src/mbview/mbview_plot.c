@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.13 2008-03-14 19:04:32 caress Exp $
+ *    $Id: mbview_plot.c,v 5.14 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2008/03/14 19:04:32  caress
+ * Fixed memory problems with route editing.
+ *
  * Revision 5.12  2007/10/08 16:32:08  caress
  * Code status as of 8 October 2007.
  *
@@ -110,7 +113,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.13 2008-03-14 19:04:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.14 2008-05-16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -2255,9 +2258,9 @@ int mbview_drapesegment_gc(int instance, struct mbview_linesegment_struct *seg)
 
 		/* allocate segment points */
 		seg->nls_alloc = nsegpoint;
-		status = mb_realloc(mbv_verbose, 
+		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 				seg->nls_alloc * sizeof(struct mbview_point_struct),
-				&(seg->lspoints), &error);
+				(void **)&(seg->lspoints), &error);
 		if (status == MB_FAILURE)
 			{
 			done = MB_YES;
@@ -2481,9 +2484,9 @@ int mbview_drapesegment_grid(int instance, struct mbview_linesegment_struct *seg
 		if ((ni + nj + 2) > seg->nls_alloc)
 			{
 			seg->nls_alloc = (ni + nj + 2);
-			status = mb_realloc(mbv_verbose, 
+			status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 			    		seg->nls_alloc * sizeof(struct mbview_point_struct),
-			    		&(seg->lspoints), &error);
+			    		(void **)&(seg->lspoints), &error);
 			if (status == MB_FAILURE)
 				{
 				done = MB_YES;
@@ -2790,10 +2793,14 @@ int mbview_drapesegmentw(int instance, struct mbview_linesegmentw_struct *seg)
 		for (i=0;i<seg->nls;i++)
 			{
 			fprintf(stderr,"dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n",
-				i, seg->lspoints[i].xgrid, seg->lspoints[i].ygrid,  seg->lspoints[i].zdata,
-				 seg->lspoints[i].xlon, seg->lspoints[i].ylat, 
-				 seg->lspoints[i].xdisplay[instance], seg->lspoints[i].ydisplay[instance],
-				 seg->lspoints[i].zdisplay[instance]);
+				i, seg->lspoints[i].xgrid[instance], 
+				seg->lspoints[i].ygrid[instance],  
+				seg->lspoints[i].zdata,
+				seg->lspoints[i].xlon, 
+				seg->lspoints[i].ylat, 
+				seg->lspoints[i].xdisplay[instance], 
+				seg->lspoints[i].ydisplay[instance],
+				seg->lspoints[i].zdisplay[instance]);
 			}
 		}
 
@@ -2903,9 +2910,9 @@ int mbview_drapesegmentw_gc(int instance, struct mbview_linesegmentw_struct *seg
 
 		/* allocate segment points */
 		seg->nls_alloc = nsegpoint;
-		status = mb_realloc(mbv_verbose, 
+		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 				seg->nls_alloc * sizeof(struct mbview_pointw_struct),
-				&(seg->lspoints), &error);
+				(void **)&(seg->lspoints), &error);
 		if (status == MB_FAILURE)
 			{
 			done = MB_YES;
@@ -3010,10 +3017,14 @@ int mbview_drapesegmentw_gc(int instance, struct mbview_linesegmentw_struct *seg
 		for (i=0;i<seg->nls;i++)
 			{
 			fprintf(stderr,"dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n",
-				i, seg->lspoints[i].xgrid[instance], seg->lspoints[i].ygrid[instance],  seg->lspoints[i].zdata,
-				 seg->lspoints[i].xlon, seg->lspoints[i].ylat, 
-				 seg->lspoints[i].xdisplay[instance], seg->lspoints[i].ydisplay[instance],
-				 seg->lspoints[i].zdisplay[instance]);
+				i, seg->lspoints[i].xgrid[instance], 
+				seg->lspoints[i].ygrid[instance],  
+				seg->lspoints[i].zdata,
+				seg->lspoints[i].xlon, 
+				seg->lspoints[i].ylat, 
+				seg->lspoints[i].xdisplay[instance], 
+				seg->lspoints[i].ydisplay[instance],
+				seg->lspoints[i].zdisplay[instance]);
 			}
 		}
 
@@ -3036,6 +3047,7 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 	double	mm, bb;
 	int	found, done, insert;
 	double	xgrid, ygrid, zdata;
+	double	xgridstart, xgridend, ygridstart, ygridend;
 	int	global;
 	double	offset_factor;
 	int	i, j, k, l, ii, icnt, jcnt;
@@ -3082,14 +3094,29 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 		}
 	
 	/* figure out how many points to calculate along the segment */
-	istart = (int)((seg->endpoints[0].xgrid[instance] - data->primary_xmin)
+	xgridstart = seg->endpoints[0].xgrid[instance];
+	xgridend = seg->endpoints[1].xgrid[instance];
+	ygridstart = seg->endpoints[0].ygrid[instance];
+	ygridend = seg->endpoints[1].ygrid[instance];
+	istart = (int)((xgridstart - data->primary_xmin)
 			/ data->primary_dx);
-	iend = (int)((seg->endpoints[1].xgrid[instance] - data->primary_xmin)
+	iend = (int)((xgridend - data->primary_xmin)
 			/ data->primary_dx);
-	jstart = (int)((seg->endpoints[0].ygrid[instance] - data->primary_ymin)
+	jstart = (int)((ygridstart - data->primary_ymin)
 			/ data->primary_dy);
-	jend = (int)((seg->endpoints[1].ygrid[instance] - data->primary_ymin)
+	jend = (int)((ygridend - data->primary_ymin)
 			/ data->primary_dy);
+	if (istart < 0) istart = 0;
+	if (istart >= data->primary_nx) istart = data->primary_nx -1;
+	if (iend < 0) iend = 0;
+	if (iend >= data->primary_nx) iend = data->primary_nx -1;
+	if (jstart < 0) jstart = 0;
+	if (jstart >= data->primary_nx) jstart = data->primary_ny -1;
+	if (jend < 0) jend = 0;
+	if (jend >= data->primary_nx) jend = data->primary_ny -1;
+/* fprintf(stderr,"mbview_drapesegmentw_grid: xgridstart:%f xgridend:%f ygridstart:%f ygridend:%f\n",
+xgridstart,xgridend,ygridstart,ygridend);
+fprintf(stderr,"mbview_drapesegmentw_grid: istart:%d iend:%d jstart:%d jend:%d\n",istart,iend,jstart,jend);*/
 			
 	/* no need to fill in if the segment doesn't cross grid boundaries */
 	if (istart == iend && jstart == jend)
@@ -3129,9 +3156,9 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 		if ((ni + nj + 2) > seg->nls_alloc)
 			{
 			seg->nls_alloc = (ni + nj + 2);
-			status = mb_realloc(mbv_verbose, 
+			status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 			    		seg->nls_alloc * sizeof(struct mbview_pointw_struct),
-			    		&(seg->lspoints), &error);
+			    		(void **)&(seg->lspoints), &error);
 			if (status == MB_FAILURE)
 				{
 				done = MB_YES;
@@ -3139,6 +3166,8 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 				}
 			}
 		}
+/*fprintf(stderr,"mbview_drapesegmentw_grid: ni:%d nj:%d iadd:%d istart:%d iend:%d jadd:%d jstart:%d jend:%d\n",
+ni,nj,iadd,istart,iend,jadd,jstart,jend);*/
 		
 	/* if points needed and space allocated do it */
 	if (done == MB_NO && ni + nj > 0)
@@ -3159,7 +3188,6 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 			}
 
 		/* loop over xgrid */
-		insert = 1;
 		for (icnt=0;icnt<ni;icnt++)
 			{
 			i = istart + icnt * iadd;
@@ -3187,6 +3215,8 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 				seg->lspoints[seg->nls].ygrid[instance] = ygrid;
 				seg->lspoints[seg->nls].zdata = zdata;
 				seg->nls++;
+/*fprintf(stderr,"new ni point: nls:%d icnt:%d i:%d j:%d k:%d l:%d xgrid:%f ygrid:%f zdata:%f\n",
+seg->nls,icnt,i,j,k,l,xgrid,ygrid,zdata);*/
 				}
 			}
 
@@ -3256,6 +3286,7 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 						{
 						done = MB_YES;
 						}
+/*fprintf(stderr,"jadd>0: insert:%d found:%d done:%d\n",insert,found,done);*/
 					}
 				else if (jadd < 0) while (done == MB_NO)
 					{
@@ -3282,7 +3313,12 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 						{
 						done = MB_YES;
 						}
+/*fprintf(stderr,"jadd<0: insert:%d found:%d done:%d\n",insert,found,done);*/
 					}
+				if (insert < 0)
+					insert = 0;
+				else if (insert > seg->nls)
+					insert = seg->nls;
 				if (found == MB_YES)
 					{
 					for (ii=seg->nls;ii>insert;ii--)
@@ -3295,7 +3331,13 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 					seg->lspoints[insert].ygrid[instance] = ygrid;
 					seg->lspoints[insert].zdata = zdata;
 					seg->nls++;
+/*fprintf(stderr,"new nj point: nls:%d jcnt:%d insert:%d jadd:%d i:%d j:%d k:%d l:%d xgrid:%f ygrid:%f zdata:%f\n",
+seg->nls,jcnt,insert,jadd,i,j,k,l,xgrid,ygrid,zdata);*/
 					}
+				if (insert <= 0)
+					insert = 1;
+				else if (insert >= seg->nls)
+					insert = seg->nls - 1;
 				}
 			}
 			
@@ -3348,11 +3390,13 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 			{
 			fprintf(stderr,"dbg2         point[%4d]:    %f %f %f  %f %f  %f %f %f\n",
 				i, seg->lspoints[i].xgrid[instance], 
-				 seg->lspoints[i].ygrid[instance],  
-				 seg->lspoints[i].zdata, seg->lspoints[i].xlon, seg->lspoints[i].ylat, 
-				 seg->lspoints[i].xdisplay[instance], 
-				 seg->lspoints[i].ydisplay[instance],
-				 seg->lspoints[i].zdisplay[instance]);
+				seg->lspoints[i].ygrid[instance],  
+				seg->lspoints[i].zdata, 
+				seg->lspoints[i].xlon, 
+				seg->lspoints[i].ylat, 
+				seg->lspoints[i].xdisplay[instance], 
+				seg->lspoints[i].ydisplay[instance],
+				seg->lspoints[i].zdisplay[instance]);
 			}
 		}
 

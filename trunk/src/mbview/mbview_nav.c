@@ -1,8 +1,8 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.17 2008-03-14 19:04:32 caress Exp $
+ *    $Id: mbview_nav.c,v 5.18 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,6 +18,9 @@
  * Date:	October 28, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2008/03/14 19:04:32  caress
+ * Fixed memory problems with route editing.
+ *
  * Revision 5.16  2007/10/17 20:35:05  caress
  * Release 5.1.1beta11
  *
@@ -120,7 +123,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.17 2008-03-14 19:04:32 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.18 2008-05-16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -250,6 +253,7 @@ int mbview_allocnavarrays(int verbose,
 	/* local variables */
 	char	*function_name = "mbview_allocnavarrays";
 	int	status = MB_SUCCESS;
+fprintf(stderr,"mbview_allocnavarrays: %d points\n",npointtotal);
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -282,29 +286,29 @@ int mbview_allocnavarrays(int verbose,
 		}
 
 	/* allocate the arrays using mb_realloc */
-	status = mb_realloc(verbose,npointtotal*sizeof(double),time_d,error);
+	status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)time_d,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),navlon,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)navlon,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),navlat,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)navlat,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),navz,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)navz,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),heading,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)heading,error);
 	if (status == MB_SUCCESS)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),speed,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)speed,error);
 	if (status == MB_SUCCESS && navportlon != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),navportlon,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)navportlon,error);
 	if (status == MB_SUCCESS && navportlat != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),navportlat,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)navportlat,error);
 	if (status == MB_SUCCESS && navstbdlon != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),navstbdlon,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)navstbdlon,error);
 	if (status == MB_SUCCESS && navstbdlat != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(double),navstbdlat,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)navstbdlat,error);
 	if (status == MB_SUCCESS && cdp != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(int),cdp,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(int),(void **)cdp,error);
 	if (status == MB_SUCCESS && shot != NULL)
-		status = mb_realloc(verbose,npointtotal*sizeof(int),shot,error);
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(int),(void **)shot,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -390,24 +394,24 @@ int mbview_freenavarrays(int verbose,
 		}
 
 	/* free the arrays using mb_free */
-	status = mb_free(verbose,time_d,error);
-	status = mb_free(verbose,navlon,error);
-	status = mb_free(verbose,navlat,error);
-	status = mb_free(verbose,navz,error);
-	status = mb_free(verbose,heading,error);
-	status = mb_free(verbose,speed,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)time_d,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)navlon,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)navlat,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)navz,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)heading,error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)speed,error);
 	if (navportlon != NULL)
-		status = mb_free(verbose,navportlon,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)navportlon,error);
 	if (navportlat != NULL)
-		status = mb_free(verbose,navportlat,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)navportlat,error);
 	if (navstbdlon != NULL)
-		status = mb_free(verbose,navstbdlon,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)navstbdlon,error);
 	if (navstbdlat != NULL)
-		status = mb_free(verbose,navstbdlat,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)navstbdlat,error);
 	if (cdp != NULL)
-		status = mb_free(verbose,cdp,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)cdp,error);
 	if (shot != NULL)
-		status = mb_free(verbose,shot,error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)shot,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -546,7 +550,7 @@ int mbview_addnav(int verbose, int instance,
 		shared.shareddata.nnav_alloc = shared.shareddata.nnav + 1;
 		status = mb_realloc(mbv_verbose, 
 			    	shared.shareddata.nnav_alloc * sizeof(struct mbview_nav_struct),
-			    	&(shared.shareddata.navs), error);
+			    	(void **)&(shared.shareddata.navs), error);
 		if (status == MB_FAILURE)
 			{
 			shared.shareddata.nnav_alloc = 0;
@@ -579,12 +583,12 @@ int mbview_addnav(int verbose, int instance,
 	if (shared.shareddata.navs[inav].npoints_alloc < npoint)
 		{
 		shared.shareddata.navs[inav].npoints_alloc = npoint;
-		status = mb_realloc(mbv_verbose, 
+		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 			    	shared.shareddata.navs[inav].npoints_alloc * sizeof(struct mbview_navpointw_struct),
-			    	&(shared.shareddata.navs[inav].navpts), error);
-		status = mb_realloc(mbv_verbose, 
+			    	(void **)&(shared.shareddata.navs[inav].navpts), error);
+		status = mb_reallocd(mbv_verbose, __FILE__, __LINE__,
 			    	shared.shareddata.navs[inav].npoints_alloc * sizeof(struct mbview_linesegmentw_struct),
-			    	&(shared.shareddata.navs[inav].segments), error);
+			    	(void **)&(shared.shareddata.navs[inav].segments), error);
 		for (j=0;j<shared.shareddata.navs[inav].npoints_alloc-1;j++)
 			{
 			shared.shareddata.navs[inav].segments[j].nls = 0;
@@ -1556,10 +1560,10 @@ int mbview_nav_delete(int instance, int inav)
 	if (inav >= 0 && inav < shared.shareddata.nnav)
 		{
 		/* free memory for deleted nav */
-		mb_free(mbv_verbose, 
-			    	&(shared.shareddata.navs[inav].navpts), &error);
-		mb_free(mbv_verbose, 
-			    	&(shared.shareddata.navs[inav].segments), &error);
+		mb_freed(mbv_verbose,__FILE__,__LINE__,
+				(void **)&(shared.shareddata.navs[inav].navpts), &error);
+		mb_freed(mbv_verbose,__FILE__,__LINE__,
+				(void **)&(shared.shareddata.navs[inav].segments), &error);
 
 		/* move nav data if necessary */
 		for (i=inav;i<shared.shareddata.nnav-1;i++)
@@ -2289,7 +2293,7 @@ shared.shareddata.navs[inav].segments[jpoint].lspoints[k].zdisplay[instance]);*/
 		if (segment.nls_alloc > 0 
 			&& segment.lspoints != NULL)
 			{
-			status = mb_free(mbv_verbose, &segment.lspoints, &error);
+			status = mb_freed(mbv_verbose, __FILE__, __LINE__, (void **)&segment.lspoints, &error);
 			segment.nls_alloc = 0;
 			}
 		

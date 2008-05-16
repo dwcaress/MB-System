@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.35 2007-10-08 15:59:34 caress Exp $
+ *    $Id: mb_process.c,v 5.36 2008-05-16 22:56:24 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
+ *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.35  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.34  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -155,7 +158,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.35 2007-10-08 15:59:34 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.36 2008-05-16 22:56:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -3069,7 +3072,9 @@ int mb_pr_update_navadj(int verbose, char *file,
 
 	/* set navadj values */
 	process.mbp_navadj_mode = mbp_navadj_mode;
-	if (mbp_navadjfile != NULL)
+	if (mbp_navadj_mode == MBP_NAV_OFF)
+		process.mbp_navadjfile[0] = '\0';
+	else if (mbp_navadjfile != NULL)
 	    strcpy(process.mbp_navadjfile, mbp_navadjfile);
 	process.mbp_navadj_algorithm = mbp_navadj_algorithm;
 

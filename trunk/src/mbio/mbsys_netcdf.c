@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.c	4/11/2002
- *	$Id: mbsys_netcdf.c,v 5.6 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbsys_netcdf.c,v 5.7 2008-05-16 22:56:24 caress Exp $
  *
- *    Copyright (c) 2002, 2003 by
+ *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	April 11, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.5  2003/12/04 23:10:23  caress
  * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
  *
@@ -56,7 +59,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_netcdf.h"
 
-static char res_id[]="$Id: mbsys_netcdf.c,v 5.6 2005-11-05 00:48:03 caress Exp $";
+static char res_id[]="$Id: mbsys_netcdf.c,v 5.7 2008-05-16 22:56:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -92,6 +95,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	if (status == MB_SUCCESS)
 	    {	
 	    /* dimensions */
+	    store->CIB_BLOCK_DIM = 0 ;
 	    store->mbHistoryRecNbr = 0 ;
 	    store->mbNameLength = MBSYS_NETCDF_NAMELEN ;
 	    store->mbCommentLength = MBSYS_NETCDF_COMMENTLEN ;
@@ -185,7 +189,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbHistCode_type, "integer");
 	    strcpy(store->mbHistCode_long_name, "History code");
 	    strcpy(store->mbHistCode_name_code, "MB_HISTORY_CODE");
-	    strcpy(store->mbHistCode_units, "");
+	    strcpy(store->mbHistCode_units, "M");
 	    strcpy(store->mbHistCode_unit_code, "MB_NOT_DEFINED");
 	    store->mbHistCode_add_offset = 0;
 	    store->mbHistCode_scale_factor = 1;
@@ -208,14 +212,14 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbCycle_type, "integer");
 	    strcpy(store->mbCycle_long_name, "Cycle number");
 	    strcpy(store->mbCycle_name_code, "MB_CYCLE_NUMBER");
-	    strcpy(store->mbCycle_units, "");
+	    strcpy(store->mbCycle_units, "M");
 	    strcpy(store->mbCycle_unit_code, "MB_NOT_DEFINED");
 	    store->mbCycle_add_offset = 0;
 	    store->mbCycle_scale_factor = 1;
 	    store->mbCycle_minimum = 1;
-	    store->mbCycle_maximum = 65535;
+	    store->mbCycle_maximum = 2147483647;
 	    store->mbCycle_valid_minimum = 1;
-	    store->mbCycle_valid_maximum = 65535;
+	    store->mbCycle_valid_maximum = 2147483647;
 	    store->mbCycle_missing_value = 0;
 	    strcpy(store->mbCycle_format_C, "%d");
 	    strcpy(store->mbCycle_orientation, "direct");
@@ -249,7 +253,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbTime_orientation, "direct");
 	    strcpy(store->mbOrdinate_type, "real");
 	    strcpy(store->mbOrdinate_long_name, "Latitude");
-	    strcpy(store->mbOrdinate_name_code, "MB_POSITION_LATITUDE");
+	    strcpy(store->mbOrdinate_name_code, "MB_CYCLE_LATITUDE");
 	    strcpy(store->mbOrdinate_units, "degree");
 	    strcpy(store->mbOrdinate_unit_code, "MB_DEGREE");
 	    store->mbOrdinate_add_offset = 0.;
@@ -263,7 +267,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbOrdinate_orientation, "direct");
 	    strcpy(store->mbAbscissa_type, "real");
 	    strcpy(store->mbAbscissa_long_name, "Longitude");
-	    strcpy(store->mbAbscissa_name_code, "MB_POSITION_LONGITUDE");
+	    strcpy(store->mbAbscissa_name_code, "MB_CYCLE_LONGITUDE");
 	    strcpy(store->mbAbscissa_units, "degree");
 	    strcpy(store->mbAbscissa_unit_code, "MB_DEGREE");
 	    store->mbAbscissa_add_offset = 0.;
@@ -278,7 +282,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbFrequency_type, "integer");
 	    strcpy(store->mbFrequency_long_name, "Frequency of cycle");
 	    strcpy(store->mbFrequency_name_code, "MB_CYCLE_FREQUENCY");
-	    strcpy(store->mbFrequency_units, "");
+	    strcpy(store->mbFrequency_units, "{");
 	    strcpy(store->mbFrequency_unit_code, "MB_NOT_DEFINED");
 	    store->mbFrequency_add_offset = 0;
 	    store->mbFrequency_scale_factor = 1;
@@ -292,7 +296,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbSounderMode_type, "integer");
 	    strcpy(store->mbSounderMode_long_name, "Sounder mode");
 	    strcpy(store->mbSounderMode_name_code, "MB_CYCLE_MODE");
-	    strcpy(store->mbSounderMode_units, "");
+	    strcpy(store->mbSounderMode_units, "M");
 	    strcpy(store->mbSounderMode_unit_code, "MB_NOT_DEFINED");
 	    store->mbSounderMode_add_offset = 0;
 	    store->mbSounderMode_scale_factor = 1;
@@ -446,21 +450,21 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbVerticalDepth_type, "integer");
 	    strcpy(store->mbVerticalDepth_long_name, "Vertical depth");
 	    strcpy(store->mbVerticalDepth_name_code, "MB_CYCLE_DEPTH");
-	    strcpy(store->mbVerticalDepth_units, "");
+	    strcpy(store->mbVerticalDepth_units, "M");
 	    strcpy(store->mbVerticalDepth_unit_code, "MB_NOT_DEFINED");
 	    store->mbVerticalDepth_add_offset = 0;
 	    store->mbVerticalDepth_scale_factor = 1;
-	    store->mbVerticalDepth_minimum = 1;
-	    store->mbVerticalDepth_maximum = 65535;
-	    store->mbVerticalDepth_valid_minimum = 1;
-	    store->mbVerticalDepth_valid_maximum = 65535;
-	    store->mbVerticalDepth_missing_value = 0;
+	    store->mbVerticalDepth_minimum = -2147483647;
+	    store->mbVerticalDepth_maximum = 2147483647;
+	    store->mbVerticalDepth_valid_minimum = -2147483647;
+	    store->mbVerticalDepth_valid_maximum = 2147483647;
+	    store->mbVerticalDepth_missing_value = -2147483648;
 	    strcpy(store->mbVerticalDepth_format_C, "%d");
 	    strcpy(store->mbVerticalDepth_orientation, "direct");
 	    strcpy(store->mbCQuality_type, "integer");
 	    strcpy(store->mbCQuality_long_name, "Quality factor");
 	    strcpy(store->mbCQuality_name_code, "MB_CYCLE_QUALITY");
-	    strcpy(store->mbCQuality_units, "");
+	    strcpy(store->mbCQuality_units, "M");
 	    strcpy(store->mbCQuality_unit_code, "MB_NOT_DEFINED");
 	    store->mbCQuality_add_offset = 0;
 	    store->mbCQuality_scale_factor = 1;
@@ -474,7 +478,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbCFlag_type, "integer");
 	    strcpy(store->mbCFlag_long_name, "Flag of cycle");
 	    strcpy(store->mbCFlag_name_code, "MB_CYCLE_FLAG");
-	    strcpy(store->mbCFlag_units, "");
+	    strcpy(store->mbCFlag_units, "M");
 	    strcpy(store->mbCFlag_unit_code, "MB_NOT_DEFINED");
 	    store->mbCFlag_add_offset = 0;
 	    store->mbCFlag_scale_factor = 1;
@@ -488,7 +492,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbInterlacing_type, "integer");
 	    strcpy(store->mbInterlacing_long_name, "Interlacing 1=Port 2=Starboard");
 	    strcpy(store->mbInterlacing_name_code, "MB_CYCLE_INTERLACING");
-	    strcpy(store->mbInterlacing_units, "");
+	    strcpy(store->mbInterlacing_units, "{");
 	    strcpy(store->mbInterlacing_unit_code, "MB_NOT_DEFINED");
 	    store->mbInterlacing_add_offset = 0;
 	    store->mbInterlacing_scale_factor = 1;
@@ -516,7 +520,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbAlongDistance_type, "integer");
 	    strcpy(store->mbAlongDistance_long_name, "Along distance");
 	    strcpy(store->mbAlongDistance_name_code, "MB_SOUNDING_X");
-	    strcpy(store->mbAlongDistance_units, "");
+	    strcpy(store->mbAlongDistance_units, "M");
 	    strcpy(store->mbAlongDistance_unit_code, "MB_NOT_DEFINED");
 	    store->mbAlongDistance_add_offset = 0;
 	    store->mbAlongDistance_scale_factor = 1;
@@ -530,7 +534,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbAcrossDistance_type, "integer");
 	    strcpy(store->mbAcrossDistance_long_name, "Across distance");
 	    strcpy(store->mbAcrossDistance_name_code, "MB_SOUNDING_Y");
-	    strcpy(store->mbAcrossDistance_units, "");
+	    strcpy(store->mbAcrossDistance_units, "M");
 	    strcpy(store->mbAcrossDistance_unit_code, "MB_NOT_DEFINED");
 	    store->mbAcrossDistance_add_offset = 0;
 	    store->mbAcrossDistance_scale_factor = 1;
@@ -544,7 +548,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbDepth_type, "integer");
 	    strcpy(store->mbDepth_long_name, "Depth");
 	    strcpy(store->mbDepth_name_code, "MB_SOUNDING_Z");
-	    strcpy(store->mbDepth_units, "");
+	    strcpy(store->mbDepth_units, "M");
 	    strcpy(store->mbDepth_unit_code, "MB_NOT_DEFINED");
 	    store->mbDepth_add_offset = 0;
 	    store->mbDepth_scale_factor = 1;
@@ -558,7 +562,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbSQuality_type, "integer");
 	    strcpy(store->mbSQuality_long_name, "Quality factor");
 	    strcpy(store->mbSQuality_name_code, "MB_SOUNDING_QUALITY");
-	    strcpy(store->mbSQuality_units, "");
+	    strcpy(store->mbSQuality_units, "{");
 	    strcpy(store->mbSQuality_unit_code, "MB_NOT_DEFINED");
 	    store->mbSQuality_add_offset = 0;
 	    store->mbSQuality_scale_factor = 1;
@@ -572,7 +576,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbSFlag_type, "integer");
 	    strcpy(store->mbSFlag_long_name, "Flag of sounding");
 	    strcpy(store->mbSFlag_name_code, "MB_SOUNDING_FLAG");
-	    strcpy(store->mbSFlag_units, "");
+	    strcpy(store->mbSFlag_units, "M");
 	    strcpy(store->mbSFlag_unit_code, "MB_NOT_DEFINED");
 	    store->mbSFlag_add_offset = 0;
 	    store->mbSFlag_scale_factor = 1;
@@ -586,7 +590,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbAntenna_type, "integer");
 	    strcpy(store->mbAntenna_long_name, "Antenna index");
 	    strcpy(store->mbAntenna_name_code, "MB_BEAM_ANTENNA");
-	    strcpy(store->mbAntenna_units, "");
+	    strcpy(store->mbAntenna_units, "M");
 	    strcpy(store->mbAntenna_unit_code, "MB_NOT_DEFINED");
 	    store->mbAntenna_add_offset = 0;
 	    store->mbAntenna_scale_factor = 1;
@@ -614,7 +618,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbBFlag_type, "integer");
 	    strcpy(store->mbBFlag_long_name, "Flag of beam");
 	    strcpy(store->mbBFlag_name_code, "MB_BEAM_FLAG");
-	    strcpy(store->mbBFlag_units, "");
+	    strcpy(store->mbBFlag_units, "M");
 	    strcpy(store->mbBFlag_unit_code, "MB_NOT_DEFINED");
 	    store->mbBFlag_add_offset = 0;
 	    store->mbBFlag_scale_factor = 1;
@@ -628,7 +632,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbBeam_type, "integer");
 	    strcpy(store->mbBeam_long_name, "Number of beams");
 	    strcpy(store->mbBeam_name_code, "MB_ANTENNA_BEAM");
-	    strcpy(store->mbBeam_units, "");
+	    strcpy(store->mbBeam_units, "M");
 	    strcpy(store->mbBeam_unit_code, "MB_NOT_DEFINED");
 	    store->mbBeam_add_offset = 0;
 	    store->mbBeam_scale_factor = 1;
@@ -642,7 +646,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbAFlag_type, "integer");
 	    strcpy(store->mbAFlag_long_name, "Flag of antenna");
 	    strcpy(store->mbAFlag_name_code, "MB_ANTENNA_FLAG");
-	    strcpy(store->mbAFlag_units, "");
+	    strcpy(store->mbAFlag_units, "M");
 	    strcpy(store->mbAFlag_unit_code, "MB_NOT_DEFINED");
 	    store->mbAFlag_add_offset = 0;
 	    store->mbAFlag_scale_factor = 1;
@@ -659,7 +663,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbVelProfilIdx_type, "integer");
 	    strcpy(store->mbVelProfilIdx_long_name, "Index of the sound velocity profil");
 	    strcpy(store->mbVelProfilIdx_name_code, "MB_PROFIL_IDX");
-	    strcpy(store->mbVelProfilIdx_units, "");
+	    strcpy(store->mbVelProfilIdx_units, "M");
 	    strcpy(store->mbVelProfilIdx_unit_code, "MB_NOT_DEFINED");
 	    store->mbVelProfilIdx_add_offset = 0;
 	    store->mbVelProfilIdx_scale_factor = 1;

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_nvnetcdf.c	5/4/02
- *	$Id: mbr_nvnetcdf.c,v 5.4 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbr_nvnetcdf.c,v 5.5 2008-05-16 22:56:24 caress Exp $
  *
- *    Copyright (c) 2002, 2003 by
+ *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	May 4, 2002
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.3  2005/03/26 22:05:17  caress
  * Release 5.0.7.
  *
@@ -85,7 +88,7 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_nvnetcdf.c,v 5.4 2005-11-05 00:48:04 caress Exp $";
+static char res_id[]="$Id: mbr_nvnetcdf.c,v 5.5 2008-05-16 22:56:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error)
@@ -243,7 +246,7 @@ int mbr_info_nvnetcdf(int verbose,
 	*pixels_ss_max = 0;
 	strncpy(format_name, "NVNETCDF", MB_NAME_LENGTH);
 	strncpy(system_name, "NAVNETCDF", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_MBNETCDF\nInformal Description: CARAIBES CDF navigation\nAttributes:           netCDF, IFREMER.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:          MBF_NVNETCDF\nInformal Description: CARAIBES CDF navigation\nAttributes:           netCDF, IFREMER.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NETCDF;
 	*variable_beams = MB_NO;

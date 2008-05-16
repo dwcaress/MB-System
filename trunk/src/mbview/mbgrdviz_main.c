@@ -2,9 +2,9 @@
 /* Begin user code block <abstract> */
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdviz_main.c		10/9/2002
- *    $Id: mbgrdviz_main.c,v 5.7 2007-06-17 23:27:30 caress Exp $
+ *    $Id: mbgrdviz_main.c,v 5.8 2008-05-16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2002, 2003, 2006, 2007 by
+ *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -89,7 +89,7 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 /* global mbview variables */
 Widget mainWindow;
 
-static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.7 2007-06-17 23:27:30 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.8 2008-05-16 22:59:42 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] =  "MBgrdviz provides simple interactive 2D/3Dvizualization of GMT grids.";
 static char usage_message[] = "mbgrdviz [-Igrdfile -T -V -H]";

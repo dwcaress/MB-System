@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.24 2008-03-01 09:12:52 caress Exp $
+#	$Id: Makefile.template,v 5.25 2008-05-16 22:56:24 caress Exp $
 #
 #     Copyright (c) 1993-2008 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.24  2008/03/01 09:12:52  caress
+# Added support for Simrad EM710 multibeam in new formats 58 and 59.
+#
 # Revision 5.23  2006/11/10 22:36:04  caress
 # Working towards release 5.1.0
 #
@@ -253,11 +256,11 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_gsf.o mbsys_mstiff.o \
 		mbsys_oic.o mbsys_hdcs.o \
 		mbsys_singlebeam.o mbsys_xse.o \
-		mbsys_hs10.o \
-		mbsys_atlas.o mbsys_surf.o \
-		mbsys_reson8k.o \
-		mbsys_netcdf.o mbsys_navnetcdf.o \
+		mbsys_hs10.o  mbsys_atlas.o \
+		mbsys_surf.o mbsys_reson8k.o \
+		mbsys_netcdf.o mbsys_navnetcdf.o  \
 		mbsys_reson7k.o mbsys_jstar.o \
+		mbsys_image83p.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -289,7 +292,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
  		mbr_xtfr8101.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
 		mbr_samesurf.o mbr_reson7kr.o \
-		mbr_edgjstar.o mbr_segysegy.o
+		mbr_edgjstar.o mbr_segysegy.o \
+		mbr_image83p.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -315,11 +319,11 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_gsf.o mbsys_mstiff.o \
 		mbsys_oic.o mbsys_hdcs.o \
 		mbsys_singlebeam.o mbsys_xse.o \
-		mbsys_hs10.o \
-		mbsys_atlas.o mbsys_surf.o \
-		mbsys_reson8k.o \
+		mbsys_hs10.o mbsys_atlas.o \
+		mbsys_surf.o mbsys_reson8k.o \
 		mbsys_netcdf.o mbsys_navnetcdf.o \
 		mbsys_reson7k.o mbsys_jstar.o \
+		mbsys_image83p.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -351,7 +355,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
  		mbr_xtfr8101.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
 		mbr_samesurf.o mbr_reson7kr.o \
-		mbr_edgjstar.o mbr_segysegy.o
+		mbr_edgjstar.o mbr_segysegy.o \
+		mbr_image83p.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -474,6 +479,8 @@ mbsys_reson7k.o:	mbsys_reson7k.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(I
 	$(CC) -c $(CFLAGS) mbsys_reson7k.c
 mbsys_jstar.o:	mbsys_jstar.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_jstar.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) mbsys_jstar.c
+mbsys_image83p.o:	mbsys_image83p.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_image83p.h $(INCDIR)/mb_segy.h
+	$(CC) -c $(CFLAGS) mbsys_image83p.c
 mbr_sbsiomrg.o:	mbr_sbsiomrg.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiomrg.h
 	$(CC) -c $(CFLAGS) mbr_sbsiomrg.c
 mbr_sbsiocen.o: mbr_sbsiocen.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiocen.h
@@ -594,6 +601,8 @@ mbr_edgjstar.o: mbr_edgjstar.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_edgjstar.c
 mbr_segysegy.o: mbr_segysegy.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_singlebeam.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_segysegy.c
+mbr_image83p.o: mbr_image83p.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_image83p.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_image83p.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_format.h:	mb_format.h
@@ -710,6 +719,9 @@ $(INCDIR)/mbsys_reson7k.h:	mbsys_reson7k.h
 $(INCDIR)/mbsys_jstar.h:	mbsys_jstar.h
 	cp mbsys_jstar.h $(INCDIR)/mbsys_jstar.h
 	chmod 664 $(INCDIR)/mbsys_jstar.h
+$(INCDIR)/mbsys_image83p.h:	mbsys_image83p.h
+	cp mbsys_image83p.h $(INCDIR)/mbsys_image83p.h
+	chmod 664 $(INCDIR)/mbsys_image83p.h
 $(INCDIR)/mbf_sbsiomrg.h:	mbf_sbsiomrg.h
 	cp mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiomrg.h
 	chmod 664 $(INCDIR)/mbf_sbsiomrg.h

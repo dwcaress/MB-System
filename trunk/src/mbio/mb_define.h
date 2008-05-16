@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.34 2008-02-12 02:58:30 caress Exp $
+ *    $Id: mb_define.h,v 5.35 2008-05-16 22:56:24 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.34  2008/02/12 02:58:30  caress
+ * Added mb_gains() function to MBIO.
+ *
  * Revision 5.33  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -226,6 +229,7 @@ typedef long long	mb_s_long;
 
 /* typedef for path string */
 typedef char mb_path[MB_PATH_MAXLINE];
+typedef char mb_name[MB_NAME_LENGTH];
 
 /* declare PI if needed */
 #ifndef M_PI
@@ -752,6 +756,23 @@ int mb_zgrid(float *z, int *nx, int *ny,
 		float *x1, float *y1, float *dx, float *dy, float *xyz, 
 		int *n, float *zpij, int *knxt, int *imnew, 
 		float *cay, int *nrng);
+int mb_malloc(int verbose, size_t size, void **ptr, int *error);
+int mb_realloc(int verbose, size_t size, void **ptr, int *error);
+int mb_free(int verbose, void **ptr, int *error);
+int mb_mallocd(int verbose, char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
+int mb_reallocd(int verbose, char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
+int mb_freed(int verbose, char *sourcefile, int sourceline, void **ptr, int *error);
+int mb_memory_clear(int verbose, int *error);
+int mb_memory_status(int verbose, int *nalloc, int *nallocmax, 
+			int *overflow, size_t *allocsize, int *error);
+int mb_memory_list(int verbose, int *error);
+int mb_register_array(int verbose, void *mbio_ptr, 
+		int type, int size, void **handle, int *error);
+int mb_update_arrays(int verbose, void *mbio_ptr, 
+		int nbath, int namp, int nss, int *error);
+int mb_update_arrayptr(int verbose, void *mbio_ptr, 
+		void **handle, int *error);
+int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error);
 
 /* end conditional include */
 #endif

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.45 2008-03-14 18:32:06 caress Exp $
+ *    $Id: mb_format.c,v 5.46 2008-05-16 22:56:24 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.45  2008/03/14 18:32:06  caress
+ * Added identifier for IFREMER Cariabes format 75.
+ *
  * Revision 5.44  2008/03/01 09:12:52  caress
  * Added support for Simrad EM710 multibeam in new formats 58 and 59.
  *
@@ -239,7 +242,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.45 2008-03-14 18:32:06 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.46 2008-05-16 22:56:24 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -566,6 +569,10 @@ int mb_format_register(int verbose,
 	else if (*format == MBF_SAMESURF)
 		{
 		status = mbr_register_samesurf(verbose, mbio_ptr, error); 
+		}
+	else if (*format == MBF_IMAGE83P)
+		{
+		status = mbr_register_image83p(verbose, mbio_ptr, error);
 		}
 	else
 		{
@@ -1409,6 +1416,17 @@ int mb_format_info(int verbose,
 			beamwidth_xtrack, beamwidth_ltrack, 
 			error);
 		}
+	else if (*format == MBF_IMAGE83P)
+		{
+		status = mbr_info_image83p(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, svp_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			error);
+		}
 	else if (*format == MBF_DATALIST)
 		{
 		*format = MBF_DATALIST;
@@ -1558,7 +1576,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.45 2008-03-14 18:32:06 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.46 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1628,7 +1646,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.45 2008-03-14 18:32:06 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.46 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1697,7 +1715,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.45 2008-03-14 18:32:06 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.46 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1763,7 +1781,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.45 2008-03-14 18:32:06 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.46 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1836,7 +1854,7 @@ int mb_format_source(int verbose, int *format,
 		int *vru_source, int *svp_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.45 2008-03-14 18:32:06 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.46 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1907,7 +1925,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.45 2008-03-14 18:32:06 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.46 2008-05-16 22:56:24 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -3019,6 +3037,31 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
 		*format = MBF_RESON7KR;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for a Imagex multibeam .83p format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".83p")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".83P")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_IMAGE83P;
 		found = MB_YES;
 		}
 	    }
