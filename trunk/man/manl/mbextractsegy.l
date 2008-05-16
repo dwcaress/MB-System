@@ -1,4 +1,4 @@
-.TH mbextractsegy l "3 June 2004" "MB-System 5.0" "MB-System 5.0"
+.TH mbextractsegy l "26 March 2008" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbextractsegy\fP - extracts subbottom profiler, center beam reflection,
 or seismic reflection data from swath data supported by MB-System and
@@ -12,7 +12,7 @@ Version 5.0
 \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-J\fP\fIxscale/yscale/maxwidth\fP 
 \fB-L\fP\fIstartline/lineroot\fP \fB-M -O\fP\fIsegyfile\fP 
 \fB-R\fP\fIroutefile\fP \fB-S\fP\fIsampleformat\fP 
-\fB-T\fP\fItimeshift\fP \fB-V -H\fP]
+\fB-T\fP\fItimeshift\fP \fB-U\fP\fIrangethreshold\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBMBextractsegy\fP is a utility for reading a swath sonar data file 
@@ -179,6 +179,17 @@ MB_SEGY_SAMPLEFORMAT_ANALYTIC but the swath file only contains envelope data,
 the data will be written in the envelope form. The default value of
 MB_SEGY_SAMPLEFORMAT_NONE allows the program to choose the most appropriate
 sample format.
+.TP
+.B \-U
+\fIrangethreshold\fP
+.br
+If the \fB-R\fP option is specified, \fBmbextractsegy\fP breaks up the
+output into files corresponding to survey lines specified in a route file.
+This option sets the threshold distance in meters used to determine when
+a waypoint along the route has been reached; the program considers the
+next waypoint reached when the range to the waypoint becomes smaller
+than \fIrangethreshold\fP and then ceases to decrease. 
+Default: \fIrangethreshold\fP = 25 m.
 .TP
 .B \-V
 This option increases the verbosity of \fBmbextractsegy\fP, causing it

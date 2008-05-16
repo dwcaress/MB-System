@@ -1,4 +1,4 @@
-.TH mb7k2ss l "17 August 2007" "MB-System 5.0" "MB-System 5.0"
+.TH mb7k2ss l "26 March 2008" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7k2ss\fP - extracts sidescan sonar
 data from Reson 7k format data, bins and lays the sidescan
@@ -12,7 +12,8 @@ Version 5.0
 \fBmb7k2ss\fP [\fB-A\fItype\fP 
 \fB-B\fP\fIbottompickmode/bottompickthreshold\fP \fB-C\fP 
 \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-L\fP\fIstartline/lineroot\fP 
-\fB-M -O\fP\fIoutfile\fP \fB-R\fP\fIroutefile\fP \fB-T\fP\fItopogridfile\fP \fB-X -H -V\fP]
+\fB-M -O\fP\fIoutfile\fP \fB-R\fP\fIroutefile\fP 
+\fB-T\fP\fItopogridfile\fP \fB-U\fP\fIrangethreshold\fP \fB-X -H -V\fP]
 
 .SH DESCRIPTION
 \fBmb7k2ss\fP is a utility that extracts Edgetech sidescan data from 
@@ -176,6 +177,17 @@ the sample into the swath data. This method is considerable improvement over the
 flat bottom assumption used when topography is unavailable. The grid file
 must contain topography (positive up) rather than bathymetry (positive down).
 .TP
+.B \-U
+\fIrangethreshold\fP
+.br
+If the \fB-R\fP option is specified, \fBmb7k2ss\fP breaks up the
+output into files corresponding to survey lines specified in a route file.
+This option sets the threshold distance in meters used to determine when
+a waypoint along the route has been reached; the program considers the
+next waypoint reached when the range to the waypoint becomes smaller
+than \fIrangethreshold\fP and then ceases to decrease. 
+Default: \fIrangethreshold\fP = 50 m.
+.TP
 .B \-V
 This option increases the verbosity of \fBmb7k2ss\fP, causing it
 to print out messages regarding its progress to stdout.
@@ -217,7 +229,7 @@ output filenames will be sequentially numbered. The \fB-T\fP option specifies a
 topography grid that is used by \fBmb7k2ss\fP to lay out the sidescan on
 the seafloor. The output appears as follows:
         Program mb7k2ss
- 	Version $Id: mb7k2ss.l,v 5.0 2007-10-08 16:54:16 caress Exp $
+ 	Version $Id: mb7k2ss.l,v 5.1 2008-05-16 23:06:21 caress Exp $
  	MB-system Version 5.1.1beta5
 
  	Data records to extract:

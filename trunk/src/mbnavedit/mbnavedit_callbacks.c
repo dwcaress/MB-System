@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.12 2006-02-16 21:15:07 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.13 2008-05-16 23:05:05 caress Exp $
  *
- *    Copyright (c) 1995, 2000, 2003 by
+ *    Copyright (c) 1995-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2006/02/16 21:15:07  caress
+ * Made smooth inversion weights work as small as 0.01 in the interface. Redimensioned some strings too.
+ *
  * Revision 5.11  2006/01/24 19:19:24  caress
  * Version 5.0.8 beta.
  *
