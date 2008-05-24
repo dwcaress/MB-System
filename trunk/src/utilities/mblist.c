@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.26 2008-02-12 02:49:15 caress Exp $
+ *    $Id: mblist.c,v 5.27 2008-05-24 19:39:03 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2008/02/12 02:49:15  caress
+ * Added ability to output transmit and receive gain values.
+ *
  * Revision 5.25  2007/10/17 20:34:00  caress
  * Release 5.1.1beta11
  * Added decimation option.
@@ -362,7 +365,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.26 2008-02-12 02:49:15 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.27 2008-05-24 19:39:03 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -1002,7 +1005,6 @@ main (int argc, char **argv)
 
 		  case '.': /* Raw value next field */
 		    raw_next_value = MB_YES;
-		    count = 0;
 		    break;
 
 		  case '=': /* Port-most value next field -ignored here */
@@ -1759,6 +1761,7 @@ main (int argc, char **argv)
 
 		  case '.': /* Raw value next field */
 		    raw_next_value = MB_YES;
+		    count = 0;
 		    break;
 
 		  case '=': /* Port-most value next field -ignored here */
@@ -2741,6 +2744,7 @@ main (int argc, char **argv)
 					break;
 				case '.': /* Raw value next field */
 					raw_next_value = MB_YES;
+		  			count = 0;
 					break;
 				case '=': /* Port-most value next field -ignored here */
 				  	port_next_value = MB_YES;
@@ -3301,6 +3305,7 @@ main (int argc, char **argv)
 					break;
 				case '.': /* Raw value next field */
 					raw_next_value = MB_YES;
+					count = 0;
 					break;
 				case '=': /* Port-most value next field -ignored here */
 				  	port_next_value = MB_YES;
@@ -3651,6 +3656,7 @@ main (int argc, char **argv)
 					break;
 				case '.': /* Raw value next field */
 					raw_next_value = MB_YES;
+					count = 0;
 					break;
 				case '=': /* Port-most value next field -ignored here */
 				  	port_next_value = MB_YES;
@@ -4117,6 +4123,7 @@ main (int argc, char **argv)
 					break;
 				case '.': /* Raw value next field */
 					raw_next_value = MB_YES;
+					count = 0;
 					break;
 				case '=': /* Port-most value next field -ignored here */
 				  	port_next_value = MB_YES;
