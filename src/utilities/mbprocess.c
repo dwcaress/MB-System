@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.52 2008-03-01 09:22:29 caress Exp $
+ *    $Id: mbprocess.c,v 5.53 2008-05-24 19:41:44 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.52  2008/03/01 09:22:29  caress
+ * Changed verbosity behavior to only print out files skipped because processing unknown when verbose > 0.
+ *
  * Revision 5.51  2008/01/14 18:37:12  caress
  * Fixed problems in comments embedded in output processed files.
  *
@@ -277,7 +280,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.52 2008-03-01 09:22:29 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.53 2008-05-24 19:41:44 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -1364,6 +1367,8 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"  Kluge003:                      %d\n",process.mbp_kluge003);
 	    fprintf(stderr,"  Kluge004:                      %d\n",process.mbp_kluge004);
 	    fprintf(stderr,"  Kluge005:                      %d\n",process.mbp_kluge005);
+	    fprintf(stderr,"  Kluge006:                      %d\n",process.mbp_kluge006);
+	    fprintf(stderr,"  Kluge007:                      %d\n",process.mbp_kluge007);
 	    }
 
 	/*--------------------------------------------
@@ -4427,7 +4432,21 @@ and mbedit edit save files.\n";
 		else if (process.mbp_kluge005 == MB_YES)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Processing Kluge005 applied (undefined)");
+			sprintf(comment,"  Processing Kluge005 applied (replaces survey record timestamps withtimestamps of corresponding merged navigation records)");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		else if (process.mbp_kluge006 == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Processing Kluge006 applied (changes sonar depth / draft values without changing bathymetry values)");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		else if (process.mbp_kluge007 == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Processing Kluge007 applied (undefined)");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -4578,7 +4597,9 @@ and mbedit edit save files.\n";
 	  handle navigation merging
 	  --------------------------------------------*/
 
-		/* apply kluge001 */
+		/* apply kluge001 - enables correction of travel times in
+               		Hydrosweep DS2 data from the R/V Maurice
+               		Ewing in 2001 and 2002. */
 		if (process.mbp_kluge001 == MB_YES
 			&& kind == MB_DATA_DATA
 			&& (format == 182 || format == 183))
@@ -4597,13 +4618,25 @@ and mbedit edit save files.\n";
 			pitch = pitch_org;
 			heave = heave_org;
 
-			/* apply kluge002 */
+			/* apply kluge002 - enables correction of draft values in Simrad data
+        		       - some Simrad multibeam data has had an
+                		 error in which the heave has bee added
+                		 to the sonar depth (draft for hull
+                		 mounted sonars)
+        		       - this correction subtracts the heave
+                		 value from the sonar depth */
 			if (process.mbp_kluge002 == MB_YES 
 			    && kind == MB_DATA_DATA)
 			    draft -= heave;
 			}
 			
-		/* apply kluge005 - take timestamps from navigation data */
+		/* apply kluge005 - replaces survey record timestamps with
+        		timestamps of corresponding merged navigation
+        		records
+        		- this feature allows users to fix
+                	  timestamp errors using MBnavedit and
+                	  then insert the corrected timestamps
+                	  into processed data */
 		if (process.mbp_kluge005 == MB_YES
 			&& error == MB_ERROR_NO_ERROR 
 			&& kind == MB_DATA_DATA
@@ -5018,6 +5051,14 @@ alpha, beta, lever_heave);*/
 	  recalculate the bathymetry
 	  --------------------------------------------*/
 
+			/* apply kluge006 - resets draft without changing bathymetry */
+			if (process.mbp_kluge006 == MB_YES 
+			    && kind == MB_DATA_DATA)
+			    {
+fprintf(stderr,"RESET Draft: %f %f %f\n",draft_org,draft,sonardepth);
+			    draft_org = draft;
+			    }
+
 			/* if svp specified recalculate bathymetry
 			    by raytracing  */
 			if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
@@ -5042,6 +5083,21 @@ alpha, beta, lever_heave);*/
 						angles[i], angles_forward[i], 
 						&alpha, &beta, 
 						&error);
+        			       /* apply kluge_003 - enables correction of beam angles in
+        				SeaBeam 2112 data
+        				- a data sample from the SeaBeam 2112 on
+                			  the USCG Icebreaker Healy (collected on
+                			  23 July 2003) was found to have an error
+                			  in which the beam angles had 0.25 times
+                			  the roll added
+        				- this correction subtracts 0.25 * roll
+                			  from the beam angles before the bathymetry
+                			  is recalculated by raytracing through a
+                			  water sound velocity profile
+        				- the mbprocess parameter files must be
+                			  set to enable bathymetry recalculation
+                			  by raytracing in order to apply this
+                			  correction */
 					if (process.mbp_kluge003 == MB_YES)
 						beta -= 0.25*roll;
 					if (process.mbp_nav_attitude == MBP_NAV_ON
@@ -5226,6 +5282,7 @@ time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 				{
 				/* apply transducer depth change to depths */	    
 				bath[i] += depth_offset_change;
+fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);
     
 				/* output some debug values */
 				if (verbose >= 5)

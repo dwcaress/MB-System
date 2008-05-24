@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	1/4/2000
- *    $Id: mbset.c,v 5.29 2008-05-13 20:22:07 caress Exp $
+ *    $Id: mbset.c,v 5.30 2008-05-24 19:41:44 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2008/05/13 20:22:07  caress
+ * Fixed bug in handling navigation adjustment.
+ *
  * Revision 5.28  2007/10/08 16:48:06  caress
  * State of the code on 8 October 2007.
  *
@@ -145,7 +148,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.29 2008-05-13 20:22:07 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.30 2008-05-24 19:41:44 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -1062,6 +1065,14 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			sscanf(pargv[i], "KLUGE005:%d", &(process.mbp_kluge005));
 			}
+		else if (strncmp(pargv[i], "KLUGE006:", 8) == 0)
+			{
+			sscanf(pargv[i], "KLUGE006:%d", &(process.mbp_kluge006));
+			}
+		else if (strncmp(pargv[i], "KLUGE007:", 8) == 0)
+			{
+			sscanf(pargv[i], "KLUGE007:%d", &(process.mbp_kluge007));
+			}
 
 		/* unrecognized command */
 		else
@@ -1413,6 +1424,8 @@ the manual pages for mbprocess and mbset. \n\n";
 	    fprintf(stderr,"  Kluge003:                      %d\n",process.mbp_kluge003);
 	    fprintf(stderr,"  Kluge004:                      %d\n",process.mbp_kluge004);
 	    fprintf(stderr,"  Kluge005:                      %d\n",process.mbp_kluge005);
+	    fprintf(stderr,"  Kluge006:                      %d\n",process.mbp_kluge006);
+	    fprintf(stderr,"  Kluge007:                      %d\n",process.mbp_kluge007);
 	    }
 
 	/* write parameters */
