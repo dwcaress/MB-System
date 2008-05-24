@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.26 2008-01-14 18:35:49 caress Exp $
+ *    $Id: mbmosaic.c,v 5.27 2008-05-24 19:40:07 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2008/01/14 18:35:49  caress
+ * Improved handling of datalists.
+ *
  * Revision 5.25  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -239,7 +242,7 @@ int mbmosaic_get_priorities(
 		int	*error);
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.26 2008-01-14 18:35:49 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.27 2008-05-24 19:40:07 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -2256,8 +2259,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					    grid[kgrid] += norm_weight * slope;
 					    sigma[kgrid] += norm_weight * slope * slope;
 					  }
-					if (ii == ix && jj == iy)
-					    cnt[kgrid]++;
+					cnt[kgrid]++;
 					}
 				    }
 				ndata++;
