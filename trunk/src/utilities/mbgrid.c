@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.42 2008-05-16 22:44:37 caress Exp $
+ *    $Id: mbgrid.c,v 5.43 2008-05-24 19:39:39 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.42  2008/05/16 22:44:37  caress
+ * Release 5.1.1beta18
+ *
  * Revision 5.41  2008/01/14 18:27:01  caress
  * Fixed minor bug.
  *
@@ -444,7 +447,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.42 2008-05-16 22:44:37 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.43 2008-05-24 19:39:39 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1271,7 +1274,6 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 	/* check that dx == dy for Arc ascii grid output */
 	if (gridkind == MBGRID_ARCASCII && fabs(dx - dy) > MBGRID_TINY)
 		{
-fprintf(outfp,"dx:%f dy:%f dy-dx:%g\n",dx,dy,dy-dx);
 		fprintf(outfp,"\nArc Ascii grid output (-G4) requires square cells, but grid intervals dx:%f dy:%f differ...\n", dx, dy);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -1851,8 +1853,8 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				    foot_hwidth =(bath[ib] - sonardepth) * tan(DTR * (foot_theta + foot_dtheta)) 
 							- foot_lateral;
 				    foot_hlength = foot_range * tan(DTR * foot_dphi);
-/* fprintf(outfp, "dx:%f dy:%f lateral:%f range:%f theta:%f dtheta:%f dphi:%f fhwidth:%f fhlength:%f\n", 
-foot_dx, foot_dy, foot_lateral, foot_range, foot_theta,foot_dtheta,foot_dphi,foot_hwidth,foot_hlength);*/
+/* fprintf(outfp, "bath:%f sonardepth:%f dx:%f dy:%f lateral:%f range:%f theta:%f dtheta:%f dphi:%f fhwidth:%f fhlength:%f\n", 
+bath[ib],sonardepth,foot_dx, foot_dy, foot_lateral, foot_range, foot_theta,foot_dtheta,foot_dphi,foot_hwidth,foot_hlength);*/
 
 				    /* get range of bins around footprint to examine */
 			  	    if (use_projection == MB_YES)
