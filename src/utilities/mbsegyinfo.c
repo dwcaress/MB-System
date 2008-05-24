@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegyinfo.c	6/2/2004
- *    $Id: mbsegyinfo.c,v 5.3 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbsegyinfo.c,v 5.4 2008-05-24 19:40:42 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	June 2, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.2  2004/10/06 19:10:53  caress
  * Release 5.0.5 update.
  *
@@ -63,7 +66,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.3 2006-01-18 15:17:00 caress Exp $";
+static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.4 2008-05-24 19:40:42 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -544,19 +547,19 @@ main (int argc, char **argv)
 	fprintf(output,"    RP trace:                 %8d %8d %8d\n", 
 		rptracemin, rptracemax, rptracemax - rptracemin + 1);
 	fprintf(output,"    Delay (sec):              %8f %8f %8f\n", 
-		delaymin, delaymax, delaymin - delaymax);
+		delaymin, delaymax, delaymax - delaymin);
 	fprintf(output,"    Range (m):                %8f %8f %8f\n", 
-		rangemin, rangemax, rangemin - rangemax);
+		rangemin, rangemax, rangemax - rangemin);
 	fprintf(output,"    Receiver Elevation (m):   %8f %8f %8f\n", 
-		receiverelevationmin, receiverelevationmax, receiverelevationmin - receiverelevationmax);
+		receiverelevationmin, receiverelevationmax, receiverelevationmax - receiverelevationmin);
 	fprintf(output,"    Source Elevation (m):     %8f %8f %8f\n", 
-		sourceelevationmin, sourceelevationmax, sourceelevationmin - sourceelevationmax);
+		sourceelevationmin, sourceelevationmax, sourceelevationmax - sourceelevationmin);
 	fprintf(output,"    Source Depth (m):         %8f %8f %8f\n", 
-		sourcedepthmin, sourcedepthmax, sourcedepthmin - sourcedepthmax);
+		sourcedepthmin, sourcedepthmax, sourcedepthmax - sourcedepthmin);
 	fprintf(output,"    Receiver Water Depth (m): %8f %8f %8f\n", 
-		receiverwaterdepthmin, receiverwaterdepthmax, receiverwaterdepthmin - receiverwaterdepthmax);
+		receiverwaterdepthmin, receiverwaterdepthmax, receiverwaterdepthmax - receiverwaterdepthmin);
 	fprintf(output,"    Source Water Depth (m):   %8f %8f %8f\n", 
-		sourcewaterdepthmin, sourcewaterdepthmax, sourcewaterdepthmin - sourcewaterdepthmax);
+		sourcewaterdepthmin, sourcewaterdepthmax, sourcewaterdepthmax - sourcewaterdepthmin);
 	fprintf(output,"\nNavigation Totals:\n");
 	fprintf(output,"\n  Start of Data:\n");
 	fprintf(output,"    Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
