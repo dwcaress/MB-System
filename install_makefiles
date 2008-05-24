@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.29 2007-08-24 23:37:05 caress Exp $
+#    $Id: install_makefiles,v 5.30 2008-05-24 19:28:41 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005, 2006 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -116,10 +116,13 @@ $LFLAGS = "-Wl -lm -bind_at_load";
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.29 2007-08-24 23:37:05 caress Exp $
+#   $Id: install_makefiles,v 5.30 2008-05-24 19:28:41 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.29  2007/08/24 23:37:05  caress
+#   Fixed CYGWIN preset and removed -lGLw references.
+#
 #   Revision 5.28  2007/05/25 19:32:04  caress
 #   Removed reference to libGLw
 #
@@ -401,6 +404,55 @@ else
 #--------------------------------------------------------------------
 # HERE ARE SOME EXAMPLE CONFIGURATION SETTINGS FOR VARIOUS SYSTEMS
 #--------------------------------------------------------------------
+#
+# Example for installing on Apple Macintosh Computers
+# running MacOS X version 10.2 to 10.4. Here I am using the 
+# Apple X11 distribution and the OpenMotif (www.openmotif.org)
+# port provided by Fink (www.fink.org). GMT and netCDF have
+# also been installed using fink (note: current versions of
+# GMT are only available through the "unstable" fink tree).
+# The "-force_flat_namespace" linker flag was
+# required in $LFLAGS prior to 10.2.6
+#	$MBSYSTEM_HOME = "/Users/caress/dev/mbsystem";
+#	$OS = "DARWIN";
+#	$CC = "cc";
+#	$BYTESWAPPED = "NO";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/sw/include";
+#	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+#	$GMTLIBDIR = "/sw/lib";
+#	$GMTINCDIR = "/sw/include";
+#	$NETCDFLIBDIR = "/sw/lib";
+#	$NETCDFINCDIR = "/sw/include";
+#	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$CFLAGS = "-g -I/usr/X11R6/include";
+#	$LFLAGS = "-Wl -lm -bind_at_load";
+#
+# Example for installing on Apple Macintosh Computers
+# running MacOS X version 10.5 ("Tiger"). Here I am using the 
+# Apple X11 distribution and the OpenMotif (www.openmotif.org)
+# port provided by Fink (www.fink.org). GMT and netCDF have
+# also been installed using fink (note: current versions of
+# GMT are only available through the "unstable" fink tree).
+# If building on a newer Intel Mac then $BYTESWAPPED = "YES";
+# else if building on an older PowerPC Mac then $BYTESWAPPED = "NO";
+#	$MBSYSTEM_HOME = "/Users/caress/dev/mbsystem";
+#	$OS = "DARWIN";
+#	$CC = "cc";
+#	$BYTESWAPPED = "NO";
+#	$GRAPHICAL = "YES";
+#	$MOTIFINCDIR = "/sw/include";
+#	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+#	$GMTLIBDIR = "/sw/lib";
+#	$GMTINCDIR = "/sw/include";
+#	$NETCDFLIBDIR = "/sw/lib";
+#	$NETCDFINCDIR = "/sw/include";
+#	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$CFLAGS = "-g -I/usr/X11R6/include";
+#	$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Freameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
+#
 # Example for installing on L-DEO Sun workstations running SunOs 4.1.x:
 #	$MBSYSTEM_HOME = "/home/hs/caress/dev/mbsystem";
 #	$OS = "SUN";
@@ -548,28 +600,6 @@ else
 #	$NETCDFLIBDIR = "/usr/local/gmt/lib";
 #	$NETCDFINCDIR = "/usr/local/gmt/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
-#
-# Example for installing on Apple Macintosh Computers
-# running MacOS X version 10.2 or later. Here I am using the 
-# Apple X11 distribution and the OpenMotif (www.openmotif.org)
-# port provided by Fink (www.fink.org). 
-# The "-force_flat_namespace" linker flag was
-# required in $LFLAGS prior to 10.2.6
-#	$MBSYSTEM_HOME = "/Users/caress/dev/mbsystem";
-#	$OS = "DARWIN";
-#	$CC = "cc";
-#	$BYTESWAPPED = "NO";
-#	$GRAPHICAL = "YES";
-#	$MOTIFINCDIR = "/sw/include";
-#	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-#	$GMTLIBDIR = "/sw/lib";
-#	$GMTINCDIR = "/sw/include";
-#	$NETCDFLIBDIR = "/sw/lib";
-#	$NETCDFINCDIR = "/sw/include";
-#	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
-#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
-#	$CFLAGS = "-g -I/usr/X11R6/include";
-#	$LFLAGS = "-Wl -lm -bind_at_load";
 #
 #--------------------------------------------------------------------
 #
