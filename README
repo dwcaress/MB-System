@@ -280,6 +280,11 @@ As of 5.1.1beta18 this support is readonly.
 Added calculation and use of three dimensional covariance in
 the xyz nav offsets used by mbnavadjust.
 
+Added processing kluge006 to mbprocess. This "kluge" allows users to
+change the sonar draft value without changing the calculated bathymetry.
+This fixes a problem in which Atalante Simard data were exported by
+Caris into GSF with an incorrect sonar draft.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1473,10 +1478,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.110 2008-05-16 23:17:22 caress Exp $
+RCS ID: $Id: README,v 5.111 2008-05-24 19:33:25 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.110  2008/05/16 23:17:22  caress
+Release 5.1.1beta18.
+
 Revision 5.109  2008/03/14 18:29:45  caress
 Updated support for JHC format 151.
 
