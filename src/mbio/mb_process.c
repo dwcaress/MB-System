@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.36 2008-05-16 22:56:24 caress Exp $
+ *    $Id: mb_process.c,v 5.37 2008-05-26 04:43:15 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.36  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.35  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -158,7 +161,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.36 2008-05-16 22:56:24 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.37 2008-05-26 04:43:15 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -349,6 +352,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_kluge003 = MB_NO;
 	process->mbp_kluge004 = MB_NO;
 	process->mbp_kluge005 = MB_NO;
+	process->mbp_kluge006 = MB_NO;
+	process->mbp_kluge007 = MB_NO;
 
 	/* open and read parameter file */
 	if ((fp = fopen(parfile, "r")) != NULL) 
@@ -1008,6 +1013,14 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			process->mbp_kluge005 = MB_YES;
 			}			
+		    else if (strncmp(buffer, "KLUGE006", 8) == 0)
+			{
+			process->mbp_kluge006 = MB_YES;
+			}			
+		    else if (strncmp(buffer, "KLUGE007", 8) == 0)
+			{
+			process->mbp_kluge007 = MB_YES;
+			}			
 		    }
 		}
 		
@@ -1477,6 +1490,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_kluge003:           %d\n",process->mbp_kluge003);
 		fprintf(stderr,"dbg2       mbp_kluge004:           %d\n",process->mbp_kluge004);
 		fprintf(stderr,"dbg2       mbp_kluge005:           %d\n",process->mbp_kluge005);
+		fprintf(stderr,"dbg2       mbp_kluge006:           %d\n",process->mbp_kluge006);
+		fprintf(stderr,"dbg2       mbp_kluge007:           %d\n",process->mbp_kluge007);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
@@ -1625,6 +1640,8 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_kluge003:           %d\n",process->mbp_kluge003);
 		fprintf(stderr,"dbg2       mbp_kluge004:           %d\n",process->mbp_kluge004);
 		fprintf(stderr,"dbg2       mbp_kluge005:           %d\n",process->mbp_kluge005);
+		fprintf(stderr,"dbg2       mbp_kluge006:           %d\n",process->mbp_kluge006);
+		fprintf(stderr,"dbg2       mbp_kluge007:           %d\n",process->mbp_kluge007);
 		}
 		
 	/* try to avoid absolute pathnames - get pwd */
@@ -1898,6 +1915,10 @@ int mb_pr_writepar(int verbose, char *file,
 	    	fprintf(fp, "KLUGE004\n");
 	    if (process->mbp_kluge005 == MB_YES)
 	    	fprintf(fp, "KLUGE005\n");
+	    if (process->mbp_kluge006 == MB_YES)
+	    	fprintf(fp, "KLUGE006\n");
+	    if (process->mbp_kluge007 == MB_YES)
+	    	fprintf(fp, "KLUGE007\n");
   	
 	    /* close file */
 	    fclose(fp);
@@ -3756,6 +3777,8 @@ int mb_pr_update_kluges(int verbose, char *file,
 			int	mbp_kluge003,
 			int	mbp_kluge004,
 			int	mbp_kluge005,
+			int	mbp_kluge006,
+			int	mbp_kluge007,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_kluges";
@@ -3775,6 +3798,8 @@ int mb_pr_update_kluges(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_kluge003:             %d\n",mbp_kluge003);
 		fprintf(stderr,"dbg2       mbp_kluge004:             %d\n",mbp_kluge004);
 		fprintf(stderr,"dbg2       mbp_kluge005:             %d\n",mbp_kluge005);
+		fprintf(stderr,"dbg2       mbp_kluge006:             %d\n",mbp_kluge006);
+		fprintf(stderr,"dbg2       mbp_kluge007:             %d\n",mbp_kluge007);
 		}
 
 	/* get known process parameters */
@@ -3786,6 +3811,8 @@ int mb_pr_update_kluges(int verbose, char *file,
         process.mbp_kluge003 = mbp_kluge003;
         process.mbp_kluge004 = mbp_kluge004;
         process.mbp_kluge005 = mbp_kluge005;
+        process.mbp_kluge006 = mbp_kluge006;
+        process.mbp_kluge007 = mbp_kluge007;
  
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
@@ -5058,6 +5085,8 @@ int mb_pr_get_kluges(int verbose, char *file,
 			int	*mbp_kluge003,
 			int	*mbp_kluge004,
 			int	*mbp_kluge005,
+			int	*mbp_kluge006,
+			int	*mbp_kluge007,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_kluges";
@@ -5083,6 +5112,8 @@ int mb_pr_get_kluges(int verbose, char *file,
         *mbp_kluge003 = process.mbp_kluge003;
         *mbp_kluge004 = process.mbp_kluge004;
         *mbp_kluge005 = process.mbp_kluge005;
+        *mbp_kluge006 = process.mbp_kluge006;
+        *mbp_kluge007 = process.mbp_kluge007;
  
 
 	/* print output debug statements */
@@ -5096,6 +5127,8 @@ int mb_pr_get_kluges(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_kluge003:             %d\n",mbp_kluge003);
 		fprintf(stderr,"dbg2       mbp_kluge004:             %d\n",mbp_kluge004);
 		fprintf(stderr,"dbg2       mbp_kluge005:             %d\n",mbp_kluge005);
+		fprintf(stderr,"dbg2       mbp_kluge006:             %d\n",mbp_kluge006);
+		fprintf(stderr,"dbg2       mbp_kluge007:             %d\n",mbp_kluge007);
 		fprintf(stderr,"dbg2       error:                    %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                   %d\n",status);

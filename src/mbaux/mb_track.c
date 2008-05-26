@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 5.3 2006-11-10 22:36:04 caress Exp $
+ *    $Id: mb_track.c,v 5.4 2008-05-26 04:43:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2006/11/10 22:36:04  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.2  2005/03/25 04:10:52  caress
  * Control over the filename annotation orientation has been added and the orientation itself has been fixed.
  *
@@ -86,7 +89,7 @@
 #define IDN 2
 #define IOR -3
 
-static char rcs_id[]="$Id: mb_track.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
+static char rcs_id[]="$Id: mb_track.c,v 5.4 2008-05-26 04:43:15 caress Exp $";
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_track plots the shiptrack of multibeam data. */
@@ -144,19 +147,19 @@ void mb_track(int verbose, struct swath *data, int *error)
 		/* check for time tick */
 		time_tick = MB_NO;
 		if (floor(hour0/data->time_tick_int) 
-			< floor(hour1/data->time_tick_int))
+			!= floor(hour1/data->time_tick_int))
 			time_tick = MB_YES;
 
 		/* check for time annotation */
 		time_annot = MB_NO;
 		if (floor(hour0/data->time_annot_int) 
-			< floor(hour1/data->time_annot_int))
+			!= floor(hour1/data->time_annot_int))
 			time_annot = MB_YES;
 
 		/* check for date annotation */
 		date_annot = MB_NO;
 		if (floor(hour0/data->date_annot_int) 
-			< floor(hour1/data->date_annot_int))
+			!= floor(hour1/data->date_annot_int))
 			date_annot = MB_YES;
 
 		/* now get azimuth and location if needed */
