@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.26 2007-10-08 15:59:34 caress Exp $
+ *    $Id: mb_process.h,v 5.27 2008-05-26 04:43:15 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -436,17 +436,59 @@
  *
  * PROCESSING KLUGES:
  *   KLUGE001                       # processing kluge 001
- *                                  # - Apply corrections to travel time data in Hydrosweep DS2
- *                                  #   data collected on the R/V Maurice Ewing in 2001/2002
+ *                                  #   - Apply corrections to travel time data in Hydrosweep DS2
+ *                                  #     data collected on the R/V Maurice Ewing in 2001/2002
  *   KLUGE002                       # processing kluge 002
- *                                  # - Apply corrections to travel time data in Hydrosweep DS2
- *                                  #   data collected on the R/V Maurice Ewing in 2001/2002
- *   KLUGE003                       # processing kluge 003 (not yet defined)
- *                                  # - Add heave obtained from mb_extract_nav() to draft.
- *                                  # - Fixes Simrad EM1002 data where draft value does not
- *				    #   include heave. 
- *   KLUGE004                       # processing kluge 004 (not yet defined)
- *   KLUGE005                       # processing kluge 005 (not yet defined)
+ *                                  #   - Apply corrections to travel time data in Hydrosweep DS2
+ *                                  #     data collected on the R/V Maurice Ewing in 2001/2002
+ *                                  #     enables correction of draft values in Simrad data
+ *                                  #   - some Simrad multibeam data has had an
+ *                                  #     error in which the heave has bee added
+ *                                  #     to the sonar depth (draft for hull
+ *                                  #     mounted sonars)
+ *                                  #   - this correction subtracts the heave
+ *                                  #     value from the sonar depth
+ *   KLUGE003                       # processing kluge 003
+ *				    #   enables correction of beam angles in SeaBeam 2112 data
+ *				    #   - a data sample from the SeaBeam 2112 on
+ *				    #     the USCG Icebreaker Healy (collected on
+ *				    #     23 July 2003) was found to have an error
+ *				    #     in which the beam angles had 0.25 times
+ *				    #     the roll added
+ *				    #   - this correction subtracts 0.25 * roll
+ *				    #     from the beam angles before the bathymetry
+ *				    #     is recalculated by raytracing through a
+ *				    #     water sound velocity profile
+ *				    #   - the mbprocess parameter files must be
+ *				    #     set to enable bathymetry recalculation
+ *				    #     by raytracing in order to apply this
+ *				    #     correction
+ *   KLUGE004                       # processing kluge 004
+ *				    #   deletes survey data associated with duplicate
+ *				    #   or reversed time tags
+ *				    #   - if survey data records are encountered
+ *				    #     with time tags less than or equal to the
+ *				    #     last good time tag, an error is set and
+ *				    #     the data record is not output to the
+ *				    #     processed data file.
+ *   KLUGE005                       # processing kluge 005
+ *				    #   replaces survey record timestamps with
+ *				    #   timestamps of corresponding merged navigation
+ *				    #   records
+ *				    #   - this feature allows users to fix
+ *				    #     timestamp errors using MBnavedit and
+ *				    #     then insert the corrected timestamps
+ *				    #     into processed data
+ *   KLUGE006                       # processing kluge 006
+ *                                  #   changes sonar depth / draft values without 
+ *                                  #   changing bathymetry values
+ *   KLUGE007                       # processing kluge 007 (not yet defined)
+ *				    #   - occasionaly odd processing problems will
+ *				    #     occur that are specific to a particular
+ *				    #     survey or sonar version
+ *				    #   - mbprocess will allow one-time fixes to
+ *				    #     be defined as "kluges" that can be turned
+ *				    #     on through the parameter files.
  *
  * MBprocess and its associated functions and programs use
  * the following file naming convention. The unprocessed swath
@@ -468,6 +510,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.25  2007/05/14 06:25:47  caress
  * Added support for vertical as well as lateral adjustments from mbnavadjust.
  *
@@ -815,6 +860,8 @@ struct mb_process_struct
 	int	mbp_kluge003;
 	int	mbp_kluge004;
 	int	mbp_kluge005;
+	int	mbp_kluge006;
+	int	mbp_kluge007;
 	};
 	
 /* edit save file definitions */
@@ -1003,6 +1050,8 @@ int mb_pr_update_kluges(int verbose, char *file,
 			int	mbp_kluge003,
 			int	mbp_kluge004,
 			int	mbp_kluge005,
+			int	mbp_kluge006,
+			int	mbp_kluge007,
 			int *error);
 int mb_pr_get_ofile(int verbose, char *file, 
 			int	*mbp_ofile_specified, 
@@ -1162,6 +1211,8 @@ int mb_pr_get_kluges(int verbose, char *file,
 			int	*mbp_kluge003,
 			int	*mbp_kluge004,
 			int	*mbp_kluge005,
+			int	*mbp_kluge006,
+			int	*mbp_kluge007,
 			int *error);
 int mb_pr_set_bathyslope(int verbose,
 			int nsmooth, 
