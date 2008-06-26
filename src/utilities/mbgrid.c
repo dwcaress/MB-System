@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.43 2008-05-24 19:39:39 caress Exp $
+ *    $Id: mbgrid.c,v 5.44 2008-06-26 07:15:46 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.43  2008/05/24 19:39:39  caress
+ * Changed some commenting.
+ *
  * Revision 5.42  2008/05/16 22:44:37  caress
  * Release 5.1.1beta18
  *
@@ -447,7 +450,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.43 2008-05-24 19:39:39 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.44 2008-06-26 07:15:46 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -2593,14 +2596,14 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		} /* end if (format > 0) */
 
 		/* if format == 0 then input is lon,lat,values triples file */
-		else if (format == 0 && file[0] != '#')
+		else if (format == 0 && path[0] != '#')
 		{
 		/* open data file */
-		if ((rfp = fopen(file,"r")) == NULL)
+		if ((rfp = fopen(path,"r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
-			fprintf(outfp,"\nUnable to open lon,lat,value triples data file: %s\n",
-				file);
+			fprintf(outfp,"\nUnable to open lon,lat,value triples data file1: %s\n",
+				path);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
 			mb_memory_clear(verbose, &error);
@@ -3219,14 +3222,14 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		} /* end if (format > 0) */
 
 		/* if format == 0 then input is lon,lat,values triples file */
-		else if (format == 0 && file[0] != '#')
+		else if (format == 0 && path[0] != '#')
 		{
 		/* open data file */
-		if ((rfp = fopen(file,"r")) == NULL)
+		if ((rfp = fopen(path,"r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
-			fprintf(outfp,"\nUnable to open lon,lat,value triples data file: %s\n",
-				file);
+			fprintf(outfp,"\nUnable to open lon,lat,value triples data path: %s\n",
+				path);
 			fprintf(outfp,"\nProgram <%s> Terminated\n",
 				program_name);
 			mb_memory_clear(verbose, &error);
