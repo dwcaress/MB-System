@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_oic.c	3/1/99
- *	$Id: mbsys_oic.c,v 5.9 2008-07-10 17:40:13 caress Exp $
+ *	$Id: mbsys_oic.c,v 5.10 2008-07-10 18:02:39 caress Exp $
  *
  *    Copyright (c) 1999-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -78,7 +78,7 @@
 int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_oic.c,v 5.9 2008-07-10 17:40:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_oic.c,v 5.10 2008-07-10 18:02:39 caress Exp $";
 	char	*function_name = "mbsys_oic_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.c	4/11/2002
- *	$Id: mbsys_netcdf.c,v 5.9 2008-07-10 17:40:13 caress Exp $
+ *	$Id: mbsys_netcdf.c,v 5.10 2008-07-10 18:02:39 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -62,7 +62,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_netcdf.h"
 
-static char res_id[]="$Id: mbsys_netcdf.c,v 5.9 2008-07-10 17:40:13 caress Exp $";
+static char res_id[]="$Id: mbsys_netcdf.c,v 5.10 2008-07-10 18:02:39 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
