@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_nvnetcdf.c	5/4/02
- *	$Id: mbr_nvnetcdf.c,v 5.5 2008-05-16 22:56:24 caress Exp $
+ *	$Id: mbr_nvnetcdf.c,v 5.6 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 4, 2002
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.4  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -88,7 +91,7 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_nvnetcdf.c,v 5.5 2008-05-16 22:56:24 caress Exp $";
+static char res_id[]="$Id: mbr_nvnetcdf.c,v 5.6 2008-07-10 06:43:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error)
@@ -653,34 +656,34 @@ int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    /* allocate memory for variables */
 	    if (status == MB_SUCCESS)
 		{
-		status = mb_malloc(verbose, 
+		status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			    store->mbHistoryRecNbr * sizeof(int),
-			    &store->mbHistDate,error);
-		status = mb_malloc(verbose, 
+			    (void **)&store->mbHistDate,error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			    store->mbHistoryRecNbr * sizeof(int),
-			    &store->mbHistTime,error);
-		status = mb_malloc(verbose, 
+			    (void **)&store->mbHistTime,error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			    store->mbHistoryRecNbr * sizeof(char),
-			    &store->mbHistCode,error);
-		status = mb_malloc(verbose, 
+			    (void **)&store->mbHistCode,error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			    store->mbHistoryRecNbr * store->mbNameLength * sizeof(char),
-			    &store->mbHistAutor,error);
-		status = mb_malloc(verbose, 
+			    (void **)&store->mbHistAutor,error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			    store->mbHistoryRecNbr * store->mbNameLength * sizeof(char),
-			    &store->mbHistModule,error);
-		status = mb_malloc(verbose, 
+			    (void **)&store->mbHistModule,error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			    store->mbHistoryRecNbr * store->mbCommentLength * sizeof(char),
-			    &store->mbHistComment,error);
+			    (void **)&store->mbHistComment,error);
 
 		/* deal with a memory allocation failure */
 		if (status == MB_FAILURE)
 		    {
-		    status = mb_free(verbose, &store->mbHistDate, error);
-		    status = mb_free(verbose, &store->mbHistTime, error);
-		    status = mb_free(verbose, &store->mbHistCode, error);
-		    status = mb_free(verbose, &store->mbHistAutor, error);
-		    status = mb_free(verbose, &store->mbHistModule, error);
-		    status = mb_free(verbose, &store->mbHistComment, error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistDate, error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistTime, error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistCode, error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistAutor, error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistModule, error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistComment, error);
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_MEMORY_FAIL;
 		    if (verbose >= 2)
@@ -1664,24 +1667,24 @@ int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    	{
 		/* allocate or reallocate history arrays */
 		storelocal->mbHistoryRecNbr += 20;
-		status = mb_realloc(verbose, 
+		status = mb_reallocd(verbose, __FILE__, __LINE__,
 			    storelocal->mbHistoryRecNbr * sizeof(int),
-			    &storelocal->mbHistDate,error);
-		status = mb_realloc(verbose, 
+			    (void **)&storelocal->mbHistDate,error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, 
 			    storelocal->mbHistoryRecNbr * sizeof(int),
-			    &storelocal->mbHistTime,error);
-		status = mb_realloc(verbose, 
+			    (void **)&storelocal->mbHistTime,error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, 
 			    storelocal->mbHistoryRecNbr * sizeof(char),
-			    &storelocal->mbHistCode,error);
-		status = mb_realloc(verbose, 
+			    (void **)&storelocal->mbHistCode,error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, 
 			    storelocal->mbHistoryRecNbr * storelocal->mbNameLength * sizeof(char),
-			    &storelocal->mbHistAutor,error);
-		status = mb_realloc(verbose, 
+			    (void **)&storelocal->mbHistAutor,error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, 
 			    storelocal->mbHistoryRecNbr * storelocal->mbNameLength * sizeof(char),
-			    &storelocal->mbHistModule,error);
-		status = mb_realloc(verbose, 
+			    (void **)&storelocal->mbHistModule,error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, 
 			    storelocal->mbHistoryRecNbr * storelocal->mbCommentLength * sizeof(char),
-			    &storelocal->mbHistComment,error);
+			    (void **)&storelocal->mbHistComment,error);
 		for (i=storelocal->mbNbrHistoryRec;i<storelocal->mbHistoryRecNbr;i++)
 			    {
 			    storelocal->mbHistDate[i] = 0;

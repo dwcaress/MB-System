@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_cheb.c			3/23/00
- *    $Id: mb_cheb.c,v 5.2 2007-10-08 05:56:18 caress Exp $
+ *    $Id: mb_cheb.c,v 5.3 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -31,6 +31,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2007/10/08 05:56:18  caress
+ * Changed convergence criteria.
+ *
  * Revision 5.1  2006/01/11 07:33:01  caress
  * Working towards 5.0.8
  *

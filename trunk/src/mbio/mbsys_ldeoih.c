@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 5.12 2007-10-08 15:59:34 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 5.13 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.11  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -141,7 +144,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_ldeoih.h"
 
-static char res_id[]="$Id: mbsys_ldeoih.c,v 5.12 2007-10-08 15:59:34 caress Exp $";
+static char res_id[]="$Id: mbsys_ldeoih.c,v 5.13 2008-07-10 06:43:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -166,8 +169,8 @@ int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_ldeoih_struct),
-				store_ptr,error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__,sizeof(struct mbsys_ldeoih_struct),
+				(void **)store_ptr,error);
 
 	/* get pointer to data structure */
 	store = (struct mbsys_ldeoih_struct *) *store_ptr;
@@ -247,17 +250,17 @@ int mbsys_ldeoih_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	store = (struct mbsys_ldeoih_struct *) *store_ptr;
 
 	/* deallocate memory for data structures */
-	status = mb_free(verbose,&store->beamflag,error);
-	status = mb_free(verbose,&store->bath,error);
-	status = mb_free(verbose,&store->bath_acrosstrack,error);
-	status = mb_free(verbose,&store->bath_alongtrack,error);
-	status = mb_free(verbose,&store->amp,error);
-	status = mb_free(verbose,&store->ss,error);
-	status = mb_free(verbose,&store->ss_acrosstrack,error);
-	status = mb_free(verbose,&store->ss_alongtrack,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->beamflag,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->bath,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->bath_acrosstrack,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->bath_alongtrack,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->amp,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->ss,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->ss_acrosstrack,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->ss_alongtrack,error);
 
 	/* deallocate memory for data structure */
-	status = mb_free(verbose,store_ptr,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)store_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -730,33 +733,33 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    {
 		    store->beams_bath_alloc = nbath;
 		    if (store->beamflag != NULL)
-			status = mb_free(verbose, &store->beamflag, error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->beamflag, error);
 		    if (store->bath != NULL)
-			status = mb_free(verbose, &store->bath, error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->bath, error);
 		    if (store->bath_acrosstrack != NULL)
-			status = mb_free(verbose, &store->bath_acrosstrack, error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->bath_acrosstrack, error);
 		    if (store->bath_alongtrack != NULL)
-			status = mb_free(verbose, &store->bath_alongtrack, error);
-		    status = mb_malloc(verbose, 
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->bath_alongtrack, error);
+		    status = mb_mallocd(verbose,__FILE__, __LINE__, 
 				store->beams_bath_alloc * sizeof(char),
-				&store->beamflag,error);
-		    status = mb_malloc(verbose, 
+				(void **)&store->beamflag,error);
+		    status = mb_mallocd(verbose,__FILE__, __LINE__, 
 				store->beams_bath_alloc * sizeof(short),
-				&store->bath,error);
-		    status = mb_malloc(verbose, 
+				(void **)&store->bath,error);
+		    status = mb_mallocd(verbose,__FILE__, __LINE__, 
 				store->beams_bath_alloc * sizeof(short),
-				&store->bath_acrosstrack,error);
-		    status = mb_malloc(verbose, 
+				(void **)&store->bath_acrosstrack,error);
+		    status = mb_mallocd(verbose,__FILE__, __LINE__, 
 				store->beams_bath_alloc * sizeof(short),
-				&store->bath_alongtrack,error);
+				(void **)&store->bath_alongtrack,error);
 
 		    /* deal with a memory allocation failure */
 		    if (status == MB_FAILURE)
 			{
-			status = mb_free(verbose, &store->beamflag, error);
-			status = mb_free(verbose, &store->bath, error);
-			status = mb_free(verbose, &store->bath_acrosstrack, error);
-			status = mb_free(verbose, &store->bath_alongtrack, error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->beamflag, error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->bath, error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->bath_acrosstrack, error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->bath_alongtrack, error);
 			status = MB_FAILURE;
 			*error = MB_ERROR_MEMORY_FAIL;
 			if (verbose >= 2)
@@ -777,15 +780,15 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    if (store != NULL)
 			{
 			if (store->amp != NULL)
-			    status = mb_free(verbose, &store->amp, error);
-			status = mb_malloc(verbose, 
+			    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->amp, error);
+			status = mb_mallocd(verbose,__FILE__, __LINE__, 
 				    store->beams_amp_alloc * sizeof(short),
-				    &store->amp,error);
+				    (void **)&store->amp,error);
 
 			/* deal with a memory allocation failure */
 			if (status == MB_FAILURE)
 			    {
-			    status = mb_free(verbose, &store->amp, error);
+			    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->amp, error);
 			    status = MB_FAILURE;
 			    *error = MB_ERROR_MEMORY_FAIL;
 			    if (verbose >= 2)
@@ -807,27 +810,27 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    if (store != NULL)
 			{
 			if (store->ss != NULL)
-			    status = mb_free(verbose, &store->ss, error);
+			    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->ss, error);
 			if (store->ss_acrosstrack != NULL)
-			    status = mb_free(verbose, &store->ss_acrosstrack, error);
+			    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->ss_acrosstrack, error);
 			if (store->ss_alongtrack != NULL)
-			    status = mb_free(verbose, &store->ss_alongtrack, error);
-			status = mb_malloc(verbose, 
+			    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->ss_alongtrack, error);
+			status = mb_mallocd(verbose,__FILE__, __LINE__, 
 				    store->pixels_ss_alloc * sizeof(short),
-				    &store->ss,error);
-			status = mb_malloc(verbose, 
+				    (void **)&store->ss,error);
+			status = mb_mallocd(verbose,__FILE__, __LINE__, 
 				    store->pixels_ss_alloc * sizeof(short),
-				    &store->ss_acrosstrack,error);
-			status = mb_malloc(verbose, 
+				    (void **)&store->ss_acrosstrack,error);
+			status = mb_mallocd(verbose,__FILE__, __LINE__, 
 				    store->pixels_ss_alloc * sizeof(short),
-				    &store->ss_alongtrack,error);
+				    (void **)&store->ss_alongtrack,error);
 
 			/* deal with a memory allocation failure */
 			if (status == MB_FAILURE)
 			    {
-			    status = mb_free(verbose, &store->ss, error);
-			    status = mb_free(verbose, &store->ss_acrosstrack, error);
-			    status = mb_free(verbose, &store->ss_alongtrack, error);
+			    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->ss, error);
+			    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->ss_acrosstrack, error);
+			    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->ss_alongtrack, error);
 			    status = MB_FAILURE;
 			    *error = MB_ERROR_MEMORY_FAIL;
 			    if (verbose >= 2)
@@ -1539,57 +1542,57 @@ int mbsys_ldeoih_copy(int verbose, void *mbio_ptr,
 	copy = (struct mbsys_ldeoih_struct *) copy_ptr;
 	
 	if (copy->beamflag != NULL)
-	    status = mb_free(verbose, &copy->beamflag, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->beamflag, error);
 	if (copy->bath != NULL)
-	    status = mb_free(verbose, &copy->bath, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->bath, error);
 	if (copy->bath_acrosstrack != NULL)
-	    status = mb_free(verbose, &copy->bath_acrosstrack, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->bath_acrosstrack, error);
 	if (copy->bath_alongtrack != NULL)
-	    status = mb_free(verbose, &copy->bath_alongtrack, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->bath_alongtrack, error);
 	if (copy->amp != NULL)
-	    status = mb_free(verbose, &copy->amp, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->amp, error);
 	if (copy->ss != NULL)
-	    status = mb_free(verbose, &copy->ss, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->ss, error);
 	if (copy->ss_acrosstrack != NULL)
-	    status = mb_free(verbose, &copy->ss_acrosstrack, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->ss_acrosstrack, error);
 	if (copy->ss_alongtrack != NULL)
-	    status = mb_free(verbose, &copy->ss_alongtrack, error);
-	status = mb_malloc(verbose, 
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->ss_alongtrack, error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__, 
 		    store->beams_bath * sizeof(char),
-		    &copy->beamflag,error);
-	status = mb_malloc(verbose, 
+		    (void **)&copy->beamflag,error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__, 
 		    store->beams_bath * sizeof(short),
-		    &copy->bath,error);
-	status = mb_malloc(verbose, 
+		    (void **)&copy->bath,error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__, 
 		    store->beams_bath * sizeof(short),
-		    &copy->bath_acrosstrack,error);
-	status = mb_malloc(verbose, 
+		    (void **)&copy->bath_acrosstrack,error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__, 
 		    store->beams_bath * sizeof(short),
-		    &copy->bath_alongtrack,error);
-	status = mb_malloc(verbose, 
+		    (void **)&copy->bath_alongtrack,error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__, 
 		    store->beams_amp * sizeof(short),
-		    &copy->amp,error);
-	status = mb_malloc(verbose, 
+		    (void **)&copy->amp,error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__, 
 		    store->pixels_ss * sizeof(short),
-		    &copy->ss,error);
-	status = mb_malloc(verbose, 
+		    (void **)&copy->ss,error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__, 
 		    store->pixels_ss * sizeof(short),
-		    &copy->ss_acrosstrack,error);
-	status = mb_malloc(verbose, 
+		    (void **)&copy->ss_acrosstrack,error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__, 
 		    store->pixels_ss * sizeof(short),
-		    &copy->ss_alongtrack,error);
+		    (void **)&copy->ss_alongtrack,error);
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE)
 	    {
-	    status = mb_free(verbose, &copy->beamflag, error);
-	    status = mb_free(verbose, &copy->bath, error);
-	    status = mb_free(verbose, &copy->bath_acrosstrack, error);
-	    status = mb_free(verbose, &copy->bath_alongtrack, error);
-	    status = mb_free(verbose, &copy->amp, error);
-	    status = mb_free(verbose, &copy->ss, error);
-	    status = mb_free(verbose, &copy->ss_acrosstrack, error);
-	    status = mb_free(verbose, &copy->ss_alongtrack, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->beamflag, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->bath, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->bath_acrosstrack, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->bath_alongtrack, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->amp, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->ss, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->ss_acrosstrack, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->ss_alongtrack, error);
 	    status = MB_FAILURE;
 	    *error = MB_ERROR_MEMORY_FAIL;
 	    }

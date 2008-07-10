@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.37 2008-01-14 17:49:48 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.38 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.37  2008/01/14 17:49:48  caress
+ * Fixed problem with speed data.
+ *
  * Revision 5.36  2007/10/08 07:20:21  caress
  * Fixed vertical scaling of large numbers of pings. Augmented zap box function.
  *
@@ -396,7 +399,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.37 2008-01-14 17:49:48 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.38 2008-07-10 06:43:40 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -6336,7 +6339,8 @@ int mbedit_plot_ping_label(int iping, int save)
 	/* set info string with time tag */
 	if (show_time == MBEDIT_PLOT_TIME || save == MB_YES)
 		{
-		if (ping[iping].beams_bath > 0)
+		if (ping[iping].beams_bath > 0 
+			&& mb_beam_ok(ping[iping].beamflag[ping[iping].beams_bath/2]))
 		sprintf(string,"%5d %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f",
 			ping[iping].record + 1,
 			ping[iping].time_i[1],ping[iping].time_i[2],
@@ -6344,6 +6348,14 @@ int mbedit_plot_ping_label(int iping, int save)
 			ping[iping].time_i[4],ping[iping].time_i[5],
 			(int)(0.001 * ping[iping].time_i[6]),
 			ping[iping].bath[ping[iping].beams_bath/2]);
+		else if (ping[iping].beams_bath > 0)
+		sprintf(string,"%5d %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f",
+			ping[iping].record + 1,
+			ping[iping].time_i[1],ping[iping].time_i[2],
+			ping[iping].time_i[0],ping[iping].time_i[3],
+			ping[iping].time_i[4],ping[iping].time_i[5],
+			(int)(0.001 * ping[iping].time_i[6]),
+			ping[iping].altitude + ping[iping].sonardepth);
 		else
 		sprintf(string,"%5d %2.2d/%2.2d/%4.4d %2.2d:%2.2d:%2.2d.%3.3d %10.3f",
 			ping[iping].record + 1,

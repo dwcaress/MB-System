@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.24 2007-11-16 17:53:02 caress Exp $
+ *    $Id: mbcopy.c,v 5.25 2008-07-10 06:43:41 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2004, 2006 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.24  2007/11/16 17:53:02  caress
+ * Fixes applied.
+ *
  * Revision 5.23  2007/10/31 18:41:42  caress
  * Fixed handling of null sidescan values.
  *
@@ -246,7 +249,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.24 2007-11-16 17:53:02 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.25 2008-07-10 06:43:41 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  -Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -2380,9 +2383,9 @@ int mbcopy_simrad_to_simrad2(int verbose,
 		/* allocate memory for data structure if needed */
 		if (istore->kind == MB_DATA_DATA
 			&& ostore->ping == NULL)
-			status = mb_malloc(verbose,
+			status = mb_mallocd(verbose, __FILE__, __LINE__,
 				sizeof(struct mbsys_simrad2_ping_struct),
-				&(ostore->ping),error);
+				(void **)&(ostore->ping),error);
 				
 		if (istore->kind == MB_DATA_DATA
 			&& istore->ping != NULL

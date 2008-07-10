@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
- *	$Id: mbr_omghdcsj.c,v 5.9 2008-03-14 18:33:03 caress Exp $
+ *	$Id: mbr_omghdcsj.c,v 5.10 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 10, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2008/03/14 18:33:03  caress
+ * Updated support for JHC format 151.
+ *
  * Revision 5.8  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -126,7 +129,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.9 2008-03-14 18:33:03 caress Exp $";
+	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.10 2008-07-10 06:43:41 caress Exp $";
 	char	*function_name = "mbr_register_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -259,7 +262,7 @@ int mbr_info_omghdcsj(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.9 2008-03-14 18:33:03 caress Exp $";
+	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.10 2008-07-10 06:43:41 caress Exp $";
 	char	*function_name = "mbr_info_omghdcsj";
 	int	status = MB_SUCCESS;
 
@@ -329,7 +332,7 @@ int mbr_info_omghdcsj(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_omghdcsj.c,v 5.9 2008-03-14 18:33:03 caress Exp $";
+ static char res_id[]="$Id: mbr_omghdcsj.c,v 5.10 2008-07-10 06:43:41 caress Exp $";
 	char	*function_name = "mbr_alm_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -374,8 +377,8 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_omghdcsj_struct);
-	status = mb_malloc(verbose,mb_io_ptr->structure_size,
-				&mb_io_ptr->raw_data,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,mb_io_ptr->structure_size,
+				(void **)&mb_io_ptr->raw_data,error);
 
 	/* get pointers */
 	if (status == MB_SUCCESS)
@@ -395,8 +398,8 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	    pixel_size = (double *) &mb_io_ptr->saved1;
 	    dataplus->buffer = NULL;
 	    dataplus->kind = MB_DATA_NONE;
-	    status = mb_malloc(verbose,MBF_OMGHDCSJ_SUMMARY_SIZE,
-				    &dataplus->buffer,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,MBF_OMGHDCSJ_SUMMARY_SIZE,
+				    (void **)&dataplus->buffer,error);
 	    
 	    /* initialize saved values */
 	    *read_summary = MB_NO;
@@ -539,12 +542,12 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error)
 
 	/* deallocate memory for data descriptor */
 	if (data->beams != NULL)
-	    status = mb_free(verbose,&(data->beams),error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(data->beams),error);
 	if (data->ss_raw != NULL)
-	    status = mb_free(verbose,&(data->ss_raw),error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(data->ss_raw),error);
 	if (dataplus->buffer != NULL)
-	    status = mb_free(verbose,&(dataplus->buffer),error);
-	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(dataplus->buffer),error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->raw_data,error);
 	status = mbsys_hdcs_deall(verbose,mbio_ptr,
 		&mb_io_ptr->store_data,error);
 
@@ -815,20 +818,20 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    
 		/* allocate buffer at required size */
 		if (dataplus->buffer != NULL)
-		    status = mb_free(verbose,&dataplus->buffer,error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&dataplus->buffer,error);
 		buff_size = MAX(*profile_size, MBF_OMGHDCSJ_SUMMARY_SIZE);
 		buff_size = MAX(buff_size, *image_size);
 		buff_size = MAX(buff_size, *data_size);
-		status = mb_malloc(verbose,buff_size, &dataplus->buffer,error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,buff_size, (void **)&dataplus->buffer,error);
 		if (status == MB_SUCCESS)
 		    {
 		    buffer = dataplus->buffer;
 		    if (data->beams != NULL)
-			status = mb_free(verbose,&data->beams,error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->beams,error);
 		    if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,
+			status = mb_mallocd(verbose,__FILE__,__LINE__,
 				    *num_beam * sizeof(struct mbf_omghdcsj_beam_struct), 
-				    &data->beams,error);
+				    (void **)&data->beams,error);
 		    }
 		}
 	    }
@@ -1589,10 +1592,10 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    *image_size = nrawpixels;
 		    if (data->ss_raw != NULL)
-			status = mb_free(verbose,&data->ss_raw,error);
-		    status = mb_malloc(verbose,
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ss_raw,error);
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				    *image_size, 
-				    &data->ss_raw,error);
+				    (void **)&data->ss_raw,error);
 		    }
 		    
 		/* read the sidescan */
@@ -2072,10 +2075,10 @@ sample_count, beam->offset, offset_start);
 		
 		/* beams */
 		if (store->beams != NULL)
-		    status = mb_free(verbose,&store->beams,error);
-		status = mb_malloc(verbose,
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->beams,error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,
 				*num_beam * sizeof(struct mbsys_hdcs_beam_struct), 
-				&store->beams,error);
+				(void **)&store->beams,error);
 		if (status == MB_SUCCESS)
 		    {
 		    for (i=0;i<profile->numDepths;i++)
@@ -2118,14 +2121,14 @@ sample_count, beam->offset, offset_start);
 		if (profile->numSamples > 0
 		    && store->numSamples < profile->numSamples
 		    && store->ss_raw != NULL)
-		    status = mb_free(verbose,&store->ss_raw,error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->ss_raw,error);
 		if (profile->numSamples > 0
 		    && data->ss_raw != NULL
 		    && store->ss_raw == NULL)
 		    {
-		    status = mb_malloc(verbose,
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				    profile->numSamples, 
-				    &store->ss_raw,error);
+				    (void **)&store->ss_raw,error);
 		    }
 		if (status == MB_SUCCESS
 		    && profile->numSamples > 0
@@ -2323,20 +2326,20 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    
 		/* allocate buffer at required size */
 		if (dataplus->buffer != NULL)
-		    status = mb_free(verbose,&dataplus->buffer,error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&dataplus->buffer,error);
 		buff_size = MAX(*profile_size, MBF_OMGHDCSJ_SUMMARY_SIZE);
 		buff_size = MAX(buff_size, *image_size);
 		buff_size = MAX(buff_size, *data_size);
-		status = mb_malloc(verbose,buff_size, &dataplus->buffer,error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,buff_size, (void **)&dataplus->buffer,error);
 		if (status == MB_SUCCESS)
 		    {
 		    buffer = dataplus->buffer;
 		    if (data->beams != NULL)
-			status = mb_free(verbose,&data->beams,error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->beams,error);
 		    if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,
+			status = mb_mallocd(verbose,__FILE__,__LINE__,
 				*num_beam * sizeof(struct mbf_omghdcsj_beam_struct), 
-				&data->beams,error);
+				(void **)&data->beams,error);
 		    }
 		}
 		
@@ -2387,9 +2390,9 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* beams */
 		if (data->beams == NULL)
 		    {
-		    status = mb_malloc(verbose,
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				*num_beam * sizeof(struct mbf_omghdcsj_beam_struct), 
-				&data->beams,error);
+				(void **)&data->beams,error);
 		    }
 		if (status == MB_SUCCESS)
 		    {
@@ -2467,13 +2470,13 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		if (store->numSamples > 0
 		    && profile->numSamples < store->numSamples
 		    && data->ss_raw != NULL)
-		    status = mb_free(verbose,&data->ss_raw,error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ss_raw,error);
 		if (store->numSamples > 0
 		    && store->ss_raw != NULL)
 		    {
-		    status = mb_malloc(verbose,
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				    store->numSamples, 
-				    &data->ss_raw,error);
+				    (void **)&data->ss_raw,error);
 		    if (status == MB_SUCCESS)
 			{
 			profile->numSamples = store->numSamples;

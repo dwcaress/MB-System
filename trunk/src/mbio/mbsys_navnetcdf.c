@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_navnetcdf.c	4/11/2002
- *	$Id: mbsys_navnetcdf.c,v 5.4 2008-05-16 22:56:24 caress Exp $
+ *	$Id: mbsys_navnetcdf.c,v 5.5 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	April 11, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.3  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -49,7 +52,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_navnetcdf.h"
 
-static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.4 2008-05-16 22:56:24 caress Exp $";
+static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.5 2008-07-10 06:43:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -75,7 +78,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_navnetcdf_struct),
+	status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct mbsys_navnetcdf_struct),
 				store_ptr,error);
 
 	/* get data structure pointer */
@@ -400,20 +403,20 @@ int mbsys_navnetcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* deallocate any allocated arrays */
 	if (store->mbHistDate != NULL)
-	    status = mb_free(verbose, &store->mbHistDate, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistDate, error);
 	if (store->mbHistTime != NULL)
-	    status = mb_free(verbose, &store->mbHistTime, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistTime, error);
 	if (store->mbHistCode != NULL)
-	    status = mb_free(verbose, &store->mbHistCode, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistCode, error);
 	if (store->mbHistAutor != NULL)
-	    status = mb_free(verbose, &store->mbHistAutor, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistAutor, error);
 	if (store->mbHistModule != NULL)
-	    status = mb_free(verbose, &store->mbHistModule, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistModule, error);
 	if (store->mbHistComment != NULL)
-	    status = mb_free(verbose, &store->mbHistComment, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistComment, error);
 
 	/* deallocate memory for data structure */
-	status = mb_free(verbose,store_ptr,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)store_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1304,12 +1307,12 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 	/* deallocate memory if required */
 	if (store->mbHistoryRecNbr > copy->mbHistoryRecNbr)
 	    {
-	    status = mb_free(verbose, &store->mbHistDate, error);
-	    status = mb_free(verbose, &store->mbHistTime, error);
-	    status = mb_free(verbose, &store->mbHistCode, error);
-	    status = mb_free(verbose, &store->mbHistAutor, error);
-	    status = mb_free(verbose, &store->mbHistModule, error);
-	    status = mb_free(verbose, &store->mbHistComment, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistDate, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistTime, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistCode, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistAutor, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistModule, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistComment, error);
 	    }
 	
 	/* allocate the memory in copy */
@@ -1319,35 +1322,35 @@ int mbsys_navnetcdf_copy(int verbose, void *mbio_ptr,
 	    copy->mbNameLength = store->mbNameLength;
 	    copy->mbCommentLength = store->mbCommentLength;
 	    copy->mbPositionNbr = store->mbPositionNbr;
-	    status = mb_malloc(verbose, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			copy->mbHistoryRecNbr * sizeof(int),
-			&copy->mbHistDate,error);
-	    status = mb_malloc(verbose, 
+			(void **)&copy->mbHistDate,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			copy->mbHistoryRecNbr * sizeof(int),
-			&copy->mbHistTime,error);
-	    status = mb_malloc(verbose, 
+			(void **)&copy->mbHistTime,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			copy->mbHistoryRecNbr * sizeof(char),
-			&copy->mbHistCode,error);
-	    status = mb_malloc(verbose, 
+			(void **)&copy->mbHistCode,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			copy->mbHistoryRecNbr * copy->mbNameLength * sizeof(char),
-			&copy->mbHistAutor,error);
-	    status = mb_malloc(verbose, 
+			(void **)&copy->mbHistAutor,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			copy->mbHistoryRecNbr * copy->mbNameLength * sizeof(char),
-			&copy->mbHistModule,error);
-	    status = mb_malloc(verbose, 
+			(void **)&copy->mbHistModule,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
 			copy->mbHistoryRecNbr * copy->mbCommentLength * sizeof(char),
-			&copy->mbHistComment,error);
+			(void **)&copy->mbHistComment,error);
 	    }
 
 	/* deal with a memory allocation failure */
 	if (status == MB_FAILURE)
 	    {
-	    status = mb_free(verbose, &store->mbHistDate, error);
-	    status = mb_free(verbose, &store->mbHistTime, error);
-	    status = mb_free(verbose, &store->mbHistCode, error);
-	    status = mb_free(verbose, &store->mbHistAutor, error);
-	    status = mb_free(verbose, &store->mbHistModule, error);
-	    status = mb_free(verbose, &store->mbHistComment, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistDate, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistTime, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistCode, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistAutor, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistModule, error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->mbHistComment, error);
 	    status = MB_FAILURE;
 	    *error = MB_ERROR_MEMORY_FAIL;
 	    if (verbose >= 2)

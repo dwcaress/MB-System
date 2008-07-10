@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.c	10/4/94
- *	$Id: mbsys_jstar.c,v 5.5 2007-10-08 15:59:34 caress Exp $
+ *	$Id: mbsys_jstar.c,v 5.6 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Author:	D. W. Caress
  * Date:	May 4, 2005
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.4  2006/11/10 22:36:05  caress
  * Working towards release 5.1.0
  *
@@ -59,7 +62,7 @@
 int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_jstar.c,v 5.5 2007-10-08 15:59:34 caress Exp $";
+ static char res_id[]="$Id: mbsys_jstar.c,v 5.6 2008-07-10 06:43:41 caress Exp $";
 	char	*function_name = "mbsys_jstar_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -80,8 +83,8 @@ int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_jstar_struct),
-				store_ptr,error);
+	status = mb_mallocd(verbose, __FILE__,__LINE__,sizeof(struct mbsys_jstar_struct),
+				(void **)store_ptr,error);
 
 	/* make sure trace pointers are null */
 	store = (struct mbsys_jstar_struct *) mb_io_ptr->store_data;
@@ -137,23 +140,23 @@ int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		if (store->sbp.trace != NULL
 			&& store->sbp.trace_alloc > 0)
 			{
-			status = mb_free(verbose,&(store->sbp.trace),error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->sbp.trace),error);
 			}
 		store->sbp.trace_alloc = 0;
 		if (store->ssport.trace != NULL
 			&& store->ssport.trace_alloc > 0)
 			{
-			status = mb_free(verbose,&(store->ssport.trace),error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->ssport.trace),error);
 			}
 		store->ssport.trace_alloc = 0;
 		if (store->ssstbd.trace != NULL
 			&& store->ssstbd.trace_alloc > 0)
 			{
-			status = mb_free(verbose,&(store->ssstbd.trace),error);
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->ssstbd.trace),error);
 			}
 		store->ssstbd.trace_alloc = 0;
 		}
-	status = mb_free(verbose,store_ptr,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)store_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -953,7 +956,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			trace_size = shortspersample * nsamples * sizeof(short);
 			if (ssport->trace_alloc < trace_size)
 				{
-				if ((status = mb_realloc(verbose, trace_size, &(ssport->trace), error))
+				if ((status = mb_reallocd(verbose, __FILE__,__LINE__, trace_size, (void **)&(ssport->trace), error))
 					== MB_SUCCESS)
 					{
 					ssport->trace_alloc = trace_size;
@@ -961,7 +964,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			if (ssstbd->trace_alloc < trace_size)
 				{
-				if ((status = mb_realloc(verbose, trace_size, &(ssstbd->trace), error))
+				if ((status = mb_reallocd(verbose, __FILE__,__LINE__, trace_size, (void **)&(ssstbd->trace), error))
 					== MB_SUCCESS)
 					{
 					ssstbd->trace_alloc = trace_size;
@@ -2311,7 +2314,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		data_size = sizeof(short) * sbp->samples;
 		if (sbp->trace_alloc < data_size)
 			{
-			status = mb_realloc(verbose, data_size, &(sbp->trace), error);
+			status = mb_reallocd(verbose, __FILE__,__LINE__, data_size, (void **)&(sbp->trace), error);
 			if (status == MB_SUCCESS)
 				{
 				sbp->trace_alloc = data_size;
@@ -2501,7 +2504,7 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 	trace_size = shortspersample * copy->sbp.samples * sizeof(short);
 	if (copy->sbp.trace_alloc < trace_size)
 		{
-		if ((status = mb_realloc(verbose, trace_size, &(copy->sbp.trace), error))
+		if ((status = mb_reallocd(verbose, __FILE__,__LINE__, trace_size, (void **)&(copy->sbp.trace), error))
 			== MB_SUCCESS)
 			{
 			copy->sbp.trace_alloc = trace_size;
@@ -2523,7 +2526,7 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 	trace_size = shortspersample * copy->ssport.samples * sizeof(short);
 	if (copy->ssport.trace_alloc < trace_size)
 		{
-		if ((status = mb_realloc(verbose, trace_size, &(copy->ssport.trace), error))
+		if ((status = mb_reallocd(verbose, __FILE__,__LINE__, trace_size, (void **)&(copy->ssport.trace), error))
 			== MB_SUCCESS)
 			{
 			copy->ssport.trace_alloc = trace_size;
@@ -2545,7 +2548,7 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 	trace_size = shortspersample * copy->ssstbd.samples * sizeof(short);
 	if (copy->ssstbd.trace_alloc < trace_size)
 		{
-		if ((status = mb_realloc(verbose, trace_size, &(copy->ssstbd.trace), error))
+		if ((status = mb_reallocd(verbose, __FILE__,__LINE__, trace_size, (void **)&(copy->ssstbd.trace), error))
 			== MB_SUCCESS)
 			{
 			copy->ssstbd.trace_alloc = trace_size;

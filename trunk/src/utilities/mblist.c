@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.27 2008-05-24 19:39:03 caress Exp $
+ *    $Id: mblist.c,v 5.28 2008-07-10 06:43:41 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2008/05/24 19:39:03  caress
+ * Applied Gordon Keith fix to mblist.
+ *
  * Revision 5.26  2008/02/12 02:49:15  caress
  * Added ability to output transmit and receive gain values.
  *
@@ -365,7 +368,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.27 2008-05-24 19:39:03 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.28 2008-07-10 06:43:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -888,7 +891,7 @@ main (int argc, char **argv)
 	distance_total = 0.0;
 	
 	/* initialize output files */
-	status = mb_malloc(verbose, n_list*sizeof(FILE*), &output, &error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, n_list*sizeof(FILE*), (void **)&output, &error);
 	
 	if (netcdf == MB_NO)
 	    { 
@@ -2364,8 +2367,9 @@ main (int argc, char **argv)
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							sizeof(double), (void **)&bs, &error);
-		status = mb_malloc(verbose,(MBSYS_SIMRAD2_MAXRAWPIXELS)*sizeof(double),
-					(char **)&ss_pixels,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, 
+					(MBSYS_SIMRAD2_MAXRAWPIXELS)*sizeof(double),
+					(void **)&ss_pixels,&error);
 		}
 
 	/* if error initializing memory then quit */
@@ -4389,7 +4393,7 @@ main (int argc, char **argv)
 	/* deallocate memory used for data arrays */
 	if (use_raw == MB_YES)
 		{
-		mb_free(verbose,(char **)&ss_pixels,&error); 
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&ss_pixels,&error); 
 		}
 
 	/* figure out whether and what to read next */

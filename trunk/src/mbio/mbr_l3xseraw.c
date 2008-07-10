@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.20 2007-07-03 17:28:08 caress Exp $
+ *	$Id: mbr_l3xseraw.c,v 5.21 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2007/07/03 17:28:08  caress
+ * Fixes to XSE format.
+ *
  * Revision 5.19  2007/06/18 01:19:48  caress
  * Changes as of 17 June 2007.
  *
@@ -148,7 +151,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.20 2007-07-03 17:28:08 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -281,7 +284,7 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.20 2007-07-03 17:28:08 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
@@ -351,7 +354,7 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.20 2007-07-03 17:28:08 caress Exp $";
+	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -373,8 +376,8 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 	status = MB_SUCCESS;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,MBSYS_XSE_BUFFER_SIZE,
-				&mb_io_ptr->hdr_comment,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,MBSYS_XSE_BUFFER_SIZE,
+				(void **)&mb_io_ptr->hdr_comment,error);
 	mbsys_xse_alloc(verbose,mbio_ptr,
 				&mb_io_ptr->store_data,error);
 
@@ -413,8 +416,8 @@ int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,&mb_io_ptr->store_data,error);
-	status = mb_free(verbose,&mb_io_ptr->hdr_comment,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->store_data,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->hdr_comment,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

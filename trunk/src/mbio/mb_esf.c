@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.12 2007-07-03 17:33:07 caress Exp $
+ *    $Id: mb_esf.c,v 5.13 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 10, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2007/07/03 17:33:07  caress
+ * A couple of debug statements added.
+ *
  * Revision 5.11  2007/06/18 01:19:48  caress
  * Changes as of 17 June 2007.
  *
@@ -74,7 +77,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.12 2007-07-03 17:33:07 caress Exp $";
+static char rcs_id[]="$Id: mb_esf.c,v 5.13 2008-07-10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
@@ -276,7 +279,7 @@ int mb_esf_open(int verbose, char *esffile,
 		    /* allocate arrays for old edits */
 		    if (esf->nedit > 0)
 			{
-			status = mb_malloc(verbose, esf->nedit * sizeof(struct mb_edit_struct), &(esf->edit), error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, esf->nedit * sizeof(struct mb_edit_struct), (void **)&(esf->edit), error);
 			if (status == MB_SUCCESS)
 			memset(esf->edit, 0, esf->nedit * sizeof(struct mb_edit_struct));
 
@@ -728,7 +731,7 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
 	if (esf->nedit != 0)
 		{
 		if (esf->edit != NULL)
-			status = mb_free(verbose, &(esf->edit), error);
+			status = mb_freed(verbose,__FILE__, __LINE__,(void **)&(esf->edit), error);
 		}
 	esf->nedit = 0;
 

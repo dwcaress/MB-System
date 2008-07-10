@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
- *    $Id: mb_segy.c,v 5.5 2006-11-10 22:36:04 caress Exp $
+ *    $Id: mb_segy.c,v 5.6 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 25, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/11/10 22:36:04  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.4  2006/01/24 19:11:17  caress
  * Version 5.0.8 beta.
  *
@@ -52,7 +55,7 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_segy.c,v 5.5 2006-11-10 22:36:04 caress Exp $";
+static char rcs_id[]="$Id: mb_segy.c,v 5.6 2008-07-10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_segy_read_init opens an existing segy file for 
@@ -86,8 +89,8 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		}
 
 	/* allocate memory for mbsegyio descriptor */
-	if ((status = mb_malloc(verbose, sizeof(struct mb_segyio_struct),
-				mbsegyio_ptr, error)) == MB_SUCCESS)
+	if ((status = mb_mallocd(verbose,__FILE__, __LINE__, sizeof(struct mb_segyio_struct),
+				(void **)mbsegyio_ptr, error)) == MB_SUCCESS)
 		{
 		/* get structure */
 		mb_segyio_ptr = (struct mb_segyio_struct *) *mbsegyio_ptr;
@@ -96,8 +99,8 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		memset(mb_segyio_ptr, 0, sizeof(struct mb_segyio_struct));
 		
 		/* allocate buffer memory */
-		status = mb_malloc(verbose, MB_SEGY_FILEHEADER_LENGTH,
-				&(mb_segyio_ptr->buffer),error);
+		status = mb_mallocd(verbose,__FILE__, __LINE__, MB_SEGY_FILEHEADER_LENGTH,
+				(void **)&(mb_segyio_ptr->buffer),error);
 		if (status == MB_SUCCESS)
 			mb_segyio_ptr->bufferalloc = MB_SEGY_FILEHEADER_LENGTH;
 		else
@@ -310,8 +313,8 @@ int mb_segy_write_init(int verbose, char *segyfile,
 		}
 
 	/* allocate memory for mbsegyio descriptor */
-	if ((status = mb_malloc(verbose, sizeof(struct mb_segyio_struct),
-				mbsegyio_ptr, error)) == MB_SUCCESS)
+	if ((status = mb_mallocd(verbose,__FILE__, __LINE__, sizeof(struct mb_segyio_struct),
+				(void **)mbsegyio_ptr, error)) == MB_SUCCESS)
 		{
 		/* get structure */
 		mb_segyio_ptr = (struct mb_segyio_struct *) *mbsegyio_ptr;
@@ -320,8 +323,8 @@ int mb_segy_write_init(int verbose, char *segyfile,
 		memset(mb_segyio_ptr, 0, sizeof(struct mb_segyio_struct));
 		
 		/* allocate buffer memory */
-		status = mb_malloc(verbose, MB_SEGY_FILEHEADER_LENGTH,
-				&(mb_segyio_ptr->buffer),error);
+		status = mb_mallocd(verbose,__FILE__, __LINE__, MB_SEGY_FILEHEADER_LENGTH,
+				(void **)&(mb_segyio_ptr->buffer),error);
 		if (status == MB_SUCCESS)
 			mb_segyio_ptr->bufferalloc = MB_SEGY_FILEHEADER_LENGTH;
 		else
@@ -454,9 +457,9 @@ int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error)
 	
 	/* deallocate memory */
 	if (mb_segyio_ptr->bufferalloc > 0)
-		mb_free(verbose, &(mb_segyio_ptr->buffer), error);
+		mb_freed(verbose,__FILE__, __LINE__,(void **)&(mb_segyio_ptr->buffer), error);
 	if (mb_segyio_ptr->tracealloc > 0)
-		mb_free(verbose, &(mb_segyio_ptr->trace), error);
+		mb_freed(verbose,__FILE__, __LINE__,(void **)&(mb_segyio_ptr->trace), error);
 
 	/* close the segy file */
 	fclose(mb_segyio_ptr->fp);
@@ -523,8 +526,8 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 	if (mb_segyio_ptr->bufferalloc < MB_SEGY_TRACEHEADER_LENGTH)
 		{
 		/* allocate buffer memory */
-		status = mb_realloc(verbose, MB_SEGY_TRACEHEADER_LENGTH,
-				&(mb_segyio_ptr->buffer),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, MB_SEGY_TRACEHEADER_LENGTH,
+				(void **)(void **)&(mb_segyio_ptr->buffer),error);
 		if (status == MB_SUCCESS)
 			mb_segyio_ptr->bufferalloc = MB_SEGY_TRACEHEADER_LENGTH;
 		else
@@ -647,8 +650,8 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		if (mb_segyio_ptr->bufferalloc < bytes_per_sample * traceheader->nsamps)
 			{
 			/* allocate buffer memory */
-			status = mb_realloc(verbose, bytes_per_sample * traceheader->nsamps,
-					&(mb_segyio_ptr->buffer),error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, bytes_per_sample * traceheader->nsamps,
+					(void **)&(mb_segyio_ptr->buffer),error);
 			if (status == MB_SUCCESS)
 				mb_segyio_ptr->bufferalloc = bytes_per_sample * traceheader->nsamps;
 			else
@@ -659,8 +662,8 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		if (mb_segyio_ptr->tracealloc < sizeof(float) * traceheader->nsamps)
 			{
 			/* allocate trace memory */
-			status = mb_realloc(verbose, sizeof(float) * traceheader->nsamps,
-					&(mb_segyio_ptr->trace),error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, sizeof(float) * traceheader->nsamps,
+					(void **)&(mb_segyio_ptr->trace),error);
 			if (status == MB_SUCCESS)
 				mb_segyio_ptr->tracealloc = sizeof(float) * traceheader->nsamps;
 			else
@@ -925,8 +928,8 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		if (mb_segyio_ptr->bufferalloc < MB_SEGY_FILEHEADER_LENGTH)
 			{
 			/* allocate buffer memory */
-			status = mb_realloc(verbose, MB_SEGY_FILEHEADER_LENGTH,
-					&(mb_segyio_ptr->buffer),error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, MB_SEGY_FILEHEADER_LENGTH,
+					(void **)&(mb_segyio_ptr->buffer),error);
 			if (status == MB_SUCCESS)
 				mb_segyio_ptr->bufferalloc = MB_SEGY_FILEHEADER_LENGTH;
 			else
@@ -981,8 +984,8 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 	if (mb_segyio_ptr->bufferalloc < MB_SEGY_TRACEHEADER_LENGTH)
 		{
 		/* allocate buffer memory */
-		status = mb_realloc(verbose, MB_SEGY_TRACEHEADER_LENGTH,
-				&(mb_segyio_ptr->buffer),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, MB_SEGY_TRACEHEADER_LENGTH,
+				(void **)&(mb_segyio_ptr->buffer),error);
 		if (status == MB_SUCCESS)
 			mb_segyio_ptr->bufferalloc = MB_SEGY_TRACEHEADER_LENGTH;
 		else
@@ -1014,8 +1017,8 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		if (mb_segyio_ptr->bufferalloc < bytes_per_sample * traceheader->nsamps)
 			{
 			/* allocate buffer memory */
-			status = mb_realloc(verbose, bytes_per_sample * traceheader->nsamps,
-					&(mb_segyio_ptr->buffer),error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__, bytes_per_sample * traceheader->nsamps,
+					(void **)&(mb_segyio_ptr->buffer),error);
 			if (status == MB_SUCCESS)
 				mb_segyio_ptr->bufferalloc = bytes_per_sample * traceheader->nsamps;
 			else

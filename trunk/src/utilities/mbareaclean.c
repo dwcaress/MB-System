@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.10 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mbareaclean.c,v 5.11 2008-07-10 06:43:41 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.9  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -144,7 +147,7 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.10 2007-10-08 16:48:07 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.11 2008-07-10 06:43:41 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize \n\t -Mthreshold/nmin -Dthreshold/nmin -Ttype -N[-]minbeam/maxbeam]";
@@ -538,14 +541,14 @@ main (int argc, char **argv)
 	/* allocate grid arrays */
 	nsndg = 0;
 	nsndg_alloc = 0;
-	status = mb_malloc(verbose, nx * ny * sizeof(int *),
-			&gsndg, &error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__, nx * ny * sizeof(int *),
+			(void **)&gsndg, &error);
 	if (status == MB_SUCCESS)
-	status = mb_malloc(verbose, nx * ny * sizeof(int),
-			&gsndgnum, &error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__, nx * ny * sizeof(int),
+			(void **)&gsndgnum, &error);
 	if (status == MB_SUCCESS)
-	status = mb_malloc(verbose, nx * ny * sizeof(int),
-			&gsndgnum_alloc, &error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__, nx * ny * sizeof(int),
+			(void **)&gsndgnum_alloc, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -770,9 +773,9 @@ main (int argc, char **argv)
 	if (nfile >= nfile_alloc)
 		{
 		nfile_alloc += FILEALLOCNUM;
-		status = mb_realloc(verbose,
+		status = mb_reallocd(verbose, __FILE__, __LINE__,
 				nfile_alloc * sizeof(struct mbareaclean_file_struct),
-				&files, &error);
+				(void **)&files, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -802,17 +805,17 @@ main (int argc, char **argv)
 	files[nfile].sndg_countstart = nsndg;
 	files[nfile].beams_bath = beams_bath;
 	files[nfile].sndg = NULL;
-	status = mb_malloc(verbose,
+	status = mb_mallocd(verbose,__FILE__,__LINE__,
 			files[nfile].nping_alloc * sizeof(double),
-			&(files[nfile].ping_time_d), &error);
+			(void **)&(files[nfile].ping_time_d), &error);
 	if (status == MB_SUCCESS)
-	status = mb_malloc(verbose,
+	status = mb_mallocd(verbose,__FILE__,__LINE__,
 			files[nfile].nping_alloc * sizeof(double),
-			&(files[nfile].ping_altitude), &error);
+			(void **)&(files[nfile].ping_altitude), &error);
 	if (status == MB_SUCCESS)
-	status = mb_malloc(verbose,
+	status = mb_mallocd(verbose,__FILE__,__LINE__,
 			files[nfile].nsndg_alloc * sizeof(struct mbareaclean_sndg_struct),
-			&(files[nfile].sndg), &error);
+			(void **)&(files[nfile].sndg), &error);
 	if (error != MB_ERROR_NO_ERROR)
 		{
 		mb_error(verbose,error,&message);
@@ -918,13 +921,13 @@ main (int argc, char **argv)
 		if (files[nfile-1].nping >= files[nfile-1].nping_alloc)
 			{
 			files[nfile-1].nping_alloc += PINGALLOCNUM;
-			status = mb_realloc(verbose,
+			status = mb_reallocd(verbose, __FILE__, __LINE__,
 					files[nfile-1].nping_alloc * sizeof(double),
-					&(files[nfile-1].ping_time_d), &error);
+					(void **)&(files[nfile-1].ping_time_d), &error);
 			if (status == MB_SUCCESS)
-			status = mb_realloc(verbose,
+			status = mb_reallocd(verbose, __FILE__, __LINE__,
 					files[nfile-1].nping_alloc * sizeof(double),
-					&(files[nfile-1].ping_altitude), &error);
+					(void **)&(files[nfile-1].ping_altitude), &error);
 			if (error != MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
@@ -961,9 +964,9 @@ main (int argc, char **argv)
 					if (files[nfile-1].nsndg >= files[nfile-1].nsndg_alloc)
 						{
 						files[nfile-1].nsndg_alloc += SNDGALLOCNUM;
-						status = mb_realloc(verbose,
-							files[nfile-1].nsndg_alloc * sizeof(struct mbareaclean_sndg_struct),
-							&files[nfile-1].sndg, &error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__,
+									files[nfile-1].nsndg_alloc * sizeof(struct mbareaclean_sndg_struct),
+									(void **)&files[nfile-1].sndg, &error);
 						if (error != MB_ERROR_NO_ERROR)
 							{
 							mb_error(verbose,error,&message);
@@ -979,9 +982,9 @@ main (int argc, char **argv)
 					if (gsndgnum[kgrid] >= gsndgnum_alloc[kgrid])
 						{
 						gsndgnum_alloc[kgrid] += SNDGALLOCNUM;
-						status = mb_realloc(verbose,
-							gsndgnum_alloc[kgrid] * sizeof(int),
-							&gsndg[kgrid], &error);
+						status = mb_reallocd(verbose, __FILE__, __LINE__,
+									gsndgnum_alloc[kgrid] * sizeof(int),
+									(void **)&gsndg[kgrid], &error);
 						if (error != MB_ERROR_NO_ERROR)
 							{
 							mb_error(verbose,error,&message);
@@ -1092,9 +1095,9 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 		yy = areabounds[3] + 0.5 * dy + iy * dy;
 		binnummax = MAX(binnummax, gsndgnum[kgrid]);
 		}
-	status = mb_malloc(verbose,
+	status = mb_mallocd(verbose,__FILE__,__LINE__,
 			binnummax * sizeof(double),
-			&(bindepths), &error);
+			(void **)&(bindepths), &error);
 	if (error != MB_ERROR_NO_ERROR)
 		{
 		mb_error(verbose,error,&message);
@@ -1300,18 +1303,18 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 		}
 
 	/* free arrays */
-	mb_free(verbose,&bindepths,&error);
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&bindepths,&error);
 	for (i=0;i<nx*ny;i++)
 		if (gsndg[i] != NULL)
-			mb_free(verbose,&gsndg[i],&error);
-	mb_free(verbose,&gsndg,&error);
-	mb_free(verbose,&gsndgnum,&error);
-	mb_free(verbose,&gsndgnum_alloc,&error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&gsndg[i],&error);
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&gsndg,&error);
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&gsndgnum,&error);
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&gsndgnum_alloc,&error);
 
 	for (i=0;i<nfile;i++)
 		{
-		mb_free(verbose,&(files[nfile-1].ping_time_d),&error);
-		mb_free(verbose,&(files[nfile-1].ping_altitude),&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&(files[nfile-1].ping_time_d),&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&(files[nfile-1].ping_altitude),&error);
 		}
 
 	/* set program status */

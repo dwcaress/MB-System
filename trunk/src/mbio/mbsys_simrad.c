@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.17 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.18 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	August 5, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.16  2007/10/31 18:38:41  caress
  * Fixed handling of null sidescan values.
  *
@@ -173,7 +176,7 @@
 #define MBSYS_SIMRAD_C
 #include "../../include/mbsys_simrad.h"
 
-static char res_id[]="$Id: mbsys_simrad.c,v 5.17 2008-03-01 09:14:03 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad.c,v 5.18 2008-07-10 06:43:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -199,8 +202,8 @@ int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_simrad_struct),
-				store_ptr,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct mbsys_simrad_struct),
+				(void **)store_ptr,error);
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad_struct *) *store_ptr;
@@ -336,9 +339,9 @@ int mbsys_simrad_survey_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->ping == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__,__LINE__,
 			sizeof(struct mbsys_simrad_survey_struct),
-			&(store->ping),error);
+			(void **)&(store->ping),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -438,10 +441,10 @@ int mbsys_simrad_deall(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* deallocate memory for survey data structure */
 	if (store->ping != NULL)
-		status = mb_free(verbose,&(store->ping),error);
+		status = status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->ping),error);
 
 	/* deallocate memory for data structure */
-	status = mb_free(verbose,store_ptr,error);
+	status = status = mb_freed(verbose,__FILE__, __LINE__, (void **)store_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

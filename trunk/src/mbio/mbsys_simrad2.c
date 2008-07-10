@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.29 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.30 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 1998-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.28  2007/10/31 18:38:41  caress
  * Fixed handling of null sidescan values.
  *
@@ -151,7 +154,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.29 2008-03-01 09:14:03 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.30 2008-07-10 06:43:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -178,8 +181,8 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_simrad2_struct),
-				store_ptr,error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__,sizeof(struct mbsys_simrad2_struct),
+				(void **)store_ptr,error);
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad2_struct *) *store_ptr;
@@ -512,9 +515,9 @@ int mbsys_simrad2_survey_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->ping == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_ping_struct),
-			&(store->ping),error);
+			(void **)&(store->ping),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -878,9 +881,9 @@ int mbsys_simrad2_wc_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->wc == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_watercolumn_struct),
-			&(store->wc),error);
+			(void **)&(store->wc),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -975,9 +978,9 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->attitude == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_attitude_struct),
-			&(store->attitude),error);
+			(void **)&(store->attitude),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -1063,9 +1066,9 @@ int mbsys_simrad2_heading_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->heading == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_heading_struct),
-			&(store->heading),error);
+			(void **)&(store->heading),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -1143,9 +1146,9 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->ssv == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_ssv_struct),
-			&(store->ssv),error);
+			(void **)&(store->ssv),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -1221,9 +1224,9 @@ int mbsys_simrad2_tilt_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->tilt == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_tilt_struct),
-			&(store->tilt),error);
+			(void **)&(store->tilt),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -1293,30 +1296,30 @@ int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* deallocate memory for survey data structure */
 	if (store->ping != NULL)
-		status = mb_free(verbose,&(store->ping),error);
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&(store->ping),error);
 
 	/* deallocate memory for water column data structure */
 	if (store->wc != NULL)
-		status = mb_free(verbose,&(store->wc),error);
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&(store->wc),error);
 
 	/* deallocate memory for attitude data structure */
 	if (store->attitude != NULL)
-		status = mb_free(verbose,&(store->attitude),error);
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&(store->attitude),error);
 
 	/* deallocate memory for heading data structure */
 	if (store->heading != NULL)
-		status = mb_free(verbose,&(store->heading),error);
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&(store->heading),error);
 
 	/* deallocate memory for ssv data structure */
 	if (store->ssv != NULL)
-		status = mb_free(verbose,&(store->ssv),error);
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&(store->ssv),error);
 
 	/* deallocate memory for tilt data structure */
 	if (store->tilt != NULL)
-		status = mb_free(verbose,&(store->tilt),error);
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&(store->tilt),error);
 
 	/* deallocate memory for data structure */
-	status = mb_free(verbose,store_ptr,error);
+	status = mb_freed(verbose,__FILE__, __LINE__,(void **)store_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2785,7 +2788,9 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			}		
 		    }
 		if (found == MB_YES)
+		    {
 		    *altitude = bath_best - *transducer_depth;
+		    }
 		else
 		    *altitude = 0.0;
 

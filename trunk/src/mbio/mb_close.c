@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 5.12 2007-10-08 15:59:34 caress Exp $
+ *	$Id: mb_close.c,v 5.13 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  *	
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.11  2006/01/11 07:37:29  caress
  * Working towards 5.0.8
  *
@@ -167,7 +170,7 @@
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error)
 {
-	static	char	rcs_id[]="$Id: mb_close.c,v 5.12 2007-10-08 15:59:34 caress Exp $";
+	static	char	rcs_id[]="$Id: mb_close.c,v 5.13 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_close";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -196,15 +199,15 @@ int mb_close(int verbose, void **mbio_ptr, int *error)
 	/* deallocate memory for arrays within the mbio descriptor */
 	if (mb_io_ptr->filetype == MB_FILETYPE_XDR
 		&& mb_io_ptr->xdrs != NULL)
-		status = mb_free(verbose,&mb_io_ptr->xdrs,error);
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&mb_io_ptr->xdrs,error);
 	if (mb_io_ptr->filetype == MB_FILETYPE_XDR
 		&& mb_io_ptr->xdrs2 != NULL)
-		status = mb_free(verbose,&mb_io_ptr->xdrs2,error);
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&mb_io_ptr->xdrs2,error);
 	if (mb_io_ptr->filetype == MB_FILETYPE_XDR
 		&& mb_io_ptr->xdrs3 != NULL)
-		status = mb_free(verbose,&mb_io_ptr->xdrs3,error);
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&mb_io_ptr->xdrs3,error);
 	if (mb_io_ptr->hdr_comment != NULL)
-		status = mb_free(verbose,&mb_io_ptr->hdr_comment,error);
+		status = mb_freed(verbose,__FILE__, __LINE__,(void **)&mb_io_ptr->hdr_comment,error);
 	status = mb_deall_ioarrays(verbose, *mbio_ptr, error);
 
 	/* close the files if normal */
@@ -247,7 +250,7 @@ int mb_close(int verbose, void **mbio_ptr, int *error)
 		}
 
 	/* deallocate the mbio descriptor */
-	status = mb_free(verbose,mbio_ptr,error);
+	status = mb_freed(verbose,__FILE__, __LINE__,(void **)mbio_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

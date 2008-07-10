@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.53 2008-05-24 19:41:44 caress Exp $
+ *    $Id: mbprocess.c,v 5.54 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.53  2008/05/24 19:41:44  caress
+ * Added processing kluge (kluge006) allowing the sonar draft to be be changed without changing the calculated bathymetry.
+ *
  * Revision 5.52  2008/03/01 09:22:29  caress
  * Changed verbosity behavior to only print out files skipped because processing unknown when verbose > 0.
  *
@@ -280,7 +283,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.53 2008-05-24 19:41:44 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.54 2008-07-10 06:43:41 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -1398,11 +1401,11 @@ and mbedit edit save files.\n";
 	    if (nsvp > 1)
 		{
 		size = (nsvp+2) * sizeof(double);
-		status = mb_malloc(verbose,size,&depth,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&depth,&error);
 		if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,size,&velocity,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&velocity,&error);
 		if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,size,&velocity_sum,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&velocity_sum,&error);
 	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -1530,17 +1533,17 @@ and mbedit edit save files.\n";
 	    if (nnav > 1)
 		{
 		size = (nnav+1)*sizeof(double);
-		status = mb_malloc(verbose,nnav*sizeof(double),&ntime,&error);
-		status = mb_malloc(verbose,nnav*sizeof(double),&nlon,&error);
-		status = mb_malloc(verbose,nnav*sizeof(double),&nlat,&error);
-		status = mb_malloc(verbose,nnav*sizeof(double),&nheading,&error);
-		status = mb_malloc(verbose,nnav*sizeof(double),&nspeed,&error);
-		status = mb_malloc(verbose,nnav*sizeof(double),&ndraft,&error);
-		status = mb_malloc(verbose,nnav*sizeof(double),&nroll,&error);
-		status = mb_malloc(verbose,nnav*sizeof(double),&npitch,&error);
-		status = mb_malloc(verbose,nnav*sizeof(double),&nheave,&error);
-		status = mb_malloc(verbose,nnav*sizeof(double),&nlonspl,&error);
-		status = mb_malloc(verbose,nnav*sizeof(double),&nlatspl,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&ntime,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlon,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlat,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nheading,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nspeed,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&ndraft,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nroll,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&npitch,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nheave,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlonspl,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlatspl,&error);
 	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -2001,13 +2004,13 @@ and mbedit edit save files.\n";
 	    if (nanav > 1)
 		{
 		size = (nanav+1)*sizeof(double);
-		status = mb_malloc(verbose,nanav*sizeof(double),&natime,&error);
-		status = mb_malloc(verbose,nanav*sizeof(double),&nalon,&error);
-		status = mb_malloc(verbose,nanav*sizeof(double),&nalat,&error);
-		status = mb_malloc(verbose,nanav*sizeof(double),&naz,&error);
-		status = mb_malloc(verbose,nanav*sizeof(double),&nalonspl,&error);
-		status = mb_malloc(verbose,nanav*sizeof(double),&nalatspl,&error);
-		status = mb_malloc(verbose,nanav*sizeof(double),&nazspl,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nanav*sizeof(double),(void **)&natime,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nanav*sizeof(double),(void **)&nalon,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nanav*sizeof(double),(void **)&nalat,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nanav*sizeof(double),(void **)&naz,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nanav*sizeof(double),(void **)&nalonspl,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nanav*sizeof(double),(void **)&nalatspl,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nanav*sizeof(double),(void **)&nazspl,&error);
 	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -2171,10 +2174,10 @@ and mbedit edit save files.\n";
 	    if (nattitude > 1)
 		{
 		size = (nattitude+1)*sizeof(double);
-		status = mb_malloc(verbose,nattitude*sizeof(double),&attitudetime,&error);
-		status = mb_malloc(verbose,nattitude*sizeof(double),&attituderoll,&error);
-		status = mb_malloc(verbose,nattitude*sizeof(double),&attitudepitch,&error);
-		status = mb_malloc(verbose,nattitude*sizeof(double),&attitudeheave,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nattitude*sizeof(double),(void **)&attitudetime,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nattitude*sizeof(double),(void **)&attituderoll,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nattitude*sizeof(double),(void **)&attitudepitch,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nattitude*sizeof(double),(void **)&attitudeheave,&error);
  	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -2376,8 +2379,8 @@ and mbedit edit save files.\n";
 	    if (nsonardepth > 1)
 		{
 		size = (nsonardepth+1)*sizeof(double);
-		status = mb_malloc(verbose,nsonardepth*sizeof(double),&fsonardepthtime,&error);
-		status = mb_malloc(verbose,nsonardepth*sizeof(double),&fsonardepth,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nsonardepth*sizeof(double),(void **)&fsonardepthtime,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nsonardepth*sizeof(double),(void **)&fsonardepth,&error);
  	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -2567,8 +2570,8 @@ and mbedit edit save files.\n";
 	    if (ntide > 1)
 		{
 		size = (ntide+1)*sizeof(double);
-		status = mb_malloc(verbose,ntide*sizeof(double),&tidetime,&error);
-		status = mb_malloc(verbose,ntide*sizeof(double),&tide,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&tidetime,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&tide,&error);
  	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -2781,8 +2784,8 @@ and mbedit edit save files.\n";
 	    if (nstatic > 0)
 		{
 		size = (nstatic+1)*sizeof(double);
-		status = mb_malloc(verbose,nstatic*sizeof(int),&staticbeam,&error);
-		status = mb_malloc(verbose,nstatic*sizeof(double),&staticoffset,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nstatic*sizeof(int),(void **)&staticbeam,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nstatic*sizeof(double),(void **)&staticoffset,&error);
  	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -2892,22 +2895,22 @@ and mbedit edit save files.\n";
 		{
 		size = nampcorrtable*sizeof(struct mbprocess_sscorr_struct);
 		ampcorrtable = NULL;
-		status = mb_malloc(verbose,size,&ampcorrtable,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&ampcorrtable,&error);
 		for (i=0;i<nampcorrtable;i++)
 			{
 			ampcorrtable[i].angle = NULL;
 			ampcorrtable[i].amplitude = NULL;
 			ampcorrtable[i].sigma = NULL;
-			status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtable[i].angle),&error);
-			status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtable[i].amplitude),&error);
-			status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtable[i].sigma),&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrtable[i].angle),&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrtable[i].amplitude),&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrtable[i].sigma),&error);
 			}
 		ampcorrtableuse.angle = NULL;
 		ampcorrtableuse.amplitude = NULL;
 		ampcorrtableuse.sigma = NULL;
-		status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtableuse.angle),&error);
-		status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtableuse.amplitude),&error);
-		status = mb_malloc(verbose,nampcorrangle*sizeof(double),&(ampcorrtableuse.sigma),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrtableuse.angle),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrtableuse.amplitude),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrtableuse.sigma),&error);
 	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -3044,22 +3047,22 @@ and mbedit edit save files.\n";
 		{
 		size = nsscorrtable*sizeof(struct mbprocess_sscorr_struct);
 		sscorrtable = NULL;
-		status = mb_malloc(verbose,size,&sscorrtable,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&sscorrtable,&error);
 		for (i=0;i<nsscorrtable;i++)
 			{
 			sscorrtable[i].angle = NULL;
 			sscorrtable[i].amplitude = NULL;
 			sscorrtable[i].sigma = NULL;
-			status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtable[i].angle),&error);
-			status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtable[i].amplitude),&error);
-			status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtable[i].sigma),&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nsscorrangle*sizeof(double),(void **)&(sscorrtable[i].angle),&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nsscorrangle*sizeof(double),(void **)&(sscorrtable[i].amplitude),&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nsscorrangle*sizeof(double),(void **)&(sscorrtable[i].sigma),&error);
 			}
 		sscorrtableuse.angle = NULL;
 		sscorrtableuse.amplitude = NULL;
 		sscorrtableuse.sigma = NULL;
-		status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtableuse.angle),&error);
-		status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtableuse.amplitude),&error);
-		status = mb_malloc(verbose,nsscorrangle*sizeof(double),&(sscorrtableuse.sigma),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nsscorrangle*sizeof(double),(void **)&(sscorrtableuse.angle),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nsscorrangle*sizeof(double),(void **)&(sscorrtableuse.amplitude),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nsscorrangle*sizeof(double),(void **)&(sscorrtableuse.sigma),&error);
 	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -4824,6 +4827,38 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			}
 
 	/*--------------------------------------------
+	  apply z offset from navigation adjustment correction
+	  --------------------------------------------*/
+			    
+		/* apply z offset from navigation adjustment correction */
+		if (error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA
+			&& process.mbp_navadj_mode == MBP_NAVADJ_LLZ
+			&& nanav > 1)
+		    {
+		    /* interpolate z offset */
+		    if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
+			&& time_d >= natime[0] 
+			&& time_d <= natime[nanav-1])
+			{
+			intstat = mb_spline_interp(verbose, 
+				    natime-1, naz-1, nazspl-1,
+				    nanav, time_d, &zoffset, &iatime, 
+				    &error);
+			}
+		    else
+			{
+			intstat = mb_linear_interp(verbose, 
+				    natime-1, naz-1,
+				    nanav, time_d, &zoffset, &iatime, 
+				    &error);
+			}
+
+		    /* apply z offset to draft / sonar depth */
+		    draft += zoffset;
+		    }
+
+	/*--------------------------------------------
 	  handle lever arm correction
 	  --------------------------------------------*/
 			
@@ -5055,7 +5090,7 @@ alpha, beta, lever_heave);*/
 			if (process.mbp_kluge006 == MB_YES 
 			    && kind == MB_DATA_DATA)
 			    {
-fprintf(stderr,"RESET Draft: %f %f %f\n",draft_org,draft,sonardepth);
+/*fprintf(stderr,"RESET Draft: %f %f %f\n",draft_org,draft,sonardepth);*/
 			    draft_org = draft;
 			    }
 
@@ -5268,7 +5303,8 @@ idata, i, bheave[i], draft, draft_org, depth_offset_use, static_shift, zz);*/
 			    }
 
 			/* recalculate bathymetry by changes to transducer depth  */
-			else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET)
+			else if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_OFFSET
+				|| process.mbp_navadj_mode == MBP_NAVADJ_LLZ)
 			    {
 			    /* get draft change */
 			    depth_offset_change = draft - draft_org + lever_heave;
@@ -5282,7 +5318,7 @@ time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 				{
 				/* apply transducer depth change to depths */	    
 				bath[i] += depth_offset_change;
-fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);
+/*fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);*/
     
 				/* output some debug values */
 				if (verbose >= 5)
@@ -5352,6 +5388,28 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					bath[i] = zz * vavg / 1500.0 + depth_offset_use;
 
 				    }
+				}
+			    }
+
+	/*--------------------------------------------
+	  apply tide correction
+	  --------------------------------------------*/
+			    
+			/* apply tide corrections */
+			if (process.mbp_tide_mode == MBP_TIDE_ON
+				&& ntide > 1)
+			    {
+			    /* interpolate tide */
+			    intstat = mb_linear_interp(verbose, 
+					tidetime-1, tide-1,
+					ntide, time_d, &tideval, &itime, 
+					&error);
+
+			    /* apply tide to all valid beams */
+			    for (i=0;i<nbath;i++)
+				{
+				if (beamflag[i] != MB_FLAG_NULL)
+					bath[i] -= tideval;
 				}
 			    }
 
@@ -6121,66 +6179,6 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 			}
 
 	/*--------------------------------------------
-	  apply tide correction
-	  --------------------------------------------*/
-			    
-		/* apply tide corrections */
-		if (error == MB_ERROR_NO_ERROR
-			&& kind == MB_DATA_DATA
-			&& process.mbp_tide_mode == MBP_TIDE_ON
-			&& ntide > 1)
-		    {
-		    /* interpolate tide */
-		    intstat = mb_linear_interp(verbose, 
-				tidetime-1, tide-1,
-				ntide, time_d, &tideval, &itime, 
-				&error);
-
-		    /* apply tide to all valid beams */
-		    for (i=0;i<nbath;i++)
-			{
-			if (beamflag[i] != MB_FLAG_NULL)
-				bath[i] -= tideval;
-			}
-		    }
-
-	/*--------------------------------------------
-	  apply z offset from navigation adjustment correction
-	  --------------------------------------------*/
-			    
-		/* apply z offset from navigation adjustment correction */
-		if (error == MB_ERROR_NO_ERROR
-			&& kind == MB_DATA_DATA
-			&& process.mbp_navadj_mode == MBP_NAVADJ_LLZ
-			&& nanav > 1)
-		    {
-		    /* interpolate z offset */
-		    if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
-			&& time_d >= natime[0] 
-			&& time_d <= natime[nanav-1])
-			{
-			intstat = mb_spline_interp(verbose, 
-				    natime-1, naz-1, nazspl-1,
-				    nanav, time_d, &zoffset, &iatime, 
-				    &error);
-			}
-		    else
-			{
-			intstat = mb_linear_interp(verbose, 
-				    natime-1, naz-1,
-				    nanav, time_d, &zoffset, &iatime, 
-				    &error);
-			}
-
-		    /* apply tide to all valid beams */
-		    for (i=0;i<nbath;i++)
-			{
-			if (beamflag[i] != MB_FLAG_NULL)
-				bath[i] += zoffset;
-			}
-		    }
-
-	/*--------------------------------------------
 	  insert the altered data (now done)
 	  --------------------------------------------*/
 
@@ -6299,80 +6297,80 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 	/* deallocate arrays for amplitude correction tables */
 	if (nampcorrtable > 0)
 		{
-		mb_free(verbose,&(ampcorrtableuse.angle),&error);
-		mb_free(verbose,&(ampcorrtableuse.amplitude),&error);
-		mb_free(verbose,&(ampcorrtableuse.sigma),&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&(ampcorrtableuse.angle),&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&(ampcorrtableuse.amplitude),&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&(ampcorrtableuse.sigma),&error);
 		for (i=0;i<nampcorrtable;i++)
 			{
-			mb_free(verbose,&(ampcorrtable[i].angle),&error);
-			mb_free(verbose,&(ampcorrtable[i].amplitude),&error);
-			mb_free(verbose,&(ampcorrtable[i].sigma),&error);
+			mb_freed(verbose,__FILE__,__LINE__,(void **)&(ampcorrtable[i].angle),&error);
+			mb_freed(verbose,__FILE__,__LINE__,(void **)&(ampcorrtable[i].amplitude),&error);
+			mb_freed(verbose,__FILE__,__LINE__,(void **)&(ampcorrtable[i].sigma),&error);
 			}
-		status = mb_malloc(verbose,size,&ampcorrtable,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&ampcorrtable,&error);
 		}
 	    
 	/* deallocate arrays for sidescan correction tables */
 	if (nsscorrtable > 0)
 		{
-		mb_free(verbose,&(sscorrtableuse.angle),&error);
-		mb_free(verbose,&(sscorrtableuse.amplitude),&error);
-		mb_free(verbose,&(sscorrtableuse.sigma),&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&(sscorrtableuse.angle),&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&(sscorrtableuse.amplitude),&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&(sscorrtableuse.sigma),&error);
 		for (i=0;i<nsscorrtable;i++)
 			{
-			mb_free(verbose,&(sscorrtable[i].angle),&error);
-			mb_free(verbose,&(sscorrtable[i].amplitude),&error);
-			mb_free(verbose,&(sscorrtable[i].sigma),&error);
+			mb_freed(verbose,__FILE__,__LINE__,(void **)&(sscorrtable[i].angle),&error);
+			mb_freed(verbose,__FILE__,__LINE__,(void **)&(sscorrtable[i].amplitude),&error);
+			mb_freed(verbose,__FILE__,__LINE__,(void **)&(sscorrtable[i].sigma),&error);
 			}
-		status = mb_malloc(verbose,size,&sscorrtable,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&sscorrtable,&error);
 		}
 	    
 	/* deallocate topography grid */
 	if (grid.data != NULL)
 		{
-		mb_free(verbose,&grid.data,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&grid.data,&error);
 		memset(&grid, 0, sizeof (struct mbprocess_grid_struct));
 		}
 
 	/* deallocate arrays for navigation */
 	if (nnav > 0)
 		{
-		mb_free(verbose,&ntime,&error);
-		mb_free(verbose,&nlon,&error);
-		mb_free(verbose,&nlat,&error);
-		mb_free(verbose,&nheading,&error);
-		mb_free(verbose,&nspeed,&error);
-		mb_free(verbose,&ndraft,&error);
-		mb_free(verbose,&nroll,&error);
-		mb_free(verbose,&npitch,&error);
-		mb_free(verbose,&nheave,&error);
-		mb_free(verbose,&nlonspl,&error);
-		mb_free(verbose,&nlatspl,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ntime,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nlon,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nlat,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nheading,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nspeed,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ndraft,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nroll,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&npitch,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nheave,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nlonspl,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nlatspl,&error);
 		}
 
 	/* deallocate arrays for adjusted navigation */
 	if (nanav > 0)
 		{
-		mb_free(verbose,&natime,&error);
-		mb_free(verbose,&nalon,&error);
-		mb_free(verbose,&nalat,&error);
-		mb_free(verbose,&nalonspl,&error);
-		mb_free(verbose,&nalatspl,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&natime,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nalon,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nalat,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nalonspl,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nalatspl,&error);
 		}
 
 	/* deallocate arrays for attitude merging */
 	if (nanav > 0)
 		{
-		mb_free(verbose,&attitudetime,&error);
-		mb_free(verbose,&attituderoll,&error);
-		mb_free(verbose,&attitudepitch,&error);
-		mb_free(verbose,&attitudeheave,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&attitudetime,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&attituderoll,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&attitudepitch,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&attitudeheave,&error);
 		}
 
 	/* deallocate arrays for sonardepth merging */
 	if (nsonardepth > 0)
 		{
-		mb_free(verbose,&fsonardepthtime,&error);
-		mb_free(verbose,&fsonardepth,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&fsonardepthtime,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&fsonardepth,&error);
 		}
 
 	/* deallocate arrays for beam edits */
@@ -6382,9 +6380,9 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 		}
 
 	/* deallocate memory for svp arrays */
-	mb_free(verbose,&depth,&error);
-	mb_free(verbose,&velocity,&error);
-	mb_free(verbose,&velocity_sum,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&depth,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&velocity,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&velocity_sum,&error);
 
 	/* check memory */
 	if (verbose >= 4)

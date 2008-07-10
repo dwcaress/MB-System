@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_edgjstar.c	5/2/2005
- *	$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $
+ *	$Id: mbr_edgjstar.c,v 5.4 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	May 2, 2005
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2006/11/10 22:36:04  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.2  2006/04/11 19:14:46  caress
  * Various fixes.
  *
@@ -103,7 +106,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.4 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_register_edgjstar";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -243,7 +246,7 @@ int mbr_info_edgjstar(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.4 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_info_edgjstar";
 	int	status = MB_SUCCESS;
 
@@ -313,7 +316,7 @@ int mbr_info_edgjstar(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.4 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_register_edgjstr2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -452,7 +455,7 @@ int mbr_info_edgjstr2(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
+	static char res_id[]="$Id: mbr_edgjstar.c,v 5.4 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_info_edgjstr2";
 	int	status = MB_SUCCESS;
 
@@ -522,7 +525,7 @@ int mbr_info_edgjstr2(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_edgjstar.c,v 5.3 2006-11-10 22:36:04 caress Exp $";
+ static char res_id[]="$Id: mbr_edgjstar.c,v 5.4 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_alm_edgjstar";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -803,7 +806,8 @@ status,message.type,message.subsystem,message.channel,message.size);*/
 				trace_size = shortspersample * sbp->samples * sizeof(short);
 				if (sbp->trace_alloc < trace_size)
 					{
-					if ((status = mb_realloc(verbose, trace_size, &(sbp->trace), error))
+					if ((status = mb_reallocd(verbose, __FILE__, __LINE__,
+								trace_size, (void **)&(sbp->trace), error))
 						== MB_SUCCESS)
 						{
 						sbp->trace_alloc = trace_size;
@@ -955,7 +959,8 @@ status,message.type,message.subsystem,message.channel,message.size);*/
 				trace_size = shortspersample * ss->samples * sizeof(short);
 				if (ss->trace_alloc < trace_size)
 					{
-					if ((status = mb_realloc(verbose, trace_size, &(ss->trace), error))
+					if ((status = mb_reallocd(verbose, __FILE__, __LINE__,
+								trace_size, (void **)&(ss->trace), error))
 						== MB_SUCCESS)
 						{
 						ss->trace_alloc = trace_size;

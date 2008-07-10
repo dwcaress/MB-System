@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hydrob93.c	9/19/2002
- *	$Id: mbr_hydrob93.c,v 5.4 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbr_hydrob93.c,v 5.5 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	September 19, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.3  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -88,7 +91,7 @@ int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_hydrob93.c,v 5.4 2005-11-05 00:48:04 caress Exp $";
+static char res_id[]="$Id: mbr_hydrob93.c,v 5.5 2008-07-10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error)
@@ -317,8 +320,8 @@ int mbr_alm_hydrob93(int verbose, void *mbio_ptr, int *error)
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_malloc(verbose,sizeof(struct mbsys_singlebeam_struct),
-				(char **)&mb_io_ptr->store_data,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct mbsys_singlebeam_struct),
+				(void **)&mb_io_ptr->store_data,error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -361,7 +364,7 @@ int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,(char **)&mb_io_ptr->store_data,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

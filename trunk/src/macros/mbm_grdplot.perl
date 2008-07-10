@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.31 2008-05-16 22:36:21 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.32 2008-07-10 06:43:40 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -69,10 +69,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.31 2008-05-16 22:36:21 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.32 2008-07-10 06:43:40 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.31  2008/05/16 22:36:21  caress
+#   Release 5.1.1beta18
+#
 #   Revision 5.30  2008/02/12 02:52:50  caress
 #   Working on adding sealevel colormap, but haven't finished it at this point.
 #
@@ -1772,9 +1775,7 @@ elsif ($color_mode)
 # get colors to use by interpolating defined color pallette
 if ($color_mode)
 	{
-	# if doing sealevel colors (different colormaps above and below sealevel 
-	# then generate first Haxby colormap below sealevel and second brown
-	# colormap above sealevel
+	# deal with single colormap (not sealevel)
 	if ($color_pallette != 8)
 		{
 		# set selected color pallette
@@ -1814,14 +1815,14 @@ if ($color_mode)
 			$xx = ($ncpt - 1) * $i / ($ncolors - 1);
 			$i1 = int($xx);
 			$i2 = $i1 + 1;
-			$red = $cptbr[$i1] 
-				+ ($cptbr[$i2] - $cptbr1[$i1])
+			$red = $cptbr1[$i1] 
+				+ ($cptbr1[$i2] - $cptbr1[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
-			$green = $cptbg[$i1] 
-				+ ($cptbg[$i2] - $cptbg1[$i1])
+			$green = $cptbg1[$i1] 
+				+ ($cptbg1[$i2] - $cptbg1[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
-			$blue = $cptbb[$i1] 
-				+ ($cptbb[$i2] - $cptbb1[$i1])
+			$blue = $cptbb1[$i1] 
+				+ ($cptbb1[$i2] - $cptbb1[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
 			push (@cptr, $red);
 			push (@cptg, $green);
@@ -1834,14 +1835,14 @@ if ($color_mode)
 			$xx = ($ncpt - 1) * $i / ($ncolors - 1);
 			$i1 = int($xx);
 			$i2 = $i1 + 1;
-			$red = $cptbr[$i1] 
-				+ ($cptbr[$i2] - $cptbr8[$i1])
+			$red = $cptbr8[$i1] 
+				+ ($cptbr8[$i2] - $cptbr8[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
-			$green = $cptbg[$i1] 
-				+ ($cptbg[$i2] - $cptbg8[$i1])
+			$green = $cptbg8[$i1] 
+				+ ($cptbg8[$i2] - $cptbg8[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
-			$blue = $cptbb[$i1] 
-				+ ($cptbb[$i2] - $cptbb8[$i1])
+			$blue = $cptbb8[$i1] 
+				+ ($cptbb8[$i2] - $cptbb8[$i1])
 				* ($xx - $i1) / ($i2 - $i1);
 			push (@cptrr, $red);
 			push (@cptgg, $green);

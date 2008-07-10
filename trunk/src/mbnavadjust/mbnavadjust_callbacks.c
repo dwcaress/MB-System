@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.13 2008-05-16 22:42:32 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.14 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2008/05/16 22:42:32  caress
+ * Release 5.1.1beta18 - working towards use of 3D uncertainty.
+ *
  * Revision 5.12  2008/01/14 18:15:46  caress
  * Minor fixes.
  *
@@ -1047,7 +1050,7 @@ void do_update_status()
 						+ (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax3[2]) / tie->sigmar3;
 					}
 				if (tie->inversion_status == MBNA_INVERSION_CURRENT)
-				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f",
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f",
 					i, j,
 					crossing->file_id_1,
 					crossing->section_1,
@@ -1055,6 +1058,8 @@ void do_update_status()
 					crossing->file_id_2,
 					crossing->section_2,
 					tie->snav_2,
+					project.files[crossing->file_id_1].block,
+					project.files[crossing->file_id_2].block,
 					tie->offset_x_m,
 					tie->offset_y_m,
 					tie->offset_z_m,
@@ -1063,7 +1068,7 @@ void do_update_status()
 					tie->sigmar3,
 					dr1, dr2, dr3);
 				else if (tie->inversion_status == MBNA_INVERSION_OLD)
-				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f ***",
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f ***",
 					i, j,
 					crossing->file_id_1,
 					crossing->section_1,
@@ -1071,6 +1076,8 @@ void do_update_status()
 					crossing->file_id_2,
 					crossing->section_2,
 					tie->snav_2,
+					project.files[crossing->file_id_1].block,
+					project.files[crossing->file_id_2].block,
 					tie->offset_x_m,
 					tie->offset_y_m,
 					tie->offset_z_m,
@@ -1079,7 +1086,7 @@ void do_update_status()
 					tie->sigmar3,
 					dr1, dr2, dr3);
 				else
-				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
+				    sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
 					i, j,
 					crossing->file_id_1,
 					crossing->section_1,
@@ -1087,6 +1094,8 @@ void do_update_status()
 					crossing->file_id_2,
 					crossing->section_2,
 					tie->snav_2,
+					project.files[crossing->file_id_1].block,
+					project.files[crossing->file_id_2].block,
 					tie->offset_x_m,
 					tie->offset_y_m,
 					tie->offset_z_m,

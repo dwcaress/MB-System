@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	xgraphics.c	8/3/94
- *    $Id: xgraphics.c,v 5.5 2007-10-08 05:48:26 caress Exp $
+ *    $Id: xgraphics.c,v 5.6 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1999, 2000 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	August 3, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2007/10/08 05:48:26  caress
+ * Added function prototypes.
+ *
  * Revision 5.4  2006/01/24 19:17:13  caress
  * Version 5.0.8 beta.
  *
@@ -127,7 +130,7 @@ void xg_setclip(int xgid, int x, int y, int width, int height);
 int xg_init(Display *display, Window can_xid, 
 		int *can_bounds, char *fontname)
 {
-static char rcs_id[]="$Id: xgraphics.c,v 5.5 2007-10-08 05:48:26 caress Exp $";
+static char rcs_id[]="$Id: xgraphics.c,v 5.6 2008-07-10 06:43:40 caress Exp $";
 	/* local variables */
 	struct xg_graphic *graphic;
 	XGCValues gc_val;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.20 2008-01-14 18:25:52 caress Exp $
+ *    $Id: mbbackangle.c,v 5.21 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004m 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	January 6, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2008/01/14 18:25:52  caress
+ * Fixed bug in handling pixel acrosstrack distances.
+ *
  * Revision 5.19  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -206,7 +209,7 @@ int output_model(int verbose, FILE *tfp,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.20 2008-01-14 18:25:52 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.21 2008-07-10 06:43:41 caress Exp $";
 static char program_name[] = "mbbackangle";
 static int	pargc;
 static char	**pargv;
@@ -654,44 +657,44 @@ by MBprocess.";
 	if (amplitude_on == MB_YES)
 		{
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(int),
-				&nmeanamp,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(int),
+				(void **)&nmeanamp,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&meanamp,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&meanamp,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&sigmaamp,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&sigmaamp,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(int),
-				&nmeantotamp,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(int),
+				(void **)&nmeantotamp,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&meantotamp,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&meantotamp,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&sigmatotamp,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&sigmatotamp,&error);
 		}
 	if (sidescan_on == MB_YES)
 		{
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(int),
-				&nmeanss,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(int),
+				(void **)&nmeanss,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&meanss,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&meanss,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&sigmass,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&sigmass,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(int),
-				&nmeantotss,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(int),
+				(void **)&nmeantotss,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&meantotss,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&meantotss,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&sigmatotss,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&sigmatotss,&error);
 		}
 
 	/* if error initializing memory then quit */
@@ -832,7 +835,9 @@ by MBprocess.";
 	if (gridamp == MB_YES)
 		{
 		/* allocate memory for output grids */
-		status = mb_malloc(verbose, gridampnx * gridampny * sizeof(float), &gridamphist, &error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__, 
+					gridampnx * gridampny * sizeof(float), 
+					(void **)&gridamphist, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -849,7 +854,9 @@ by MBprocess.";
 	if (gridss == MB_YES)
 		{
 		/* allocate memory for output grids */
-		status = mb_malloc(verbose, gridssnx * gridssny * sizeof(float), &gridsshist, &error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__, 
+					gridssnx * gridssny * sizeof(float), 
+					(void **)&gridsshist, &error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -938,44 +945,44 @@ by MBprocess.";
 	
 	/* allocate memory for data arrays */
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-					&beamflag,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
+					(void **)&beamflag,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&bath,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+					(void **)&bath,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-					&amp,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
+					(void **)&amp,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&bathacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+					(void **)&bathacrosstrack,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&bathalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+					(void **)&bathalongtrack,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-					&ss,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+					(void **)&ss,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-					&ssacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+					(void **)&ssacrosstrack,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-					&ssalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+					(void **)&ssalongtrack,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&depths,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+					(void **)&depths,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&depthsmooth,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+					(void **)&depthsmooth,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-					&depthacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+					(void **)&depthacrosstrack,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
-					&slopes,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,(beams_bath+1)*sizeof(double),
+					(void **)&slopes,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
-					&slopeacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,(beams_bath+1)*sizeof(double),
+					(void **)&slopeacrosstrack,&error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(char), (void **)&beamflag, &error);
@@ -1878,33 +1885,33 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	/* deallocate memory used for data arrays */
 	if (amplitude_on == MB_YES)
 		{
-		mb_free(verbose,&nmeanamp,&error);
-		mb_free(verbose,&meanamp,&error);
-		mb_free(verbose,&sigmaamp,&error);
-		mb_free(verbose,&nmeantotamp,&error);
-		mb_free(verbose,&meantotamp,&error);
-		mb_free(verbose,&sigmatotamp,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&nmeanamp,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&meanamp,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&sigmaamp,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&nmeantotamp,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&meantotamp,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&sigmatotamp,&error);
 		if (gridamp == MB_YES)
 			{
-			mb_free(verbose,&gridamphist,&error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&gridamphist,&error);
 			}
 		}
 	if (sidescan_on == MB_YES)
 		{
-		mb_free(verbose,&nmeanss,&error);
-		mb_free(verbose,&meanss,&error);
-		mb_free(verbose,&sigmass,&error);
-		mb_free(verbose,&nmeantotss,&error);
-		mb_free(verbose,&meantotss,&error);
-		mb_free(verbose,&sigmatotss,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&nmeanss,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&meanss,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&sigmass,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&nmeantotss,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&meantotss,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&sigmatotss,&error);
 		if (gridss == MB_YES)
 			{
-			mb_free(verbose,&gridsshist,&error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&gridsshist,&error);
 			}
 		}
 	if (grid.data != NULL)
 		{
-		mb_free(verbose,&grid.data,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&grid.data,&error);
 		}
 
 	/* set program status */
@@ -2240,7 +2247,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	complex = 0;
 
 	/* allocate memory for output array */
-	status = mb_malloc(verbose,grd.nx*grd.ny*sizeof(float),&a,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
 	if (*error != MB_ERROR_NO_ERROR)
 		{
 		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -2248,7 +2255,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 			message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
-		mb_memory_clear(verbose, &error);
+		mb_memory_clear(verbose, error);
 		exit(status);
 		}
 
@@ -2268,7 +2275,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
 
 		/* free memory for output array */
-		mb_free(verbose, &a, error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **) &a, error);
 		}
 	    
 	/* free GMT memory */

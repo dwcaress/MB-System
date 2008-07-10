@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.20 2008-01-14 18:05:09 caress Exp $
+ *    $Id: mb_check_info.c,v 5.21 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2008/01/14 18:05:09  caress
+ * Made checking for data min maxes and bounds more robust.
+ *
  * Revision 5.19  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -124,7 +127,7 @@
 /*--------------------------------------------------------------------*/
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.20 2008-01-14 18:05:09 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -207,8 +210,8 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 			else if (strncmp(line, "CM dimensions:", 14) == 0)
 			    {
 			    sscanf(line, "CM dimensions: %d %d", &mask_nx, &mask_ny);
-			    status = mb_malloc(verbose,mask_nx*mask_ny*sizeof(int),
-							&mask,error);
+			    status = mb_mallocd(verbose,__FILE__, __LINE__,mask_nx*mask_ny*sizeof(int),
+							(void **)&mask,error);
 			    for (j=mask_ny-1;j>=0;j--)
 				{
 				if ((startptr = fgets(line, 128, fp)) != NULL)
@@ -277,7 +280,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 					&& latsouth < bounds[3] && latnorth > bounds[2])
 					*file_in_bounds = MB_YES;
 				    }
-			    mb_free(verbose, &mask, error);
+			    mb_freed(verbose,__FILE__, __LINE__,(void **) &mask, error);
 			    }
 			    
 			/* else check whole file against desired input bounds */
@@ -361,7 +364,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.20 2008-01-14 18:05:09 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_get_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -612,8 +615,8 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 			else if (strncmp(line, "CM dimensions:", 14) == 0)
 			    {
 			    sscanf(line, "CM dimensions: %d %d", &mb_info->mask_nx, &mb_info->mask_ny);
-			    status = mb_malloc(verbose,mb_info->mask_nx*mb_info->mask_ny*sizeof(int),
-							&mb_info->mask,error);
+			    status = mb_mallocd(verbose,__FILE__, __LINE__,mb_info->mask_nx*mb_info->mask_ny*sizeof(int),
+							(void **)&mb_info->mask,error);
 			    for (j=mb_info->mask_ny-1;j>=0;j--)
 				{
 				if ((startptr = fgets(line, 128, fp)) != NULL)
@@ -1159,7 +1162,7 @@ int mb_swathbounds(int verbose, int checkgood,
 /*--------------------------------------------------------------------*/
 int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.20 2008-01-14 18:05:09 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_info_init";
 	int	status = MB_SUCCESS;
 
@@ -1267,7 +1270,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 int mb_get_info_datalist(int verbose, char *read_file, int *format, 
 			struct mb_info_struct *mb_info, int lonflip, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.20 2008-01-14 18:05:09 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_get_info_datalist";
 	int	status = MB_SUCCESS;
 	char	file_inf[MB_PATH_MAXLINE];

@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_surface.c	5/2/94
- *    $Id: mb_surface.c,v 5.3 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mb_surface.c,v 5.4 2008-07-10 06:43:40 caress Exp $
  *
  *    Inclusion in MB-System:
- *    Copyright (c) 1994, 2003 by
+ *    Copyright (c) 1994-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -57,6 +57,9 @@
  * Date:	May 2, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.2  2005/03/25 04:09:53  caress
  * Problems with global variables in mb_surface.c stomping on similarly named global variables in some programs has been fixed.
  *
@@ -270,9 +273,15 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat,
 
 	/* Allocate more space  */
 	
-	status = mb_malloc(local_verbose, npoints * sizeof(struct MB_SURFACE_BRIGGS), &briggs, &local_error);
-	status = mb_malloc(local_verbose, mx * my * sizeof(char), &iu, &local_error);
-	status = mb_malloc(local_verbose, mx * my * sizeof(float), &u, &local_error);
+	status = mb_mallocd(local_verbose, __FILE__, __LINE__, 
+				npoints * sizeof(struct MB_SURFACE_BRIGGS), 
+				(void **)&briggs, &local_error);
+	status = mb_mallocd(local_verbose, __FILE__, __LINE__, 
+				mx * my * sizeof(char), 
+				(void **)&iu, &local_error);
+	status = mb_mallocd(local_verbose, __FILE__, __LINE__, 
+				mx * my * sizeof(float), 
+				(void **)&u, &local_error);
 
 	if (radius > 0) initialize_grid(); /* Fill in nodes with a weighted avg in a search radius  */
 
@@ -304,12 +313,12 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat,
 
 	get_output(sgrid);
 
-	status = mb_free(verbose, &data, &local_error);
-	status = mb_free(verbose, &briggs, &local_error);
-	status = mb_free(verbose, &iu, &local_error);
-	status = mb_free(verbose, &u, &local_error);
-	if (set_low) status = mb_free(verbose, &lower, &local_error);
-	if (set_high) status = mb_free(verbose, &upper, &local_error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data, &local_error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&briggs, &local_error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&iu, &local_error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&u, &local_error);
+	if (set_low) status = mb_freed(verbose,__FILE__, __LINE__, (void **)&lower, &local_error);
+	if (set_high) status = mb_freed(verbose,__FILE__, __LINE__, (void **)&upper, &local_error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -724,7 +733,9 @@ int read_data(int ndat, float *xdat, float *ydat, float *zdat)
 	int	i, j, k, kmax, kmin, idat;
 	double	zmin = 1.0e38, zmax = -1.0e38;
 
-	status = mb_malloc(local_verbose, ndat * sizeof(struct MB_SURFACE_DATA), &data, &local_error);
+	status = mb_mallocd(local_verbose, __FILE__, __LINE__, 
+				ndat * sizeof(struct MB_SURFACE_DATA), 
+				(void **)&data, &local_error);
 	
 	/* Read in xyz data and computes index no and store it in a structure */
 	k = 0;
@@ -1298,7 +1309,9 @@ int	throw_away_unusables()
 	
 	qsort ((char *)data, npoints, sizeof (struct MB_SURFACE_DATA), (void *)compare_points);
 	npoints -= n_outside;
-	status = mb_realloc(local_verbose, npoints * sizeof(struct MB_SURFACE_DATA), &data, &local_error);
+	status = mb_reallocd(local_verbose, __FILE__, __LINE__, 
+				npoints * sizeof(struct MB_SURFACE_DATA), 
+				(void **)&data, &local_error);
 	if (local_verbose && (n_outside)) {
 		fprintf(stderr,"surface: %ld unusable points were supplied; these will be ignored.\n", n_outside);
 		fprintf(stderr,"\tYou should have pre-processed the data with blockmean or blockmedian.\n");
@@ -1336,7 +1349,9 @@ int load_constraints (char *low, char *high)
 	/* Load lower/upper limits, verify range, deplane, and rescale */
 	
 	if (set_low > 0) {
-		status = mb_malloc(local_verbose, nx * ny * sizeof(float), &lower, &local_error);
+		status = mb_mallocd(local_verbose, __FILE__, __LINE__, 
+					nx * ny * sizeof(float), 
+					(void **)&lower, &local_error);
 		if (set_low < 3)
 			for (i = 0; i < nx * ny; i++) lower[i] = low_limit;
 /* Comment this out:
@@ -1373,7 +1388,9 @@ int load_constraints (char *low, char *high)
 		constrained = TRUE;
 	}
 	if (set_high > 0) {
-		status = mb_malloc(local_verbose, nx * ny * sizeof(float), &upper, &local_error);
+		status = mb_mallocd(local_verbose, __FILE__, __LINE__, 
+					nx * ny * sizeof(float), 
+					(void **)&upper, &local_error);
 		if (set_high < 3)
 			for (i = 0; i < nx * ny; i++) upper[i] = high_limit;
 /* Comment this out:
