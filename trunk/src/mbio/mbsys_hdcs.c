@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.c	3/1/99
- *	$Id: mbsys_hdcs.c,v 5.11 2008-07-10 17:40:13 caress Exp $
+ *	$Id: mbsys_hdcs.c,v 5.12 2008-07-10 18:02:39 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -86,7 +86,7 @@
 int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hdcs.c,v 5.11 2008-07-10 17:40:13 caress Exp $";
+ static char res_id[]="$Id: mbsys_hdcs.c,v 5.12 2008-07-10 18:02:39 caress Exp $";
 	char	*function_name = "mbsys_hdcs_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

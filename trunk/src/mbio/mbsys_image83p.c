@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_image83p.c	5/5/2008
- *	$Id: mbsys_image83p.c,v 5.2 2008-07-10 17:40:13 caress Exp $
+ *	$Id: mbsys_image83p.c,v 5.3 2008-07-10 18:02:39 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -47,7 +47,7 @@
 int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
-    static char res_id[]="$Id: mbsys_image83p.c,v 5.2 2008-07-10 17:40:13 caress Exp $";
+    static char res_id[]="$Id: mbsys_image83p.c,v 5.3 2008-07-10 18:02:39 caress Exp $";
 	char	*function_name = "mbsys_image83p_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
