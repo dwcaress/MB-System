@@ -27,6 +27,8 @@ adjusting survey navigation.
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
 Version 5.1.1          To be determined
+Version 5.1.1beta20    July 10, 2008
+Version 5.1.1beta19    June 6, 2008
 Version 5.1.1beta18    May 16, 2008
 Version 5.1.1beta17    March 21, 2008
 Version 5.1.1beta16    March 14, 2008
@@ -291,6 +293,13 @@ times and unix time values.
 Fixed mbprocess so that changes to the sonar depth/draft derived from
 mbnavadjust are output to the processed data. Previously the bathymetry
 was corrected, but not the sonar depth/draft.
+
+Fixed formats 58/59 to support EM302, EM122 in addition to EM710. Also
+supported "network attitude" datagram as source of attitude.
+
+Changed mbnavadjust inversion to use simplistic iterative relaxation
+rather than a full matrix solver. This targeted solver is faster and
+avoids some bad behavior around survey starts and ends.
 
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
@@ -1485,10 +1494,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.112 2008-07-10 06:51:04 caress Exp $
+RCS ID: $Id: README,v 5.113 2008-07-10 18:24:56 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.112  2008/07/10 06:51:04  caress
+Preparing for 5.1.1beta20
+
 Revision 5.111  2008/05/24 19:33:25  caress
 Update on 24 May 2008.
 
