@@ -285,6 +285,13 @@ change the sonar draft value without changing the calculated bathymetry.
 This fixes a problem in which Atalante Simard data were exported by
 Caris into GSF with an incorrect sonar draft.
 
+Added program mbtime to allow command line conversion between calendar
+times and unix time values.
+
+Fixed mbprocess so that changes to the sonar depth/draft derived from
+mbnavadjust are output to the processed data. Previously the bathymetry
+was corrected, but not the sonar depth/draft.
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1478,10 +1485,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.111 2008-05-24 19:33:25 caress Exp $
+RCS ID: $Id: README,v 5.112 2008-07-10 06:51:04 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.111  2008/05/24 19:33:25  caress
+Update on 24 May 2008.
+
 Revision 5.110  2008/05/16 23:17:22  caress
 Release 5.1.1beta18.
 
