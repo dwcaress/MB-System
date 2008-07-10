@@ -1,4 +1,4 @@
-.TH mb7kpreprocess l "13 August 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mb7kpreprocess l "9 July 2008" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7kpreprocess\fP - performs preprocessing of Reson 7k multibeam data 
 in the 7k format (\fBMBIO\fP format 88).
@@ -8,8 +8,8 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmb7kpreprocess\fP [\fB-A\fP \fB-B\fP \fB-D\fP\fIoffx/offy\fP \fB-F\fP\fIformat\fP 
-\fB-I\fIfile \fB-L\fP \fB-N\fP\fIinsfile\fP \fB-O\fP\fIoutfile\fP 
-\fB-T\fP\fItimelag\fP \fB-H -V\fP]
+\fB-I\fIfile \fB-L\fP \fB-M\fP\fIrockfile\fP \fB-N\fP\fIinsfile\fP \fB-O\fP\fIoutfile\fP 
+\fB-T\fP\fItimelag\fP \fB-W\fP\fIdslfile\fP \fB-H -V\fP]
 
 .SH DESCRIPTION
 \fBmb7kpreprocess\fP reads a Reson 7k (format 88) file, interpolates the
@@ -82,6 +82,25 @@ format 88).
 This option causes the program to list the timetags of bathymetry,
 sidescan, subbottom, navigation, and attitude data records.
 .TP
+.B \-M
+\fIrockfile\fP
+.br
+The program will read navigation and attitude from the Steve Rock navigation
+and attitude file \fIrockfile\fP and merge those data with the multibeam, sidescan,
+and subbtottom data in the 7k file.If a timelag model is specified using
+\fB-T\fP\fItimelag\fP, the time lag will be applied to the navigation and
+attitude data before merging with the sonar data. The navigation and attitude
+data from \fIrockfile\fP will also be embedded in asynchronous data records
+in the output 7k format data. Any pre-existing navigation data records will
+be replaced. The similar \fB-N\fP\fIinsfile\fP and \fB-W\fP\fIdslfile\fP options 
+cause merging of data from MBARI AUV logfiles and WHOI DSL navigation files,
+respectively. The Steve Rock navigation and attitude file is a text file with
+seven space delimited columns:
+ 	time_d longitude latitude sonardepth heading roll pitch
+.br
+where time_d is decimal seconds since the start of 1970, longitude, latitude,
+heading, roll, and pitch are in decimal degrees, and sonardepth is in meters.
+.TP
 .B \-N
 \fIinsfile\fP
 .br
@@ -92,7 +111,7 @@ and subbtottom data in the 7k file.If a timelag model is specified using
 attitude data before merging with the sonar data. The navigation and attitude
 data from \fIinsfile\fP will also be embedded in asynchronous data records
 in the output 7k format data. Any pre-existing navigation data records will
-be replaced.
+be replaced. MBARI AUV navigation files are binary and specific to MBARI.
 .TP
 .B \-T
 \fItimelag\fP
@@ -102,6 +121,32 @@ to the navigation and attitude data prior to it being merged with the
 bathymetry. If \fItimelag\fP is a valid path to a file containing time
 stamp and time lag pairs, then these data will be read and the time lag
 applied to particular records will be interpolated by time.
+.TP
+.B \-W
+\fIdslfile\fP
+.br
+The program will read navigation and attitude from the WHOI DSL navigation
+and attitude file \fIdslfile\fP and merge those data with the multibeam, sidescan,
+and subbtottom data in the 7k file.If a timelag model is specified using
+\fB-T\fP\fItimelag\fP, the time lag will be applied to the navigation and
+attitude data before merging with the sonar data. Any pre-existing navigation data 
+records will be replaced. The similar \fB-N\fP\fIinsfile\fP and \fB-W\fP\fIdslfile\fP 
+options cause merging of data from MBARI AUV logfiles and WHOI DSL navigation files,
+respectively. The WHOI DSL navigation and attitude file is a text file with
+eleven space delimited columns:
+ 	PPL date time vehicle latitude longitude depth heading pitch roll id
+.br
+where:
+ 	PPL - tag indicating processed navigation and attitude
+ 	date - yyyy/mm/dd
+ 	time - hh:mm:ss.sss
+ 	vehicle - SEN for Sentry
+ 	latitude - decimal degrees 
+ 	longitude - decimal degrees 
+ 	depth - sonar depth in meters 
+ 	pitch - decimal degrees 
+ 	roll - decimal degrees 
+ 	id - seems to be 1.00 
 
 .SH EXAMPLES
 Suppose that one has collected a Reson 7k datafile incorporating 
