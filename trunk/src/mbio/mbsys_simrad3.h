@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
- *	$Id: mbsys_simrad3.h,v 5.0 2008-03-01 09:11:35 caress Exp $
+ *	$Id: mbsys_simrad3.h,v 5.1 2008-07-10 06:40:34 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_simrad3.h defines the MBIO data structures for handling data from 
- * new (post-1997) Simrad multibeam sonars (e.g. EM120, EM300, EM3000).
+ * new (post-2006) Simrad multibeam sonars (e.g. EM710, EM3002, EM302, EM122).
  * The data formats associated with Simrad multibeams 
  * (both old and new) include:
  *    MBSYS_SIMRAD formats (code in mbsys_simrad.c and mbsys_simrad.h):
@@ -25,7 +25,7 @@
  *                   : MBIO ID 55 - aliased to 51
  *    MBSYS_SIMRAD3 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
  *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120 
- *      MBF_EM300MBA : MBIO ID 57 - MBARI EM3000, EM300, EM120
+ *      MBF_EM300MBA : MBIO ID 57 - MBARI EM3000, EM300, EM120 for processing
  *    MBSYS_SIMRAD3 formats (code in mbsys_simrad3.c and mbsys_simrad3.h):
  *      MBF_EM710RAW : MBIO ID 58 - Vendor EM710 
  *      MBF_EM710MBA : MBIO ID 59 - MBARI EM710 for processing
@@ -35,6 +35,9 @@
  * Date:	February 22, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2008/03/01 09:11:35  caress
+ * Added support for Simrad EM710 multibeam in new formats 58 and 59.
+ *
  *
  */
 /*
@@ -87,6 +90,7 @@
  *        *0x0268: Height Output                          24 bytes
  *        *0x0269: Parameter - Stop                       variable size
  *        *0x026B: Water column                           variable size
+ *        *0x026E: Network attitude                       variable size
  *         0x0270: Parameter - Remote                     variable size
  *         0x0273: Surface sound speed                    variable size
  *        *0x02E1: Bathymetry (MBARI format 57)           48-4092 bytes
@@ -158,6 +162,12 @@
 
 /* sonar models */
 #define	MBSYS_SIMRAD3_UNKNOWN	0
+
+#define	MBSYS_SIMRAD3_EM3002	3020
+#define	MBSYS_SIMRAD3_EM710	 710
+#define	MBSYS_SIMRAD3_EM302	 302
+#define	MBSYS_SIMRAD3_EM122	 122
+
 #define	MBSYS_SIMRAD3_EM120	120
 #define	MBSYS_SIMRAD3_EM300	300
 #define	MBSYS_SIMRAD3_EM1002	1002
@@ -171,8 +181,6 @@
 #define	MBSYS_SIMRAD3_EM3000D_6	3006
 #define	MBSYS_SIMRAD3_EM3000D_7	3007
 #define	MBSYS_SIMRAD3_EM3000D_8	3008
-#define	MBSYS_SIMRAD3_EM3002	3020
-#define	MBSYS_SIMRAD3_EM710	 710
 
 #define	MBSYS_SIMRAD3_EM12S	9901
 #define	MBSYS_SIMRAD3_EM12D	9902
@@ -181,7 +189,7 @@
 #define	MBSYS_SIMRAD3_EM1000	9905
 
 /* maximum number of beams and pixels */
-#define	MBSYS_SIMRAD3_MAXBEAMS		400
+#define	MBSYS_SIMRAD3_MAXBEAMS		512
 #define	MBSYS_SIMRAD3_MAXPIXELS		1024
 #define	MBSYS_SIMRAD3_MAXRAWPIXELS	65535
 #define MBSYS_SIMRAD3_MAXTX		19
@@ -229,6 +237,7 @@
 #define	EM3_HEIGHT		0x0268
 #define	EM3_STOP		0x0269
 #define	EM3_WATERCOLUMN		0x026B
+#define	EM3_NETATTITUDE		0x026E
 #define	EM3_REMOTE		0x0270
 #define	EM3_SSP			0x0273
 #define	EM3_BATH_MBA		0x02E1
@@ -266,6 +275,7 @@
 #define	EM3_ID_HEIGHT		0x68
 #define	EM3_ID_STOP		0x69
 #define	EM3_ID_WATERCOLUMN	0x6B
+#define	EM3_ID_NETATTITUDE	0x6E
 #define	EM3_ID_REMOTE		0x70
 #define	EM3_ID_SSP		0x73
 #define	EM3_ID_BATH_MBA		0xE1
@@ -308,6 +318,8 @@
 #define	EM3_SS2_BEAM_SIZE		6
 #define	EM3_SS2_MBA_HEADER_SIZE		36
 #define	EM3_SS2_MBA_BEAM_SIZE		6
+#define	EM3_NETATTITUDE_HEADER_SIZE	16
+#define	EM3_NETATTITUDE_SLICE_SIZE	11
 #define	EM3_WC_HEADER_SIZE		36
 #define	EM3_WC_TX_SIZE			6
 #define	EM3_WC_BEAM_SIZE		10
@@ -651,6 +663,31 @@ struct mbsys_simrad3_attitude_struct
 				/* heading status (0=inactive) */
 	};
 
+/* internal data structure for network attitude data */
+struct mbsys_simrad3_netattitude_struct
+	{
+	int	nat_date;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+	int	nat_msec;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+	int	nat_count;	/* sequential counter or input identifier */
+	int	nat_serial;	/* system 1 or system 2 serial number */
+	int	nat_ndata;	/* number of attitude data */
+	int	nat_sensordescriptor;	/* sensor system descriptor */
+	int	nat_time[MBSYS_SIMRAD3_MAXATTITUDE];
+				/* time since record start (msec) */
+	int	nat_roll[MBSYS_SIMRAD3_MAXATTITUDE];
+				/* roll (0.01 degree) */
+	int	nat_pitch[MBSYS_SIMRAD3_MAXATTITUDE];
+				/* pitch (0.01 degree) */
+	int	nat_heave[MBSYS_SIMRAD3_MAXATTITUDE];
+				/* heave (cm) */
+	int	nat_heading[MBSYS_SIMRAD3_MAXATTITUDE];
+				/* heading (0.01 degree) */
+	int	nat_nbyte_raw[MBSYS_SIMRAD3_MAXATTITUDE];	/* number of bytes in input datagram (Nd) */
+	char	nat_raw[MBSYS_SIMRAD3_MAXATTITUDE*MBSYS_SIMRAD3_BUFFER_SIZE];	/* network attitude input datagram as received by datalogger */
+	};
+
 /* internal data structure for heading data */
 struct mbsys_simrad3_heading_struct
 	{
@@ -991,6 +1028,9 @@ struct mbsys_simrad3_struct
 	/* pointer to attitude data structure */
 	struct mbsys_simrad3_attitude_struct *attitude;
 
+	/* pointer to network attitude data structure */
+	struct mbsys_simrad3_netattitude_struct *netattitude;
+
 	/* pointer to heading data structure */
 	struct mbsys_simrad3_heading_struct *heading;
 
@@ -1015,6 +1055,9 @@ int mbsys_simrad3_survey_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
 int mbsys_simrad3_attitude_alloc(int verbose, 
+			void *mbio_ptr, void *store_ptr, 
+			int *error);
+int mbsys_simrad3_netattitude_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
 int mbsys_simrad3_heading_alloc(int verbose, 

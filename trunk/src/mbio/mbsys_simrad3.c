@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.c	3.00	2/22/2008
- *	$Id: mbsys_simrad3.c,v 5.0 2008-03-01 09:11:35 caress Exp $
+ *	$Id: mbsys_simrad3.c,v 5.1 2008-07-10 06:40:34 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_simrad3.c contains the MBIO functions for handling data from 
- * new (post-2006) Simrad multibeam sonars (e.g. EM710).
+ * new (post-2006) Simrad multibeam sonars (e.g. EM710, EM3002, EM302, EM122).
  * The data formats associated with Simrad multibeams 
  * (both old and new) include:
  *    MBSYS_SIMRAD formats (code in mbsys_simrad.c and mbsys_simrad.h):
@@ -34,6 +34,9 @@
  * Date:	February 22, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2008/03/01 09:11:35  caress
+ * Added support for Simrad EM710 multibeam in new formats 58 and 59.
+ *
  *
  */
 
@@ -49,7 +52,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad3.h"
 
-static char res_id[]="$Id: mbsys_simrad3.c,v 5.0 2008-03-01 09:11:35 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad3.c,v 5.1 2008-07-10 06:40:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -76,8 +79,8 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_simrad3_struct),
-				store_ptr,error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct mbsys_simrad3_struct),
+				(void **)store_ptr,error);
 
 	/* get data structure pointer */
 	store = (struct mbsys_simrad3_struct *) *store_ptr;
@@ -387,6 +390,9 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	/* pointer to attitude data structure */
 	store->attitude = NULL;
 
+	/* pointer to network attitude data structure */
+	store->netattitude = NULL;
+
 	/* pointer to heading data structure */
 	store->heading = NULL;
 
@@ -450,9 +456,9 @@ int mbsys_simrad3_survey_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->ping == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__, 
 			sizeof(struct mbsys_simrad3_ping_struct),
-			&(store->ping),error);
+			(void **)&(store->ping),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -788,9 +794,9 @@ int mbsys_simrad3_wc_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->wc == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__, 
 			sizeof(struct mbsys_simrad3_watercolumn_struct),
-			&(store->wc),error);
+			(void **)&(store->wc),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -885,9 +891,9 @@ int mbsys_simrad3_attitude_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->attitude == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose, __FILE__, __LINE__, 
 			sizeof(struct mbsys_simrad3_attitude_struct),
-			&(store->attitude),error);
+			(void **)&(store->attitude),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -941,6 +947,95 @@ int mbsys_simrad3_attitude_alloc(int verbose,
 	/* return status */
 	return(status);
 }
+
+/*--------------------------------------------------------------------*/
+int mbsys_simrad3_netattitude_alloc(int verbose, 
+			void *mbio_ptr, void *store_ptr, 
+			int *error)
+{
+	char	*function_name = "mbsys_simrad3_netattitude_alloc";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad3_struct *store;
+	struct mbsys_simrad3_netattitude_struct *netattitude;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad3_struct *) store_ptr;
+
+	/* allocate memory for data structure if needed */
+	if (store->netattitude == NULL)
+		status = mb_mallocd(verbose, __FILE__, __LINE__, 
+			sizeof(struct mbsys_simrad3_netattitude_struct),
+			(void **)&(store->netattitude),error);
+			
+	if (status == MB_SUCCESS)
+		{
+
+		/* get data structure pointer */
+		netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
+
+		/* initialize everything */
+		netattitude->nat_date = 0;	
+				/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		netattitude->nat_msec = 0;	
+				/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		netattitude->nat_count = 0;	
+				/* sequential counter or input identifier */
+		netattitude->nat_serial = 0;	
+				/* system 1 or system 2 serial number */
+		netattitude->nat_ndata = 0;	
+				/* number of attitude data */
+		netattitude->nat_sensordescriptor = 0;	/* sensor system descriptor */
+		for (i=0;i<MBSYS_SIMRAD3_MAXATTITUDE;i++)
+		    {
+		    netattitude->nat_time[i] = 0;
+				/* time since record start (msec) */
+		    netattitude->nat_roll[i] = 0;
+				/* roll (0.01 degree) */
+		    netattitude->nat_pitch[i] = 0;
+				/* pitch (0.01 degree) */
+		    netattitude->nat_heave[i] = 0;
+				/* heave (cm) */
+		    netattitude->nat_heading[i] = 0;
+				/* heading (0.01 degree) */
+		    netattitude->nat_nbyte_raw[i] = 0;	/* number of bytes in input datagram (Nd) */
+		    for (j=0;j<MBSYS_SIMRAD3_BUFFER_SIZE;j++)
+		    	netattitude->nat_raw[i*MBSYS_SIMRAD3_BUFFER_SIZE+j] = 0;	/* network attitude input datagram as received by datalogger */
+		    }
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_heading_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
@@ -973,9 +1068,9 @@ int mbsys_simrad3_heading_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->heading == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__, 
 			sizeof(struct mbsys_simrad3_heading_struct),
-			&(store->heading),error);
+			(void **)&(store->heading),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -1053,9 +1148,9 @@ int mbsys_simrad3_ssv_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->ssv == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__, 
 			sizeof(struct mbsys_simrad3_ssv_struct),
-			&(store->ssv),error);
+			(void **)&(store->ssv),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -1131,9 +1226,9 @@ int mbsys_simrad3_tilt_alloc(int verbose,
 
 	/* allocate memory for data structure if needed */
 	if (store->tilt == NULL)
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__, 
 			sizeof(struct mbsys_simrad3_tilt_struct),
-			&(store->tilt),error);
+			(void **)&(store->tilt),error);
 			
 	if (status == MB_SUCCESS)
 		{
@@ -1185,6 +1280,7 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
+	struct mbsys_simrad3_netattitude_struct *netattitude;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1203,30 +1299,41 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* deallocate memory for survey data structure */
 	if (store->ping != NULL)
-		status = mb_free(verbose,&(store->ping),error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->ping),error);
 
 	/* deallocate memory for water column data structure */
 	if (store->wc != NULL)
-		status = mb_free(verbose,&(store->wc),error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->wc),error);
 
 	/* deallocate memory for attitude data structure */
 	if (store->attitude != NULL)
-		status = mb_free(verbose,&(store->attitude),error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->attitude),error);
+
+	/* deallocate memory for network attitude data structure */
+	if (store->netattitude != NULL)
+		{
+		netattitude = (struct mbsys_simrad3_netattitude_struct *) &(store->netattitude);
+		if (netattitude->nat_raw != NULL)
+			{
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(netattitude->nat_raw),error);
+			}
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->netattitude),error);
+		}
 
 	/* deallocate memory for heading data structure */
 	if (store->heading != NULL)
-		status = mb_free(verbose,&(store->heading),error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->heading),error);
 
 	/* deallocate memory for ssv data structure */
 	if (store->ssv != NULL)
-		status = mb_free(verbose,&(store->ssv),error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->ssv),error);
 
 	/* deallocate memory for tilt data structure */
 	if (store->tilt != NULL)
-		status = mb_free(verbose,&(store->tilt),error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->tilt),error);
 
 	/* deallocate memory for data structure */
-	status = mb_free(verbose,store_ptr,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)store_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1570,14 +1677,6 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* read distance and depth values into storage arrays */
 		reflscale  = 0.1;
 		*nbath = 0;
-		for (j=0;j<MBSYS_SIMRAD3_MAXBEAMS;j++)
-			{
-			bath[j] = 0.0;
-			beamflag[j] = MB_FLAG_NULL;
-			amp[j] = 0.0;
-			bathacrosstrack[j] = 0.0;
-			bathalongtrack[j] = 0.0;
-			}
 		for (i=0;i<ping->png_nbeams;i++)
 			{
 			bath[i] = ping->png_depth[i] + ping->png_xducer_depth;
@@ -1757,7 +1856,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				function_name);
 			fprintf(stderr,"dbg4  New ping values:\n");
 			fprintf(stderr,"dbg4       error:      %d\n",
-				error);
+				*error);
 			fprintf(stderr,"dbg4       comment:    %s\n",
 				comment);
 			}
@@ -3123,6 +3222,9 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr,
 	struct mbsys_simrad3_attitude_struct *attitude_store;
 	struct mbsys_simrad3_attitude_struct *attitude_copy;
 	char	*attitude_save;
+	struct mbsys_simrad3_netattitude_struct *netattitude_store;
+	struct mbsys_simrad3_netattitude_struct *netattitude_copy;
+	char	*netattitude_save;
 	struct mbsys_simrad3_heading_struct *heading_store;
 	struct mbsys_simrad3_heading_struct *heading_copy;
 	char	*heading_save;
@@ -3186,6 +3288,22 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr,
 			
 		/* save pointer value */
 		attitude_save = (char *)copy->attitude;
+		}
+	
+	/* check if netattitude data needs to be copied */
+	if (store->netattitude != NULL)
+		{
+		/* make sure a netattitude data structure exists to
+			be copied into */
+		if (copy->netattitude == NULL)
+			{
+			status = mbsys_simrad3_netattitude_alloc(
+					verbose,mbio_ptr,
+					copy_ptr,error);
+			}
+			
+		/* save pointer value */
+		netattitude_save = (char *)copy->netattitude;
 		}
 	
 	/* check if heading data needs to be copied */
@@ -3259,6 +3377,15 @@ int mbsys_simrad3_copy(int verbose, void *mbio_ptr,
 		attitude_store = (struct mbsys_simrad3_attitude_struct *) store->attitude;
 		attitude_copy = (struct mbsys_simrad3_attitude_struct *) copy->attitude;
 		*attitude_copy = *attitude_store;
+		}
+	
+	/* if needed copy the netattitude data structure */
+	if (store->netattitude != NULL && status == MB_SUCCESS)
+		{
+		copy->netattitude = (struct mbsys_simrad3_netattitude_struct *) netattitude_save;
+		netattitude_store = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
+		netattitude_copy = (struct mbsys_simrad3_netattitude_struct *) copy->netattitude;
+		*netattitude_copy = *netattitude_store;
 		}
 	
 	/* if needed copy the heading data structure */
