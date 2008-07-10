@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em710mba.c	2/26/2008
- *	$Id: mbr_em710mba.c,v 5.0 2008-03-01 09:11:35 caress Exp $
+ *	$Id: mbr_em710mba.c,v 5.1 2008-07-10 06:41:31 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 26, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2008/03/01 09:11:35  caress
+ * Added support for Simrad EM710 multibeam in new formats 58 and 59.
+ *
  *
  */
 
@@ -106,6 +109,9 @@ int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap,
 int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad3_struct *store, 
 		short sonar, int *goodend, int *error);
+int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap, 
+		struct mbsys_simrad3_struct *store, 
+		short sonar, int *goodend, int *error);
 int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad3_struct *store, 
 		short sonar, int *goodend, int *error);
@@ -148,6 +154,8 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
 int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad3_struct *store, int *error);
+int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap, 
+		struct mbsys_simrad3_struct *store, int *error);
 int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad3_struct *store, int *error);
 int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap, 
@@ -163,7 +171,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad3_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em710mba.c,v 5.0 2008-03-01 09:11:35 caress Exp $";
+static char res_id[]="$Id: mbr_em710mba.c,v 5.1 2008-07-10 06:41:31 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em710mba(int verbose, void *mbio_ptr, int *error)
@@ -476,6 +484,7 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_attitude_struct *attitude;
+	struct mbsys_simrad3_netattitude_struct *netattitude;
 	struct mbsys_simrad3_heading_struct *heading;
 	struct mbsys_simrad3_ssv_struct *ssv;
 	struct mbsys_simrad3_ping_struct *ping;
@@ -515,6 +524,7 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* get pointers to data structures */
 	store = (struct mbsys_simrad3_struct *) store_ptr;
 	attitude = (struct mbsys_simrad3_attitude_struct *) store->attitude;
+	netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
 	heading = (struct mbsys_simrad3_heading_struct *) store->heading;
 	ssv = (struct mbsys_simrad3_ssv_struct *) store->ssv;
 	ping = (struct mbsys_simrad3_ping_struct *) store->ping;
@@ -547,7 +557,8 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* save attitude if attitude data */
 	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_ATTITUDE)
+		&& store->kind == MB_DATA_ATTITUDE
+		&& store->type == EM3_ATTITUDE)
 		{
 		/* get attitude time */
 		time_i[0] = attitude->att_date / 10000;
@@ -567,6 +578,33 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				(double)(0.01 * attitude->att_heave[i]),
 				(double)(0.01 * attitude->att_roll[i]),
 				(double)(0.01 * attitude->att_pitch[i]),
+				error);
+			}
+		}
+
+	/* save attitude if network attitude data */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_ATTITUDE
+		&& store->type == EM3_NETATTITUDE)
+		{
+		/* get attitude time */
+		time_i[0] = netattitude->nat_date / 10000;
+		time_i[1] = (netattitude->nat_date % 10000) / 100;
+		time_i[2] = netattitude->nat_date % 100;
+		time_i[3] = netattitude->nat_msec / 3600000;
+		time_i[4] = (netattitude->nat_msec % 3600000) / 60000;
+		time_i[5] = (netattitude->nat_msec % 60000) / 1000;
+		time_i[6] = (netattitude->nat_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &atime_d);
+		
+		/* add latest attitude samples */
+		for (i=0;i<netattitude->nat_ndata;i++)
+			{
+			mb_attint_add(verbose, mbio_ptr,
+				(double)(atime_d + 0.001 * netattitude->nat_time[i]),
+				(double)(0.01 * netattitude->nat_heave[i]),
+				(double)(0.01 * netattitude->nat_roll[i]),
+				(double)(0.01 * netattitude->nat_pitch[i]),
 				error);
 			}
 		}
@@ -944,6 +982,17 @@ Have a nice day...\n");
 			}
 		
 		/* allocate secondary data structure for
+			netattitude data if needed */
+		if (status == MB_SUCCESS && 
+			(type == EM3_NETATTITUDE)
+			&& store->netattitude == NULL)
+			{
+			status = mbsys_simrad3_netattitude_alloc(
+					verbose,mbio_ptr,
+					store_ptr,error);
+			}
+		
+		/* allocate secondary data structure for
 			ssv data if needed */
 		if (status == MB_SUCCESS && 
 			(type == EM3_SSV)
@@ -1037,6 +1086,7 @@ Have a nice day...\n");
 			&& type != EM3_HEIGHT
 			&& type != EM3_STOP
 			&& type != EM3_WATERCOLUMN
+			&& type != EM3_NETATTITUDE
 			&& type != EM3_REMOTE
 			&& type != EM3_SSP
 			&& type != EM3_BATH_MBA
@@ -1236,6 +1286,26 @@ Have a nice day...\n");
 	fprintf(stderr,"call mbr_em710mba_rd_attitude type %x\n",type);
 #endif
 			status = mbr_em710mba_rd_attitude(
+				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
+			if (status == MB_SUCCESS)
+				{
+				done = MB_YES;
+				if (expect != EM3_NONE)
+					{
+					*expect_save = expect;
+					*expect_save_flag = MB_YES;
+					*first_type_save = first_type;
+					}
+				else
+					*expect_save_flag = MB_NO;
+				}
+			}	
+		else if (type == EM3_NETATTITUDE)
+			{
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"call mbr_em710mba_rd_netattitude type %x\n",type);
+#endif
+			status = mbr_em710mba_rd_netattitude(
 				verbose,mbfp,swap,store,sonar,&good_end_bytes,error);
 			if (status == MB_SUCCESS)
 				{
@@ -1550,6 +1620,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		|| typebyte == EM3_ID_STATUS
 		|| typebyte == EM3_ID_ON
 		|| typebyte == EM3_ID_ATTITUDE
+		|| typebyte == EM3_ID_NETATTITUDE
 		|| typebyte == EM3_ID_CLOCK
 		|| typebyte == EM3_ID_BATH
 		|| typebyte == EM3_ID_SBDEPTH
@@ -1595,7 +1666,10 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		sonarswap = mb_swap_short(sonarunswap);
 
 		/* check for valid sonarunswap */
-		if (sonarunswap == MBSYS_SIMRAD3_EM710)
+		if (sonarunswap == MBSYS_SIMRAD3_EM710
+			|| sonarunswap == MBSYS_SIMRAD3_EM3002
+			|| sonarunswap == MBSYS_SIMRAD3_EM302
+			|| sonarunswap == MBSYS_SIMRAD3_EM122)
 			{
 			sonarunswapgood = MB_YES;
 			}
@@ -1605,7 +1679,10 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			}
 
 		/* check for valid sonarswap */
-		if (sonarswap == MBSYS_SIMRAD3_EM710)
+		if (sonarswap == MBSYS_SIMRAD3_EM710
+			|| sonarswap == MBSYS_SIMRAD3_EM3002
+			|| sonarswap == MBSYS_SIMRAD3_EM302
+			|| sonarswap == MBSYS_SIMRAD3_EM122)
 			{
 			sonarswapgood = MB_YES;
 			}
@@ -1648,7 +1725,10 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 #endif
 		
 	/* check for valid sonar */
-	if (*sonar != MBSYS_SIMRAD3_EM710)
+	if (*sonar != MBSYS_SIMRAD3_EM710
+		&& *sonar != MBSYS_SIMRAD3_EM3002
+		&& *sonar != MBSYS_SIMRAD3_EM302
+		&& *sonar != MBSYS_SIMRAD3_EM122)
 		{
 		sonargood = MB_NO;
 		}
@@ -3313,6 +3393,199 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 				attitude->att_pitch[i], attitude->att_heave[i], 
 				attitude->att_heading[i]);
 		fprintf(stderr,"dbg5       att_heading_status: %d\n",attitude->att_heading_status);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap, 
+		struct mbsys_simrad3_struct *store, 
+		short sonar, int *goodend, int *error)
+{
+	char	*function_name = "mbr_em710mba_rd_netattitude";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad3_netattitude_struct *netattitude;
+	char	line[MBSYS_SIMRAD3_BUFFER_SIZE];
+	short	short_val;
+	int	read_len;
+	int	readcount;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
+		fprintf(stderr,"dbg2       store:      %d\n",store);
+		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		}
+		
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
+		
+	/* get  storage structure */
+	netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
+		
+	/* set kind and type values */
+	store->kind = MB_DATA_ATTITUDE;
+	store->type = EM3_NETATTITUDE;
+	store->sonar = sonar;
+
+	/* read binary header values into char array */
+	read_len = fread(line,1,EM3_NETATTITUDE_HEADER_SIZE,mbfp);
+	if (read_len == EM3_NETATTITUDE_HEADER_SIZE)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_get_binary_int(swap, &line[0], &netattitude->nat_date); 
+		    store->date = netattitude->nat_date;
+		mb_get_binary_int(swap, &line[4], &netattitude->nat_msec); 
+		    store->msec = netattitude->nat_msec;
+		mb_get_binary_short(swap, &line[8], &short_val); 
+		    netattitude->nat_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[10], &short_val); 
+		    netattitude->nat_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[12], &short_val); 
+		    netattitude->nat_ndata = (int) ((unsigned short) short_val);
+		netattitude->nat_sensordescriptor = line[14];
+		}
+
+	/* read binary netattitude values */
+	if (status == MB_SUCCESS)
+	    {
+	    readcount = 16;
+	    for (i=0;i<netattitude->nat_ndata && status == MB_SUCCESS;i++)
+		{
+		read_len = fread(line,1,EM3_NETATTITUDE_SLICE_SIZE,mbfp);
+		if (read_len == EM3_NETATTITUDE_SLICE_SIZE 
+			&& i < MBSYS_SIMRAD3_MAXATTITUDE)
+			{
+			status = MB_SUCCESS;
+			mb_get_binary_short(swap, &line[0], &short_val); 
+			    netattitude->nat_time[i] = (int) ((unsigned short) short_val);
+			mb_get_binary_short(swap, &line[2], &short_val); 
+			    netattitude->nat_roll[i] = (int) short_val;
+			mb_get_binary_short(swap, &line[4], &short_val); 
+			    netattitude->nat_pitch[i] = (int) short_val;
+			mb_get_binary_short(swap, &line[6], &short_val); 
+			    netattitude->nat_heave[i] = (int) short_val;
+			mb_get_binary_short(swap, &line[8], &short_val); 
+			    netattitude->nat_heading[i] = (int) ((unsigned short) short_val);
+			netattitude->nat_nbyte_raw[i] = line[10];
+			if (netattitude->nat_nbyte_raw[i] <= MBSYS_SIMRAD3_BUFFER_SIZE)
+				{
+				read_len = fread(line,1,netattitude->nat_nbyte_raw[i],mbfp);
+				if (read_len == netattitude->nat_nbyte_raw[i])
+					{
+					for (j=0;j<netattitude->nat_nbyte_raw[i];j++)
+						netattitude->nat_raw[i*MBSYS_SIMRAD3_BUFFER_SIZE+j] = line[j];
+					}
+				else
+					{
+					status = MB_FAILURE;
+					*error = MB_ERROR_EOF;
+					}
+				}
+			else
+				{
+				for (j=0;j<netattitude->nat_nbyte_raw[i];j++)
+					read_len = fread(line,1,1,mbfp);
+				netattitude->nat_nbyte_raw[i] = 0;
+				}
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		}
+	    netattitude->nat_ndata = MIN(netattitude->nat_ndata, MBSYS_SIMRAD3_MAXATTITUDE);
+	    }
+		
+	/* now get last bytes of record */
+	if (status == MB_SUCCESS)
+		{
+		read_len = fread(&line[0],1,1,mbfp);
+		if (line[0] != EM3_END)
+			read_len = fread(&line[1],1,1,mbfp);
+		else
+			line[1] = EM3_END;
+		read_len = fread(&line[2],1,2,mbfp);
+		if (read_len == 2)
+			{
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			/* return success here because all of the
+			    important information in this record has
+			    already been read - next attempt to read
+			    file will return error */
+			status = MB_SUCCESS;
+			}
+		if (line[1] == EM3_END)
+			*goodend = MB_YES;
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
+		line[1], line[1], 
+		line[2], line[2], 
+		line[3], line[3]);
+#endif
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:                 %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:                %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:                 %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:                 %d\n",store->msec);
+		fprintf(stderr,"dbg5       nat_date:             %d\n",netattitude->nat_date);
+		fprintf(stderr,"dbg5       nat_msec:             %d\n",netattitude->nat_msec);
+		fprintf(stderr,"dbg5       nat_count:            %d\n",netattitude->nat_count);
+		fprintf(stderr,"dbg5       nat_serial:           %d\n",netattitude->nat_serial);
+		fprintf(stderr,"dbg5       nat_ndata:            %d\n",netattitude->nat_ndata);
+		fprintf(stderr,"dbg5       nat_sensordescriptor: %d\n",netattitude->nat_sensordescriptor);
+		fprintf(stderr,"dbg5       cnt   time   roll pitch heave heading nraw\n");
+		fprintf(stderr,"dbg5       -------------------------------------\n");
+		for (i=0;i<netattitude->nat_ndata;i++)
+			{
+			fprintf(stderr,"dbg5        %3d  %d  %d %d %d %d %d\n",
+				i, netattitude->nat_time[i], netattitude->nat_roll[i], 
+				netattitude->nat_pitch[i], netattitude->nat_heave[i], 
+				netattitude->nat_heading[i],netattitude->nat_nbyte_raw[i]);
+			fprintf(stderr,"dbg5        nat_raw[%d]: ",netattitude->nat_nbyte_raw[i]);
+			for (j=0;j<netattitude->nat_nbyte_raw[i];j++)
+				fprintf(stderr,"%x",netattitude->nat_raw[i*MBSYS_SIMRAD3_BUFFER_SIZE+j]);
+			fprintf(stderr,"\n");
+			}
 		}
 
 	/* print output debug statements */
@@ -5051,12 +5324,19 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 		status = mbr_em710mba_wr_tilt(verbose,mbfp,swap,store,error);
 		}
-	else if (store->kind == MB_DATA_ATTITUDE)
+	else if (store->kind == MB_DATA_ATTITUDE && store->type == EM3_ATTITUDE)
 		{
 #ifdef MBR_EM710MBA_DEBUG
 	fprintf(stderr,"call mbr_em710mba_wr_attitude kind:%d type %x\n",store->kind,store->type);
 #endif
 		status = mbr_em710mba_wr_attitude(verbose,mbfp,swap,store,error);
+		}
+	else if (store->kind == MB_DATA_ATTITUDE && store->type == EM3_NETATTITUDE)
+		{
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"call mbr_em710mba_wr_netattitude kind:%d type %x\n",store->kind,store->type);
+#endif
+		status = mbr_em710mba_wr_netattitude(verbose,mbfp,swap,store,error);
 		}
 	else if (store->kind == MB_DATA_NAV
 		|| store->kind == MB_DATA_NAV1
@@ -7103,6 +7383,246 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 			{
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap, 
+		struct mbsys_simrad3_struct *store, int *error)
+{
+	char	*function_name = "mbr_em710mba_wr_netattitude";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad3_netattitude_struct *netattitude;
+	char	line[EM3_NETATTITUDE_SLICE_SIZE+MBSYS_SIMRAD3_BUFFER_SIZE];
+	short	label;
+	int	write_len;
+	int	write_size;
+	int	extrabyte;
+	unsigned short checksum;
+	mb_u_char   *uchar_ptr;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
+		fprintf(stderr,"dbg2       store:      %d\n",store);
+		}
+		
+	/* get storage structure */
+	netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg5       type:                 %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:                %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:                 %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:                 %d\n",store->msec);
+		fprintf(stderr,"dbg5       nat_date:             %d\n",netattitude->nat_date);
+		fprintf(stderr,"dbg5       nat_msec:             %d\n",netattitude->nat_msec);
+		fprintf(stderr,"dbg5       nat_count:            %d\n",netattitude->nat_count);
+		fprintf(stderr,"dbg5       nat_serial:           %d\n",netattitude->nat_serial);
+		fprintf(stderr,"dbg5       nat_ndata:            %d\n",netattitude->nat_ndata);
+		fprintf(stderr,"dbg5       nat_sensordescriptor: %d\n",netattitude->nat_sensordescriptor);
+		fprintf(stderr,"dbg5       cnt   time   roll pitch heave heading\n");
+		fprintf(stderr,"dbg5       -------------------------------------\n");
+		for (i=0;i<netattitude->nat_ndata;i++)
+			{
+			fprintf(stderr,"dbg5        %3d  %d  %d %d %d %d %d\n",
+				i, netattitude->nat_time[i], netattitude->nat_roll[i], 
+				netattitude->nat_pitch[i], netattitude->nat_heave[i], 
+				netattitude->nat_heading[i],netattitude->nat_nbyte_raw[i]);
+			fprintf(stderr,"dbg5        nat_raw[%d]: ",netattitude->nat_nbyte_raw[i]);
+			for (j=0;j<netattitude->nat_nbyte_raw[i];j++)
+				fprintf(stderr,"%x",netattitude->nat_raw[i*MBSYS_SIMRAD3_BUFFER_SIZE+j]);
+			fprintf(stderr,"\n");
+			}
+		}
+		
+	/* zero checksum */
+	checksum = 0;
+
+	/* write the record size */
+	write_size = EM3_NETATTITUDE_HEADER_SIZE + 8;
+	for (i=0;i<netattitude->nat_ndata;i++)
+		{
+		write_size += EM3_NETATTITUDE_SLICE_SIZE + netattitude->nat_nbyte_raw[i];
+		}
+	extrabyte = 0;
+	if (write_size%2)
+		{
+		extrabyte++;
+		write_size++;
+		}
+	mb_put_binary_int(swap, (int)write_size, (void *) line); 
+	write_len = fwrite(line,1,4,mbfp);
+	if (write_len != 4)
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_WRITE_FAIL;
+		}
+	else
+		status = MB_SUCCESS;
+
+	/* write the record label */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(swap, (short) (EM3_NETATTITUDE), (void *) &label); 
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[1];
+		}
+
+	/* write the sonar id */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		write_len = fwrite(&label,1,2,mbfp);
+		if (write_len != 2)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_WRITE_FAIL;
+			}
+		else
+			status = MB_SUCCESS;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) &label;
+		checksum += uchar_ptr[0];
+		checksum += uchar_ptr[1];
+		}
+
+	/* output binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_put_binary_int(swap, (int) netattitude->nat_date, (void *) &line[0]); 
+		mb_put_binary_int(swap, (int) netattitude->nat_msec, (void *) &line[4]); 
+		mb_put_binary_short(swap, (unsigned short) netattitude->nat_count, (void *) &line[8]);
+		mb_put_binary_short(swap, (unsigned short) netattitude->nat_serial, (void *) &line[10]);
+		mb_put_binary_short(swap, (unsigned short) netattitude->nat_ndata, (void *) &line[12]);
+		line[14] = (mb_u_char) netattitude->nat_sensordescriptor;
+		line[15] = (mb_u_char) 0;
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM3_NETATTITUDE_HEADER_SIZE;j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM3_NETATTITUDE_HEADER_SIZE,mbfp);
+		if (write_len != EM3_NETATTITUDE_HEADER_SIZE)
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output binary attitude data */
+	if (status == MB_SUCCESS)
+	    for (i=0;i<netattitude->nat_ndata;i++)
+		{
+		mb_put_binary_short(swap, (unsigned short) netattitude->nat_time[i], (void *) &line[0]);
+		mb_put_binary_short(swap, (short) netattitude->nat_roll[i], (void *) &line[2]);
+		mb_put_binary_short(swap, (short) netattitude->nat_pitch[i], (void *) &line[4]);
+		mb_put_binary_short(swap, (short) netattitude->nat_heave[i], (void *) &line[6]);
+		mb_put_binary_short(swap, (unsigned short) netattitude->nat_heading[i], (void *) &line[8]);
+		line[10] = (mb_u_char) netattitude->nat_nbyte_raw[i];
+		for (j=0;j<netattitude->nat_nbyte_raw[i];j++)
+			line[i+11] = netattitude->nat_raw[i*MBSYS_SIMRAD3_BUFFER_SIZE+j];
+		
+		/* compute checksum */
+		uchar_ptr = (mb_u_char *) line;
+		for (j=0;j<EM3_NETATTITUDE_SLICE_SIZE+netattitude->nat_nbyte_raw[i];j++)
+		    checksum += uchar_ptr[j];
+
+		/* write out data */
+		write_len = fwrite(line,1,EM3_NETATTITUDE_SLICE_SIZE+netattitude->nat_nbyte_raw[i],mbfp);
+		if (write_len != EM3_NETATTITUDE_SLICE_SIZE+netattitude->nat_nbyte_raw[i])
+			{
+			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_FAILURE;
+			}
+		else
+			{
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		}
+
+	/* output end of record */
+	if (status == MB_SUCCESS)
+		{
+		line[0] = 0;
+		line[1] = 0x03;
+	    
+		/* set checksum */
+		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
+
+		/* write out data */
+		if (extrabyte)
+			{
+			write_len = fwrite(&line[0],1,4,mbfp);
+			if (write_len != 4)
+				{
+				*error = MB_ERROR_WRITE_FAIL;
+				status = MB_FAILURE;
+				}
+			else
+				{
+				*error = MB_ERROR_NO_ERROR;
+				status = MB_SUCCESS;
+				}
+			}
+		else
+			{
+			write_len = fwrite(&line[1],1,3,mbfp);
+			if (write_len != 3)
+				{
+				*error = MB_ERROR_WRITE_FAIL;
+				status = MB_FAILURE;
+				}
+			else
+				{
+				*error = MB_ERROR_NO_ERROR;
+				status = MB_SUCCESS;
+				}
 			}
 		}
 
