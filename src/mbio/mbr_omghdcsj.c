@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
- *	$Id: mbr_omghdcsj.c,v 5.10 2008-07-10 06:43:41 caress Exp $
+ *	$Id: mbr_omghdcsj.c,v 5.11 2008-07-10 17:40:13 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -129,7 +129,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.10 2008-07-10 06:43:41 caress Exp $";
+	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.11 2008-07-10 17:40:13 caress Exp $";
 	char	*function_name = "mbr_register_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -262,7 +262,7 @@ int mbr_info_omghdcsj(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.10 2008-07-10 06:43:41 caress Exp $";
+	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.11 2008-07-10 17:40:13 caress Exp $";
 	char	*function_name = "mbr_info_omghdcsj";
 	int	status = MB_SUCCESS;
 
@@ -332,7 +332,7 @@ int mbr_info_omghdcsj(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_omghdcsj.c,v 5.10 2008-07-10 06:43:41 caress Exp $";
+ static char res_id[]="$Id: mbr_omghdcsj.c,v 5.11 2008-07-10 17:40:13 caress Exp $";
 	char	*function_name = "mbr_alm_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

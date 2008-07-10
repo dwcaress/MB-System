@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_navnetcdf.c	4/11/2002
- *	$Id: mbsys_navnetcdf.c,v 5.5 2008-07-10 06:43:41 caress Exp $
+ *	$Id: mbsys_navnetcdf.c,v 5.6 2008-07-10 17:40:13 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -52,7 +52,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_navnetcdf.h"
 
-static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.5 2008-07-10 06:43:41 caress Exp $";
+static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.6 2008-07-10 17:40:13 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
