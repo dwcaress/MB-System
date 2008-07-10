@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.16 2008-05-16 22:44:37 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.17 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 2005-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2008/05/16 22:44:37  caress
+ * Release 5.1.1beta18
+ *
  * Revision 5.15  2008/02/12 02:47:42  caress
  * Fixed handling of time lag correction to attitude data. The raw attitude data in the output file are now time lag corrected. Before the corrections were applied to the attitude values in bathymetry calculation, but not otherwise kept in the output.
  *
@@ -98,7 +101,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.16 2008-05-16 22:44:37 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.17 2008-07-10 06:43:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -255,6 +258,21 @@ main (int argc, char **argv)
 	double	*rock_pitch = NULL;
 	double	*rock_sonardepth = NULL;
 	int	rock_output_index = -1;
+	
+	/* merge navigation and attitude from separate WHOI DSL data file */
+	char	dslfile[MB_PATH_MAXLINE];
+	int	dsldata = MB_NO;
+	int	ndsl = 0;
+	int	ndsl_altitude = 0;
+	int	ndsl_speed = 0;
+	double	*dsl_time_d = NULL;
+	double	*dsl_lon = NULL;
+	double	*dsl_lat = NULL;
+	double	*dsl_heading = NULL;
+	double	*dsl_roll = NULL;
+	double	*dsl_pitch = NULL;
+	double	*dsl_sonardepth = NULL;
+	int	dsl_output_index = -1;
 	
 	/* merge navigation and attitude from separate ins data file */
 	char	insfile[MB_PATH_MAXLINE];
@@ -416,6 +434,9 @@ main (int argc, char **argv)
 	double	factor;
 	int	type_save, kind_save;
 	char	type[MB_PATH_MAXLINE], value[MB_PATH_MAXLINE];
+	int	year, month, day, hour, minute;
+	double	second, id;
+	char	sensor[24];
 	int	i, j, n;
 
 	/* get current default values */
@@ -426,7 +447,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaBbD:d:F:f:I:i:LlM:m:N:n:O:o:P:p:R:r:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "AaBbD:d:F:f:I:i:LlM:m:N:n:O:o:P:p:R:r:T:t:W:w:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -552,6 +573,12 @@ main (int argc, char **argv)
 			timelagoutput = MB_YES;
 			flag++;
 			break;
+		case 'W':
+		case 'w':
+			sscanf (optarg,"%s", dslfile);
+			dsldata  = MB_YES;
+			flag++;
+			break;
 		case '?':
 			errflg++;
 		}
@@ -611,6 +638,8 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       ofile_set:           %d\n",ofile_set);
 		fprintf(stderr,"dbg2       rockfile:            %s\n",rockfile);
 		fprintf(stderr,"dbg2       rockdata:            %d\n",rockdata);
+		fprintf(stderr,"dbg2       dslfile:             %s\n",dslfile);
+		fprintf(stderr,"dbg2       dsldata:             %d\n",dsldata);
 		fprintf(stderr,"dbg2       insfile:             %s\n",insfile);
 		fprintf(stderr,"dbg2       insdata:             %d\n",insdata);
 		fprintf(stderr,"dbg2       mode:                %d\n",mode);
@@ -801,7 +830,7 @@ ins_altitude[nins]);*/
 	/* read navigation and attitude data from rock file if specified */
 	if (rockdata == MB_YES)
 		{
-		/* count the data points in the auv log file */
+		/* count the data points in the rock file */
 		if ((tfp = fopen(rockfile, "r")) == NULL) 
 			{
 			error = MB_ERROR_OPEN_FAIL;
@@ -875,6 +904,102 @@ rock_pitch[nrock],
 rock_heading[nrock]);*/
 			    	nrock++;
 				}
+			}
+		fclose(tfp);
+		}
+		
+	/* read navigation and attitude data from dsl file if specified */
+	if (dsldata == MB_YES)
+		{
+		/* count the data points in the dsl file */
+		if ((tfp = fopen(dslfile, "r")) == NULL) 
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open dsl data file <%s> for reading\n",dslfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		/* count the data records */
+		ndsl = 0;
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+			if (buffer[0] != '#')
+			    ndsl++;
+		rewind(tfp);
+fprintf(stderr,"ndsl:%d\n",ndsl);
+
+		/* allocate arrays for dsl data */
+		if (ndsl > 0)
+		    {
+		    status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_time_d,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lon,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lat,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepth,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_heading,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_roll,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_pitch,&error);
+		    if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating dsl data arrays:\n%s\n",message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}		    
+		    }
+
+		/* if no dsl data then quit */
+		else
+		    {
+		    error = MB_ERROR_BAD_DATA;
+		    fprintf(stderr,"\nUnable to read data from dsl file <%s>\n",dslfile);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }		    
+
+		/* read the data points in the dsl file */
+		ndsl = 0;
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,tfp)) == buffer)
+			{
+			if (buffer[0] != '#')
+			    {
+			    nscan = sscanf(buffer,"PPL %d/%d/%d %d:%d:%lf %s %lf %lf %lf %lf %lf %lf %lf",
+			    		&year, &month, &day, &hour, &minute, &second,
+					sensor, &dsl_lat[ndsl], &dsl_lon[ndsl], &dsl_sonardepth[ndsl],
+					&dsl_heading[ndsl], &dsl_pitch[ndsl], &dsl_roll[ndsl], &id);
+/*fprintf(stderr,"nscan:%d year:%d month:%d day:%d hour:%d minute:%d second:%f sensor:%s %f %f %f %f %f %f %f\n",
+nscan,year,month,day,hour,minute,second,sensor,dsl_lat[ndsl], dsl_lon[ndsl], dsl_sonardepth[ndsl],
+dsl_heading[ndsl], dsl_pitch[ndsl], dsl_roll[ndsl], id);*/
+			    if (nscan == 14)
+			    	{
+				time_i[0] = year;
+				time_i[1] = month;
+				time_i[2] = day;
+				time_i[3] = hour;
+				time_i[4] = minute;
+				time_i[5] = (int)second;
+				time_i[6] = (int)((second - time_i[5]) * 1000000);
+				mb_get_time(verbose, time_i, &dsl_time_d[ndsl]);
+/*fprintf(stderr,"dsl DATA: %f %f %f %f %f %f\n", 
+dsl_time_d[ndsl],
+dsl_lon[ndsl],
+dsl_lat[ndsl],
+dsl_sonardepth[ndsl],
+dsl_heading[ndsl],
+dsl_roll[ndsl],
+dsl_pitch[ndsl],
+dsl_heading[ndsl]);*/
+			    	ndsl++;
+				}
+			    }
 			}
 		fclose(tfp);
 		}
@@ -2634,6 +2759,18 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 								nrock, time_d, &navlat, &j, 
 								&error);
 					}
+				else if (ndsl > 0)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								dsl_time_d-1, dsl_lon-1,
+								ndsl, time_d, &navlon, &j, 
+								&error);
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp_degrees(verbose, 
+								dsl_time_d-1, dsl_lat-1,
+								ndsl, time_d, &navlat, &j, 
+								&error);
+					}
 				else if (nnav > 0)
 					{
 					interp_status = mb_linear_interp_degrees(verbose, 
@@ -2683,6 +2820,13 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 					interp_status = mb_linear_interp_degrees(verbose, 
 								rock_time_d-1, rock_heading-1,
 								nrock, time_d, &heading, &j, 
+								&error);
+					}
+				else if (ndsl > 0)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								dsl_time_d-1, dsl_heading-1,
+								ndsl, time_d, &heading, &j, 
 								&error);
 					}
 				else if (nnav > 0)
@@ -2750,6 +2894,13 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 					interp_status = mb_linear_interp(verbose, 
 								rock_time_d-1, rock_sonardepth-1,
 								nrock, time_d, &sonardepth, &j, 
+								&error);
+					}
+				else if (ndsl > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								dsl_time_d-1, dsl_sonardepth-1,
+								ndsl, time_d, &sonardepth, &j, 
 								&error);
 					}
 				else if (nnav > 0)
@@ -2836,6 +2987,18 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 								nrock, time_d, &pitch, &j, 
 								&error);
 					}
+				else if (ndsl > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								dsl_time_d-1, dsl_roll-1,
+								ndsl, time_d, &roll, &j, 
+								&error);
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp(verbose, 
+								dsl_time_d-1, dsl_pitch-1,
+								ndsl, time_d, &pitch, &j, 
+								&error);
+					}
 				else if (nnav > 0)
 					{
 					interp_status = mb_linear_interp(verbose, 
@@ -2896,6 +3059,7 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 						soundspeed = bluefin->environmental[0].sound_speed;
 					else
 						soundspeed = 1500.0;
+fprintf(stderr,"roll:%f pitch:%f\n",bathymetry->roll,bathymetry->pitch);
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
 						if ((bathymetry->quality[i] & 15) > 0)
@@ -3712,6 +3876,16 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_heading,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_roll,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_pitch,&error);
+		}
+	if (ndsl > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_lon,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_lat,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_heading,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_roll,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_pitch,&error);
 		}
 	if (nins_altitude > 0)
 		{

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 5.6 2006-12-20 04:10:49 caress Exp $
+ *    $Id: mb_truecont.c,v 5.7 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1994, 2000 by
+ *    Copyright (c) 1994-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -77,7 +77,7 @@ int mb_contour_init(
 		double	pingnumber_tick_len,
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.6 2006-12-20 04:10:49 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -124,15 +124,15 @@ int mb_contour_init(
 		}
 
 	/* allocate memory for swath structure */
-	status = mb_malloc(verbose,sizeof(struct swath),data,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct swath),(void **)data,error);
 
 	/* set variables and allocate memory for bathymetry data */
 	dataptr = *data;
 	dataptr->npings = 0;
 	dataptr->npings_max = npings_max;
 	dataptr->beams_bath = beams_bath;
-	status = mb_malloc(verbose,npings_max*sizeof(struct ping),
-				&(dataptr->pings),error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,npings_max*sizeof(struct ping),
+				(void **)&(dataptr->pings),error);
 	for (i=0;i<npings_max;i++)
 		{
 		ping = &dataptr->pings[i];
@@ -142,14 +142,14 @@ int mb_contour_init(
 		ping->bath = NULL;
 		ping->bathlon = NULL;
 		ping->bathlat = NULL;
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-				&(ping->beamflag),error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&(ping->bath),error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&(ping->bathlon),error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&(ping->bathlat),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
+				(void **)&(ping->beamflag),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+				(void **)&(ping->bath),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+				(void **)&(ping->bathlon),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+				(void **)&(ping->bathlat),error);
 		if (contour_algorithm == MB_CONTOUR_TRIANGLES)
 			{
 			ping->bflag[0] = NULL;
@@ -159,10 +159,10 @@ int mb_contour_init(
 			{
 			ping->bflag[0] = NULL;
 			ping->bflag[1] = NULL;
-			status = mb_malloc(verbose,beams_bath*sizeof(int),
-				&(ping->bflag[0]),error);
-			status = mb_malloc(verbose,beams_bath*sizeof(int),
-				&(ping->bflag[1]),error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),
+				(void **)&(ping->bflag[0]),error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),
+				(void **)&(ping->bflag[1]),error);
 			}
 		}
 
@@ -195,14 +195,14 @@ int mb_contour_init(
 	if (nlevel > 0)
 		{
 		dataptr->nlevelset = MB_YES;
-		status = mb_malloc(verbose,nlevel*sizeof(double),
-				&(dataptr->level_list),error);
-		status = mb_malloc(verbose,nlevel*sizeof(int),
-				&(dataptr->label_list),error);
-		status = mb_malloc(verbose,nlevel*sizeof(int),
-				&(dataptr->tick_list),error);
-		status = mb_malloc(verbose,nlevel*sizeof(int),
-				&(dataptr->color_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nlevel*sizeof(double),
+				(void **)&(dataptr->level_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nlevel*sizeof(int),
+				(void **)&(dataptr->label_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nlevel*sizeof(int),
+				(void **)&(dataptr->tick_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nlevel*sizeof(int),
+				(void **)&(dataptr->color_list),error);
 		for (i=0;i<nlevel;i++)
 			{
 			dataptr->level_list[i] = level_list[i];
@@ -250,44 +250,44 @@ int mb_contour_init(
 	  {
 	  dataptr->npts = 0;
 	  dataptr->npts_alloc = npings_max*beams_bath+3;
-	  status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(double),
-			&(dataptr->x),error);
-	  status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(double),
-			&(dataptr->y),error);
-	  status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(double),
-			&(dataptr->z),error);
-	  status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(int),
-			&(dataptr->edge),error);
-	  status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(int),
-			&(dataptr->pingid),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,dataptr->npts_alloc*sizeof(double),
+			(void **)&(dataptr->x),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,dataptr->npts_alloc*sizeof(double),
+			(void **)&(dataptr->y),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,dataptr->npts_alloc*sizeof(double),
+			(void **)&(dataptr->z),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,dataptr->npts_alloc*sizeof(int),
+			(void **)&(dataptr->edge),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,dataptr->npts_alloc*sizeof(int),
+			(void **)&(dataptr->pingid),error);
 	  ntri_max = 3*npings_max*beams_bath + 1;
 	  dataptr->ntri = 0;
 	  dataptr->ntri_alloc = ntri_max;
 	  for (i=0;i<3;i++)
 		{
-		status = mb_malloc(verbose,ntri_max*sizeof(int),
-				&(dataptr->iv[i]),error);
-		status = mb_malloc(verbose,ntri_max*sizeof(int),
-				&(dataptr->ct[i]),error);
-		status = mb_malloc(verbose,ntri_max*sizeof(int),
-				&(dataptr->cs[i]),error);
-		status = mb_malloc(verbose,ntri_max*sizeof(int),
-				&(dataptr->ed[i]),error);
-		status = mb_malloc(verbose,ntri_max*sizeof(int),
-				&(dataptr->flag[i]),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ntri_max*sizeof(int),
+				(void **)&(dataptr->iv[i]),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ntri_max*sizeof(int),
+				(void **)&(dataptr->ct[i]),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ntri_max*sizeof(int),
+				(void **)&(dataptr->cs[i]),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ntri_max*sizeof(int),
+				(void **)&(dataptr->ed[i]),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ntri_max*sizeof(int),
+				(void **)&(dataptr->flag[i]),error);
 		}
-	  status = mb_malloc(verbose,ntri_max*sizeof(double),
-			&(dataptr->v1),error);
-	  status = mb_malloc(verbose,ntri_max*sizeof(double),
-			&(dataptr->v2),error);
-	  status = mb_malloc(verbose,ntri_max*sizeof(double),
-			&(dataptr->v3),error);
-	  status = mb_malloc(verbose,ntri_max*sizeof(int),
-			&(dataptr->istack),error);
-	  status = mb_malloc(verbose,3*ntri_max*sizeof(int),
-			&(dataptr->kv1),error);
-	  status = mb_malloc(verbose,3*ntri_max*sizeof(int),
-			&(dataptr->kv2),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,ntri_max*sizeof(double),
+			(void **)&(dataptr->v1),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,ntri_max*sizeof(double),
+			(void **)&(dataptr->v2),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,ntri_max*sizeof(double),
+			(void **)&(dataptr->v3),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,ntri_max*sizeof(int),
+			(void **)&(dataptr->istack),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,3*ntri_max*sizeof(int),
+			(void **)&(dataptr->kv1),error);
+	  status = mb_mallocd(verbose,__FILE__,__LINE__,3*ntri_max*sizeof(int),
+			(void **)&(dataptr->kv2),error);
 	  }
 
 	/* allocate memory for contour positions */
@@ -298,23 +298,23 @@ int mb_contour_init(
 	dataptr->jsave = NULL;
 	if (contour_algorithm == MB_CONTOUR_TRIANGLES)
 		{
-		status = mb_malloc(verbose,(4*ntri_max+1)*sizeof(double),
-				&(dataptr->xsave),error);
-		status = mb_malloc(verbose,(4*ntri_max+1)*sizeof(double),
-				&(dataptr->ysave),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,(4*ntri_max+1)*sizeof(double),
+				(void **)&(dataptr->xsave),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,(4*ntri_max+1)*sizeof(double),
+				(void **)&(dataptr->ysave),error);
 		}
 	else
 		{
 		dataptr->npts = 0;
 		dataptr->npts_alloc = npings_max * beams_bath;
-		status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(double),
-				&(dataptr->xsave),error);
-		status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(double),
-				&(dataptr->ysave),error);
-		status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(int),
-				&(dataptr->isave),error);
-		status = mb_malloc(verbose,dataptr->npts_alloc*sizeof(int),
-				&(dataptr->jsave),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,dataptr->npts_alloc*sizeof(double),
+				(void **)&(dataptr->xsave),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,dataptr->npts_alloc*sizeof(double),
+				(void **)&(dataptr->ysave),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,dataptr->npts_alloc*sizeof(int),
+				(void **)&(dataptr->isave),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,dataptr->npts_alloc*sizeof(int),
+				(void **)&(dataptr->jsave),error);
 		}
 
 	/* allocate memory for contour labels */
@@ -323,14 +323,14 @@ int mb_contour_init(
 	dataptr->ylabel = NULL;
 	dataptr->angle = NULL;
 	dataptr->justify = NULL;
-	status = mb_malloc(verbose,(5*npings_max)*sizeof(double),
-				&(dataptr->xlabel),error);
-	status = mb_malloc(verbose,(5*npings_max)*sizeof(double),
-				&(dataptr->ylabel),error);
-	status = mb_malloc(verbose,(5*npings_max)*sizeof(double),
-				&(dataptr->angle),error);
-	status = mb_malloc(verbose,(5*npings_max)*sizeof(int),
-				&(dataptr->justify),error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,(5*npings_max)*sizeof(double),
+				(void **)&(dataptr->xlabel),error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,(5*npings_max)*sizeof(double),
+				(void **)&(dataptr->ylabel),error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,(5*npings_max)*sizeof(double),
+				(void **)&(dataptr->angle),error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,(5*npings_max)*sizeof(int),
+				(void **)&(dataptr->justify),error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -354,7 +354,7 @@ int mb_contour_deall(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.6 2006-12-20 04:10:49 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -374,59 +374,59 @@ int mb_contour_deall(
 	for (i=0;i<data->npings_max;i++)
 		{
 		ping = &data->pings[i];
-		status = mb_free(verbose,&ping->beamflag,error);
-		status = mb_free(verbose,&ping->bath,error);
-		status = mb_free(verbose,&ping->bathlon,error);
-		status = mb_free(verbose,&ping->bathlat,error);
-		status = mb_free(verbose,&ping->bflag[0],error);
-		status = mb_free(verbose,&ping->bflag[1],error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&ping->beamflag,error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&ping->bath,error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&ping->bathlon,error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&ping->bathlat,error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&ping->bflag[0],error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&ping->bflag[1],error);
 		}
-	status = mb_free(verbose,&data->pings,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->pings,error);
 
 	/* deallocate memory for contour controls */
 	if (data->nlevel > 0)
 		{
-		status = mb_free(verbose,&data->level_list,error);
-		status = mb_free(verbose,&data->label_list,error);
-		status = mb_free(verbose,&data->tick_list,error);
-		status = mb_free(verbose,&data->color_list,error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->level_list,error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->label_list,error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->tick_list,error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->color_list,error);
 		}
 
 	/* deallocate memory for triangle network */
-	status = mb_free(verbose,&data->x,error);
-	status = mb_free(verbose,&data->y,error);
-	status = mb_free(verbose,&data->z,error);
-	status = mb_free(verbose,&data->edge,error);
-	status = mb_free(verbose,&data->pingid,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->x,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->y,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->z,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->edge,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->pingid,error);
 	for (i=0;i<3;i++)
 		{
-		status = mb_free(verbose,&data->iv[i],error);
-		status = mb_free(verbose,&data->ct[i],error);
-		status = mb_free(verbose,&data->cs[i],error);
-		status = mb_free(verbose,&data->ed[i],error);
-		status = mb_free(verbose,&data->flag[i],error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->iv[i],error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ct[i],error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->cs[i],error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ed[i],error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->flag[i],error);
 		}
-	status = mb_free(verbose,&data->v1,error);
-	status = mb_free(verbose,&data->v2,error);
-	status = mb_free(verbose,&data->v3,error);
-	status = mb_free(verbose,&data->istack,error);
-	status = mb_free(verbose,&data->kv1,error);
-	status = mb_free(verbose,&data->kv2,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->v1,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->v2,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->v3,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->istack,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->kv1,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->kv2,error);
 
 	/* deallocate memory for contour positions */
-	status = mb_free(verbose,&data->xsave,error);
-	status = mb_free(verbose,&data->ysave,error);
-	status = mb_free(verbose,&data->isave,error);
-	status = mb_free(verbose,&data->jsave,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->xsave,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ysave,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->isave,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->jsave,error);
 
 	/* deallocate memory for contour labels */
-	status = mb_free(verbose,&data->xlabel,error);
-	status = mb_free(verbose,&data->ylabel,error);
-	status = mb_free(verbose,&data->angle,error);
-	status = mb_free(verbose,&data->justify,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->xlabel,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ylabel,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->angle,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->justify,error);
 
 	/* deallocate memory for swath structure */
-	status = mb_free(verbose,&data,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -490,7 +490,7 @@ int mb_tcontour(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.6 2006-12-20 04:10:49 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -577,49 +577,49 @@ int mb_tcontour(
 	if (npt_cnt > data->npts_alloc)
 		{
 		data->npts_alloc = npt_cnt;
-		status = mb_realloc(verbose,data->npts_alloc*sizeof(double),
-			&(data->x),error);
-		status = mb_realloc(verbose,data->npts_alloc*sizeof(double),
-			&(data->y),error);
-		status = mb_realloc(verbose,data->npts_alloc*sizeof(double),
-			&(data->z),error);
-		status = mb_realloc(verbose,data->npts_alloc*sizeof(int),
-			&(data->edge),error);
-		status = mb_realloc(verbose,data->npts_alloc*sizeof(int),
-			&(data->pingid),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,data->npts_alloc*sizeof(double),
+			(void **)&(data->x),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,data->npts_alloc*sizeof(double),
+			(void **)&(data->y),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,data->npts_alloc*sizeof(double),
+			(void **)&(data->z),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,data->npts_alloc*sizeof(int),
+			(void **)&(data->edge),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,data->npts_alloc*sizeof(int),
+			(void **)&(data->pingid),error);
 		}
 	if (ntri_cnt > data->ntri_alloc)
 		{
 		data->ntri_alloc = ntri_cnt;
 		for (i=0;i<3;i++)
 			{
-			status = mb_realloc(verbose,ntri_cnt*sizeof(int),
-				 	&(data->iv[i]),error);
-			status = mb_realloc(verbose,ntri_cnt*sizeof(int),
-				 	&(data->ct[i]),error);
-			status = mb_realloc(verbose,ntri_cnt*sizeof(int),
-				 	&(data->cs[i]),error);
-			status = mb_realloc(verbose,ntri_cnt*sizeof(int),
-				 	&(data->ed[i]),error);
-			status = mb_realloc(verbose,ntri_cnt*sizeof(int),
-					&(data->flag[i]),error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__,ntri_cnt*sizeof(int),
+				 	(void **)&(data->iv[i]),error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__,ntri_cnt*sizeof(int),
+				 	(void **)&(data->ct[i]),error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__,ntri_cnt*sizeof(int),
+				 	(void **)&(data->cs[i]),error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__,ntri_cnt*sizeof(int),
+				 	(void **)&(data->ed[i]),error);
+			status = mb_reallocd(verbose, __FILE__, __LINE__,ntri_cnt*sizeof(int),
+					(void **)&(data->flag[i]),error);
 			}
-		status = mb_realloc(verbose,ntri_cnt*sizeof(double),
-					&(data->v1),error);
-		status = mb_realloc(verbose,ntri_cnt*sizeof(double),
-		 			&(data->v2),error);
-		status = mb_realloc(verbose,ntri_cnt*sizeof(double),
-		 			&(data->v3),error);
-		status = mb_realloc(verbose,ntri_cnt*sizeof(int),
-		 			&(data->istack),error);
-		status = mb_realloc(verbose,3*ntri_cnt*sizeof(int),
-		 			&(data->kv1),error);
-		status = mb_realloc(verbose,3*ntri_cnt*sizeof(int),
-		 			&(data->kv2),error);
-		status = mb_realloc(verbose,(4*ntri_cnt+1)*sizeof(double),
-				&(data->xsave),error);
-		status = mb_realloc(verbose,(4*ntri_cnt+1)*sizeof(double),
-				&(data->ysave),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,ntri_cnt*sizeof(double),
+					(void **)&(data->v1),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,ntri_cnt*sizeof(double),
+		 			(void **)&(data->v2),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,ntri_cnt*sizeof(double),
+		 			(void **)&(data->v3),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,ntri_cnt*sizeof(int),
+		 			(void **)&(data->istack),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,3*ntri_cnt*sizeof(int),
+		 			(void **)&(data->kv1),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,3*ntri_cnt*sizeof(int),
+		 			(void **)&(data->kv2),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,(4*ntri_cnt+1)*sizeof(double),
+				(void **)&(data->xsave),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,(4*ntri_cnt+1)*sizeof(double),
+				(void **)&(data->ysave),error);
 		}
 
 	/* put good bathymetry data into x arrays */
@@ -716,22 +716,22 @@ int mb_tcontour(
 		{
 		if (data->nlevel > 0)
 			{
-			mb_free(verbose,&data->level_list,error);
-			mb_free(verbose,&data->color_list,error);
-			mb_free(verbose,&data->label_list,error);
-			mb_free(verbose,&data->tick_list,error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&data->level_list,error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&data->color_list,error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&data->label_list,error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&data->tick_list,error);
 			}
 		nci = bathmin/data->contour_int + 1;
 		ncf = bathmax/data->contour_int + 1;
 		data->nlevel = ncf - nci;
-		status = mb_malloc(verbose,data->nlevel*sizeof(double),
-				&(data->level_list),error);
-		status = mb_malloc(verbose,data->nlevel*sizeof(int),
-				&(data->color_list),error);
-		status = mb_malloc(verbose,data->nlevel*sizeof(int),
-				&(data->label_list),error);
-		status = mb_malloc(verbose,data->nlevel*sizeof(int),
-				&(data->tick_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->nlevel*sizeof(double),
+				(void **)&(data->level_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->nlevel*sizeof(int),
+				(void **)&(data->color_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->nlevel*sizeof(int),
+				(void **)&(data->label_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->nlevel*sizeof(int),
+				(void **)&(data->tick_list),error);
 		if (*error != MB_ERROR_NO_ERROR) return(status);
 		for (i=0;i<data->nlevel;i++)
 			{
@@ -1280,7 +1280,7 @@ int dump_contour(struct swath *data, double value)
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.6 2006-12-20 04:10:49 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1370,14 +1370,14 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 	if (npt_cnt > data->npts_alloc)
 		{
 		data->npts_alloc = npt_cnt;
-		status = mb_realloc(verbose,data->npts_alloc*sizeof(double),
-				&(data->xsave),error);
-		status = mb_realloc(verbose,data->npts_alloc*sizeof(double),
-				&(data->ysave),error);
-		status = mb_realloc(verbose,data->npts_alloc*sizeof(int),
-				&(data->isave),error);
-		status = mb_realloc(verbose,data->npts_alloc*sizeof(int),
-				&(data->jsave),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,data->npts_alloc*sizeof(double),
+				(void **)&(data->xsave),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,data->npts_alloc*sizeof(double),
+				(void **)&(data->ysave),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,data->npts_alloc*sizeof(int),
+				(void **)&(data->isave),error);
+		status = mb_reallocd(verbose, __FILE__, __LINE__,data->npts_alloc*sizeof(int),
+				(void **)&(data->jsave),error);
 		}
 
 	/* zero flags */
@@ -1420,22 +1420,22 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 		{
 		if (data->nlevel > 0)
 			{
-			mb_free(verbose,&data->level_list,error);
-			mb_free(verbose,&data->color_list,error);
-			mb_free(verbose,&data->label_list,error);
-			mb_free(verbose,&data->tick_list,error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&data->level_list,error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&data->color_list,error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&data->label_list,error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&data->tick_list,error);
 			}
 		nci = bathmin/data->contour_int + 1;
 		ncf = bathmax/data->contour_int + 1;
 		data->nlevel = ncf - nci;
-		status = mb_malloc(verbose,data->nlevel*sizeof(double),
-				&(data->level_list),error);
-		status = mb_malloc(verbose,data->nlevel*sizeof(int),
-				&(data->color_list),error);
-		status = mb_malloc(verbose,data->nlevel*sizeof(int),
-				&(data->label_list),error);
-		status = mb_malloc(verbose,data->nlevel*sizeof(int),
-				&(data->tick_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->nlevel*sizeof(double),
+				(void **)&(data->level_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->nlevel*sizeof(int),
+				(void **)&(data->color_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->nlevel*sizeof(int),
+				(void **)&(data->label_list),error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,data->nlevel*sizeof(int),
+				(void **)&(data->tick_list),error);
 		if (*error != MB_ERROR_NO_ERROR) return(status);
 		for (i=0;i<data->nlevel;i++)
 			{

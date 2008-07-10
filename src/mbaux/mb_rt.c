@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_rt.c	11/14/94
- *    $Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $
+ *    $Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1994, 2000 by
+ *    Copyright (c) 1994-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	November 14, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2007/10/08 06:10:15  caress
+ * Added function prototypes.
+ *
  * Revision 5.0  2000/12/01 22:53:59  caress
  * First cut at Version 5.0.
  *
@@ -124,7 +127,7 @@ int mb_rt_init(int verbose, int number_node,
 		double *depth, double *velocity, 
 		char **modelptr, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_init";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -146,22 +149,22 @@ int mb_rt_init(int verbose, int number_node,
 		}
 
 	/* allocate memory for model structure */
-	status = mb_malloc(verbose,sizeof(struct velocity_model),modelptr,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct velocity_model),(void **)modelptr,error);
 
 	/* set variables and allocate memory for velocity model */
 	model = (struct velocity_model *) *modelptr;
 	model->number_node = number_node;
-	status = mb_malloc(verbose,number_node*sizeof(double),
-				&(model->depth),error);
-	status = mb_malloc(verbose,number_node*sizeof(double),
-				&(model->velocity),error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,number_node*sizeof(double),
+				(void **)&(model->depth),error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,number_node*sizeof(double),
+				(void **)&(model->velocity),error);
 	model->number_layer = number_node - 1;
-	status = mb_malloc(verbose,model->number_layer*sizeof(int),
-				&(model->layer_mode),error);
-	status = mb_malloc(verbose,model->number_layer*sizeof(double),
-				&(model->layer_gradient),error);
-	status = mb_malloc(verbose,model->number_layer*sizeof(double),
-				&(model->layer_depth_center),error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,model->number_layer*sizeof(int),
+				(void **)&(model->layer_mode),error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,model->number_layer*sizeof(double),
+				(void **)&(model->layer_gradient),error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,model->number_layer*sizeof(double),
+				(void **)&(model->layer_depth_center),error);
 	if (status == MB_SUCCESS)
 		{
 		model->layer_depth_top = &model->depth[0];
@@ -213,7 +216,7 @@ int mb_rt_init(int verbose, int number_node,
 /*--------------------------------------------------------------------------*/
 int mb_rt_deall(int verbose, char **modelptr, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -230,12 +233,12 @@ int mb_rt_deall(int verbose, char **modelptr, int *error)
 
 	/* deallocate memory for velocity model */
 	model = (struct velocity_model *) *modelptr;
-	status = mb_free(verbose,&(model->depth),error);
-	status = mb_free(verbose,&(model->velocity),error);
-	status = mb_free(verbose,&(model->layer_mode),error);
-	status = mb_free(verbose,&(model->layer_gradient),error);
-	status = mb_free(verbose,&(model->layer_depth_center),error);
-	status = mb_free(verbose,modelptr,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(model->depth),error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(model->velocity),error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(model->layer_mode),error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(model->layer_gradient),error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(model->layer_depth_center),error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)modelptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -257,7 +260,7 @@ mb_rt(int verbose, char *modelptr,
 	int nplot_max, int *nplot, double *xplot, double *zplot, 
 	double *x, double *z, double *travel_time, int *ray_stat, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt";
 	int	status = MB_SUCCESS;
 	double	diff_angle;
@@ -490,7 +493,7 @@ mb_rt(int verbose, char *modelptr,
 /*--------------------------------------------------------------------------*/
 int mb_rt_circular(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_circular";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -534,7 +537,7 @@ int mb_rt_circular(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad1(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_quad1";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -661,7 +664,7 @@ int mb_rt_quad1(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad2(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_quad2";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -732,7 +735,7 @@ int mb_rt_quad2(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad3(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_quad3";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -803,7 +806,7 @@ int mb_rt_quad3(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad4(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_quad4";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -931,7 +934,7 @@ int mb_rt_quad4(int verbose, int *error)
 int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, 
 		double *depth, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_get_depth";
 	int	status = MB_SUCCESS;
 	double	alpha;
@@ -976,7 +979,7 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign,
 /*--------------------------------------------------------------------------*/
 int mb_rt_plot_circular(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_plot_circular";
 	int	status = MB_SUCCESS;
 	double	ai;
@@ -1027,7 +1030,7 @@ int mb_rt_plot_circular(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_line(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_line";
 	int	status = MB_SUCCESS;
 	double	theta;
@@ -1107,7 +1110,7 @@ int mb_rt_line(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_vertical(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.1 2007-10-08 06:10:15 caress Exp $";
+  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_vertical";
 	int	status = MB_SUCCESS;
 	double	vi;

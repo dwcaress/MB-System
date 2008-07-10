@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id: mb_delaun.c,v 5.0 2000-12-01 22:53:59 caress Exp $
+ *    $Id: mb_delaun.c,v 5.1 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1994, 2000 by
+ *    Copyright (c) 1994-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -96,6 +96,9 @@
  * Date:	April, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2000/12/01 22:53:59  caress
+ * First cut at Version 5.0.
+ *
  * Revision 4.8  2000/10/11  01:00:12  caress
  * Convert to ANSI C
  *
@@ -169,7 +172,7 @@ int mb_delaun(
 	int	*kv2, 
 	int	*error)
 {
-  	static char rcs_id[]="$Id: mb_delaun.c,v 5.0 2000-12-01 22:53:59 caress Exp $";
+  	static char rcs_id[]="$Id: mb_delaun.c,v 5.1 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_delaun";
 	int	status = MB_SUCCESS;
 	int	itemp[2][3];

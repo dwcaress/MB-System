@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prvr2.c	3/6/2003
- *	$Id: mbr_mr1prvr2.c,v 5.3 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbr_mr1prvr2.c,v 5.4 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 6, 2003
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.2  2004/04/27 01:01:46  caress
  * Fixed typo.
  *
@@ -82,7 +85,7 @@ int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.3 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.4 2008-07-10 06:43:41 caress Exp $";
 	char	*function_name = "mbr_register_mr1prvr2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -215,7 +218,7 @@ int mbr_info_mr1prvr2(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.3 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.4 2008-07-10 06:43:41 caress Exp $";
 	char	*function_name = "mbr_info_mr1prvr2";
 	int	status = MB_SUCCESS;
 
@@ -285,7 +288,7 @@ int mbr_info_mr1prvr2(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.3 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.4 2008-07-10 06:43:41 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prvr2";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -363,7 +366,7 @@ int mbr_dem_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 	if (store->mr1buffersize > 0 
 		&& store->mr1buffer != NULL)
 		free(store->mr1buffer);
-	status = mb_free(verbose,&mb_io_ptr->store_data,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -521,12 +524,12 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 		/* extract the comments string */
 		mb_io_ptr->hdr_comment_size = 0;
 		if (mb_io_ptr->hdr_comment != NULL)
-			mb_free(verbose,&mb_io_ptr->hdr_comment,error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->hdr_comment,error);
 		if (status == MB_SUCCESS
 			&& store->header.mf_count > 0)
 			{
-			status = mb_malloc(verbose,strlen(store->header.mf_log)+1,
-					&mb_io_ptr->hdr_comment,error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,strlen(store->header.mf_log)+1,
+					(void **)&mb_io_ptr->hdr_comment,error);
 			}
 		if (status == MB_SUCCESS)
 			{
@@ -874,7 +877,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		/* add comment to string mb_io_ptr->hdr_comment
 			to be be written in file header */
 		mb_io_ptr->hdr_comment_size += strlen(store->comment) + 2;
-		status = mb_realloc(verbose, mb_io_ptr->hdr_comment_size, 
+		status = mb_reallocd(verbose, __FILE__, __LINE__, mb_io_ptr->hdr_comment_size, 
 					(void **)&(mb_io_ptr->hdr_comment), 
 					error);
 		strcat(mb_io_ptr->hdr_comment,store->comment);

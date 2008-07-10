@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_image83p.c	5/5/2008
- *	$Id: mbsys_image83p.c,v 5.0 2008-05-16 22:51:24 caress Exp $
+ *	$Id: mbsys_image83p.c,v 5.1 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	May 5, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2008/05/16 22:51:24  caress
+ * Initial version.
+ *
  *
  */
 
@@ -44,7 +47,7 @@
 int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
-    static char res_id[]="$Id: mbsys_image83p.c,v 5.0 2008-05-16 22:51:24 caress Exp $";
+    static char res_id[]="$Id: mbsys_image83p.c,v 5.1 2008-07-10 06:43:41 caress Exp $";
 	char	*function_name = "mbsys_image83p_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -552,7 +555,7 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				verbose, 
 				alpha, beta, 
 				&theta, &phi, 
-				&error);
+				error);
 			angles[i] = theta;
 			angles_forward[i] = phi;
 			angles_null[i] = 0.0;

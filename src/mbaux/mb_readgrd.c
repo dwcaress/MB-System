@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_readgrd.c	12/10/2007
- *    $Id: mb_readgrd.c,v 5.0 2007-10-08 05:47:27 caress Exp $
+ *    $Id: mb_readgrd.c,v 5.1 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 2007 by
+ *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	September 3, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2007/10/08 05:47:27  caress
+ * Added grd reading function.
+ *
  *
  */
 
@@ -61,7 +64,7 @@ extern int isnanf(float x);
 #define	DEFAULT_NODATA		-9999999.9
 
 /* global variables */
-static char rcs_id[] = "$Id: mb_readgrd.c,v 5.0 2007-10-08 05:47:27 caress Exp $";
+static char rcs_id[] = "$Id: mb_readgrd.c,v 5.1 2008-07-10 06:43:40 caress Exp $";
 static char program_name[] = "mb_readgrd";
 static int	pargc;
 static char	**pargv;
@@ -209,26 +212,22 @@ int mb_readgrd(int verbose, char *grdfile,
     		*min = header.z_min; 
     		*max = header.z_max; 
 
-    		status = mb_malloc(verbose, sizeof(float) * (*nxy), 
-    					&rawdata,
-					&error);
+    		status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy), 
+    					(void **)&rawdata, error);
     		if (status == MB_SUCCESS)
-		status = mb_malloc(verbose, sizeof(float) * (*nxy), 
-    					&usedata,
-					&error);
+		status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy), 
+    					(void **)&usedata, error);
 		*data = usedata;
     		if (status == MB_SUCCESS && data_dzdx != NULL)
 			{
-			status = mb_malloc(verbose, sizeof(float) * (*nxy), 
-    					&usedata,
-					&error);
+			status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy), 
+    					(void **)&usedata, error);
 			*data_dzdx = usedata;
 			}
     		if (status == MB_SUCCESS && data_dzdy != NULL)
 			{
-			status = mb_malloc(verbose, sizeof(float) * (*nxy), 
-    					&usedata,
-					&error);
+			status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy), 
+    					(void **)&usedata, error);
 			*data_dzdy = usedata;
 			}
 		}
@@ -273,7 +272,7 @@ int mb_readgrd(int verbose, char *grdfile,
 			else
 				(*data)[k] = rawdata[kk];
 			}
-		mb_free(verbose, &rawdata, &error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&rawdata, error);
 		}
 	    
 	/* calculate derivatives */

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_zgrid.c	    4/25/95
- *    $Id: mb_zgrid.c,v 5.1 2007-10-08 05:50:55 caress Exp $
+ *    $Id: mb_zgrid.c,v 5.2 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 2000 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -53,6 +53,9 @@
  * Date:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2007/10/08 05:50:55  caress
+ * Changed convergence criteria.
+ *
  * Revision 5.0  2000/12/01 22:53:59  caress
  * First cut at Version 5.0.
  *
@@ -164,7 +167,7 @@ int mb_zgrid(float *z, int *nx, int *ny,
     
 
     /* Function Body */
-    itmax = 1000;
+    itmax = 300;
     eps = (float).002;
     big = (float)9e29;
 

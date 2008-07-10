@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 5.6 2006-12-15 21:42:49 caress Exp $
+ *    $Id: mb_pslibface.c,v 5.7 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/12/15 21:42:49  caress
+ * Incremental CVS update.
+ *
  * Revision 5.5  2006/06/22 04:45:42  caress
  * Working towards 5.1.0
  *
@@ -128,7 +131,7 @@ int plot_init(	int	verbose,
 		double	*inch2lon, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.6 2006-12-15 21:42:49 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
@@ -266,7 +269,7 @@ int plot_init(	int	verbose,
 /* 	function plot_end ends the GMT plotting. */
 int plot_end(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.6 2006-12-15 21:42:49 caress Exp $";
+  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
 	int	i;

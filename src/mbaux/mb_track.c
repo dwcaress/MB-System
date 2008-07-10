@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 5.4 2008-05-26 04:43:15 caress Exp $
+ *    $Id: mb_track.c,v 5.5 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2004, 2005, 2006 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Date:	August, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2008/05/26 04:43:15  caress
+ * Getting ready for release 5.1.1beta19.
+ *
  * Revision 5.3  2006/11/10 22:36:04  caress
  * Working towards release 5.1.0
  *
@@ -89,7 +92,7 @@
 #define IDN 2
 #define IOR -3
 
-static char rcs_id[]="$Id: mb_track.c,v 5.4 2008-05-26 04:43:15 caress Exp $";
+static char rcs_id[]="$Id: mb_track.c,v 5.5 2008-07-10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_track plots the shiptrack of multibeam data. */

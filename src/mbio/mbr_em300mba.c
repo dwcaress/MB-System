@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.36 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.37 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.36  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.35  2007/07/03 17:31:03  caress
  * Fixed handling of EM121A data.
  *
@@ -307,7 +310,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.36 2008-03-01 09:14:03 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.37 2008-07-10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -8851,6 +8854,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 	/* write the record size */
 	mb_put_binary_int(swap, (int) (EM2_SS_MBA_HEADER_SIZE 
 			+ EM2_SS_MBA_BEAM_SIZE * ping->png_nbeams_ss 
+			+ 2 * sizeof(short) * ping->png_pixels_ss
 			+ ping->png_npixels - (ping->png_npixels % 2) + 8), (void *) &write_size); 
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_asciixyz.c	5/8/2002
- *	$Id: mbr_asciixyz.c,v 5.6 2006-04-11 19:14:46 caress Exp $
+ *	$Id: mbr_asciixyz.c,v 5.7 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 8, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/04/11 19:14:46  caress
+ * Various fixes.
+ *
  * Revision 5.5  2006/03/06 21:47:48  caress
  * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
  *
@@ -91,7 +94,7 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_asciixyz.c,v 5.6 2006-04-11 19:14:46 caress Exp $";
+static char res_id[]="$Id: mbr_asciixyz.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error)
@@ -923,8 +926,8 @@ int mbr_alm_asciixyz(int verbose, void *mbio_ptr, int *error)
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = 0;
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_malloc(verbose,sizeof(struct mbsys_singlebeam_struct),
-				(char **)&mb_io_ptr->store_data,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct mbsys_singlebeam_struct),
+				(void **)&mb_io_ptr->store_data,error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -967,7 +970,7 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,(char **)&mb_io_ptr->store_data,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)

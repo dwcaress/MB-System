@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_spline.c	10/11/00
- *    $Id: mb_spline.c,v 5.2 2006-09-11 18:55:52 caress Exp $
+ *    $Id: mb_spline.c,v 5.3 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 2000 by
+ *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -27,6 +27,10 @@
  * Date:	October 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2006/09/11 18:55:52  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.1  2004/12/02 06:29:26  caress
  * Fixes while working to support Reson 7k data.
  *
@@ -53,7 +57,7 @@
 int mb_spline_init(int verbose, double *x, double *y, 
 	int n, double yp1, double ypn, double *y2, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.2 2006-09-11 18:55:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.3 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_spline_init";
 	int	status = MB_SUCCESS;
 	int	i, k;
@@ -83,7 +87,7 @@ int mb_spline_init(int verbose, double *x, double *y,
 
 	/* allocate memory for working vector */
 	if (status == MB_SUCCESS)
-		status = mb_malloc(verbose, n * sizeof(double), &u, error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__, n * sizeof(double), (void **)&u, error);
 	
 	/* set up spline interpolation coefficients */
 	if (status == MB_SUCCESS)
@@ -115,7 +119,7 @@ int mb_spline_init(int verbose, double *x, double *y,
 			y2[k]=y2[k]*y2[k+1]+u[k];
 	
 		/* deallocate memory for vector */
-		status = mb_free(verbose, &u, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&u, error);
 		}
 
 	/* print output debug statements */
@@ -135,7 +139,7 @@ int mb_spline_init(int verbose, double *x, double *y,
 int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 	int n, double x, double *y, int *i, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.2 2006-09-11 18:55:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.3 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_spline_interp";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;
@@ -202,7 +206,7 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 int mb_linear_interp(int verbose, double *xa, double *ya,
 		int n, double x, double *y, int *i, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.2 2006-09-11 18:55:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.3 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_linear_interp";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;
@@ -266,7 +270,7 @@ int mb_linear_interp(int verbose, double *xa, double *ya,
 int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
 		int n, double x, double *y, int *i, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.2 2006-09-11 18:55:52 caress Exp $";
+  	static char rcs_id[]="$Id: mb_spline.c,v 5.3 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_linear_interp_degrees";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;

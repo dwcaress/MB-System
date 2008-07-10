@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1aldeo.c	10/24/95
- *	$Id: mbr_mr1aldeo.c,v 5.7 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbr_mr1aldeo.c,v 5.8 2008-07-10 06:43:40 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 24, 1995
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.6  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -129,7 +132,7 @@ int mbr_wt_mr1aldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1aldeo(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.7 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.8 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_register_mr1aldeo";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -262,7 +265,7 @@ int mbr_info_mr1aldeo(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.7 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.8 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_info_mr1aldeo";
 	int	status = MB_SUCCESS;
 
@@ -332,7 +335,7 @@ int mbr_info_mr1aldeo(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1aldeo(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.7 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.8 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_alm_mr1aldeo";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -359,10 +362,10 @@ int mbr_alm_mr1aldeo(int verbose, void *mbio_ptr, int *error)
 	/* allocate memory for data structure */
 	mb_io_ptr->structure_size = sizeof(struct mbf_mr1aldeo_struct);
 	mb_io_ptr->data_structure_size = 0;
-	status = mb_malloc(verbose,mb_io_ptr->structure_size,
-				&mb_io_ptr->raw_data,error);
-	status = mb_malloc(verbose,sizeof(struct mbsys_mr1_struct),
-				&mb_io_ptr->store_data,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,mb_io_ptr->structure_size,
+				(void **)&mb_io_ptr->raw_data,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct mbsys_mr1_struct),
+				(void **)&mb_io_ptr->store_data,error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -410,8 +413,8 @@ int mbr_dem_mr1aldeo(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* deallocate memory for data descriptor */
-	status = mb_free(verbose,&mb_io_ptr->raw_data,error);
-	status = mb_free(verbose,&mb_io_ptr->store_data,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->raw_data,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->store_data,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -934,7 +937,7 @@ int mbr_mr1aldeo_rd_hdr(int verbose, char *xdrs,
 		{
 		if (len > 0)
 			{
-			status = mb_malloc(verbose,len+1,hdr_comment,error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,len+1,(void **)hdr_comment,error);
 			status = xdr_bytes(xdrs,hdr_comment,
 					&ulen,(unsigned int)(len + 1));
 			}
@@ -1289,12 +1292,12 @@ int mbr_mr1aldeo_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		if (mb_io_ptr->hdr_comment != NULL)
 			lenhc = strlen(mb_io_ptr->hdr_comment);
 		len = lenc + lenhc + 1;
-		status = mb_malloc(verbose,len,&tmp,error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,len,(void **)&tmp,error);
 		strcpy(tmp,"\0");
 		if (lenhc > 0) strcpy(tmp,mb_io_ptr->hdr_comment);
 		if (lenc > 0) strcat(tmp,data->comment);
 		if (mb_io_ptr->hdr_comment != NULL)
-			mb_free(verbose,&mb_io_ptr->hdr_comment,error);
+			mb_freed(verbose,__FILE__, __LINE__, (void **)&mb_io_ptr->hdr_comment,error);
 		mb_io_ptr->hdr_comment = tmp;
 		}
 

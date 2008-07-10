@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.c	3/1/99
- *	$Id: mbsys_hdcs.c,v 5.9 2008-05-16 22:56:24 caress Exp $
+ *	$Id: mbsys_hdcs.c,v 5.10 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 16, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.8  2008/03/14 18:33:03  caress
  * Updated support for JHC format 151.
  *
@@ -83,7 +86,7 @@
 int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hdcs.c,v 5.9 2008-05-16 22:56:24 caress Exp $";
+ static char res_id[]="$Id: mbsys_hdcs.c,v 5.10 2008-07-10 06:43:41 caress Exp $";
 	char	*function_name = "mbsys_hdcs_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -104,8 +107,8 @@ int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mbsys_hdcs_struct),
-				store_ptr,error);
+	status = mb_mallocd(verbose,__FILE__, __LINE__,sizeof(struct mbsys_hdcs_struct),
+				(void **)store_ptr,error);
 
 	if (status == MB_SUCCESS)
 	    {
@@ -235,12 +238,12 @@ int mbsys_hdcs_deall(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* deallocate memory for data structures */
 	if (store->beams != NULL)
-	    status = mb_free(verbose,&(store->beams),error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->beams),error);
 	if (store->ss_raw != NULL)
-	    status = mb_free(verbose,&(store->ss_raw),error);
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->ss_raw),error);
 
 	/* deallocate memory for data structure */
-	status = mb_free(verbose,store_ptr,error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)store_ptr,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -841,9 +844,9 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	    if (store->num_beam >= nbath
 		&& store->beams == NULL)
 		{
-		status = mb_malloc(verbose,
+		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			    store->num_beam * sizeof(struct mbsys_hdcs_beam_struct), 
-			    &store->beams,error);
+			    (void **)&store->beams,error);
 		}
 
 	    /* get bath and sidescan */
@@ -1550,7 +1553,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 	    if (store->beams == NULL)
 		{
 		if (copy->beams != NULL)
-		    status = mb_free(verbose,&copy->beams,error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->beams,error);
 		}
 		
 	    /* else copy beams */
@@ -1558,10 +1561,10 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 		{
 		/* reallocate memory for beams */
 		if (copy->beams != NULL)
-		    status = mb_free(verbose,&copy->beams,error);
-		status = mb_malloc(verbose,
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->beams,error);
+		status = mb_mallocd(verbose,__FILE__, __LINE__,
 				copy->num_beam * sizeof(struct mbsys_hdcs_beam_struct), 
-				&copy->beams,error);
+				(void **)&copy->beams,error);
 		if (status == MB_SUCCESS)
 		    {
 		    for (i=0;i<copy->numDepths_pro;i++)
@@ -1606,7 +1609,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 		|| store->ss_raw == NULL)
 		{
 		if (copy->ss_raw != NULL)
-		    status = mb_free(verbose,&copy->ss_raw,error);
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->ss_raw,error);
 		copy->numSamples = 0;
 		}
 		
@@ -1615,10 +1618,10 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 		{
 		/* reallocate memory for ss_raw */
 		if (copy->ss_raw != NULL)
-		    status = mb_free(verbose,&copy->ss_raw,error);
-		status = mb_malloc(verbose,
+		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->ss_raw,error);
+		status = mb_mallocd(verbose,__FILE__, __LINE__,
 				copy->numSamples, 
-				&copy->ss_raw,error);
+				(void **)&copy->ss_raw,error);
 		if (status == MB_SUCCESS)
 		    {
 		    for (i=0;i<copy->numSamples;i++)

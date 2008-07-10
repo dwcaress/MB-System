@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_contour.h	5/16/94
- *    $Id: mb_contour.h,v 5.6 2006-11-10 22:36:04 caress Exp $
+ *    $Id: mb_contour.h,v 5.7 2008-07-10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003, 2005 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	May 15, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/11/10 22:36:04  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.5  2005/11/04 22:49:51  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.26 2008-05-16 22:44:37 caress Exp $
+ *    $Id: mbinfo.c,v 5.27 2008-07-10 06:43:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2008/05/16 22:44:37  caress
+ * Release 5.1.1beta18
+ *
  * Revision 5.25  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -234,7 +237,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.26 2008-05-16 22:44:37 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.27 2008-07-10 06:43:41 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs \nsome basic statistics.  If pings are averaged (pings > 2) \nMBINFO estimates the variance for each of the swath \nbeams by reading a set number of pings (>2) and then finding \nthe variance of the detrended values for each beam. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C -Eyr/mo/da/hr/mn/sc -Fformat -Ifile -Llonflip -Mnx/ny -N -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -1290,7 +1293,12 @@ main (int argc, char **argv)
 				if (irec == 1)
 					{
 					if (beams_bath > 0)
-						bathbeg = bath[beams_bath/2];
+						{
+						if (mb_beam_ok(beamflag[beams_bath/2]))
+							bathbeg = bath[beams_bath/2];
+						else
+							bathbeg = altitude + sonardepth;
+						}
 					lonbeg = navlon;
 					latbeg = navlat;
 					timbeg = time_d;
@@ -1308,21 +1316,33 @@ main (int argc, char **argv)
 						&& navlon != 0.0 && navlat != 0.0)
 						{
 						lonbeg = navlon;
+						if (beams_bath > 0)
+							{
+							if (mb_beam_ok(beamflag[beams_bath/2]))
+								bathbeg = bath[beams_bath/2];
+							else
+								bathbeg = altitude + sonardepth;
+							}
 						latbeg = navlat;
-					if (spdbeg == 0.0 && speed != 0.0)
-						spdbeg = speed;
-					if (hdgbeg == 0.0 && heading != 0.0)
-						hdgbeg = heading;
-					if (sdpbeg == 0.0 && sonardepth != 0.0)
-						sdpbeg = sonardepth;
-					if (altbeg == 0.0 && altitude != 0.0)
-						altbeg = altitude;
+						if (spdbeg == 0.0 && speed != 0.0)
+							spdbeg = speed;
+						if (hdgbeg == 0.0 && heading != 0.0)
+							hdgbeg = heading;
+						if (sdpbeg == 0.0 && sonardepth != 0.0)
+							sdpbeg = sonardepth;
+						if (altbeg == 0.0 && altitude != 0.0)
+							altbeg = altitude;
 						}
 					}
 
 				/* reset ending values each time */
 				if (beams_bath > 0)
-					bathend = bath[beams_bath/2];
+					{
+					if (mb_beam_ok(beamflag[beams_bath/2]))
+						bathend = bath[beams_bath/2];
+					else
+						bathend = altitude + sonardepth;
+					}
 				lonend = navlon;
 				latend = navlat;
 				spdend = speed;
