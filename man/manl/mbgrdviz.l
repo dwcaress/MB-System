@@ -1,12 +1,12 @@
-.TH mbgrdviz l "22 October 2007" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrdviz l "6 June 2008" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbgrdviz\fP - Simple interactive 2D/3D visualization of GMT grids..
+\fBMBgrdviz\fP - Simple interactive 2D/3D visualization of GMT grids.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbgrdviz\fP [-I\fIgridfile\fP \fB-T -V -H\fP]
+\fBMBgrdviz\fP [-I\fIgridfile\fP \fB-T -V -H\fP]
 
 .SH DESCRIPTION
 
@@ -46,12 +46,17 @@ for survey planning.
 Topographic profiles associated with two-point picks, selected navigation, or 
 selected routes can be displayed in a separate window and saved.
 
+\fBMBgrdviz\fP can be used to select swath data files for bathymetry editing.
+If survey navigation has been read and displayed, a user may interactively select
+files of interest, and then start up the interactive, visualization based bathymetry
+editor \fBMBeditviz\fP to work on those files.
+
 \fBMBgrdviz\fP supports as many as ten displays deriving either from reading
 topography grids or extracting user defined regions from existing displays.
 
 \fIStarting Up\fP
 
-When \fBmbgrdviz\fP is invoked on the command line, a single window comes up with
+When \fBMBgrdviz\fP is invoked on the command line, a single window comes up with
 the title \fBMBgrdviz\fP and two menus: \fBFile\fP and \fBHelp\fP. The \fBHelp\fP 
 menu contains a single item named \fBAbout\fP, which brings up a simple 
 information window including the MB-System release version identifier. 
@@ -64,10 +69,25 @@ to "*" will display all files) and then hit the \fBFilter\fP button to relist th
 files as desired. Once the desired topography grid file has been located and 
 selected so that its full path appears in the \fBSelection\fP text item, clicking 
 the \fBOK\fP button will cause \fBMBgrdviz\fP to read the grid and open an \fBMBview\fP 
-display window.
+display window. Initially, the topography will be displayed in 2D, or map view mode. 
+The default color table will be "Haxby", and the topography will be shaded using slope magnitude.
 
-Initially, the topography will be displayed in 2D, or map view mode. The color 
+\fIPicking, Zooming, Panning in 2D View\fP
 
+\fBMBgrdviz\fP will initially be in the "pan and zoom" mouse mode. 
+
+In this mode, if the cursor is over 
+topography when the left button is clicked, a red X will appear at the
+pick point and an info window on the left side of the \fBMBview\fP display window
+will show the longitude, latitude, and topography value of the pick point.
+If the left button is used to drag the cursor from one location to another, both
+the pick and release points will be shown as red Xs and a red line will be displayed
+in between. The info window will show both the start and end positions and also the
+range and bearing between the two locations.
+
+The middle button can be used to pan by clicking, holding down, and 
+
+\fIStarting Up\fP
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)

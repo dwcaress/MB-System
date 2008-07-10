@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.21 2008-07-10 06:43:41 caress Exp $
+ *    $Id: mbbackangle.c,v 5.22 2008-07-10 18:16:33 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004m 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -209,7 +209,7 @@ int output_model(int verbose, FILE *tfp,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.21 2008-07-10 06:43:41 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.22 2008-07-10 18:16:33 caress Exp $";
 static char program_name[] = "mbbackangle";
 static int	pargc;
 static char	**pargv;

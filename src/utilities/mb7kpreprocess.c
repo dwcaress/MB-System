@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.17 2008-07-10 06:43:41 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.18 2008-07-10 18:16:33 caress Exp $
  *
  *    Copyright (c) 2005-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -101,7 +101,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.17 2008-07-10 06:43:41 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.18 2008-07-10 18:16:33 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
