@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.15 2008-07-10 17:41:18 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.16 2008-07-10 18:08:10 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
