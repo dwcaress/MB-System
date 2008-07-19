@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.55 2008-07-10 18:16:33 caress Exp $
+ *    $Id: mbprocess.c,v 5.56 2008-07-19 07:45:30 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.55  2008/07/10 18:16:33  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.53  2008/05/24 19:41:44  caress
  * Added processing kluge (kluge006) allowing the sonar draft to be be changed without changing the calculated bathymetry.
  *
@@ -283,7 +286,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.55 2008-07-10 18:16:33 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.56 2008-07-19 07:45:30 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -505,8 +508,8 @@ and mbedit edit save files.\n";
 	double	reference_amp_port;
 	double	reference_amp_stbd;
 	int	itable;
-	int	nsscorrtable;
-	int	nsscorrangle;
+	int	nsscorrtable = 0;
+	int	nsscorrangle = 0;
 	struct mbprocess_sscorr_struct	*sscorrtable = NULL;
 	struct mbprocess_sscorr_struct	sscorrtableuse;
 	int	nampcorrtable;
