@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.18 2008-07-10 18:16:33 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.19 2008-07-19 07:50:51 caress Exp $
  *
  *    Copyright (c) 2005-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2008/07/10 18:16:33  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.16  2008/05/16 22:44:37  caress
  * Release 5.1.1beta18
  *
@@ -101,7 +104,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.18 2008-07-10 18:16:33 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.19 2008-07-19 07:50:51 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -3059,7 +3062,7 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 						soundspeed = bluefin->environmental[0].sound_speed;
 					else
 						soundspeed = 1500.0;
-fprintf(stderr,"roll:%f pitch:%f\n",bathymetry->roll,bathymetry->pitch);
+/*fprintf(stderr,"roll:%f pitch:%f\n",bathymetry->roll,bathymetry->pitch);*/
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
 						if ((bathymetry->quality[i] & 15) > 0)
