@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.38 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.39 2008-07-19 07:28:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	September 19, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.38  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.37  2008/01/14 17:49:48  caress
  * Fixed problem with speed data.
  *
@@ -399,7 +402,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.38 2008-07-10 06:43:40 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.39 2008-07-19 07:28:06 caress Exp $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -554,8 +557,8 @@ int	xmin, xmax;
 int	ymin, ymax;
 int	exager = 100;
 int	plot_width = 5000;
-int	xscale;
-int	yscale;
+double	xscale;
+double	yscale;
 int	x_interval = 1000;
 int	y_interval = 250;
 int	show_detects = MB_NO;
@@ -839,8 +842,8 @@ int mbedit_set_scaling(int *brdr, int sh_time)
 		xmax = borders[1] - margin;
 		ymin = margin;
 		ymax = borders[3] - margin/2;
-		xscale = 100*plot_width/(xmax - xmin);
-		yscale = (xscale*exager)/100;
+		xscale = 100.0 * plot_width / (xmax - xmin);
+		yscale = (xscale * exager) / 100.0;
 		}
 	else
 		{
@@ -849,8 +852,8 @@ int mbedit_set_scaling(int *brdr, int sh_time)
 		xmax = borders[1] - margin;
 		ymin = margin;
 		ymax = borders[3] - margin/2;
-		xscale = 100*plot_width/(xmax - xmin);
-		yscale = (xscale*exager)/100;
+		xscale = 100.0 * plot_width / (xmax - xmin);
+		yscale = (xscale * exager) / 100.0;
 		}
 
 	/* print output debug statements */
@@ -4329,7 +4332,7 @@ int mbedit_action_filter_all(
 	/* local variables */
 	char	*function_name = "mbedit_action_filter_all";
 	int	status = MB_SUCCESS;
-	char	string[50];
+	char	string[MB_PATH_MAXLINE];
 	int	i;
 
 	/* print input debug statements */
@@ -5253,7 +5256,7 @@ int mbedit_load_data(int buffer_size,
 	char	*function_name = "mbedit_load_data";
 	int	status = MB_SUCCESS;
 	int	namp, nss;
-	char	string[50];
+	char	string[MB_PATH_MAXLINE];
 	int	detect_status, detect_error, nbeams;
 	double	speed_nav;
 	int	i, j, k;
@@ -5769,10 +5772,10 @@ int mbedit_plot_all(
 	ycen = ymin + (ymax - ymin)/2;
 	dx = ((double)(xmax - xmin))/plot_size;
 	dy = ((double)(ymax - ymin))/plot_size;
-	xscale = 100*plot_width/(xmax - xmin);
-	yscale = (xscale*100)/exager;
-	dxscale = 100.0/xscale;
-	dyscale = 100.0/yscale;
+	xscale = 100.0 * plot_width / (xmax - xmin);
+	yscale = (xscale * 100.0) / exager;
+	dxscale = 100.0 / xscale;
+	dyscale = 100.0 / yscale;
 
 	if (info_set == MB_YES)
 		{
@@ -6303,7 +6306,7 @@ int mbedit_plot_ping_label(int iping, int save)
 	char	*function_name = "mbedit_plot_ping_label";
 	int	status = MB_SUCCESS;
 	int	sascent, sdescent, swidth;
-	char	string[50];
+	char	string[MB_PATH_MAXLINE];
 	int	j;
 
 	/* print input debug statements */
