@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.20 2006-09-11 18:55:52 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.21 2008-07-19 07:28:06 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,10 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2006/09/11 18:55:52  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.19  2006/08/09 22:35:32  caress
  * A new edit mode called "grab" has been added to MBedit. In this
  * mode, the user drags a rectangle on the ping display. When the mouse
@@ -161,6 +165,7 @@
 
 /* mbedit widget includes */
 #include "mbedit_creation.h"
+#include "mb_define.h"
 #include "mb_status.h"
 
 /*
@@ -287,7 +292,7 @@ int	status;
 int	startup_file = 0;
 int	use_save_file = False;
 
-static char	input_file[128];
+static char	input_file[MB_PATH_MAXLINE];
 int selected = 0; /* indicates an input file is selected */
 
 int	can_xgid;		/* XG graphics id */
@@ -469,7 +474,7 @@ do_mbedit_init(int argc, char **argv)
     struct stat file_status;
     int	    fstat;
     int	    save_mode;
-    char    save_file[128];
+    char    save_file[MB_PATH_MAXLINE];
     int	    i;
     
     /* make sure expose plots are off */
@@ -616,7 +621,7 @@ do_mbedit_init(int argc, char **argv)
 
 int do_setup_data()
 {
-	char value_text[128];
+	char value_text[MB_PATH_MAXLINE];
 
 	/* get some default values from mbedit */
 	status = mbedit_get_defaults(&plot_size_max,
@@ -1078,7 +1083,7 @@ do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
-    static char selection_text[128];
+    static char selection_text[MB_PATH_MAXLINE];
     int	form;
     char	value_text[10];
 
@@ -1385,7 +1390,7 @@ do_load_check( Widget w, XtPointer client_data, XtPointer call_data)
     struct stat file_status;
     int	fstat;
     char    *input_file_ptr;
-    char    save_file[128];
+    char    save_file[MB_PATH_MAXLINE];
     
     /* set use save file flag to False */
     use_save_file = False;
@@ -1580,7 +1585,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
     unsigned int mask_return;
     int doit;
     int	grab_mode;
-    char	eventname[64];
+    char eventname[MB_PATH_MAXLINE];
 
     /* check for data file loaded at startup */
     if (startup_file)
@@ -2460,7 +2465,7 @@ do_goto_apply( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
 
-    char    value_text[128];
+    char    value_text[MB_PATH_MAXLINE];
 
     get_text_string(textfield_year, value_text);
     sscanf(value_text, "%d", &ttime_i[0]);
