@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_image83p.h	5/5/2008
- *	$Id: mbsys_image83p.h,v 5.0 2008-05-16 22:51:24 caress Exp $
+ *	$Id: mbsys_image83p.h,v 5.1 2008-07-19 07:41:14 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -18,25 +18,31 @@
  * The data formats which are commonly used to store Imagenex DeltaT
  * data in files include
  *      MBF_IMAGE83P : MBIO ID 191
+ *      MBF_IMAGEMBA : MBIO ID 192
  *
  * Author:	Vivek Reddy, Santa Clara University
+ *       	D.W. Caress
  * Date:	February 16, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2008/05/16 22:51:24  caress
+ * Initial version.
+ *
  *
  */
 /*
  * Notes on the MBSYS_HSDS data structure:
- *   1. Imagex multibeam systems output raw data in an
- *      ascii format.  
+ *   1. Imagex multibeam systems output raw data in a format
+ *      combining ascii and binary values.  
  *   2. The system outputs 480 beams of bathymetry 
- *
  *   3. The data structure defined below includes all of the values
  *      which are passed in imagenex multibeam records
+ *   4. Support for comment records is specific to MB-System.
  */
 
 /* number of beams for imagex multibeam */
 #define MBSYS_IMAGE83P_BEAMS 480
+#define MBSYS_IMAGE83P_COMMENTLEN 248
 
 struct mbsys_image83p_struct
 	{
@@ -48,6 +54,7 @@ struct mbsys_image83p_struct
 	double	time_d;
 	
 	/* additional navigation and depths  */
+	int	version;	/* file version */
 	double	nav_lat;
 	double	nav_long;
 	int	nav_speed; /* 0.1 knots */
@@ -69,10 +76,17 @@ struct mbsys_image83p_struct
 	int	rep_rate; /* msec */
 	int	ping_number;
 	int	range[MBSYS_IMAGE83P_BEAMS];
-	double bath[MBSYS_IMAGE83P_BEAMS];
-	double bathacrosstrack[MBSYS_IMAGE83P_BEAMS];
-	double bathalongtrack[MBSYS_IMAGE83P_BEAMS];
+	
+	/* important values not in vendor format */
+	float	sonar_depth;
+	float	heave;
+	float	bath[MBSYS_IMAGE83P_BEAMS];
+	float	bathacrosstrack[MBSYS_IMAGE83P_BEAMS];
+	float	bathalongtrack[MBSYS_IMAGE83P_BEAMS];
 	char	beamflag[MBSYS_IMAGE83P_BEAMS];
+	
+	/* comment */
+	char	comment[MBSYS_IMAGE83P_COMMENTLEN];
 	};
 	
 /* system specific function prototypes */

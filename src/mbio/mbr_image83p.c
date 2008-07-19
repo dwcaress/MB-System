@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_image83p.c	5/5/2008
- *	$Id: mbr_image83p.c,v 5.0 2008-05-16 22:51:24 caress Exp $
+ *	$Id: mbr_image83p.c,v 5.1 2008-07-19 07:41:14 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,22 +22,23 @@
  *   mbr_wt_image83p	- translate and write data
  *
  * Author:	Vivek Reddy, Santa Clara University
+ *       	D.W. Caress
  * Date:	May 5, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2008/05/16 22:51:24  caress
+ * Initial version.
  * 
  */
 /*
  * Notes on the MBF_IMAGE83P data format:
- *   1. This data format is used to store 480 Beam Imagenex DeltaT multibeam bathymetry data
- *		The beam number can be variable but for now we'll only support the defualt setting
- *	 2. The data consist of 2176 byte records including 1-byte characters,
- *      2-byte integers, 4 byte integers, and null terminates strings
- *   3. The 480 depth values are stored in a seqence of 960 characters
- *   4. There is no provision for embedding comments in the data.
- *   
- * The mbf_image83p_data_struct structure is a direct representation  
- * of the ascii data structure used in the MBF_IMAGE83P format.
+ *   1. This data format is used to store Imagenex DeltaT multibeam 
+ *      bathymetry data. 
+ *   2. This is a limited vendor data format that does not allow storage 
+ *      of calculated bathymetry and beam flags for processing. DeltaT
+ *      data should be translated to format mbf_imagemba (192) using
+ *      mbcopy before processing.
+ *   3. Comment records are supported - this is specific to MB-System.
  */
 
 /* standard include files */
@@ -94,7 +95,7 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_image83p(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_image83p.c,v 5.0 2008-05-16 22:51:24 caress Exp $";
+	static char res_id[]="$Id: mbr_image83p.c,v 5.1 2008-07-19 07:41:14 caress Exp $";
 	char	*function_name = "mbr_register_image83p";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -227,7 +228,7 @@ int mbr_info_image83p(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_image83p.c,v 5.0 2008-05-16 22:51:24 caress Exp $";
+	static char res_id[]="$Id: mbr_image83p.c,v 5.1 2008-07-19 07:41:14 caress Exp $";
 	char	*function_name = "mbr_info_image83p";
 	int	status = MB_SUCCESS;
 
@@ -249,7 +250,7 @@ int mbr_info_image83p(int verbose,
 	*pixels_ss_max = 0;
 	strncpy(format_name, "IMAGE83P", MB_NAME_LENGTH);
 	strncpy(system_name, "IMAGE83P", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_IMAGE83P\nInformal Description: Imagenex Multibeam\nAttributes:           Mulitbeam, bathymetry, 480 beams, ascii, Imagenex.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:          MBF_IMAGE83P\nInformal Description: Imagenex DeltaT Multibeam\nAttributes:           Multibeam, bathymetry, 480 beams, ascii + binary, Imagenex.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_NO;
@@ -297,7 +298,7 @@ int mbr_info_image83p(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_image83p(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_image83p.c,v 5.0 2008-05-16 22:51:24 caress Exp $";
+ static char res_id[]="$Id: mbr_image83p.c,v 5.1 2008-07-19 07:41:14 caress Exp $";
 	char	*function_name = "mbr_alm_image83p";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -385,9 +386,10 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	done;
 	int	id;
 	int	count, temp_beam;
-	int	index, swap;
-	short short_val;
-	unsigned int int_val;
+	int	index;
+	int	swap = MB_NO;
+	short	short_val;
+	int	int_val;
 	int	numberbytes, seconds_hundredths;
 	double	degrees, minutes, dec_minutes;
 	double	alpha, beta, theta, phi;
@@ -410,7 +412,6 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_image83p_struct *) store_ptr;
-	swap = MB_NO;
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
@@ -460,7 +461,8 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* read rest of record from file */
 	if (status == MB_SUCCESS)
 		{
-		index = 4;
+		index = 3;
+		store->version = (int) buffer[index]; index++;
 
 		mb_get_binary_short(swap, &buffer[index], &short_val); 
 		numberbytes = (int) ((unsigned short) short_val);
@@ -480,10 +482,20 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	
 	/* if success then parse the buffer */
-	if (status == MB_SUCCESS)
+	if (status == MB_SUCCESS && buffer[6] =='#')
 		{
 		/* type of data record */
+		store->kind = MB_DATA_COMMENT;
 
+		/* copy comment */
+		index = 8;
+		strncpy(store->comment, &buffer[index], MBSYS_IMAGE83P_COMMENTLEN);
+		}
+	
+	/* if success then parse the buffer */
+	else if (status == MB_SUCCESS)
+		{
+		/* type of data record */
 		store->kind = MB_DATA_DATA;
 
 		/* parse year */
@@ -658,7 +670,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_get_binary_short(swap, &buffer[index], &short_val); index += 2;
 		    store->rep_rate = (int) ((unsigned short) short_val);
 		mb_get_binary_int(swap, &buffer[index], &int_val); index += 4;
-		    store->ping_number = (int) ((unsigned int) int_val);
+		    store->ping_number = int_val;
 		index += 159;
 		    
 		/* get ranges */
@@ -678,6 +690,8 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			soundspeed = 0.1 * store->sound_velocity;
 		else
 			soundspeed = 1500.0;
+		store->sonar_depth = 0.0;
+		store->heave = 0.0;
 		for (i=0;i<store->num_beams;i++)
 			{
 			if (store->range[i] > 0)
@@ -695,7 +709,7 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				zz = rr * cos(DTR * theta);
 				store->bathacrosstrack[i] = xx * cos(DTR * phi);
 				store->bathalongtrack[i] = xx * sin(DTR * phi);
-				store->bath[i] = zz + 0.0;
+				store->bath[i] = zz + store->sonar_depth - store->heave;
 				store->beamflag[i] = MB_FLAG_NONE;
 				}
 			else
@@ -709,12 +723,13 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* print output debug statements */
-	if (verbose >= 1)
+	if (verbose >= 4)
 		{
 		fprintf(stderr,"\ndbg2  Record read in MBIO function <%s>\n",
 			function_name);
 		fprintf(stderr,"dbg4  Data values:\n");
 		fprintf(stderr,"dbg4       kind:               %d\n",store->kind);
+		fprintf(stderr,"dbg4       version:            %d\n",store->version);
 		fprintf(stderr,"dbg4       time_i[0]:          %d\n",store->time_i[0]);
 		fprintf(stderr,"dbg4       time_i[1]:          %d\n",store->time_i[1]);
 		fprintf(stderr,"dbg4       time_i[2]:          %d\n",store->time_i[2]);
@@ -744,7 +759,13 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg4       rep_rate:           %d\n",store->rep_rate); /* msec */
 		fprintf(stderr,"dbg4       ping_number:        %d\n",store->ping_number);
 		for (i=0;i<store->num_beams;i++)
-			fprintf(stderr,"dbg4       range:              %d\n",store->range[i]);
+			fprintf(stderr,"dbg4       range[%d]:            %d\n",i,store->range[i]);
+		fprintf(stderr,"dbg4       sonar_depth:        %f\n",store->sonar_depth);
+		fprintf(stderr,"dbg4       heave:              %f\n",store->heave);
+		for (i=0;i<store->num_beams;i++)
+			fprintf(stderr,"dbg4       bath[%d]:    %f %f %f %d\n",
+				i,store->bath[i],store->bathacrosstrack[i],
+				store->bathalongtrack[i],store->beamflag[i]);
 		}
 
 	/* print output debug statements */
@@ -768,13 +789,14 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	int	i, j;
-	int	id;
-	int seconds_hundredths;
-	double degrees, minutes, dec_minutes, remainder;
 	char	buffer[MBF_IMAGE83P_BUFFER_SIZE];
-	int swap ;
-	int write_len, index;
+	int	swap = MB_NO;
+	int	seconds_hundredths;
+	int	degrees;
+	double	minutes;
+	char	NorS;
+	int	write_len, index;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -786,16 +808,12 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
 		}
-
-	swap = MB_YES;
 	
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* get pointer to raw data structure */
 	store = (struct mbsys_image83p_struct *) store_ptr;
-	
-	
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -813,177 +831,244 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5       status:         %d\n",status);
 		}
 
+	/* print output debug statements */
+	if (verbose >= 4)
+		{
+		fprintf(stderr,"\ndbg2  Record read in MBIO function <%s>\n",
+			function_name);
+		fprintf(stderr,"dbg4  Data values:\n");
+		fprintf(stderr,"dbg4       kind:               %d\n",store->kind);
+		fprintf(stderr,"dbg4       version:            %d\n",store->version);
+		fprintf(stderr,"dbg4       time_i[0]:          %d\n",store->time_i[0]);
+		fprintf(stderr,"dbg4       time_i[1]:          %d\n",store->time_i[1]);
+		fprintf(stderr,"dbg4       time_i[2]:          %d\n",store->time_i[2]);
+		fprintf(stderr,"dbg4       time_i[3]:          %d\n",store->time_i[3]);
+		fprintf(stderr,"dbg4       time_i[4]:          %d\n",store->time_i[4]);
+		fprintf(stderr,"dbg4       time_i[5]:          %d\n",store->time_i[5]);
+		fprintf(stderr,"dbg4       time_i[6]:          %d\n",store->time_i[6]);
+		fprintf(stderr,"dbg4       time_d:             %f\n",store->time_d);
+		fprintf(stderr,"dbg4       nav_lat:            %f\n",store->nav_lat);
+		fprintf(stderr,"dbg4       nav_long:           %f\n",store->nav_long);
+		fprintf(stderr,"dbg4       nav_speed:          %d\n",store->nav_speed); /* 0.1 knots */
+		fprintf(stderr,"dbg4       nav_heading:        %d\n",store->nav_heading); /*0.1 degrees */
+		fprintf(stderr,"dbg4       pitch:              %d\n",store->pitch);
+		fprintf(stderr,"dbg4       roll:               %d\n",store->roll);
+		fprintf(stderr,"dbg4       heading:            %d\n",store->heading);
+		fprintf(stderr,"dbg4       num_beams:          %d\n",store->num_beams);
+		fprintf(stderr,"dbg4       samples_per_beam:   %d\n",store->samples_per_beam);
+		fprintf(stderr,"dbg4       sector_size:        %d\n",store->sector_size); /* degrees */
+		fprintf(stderr,"dbg4       start_angle:        %d\n",store->start_angle); /* 0.01 degrees + 180.0 */
+		fprintf(stderr,"dbg4       angle_increment:    %d\n",store->angle_increment); /* 0.01 degrees */
+		fprintf(stderr,"dbg4       acoustic_range:     %d\n",store->acoustic_range); /* meters */
+		fprintf(stderr,"dbg4       acoustic_frequency: %d\n",store->acoustic_frequency); /* kHz */
+		fprintf(stderr,"dbg4       sound_velocity:     %d\n",store->sound_velocity); /* 0.1 m/sec */
+		fprintf(stderr,"dbg4       range_resolution:   %d\n",store->range_resolution); /* 0.001 meters */
+		fprintf(stderr,"dbg4       pulse_length:       %d\n",store->pulse_length); /* usec */
+		fprintf(stderr,"dbg4       profile_tilt_angle: %d\n",store->profile_tilt_angle); /* degrees + 180.0 */
+		fprintf(stderr,"dbg4       rep_rate:           %d\n",store->rep_rate); /* msec */
+		fprintf(stderr,"dbg4       ping_number:        %d\n",store->ping_number);
+		for (i=0;i<store->num_beams;i++)
+			fprintf(stderr,"dbg4       range[%d]:            %d\n",i,store->range[i]);
+		fprintf(stderr,"dbg4       sonar_depth:        %f\n",store->sonar_depth);
+		fprintf(stderr,"dbg4       heave:              %f\n",store->heave);
+		for (i=0;i<store->num_beams;i++)
+			fprintf(stderr,"dbg4       bath[%d]:    %f %f %f %d\n",
+				i,store->bath[i],store->bathacrosstrack[i],
+				store->bathalongtrack[i],store->beamflag[i]);
+		}
 
-    
 	/*  translate values from image83p data storage structure */
 	if (store != NULL)
 		{
 		if (store->kind == MB_DATA_DATA)
 			{
-			/*put in header information*/
+			/* header */
 			index = 0;
-			strncpy(buffer, "83P", 3);
-			index = 4;
-			write_len = MBF_IMAGE83P_BUFFER_SIZE;
-			mb_put_binary_short(swap, (unsigned short)write_len, (void *) &buffer[index]);
-			index = 8; /*date*/
-			sprintf(&buffer[index], "%2.2d-", store->time_i[2]);
-			switch(store->time_i[1]) {
-			case (1)  : sprintf(&buffer[index + 3], "%s", "JAN-");
-						break;
-			case (2)  : sprintf(&buffer[index + 3], "%s", "FEB-");
-						break;
-			case (3)  : sprintf(&buffer[index + 3], "%s", "MAR-");
-						break;
-			case (4)  : sprintf(&buffer[index + 3], "%s", "APR-");
-						break;
-			case (5)  : sprintf(&buffer[index + 3], "%s", "MAY-");
-						break;
-			case (6)  : sprintf(&buffer[index + 3], "%s", "JUN-");
-						break;
-			case (7)  : sprintf(&buffer[index + 3], "%s", "JUL-");
-						break;
-			case (8)  : sprintf(&buffer[index + 3], "%s", "AUG-");
-						break;
-			case (9)  : sprintf(&buffer[index + 3], "%s", "SEP-");
-						break;
-			case (10)  :sprintf(&buffer[index + 3], "%s", "OCT-");
-						break;
-			case (11) : sprintf(&buffer[index + 3], "%s", "NOV-");
-						break;
-			case (12) : sprintf(&buffer[index + 3],"%s", "DEC-");
-						break;
-			}
-			sprintf(&buffer[index + 7], "%2.2d", store->time_i[0]); 
+			buffer[index] = '8'; index++;
+			buffer[index] = '3'; index++;
+			buffer[index] = 'P'; index++;
+			buffer[index] = (char) store->version; index++;
+			write_len = 256 + 2 * store->num_beams;
+			mb_put_binary_short(swap, (unsigned short)write_len, (void *) &buffer[index]); index +=2;
+			buffer[index] = 0; index++;
+			buffer[index] = 0; index++; /* index = 8 */
 			
-			index = 20; /*time*/
-			sprintf(&buffer[index], "%2.2d:%2.2d:%2.2d", store->time_i[3], store->time_i[4], store->time_i[5]);
+			/* date */
+			sprintf(&buffer[index], "%2.2d-", store->time_i[2]); index += 3;
+			switch(store->time_i[1]) 
+				{
+				case (1)  : sprintf(&buffer[index], "%s", "JAN-");
+							break;
+				case (2)  : sprintf(&buffer[index], "%s", "FEB-");
+							break;
+				case (3)  : sprintf(&buffer[index], "%s", "MAR-");
+							break;
+				case (4)  : sprintf(&buffer[index], "%s", "APR-");
+							break;
+				case (5)  : sprintf(&buffer[index], "%s", "MAY-");
+							break;
+				case (6)  : sprintf(&buffer[index], "%s", "JUN-");
+							break;
+				case (7)  : sprintf(&buffer[index], "%s", "JUL-");
+							break;
+				case (8)  : sprintf(&buffer[index], "%s", "AUG-");
+							break;
+				case (9)  : sprintf(&buffer[index], "%s", "SEP-");
+							break;
+				case (10)  :sprintf(&buffer[index], "%s", "OCT-");
+							break;
+				case (11) : sprintf(&buffer[index], "%s", "NOV-");
+							break;
+				case (12) : sprintf(&buffer[index],"%s", "DEC-");
+							break;
+				}
+			index += 4;
+			sprintf(&buffer[index], "%4.4d", store->time_i[0]); index += 4;
+			buffer[index] = 0; index++; /* index = 20 */
 			
-			index = 29; /*hundredths of seconds*/
-			buffer[index] = '.';
+			/* time */
+			sprintf(&buffer[index], "%2.2d:%2.2d:%2.2d", 
+				store->time_i[3], store->time_i[4], store->time_i[5]); index += 8;
+			buffer[index] = 0; index++; /* index = 29 */
+			
+			/* hundredths of seconds */
 			seconds_hundredths = store->time_i[6] / 10000;
-			for (i=0;i<7;i++)
-			{
-			mb_io_ptr->new_time_i[i] = store->time_i[i];
-			}
-			mb_io_ptr->new_time_d = store->time_d;
-			mb_put_binary_short(swap, (unsigned short)seconds_hundredths, (void *) &buffer[index + 1]);
+			sprintf(&buffer[index], ".%2.2d", seconds_hundredths); index += 3;
+			buffer[index] = 0; index++; /* index = 33 */
 			
-			index = 33; /*GPS Latitude*/
-			sprintf(&buffer[index], "_%2.2d", (int)store->nav_lat);
-			sprintf(&buffer[index + 3], "%s", ".");
-			remainder = store->nav_lat - (int)store->nav_lat;
-			minutes = remainder * 60;
-			sprintf(&buffer[index + 4], "%2.2d", (int)minutes);
-			remainder = minutes - (int)minutes;
-			dec_minutes = remainder * 100000;
-			sprintf(&buffer[index + 6], "%s", ".");
-			sprintf(&buffer[index + 7], "%5.5d", (int)dec_minutes);
-			if(store->nav_lat < 0.0)
-			{
-				sprintf(&buffer[index + 13], "%s", "S");
-			}
+			/* latitude*/
+			if (store->nav_lat > 0.0)
+				NorS = 'N';
 			else
-			{
-				sprintf(&buffer[index + 13], "%s", "N");
-			}
-			index = 47; /*GPS Longtitue*/
-			sprintf(&buffer[index], "%3.3d", (int)store->nav_long);
-			sprintf(&buffer[index + 3], "%s", ".");
-			remainder = store->nav_long - (int)store->nav_long;
-			minutes = remainder * 60;
-			sprintf(&buffer[index + 4], "%2.2d", (int)minutes);
-			remainder = minutes - (int)minutes;
-			dec_minutes = remainder * 100000;
-			sprintf(&buffer[index + 6], "%s", ".");
-			sprintf(&buffer[index + 7], "%5.5d", (int)dec_minutes);
-			if(store->nav_long < 0.0)
-			{
-				sprintf(&buffer[index + 13], "%s", "W");
-			}
+				NorS = 'S';
+			degrees = (int) fabs(store->nav_lat);
+			minutes = (fabs(store->nav_lat) - (double)degrees) * 60.0;
+			sprintf(&buffer[index], "_%2.2d.%8.5f_%c", degrees, minutes, NorS); index += 14; /* index = 47 */
+			
+			/* longitude*/
+			if (store->nav_long > 0.0)
+				NorS = 'E';
 			else
-			{
-				sprintf(&buffer[index + 13], "%s", "E");
-			}
+				NorS = 'W';
+			degrees = (int) fabs(store->nav_long);
+			minutes = (fabs(store->nav_long) - (double)degrees) * 60.0;
+			sprintf(&buffer[index], "%3.3d.%8.5f_%c", degrees, minutes, NorS); 
+			index += 14; /* index = 61 */
 
-			index = 61; /*nav speed*/
-			buffer[index] = store->nav_speed;
-			index = 62; /*nav heading*/
-			mb_put_binary_short(swap, (unsigned short)store->nav_heading, (void *) &buffer[index]);
-			index = 64; /*pitch*/
-			if(store->pitch != 0)
-			{
-				mb_put_binary_short(swap, (unsigned short)store->pitch, (void *)&buffer[index]);
+			/* speed */
+			buffer[index] = store->nav_speed; index++; /* index = 62 */
+			
+			/* heading*/
+			mb_put_binary_short(swap, (unsigned short)store->nav_heading, (void *) &buffer[index]); 
+			index += 2; /* index = 64 */
+			
+			/* pitch */
+			mb_put_binary_short(swap, (unsigned short)store->pitch, (void *)&buffer[index]);
+			if (store->pitch != 0)
 				buffer[index] = buffer[index] | 0x80;
-			}
-			index = 66; /*roll*/
+			index += 2; /* index = 66 */
+			
+			/* roll */
+			mb_put_binary_short(swap, (unsigned short)store->roll, (void *)&buffer[index]);
 			if(store->roll != 0)
-			{
-				mb_put_binary_short(swap, (unsigned short)store->roll, (void *)&buffer[index]);
 				buffer[index] = buffer[index] | 0x80;
-			}
-			index = 68; /*heading*/
-			if(store->heading != 0)
-			{
-				mb_put_binary_short(swap, (unsigned short)store->heading, (void *)&buffer[index]);
-				buffer[index] = buffer[index] | 0x80;
-			}
-			index = 70; /*beams*/
-			mb_put_binary_short(swap, (unsigned short)store->num_beams, (void *)&buffer[index]);
-			index += 2;
-			mb_put_binary_short(swap, (unsigned short)store->samples_per_beam, (void *)&buffer[index]);
-			index += 2;
-			mb_put_binary_short(swap, (unsigned short)store->sector_size, (void *)&buffer[index]);
-			index += 2;
-			mb_put_binary_short(swap, (unsigned short)store->start_angle, (void *)&buffer[index]);
-			index += 2;
-			buffer[index] = store->angle_increment; index+=1;
-			mb_put_binary_short(swap, (unsigned short)store->acoustic_range, (void *)&buffer[index]);
-			index += 2;
-			mb_put_binary_short(swap, (unsigned short)store->acoustic_frequency, (void *)&buffer[index]);
-			index += 2;
-			if(store->sound_velocity != 0)
-			{
-				mb_put_binary_short(swap, (unsigned short)store->sound_velocity, (void *)&buffer[index]);
-				buffer[index] = buffer[index] | 0x80;
-			}
-			index += 2;
-			mb_put_binary_short(swap, (unsigned short)store->range_resolution, (void *)&buffer[index]);
-			index += 2;
-			mb_put_binary_short(swap, (unsigned short)store->profile_tilt_angle, (void *)&buffer[index]);
-			index += 2;
-			mb_put_binary_short(swap, (unsigned short)store->rep_rate, (void *)&buffer[index]);
-			index += 2;
-			mb_put_binary_int(swap, store->ping_number, (void *)&buffer[index]);
-			index = 256;
-			/* get ranges */
-			for (i=0;i<store->num_beams;i++)
-			{
-			mb_put_binary_short(swap, (unsigned short)store->range[i], &buffer[index + (i * 2)]); 
-			}
-			
-			
-			}
-		}
+			index += 2; /* index = 68 */
 
-	/* write next record to file */
-	if (store->kind == MB_DATA_DATA
-		|| store->kind == MB_DATA_COMMENT)
-		{
-		if ((status = fwrite(buffer,1,write_len,
-			mb_io_ptr->mbfp)) 
-			== write_len) 
+			/* heading */
+			mb_put_binary_short(swap, (unsigned short)store->heading, (void *)&buffer[index]);
+			if(store->heading != 0)
+				buffer[index] = buffer[index] | 0x80;
+			index += 2; /* index = 70 */
+
+			/* beams */
+			mb_put_binary_short(swap, (unsigned short)store->num_beams, (void *)&buffer[index]);
+			index += 2; /* index = 72 */
+			mb_put_binary_short(swap, (unsigned short)store->samples_per_beam, (void *)&buffer[index]);
+			index += 2; /* index = 74 */
+			mb_put_binary_short(swap, (unsigned short)store->sector_size, (void *)&buffer[index]);
+			index += 2; /* index = 76 */
+			mb_put_binary_short(swap, (unsigned short)store->start_angle, (void *)&buffer[index]);
+			index += 2; /* index = 78 */
+			buffer[index] = store->angle_increment; 
+			index+=1; /* index = 79 */
+			mb_put_binary_short(swap, (unsigned short)store->acoustic_range, (void *)&buffer[index]);
+			index += 2; /* index = 81 */
+			mb_put_binary_short(swap, (unsigned short)store->acoustic_frequency, (void *)&buffer[index]);
+			index += 2; /* index = 83 */
+			mb_put_binary_short(swap, (unsigned short)store->sound_velocity, (void *)&buffer[index]);
+			if(store->sound_velocity != 0)
+				buffer[index] = buffer[index] | 0x80;
+			index += 2; /* index = 85 */
+			mb_put_binary_short(swap, (unsigned short)store->range_resolution, (void *)&buffer[index]);
+			index += 2; /* index = 87 */
+			mb_put_binary_short(swap, (unsigned short)store->pulse_length, (void *)&buffer[index]);
+			index += 2; /* index = 89 */
+			mb_put_binary_short(swap, (unsigned short)store->profile_tilt_angle, (void *)&buffer[index]);
+			index += 2; /* index = 91 */
+			mb_put_binary_short(swap, (unsigned short)store->rep_rate, (void *)&buffer[index]);
+			index += 2; /* index = 93 */
+			mb_put_binary_int(swap, store->ping_number, (void *)&buffer[index]);
+			index += 4; /* index = 97 */
+			
+			/* blank part of header */
+			for (i=index;i<=255;i++)
+				buffer[i] = 0; 
+			index += 159; /* index 256 */
+			
+			/* ranges */
+			for (i=0;i<store->num_beams;i++)
+				{
+				mb_put_binary_short(swap, (unsigned short)store->range[i], &buffer[index + (i * 2)]); 
+				}
+			}
+			
+		else if (store->kind == MB_DATA_COMMENT)
 			{
-			status = MB_SUCCESS;
-			*error = MB_ERROR_NO_ERROR;
+			/* header */
+			index = 0;
+			buffer[index] = '8'; index++;
+			buffer[index] = '3'; index++;
+			buffer[index] = 'P'; index++;
+			buffer[index] = (char) store->version; index++;
+			write_len = 256;
+			mb_put_binary_short(swap, (unsigned short)write_len, (void *) &buffer[index]); index +=2;
+			buffer[index] = '#'; index++;
+			buffer[index] = '#'; index++; /* index = 8 */
+			
+			/* write comment */
+			strncpy(&buffer[index], store->comment, MBSYS_IMAGE83P_COMMENTLEN);
+			for (i=8+strlen(store->comment);i<8+MBSYS_IMAGE83P_COMMENTLEN;i++)
+					buffer[i] = 0;
+			}
+
+		/* write next record to file */
+		if (store->kind == MB_DATA_DATA
+			|| store->kind == MB_DATA_COMMENT)
+			{
+			if ((status = fwrite(buffer,1,write_len,
+				mb_io_ptr->mbfp)) 
+				== write_len) 
+				{
+				status = MB_SUCCESS;
+				*error = MB_ERROR_NO_ERROR;
+				}
+			else
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_WRITE_FAIL;
+				}
+
 			}
 		else
 			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_WRITE_FAIL;
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			if (verbose >= 5)
+				fprintf(stderr,"\ndbg5  No data written in MBIO function <%s>\n",
+					function_name);
 			}
-
 		}
+
 	else
 		{
 		status = MB_SUCCESS;

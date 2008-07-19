@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_image83p.c	5/5/2008
- *	$Id: mbsys_image83p.c,v 5.3 2008-07-10 18:02:39 caress Exp $
+ *	$Id: mbsys_image83p.c,v 5.4 2008-07-19 07:41:14 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -19,12 +19,17 @@
  * The data formats which are commonly used to store Imagenex DeltaT
  * data in files include
  *      MBF_IMAGE83P : MBIO ID 191
+ *      MBF_IMAGEMBA : MBIO ID 192
  *     
  *
  * Author:	Vivek Reddy, Santa Clara University
+ *       	D.W. Caress
  * Date:	May 5, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2008/07/10 18:02:39  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.0  2008/05/16 22:51:24  caress
  * Initial version.
  *
@@ -47,7 +52,7 @@
 int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
-    static char res_id[]="$Id: mbsys_image83p.c,v 5.3 2008-07-10 18:02:39 caress Exp $";
+    static char res_id[]="$Id: mbsys_image83p.c,v 5.4 2008-07-19 07:41:14 caress Exp $";
 	char	*function_name = "mbsys_image83p_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -305,6 +310,7 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	else if (*kind == MB_DATA_COMMENT)
 		{
 		/* copy comment */
+		strncpy(comment, store->comment, MBSYS_IMAGE83P_COMMENTLEN);
 
 		/* print debug statements */
 		if (verbose >= 4)
@@ -476,7 +482,13 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			store->bathacrosstrack[i] = bathacrosstrack[i];
 			store->bathalongtrack[i] = bathalongtrack[i];
 			}
-	}
+		}
+
+	/* insert data in structure */
+	else if (store->kind == MB_DATA_COMMENT)
+		{
+		strncpy(store->comment, comment, MBSYS_IMAGE83P_COMMENTLEN);
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -539,7 +551,7 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get nbeams */
 		*nbeams = store->num_beams;
 		
-		*draft = 0.0;
+		*draft = store->sonar_depth;
 		if (store->sound_velocity > 13000 && store->sound_velocity < 17000)
 			*ssv = 0.1 * store->sound_velocity;
 		else
@@ -560,7 +572,7 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			angles_forward[i] = phi;
 			angles_null[i] = 0.0;
 			alongtrack_offset[i] = 0.0;
-			heave[i] = 0.0;
+			heave[i] = store->heave;
 			}
 
 		/* set status */
@@ -654,7 +666,7 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get transducer depth */
-		*transducer_depth = 0.0;
+		*transducer_depth = store->sonar_depth - store->heave;
 
 		/* get altitude from depth closest to nadir */
 		altitude_found = MB_NO;
@@ -762,12 +774,16 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get heading */
 		*heading = 0.1 * store->heading;
 
+		/* get draft */
+		*draft = store->sonar_depth;
+
 		/* get speed (convert knots to km/hr) */
 		*speed = 1.852 * store->nav_speed * 0.1;
 
 		/* get roll pitch  */
 		*roll = 0.1 * (store->roll - 900.0);
 		*pitch = 0.1 * (store->pitch - 900.0);
+		*heave = store->heave;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -934,12 +950,16 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get heading (360 degrees = 65536) */
 		store->heading = (int) (10 * heading);
 
+		/* get draft */
+		store->sonar_depth = draft;
+
 		/* get speed (convert km/hr to knots) */
 		store->nav_speed = (int) (0.539996 * speed * 10);
 
 		/* get roll pitch and heave */
 		store->roll = roll * 10 + 900;
 		store->pitch = pitch * 10 + 900;
+		store->heave = heave;
 		
 		}
 

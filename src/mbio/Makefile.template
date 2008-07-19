@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.25 2008-05-16 22:56:24 caress Exp $
+#	$Id: Makefile.template,v 5.26 2008-07-19 07:41:14 caress Exp $
 #
 #     Copyright (c) 1993-2008 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.25  2008/05/16 22:56:24  caress
+# Release 5.1.1beta18.
+#
 # Revision 5.24  2008/03/01 09:12:52  caress
 # Added support for Simrad EM710 multibeam in new formats 58 and 59.
 #
@@ -293,7 +296,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
 		mbr_samesurf.o mbr_reson7kr.o \
 		mbr_edgjstar.o mbr_segysegy.o \
-		mbr_image83p.o
+		mbr_image83p.o mbr_imagemba.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -356,7 +359,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
 		mbr_samesurf.o mbr_reson7kr.o \
 		mbr_edgjstar.o mbr_segysegy.o \
-		mbr_image83p.o
+		mbr_image83p.o mbr_imagemba.o
 	ranlib $(LIBDIR)/libmbio.a
 
 ### compile the source files
@@ -603,6 +606,8 @@ mbr_segysegy.o: mbr_segysegy.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_segysegy.c
 mbr_image83p.o: mbr_image83p.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_image83p.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_image83p.c
+mbr_imagemba.o: mbr_imagemba.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_image83p.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_imagemba.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_format.h:	mb_format.h
