@@ -27,6 +27,7 @@ adjusting survey navigation.
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
 Version 5.1.1          To be determined
+Version 5.1.1beta21    July 20, 2008
 Version 5.1.1beta20    July 10, 2008
 Version 5.1.1beta19    June 6, 2008
 Version 5.1.1beta18    May 16, 2008
@@ -276,9 +277,6 @@ Updated format MBF_OMGHDCSJ (151), which supports the John Hughes
 Clark HDCS (SwathEd) format, to handle all of John's "version 3"
 data. John's "version 4" format is not yet supported.
 
-Added new format 191 supporting data from Imagenex 83P DeltaT multibeams.
-As of 5.1.1beta18 this support is readonly.
-
 Added calculation and use of three dimensional covariance in
 the xyz nav offsets used by mbnavadjust.
 
@@ -300,6 +298,15 @@ supported "network attitude" datagram as source of attitude.
 Changed mbnavadjust inversion to use simplistic iterative relaxation
 rather than a full matrix solver. This targeted solver is faster and
 avoids some bad behavior around survey starts and ends.
+
+Fixed mbedit scaling for swath widths less than 6 m.
+
+Added formats 191 and 192 to support Imagenex Delta T multibeams. 
+Format 191 supports the 83P vendor format and format 192 is an
+extended processing format.
+
+Lengthened filename char arrays in mbedit, mbnavedit, and mbvelocitytool
+to prevent possible overflows with large paths.
 
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
@@ -1494,10 +1501,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.113 2008-07-10 18:24:56 caress Exp $
+RCS ID: $Id: README,v 5.114 2008-07-20 15:42:00 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.113  2008/07/10 18:24:56  caress
+Proceeding towards 5.1.1beta20.
+
 Revision 5.112  2008/07/10 06:51:04  caress
 Preparing for 5.1.1beta20
 
