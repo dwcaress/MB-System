@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.13 2008-05-16 23:05:05 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.14 2008-07-20 15:32:14 caress Exp $
  *
  *    Copyright (c) 1995-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2008/05/16 23:05:05  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.12  2006/02/16 21:15:07  caress
  * Made smooth inversion weights work as small as 0.01 in the interface. Redimensioned some strings too.
  *
@@ -186,7 +189,7 @@ XFontStruct	*fontStruct;
 int	expose_plot_ok = True;
 
 static char	*input_file;
-static char	output_file[128];
+static char	output_file[MB_PATH_MAXLINE];
 int selected = 0; /* indicates an input file is selected */
 
 int	can_xgid;		/* XG graphics id */
@@ -206,7 +209,7 @@ static int mb_borders[4] =
 	{ 0, 1016, 0, 552 };
 
 int	status;
-char	string[128];
+char	string[MB_PATH_MAXLINE];
 
 void	do_fileselection_list();
 void	set_label_string(Widget, String);
@@ -688,7 +691,7 @@ do_mbnavedit_init(int argc, char **argv)
 
 void do_set_controls()
 {
-	char	value_text[128];
+	char	value_text[MB_PATH_MAXLINE];
 				
 	/* set about version label */
 	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"", 
@@ -1972,7 +1975,7 @@ do_driftlat( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_offset_apply( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	char	value_text[128];
+	char	value_text[MB_PATH_MAXLINE];
     	double  dvalue;
 	XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
@@ -2283,7 +2286,7 @@ do_fileselection_filter( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	char	fileroot[128];
+	char	fileroot[MB_PATH_MAXLINE];
 	int	format_status, format_error;
 	int	form;
 	char	value_text[10];
