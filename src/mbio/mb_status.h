@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.90 2008-07-19 07:41:14 caress Exp $
+ *    $Id: mb_status.h,v 5.91 2008-07-20 15:41:35 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.90  2008/07/19 07:41:14  caress
+ * Added formats 191 and 192 to support Imagenex Delta T multibeam data.
+ *
  * Revision 5.89  2008/07/10 18:25:41  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -383,7 +386,7 @@
 
 /* MB-system version id */
 #define	MB_VERSION	"5.1.1beta21"
-#define	MB_BUILD_DATE	"19 July 2008"
+#define	MB_BUILD_DATE	"20 July 2008"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
