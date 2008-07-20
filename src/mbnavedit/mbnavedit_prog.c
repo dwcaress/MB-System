@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.21 2008-05-16 23:05:05 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.22 2008-07-20 15:32:14 caress Exp $
  *
  *    Copyright (c) 1995-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2008/05/16 23:05:05  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.20  2007/10/08 16:17:00  caress
  * Repeated positions are now automatically flagged for modeling or smooth inversion.
  *
@@ -257,7 +260,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.21 2008-05-16 23:05:05 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.22 2008-07-20 15:32:14 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -313,7 +316,7 @@ static int	idata = 0;
 static int	icomment = 0;
 static int	odata = 0;
 static int	ocomment = 0;
-static char	comment[256];
+static char	comment[MB_COMMENT_MAXLINE];
 
 /* buffer control variables */
 #define	MBNAVEDIT_BUFFER_SIZE	25000
