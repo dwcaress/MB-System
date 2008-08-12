@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.29 2008-07-10 18:16:33 caress Exp $
+ *    $Id: mblist.c,v 5.30 2008-08-12 00:05:54 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  *		in 1990.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2008/07/10 18:16:33  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.27  2008/05/24 19:39:03  caress
  * Applied Gordon Keith fix to mblist.
  *
@@ -368,7 +371,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.29 2008-07-10 18:16:33 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.30 2008-08-12 00:05:54 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -1937,6 +1940,10 @@ main (int argc, char **argv)
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 
 			fprintf(outfile, "file name\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
 			break;
 
 		  case 'f': /* format */
@@ -1949,6 +1956,10 @@ main (int argc, char **argv)
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 			
 			fprintf(outfile, "see mbformat\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
 			break;
 
 		  case 'G': /* TVG start */
@@ -2006,6 +2017,10 @@ main (int argc, char **argv)
 			fprintf(outfile, "\t\t%s:long_name = \"Pulse Length\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 			fprintf(outfile, "us");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
 			break;
 
 		  case 'l': /* Transmit pulse length */
@@ -2040,6 +2055,10 @@ main (int argc, char **argv)
 			fprintf(outfile, "\t\t%s:long_name = \"Sounder mode\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 			fprintf(outfile, "0=very shallow,1=shallow,2=medium,3=deep,4=very deep,5=extra deep\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
 			break;
 
 		  case 'N' : /* Ping number */
@@ -2051,6 +2070,10 @@ main (int argc, char **argv)
 			fprintf(outfile, "\t\t%s:long_name = \"Sounder ping counter\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 			fprintf(outfile, "pings\";\n");
+			
+			signflip_next_value = MB_NO;
+			invert_next_value = MB_NO;
+			raw_next_value = MB_NO;
 			break;
 
 		  case 'p': /* sidescan pixel */
@@ -3498,7 +3521,7 @@ main (int argc, char **argv)
 							 &signflip_next_value, &error);
 					if (count > 0)
 					  {
-					    for (k = 1; k < count && k < beam_samples[k]; k++) 
+					    for (m = 1; m < count && m < beam_samples[k]; m++) 
 					      {
 						if (netcdf == MB_YES)
 						  fprintf(output[i], ", ");
@@ -3507,11 +3530,11 @@ main (int argc, char **argv)
 						invert_next_value = invert;
 						signflip_next_value = flip;
 
-						printsimplevalue(verbose, output[i], ss_pixels[start_sample[k] + k], 5, 1, ascii, 
+						printsimplevalue(verbose, output[i], ss_pixels[start_sample[k] + m], 5, 1, ascii, 
 								 &invert_next_value, 
 								 &signflip_next_value, &error);
 					      }
-					    for (; k < count; k++)
+					    for (; m < count; m++)
 					      {
 						if (netcdf == MB_YES)
 						  fprintf(output[i], ", ");
@@ -4280,7 +4303,7 @@ main (int argc, char **argv)
 							 &signflip_next_value, &error);
 					if (count > 0)
 					  {
-					    for (k = 1; k < count && k < beam_samples[beam_vertical]; k++) 
+					    for (m = 1; m < count && m < beam_samples[beam_vertical]; m++) 
 					      {
 						if (netcdf == MB_YES)
 						  fprintf(output[i], ", ");
@@ -4289,11 +4312,11 @@ main (int argc, char **argv)
 						invert_next_value = invert;
 						signflip_next_value = flip;
 
-						printsimplevalue(verbose, output[i], ss_pixels[start_sample[beam_vertical] + k], 5, 1, ascii, 
+						printsimplevalue(verbose, output[i], ss_pixels[start_sample[beam_vertical] + m], 5, 1, ascii, 
 								 &invert_next_value, 
 								 &signflip_next_value, &error);
 					      }
-					    for (; k < count; k++)
+					    for (; m < count; m++)
 					      {
 						if (netcdf == MB_YES)
 						  fprintf(output[i], ", ");
