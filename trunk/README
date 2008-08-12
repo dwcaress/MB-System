@@ -308,6 +308,8 @@ extended processing format.
 Lengthened filename char arrays in mbedit, mbnavedit, and mbvelocitytool
 to prevent possible overflows with large paths.
 
+Updated the GSF code to new GSF version 2.09
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1501,10 +1503,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.114 2008-07-20 15:42:00 caress Exp $
+RCS ID: $Id: README,v 5.115 2008-08-12 00:00:40 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.114  2008/07/20 15:42:00  caress
+Release 5.1.1beta21
+
 Revision 5.113  2008/07/10 18:24:56  caress
 Proceeding towards 5.1.1beta20.
 
