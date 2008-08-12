@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.27 2008-05-24 19:40:07 caress Exp $
+ *    $Id: mbmosaic.c,v 5.28 2008-08-12 00:04:04 caress Exp $
  *
- *    Copyright (c) 1997, 2000, 2002, 2003, 2006 by
+ *    Copyright (c) 1997-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2008/05/24 19:40:07  caress
+ * Applied a Gordon Keith fix.
+ *
  * Revision 5.26  2008/01/14 18:35:49  caress
  * Improved handling of datalists.
  *
@@ -242,7 +245,7 @@ int mbmosaic_get_priorities(
 		int	*error);
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.27 2008-05-24 19:40:07 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.28 2008-08-12 00:04:04 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -324,6 +327,7 @@ main (int argc, char **argv)
 	int	n_priority_angle = 0;
 	double	*priority_angle_angle = NULL;
 	double	*priority_angle_priority = NULL;
+	int	weight_priorities = 0;
 	double	altitude_default = 1000.0;
 	int	pstatus;
 	char	path[MB_PATH_MAXLINE];
@@ -517,7 +521,7 @@ main (int argc, char **argv)
 			break;
 		case 'F':
 		case 'f':
-			sscanf (optarg,"%lf", &priority_range);
+			sscanf (optarg,"%lf/%d", &priority_range, &weight_priorities);
 			grid_mode = MBMOSAIC_AVERAGE;
 			flag++;
 			break;
@@ -716,6 +720,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       grid_mode:            %d\n",grid_mode);
 		fprintf(outfp,"dbg2       priority_mode:        %d\n",priority_mode);
 		fprintf(outfp,"dbg2       priority_range:       %f\n",priority_range);
+		fprintf(outfp,"dbg2       weight_priorities:    %d\n",weight_priorities);
 		fprintf(outfp,"dbg2       pfile:                %s\n",pfile);
 		fprintf(outfp,"dbg2       priority_azimuth:     %f\n",priority_azimuth);
 		fprintf(outfp,"dbg2       priority_azimuth_fac: %f\n",priority_azimuth_factor);
@@ -1151,11 +1156,11 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
 		/* allocate memory */
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,n_priority_angle*sizeof(double),
-				&priority_angle_angle,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,n_priority_angle*sizeof(double),
+				(void **)&priority_angle_angle,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,n_priority_angle*sizeof(double),
-				&priority_angle_priority,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,n_priority_angle*sizeof(double),
+				(void **)&priority_angle_priority,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
@@ -1334,14 +1339,14 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		fprintf(outfp,"\n");
 
 	/* allocate memory for arrays */
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&grid,&error);
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&norm,&error);
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&maxpriority,&error);
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&cnt,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&grid,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&norm,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&maxpriority,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(int),(void **)&cnt,&error);
 	if (clip != 0)
-	    status = mb_malloc(verbose,gxdim*gydim*sizeof(int),&num,&error);
-	status = mb_malloc(verbose,gxdim*gydim*sizeof(double),&sigma,&error);
-	status = mb_malloc(verbose,xdim*ydim*sizeof(float),&output,&error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(int),(void **)&num,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&sigma,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,xdim*ydim*sizeof(float),(void **)&output,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -2230,6 +2235,10 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					xx = wbnd[0] + ii*dx - bathlon[ib];
 					yy = wbnd[2] + jj*dy - bathlat[ib];
 					norm_weight = file_weight * exp(-(xx*xx + yy*yy)*gaussian_factor);
+					if (weight_priorities == 1)
+						norm_weight *= priorities[ib];
+					else if (weight_priorities == 2)
+						norm_weight *= priorities[ib] * priorities[ib];
 					norm[kgrid] += norm_weight;
 					if (datatype == MBMOSAIC_DATA_AMPLITUDE)
 					  {
@@ -2414,6 +2423,10 @@ ib,priorities[ib],kgrid,maxpriority[kgrid],priority_range); */
 					xx = wbnd[0] + ii*dx - sslon[ib];
 					yy = wbnd[2] + jj*dy - sslat[ib];
 					norm_weight = file_weight * exp(-(xx*xx + yy*yy)*gaussian_factor);
+					if (weight_priorities == 1)
+						norm_weight *= priorities[ib];
+					else if (weight_priorities == 2)
+						norm_weight *= priorities[ib] * priorities[ib];
 					grid[kgrid] += norm_weight * ss[ib];
 					norm[kgrid] += norm_weight;
 					sigma[kgrid] += norm_weight * ss[ib] * ss[ib];
@@ -2523,15 +2536,15 @@ kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 				}
 
 		/* allocate and initialize sgrid */
-		status = mb_malloc(verbose,3*ndata*sizeof(float),&sdata,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,3*ndata*sizeof(float),(void **)&sdata,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,gxdim*gydim*sizeof(float),&sgrid,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(float),(void **)&sgrid,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,ndata*sizeof(float),&work1,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(float),(void **)&work1,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,ndata*sizeof(int),&work2,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(int),(void **)&work2,&error);
 		if (status == MB_SUCCESS)
-			status = mb_malloc(verbose,(gxdim+gydim)*sizeof(int),&work3,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,(gxdim+gydim)*sizeof(int),(void **)&work3,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
@@ -2667,11 +2680,11 @@ kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 				nbinspline++;
 				}
 			}
-		mb_free(verbose,&sdata,&error);
-		mb_free(verbose,&sgrid,&error);
-		mb_free(verbose,&work1,&error);
-		mb_free(verbose,&work2,&error);
-		mb_free(verbose,&work3,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&sdata,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&sgrid,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&work1,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&work2,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&work3,&error);
 		}
 
 	/* get min max of data */
@@ -2993,18 +3006,18 @@ kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 		}
 
 	/* deallocate arrays */
-	mb_free(verbose,&grid,&error); 
-	mb_free(verbose,&norm,&error); 
-	mb_free(verbose,&maxpriority,&error); 
-	mb_free(verbose,&cnt,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&grid,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&norm,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&maxpriority,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&cnt,&error); 
 	if (clip != 0)
-	    mb_free(verbose,&num,&error); 
-	mb_free(verbose,&sigma,&error); 
-	mb_free(verbose,&output,&error); 
+	    mb_freed(verbose,__FILE__,__LINE__,(void **)&num,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sigma,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&output,&error); 
 	if (n_priority_angle > 0)
 		{
-		mb_free(verbose,&priority_angle_angle,&error); 
-		mb_free(verbose,&priority_angle_priority,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&priority_angle_angle,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&priority_angle_priority,&error); 
 		}
 
 	/* deallocate projection */
@@ -3425,7 +3438,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	complex = 0;
 
 	/* allocate memory for output array */
-	status = mb_malloc(verbose,grd.nx*grd.ny*sizeof(float),&a,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
 
 	/* copy grid to new array and write it to GMT netCDF grd file */
 	if (status == MB_SUCCESS)
@@ -3443,7 +3456,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
 
 		/* free memory for output array */
-		mb_free(verbose, &a, error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **) &a, error);
 		}
 	    
 	/* free GMT memory */
