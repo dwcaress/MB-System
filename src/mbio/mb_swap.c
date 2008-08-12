@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c,v 5.6 2008-05-16 22:56:24 caress Exp $
+ *    $Id: mb_swap.c,v 5.7 2008-08-12 05:31:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	July 6, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.5  2006/02/12 04:28:09  caress
  * For 5.0.9.
  *
@@ -120,15 +123,26 @@ int mb_swap_float(float *a)
 /* function mb_swap_double swaps the bytes of an 8 byte double value */
 int mb_swap_double(double *a)
 {
-	double b;
-	unsigned int *t1;
-	unsigned int *t2;
-
-	b = *a;
-	t1 = (unsigned int *) &b;
-	t2 = (unsigned int *) a;
-	t2[1] = mb_swap_int(t1[0]);
-	t2[0] = mb_swap_int(t1[1]);
+	mb_u_char bc[8];
+	mb_u_char *ac;
+	
+	ac = (mb_u_char *) a;
+	bc[0] = ac[7];
+	bc[1] = ac[6];
+	bc[2] = ac[5];
+	bc[3] = ac[4];
+	bc[4] = ac[3];
+	bc[5] = ac[2];
+	bc[6] = ac[1];
+	bc[7] = ac[0];
+	ac[0] = bc[0];
+	ac[1] = bc[1];
+	ac[2] = bc[2];
+	ac[3] = bc[3];
+	ac[4] = bc[4];
+	ac[5] = bc[5];
+	ac[6] = bc[6];
+	ac[7] = bc[7];
 	
 	return(MB_SUCCESS);
 }
@@ -136,15 +150,26 @@ int mb_swap_double(double *a)
 /* function mb_swap_long swaps the bytes of an 8 byte long value */
 int mb_swap_long(mb_s_long *a)
 {
-	mb_s_long b;
-	unsigned int *t1;
-	unsigned int *t2;
-
-	b = *a;
-	t1 = (unsigned int *) &b;
-	t2 = (unsigned int *) a;
-	t2[1] = mb_swap_int(t1[0]);
-	t2[0] = mb_swap_int(t1[1]);
+	mb_u_char bc[8];
+	mb_u_char *ac;
+	
+	ac = (mb_u_char *) a;
+	bc[0] = ac[7];
+	bc[1] = ac[6];
+	bc[2] = ac[5];
+	bc[3] = ac[4];
+	bc[4] = ac[3];
+	bc[5] = ac[2];
+	bc[6] = ac[1];
+	bc[7] = ac[0];
+	ac[0] = bc[0];
+	ac[1] = bc[1];
+	ac[2] = bc[2];
+	ac[3] = bc[3];
+	ac[4] = bc[4];
+	ac[5] = bc[5];
+	ac[6] = bc[6];
+	ac[7] = bc[7];
 	
 	return(MB_SUCCESS);
 }
