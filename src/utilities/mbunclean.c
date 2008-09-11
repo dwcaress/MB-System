@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbunclean.c	3/10/93
- *    $Id: mbunclean.c,v 5.6 2006-09-11 18:55:54 caress Exp $
+ *    $Id: mbunclean.c,v 5.7 2008-09-11 20:20:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,10 @@
  * Date:	March 10, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/09/11 18:55:54  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.5  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -91,6 +95,10 @@
  *
  * Revision 3.1  1993/05/14  23:49:32  sohara
  * fixed $Log: not supported by cvs2svn $
+ * fixed Revision 5.6  2006/09/11 18:55:54  caress
+ * fixed Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * fixed 2006.
+ * fixed
  * fixed Revision 5.5  2006/01/18 15:17:00  caress
  * fixed Added stdlib.h include.
  * fixed
@@ -180,7 +188,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbunclean.c,v 5.6 2006-09-11 18:55:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbunclean.c,v 5.7 2008-09-11 20:20:14 caress Exp $";
 	static char program_name[] = "MBUNCLEAN";
 	static char help_message[] =  "MBUNCLEAN unflags swath bathymetry and amplitude data \nwhich has been flagged as bad by being set negative. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbunclean [-Blow/high -Fformat -Llonflip -V -H  -Iinfile -Ooutfile]";
@@ -431,18 +439,22 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
+			(void **)&beamflag,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
+			(void **)&amp,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ss,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -642,14 +654,14 @@ main (int argc, char **argv)
 	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&bathacrosstrack,&error); 
-	mb_free(verbose,&bathalongtrack,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&ssacrosstrack,&error); 
-	mb_free(verbose,&ssalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

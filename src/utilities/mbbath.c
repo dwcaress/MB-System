@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbath.c	3/31/93
- *    $Id: mbbath.c,v 5.5 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbbath.c,v 5.6 2008-09-11 20:20:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 31, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.4  2005/03/25 04:43:00  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -199,7 +202,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbbath.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbbath.c,v 5.6 2008-09-11 20:20:14 caress Exp $";
 	static char program_name[] = "MBBATH";
 	static char help_message[] =  "MBBATH calculates bathymetry from \
 the travel time data by raytracing \nthrough a layered water velocity \
@@ -613,9 +616,9 @@ and stdout.";
 	
 		/* allocate space for the velocity profile and raytracing tables */
 		size = (nvel+1)*sizeof(double);
-		status = mb_malloc(verbose,size,&depth,&error);
-		status = mb_malloc(verbose,size,&velocity,&error);
-		status = mb_malloc(verbose,size,&velocity_sum,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&depth,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&velocity,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&velocity_sum,&error);
 	
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -713,8 +716,8 @@ and stdout.";
 		}
 
 	/* allocate space for the roll correction arrays */
-	status = mb_malloc(verbose,nroll*sizeof(double),&roll_time,&error);
-	status = mb_malloc(verbose,nroll*sizeof(double),&roll_corr,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,nroll*sizeof(double),(void **)&roll_time,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,nroll*sizeof(double),(void **)&roll_corr,&error);
 
 	/* if a roll correction file has been specified then
 		read in roll correction data */
@@ -781,24 +784,24 @@ and stdout.";
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-				&bathalongtrack,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssacrosstrack,
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),(void **)&beamflag,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+				(void **)&bathacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+				(void **)&bathalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),(void **)&amp,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ss,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ssacrosstrack,
 				&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ssalongtrack,
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ssalongtrack,
 				&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&ttimes,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_forward,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&angles_null,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&heave,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&alongtrack_offset,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&ttimes,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&angles,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&angles_forward,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&angles_null,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&heave,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&alongtrack_offset,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -884,7 +887,7 @@ and stdout.";
 				program_name);
 			exit(error);
 			}
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&bath_corr,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bath_corr,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
@@ -1547,26 +1550,26 @@ and stdout.";
 	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&depth,&error);
-	mb_free(verbose,&velocity,&error);
-	mb_free(verbose,&velocity_sum,&error);
-	mb_free(verbose,&roll_time,&error);
-	mb_free(verbose,&roll_corr,&error);
-	mb_free(verbose,&bath_corr,&error);
-	mb_free(verbose,&ttimes,&error);
-	mb_free(verbose,&angles,&error);
-	mb_free(verbose,&angles_forward,&error);
-	mb_free(verbose,&angles_null,&error);
-	mb_free(verbose,&heave,&error);
-	mb_free(verbose,&alongtrack_offset,&error);
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&bathacrosstrack,&error); 
-	mb_free(verbose,&bathalongtrack,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&ssacrosstrack,&error); 
-	mb_free(verbose,&ssalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&depth,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&velocity,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&velocity_sum,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&roll_time,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&roll_corr,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath_corr,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ttimes,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&angles,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&angles_forward,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&angles_null,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&heave,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&alongtrack_offset,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

@@ -75,7 +75,6 @@ int main( int argc, char **argv)
     Boolean      argok=False;
     Widget   topLevelShell;
     Widget   mainWindow;
-    int		startupfile;
     
     /* Begin user code block <declarations> */
     
@@ -128,7 +127,7 @@ int main( int argc, char **argv)
     XtSetArg(args[ac], XmNtitle, "MBnavadjust"); ac++;
     XtSetArg(args[ac], XmNiconName, "MBnavadjust"); ac++;
     XtSetArg(args[ac], XmNx, 47); ac++;
-    XtSetArg(args[ac], XmNy, 53); ac++;
+    XtSetArg(args[ac], XmNy, 75); ac++;
     XtSetArg(args[ac], XmNwidth, 962); ac++;
     XtSetArg(args[ac], XmNheight, 400); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",

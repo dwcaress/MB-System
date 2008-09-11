@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.37 2008-05-26 04:43:15 caress Exp $
+ *    $Id: mb_process.c,v 5.38 2008-09-11 20:11:52 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.37  2008/05/26 04:43:15  caress
+ * Getting ready for release 5.1.1beta19.
+ *
  * Revision 5.36  2008/05/16 22:56:24  caress
  * Release 5.1.1beta18.
  *
@@ -161,7 +164,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.37 2008-05-26 04:43:15 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.38 2008-09-11 20:11:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -219,6 +222,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_nav_shift = MBP_NAV_OFF;
 	process->mbp_nav_offsetx = 0.0;
 	process->mbp_nav_offsety = 0.0;
+	process->mbp_nav_offsetz = 0.0;
+	process->mbp_nav_shiftlon = 0.0;
+	process->mbp_nav_shiftlat = 0.0;
 	
 	/* adjusted navigation merging */
 	process->mbp_navadj_mode = MBP_NAV_OFF;
@@ -433,14 +439,12 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_algorithm);
 			}
-		    else if (strncmp(buffer, "NAVSHIFT", 12) == 0)
-			{
-			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_shift);
-			}
 		    else if (strncmp(buffer, "NAVTIMESHIFT", 12) == 0)
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_nav_timeshift);
 			}
+			
+		    /* navigation offsets and shifts */
 		    else if (strncmp(buffer, "NAVOFFSETX", 10) == 0)
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_nav_offsetx);
@@ -452,6 +456,18 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    else if (strncmp(buffer, "NAVOFFSETZ", 10) == 0)
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_nav_offsetz);
+			}
+		    else if (strncmp(buffer, "NAVSHIFTLON", 11) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_nav_shiftlon);
+			}
+		    else if (strncmp(buffer, "NAVSHIFTLAT", 11) == 0)
+			{
+			sscanf(buffer, "%s %lf", dummy, &process->mbp_nav_shiftlat);
+			}
+		    else if (strncmp(buffer, "NAVSHIFT", 8) == 0)
+			{
+			sscanf(buffer, "%s %d", dummy, &process->mbp_nav_shift);
 			}
 
 		    /* adjusted navigation merging */
@@ -1229,6 +1245,14 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		strcpy(dummy, &(lastslash[1]));
 		strcpy(process->mbp_sscorrfile, dummy);
 		}
+
+	    /* reset mbp_ampsscorr_topo file */
+	    if ((lastslash = strrchr(process->mbp_ampsscorr_topofile, '/')) != NULL
+		&& strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_ampsscorr_topofile, dummy);
+		}
 	    }
 	    
 	/* Now make filenames global if local */
@@ -1344,6 +1368,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    process->mbp_sscorrfile[len] = '\0';
 	    strcat(process->mbp_sscorrfile, dummy);
 	    }
+
+	/* reset mbp_ampsscorr_topo file */
+	if (len > 1
+	    && strlen(process->mbp_ampsscorr_topofile) > 1
+	    && process->mbp_ampsscorr_topofile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_ampsscorr_topofile);
+	    strncpy(process->mbp_ampsscorr_topofile, process->mbp_ifile, len);
+	    process->mbp_ampsscorr_topofile[len] = '\0';
+	    strcat(process->mbp_ampsscorr_topofile, dummy);
+	    }
 	    
 	/* make sure all global paths are as short as possible */
 	mb_get_shortest_path(verbose, process->mbp_navadjfile, error);
@@ -1356,6 +1391,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	mb_get_shortest_path(verbose, process->mbp_tidefile, error);
 	mb_get_shortest_path(verbose, process->mbp_ampcorrfile, error);
 	mb_get_shortest_path(verbose, process->mbp_sscorrfile, error);
+	mb_get_shortest_path(verbose, process->mbp_ampsscorr_topofile, error);
 	    
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, process, error);
@@ -1394,6 +1430,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_nav_offsetx:        %f\n",process->mbp_nav_offsetx);
 		fprintf(stderr,"dbg2       mbp_nav_offsety:        %f\n",process->mbp_nav_offsety);
 		fprintf(stderr,"dbg2       mbp_nav_offsetz:        %f\n",process->mbp_nav_offsetz);
+		fprintf(stderr,"dbg2       mbp_nav_shiftlon:       %f\n",process->mbp_nav_shiftlon);
+		fprintf(stderr,"dbg2       mbp_nav_shiftlat:       %f\n",process->mbp_nav_shiftlat);
 		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_navadj_mode);
 		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
 		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
@@ -1543,6 +1581,8 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_nav_offsetx:        %f\n",process->mbp_nav_offsetx);
 		fprintf(stderr,"dbg2       mbp_nav_offsety:        %f\n",process->mbp_nav_offsety);
 		fprintf(stderr,"dbg2       mbp_nav_offsetz:        %f\n",process->mbp_nav_offsetz);
+		fprintf(stderr,"dbg2       mbp_nav_shiftlon:       %f\n",process->mbp_nav_shiftlon);
+		fprintf(stderr,"dbg2       mbp_nav_shiftlat:       %f\n",process->mbp_nav_shiftlat);
 		fprintf(stderr,"dbg2       mbp_navadj_mode:        %d\n",process->mbp_navadj_mode);
 		fprintf(stderr,"dbg2       mbp_navadjfile:         %s\n",process->mbp_navadjfile);
 		fprintf(stderr,"dbg2       mbp_navadj_algorithm:   %d\n",process->mbp_navadj_algorithm);
@@ -1733,10 +1773,15 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "NAVATTITUDE %d\n", process->mbp_nav_attitude);
 	    fprintf(fp, "NAVINTERP %d\n", process->mbp_nav_algorithm);
 	    fprintf(fp, "NAVTIMESHIFT %f\n", process->mbp_nav_timeshift);
+	    
+	    /* navigation offsets and shifts */
+	    fprintf(fp, "##\n## Navigation Offsets and Shifts:\n");
 	    fprintf(fp, "NAVSHIFT %d\n", process->mbp_nav_shift);
 	    fprintf(fp, "NAVOFFSETX %f\n", process->mbp_nav_offsetx);
 	    fprintf(fp, "NAVOFFSETY %f\n", process->mbp_nav_offsety);
 	    fprintf(fp, "NAVOFFSETZ %f\n", process->mbp_nav_offsetz);
+	    fprintf(fp, "NAVSHIFTLON %f\n", process->mbp_nav_shiftlon);
+	    fprintf(fp, "NAVSHIFTLAT %f\n", process->mbp_nav_shiftlat);
 	    
 	    /* adjusted navigation merging */
 	    fprintf(fp, "##\n## Adjusted Navigation Merging:\n");
@@ -3296,6 +3341,8 @@ int mb_pr_update_navshift(int verbose, char *file,
 			double	mbp_nav_offsetx, 
 			double	mbp_nav_offsety, 
 			double	mbp_nav_offsetz, 
+			double	mbp_nav_shiftlon, 
+			double	mbp_nav_shiftlat, 
 			int *error)
 {
 	char	*function_name = "mb_pr_update_navshift";
@@ -3314,6 +3361,8 @@ int mb_pr_update_navshift(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_nav_offsetx:   %f\n",mbp_nav_offsetx);
 		fprintf(stderr,"dbg2       mbp_nav_offsety:   %f\n",mbp_nav_offsety);
 		fprintf(stderr,"dbg2       mbp_nav_offsetz:   %f\n",mbp_nav_offsetz);
+		fprintf(stderr,"dbg2       mbp_nav_shiftlon:  %f\n",mbp_nav_shiftlon);
+		fprintf(stderr,"dbg2       mbp_nav_shiftlat:  %f\n",mbp_nav_shiftlat);
 		}
 
 	/* get known process parameters */
@@ -3324,6 +3373,8 @@ int mb_pr_update_navshift(int verbose, char *file,
 	process.mbp_nav_offsetx = mbp_nav_offsetx;
 	process.mbp_nav_offsety = mbp_nav_offsety;
 	process.mbp_nav_offsetz = mbp_nav_offsetz;
+	process.mbp_nav_shiftlon = mbp_nav_shiftlon;
+	process.mbp_nav_shiftlat = mbp_nav_shiftlat;
 
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
@@ -4629,6 +4680,8 @@ int mb_pr_get_navshift(int verbose, char *file,
 			double	*mbp_nav_offsetx, 
 			double	*mbp_nav_offsety, 
 			double	*mbp_nav_offsetz, 
+			double	*mbp_nav_shiftlon, 
+			double	*mbp_nav_shiftlat, 
 			int *error)
 {
 	char	*function_name = "mb_pr_get_navshift";
@@ -4653,6 +4706,8 @@ int mb_pr_get_navshift(int verbose, char *file,
 	*mbp_nav_offsetx = process.mbp_nav_offsetx;
 	*mbp_nav_offsety = process.mbp_nav_offsety;
 	*mbp_nav_offsetz = process.mbp_nav_offsetz;
+	*mbp_nav_shiftlon = process.mbp_nav_shiftlon;
+	*mbp_nav_shiftlat = process.mbp_nav_shiftlat;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -4664,6 +4719,8 @@ int mb_pr_get_navshift(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_nav_offsetx:   %f\n",*mbp_nav_offsetx);
 		fprintf(stderr,"dbg2       mbp_nav_offsety:   %f\n",*mbp_nav_offsety);
 		fprintf(stderr,"dbg2       mbp_nav_offsetz:   %f\n",*mbp_nav_offsetz);
+		fprintf(stderr,"dbg2       mbp_nav_shiftlon:  %f\n",*mbp_nav_shiftlon);
+		fprintf(stderr,"dbg2       mbp_nav_shiftlat:  %f\n",*mbp_nav_shiftlat);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

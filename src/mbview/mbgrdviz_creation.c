@@ -136,9 +136,10 @@ CreatemainWindow_mbgrdviz(Widget parent)
     Widget   dialogShell_arearoute;
     Widget   label_arearoute_name;
     Widget   label_arearoute_color;
-    Widget   label_arearoute_depth1;
+    Widget   label_arearoute_crosslines;
     Widget   label_arearoute_direction;
-    Widget   label_arearoute_interleaving;
+    Widget   label_arearoute_crosslinesfirstlast;
+    Widget   label_arearoute_platform;
     Widget   label_arearoute_linecontrol;
     Widget   pushButton_arearoute_dismiss;
     Widget   dialogShell_about;
@@ -1116,11 +1117,11 @@ CreatemainWindow_mbgrdviz(Widget parent)
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(bulletinBoard_arearoute, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        label_arearoute_depth1 = XmCreateLabel(bulletinBoard_arearoute,
-            (char *)"label_arearoute_depth1",
+        label_arearoute_crosslines = XmCreateLabel(bulletinBoard_arearoute,
+            (char *)"label_arearoute_crosslines",
             args, 
             ac);
-        XtManageChild(label_arearoute_depth1);
+        XtManageChild(label_arearoute_crosslines);
         
         /**
          * Free any memory allocated for resources.
@@ -1478,7 +1479,7 @@ CreatemainWindow_mbgrdviz(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_arearoute, (char *)"Interleaving Factor (1=none):", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_arearoute, (char *)"Crosslines First or Last:", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
@@ -1489,11 +1490,11 @@ CreatemainWindow_mbgrdviz(Widget parent)
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(bulletinBoard_arearoute, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        label_arearoute_interleaving = XmCreateLabel(bulletinBoard_arearoute,
-            (char *)"label_arearoute_interleaving",
+        label_arearoute_crosslinesfirstlast = XmCreateLabel(bulletinBoard_arearoute,
+            (char *)"label_arearoute_crosslinesfirstlast",
             args, 
             ac);
-        XtManageChild(label_arearoute_interleaving);
+        XtManageChild(label_arearoute_crosslinesfirstlast);
         
         /**
          * Free any memory allocated for resources.
@@ -1503,31 +1504,35 @@ CreatemainWindow_mbgrdviz(Widget parent)
     
     
     ac = 0;
+    XtSetArg(args[ac], XmNarrowLayout, XmARROWS_END); ac++;
+    XtSetArg(args[ac], XmNlayoutDirection, XmLEFT_TO_RIGHT); ac++;
     XtSetArg(args[ac], XmNx, 10); ac++;
     XtSetArg(args[ac], XmNy, 430); ac++;
     XtSetArg(args[ac], XmNwidth, 230); ac++;
-    XtSetArg(args[ac], XmNheight, 40); ac++;
-    spinBox_arearoute_interleaving = XmCreateSpinBox(bulletinBoard_arearoute,
-        (char *)"spinBox_arearoute_interleaving",
+    XtSetArg(args[ac], XmNheight, 50); ac++;
+    spinBox_arearoute_crosslinesfirstlast = XmCreateSpinBox(bulletinBoard_arearoute,
+        (char *)"spinBox_arearoute_crosslinesfirstlast",
         args, 
         ac);
-    XtManageChild(spinBox_arearoute_interleaving);
-    XtAddCallback(spinBox_arearoute_interleaving, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
+    XtManageChild(spinBox_arearoute_crosslinesfirstlast);
+    XtAddCallback(spinBox_arearoute_crosslinesfirstlast, XmNvalueChangedCallback, do_mbgrdviz_arearoute_parameterchange, (XtPointer)0);
     
     ac = 0;
     XtSetArg(args[ac], XmNcursorPositionVisible, False); ac++;
+    XtSetArg(args[ac], XmNvalue, ""); ac++;
     XtSetArg(args[ac], XmNeditable, False); ac++;
     XtSetArg(args[ac], XmNx, 2); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNwidth, 200); ac++;
     XtSetArg(args[ac], XmNheight, 40); ac++;
     XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(spinBox_arearoute_interleaving, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+        BX_CONVERT(spinBox_arearoute_crosslinesfirstlast, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
-    spinText_arearoute_interleaving = XmCreateTextField(spinBox_arearoute_interleaving,
-        (char *)"spinText_arearoute_interleaving",
+    spinText_arearoute_crosslinesfirstlast = XmCreateTextField(spinBox_arearoute_crosslinesfirstlast,
+        (char *)"spinText_arearoute_crosslinesfirstlast",
         args, 
         ac);
-    XtManageChild(spinText_arearoute_interleaving);
+    XtManageChild(spinText_arearoute_crosslinesfirstlast);
     
     ac = 0;
     {
@@ -2317,12 +2322,9 @@ CreatemainWindow_mbgrdviz(Widget parent)
     XtSetValues(spinText_arearoute_linespacing, args, ac);
     
     ac = 0;
-    XtSetArg(args[ac], XmNposition, 1); ac++;
-    XtSetArg(args[ac], XmNminimumValue, 1); ac++;
-    XtSetArg(args[ac], XmNmaximumValue, 50); ac++;
-    XtSetArg(args[ac], XmNspinBoxChildType, XmNUMERIC); ac++;
     XtSetArg(args[ac], XmNnumValues, 0); ac++;
-    XtSetValues(spinText_arearoute_interleaving, args, ac);
+    XtSetArg(args[ac], XmNpositionType, XmPOSITION_VALUE); ac++;
+    XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
     
     ac = 0;
     XtSetArg(args[ac], XmNnumValues, 0); ac++;

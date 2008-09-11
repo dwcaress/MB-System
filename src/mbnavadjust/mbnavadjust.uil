@@ -42,7 +42,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/opt/bx-6.1")
 !(BX) bx_info("builder_version", "BuilderXcessory Version 6.1.3")
 !(BX) bx_info("build_lang", "C")
@@ -96,6 +95,7 @@ identifier BXG_label_format;
 identifier BXG_fileSelectionBox;
 identifier BXG_bulletinBoard_fileselection;
 identifier BXG_xmDialogShell_fileselection;
+identifier BXG_pushButton_naverr_minxymisfit;
 identifier BXG_drawingArea_naverr_zcorr;
 identifier BXG_pushButton_naverr_zerozoffset;
 identifier BXG_pushButton_naverr_settie;
@@ -174,6 +174,7 @@ procedure do_naverr_deletetie();
 procedure do_naverr_fullsize();
 procedure do_naverr_init();
 procedure do_naverr_minmisfit();
+procedure do_naverr_minxymisfit();
 procedure do_naverr_misfitcenter();
 procedure do_naverr_next();
 procedure do_naverr_nextunset();
@@ -320,8 +321,8 @@ object bulletinBoard_modelplot : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 115;
-        XmNy = 362;
+        XmNx = 379;
+        XmNy = 876;
         XmNwidth = 843;
         XmNheight = 393;
     };
@@ -957,8 +958,8 @@ object form_controls : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1203;
-        XmNy = 404;
+        XmNx = 483;
+        XmNy = 854;
         XmNwidth = 635;
         XmNheight = 438;
     };
@@ -1310,8 +1311,8 @@ object form_about : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1277;
-        XmNy = 381;
+        XmNx = 557;
+        XmNy = 831;
         XmNwidth = 488;
         XmNheight = 484;
     };
@@ -1655,8 +1656,8 @@ object bulletinBoard_biases : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Heading & Roll Bias");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1379;
-        XmNy = 400;
+        XmNx = 659;
+        XmNy = 850;
         XmNwidth = 284;
         XmNheight = 446;
     };
@@ -1773,8 +1774,8 @@ object pushButton_naverr_minmisfit : XmPushButton widget {
         XmNrecomputeSize = false;
         XmNx = 10;
         XmNy = 620;
-        XmNwidth = 110;
-        XmNheight = 60;
+        XmNwidth = 120;
+        XmNheight = 30;
     };
     controls {
     };
@@ -2278,6 +2279,27 @@ object drawingArea_naverr_zcorr : XmDrawingArea widget {
 !(BX)    };
 };
 
+object pushButton_naverr_minxymisfit : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Minimum XY Misfit");
+        XmNx = 10;
+        XmNy = 650;
+        XmNwidth = 120;
+        XmNheight = 32;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_minxymisfit);
+        XmNactivateCallback = procedure do_naverr_minxymisfit();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object bulletinBoard_naverr : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
@@ -2287,12 +2309,13 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 68;
-        XmNy = 121;
+        XmNx = 445;
+        XmNy = 70;
         XmNwidth = 935;
         XmNheight = 685;
     };
     controls {
+         managed XmPushButton pushButton_naverr_minxymisfit;
          managed XmDrawingArea drawingArea_naverr_zcorr;
          managed XmPushButton pushButton_naverr_zerozoffset;
          managed XmMenuBar menuBar_settings;
@@ -2417,8 +2440,8 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 1215;
-        XmNy = 358;
+        XmNx = 495;
+        XmNy = 808;
         XmNwidth = 611;
         XmNheight = 530;
     };
@@ -2534,8 +2557,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1365;
-        XmNy = 543;
+        XmNx = 645;
+        XmNy = 993;
         XmNwidth = 311;
         XmNheight = 160;
     };
@@ -2614,8 +2637,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_ANY;
-        XmNx = 1250;
-        XmNy = 580;
+        XmNx = 530;
+        XmNy = 1030;
         XmNwidth = 542;
         XmNheight = 86;
     };
@@ -3026,8 +3049,8 @@ object pushButton_showmodelplot : XmPushButton widget {
 object pulldownMenu_view : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 143;
-        XmNy = 80;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 196;
         XmNheight = 160;
     };
@@ -3205,8 +3228,8 @@ object pushButton_updateproject : XmPushButton widget {
 object pulldownMenu_action : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 188;
-        XmNy = 80;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 120;
         XmNheight = 142;
     };
@@ -3511,7 +3534,7 @@ object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 47;
-        XmNy = 53;
+        XmNy = 75;
         XmNwidth = 962;
         XmNheight = 400;
     };
@@ -3540,7 +3563,7 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNtitle = "MBnavadjust";
 !(BX)        XmNiconName = "MBnavadjust";
 !(BX)        XmNx = 47;
-!(BX)        XmNy = 53;
+!(BX)        XmNy = 75;
 !(BX)        XmNwidth = 962;
 !(BX)        XmNheight = 400;
 !(BX)    };

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.27 2008-05-26 04:43:15 caress Exp $
+ *    $Id: mb_process.h,v 5.28 2008-09-11 20:11:52 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -72,9 +72,15 @@
  *                                  # - note: time shift added to timestamps of 
  *                                  #   navigation fixes read in from NAVFILE 
  *                                  #   prior to merging
+ *
+ * NAVIGATION OFFSETS AND SHIFTS:
  *   NAVSHIFT boolean               # sets navigation offset [0]
- *                                  # - note: offsets applied to navigation read
- *                                  #   in from NAVFILE prior to merging
+ *                                  # - note: offsets and shifts are applied to navigation
+ *                                  #   values from both survey and navigation records, and
+ *                                  #   are applied to navigation read in from 
+ *                                  #   NAVFILE prior to merging
+ *                                  # - note: offsets and shifts are NOT applied to adjusted
+ *                                  #   navigation values from NAVADJFILE
  *   NAVOFFSETX constant            # sets navigation athwartship offset (meters) [0.0]
  *                                  # - note: the effective navigation shift is
  *                                  #   (NAVOFFSETX - SONAROFFSETX), and the 
@@ -92,6 +98,8 @@
  *                                  # - note: this value is not yet used for
  *                                  #   anything.
  *                                  # - note: vertical shift is positive down.
+ *   NAVSHIFTLON constant           # sets navigation longitude shift (degrees) [0.0]
+ *   NAVSHIFTLAT constant           # sets navigation latitude shift (degrees) [0.0]
  *
  * ADJUSTED NAVIGATION MERGING:
  *   NAVADJMODE boolean             # sets navigation merging from mbnavadjust [0]
@@ -510,6 +518,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2008/05/26 04:43:15  caress
+ * Getting ready for release 5.1.1beta19.
+ *
  * Revision 5.26  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -730,6 +741,8 @@ struct mb_process_struct
 	double	mbp_nav_offsetx;
 	double	mbp_nav_offsety;
 	double	mbp_nav_offsetz;
+	double	mbp_nav_shiftlon;
+	double	mbp_nav_shiftlat;
 	
 	/* adjusted navigation merging */
 	int	mbp_navadj_mode;
@@ -984,6 +997,8 @@ int mb_pr_update_navshift(int verbose, char *file,
 			double	mbp_nav_offsetx, 
 			double	mbp_nav_offsety, 
 			double	mbp_nav_offsetz, 
+			double	mbp_nav_shiftlon, 
+			double	mbp_nav_shiftlat, 
 			int *error);
 int mb_pr_update_heading(int verbose, char *file, 
 			int	mbp_heading_mode, 
@@ -1145,6 +1160,8 @@ int mb_pr_get_navshift(int verbose, char *file,
 			double	*mbp_nav_offsetx, 
 			double	*mbp_nav_offsety, 
 			double	*mbp_nav_offsetz, 
+			double	*mbp_nav_shiftlon, 
+			double	*mbp_nav_shiftlat, 
 			int *error);
 int mb_pr_get_heading(int verbose, char *file, 
 			int	*mbp_heading_mode, 

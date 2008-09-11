@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbcleanold.c,v 5.6 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbcleanold.c,v 5.7 2008-09-11 20:20:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.5  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -201,7 +204,7 @@ struct bad_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbcleanold.c,v 5.6 2006-08-09 22:41:27 caress Exp $";
+	static char rcs_id[] = "$Id: mbcleanold.c,v 5.7 2008-09-11 20:20:14 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -610,29 +613,29 @@ main (int argc, char **argv)
 		ping[i].ssalongtrack = NULL;
 		ping[i].bathx = NULL;
 		ping[i].bathy = NULL;
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-			&ping[i].beamflag,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bath,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathacrosstrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathalongtrack,&error);
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-			&ping[i].amp,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ss,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ssacrosstrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ssalongtrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathx,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathy,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
+			(void **)&ping[i].beamflag,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bath,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
+			(void **)&ping[i].amp,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ss,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ssacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ssalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathx,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathy,&error);
 		}
-	status = mb_malloc(verbose,4*beams_bath*sizeof(double),
-			&list,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,4*beams_bath*sizeof(double),
+			(void **)&list,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1507,18 +1510,18 @@ main (int argc, char **argv)
 	/* free the memory */
 	for (j=0;j<3;j++)
 		{
-		mb_free(verbose,&ping[j].beamflag,&error); 
-		mb_free(verbose,&ping[j].bath,&error); 
-		mb_free(verbose,&ping[j].bathacrosstrack,&error); 
-		mb_free(verbose,&ping[j].bathalongtrack,&error); 
-		mb_free(verbose,&ping[j].amp,&error); 
-		mb_free(verbose,&ping[j].ss,&error); 
-		mb_free(verbose,&ping[j].ssacrosstrack,&error); 
-		mb_free(verbose,&ping[j].ssalongtrack,&error); 
-		mb_free(verbose,&ping[j].bathx,&error); 
-		mb_free(verbose,&ping[j].bathy,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].beamflag,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bath,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathacrosstrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathalongtrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].amp,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ss,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ssacrosstrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ssalongtrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathx,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathy,&error); 
 		}
-	mb_free(verbose,&list,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&list,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

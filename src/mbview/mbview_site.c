@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.9 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbview_site.c,v 5.10 2008-09-11 20:17:33 caress Exp $
  *
  *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2008/05/16 22:59:42  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.8  2007/06/17 23:27:30  caress
  * Added NBeditviz.
  *
@@ -107,7 +110,7 @@ static Arg      	args[256];
 static char	value_string[MB_PATH_MAXLINE];
 static char	value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.9 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 5.10 2008-09-11 20:17:33 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,
@@ -1321,7 +1324,7 @@ int mbview_drawsite(int instance, int rez)
 			if (isite == shared.shareddata.site_selected)
 				icolor = MBV_COLOR_RED;
 			else
-				icolor = MBV_COLOR_GREEN;
+				icolor = shared.shareddata.sites[isite].color;
 			glColor3f(colortable_object_red[icolor], 
 				colortable_object_green[icolor], 
 				colortable_object_blue[icolor]);

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmerge.c	2/20/93
  *
- *    $Id: mbmerge.c,v 5.8 2006-09-11 18:55:54 caress Exp $
+ *    $Id: mbmerge.c,v 5.9 2008-09-11 20:20:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,10 @@
  * Date:	February 20, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2006/09/11 18:55:54  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.7  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -176,7 +180,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmerge.c,v 5.8 2006-09-11 18:55:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbmerge.c,v 5.9 2008-09-11 20:20:14 caress Exp $";
 	static char program_name[] = "MBMERGE";
 	static char help_message[] =  "MBMERGE merges new navigation with swath sonar data from an \ninput file and then writes the merged data to an output \nswath sonar data file. The default input \nand output streams are stdin and stdout.";
 	static char usage_message[] = "mbmerge [-Aheading_offset -B -Fformat -Llonflip -V -H  -Iinfile -Ooutfile -Mnavformat -Nnavfile -Z]";
@@ -489,11 +493,11 @@ main (int argc, char **argv)
 	fclose(nfp);
 
 	/* allocate space for the nav points */
-	status = mb_malloc(verbose,nnav*sizeof(double),&ntime,&error);
-	status = mb_malloc(verbose,nnav*sizeof(double),&nlon,&error);
-	status = mb_malloc(verbose,nnav*sizeof(double),&nlat,&error);
-	status = mb_malloc(verbose,nnav*sizeof(double),&nlonspl,&error);
-	status = mb_malloc(verbose,nnav*sizeof(double),&nlatspl,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&ntime,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlon,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlat,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlonspl,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlatspl,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -858,18 +862,22 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathalongtrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
+			(void **)&beamflag,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
+			(void **)&amp,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(
+			void **)&ss,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1165,19 +1173,19 @@ main (int argc, char **argv)
 	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&ntime,&error);
-	mb_free(verbose,&nlon,&error);
-	mb_free(verbose,&nlat,&error);
-	mb_free(verbose,&nlonspl,&error);
-	mb_free(verbose,&nlatspl,&error);
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&bathacrosstrack,&error); 
-	mb_free(verbose,&bathalongtrack,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&ssacrosstrack,&error); 
-	mb_free(verbose,&ssalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ntime,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nlon,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nlat,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nlonspl,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nlatspl,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.10 2008-05-16 22:42:32 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.11 2008-09-11 20:12:43 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2008/05/16 22:42:32  caress
+ * Release 5.1.1beta18 - working towards use of 3D uncertainty.
+ *
  * Revision 5.9  2007/10/08 16:02:46  caress
  * MBnavadjust now performs an initial inversion for the average offsets for each independent block of data and then removes that average signal before performing the full inversion.
  *
@@ -331,6 +334,9 @@ EXTERNAL int	mbna_minmisfit_n;
 EXTERNAL double mbna_minmisfit_x;
 EXTERNAL double mbna_minmisfit_y;
 EXTERNAL double mbna_minmisfit_z;
+EXTERNAL double mbna_minmisfit_xh;
+EXTERNAL double mbna_minmisfit_yh;
+EXTERNAL double mbna_minmisfit_zh;
 EXTERNAL double mbna_minmisfit_sr1;
 EXTERNAL double mbna_minmisfit_sx1[4];
 EXTERNAL double mbna_minmisfit_sr2;

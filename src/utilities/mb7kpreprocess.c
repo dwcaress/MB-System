@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.20 2008-08-12 00:05:15 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.21 2008-09-11 20:20:14 caress Exp $
  *
  *    Copyright (c) 2005-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2008/08/12 00:05:15  caress
+ * Fixed handling of beam flags.
+ *
  * Revision 5.19  2008/07/19 07:50:51  caress
  * Removed debug message.
  *
@@ -107,7 +110,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.20 2008-08-12 00:05:15 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.21 2008-09-11 20:20:14 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -2695,9 +2698,7 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 					}
 					
 				/* fix upgraded version 5 quality flags */
-				else if (bathymetry->header.Version == 5
-						&& header->s7kTime.Year == 2008
-						&& header->s7kTime.Day < 200)
+				else if (bathymetry->header.Version == 5)
 					{
 					for (i=0;i<bathymetry->number_beams;i++)
 						{

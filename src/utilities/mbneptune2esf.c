@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbneptune2esf.c	2004/11/11
- *    $Id: mbneptune2esf.c,v 5.4 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbneptune2esf.c,v 5.5 2008-09-11 20:20:14 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    Gordon Keith
@@ -46,6 +46,9 @@
  * This program is based on a skeleton derived from mbclean.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.3  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -147,7 +150,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.4 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.5 2008-09-11 20:20:14 caress Exp $";
 	static char program_name[] = "mbneptune2esf";
 	static char help_message[] =  "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand applies the flags in the rules file to the esf file of the coresponding line";
 	static char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
@@ -518,7 +521,7 @@ main (int argc, char **argv)
 						  if (NULL == beam)
 						    {
 #ifdef USE_MB_MALLOC
-						      status = mb_malloc(verbose,sizeof(struct neptune_beam_list),&(ping->beams),&error);
+						      status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct neptune_beam_list),(void **)&(ping->beams),&error);
 #else
 						      ping->beams = malloc(sizeof(struct neptune_beam_list));
 #endif
@@ -527,7 +530,7 @@ main (int argc, char **argv)
 						  else
 						    {
 #ifdef USE_MB_MALLOC
-						      status = mb_malloc(verbose,sizeof(struct neptune_beam_list),&(beam->next),&error);
+						      status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct neptune_beam_list),(void **)&(beam->next),&error);
 #else
 						      beam->next = malloc(sizeof(struct neptune_beam_list));
 #endif
@@ -549,7 +552,7 @@ main (int argc, char **argv)
 		}
 
 	/* put lines in an array */
-	status = mb_malloc(verbose,no_lines * sizeof(void*),&lines,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,no_lines * sizeof(void*),(void **)&lines,&error);
 	i = 0;
 	line_array(rule_lines,&lines,&i);
 
@@ -997,7 +1000,7 @@ main (int argc, char **argv)
 	      {
 	      free_pings(verbose, &lines[i]->pings, &error);
 #ifdef USE_MB_MALLOC
-	      mb_free(verbose, &lines[i], &error);
+	      mb_freed(verbose,__FILE__,__LINE__,(void **) &lines[i], &error);
 #else
 	      free(lines[i]);
 #endif
@@ -1093,8 +1096,8 @@ int find_line(int verbose, char* line_name, struct neptune_line_tree **node, int
 	    return MB_FAILURE;
 
 #ifdef USE_MB_MALLOC
-	    status = mb_malloc(verbose,sizeof(struct neptune_line_tree),
-			result,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct neptune_line_tree),
+			(void **)result,error);
 #else
 	    *result = malloc(sizeof(struct neptune_line_tree));
 #endif
@@ -1137,8 +1140,8 @@ int find_ping(int verbose, int ping, struct neptune_ping_tree **node, int create
 	    return MB_FAILURE;
 
 #ifdef USE_MB_MALLOC
-	    status = mb_malloc(verbose,sizeof(struct neptune_ping_tree),
-			result,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct neptune_ping_tree),
+			(void **)result,error);
 #else
 	    *result = malloc(sizeof(struct neptune_ping_tree));
 #endif
@@ -1218,14 +1221,14 @@ int free_pings(int verbose, struct neptune_ping_tree **node, int *error)
     {
       nextbeam = beam->next;
 #ifdef USE_MB_MALLOC
-      mb_free(verbose, &beam, error);
+      mb_freed(verbose,__FILE__,__LINE__,(void **) &beam, error);
 #else
       free(beam);
 #endif
       beam = nextbeam;
     }
 #ifdef USE_MB_MALLOC
-  mb_free(verbose, node, error);
+  mb_freed(verbose,__FILE__,__LINE__,(void **) node, error);
 #else
   free(*node);
 #endif

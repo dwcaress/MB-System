@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 5.6 2006-01-24 19:12:01 caress Exp $
+ *    $Id: hsdump.c,v 5.7 2008-09-11 20:20:14 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/01/24 19:12:01  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.5  2005/03/25 04:42:59  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -111,7 +114,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 5.6 2006-01-24 19:12:01 caress Exp $";
+	static char rcs_id[] = "$Id: hsdump.c,v 5.7 2008-09-11 20:20:14 caress Exp $";
 	static char program_name[] = "HSDUMP";
 	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
 	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
@@ -766,14 +769,14 @@ main (int argc, char **argv)
 	status = mb_close(verbose,&mbio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&bathacrosstrack,&error); 
-	mb_free(verbose,&bathalongtrack,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&ssacrosstrack,&error); 
-	mb_free(verbose,&ssalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)
