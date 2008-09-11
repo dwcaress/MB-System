@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.30 2008-05-24 19:28:41 caress Exp $
+#    $Id: install_makefiles,v 5.31 2008-09-11 19:58:27 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005, 2006 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -116,10 +116,13 @@ $LFLAGS = "-Wl -lm -bind_at_load";
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.30 2008-05-24 19:28:41 caress Exp $
+#   $Id: install_makefiles,v 5.31 2008-09-11 19:58:27 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.30  2008/05/24 19:28:41  caress
+#   Updated description on how to build MB-System on MacOs X.
+#
 #   Revision 5.29  2007/08/24 23:37:05  caress
 #   Fixed CYGWIN preset and removed -lGLw references.
 #
@@ -413,7 +416,7 @@ else
 # GMT are only available through the "unstable" fink tree).
 # The "-force_flat_namespace" linker flag was
 # required in $LFLAGS prior to 10.2.6
-#	$MBSYSTEM_HOME = "/Users/caress/dev/mbsystem";
+#	$MBSYSTEM_HOME = "cmbsystem";
 #	$OS = "DARWIN";
 #	$CC = "cc";
 #	$BYTESWAPPED = "NO";
@@ -430,14 +433,14 @@ else
 #	$LFLAGS = "-Wl -lm -bind_at_load";
 #
 # Example for installing on Apple Macintosh Computers
-# running MacOS X version 10.5 ("Tiger"). Here I am using the 
+# running MacOS X version 10.5 ("Leopard"). Here I am using the 
 # Apple X11 distribution and the OpenMotif (www.openmotif.org)
 # port provided by Fink (www.fink.org). GMT and netCDF have
 # also been installed using fink (note: current versions of
 # GMT are only available through the "unstable" fink tree).
 # If building on a newer Intel Mac then $BYTESWAPPED = "YES";
 # else if building on an older PowerPC Mac then $BYTESWAPPED = "NO";
-#	$MBSYSTEM_HOME = "/Users/caress/dev/mbsystem";
+#	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "DARWIN";
 #	$CC = "cc";
 #	$BYTESWAPPED = "NO";
