@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
-#    $Id: mbm_grd3dplot.perl,v 5.17 2007-10-08 04:31:20 caress Exp $
+#    $Id: mbm_grd3dplot.perl,v 5.18 2008-09-11 20:06:45 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -63,10 +63,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 8, 1994
 #
 # Version:
-#   $Id: mbm_grd3dplot.perl,v 5.17 2007-10-08 04:31:20 caress Exp $
+#   $Id: mbm_grd3dplot.perl,v 5.18 2008-09-11 20:06:45 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.17  2007/10/08 04:31:20  caress
+#   Added some large page definitions.
+#
 #   Revision 5.16  2006/07/05 19:50:21  caress
 #   Working towards 5.1.0beta
 #
@@ -1395,6 +1398,34 @@ $xoffset = ($width - $plot_width
 $yoffset = ($height - $plot_height 
 	- $space_bottom - $space_top) / 2 + $space_bottom;
 
+# get plot degree annotation for geographic maps
+$degree_format = "ddd:mm";
+if (!$gridprojected)
+	{
+	$xsize = $xmax - $xmin;
+	$ysize = $ymax - $ymin;
+	if ($xsize < $ysize)
+		{
+		$size = $xsize;
+		}
+	else
+		{
+		$size = $ysize;
+		}
+	if ($size > 1.0)
+		{
+		$degree_format = "ddd";
+		}
+	elsif ($size > (1.0 / 60.0))
+		{
+		$degree_format = "ddd:mm";
+		}
+	else
+		{
+		$degree_format = "ddd:mm:ss";
+		}
+	}
+
 # figure out where to place the color scale
 $scale_loc =~ tr/A-Z/a-z/;
 if ($scale_loc eq "l")
@@ -1598,7 +1629,7 @@ $gmt_def = "COLOR_FOREGROUND/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
 $gmt_def = "COLOR_NAN/255/255/255";
 push(@gmt_macro_defs, $gmt_def);
-$gmt_def = "PLOT_DEGREE_FORMAT/ddd:mm";
+$gmt_def = "PLOT_DEGREE_FORMAT/$degree_format";
 push(@gmt_macro_defs, $gmt_def);
 
 # open the shellscript file
