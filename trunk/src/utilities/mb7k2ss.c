@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2ss.c		8/15/2007
- *    $Id: mb7k2ss.c,v 5.1 2008-05-16 22:44:37 caress Exp $
+ *    $Id: mb7k2ss.c,v 5.2 2008-09-11 20:20:14 caress Exp $
  *
  *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  *              R/V Atlantis, Axial Seamount
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2008/05/16 22:44:37  caress
+ * Release 5.1.1beta18
+ *
  * Revision 5.0  2007/10/08 17:04:13  caress
  * Update version number.
  *
@@ -133,7 +136,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 					struct mb7k2ss_grid_struct *grid,
 					double	 *range, int *error);
 
-static char rcs_id[] = "$Id: mb7k2ss.c,v 5.1 2008-05-16 22:44:37 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2ss.c,v 5.2 2008-09-11 20:20:14 caress Exp $";
 static char program_name[] = "mb7k2ss";
 static int	pargc;
 static char	**pargv;
@@ -253,6 +256,7 @@ main (int argc, char **argv)
 	
 	/* extract modes */
 	int	extract_type = MB7K2SS_SSLOW;
+	int	target_kind = MB_DATA_SIDESCAN2;
 	int	print_comments = MB_NO;
 	
 	/* bottompick mode */
@@ -390,19 +394,27 @@ main (int argc, char **argv)
 				|| strncmp(optarg, "sslow", 5) == 0)
 				{
 				extract_type = MB7K2SS_SSLOW;
+				target_kind = MB_DATA_SIDESCAN2;
 				}
 			else if (strncmp(optarg, "SSHIGH", 6) == 0
 				|| strncmp(optarg, "sshigh", 6) == 0)
 				{
 				extract_type = MB7K2SS_SSHIGH;
+				target_kind = MB_DATA_SIDESCAN3;
 				}
 			else
 				{
 				sscanf (optarg,"%d", &mode);
 				if (mode == MB7K2SS_SSLOW)
+					{
 					extract_type = MB7K2SS_SSLOW;
+					target_kind = MB_DATA_SIDESCAN2;
+					}
 				else if (mode == MB7K2SS_SSHIGH)
+					{
 					extract_type = MB7K2SS_SSHIGH;
+					target_kind = MB_DATA_SIDESCAN3;
+					}
 				}
 			flag++;
 			break;
@@ -930,8 +942,36 @@ istore->time_i[0],istore->time_i[1],istore->time_i[2],istore->time_i[3],istore->
 			error = MB_ERROR_NO_ERROR;
 			}
 
+		/* get nav and attitude */
+		if (status == MB_SUCCESS
+			&& (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM
+				|| kind == MB_DATA_DATA
+				|| kind == MB_DATA_SIDESCAN2
+				|| kind == MB_DATA_SIDESCAN3))
+			{
+/*for (i=MAX(0,imb_io_ptr->nfix-5);i<imb_io_ptr->nfix;i++)
+fprintf(stderr,"dbg2       nav fix[%2d]:   %f %f %f\n",
+i, imb_io_ptr->fix_time_d[i],
+imb_io_ptr->fix_lon[i],
+imb_io_ptr->fix_lat[i]);*/
+			mb_get_jtime(verbose, istore->time_i, time_j);
+			speed = 0.0;
+			mb_hedint_interp(verbose, imbio_ptr, time_d,  
+					&heading, &error);
+			mb_navint_interp(verbose, imbio_ptr, time_d, heading, speed, 
+					&navlon, &navlat, &speed, &error);
+/*fprintf(stderr,"time:%4d/%2d/%2d-%2d:%2d:%2d.%6d navlon:%f navlat:%f\n",
+time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],navlon,navlat);*/
+			mb_depint_interp(verbose, imbio_ptr, time_d,  
+					&sonardepth, &error);
+			mb_altint_interp(verbose, imbio_ptr, time_d,  
+					&altitude, &error);
+			mb_attint_interp(verbose, imbio_ptr, time_d,  
+					&heave, &roll, &pitch, &error);
+			}
+
 		/* save last nav and heading */
-		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
+		if (status == MB_SUCCESS && kind == target_kind)
 			{
 			if (navlon != 0.0)
 				lastlon = navlon;
@@ -942,24 +982,24 @@ istore->time_i[0],istore->time_i[1],istore->time_i[2],istore->time_i[3],istore->
 			}
 		    
 		/* check survey data position against waypoints */
-/* fprintf(stderr,"status:%d error:%d kind:%d route_file_set:%d nroutepoint:%d navlon:%f navlat:%f\n",
-status,error,kind,route_file_set,nroutepoint,navlon,navlat); */
-		if (status == MB_SUCCESS && kind == MB_DATA_DATA
+/*fprintf(stderr,"status:%d error:%d | kind:%d %d | route_file_set:%d nroutepoint:%d navlon:%f navlat:%f\n",
+status,error,kind,target_kind,route_file_set,nroutepoint,navlon,navlat);*/
+		if (status == MB_SUCCESS && kind == target_kind
 			&& route_file_set == MB_YES && nroutepoint > 1 
 			&& navlon != 0.0 && navlat != 0.0)
 			{
 			dx = (navlon - routelon[activewaypoint]) / mtodeglon;
 			dy = (navlat - routelat[activewaypoint]) / mtodeglat;
 			range = sqrt(dx * dx + dy * dy);
-/* fprintf(stderr,"activewaypoint:%d range:%f rangelast:%f lon:%f %f lat:%f %f\n",
-activewaypoint, range, rangelast, navlon, routelon[activewaypoint], navlat, routelat[activewaypoint]); */
+/*fprintf(stderr,"activewaypoint:%d range:%f rangelast:%f lon:%f %f lat:%f %f\n",
+activewaypoint, range, rangelast, navlon, routelon[activewaypoint], navlat, routelat[activewaypoint]);*/
 			if (range < rangethreshold)
 				rangeok = MB_YES;
 			if (rangeok == MB_YES 
 				&& (activewaypoint == 0 || range > rangelast) 
 				&& activewaypoint < nroutepoint - 1)
 				{
-/* fprintf(stderr,"New output by range to routepoint: %f\n",range); */
+/*fprintf(stderr,"New output by range to routepoint: %f\n",range);*/
 				/* if needed set flag to open new output file */
 				if (new_output_file == MB_NO)
 				    {
@@ -986,7 +1026,7 @@ activewaypoint, range, rangelast, navlon, routelon[activewaypoint], navlat, rout
 				}
 			else
 				rangelast = range;
-/* fprintf(stderr,"> activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
+/*fprintf(stderr,"> activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
 activewaypoint,linenumber,range, navlon, 
 routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 			}
@@ -1091,32 +1131,6 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 			
 			/* reset new_output_file */
 			new_output_file = MB_NO;
-			}
-
-		/* get some more values */
-		if (status == MB_SUCCESS
-			&& (kind == MB_DATA_SUBBOTTOM_SUBBOTTOM
-				|| kind == MB_DATA_DATA
-				|| kind == MB_DATA_SIDESCAN2
-				|| kind == MB_DATA_SIDESCAN3))
-			{
-/*for (i=MAX(0,imb_io_ptr->nfix-5);i<imb_io_ptr->nfix;i++)
-fprintf(stderr,"dbg2       nav fix[%2d]:   %f %f %f\n",
-i, imb_io_ptr->fix_time_d[i],
-imb_io_ptr->fix_lon[i],
-imb_io_ptr->fix_lat[i]);*/
-			mb_get_jtime(verbose, istore->time_i, time_j);
-			speed = 0.0;
-			mb_hedint_interp(verbose, imbio_ptr, time_d,  
-					&heading, &error);
-			mb_navint_interp(verbose, imbio_ptr, time_d, heading, speed, 
-					&navlon, &navlat, &speed, &error);
-			mb_depint_interp(verbose, imbio_ptr, time_d,  
-					&sonardepth, &error);
-			mb_altint_interp(verbose, imbio_ptr, time_d,  
-					&altitude, &error);
-			mb_attint_interp(verbose, imbio_ptr, time_d,  
-					&heave, &roll, &pitch, &error);
 			}
 			
 		/* if following a route check that the vehicle has come on line 
@@ -1363,9 +1377,12 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 
 					/* bin the value and position */
 					j = opixels_ss / 2 + (int)(xtrack / pixel_width);
-					oss[j] += value / weight;
-					ossbincount[j]++;
-					ossalongtrack[j] += ltrack;
+					if (j >= 0 && j < opixels_ss)
+						{
+						oss[j] += value / weight;
+						ossbincount[j]++;
+						ossalongtrack[j] += ltrack;
+						}
 					}
 									
 				/* find minimum range */
@@ -1426,9 +1443,12 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 
 					/* bin the value and position */
 					j = opixels_ss / 2 + (int)(xtrack / pixel_width);
-					oss[j] += value / weight;
-					ossbincount[j]++;
-					ossalongtrack[j] += ltrack;
+					if (j >= 0 && j < opixels_ss)
+						{
+						oss[j] += value / weight;
+						ossbincount[j]++;
+						ossalongtrack[j] += ltrack;
+						}
 					}
 
 				/* calculate the output sidescan */
@@ -1652,9 +1672,12 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 
 					/* bin the value and position */
 					j = opixels_ss / 2 + (int)(xtrack / pixel_width);
-					oss[j] += value / weight;
-					ossbincount[j]++;
-					ossalongtrack[j] += ltrack;
+					if (j >= 0 && j < opixels_ss)
+						{
+						oss[j] += value / weight;
+						ossbincount[j]++;
+						ossalongtrack[j] += ltrack;
+						}
 					}
 									
 				/* find minimum range */
@@ -1711,9 +1734,12 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 
 					/* bin the value and position */
 					j = opixels_ss / 2 + (int)(xtrack / pixel_width);
-					oss[j] += value / weight;
-					ossbincount[j]++;
-					ossalongtrack[j] += ltrack;
+					if (j >= 0 && j < opixels_ss)
+						{
+						oss[j] += value / weight;
+						ossbincount[j]++;
+						ossalongtrack[j] += ltrack;
+						}
 					}
 
 				/* calculate the output sidescan */

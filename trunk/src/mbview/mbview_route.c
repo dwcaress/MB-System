@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.19 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbview_route.c,v 5.20 2008-09-11 20:17:33 caress Exp $
  *
  *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2008/05/16 22:59:42  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.18  2008/03/14 19:04:32  caress
  * Fixed memory problems with route editing.
  *
@@ -130,7 +133,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.19 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_route.c,v 5.20 2008-09-11 20:17:33 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,
@@ -230,6 +233,59 @@ int mbview_getroutepointcount(int verbose, int instance,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       npoint:                    %d\n", *npoint);
 		fprintf(stderr,"dbg2       nintpoint:                 %d\n", *nintpoint);
+		fprintf(stderr,"dbg2       error:                     %d\n", *error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:                    %d\n", status);
+		}
+
+	/* return */
+	return(status);
+
+}
+/*------------------------------------------------------------------------------*/
+int mbview_getrouteselected(int verbose, int instance,
+			int	route,
+			int	*selected,
+			int *error)
+{
+	/* local variables */
+	char	*function_name = "mbview_getrouteselected";
+	int	status = MB_SUCCESS;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	i;
+
+	/* print starting debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
+		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       route:                     %d\n", route);
+		}
+
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	/* check if the specified route is currently selected in totality */
+	if (route == shared.shareddata.route_selected
+		&& shared.shareddata.route_point_selected == MBV_SELECT_ALL)
+		*selected = MB_YES;
+	else
+		*selected = MB_NO;
+		
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       selected:                  %d\n", *selected);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -1816,6 +1872,12 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 			    				shared.shareddata.routes[i].npoints_alloc * sizeof(int),
 			    				(void **)&(shared.shareddata.routes[i].waypoint), &error);
 					status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
+			    				shared.shareddata.routes[i].npoints_alloc * sizeof(double),
+			    				(void **)&(shared.shareddata.routes[i].distlateral), &error);
+					status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
+			    				shared.shareddata.routes[i].npoints_alloc * sizeof(double),
+			    				(void **)&(shared.shareddata.routes[i].disttopo), &error);
+					status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
 			    				shared.shareddata.routes[i].npoints_alloc * sizeof(struct mbview_pointw_struct),
 			    				(void **)&(shared.shareddata.routes[i].points), &error);
 					status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,
@@ -1837,7 +1899,7 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 		shared.shareddata.nroute++;
 
 		/* add the new route */
-		shared.shareddata.routes[inew].color = MBV_COLOR_RED;
+		shared.shareddata.routes[inew].color = MBV_COLOR_BLACK;
 		shared.shareddata.routes[inew].size = 1;
 		sprintf(shared.shareddata.routes[inew].name, "Route:%d", shared.shareddata.nroute);
 		}
@@ -1850,6 +1912,12 @@ int mbview_route_add(int instance, int inew, int jnew, int waypoint,
 		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
 			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(int),
 			    	(void **)&(shared.shareddata.routes[inew].waypoint), &error);
+		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
+			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(double),
+			    	(void **)&(shared.shareddata.routes[inew].distlateral), &error);
+		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
+			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(double),
+			    	(void **)&(shared.shareddata.routes[inew].disttopo), &error);
 		status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__, 
 			    	shared.shareddata.routes[inew].npoints_alloc * sizeof(struct mbview_pointw_struct),
 			    	(void **)&(shared.shareddata.routes[inew].points), &error);
@@ -2258,6 +2326,10 @@ int mbview_route_setdistance(int instance, int working_route)
 			routelat0 = routelat1;
 			routetopo0 = routetopo1;
 			route->nroutepoint++;
+				
+			/* set distances for route waypoint */
+			route->distlateral[i] = route->distancelateral;
+			route->disttopo[i] = route->distancetopo;
 			
 			/* loop over interior of segment */
 			for (j=1;j<route->segments[i].nls-1;j++)
@@ -2305,6 +2377,10 @@ int mbview_route_setdistance(int instance, int working_route)
 		routelat0 = routelat1;
 		routetopo0 = routetopo1;
 		route->nroutepoint++;
+				
+		/* set distances for route waypoint */
+		route->distlateral[j] = route->distancelateral;
+		route->disttopo[j] = route->distancetopo;
 		}
 		
 	/* print output debug statements */
@@ -2440,7 +2516,8 @@ int mbview_drawroute(int instance, int rez)
 						shared.shareddata.routes[iroute].points[jpoint].ydisplay[instance],
 						shared.shareddata.routes[iroute].points[jpoint].zdisplay[instance]);
 				if (iroute == shared.shareddata.route_selected
-					&& jpoint == shared.shareddata.route_point_selected)
+					&& (jpoint == shared.shareddata.route_point_selected
+						|| shared.shareddata.route_point_selected == MBV_SELECT_ALL))
 	    				glCallList((GLuint)MBV_GLLIST_ROUTELARGE);
 				else
 	    				glCallList((GLuint)MBV_GLLIST_ROUTESMALL);
@@ -2508,14 +2585,13 @@ int mbview_updateroutelist()
 	char	*function_name = "mbview_updateroutelist";
 	int	status = MB_SUCCESS;
    	XmString *xstr;
-	int	iroute;
 	int	jpoint;
 	int	nitems;
 	int	iitem;
 	char	lonstr0[24];
 	char	latstr0[24];
 	char	waypointstr[8];
-	
+	int	iroute, jwaypoint;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2536,7 +2612,7 @@ int mbview_updateroutelist()
 		if (shared.shareddata.nroute > 0)
 			{
 			/* get number of items */
-			nitems = 0;
+			nitems = shared.shareddata.nroute;
 			for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
 				{
 				nitems += 1 + shared.shareddata.routes[iroute].npoints;
@@ -2549,6 +2625,15 @@ int mbview_updateroutelist()
 			nitems = 0;
 			for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
 				{
+				sprintf(value_string,"Route %3d | Waypoints:%3d | Length:%.2f %.2f m | %s | Name: %s", 
+					iroute, shared.shareddata.routes[iroute].npoints,
+					shared.shareddata.routes[iroute].distancelateral,
+					shared.shareddata.routes[iroute].distancetopo,
+					mbview_colorname[shared.shareddata.routes[iroute].color],
+					shared.shareddata.routes[iroute].name);
+      				xstr[nitems] = XmStringCreateLocalized(value_string);
+				nitems++;
+
 				/* add list item for each waypoint */
 				for (jpoint=0;jpoint<shared.shareddata.routes[iroute].npoints;jpoint++)
 					{
@@ -2568,13 +2653,12 @@ int mbview_updateroutelist()
 						strcpy(waypointstr, "--END--");
 					else
 						strcpy(waypointstr, "-------");
-					sprintf(value_string,"%3d | %3d | %s | %s | %.3f | %s | %s | %d | %s", 
+					sprintf(value_string,"%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", 
 						iroute, jpoint, lonstr0, latstr0,
 						shared.shareddata.routes[iroute].points[jpoint].zdata,
-						waypointstr,
-						mbview_colorname[shared.shareddata.routes[iroute].color],
-						shared.shareddata.routes[iroute].size,
-						shared.shareddata.routes[iroute].name);
+						shared.shareddata.routes[iroute].distlateral[jpoint],
+						shared.shareddata.routes[iroute].disttopo[jpoint],
+						waypointstr);
       					xstr[nitems] = XmStringCreateLocalized(value_string);
 					nitems++;
 					}
@@ -2583,24 +2667,32 @@ int mbview_updateroutelist()
 			/* add list items */
     			XmListAddItems(shared.mb3d_routelist.mbview_list_routelist,
 					xstr, nitems, 0);
-					
+
 			/* select list item for selected route */
 			if (shared.shareddata.route_selected != MBV_SELECT_NONE)
 				{
 				/* get item number */
-				iitem = 1;
-				for (iroute=0;iroute<=shared.shareddata.route_selected;iroute++)
+				iitem = 0;
+				for (iroute=0;iroute<shared.shareddata.nroute;iroute++)
 					{
-					if (iroute < shared.shareddata.route_selected)
-						iitem += shared.shareddata.routes[iroute].npoints;
-					else if (iroute == shared.shareddata.route_selected)
-						iitem += shared.shareddata.route_point_selected;
+					iitem++;
+					if (iroute == shared.shareddata.route_selected
+						&& shared.shareddata.route_point_selected == MBV_SELECT_ALL)
+						{
+						XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist,iitem,0);
+						XmListSetPos(shared.mb3d_routelist.mbview_list_routelist,MAX(iitem-5, 1));
+						}
+					for (jwaypoint=0;jwaypoint<shared.shareddata.routes[iroute].npoints;jwaypoint++)
+						{
+						iitem++;
+						if (iroute == shared.shareddata.route_selected
+							&& shared.shareddata.route_point_selected == jwaypoint)
+							{
+							XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist,iitem,0);
+							XmListSetPos(shared.mb3d_routelist.mbview_list_routelist,MAX(iitem-5, 1));
+							}
+						}
 					}
-
-				XmListSelectPos(shared.mb3d_routelist.mbview_list_routelist,
-						iitem,0);
-				XmListSetPos(shared.mb3d_routelist.mbview_list_routelist,
-					MAX(iitem-5, 1));
 				}
 
 			/* deallocate memory no longer needed */

@@ -92,8 +92,9 @@ identifier BXG_spinText_arearoute_platform;
 identifier BXG_spinBox_arearoute_platform;
 identifier BXG_spinText_arearoute_linespacing;
 identifier BXG_spinBox_arearoute_linespacing;
-identifier BXG_spinText_arearoute_interleaving;
-identifier BXG_spinBox_arearoute_interleaving;
+identifier BXG_label_arearoute_crosslinesfirstlast;
+identifier BXG_spinText_arearoute_crosslinesfirstlast;
+identifier BXG_spinBox_arearoute_crosslinesfirstlast;
 identifier BXG_label_arearoute_info;
 identifier BXG_spinText_arearoute_linecontrol;
 identifier BXG_spinBox_arearoute_linecontrol;
@@ -831,47 +832,48 @@ object label_arearoute_info : XmLabel widget {
 !(BX)    };
 };
 
-object spinText_arearoute_interleaving : XmTextField widget {
+object spinText_arearoute_crosslinesfirstlast : XmTextField widget {
     arguments {
         arguments Style_use;
         XmNcursorPositionVisible = false;
+        XmNvalue = "";
         XmNeditable = false;
-        XmNposition = 1;
-        XmNminimumValue = 1;
-        XmNmaximumValue = 50;
-        XmNspinBoxChildType = XmNUMERIC;
         XmNnumValues = 0;
         XmNvalues = string_table(
 	compound_string(""));
+        XmNpositionType = XmPOSITION_VALUE;
         XmNx = 2;
         XmNy = 0;
+        XmNwidth = 200;
         XmNheight = 40;
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_spinText_arearoute_interleaving);
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_spinText_arearoute_crosslinesfirstlast);
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
 };
 
-object spinBox_arearoute_interleaving : XmSpinBox widget {
+object spinBox_arearoute_crosslinesfirstlast : XmSpinBox widget {
     arguments {
         arguments Style_use;
+        XmNarrowLayout = XmARROWS_END;
+        XmNlayoutDirection = XmLEFT_TO_RIGHT;
         XmNx = 10;
         XmNy = 430;
         XmNwidth = 230;
-        XmNheight = 40;
+        XmNheight = 50;
     };
     controls {
-         managed XmTextField spinText_arearoute_interleaving;
+         managed XmTextField spinText_arearoute_crosslinesfirstlast;
     };
     callbacks {
         callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_spinBox_arearoute_interleaving);
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_spinBox_arearoute_crosslinesfirstlast);
         XmNvalueChangedCallback = procedure do_mbgrdviz_arearoute_parameterchange();
     };
 !(BX)    handlers {
@@ -879,11 +881,11 @@ object spinBox_arearoute_interleaving : XmSpinBox widget {
 !(BX)    };
 };
 
-object label_arearoute_interleaving : XmLabel widget {
+object label_arearoute_crosslinesfirstlast : XmLabel widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Interleaving Factor (1=none):");
+        XmNlabelString = compound_string("Crosslines Before/After Survey:");
         XmNx = 10;
         XmNy = 400;
         XmNwidth = 210;
@@ -1335,7 +1337,7 @@ object spinBox_arearoute_crosslines : XmSpinBox widget {
 !(BX)    };
 };
 
-object label_arearoute_depth1 : XmLabel widget {
+object label_arearoute_crosslines : XmLabel widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
@@ -1481,7 +1483,7 @@ object bulletinBoard_arearoute : XmBulletinBoardDialog widget {
          managed XmLabel label_arearoute_name;
          managed XmSpinBox spinBox_arearoute_color;
          managed XmLabel label_arearoute_color;
-         managed XmLabel label_arearoute_depth1;
+         managed XmLabel label_arearoute_crosslines;
          managed XmSpinBox spinBox_arearoute_crosslines;
          managed XmLabel label_arearoute_depth;
          managed XmLabel label_arearoute_altitude;
@@ -1494,8 +1496,8 @@ object bulletinBoard_arearoute : XmBulletinBoardDialog widget {
          managed XmLabel label_arearoute_platform;
          managed XmSpinBox spinBox_arearoute_platform;
          managed XmSpinBox spinBox_arearoute_linespacing;
-         managed XmLabel label_arearoute_interleaving;
-         managed XmSpinBox spinBox_arearoute_interleaving;
+         managed XmLabel label_arearoute_crosslinesfirstlast;
+         managed XmSpinBox spinBox_arearoute_crosslinesfirstlast;
          managed XmLabel label_arearoute_info;
          managed XmSpinBox spinBox_arearoute_linecontrol;
          managed XmLabel label_arearoute_linecontrol;

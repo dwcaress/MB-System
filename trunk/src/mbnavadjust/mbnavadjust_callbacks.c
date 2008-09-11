@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.16 2008-07-10 18:08:10 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.17 2008-09-11 20:12:43 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2008/07/10 18:08:10  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.13  2008/05/16 22:42:32  caress
  * Release 5.1.1beta18 - working towards use of 3D uncertainty.
  *
@@ -205,6 +208,7 @@ void	do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data)
 void	do_naverr_zerozoffset( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_minxymisfit( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_naverr_misfitcenter( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_file_new( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_file_open( Widget w, XtPointer client_data, XtPointer call_data);
@@ -2266,6 +2270,9 @@ do_naverr_zcorr_input( Widget w, XtPointer client_data, XtPointer call_data)
 		mbna_offset_z = ((event->xbutton.x - zoff_borders[0]) 
 		    			/ mbna_zoff_scale_x) 
 					+ mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
+	
+		/* recalculate minimum misfit at current z offset */
+		mbnavadjust_get_misfitxy();
 
 		/* replot contours */
 		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_MOVE);
@@ -2299,6 +2306,9 @@ do_naverr_zcorr_input( Widget w, XtPointer client_data, XtPointer call_data)
 fprintf(stderr,"buttonx:%d %f  mbna_misfit_offset_z:%f project.zoffsetwidth:%f  mbna_offset_z:%f\n",
 event->xbutton.x,((event->xbutton.x - zoff_borders[0])/mbna_zoff_scale_x), mbna_misfit_offset_z,
 project.zoffsetwidth, mbna_offset_z);
+	
+		/* recalculate minimum misfit at current z offset */
+		mbnavadjust_get_misfitxy();
 		
 		/* replot contours */
 		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_MOVE);
@@ -2503,6 +2513,9 @@ do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data)
 	mbna_offset_x = 0.0;
 	mbna_offset_y = 0.0;
 	mbna_offset_z = 0.0;
+
+	/* recalculate minimum misfit at current z offset */
+	mbnavadjust_get_misfitxy();
 		
 	/* replot contours */
 	mbnavadjust_crossing_replot();
@@ -2518,6 +2531,9 @@ do_naverr_zerozoffset( Widget w, XtPointer client_data, XtPointer call_data)
 		
 	/* move offset */
 	mbna_offset_z = 0.0;
+	
+	/* recalculate minimum misfit at current z offset */
+	mbnavadjust_get_misfitxy();
 		
 	/* replot contours */
 	mbnavadjust_crossing_replot();
@@ -2530,6 +2546,9 @@ void
 do_naverr_applyzoffset( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+	
+	/* recalculate minimum misfit at current z offset */
+	mbnavadjust_get_misfitxy();
 		
 	/* replot contours */
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2549,6 +2568,9 @@ do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data)
 	mbna_offset_x = mbna_minmisfit_x;
 	mbna_offset_y = mbna_minmisfit_y;
 	mbna_offset_z = mbna_minmisfit_z;
+	
+	/* recalculate minimum misfit at current z offset */
+	mbnavadjust_get_misfitxy();
 		
 	/* replot contours */
 	mbnavadjust_crossing_replot();
@@ -2557,6 +2579,26 @@ do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data)
 	if (project.modelplot == MB_YES)
 		mbnavadjust_modelplot_plot();
 
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_naverr_minxymisfit( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	/* move offset */
+	mbna_offset_x = mbna_minmisfit_xh;
+	mbna_offset_y = mbna_minmisfit_yh;
+	mbna_offset_z = mbna_minmisfit_zh;
+		
+	/* replot contours */
+	mbnavadjust_crossing_replot();
+   	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+    	do_update_naverr();
+	if (project.modelplot == MB_YES)
+		mbnavadjust_modelplot_plot();
 }
 /*--------------------------------------------------------------------*/
 

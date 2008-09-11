@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.31 2008-07-10 18:08:10 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.32 2008-09-11 20:12:43 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.31  2008/07/10 18:08:10  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.28  2008/05/16 22:42:32  caress
  * Release 5.1.1beta18 - working towards use of 3D uncertainty.
  *
@@ -169,7 +172,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.31 2008-07-10 18:08:10 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.32 2008-09-11 20:12:43 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -1701,6 +1704,27 @@ fprintf(stderr, "read failed on tie: %s\n", buffer);
 						{
 						status = MB_FAILURE;
 fprintf(stderr, "read failed on tie covariance: %s\n", buffer);
+						}
+					if (tie->sigmar1 <= 0.0)
+						{
+						tie->sigmax2[0] = 1.0;
+						tie->sigmax2[1] = 0.0;
+						tie->sigmax2[2] = 0.0;
+						mbna_minmisfit_sr2 = 1.0;
+						}
+					if (tie->sigmar2 <= 0.0)
+						{
+						tie->sigmax2[0] = 0.0;
+						tie->sigmax2[1] = 1.0;
+						tie->sigmax2[2] = 0.0;
+						mbna_minmisfit_sr2 = 1.0;
+						}
+					if (tie->sigmar3 <= 0.0)
+						{
+						tie->sigmax3[0] = 0.0;
+						tie->sigmax3[1] = 0.0;
+						tie->sigmax3[2] = 1.0;
+						mbna_minmisfit_sr3 = 1.0;
 						}
 					}
 				else if (status == MB_SUCCESS)
@@ -4161,6 +4185,7 @@ int mbnavadjust_naverr_resettie()
 	struct mbna_section *section1, *section2;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
+	int	i;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -4195,6 +4220,15 @@ int mbnavadjust_naverr_resettie()
 			mbna_offset_x = tie->offset_x;
 			mbna_offset_y = tie->offset_y;
 			mbna_offset_z = tie->offset_z_m;
+			mbna_minmisfit_sr1 = tie->sigmar1;
+			mbna_minmisfit_sr2 = tie->sigmar2;
+			mbna_minmisfit_sr3 = tie->sigmar3;
+			for (i=0;i<3;i++)
+				{
+				mbna_minmisfit_sx1[i] = tie->sigmax1[i];
+				mbna_minmisfit_sx2[i] = tie->sigmax2[i];
+				mbna_minmisfit_sx3[i] = tie->sigmax3[i];
+				}
   			}
    		}
    		
@@ -5879,6 +5913,9 @@ mbna_minmisfit_z);*/
 /*fprintf(stderr,"Misfit bounds: nmin:%d best:%f min:%f max:%f min loc: %f %f %f\n",
 mbna_minmisfit_n,mbna_minmisfit,misfit_min,misfit_max,
 mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z);*/
+		
+		/* get minimum misfit in 2D plane at current z offset */
+		mbnavadjust_get_misfitxy();
 
     		/* set message on */
     		if (mbna_verbose > 1)
@@ -5962,8 +5999,8 @@ ic,jc,kc,lc,gridm[lc],minmisfitthreshold,x,y,z,r);*/
 		    mbna_minmisfit_sr2 = sqrt(mbna_minmisfit_sx1[0] * mbna_minmisfit_sx1[0] + mbna_minmisfit_sx1[1] * mbna_minmisfit_sx1[1]);
 		    if (mbna_minmisfit_sr2 == 0.0)
 			    {
-			    mbna_minmisfit_sx2[0] = 1.0;
-			    mbna_minmisfit_sx2[1] = 0.0;
+			    mbna_minmisfit_sx2[0] = 0.0;
+			    mbna_minmisfit_sx2[1] = 1.0;
 			    mbna_minmisfit_sx2[2] = 0.0;
 			    mbna_minmisfit_sr2 = 1.0;
 			    }
@@ -5984,8 +6021,8 @@ mbna_minmisfit_sx2[0],mbna_minmisfit_sx2[1],mbna_minmisfit_sx2[2],mbna_minmisfit
 		    if (mbna_minmisfit_sr3 == 0.0)
 			{
 			mbna_minmisfit_sx3[0] = 0.0;
-			mbna_minmisfit_sx3[1] = 1.0;
-			mbna_minmisfit_sx3[2] = 0.0;
+			mbna_minmisfit_sx3[1] = 0.0;
+			mbna_minmisfit_sx3[2] = 1.0;
 			mbna_minmisfit_sr3 = 1.0;
 			}
 		    else
@@ -6099,6 +6136,72 @@ fprintf(stderr,"3v2:%f\n",dotproduct);*/
 		
 		do_message_off();
  		}
+			
+ 	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavadjust_get_misfitxy()
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_get_misfitxy";
+	int	status = MB_SUCCESS;
+	int	ic, jc, kc, lc;
+
+ 	/* print input debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+		
+    	if (project.open == MB_YES
+    		&& project.num_crossings > 0
+    		&& mbna_current_crossing >= 0)
+    		{				
+		/* get minimum misfit in plane at current z offset */
+		if (grid_nxyzeq > 0)
+		    {
+		    /* get closest to current zoffset in existing 3d grid */
+		    misfit_max = 0.0;
+		    misfit_min = 0.0;
+		    kc = (int)((mbna_offset_z - zmin) / zoff_dz);
+		    for (ic=0;ic<gridm_nx;ic++)
+			for (jc=0;jc<gridm_ny;jc++)
+			    {
+			    lc = kc + nzmisfitcalc * (ic + jc * gridm_nx);
+			    if (gridnm[lc] > mbna_minmisfit_nthreshold)
+				{
+				if (misfit_max == 0.0)
+			    	    {
+				    misfit_min = gridm[lc];
+				    misfit_max = gridm[lc];
+				    }
+				else if (gridm[lc] < misfit_min)
+				    {
+				    misfit_min = gridm[lc];
+				    mbna_minmisfit_xh = (ic - gridm_nx / 2) * grid_dx + mbna_misfit_offset_x;
+				    mbna_minmisfit_yh = (jc - gridm_ny / 2) * grid_dy + mbna_misfit_offset_y;
+				    mbna_minmisfit_zh = mbna_minmisfit_z;
+				    }
+				else if (gridm[lc] > misfit_max)
+				    {
+				    misfit_max = gridm[lc];
+				    }
+				}
+			    }
+		    }
+		}
 			
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -6639,6 +6742,21 @@ mbnavadjust_naverr_plot(int plotmode)
 		xg_drawline(pcorr_xgid,
 				ix + 10, iy + 10,
 				ix - 10, iy - 10,
+				pixel_values[BLACK], XG_SOLIDLINE);
+		}
+	
+	    /* draw small x at minimum misfit for current z offset */
+	    if (mbna_minmisfit_n > 0)
+	    	{
+		ix = ixo + (int)(mbna_misfit_scale * (mbna_minmisfit_xh - mbna_misfit_offset_x));
+		iy = iyo - (int)(mbna_misfit_scale * (mbna_minmisfit_yh - mbna_misfit_offset_y));
+		xg_drawline(pcorr_xgid,
+				ix - 5, iy + 5,
+				ix + 5, iy - 5,
+				pixel_values[BLACK], XG_SOLIDLINE);
+		xg_drawline(pcorr_xgid,
+				ix + 5, iy + 5,
+				ix - 5, iy - 5,
 				pixel_values[BLACK], XG_SOLIDLINE);
 		}
 	
@@ -12592,6 +12710,7 @@ mbnavadjust_modelplot_plot()
 		mbna_modelplot_xscale = ((double)plot_width) / (mbna_modelplot_pingend - mbna_modelplot_pingstart + 1);
 		mbna_modelplot_yscale = ((double)plot_height) / (2.2 * xymax);
 		yzmax = MAX(fabs(z_offset_min),fabs(z_offset_max));
+		yzmax = MAX(yzmax,0.5);
 		mbna_modelplot_yzscale = ((double)plot_height) / (2.2 * yzmax);
 
 		/* clear screens for first plot */

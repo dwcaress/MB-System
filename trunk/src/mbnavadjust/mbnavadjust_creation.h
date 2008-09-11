@@ -54,6 +54,7 @@ EXTERNAL Widget   label_biases_files;
 EXTERNAL Widget   toggleButton_biases_together;
 EXTERNAL Widget   toggleButton_biases_separate;
 EXTERNAL Widget   bulletinBoard_naverr;
+EXTERNAL Widget   pushButton_naverr_minxymisfit;
 EXTERNAL Widget   drawingArea_naverr_zcorr;
 EXTERNAL Widget   pushButton_naverr_zerozoffset;
 EXTERNAL Widget   pushButton_naverr_settie;

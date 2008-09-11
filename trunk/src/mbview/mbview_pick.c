@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.16 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbview_pick.c,v 5.17 2008-09-11 20:17:33 caress Exp $
  *
  *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  *		begun on October 7, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2008/05/16 22:59:42  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.15  2008/03/14 19:04:32  caress
  * Fixed memory problems with route editing.
  *
@@ -121,7 +124,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.16 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.17 2008-09-11 20:17:33 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -737,6 +740,21 @@ int mbview_pick_text(int instance)
 		}
 	else if (data->pickinfo_mode == MBV_PICK_ROUTE
 		&& shared.shareddata.route_selected != MBV_SELECT_NONE
+		&& shared.shareddata.route_point_selected == MBV_SELECT_ALL)
+		{
+		sprintf(value_text,":::t\"Route %d Pick Info:\":t\" Points: %d\":t\" Length: %.3f m\":t\" LOB: %.3f m\":t\" Name: %s\"", 
+			shared.shareddata.route_selected,shared.shareddata.routes[shared.shareddata.route_selected].npoints,
+			shared.shareddata.routes[shared.shareddata.route_selected].distancelateral,
+			shared.shareddata.routes[shared.shareddata.route_selected].distancetopo,
+			shared.shareddata.routes[shared.shareddata.route_selected].name);
+		sprintf(value_list,"Route %d Pick Info: Points: %d Length: %.3f m LOB: %.3f m Name: %s", 
+			shared.shareddata.route_selected,shared.shareddata.routes[shared.shareddata.route_selected].npoints,
+			shared.shareddata.routes[shared.shareddata.route_selected].distancelateral,
+			shared.shareddata.routes[shared.shareddata.route_selected].distancetopo,
+			shared.shareddata.routes[shared.shareddata.route_selected].name);
+		}
+	else if (data->pickinfo_mode == MBV_PICK_ROUTE
+		&& shared.shareddata.route_selected != MBV_SELECT_NONE
 		&& shared.shareddata.route_point_selected != MBV_SELECT_NONE)
 		{
 		mbview_setlonlatstrings(shared.lonlatstyle, 
@@ -747,15 +765,15 @@ int mbview_pick_text(int instance)
 			shared.shareddata.route_selected,shared.shareddata.route_point_selected, 
 			lonstr0, latstr0,
 			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].zdata,
-			shared.shareddata.routes[shared.shareddata.route_selected].distancelateral,
-			shared.shareddata.routes[shared.shareddata.route_selected].distancetopo,
+			shared.shareddata.routes[shared.shareddata.route_selected].distlateral[shared.shareddata.route_point_selected],
+			shared.shareddata.routes[shared.shareddata.route_selected].disttopo[shared.shareddata.route_point_selected],
 			shared.shareddata.routes[shared.shareddata.route_selected].name);
 		sprintf(value_list,"Route %d Pick Info: Point: %d Lon: %s Lat: %s Depth: %.3f m Length: %.3f m LOB: %.3f m Name: %s", 
 			shared.shareddata.route_selected,shared.shareddata.route_point_selected, 
 			lonstr0, latstr0,
 			shared.shareddata.routes[shared.shareddata.route_selected].points[shared.shareddata.route_point_selected].zdata,
-			shared.shareddata.routes[shared.shareddata.route_selected].distancelateral,
-			shared.shareddata.routes[shared.shareddata.route_selected].distancetopo,
+			shared.shareddata.routes[shared.shareddata.route_selected].distlateral[shared.shareddata.route_point_selected],
+			shared.shareddata.routes[shared.shareddata.route_selected].disttopo[shared.shareddata.route_point_selected],
 			shared.shareddata.routes[shared.shareddata.route_selected].name);
 		}
 	else if (data->pickinfo_mode == MBV_PICK_NAV

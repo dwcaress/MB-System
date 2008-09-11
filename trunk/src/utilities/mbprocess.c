@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.56 2008-07-19 07:45:30 caress Exp $
+ *    $Id: mbprocess.c,v 5.57 2008-09-11 20:20:14 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.56  2008/07/19 07:45:30  caress
+ * Fix for crashes provided by Gordon Keith.
+ *
  * Revision 5.55  2008/07/10 18:16:33  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -286,7 +289,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.56 2008-07-19 07:45:30 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.57 2008-09-11 20:20:14 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -1060,18 +1063,22 @@ and mbedit edit save files.\n";
 	    	else if (process.mbp_nav_algorithm == MBP_NAV_SPLINE)
 			fprintf(stderr,"  Navigation algorithm:          spline interpolation\n");
 	    	fprintf(stderr,"  Navigation time shift:         %f\n", process.mbp_nav_timeshift);
-	    	if (process.mbp_nav_shift == MBP_NAV_ON)
-			{
-			fprintf(stderr,"  Navigation positions shifted.\n");
-			fprintf(stderr,"  Navigation offset x:       %f\n", process.mbp_nav_offsetx);
-			fprintf(stderr,"  Navigation offset y:       %f\n", process.mbp_nav_offsety);
-			fprintf(stderr,"  Navigation offset z:       %f\n", process.mbp_nav_offsetz);
-			}
-	    	else 
-			fprintf(stderr,"  Navigation positions not shifted.\n");
 		}
 	    else
 		fprintf(stderr,"  Navigation not merged from navigation file.\n");
+
+	    fprintf(stderr,"\nNavigation Offsets and Shifts:\n");
+	    if (process.mbp_nav_shift == MBP_NAV_ON)
+		    {
+		    fprintf(stderr,"  Navigation positions shifted.\n");
+		    fprintf(stderr,"  Navigation offset x:       %f\n", process.mbp_nav_offsetx);
+		    fprintf(stderr,"  Navigation offset y:       %f\n", process.mbp_nav_offsety);
+		    fprintf(stderr,"  Navigation offset z:       %f\n", process.mbp_nav_offsetz);
+		    fprintf(stderr,"  Navigation shift longitude:%f\n", process.mbp_nav_shiftlon);
+		    fprintf(stderr,"  Navigation shift latitude: %f\n", process.mbp_nav_shiftlat);
+		    }
+	    else 
+		    fprintf(stderr,"  Navigation positions not shifted.\n");
 
 	    fprintf(stderr,"\nAdjusted Navigation Merging:\n");
 	    if (process.mbp_navadj_mode >= MBP_NAVADJ_LL)
@@ -1945,13 +1952,15 @@ and mbedit edit save files.\n";
 		    headingx = sin(nheading[i] * DTR);
 		    headingy = cos(nheading[i] * DTR);
 		    nlon[i] -= (headingy * mtodeglon
-				* process.mbp_nav_offsetx
-			    + headingx * mtodeglon
-				* process.mbp_nav_offsety);
+					* process.mbp_nav_offsetx
+			    	+ headingx * mtodeglon
+					* process.mbp_nav_offsety
+				- process.mbp_nav_shiftlon);
 		    nlat[i] -= (-headingx * mtodeglat
-				* process.mbp_nav_offsetx
-			    + headingy * mtodeglat
-				* process.mbp_nav_offsety);
+					* process.mbp_nav_offsetx
+			    	+ headingy * mtodeglat
+					* process.mbp_nav_offsety
+				- process.mbp_nav_shiftlat);
 		    }
 		}
     
@@ -4081,9 +4090,10 @@ and mbedit edit save files.\n";
 	    		sprintf(comment,"  Navigation time shift:         %f", process.mbp_nav_timeshift);
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
-	    		if (process.mbp_nav_shift == MBP_NAV_ON)
-				{
-				sprintf(comment,"  Navigation positions shifted.");
+			}
+	    	    if (process.mbp_nav_shift == MBP_NAV_ON)
+			    {
+			    sprintf(comment,"  Navigation positions shifted.");
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
 				sprintf(comment,"  Navigation offset x:       %f", process.mbp_nav_offsetx);
@@ -4095,14 +4105,19 @@ and mbedit edit save files.\n";
 				sprintf(comment,"  Navigation offset z:       %f", process.mbp_nav_offsetz);
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
-				}
-	    		else 
-				{
-				sprintf(comment,"  Navigation positions not shifted.");
+				sprintf(comment,"  Navigation shift longitude:%f", process.mbp_nav_shiftlon);
 			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			    if (error == MB_ERROR_NO_ERROR) ocomment++;
-				}
-			}
+				sprintf(comment,"  Navigation shift latitude: %f", process.mbp_nav_shiftlat);
+			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			    if (error == MB_ERROR_NO_ERROR) ocomment++;
+			    }
+	    	    else 
+			    {
+			    sprintf(comment,"  Navigation positions not shifted.");
+			    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			    if (error == MB_ERROR_NO_ERROR) ocomment++;
+			    }
 		if (process.mbp_navadj_mode == MBP_NAVADJ_OFF)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
@@ -4652,6 +4667,24 @@ and mbedit edit save files.\n";
 time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			time_d = ntime[idata-1];
 			mb_get_date(verbose,time_d,time_i);
+			}
+		    
+		/* apply position shifts if needed */
+    		if (process.mbp_nav_shift == MBP_NAV_ON)
+			{
+			mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+			headingx = sin(heading * DTR);
+			headingy = cos(heading * DTR);
+			navlon -= (headingy * mtodeglon
+					    * process.mbp_nav_offsetx
+			    	    + headingx * mtodeglon
+					    * process.mbp_nav_offsety
+				    - process.mbp_nav_shiftlon);
+			navlat -= (-headingx * mtodeglat
+					    * process.mbp_nav_offsetx
+			    	    + headingy * mtodeglat
+					    * process.mbp_nav_offsety
+				    - process.mbp_nav_shiftlat);
 			}
 
 		/* interpolate the navigation if desired */

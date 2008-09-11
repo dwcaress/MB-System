@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
- *    $Id: mbgrdviz_callbacks.c,v 5.29 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbgrdviz_callbacks.c,v 5.30 2008-09-11 20:17:33 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -90,8 +90,8 @@ extern int isnanf(float x);
 #define MBGRDVIZ_SURVEY_MODE_UNIFORM			0
 #define MBGRDVIZ_SURVEY_MODE_VARIABLE			1
 #define MBGRDVIZ_SURVEY_PLATFORM_SURFACE		0
-#define MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH	1
-#define MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE	2
+#define MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE	1
+#define MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH	2
 #define MBGRDVIZ_SURVEY_DIRECTION_SW			0
 #define MBGRDVIZ_SURVEY_DIRECTION_SE			1
 #define MBGRDVIZ_SURVEY_DIRECTION_NW			2
@@ -108,7 +108,7 @@ static int	survey_mode = MBGRDVIZ_SURVEY_MODE_UNIFORM;
 static int	survey_platform = MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE;
 static int	survey_interleaving = 1;
 static int	survey_direction = MBGRDVIZ_SURVEY_DIRECTION_SW;
-static int	survey_crosslines_first = MB_YES;
+static int	survey_crosslines_last = MB_NO;
 static int	survey_crosslines = 0;
 static int	survey_linespacing = 200;
 static int	survey_swathwidth = 120;
@@ -122,7 +122,7 @@ static int	realtime_update = 5;
 static int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.29 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.30 2008-09-11 20:17:33 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -479,6 +479,18 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	XmStringFree(str_list[0]);
 	XmStringFree(str_list[1]);
 	XmStringFree(str_list[2]);
+	XtFree((XtPointer)str_list);
+
+	/* set up crosslinesfirstlast type */
+	str_list = (XmStringTable) XtMalloc(2 * sizeof(XmString *));
+	str_list[0] = XmStringCreateLocalized("Crosslines first");
+	str_list[1] = XmStringCreateLocalized("Crosslines last");
+	ac = 0;
+	XtSetArg(args[ac], XmNnumValues, 2); ac++;
+	XtSetArg(args[ac], XmNvalues, str_list); ac++;
+	XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
+	XmStringFree(str_list[0]);
+	XmStringFree(str_list[1]);
 	XtFree((XtPointer)str_list);
 
 	/* set up survey direction */
@@ -2141,7 +2153,7 @@ fprintf(stderr,"routename:%s routecolor:%d routesize:%d\n\n",routename,routecolo
 			if (npoint > 0)
 			    {
 fprintf(stderr,"Calling mbview_addroute npoint:%d\n", npoint);
-			    status = mbview_addroute(verbose, instance,
+			    status = mbview_addroute(5, instance,
 			    				npoint, routelon, routelat, routewaypoint,
 							routecolor, routesize, routename,
 							&iroute, &error);
@@ -2198,7 +2210,7 @@ fprintf(stderr,"Calling mbview_addroute npoint:%d\n", npoint);
 		if (npoint > 0)
 		    {
 fprintf(stderr,"Calling mbview_addroute npoint:%d\n", npoint);
-		    status = mbview_addroute(verbose, instance,
+		    status = mbview_addroute(5, instance,
 			    			npoint, routelon, routelat, routewaypoint,
 						routecolor, routesize, routename,
 						&iroute, &error);
@@ -2240,6 +2252,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 	FILE	*sfp;
 	char	buffer[MB_PATH_MAXLINE];
 	int	nroute = 0;
+	int	nroutewrite = 0;
 	int	npoint = 0;
 	int	nintpoint = 0;
 	int	npointtotal = 0;
@@ -2255,6 +2268,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 	int	routecolor;
 	int	routesize;
 	mb_path	routename;
+	int	selected;
 	int	iroute, j;
 
 	/* time, user, host variables */
@@ -2268,6 +2282,14 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 
 	    /* get the number of routes to be written to the outpuf file */
 	    status = mbview_getroutecount(verbose, instance, &nroute, &error);
+	    for (iroute=0;iroute<nroute;iroute++)
+	    	{
+		mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
+		if (selected == MB_YES)
+			nroutewrite++;
+		}
+	    if (nroutewrite == 0)
+	    	nroutewrite = nroute;
 	    if (nroute <= 0)
 	    	{
 		fprintf(stderr,"Unable to write route file...\nCurrently %d routes defined for instance %d!\n",
@@ -2277,7 +2299,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 		}
 		
 	    /* initialize the output file */
-	    if (status == MB_SUCCESS && nroute > 0)
+	    if (status == MB_SUCCESS && nroutewrite > 0)
 	    	{
 		/* open the output file */
 		if ((sfp = fopen(output_file_ptr, "w")) != NULL) 
@@ -2296,7 +2318,7 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 			gethostname(host,MB_PATH_MAXLINE);
 			fprintf(sfp, "## Run by user <%s> on cpu <%s> at <%s>\n",
 				user_ptr,host,date);
-			fprintf(sfp, "## Number of routes: %d\n",nroute); 
+			fprintf(sfp, "## Number of routes: %d\n",nroutewrite); 
 			fprintf(sfp, "## Route point format:\n"); 
 			fprintf(sfp, "##   <longitude (deg)> <latitude (deg)> <waypoint (boolean)> <topography (m)> <bearing (deg)> <lateral distance (m)> <distance along topography (m)> <slope (m/m)>\n"); 
 			}
@@ -2312,113 +2334,124 @@ int do_mbgrdviz_saveroute(int instance, char *output_file_ptr)
 		}
 	    
 	    /* if all ok proceed to extract and output routes */
-	    if (status == MB_SUCCESS)
+	    if (status == MB_SUCCESS && nroutewrite > 0)
 	    	{
 	        /* loop over routes */
 		for (iroute=0;iroute<nroute;iroute++)
 	    	    {
-		    /* get point count for current route */
-		    status = mbview_getroutepointcount(verbose, instance,
-			    iroute, &npoint, &nintpoint, &error);
+		    /* check if this route is selected for writing */
+		    if (nroutewrite == nroute)
+		    	selected = MB_YES;
+		    else
+			mbview_getrouteselected(verbose, instance, iroute, &selected, &error);
+			
+		    /* output if selected */
+		    if (selected == MB_YES)
+		    	{
+			/* get point count for current route */
+			status = mbview_getroutepointcount(verbose, instance,
+				iroute, &npoint, &nintpoint, &error);
 
-		    /* allocate route arrays */
-		    npointtotal = npoint + nintpoint;
-		    if (status == MB_SUCCESS
-			    && npointalloc < npointtotal)
-			    {
-			    status = mbview_allocroutearrays(verbose, 
-						    npointtotal,
-						    &routelon,
-						    &routelat,
-						    &routewaypoint,
-						    &routetopo,
-						    &routebearing,
-						    &distlateral,
-						    &distovertopo,
-						    &slope,
-						    &error);
-			    if (status == MB_SUCCESS)
-				    {
-				    npointalloc = npointtotal;
-				    }
+			/* allocate route arrays */
+			npointtotal = npoint + nintpoint;
+			if (status == MB_SUCCESS
+				&& npointalloc < npointtotal)
+				{
+				status = mbview_allocroutearrays(verbose, 
+							npointtotal,
+							&routelon,
+							&routelat,
+							&routewaypoint,
+							&routetopo,
+							&routebearing,
+							&distlateral,
+							&distovertopo,
+							&slope,
+							&error);
+				if (status == MB_SUCCESS)
+					{
+					npointalloc = npointtotal;
+					}
 
-			    /* if error initializing memory then cancel dealing with this route */
-			    else
-	    			    {
-				    fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %d!\n",
-					    npointtotal, instance);
-				    XBell((Display *) XtDisplay(mainWindow),100);
-				    npoint = 0;		    
-				    nintpoint = 0;		    
-				    npointtotal = 0;		    
-				    }
-			    }
+				/* if error initializing memory then cancel dealing with this route */
+				else
+	    				{
+					fprintf(stderr,"Unable to write route...\nArray allocation for %d points failed for instance %d!\n",
+						npointtotal, instance);
+					XBell((Display *) XtDisplay(mainWindow),100);
+					npoint = 0;		    
+					nintpoint = 0;		    
+					npointtotal = 0;		    
+					}
+				}
 
-		    /* extract data for route */
-		    status = mbview_getroute(verbose, instance,
-					    iroute,
-					    &npointtotal,
-					    routelon,
-					    routelat,
-					    routewaypoint,
-					    routetopo,
-					    routebearing,
-					    distlateral,
-					    distovertopo,
-					    slope,
-					    &routecolor,
-					    &routesize,
-					    routename,
-					    &error);
+			/* extract data for route */
+			status = mbview_getroute(verbose, instance,
+						iroute,
+						&npointtotal,
+						routelon,
+						routelat,
+						routewaypoint,
+						routetopo,
+						routebearing,
+						distlateral,
+						distovertopo,
+						slope,
+						&routecolor,
+						&routesize,
+						routename,
+						&error);
 
-		    /* write the route header */
-		    fprintf(sfp,"## ROUTENAME %s\n", routename);
-		    fprintf(sfp,"## ROUTESIZE %d\n", routesize);
-		    fprintf(sfp,"## ROUTECOLOR %d\n", routecolor);
-		    fprintf(sfp,"## ROUTEPOINTS %d\n", npointtotal);
-		    fprintf(sfp,"> ## STARTROUTE\n");
+			/* write the route header */
+			fprintf(sfp,"## ROUTENAME %s\n", routename);
+			fprintf(sfp,"## ROUTESIZE %d\n", routesize);
+			fprintf(sfp,"## ROUTECOLOR %d\n", routecolor);
+			fprintf(sfp,"## ROUTEPOINTS %d\n", npointtotal);
+			fprintf(sfp,"> ## STARTROUTE\n");
 
-		    /* write the route points */
-		    for (j=0;j<npointtotal;j++)
-			    {
-			    fprintf(sfp,"%f %f %f %d %f %f %f %f",
-				    routelon[j], routelat[j], 
-				    routetopo[j],
-				    routewaypoint[j], routebearing[j],
-				    distlateral[j], distovertopo[j], slope[j]);
-			    if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_SIMPLE)
-			    	fprintf(sfp," ## WAYPOINT\n");
-			    else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_TRANSIT)
-			    	fprintf(sfp," ## WAYPOINT TRANSIT\n");
-			    else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE)
-			    	fprintf(sfp," ## WAYPOINT STARTLINE\n");
-			    else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE)
-			    	fprintf(sfp," ## WAYPOINT ENDLINE\n");
-			    else
-			    	fprintf(sfp,"\n");
-			    }
+			/* write the route points */
+			for (j=0;j<npointtotal;j++)
+				{
+				fprintf(sfp,"%f %f %f %d %f %f %f %f",
+					routelon[j], routelat[j], 
+					routetopo[j],
+					routewaypoint[j], routebearing[j],
+					distlateral[j], distovertopo[j], slope[j]);
+				if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_SIMPLE)
+			    	    fprintf(sfp," ## WAYPOINT\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_TRANSIT)
+			    	    fprintf(sfp," ## WAYPOINT TRANSIT\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE)
+			    	    fprintf(sfp," ## WAYPOINT STARTLINE\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE)
+			    	    fprintf(sfp," ## WAYPOINT ENDLINE\n");
+				else
+			    	    fprintf(sfp,"\n");
+				}
 
-		    /* write the route end */
-		    fprintf(sfp,"> ## ENDROUTE\n");
+			/* write the route end */
+			fprintf(sfp,"> ## ENDROUTE\n");
+			}
+
+		    /* deallocate arrays */
+		    if (npointalloc > 0)
+	    		{
+			status = mbview_freeroutearrays(verbose, 
+						&routelon,
+						&routelat,
+						&routewaypoint,
+						&routetopo,
+						&routebearing,
+						&distlateral,
+						&distovertopo,
+						&slope,
+						&error);
+			}
 		    }
 
 		/* close the output file */
 		fclose(sfp);
-
-		/* deallocate arrays */
-		if (npointalloc > 0)
-	    	    {
-		    status = mbview_freeroutearrays(verbose, 
-					    &routelon,
-					    &routelat,
-					    &routewaypoint,
-					    &routetopo,
-					    &routebearing,
-					    &distlateral,
-					    &distovertopo,
-					    &slope,
-					    &error);
-		    }
+		    
 		}
 	    }
 }
@@ -3539,6 +3572,47 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 			GMT_io.in_col_type[1] = GMT_IS_LAT;
 			}
 		}
+	else if (strncmp(&(header.remark[0]), "Projection: ", 12) == 0)
+		{
+		if ((nscan = sscanf(&(header.remark[0]), "Projection: UTM%d%c", &utmzone, &NorS)) == 2)
+			{
+			if (NorS == 'N')
+				{
+				projectionid = 32600 + utmzone;
+				}
+			else if (NorS == 'S')
+				{
+				projectionid = 32700 + utmzone;
+				}
+				modeltype = ModelTypeProjected;
+			sprintf(projectionname, "UTM%2.2d%c", utmzone, NorS);
+			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
+			sprintf(grid_projection_id, "epsg%d", projectionid);
+			
+			project_info.degree[0] = FALSE;
+			}
+		else if ((nscan = sscanf(&(header.remark[0]), "Projection: epsg%d", &projectionid)) == 1)
+			{
+			sprintf(projectionname, "epsg%d", projectionid);
+			modeltype = ModelTypeProjected;
+			*grid_projection_mode = MBV_PROJECTION_PROJECTED;
+			sprintf(grid_projection_id, "epsg%d", projectionid);
+			
+			project_info.degree[0] = FALSE;
+			}
+		else
+			{
+			strcpy(projectionname, "Geographic WGS84");
+			modeltype = ModelTypeGeographic;
+			projectionid = GCS_WGS_84;
+			*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
+			sprintf(grid_projection_id, "epsg%d", projectionid);
+			
+			project_info.degree[0] = TRUE;
+			GMT_io.in_col_type[0] = GMT_IS_LON;
+			GMT_io.in_col_type[1] = GMT_IS_LAT;
+			}
+		}
 	else
 		{
 		strcpy(projectionname, "Geographic WGS84");
@@ -4305,8 +4379,8 @@ fprintf(stderr,"Called do_mbgrdviz_make_survey instance:%d\n", instance);
 		XtSetValues(spinText_arearoute_platform, args, ac);
 		XtSetValues(spinBox_arearoute_linespacing, args, ac);
 		XtSetValues(spinText_arearoute_linespacing, args, ac);
-		XtSetValues(spinBox_arearoute_interleaving, args, ac);
-		XtSetValues(spinText_arearoute_interleaving, args, ac);
+		XtSetValues(spinBox_arearoute_crosslinesfirstlast, args, ac);
+		XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
 		XtSetValues(label_arearoute_info, args, ac);
 		XtSetValues(spinBox_arearoute_linecontrol, args, ac);
 		XtSetValues(spinText_arearoute_linecontrol, args, ac);
@@ -4334,8 +4408,8 @@ fprintf(stderr,"Called do_mbgrdviz_make_survey instance:%d\n", instance);
 		XtSetValues(spinText_arearoute_crosslines, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, survey_interleaving); ac++;
-		XtSetValues(spinText_arearoute_interleaving, args, ac);
+		XtSetArg(args[ac], XmNposition, survey_crosslines_last); ac++;
+		XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
 
 		ac = 0;
 		XtSetArg(args[ac], XmNposition, survey_color); ac++;
@@ -4386,6 +4460,10 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 	double	line_spacing;
 	double	line_spacing_use;
 	double	crossline_spacing;
+	double	sonar_depth;
+	double	sonar_altitude;
+	double	maxtopo;
+	struct mbview_linesegment_struct segment;
 	int	nlines;
 	int	nlinegroups, npoints;
 	double xgrid, ygrid;
@@ -4508,6 +4586,7 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 		first = MB_YES;
 
 		/* do uniform line spacing */
+fprintf(stderr,"survey_mode:%d survey_platform:%d\n",survey_mode,survey_platform);
 		if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM)
 			{
 			/* get number of lines */
@@ -4532,8 +4611,7 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			for (i=0;i<nlines;i++)
 				{
 				/* get line position in survey area */
-				xx[i] = dsign * line_spacing_use * (((double)i) 
-								- 0.5 * (nlines - 1.0));
+				xx[i] = dsign * line_spacing_use * (((double)i) - 0.5 * (nlines - 1.0));
 				}
 			}
 
@@ -4542,7 +4620,8 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE)
 			{
 			/* get number of lines */
-			line_spacing = (double) survey_altitude * 2.0 * tan(0.5 * survey_swathwidth);
+			line_spacing = (double) survey_altitude * 2.0 * tan(DTR * 0.5 * (double) survey_swathwidth);
+fprintf(stderr,"altitude:%d width:%f line_spacing:%d\n",survey_altitude,survey_swathwidth,line_spacing);
 			line_spacing_use = line_spacing * r / data->area.width;
 			nlines = (data->area.width / line_spacing) + 1;
 			
@@ -4563,27 +4642,26 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 			for (i=0;i<nlines;i++)
 				{
 				/* get line position in survey area */
-				xx[i] = dsign * line_spacing_use * (((double)i) 
-								- 0.5 * (nlines - 1.0));
+				xx[i] = dsign * line_spacing_use * (((double)i) - 0.5 * (nlines - 1.0));
 				}
 			}
 
 		/* do variable line spacing with variable altitude */
 		else if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE)
 			{
-			/* find range of altitude along each line and calculate the swath width
-				from the smallest altitude */
-				
-			/* start in the center of the survey */
-				 
-			/* get number of lines */
-			line_spacing = (double) survey_altitude * 2.0 * tan(0.5 * survey_swathwidth);
-			line_spacing_use = line_spacing * r / data->area.width;
-			nlines = (data->area.width / line_spacing) + 1;
+			/* get platform depth */
+			if (survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH)
+				{
+				sonar_depth = (double) survey_depth;
+				}
+			else
+				{
+				sonar_depth = 0.0;
+				}
 			
 			/* allocate space for line position array */
 			nlines_alloc += 100;
-			status = mb_reallocd(verbose, __FILE__, __LINE__, nlines_alloc * sizeof(double), (void **)&xx, &error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, nlines_alloc * sizeof(double), (void **)&xx, &error);
 			if (status != MB_SUCCESS)
 				{
 				nlines_alloc = 0;
@@ -4591,23 +4669,105 @@ fprintf(stderr,"Called do_mbgrdviz_generate_survey instance:%d\n", instance);
 				fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
 					error_message);
 				}
-			else
-				nlines_alloc = nlines;
+				
+			/* start on the port side of the survey */
+			/* find range of altitude along each line and calculate the swath width
+				from the smallest altitude */
+			xx[0] = -dsign * 0.5 * r;
+			nlines = 1;
+			segment.nls = 0;
+			segment.nls_alloc = 0;
+			segment.lspoints = NULL;
 			
-			/* calculate line positions */
-			if (status == MB_SUCCESS)
+			while (nlines == 1 || fabs(xx[nlines-1] + dsign * 0.5 * line_spacing_use) < 0.5 * r)
 				{
-				for (i=0;i<nlines;i++)
+				/* allocate more space for xx if needed */
+				if (nlines_alloc <= nlines)
 					{
-					/* get line position in survey area */
-					xx[i] = dsign * line_spacing_use * (((double)i) 
-									- 0.5 * (nlines - 1.0));
+					nlines_alloc += 100;
+					status = mb_reallocd(verbose, __FILE__, __LINE__, nlines_alloc * sizeof(double), (void **)&xx, &error);
+					if (status != MB_SUCCESS)
+						{
+						nlines_alloc = 0;
+						mb_error(verbose,error,&error_message);
+						fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
+							error_message);
+						}
 					}
+				/* get offset from last xx */
+				dxuse = dx * xx[nlines-1];
+				dyuse = dy * xx[nlines-1];
+fprintf(stderr,"nlines:%d xx[%d]:%f\n",
+nlines,nlines-1,xx[nlines-1]);
+				
+				/* get first point */
+				segment.endpoints[0].xdisplay = data->area.endpoints[0].xdisplay + dxuse;
+				segment.endpoints[0].ydisplay = data->area.endpoints[0].ydisplay + dyuse;
+				segment.endpoints[0].zdisplay = data->area.endpoints[0].zdisplay;
+				mbview_projectinverse(instance, MB_YES,
+						segment.endpoints[0].xdisplay, 
+						segment.endpoints[0].ydisplay, 
+						segment.endpoints[0].zdisplay, 
+						&segment.endpoints[0].xlon, 
+						&segment.endpoints[0].ylat,
+						&segment.endpoints[0].xgrid, 
+						&segment.endpoints[0].ygrid);
+				mbview_getzdata(instance, 
+						segment.endpoints[0].xgrid, segment.endpoints[0].ygrid, 
+						&ok, &segment.endpoints[0].zdata);
+
+				/* get second point */
+				segment.endpoints[1].xdisplay = data->area.endpoints[1].xdisplay + dxuse;
+				segment.endpoints[1].ydisplay = data->area.endpoints[1].ydisplay + dyuse;
+				segment.endpoints[1].zdisplay = data->area.endpoints[1].zdisplay;
+				mbview_projectinverse(instance, MB_YES,
+						segment.endpoints[1].xdisplay, 
+						segment.endpoints[1].ydisplay, 
+						segment.endpoints[1].zdisplay, 
+						&segment.endpoints[1].xlon, 
+						&segment.endpoints[1].ylat,
+						&segment.endpoints[1].xgrid, 
+						&segment.endpoints[1].ygrid);
+				mbview_getzdata(instance, 
+						segment.endpoints[1].xgrid, segment.endpoints[1].ygrid, 
+						&ok, &segment.endpoints[1].zdata);
+
+				/* drape line and get max topo */
+				mbview_drapesegment(instance, &(segment));
+				maxtopo = -9999999.9;
+				if (segment.endpoints[0].zdata < -sonar_depth)
+					{
+					maxtopo = segment.endpoints[0].zdata;
+					}
+				if (segment.endpoints[1].zdata < -sonar_depth
+					&& segment.endpoints[1].zdata > maxtopo)
+					{
+					maxtopo = segment.endpoints[1].zdata;
+					}
+				for (i=0;i<segment.nls;i++)
+					{
+					if (segment.lspoints[i].zdata < -sonar_depth)
+						maxtopo = MAX(maxtopo, segment.lspoints[i].zdata);
+					}
+					
+				/* figure minimum swath width and location of next line */
+				sonar_altitude = -maxtopo - sonar_depth;
+				line_spacing = sonar_altitude * 2.0 * tan(DTR * 0.5 * (double) survey_swathwidth);
+				line_spacing_use = line_spacing * r / data->area.width;
+				xx[nlines] = xx[nlines-1] + dsign * line_spacing_use;
+				nlines++;
+				}
+				
+			/* deallocate segment points */
+			if (segment.lspoints != NULL)
+				{
+				mb_freed(verbose, __FILE__, __LINE__, (void **)&(segment.lspoints), &error);
+				segment.nls_alloc = 0;
 				}
 			}
 			
 		/* do crosslines if requested */
-		if (survey_crosslines > 0 && survey_crosslines_first != MB_NO && status == MB_SUCCESS)
+		if (survey_crosslines > 0 && survey_crosslines_last == MB_NO && status == MB_SUCCESS)
 			{
 			/* figure out which corner the main lines start at */
 			dxuse = dx * xx[0];
@@ -4921,7 +5081,7 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 			}
 			
 		/* do crosslines if requested */
-		if (survey_crosslines > 0 && survey_crosslines_first == MB_NO && status == MB_SUCCESS)
+		if (survey_crosslines > 0 && survey_crosslines_last == MB_YES && status == MB_SUCCESS)
 			{
 			/* figure out which corner the mail lines ended at */
 			for (i=0;i<4;i++)
@@ -5059,6 +5219,9 @@ iline, jendpoint, xlon, ylat, zdata, xgrid, ygrid, xdisplay, ydisplay, zdisplay)
 				}
 			
 			}
+			
+		/* free the memory for xx */
+		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&xx, &error);
 
 		/* update widgets */
 		do_mbgrdviz_arearoute_info(instance);
@@ -5134,8 +5297,8 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_parameterchange instance:%d\n", ins
 		XtGetValues(spinText_arearoute_crosslines, args, ac);
 
 		ac = 0;
-		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_interleaving); ac++;
-		XtGetValues(spinText_arearoute_interleaving, args, ac);
+		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_crosslines_last); ac++;
+		XtGetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
 
 		ac = 0;
 		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_color); ac++;
@@ -5174,18 +5337,18 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_parameterchange instance:%d\n", ins
 			XtFree(tmp);
 		
 fprintf(stderr,"\nIn do_mbgrdviz_arearoute_parameterchange:\n");
-fprintf(stderr,"  survey_mode:              %d\n",survey_mode);
-fprintf(stderr,"  survey_platform:          %d\n",survey_platform);
-fprintf(stderr,"  survey_interleaving:      %d\n",survey_interleaving);
-fprintf(stderr,"  survey_direction:         %d\n",survey_direction);
-fprintf(stderr,"  survey_crosslines_first:  %d\n",survey_crosslines_first);
-fprintf(stderr,"  survey_crosslines:        %d\n",survey_crosslines);
-fprintf(stderr,"  survey_linespacing:       %d\n",survey_linespacing);
-fprintf(stderr,"  survey_swathwidth:        %d\n",survey_swathwidth);
-fprintf(stderr,"  survey_depth:             %d\n",survey_depth);
-fprintf(stderr,"  survey_altitude:          %d\n",survey_altitude);
-fprintf(stderr,"  survey_color:             %d\n",survey_color);
-fprintf(stderr,"  survey_name:              %s\n",survey_name);
+fprintf(stderr,"  survey_mode:                %d\n",survey_mode);
+fprintf(stderr,"  survey_platform:            %d\n",survey_platform);
+fprintf(stderr,"  survey_interleaving:        %d\n",survey_interleaving);
+fprintf(stderr,"  survey_direction:           %d\n",survey_direction);
+fprintf(stderr,"  survey_crosslines_last:     %d\n",survey_crosslines_last);
+fprintf(stderr,"  survey_crosslines:          %d\n",survey_crosslines);
+fprintf(stderr,"  survey_linespacing:         %d\n",survey_linespacing);
+fprintf(stderr,"  survey_swathwidth:          %d\n",survey_swathwidth);
+fprintf(stderr,"  survey_depth:               %d\n",survey_depth);
+fprintf(stderr,"  survey_altitude:            %d\n",survey_altitude);
+fprintf(stderr,"  survey_color:               %d\n",survey_color);
+fprintf(stderr,"  survey_name:                %s\n",survey_name);
 
 		/* reset widgets accordingly (sensitivity and info) */
 		do_mbgrdviz_arearoute_recalc(instance);
@@ -5236,7 +5399,7 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_recalc instance:%d\n", instance);
 
 		ac = 0;
 		XtSetArg(args[ac], XmNsensitive, True); ac++; 
-		XtSetValues(spinText_arearoute_interleaving, args, ac);
+		XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
 
 		ac = 0;
 		XtSetArg(args[ac], XmNsensitive, True); ac++; 
@@ -5277,7 +5440,7 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_recalc instance:%d\n", instance);
 
 		ac = 0;
 		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE
-			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH)
+			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE)
 			{
 			XtSetArg(args[ac], XmNsensitive, True); ac++; 
 			}
@@ -5289,7 +5452,7 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_recalc instance:%d\n", instance);
 
 		ac = 0;
 		if (survey_mode == MBGRDVIZ_SURVEY_MODE_VARIABLE
-			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_ALTITUDE)
+			&& survey_platform == MBGRDVIZ_SURVEY_PLATFORM_SUBMERGED_DEPTH)
 			{
 			XtSetArg(args[ac], XmNsensitive, True); ac++; 
 			}

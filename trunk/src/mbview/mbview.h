@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.21 2008-03-14 19:04:32 caress Exp $
+ *    $Id: mbview.h,v 5.22 2008-09-11 20:17:33 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2008/03/14 19:04:32  caress
+ * Fixed memory problems with route editing.
+ *
  * Revision 5.20  2007/11/16 17:26:56  caress
  * Progress on MBeditviz
  *
@@ -177,6 +180,7 @@
 
 /* selection defines */
 #define MBV_SELECT_NONE			-1
+#define MBV_SELECT_ALL			-2
 
 /* pick defines */
 #define MBV_PICK_NONE			0
@@ -215,6 +219,7 @@
 #define MBV_ROUTE_OFF			0
 #define MBV_ROUTE_VIEW			1
 #define MBV_ROUTE_EDIT			2
+#define MBV_ROUTE_WAYPOINT_DELETEFLAG	-1
 #define MBV_ROUTE_WAYPOINT_NONE		0
 #define MBV_ROUTE_WAYPOINT_SIMPLE	1
 #define MBV_ROUTE_WAYPOINT_TRANSIT	2
@@ -410,6 +415,8 @@ struct mbview_route_struct {
 	int	npoints_alloc;
 	int	nroutepoint;
 	int	*waypoint;
+	double	*distlateral;
+	double	*disttopo;
 	struct mbview_pointw_struct *points;
 	struct mbview_linesegmentw_struct *segments;
 	};
@@ -852,10 +859,9 @@ int mbview_getroutepointcount(int verbose, int instance,
 			int	*npoint,
 			int	*nintpoint,
 			int *error);
-int mbview_getroutepointcount(int verbose, int instance,
+int mbview_getrouteselected(int verbose, int instance,
 			int	route,
-			int	*npoint,
-			int	*nintpoint,
+			int	*selected,
 			int *error);
 int mbview_getrouteinfo(int verbose, int instance,
 			int working_route, 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.14 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.15 2008-09-11 20:20:14 caress Exp $
  *
  *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.13  2006/12/15 21:42:49  caress
  * Incremental CVS update.
  *
@@ -115,7 +118,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.14 2007-10-08 16:48:07 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.15 2008-09-11 20:20:14 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -448,9 +451,9 @@ main (int argc, char **argv)
 		}		
 	
 	/* allocate memory for grid array */
-	status = mb_malloc(verbose, 2 * ngridxy * sizeof(float), &grid, &error);
-	status = mb_malloc(verbose, ngridy * sizeof(float), &ptrace, &error);
-	status = mb_malloc(verbose, ngridy * sizeof(float), &wtrace, &error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__, 2 * ngridxy * sizeof(float), (void **)&grid, &error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__, ngridy * sizeof(float), (void **)&ptrace, &error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__, ngridy * sizeof(float), (void **)&wtrace, &error);
 
 	/* output info */
 	if (verbose >= 0)
@@ -774,9 +777,9 @@ ix,iy,k,ptrace[iy],wtrace[iy],grid[k]);*/
 	status = mb_segy_close(verbose,&mbsegyioptr,&error);
 
 	/* deallocate memory for grid array */
-	status = mb_free(verbose, &grid, &error);
-	status = mb_free(verbose, &ptrace, &error);
-	status = mb_free(verbose, &wtrace, &error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&grid, &error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ptrace, &error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&wtrace, &error);
 	
 	/* run mbm_grdplot */
 	xwidth = MIN(0.01 * (double) ngridx, 55.0);
