@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.5 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.6 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.4  2006/01/27 19:11:29  caress
  * Version 5.0.8beta2
  *
@@ -264,7 +267,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.5 2006-08-09 22:41:27 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.6 2008-09-13 06:08:09 caress Exp $";
 static char program_name[] = "MBeditold";
 static char help_message[] =  
 "MBeditold is an interactive editor used to identify and flag\n\
@@ -3857,19 +3860,19 @@ int mbedit_open_file(char *file, int form, int savemode)
 		ombio_ptr = NULL;
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathalongtrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssalongtrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&editcount,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),(void **)&beamflag,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),(void **)&amp,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ss,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),(void **)&editcount,&error);
 	for (i=0;i<MBEDIT_MAX_PINGS;i++)
 		{
 		ping[i].beamflag = NULL;
@@ -3882,29 +3885,29 @@ int mbedit_open_file(char *file, int form, int savemode)
 		ping[i].ssalongtrack = NULL;
 		ping[i].bath_x = NULL;
 		ping[i].bath_y = NULL;
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-			&ping[i].beamflag,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bath,&error);
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-			&ping[i].amp,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathacrosstrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathalongtrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ss,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ssacrosstrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ssalongtrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(int),
-			&ping[i].bath_x,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(int),
-			&ping[i].bath_y,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
+			(void **)&ping[i].beamflag,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bath,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
+			(void **)&ping[i].amp,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ss,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ssacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ssalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),
+			(void **)&ping[i].bath_x,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),
+			(void **)&ping[i].bath_y,&error);
 		}
-	status = mb_malloc(verbose,beams_bath*MBEDIT_MAX_PINGS*sizeof(double),
-			&bathlist,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*MBEDIT_MAX_PINGS*sizeof(double),
+			(void **)&bathlist,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -3992,9 +3995,9 @@ int mbedit_open_file(char *file, int form, int savemode)
 	            /* allocate arrays for old edits */
 	            if (neditsave > 0)
 			{
-			status = mb_malloc(verbose,neditsave *sizeof(double),&editsave_time_d,&error);
-			status = mb_malloc(verbose,neditsave *sizeof(int),&editsave_beam,&error);
-			status = mb_malloc(verbose,neditsave *sizeof(int),&editsave_action,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,neditsave *sizeof(double),(void **)&editsave_time_d,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,neditsave *sizeof(int),(void **)&editsave_beam,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,neditsave *sizeof(int),(void **)&editsave_action,&error);
 	
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR)
@@ -4168,9 +4171,9 @@ int mbedit_close_file()
 	ofile_defined = MB_NO;
 	if (neditsave > 0)
 	    {
-	    mb_free(verbose,&editsave_time_d,&error);
-	    mb_free(verbose,&editsave_beam,&error);
-	    mb_free(verbose,&editsave_action,&error);
+	    mb_freed(verbose,__FILE__,__LINE__,(void **)&editsave_time_d,&error);
+	    mb_freed(verbose,__FILE__,__LINE__,(void **)&editsave_beam,&error);
+	    mb_freed(verbose,__FILE__,__LINE__,(void **)&editsave_action,&error);
 	    neditsave = 0;
 	    }
 	if (sofile_open == MB_YES)
@@ -4180,29 +4183,29 @@ int mbedit_close_file()
 	    }
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&beamflag,&error);
-	mb_free(verbose,&bath,&error);
-	mb_free(verbose,&amp,&error);
-	mb_free(verbose,&bathacrosstrack,&error);
-	mb_free(verbose,&bathalongtrack,&error);
-	mb_free(verbose,&ss,&error);
-	mb_free(verbose,&ssacrosstrack,&error);
-	mb_free(verbose,&ssalongtrack,&error);
-	mb_free(verbose,&editcount,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathacrosstrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathalongtrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssacrosstrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssalongtrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&editcount,&error);
 	for (i=0;i<MBEDIT_MAX_PINGS;i++)
 		{
-		mb_free(verbose,&ping[i].beamflag,&error);
-		mb_free(verbose,&ping[i].bath,&error);
-		mb_free(verbose,&ping[i].amp,&error);
-		mb_free(verbose,&ping[i].bathacrosstrack,&error);
-		mb_free(verbose,&ping[i].bathalongtrack,&error);
-		mb_free(verbose,&ping[i].ss,&error);
-		mb_free(verbose,&ping[i].ssacrosstrack,&error);
-		mb_free(verbose,&ping[i].ssalongtrack,&error);
-		mb_free(verbose,&ping[i].bath_x,&error);
-		mb_free(verbose,&ping[i].bath_y,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[i].beamflag,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[i].bath,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[i].amp,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[i].bathacrosstrack,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[i].bathalongtrack,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[i].ss,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[i].ssacrosstrack,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[i].ssalongtrack,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[i].bath_x,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[i].bath_y,&error);
 		}
-	mb_free(verbose, &bathlist, &error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **) &bathlist, &error);
 
 	/* check memory */
 	if (verbose >= 4)

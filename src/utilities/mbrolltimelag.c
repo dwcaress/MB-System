@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
- *    $Id: mbrolltimelag.c,v 5.6 2008-02-12 02:48:39 caress Exp $
+ *    $Id: mbrolltimelag.c,v 5.7 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,9 @@
  * Date:	November 11, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2008/02/12 02:48:39  caress
+ * Added ability to set output filename root.
+ *
  * Revision 5.5  2006/06/16 19:30:58  caress
  * Check in after the Santa Monica Basin Mapping AUV Expedition.
  *
@@ -69,7 +72,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.6 2008-02-12 02:48:39 caress Exp $";
+	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.7 2008-09-13 06:08:09 caress Exp $";
 	static char program_name[] = "MBrolltimelag";
 	static char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
 	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Ooutputname -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
@@ -280,8 +283,8 @@ main (int argc, char **argv)
 		
 	/* get time lag step */
 	lagstep = (lagmax - lagmin) / (nlag - 1);
-	status = mb_realloc(verbose, nlag * sizeof(double), &rr, &error);
-	status = mb_realloc(verbose, nlag * sizeof(int), &timelaghistogram, &error);
+	status = mb_reallocd(verbose,__FILE__,__LINE__, nlag * sizeof(double), (void **)&rr, &error);
+	status = mb_reallocd(verbose,__FILE__,__LINE__, nlag * sizeof(int), (void **)&timelaghistogram, &error);
 		
 	/* print out some helpful information */
 	if (verbose > 0)
@@ -305,8 +308,8 @@ main (int argc, char **argv)
 		if (nroll >= nroll_alloc)
 			{
 			nroll_alloc += MBRTL_ALLOC_CHUNK;
-			status = mb_realloc(verbose, nroll_alloc * sizeof(double), &roll_time_d, &error);
-			status = mb_realloc(verbose, nroll_alloc * sizeof(double), &roll_roll, &error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__, nroll_alloc * sizeof(double), (void **)&roll_time_d, &error);
+			status = mb_reallocd(verbose,__FILE__,__LINE__, nroll_alloc * sizeof(double), (void **)&roll_roll, &error);
 			}
 		if (nroll == 0 || time_d > roll_time_d[nroll-1])
 			{
@@ -397,9 +400,9 @@ main (int argc, char **argv)
 			if (nslope >= nslope_alloc)
 				{
 				nslope_alloc += MBRTL_ALLOC_CHUNK;
-				status = mb_realloc(verbose, nslope_alloc * sizeof(double), &slope_time_d, &error);
-				status = mb_realloc(verbose, nslope_alloc * sizeof(double), &slope_slope, &error);
-				status = mb_realloc(verbose, nslope_alloc * sizeof(double), &slope_roll, &error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__, nslope_alloc * sizeof(double), (void **)&slope_time_d, &error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__, nslope_alloc * sizeof(double), (void **)&slope_slope, &error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__, nslope_alloc * sizeof(double), (void **)&slope_roll, &error);
 				}
 			if (nslope == 0 || time_d > slope_time_d[nslope-1])
 				{
@@ -684,13 +687,13 @@ main (int argc, char **argv)
 	system(cmdfile);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&slope_time_d,&error);
-	mb_free(verbose,&slope_slope,&error);
-	mb_free(verbose,&slope_roll,&error);
-	mb_free(verbose,&roll_time_d,&error);
-	mb_free(verbose,&roll_roll,&error);
-	mb_free(verbose,&rr,&error);
-	mb_free(verbose,&timelaghistogram,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&slope_time_d,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&slope_slope,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&slope_roll,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&roll_time_d,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&roll_roll,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&rr,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&timelaghistogram,&error);
 
 	/* check memory */
 	if (verbose >= 4)

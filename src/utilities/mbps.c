@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 5.8 2006-01-18 15:15:10 caress Exp $
+ *    $Id: mbps.c,v 5.9 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	August 31, 1991 (original version)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2006/01/18 15:15:10  caress
+ * Had to change ps_text calls to work with pslib from GMT 4.1.
+ *
  * Revision 5.7  2005/11/05 01:07:54  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -167,7 +170,7 @@ int rgb_white[] = {255, 255, 255};
 main (int argc, char **argv)
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 5.8 2006-01-18 15:15:10 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 5.9 2008-09-13 06:08:09 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
@@ -1041,12 +1044,6 @@ main (int argc, char **argv)
 
 	/* end the postscript file */
 	ps_plotend(1);
-
-	/* deallocate memory */
-	for (i=0;i<nread;i++) 
-		{
-		mb_free(verbose,&data[i],&error);
-		}
 
 	/* check memory */
 	if (verbose >= 4)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.15 2006-09-11 18:55:52 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.16 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -215,6 +215,10 @@
  *
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2006/09/11 18:55:52  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.14  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -388,7 +392,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.15 2006-09-11 18:55:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.16 2008-09-13 06:08:09 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -648,6 +652,13 @@ main (int argc, char **argv)
 			
 			project_info.degree[0] = FALSE;
 			}
+		else if (strncmp(&(header.remark[2]), "Projection: SeismicProfile", 26) == 0)
+			{
+			sprintf(projectionname, "SeismicProfile");
+			modeltype = ModelTypeProjected;
+			
+			project_info.degree[0] = FALSE;
+			}
 		else
 			{
 			strcpy(projectionname, "Geographic WGS84");
@@ -688,10 +699,10 @@ main (int argc, char **argv)
 	  image_size = nx * ny;
 	else
 	  image_size = 3 * nx * ny;
-	status = mb_malloc(verbose, nxy * sizeof(float), &grid, &error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, nxy * sizeof(float), (void **)&grid, &error);
 	if (intensity == MB_YES)
-	    status = mb_malloc(verbose, nxy * sizeof(float), &igrid, &error);
-	status = mb_malloc(verbose, image_size, &tiff_image, &error);
+	    status = mb_mallocd(verbose, __FILE__, __LINE__, nxy * sizeof(float), (void **)&igrid, &error);
+	status = mb_mallocd(verbose, __FILE__, __LINE__, image_size, (void **)&tiff_image, &error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1157,10 +1168,10 @@ main (int argc, char **argv)
 	fclose(tfp);
 
 	/* deallocate arrays */
-	status = mb_free(verbose,&grid,&error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&grid, &error);
 	if (intensity == MB_YES)
-	  status = mb_free(verbose,&igrid,&error);
-	status = mb_free(verbose,&tiff_image,&error);
+	  status = mb_freed(verbose,__FILE__, __LINE__, (void **)&igrid, &error);
+	status = mb_freed(verbose,__FILE__, __LINE__, (void **)&tiff_image, &error);
 
 	/* set the status */
 	status = MB_SUCCESS;

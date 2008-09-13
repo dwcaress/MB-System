@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id: mb_get_value.c,v 5.4 2004-11-06 03:55:16 caress Exp $
+ *    $Id: mb_get_value.c,v 5.5 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	February 15, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2004/11/06 03:55:16  caress
+ * Working to support the Reson 7k format.
+ *
  * Revision 5.3  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -103,7 +106,7 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 5.4 2004-11-06 03:55:16 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 5.5 2008-09-13 06:08:09 caress Exp $";
 char	tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/
@@ -129,12 +132,15 @@ int mb_get_int(int *value, char *str, int nchar)
 /*	function mb_get_binary_short copies a binary short from
  *	a buffer, swapping if necessary
  */
-int mb_get_binary_short(int swapped, void *buffer, short *value)
+int mb_get_binary_short(int swapped, void *buffer, void *ptr)
 {
+	short *value;
+	
+	value = (short *) ptr;
 	memcpy(value, buffer, sizeof(short));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
-	    *value = mb_swap_short(*value);
+	    *value = mb_swap_short(*((short *)value));
 #else
 	if (swapped == MB_YES)
 	    *value = mb_swap_short(*value);
@@ -145,8 +151,11 @@ int mb_get_binary_short(int swapped, void *buffer, short *value)
 /*	function mb_get_binary_int copies a binary int from
  *	a buffer, swapping if necessary
  */
-int mb_get_binary_int(int swapped, void *buffer, int *value)
+int mb_get_binary_int(int swapped, void *buffer, void *ptr)
 {
+	int *value;
+	
+	value = (int *) ptr;
 	memcpy(value, buffer, sizeof(int));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -161,8 +170,11 @@ int mb_get_binary_int(int swapped, void *buffer, int *value)
 /*	function mb_get_binary_float copies a binary float from
  *	a buffer, swapping if necessary
  */
-int mb_get_binary_float(int swapped, void *buffer, float *value)
+int mb_get_binary_float(int swapped, void *buffer, void *ptr)
 {
+	float *value;
+	
+	value = (float *) ptr;
 	memcpy(value, buffer, sizeof(float));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -177,8 +189,11 @@ int mb_get_binary_float(int swapped, void *buffer, float *value)
 /*	function mb_get_binary_double copies a binary double from
  *	a buffer, swapping if necessary
  */
-int mb_get_binary_double(int swapped, void *buffer, double *value)
+int mb_get_binary_double(int swapped, void *buffer, void *ptr)
 {
+	double *value;
+	
+	value = (double *) ptr;
 	memcpy(value, buffer, sizeof(double));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)
@@ -193,8 +208,11 @@ int mb_get_binary_double(int swapped, void *buffer, double *value)
 /*	function mb_get_binary_long copies a binary long from
  *	a buffer, swapping if necessary
  */
-int mb_get_binary_long(int swapped, void *buffer, mb_s_long *value)
+int mb_get_binary_long(int swapped, void *buffer, void *ptr)
 {
+	mb_s_long *value;
+	
+	value = (mb_s_long *) ptr;
 	memcpy(value, buffer, sizeof(mb_s_long));
 #ifdef BYTESWAPPED
 	if (swapped == MB_NO)

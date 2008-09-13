@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_cbat9001.c	8/8/94
- *	$Id: mbr_cbat9001.c,v 5.10 2008-07-10 06:43:40 caress Exp $
+ *	$Id: mbr_cbat9001.c,v 5.11 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	August 8, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.9  2006/01/06 18:27:18  caress
  * Working towards 5.0.8
  *
@@ -151,7 +154,7 @@ int mbr_wt_cbat9001(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_cbat9001(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_cbat9001.c,v 5.10 2008-07-10 06:43:40 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat9001.c,v 5.11 2008-09-13 06:08:09 caress Exp $";
 	char	*function_name = "mbr_register_cbat9001";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -284,7 +287,7 @@ int mbr_info_cbat9001(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_cbat9001.c,v 5.10 2008-07-10 06:43:40 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat9001.c,v 5.11 2008-09-13 06:08:09 caress Exp $";
 	char	*function_name = "mbr_info_cbat9001";
 	int	status = MB_SUCCESS;
 
@@ -354,7 +357,7 @@ int mbr_info_cbat9001(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_cbat9001(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_cbat9001.c,v 5.10 2008-07-10 06:43:40 caress Exp $";
+	static char res_id[]="$Id: mbr_cbat9001.c,v 5.11 2008-09-13 06:08:09 caress Exp $";
 	char	*function_name = "mbr_alm_cbat9001";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1865,9 +1868,9 @@ int mbr_cbat9001_rd_bath(int verbose, FILE *mbfp, int swap,
 				data->tt[i] = (short) mb_swap_short(*short_ptr);
 				short_ptr = ((short *) beamarray) + 4; 
 				data->angle[i] = (short) mb_swap_short(*short_ptr);
-				char_ptr = beamarray + 10; 
+				char_ptr = (unsigned char *) (beamarray + 10); 
 				data->quality[i] = (short) *char_ptr;
-				char_ptr = beamarray + 11; 
+				char_ptr = (unsigned char *) (beamarray + 11); 
 				data->amp[i] = (short) *char_ptr;
 				}
 			}
@@ -2766,9 +2769,9 @@ int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, char *data_ptr, int 
 				short_ptr = ((short *) beamarray) + 4; 
 				*short_ptr = (short) 
 					mb_swap_short((short)data->angle[i]);
-				char_ptr = beamarray + 10; 
+				char_ptr = (unsigned char *) (beamarray + 10); 
 				*char_ptr = (char) data->quality[i];
-				char_ptr = beamarray + 11; 
+				char_ptr = (unsigned char *) (beamarray + 11); 
 				*char_ptr = (unsigned char) data->amp[i];
 				}
 			}

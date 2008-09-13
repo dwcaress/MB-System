@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegyinfo.c	6/2/2004
- *    $Id: mbsegyinfo.c,v 5.4 2008-05-24 19:40:42 caress Exp $
+ *    $Id: mbsegyinfo.c,v 5.5 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	June 2, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2008/05/24 19:40:42  caress
+ * Applied a Gordon Keith fix.
+ *
  * Revision 5.3  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -66,7 +69,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.4 2008-05-24 19:40:42 caress Exp $";
+static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.5 2008-09-13 06:08:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -323,8 +326,8 @@ main (int argc, char **argv)
 		/* read a trace */
 		status = mb_segy_read_trace(verbose, mbsegyioptr, 
 				&traceheader, &trace, &error);
-/*fprintf(stderr,"file:%s record:%d shot:%d  %4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d\n",
-	file,nread,traceheader.shot_num,
+/*fprintf(stderr,"read_file:%s record:%d shot:%d  %4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d\n",
+	read_file,nread,traceheader.shot_num,
 	traceheader.year,traceheader.day_of_yr,
 	traceheader.hour,traceheader.min,traceheader.sec,traceheader.mils,
 	traceheader.nsamps,traceheader.si_micros);*/

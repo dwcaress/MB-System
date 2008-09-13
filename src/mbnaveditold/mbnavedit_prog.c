@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.5 2007-10-08 16:18:36 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.6 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	June 23,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2007/10/08 16:18:36  caress
+ * Renamed plot variables.
+ *
  * Revision 5.4  2006/01/27 19:12:12  caress
  * Version 5.0.8beta2
  *
@@ -206,7 +209,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.5 2007-10-08 16:18:36 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.6 2008-09-13 06:08:09 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -V -H]";
@@ -765,18 +768,18 @@ int mbnavedit_open_file()
 		ombio_ptr = NULL;
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathalongtrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),(void **)&beamflag,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),(void **)&amp,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ss,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -986,14 +989,14 @@ int mbnavedit_close_file()
 	    }
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&beamflag,&error);
-	mb_free(verbose,&bath,&error);
-	mb_free(verbose,&amp,&error);
-	mb_free(verbose,&bathacrosstrack,&error);
-	mb_free(verbose,&bathalongtrack,&error);
-	mb_free(verbose,&ss,&error);
-	mb_free(verbose,&ssacrosstrack,&error);
-	mb_free(verbose,&ssalongtrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathacrosstrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathalongtrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssacrosstrack,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssalongtrack,&error);
 
 	/* check memory */
 	if (verbose >= 4)

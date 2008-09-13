@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_navnetcdf.c	4/11/2002
- *	$Id: mbsys_navnetcdf.c,v 5.7 2008-07-10 18:02:39 caress Exp $
+ *	$Id: mbsys_navnetcdf.c,v 5.8 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	April 11, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2008/07/10 18:02:39  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.4  2008/05/16 22:56:24  caress
  * Release 5.1.1beta18.
  *
@@ -52,7 +55,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_navnetcdf.h"
 
-static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.7 2008-07-10 18:02:39 caress Exp $";
+static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.8 2008-09-13 06:08:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -151,7 +154,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbHistTime_maximum = 86399999;
 	    store->mbHistTime_valid_minimum = 0;
 	    store->mbHistTime_valid_maximum = 86399999;
-	    store->mbHistTime_missing_value = -2147483648;
+	    store->mbHistTime_missing_value = -2000000000 - 147483648;
 	    strcpy(store->mbHistTime_format_C, "%d");
 	    strcpy(store->mbHistTime_orientation, "direct");
 	    strcpy(store->mbHistCode_type, "integer");
@@ -202,7 +205,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbTime_maximum = 86399999;
 	    store->mbTime_valid_minimum = 0;
 	    store->mbTime_valid_maximum = 86399999;
-	    store->mbTime_missing_value = -2147483648;
+	    store->mbTime_missing_value = -2000000000 - 147483648;
 	    strcpy(store->mbTime_format_C, "%d");
 	    strcpy(store->mbTime_orientation, "direct");
 	    strcpy(store->mbOrdinate_type, "real");
@@ -216,7 +219,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbOrdinate_maximum = 1800000000;
 	    store->mbOrdinate_valid_minimum = -1800000000;
 	    store->mbOrdinate_valid_maximum = 1800000000;
-	    store->mbOrdinate_missing_value = -2147483648;
+	    store->mbOrdinate_missing_value = -2000000000 - 147483648;
 	    strcpy(store->mbOrdinate_format_C, "%f");
 	    strcpy(store->mbOrdinate_orientation, "direct");
 	    strcpy(store->mbAbscissa_type, "real");
@@ -230,7 +233,7 @@ int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbAbscissa_maximum = 1800000000;
 	    store->mbAbscissa_valid_minimum = -1800000000;
 	    store->mbAbscissa_valid_maximum = 1800000000;
-	    store->mbAbscissa_missing_value = -2147483648;
+	    store->mbAbscissa_missing_value = -2000000000 - 147483648;
 	    strcpy(store->mbAbscissa_format_C, "%f");
 	    strcpy(store->mbAbscissa_orientation, "direct");
 	    strcpy(store->mbAltitude_type, "real");

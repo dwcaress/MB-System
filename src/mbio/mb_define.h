@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.35 2008-05-16 22:56:24 caress Exp $
+ *    $Id: mb_define.h,v 5.36 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.35  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.34  2008/02/12 02:58:30  caress
  * Added mb_gains() function to MBIO.
  *
@@ -599,11 +602,11 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 int mb_swap_check();
 int mb_get_double(double *, char *, int);
 int mb_get_int(int *, char *, int);
-int mb_get_binary_short(int, void *, short *);
-int mb_get_binary_int(int, void *, int *);
-int mb_get_binary_float(int, void *, float *);
-int mb_get_binary_double(int, void *, double *);
-int mb_get_binary_long(int, void *, mb_s_long *);
+int mb_get_binary_short(int, void *, void *);
+int mb_get_binary_int(int, void *, void *);
+int mb_get_binary_float(int, void *, void *);
+int mb_get_binary_double(int, void *, void *);
+int mb_get_binary_long(int, void *, void *);
 int mb_put_binary_short(int, short, void *);
 int mb_put_binary_int(int, int, void *);
 int mb_put_binary_float(int, float, void *);

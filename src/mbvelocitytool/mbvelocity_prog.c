@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c,v 5.17 2008-07-20 15:31:33 caress Exp $ 
+ *    $Id: mbvelocity_prog.c,v 5.18 2008-09-13 06:08:09 caress Exp $ 
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:        June 6, 1993 
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2008/07/20 15:31:33  caress
+ * Lengthened filename char arrays to prevent possible overflows.
+ *
  * Revision 5.16  2006/09/11 18:55:53  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -236,7 +239,7 @@ struct mbvt_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.17 2008-07-20 15:31:33 caress Exp $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.18 2008-09-13 06:08:09 caress Exp $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";
@@ -806,10 +809,10 @@ int mbvt_open_edit_profile(char *file)
 		edit = MB_NO;
 		profile->n = 0;
 		strcpy(profile->name,"\0");
-		mb_free(verbose,&edit_x,&error);
-		mb_free(verbose,&edit_y,&error);
-		mb_free(verbose,&profile->depth,&error);
-		mb_free(verbose,&profile->velocity,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&edit_x,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&edit_y,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&profile->depth,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&profile->velocity,&error);
 		}
 
 	/* open the file if possible and count the velocity points */
@@ -831,11 +834,11 @@ int mbvt_open_edit_profile(char *file)
 	/* allocate space for the velocity profile and raytracing tables */
 	profile->nalloc = MAX(10 * profile->n, 60);
 	size = profile->nalloc * sizeof(int);
-	status = mb_malloc(verbose,size,&edit_x,&error);
-	status = mb_malloc(verbose,size,&edit_y,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&edit_x,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&edit_y,&error);
 	size = profile->nalloc * sizeof(double);
-	status = mb_malloc(verbose,size,&(profile->depth),&error);
-	status = mb_malloc(verbose,size,&(profile->velocity),&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&(profile->depth),&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&(profile->velocity),&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -936,22 +939,22 @@ int mbvt_new_edit_profile()
 		edit = MB_NO;
 		profile->n = 0;
 		strcpy(profile->name,"\0");
-		mb_free(verbose,&edit_x,&error);
-		mb_free(verbose,&edit_y,&error);
-		mb_free(verbose,&profile->depth,&error);
-		mb_free(verbose,&profile->velocity,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&edit_x,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&edit_y,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&profile->depth,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&profile->velocity,&error);
 		}
 
 	/* allocate space for the velocity profile and raytracing tables */
 	profile->nalloc = 10 * NUM_EDIT_START;
 	size = profile->nalloc * sizeof(int);
-	status = mb_malloc(verbose,size,&edit_x,&error);
-	status = mb_malloc(verbose,size,&edit_y,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&edit_x,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&edit_y,&error);
 	size = profile->nalloc * sizeof(double);
 	profile->depth = NULL;
 	profile->velocity = NULL;
-	status = mb_malloc(verbose,size,&(profile->depth),&error);
-	status = mb_malloc(verbose,size,&(profile->velocity),&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&(profile->depth),&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&(profile->velocity),&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1355,10 +1358,10 @@ int mbvt_open_display_profile(char *file)
 	profile->depth = NULL;
 	profile->velocity = NULL;
 	profile->nalloc = profile->n;
-	status = mb_malloc(verbose,profile->nalloc * sizeof(double),
-		&(profile->depth),&error);
-	status = mb_malloc(verbose,profile->nalloc * sizeof(double),
-		&(profile->velocity),&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,profile->nalloc * sizeof(double),
+		(void **)&(profile->depth),&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,profile->nalloc * sizeof(double),
+		(void **)&(profile->velocity),&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1502,8 +1505,8 @@ int mbvt_delete_display_profile(int select)
 		profile->n = 0;
 		profile->nalloc = 0;
 		strcpy(profile->name,"\0");
-		mb_free(verbose,&profile->depth,&error);
-		mb_free(verbose,&profile->velocity,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&profile->depth,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&profile->velocity,&error);
 
 		/* reorder remaining profiles */
 		for (i=select+1;i<ndisplay;i++)
@@ -2800,12 +2803,12 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 	/* allocate resicual arrays to accomodate greatest number of beams */
 	if (status == MB_SUCCESS)
 		{
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&depth,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&acrosstrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&angle,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&residual,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),&res_sd,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(int),&nresidual,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&depth,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&acrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&angle,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&residual,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&res_sd,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),(void **)&nresidual,&error);
 		}
 	
 	/* set error message */
@@ -2899,18 +2902,18 @@ int mbvt_open_swath_file(char *file, int form, int *numload)
 		}
 
 	/* allocate memory for raytracing arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(int),&nraypath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double *),
-				&raypathx,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double *),
-				&raypathy,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),(void **)&nraypath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double *),
+				(void **)&raypathx,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double *),
+				(void **)&raypathy,&error);
 	nraypathmax = 100*profile_edit.n;
 	for (i=0;i<beams_bath;i++)
 		{
-		status = mb_malloc(verbose,nraypathmax*sizeof(double),
-				&(raypathx[i]),&error);
-		status = mb_malloc(verbose,nraypathmax*sizeof(double),
-				&(raypathy[i]),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nraypathmax*sizeof(double),
+				(void **)&(raypathx[i]),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nraypathmax*sizeof(double),
+				(void **)&(raypathy[i]),&error);
 		}
 
 	/* if error initializing memory then quit */
@@ -2973,20 +2976,20 @@ int mbvt_deallocate_swath()
 	/* deallocate previously loaded data, if any */
 	if (nbuffer > 0)
 		{
-		mb_free(verbose,&nraypath,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nraypath,&error);
 		for (i=0;i<beams_bath;i++)
 			{
-			mb_free(verbose,&(raypathx[i]),&error);
-			mb_free(verbose,&(raypathy[i]),&error);
+			mb_freed(verbose,__FILE__,__LINE__,(void **)&(raypathx[i]),&error);
+			mb_freed(verbose,__FILE__,__LINE__,(void **)&(raypathy[i]),&error);
 			}
-		mb_free(verbose,&raypathx,&error);
-		mb_free(verbose,&raypathy,&error);
-		mb_free(verbose,&depth,&error);
-		mb_free(verbose,&acrosstrack,&error);
-		mb_free(verbose,&angle,&error);
-		mb_free(verbose,&residual,&error);
-		mb_free(verbose,&res_sd,&error);
-		mb_free(verbose,&nresidual,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&raypathx,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&raypathy,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&depth,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&acrosstrack,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&angle,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&residual,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&res_sd,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&nresidual,&error);
 		for (i=0;i<MBVT_BUFFER_SIZE;i++)
 			{
 			if (ping[i].allocated > 0 && ping[i].allocated != 60)

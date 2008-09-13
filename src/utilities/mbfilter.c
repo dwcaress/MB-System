@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 5.7 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mbfilter.c,v 5.8 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,6 +32,9 @@
  * Date:	January 16, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.6  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -185,7 +188,7 @@ struct mbfilter_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 5.7 2007-10-08 16:48:07 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 5.8 2008-09-13 06:08:09 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
@@ -693,28 +696,28 @@ The default input and output streams are stdin and stdout.\n";
 		ping[i].data_i_ptr = NULL;
 		ping[i].data_f_ptr = NULL;
 		ping[i].flag_ptr = NULL;
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-			&ping[i].beamflag,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bath,&error);
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-			&ping[i].amp,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathacrosstrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathalongtrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(char),
-			&ping[i].pixelflag,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ss,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ssacrosstrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ssalongtrack,&error);
-		status = mb_malloc(verbose,ndatapts*sizeof(double),
-			&ping[i].dataprocess,&error);
-		status = mb_malloc(verbose,ndatapts*sizeof(double),
-			    &ping[i].datasave,&error);		    
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
+			(void **)&ping[i].beamflag,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bath,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
+			(void **)&ping[i].amp,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(char),
+			(void **)&ping[i].pixelflag,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ss,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ssacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ssalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ndatapts*sizeof(double),
+			(void **)&ping[i].dataprocess,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ndatapts*sizeof(double),
+			(void **)&ping[i].datasave,&error);		    
 		}
 		
 	/* get ideal number of ping records to hold */
@@ -736,14 +739,14 @@ The default input and output streams are stdin and stdout.\n";
 	contrast_ndx = contrast_xdim/2;
 	contrast_ndl = contrast_ldim/2;
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,nweightmax*sizeof(double),
-				&weights,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nweightmax*sizeof(double),
+				(void **)&weights,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,nweightmax*sizeof(double),
-				&values,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nweightmax*sizeof(double),
+				(void **)&values,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,nweightmax*sizeof(double),
-				&distances,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nweightmax*sizeof(double),
+				(void **)&distances,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1485,16 +1488,16 @@ done, jbeg, jend, nbuff, nhold_ping, nhold);*/
 	/* free the memory */
 	for (j=0;j<n_buffer_max;j++)
 		{
-		mb_free(verbose,&ping[j].beamflag,&error); 
-		mb_free(verbose,&ping[j].bath,&error); 
-		mb_free(verbose,&ping[j].bathacrosstrack,&error); 
-		mb_free(verbose,&ping[j].bathalongtrack,&error); 
-		mb_free(verbose,&ping[j].amp,&error); 
-		mb_free(verbose,&ping[j].ss,&error); 
-		mb_free(verbose,&ping[j].ssacrosstrack,&error); 
-		mb_free(verbose,&ping[j].ssalongtrack,&error); 
-		mb_free(verbose,&ping[j].dataprocess,&error); 
-		mb_free(verbose,&ping[j].datasave,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].beamflag,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bath,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathacrosstrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathalongtrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].amp,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ss,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ssacrosstrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ssalongtrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].dataprocess,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].datasave,&error); 
 		}
 
 	/* check memory */

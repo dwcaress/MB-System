@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 5.5 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbsmooth.c,v 5.6 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.4  2005/03/25 04:43:02  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -182,7 +185,7 @@ double	width_def = 250.0;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 5.6 2008-09-13 06:08:09 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to swath \nbathymetry data in order to \
@@ -452,33 +455,33 @@ smooth out noise in the data.";
 		ping[i].bathx = NULL;
 		ping[i].bathy = NULL;
 		ping[i].bathsmooth = NULL;
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-			&ping[i].beamflag,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bath,&error);
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-			&ping[i].amp,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathacrosstrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathalongtrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ss,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ssacrosstrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ssalongtrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathx,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathy,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(int),
-			&ping[i].bathsmooth,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
+			(void **)&ping[i].beamflag,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bath,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
+			(void **)&ping[i].amp,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ss,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ssacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ssalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathx,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathy,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),
+			(void **)&ping[i].bathsmooth,&error);
 		}
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&width,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&factor,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&width,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&factor,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -763,19 +766,19 @@ smooth out noise in the data.";
 	/* free the memory */
 	for (j=0;j<3;j++)
 		{
-		mb_free(verbose,&ping[j].beamflag,&error); 
-		mb_free(verbose,&ping[j].bath,&error); 
-		mb_free(verbose,&ping[j].bathacrosstrack,&error); 
-		mb_free(verbose,&ping[j].bathalongtrack,&error); 
-		mb_free(verbose,&ping[j].amp,&error); 
-		mb_free(verbose,&ping[j].ss,&error); 
-		mb_free(verbose,&ping[j].ssacrosstrack,&error); 
-		mb_free(verbose,&ping[j].ssalongtrack,&error); 
-		mb_free(verbose,&ping[j].bathx,&error); 
-		mb_free(verbose,&ping[j].bathy,&error); 
-		mb_free(verbose,&ping[j].bathsmooth,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].beamflag,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bath,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathacrosstrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathalongtrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].amp,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ss,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ssacrosstrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ssalongtrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathx,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathy,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathsmooth,&error); 
 		}
-	mb_free(verbose,&width,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&width,&error); 
 
 	/* check memory */
 	if (verbose >= 4)
