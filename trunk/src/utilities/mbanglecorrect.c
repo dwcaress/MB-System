@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 5.6 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mbanglecorrect.c,v 5.7 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -47,6 +47,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.5  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -185,7 +188,7 @@ struct mbanglecorrect_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.6 2007-10-08 16:48:07 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.7 2008-09-13 06:08:09 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -608,38 +611,38 @@ The default input and output streams are stdin and stdout.\n";
 		ping[i].ssacrosstrack = NULL;
 		ping[i].ssalongtrack = NULL;
 		ping[i].dataprocess = NULL;
-		status = mb_malloc(verbose,beams_bath*sizeof(char),
-			&ping[i].beamflag,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bath,&error);
-		status = mb_malloc(verbose,beams_amp*sizeof(double),
-			&ping[i].amp,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathacrosstrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].bathalongtrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ss,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ssacrosstrack,&error);
-		status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ping[i].ssalongtrack,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].depths,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&ping[i].depthacrosstrack,&error);
-		status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
-			&ping[i].slopes,&error);
-		status = mb_malloc(verbose,(beams_bath+1)*sizeof(double),
-			&ping[i].slopeacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
+			(void **)&ping[i].beamflag,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bath,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
+			(void **)&ping[i].amp,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].bathalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ss,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ssacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ping[i].ssalongtrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].depths,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&ping[i].depthacrosstrack,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,(beams_bath+1)*sizeof(double),
+			(void **)&ping[i].slopes,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,(beams_bath+1)*sizeof(double),
+			(void **)&ping[i].slopeacrosstrack,&error);
 		if (ampkind == MBANGLECORRECT_SS)
-			status = mb_malloc(verbose,pixels_ss*sizeof(double),
-				&ping[i].dataprocess,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+				(void **)&ping[i].dataprocess,&error);
 		else
-			status = mb_malloc(verbose,beams_amp*sizeof(double),
-				&ping[i].dataprocess,&error);
-		status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&depthsmooth,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),
+				(void **)&ping[i].dataprocess,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&depthsmooth,&error);
 		}
 
 	/* if error initializing memory then quit */
@@ -676,17 +679,17 @@ The default input and output streams are stdin and stdout.\n";
 
 		/* allocate memory */
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(int),
-				&nmean,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(int),
+				(void **)&nmean,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&mean,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&mean,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&angles,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&angles,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&sigma,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&sigma,&error);
 		if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
@@ -739,17 +742,17 @@ The default input and output streams are stdin and stdout.\n";
 		{
 		/* allocate memory for angle arrays */
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(int),
-				&nmean,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(int),
+				(void **)&nmean,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&mean,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&mean,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&angles,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&angles,&error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_malloc(verbose,nangles*sizeof(double),
-				&sigma,&error);
+			status = mb_mallocd(verbose,__FILE__,__LINE__,nangles*sizeof(double),
+				(void **)&sigma,&error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -1527,26 +1530,26 @@ j, i, slopeangle, rawangle, correction, ping[j].ss[i], ping[j].dataprocess[i]);*
 	/* free the memory */
 	for (j=0;j<n_buffer_max;j++)
 		{
-		mb_free(verbose,&ping[j].beamflag,&error); 
-		mb_free(verbose,&ping[j].bath,&error); 
-		mb_free(verbose,&ping[j].bathacrosstrack,&error); 
-		mb_free(verbose,&ping[j].bathalongtrack,&error); 
-		mb_free(verbose,&ping[j].amp,&error); 
-		mb_free(verbose,&ping[j].ss,&error); 
-		mb_free(verbose,&ping[j].ssacrosstrack,&error); 
-		mb_free(verbose,&ping[j].ssalongtrack,&error); 
-		mb_free(verbose,&ping[j].depths,&error); 
-		mb_free(verbose,&ping[j].depthacrosstrack,&error); 
-		mb_free(verbose,&ping[j].slopes,&error); 
-		mb_free(verbose,&ping[j].slopeacrosstrack,&error); 
-		mb_free(verbose,&ping[j].dataprocess,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].beamflag,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bath,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathacrosstrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].bathalongtrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].amp,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ss,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ssacrosstrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].ssalongtrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].depths,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].depthacrosstrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].slopes,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].slopeacrosstrack,&error); 
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&ping[j].dataprocess,&error); 
 		}
-	mb_free(verbose,&depthsmooth,&error); 
-	mb_free(verbose,&nmean,&error); 
-	mb_free(verbose,&mean,&error); 
-	mb_free(verbose,&angles,&error); 
-	mb_free(verbose,&nmean,&error); 
-	mb_free(verbose,&sigma,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&depthsmooth,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nmean,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&mean,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&angles,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&nmean,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sigma,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

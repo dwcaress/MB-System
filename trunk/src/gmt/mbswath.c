@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.20 2007-11-02 22:38:52 caress Exp $
+ *    $Id: mbswath.c,v 5.21 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -29,6 +29,9 @@
  * Date:	May 30, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2007/11/02 22:38:52  caress
+ * Fixed handling of time gap errors in mbswath.
+ *
  * Revision 5.19  2007/10/17 20:35:53  caress
  * Release 5.1.1beta11
  *
@@ -339,7 +342,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.20 2007-11-02 22:38:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.21 2008-09-13 06:08:09 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode -V -H]";
@@ -861,8 +864,8 @@ main (int argc, char **argv)
 		fclose(fp);
 
 		/* allocate memory */
-		status = mb_malloc(verbose,nshadelevel*sizeof(double),&shadelevel,&error);
-		status = mb_malloc(verbose,nshadelevel*sizeof(int),&shadelevelgray,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, nshadelevel*sizeof(double), (void **)&shadelevel, &error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, nshadelevel*sizeof(int), (void **)&shadelevelgray, &error);
 
 		/* reopen shade control cpt file */
 		if ((fp = fopen(cptshadefile,"r")) == NULL)
@@ -937,8 +940,8 @@ main (int argc, char **argv)
 		if (image == MBSWATH_IMAGE_8)
 			{
 			/* allocate image */
-			status = mb_malloc(verbose,nm*sizeof(char),
-					&bitimage,&error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, nm*sizeof(char),
+					(void **)&bitimage, &error);
 
 			/* set image to background color */
 			gray = YIQ (gmtdefs.page_rgb); 
@@ -948,8 +951,8 @@ main (int argc, char **argv)
 		else
 			{
 			/* allocate image */
-			status = mb_malloc(verbose,3*nm*sizeof(char),
-					&bitimage,&error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, 3*nm*sizeof(char),
+					(void **)&bitimage, &error);
 
 			/* set image to background color */
 			j = 0;
@@ -1051,8 +1054,8 @@ main (int argc, char **argv)
 		    default_depth_use = default_depth;
     
 		/* allocate memory for data arrays */
-		status = mb_malloc(verbose,sizeof(struct swath),
-				&swath_plot,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct swath),
+				(void **)&swath_plot, &error);
 		npings = &swath_plot->npings;
 		swath_plot->beams_bath = beams_bath_max;
 		swath_plot->beams_amp = beams_amp_max;
@@ -1385,7 +1388,7 @@ main (int argc, char **argv)
 		status = mb_close(verbose,&mbio_ptr,&error);
     
 		/* deallocate memory for data arrays */
-		mb_free(verbose,&swath_plot,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&swath_plot, &error);
 		} /* end if file in bounds */
 		
 	    /* figure out whether and what to read next */
@@ -1437,7 +1440,12 @@ main (int argc, char **argv)
 
 	/* deallocate image */
 	if (image == MBSWATH_IMAGE_8 || image == MBSWATH_IMAGE_24)
-		mb_free(verbose,&bitimage,&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&bitimage, &error);
+	if (mode == MBSWATH_BATH_AMP_CPT)
+		{
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&shadelevel, &error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&shadelevelgray, &error);
+		}
 
 	/* check memory */
 	if (verbose >= 2)

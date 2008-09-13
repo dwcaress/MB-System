@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_segy.h,v 5.6 2006-11-10 22:36:04 caress Exp $
+ *    $Id: mb_segy.h,v 5.7 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	April 13, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/11/10 22:36:04  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.5  2005/05/05 23:53:01  caress
  * Just added a space in a line of code...
  *
@@ -61,7 +64,7 @@
 /* SEGY structures */
 struct mb_segyasciiheader_struct
 	{
-	char line[80][40];
+	char line[40][80];
 	};
 struct mb_segyfileheader_struct
 	{
@@ -99,6 +102,9 @@ struct mb_segyfileheader_struct
 	short	impulse_polarity;
 	short	vibrate_polarity;
 	short	domain;
+	short	rev;
+	short	fixed_length;
+	short	num_ext_headers;
 	char	extra[338];
 	};
 struct mb_segytraceheader_struct 

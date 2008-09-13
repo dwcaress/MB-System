@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmask.c	6/15/93
- *    $Id: mbmask.c,v 5.6 2006-09-11 18:55:54 caress Exp $
+ *    $Id: mbmask.c,v 5.7 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993,1994, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -27,6 +27,10 @@
  * Date:	June 15, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/09/11 18:55:54  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.5  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -131,7 +135,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbmask.c,v 5.6 2006-09-11 18:55:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbmask.c,v 5.7 2008-09-13 06:08:09 caress Exp $";
 	static char program_name[] = "MBMASK";
 	static char help_message[] = "MBMASK reads a flagging mask file and applies it to the input \nmultibeam data file.  Flagging mask files are created from  \nmultibeam data files using the program MBGETMASK.  If the time \ntag of a mask record matches that of a data ping, then any \nbeams marked as flagged in the mask are flagged in the data. \nThe utilities MBGETMASK and MBMASK provide a means for transferring \nediting information from one file to another, provided the files \ncontain versions of the same data. \nThe default input and output multibeam streams are stdin and stdout.";
 	static char usage_message[] = "mbmask [-Fformat -Mmaskfile -Iinfile -Ooutfile -V -H]";
@@ -411,8 +415,8 @@ main (int argc, char **argv)
 	while (ready == MB_NO);
 
 	/* allocate memory for the flagging mask arrays */
-	status = mb_malloc(verbose,beams_bath_mask*sizeof(char),
-			&bath_mask,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath_mask*sizeof(char),
+			(void **)&bath_mask,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -473,18 +477,18 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathalongtrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),(void **)&beamflag,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),(void **)&amp,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathalongtrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ss,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssacrosstrack,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -741,15 +745,15 @@ main (int argc, char **argv)
 	fclose(fp);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&bathacrosstrack,&error); 
-	mb_free(verbose,&bathalongtrack,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&ssacrosstrack,&error); 
-	mb_free(verbose,&ssalongtrack,&error); 
-	mb_free(verbose,&bath_mask,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath_mask,&error);
 
 	/* check memory */
 	if (verbose >= 4)

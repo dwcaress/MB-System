@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.37 2008-07-10 06:43:40 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.38 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 16,  1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.37  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.36  2008/03/01 09:14:03  caress
  * Some housekeeping changes.
  *
@@ -310,7 +313,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.37 2008-07-10 06:43:40 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.38 2008-09-13 06:08:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -1979,10 +1982,10 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp, int swap,
 			}
 
 		if (status == MB_SUCCESS 
-			&& (line[len-1] < 32
-			    || line[len-1] > 127)
-			&& line[len-1] != '\r'
-			&& line[len-1] != '\n')
+			&& (((mb_u_char)(line[len-1])) < 32
+			    || ((mb_u_char)(line[len-1])) > 127)
+			&& ((mb_u_char)(line[len-1])) != '\r'
+			&& ((mb_u_char)(line[len-1])) != '\n')
 			{
 			done = MB_YES;
 			if (len > 1)

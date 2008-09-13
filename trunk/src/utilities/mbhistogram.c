@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 5.7 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mbhistogram.c,v 5.8 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	December 28, 1994
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.6  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -108,7 +111,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 5.7 2007-10-08 16:48:07 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 5.8 2008-09-13 06:08:09 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";
@@ -389,11 +392,11 @@ main (int argc, char **argv)
 
 	/* allocate memory for histogram arrays */
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,nbins*sizeof(double),
-				&histogram,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nbins*sizeof(double),
+				(void **)&histogram,&error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_malloc(verbose,nintervals*sizeof(double),
-				&intervals,&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nintervals*sizeof(double),
+				(void **)&intervals,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -770,8 +773,8 @@ main (int argc, char **argv)
 		}
 
 	/* deallocate memory used for data arrays */
-	mb_free(verbose,&histogram,&error);
-	mb_free(verbose,&intervals,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&histogram,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&intervals,&error);
 
 	/* set program status */
 	status = MB_SUCCESS;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_xtfr8101.c	8/8/94
- *	$Id: mbr_xtfr8101.c,v 5.10 2006-03-06 21:47:48 caress Exp $
+ *	$Id: mbr_xtfr8101.c,v 5.11 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	August 26, 2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2006/03/06 21:47:48  caress
+ * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
+ *
  * Revision 5.9  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -106,7 +109,7 @@ int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.10 2006-03-06 21:47:48 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.11 2008-09-13 06:08:09 caress Exp $";
 	char	*function_name = "mbr_register_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -239,7 +242,7 @@ int mbr_info_xtfr8101(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.10 2006-03-06 21:47:48 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.11 2008-09-13 06:08:09 caress Exp $";
 	char	*function_name = "mbr_info_xtfr8101";
 	int	status = MB_SUCCESS;
 
@@ -309,7 +312,7 @@ int mbr_info_xtfr8101(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_xtfr8101(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.10 2006-03-06 21:47:48 caress Exp $";
+	static char res_id[]="$Id: mbr_xtfr8101.c,v 5.11 2008-09-13 06:08:09 caress Exp $";
 	char	*function_name = "mbr_alm_xtfr8101";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1174,7 +1177,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		index += 4;
 
 		/* check packet header details */
-		if( packetheader.NumChansToFollow > 20 || packetheader.NumChansToFollow < 0) 
+		if( packetheader.NumChansToFollow > 20) 
 			{
 			if (verbose > 0)
 				fprintf(stderr,"Bad packet header in xtf - skip this record\n");

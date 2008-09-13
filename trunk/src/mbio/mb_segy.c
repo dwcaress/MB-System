@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
- *    $Id: mb_segy.c,v 5.6 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_segy.c,v 5.7 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 25, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.5  2006/11/10 22:36:04  caress
  * Working towards release 5.1.0
  *
@@ -55,7 +58,7 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_segy.c,v 5.6 2008-07-10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id: mb_segy.c,v 5.7 2008-09-13 06:08:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_segy_read_init opens an existing segy file for 
@@ -184,7 +187,14 @@ int mb_segy_read_init(int verbose, char *segyfile,
 			mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(fileheader->impulse_polarity)); index += 2;
 			mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(fileheader->vibrate_polarity)); index += 2;
 			mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(fileheader->domain)); index += 2;
-			for (i=0;i<338;i++)
+			for (i=0;i<238;i++)
+				{
+				fileheader->extra[i] = buffer[index]; index++;
+				}
+			mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(fileheader->rev)); index += 2;
+			mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(fileheader->fixed_length)); index += 2;
+			mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(fileheader->num_ext_headers)); index += 2;
+			for (i=0;i<94;i++)
 				{
 				fileheader->extra[i] = buffer[index]; index++;
 				}
@@ -206,7 +216,7 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2       asciiheader:         %d\n",asciiheader);
 		fprintf(stderr,"dbg2       fileheader:          %d\n",fileheader);
 		for (j=0;j<40;j++)
-			fprintf(stderr,"dbg2       asciiheader[%d]:%s\n",j,&(asciiheader->line[0][j]));
+			fprintf(stderr,"dbg2       asciiheader[%d]:%.80s\n",j,&(asciiheader->line[j]));
 		fprintf(stderr,"dbg2       jobid:               %d\n",fileheader->jobid);
 		fprintf(stderr,"dbg2       line:                %d\n",fileheader->line);
 		fprintf(stderr,"dbg2       reel:                %d\n",fileheader->reel);
@@ -235,7 +245,12 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2       impulse_polarity:    %d\n",fileheader->impulse_polarity);
 		fprintf(stderr,"dbg2       vibrate_polarity:    %d\n",fileheader->vibrate_polarity);
 		fprintf(stderr,"dbg2       domain:              %d\n",fileheader->domain);
-		for (i=0;i<338;i++)
+		for (i=0;i<238;i++)
+			fprintf(stderr,"dbg2       extra[%d]:          %d\n",i,fileheader->extra[i]);
+		fprintf(stderr,"dbg2       SEG Y format rev:     %d\n",fileheader->rev);
+		fprintf(stderr,"dbg2       fixed_length flag:    %d\n",fileheader->fixed_length);
+		fprintf(stderr,"dbg2       num extended headers: %d\n",fileheader->num_ext_headers);
+		for (i=238;i<238+94;i++)
 			fprintf(stderr,"dbg2       extra[%d]:          %d\n",i,fileheader->extra[i]);
 		fprintf(stderr,"dbg2       fp:            %d\n",mb_segyio_ptr->fp);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
@@ -275,7 +290,7 @@ int mb_segy_write_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2       fileheader:          %d\n",fileheader);
 		if (asciiheader != NULL)
 			for (j=0;j<40;j++)
-				fprintf(stderr,"dbg2       asciiheader[%2.2d]:     %s",j,asciiheader[j]);
+				fprintf(stderr,"dbg2       asciiheader[%2.2d]:     %.80s",j,asciiheader[j]);
 		if (fileheader != NULL)
 			{
 			fprintf(stderr,"dbg2       jobid:               %d\n",fileheader->jobid);

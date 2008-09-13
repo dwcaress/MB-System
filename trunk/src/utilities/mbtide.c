@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbtide.c	8/24/93
  *
- *    $Id: mbtide.c,v 5.5 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbtide.c,v 5.6 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	August 24, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.4  2005/03/25 04:42:59  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -87,7 +90,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbtide.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbtide.c,v 5.6 2008-09-13 06:08:09 caress Exp $";
 	static char program_name[] = "MBTIDE";
 	static char help_message[] =  "MBTIDE corrects swath bathymetry data for tides. \nThe default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbtide [-Fformat -V -H  -Iinfile -Mtide_format -Ooutfile -Ttidefile]";
@@ -331,9 +334,9 @@ main (int argc, char **argv)
 	fclose(tfp);
 
 	/* allocate space for the tide points */
-	status = mb_malloc(verbose,ntide*sizeof(double),&tide_time,&error);
-	status = mb_malloc(verbose,ntide*sizeof(double),&tide,&error);
-	status = mb_malloc(verbose,ntide*sizeof(double),&tidespl,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&tide_time,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&tide,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,ntide*sizeof(double),(void **)&tidespl,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -472,18 +475,18 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathacrosstrack,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),
-			&bathalongtrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssacrosstrack,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),
-			&ssalongtrack,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),(void **)&beamflag,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bath,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),(void **)&amp,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathacrosstrack,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),
+			(void **)&bathalongtrack,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ss,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssacrosstrack,&error);
+	status = status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),
+			(void **)&ssalongtrack,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -672,17 +675,17 @@ main (int argc, char **argv)
 	status = mb_close(verbose,&ombio_ptr,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&tide_time,&error);
-	mb_free(verbose,&tide,&error);
-	mb_free(verbose,&tidespl,&error);
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&bathacrosstrack,&error); 
-	mb_free(verbose,&bathalongtrack,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&ssacrosstrack,&error); 
-	mb_free(verbose,&ssalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&tide_time,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&tide,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&tidespl,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathalongtrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssacrosstrack,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ssalongtrack,&error); 
 
 	/* check memory */
 	if (verbose >= 4)

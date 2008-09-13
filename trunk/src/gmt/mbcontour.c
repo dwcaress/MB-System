@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.13 2007-03-02 18:17:38 caress Exp $
+ *    $Id: mbcontour.c,v 5.14 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003, 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	June 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2007/03/02 18:17:38  caress
+ * Fixed problems plotting ping/shot number annotation.
+ *
  * Revision 5.12  2006/11/10 22:05:37  caress
  * Added ping number/shot number navigation track annotation.
  *
@@ -208,7 +211,7 @@
 
 main (int argc, char **argv) 
 {
-	static char rcs_id[] = "$Id: mbcontour.c,v 5.13 2007-03-02 18:17:38 caress Exp $";
+	static char rcs_id[] = "$Id: mbcontour.c,v 5.14 2008-09-13 06:08:09 caress Exp $";
 #ifdef MBCONTOURFILTER
 	static char program_name[] = "MBCONTOURFILTER";
 	static char help_message[] =  "MBCONTOURFILTER is a utility which creates a pen plot \ncontour map of multibeam swath bathymetry.  \nThe primary purpose of this program is to serve as \npart of a real-time plotting system.  The contour \nlevels and colors can be controlled \ndirectly or set implicitly using contour and color change intervals. \nContours can also be set to have ticks pointing downhill.";
@@ -756,12 +759,12 @@ main (int argc, char **argv)
 		ncolor = nlevel;
 
 		/* allocate memory */
-		status = mb_malloc(verbose,nlevel*sizeof(double),&level,&error);
-		status = mb_malloc(verbose,nlevel*sizeof(int),&label,&error);
-		status = mb_malloc(verbose,nlevel*sizeof(int),&tick,&error);
-		status = mb_malloc(verbose,ncolor*sizeof(int),&red,&error);
-		status = mb_malloc(verbose,ncolor*sizeof(int),&green,&error);
-		status = mb_malloc(verbose,ncolor*sizeof(int),&blue,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, nlevel*sizeof(double), (void **)&level,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, nlevel*sizeof(int), (void **)&label,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, nlevel*sizeof(int), (void **)&tick,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, ncolor*sizeof(int), (void **)&red,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, ncolor*sizeof(int), (void **)&green,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, ncolor*sizeof(int), (void **)&blue,&error);
 
 		/* reopen contour file */
 		if ((fp = fopen(contourfile,"r")) == NULL)
@@ -819,9 +822,9 @@ main (int argc, char **argv)
 		ncolor = 4;
 
 		/* allocate memory */
-		status = mb_malloc(verbose,ncolor*sizeof(int),&red,&error);
-		status = mb_malloc(verbose,ncolor*sizeof(int),&green,&error);
-		status = mb_malloc(verbose,ncolor*sizeof(int),&blue,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, ncolor*sizeof(int), (void **)&red,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, ncolor*sizeof(int), (void **)&green,&error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, ncolor*sizeof(int), (void **)&blue,&error);
 
 		/* set colors */
 		red[0] =   0; green[0] =   0; blue[0] =   0; /* black */
@@ -1028,14 +1031,14 @@ main (int argc, char **argv)
 			/* make sure enough memory is allocated */
 			if (pingcur->beams_bath_alloc < beams_bath)
 				{
-				status = mb_realloc(verbose,beams_bath*sizeof(char),
-						&(pingcur->beamflag),&error);
-				status = mb_realloc(verbose,beams_bath*sizeof(double),
-						&(pingcur->bath),&error);
-				status = mb_realloc(verbose,beams_bath*sizeof(double),
-						&(pingcur->bathlon),&error);
-				status = mb_realloc(verbose,beams_bath*sizeof(double),
-						&(pingcur->bathlat),&error);
+				status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(char),
+						(void **)&(pingcur->beamflag),&error);
+				status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(double),
+						(void **)&(pingcur->bath),&error);
+				status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(double),
+						(void **)&(pingcur->bathlon),&error);
+				status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(double),
+						(void **)&(pingcur->bathlat),&error);
 				pingcur->beams_bath_alloc = beams_bath;
 				}
 			
@@ -1231,12 +1234,12 @@ main (int argc, char **argv)
 	plot_end(verbose,&error);
 
 	/* deallocate memory for data arrays */
-	mb_free(verbose,&level,&error);
-	mb_free(verbose,&label,&error);
-	mb_free(verbose,&tick,&error);
-	mb_free(verbose,&red,&error);
-	mb_free(verbose,&green,&error);
-	mb_free(verbose,&blue,&error);
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&level,&error);
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&label,&error);
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&tick,&error);
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&red,&error);
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&green,&error);
+	mb_freed(verbose,__FILE__, __LINE__, (void **)&blue,&error);
 
 	/* print ending info */
 	if (verbose >= 1)

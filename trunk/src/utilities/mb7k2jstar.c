@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c,v 5.8 2007-10-08 16:48:07 caress Exp $
+ *    $Id: mb7k2jstar.c,v 5.9 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2005, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	May 19, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2007/10/08 16:48:07  caress
+ * State of the code on 8 October 2007.
+ *
  * Revision 5.7  2006/12/15 21:42:49  caress
  * Incremental CVS update.
  *
@@ -83,7 +86,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.8 2007-10-08 16:48:07 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.9 2008-09-13 06:08:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -567,14 +570,14 @@ main (int argc, char **argv)
 					&& nroutepoint + 1 > nroutepointalloc)
 				    	{
 				    	nroutepointalloc += MBES_ALLOC_NUM;
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
-								(char **)&routelon, &error);
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
-								(char **)&routelat, &error);
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(double),
-								(char **)&routeheading, &error);
-					status = mb_realloc(verbose, nroutepointalloc * sizeof(int),
-								(char **)&routewaypoint, &error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nroutepointalloc * sizeof(double),
+								(void **)&routelon, &error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nroutepointalloc * sizeof(double),
+								(void **)&routelat, &error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nroutepointalloc * sizeof(double),
+								(void **)&routeheading, &error);
+					status = mb_reallocd(verbose,__FILE__,__LINE__,nroutepointalloc * sizeof(int),
+								(void **)&routewaypoint, &error);
 				    	if (status != MB_SUCCESS)
 					    	{
 						mb_error(verbose,error,&message);
@@ -1231,7 +1234,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->message.size = shortspersample * channel->samples * sizeof(short);
 				if (channel->trace_alloc < trace_size)
 					{
-					if ((status = mb_realloc(verbose, trace_size, &(channel->trace), &error))
+					if ((status = mb_reallocd(verbose,__FILE__,__LINE__,trace_size, (void **)&(channel->trace), &error))
 						== MB_SUCCESS)
 						{
 						channel->trace_alloc = trace_size;
@@ -1474,7 +1477,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->message.size = shortspersample * channel->samples * sizeof(short);
 				if (channel->trace_alloc < trace_size)
 					{
-					if ((status = mb_realloc(verbose, trace_size, &(channel->trace), &error))
+					if ((status = mb_reallocd(verbose,__FILE__,__LINE__,trace_size, (void **)&(channel->trace), &error))
 						== MB_SUCCESS)
 						{
 						channel->trace_alloc = trace_size;
@@ -1756,7 +1759,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->message.size = shortspersample * channel->samples * sizeof(short);
 				if (channel->trace_alloc < trace_size)
 					{
-					if ((status = mb_realloc(verbose, trace_size, &(channel->trace), &error))
+					if ((status = mb_reallocd(verbose,__FILE__,__LINE__,trace_size, (void **)&(channel->trace), &error))
 						== MB_SUCCESS)
 						{
 						channel->trace_alloc = trace_size;
@@ -2050,7 +2053,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->message.size = shortspersample * channel->samples * sizeof(short);
 				if (channel->trace_alloc < trace_size)
 					{
-					if ((status = mb_realloc(verbose, trace_size, &(channel->trace), &error))
+					if ((status = mb_reallocd(verbose,__FILE__,__LINE__,trace_size, (void **)&(channel->trace), &error))
 						== MB_SUCCESS)
 						{
 						channel->trace_alloc = trace_size;
@@ -2310,7 +2313,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->message.size = shortspersample * channel->samples * sizeof(short);
 				if (channel->trace_alloc < trace_size)
 					{
-					if ((status = mb_realloc(verbose, trace_size, &(channel->trace), &error))
+					if ((status = mb_reallocd(verbose,__FILE__,__LINE__,trace_size, (void **)&(channel->trace), &error))
 						== MB_SUCCESS)
 						{
 						channel->trace_alloc = trace_size;
@@ -2549,10 +2552,10 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 	/* deallocate route arrays */
 	if (route_file_set == MB_YES)
 		{	    
-		status = mb_free(verbose, (char **)&routelon, &error);
-		status = mb_free(verbose, (char **)&routelat, &error);
-		status = mb_free(verbose, (char **)&routeheading, &error);
-		status = mb_free(verbose, (char **)&routewaypoint, &error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&routelon, &error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&routelat, &error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&routeheading, &error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&routewaypoint, &error);
 		}
 
 	/* check memory */

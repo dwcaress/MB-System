@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrollbias.c	5/16/93
- *    $Id: mbrollbias.c,v 5.5 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbrollbias.c,v 5.6 2008-09-13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -34,6 +34,9 @@
  * Date:	May 16, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.4  2005/03/25 04:43:03  caress
  * Standardized the string lengths used for filenames and comment data.
  *
@@ -129,7 +132,7 @@ struct bathptr
 	};
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbrollbias.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
+static char rcs_id[] = "$Id: mbrollbias.c,v 5.6 2008-09-13 06:08:09 caress Exp $";
 static char program_name[] = "MBROLLBIAS";
 static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of swath \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the swath system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
 static char usage_message[] = "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";
@@ -430,8 +433,8 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for counting arrays */
-	status = mb_malloc(verbose,xdim*ydim*sizeof(int),&icount,&error);
-	status = mb_malloc(verbose,xdim*ydim*sizeof(int),&jcount,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,xdim*ydim*sizeof(int),(void **)&icount,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,xdim*ydim*sizeof(int),(void **)&jcount,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -470,14 +473,14 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for reading data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),(void **)&beamflag,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bathlon,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bathlat,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),(void **)&amp,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ss,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&sslon,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&sslat,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -540,14 +543,14 @@ main (int argc, char **argv)
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&bathlon,&error); 
-	mb_free(verbose,&bathlat,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&sslon,&error); 
-	mb_free(verbose,&sslat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -574,14 +577,14 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for reading data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),(void **)&beamflag,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bathlon,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bathlat,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),(void **)&amp,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ss,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&sslon,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&sslat,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -644,14 +647,14 @@ main (int argc, char **argv)
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&bathlon,&error); 
-	mb_free(verbose,&bathlat,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&sslon,&error); 
-	mb_free(verbose,&sslat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -660,10 +663,10 @@ main (int argc, char **argv)
 			ndatafile,jfile);
 
 	/* allocate space for data */
-	status = mb_malloc(verbose,xdim*ydim*sizeof(struct bathptr),
-			&idata,&error);
-	status = mb_malloc(verbose,xdim*ydim*sizeof(struct bathptr),
-			&jdata,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,xdim*ydim*sizeof(struct bathptr),
+			(void **)&idata,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,xdim*ydim*sizeof(struct bathptr),
+			(void **)&jdata,&error);
 	for (i=0;i<xdim;i++)
 		for (j=0;j<ydim;j++)
 			{
@@ -672,16 +675,16 @@ main (int argc, char **argv)
 			jdata[k].ptr = NULL;
 			if (icount[k] > 0)
 				{
-				status = mb_malloc(verbose,
+				status = mb_mallocd(verbose,__FILE__,__LINE__,
 					icount[k]*sizeof(struct bath),
-					&(idata[k].ptr),&error);
+					(void **)&(idata[k].ptr),&error);
 				icount[k] = 0;
 				}
 			if (jcount[k] > 0)
 				{
-				status = mb_malloc(verbose,
+				status = mb_mallocd(verbose,__FILE__,__LINE__,
 					jcount[k]*sizeof(struct bath),
-					&(jdata[k].ptr),&error);
+					(void **)&(jdata[k].ptr),&error);
 				jcount[k] = 0;
 				}
 			}
@@ -717,14 +720,14 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for reading data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&beamflag,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bathlon,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bathlat,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),(void **)&amp,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ss,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&sslon,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&sslat,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -797,14 +800,14 @@ main (int argc, char **argv)
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&bathlon,&error); 
-	mb_free(verbose,&bathlat,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&sslon,&error); 
-	mb_free(verbose,&sslat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -831,14 +834,14 @@ main (int argc, char **argv)
 		}
 
 	/* allocate memory for reading data arrays */
-	status = mb_malloc(verbose,beams_bath*sizeof(char),&beamflag,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bath,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlon,&error);
-	status = mb_malloc(verbose,beams_bath*sizeof(double),&bathlat,&error);
-	status = mb_malloc(verbose,beams_amp*sizeof(double),&amp,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&ss,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslon,&error);
-	status = mb_malloc(verbose,pixels_ss*sizeof(double),&sslat,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),(void **)&beamflag,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bath,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bathlon,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(double),(void **)&bathlat,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,beams_amp*sizeof(double),(void **)&amp,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&ss,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&sslon,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,pixels_ss*sizeof(double),(void **)&sslat,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -911,14 +914,14 @@ main (int argc, char **argv)
 			}
 		}
 	status = mb_close(verbose,&mbio_ptr,&error);
-	mb_free(verbose,&beamflag,&error); 
-	mb_free(verbose,&bath,&error); 
-	mb_free(verbose,&bathlon,&error); 
-	mb_free(verbose,&bathlat,&error); 
-	mb_free(verbose,&amp,&error); 
-	mb_free(verbose,&ss,&error); 
-	mb_free(verbose,&sslon,&error); 
-	mb_free(verbose,&sslat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&beamflag,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bath,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlon,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathlat,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&amp,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&ss,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslon,&error); 
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sslat,&error); 
 	status = MB_SUCCESS;
 	error = MB_ERROR_NO_ERROR;
 	if (verbose >= 2) 
@@ -1102,17 +1105,17 @@ main (int argc, char **argv)
 			k = i*ydim + j;
 			if (icount[k] > 0)
 				{
-				status = mb_free(verbose,&idata[k].ptr,&error);
+				status = mb_freed(verbose,__FILE__,__LINE__,(void **)&idata[k].ptr,&error);
 				}
 			if (jcount[k] > 0)
 				{
-				status = mb_free(verbose,&jdata[k].ptr,&error);
+				status = mb_freed(verbose,__FILE__,__LINE__,(void **)&jdata[k].ptr,&error);
 				}
 			}
-	status = mb_free(verbose,&idata,&error);
-	status = mb_free(verbose,&jdata,&error);
-	status = mb_free(verbose,&icount,&error);
-	status = mb_free(verbose,&jcount,&error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&idata,&error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&jdata,&error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&icount,&error);
+	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&jcount,&error);
 
 	/* check memory */
 	if (verbose >= 4)
