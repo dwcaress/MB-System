@@ -27,6 +27,7 @@ adjusting survey navigation.
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
 Version 5.1.1          To be determined
+Version 5.1.1beta23    September 19, 2008
 Version 5.1.1beta21    July 20, 2008
 Version 5.1.1beta20    July 10, 2008
 Version 5.1.1beta19    June 6, 2008
@@ -303,12 +304,19 @@ Fixed mbedit scaling for swath widths less than 6 m.
 
 Added formats 191 and 192 to support Imagenex Delta T multibeams. 
 Format 191 supports the 83P vendor format and format 192 is an
-extended processing format.
+extended processing format. This format also supports data from
+the Odom ES3 multibeam sonar.
 
 Lengthened filename char arrays in mbedit, mbnavedit, and mbvelocitytool
 to prevent possible overflows with large paths.
 
 Updated the GSF code to new GSF version 2.09
+
+Fixed support of UNB OMG HDCS format 151 to handle situation where
+ancillary sidescan files are missing.
+
+Added new program mbctdlist to allow mblist style text output of
+CTD data from swath files. Initially relevant only to Reson 7k format data.
 
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
@@ -1503,10 +1511,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.115 2008-08-12 00:00:40 caress Exp $
+RCS ID: $Id: README,v 5.116 2008-09-20 00:57:40 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.115  2008/08/12 00:00:40  caress
+Working towards 5.1.beta22
+
 Revision 5.114  2008/07/20 15:42:00  caress
 Release 5.1.1beta21
 

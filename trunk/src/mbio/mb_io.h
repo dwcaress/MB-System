@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.25 2008-03-01 09:12:52 caress Exp $
+ *    $Id: mb_io.h,v 5.26 2008-09-20 00:57:40 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2008/03/01 09:12:52  caress
+ * Added support for Simrad EM710 multibeam in new formats 58 and 59.
+ *
  * Revision 5.24  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -531,6 +534,10 @@ struct mb_io_struct
 		void *segytraceheader_ptr, 
 		float *segydata, 
 		int *error);
+	int (*mb_io_ctd)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, int *nctd, double *time_d, 
+		double *conductivity, double *temperature, 
+		double *depth, double *salinity, double *soundspeed, int *error);
 	int (*mb_io_copyrecord)(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);
 

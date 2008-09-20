@@ -1,4 +1,4 @@
-.TH mbmosaic l "15 August 2007" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic l "22 July 2008" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -10,7 +10,7 @@ Version 5.0
 \fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
 \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
 \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
-\fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range\fP 
+\fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range[/weight]\fP 
 \fB-G\fIgridkind\fP  \fB-J\fIprojection\fP
 \fB-H -L\fIlonflip\fP \fB-M -N -P\fIpings\fP
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fIazimuth/factor\fP 
@@ -140,6 +140,12 @@ the weights adds to a value of 1.  Normally, the distance a is set to be
 half the average grid point spacing, but this can be varied using the \fB-W\fP
 option. 
 
+If the weight parameter is used on the \fB-F\fP option then 
+for weight = 0 [default] the above weight is used,
+for weight = 1 the above weight is multiplied by the sample priority,
+and for weight = 2 the above weight is multiplied by the square of the sample priority. 
+Using \fB-F1/1\fP causes the priorities to be treated as weights rather than priorities.
+
 If the \fB-C\fP option is used to set clipping to a value > 0, then a
 2D thin plate spline algorithm is applied to the successfully calculated 
 grid values to fill in, or interpolate, gaps in the data.  New values
@@ -256,7 +262,7 @@ the program sets the grid cell spacing to be 0.02 times the maximum
 sonar altitude in the input files.
 .TP
 .B \-F
-\fIpriority_range\fP
+\fIpriority_range[/weight]\fP
 .br
 Turns on Gaussian weighted mean mosaicing. The 
 \fIpriority_range\fP value determines which data points are
@@ -267,6 +273,13 @@ Only samples with priorities greater than this threshold
 are used in the Gaussian weighted mean mosaicing.
 The default is to simply set each bin's value equal to the
 value of the highest priority sample in that bin.
+The \fIweight\fP value, if present, causes priorities to be 
+also used to weight values. A \fIweight\fP of 0 (the default) indicates 
+priorities are not used as weights. A \fIweight\fP of 1 
+indicates the Gaussian weight of each value is 
+multiplied by its priority to get the value weight. A \fIweight\fP of 2 
+indicates the Gaussian weight of each value is multiplied by the square of 
+its priority to get the value weight.
 .TP
 .B \-G
 \fIgridkind\fP
@@ -641,7 +654,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.8 2007-10-08 16:55:56 caress Exp $
+ Version $Id: mbmosaic.l,v 5.9 2008-09-20 00:57:40 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

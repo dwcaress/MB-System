@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.28 2008-07-10 18:16:33 caress Exp $
+#	$Id: Makefile.template,v 5.29 2008-09-20 00:57:41 caress Exp $
 #
 #     Copyright (c) 1993, 1994, 2000, 2002, 2003, 2005, 2007 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.28  2008/07/10 18:16:33  caress
+# Proceeding towards 5.1.1beta20.
+#
 # Revision 5.26  2008/05/13 20:23:56  caress
 # Added mbabsorption.
 #
@@ -244,128 +247,129 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mb7k2ss \
 	$(BINDIR)/mbabsorption \
 	$(BINDIR)/mbdumpesf\
-	$(BINDIR)/mbtime
+	$(BINDIR)/mbtime \
+	$(BINDIR)/mbctdlist
 
 ### make clean removes the object files
 clean:
 	rm -f *.o
 
 ### link the executables
-$(BINDIR)/mbformat:	mbformat.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbformat.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbformat:	mbformat.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbformat.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbformat
-$(BINDIR)/mbdefaults:	mbdefaults.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbdefaults.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbdefaults:	mbdefaults.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbdefaults.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbdefaults
-$(BINDIR)/mbdatalist:	mbdatalist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbdatalist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbdatalist:	mbdatalist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbdatalist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbdatalist
-$(BINDIR)/mbinfo:	mbinfo.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbinfo.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbinfo:	mbinfo.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbinfo.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbinfo
-$(BINDIR)/mbcopy:	mbcopy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbcopy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbcopy:	mbcopy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbcopy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbcopy
-$(BINDIR)/mblist:	mblist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mblist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mblist:	mblist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mblist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mblist
-$(BINDIR)/mbmerge:	mbmerge.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) mbmerge.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
+$(BINDIR)/mbmerge:	mbmerge.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbmerge.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a $(LFLAGS) \
 		-o $(BINDIR)/mbmerge
-$(BINDIR)/mbclean:	mbclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbclean:	mbclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbclean
-$(BINDIR)/mbareaclean:	mbareaclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbareaclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbareaclean:	mbareaclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbareaclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbareaclean
-$(BINDIR)/mbcleanold:	mbcleanold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbcleanold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbcleanold:	mbcleanold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbcleanold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbcleanold
-$(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbunclean:	mbunclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbunclean.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbunclean
-$(BINDIR)/mbgrid:	mbgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) mbgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
+$(BINDIR)/mbgrid:	mbgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbgrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbgrid
-$(BINDIR)/mbmosaic:	mbmosaic.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) mbmosaic.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
+$(BINDIR)/mbmosaic:	mbmosaic.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbmosaic.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbmosaic
-$(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mblevitus:	mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mblevitus.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mblevitus
-$(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) mbbath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbbath:	mbbath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbbath.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbaux.a $(LFLAGS) \
 		-o $(BINDIR)/mbbath
-$(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/hsdump:	hsdump.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) hsdump.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/hsdump
-$(BINDIR)/mbrollbias:	mbrollbias.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbrollbias.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbrollbias:	mbrollbias.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbrollbias.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbrollbias
-$(BINDIR)/mbgetesf:	mbgetesf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbgetesf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbgetesf:	mbgetesf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbgetesf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbgetesf
-$(BINDIR)/mbneptune2esf:	mbneptune2esf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbneptune2esf.o $(LIBDIR)/libmbio.a $(LFLAGS) $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbneptune2esf:	mbneptune2esf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbneptune2esf.o $(LIBDIR)/libmbio.a $(LFLAGS) $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbneptune2esf
-$(BINDIR)/mbgetmask:	mbgetmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbgetmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbgetmask:	mbgetmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbgetmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbgetmask
-$(BINDIR)/mbmask:	mbmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbmask:	mbmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbmask.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbmask
-$(BINDIR)/mbsmooth:	mbsmooth.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbsmooth.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
+$(BINDIR)/mbsmooth:	mbsmooth.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbsmooth.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LFLAGS) \
 		-o $(BINDIR)/mbsmooth
-$(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbps:	mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbps.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmtps.a \
 		$(LFLAGS) -o $(BINDIR)/mbps
 $(BINDIR)/mbstripnan:	mbstripnan.o
 	$(CC) $(CFLAGS) mbstripnan.o $(LFLAGS) -o $(BINDIR)/mbstripnan
-$(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbhistogram.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbhistogram
-$(BINDIR)/mbbackangle:	mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbbackangle:	mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbbackangle
-$(BINDIR)/mbbackangleold:	mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbbackangleold:	mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbbackangleold.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbbackangleold
-$(BINDIR)/mbanglecorrect:	mbanglecorrect.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbanglecorrect.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbanglecorrect:	mbanglecorrect.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbanglecorrect.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbanglecorrect
-$(BINDIR)/mbfilter:	mbfilter.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbfilter.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbfilter:	mbfilter.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbfilter.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbfilter
-$(BINDIR)/mbcut:	mbcut.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbcut.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbcut:	mbcut.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbcut.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbcut
-$(BINDIR)/mbtide:	mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
+$(BINDIR)/mbtide:	mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbtide.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
 		$(LFLAGS) -o $(BINDIR)/mbtide
-$(BINDIR)/mbsimradmakess:	mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbsimradmakess:	mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbsimradmakess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbsimradmakess
-$(BINDIR)/mbnavlist:	mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbnavlist:	mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbnavlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbnavlist
-$(BINDIR)/mbsvplist:	mbsvplist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbsvplist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbsvplist:	mbsvplist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbsvplist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbsvplist
-$(BINDIR)/mbset:	mbset.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) mbset.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
+$(BINDIR)/mbset:	mbset.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbset.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
 		$(LFLAGS) -o $(BINDIR)/mbset
-$(BINDIR)/mbprocess:	mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
+$(BINDIR)/mbprocess:	mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbprocess
-$(BINDIR)/mbextractsegy:	mbextractsegy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
-	$(CC) $(CFLAGS) mbextractsegy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
+$(BINDIR)/mbextractsegy:	mbextractsegy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbextractsegy.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
 		$(LFLAGS) -o $(BINDIR)/mbextractsegy
 $(BINDIR)/mbsegylist:	mbsegylist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbsegylist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a \
@@ -380,20 +384,20 @@ $(BINDIR)/mbsegygrid:	mbsegygrid.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(L
 $(BINDIR)/mbauvnavusbl:	mbauvnavusbl.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbauvnavusbl.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a \
 		$(LFLAGS) -o $(BINDIR)/mbauvnavusbl
-$(BINDIR)/mb7k2jstar:	mb7k2jstar.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mb7k2jstar.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mb7k2jstar:	mb7k2jstar.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mb7k2jstar.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mb7k2jstar
-$(BINDIR)/mb7kpreprocess:	mb7kpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mb7kpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mb7kpreprocess:	mb7kpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mb7kpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mb7kpreprocess
-$(BINDIR)/mbrolltimelag:	mbrolltimelag.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbrolltimelag.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbrolltimelag:	mbrolltimelag.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbrolltimelag.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbrolltimelag
-$(BINDIR)/mbauvloglist:	mbauvloglist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbauvloglist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mbauvloglist:	mbauvloglist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbauvloglist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbauvloglist
-$(BINDIR)/mb7k2ss:	mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a  $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+$(BINDIR)/mb7k2ss:	mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mb7k2ss.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(GMTLIBDIR)/libgmt.a \
 		$(LFLAGS) -o $(BINDIR)/mb7k2ss
 $(BINDIR)/mbabsorption:	mbabsorption.o $(LIBDIR)/libmbio.a
@@ -405,104 +409,109 @@ $(BINDIR)/mbdumpesf:	mbdumpesf.o $(LIBDIR)/libmbio.a
 $(BINDIR)/mbtime:	mbtime.o $(LIBDIR)/libmbio.a
 	$(CC) $(CFLAGS) mbtime.o $(LIBDIR)/libmbio.a \
 		$(LFLAGS) -o $(BINDIR)/mbtime
+$(BINDIR)/mbctdlist:	mbctdlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbctdlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mbctdlist
 
 ### compile the source files
-mbformat.o:	mbformat.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbformat.o:	mbformat.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbformat.c
-mbdefaults.o:	mbdefaults.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbdefaults.o:	mbdefaults.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbdefaults.c
-mbdatalist.o:	mbdatalist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbdatalist.o:	mbdatalist.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbdatalist.c
-mbinfo.o:	mbinfo.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbinfo.o:	mbinfo.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbinfo.c
-mbcopy.o:	mbcopy.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbcopy.o:	mbcopy.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbcopy.c
-mblist.o:	mblist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_simrad2.h
+mblist.o:	mblist.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_simrad2.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mblist.c
-mbmerge.o:	mbmerge.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbmerge.o:	mbmerge.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbmerge.c
-mbclean.o:	mbclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbclean.o:	mbclean.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbclean.c
-mbareaclean.o:	mbareaclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbareaclean.o:	mbareaclean.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbareaclean.c
-mbcleanold.o:	mbcleanold.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbcleanold.o:	mbcleanold.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbcleanold.c
-mbunclean.o:	mbunclean.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbunclean.o:	mbunclean.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbunclean.c
-mbgrid.o:	mbgrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbgrid.o:	mbgrid.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) $(BIGFLAG) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbgrid.c
-mbmosaic.o:	mbmosaic.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbmosaic.o:	mbmosaic.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) $(BIGFLAG) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbmosaic.c
 mblevitus.o:	mblevitus.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h Makefile
 	echo "	char *ifile = "'"$(LEVITUS)"'";" > levitus.h
 	$(CC) -c $(CFLAGS) mblevitus.c
-mbbath.o:	mbbath.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbbath.o:	mbbath.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbbath.c
-hsdump.o:	hsdump.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hsds.h
+hsdump.o:	hsdump.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hsds.h
 	$(CC) -c $(CFLAGS) hsdump.c
-mbrollbias.o:	mbrollbias.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbrollbias.o:	mbrollbias.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbrollbias.c
-mbgetesf.o:	mbgetesf.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbgetesf.o:	mbgetesf.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbgetesf.c
-mbneptune2esf.o:	mbneptune2esf.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbneptune2esf.o:	mbneptune2esf.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbneptune2esf.c
-mbgetmask.o:	mbgetmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbgetmask.o:	mbgetmask.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbgetmask.c
-mbmask.o:	mbmask.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbmask.o:	mbmask.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbmask.c
-mbsmooth.o:	mbsmooth.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbsmooth.o:	mbsmooth.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbsmooth.c
-mbps.o:	mbps.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbps.o:	mbps.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbps.c
 mbstripnan.o:	mbstripnan.c 
 	$(CC) -c $(CFLAGS) mbstripnan.c
-mbhistogram.o:	mbhistogram.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbhistogram.o:	mbhistogram.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbhistogram.c
-mbbackangle.o:	mbbackangle.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbbackangle.o:	mbbackangle.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbbackangle.c
-mbbackangleold.o:	mbbackangleold.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbbackangleold.o:	mbbackangleold.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbbackangleold.c
-mbanglecorrect.o:	mbanglecorrect.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbanglecorrect.o:	mbanglecorrect.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbanglecorrect.c
-mbfilter.o:	mbfilter.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbfilter.o:	mbfilter.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbfilter.c
-mbcut.o:	mbcut.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbcut.o:	mbcut.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbcut.c
-mbtide.o:	mbtide.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbtide.o:	mbtide.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbtide.c
-mbsimradmakess.o:	mbsimradmakess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbsimradmakess.o:	mbsimradmakess.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbsimradmakess.c
-mbnavlist.o:	mbnavlist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbnavlist.o:	mbnavlist.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbnavlist.c
-mbsvplist.o:	mbsvplist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbsvplist.o:	mbsvplist.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbsvplist.c
-mbset.o:	mbset.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbset.o:	mbset.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbset.c
-mbprocess.o:	mbprocess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbprocess.o:	mbprocess.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbprocess.c
-mbextractsegy.o:	mbextractsegy.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
+mbextractsegy.o:	mbextractsegy.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) mbextractsegy.c
-mbsegylist.o:	mbsegylist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
+mbsegylist.o:	mbsegylist.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbsegylist.c
-mbsegyinfo.o:	mbsegyinfo.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
+mbsegyinfo.o:	mbsegyinfo.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbsegyinfo.c
-mbsegygrid.o:	mbsegygrid.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
+mbsegygrid.o:	mbsegygrid.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbsegygrid.c
-mbauvnavusbl.o:	mbauvnavusbl.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbauvnavusbl.o:	mbauvnavusbl.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbauvnavusbl.c
-mb7k2jstar.o:	mb7k2jstar.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h
+mb7k2jstar.o:	mb7k2jstar.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h
 	$(CC) -c $(CFLAGS) mb7k2jstar.c
-mb7kpreprocess.o:	mb7kpreprocess.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h
+mb7kpreprocess.o:	mb7kpreprocess.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h
 	$(CC) -c $(CFLAGS) mb7kpreprocess.c
-mbrolltimelag.o:	mbrolltimelag.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbrolltimelag.o:	mbrolltimelag.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbrolltimelag.c
-mbauvloglist.o:	mbauvloglist.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbauvloglist.o:	mbauvloglist.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbauvloglist.c
-mb7k2ss.o:	mb7k2ss.c  $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_ldeoih.h
+mb7k2ss.o:	mb7k2ss.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_ldeoih.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb7k2ss.c
-mbabsorption.o:	mbabsorption.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbabsorption.o:	mbabsorption.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbabsorption.c
-mbdumpesf.o:	mbdumpesf.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbdumpesf.o:	mbdumpesf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbdumpesf.c
-mbtime.o:	mbtime.c  $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mbtime.o:	mbtime.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbtime.c
+mbctdlist.o:	mbctdlist.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbctdlist.c

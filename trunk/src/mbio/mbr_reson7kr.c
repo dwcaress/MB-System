@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.19 2008-05-16 22:56:24 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.20 2008-09-20 00:57:41 caress Exp $
  *
  *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.18  2008/03/01 09:14:03  caress
  * Some housekeeping changes.
  *
@@ -137,7 +140,7 @@ int mbr_reson7kr_chk_label(int verbose, void *mbio_ptr, short type);
 int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, 
 				int *ping_number);
 int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, 
-		s7k_header *header, int *error);
+				s7k_header *header, int *error);
 
 int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int *error);
@@ -220,7 +223,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.19 2008-05-16 22:56:24 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.20 2008-09-20 00:57:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -291,6 +294,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_segytraceheader = &mbsys_reson7k_extract_segytraceheader; 
 	mb_io_ptr->mb_io_extract_segy = &mbsys_reson7k_extract_segy; 
 	mb_io_ptr->mb_io_insert_segy = &mbsys_reson7k_insert_segy; 
+	mb_io_ptr->mb_io_ctd = &mbsys_reson7k_ctd; 
 
 	/* print output debug statements */
 	if (verbose >= 2)

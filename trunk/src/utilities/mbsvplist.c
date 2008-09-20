@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsvplist.c	1/3/2001
- *    $Id: mbsvplist.c,v 5.9 2006-09-11 18:55:54 caress Exp $
+ *    $Id: mbsvplist.c,v 5.10 2008-09-20 00:57:41 caress Exp $
  *
- *    Copyright (c) 2001, 2003, 2004 by
+ *    Copyright (c) 2001-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -32,6 +32,10 @@
  * Date:	January 3,  2001
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2006/09/11 18:55:54  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.8  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -83,7 +87,7 @@ char	*getenv();
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsvplist.c,v 5.9 2006-09-11 18:55:54 caress Exp $";
+	static char rcs_id[] = "$Id: mbsvplist.c,v 5.10 2008-09-20 00:57:41 caress Exp $";
 	static char program_name[] = "mbsvplist";
 	static char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file.  The -D\noption causes duplicate SVPs to be output.";
 	static char usage_message[] = "mbsvplist [-D -Fformat -H -Ifile -O -P -V -Z]";

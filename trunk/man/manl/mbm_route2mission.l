@@ -11,7 +11,7 @@ Version 5.0\fP
 [\fB-A\fP\fIaltitudemin/altitudeabort[/altitudedepthcom]\fP 
 \fB-B\fP\fIbehavior\fP \fB-C\fP\fImissiontime\fP \fB-D\fP\fIdepthmax/depthabort/depthdescent\fP 
 \fB-F\fP\fIforwarddistance\fP \fB-G\fP\fIgpsmode\fP \fB-G\fP\fIapproachdepth\fP 
-\fB-M -N\fP \fB-O\fP\fImissionfile\fP 
+\fB-M\fP\fI[sonarlist]\fP \fB-N\fP \fB-O\fP\fImissionfile\fP 
 \fB-P\fP\fI[startlon/startlat | startdistance]\fP 
 \fB-T\fP\fIspeed\fP \fB-T\fP\fIstarttime\fP
 \fB-W\fP\fIwaypointspacing\fP \fB-V\fP \fB-H\fP]
@@ -84,6 +84,10 @@ The mission script must also allow sufficient time for the vehicle to transit fr
 starting point to the first waypoint in the survey mission. The \fB-T\fP and \fB-P\fP
 options allow the user specify the AUV starting position, the distance to the first
 waypoint, or the time required to reach the first waypoint.
+
+The MBARI Mapping AUV is equipped with a 200 kHz multibeam sonar, a 2-16 kHz chirp subbottom
+profiler, a 110 kHz chirp sidescan, and a 410 kHz chirp sidescan. The \fB-M\fP option is
+used to enable these mapping sonars in the AUV mission script.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -171,8 +175,22 @@ Sets the vehicle depth during the approach to the first waypoint when a
 spiral descent to depth at the first waypoint is specified  using the \fB-N\fP option.
 .TP
 .B \-M
+\fI[sonarlist]\fP
 This option enables control of the Mapping AUV's mapping sonars. By default,
-the AUV mission is generated without turning on the mapping sonars.
+the AUV mission is generated without turning on the mapping sonars. If \fB-M\fP
+is given alone, the multibeam, subbottom profiler, and both low and high
+frequency sidescan sonars will be enabled. The \fIsonarlist\fP parameter can
+optionally specify which sonars are enabled in addition to the multibeam (the
+multibeam serves as the ping timing master for all sonars, and thus must be
+enabled if any mapping sonars are enabled). The \fIsonarlist\fP value is 
+made up of one or more of the following characters:
+ 		S	subbottom profiler
+ 		L	low frequency sidescan
+ 		H	high frequency sidescan
+.br
+Thus, \fB-M\fP\fISL\fP will cause the multibeam, the subbottom profiler, and
+the low frequency sidescan to be enabled while leaving the high frequency
+sidescan off.
 .TP
 .B \-N
 \fIapproachdepth\fP
