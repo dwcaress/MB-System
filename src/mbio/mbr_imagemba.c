@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_imagemba.c	7/18/2008
- *	$Id: mbr_imagemba.c,v 5.0 2008-07-19 07:43:00 caress Exp $
+ *	$Id: mbr_imagemba.c,v 5.1 2008-09-20 00:57:41 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	July 18, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.0  2008/07/19 07:43:00  caress
+ * Added format 192 to support Imagenex Delta T multibeam data.
+ *
  *
  * 
  */
@@ -93,7 +96,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_imagemba.c,v 5.0 2008-07-19 07:43:00 caress Exp $";
+	static char res_id[]="$Id: mbr_imagemba.c,v 5.1 2008-09-20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_register_imagemba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -226,7 +229,7 @@ int mbr_info_imagemba(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_imagemba.c,v 5.0 2008-07-19 07:43:00 caress Exp $";
+	static char res_id[]="$Id: mbr_imagemba.c,v 5.1 2008-09-20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_info_imagemba";
 	int	status = MB_SUCCESS;
 
@@ -296,7 +299,7 @@ int mbr_info_imagemba(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_imagemba(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_imagemba.c,v 5.0 2008-07-19 07:43:00 caress Exp $";
+ static char res_id[]="$Id: mbr_imagemba.c,v 5.1 2008-09-20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_alm_imagemba";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -607,32 +610,35 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    store->nav_heading = (int) ((unsigned short) short_val);
 		
 		/* parse dvl attitude and heading */
-		if (buffer[index] >> 7)
+/*		if (buffer[index] >> 7)
 			{
 			store->pitch = ((((mb_u_char)buffer[index]) & 0x7F) << 8) + ((mb_u_char)buffer[index+1]);
 			}
 		else
 			{
 			store->pitch = 0;
-			}
+			}*/
+		store->pitch = ((((mb_u_char)buffer[index]) & 0x7F) << 8) + ((mb_u_char)buffer[index+1]);
 		index += 2;
-		if (buffer[index] >> 7)
+/*		if (buffer[index] >> 7)
 			{
 			store->roll = ((((mb_u_char)buffer[index]) & 0x7F) << 8) + ((mb_u_char)buffer[index+1]);
 			}
 		else
 			{
 			store->roll = 0;
-			}
+			}*/
+		store->roll = ((((mb_u_char)buffer[index]) & 0x7F) << 8) + ((mb_u_char)buffer[index+1]);
 		index += 2;
-		if (buffer[index] >> 7)
+/*		if (buffer[index] >> 7)
 			{
 			store->heading = ((((mb_u_char)buffer[index]) & 0x7F) << 8) + ((mb_u_char)buffer[index+1]);
 			}
 		else
 			{
 			store->heading = 0;
-			}
+			}*/
+		store->heading = ((((mb_u_char)buffer[index]) & 0x7F) << 8) + ((mb_u_char)buffer[index+1]);
 		index += 2;
 		
 		/* parse beam info */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
- *	$Id: mbr_omghdcsj.c,v 5.12 2008-07-10 18:02:39 caress Exp $
+ *	$Id: mbr_omghdcsj.c,v 5.13 2008-09-20 00:57:41 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	March 10, 1999
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2008/07/10 18:02:39  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.9  2008/03/14 18:33:03  caress
  * Updated support for JHC format 151.
  *
@@ -129,7 +132,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.12 2008-07-10 18:02:39 caress Exp $";
+	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.13 2008-09-20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_register_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -262,7 +265,7 @@ int mbr_info_omghdcsj(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.12 2008-07-10 18:02:39 caress Exp $";
+	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.13 2008-09-20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_info_omghdcsj";
 	int	status = MB_SUCCESS;
 
@@ -332,7 +335,7 @@ int mbr_info_omghdcsj(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_omghdcsj.c,v 5.12 2008-07-10 18:02:39 caress Exp $";
+ static char res_id[]="$Id: mbr_omghdcsj.c,v 5.13 2008-09-20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_alm_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1609,8 +1612,11 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    if ((read_size = fread(data->ss_raw,1,
 				1,mb_io_ptr->mbfp2)) != 1)
 				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;		    
+				/* close the secondary file and deallocate memory */
+				fclose(mb_io_ptr->mbfp2);
+				mb_io_ptr->mbfp2 = NULL;
+				if (data->ss_raw != NULL)
+				    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ss_raw,error);
 				}
 			    else
 				{
@@ -1624,8 +1630,11 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			nrawpixels,mb_io_ptr->mbfp2))
 			!= nrawpixels)
 			{
-			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;		    
+			/* close the secondary file and deallocate memory */
+			fclose(mb_io_ptr->mbfp2);
+			mb_io_ptr->mbfp2 = NULL;
+			if (data->ss_raw != NULL)
+			    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&data->ss_raw,error);
 			}
 		    else
 			{

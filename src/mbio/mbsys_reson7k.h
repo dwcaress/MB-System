@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.14 2008-05-16 22:56:24 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.15 2008-09-20 00:57:41 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.14  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.13  2008/03/01 09:14:03  caress
  * Some housekeeping changes.
  *
@@ -1001,11 +1004,14 @@ typedef struct s7k_bluefin_environmental_struct
 	float		sound_speed;		/* Sound speed (m/sec) */
 	float		conductivity;		/* Conductivity (S/m) */
 	float		temperature;		/* Temperature (deg C) */
-	float		pressure;		/* Pressure (?) */
-	float		salinity;		/* Salinity (?) */
+	float		pressure;		/* Pressure (dBar) */
+	float		salinity;		/* Salinity (psu) */
 	double		ctd_time;		/* CTD sample time (unix sec) */
 	double		temperature_time;	/* Temperature sample time (unix sec) */
-	char		reserved2[56];
+	double		surface_pressure;	/* dBar */
+	short		pressure_frequency;	/* 0.01 Hz ? */
+	short		conductivity_frequency;	/* 0.01 Hz ? */
+	char		reserved2[44];
 }
 s7k_bluefin_environmental;
 	
@@ -1860,16 +1866,21 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			void *segyheader_ptr, 
 			float *segydata, 
 			int *error);
+int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nctd, double *time_d, 
+			double *conductivity, double *temperature, 
+			double *depth, double *salinity, double *soundspeed, int *error);
 int mbsys_reson7k_copy(int verbose, void *mbio_ptr, 
 			void *store_ptr, void *copy_ptr,
 			int *error);
 int mbsys_reson7k_checkheader(s7k_header header);
 int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
-		int pixel_size_set, double *pixel_size, 
-		int swath_width_set, double *swath_width, 
-		int pixel_int, 
-		int *nss, double *ss, double *ssacrosstrack, double *ssalongtrack,
-		int *error);
+			int pixel_size_set, double *pixel_size, 
+			int swath_width_set, double *swath_width, 
+			int pixel_int, 
+			int *nss, double *ss, 
+			double *ssacrosstrack, double *ssalongtrack,
+			int *error);
 int mbsys_reson7k_print_header(int verbose, 
 			s7k_header *header,
 			int *error);

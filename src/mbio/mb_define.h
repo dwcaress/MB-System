@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.36 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mb_define.h,v 5.37 2008-09-20 00:57:40 caress Exp $
  *
- *    Copyright (c) 1996, 2000, 2002, 2003 by
+ *    Copyright (c) 1996-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.36  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.35  2008/05/16 22:56:24  caress
  * Release 5.1.1beta18.
  *
@@ -169,6 +172,9 @@
 
 /* maximum size of SVP profiles */
 #define MB_SVP_MAX 1024
+
+/* maximum number of CTD samples per record */
+#define MB_CTD_MAX 64
 
 /* file mode (read or write) */
 #define	MB_FILEMODE_READ	0

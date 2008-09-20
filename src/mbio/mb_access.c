@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.16 2008-03-01 09:12:52 caress Exp $
+ *    $Id: mb_access.c,v 5.17 2008-09-20 00:57:40 caress Exp $
 
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 1, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2008/03/01 09:12:52  caress
+ * Added support for Simrad EM710 multibeam in new formats 58 and 59.
+ *
  *
  */
 
@@ -35,7 +38,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.16 2008-03-01 09:12:52 caress Exp $";
+static char rcs_id[]="$Id: mb_access.c,v 5.17 2008-09-20 00:57:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -2058,6 +2061,78 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, int *nctd, double *time_d, 
+	double *conductivity, double *temperature, 
+	double *depth, double *salinity, double *soundspeed, int *error)
+{
+	char	*function_name = "mb_ctd";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	/* note: the arrays should be allocated to MB_CTD_MAX length */
+	if (mb_io_ptr->mb_io_ctd != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_ctd)
+				(verbose,mbio_ptr,store_ptr,
+				kind,nctd,time_d,conductivity,
+				temperature,depth,salinity,
+				soundspeed,error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nctd:          %d\n",*nctd);
+		for (i=0;i<*nctd;i++)
+			{
+			fprintf(stderr,"dbg2       time_d:        %f\n",time_d[i]);
+			fprintf(stderr,"dbg2       conductivity:  %f\n",conductivity[i]);
+			fprintf(stderr,"dbg2       temperature:   %f\n",temperature[i]);
+			fprintf(stderr,"dbg2       depth:         %f\n",depth[i]);
+			fprintf(stderr,"dbg2       salinity:      %f\n",salinity[i]);
+			fprintf(stderr,"dbg2       soundspeed:    %f\n",soundspeed[i]);
+			}
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */

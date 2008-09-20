@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.19 2008-05-16 22:56:24 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.20 2008-09-20 00:57:41 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.18  2008/03/01 09:14:03  caress
  * Some housekeeping changes.
  *
@@ -104,7 +107,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.19 2008-05-16 22:56:24 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.20 2008-09-20 00:57:41 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -7015,6 +7018,134 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, int *nctd, double *time_d, 
+	double *conductivity, double *temperature, 
+	double *depth, double *salinity, double *soundspeed, int *error)
+{
+	char	*function_name = "mbsys_reson7k_ctd";
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_bluefin *bluefin;
+	s7k_bluefin_environmental *environmental;
+	s7kr_ctd *ctd;
+	int	status;
+	int	time_j[5];
+	int	time_i[7];
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract ctd data from bluefin environmental SSV record */
+	if (*kind == MB_DATA_SSV)
+		{
+		bluefin = &(store->bluefin);
+		header = &(bluefin->header);
+		
+		*nctd = 0;
+		for (i=0;i<bluefin->number_frames;i++)
+			{
+			environmental = &(bluefin->environmental[i]);
+			if (environmental->ctd_time > 0.0)
+				{
+				time_d[*nctd] = environmental->ctd_time;
+				conductivity[*nctd] = environmental->conductivity;
+				temperature[*nctd] = environmental->temperature;
+				depth[*nctd] = environmental->pressure;
+				salinity[*nctd] = environmental->salinity;
+				soundspeed[*nctd] = environmental->sound_speed;
+				(*nctd)++;
+				}
+			}
+		}
+
+	/* extract ctd data from CTD record */
+	else if (*kind == MB_DATA_CTD)
+		{
+		ctd = &(store->ctd);
+		header = &(ctd->header);
+
+		/* get time */
+		time_j[0] = header->s7kTime.Year;
+		time_j[1] = header->s7kTime.Day;
+		time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+		time_j[3] = (int) header->s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, time_i);
+		mb_get_time(verbose, time_i, &time_d[0]);
+		
+		*nctd = ctd->n;
+		for (i=0;i<ctd->n;i++)
+			{
+			time_d[i] = time_d[0] + i * (1.0 / ctd->sample_rate);
+			if (ctd->conductivity_flag == 0)
+				conductivity[i] = ctd->conductivity_salinity[i];
+			else
+				salinity[i] = ctd->conductivity_salinity[i];
+			temperature[i] = ctd->temperature[i];
+			depth[i] = ctd->pressure_depth[i];
+			soundspeed[i] = ctd->sound_velocity[i];
+			}
+		}
+		
+	/* else failure */
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nctd:          %d\n",*nctd);
+		for (i=0;i<*nctd;i++)
+			{
+			fprintf(stderr,"dbg2       time_d:        %f\n",time_d[i]);
+			fprintf(stderr,"dbg2       conductivity:  %f\n",conductivity[i]);
+			fprintf(stderr,"dbg2       temperature:   %f\n",temperature[i]);
+			fprintf(stderr,"dbg2       depth:         %f\n",depth[i]);
+			fprintf(stderr,"dbg2       salinity:      %f\n",salinity[i]);
+			fprintf(stderr,"dbg2       soundspeed:    %f\n",soundspeed[i]);
+			}
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
 	/* return status */

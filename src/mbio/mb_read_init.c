@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.23 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_read_init.c,v 5.24 2008-09-20 00:57:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.22  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -186,6 +189,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <sys/stat.h>
 
 /* XDR i/o include file */
 #ifdef IRIX
@@ -240,7 +244,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.23 2008-07-10 06:43:40 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.24 2008-09-20 00:57:40 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -253,6 +257,8 @@ int mb_read_init(int verbose, char *file,
 	char	projection_id[MB_NAME_LENGTH];
 	int	proj_status;
 	FILE	*pfp;
+	struct stat file_status;
+	int	fstat, file_ok;
 	int	i;
 	char	*stdin_string = "stdin";
 
@@ -544,7 +550,10 @@ int mb_read_init(int verbose, char *file,
 	    else if (status == MB_SUCCESS 
 		&& mb_io_ptr->numfile <= -2)
 		{
-		mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r");
+		if ((fstat = stat(mb_io_ptr->file2, &file_status)) == 0
+		    && (file_status.st_mode & S_IFMT) != S_IFDIR
+		    && file_status.st_size > 0)
+			mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r");
 		}
  
 	    /* open the third file if required */
@@ -561,7 +570,12 @@ int mb_read_init(int verbose, char *file,
 	    /* or open the third file if desired and possible */
 	    else if (status == MB_SUCCESS 
 		&& mb_io_ptr->numfile <= -3)
-		mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r");
+		{
+		if ((fstat = stat(mb_io_ptr->file2, &file_status)) == 0
+		    && (file_status.st_mode & S_IFMT) != S_IFDIR
+		    && file_status.st_size > 0)
+			mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r");
+		}
 
 	    /* if needed, initialize XDR stream */
 	    if (status == MB_SUCCESS 
