@@ -170,6 +170,7 @@ static int      DecodeEM4Specific(gsfSensorSpecific *sdata, unsigned char *sptr,
 static int      DecodeGeoSwathPlusSpecific(gsfSensorSpecific *sdata, unsigned char *sptr);
 static int      DecodeEM3ImagerySpecific(gsfSensorImagery *sdata, unsigned char *sptr);
 static int      DecodeEM4ImagerySpecific(gsfSensorImagery *sdata, unsigned char *sptr);
+static int      DecodeKlein5410BssSpecific(gsfSensorSpecific *sdata, unsigned char *sptr);
 
 /********************************************************************
  *
@@ -840,7 +841,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
         int next_size;
         int sr_size;
         int count;
-
+            
         /* First four byte integer in subrecord contains the subrecord
         *  size and subrecord identifier.
         */
@@ -849,7 +850,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
         ltemp = ntohl(ltemp);
         subrecord_id = (ltemp & 0xFF000000) >> 24;
         subrecord_size = ltemp & 0x00FFFFFF;
-        
+
         bytes_per_value = subrecord_size / (int) ping->number_beams;
         switch (bytes_per_value) 
         {
@@ -918,7 +919,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
             ft->rec.mb_ping.scaleFactors.scaleTable[subrecord_id - 1].compressionFlag &= 0x0F;
             ft->rec.mb_ping.scaleFactors.scaleTable[subrecord_id - 1].compressionFlag |= field_size;
             ping->scaleFactors.scaleTable[subrecord_id - 1].compressionFlag = ft->rec.mb_ping.scaleFactors.scaleTable[subrecord_id - 1].compressionFlag;
-        }
+        }        
 
         switch (subrecord_id)
         {
@@ -959,7 +960,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                         }
                     }
                 }
-                break; 
+                break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY):
                 switch (field_size)
@@ -1262,6 +1263,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_SECTOR_NUMBER_ARRAY):
+
                 ret = DecodeFromByteToUnsignedShortArray(&ft->rec.mb_ping.sector_number, p, ping->number_beams,
                     &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_SECTOR_NUMBER_ARRAY, handle);
                 if (ret < 0)
@@ -1465,6 +1467,11 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
             case (GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC):
                 p += DecodeGeoSwathPlusSpecific(&ping->sensor_data, p);
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
+                p += DecodeKlein5410BssSpecific(&ping->sensor_data, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC;
                 break;
 
             /* 12/20/2002 RWL added SB types, made Echotrac version dependent */
@@ -4477,6 +4484,119 @@ DecodeGeoSwathPlusSpecific(gsfSensorSpecific *sdata, unsigned char *sptr)
 
 /********************************************************************
  *
+ * Function Name : DecodeKlein5410BssSpecific
+ *
+ * Description : This function decodes the Klein 5410 Bathy sidescan series
+ *    sonar system sensor specific information from the GSF byte stream.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes enocoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeKlein5410BssSpecific(gsfSensorSpecific *sdata, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+    gsfuLong        ltemp;
+
+    /* First 2 bytes contain the data source (0 = SDF) */
+    memcpy(&stemp, p, 2);
+    sdata->gsfKlein5410BssSpecific.data_source = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes contain the ping side (0 port, 1 = stbd)  */
+    memcpy(&stemp, p, 2);
+    sdata->gsfKlein5410BssSpecific.side = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes contain the sonar model number */
+    memcpy(&stemp, p, 2);
+    sdata->gsfKlein5410BssSpecific.model_number = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next four bytes contain the system frequency */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.acoustic_frequency = (double) (ntohl(ltemp)) / 1000.0;
+    p += 4;
+
+    /* Next four bytes contain the sampling frequency */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.sampling_frequency = (double) (ntohl(ltemp)) / 1000.0;
+    p += 4;
+
+    /* Next four bytes contain the ping number */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.ping_number = (unsigned int) (ntohl(ltemp));
+    p += 4;
+
+    /* Next four bytes contain the total number of samples in the ping */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.num_samples = (unsigned int) ntohl(ltemp);
+    p += 4;
+
+    /* Next four bytes contain the number of valid range, angle, amplitude
+    samples in the ping */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.num_raa_samples = (unsigned int) ntohl(ltemp);
+    p += 4;
+
+    /* Next four bytes contain the error flags */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.error_flags = (unsigned int) ntohl(ltemp);
+    p += 4;
+
+    /* Next four bytes contain the range */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.range = (unsigned int) ntohl(ltemp);
+    p += 4;
+
+    /* Next four bytes contain the reading from the towfish pressure sensor in Volts */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.fish_depth = (double) (ntohl(ltemp)) / 1000.0;
+    p += 4;
+
+    /* Next four bytes contain the towfish altitude in m */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.fish_altitude = (double) (ntohl(ltemp)) / 1000.0;
+    p += 4;
+
+    /* Next four bytes contain the speed of sound at the transducer face in m/sec */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.sound_speed = (double) (ntohl(ltemp)) / 1000.0;
+    p += 4;
+
+    /* Next 2 bytes contain the transmit pulse  */
+    memcpy(&stemp, p, 2);
+    sdata->gsfKlein5410BssSpecific.tx_waveform = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next 2 bytes contain the altimeter status: 0 = passive, 1 = active  */
+    memcpy(&stemp, p, 2);
+    sdata->gsfKlein5410BssSpecific.altimeter = (int) ntohs(stemp);
+    p += 2;
+
+    /* Next four bytes contain the raw data configuration */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfKlein5410BssSpecific.raw_data_config = (unsigned int) (ntohl(ltemp));
+	p += 4;
+
+    /* Next 32 bytes are spare, but reserved for the future */
+    memcpy (sdata->gsfKlein5410BssSpecific.spare, p, sizeof (char) * 32);
+    p += 32;
+
+    return(p - sptr);
+}
+
+/********************************************************************
+ *
  * Function Name : DecodeReson8100Specific
  *
  * Description : This function decodes the Reson SeaBat 8101 sensor specific
@@ -5078,6 +5198,57 @@ DecodeEM4ImagerySpecific(gsfSensorImagery *sdata, unsigned char *sptr)
 
 /********************************************************************
  *
+ * Function Name : DecodeKlein5410BssImagerySpecific
+ *
+ * Description : This function decodes the Klein 5410 Bathy Sidescan sensor
+ *    specific imagery information from the GSF byte stream.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific imagery data
+              to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes encoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeKlein5410BssImagerySpecific(gsfSensorImagery *sdata, unsigned char *sptr)
+{
+	int i;
+    unsigned char   *p = sptr;
+    gsfuShort       stemp;
+
+    /* First two bytes contain the descriptor for resolution mode. */
+    memcpy(&stemp, p, 2);
+	sdata->gsfKlein5410BssImagerySpecific.res_mode = ((unsigned int) ntohs(stemp));
+    p += 2;
+
+    /* Next two bytes contain the TVG page */
+    memcpy(&stemp, p, 2);
+	sdata->gsfKlein5410BssImagerySpecific.tvg_page = ((unsigned int) ntohs(stemp));
+    p += 2;
+
+	/* Next 10 bytes contain an array of beam identifiers */
+	for (i = 0; i < 5; i++)
+	{
+		memcpy(&stemp, p, 2);
+		sdata->gsfKlein5410BssImagerySpecific.beam_id[i] = ((unsigned int) ntohs(stemp));
+		p += 2;
+	}
+
+    /* Decode the spare header bytes */
+    memcpy(sdata->gsfKlein5410BssImagerySpecific.spare, p, 4);
+    p += 4;
+
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
  * Function Name : DecodeReson8100Specific
  *
  * Description : This function decodes the Reson 8100 series sensor
@@ -5240,6 +5411,10 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
         case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
             sensor_size = DecodeEM4ImagerySpecific(&(*idata)->sensor_imagery, ptr);
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
+            sensor_size = DecodeKlein5410BssImagerySpecific(&(*idata)->sensor_imagery, ptr);
             break;
 
         default:

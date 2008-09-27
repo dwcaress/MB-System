@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.32 2008-09-11 20:12:43 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.33 2008-09-27 03:27:10 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.32  2008/09/11 20:12:43  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.31  2008/07/10 18:08:10  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -172,7 +175,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.32 2008-09-11 20:12:43 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.33 2008-09-27 03:27:10 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -2592,6 +2595,9 @@ section->distance, distance, project.section_length);*/
 					else
 						{
 						beamflag[i] = MB_FLAG_NULL;
+						bath[i] = 0.0;
+						bathacrosstrack[i] = 0.0;
+						bathalongtrack[i] = 0.0;
 						}
 					}
 					
@@ -4967,12 +4973,27 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 				    pingraw->heading = heading;
 				    pingraw->draft = draft;
 				    pingraw->beams_bath = beams_bath;
+/* fprintf(stderr,"\nPING %d : %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+swathraw->npings,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6]); */
 				    for (i=0;i<beams_bath;i++)
 				    	{
 					pingraw->beamflag[i] = beamflag[i];
-				    	pingraw->bath[i] = bath[i];
-				    	pingraw->bathacrosstrack[i] = bathacrosstrack[i];
-				    	pingraw->bathalongtrack[i] = bathalongtrack[i];
+					if (mb_beam_ok(beamflag[i]))
+				    		{
+						pingraw->beamflag[i] = beamflag[i];
+						pingraw->bath[i] = bath[i];
+				    		pingraw->bathacrosstrack[i] = bathacrosstrack[i];
+				    		pingraw->bathalongtrack[i] = bathalongtrack[i];
+						}
+					else
+				    		{
+						pingraw->beamflag[i] = MB_FLAG_NULL;
+						pingraw->bath[i] = 0.0;
+				    		pingraw->bathacrosstrack[i] = 0.0;
+				    		pingraw->bathalongtrack[i] = 0.0;
+						}
+/* fprintf(stderr,"BEAM: %d:%d  Flag:%d    %f %f %f\n",
+swathraw->npings,i,pingraw->beamflag[i],pingraw->bath[i],pingraw->bathacrosstrack[i],pingraw->bathalongtrack[i]); */
 					}
 				    }
 
@@ -6192,7 +6213,7 @@ int mbnavadjust_get_misfitxy()
 				    misfit_min = gridm[lc];
 				    mbna_minmisfit_xh = (ic - gridm_nx / 2) * grid_dx + mbna_misfit_offset_x;
 				    mbna_minmisfit_yh = (jc - gridm_ny / 2) * grid_dy + mbna_misfit_offset_y;
-				    mbna_minmisfit_zh = mbna_minmisfit_z;
+				    mbna_minmisfit_zh = zmin + zoff_dz * kc;
 				    }
 				else if (gridm[lc] > misfit_max)
 				    {
@@ -6202,6 +6223,8 @@ int mbnavadjust_get_misfitxy()
 			    }
 		    }
 		}
+fprintf(stderr,"mbna_minmisfit_xh:%f mbna_minmisfit_yh:%f mbna_minmisfit_zh:%f\n",
+mbna_minmisfit_xh,mbna_minmisfit_yh,mbna_minmisfit_zh);
 			
  	/* print output debug statements */
 	if (mbna_verbose >= 2)

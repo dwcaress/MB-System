@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.20 2008-09-20 00:57:41 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.21 2008-09-27 03:27:10 caress Exp $
  *
  *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	April 4,2004
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2008/09/20 00:57:41  caress
+ * Release 5.1.1beta23
+ *
  * Revision 5.19  2008/05/16 22:56:24  caress
  * Release 5.1.1beta18.
  *
@@ -223,7 +226,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.20 2008-09-20 00:57:41 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.21 2008-09-27 03:27:10 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -607,6 +610,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	*function_name = "mbr_rt_reson7kr";
 	int	status = MB_SUCCESS;
 	int	interp_status;
+	int	interp_error = MB_ERROR_NO_ERROR;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
 	s7kr_position 		*position;
@@ -823,16 +827,13 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		/* get navigation */
 		speed = 0.0;
 		interp_status = mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
-				    &heading, error);
+				    &heading, &interp_error);
 		if (interp_status == MB_SUCCESS)
 		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed, 
-				    &longitude, &latitude, &speed, error);
+				    &longitude, &latitude, &speed, &interp_error);
 		if (interp_status == MB_SUCCESS)
 		interp_status = mb_depint_interp(verbose, mbio_ptr, store->time_d,  
-				    &sonar_depth, error);
-		if (interp_status == MB_SUCCESS)
-		interp_status = mb_altint_interp(verbose, mbio_ptr, store->time_d,  
-				    &sonar_altitude, error);
+				    &sonar_depth, &interp_error);
 				    
 		/* if the optional data are not all available, this ping
 			is not useful. Just use null values here and catch
@@ -846,9 +847,18 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			sonar_depth = 0.0;
 			}
 
+		/* get altitude */
+		interp_status = mb_altint_interp(verbose, mbio_ptr, store->time_d,  
+				    &sonar_altitude, &interp_error);
+		if (interp_status == MB_FAILURE)
+			{
+			/* set altitude data to zero */
+			sonar_altitude = 0.0;
+			}
+
 		/* get attitude */
 		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d,  
-				    &heave, &roll, &pitch, error);
+				    &heave, &roll, &pitch, &interp_error);
 		if (interp_status == MB_FAILURE)
 			{
 			/* set nav & attitude data to zero */
@@ -912,7 +922,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 					+ R7KHDRSIZE_7kBathymetricData
 					+ bathymetry->number_beams * 9;
 
-/*mbsys_reson7k_print_bathymetry(verbose, bathymetry, error);*/
+/* mbsys_reson7k_print_bathymetry(verbose, bathymetry, error);*/
 		}
 
 	/* set error and kind in mb_io_ptr */
@@ -5068,7 +5078,12 @@ time_d);
 			mb_get_binary_float(MB_YES, &buffer[index], &(bluefin->environmental[i].salinity)); index += 4;
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->environmental[i].ctd_time)); index += 8;
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->environmental[i].temperature_time)); index += 8;
-			for (j=0;j<56;j++)
+			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->environmental[i].surface_pressure)); index += 8;
+			mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->environmental[i].temperature_counts)); index += 4;
+			mb_get_binary_float(MB_YES, &buffer[index], &(bluefin->environmental[i].conductivity_frequency)); index += 4;
+			mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->environmental[i].pressure_counts)); index += 4;
+			mb_get_binary_float(MB_YES, &buffer[index], &(bluefin->environmental[i].pressure_comp_voltage)); index += 4;
+			for (j=0;j<32;j++)
 				{
 				bluefin->environmental[i].reserved2[j] = buffer[index]; index++;
 				}
@@ -10769,7 +10784,12 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 				mb_put_binary_float(MB_YES, bluefin->environmental[i].salinity, &buffer[index]); index += 4;
 				mb_put_binary_double(MB_YES, bluefin->environmental[i].ctd_time, &buffer[index]); index += 8;
 				mb_put_binary_double(MB_YES, bluefin->environmental[i].temperature_time, &buffer[index]); index += 8;
-				for (j=0;j<56;j++)
+				mb_put_binary_double(MB_YES, bluefin->environmental[i].surface_pressure, &buffer[index]); index += 8;
+				mb_put_binary_int(MB_YES, bluefin->environmental[i].temperature_counts, &buffer[index]); index += 4;
+				mb_put_binary_float(MB_YES, bluefin->environmental[i].conductivity_frequency, &buffer[index]); index += 4;
+				mb_put_binary_int(MB_YES, bluefin->environmental[i].pressure_counts, &buffer[index]); index += 4;
+				mb_put_binary_float(MB_YES, bluefin->environmental[i].pressure_comp_voltage, &buffer[index]); index += 4;
+				for (j=0;j<32;j++)
 					{
 					buffer[index] = bluefin->environmental[i].reserved2[j]; index++;
 					}

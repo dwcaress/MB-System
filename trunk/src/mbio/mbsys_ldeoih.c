@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 5.15 2008-07-10 18:02:39 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 5.16 2008-09-27 03:27:10 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2008/07/10 18:02:39  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.12  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -144,7 +147,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_ldeoih.h"
 
-static char res_id[]="$Id: mbsys_ldeoih.c,v 5.15 2008-07-10 18:02:39 caress Exp $";
+static char res_id[]="$Id: mbsys_ldeoih.c,v 5.16 2008-09-27 03:27:10 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -865,6 +868,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			depthmax = MAX(depthmax, bath[i]);
 			distmax = MAX(distmax, fabs(bathacrosstrack[i]));
+			distmax = MAX(distmax, fabs(bathalongtrack[i]));
 			}
 		    }
 		for (i=0;i<nss;i++)
@@ -872,6 +876,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    if (ss[i] > MB_SIDESCAN_NULL)
 			{
 			distmax = MAX(distmax, fabs(ssacrosstrack[i]));
+			distmax = MAX(distmax, fabs(ssalongtrack[i]));
 			}
 		    }
 		if (depthmax > 0.0)

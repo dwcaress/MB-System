@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.20 2008-09-20 00:57:41 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.21 2008-09-27 03:27:10 caress Exp $
  *
  *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 23, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.20  2008/09/20 00:57:41  caress
+ * Release 5.1.1beta23
+ *
  * Revision 5.19  2008/05/16 22:56:24  caress
  * Release 5.1.1beta18.
  *
@@ -107,7 +110,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.20 2008-09-20 00:57:41 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.21 2008-09-27 03:27:10 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -603,7 +606,12 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		bluefin->environmental[i].salinity = 0.0;
 		bluefin->environmental[i].ctd_time = 0.0;
 		bluefin->environmental[i].temperature_time = 0.0;
-		for (j=0;j<56;j++)
+		bluefin->environmental[i].surface_pressure = 0.0;
+		bluefin->environmental[i].temperature_counts = 0;
+		bluefin->environmental[i].conductivity_frequency = 0.0;
+		bluefin->environmental[i].pressure_counts = 0;
+		bluefin->environmental[i].pressure_comp_voltage = 0.0;
+		for (j=0;j<32;j++)
 			bluefin->environmental[i].reserved2[j] = 0;
 		}
 
@@ -2646,28 +2654,33 @@ int mbsys_reson7k_print_bluefin(int verbose,
 		{
 		for (i=0;i<MIN(bluefin->number_frames,BLUEFIN_MAX_FRAMES);i++)
 			{
-			fprintf(stderr,"%s     env[%d].packet_size:        %d\n",first,i,bluefin->environmental[i].packet_size);
-			fprintf(stderr,"%s     env[%d].version:            %d\n",first,i,bluefin->environmental[i].version);
-			fprintf(stderr,"%s     env[%d].offset:             %d\n",first,i,bluefin->environmental[i].offset);
-			fprintf(stderr,"%s     env[%d].data_type:          %d\n",first,i,bluefin->environmental[i].data_type);
-			fprintf(stderr,"%s     env[%d].data_size:          %d\n",first,i,bluefin->environmental[i].data_size);
-			fprintf(stderr,"%s     env[%d].s7kTime.Year:       %d\n",first,i,bluefin->environmental[i].s7kTime.Year);
-			fprintf(stderr,"%s     env[%d].s7kTime.Day:        %d\n",first,i,bluefin->environmental[i].s7kTime.Day);
-			fprintf(stderr,"%s     env[%d].s7kTime.Seconds:    %f\n",first,i,bluefin->environmental[i].s7kTime.Seconds);
-			fprintf(stderr,"%s     env[%d].s7kTime.Hours:      %d\n",first,i,bluefin->environmental[i].s7kTime.Hours);
-			fprintf(stderr,"%s     env[%d].7kTime->Minutes:    %d\n",first,i,bluefin->environmental[i].s7kTime.Minutes);
-			fprintf(stderr,"%s     env[%d].checksum:           %d\n",first,i,bluefin->environmental[i].checksum);
-			fprintf(stderr,"%s     env[%d].reserved1:          %d\n",first,i,bluefin->environmental[i].reserved1);
-			fprintf(stderr,"%s     env[%d].quality:            %d\n",first,i,bluefin->environmental[i].quality);
-			fprintf(stderr,"%s     env[%d].sound_speed:        %f\n",first,i,bluefin->environmental[i].sound_speed);
-			fprintf(stderr,"%s     env[%d].conductivity:       %f\n",first,i,bluefin->environmental[i].conductivity);
-			fprintf(stderr,"%s     env[%d].temperature:        %f\n",first,i,bluefin->environmental[i].temperature);
-			fprintf(stderr,"%s     env[%d].pressure:           %f\n",first,i,bluefin->environmental[i].pressure);
-			fprintf(stderr,"%s     env[%d].salinity:           %f\n",first,i,bluefin->environmental[i].salinity);
-			fprintf(stderr,"%s     env[%d].ctd_time:           %f\n",first,i,bluefin->environmental[i].ctd_time);
-			fprintf(stderr,"%s     env[%d].temperature_time:   %f\n",first,i,bluefin->environmental[i].temperature_time);
-			for (j=0;j<56;j++)
-				fprintf(stderr,"%s     env[%d].reserved2[%2d]:      %d\n",first,i,j,bluefin->environmental[i].reserved2[j]);
+			fprintf(stderr,"%s     env[%d].packet_size:            %d\n",first,i,bluefin->environmental[i].packet_size);
+			fprintf(stderr,"%s     env[%d].version:                %d\n",first,i,bluefin->environmental[i].version);
+			fprintf(stderr,"%s     env[%d].offset:                 %d\n",first,i,bluefin->environmental[i].offset);
+			fprintf(stderr,"%s     env[%d].data_type:              %d\n",first,i,bluefin->environmental[i].data_type);
+			fprintf(stderr,"%s     env[%d].data_size:              %d\n",first,i,bluefin->environmental[i].data_size);
+			fprintf(stderr,"%s     env[%d].s7kTime.Year:           %d\n",first,i,bluefin->environmental[i].s7kTime.Year);
+			fprintf(stderr,"%s     env[%d].s7kTime.Day:            %d\n",first,i,bluefin->environmental[i].s7kTime.Day);
+			fprintf(stderr,"%s     env[%d].s7kTime.Seconds:        %f\n",first,i,bluefin->environmental[i].s7kTime.Seconds);
+			fprintf(stderr,"%s     env[%d].s7kTime.Hours:          %d\n",first,i,bluefin->environmental[i].s7kTime.Hours);
+			fprintf(stderr,"%s     env[%d].7kTime->Minutes:        %d\n",first,i,bluefin->environmental[i].s7kTime.Minutes);
+			fprintf(stderr,"%s     env[%d].checksum:               %d\n",first,i,bluefin->environmental[i].checksum);
+			fprintf(stderr,"%s     env[%d].reserved1:              %d\n",first,i,bluefin->environmental[i].reserved1);
+			fprintf(stderr,"%s     env[%d].quality:                %d\n",first,i,bluefin->environmental[i].quality);
+			fprintf(stderr,"%s     env[%d].sound_speed:            %f\n",first,i,bluefin->environmental[i].sound_speed);
+			fprintf(stderr,"%s     env[%d].conductivity:           %f\n",first,i,bluefin->environmental[i].conductivity);
+			fprintf(stderr,"%s     env[%d].temperature:            %f\n",first,i,bluefin->environmental[i].temperature);
+			fprintf(stderr,"%s     env[%d].pressure:               %f\n",first,i,bluefin->environmental[i].pressure);
+			fprintf(stderr,"%s     env[%d].salinity:               %f\n",first,i,bluefin->environmental[i].salinity);
+			fprintf(stderr,"%s     env[%d].ctd_time:               %f\n",first,i,bluefin->environmental[i].ctd_time);
+			fprintf(stderr,"%s     env[%d].temperature_time:       %f\n",first,i,bluefin->environmental[i].temperature_time);
+			fprintf(stderr,"%s     env[%d].surface_pressure:       %f\n",first,i,bluefin->environmental[i].surface_pressure);
+			fprintf(stderr,"%s     env[%d].temperature_counts:     %d\n",first,i,bluefin->environmental[i].temperature_counts);
+			fprintf(stderr,"%s     env[%d].conductivity_frequency: %f\n",first,i,bluefin->environmental[i].conductivity_frequency);
+			fprintf(stderr,"%s     env[%d].pressure_counts:        %d\n",first,i,bluefin->environmental[i].pressure_counts);
+			fprintf(stderr,"%s     env[%d].pressure_comp_voltage:  %f\n",first,i,bluefin->environmental[i].pressure_comp_voltage);
+			for (j=0;j<32;j++)
+				fprintf(stderr,"%s     env[%d].reserved2[%2d]:          %d\n",first,i,j,bluefin->environmental[i].reserved2[j]);
 			}
 		}
 		
@@ -7073,6 +7086,19 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 			environmental = &(bluefin->environmental[i]);
 			if (environmental->ctd_time > 0.0)
 				{
+				/* get time_d if needed */
+				if (environmental->ctd_time < 10000.0)
+					{
+					time_j[0] = environmental->s7kTime.Year;
+					time_j[1] = environmental->s7kTime.Day;
+					time_j[2] = 60 * environmental->s7kTime.Hours + environmental->s7kTime.Minutes;
+					time_j[3] = (int) environmental->s7kTime.Seconds;
+					time_j[4] = (int) (1000000 * (environmental->s7kTime.Seconds - time_j[3]));
+					mb_get_itime(verbose, time_j, time_i);
+					mb_get_time(verbose, time_i, &environmental->ctd_time);
+					}
+					
+				/* get values */
 				time_d[*nctd] = environmental->ctd_time;
 				conductivity[*nctd] = environmental->conductivity;
 				temperature[*nctd] = environmental->temperature;

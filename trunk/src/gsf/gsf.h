@@ -107,6 +107,8 @@
  * jsb 07-24-07  GSFv2.07 includes some additional parameters in the imagery sensor specific structure
  *                to support calculating back to the exact original intensity values received from the
  *                sonar.
+ * bsl 11-05-07  Added sensor ID and structure for gsfGeoSwathPlusSpecific data received via Klein 5410
+ *                bathymetric sidescan sonar.  Also added an imagery sensor specific structure.
  * jsb 11-06-07  Updates to utilize the subrecord size in termining the field size for the array subrecords
  *                that support more than one field size.  Also replaced use of strstr with strcmp in gsfGetMBParams
  *                to resolve potential problem where one keyword name may be fully contained in another.
@@ -145,7 +147,7 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library */
-#define GSF_VERSION       "GSF-v02.08"
+#define GSF_VERSION       "GSF-v02.09"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    262144
@@ -297,6 +299,7 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC            (unsigned)134
 #define GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC            (unsigned)135
 #define GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC    (unsigned)136 /* 2006-09-27: dhg: GeoAcoustics GeoSwath+ */
+#define GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC   (unsigned)137
 
 #define GSF_SINGLE_BEAM_SUBRECORD_UNKNOWN                   (unsigned)  0
 #define GSF_SINGLE_BEAM_SUBRECORD_ECHOTRAC_SPECIFIC         (unsigned)201
@@ -928,8 +931,35 @@ typedef struct t_gsfGeoSwathPlusSpecific
 }
 t_gsfGeoSwathPlusSpecific;
 
-#define GSF_GEOSWATH_PLUS_PORT_PING 0
-#define GSF_GEOSWATH_PLUS_STBD_PING 1
+#define PORT_PING 0
+#define STBD_PING 1
+
+#define GSF_GEOSWATH_PLUS_PORT_PING PORT_PING
+#define GSF_GEOSWATH_PLUS_STBD_PING STBD_PING
+
+/* Define the Klein 5410 Bathy Sidescan sensor specific data structure */
+typedef struct t_gsfKlein5410BssSpecific
+{
+    int             data_source;             /* 0 = SDF */
+    int             side;                    /* 0 = port, 1 = stbd */
+    int             model_number;            /* ie: 5410 */
+    double          acoustic_frequency;      /* system frequency in Hz */
+    double          sampling_frequency;      /* sampling frequency in Hz */
+    unsigned int    ping_number;             /* 0 - 4,294,967,295 */
+    unsigned int    num_samples;             /* total number of samples in this ping */
+    unsigned int    num_raa_samples;         /* number of valid range, angle, amplitude samples in ping */
+    unsigned int    error_flags;             /* error flags for this ping */
+    unsigned int    range;                   /* sonar range setting */
+    double          fish_depth;              /* reading from the towfish pressure sensor in Volts */
+    double          fish_altitude;           /* towfish altitude in m */
+    double          sound_speed;             /* speed of sound at the transducer face in m/sec */
+    int             tx_waveform;             /* transmit pulse: 0 = 132 microsec CW; 1 = 132 microsec FM; */
+                                             /* 2 = 176 microsec CW; 3 = 176 microsec FM */
+    int             altimeter;               /* altimeter status: 0 = passive, 1 = active */
+    unsigned int    raw_data_config;         /* raw data configuration */
+    char            spare[32];               /* 32 bytes of reserved space */
+}
+t_gsfKlein5410BssSpecific;
 
 /* Define a union of the known sensor specific ping subrecords */
 typedef union t_gsfSensorSpecific
@@ -960,6 +990,7 @@ typedef union t_gsfSensorSpecific
     t_gsfReson8100Specific    gsfReson8100Specific;
     t_gsfEM4Specific          gsfEM4Specific;          /* used for EM710, EM302, and EM122 */
     t_gsfGeoSwathPlusSpecific gsfGeoSwathPlusSpecific; /* DHG 2006/09/27 Use for GeoSwath+ interferometer */
+    t_gsfKlein5410BssSpecific gsfKlein5410BssSpecific; /* Use for Klein 5410 Bathy Sidescan. */
 
         /* Single beam sensors added */
     t_gsfSBEchotracSpecific   gsfSBEchotracSpecific;
@@ -1140,11 +1171,20 @@ typedef struct t_gsfEM4ImagerySpecific
     unsigned char  spare[20];           /* spare sensor specific subrecord space, reserved for future expansion */
 } t_gsfEM4ImagerySpecific;
 
+typedef struct t_gsfKlein5410BssImagerySpecific
+{
+    unsigned int   res_mode;            /* Descriptor for resolution mode: 0 = normal; 1 = high */
+    unsigned int   tvg_page;            /* TVG page number */
+    unsigned int   beam_id[5];          /* array of identifiers for five sidescan beam magnitude time series, starting with beam id 1 as the forward-most */
+	unsigned char  spare[4];            /* spare sensor specific subrecord space, reserved for future expansion */
+} t_gsfKlein5410BssImagerySpecific;
+
 typedef union t_gsfSensorImagery
 {
-    t_gsfEM3ImagerySpecific         gsfEM3ImagerySpecific;          /* used for EM120, EM300, EM1002, EM3000 */
-    t_gsfReson8100ImagerySpecific   gsfReson8100ImagerySpecific;    /* For Reson 81P "snippet" imagery */
-    t_gsfEM4ImagerySpecific         gsfEM4ImagerySpecific;          /* used for EM122, EM302, EM710 */
+    t_gsfEM3ImagerySpecific          gsfEM3ImagerySpecific;          /* used for EM120, EM300, EM1002, EM3000 */
+    t_gsfReson8100ImagerySpecific    gsfReson8100ImagerySpecific;    /* For Reson 81P "snippet" imagery */
+    t_gsfEM4ImagerySpecific          gsfEM4ImagerySpecific;          /* used for EM122, EM302, EM710 */
+    t_gsfKlein5410BssImagerySpecific gsfKlein5410BssImagerySpecific; /* used for Klein 5410 Bathy Sidescan */
 } gsfSensorImagery;
 
 typedef struct gsfTimeSeriesIntensity

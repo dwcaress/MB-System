@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.28 2008-08-12 00:04:04 caress Exp $
+ *    $Id: mbmosaic.c,v 5.29 2008-09-27 03:27:11 caress Exp $
  *
  *    Copyright (c) 1997-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.28  2008/08/12 00:04:04  caress
+ * Gordon Keith's addition of a weighting option.
+ *
  * Revision 5.27  2008/05/24 19:40:07  caress
  * Applied a Gordon Keith fix.
  *
@@ -245,7 +248,7 @@ int mbmosaic_get_priorities(
 		int	*error);
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.28 2008-08-12 00:04:04 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.29 2008-09-27 03:27:11 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -853,6 +856,7 @@ main (int argc, char **argv)
 			yy = gbnd[2];
 			mb_proj_inverse(verbose, pjptr, xx, yy,
 					&xlon, &ylat, &error);
+			mb_apply_lonflip(verbose, lonflip, &xlon);
 			obnd[0] = xlon;
 			obnd[1] = xlon;
 			obnd[2] = ylat;
@@ -863,6 +867,7 @@ main (int argc, char **argv)
 			yy = gbnd[2];
 			mb_proj_inverse(verbose, pjptr, xx, yy,
 					&xlon, &ylat, &error);
+			mb_apply_lonflip(verbose, lonflip, &xlon);
 			obnd[0] = MIN(obnd[0], xlon);
 			obnd[1] = MAX(obnd[1], xlon);
 			obnd[2] = MIN(obnd[2], ylat);
@@ -873,6 +878,7 @@ main (int argc, char **argv)
 			yy = gbnd[3];
 			mb_proj_inverse(verbose, pjptr, xx, yy,
 					&xlon, &ylat, &error);
+			mb_apply_lonflip(verbose, lonflip, &xlon);
 			obnd[0] = MIN(obnd[0], xlon);
 			obnd[1] = MAX(obnd[1], xlon);
 			obnd[2] = MIN(obnd[2], ylat);
@@ -883,6 +889,7 @@ main (int argc, char **argv)
 			yy = gbnd[3];
 			mb_proj_inverse(verbose, pjptr, xx, yy,
 					&xlon, &ylat, &error);
+			mb_apply_lonflip(verbose, lonflip, &xlon);
 			obnd[0] = MIN(obnd[0], xlon);
 			obnd[1] = MAX(obnd[1], xlon);
 			obnd[2] = MIN(obnd[2], ylat);
@@ -1070,6 +1077,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					xx, yy,
 					&xlon, &ylat,
 					&error);
+		mb_apply_lonflip(verbose, lonflip, &xlon);
 		bounds[0] = xlon;
 		bounds[1] = xlon;
 		bounds[2] = ylat;
@@ -1082,6 +1090,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					xx, yy,
 					&xlon, &ylat,
 					&error);
+		mb_apply_lonflip(verbose, lonflip, &xlon);
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
@@ -1094,6 +1103,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					xx, yy,
 					&xlon, &ylat,
 					&error);
+		mb_apply_lonflip(verbose, lonflip, &xlon);
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
@@ -1106,6 +1116,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					xx, yy,
 					&xlon, &ylat,
 					&error);
+		mb_apply_lonflip(verbose, lonflip, &xlon);
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);

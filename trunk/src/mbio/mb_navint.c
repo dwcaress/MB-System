@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.13 2006-03-14 01:41:52 caress Exp $
+ *    $Id: mb_navint.c,v 5.14 2008-09-27 03:27:10 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	October 30, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.13  2006/03/14 01:41:52  caress
+ * Improved debug messages.
+ *
  * Revision 5.12  2005/06/15 15:17:51  caress
  * Added some useful debug statements.
  *
@@ -81,7 +84,7 @@
     #define MB_ALTINT_DEBUG 1 */
 
 
-static char rcs_id[]="$Id: mb_navint.c,v 5.13 2006-03-14 01:41:52 caress Exp $";
+static char rcs_id[]="$Id: mb_navint.c,v 5.14 2008-09-27 03:27:10 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal
@@ -341,6 +344,7 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 		*lat = 0.0;
 		*speed = 0.0;
 		status = MB_FAILURE;
+		*error = MB_ERROR_NOT_ENOUGH_DATA;
 #ifdef MB_NAVINT_DEBUG
 	fprintf(stderr, "mb_navint_interp: Nav zeroed\n");
 #endif
@@ -554,6 +558,7 @@ int mb_attint_interp(int verbose, void *mbio_ptr,
 		*roll = 0.0;
 		*pitch = 0.0;
 		status = MB_FAILURE;
+		*error = MB_ERROR_NOT_ENOUGH_DATA;
 #ifdef MB_ATTINT_DEBUG
 	fprintf(stderr, "mb_attint_interp: Attitude zeroed\n");
 #endif
@@ -753,6 +758,7 @@ int mb_hedint_interp(int verbose, void *mbio_ptr,
 		{
 		*heading = 0.0;
 		status = MB_FAILURE;
+		*error = MB_ERROR_NOT_ENOUGH_DATA;
 #ifdef MB_HEDINT_DEBUG
 	fprintf(stderr, "mb_hedint_interp: Heading zeroed\n");
 #endif
@@ -940,6 +946,7 @@ int mb_depint_interp(int verbose, void *mbio_ptr,
 		{
 		*sonardepth = 0.0;
 		status = MB_FAILURE;
+		*error = MB_ERROR_NOT_ENOUGH_DATA;
 #ifdef MB_DEPINT_DEBUG
 	fprintf(stderr, "mb_depint_interp: sonardepth zeroed\n");
 #endif
@@ -1127,6 +1134,7 @@ int mb_altint_interp(int verbose, void *mbio_ptr,
 		{
 		*altitude = 0.0;
 		status = MB_FAILURE;
+		*error = MB_ERROR_NOT_ENOUGH_DATA;
 #ifdef MB_ALTINT_DEBUG
 	fprintf(stderr, "mb_altint_interp: altitude zeroed\n");
 #endif

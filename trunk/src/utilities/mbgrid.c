@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.44 2008-06-26 07:15:46 caress Exp $
+ *    $Id: mbgrid.c,v 5.45 2008-09-27 03:27:11 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.44  2008/06/26 07:15:46  caress
+ * Fixed problem reading xyz files.
+ *
  * Revision 5.43  2008/05/24 19:39:39  caress
  * Changed some commenting.
  *
@@ -450,7 +453,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.44 2008-06-26 07:15:46 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.45 2008-09-27 03:27:11 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1065,6 +1068,7 @@ main (int argc, char **argv)
 			yy = gbnd[2];
 			mb_proj_inverse(verbose, pjptr, xx, yy,
 					&xlon, &ylat, &error);
+			mb_apply_lonflip(verbose, lonflip, &xlon);
 			obnd[0] = xlon;
 			obnd[1] = xlon;
 			obnd[2] = ylat;
@@ -1075,6 +1079,7 @@ main (int argc, char **argv)
 			yy = gbnd[2];
 			mb_proj_inverse(verbose, pjptr, xx, yy,
 					&xlon, &ylat, &error);
+			mb_apply_lonflip(verbose, lonflip, &xlon);
 			obnd[0] = MIN(obnd[0], xlon);
 			obnd[1] = MAX(obnd[1], xlon);
 			obnd[2] = MIN(obnd[2], ylat);
@@ -1085,6 +1090,7 @@ main (int argc, char **argv)
 			yy = gbnd[3];
 			mb_proj_inverse(verbose, pjptr, xx, yy,
 					&xlon, &ylat, &error);
+			mb_apply_lonflip(verbose, lonflip, &xlon);
 			obnd[0] = MIN(obnd[0], xlon);
 			obnd[1] = MAX(obnd[1], xlon);
 			obnd[2] = MIN(obnd[2], ylat);
@@ -1095,6 +1101,7 @@ main (int argc, char **argv)
 			yy = gbnd[3];
 			mb_proj_inverse(verbose, pjptr, xx, yy,
 					&xlon, &ylat, &error);
+			mb_apply_lonflip(verbose, lonflip, &xlon);
 			obnd[0] = MIN(obnd[0], xlon);
 			obnd[1] = MAX(obnd[1], xlon);
 			obnd[2] = MIN(obnd[2], ylat);
@@ -1302,6 +1309,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					xx, yy,
 					&xlon, &ylat,
 					&error);
+		mb_apply_lonflip(verbose, lonflip, &xlon);
 		bounds[0] = xlon;
 		bounds[1] = xlon;
 		bounds[2] = ylat;
@@ -1314,6 +1322,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					xx, yy,
 					&xlon, &ylat,
 					&error);
+		mb_apply_lonflip(verbose, lonflip, &xlon);
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
@@ -1326,6 +1335,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					xx, yy,
 					&xlon, &ylat,
 					&error);
+		mb_apply_lonflip(verbose, lonflip, &xlon);
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
@@ -1338,6 +1348,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					xx, yy,
 					&xlon, &ylat,
 					&error);
+		mb_apply_lonflip(verbose, lonflip, &xlon);
 		bounds[0] = MIN(bounds[0], xlon);
 		bounds[1] = MAX(bounds[1], xlon);
 		bounds[2] = MIN(bounds[2], ylat);
