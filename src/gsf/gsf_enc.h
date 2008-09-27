@@ -39,5 +39,6 @@
    int OPTLK gsfEncodeHVNavigationError(unsigned char *sptr, gsfHVNavigationError *hv_nav_error);
    int OPTLK gsfEncodeSinglebeam (unsigned char *sptr, gsfSingleBeamPing * ping);
    int OPTLK gsfEncodeAttitude(unsigned char *sptr, gsfAttitude * attitude);
+   int OPTLK gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping);
 
 #endif

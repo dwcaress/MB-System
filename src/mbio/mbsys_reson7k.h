@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.15 2008-09-20 00:57:41 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.16 2008-09-27 03:27:10 caress Exp $
  *
  *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	March 3, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2008/09/20 00:57:41  caress
+ * Release 5.1.1beta23
+ *
  * Revision 5.14  2008/05/16 22:56:24  caress
  * Release 5.1.1beta18.
  *
@@ -1009,9 +1012,11 @@ typedef struct s7k_bluefin_environmental_struct
 	double		ctd_time;		/* CTD sample time (unix sec) */
 	double		temperature_time;	/* Temperature sample time (unix sec) */
 	double		surface_pressure;	/* dBar */
-	short		pressure_frequency;	/* 0.01 Hz ? */
-	short		conductivity_frequency;	/* 0.01 Hz ? */
-	char		reserved2[44];
+	int		temperature_counts;	/* thermister A/D counts */
+	float		conductivity_frequency;	/* Hz */
+	int		pressure_counts;	/* strain gauge pressure sensor A/D counts */
+	float		pressure_comp_voltage;	/* Volts */
+	char		reserved2[32];
 }
 s7k_bluefin_environmental;
 	

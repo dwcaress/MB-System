@@ -5873,6 +5873,11 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
             }
             break;
 
+        case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
+            *fore_aft = GSF_BEAM_WIDTH_UNKNOWN;
+            *athwartship = GSF_BEAM_WIDTH_UNKNOWN;
+            break;            
+
         default:
             *fore_aft = GSF_BEAM_WIDTH_UNKNOWN;
             *athwartship = GSF_BEAM_WIDTH_UNKNOWN;
@@ -5915,6 +5920,9 @@ gsfIsStarboardPing(gsfRecords *data)
 
         case GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC:
             return data->mb_ping.sensor_data.gsfGeoSwathPlusSpecific.side;
+            break;
+        case GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC:
+            return data->mb_ping.sensor_data.gsfKlein5410BssSpecific.side;            
             break;
         case GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC:
 /* zzz_ */

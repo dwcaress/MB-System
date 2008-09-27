@@ -162,6 +162,7 @@ static int      EncodeSBNOSHDBSpecific(unsigned char *sptr, t_gsfSBNOSHDBSpecifi
 static int      EncodeSBNavisoundSpecific(unsigned char *sptr, t_gsfSBNavisoundSpecific * sdata);
 static int      EncodeEM4Specific(unsigned char *sptr, gsfSensorSpecific * sdata, GSF_FILE_TABLE *ft);
 static int      EncodeGeoSwathPlusSpecific(unsigned char *sptr, gsfSensorSpecific * sdata);
+static int      EncodeKlein5410BssSpecific(unsigned char *sptr, gsfSensorSpecific * sdata);
 
 /********************************************************************
  *
@@ -1567,6 +1568,10 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
 
         case (GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC):
             sensor_size = EncodeGeoSwathPlusSpecific(p, &ping->sensor_data);
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
+            sensor_size = EncodeKlein5410BssSpecific(p, &ping->sensor_data);
             break;
 
         default:
@@ -3048,7 +3053,7 @@ EncodeSeaMapSpecific(unsigned char *sptr, gsfSensorSpecific * sdata, GSF_FILE_TA
 
     dtemp = (sdata->gsfSeamapSpecific.pressureDepth * 10.0);
     if (dtemp < 0.0)
-    {		    
+    {
         dtemp -= 0.501;
     }
     else
@@ -4601,6 +4606,164 @@ EncodeGeoSwathPlusSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
 
 /********************************************************************
  *
+ * Function Name : EncodeKlein5410BssSpecific
+ *
+ * Description : This function encodes the Klein 5410 Bathy Sidescan
+ *  sensor specific information into external byte stream form.
+ *
+ * Inputs :
+ *    sptr = a pointer to an unsigned char buffer to write into
+ *    sdata = a pointer to a union of sensor specific data.
+ *
+ * Returns : This function returns the number of bytes encoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+EncodeKlein5410BssSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+    gsfuLong        ltemp;
+    double          dtemp;
+
+    /* First 2 bytes contain the data source (0 = SDF) */
+    stemp = htons((gsfuShort) sdata->gsfKlein5410BssSpecific.data_source);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* Next 2 bytes contain the ping side (0 port, 1 = stbd)  */
+    stemp = htons((gsfuShort) sdata->gsfKlein5410BssSpecific.side);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* Next 2 bytes contain the sonar model number  */
+    stemp = htons((gsfuShort) sdata->gsfKlein5410BssSpecific.model_number);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* Next four bytes contain the system frequency */
+    dtemp = sdata->gsfKlein5410BssSpecific.acoustic_frequency * 1.0e03;
+    if (dtemp < 0.0)
+    {
+        dtemp -= 0.501;
+    }
+    else
+    {
+        dtemp += 0.501;
+    }
+    ltemp = htonl((gsfuLong) dtemp);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next four bytes contain the sampling frequency */
+    dtemp = sdata->gsfKlein5410BssSpecific.sampling_frequency * 1.0e03;
+    if (dtemp < 0.0)
+    {
+        dtemp -= 0.501;
+    }
+    else
+    {
+        dtemp += 0.501;
+    }
+    ltemp = htonl((gsfuLong) dtemp);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next four bytes contain the ping number */
+    ltemp = htonl((gsfuLong) sdata->gsfKlein5410BssSpecific.ping_number);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next four bytes contain the total number of samples in the ping */
+    ltemp = htonl((gsfuLong) sdata->gsfKlein5410BssSpecific.num_samples);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next four bytes contain the number of valid range, angle, amplitude
+    samples in the ping */
+    ltemp = htonl((gsfuLong) sdata->gsfKlein5410BssSpecific.num_raa_samples);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next four bytes contain the error flags */
+    ltemp = htonl((gsfuLong) sdata->gsfKlein5410BssSpecific.error_flags);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next four bytes contain the range */
+    ltemp = htonl((gsfuLong) sdata->gsfKlein5410BssSpecific.range);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next four bytes contain the reading from the towfish pressure sensor in Volts */
+    dtemp = sdata->gsfKlein5410BssSpecific.fish_depth * 1.0e03;
+    if (dtemp < 0.0)
+    {
+        dtemp -= 0.501;
+    }
+    else
+    {
+        dtemp += 0.501;
+    }
+    ltemp = htonl((gsfuLong) dtemp);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next four bytes contain the towfish altitude in m */
+    dtemp = sdata->gsfKlein5410BssSpecific.fish_altitude * 1.0e03;
+    if (dtemp < 0.0)
+    {
+        dtemp -= 0.501;
+    }
+    else
+    {
+        dtemp += 0.501;
+    }
+    ltemp = htonl((gsfuLong) dtemp);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next four bytes contain the speed of sound at the transducer face in m/sec */
+    dtemp = sdata->gsfKlein5410BssSpecific.sound_speed * 1.0e03;
+    if (dtemp < 0.0)
+    {
+        dtemp -= 0.501;
+    }
+    else
+    {
+        dtemp += 0.501;
+    }
+    ltemp = htonl((gsfuLong) dtemp);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next 2 bytes contain the transmit pulse  */
+    stemp = htons((gsfuShort) sdata->gsfKlein5410BssSpecific.tx_waveform);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* Next 2 bytes contain the altimeter status: 0 = passive, 1 = active  */
+    stemp = htons((gsfuShort) sdata->gsfKlein5410BssSpecific.altimeter);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* Next four bytes contain the raw data configuration */
+    ltemp = htonl((gsfuLong) sdata->gsfKlein5410BssSpecific.raw_data_config);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* Next 32 bytes are spare, but are reserved for the future */
+    memcpy (p, &sdata->gsfKlein5410BssSpecific.spare, sizeof (unsigned char) * 32);
+    p += 32;
+
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
  * Function Name : EncodeReson8100Specific
  *
  * Description : This function encodes the Reson 8100 sensor specific
@@ -5310,6 +5473,55 @@ EncodeEM4ImagerySpecific(unsigned char *sptr, gsfSensorImagery *sdata)
 
 /********************************************************************
  *
+ * Function Name : EncodeKlein5410BssSpecific
+ *
+ * Description : This function encodes the Simrad EM4 series sensor
+ *  specific imagery information into external byte stream form.
+ *
+ * Inputs :
+ *    sptr = a pointer to an unsigned char buffer to write into
+ *    sdata = a pointer to a union of sensor specific imagery data.
+ *
+ * Returns : This function returns the number of bytes encoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+EncodeKlein5410BssImagerySpecific(unsigned char *sptr, gsfSensorImagery *sdata)
+{
+    int i;
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+
+    /* First two bytes contain the descriptor for resolution mode. */
+    stemp = htons((gsfuShort) sdata->gsfKlein5410BssImagerySpecific.res_mode);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* Next two bytes contain the TVG page. */
+    stemp = htons((gsfuShort) sdata->gsfKlein5410BssImagerySpecific.tvg_page);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* Next 10 bytes contain an array of beam identifiers */
+    for (i = 0; i < 5; i++)
+    {
+       	stemp = htons((gsfuShort) sdata->gsfKlein5410BssImagerySpecific.beam_id[i]);
+        memcpy(p, &stemp, 2);
+        p += 2;
+    }
+
+    /* write the spare bytes */
+    memcpy(p, sdata->gsfReson8100ImagerySpecific.spare, 4);
+    p += 4;
+
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
  * Function Name : EncodeReson8100ImagerySpecific
  *
  * Description : This function encodes the Reson 8100 series sensor
@@ -5426,6 +5638,10 @@ EncodeBRBIntensity(unsigned char *sptr, gsfBRBIntensity *idata, int num_beams, i
         case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
             sensor_size = EncodeEM4ImagerySpecific(ptr, &idata->sensor_imagery);
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
+            sensor_size = EncodeKlein5410BssImagerySpecific(ptr, &idata->sensor_imagery);
             break;
 
         default:
@@ -6223,5 +6439,308 @@ gsfEncodeAttitude(unsigned char *sptr, gsfAttitude * attitude)
     }
 
     return (p - sptr);
+}
+
+/********************************************************************
+ *
+ * Function Name : gsfSetDefaultScaleFactor
+ *
+ * Description : This function is used to estimate and set scale
+ *               factors for a ping record
+ *
+ * Inputs :
+ *    mb_ping - a pointer to a ping record.  The scale factors
+ *              will be set in this record.
+ *
+ * Returns : This function returns 0.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+int gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping)
+{
+    const double GSF_DEPTH_ASSUMED_HIGHEST_PRECISION = 100;
+    const double GSF_ACROSS_TRACK_ASSUMED_HIGHEST_PRECISION = 100; 
+    const double GSF_ALONG_TRACK_ASSUMED_HIGHEST_PRECISION = 100;       
+    const double GSF_TRAVEL_TIME_ASSUMED_HIGHEST_PRECISION = 10e6;      
+    const double GSF_BEAM_ANGLE_ASSUMED_HIGHEST_PRECISION = 100;  
+    const double GSF_MEAN_CAL_AMPLITUDE_ASSUMED_HIGHEST_PRECISION = 10;
+    const double GSF_MEAN_REL_AMPLITUDE_ASSUMED_HIGHEST_PRECISION = 100;  
+    const double GSF_ECHO_WIDTH_ASSUMED_HIGHEST_PRECISION = 10e5;  
+    const double GSF_QUALITY_FACTOR_ASSUMED_HIGHEST_PRECISION = 100;       
+    const double GSF_RECEIVE_HEAVE_ASSUMED_HIGHEST_PRECISION = 100;       
+    const double GSF_DEPTH_ERROR_ASSUMED_HIGHEST_PRECISION = 100;        
+    const double GSF_ACROSS_TRACK_ERROR_ASSUMED_HIGHEST_PRECISION = 100;
+    const double GSF_ALONG_TRACK_ERROR_ASSUMED_HIGHEST_PRECISION = 100;
+    const double GSF_NOMINAL_DEPTH_ASSUMED_HIGHEST_PRECISION = 100;
+    const double GSF_QUALITY_FLAGS_ASSUMED_HIGHEST_PRECISION = 100;  
+    const double GSF_BEAM_FLAGS_ASSUMED_HIGHEST_PRECISION = 100;
+    const double GSF_SIGNAL_TO_NOISE_ASSUMED_HIGHEST_PRECISION = 100;       
+    const double GSF_BEAM_ANGLE_FORWARD_ASSUMED_HIGHEST_PRECISION = 100;
+    const double GSF_VERTICAL_ERROR_ASSUMED_HIGHEST_PRECISION = 200;      
+    const double GSF_HORIZONTAL_ERROR_ASSUMED_HIGHEST_PRECISION = 200;  
+    const double GSF_SECTOR_NUMBER_ASSUMED_HIGHEST_PRECISION = 100;    
+    const double GSF_DETECTION_INFO_ASSUMED_HIGHEST_PRECISION = 100;  
+    const double GSF_INCIDENT_BEAM_ADJ_ASSUMED_HIGHEST_PRECISION = 100;    
+    const double GSF_SYSTEM_CLEANING_ASSUMED_HIGHEST_PRECISION = 100;     
+    const double GSF_DOPPLER_CORRECTION_ASSUMED_HIGHEST_PRECISION = 100; 
+
+    int             i, j; /* iterators */
+    double          *dptr; /* pointer to ping array */
+    unsigned short  *usptr; /* pointer to ping array */
+    unsigned char   *ucptr; /* pointer to ping array */
+    int             id; /* type of ping array subrecord */
+    double          max, min; /* min and max value of each ping array */
+    double          max_scale_factor, min_scale_factor; /* min and max allowable size of values in ping array */
+    double          highest_precision; /* starting value for multiplier */
+
+    for (i = 1; i <= GSF_MAX_PING_ARRAY_SUBRECORDS; i++)
+    {
+        dptr = NULL;
+        usptr = NULL;
+
+        switch (i)
+        {
+            case GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY:
+                dptr = mb_ping->depth;
+                highest_precision = GSF_DEPTH_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY:
+                dptr = mb_ping->across_track;
+                highest_precision = GSF_ACROSS_TRACK_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY;
+                max_scale_factor = SHRT_MAX;
+                min_scale_factor = SHRT_MIN;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY:
+                dptr = mb_ping->along_track;
+                highest_precision = GSF_ALONG_TRACK_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY;
+                max_scale_factor = SHRT_MAX;
+                min_scale_factor = SHRT_MIN;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY:
+                dptr = mb_ping->travel_time;
+                highest_precision = GSF_TRAVEL_TIME_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_ARRAY:
+                dptr = mb_ping->beam_angle;
+                highest_precision = GSF_BEAM_ANGLE_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_ARRAY;
+                max_scale_factor = SHRT_MAX;
+                min_scale_factor = SHRT_MIN;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY:
+                dptr = mb_ping->mc_amplitude;
+                highest_precision = GSF_MEAN_CAL_AMPLITUDE_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_MEAN_CAL_AMPLITUDE_ARRAY;
+                max_scale_factor = SCHAR_MAX;
+                min_scale_factor = SCHAR_MIN;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY:
+                dptr = mb_ping->mr_amplitude;
+                highest_precision = GSF_MEAN_REL_AMPLITUDE_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY;
+                max_scale_factor = UCHAR_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_ECHO_WIDTH_ARRAY:
+                dptr = mb_ping->echo_width;
+                highest_precision = GSF_ECHO_WIDTH_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_ECHO_WIDTH_ARRAY;
+                max_scale_factor = UCHAR_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_QUALITY_FACTOR_ARRAY:
+                dptr = mb_ping->quality_factor;
+                highest_precision = GSF_QUALITY_FACTOR_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_QUALITY_FACTOR_ARRAY;
+                max_scale_factor = UCHAR_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_RECEIVE_HEAVE_ARRAY:
+                dptr = mb_ping->receive_heave;
+                highest_precision = GSF_RECEIVE_HEAVE_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_RECEIVE_HEAVE_ARRAY;
+                max_scale_factor = UCHAR_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_DEPTH_ERROR_ARRAY:
+                dptr = mb_ping->depth_error;
+                highest_precision = GSF_DEPTH_ERROR_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_DEPTH_ERROR_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ERROR_ARRAY:
+                dptr = mb_ping->across_track_error;
+                highest_precision = GSF_ACROSS_TRACK_ERROR_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ERROR_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ERROR_ARRAY:
+                dptr = mb_ping->along_track_error;
+                highest_precision = GSF_ALONG_TRACK_ERROR_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ERROR_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY:
+                dptr = mb_ping->nominal_depth;
+                highest_precision = GSF_NOMINAL_DEPTH_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_NOMINAL_DEPTH_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_QUALITY_FLAGS_ARRAY:
+                ucptr = mb_ping->quality_flags;
+                highest_precision = GSF_QUALITY_FLAGS_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_QUALITY_FLAGS_ARRAY;
+                max_scale_factor = UCHAR_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_BEAM_FLAGS_ARRAY:
+                ucptr = mb_ping->beam_flags;
+                highest_precision = GSF_BEAM_FLAGS_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_BEAM_FLAGS_ARRAY;
+                max_scale_factor = UCHAR_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_SIGNAL_TO_NOISE_ARRAY:
+                dptr = mb_ping->signal_to_noise;
+                highest_precision = GSF_SIGNAL_TO_NOISE_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_SIGNAL_TO_NOISE_ARRAY;
+                max_scale_factor = UCHAR_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY:
+                dptr = mb_ping->beam_angle_forward;
+                highest_precision = GSF_BEAM_ANGLE_FORWARD_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_VERTICAL_ERROR_ARRAY:
+                dptr = mb_ping->vertical_error;
+                highest_precision = GSF_VERTICAL_ERROR_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_VERTICAL_ERROR_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_HORIZONTAL_ERROR_ARRAY:
+                dptr = mb_ping->horizontal_error;
+                highest_precision = GSF_HORIZONTAL_ERROR_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_HORIZONTAL_ERROR_ARRAY;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_SECTOR_NUMBER_ARRAY:
+                usptr = mb_ping->sector_number;
+                highest_precision = GSF_SECTOR_NUMBER_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_SECTOR_NUMBER_ARRAY;
+                max_scale_factor = UCHAR_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_DETECTION_INFO_ARRAY:
+                usptr = mb_ping->detection_info;
+                highest_precision = GSF_DETECTION_INFO_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_DETECTION_INFO_ARRAY;
+                max_scale_factor = UCHAR_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY:
+                dptr = mb_ping->incident_beam_adj;
+                highest_precision = GSF_INCIDENT_BEAM_ADJ_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY;
+                max_scale_factor = SCHAR_MAX;
+                min_scale_factor = SCHAR_MIN;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_SYSTEM_CLEANING_ARRAY:
+                usptr = mb_ping->system_cleaning;
+                highest_precision = GSF_SYSTEM_CLEANING_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_SYSTEM_CLEANING_ARRAY;
+                max_scale_factor = UCHAR_MAX;
+                min_scale_factor = 0;
+                break;
+            case GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY:
+                dptr = mb_ping->doppler_corr;
+                highest_precision = GSF_DOPPLER_CORRECTION_ASSUMED_HIGHEST_PRECISION;
+                id = GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY;
+                max_scale_factor = SCHAR_MAX;
+                min_scale_factor = SCHAR_MIN;
+                break;
+
+        }        
+
+        if (dptr != NULL || usptr != NULL)
+        {
+            max = DBL_MIN;
+            min = DBL_MAX;
+
+            if (dptr != NULL)
+            {
+                for (j = 0; j < mb_ping->number_beams; j++)
+                {
+                    if (dptr[j] > max)
+                        max = dptr[j];
+                    if (dptr[j] < min)
+                        min = dptr[j];
+                }
+            }
+            else if (usptr != NULL)
+            {
+                for (j = 0; j < mb_ping->number_beams; j++)
+                {
+                    if (usptr[j] > max)
+                        max = (double) usptr[j];
+                    if (usptr[j] < min)
+                        min = (double) usptr[j];
+                }
+            }
+            else if (ucptr != NULL)
+            {
+                for (j = 0; j < mb_ping->number_beams; j++)
+                {
+                    if (ucptr[j] > max)
+                        max = (double) ucptr[j];
+                    if (ucptr[j] < min)
+                        min = (double) ucptr[j];
+                }
+            }
+
+            mb_ping->scaleFactors.scaleTable[id - 1].offset = 0;
+            mb_ping->scaleFactors.scaleTable[id - 1].multiplier = highest_precision;
+            /* Clear the high order 4 bits of the compression flag field */ 
+            mb_ping->scaleFactors.scaleTable[id - 1].compressionFlag &= 0x0F;
+            /* set these bits to specify the default field size */
+            mb_ping->scaleFactors.scaleTable[id - 1].compressionFlag |= GSF_FIELD_SIZE_DEFAULT;
+
+            /* apply the multiplier and offset to the maximum value, if
+             * the new value is greater then the max scale factor multiplier
+             * size, decrease the multiplier by 2 until this condition is no
+             * longer violated. */
+            while (((( max + mb_ping->scaleFactors.scaleTable[id - 1].offset) * mb_ping->scaleFactors.scaleTable[id - 1].multiplier) > max_scale_factor)
+                    || ((( min + mb_ping->scaleFactors.scaleTable[id - 1].offset) * mb_ping->scaleFactors.scaleTable[id - 1].multiplier) < min_scale_factor ))
+            {   
+                mb_ping->scaleFactors.scaleTable[id - 1].multiplier = (int) ( mb_ping->scaleFactors.scaleTable[id - 1].multiplier / 2.0 );
+            }
+
+            
+            if (mb_ping->scaleFactors.scaleTable[id - 1].multiplier < 1.0)
+            {
+                mb_ping->scaleFactors.scaleTable[id - 1].multiplier = 1.0;
+            }
+        }
+                            
+    }
+
+    return 0;
 }
 

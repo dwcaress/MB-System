@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.17 2008-09-11 20:06:46 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.18 2008-09-27 03:27:10 caress Exp $
 #
 #    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.17 2008-09-11 20:06:46 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.18 2008-09-27 03:27:10 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.17  2008/09/11 20:06:46  caress
+#   Checking in updates made during cruise AT15-36.
+#
 #   Revision 5.16  2008/05/16 22:36:21  caress
 #   Release 5.1.1beta18
 #
@@ -580,6 +583,14 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired;
 #printf "DEPTHS %f\n", $mmissiondepths[$i];
 		}
+	if ($mmissiondepths[$i] < $descentdepth)
+		{
+		$mmissiondepths[$i] = $descentdepth;
+		if (-$mtopomaxs[$i] - $mmissiondepths[$i] <= $altitudeabort)
+			{
+			die "Mission will fail due to altitude abort at mission point $i\r\n\tTopo:$mtopomaxs[$i]\r\nAbort Altitude:$altitudeabort\r\n";
+			}
+		}
 	if ($mmissiondepths[$i] > $depthabort)
 		{
 		$depthabort = $mmissiondepths[$i];
@@ -587,26 +598,6 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 	}
 $depthabort = $depthabort + $altitudedesired;
 $depthmax = $depthabort - 0.5 * $altitudemin;
-	
-# calculate slopes
-#for ($i = 0; $i < $nmissionpoints; $i++)
-#	{
-#	if ($i == 0)
-#		{
-#		$distance = $startdistance;
-#		$slope = 0.0;
-#		}
-#	else
-#		{
-#		$distance = $mdistances[$i] - $mdistances[$i-1];
-#		$slope = -($mmissiondepths[$i] - $mmissiondepths[$i-1])/$distance;
-#		}
-#	if ($slope > $maxclimbslope)
-#		{
-#print "EXCESSIVE SLOPE:$slope\n";
-#		$mmissiondepths[$i-1] = $mmissiondepths[$i] + 0.5 * $distance;
-#		}
-#	}
 	
 # calculate slopes
 for ($i = $nmissionpoints-1; $i > 0; $i--)
@@ -1450,16 +1441,16 @@ print "Output Behavior: waypoint_depth (during line $iwaypoint) ";
 				}
 			print MFILE "behavior waypoint_depth  \r\n";
 			print MFILE "{ \r\n";
-			printf MFILE "latitude          = %f; \r\n", $mlats[$i];
-			printf MFILE "longitude         = %f; \r\n", $mlons[$i];
+			printf MFILE "latitude           = %f; \r\n", $mlats[$i];
+			printf MFILE "longitude          = %f; \r\n", $mlons[$i];
 			print MFILE "captureRadius      = 10; \r\n";
 			if ($mwaypoints[$i] != 0 && $iwaypoint == 0)
 				{
-				printf MFILE "duration          = %d; \r\n", 600;
+				printf MFILE "duration           = %d; \r\n", 600;
 				}
 			else
 				{
-				printf MFILE "duration          = %d; \r\n", ($durationfactorwaypoint * $distance / $mission_speed);
+				printf MFILE "duration           = %d; \r\n", ($durationfactorwaypoint * $distance / $mission_speed);
 				}
 			if ($mwaypoints[$i] != 0 && $iwaypoint != 0)
 				{
@@ -1468,15 +1459,15 @@ print "Output Behavior: waypoint_depth (during line $iwaypoint) ";
 print " Depths: ";
 			if ($i > 0)
 				{
-				printf MFILE "initialDepth        = %f; \r\n", $mmissiondepths[$i-1];
+				printf MFILE "initialDepth       = %f; \r\n", $mmissiondepths[$i-1];
 print " $mmissiondepths[$i-1]";
 				}
 			else
 				{
-				printf MFILE "initialDepth        = %f; \r\n", $mmissiondepths[$i];
+				printf MFILE "initialDepth       = %f; \r\n", $mmissiondepths[$i];
 print " $mmissiondepths[$i]";
 				}
-			printf MFILE "finalDepth      = %f; \r\n", $mmissiondepths[$i];
+			printf MFILE "finalDepth         = %f; \r\n", $mmissiondepths[$i];
 print " $mmissiondepths[$i]\n";
 			print MFILE "maxCrossTrackError = MAXCROSSTRACKERROR; \r\n";
 			print MFILE "speed              = MISSION_SPEED; \r\n";
@@ -1484,7 +1475,7 @@ print " $mmissiondepths[$i]\n";
 			}
 			
 		# insert acoustic update after end of line
-		if ($mwaypoints[$i-1] == 4)
+		if ($mwaypoints[$i-1] == 4 && $gpsmode < 2)
 			{
 			print MFILE "#######################################################\r\n";
 			print MFILE "# Acoustic update - sent status ping after end of line \r\n";
@@ -1510,7 +1501,7 @@ print " $mmissiondepths[$i]\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";	
-			if ($subbottom && $mwaypoints[$i-1] == 4)
+			if ($subbottom && $mwaypoints[$i-1] == 4 && $gpsmode == 0)
 				{
 				print MFILE "SBP_Mode = 0; \r\n";
 				print MFILE "SBP_Power = 0.0; \r\n";
@@ -1655,44 +1646,16 @@ print "Output Behavior: gps\n";
 	print MFILE "duration  = RESON_DURATION; \r\n";	
 	print MFILE "MB_Mode  = 1; \r\n";	
 	print MFILE "Log_Mode  = 0; \r\n";	
-	if ($subbottom)
-		{
-		print MFILE "SBP_Mode = 1; \r\n";
-		print MFILE "SBP_Power = 100.0; \r\n";
-		print MFILE "SBP_Gain = 128.0; \r\n";
-		printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
-		}
-	else
-		{
-		print MFILE "SBP_Mode = 0; \r\n";
-		print MFILE "SBP_Power = 0.0; \r\n";
-		print MFILE "SBP_Gain = 128.0; \r\n";
-		printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
-		}
-	if ($sidescanlo)
-		{
-		print MFILE "LoSS_Mode = 1; \r\n";
-		print MFILE "LoSS_Power = 100.0; \r\n";
-		printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
-		}
-	else
-		{
-		print MFILE "LoSS_Mode = 0; \r\n";
-		print MFILE "LoSS_Power = 0.0; \r\n";
-		printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
-		}
-	if ($sidescanhi)
-		{
-		print MFILE "HiSS_Mode = 0; \r\n";
-		print MFILE "HiSS_Power = 0.0; \r\n";
-		print MFILE "HiSS_Range = $sslo_range; \r\n";
-		}
-	else
-		{
-		print MFILE "HiSS_Mode = 0; \r\n";
-		print MFILE "HiSS_Power = 0.0; \r\n";
-		print MFILE "HiSS_Range = $sslo_range; \r\n";
-		}
+	print MFILE "SBP_Mode = 0; \r\n";
+	print MFILE "SBP_Power = 0.0; \r\n";
+	print MFILE "SBP_Gain = 128.0; \r\n";
+	printf MFILE "SBP_Duration = %.3f; \r\n", $sbp_duration;
+	print MFILE "LoSS_Mode = 0; \r\n";
+	print MFILE "LoSS_Power = 0.0; \r\n";
+	printf MFILE "LoSS_Range = %.2f; \r\n", $sslo_range;
+	print MFILE "HiSS_Mode = 0; \r\n";
+	print MFILE "HiSS_Power = 0.0; \r\n";
+	print MFILE "HiSS_Range = $sslo_range; \r\n";
 	print MFILE "MB_Power = $mb_transmitgain; \r\n";
 	printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 	print MFILE "MB_Rate = $mb_pingrate; \r\n";
