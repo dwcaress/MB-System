@@ -4,7 +4,7 @@
 ** Copyright (c) 2003, 2006   Gerald I. Evenden
 */
 static const char
-LIBPROJ_ID[] = "$Id: proj_rouss.c,v 5.1 2008-01-14 18:21:58 caress Exp $";
+LIBPROJ_ID[] = "$Id: proj_rouss.c,v 5.2 2008-09-29 04:56:21 caress Exp $";
 /*
 ** Permission is hereby granted, free of charge, to any person obtaining
 ** a copy of this software and associated documentation files (the

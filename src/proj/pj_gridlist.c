@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_gridlist.c,v 5.3 2008-01-14 18:21:58 caress Exp $
+ * $Id: pj_gridlist.c,v 5.4 2008-09-29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Code to manage the list of currently loaded (cached) PJ_GRIDINFOs
@@ -29,9 +29,6 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
- * Revision 1.5  2006/11/17 22:16:30  mloskot
- * Uploaded PROJ.4 port for Windows CE.
- *
  * Revision 1.4  2005/11/01 05:56:13  fwarmerdam
  * improved error handling if gridcount is zero
  *
@@ -51,16 +48,7 @@
 #include <projects.h>
 #include <string.h>
 #include <math.h>
-
-#ifdef _WIN32_WCE
-/* assert.h includes all Windows API headers and causes 'LP' name clash.
- * Here assert we disable assert() for Windows CE.
- * TODO - mloskot: re-implement porting friendly assert
- */
-# define assert(exp)	((void)0)
-#else
-# include <assert.h>
-#endif /* _WIN32_WCE */
+#include <assert.h>
 
 static PJ_GRIDINFO *grid_list = NULL;
 
