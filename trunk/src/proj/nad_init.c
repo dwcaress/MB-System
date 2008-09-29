@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nad_init.c,v 5.5 2008-01-14 18:21:58 caress Exp $
+ * $Id: nad_init.c,v 5.6 2008-09-29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Load datum shift files into memory.
@@ -28,12 +28,6 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
- * Revision 1.10  2007/09/11 20:16:33  fwarmerdam
- *  Improve error recovery if ctable datum shift files fails to load.
- *
- * Revision 1.9  2006/11/17 22:16:30  mloskot
- * Uploaded PROJ.4 port for Windows CE.
- *
  * Revision 1.8  2003/03/17 18:56:01  warmerda
  * implement delayed loading of ctable format files
  *
@@ -59,17 +53,8 @@
 #include <projects.h>
 #include <stdio.h>
 #include <errno.h>
+#include <assert.h>
 #include <string.h>
-
-#ifdef _WIN32_WCE
-/* assert.h includes all Windows API headers and causes 'LP' name clash.
- * Here assert we disable assert() for Windows CE.
- * TODO - mloskot: re-implement porting friendly assert
- */
-# define assert(exp)	((void)0)
-#else
-# include <assert.h>
-#endif /* _WIN32_WCE */
 
 /************************************************************************/
 /*                          nad_ctable_load()                           */
@@ -90,15 +75,6 @@ int nad_ctable_load( struct CTABLE *ct, FILE *fid )
     if( ct->cvs == NULL 
         || fread(ct->cvs, sizeof(FLP), a_size, fid) != a_size )
     {
-        pj_dalloc( ct->cvs );
-        ct->cvs = NULL;
-
-        if( getenv("PROJ_DEBUG") != NULL )
-        {
-            fprintf( stderr, 
-            "ctable loading failed on fread() - binary incompatible?\n" );
-        }
-
         pj_errno = -38;
         return 0;
     }

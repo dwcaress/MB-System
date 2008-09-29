@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_aitoff.c,v 5.4 2008-01-14 18:21:58 caress Exp $
+ * $Id: PJ_aitoff.c,v 5.5 2008-09-29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the aitoff (Aitoff) and wintri (Winkel Tripel)
@@ -40,7 +40,7 @@
 #define PJ_LIB__
 #include <projects.h>
 
-PJ_CVSID("$Id: PJ_aitoff.c,v 5.4 2008-01-14 18:21:58 caress Exp $");
+PJ_CVSID("$Id: PJ_aitoff.c,v 5.5 2008-09-29 04:56:21 caress Exp $");
 
 PROJ_HEAD(aitoff, "Aitoff") "\n\tMisc Sph";
 PROJ_HEAD(wintri, "Winkel Tripel") "\n\tMisc Sph\n\tlat_1";

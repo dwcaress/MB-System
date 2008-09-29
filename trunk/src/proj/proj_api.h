@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: proj_api.h,v 5.5 2008-01-14 18:21:58 caress Exp $
+ * $Id: proj_api.h,v 5.6 2008-09-29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Public (application) include file for PROJ.4 API, and constants.
@@ -28,12 +28,6 @@
  ******************************************************************************
  *
  * $Log: not supported by cvs2svn $
- * Revision 1.16  2007/11/29 21:07:49  fwarmerdam
- * prepare for 4.6.0 release
- *
- * Revision 1.15  2007/08/20 13:40:06  fwarmerdam
- * avoid warnings in c++ for some prototypes
- *
  * Revision 1.14  2006/04/20 04:19:59  fwarmerdam
  * updated version
  *
@@ -92,7 +86,7 @@ extern "C" {
 #endif
 
 /* Try to update this every version! */
-#define PJ_VERSION 460
+#define PJ_VERSION 450
 
 extern char const pj_release[]; /* global release id string */
 
@@ -132,7 +126,7 @@ int pj_compare_datums( projPJ srcdefn, projPJ dstdefn );
 int pj_apply_gridshift( const char *, int, 
                         long point_count, int point_offset,
                         double *x, double *y, double *z );
-void pj_deallocate_grids(void);
+void pj_deallocate_grids();
 int pj_is_latlong(projPJ);
 int pj_is_geocent(projPJ);
 void pj_pr_list(projPJ);
@@ -146,8 +140,8 @@ projPJ pj_latlong_from_proj( projPJ );
 void *pj_malloc(size_t);
 void pj_dalloc(void *);
 char *pj_strerrno(int);
-int *pj_get_errno_ref(void);
-const char *pj_get_release(void);
+int *pj_get_errno_ref();
+const char *pj_get_release();
 
 #ifdef __cplusplus
 }
