@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.18 2008-09-27 03:27:10 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.19 2008-10-17 07:52:44 caress Exp $
 #
 #    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.18 2008-09-27 03:27:10 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.19 2008-10-17 07:52:44 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.18  2008/09/27 03:27:10  caress
+#   Working towards release 5.1.1beta24
+#
 #   Revision 5.17  2008/09/11 20:06:46  caress
 #   Checking in updates made during cruise AT15-36.
 #
@@ -1305,22 +1308,14 @@ print "Output Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint
 			print MFILE "speed        = MISSION_SPEED; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
+print "Output Behavior: waypoint\n";
 			print MFILE "# Zero speed hang to allow final nav updates over acoustic modem\r\n";
 			print MFILE "# - must get start survey command over acoustic modem or mission aborts\r\n";
 			print MFILE "behavior StartSurvey  \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration     = 300; \r\n";
 			print MFILE "} \r\n";
-#			print MFILE "# Zero speed setpoint to allow final nav updates over acoustic modem\r\n";
-#			print MFILE "behavior setpoint  \r\n";
-#			print MFILE "{ \r\n";
-#			print MFILE "duration     = 300; \r\n";
-#			print MFILE "heading      = 270.0; \r\n";
-#			print MFILE "speed        = 0.0; \r\n";
-#			print MFILE "verticalMode = pitch; \r\n";
-#			print MFILE "pitch = 0; \r\n";
-#			print MFILE "} \r\n";
-print "Output Behavior: waypoint\n";
+print "Output Behavior: startsurvey\n";
 			print MFILE "# \r\n";
 			print MFILE "# Spiral descend behavior to get to proper depth at start of line 1 \r\n";
 			if ($maxdepthapplied == 0)
@@ -1341,7 +1336,15 @@ print "Output Behavior: waypoint\n";
 			print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH; \r\n";
 			print MFILE "minAltitude      = ALTITUDE_MIN; \r\n";
 			print MFILE "} \r\n";
+			print MFILE "# \r\n";
 print "Output Behavior: spiral descend\n";
+			print MFILE "# Acoustic update - sent status ping after end of line \r\n";
+			print MFILE "# \r\n";
+			print MFILE "behavior acousticUpdate \r\n";
+			print MFILE "{ \r\n";
+			print MFILE "duration  = 2; \r\n";	
+			print MFILE "dummy  = 1; \r\n";	
+			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 			print MFILE "# Waypoint behavior to get to start of line 1\r\n";
 			printf MFILE "#   Segment length %f meters\r\n", $distance;

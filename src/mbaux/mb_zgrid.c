@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_zgrid.c	    4/25/95
- *    $Id: mb_zgrid.c,v 5.2 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_zgrid.c,v 5.3 2008-10-17 07:52:44 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -53,6 +53,9 @@
  * Date:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.1  2007/10/08 05:50:55  caress
  * Changed convergence criteria.
  *
@@ -131,6 +134,9 @@
 /* MBIO include files */
 #include "../../include/mb_define.h"
 
+#define ITERMAX 1000
+#define ITERTRANSITION 300
+
 /*----------------------------------------------------------------------- */
 int mb_zgrid(float *z, int *nx, int *ny, 
 		float *x1, float *y1, float *dx, float *dy, float *xyz, 
@@ -149,7 +155,7 @@ int mb_zgrid(float *z, int *nx, int *ny,
     int i, j, k;
     float x, y, zbase, relax, delzm;
     float derzm;
-    int itmax, jmnew;
+    int jmnew;
     float dzmax, dzrms;
     int kk, im, jm;
     float dzrms8, z00, dz, ze, hrange, zn, zs, zw, zrange, dzmaxf, convtest, 
@@ -167,7 +173,6 @@ int mb_zgrid(float *z, int *nx, int *ny,
     
 
     /* Function Body */
-    itmax = 300;
     eps = (float).002;
     big = (float)9e29;
 
@@ -425,8 +430,7 @@ L202:
 fprintf(stderr,"Zgrid starting iterations\n");
     dzrmsp = zrange;
     relax = (float)1.;
-    i__3 = itmax;
-    for (iter = 1; iter <= i__3; ++iter) {
+    for (iter = 1; iter <= ITERMAX; ++iter) {
 	dzrms = (float)0.;
 	dzmax = (float)0.;
 	npg = 0;
@@ -825,7 +829,7 @@ L3720:
 L3730:
 	convtest = dzmaxf / ((float)1. - root) - eps;
 	fprintf(stderr,"Zgrid iteration %d convergence test: %f\n",iter,convtest);
-	if (convtest <= (float)0.) {
+	if (convtest <= (float)0. || (iter > ITERTRANSITION && convtest < 1.0)) {
 	    goto L4010;
 	} else {
 	    goto L3740;

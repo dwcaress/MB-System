@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.33 2008-09-27 03:27:10 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.34 2008-10-17 07:52:44 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 23, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.33  2008/09/27 03:27:10  caress
+ * Working towards release 5.1.1beta24
+ *
  * Revision 5.32  2008/09/11 20:12:43  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -175,7 +178,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.33 2008-09-27 03:27:10 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.34 2008-10-17 07:52:44 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -1042,6 +1045,7 @@ int mbnavadjust_write_project()
 	/* open and write home file */
 	if ((hfp = fopen(project.home,"w")) != NULL)
 		{
+fprintf(stderr,"Writing project %s\n", project.name);
 		fprintf(hfp,"##MBNAVADJUST PROJECT\n");
 		fprintf(hfp,"MB-SYSTEM_VERSION\t%s\n",MB_VERSION);
 		fprintf(hfp,"PROGRAM_VERSION\t%s\n",rcs_id);
@@ -7228,9 +7232,13 @@ mbnavadjust_invertnav()
 		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
 		    	{
 			ntie += crossing->num_ties;
-			misfit_initial += tie->offset_x_m * tie->offset_x_m;
-			misfit_initial += tie->offset_y_m * tie->offset_y_m;
-			misfit_initial += tie->offset_z_m * tie->offset_z_m;
+			for (j=0;j<crossing->num_ties;j++)
+				{
+				tie = (struct mbna_tie *) &crossing->ties[j];
+				misfit_initial += tie->offset_x_m * tie->offset_x_m;
+				misfit_initial += tie->offset_y_m * tie->offset_y_m;
+				misfit_initial += tie->offset_z_m * tie->offset_z_m;
+				}
 			}
 		    }
 		misfit_initial = sqrt(misfit_initial) / ntie;
@@ -7911,6 +7919,88 @@ iter,ntie,misfit_initial,misfit_ties,perturbationsize);*/
 		/* deallocate arrays */
 		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&x,&error);
 		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&xx,&error);
+		
+		/* turn off message dialog */
+		do_message_off();
+		}
+
+ 	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+			
+/*--------------------------------------------------------------------*/
+
+int
+mbnavadjust_applynav()
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_applynav";
+	int	status = MB_SUCCESS;
+	struct mbna_file *file;
+	struct mbna_file *file1;
+	struct mbna_file *file2;
+	struct mbna_section *section;
+	struct mbna_crossing *crossing;
+	struct mbna_tie *tie;
+	char	npath[STRING_MAX];
+	char	apath[STRING_MAX];
+	char	opath[STRING_MAX];
+	FILE	*nfp, *afp, *ofp;
+	char	*result;
+	char	buffer[BUFFER_MAX];
+	int	nscan;
+	int	time_i[7];
+	double	time_d;
+	double	navlon;
+	double	navlat;
+	double	heading;
+	double	speed;
+	double	draft;
+	double	roll;
+	double	pitch;
+	double	heave;
+	double	factor;
+	double	zoffset;
+	char	ostring[STRING_MAX];
+	int	mbp_heading_mode;
+	double	mbp_headingbias;
+	int	mbp_rollbias_mode;
+	double	mbp_rollbias;
+	double	mbp_rollbias_port;
+	double	mbp_rollbias_stbd;
+	double	time_d1, time_d2, time_d3;
+	int	done;
+	int	isection, isnav;
+	int	i;
+
+ 	/* print input debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+		
+	/* output results from navigation solution */
+    	if (project.open == MB_YES
+    		&& project.num_crossings > 0
+		&& (project.num_crossings_analyzed == project.num_crossings
+			|| project.num_truecrossings_analyzed == project.num_truecrossings)
+		&& error == MB_ERROR_NO_ERROR)
+    		{
+		
+		/* now output inverse solution */
+		sprintf(message,"Applying navigation solution...");
+		do_message_on(message);
 
 		/* generate new nav files */
 		for (i=0;i<project.num_files;i++)

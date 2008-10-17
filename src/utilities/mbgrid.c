@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.45 2008-09-27 03:27:11 caress Exp $
+ *    $Id: mbgrid.c,v 5.46 2008-10-17 07:52:44 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.45  2008/09/27 03:27:11  caress
+ * Working towards release 5.1.1beta24
+ *
  * Revision 5.44  2008/06/26 07:15:46  caress
  * Fixed problem reading xyz files.
  *
@@ -453,7 +456,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.45 2008-09-27 03:27:11 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.46 2008-10-17 07:52:44 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1180,13 +1183,13 @@ main (int argc, char **argv)
 				strcpy(units, "unknown");
 			}
 
-/*fprintf(outfp," Projected coordinates on: proj_status:%d  projection:%s\n",
+/* fprintf(outfp," Projected coordinates on: proj_status:%d  projection:%s\n",
 proj_status, projection_id);
 fprintf(outfp," Lon Lat Bounds: %f %f %f %f\n",
 obnd[0], obnd[1], obnd[2], obnd[3]);
 fprintf(outfp," XY Bounds: %f %f %f %f\n",
-gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
-*/
+gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
+
 		}
 
 	/* deal with no projection */
@@ -3596,11 +3599,11 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 		ddx = dx;
 		ddy = dy;
 		fprintf(outfp,"\nDoing Zgrid spline interpolation with %d data points...\n",ndata);
-for (i=0;i<ndata/3;i++)
+/*for (i=0;i<ndata/3;i++)
 {
 if (sdata[3*i+2]>2000.0)
 fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
-}
+}*/
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
 			work1,work2,work3,&cay,&clip);

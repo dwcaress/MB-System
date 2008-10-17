@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.21 2008-09-11 20:20:14 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.22 2008-10-17 07:52:44 caress Exp $
  *
  *    Copyright (c) 2005-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2008/09/11 20:20:14  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.20  2008/08/12 00:05:15  caress
  * Fixed handling of beam flags.
  *
@@ -110,7 +113,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.21 2008-09-11 20:20:14 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.22 2008-10-17 07:52:44 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -331,6 +334,7 @@ main (int argc, char **argv)
 	double	*alt_time_d = NULL;
 	double	*alt_altitude = NULL;
 	int	ntimedelay = 0;
+	int	ntimedelaycount = 0;
 	int	ntimedelay_alloc = 0;
 	double	*timedelay_time_d = NULL;
 	double	*timedelay_timedelay = NULL;
@@ -384,6 +388,7 @@ main (int argc, char **argv)
 	/* depth sensor filtering */
 	int	sonardepthfilter = MB_NO;
 	double	sonardepthfilterlength = 20.0;
+	double	sonardepthfilterdepth = 20.0;
 	
 	/* depth sensor offset (+ makes vehicle deeper) */
 	double	sonardepthoffset = 0.0;
@@ -530,8 +535,10 @@ main (int argc, char **argv)
 					}
 			else if (optarg[0] == 'F' || optarg[0] == 'f')
 				{
-				nscan = sscanf (&(optarg[1]),"%lf", &sonardepthfilterlength);
-				if (nscan == 1) 
+				nscan = sscanf (&(optarg[1]),"%lf/%lf", &sonardepthfilterlength, &sonardepthfilterdepth);
+				if (nscan == 1)
+					sonardepthfilterdepth = 20.0;
+				if (nscan >= 1) 
 					sonardepthfilter = MB_YES;
 				else
 					sonardepthfilter = MB_NO;
@@ -668,15 +675,18 @@ main (int argc, char **argv)
 			fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
 			fprintf(stderr,"dbg2       timelagoutput:       %d\n",timelagoutput);
 			}
-		fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
-		fprintf(stderr,"dbg2       sonardepthfile:      %s\n",sonardepthfile);
-		fprintf(stderr,"dbg2       sonardepthdata:      %d\n",sonardepthdata);
-		fprintf(stderr,"dbg2       sonardepthlagfix:    %d\n",sonardepthlagfix);
-		fprintf(stderr,"dbg2       sonardepthlagmax:    %f\n",sonardepthlagmax);
-		fprintf(stderr,"dbg2       sonardepthratemax:   %f\n",sonardepthratemax);
-		fprintf(stderr,"dbg2       sonardepthoffset:    %f\n",sonardepthoffset);
-		fprintf(stderr,"dbg2       depthsensoroffx:     %f\n",depthsensoroffx);
-		fprintf(stderr,"dbg2       depthsensoroffz:     %f\n",depthsensoroffz);
+		fprintf(stderr,"dbg2       timelag:                %f\n",timelag);
+		fprintf(stderr,"dbg2       sonardepthfilter:       %d\n",sonardepthfilter);
+		fprintf(stderr,"dbg2       sonardepthfilterlength: %f\n",sonardepthfilterlength);
+		fprintf(stderr,"dbg2       sonardepthfilterdepth:  %f\n",sonardepthfilterdepth);
+		fprintf(stderr,"dbg2       sonardepthfile:         %s\n",sonardepthfile);
+		fprintf(stderr,"dbg2       sonardepthdata:         %d\n",sonardepthdata);
+		fprintf(stderr,"dbg2       sonardepthlagfix:       %d\n",sonardepthlagfix);
+		fprintf(stderr,"dbg2       sonardepthlagmax:       %f\n",sonardepthlagmax);
+		fprintf(stderr,"dbg2       sonardepthratemax:      %f\n",sonardepthratemax);
+		fprintf(stderr,"dbg2       sonardepthoffset:       %f\n",sonardepthoffset);
+		fprintf(stderr,"dbg2       depthsensoroffx:        %f\n",depthsensoroffx);
+		fprintf(stderr,"dbg2       depthsensoroffz:        %f\n",depthsensoroffz);
 		for (i=0;i<nrangeoffset;i++)
 			fprintf(stderr,"dbg2       rangeoffset[%d]:         %d %d %f\n",
 				rangeoffsetstart[i], rangeoffsetend[i], rangeoffset[i]);
@@ -855,7 +865,6 @@ ins_altitude[nins]);*/
 			if (buffer[0] != '#')
 			    nrock++;
 		rewind(tfp);
-fprintf(stderr,"nrock:%d\n",nrock);
 
 		/* allocate arrays for rock data */
 		if (nrock > 0)
@@ -936,7 +945,6 @@ rock_heading[nrock]);*/
 			if (buffer[0] != '#')
 			    ndsl++;
 		rewind(tfp);
-fprintf(stderr,"ndsl:%d\n",ndsl);
 
 		/* allocate arrays for dsl data */
 		if (ndsl > 0)
@@ -1194,16 +1202,16 @@ sonardepth_sonardepth[nsonardepth]);*/
 	    read_data = MB_YES;
 	    }
 	    
-/* open file for timedelay values */
-sprintf(timelagfile, "%s_timedelay.txt", read_file);
-if ((tfp = fopen(timelagfile, "w")) == NULL) 
-	{
-	error = MB_ERROR_OPEN_FAIL;
-	fprintf(stderr,"\nUnable to open time delay file <%s> for writing\n",timelagfile);
-	fprintf(stderr,"\nProgram <%s> Terminated\n",
-		program_name);
-	exit(error);
-	}
+	/* open file for timedelay values */
+	sprintf(timelagfile, "%s_timedelay.txt", read_file);
+	if ((tfp = fopen(timelagfile, "w")) == NULL) 
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open time delay file <%s> for writing\n",timelagfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
 	
 	
 	/* loop over all files to be read */
@@ -1570,13 +1578,13 @@ if ((tfp = fopen(timelagfile, "w")) == NULL)
 				time_j[3] = (int) bluefin->nav[i].s7kTime.Seconds;
 				time_j[4] = (int) (1000000 * (bluefin->nav[i].s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
+fprintf(tfp,"%f %f\n",
+bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 				if (verbose > 0)
 				fprintf(stderr,"                       %2.2d          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) Pos_time:%f\n",
 					i,time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					bluefin->nav[i].position_time);
-fprintf(tfp,"%f %f\n",
-bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 				}
 				
 			/* allocate memory for navigation/attitude arrays if needed */
@@ -1645,13 +1653,25 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 					alt_altitude[nalt] = bluefin->nav[i].altitude;
 					nalt++;
 					}
-				if (ntimedelay == 0 || timedelay_timedelay[ntimedelay-1] 
-							> (-0.001 * (double)bluefin->nav[i].timedelay))
+/*fprintf(stderr,"TIMEDELAYS: count:%d delay: %d",ntimedelaycount,bluefin->nav[i].timedelay);*/
+				if (ntimedelaycount == 0)
 					{
 					timedelay_time_d[ntimedelay] = bluefin->nav[i].position_time;
 					timedelay_timedelay[ntimedelay] = (-0.001 * (double)bluefin->nav[i].timedelay);
+/*fprintf(stderr,"   USED: %f",timedelay_timedelay[ntimedelay]);*/
 					ntimedelay++;
 					}
+				else if (timedelay_timedelay[ntimedelay-1] 
+							> (-0.001 * (double)bluefin->nav[i].timedelay))
+					{
+					timedelay_time_d[ntimedelay-1] = bluefin->nav[i].position_time;
+					timedelay_timedelay[ntimedelay-1] = (-0.001 * (double)bluefin->nav[i].timedelay);
+/*fprintf(stderr,"   USED: %d %f",ntimedelay,timedelay_timedelay[ntimedelay-1]);*/
+					}
+/*fprintf(stderr,"\n");*/
+				ntimedelaycount++;
+				if (ntimedelaycount >= 100)
+					ntimedelaycount = 0;
 				}
 			
 			}
@@ -2054,7 +2074,9 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 							ntimelag, nav_time_d[i], &timelag, &j, 
 							&error);
 				}
+/*fprintf(stderr,"NAV TIME LAG CORRECTION: %f %f",timelag,nav_time_d[i]);*/
 			nav_time_d[i] -= timelag;
+/*fprintf(stderr," %f\n",nav_time_d[i]);*/
 			}
 		}
 		
@@ -2108,11 +2130,11 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 			}
 		for (i=0;i<nsonardepth;i++)
 			{
-			if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterlength)
+			if (sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 				factor = 1.0;
 			else
-				factor = exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterlength)
-						/ (sonardepthfilterlength));
+				factor = exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+						/ (sonardepthfilterdepth));
 			sonardepth_sonardepth[i] = (1.0 - factor) * sonardepth_sonardepth[i]
 						+ factor * sonardepth_filter[i];
 			}
@@ -2143,11 +2165,11 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 			{
 /*fprintf(stderr,"nav_time_d[%d]:%f raw:%f filter:%f\n", 
 i, nav_time_d[i], nav_sonardepth[i], nav_sonardepthfilter[i]);*/
-			if (nav_sonardepth[i] < 2.0 * sonardepthfilterlength)
+			if (nav_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 				factor = 1.0;
 			else
-				factor = exp(-(nav_sonardepth[i] - 2.0 * sonardepthfilterlength)
-						/ (sonardepthfilterlength));
+				factor = exp(-(nav_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+						/ (sonardepthfilterdepth));
 			nav_sonardepth[i] = (1.0 - factor) * nav_sonardepth[i]
 						+ factor * nav_sonardepthfilter[i];
 			}
@@ -2178,11 +2200,11 @@ i, nav_time_d[i], nav_sonardepth[i], nav_sonardepthfilter[i]);*/
 			{
 /*fprintf(stderr,"ins_time_d[%d]:%f raw:%f filter:%f\n", 
 i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
-			if (ins_sonardepth[i] < 2.0 * sonardepthfilterlength)
+			if (ins_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 				factor = 1.0;
 			else
-				factor = exp(-(ins_sonardepth[i] - 2.0 * sonardepthfilterlength)
-						/ (sonardepthfilterlength));
+				factor = exp(-(ins_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+						/ (sonardepthfilterdepth));
 			ins_sonardepth[i] = (1.0 - factor) * ins_sonardepth[i]
 						+ factor * ins_sonardepthfilter[i];
 			}
@@ -3800,6 +3822,12 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	nreadsslotot += nreadsslo;
 	nreadsshitot += nreadsshi;
 	nreadothertot += nreadother;
+		
+	/* generate inf file */
+	if (status == MB_SUCCESS)
+		{
+		status = mb_make_info(verbose, MB_YES, ofile, format, &error);
+		}
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)

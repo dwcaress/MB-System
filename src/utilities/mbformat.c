@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 5.8 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mbformat.c,v 5.9 2008-10-17 07:52:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	January 22, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.7  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -116,7 +119,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 5.8 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 5.9 2008-10-17 07:52:44 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-Fformat -Ifile -L -W -V -H]";
@@ -314,6 +317,7 @@ main (int argc, char **argv)
 		printf("<LI>Sea Beam 2120 multibeam sonars </LI>\n\n");
 		printf("<LI>Simrad EM12, EM121, EM950, and EM1000 multibeam sonars </LI>\n\n");
 		printf("<LI>Simrad EM120, EM300, and EM3000 multibeam sonars</LI>\n\n");
+		printf("<LI>Simrad EM122, EM302, EM710, and EM3002 multibeam sonars</LI>\n\n");
 		printf("<LI>Simrad Mesotech SM2000 multibeam sonar</LI>\n\n");
 		printf("<LI>Hawaii MR-1 shallow tow interferometric sonar </LI>\n\n");
 		printf("<LI>ELAC Bottomchart and Bottomchart MkII shallow water multibeam sonars</LI>\n\n");
@@ -322,6 +326,8 @@ main (int argc, char **argv)
 		printf("<LI>Sea Scan sidescan sonar</LI>\n\n");
 		printf("<LI>Furuno HS-1 multibeam sonar</LI>\n\n");
 		printf("<LI>Edgetech sidescan and subbottom profiler sonars</LI>\n\n");
+		printf("<LI>Imagenex DeltaT multibeam sonars</LI>\n\n");
+		printf("<LI>Odom ES3 multibeam sonar</LI>\n\n");
 		printf("</UL>\n\n");
 		printf("<P>The following swath mapping sonar data formats are currently supported by MB-System:</P>\n\n");
 
