@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.17 2008-09-11 20:12:43 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.18 2008-10-17 07:52:44 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.17  2008/09/11 20:12:43  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.16  2008/07/10 18:08:10  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -1426,9 +1429,14 @@ void do_update_status()
 			XtVaSetValues(pushButton_showmodelplot,
 				XmNsensitive, False,
 				NULL);
-		XtVaSetValues(pushButton_updateproject,
-			XmNsensitive, False,
-			NULL);
+        	if (project.inversion == MBNA_INVERSION_CURRENT)
+			XtVaSetValues(pushButton_updateproject,
+				XmNsensitive, True,
+				NULL);
+        	else
+			XtVaSetValues(pushButton_updateproject,
+				XmNsensitive, False,
+				NULL);
 		}
 	else
 		{
@@ -1447,9 +1455,14 @@ void do_update_status()
 		XtVaSetValues(pushButton_updateproject,
 			XmNsensitive, False,
 			NULL);
-		XtVaSetValues(pushButton_showmodelplot,
-			XmNsensitive, False,
-			NULL);
+		if (project.inversion != MBNA_INVERSION_NONE)
+			XtVaSetValues(pushButton_showmodelplot,
+				XmNsensitive, True,
+				NULL);
+		else
+			XtVaSetValues(pushButton_showmodelplot,
+				XmNsensitive, False,
+				NULL);
 		}
 
 	/* set values of decimation slider */
@@ -3375,6 +3388,15 @@ do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data)
     do_update_status();
 }
 
+/*--------------------------------------------------------------------*/
+
+void
+do_update_project( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    mbnavadjust_applynav();
+    do_update_status();
+}
 
 /*--------------------------------------------------------------------*/
 
@@ -3899,13 +3921,6 @@ void get_text_string(Widget w, String str)
     XtFree(str_tmp);
 }
 
-/*--------------------------------------------------------------------*/
-
-void
-do_update_project( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-}
 /*--------------------------------------------------------------------*/
 
 void

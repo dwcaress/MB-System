@@ -27,6 +27,7 @@ adjusting survey navigation.
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
 Version 5.1.1          To be determined
+Version 5.1.1beta25    September 28, 2008
 Version 5.1.1beta23    September 19, 2008
 Version 5.1.1beta21    July 20, 2008
 Version 5.1.1beta20    July 10, 2008
@@ -320,6 +321,8 @@ CTD data from swath files. Initially relevant only to Reson 7k format data.
 
 Applied patches to mbgrid and mbmosaic to handle lonflipping of bounds in
 projected coordinates.
+
+Added format 26 to support Hydrosweep DS data format used by SOPAC.
 
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
@@ -1514,10 +1517,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.117 2008-09-27 03:27:10 caress Exp $
+RCS ID: $Id: README,v 5.118 2008-10-17 07:54:03 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.117  2008/09/27 03:27:10  caress
+Working towards release 5.1.1beta24
+
 Revision 5.116  2008/09/20 00:57:40  caress
 Release 5.1.1beta23
 

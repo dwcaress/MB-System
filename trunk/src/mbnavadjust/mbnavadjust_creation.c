@@ -937,7 +937,7 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Update Project", 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Apply Adjusted Navigation", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 

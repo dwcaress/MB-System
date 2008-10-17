@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
- *    $Id: mbgrdviz_callbacks.c,v 5.30 2008-09-11 20:17:33 caress Exp $
+ *    $Id: mbgrdviz_callbacks.c,v 5.31 2008-10-17 07:52:44 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -122,7 +122,7 @@ static int	realtime_update = 5;
 static int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.30 2008-09-11 20:17:33 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.31 2008-10-17 07:52:44 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -3559,6 +3559,29 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 			
 			project_info.degree[0] = FALSE;
 			}
+		else if ((nscan = sscanf(&(header.remark[2]), "Projection: %s", projectionname)) == 1)
+			{
+			if (strncmp(projectionname, "Geographic", 10) == 0)
+				{
+				strcpy(projectionname, "Geographic WGS84");
+				modeltype = ModelTypeGeographic;
+				projectionid = GCS_WGS_84;
+				*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
+				sprintf(grid_projection_id, "epsg%d", projectionid);
+
+				project_info.degree[0] = TRUE;
+				GMT_io.in_col_type[0] = GMT_IS_LON;
+				GMT_io.in_col_type[1] = GMT_IS_LAT;
+				}
+			else
+				{
+				modeltype = ModelTypeProjected;
+				*grid_projection_mode = MBV_PROJECTION_PROJECTED;
+				strcpy(grid_projection_id, projectionname);
+			
+				project_info.degree[0] = FALSE;
+				}
+			}
 		else
 			{
 			strcpy(projectionname, "Geographic WGS84");
@@ -3599,6 +3622,29 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 			sprintf(grid_projection_id, "epsg%d", projectionid);
 			
 			project_info.degree[0] = FALSE;
+			}
+		else if ((nscan = sscanf(&(header.remark[0]), "Projection: %s", projectionname)) == 1)
+			{
+			if (strncmp(projectionname, "Geographic", 10) == 0)
+				{
+				strcpy(projectionname, "Geographic WGS84");
+				modeltype = ModelTypeGeographic;
+				projectionid = GCS_WGS_84;
+				*grid_projection_mode = MBV_PROJECTION_GEOGRAPHIC;
+				sprintf(grid_projection_id, "epsg%d", projectionid);
+
+				project_info.degree[0] = TRUE;
+				GMT_io.in_col_type[0] = GMT_IS_LON;
+				GMT_io.in_col_type[1] = GMT_IS_LAT;
+				}
+			else
+				{
+				modeltype = ModelTypeProjected;
+				*grid_projection_mode = MBV_PROJECTION_PROJECTED;
+				strcpy(grid_projection_id, projectionname);
+			
+				project_info.degree[0] = FALSE;
+				}
 			}
 		else
 			{

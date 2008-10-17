@@ -3211,7 +3211,7 @@ object pushButton_invertnav : XmPushButton widget {
 object pushButton_updateproject : XmPushButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Update Project");
+        XmNlabelString = compound_string("Apply Adjusted Navigation");
     };
     controls {
     };
