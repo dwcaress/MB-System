@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.26 2008-07-19 07:41:14 caress Exp $
+#	$Id: Makefile.template,v 5.27 2008-10-17 07:30:22 caress Exp $
 #
 #     Copyright (c) 1993-2008 by
 #     David W. Caress (caress@mbari.org)
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.26  2008/07/19 07:41:14  caress
+# Added formats 191 and 192 to support Imagenex Delta T multibeam data.
+#
 # Revision 5.25  2008/05/16 22:56:24  caress
 # Release 5.1.1beta18.
 #
@@ -269,7 +272,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_sburivax.o mbr_sbifremr.o \
 		mbr_hsatlraw.o mbr_hsldedmb.o \
 		mbr_hsuricen.o mbr_hsurivax.o \
-		mbr_hsldeoih.o \
+		mbr_hsldeoih.o mbr_hsunknwn.o \
 		mbr_sb2100rw.o mbr_sb2100bi.o \
 		mbr_emoldraw.o mbr_em12darw.o \
 		mbr_em12ifrm.o \
@@ -332,7 +335,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_sburivax.o mbr_sbifremr.o \
 		mbr_hsatlraw.o mbr_hsldedmb.o \
 		mbr_hsuricen.o mbr_hsurivax.o \
-		mbr_hsldeoih.o \
+		mbr_hsldeoih.o mbr_hsunknwn.o \
 		mbr_sb2100rw.o mbr_sb2100bi.o \
 		mbr_emoldraw.o mbr_em12darw.o \
 		mbr_em12ifrm.o \
@@ -506,6 +509,8 @@ mbr_hsurivax.o: mbr_hsurivax.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_hsurivax.c
 mbr_hsldeoih.o: mbr_hsldeoih.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_hsds.h $(INCDIR)/mbf_hsldeoih.h
 	$(CC) -c $(CFLAGS) mbr_hsldeoih.c
+mbr_hsunknwn.o: mbr_hsunknwn.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_hsds.h
+	$(CC) -c $(CFLAGS) mbr_hsunknwn.c
 mbr_sb2100rw.o: mbr_sb2100rw.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_sb2100rw.h $(INCDIR)/mbsys_sb2100.h
 	$(CC) -c $(CFLAGS) mbr_sb2100rw.c
 mbr_sb2100bi.o: mbr_sb2100bi.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb2100.h

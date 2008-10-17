@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.c	3/2/93
- *	$Id: mbsys_hsds.c,v 5.9 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_hsds.c,v 5.10 2008-10-17 07:30:22 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.8  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -145,7 +148,7 @@
 int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hsds.c,v 5.9 2005-11-05 00:48:05 caress Exp $";
+ static char res_id[]="$Id: mbsys_hsds.c,v 5.10 2008-10-17 07:30:22 caress Exp $";
 	char	*function_name = "mbsys_hsds_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -377,9 +380,11 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		else
 		    bath[29] = store->depth_center;
 		bathacrosstrack[29] = 0.0;
+		if (store->back_scale <= 0.0)
+			store->back_scale = 1.0;
 		for (i=0;i<*namp;i++)
 			{
-			amp[i] = store->back[i];
+			amp[i] = store->back_scale * store->back[i];
 			}
 
 		/* print debug statements */
@@ -639,8 +644,10 @@ time_d, i, beamflag[i], bath[i], store->depth[i]);*/
 		    store->depth_center = -bath[29];
 		else
 		    store->depth_center = bath[29];
+		if (store->back_scale <= 0.0)
+			store->back_scale = 1.0;
 		for (i=0;i<namp;i++)
-			store->back[i] = amp[i];
+			store->back[i] = amp[i] / store->back_scale;
 		}
 
 	/* insert comment in structure */

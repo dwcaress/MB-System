@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.25 2008-07-19 07:41:14 caress Exp $
+ *    $Id: mb_format.h,v 5.26 2008-10-17 07:30:22 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2008/07/19 07:41:14  caress
+ * Added formats 191 and 192 to support Imagenex Delta T multibeam data.
+ *
  * Revision 5.24  2008/05/16 22:56:24  caress
  * Release 5.1.1beta18.
  *
@@ -238,7 +241,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2008-07-19 07:41:14 $ $Revision: 5.25 $";
+static char mb_format_updatedate[] = "$Date: 2008-10-17 07:30:22 $ $Revision: 5.26 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -275,7 +278,7 @@ static char mb_format_updatedate[] = "$Date: 2008-07-19 07:41:14 $ $Revision: 5.
 #define	MB_SYS_IMAGE83P		31
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	65
+#define	MB_FORMATS	68
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -309,9 +312,9 @@ static char mb_format_updatedate[] = "$Date: 2008-07-19 07:41:14 $ $Revision: 5.
  					binary, centered, L-DEO. */
 #define	MBF_HSURIVAX	25	/* Hydrosweep DS, 59 beam, bathymetry, 
  					binary, VAX byte order, URI. */
-#define	MBF_HSSIOSWB	26	/* Hydrosweep DS, 59 beam, bathymetry, 
+#define	MBF_HSUNKNWN	26	/* Hydrosweep DS, 59 beam, bathymetry, 
  					bathymetry and amplitude, 
-					swath-bathy, SIO. */
+					ascii, unknown origin, SOPAC. */
 #define	MBF_SB2000RW	31	/* SeaBeam 2000 vender format,
 					151 beam bathymetry and amplitude,
 					2000 pixel sidescan, ascii + binary, 
