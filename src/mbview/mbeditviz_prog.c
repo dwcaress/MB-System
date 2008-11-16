@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.8 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbeditviz_prog.c,v 5.9 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	May 1, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2008/05/16 22:59:42  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.7  2008/03/14 19:04:32  caress
  * Fixed memory problems with route editing.
  *
@@ -75,7 +78,7 @@
 #include "mbview.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.8 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.9 2008-11-16 21:51:18 caress Exp $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
@@ -107,8 +110,12 @@ int mbeditviz_beam_position(double navlon, double navlat, double headingx, doubl
 				double mtodeglon, double mtodeglat,
 				double bath, double acrosstrack, double alongtrack, 
 				double sonardepth, 
-				double rollbias, double pitchbias, double headingbias, 
+				double rollbias, double pitchbias,
 				double *bathcorr, double *lon, double *lat);
+int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, 
+				double rollbias, double pitchbias, double headingbias, double timelag,  
+				double *heading, double *sonardepth,
+				double *rolldelta, double *pitchdelta);
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_init(int argc,char **argv)
@@ -194,6 +201,7 @@ int mbeditviz_init(int argc,char **argv)
 	mbev_rollbias = 0.0;
 	mbev_pitchbias = 0.0;
 	mbev_headingbias = 0.0;
+	mbev_timelag = 0.0;
 
 	/* set mbio default values */
 	mbev_status = mb_lonflip(mbev_verbose,&mbdef_lonflip);
@@ -395,7 +403,7 @@ int mbeditviz_open_data(char *path, int format)
 				{
 				while (done == MB_NO)
 					{
-					if (mbev_status = mb_datalist_read2(5,datalist,
+					if (mbev_status = mb_datalist_read2(mbev_verbose,datalist,
 							&filestatus,fileraw,fileprocessed,&format,&weight,&mbev_error)
 							== MB_SUCCESS)
 						{
@@ -481,6 +489,20 @@ int mbeditviz_import_file(char *path, int format)
 		file->format = format;
 		file->raw_info_loaded = MB_NO;
 		file->esf_open = MB_NO;
+		file->n_async_heading = 0;
+		file->n_async_heading_alloc = 0;
+		file->async_heading_time_d = NULL;
+		file->async_heading_heading = NULL;
+		file->n_async_attitude = 0;
+		file->n_async_attitude_alloc = 0;
+		file->async_attitude_time_d = NULL;
+		file->async_attitude_roll = NULL;
+		file->async_attitude_pitch = NULL;
+		file->n_sync_attitude = 0;
+		file->n_sync_attitude_alloc = 0;
+		file->sync_attitude_time_d = NULL;
+		file->sync_attitude_roll = NULL;
+		file->sync_attitude_pitch = NULL;
 				
 		/* load info */
 		mbev_status = mb_get_info(mbev_verbose, file->path, &(file->raw_info), mbdef_lonflip, &mbev_error);
@@ -534,6 +556,10 @@ int mbeditviz_load_file(int ifile)
 	mb_path	swathfile;
 	struct stat file_status;
 	int	fstatus;
+	FILE	*afp;
+	mb_path	asyncfile;
+	char	buffer[MBP_FILENAMESIZE], *result;
+	int	nread;
 
 	/* mbio read and write values */
 	int	format;
@@ -559,10 +585,16 @@ int mbeditviz_load_file(int ifile)
 	int	esfmodtime = 0;
 	int	ofilemodtime = 0;
 	int	load_esf;
-
-	int	swathbounds;
+	
 	double	mtodeglon, mtodeglat;
+	double	heading, sonardepth;
 	double	headingx, headingy;
+	double	rolldelta, pitchdelta;
+	int	intstat;
+	int	inav = 0;
+	int	iheading = 0;
+	int	iattitude = 0;
+	int	swathbounds;
 	int	icenter, iport, istbd;
 	double	centerdistance, portdistance, stbddistance;
 	int	iping, ibeam;
@@ -839,9 +871,14 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 				if (mbev_error == MB_ERROR_NO_ERROR
 				    && kind == MB_DATA_DATA)
 					{
+					mbeditviz_apply_timelag(file, ping, 
+								mbev_rollbias, mbev_pitchbias, mbev_headingbias, mbev_timelag,  
+								&heading, &sonardepth,
+								&rolldelta, &pitchdelta);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-					headingx = sin(ping->heading * DTR);
-					headingy = cos(ping->heading * DTR);
+					headingx = sin(heading * DTR);
+					headingy = cos(heading * DTR);
+					
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
 						ping->beamflag[ibeam] = beamflag[ibeam];
@@ -857,8 +894,8 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 							mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 										mtodeglon, mtodeglat,
 										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-										ping->sonardepth, 
-										mbev_rollbias, mbev_pitchbias, mbev_headingbias, 
+										sonardepth, 
+										rolldelta, pitchdelta,
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 							}
 						}
@@ -1012,7 +1049,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 				if ((fstatus = stat(file->process.mbp_editfile, &file_status)) == 0
 					&& (file_status.st_mode & S_IFMT) != S_IFDIR)
 					esfmodtime = file_status.st_mtime;
-				else
+				  else
 					esfmodtime = 0;
 					
 				/* get mod time for the output file */
@@ -1078,6 +1115,400 @@ file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
 				}
 			}
 
+		/* load asynchronous data if available */
+		if (mbev_status == MB_SUCCESS)
+			{
+			/* try to load heading data from file */
+			strcpy(asyncfile, file->path);
+			strcat(asyncfile, ".ath");
+			if ((fstatus = stat(asyncfile, &file_status)) == 0
+				&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				/* count the asynchronous heading data */
+				file->n_async_heading = 0;
+				file->n_async_heading_alloc = 0;
+				if ((afp = fopen(asyncfile, "r")) != NULL) 
+					{
+					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
+						if (buffer[0] != '#')
+						    file->n_async_heading++;
+					fclose(afp);
+					}
+				
+				/* allocate space for asynchronous heading */
+				if (file->n_async_heading > 0)
+					{
+					if ((file->async_heading_time_d = (double *) malloc(sizeof(double) * (file->n_async_heading))) != NULL)
+						{
+						if ((file->async_heading_heading = (double *) malloc(sizeof(double) * (file->n_async_heading))) != NULL)
+							{
+							file->n_async_heading_alloc = file->n_async_heading;
+							}
+						else if (file->async_heading_time_d != NULL)
+							{
+							free(file->async_heading_time_d);
+							file->async_heading_time_d = NULL;
+							}
+						}
+					}
+
+				/* read the asynchronous heading data */
+				file->n_async_heading = 0;
+				if ((afp = fopen(asyncfile, "r")) != NULL) 
+					{
+					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
+						{
+						if (buffer[0] != '#')
+		    					{
+							nread = sscanf(buffer,"%lf %lf",
+									&(file->async_heading_time_d[file->n_async_heading]),
+						    			&(file->async_heading_heading[file->n_async_heading]));
+							if (nread == 2)
+						    	    file->n_async_heading++;
+							}
+						}
+					fclose(afp);
+					}
+				
+				}
+				
+			/* if heading data not loaded from file extract from ping data */
+			if (file->n_async_heading <= 0)
+				{
+				if (file->num_pings > 0)
+					{
+					if ((file->async_heading_time_d = (double *) malloc(sizeof(double) * (file->num_pings))) != NULL)
+						{
+						if ((file->async_heading_heading = (double *) malloc(sizeof(double) * (file->num_pings))) != NULL)
+							{
+							file->n_async_heading = file->num_pings;
+							file->n_async_heading_alloc = file->n_async_heading;
+							}
+						else if (file->async_heading_time_d != NULL)
+							{
+							free(file->async_heading_time_d);
+							file->async_heading_time_d = NULL;
+							}
+						}
+					for (iping=0;iping<file->num_pings;iping++)
+						{
+						ping = &(file->pings[iping]);
+						file->async_heading_time_d[iping] = ping->time_d;
+						file->async_heading_heading[iping] = ping->heading;
+						}
+					}
+				}
+			
+			/* try to load sonardepth data */
+			strcpy(asyncfile, file->path);
+			strcat(asyncfile, ".ats");
+			if ((fstatus = stat(asyncfile, &file_status)) == 0
+				&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				/* count the asynchronous sonardepth data */
+				file->n_async_sonardepth = 0;
+				file->n_async_sonardepth_alloc = 0;
+				if ((afp = fopen(asyncfile, "r")) != NULL) 
+					{
+					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
+						if (buffer[0] != '#')
+						    file->n_async_sonardepth++;
+					fclose(afp);
+					}
+				
+				/* allocate space for asynchronous sonardepth */
+				if (file->n_async_sonardepth > 0)
+					{
+					if ((file->async_sonardepth_time_d = (double *) malloc(sizeof(double) * (file->n_async_sonardepth))) != NULL)
+						{
+						if ((file->async_sonardepth_sonardepth = (double *) malloc(sizeof(double) * (file->n_async_sonardepth))) != NULL)
+							{
+							file->n_async_sonardepth_alloc = file->n_async_sonardepth;
+							}
+						else if (file->async_sonardepth_time_d != NULL)
+							{
+							free(file->async_sonardepth_time_d);
+							file->async_sonardepth_time_d = NULL;
+							}
+						}
+					}
+
+				/* read the asynchronous sonardepth data */
+				file->n_async_sonardepth = 0;
+				if ((afp = fopen(asyncfile, "r")) != NULL) 
+					{
+					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
+						{
+						if (buffer[0] != '#')
+		    					{
+							nread = sscanf(buffer,"%lf %lf",
+									&(file->async_sonardepth_time_d[file->n_async_sonardepth]),
+						    			&(file->async_sonardepth_sonardepth[file->n_async_sonardepth]));
+							if (nread == 2)
+						    	    file->n_async_sonardepth++;
+							}
+						}
+					fclose(afp);
+					}
+				
+				}
+				
+			/* if sonardepth data not loaded from file extract from ping data */
+			if (file->n_async_sonardepth <= 0)
+				{
+				if (file->num_pings > 0)
+					{
+					if ((file->async_sonardepth_time_d = (double *) malloc(sizeof(double) * (file->num_pings))) != NULL)
+						{
+						if ((file->async_sonardepth_sonardepth = (double *) malloc(sizeof(double) * (file->num_pings))) != NULL)
+							{
+							file->n_async_sonardepth = file->num_pings;
+							file->n_async_sonardepth_alloc = file->n_async_sonardepth;
+							}
+						else if (file->async_sonardepth_time_d != NULL)
+							{
+							free(file->async_sonardepth_time_d);
+							file->async_sonardepth_time_d = NULL;
+							}
+						}
+					for (iping=0;iping<file->num_pings;iping++)
+						{
+						ping = &(file->pings[iping]);
+						file->async_sonardepth_time_d[iping] = ping->time_d;
+						file->async_sonardepth_sonardepth[iping] = ping->sonardepth;
+						}
+					}
+				}
+			
+			/* try to load asynchronous attitude data */
+			strcpy(asyncfile, file->path);
+			strcat(asyncfile, ".ata");
+			if ((fstatus = stat(asyncfile, &file_status)) == 0
+				&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				/* count the asynchronous attitude data */
+				file->n_async_attitude = 0;
+				file->n_async_attitude_alloc = 0;
+				if ((afp = fopen(asyncfile, "r")) != NULL) 
+					{
+					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
+						if (buffer[0] != '#')
+						    file->n_async_attitude++;
+					fclose(afp);
+					}
+				
+				/* allocate space for asynchronous attitude */
+				if (file->n_async_attitude > 0)
+					{
+					if ((file->async_attitude_time_d = (double *) malloc(sizeof(double) * (file->n_async_attitude))) != NULL)
+						{
+						if ((file->async_attitude_roll = (double *) malloc(sizeof(double) * (file->n_async_attitude))) != NULL)
+							{
+							if ((file->async_attitude_pitch = (double *) malloc(sizeof(double) * (file->n_async_attitude))) != NULL)
+								{
+								file->n_async_attitude_alloc = file->n_async_attitude;
+								}
+							else
+								{
+								if (file->async_attitude_time_d != NULL)
+									{
+									free(file->async_attitude_time_d);
+									file->async_attitude_time_d = NULL;
+									}
+								if (file->async_attitude_roll != NULL)
+									{
+									free(file->async_attitude_roll);
+									file->async_attitude_roll = NULL;
+									}
+								}
+							}
+						else if (file->async_attitude_time_d != NULL)
+							{
+							free(file->async_attitude_time_d);
+							file->async_attitude_time_d = NULL;
+							}
+						}
+					}
+
+				/* read the asynchronous attitude data */
+				file->n_async_attitude = 0;
+				if ((afp = fopen(asyncfile, "r")) != NULL) 
+					{
+					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
+						{
+						if (buffer[0] != '#')
+		    					{
+							nread = sscanf(buffer,"%lf %lf %lf",
+									&(file->async_attitude_time_d[file->n_async_attitude]),
+						    			&(file->async_attitude_roll[file->n_async_attitude]),
+						    			&(file->async_attitude_pitch[file->n_async_attitude]));
+							if (nread == 3)
+						    	    file->n_async_attitude++;
+							}
+						}
+					fclose(afp);
+					}				
+				}			
+				
+			/* if attitude data not loaded from file extract from ping data */
+			if (file->n_async_attitude <= 0)
+				{
+				if (file->num_pings > 0)
+					{
+					if ((file->async_attitude_time_d = (double *) malloc(sizeof(double) * (file->num_pings))) != NULL)
+						{
+						if ((file->async_attitude_roll = (double *) malloc(sizeof(double) * (file->num_pings))) != NULL)
+							{
+							if ((file->async_attitude_pitch = (double *) malloc(sizeof(double) * (file->num_pings))) != NULL)
+								{
+								file->n_async_attitude = file->num_pings;
+								file->n_async_attitude_alloc = file->n_async_attitude;
+								}
+							else
+								{
+								if (file->async_attitude_time_d != NULL)
+									{
+									free(file->async_attitude_time_d);
+									file->async_attitude_time_d = NULL;
+									}
+								if (file->async_attitude_roll != NULL)
+									{
+									free(file->async_attitude_roll);
+									file->async_attitude_roll = NULL;
+									}
+								}
+							}
+						else if (file->async_attitude_time_d != NULL)
+							{
+							free(file->async_attitude_time_d);
+							file->async_attitude_time_d = NULL;
+							}
+						}
+					for (iping=0;iping<file->num_pings;iping++)
+						{
+						ping = &(file->pings[iping]);
+						file->async_attitude_time_d[iping] = ping->time_d;
+						file->async_attitude_roll[iping] = ping->roll;
+						file->async_attitude_pitch[iping] = ping->pitch;
+						}
+					}
+				}
+			
+			/* try to load synchronous attitude data */
+			strcpy(asyncfile, file->path);
+			strcat(asyncfile, ".sta");
+			if ((fstatus = stat(asyncfile, &file_status)) == 0
+				&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+				{
+				/* count the synchronous attitude data */
+				file->n_sync_attitude = 0;
+				file->n_sync_attitude_alloc = 0;
+				if ((afp = fopen(asyncfile, "r")) != NULL) 
+					{
+					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
+						if (buffer[0] != '#')
+						    file->n_sync_attitude++;
+					fclose(afp);
+					}
+				
+				/* allocate space for asynchronous attitude */
+				if (file->n_sync_attitude > 0)
+					{
+					if ((file->sync_attitude_time_d = (double *) malloc(sizeof(double) * (file->n_sync_attitude))) != NULL)
+						{
+						if ((file->sync_attitude_roll = (double *) malloc(sizeof(double) * (file->n_sync_attitude))) != NULL)
+							{
+							if ((file->sync_attitude_pitch = (double *) malloc(sizeof(double) * (file->n_sync_attitude))) != NULL)
+								{
+								file->n_sync_attitude_alloc = file->n_sync_attitude;
+								}
+							else
+								{
+								if (file->sync_attitude_time_d != NULL)
+									{
+									free(file->sync_attitude_time_d);
+									file->sync_attitude_time_d = NULL;
+									}
+								if (file->sync_attitude_roll != NULL)
+									{
+									free(file->sync_attitude_roll);
+									file->sync_attitude_roll = NULL;
+									}
+								}
+							}
+						else if (file->sync_attitude_time_d != NULL)
+							{
+							free(file->sync_attitude_time_d);
+							file->sync_attitude_time_d = NULL;
+							}
+						}
+					}
+
+				/* read the synchronous attitude data */
+				file->n_sync_attitude = 0;
+				if ((afp = fopen(asyncfile, "r")) != NULL) 
+					{
+					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
+						{
+						if (buffer[0] != '#')
+		    					{
+							nread = sscanf(buffer,"%lf %lf %lf",
+									&(file->sync_attitude_time_d[file->n_sync_attitude]),
+						    			&(file->sync_attitude_roll[file->n_sync_attitude]),
+						    			&(file->sync_attitude_pitch[file->n_sync_attitude]));
+							if (nread == 3)
+						    	    file->n_sync_attitude++;
+							}
+						}
+					fclose(afp);
+					}				
+				}			
+				
+			/* if attitude data not loaded from file extract from ping data */
+			if (file->n_sync_attitude <= 0)
+				{
+				if (file->num_pings > 0)
+					{
+					if ((file->sync_attitude_time_d = (double *) malloc(sizeof(double) * (file->num_pings))) != NULL)
+						{
+						if ((file->sync_attitude_roll = (double *) malloc(sizeof(double) * (file->num_pings))) != NULL)
+							{
+							if ((file->sync_attitude_pitch = (double *) malloc(sizeof(double) * (file->num_pings))) != NULL)
+								{
+								file->n_sync_attitude = file->num_pings;
+								file->n_sync_attitude_alloc = file->n_sync_attitude;
+								}
+							else
+								{
+								if (file->sync_attitude_time_d != NULL)
+									{
+									free(file->sync_attitude_time_d);
+									file->sync_attitude_time_d = NULL;
+									}
+								if (file->sync_attitude_roll != NULL)
+									{
+									free(file->sync_attitude_roll);
+									file->sync_attitude_roll = NULL;
+									}
+								}
+							}
+						else if (file->sync_attitude_time_d != NULL)
+							{
+							free(file->sync_attitude_time_d);
+							file->sync_attitude_time_d = NULL;
+							}
+						}
+					for (iping=0;iping<file->num_pings;iping++)
+						{
+						ping = &(file->pings[iping]);
+						file->sync_attitude_time_d[iping] = ping->time_d;
+						file->sync_attitude_roll[iping] = ping->roll;
+						file->sync_attitude_pitch[iping] = ping->pitch;
+						}
+					}
+				}
+			}
+
 		/* set the load status */
 		if (mbev_status == MB_SUCCESS)
 			{
@@ -1101,11 +1532,124 @@ file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
 	return(mbev_status);
 }
 /*--------------------------------------------------------------------*/
+int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, 
+				double rollbias, double pitchbias, double headingbias, double timelag,  
+				double *heading, double *sonardepth,
+				double *rolldelta, double *pitchdelta)
+{
+	/* local variables */
+	char	*function_name = "mbeditviz_apply_timelag";
+	double	time_d;
+	int	intstat;
+	int	inav = 0;
+	int	iheading = 0;
+	int	isonardepth = 0;
+	int	iattitude = 0;
+	double	rollsync, pitchsync;
+	double	rollasync, pitchasync;
+
+	/* print input debug statements */
+	if (mbev_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       file:        %d\n",file);
+		fprintf(stderr,"dbg2       ping:        %d\n",ping);
+		fprintf(stderr,"dbg2       timelag:     %f\n",timelag);
+		}
+
+	/* apply timelag to get new values of lon, lat, heading, rollbias, pitchbias */
+	if (file != NULL && ping != NULL)
+		{		
+		/* get adjusted time for interpolation in asyncronous time series */
+		time_d = ping->time_d + timelag;
+
+		/* if asyncronous heading available, interpolate new value */
+		if (file->n_async_heading > 0)
+			{
+			intstat = mb_linear_interp(mbev_verbose, 
+					file->async_heading_time_d-1, file->async_heading_heading-1,
+					file->n_async_heading, time_d, heading, &iheading, 
+					&mbev_error);
+			*heading += headingbias;
+			}
+		else
+			{
+			*heading = ping->heading + headingbias;
+			}
+
+		/* if asyncronous sonardepth available, interpolate new value */
+		if (file->n_async_sonardepth > 0)
+			{
+			intstat = mb_linear_interp(mbev_verbose, 
+					file->async_sonardepth_time_d-1, file->async_sonardepth_sonardepth-1,
+					file->n_async_sonardepth, time_d, sonardepth, &isonardepth, 
+					&mbev_error);
+			}
+		else
+			{
+			*sonardepth = ping->sonardepth;
+			}
+
+		/* if both synchronous and asyncronous attitude available, interpolate new values */
+		if (file->n_sync_attitude > 0 && file->n_async_attitude > 0)
+			{
+			intstat = mb_linear_interp(mbev_verbose, 
+					file->sync_attitude_time_d-1, file->sync_attitude_roll-1,
+					file->n_sync_attitude, ping->time_d, &rollsync, &iattitude, 
+					&mbev_error);
+			intstat = mb_linear_interp(mbev_verbose, 
+					file->sync_attitude_time_d-1, file->sync_attitude_pitch-1,
+					file->n_sync_attitude, ping->time_d, &pitchsync, &iattitude, 
+					&mbev_error);
+			intstat = mb_linear_interp(mbev_verbose, 
+					file->async_attitude_time_d-1, file->async_attitude_roll-1,
+					file->n_async_attitude, time_d, &rollasync, &iattitude, 
+					&mbev_error);
+			intstat = mb_linear_interp(mbev_verbose, 
+					file->async_attitude_time_d-1, file->async_attitude_pitch-1,
+					file->n_async_attitude, time_d, &pitchasync, &iattitude, 
+					&mbev_error);
+fprintf(stderr,"Rollasync:%f Rollsync:%f Rollbias:%f Rolldelta:%f\n",rollasync,rollsync,rollbias,*rolldelta);
+			*rolldelta = rollasync - rollsync + rollbias;
+			*pitchdelta = pitchasync - pitchsync + pitchbias;
+			}
+		else
+			{
+			*rolldelta = rollbias;
+			*pitchdelta = pitchbias;
+			}
+/*fprintf(stderr,"heading: %f %f   %f %d\n", *heading, ping->heading, *heading-ping->heading, iheading);
+fprintf(stderr,"sonardepth: %f %f   %f %d\n", *sonardepth, ping->sonardepth,*sonardepth-ping->sonardepth, isonardepth);
+fprintf(stderr,"rolldelta:  %f %f    roll:%f %f   %d\n", *rolldelta, rollbias, rollasync, rollsync, iattitude);
+fprintf(stderr,"pitchdelta: %f %f    pitch:%f %f   %d\n", *pitchdelta, pitchbias, pitchasync, pitchsync, iattitude);*/
+		}
+
+	/* print output debug statements */
+	if (mbev_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",mbev_error);
+		fprintf(stderr,"dbg2       heading:    %f\n",*heading);
+		fprintf(stderr,"dbg2       sonardepth: %f\n",*sonardepth);
+		fprintf(stderr,"dbg2       rolldelta:  %f\n",*rolldelta);
+		fprintf(stderr,"dbg2       pitchdelta: %f\n",*pitchdelta);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       mbev_status: %d\n",mbev_status);
+		}
+
+	/* return */
+	return(mbev_status);
+}
+/*--------------------------------------------------------------------*/
 int mbeditviz_beam_position(double navlon, double navlat, double headingx, double headingy,
 				double mtodeglon, double mtodeglat,
 				double bath, double acrosstrack, double alongtrack, 
 				double sonardepth, 
-				double rollbias, double pitchbias, double headingbias, 
+				double rollbias, double pitchbias, 
 				double *bathcorr, double *lon, double *lat)
 {
 	/* local variables */
@@ -1115,7 +1659,6 @@ int mbeditviz_beam_position(double navlon, double navlat, double headingx, doubl
 	double	alpha, beta;
 	double	newbath, newacrosstrack, newalongtrack;
 	
-
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
 		{
@@ -1134,7 +1677,6 @@ int mbeditviz_beam_position(double navlon, double navlat, double headingx, doubl
 		fprintf(stderr,"dbg2       sonardepth:  %f\n",sonardepth);
 		fprintf(stderr,"dbg2       rollbias:    %f\n",rollbias);
 		fprintf(stderr,"dbg2       pitchbias:   %f\n",pitchbias);
-		fprintf(stderr,"dbg2       headingbias: %f\n",headingbias);
 		}
 
 	/* strip off heave + draft */
@@ -1300,6 +1842,65 @@ int mbeditviz_unload_file(int ifile)
 			}
 		    free(file->pings);
 		    file->pings = NULL;
+		    
+		    file->n_async_heading = 0;
+		    file->n_async_heading_alloc = 0;
+		    if (file->async_heading_time_d != NULL)
+		    	{
+			free(file->async_heading_time_d);
+			file->async_heading_time_d = NULL;
+			}
+		    if (file->async_heading_heading != NULL)
+		    	{
+			free(file->async_heading_heading);
+			file->async_heading_heading = NULL;
+			}
+		    file->n_async_sonardepth = 0;
+		    file->n_async_sonardepth_alloc = 0;
+		    if (file->async_sonardepth_time_d != NULL)
+		    	{
+			free(file->async_sonardepth_time_d);
+			file->async_sonardepth_time_d = NULL;
+			}
+		    if (file->async_sonardepth_sonardepth != NULL)
+		    	{
+			free(file->async_sonardepth_sonardepth);
+			file->async_sonardepth_sonardepth = NULL;
+			}
+		    file->n_async_attitude = 0;
+		    file->n_async_attitude_alloc = 0;
+		    if (file->async_attitude_time_d != NULL)
+		    	{
+			free(file->async_attitude_time_d);
+			file->async_attitude_time_d = NULL;
+			}
+		    if (file->async_attitude_roll != NULL)
+		    	{
+			free(file->async_attitude_roll);
+			file->async_attitude_roll = NULL;
+			}
+		    if (file->async_attitude_pitch != NULL)
+		    	{
+			free(file->async_attitude_pitch);
+			file->async_attitude_pitch = NULL;
+			}
+		    file->n_sync_attitude = 0;
+		    file->n_sync_attitude_alloc = 0;
+		    if (file->sync_attitude_time_d != NULL)
+		    	{
+			free(file->sync_attitude_time_d);
+			file->sync_attitude_time_d = NULL;
+			}
+		    if (file->sync_attitude_roll != NULL)
+		    	{
+			free(file->sync_attitude_roll);
+			file->sync_attitude_roll = NULL;
+			}
+		    if (file->sync_attitude_pitch != NULL)
+		    	{
+			free(file->sync_attitude_pitch);
+			file->sync_attitude_pitch = NULL;
+			}
 		    }
 		file->load_status = MB_NO;
 		mbev_num_files_loaded--;
@@ -2613,10 +3214,13 @@ int mbeditviz_selectregion(int instance)
 	struct mb_info_struct *info;
 	struct mbview_struct *mbviewdata;
 	struct mbview_region_struct *region;
+	double	time_duse, navlonuse, navlatuse, headinguse;
 	double	xmin, xmax, ymin, ymax, zmin, zmax;
 	double	dx, dy, dz;
 	double	x, y, z;
 	double	xx, yy;
+	double	heading, sonardepth;
+	double	rolldelta, pitchdelta;
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	int	i, ifile, iping, ibeam;
@@ -2640,8 +3244,8 @@ int mbeditviz_selectregion(int instance)
 		region = (struct mbview_region_struct *) &mbviewdata->region;
 
 		/* get region bounds */
-fprintf(stderr,"mbeditviz_selectregion: rollbias:%f pitchbias:%f headingbias:%f\n",
-mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg);
+fprintf(stderr,"mbeditviz_selectregion: rollbias:%f pitchbias:%f headingbias:%f timelag:%f\n",
+mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg);
 fprintf(stderr,"REGION: %f %f   %f %f   %f %f   %f %f\n",
 region->cornerpoints[0].xgrid,region->cornerpoints[0].ygrid,
 region->cornerpoints[1].xgrid,region->cornerpoints[2].ygrid,
@@ -2686,9 +3290,13 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 				for (iping=0;iping<file->num_pings;iping++)
 					{
 					ping = &(file->pings[iping]);
+					mbeditviz_apply_timelag(file, ping, 
+								mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,  
+								&heading, &sonardepth,
+								&rolldelta, &pitchdelta);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-					headingx = sin(ping->heading * DTR);
-					headingy = cos(ping->heading * DTR);
+					headingx = sin(heading * DTR);
+					headingy = cos(heading * DTR);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
 						if (ping->beamflag[ibeam] != MB_FLAG_NULL)
@@ -2717,8 +3325,8 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 										mtodeglon, mtodeglat,
 										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-										ping->sonardepth, 
-										mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, 
+										sonardepth, 
+										rolldelta, pitchdelta, 
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 								mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
@@ -2805,6 +3413,8 @@ int mbeditviz_selectarea(int instance)
 	int	ifile, iping, ibeam;
 	double	x, y, xx, yy;
 	double	zmin, zmax, dz;
+	double	heading, sonardepth;
+	double	rolldelta, pitchdelta;
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	int	i;
@@ -2826,8 +3436,8 @@ int mbeditviz_selectarea(int instance)
 		{
 		/* get area */
 		area = (struct mbview_area_struct *) &mbviewdata->area;
-fprintf(stderr,"mbeditviz_selectarea: rollbias:%f pitchbias:%f headingbias:%f\n",
-mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg);
+fprintf(stderr,"mbeditviz_selectarea: rollbias:%f pitchbias:%f headingbias:%f timelag:%f\n",
+mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg);
 fprintf(stderr,"AREA: %f %f   %f %f   %f %f   %f %f\n",
 area->cornerpoints[0].xgrid,area->cornerpoints[0].ygrid,
 area->cornerpoints[1].xgrid,area->cornerpoints[2].ygrid,
@@ -2859,9 +3469,13 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 				for (iping=0;iping<file->num_pings;iping++)
 					{
 					ping = &(file->pings[iping]);
+					mbeditviz_apply_timelag(file, ping, 
+								mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,  
+								&heading, &sonardepth,
+								&rolldelta, &pitchdelta);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-					headingx = sin(ping->heading * DTR);
-					headingy = cos(ping->heading * DTR);
+					headingx = sin(heading * DTR);
+					headingy = cos(heading * DTR);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
 						if (ping->beamflag[ibeam] != MB_FLAG_NULL)
@@ -2894,8 +3508,8 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 										mtodeglon, mtodeglat,
 										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-										ping->sonardepth, 
-										mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, 
+										sonardepth, 
+										rolldelta, pitchdelta, 
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 								mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
@@ -2979,6 +3593,8 @@ int mbeditviz_selectnav(int instance)
 	int	ifile, iping, ibeam, isounding;
 	double	dx, dy, dz;
 	double	xmin, xmax, ymin, ymax, zmin, zmax;
+	double	heading, sonardepth;
+	double	rolldelta, pitchdelta;
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	int	i;
@@ -3022,9 +3638,13 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 					if (navpts[iping].selected == MB_YES)
 						{
 						ping = &(file->pings[iping]);
+						mbeditviz_apply_timelag(file, ping, 
+								  	mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,  
+								  	&heading, &sonardepth,
+								  	&rolldelta, &pitchdelta);
 						mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-						headingx = sin(ping->heading * DTR);
-						headingy = cos(ping->heading * DTR);
+						headingx = sin(heading * DTR);
+						headingy = cos(heading * DTR);
 						for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 							{
 							if (ping->beamflag[ibeam] != MB_FLAG_NULL)
@@ -3048,8 +3668,8 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 										mtodeglon, mtodeglat,
 										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-										ping->sonardepth, 
-										mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, 
+										sonardepth, 
+										rolldelta, pitchdelta, 
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 								mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
@@ -3328,7 +3948,7 @@ ifile, iping, ibeam);
 		}
 }				   
 /*--------------------------------------------------------------------*/
-void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias)
+void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag)
 {
 	char	*function_name = "mbeditviz_mb3dsoundings_bias";
 	struct mbev_file_struct *file;
@@ -3336,12 +3956,19 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 	int	ifile, iping, ibeam;
 	double	x, y, xx, yy;
 	double	zmin, zmax, dz;
+	double	heading, sonardepth;
+	double	rolldelta, pitchdelta;
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
+	int	inav = 0;
+	int	iheading = 0;
+	int	iattitude = 0;
+	int	intstat;
+	int	ifilelast, ipinglast;
 	int	i;
 
-fprintf(stderr,"mbeditviz_mb3dsoundings_bias:%f %f %f\n", 
-rollbias, pitchbias, headingbias);
+fprintf(stderr,"mbeditviz_mb3dsoundings_bias:%f %f %f %f\n", 
+rollbias, pitchbias, headingbias, timelag);
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -3352,12 +3979,16 @@ rollbias, pitchbias, headingbias);
 		fprintf(stderr,"dbg2       rollbias:    %f\n",rollbias);
 		fprintf(stderr,"dbg2       pitchbias:   %f\n",pitchbias);
 		fprintf(stderr,"dbg2       headingbias: %f\n",headingbias);
+		fprintf(stderr,"dbg2       timelag:     %f\n",timelag);
 		}
 		
 	/* copy bias parameters */
 	mbev_rollbias_3dsdg = rollbias;
 	mbev_pitchbias_3dsdg = pitchbias;
 	mbev_headingbias_3dsdg = headingbias;
+	mbev_timelag_3dsdg = timelag;
+	ifilelast = -1;
+	ipinglast = -1;
 		
 	/* apply bias parameters */
 	for (i=0;i<mbev_selected.num_soundings;i++)
@@ -3368,16 +3999,25 @@ rollbias, pitchbias, headingbias);
 		file = &mbev_files[ifile];
 		ping = &(file->pings[iping]);
 
-		mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-		headingx = sin((ping->heading + headingbias) * DTR);
-		headingy = cos((ping->heading + headingbias) * DTR);
+		if (ifile != ifilelast || iping != ipinglast)
+			{
+			mbeditviz_apply_timelag(file, ping, 
+					mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,  
+					&heading, &sonardepth,
+					&rolldelta, &pitchdelta);
+			mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
+			headingx = sin(heading * DTR);
+			headingy = cos(heading * DTR);
+			ifilelast = ifile;
+			ipinglast = iping;
+			}
 
 		/* apply rotations and recalculate position */
 		mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 				mtodeglon, mtodeglat,
 				ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-				ping->sonardepth, 
-				mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, 
+				sonardepth, 
+				rolldelta, pitchdelta, 
 				&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 		mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
 			ping->bathlon[ibeam], ping->bathlat[ibeam],
@@ -3425,7 +4065,7 @@ rollbias, pitchbias, headingbias);
 		}
 }				   
 /*--------------------------------------------------------------------*/
-void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias)
+void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag)
 {
 	char	*function_name = "mbeditviz_mb3dsoundings_biasapply";
 	struct mbev_file_struct *file;
@@ -3433,12 +4073,14 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 	int	ifile, iping, ibeam;
 	double	x, y, xx, yy;
 	double	zmin, zmax, dz;
+	double	heading, sonardepth;
+	double	rolldelta, pitchdelta;
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	int	i;
 
-fprintf(stderr,"mbeditviz_mb3dsoundings_biasapply:%f %f %f\n", 
-rollbias, pitchbias, headingbias);
+fprintf(stderr,"mbeditviz_mb3dsoundings_biasapply:%f %f %f %f\n", 
+rollbias, pitchbias, headingbias, timelag);
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -3449,16 +4091,18 @@ rollbias, pitchbias, headingbias);
 		fprintf(stderr,"dbg2       rollbias:    %f\n",rollbias);
 		fprintf(stderr,"dbg2       pitchbias:   %f\n",pitchbias);
 		fprintf(stderr,"dbg2       headingbias: %f\n",headingbias);
+		fprintf(stderr,"dbg2       timelag:     %f\n",timelag);
 		}
 		
 	/* copy bias parameters */
 	mbev_rollbias = rollbias;
 	mbev_pitchbias = pitchbias;
 	mbev_headingbias = headingbias;
+	mbev_timelag = timelag;
 
 	/* turn message on */
-	sprintf(message, "Regridding using new bias parameters %f %f %f\n",
-				mbev_rollbias, mbev_pitchbias, mbev_headingbias);
+	sprintf(message, "Regridding using new bias parameters %f %f %f %f\n",
+				mbev_rollbias, mbev_pitchbias, mbev_headingbias, mbev_timelag);
 	do_mbeditviz_message_on(message);
 		
 	/* apply bias parameters to swath data */
@@ -3470,17 +4114,21 @@ rollbias, pitchbias, headingbias);
 			for (iping=0;iping<file->num_pings;iping++)
 				{
 				ping = &(file->pings[iping]);
+				mbeditviz_apply_timelag(file, ping, 
+							mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,  
+							&heading, &sonardepth,
+							&rolldelta, &pitchdelta);
 				mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
-				headingx = sin((ping->heading + mbev_headingbias) * DTR);
-				headingy = cos((ping->heading + mbev_headingbias) * DTR);
+				headingx = sin(heading * DTR);
+				headingy = cos(heading * DTR);
 				for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 					{
 					/* apply rotations and recalculate position */
 					mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 							mtodeglon, mtodeglat,
 							ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-							ping->sonardepth, 
-							mbev_rollbias, mbev_pitchbias, mbev_headingbias, 
+							sonardepth, 
+							rolldelta, pitchdelta, 
 							&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 					mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
 						ping->bathlon[ibeam], ping->bathlat[ibeam],

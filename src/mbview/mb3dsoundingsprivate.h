@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	9/24/2003
- *    $Id: mb3dsoundingsprivate.h,v 5.3 2007-11-16 17:26:56 caress Exp $
+ *    $Id: mb3dsoundingsprivate.h,v 5.4 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	May 25,  2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2007/11/16 17:26:56  caress
+ * Progress on MBeditviz
+ *
  * Revision 5.2  2007/10/08 16:32:08  caress
  * Code status as of 8 October 2007.
  *
@@ -99,8 +102,8 @@ struct mb3dsoundings_world_struct
     void (*mb3dsoundings_dismiss_notify)();
     void (*mb3dsoundings_edit_notify)(int ifile, int iping, int ibeam, char beamflag, int flush);
     void (*mb3dsoundings_info_notify)(int ifile, int iping, int ibeam, char *infostring);
-    void (*mb3dsoundings_bias_notify)(double rollbias, double pitchbias, double headingbias);
-    void (*mb3dsoundings_biasapply_notify)(double rollbias, double pitchbias, double headingbias);
+    void (*mb3dsoundings_bias_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
+    void (*mb3dsoundings_biasapply_notify)(double rollbias, double pitchbias, double headingbias, double timelag);
 
     /* pointer to structure holding data to be rendered */
     struct mb3dsoundings_struct *soundingdata;
@@ -184,6 +187,7 @@ struct mb3dsoundings_world_struct
     int	irollbias;
     int	ipitchbias;
     int	iheadingbias;
+    int	itimelag;
     
     /* view parameters */
     int	view_boundingbox;
@@ -262,6 +266,7 @@ int mb3dsoundings_info(int x, int y);
 void do_mb3dsdg_rollbias( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_pitchbias( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_headingbias( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_timelag( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_flagged( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_noprofile( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_goodprofile( Widget w, XtPointer client_data, XtPointer call_data);

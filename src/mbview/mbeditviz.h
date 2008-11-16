@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz.h		4/27/2007
- *    $Id: mbeditviz.h,v 5.1 2007-11-16 17:26:56 caress Exp $
+ *    $Id: mbeditviz.h,v 5.2 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	April 27, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2007/11/16 17:26:56  caress
+ * Progress on MBeditviz
+ *
  * Revision 5.0  2007/06/17 23:24:12  caress
  * Added NBeditviz.
  *
@@ -139,6 +142,25 @@ struct mbev_file_struct
 	struct mbev_ping_struct *pings;
 	double	beamwidth_xtrack;
 	double	beamwidth_ltrack;
+
+	int	n_async_heading;
+	int	n_async_heading_alloc;
+	double	*async_heading_time_d;
+	double	*async_heading_heading;
+	int	n_async_sonardepth;
+	int	n_async_sonardepth_alloc;
+	double	*async_sonardepth_time_d;
+	double	*async_sonardepth_sonardepth;
+	int	n_async_attitude;
+	int	n_async_attitude_alloc;
+	double	*async_attitude_time_d;
+	double	*async_attitude_roll;
+	double	*async_attitude_pitch;
+	int	n_sync_attitude;
+	int	n_sync_attitude_alloc;
+	double	*sync_attitude_time_d;
+	double	*sync_attitude_roll;
+	double	*sync_attitude_pitch;
 	};
 struct mbev_grid_struct
 	{
@@ -200,9 +222,11 @@ EXTERNAL int mbev_grid_ny;
 EXTERNAL double	mbev_rollbias;
 EXTERNAL double	mbev_pitchbias;
 EXTERNAL double	mbev_headingbias;
+EXTERNAL double	mbev_timelag;
 EXTERNAL double	mbev_rollbias_3dsdg;
 EXTERNAL double	mbev_pitchbias_3dsdg;
 EXTERNAL double	mbev_headingbias_3dsdg;
+EXTERNAL double	mbev_timelag_3dsdg;
 
 /* selected sounding parameters */
 EXTERNAL struct mb3dsoundings_struct mbev_selected;
@@ -210,8 +234,8 @@ EXTERNAL struct mb3dsoundings_struct mbev_selected;
 void mbeditviz_mb3dsoundings_dismiss();
 void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag, int flush);
 void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostring);
-void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias);
-void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias);
+void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag);
+void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag);
 
 /* end this include */
 #endif

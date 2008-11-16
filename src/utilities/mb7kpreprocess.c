@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.22 2008-10-17 07:52:44 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.23 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2005-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	October 12, 2005
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2008/10/17 07:52:44  caress
+ * Check in on October 17, 2008.
+ *
  * Revision 5.21  2008/09/11 20:20:14  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -113,7 +116,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.22 2008-10-17 07:52:44 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.23 2008-11-16 21:51:18 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -371,13 +374,9 @@ main (int argc, char **argv)
 	double	timelag = 0.0;
 	double	timelagconstant = 0.0;
 	char	timelagfile[MB_PATH_MAXLINE];
-	FILE	*tfp;
 	int	ntimelag = 0;
 	double	*timelag_time_d = NULL;
 	double	*timelag_model = NULL;
-	int	timelagoutput = MB_NO;
-	char	timelagoutfile[MB_PATH_MAXLINE];
-	FILE	*tofp;
 	
 	/* range offset parameters */
 	int	nrangeoffset = 0;
@@ -405,6 +404,16 @@ main (int argc, char **argv)
 	double	sonardepthlag = 0.0;
 	double	sonardepthrate;
 	
+	/* output asynchronous and synchronous time series ancilliary files */
+	char	athfile[MB_PATH_MAXLINE];
+	char	atsfile[MB_PATH_MAXLINE];
+	char	atafile[MB_PATH_MAXLINE];
+	char	stafile[MB_PATH_MAXLINE];
+	FILE	*athfp;
+	FILE	*atsfp;
+	FILE	*atafp;
+	FILE	*stafp;
+	
 	int	interp_status;
 	double	soundspeed;
 	double	alpha, beta, theta, phi;
@@ -413,6 +422,7 @@ main (int argc, char **argv)
 	double	dx, dy, dist, dt;
 	int	j1, j2;
 	
+	FILE	*tfp;
 	struct stat file_status;
 	int	fstat;
 	char	buffer[MB_PATH_MAXLINE];
@@ -420,6 +430,7 @@ main (int argc, char **argv)
 	int	read_data;
 	int	testformat;
 	char	fileroot[MB_PATH_MAXLINE];
+	char	command[MB_PATH_MAXLINE];
 	int	found, jfound;
 	int	d1, d2;
 	double	v;
@@ -451,6 +462,7 @@ main (int argc, char **argv)
 	int	year, month, day, hour, minute;
 	double	second, id;
 	char	sensor[24];
+	int	navtype;
 	int	i, j, n;
 
 	/* get current default values */
@@ -584,11 +596,6 @@ main (int argc, char **argv)
 				}
 			flag++;
 			break;
-		case 'U':
-		case 'u':
-			timelagoutput = MB_YES;
-			flag++;
-			break;
 		case 'W':
 		case 'w':
 			sscanf (optarg,"%s", dslfile);
@@ -673,7 +680,6 @@ main (int argc, char **argv)
 		else
 			{
 			fprintf(stderr,"dbg2       timelag:             %f\n",timelag);
-			fprintf(stderr,"dbg2       timelagoutput:       %d\n",timelagoutput);
 			}
 		fprintf(stderr,"dbg2       timelag:                %f\n",timelag);
 		fprintf(stderr,"dbg2       sonardepthfilter:       %d\n",sonardepthfilter);
@@ -2468,6 +2474,50 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 			program_name);
 		exit(error);
 		}
+		
+	/* initialize asynchronous heading output file */
+	sprintf(athfile,"%s.ath",ofile);
+	if ((athfp = fopen(athfile, "w")) == NULL) 
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open asynchronous heading data file <%s> for writing\n",athfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+		
+	/* initialize asynchronous sonardepth output file */
+	sprintf(atsfile,"%s.ats",ofile);
+	if ((atsfp = fopen(atsfile, "w")) == NULL) 
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open asynchronous sonardepth data file <%s> for writing\n",atsfile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+		
+	/* initialize asynchronous attitude output file */
+	sprintf(atafile,"%s.ata",ofile);
+	if ((atafp = fopen(atafile, "w")) == NULL) 
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open asynchronous attitude data file <%s> for writing\n",atafile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+		
+	/* initialize synchronous attitude output file */
+	sprintf(stafile,"%s.sta",ofile);
+	if ((stafp = fopen(stafile, "w")) == NULL) 
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open synchronous attitude data file <%s> for writing\n",stafile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
 
 	/* get pointers to data storage */
 	imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
@@ -3131,6 +3181,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 							= MBSYS_RESON7K_RECORDHEADER_SIZE 
 								+ R7KHDRSIZE_7kBathymetricData
 								+ bathymetry->number_beams * 9;
+					
+					/* output synchronous attitude */
+					fprintf(stafp, "%0.6f\t%0.3f\t%0.3f\n", 
+						time_d, roll, pitch);
 					}
 				}
 			if (istore->read_backscatter == MB_YES)
@@ -3428,6 +3482,16 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 					i,time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					bluefin->nav[i].position_time);
+					
+				/* output asynchronous heading, sonardepth, and attitude */
+				fprintf(athfp, "%0.6f\t%7.3f\n", time_d, RTD * bluefin->nav[i].yaw);
+				sonardepth = bluefin->nav[i].depth 
+						+ depthsensoroffx * sin(bluefin->nav[i].pitch)
+						+ depthsensoroffz * cos(bluefin->nav[i].pitch)
+						+ sonardepthoffset;
+				fprintf(atsfp, "%0.6f\t%0.3f\n", time_d, sonardepth);
+				fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n", 
+						time_d, RTD * bluefin->nav[i].roll, RTD * bluefin->nav[i].pitch);
 				}			
 			}
 			
@@ -3476,31 +3540,6 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 						time_i[0],time_i[1],time_i[2],
 						time_i[3],time_i[4],time_i[5],time_i[6],
 						header->RecordNumber);
-			for (i=0;i<bluefin->number_frames;i++)
-				{
-				time_j[0] = bluefin->nav[i].s7kTime.Year;
-				time_j[1] = bluefin->nav[i].s7kTime.Day;
-				time_j[2] = 60 * bluefin->nav[i].s7kTime.Hours + bluefin->nav[i].s7kTime.Minutes;
-				time_j[3] = (int) bluefin->nav[i].s7kTime.Seconds;
-				time_j[4] = (int) (1000000 * (bluefin->nav[i].s7kTime.Seconds - time_j[3]));
-				mb_get_itime(verbose, time_j, time_i);
-				mb_get_time(verbose, time_i, &time_d);
-				time_d -= timelag;
-				bluefin->nav[i].position_time -= timelag;
-				bluefin->nav[i].altitude_time -= timelag;
-				mb_get_date(verbose, time_d,time_i);
-				mb_get_jtime(verbose, time_i, time_j);
-				bluefin->nav[i].s7kTime.Year = time_i[0];
-				bluefin->nav[i].s7kTime.Day = time_j[1];
-				bluefin->nav[i].s7kTime.Hours = time_i[3];
-				bluefin->nav[i].s7kTime.Minutes = time_i[4];
-				bluefin->nav[i].s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
-				if (verbose > 0)
-				fprintf(stderr,"                       %2.2d          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) Pos_time:%f\n",
-					i,time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5],time_i[6],
-					bluefin->nav[i].position_time);
-				}			
 			}
 			
 	   	/* handle subbottom data */
@@ -3788,6 +3827,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	status = mb_close(verbose,&imbio_ptr,&error);
 	status = mb_close(verbose,&ombio_ptr,&error);
 	fclose(tfp);
+	fclose(athfp);
+	fclose(atsfp);
+	fclose(atafp);
+	fclose(stafp);
 	
 	/* output counts */
 	fprintf(stdout, "\nData records written to: %s\n", ofile);
@@ -3823,7 +3866,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	nreadsshitot += nreadsshi;
 	nreadothertot += nreadother;
 		
-	/* generate inf file */
+	/* generate inf fnv and fbt files */
 	if (status == MB_SUCCESS)
 		{
 		status = mb_make_info(verbose, MB_YES, ofile, format, &error);

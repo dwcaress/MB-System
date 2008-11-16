@@ -1,4 +1,4 @@
-.TH mbm_route2mission l "12 July 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_route2mission l "27 October 2008" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_route2mission\fP - Macro to convert an \fBmbgrdviz\fP route file into an
 MBARI AUV mission script. 
@@ -10,10 +10,11 @@ Version 5.0\fP
 \fBmbm_route2mission\fP \fB-I\fP\fIroutefile\fP 
 [\fB-A\fP\fIaltitudemin/altitudeabort[/altitudedepthcom]\fP 
 \fB-B\fP\fIbehavior\fP \fB-C\fP\fImissiontime\fP \fB-D\fP\fIdepthmax/depthabort/depthdescent\fP 
-\fB-F\fP\fIforwarddistance\fP \fB-G\fP\fIgpsmode\fP \fB-G\fP\fIapproachdepth\fP 
+\fB-F\fP\fIforwarddistance\fP \fB-G\fP\fIgpsmode\fP \fB-J\fP\fIdepthprofilefile\fP \fB-L\fP\fIapproachdepth\fP 
 \fB-M\fP\fI[sonarlist]\fP \fB-N\fP \fB-O\fP\fImissionfile\fP 
 \fB-P\fP\fI[startlon/startlat | startdistance]\fP 
-\fB-T\fP\fIspeed\fP \fB-T\fP\fIstarttime\fP
+\fB-R\fP\fItransmitpower/receivegain[/rangeminfraction]\fP
+\fB-S\fP\fIspeed\fP \fB-T\fP\fIstarttime\fP
 \fB-W\fP\fIwaypointspacing\fP \fB-V\fP \fB-H\fP]
 
 .SH DESCRIPTION
@@ -168,6 +169,13 @@ A route file specifies a desired survey route as a set of
 lines between waypoints. In addition to the waypoints, the file
 also includes the depth profiles along those lines.
 .TP
+.B \-J
+\fIdepthprofilefile\fP
+.br
+Sets the filename of an input desired depth profile file. This is the depth
+profile that the vehicle should follow when flying the mission (as opposed to
+following the bottom at a particular altitude).
+.TP
 .B \-L
 \fIapproachdepth\fP
 .br
@@ -211,6 +219,19 @@ and \fIlat\fP latitude) of the Mapping AUV so that the
 expected time to run to the first waypoint can be estimated. If neither 
 the \fB-P\fP or \fB-T\fP options are specified, a distance of 500 meters 
 to the first waypoint is assumed. 
+.TP
+.B \-R
+\fItransmitpower/receivegain[/rangeminfraction]\fP
+.br
+This sets the key multibeam sonar parameters. Here \fItransmitpower\fP is
+the transmit power of the multibeam in dB, with a range of 0-220 dB. The 
+multibeam receive gain has a range of 0-83 dB. The \fIrangeminfraction\fP variable
+sets the minimum range at which the multibeam will make bottom picks; this 
+prevents the multibeam from picking on nearfield arrivals usually reflecting
+interference from other sonars. If the sonar is operating with an altitude of
+50 m and \fIrangeminfraction\fP = 0.2, then the range gating minimum range will be
+0.2 * 50 m = 10 m. Default: \fItransmitpower\fP = 220, \fIreceivegain\fP = 220, 
+\fIrangeminfraction\fP = 0.2.
 .TP
 .B \-S
 \fIspeed\fP

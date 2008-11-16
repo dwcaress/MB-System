@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_zgrid.c	    4/25/95
- *    $Id: mb_zgrid.c,v 5.3 2008-10-17 07:52:44 caress Exp $
+ *    $Id: mb_zgrid.c,v 5.4 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -53,6 +53,9 @@
  * Date:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2008/10/17 07:52:44  caress
+ * Check in on October 17, 2008.
+ *
  * Revision 5.2  2008/07/10 06:43:40  caress
  * Preparing for 5.1.1beta20
  *
@@ -170,7 +173,6 @@ int mb_zgrid(float *z, int *nx, int *ny,
     z_offset = z_dim1 + 1;
     z -= z_offset;
     xyz -= 4;
-    
 
     /* Function Body */
     eps = (float).002;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundings_callbacks.c		5/25/2007
- *    $Id: mb3dsoundings_callbacks.c,v 5.5 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mb3dsoundings_callbacks.c,v 5.6 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -74,7 +74,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.5 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.6 2008-11-16 21:51:18 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -274,6 +274,14 @@ int mb3dsoundings_updategui()
         XtSetArg(args[ac], XmNmaximum, ibiasmax); ac++;
         XtSetArg(args[ac], XmNvalue, mb3dsoundings.iheadingbias); ac++;
 	XtSetValues(mb3dsoundings.mb3dsdg.scale_headingbias, args, ac);
+	
+	ibiasmin = 100 *(mb3dsoundings.itimelag / 100) - 100;
+	ibiasmax = 100 *(mb3dsoundings.itimelag / 100) + 100;
+	ac = 0;
+        XtSetArg(args[ac], XmNminimum, ibiasmin); ac++;
+        XtSetArg(args[ac], XmNmaximum, ibiasmax); ac++;
+        XtSetArg(args[ac], XmNvalue, mb3dsoundings.itimelag); ac++;
+	XtSetValues(mb3dsoundings.mb3dsdg.scale_timelag, args, ac);
 	
 	if (mb3dsoundings.view_boundingbox == MB_YES)
 		{
@@ -561,7 +569,7 @@ int mb3dsoundings_set_info_notify(int verbose, void (info_notify)(int, int, int,
 }
 
 /*------------------------------------------------------------------------------*/
-int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double), int *error)
+int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double, double), int *error)
 {
 	/* local variables */
 	char	*function_name = "mb3dsoundings_set_info_notify";
@@ -602,7 +610,7 @@ int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double
 }
 
 /*------------------------------------------------------------------------------*/
-int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double), int *error)
+int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double, double), int *error)
 {
 	/* local variables */
 	char	*function_name = "mb3dsoundings_set_info_notify";
@@ -720,6 +728,7 @@ int mb3dsoundings_reset()
 	mb3dsoundings.irollbias = 0;
 	mb3dsoundings.ipitchbias = 0;
 	mb3dsoundings.iheadingbias = 0;
+	mb3dsoundings.itimelag = 0;
     
 	/* view parameters */
 	mb3dsoundings.view_boundingbox = MB_YES;
@@ -2189,7 +2198,7 @@ fprintf(stderr,"glxmin:%f glxmax:%f glymin:%f glymax:%f\n", glxmin, glxmax, glym
 /*---------------------------------------------------------------------------------------*/
 int 
 mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, 
-				double *headingbias, int *error)
+				double *headingbias, double *timelag, int *error)
 {
 fprintf(stderr,"Called mb3dsoundings_get_bias_values\n");
 			
@@ -2197,6 +2206,7 @@ fprintf(stderr,"Called mb3dsoundings_get_bias_values\n");
 	*rollbias = 0.01 * ((double)mb3dsoundings.irollbias);
 	*pitchbias = 0.01 * ((double)mb3dsoundings.ipitchbias);
 	*headingbias = 0.01 * ((double)mb3dsoundings.iheadingbias);
+	*timelag = 0.01 * ((double)mb3dsoundings.itimelag);
 
 }
 
@@ -2222,7 +2232,8 @@ fprintf(stderr,"Called do_mb3dsdg_rollbias: %d\n", acs->value);
 	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
 	(mb3dsoundings.mb3dsoundings_bias_notify)(0.01 *((double)mb3dsoundings.irollbias), 
 						0.01 *((double)mb3dsoundings.ipitchbias),
-						0.01 *((double)mb3dsoundings.iheadingbias));
+						0.01 *((double)mb3dsoundings.iheadingbias),
+						0.01 *((double)mb3dsoundings.itimelag));
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
@@ -2264,7 +2275,8 @@ fprintf(stderr,"Called do_mb3dsdg_pitchbias: %d\n", acs->value);
 	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
 	(mb3dsoundings.mb3dsoundings_bias_notify)(0.01 *((double)mb3dsoundings.irollbias), 
 						0.01 *((double)mb3dsoundings.ipitchbias),
-						0.01 *((double)mb3dsoundings.iheadingbias));
+						0.01 *((double)mb3dsoundings.iheadingbias),
+						0.01 *((double)mb3dsoundings.itimelag));
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
@@ -2306,7 +2318,8 @@ fprintf(stderr,"Called do_mb3dsdg_headingbias: %d\n", acs->value);
 	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
 	(mb3dsoundings.mb3dsoundings_bias_notify)(0.01 *((double)mb3dsoundings.irollbias), 
 						0.01 *((double)mb3dsoundings.ipitchbias),
-						0.01 *((double)mb3dsoundings.iheadingbias));
+						0.01 *((double)mb3dsoundings.iheadingbias),
+						0.01 *((double)mb3dsoundings.itimelag));
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
@@ -2324,6 +2337,50 @@ fprintf(stderr,"Called do_mb3dsdg_headingbias: %d\n", acs->value);
         	XtSetArg(args[ac], XmNminimum, iheadingbiasmin); ac++;
         	XtSetArg(args[ac], XmNmaximum, iheadingbiasmax); ac++;
 		XtSetValues(mb3dsoundings.mb3dsdg.scale_headingbias, args, ac);
+		}
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_timelag( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+    	int	itimelagmin, itimelagmax;
+    
+fprintf(stderr,"Called do_mb3dsdg_timelag: %d\n", acs->value);
+
+	mb3dsoundings.itimelag = acs->value;
+
+	ac = 0;
+        XtSetArg(args[ac], XmNminimum, &itimelagmin); ac++;
+        XtSetArg(args[ac], XmNmaximum, &itimelagmax); ac++;
+        XtSetArg(args[ac], XmNvalue, &(mb3dsoundings.itimelag)); ac++;
+	XtGetValues(mb3dsoundings.mb3dsdg.scale_timelag, args, ac);
+			
+	/* send bias parameters to calling program */
+	if (mb3dsoundings.mb3dsoundings_bias_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_bias_notify)(0.01 *((double)mb3dsoundings.irollbias), 
+						0.01 *((double)mb3dsoundings.ipitchbias),
+						0.01 *((double)mb3dsoundings.iheadingbias),
+						0.01 *((double)mb3dsoundings.itimelag));
+
+	/* rescale data to the gl coordinates */
+	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+
+	/* reset scale min max */
+	if (mb3dsoundings.itimelag == itimelagmin 
+		|| mb3dsoundings.itimelag == itimelagmax)
+		{
+		itimelagmin = mb3dsoundings.itimelag - 100;
+		itimelagmax = mb3dsoundings.itimelag + 100;
+		ac = 0;
+        	XtSetArg(args[ac], XmNminimum, itimelagmin); ac++;
+        	XtSetArg(args[ac], XmNmaximum, itimelagmax); ac++;
+		XtSetValues(mb3dsoundings.mb3dsdg.scale_timelag, args, ac);
 		}
 }
 
@@ -2421,7 +2478,8 @@ fprintf(stderr,"Called do_mb3dsdg_action_applybias\n");
 	if (mb3dsoundings.mb3dsoundings_biasapply_notify != NULL)
 	(mb3dsoundings.mb3dsoundings_biasapply_notify)(0.01 *((double)mb3dsoundings.irollbias), 
 						0.01 *((double)mb3dsoundings.ipitchbias),
-						0.01 *((double)mb3dsoundings.iheadingbias));
+						0.01 *((double)mb3dsoundings.iheadingbias),
+						0.01 *((double)mb3dsoundings.itimelag));
 }
 
 /*---------------------------------------------------------------------------------------*/

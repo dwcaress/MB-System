@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.22 2008-09-11 20:17:33 caress Exp $
+ *    $Id: mbview.h,v 5.23 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -18,6 +18,9 @@
  * Date:	October 10,  2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.22  2008/09/11 20:17:33  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.21  2008/03/14 19:04:32  caress
  * Fixed memory problems with route editing.
  *
@@ -1091,7 +1094,7 @@ int mb3dsoundings_end(int verbose, int *error);
 int mb3dsoundings_set_dismiss_notify(int verbose, void (dismiss_notify)(), int *error);
 int mb3dsoundings_set_edit_notify(int verbose, void (edit_notify)(int, int, int, char, int), int *error);
 int mb3dsoundings_set_info_notify(int verbose, void (edit_notify)(int, int, int, char *), int *error);
-int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double), int *error);
+int mb3dsoundings_set_bias_notify(int verbose, void (bias_notify)(double, double, double, double), int *error);
 int mb3dsoundings_plot(int verbose, int *error);
-int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, int *error);
+int mb3dsoundings_get_bias_values(int verbose, double *rollbias, double *pitchbias, double *headingbias, double *timelag, int *error);
 /*--------------------------------------------------------------------*/

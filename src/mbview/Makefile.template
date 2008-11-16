@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  7/27/2003
-#	$Id: Makefile.template,v 5.11 2007-11-16 17:26:56 caress Exp $
+#	$Id: Makefile.template,v 5.12 2008-11-16 21:51:18 caress Exp $
 #
-#     Copyright (c) 2003 - 2007 by
+#     Copyright (c) 2003 - 2008 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		August 31, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.11  2007/11/16 17:26:56  caress
+# Progress on MBeditviz
+#
 # Revision 5.10  2007/10/08 16:32:08  caress
 # Code status as of 8 October 2007.
 #
@@ -163,6 +166,7 @@ $(BINDIR)/mbeditviz: mbeditviz_main.o \
 		mbeditviz_creation.o \
 		$(LIBDIR)/libmbview.a \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbproj.a \
 		$(LIBDIR)/libmbgsf.a \
 		$(LIBDIR)/libsapi.a \
@@ -178,6 +182,7 @@ $(BINDIR)/mbeditviz: mbeditviz_main.o \
 		mbeditviz_creation.o \
 		$(LIBDIR)/libmbview.a \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbproj.a \
 		$(LIBDIR)/libmbgsf.a \
 		$(LIBDIR)/libsapi.a \

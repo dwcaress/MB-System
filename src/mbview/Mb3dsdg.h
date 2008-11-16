@@ -43,9 +43,9 @@ typedef struct _Mb3dsdgData
      * Widgets created by this class.
      */
     Widget Mb3dsdg;
+    Widget scale_timelag;
     Widget toggleButton_mouse_panzoom1;
     Widget toggleButton_mouse_rotate1;
-    Widget separator3;
     Widget label_mousemode;
     Widget scale_headingbias;
     Widget scale_pitchbias;

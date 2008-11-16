@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.46 2008-10-17 07:52:44 caress Exp $
+ *    $Id: mbgrid.c,v 5.47 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.46  2008/10/17 07:52:44  caress
+ * Check in on October 17, 2008.
+ *
  * Revision 5.45  2008/09/27 03:27:11  caress
  * Working towards release 5.1.1beta24
  *
@@ -456,7 +459,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.46 2008-10-17 07:52:44 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.47 2008-11-16 21:51:18 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -588,10 +591,14 @@ main (int argc, char **argv)
 	double	xlon, ylat, xx, yy;
 	double	factor, weight, topofactor;
 	int	gxdim, gydim, offx, offy, xtradim;
+	double	sbnd[4], sdx, sdy;
+	int	sclip;
+	int	sxdim, sydim;
 	double	*grid = NULL;
 	double	*norm = NULL;
 	double	*sigma = NULL;
 	double	*firsttime = NULL;
+	double	*gridsmall = NULL;
 #ifdef USESURFACE
 	float	*bxdata = NULL;
 	float	*bydata = NULL;
@@ -651,11 +658,11 @@ main (int argc, char **argv)
 	/* other variables */
 	FILE	*dfp, *rfp;
 	int	i, j, k, ii, jj, iii, jjj, kkk, ir, n;
-	int	i1, i2, j1, j2;
+	int	i1, i2, j1, j2, k1, k2;
 	double	r;
 	int	dmask[9];
 	int	kgrid, kout, kint, ib, ix, iy;
-	int	ix1, ix2, iy1, iy2;
+	int	ix1, ix2, iy1, iy2, isx, isy;
 	int	nscan;
 	int	system_status;
 	int	pid;
@@ -665,6 +672,7 @@ main (int argc, char **argv)
 	double	foot_dtheta, foot_dphi;
 	double	foot_hwidth, foot_hlength;
 	int	foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy;
+	double	dzdx, dzdy, sbath;
 	double	xx0, yy0, bdx, bdy, xx1, xx2, yy1, yy2;
 	double	prx[5], pry[5];
 	int	use_weight;
@@ -1382,6 +1390,58 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		&& clip > xdim && clip > ydim)
 		clipmode = MBGRID_INTERP_ALL;
 
+	/* set plot label strings */
+	if (use_projection == MB_YES)
+		{
+		sprintf(xlabel,"Easting (%s)", units);
+		sprintf(ylabel,"Northing (%s)", units);
+		}
+	else
+		{
+		strcpy(xlabel,"Longitude");
+		strcpy(ylabel,"Latitude");
+		}
+	if (datatype == MBGRID_DATA_BATHYMETRY)
+		{
+		if (bathy_in_feet == MB_YES)
+			strcpy(zlabel,"Depth (ft)");
+		else
+			strcpy(zlabel,"Depth (m)");
+		strcpy(nlabel,"Number of Depth Data Points");
+		if (bathy_in_feet == MB_YES)
+			strcpy(sdlabel,"Depth Standard Deviation (ft)");
+		else
+			strcpy(sdlabel,"Depth Standard Deviation (m)");
+		strcpy(title,"Bathymetry Grid");
+		}
+	else if (datatype == MBGRID_DATA_TOPOGRAPHY)
+		{
+		if (bathy_in_feet == MB_YES)
+			strcpy(zlabel,"Topography (ft)");
+		else
+			strcpy(zlabel,"Topography (m)");
+		strcpy(nlabel,"Number of Topography Data Points");
+		if (bathy_in_feet == MB_YES)
+			strcpy(sdlabel,"Topography Standard Deviation (ft)");
+		else
+			strcpy(sdlabel,"Topography Standard Deviation (m)");
+		strcpy(title,"Topography Grid");
+		}
+	else if (datatype == MBGRID_DATA_AMPLITUDE)
+		{
+		strcpy(zlabel,"Amplitude");
+		strcpy(nlabel,"Number of Amplitude Data Points");
+		strcpy(sdlabel,"Amplitude Standard Deviation (m)");
+		strcpy(title,"Amplitude Grid");
+		}
+	else if (datatype == MBGRID_DATA_SIDESCAN)
+		{
+		strcpy(zlabel,"Sidescan");
+		strcpy(nlabel,"Number of Sidescan Data Points");
+		strcpy(sdlabel,"Sidescan Standard Deviation (m)");
+		strcpy(title,"Sidescan Grid");
+		}
+
 	/* output info */
 	if (verbose >= 0)
 		{
@@ -1580,9 +1640,18 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 	/***** do footprint gridding *****/
 	if (grid_mode == MBGRID_WEIGHTED_FOOTPRINT)
 	{
+	/* set up parameters for first cut low resolution slope grid */
+	for (i=0;i<4;i++)
+		sbnd[i] = wbnd[i];
+	sdx = 2.0 * dx;
+	sdy = 2.0 * dy;
+	sxdim = gxdim  / 2;
+	sydim = gydim  / 2;
+	sclip = gxdim * gydim;
 
 	/* allocate memory for additional arrays */
 	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&norm,&error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,sxdim*sydim*sizeof(double),(void **)&gridsmall,&error);
 
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR)
@@ -1595,6 +1664,372 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		mb_memory_clear(verbose, &error);
 		exit(error);
 		}
+		
+	/* do first pass using simple mean to get low-resolution quick bathymetry to provide bottom slope
+		estimates for footprint gridding */
+
+	/* initialize arrays */
+	for (i=0;i<sxdim;i++)
+		for (j=0;j<sydim;j++)
+			{
+			kgrid = i * sydim + j;
+			gridsmall[kgrid] = 0.0;
+			cnt[kgrid] = 0;
+			}
+
+	/* read in data */
+	fprintf(outfp,"\nDoing first pass to generate low resolution slope grid...\n");
+	ndata = 0;
+	if (status = mb_datalist_open(verbose,&datalist,
+					filelist,look_processed,&error) != MB_SUCCESS)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(outfp,"\nUnable to open data list file: %s\n",
+			filelist);
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
+			program_name);
+		mb_memory_clear(verbose, &error);
+		exit(error);
+		}
+	while ((status = mb_datalist_read2(verbose,datalist,
+			&pstatus,path,ppath,&format,&file_weight,&error))
+			== MB_SUCCESS)
+		{
+		ndatafile = 0;
+		
+		/* if format > 0 then input is swath sonar file */
+		if (format > 0 && path[0] != '#')
+		{
+		/* apply pstatus */
+		if (pstatus == MB_PROCESSED_USE)
+			strcpy(file, ppath);
+		else
+			strcpy(file, path);
+
+		/* check for mbinfo file - get file bounds if possible */
+		rformat = format;
+		strcpy(rfile,file);
+		status = mb_check_info(verbose, rfile, lonflip, bounds, 
+				&file_in_bounds, &error);
+		if (status == MB_FAILURE)
+			{
+			file_in_bounds = MB_YES;
+			status = MB_SUCCESS;
+			error = MB_ERROR_NO_ERROR;
+			}
+
+		/* initialize the swath sonar file */
+		if (file_in_bounds == MB_YES)
+		    {
+		    /* check for "fast bathymetry" or "fbt" file */
+		    if (datatype == MBGRID_DATA_TOPOGRAPHY
+			    || datatype == MBGRID_DATA_BATHYMETRY)
+			{
+			mb_get_fbt(verbose, rfile, &rformat, &error);
+			}
+		
+		    /* call mb_read_init() */
+		    if ((status = mb_read_init(
+			verbose,rfile,rformat,pings,lonflip,bounds,
+			btime_i,etime_i,speedmin,timegap,
+			&mbio_ptr,&btime_d,&etime_d,
+			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(outfp,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+			fprintf(outfp,"\nMultibeam File <%s> not initialized for reading\n",rfile);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+			
+		    /* get mb_io_ptr */
+		    mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+		    /* allocate memory for reading data arrays */
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(char), (void **)&beamflag, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bath, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							    sizeof(double), (void **)&amp, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							    sizeof(double), (void **)&bathlat, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&ss, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslon, &error);
+		    if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							    sizeof(double), (void **)&sslat, &error);
+
+		    /* if error initializing memory then quit */
+		    if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(outfp,"\nMBIO Error allocating data arrays:\n%s\n",
+				message);
+			fprintf(outfp,"\nProgram <%s> Terminated\n",
+				program_name);
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
+
+		    /* loop over reading */
+		    while (error <= MB_ERROR_NO_ERROR)
+			{
+			status = mb_read(verbose,mbio_ptr,&kind,
+				&rpings,time_i,&time_d,
+				&navlon,&navlat,
+				&speed,&heading,
+				&distance,&altitude,&sonardepth,
+				&beams_bath,&beams_amp,&pixels_ss,
+				beamflag,bath,amp,bathlon,bathlat,
+				ss,sslon,sslat,
+				comment,&error);
+
+			/* time gaps are not a problem here */
+			if (error == MB_ERROR_TIME_GAP)
+				{
+				error = MB_ERROR_NO_ERROR;
+				status = MB_SUCCESS;
+				}
+
+			/* print debug statements */
+			if (verbose >= 2)
+				{
+				fprintf(outfp,"\ndbg2  Ping read in program <%s>\n",program_name);
+				fprintf(outfp,"dbg2       kind:           %d\n",kind);
+				fprintf(outfp,"dbg2       beams_bath:     %d\n",beams_bath);
+				fprintf(outfp,"dbg2       beams_amp:      %d\n",beams_amp);
+				fprintf(outfp,"dbg2       pixels_ss:      %d\n",pixels_ss);
+				fprintf(outfp,"dbg2       error:          %d\n",error);
+				fprintf(outfp,"dbg2       status:         %d\n",status);
+				}
+
+			if ((datatype == MBGRID_DATA_BATHYMETRY
+				|| datatype == MBGRID_DATA_TOPOGRAPHY)
+				&& error == MB_ERROR_NO_ERROR)
+			  {
+
+			  /* reproject beam positions if necessary */
+			  if (use_projection == MB_YES)
+			    {
+			    mb_proj_forward(verbose, pjptr, 
+					    navlon, navlat,
+					    &navlon, &navlat,
+					    &error);
+			    for (ib=0;ib<beams_bath;ib++)
+			      if (mb_beam_ok(beamflag[ib]))
+				mb_proj_forward(verbose, pjptr, 
+						bathlon[ib], bathlat[ib],
+						&bathlon[ib], &bathlat[ib],
+						&error);
+			    }
+
+			  /* deal with data */
+			  for (ib=0;ib<beams_bath;ib++) 
+			    if (mb_beam_ok(beamflag[ib]))
+			      {
+			      /* get position in grid */
+			      ix = (bathlon[ib] - wbnd[0] + dx) / (2.0 * dx);
+			      iy = (bathlat[ib] - wbnd[2] + dy) / (2.0 * dy);
+/*fprintf(outfp, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n", 
+ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
+
+			      /* process if in region of interest */
+			      if (ix >= 0 
+				&& ix < sxdim 
+				&& iy >= 0 
+				&& iy < sydim)
+			        {
+				kgrid = ix * sydim + iy;
+				gridsmall[kgrid] += topofactor * bath[ib];
+				cnt[kgrid]++;
+				ndata++;
+				ndatafile++;
+				}
+			      }
+			  }
+			}
+		    status = mb_close(verbose,&mbio_ptr,&error);
+		    status = MB_SUCCESS;
+		    error = MB_ERROR_NO_ERROR;
+		    }
+		if (verbose >= 2) 
+			fprintf(outfp,"\n");
+		if (verbose > 0 || file_in_bounds == MB_YES)
+			fprintf(outfp,"%d data points processed in %s\n",
+				ndatafile,rfile);
+		} /* end if (format > 0) */
+
+		}
+	if (datalist != NULL)
+		mb_datalist_close(verbose,&datalist,&error);
+	if (verbose > 0)
+		fprintf(outfp,"\n%d total data points processed\n",ndata);
+
+	/* now loop over all points in the low resolution grid */
+	if (verbose >= 1)
+		fprintf(outfp,"\nMaking low resolution slope grid...\n");
+	ndata = 0;
+	for (i=0;i<sxdim;i++)
+		for (j=0;j<sydim;j++)
+			{
+			kgrid = i * sydim + j;
+			if (cnt[kgrid] > 0)
+				{
+				gridsmall[kgrid] = gridsmall[kgrid]/((double)cnt[kgrid]);
+				ndata++;
+				}
+			}
+			
+	/* now fill in the low resolution grid with interpolation */
+#ifdef USESURFACE
+	/* allocate and initialize sgrid */
+	status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(float),(void **)&sxdata,&error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(float),(void **)&sydata,&error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(float),(void **)&szdata,&error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose,__FILE__,__LINE__,sxdim*sydim*sizeof(float),(void **)&sgrid,&error);
+	if (error != MB_ERROR_NO_ERROR)
+		{
+		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
+		fprintf(outfp,"\nMBIO Error allocating interpolation work arrays:\n%s\n",
+			message);
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
+			program_name);
+		mb_memory_clear(verbose, &error);
+		exit(error);
+		}
+	memset((char *)sgrid,0,sxdim*sydim*sizeof(float));
+	memset((char *)sxdata,0,ndata*sizeof(float));
+	memset((char *)sydata,0,ndata*sizeof(float));
+	memset((char *)szdata,0,ndata*sizeof(float));
+
+	/* get points from grid */
+	ndata = 0;
+	for (i=0;i<sxdim;i++)
+		for (j=0;j<sydim;j++)
+			{
+			kgrid = i * sydim + j;
+			if (cnt[kgrid] > 0)
+				{
+				sxdata[ndata] = wbnd[0] + sdx * i;
+				sydata[ndata] = wbnd[2] + sdy * j;
+				szdata[ndata] = gridsmall[kgrid];
+				ndata++;
+				}
+			}
+
+	/* do the interpolation */
+	fprintf(outfp,"\nDoing Surface spline interpolation with %d data points...\n",ndata);
+	mb_surface(verbose, ndata, sxdata, sydata, szdata,
+		wbnd[0], wbnd[1], wbnd[2], wbnd[3], sdx, sdy,
+		tension, sgrid);
+#else
+	/* allocate and initialize sgrid */
+	status = mb_mallocd(verbose,__FILE__,__LINE__,3*ndata*sizeof(float),(void **)&sdata,&error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose,__FILE__,__LINE__,sxdim*sydim*sizeof(float),(void **)&sgrid,&error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(float),(void **)&work1,&error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose,__FILE__,__LINE__,ndata*sizeof(int),(void **)&work2,&error);
+	if (status == MB_SUCCESS)
+		status = mb_mallocd(verbose,__FILE__,__LINE__,(sxdim+sydim)*sizeof(int),(void **)&work3,&error);
+	if (error != MB_ERROR_NO_ERROR)
+		{
+		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
+		fprintf(outfp,"\nMBIO Error allocating interpolation work arrays:\n%s\n",
+			message);
+		fprintf(outfp,"\nProgram <%s> Terminated\n",
+			program_name);
+		mb_memory_clear(verbose, &error);
+		exit(error);
+		}
+	memset((char *)sgrid,0,sxdim*sydim*sizeof(float));
+	memset((char *)sdata,0,3*ndata*sizeof(float));
+	memset((char *)work1,0,ndata*sizeof(float));
+	memset((char *)work2,0,ndata*sizeof(int));
+	memset((char *)work3,0,(sxdim+sydim)*sizeof(int));
+
+	/* get points from grid */
+	ndata = 0;
+	for (i=0;i<sxdim;i++)
+		for (j=0;j<sydim;j++)
+			{
+			kgrid = i * sydim + j;
+			if (cnt[kgrid] > 0)
+				{
+				sdata[ndata++] = wbnd[0] + sdx * i;
+				sdata[ndata++] = wbnd[2] + sdy * j;
+				sdata[ndata++] = gridsmall[kgrid];
+				}
+			}
+	ndata = ndata/3;
+
+	/* do the interpolation */
+	cay = tension;
+	xmin = wbnd[0] - 0.5 * sdx;
+	ymin = wbnd[2] - 0.5 * sdy;
+	ddx = sdx;
+	ddy = sdy;
+	fprintf(outfp,"\nDoing Zgrid spline interpolation with %d data points...\n",ndata);
+/*for (i=0;i<ndata/3;i++)
+{
+if (sdata[3*i+2]>2000.0)
+fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
+}*/
+	mb_zgrid(sgrid,&sxdim,&sydim,&xmin,&ymin,
+		&ddx,&ddy,sdata,&ndata,
+		work1,work2,work3,&cay,&sclip);
+#endif
+
+	zflag = 5.0e34;
+	for (i=0;i<sxdim;i++)
+	    for (j=0;j<sydim;j++)
+		{
+		kgrid = i * sydim + j;
+#ifdef USESURFACE
+		kint = i + (sydim - j - 1) * sxdim;
+#else
+		kint = i + j * sxdim;
+#endif
+		if (cnt[kgrid] == 0)
+			{
+			gridsmall[kgrid] = sgrid[kint];
+			nbinspline++;
+			}
+		}
+
+			
+	/* deallocate the interpolation arrays */
+#ifdef USESURFACE
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sxdata,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sydata,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&szdata,&error);
+#else
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sdata,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&work1,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&work2,&error);
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&work3,&error);
+#endif
+	mb_freed(verbose,__FILE__,__LINE__,(void **)&sgrid,&error);	
+
+	/* do second pass footprint gridding using slope estimates from first pass interpolated grid */
 
 	/* initialize arrays */
 	for (i=0;i<gxdim;i++)
@@ -1610,6 +2045,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			}
 
 	/* read in data */
+	fprintf(outfp,"\nDoing second pass to generate final grid...\n");
 	ndata = 0;
 	if (status = mb_datalist_open(verbose,&datalist,
 					filelist,look_processed,&error) != MB_SUCCESS)
@@ -1778,6 +2214,48 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 /*fprintf(outfp, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n", 
 ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 
+			      /* get slope from low resolution grid */
+			      isx = (bathlon[ib] - wbnd[0] + 0.5 * sdx)/sdx;
+			      isy = (bathlat[ib] - wbnd[2] + 0.5 * sdy)/sdy;
+			      isx = MIN( MAX(isx, 0), sxdim - 1);
+			      isy = MIN( MAX(isy, 0), sydim - 1);
+			      if (isx == 0)
+			      	{
+				k1 = isx * sydim + isy;
+				k2 = (isx + 1) * sydim + isy;
+			      	dzdx = (gridsmall[k2] - gridsmall[k1]) / sdx;
+				}
+			      else if (isx == sxdim - 1)
+			      	{
+				k1 = (isx - 1) * sydim + isy;
+				k2 = isx * sydim + isy;
+			      	dzdx = (gridsmall[k2] - gridsmall[k1]) / sdx;
+				}
+			      else
+			      	{
+				k1 = (isx - 1) * sydim + isy;
+				k2 = (isx + 1) * sydim + isy;
+			      	dzdx = (gridsmall[k2] - gridsmall[k1]) / (2.0 * sdx);
+				}
+			      if (isy == 0)
+			      	{
+				k1 = isx * sydim + isy;
+				k2 = isx * sydim + (isy + 1);
+			      	dzdy = (gridsmall[k2] - gridsmall[k1]) / sdy;
+				}
+			      else if (isx == sxdim - 1)
+			      	{
+				k1 = isx * sydim + (isy - 1);
+				k2 = isx * sydim + isy;
+			      	dzdy = (gridsmall[k2] - gridsmall[k1]) / sdy;
+				}
+			      else
+			      	{
+				k1 = isx * sydim + (isy - 1);
+				k2 = isx * sydim + (isy + 1);
+			      	dzdy = (gridsmall[k2] - gridsmall[k1]) / (2.0 * sdy);
+				}
+
 			      /* check if within allowed time */
 			      if (check_time == MB_YES)
 			        {
@@ -1907,6 +2385,11 @@ foot_wix, foot_wiy, foot_lix, foot_liy, foot_dix, foot_diy);*/
 				       kgrid = ii * gydim + jj;				   
 				       xx = (wbnd[0] + ii*dx + 0.5*dx - bathlon[ib]);
 				       yy = (wbnd[2] + jj*dy + 0.5*dy - bathlat[ib]);
+				       
+				       /* get depth or topo value at this point using slope estimate */
+				       sbath = topofactor * bath[ib] + dzdx * xx + dzdy * yy;
+/*fprintf(stderr,"ib:%d ii:%d jj:%d bath:%f %f   diff:%f   xx:%f yy:%f dzdx:%f dzdy:%f\n",
+ib,ii,jj,topofactor * bath[ib],sbath,topofactor * bath[ib]-sbath,xx,yy,dzdx,dzdy);*/
 
 				       /* get center and corners of bin in meters from sounding center */
 			  	      if (use_projection == MB_YES)
@@ -1953,11 +2436,8 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 					    {
 					    weight *= file_weight;
 					    norm[kgrid] = norm[kgrid] + weight;
-					    grid[kgrid] = grid[kgrid] 
-						    + weight*topofactor*bath[ib];
-					    sigma[kgrid] = sigma[kgrid] 
-						    + weight*topofactor*topofactor
-						    *bath[ib]*bath[ib];
+					    grid[kgrid] = grid[kgrid] + weight * sbath;
+					    sigma[kgrid] = sigma[kgrid] + weight * sbath * sbath;
 					    if (use_weight == MBGRID_USE_YES)
 						{
 						num[kgrid]++;
@@ -4238,58 +4718,6 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		zmin,zmax);
 	fprintf(outfp,"Minimum sigma: %10.5f   Maximum sigma: %10.5f\n",
 		smin,smax);
-
-	/* set plot label strings */
-	if (use_projection == MB_YES)
-		{
-		sprintf(xlabel,"Easting (%s)", units);
-		sprintf(ylabel,"Northing (%s)", units);
-		}
-	else
-		{
-		strcpy(xlabel,"Longitude");
-		strcpy(ylabel,"Latitude");
-		}
-	if (datatype == MBGRID_DATA_BATHYMETRY)
-		{
-		if (bathy_in_feet == MB_YES)
-			strcpy(zlabel,"Depth (ft)");
-		else
-			strcpy(zlabel,"Depth (m)");
-		strcpy(nlabel,"Number of Depth Data Points");
-		if (bathy_in_feet == MB_YES)
-			strcpy(sdlabel,"Depth Standard Deviation (ft)");
-		else
-			strcpy(sdlabel,"Depth Standard Deviation (m)");
-		strcpy(title,"Bathymetry Grid");
-		}
-	else if (datatype == MBGRID_DATA_TOPOGRAPHY)
-		{
-		if (bathy_in_feet == MB_YES)
-			strcpy(zlabel,"Topography (ft)");
-		else
-			strcpy(zlabel,"Topography (m)");
-		strcpy(nlabel,"Number of Topography Data Points");
-		if (bathy_in_feet == MB_YES)
-			strcpy(sdlabel,"Topography Standard Deviation (ft)");
-		else
-			strcpy(sdlabel,"Topography Standard Deviation (m)");
-		strcpy(title,"Topography Grid");
-		}
-	else if (datatype == MBGRID_DATA_AMPLITUDE)
-		{
-		strcpy(zlabel,"Amplitude");
-		strcpy(nlabel,"Number of Amplitude Data Points");
-		strcpy(sdlabel,"Amplitude Standard Deviation (m)");
-		strcpy(title,"Amplitude Grid");
-		}
-	else if (datatype == MBGRID_DATA_SIDESCAN)
-		{
-		strcpy(zlabel,"Sidescan");
-		strcpy(nlabel,"Number of Sidescan Data Points");
-		strcpy(sdlabel,"Sidescan Standard Deviation (m)");
-		strcpy(title,"Sidescan Grid");
-		}
 
 	/* write first output file */
 	if (verbose > 0)
