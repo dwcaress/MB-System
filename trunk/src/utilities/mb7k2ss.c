@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2ss.c		8/15/2007
- *    $Id: mb7k2ss.c,v 5.3 2008-09-27 03:27:11 caress Exp $
+ *    $Id: mb7k2ss.c,v 5.4 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  *              R/V Atlantis, Axial Seamount
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2008/09/27 03:27:11  caress
+ * Working towards release 5.1.1beta24
+ *
  * Revision 5.2  2008/09/11 20:20:14  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -139,7 +142,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 					struct mb7k2ss_grid_struct *grid,
 					double	 *range, int *error);
 
-static char rcs_id[] = "$Id: mb7k2ss.c,v 5.3 2008-09-27 03:27:11 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2ss.c,v 5.4 2008-11-16 21:51:18 caress Exp $";
 static char program_name[] = "mb7k2ss";
 static int	pargc;
 static char	**pargv;
@@ -1136,7 +1139,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				    
 				/* output commands to first cut plotting script file */
 				fprintf(sfp, "# Generate swath plot of sidescan file: %s\n", current_output_file);
-				fprintf(sfp, "mbm_plot -I %s -N -G4 -S -Pb -V -O %s_ssrawplot\n", 
+				fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n", 
 					current_output_file, current_output_file);
 				fprintf(sfp, "%s_ssrawplot.cmd\n\n", current_output_file);
 				}
@@ -1902,7 +1905,7 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 				    
 			/* output commands to first cut plotting script file */
 			fprintf(sfp, "# Generate swath plot of sidescan file: %s\n", output_file);
-			fprintf(sfp, "mbm_plot -I %s -N -G4 -S -Pb -V -O %s_ssrawplot\n", 
+			fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n", 
 				output_file, output_file);
 			fprintf(sfp, "%s_ssrawplot.cmd\n\n", output_file);
 			}

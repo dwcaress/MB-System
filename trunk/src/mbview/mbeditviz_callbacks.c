@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
- *    $Id: mbeditviz_callbacks.c,v 5.8 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbeditviz_callbacks.c,v 5.9 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	April 27, 2007
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2008/05/16 22:59:42  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.7  2008/03/14 19:04:32  caress
  * Fixed memory problems with route editing.
  *
@@ -1411,6 +1414,9 @@ do_mbeditviz_update_gui( )
 	struct mbev_ping_struct *ping;
 	char	string[MB_PATH_MAXLINE];
 	char	loadchar;
+	char	athchar;
+	char	atschar;
+	char	atachar;
 	int	nfilesloaded;
     	XmString *xstr;
 	int	i, j, k;
@@ -1461,7 +1467,21 @@ fprintf(stderr,"do_mbeditviz_update_gui status:%d\n", mbev_status);
 				loadchar = '*';
 			else
 				loadchar = ' ';
-			sprintf(string,"%c %s", loadchar, mbev_files[i].name);
+			if (file->n_async_heading > 0)
+				athchar = 'H';
+			else
+				athchar = ' ';
+			if (file->n_async_sonardepth > 0)
+				atschar = 'S';
+			else
+				atschar = ' ';
+			if (file->n_async_attitude > 0)
+				atachar = 'A';
+			else
+				atachar = ' ';
+			sprintf(string,"%c%c%c%c %s", 
+				loadchar, athchar, atschar, atachar, 
+				mbev_files[i].name);
    			xstr[i] = XmStringCreateLocalized(string);
  			}
     		XmListAddItems(list_filelist,xstr,mbev_num_files,0);
@@ -1643,14 +1663,15 @@ do_mbeditviz_regrid_notify( Widget w, XtPointer client_data, XtPointer call_data
     double	rollbias;
     double	pitchbias;
     double	headingbias;
+    double	timelag;
     
 fprintf(stderr,"do_mbeditviz_regrid_notify\n");
 
 	/* get current bias parameters */
-	mb3dsoundings_get_bias_values(mbev_verbose, &rollbias, &pitchbias, &headingbias, &mbev_error);
+	mb3dsoundings_get_bias_values(mbev_verbose, &rollbias, &pitchbias, &headingbias, &timelag, &mbev_error);
 
 	/* regrid the bathymetry */
-	mbeditviz_mb3dsoundings_biasapply(rollbias, pitchbias, headingbias);
+	mbeditviz_mb3dsoundings_biasapply(rollbias, pitchbias, headingbias, timelag);
 	
 	/* reset the gui */
 	do_mbeditviz_update_gui();

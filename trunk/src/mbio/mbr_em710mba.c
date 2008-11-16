@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em710mba.c	2/26/2008
- *	$Id: mbr_em710mba.c,v 5.1 2008-07-10 06:41:31 caress Exp $
+ *	$Id: mbr_em710mba.c,v 5.2 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 26, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2008/07/10 06:41:31  caress
+ * Fixed support for EM122
+ *
  * Revision 5.0  2008/03/01 09:11:35  caress
  * Added support for Simrad EM710 multibeam in new formats 58 and 59.
  *
@@ -171,7 +174,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad3_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em710mba.c,v 5.1 2008-07-10 06:41:31 caress Exp $";
+static char res_id[]="$Id: mbr_em710mba.c,v 5.2 2008-11-16 21:51:18 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em710mba(int verbose, void *mbio_ptr, int *error)
@@ -3496,7 +3499,7 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 			    netattitude->nat_heave[i] = (int) short_val;
 			mb_get_binary_short(swap, &line[8], &short_val); 
 			    netattitude->nat_heading[i] = (int) ((unsigned short) short_val);
-			netattitude->nat_nbyte_raw[i] = line[10];
+			netattitude->nat_nbyte_raw[i] = (mb_u_char) line[10];
 			if (netattitude->nat_nbyte_raw[i] <= MBSYS_SIMRAD3_BUFFER_SIZE)
 				{
 				read_len = fread(line,1,netattitude->nat_nbyte_raw[i],mbfp);

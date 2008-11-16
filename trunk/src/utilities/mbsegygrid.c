@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.15 2008-09-11 20:20:14 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.16 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	June 12, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2008/09/11 20:20:14  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.14  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -118,7 +121,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.15 2008-09-11 20:20:14 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.16 2008-11-16 21:51:18 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -559,6 +562,13 @@ main (int argc, char **argv)
 					{
 					btime = factor * traceheader.src_depth / 750.0 + 0.001 * traceheader.delay_mils;
 					dtime = factor * traceheader.src_depth / 750.0;
+					btimesave = btime;
+					dtimesave = dtime;
+					}
+				else if (traceheader.src_elev > 0)
+					{
+					btime = -factor * traceheader.src_elev / 750.0 + 0.001 * traceheader.delay_mils;
+					dtime = -factor * traceheader.src_elev / 750.0;
 					btimesave = btime;
 					dtimesave = dtime;
 					}

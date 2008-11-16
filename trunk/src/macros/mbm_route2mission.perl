@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.19 2008-10-17 07:52:44 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.20 2008-11-16 21:51:18 caress Exp $
 #
 #    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.19 2008-10-17 07:52:44 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.20 2008-11-16 21:51:18 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.19  2008/10/17 07:52:44  caress
+#   Check in on October 17, 2008.
+#
 #   Revision 5.18  2008/09/27 03:27:10  caress
 #   Working towards release 5.1.1beta24
 #
@@ -159,8 +162,9 @@ $ascendenddepth = 2;
 $resonduration = 6;
 $sonaraltitudemax = 100.0;
 $mb_pingrate = 2.0;
-$mb_transmitgain = 210.0;
-$mb_receivegain = 83.0;
+$mb_transmitgain = 220.0;
+$mb_receivegain = 75.0;
+$mb_minrangefraction = 0.2;
 $mb_pulsewidth = 0.000030;
 $resongainsetcount = 0;
 
@@ -201,8 +205,8 @@ $mappingsonar =		($flg_M || $flg_m);
 $mappingsonararg =	($opt_M || $opt_m);
 $spiraldescent =	($opt_N || $opt_n);
 $missionfile =		($opt_O || $opt_o);
-$multibeamsettings =	($opt_R || $opt_r);
 $startposition =	($opt_P || $opt_p);
+$multibeamsettings =	($opt_R || $opt_r);
 $mission_speed =	($opt_S || $opt_s || $mission_speed);
 $starttime =		($opt_T || $opt_t);
 $waypointdist =		($opt_W || $opt_w || $waypointdist);
@@ -216,8 +220,12 @@ if ($help) {
     print "MBgrdviz into an MBARI AUV mission script. Developed for use\r\n";
     print "in survey planning for the MBARI Mapping AUV.\r\n";
     print "Usage: mbm_route2mission -Iroutefile \r\n";
-    print "\t\t[-Aaltitudemin/altitudeabort[/altitudedesired] -Ddepthmax/depthabort[/depthdescent] -Fforwarddistance \r\n";
-    print "\t\t-Ggpsmode -Jdepthprofilefile -Lapproachdepth -Omissionfile -Pstartlon/startlat \r\n\t\t-Sstarttime -Wwaypointspacing -Z -V -H]\r\n";
+    print "\t\t[-Aaltitudemin/altitudeabort[/altitudedesired] -Abehavior -Caborttime \r\n";
+    print "-Ddepthmax/depthabort[/depthdescent] -Fforwarddistance -Ggpsmode \r\n";
+    print "\t\t-Jdepthprofilefile -Lapproachdepth -M[sonarlist] -N \r\n";
+    print "-Omissionfile \r\n\t\t-P[startlon/startlat | startdistance] \r\n"
+    print "\t\t-Rtransmitpower/receivegain[/rangeminfraction] \r\n";
+    print "\t\t-Tstarttime -Wwaypointspacing -Z -V -H]\r\n";
     exit 0;
 }
 
@@ -293,9 +301,14 @@ if ($mappingsonar && !$mappingsonararg)
 	$sidescanlo = 1;
 	$sidescanhi = 1;
 	}
-if ($multibeamsettings =~ /\S+\/\S+/)
+if ($multibeamsettings =~ /\S+\/\S+\/\S+/)
+	{
+	($mb_transmitgain,$mb_receivegain,$mb_minrangefraction) = $multibeamsettings =~ /(\S+)\/(\S+)\/(\S+)/;
+	}
+elsif ($multibeamsettings =~ /\S+\/\S+/)
 	{
 	($mb_transmitgain,$mb_receivegain) = $multibeamsettings =~ /(\S+)\/(\S+)/;
+	$mb_minrangefraction = 0.2;
 	}
 	
 # Open the input file
@@ -721,8 +734,9 @@ elsif ($verbose)
 		{
 		printf "    Mapping sonar control enabled:          \r\n";
 		printf "                               Multibeam enabled\r\n";
-		printf "                                 Multibeam receive gain:  $mb_receivegain\r\n";
-		printf "                                 Multibeam transmit gain: $mb_transmitgain\r\n";
+		printf "                                 Multibeam receive gain:           $mb_receivegain\r\n";
+		printf "                                 Multibeam transmit gain:          $mb_transmitgain\r\n";
+		printf "                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
 		if ($subbottom)
 			{
 			printf "                               Subbottom enabled\r\n";
@@ -854,8 +868,9 @@ if (!$outputoff)
 		{
 		printf MFILE "#     Mapping sonar control enabled:          \r\n";
 		printf MFILE "#                               Multibeam enabled\r\n";
-		printf MFILE "#                                 Multibeam receive gain:  $mb_receivegain\r\n";
-		printf MFILE "#                                 Multibeam transmit gain: $mb_transmitgain\r\n";
+		printf MFILE "#                                 Multibeam receive gain:           $mb_receivegain\r\n";
+		printf MFILE "#                                 Multibeam transmit gain:          $mb_transmitgain\r\n";
+		printf MFILE "#                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
 		if ($subbottom)
 			{
 			printf MFILE "#                               Subbottom enabled\r\n";
@@ -1073,7 +1088,7 @@ print "Output Behavior: reson (stop, Log_Mode = 0)\n";
 			{
 			$mb_range = 350.0;
 			}
-		$mb_minrange = 0.2 * $sonaraltitudeuse;
+		$mb_minrange = $mb_minrangefraction * $sonaraltitudeuse;
 		$mb_maxrange = $mb_range;
 		$mb_mindepth = 0.0;
 		$mb_maxdepth = $mb_range;
@@ -1630,7 +1645,7 @@ print "Output Behavior: gps\n";
 		{
 		$mb_range = 350.0;
 		}
-	$mb_minrange = 0.2 * $sonaraltitudeuse;
+	$mb_minrange = $mb_minrangefraction * $sonaraltitudeuse;
 	$mb_maxrange = $mb_range;
 	$mb_mindepth = 0.0;
 	$mb_maxdepth = $mb_range;

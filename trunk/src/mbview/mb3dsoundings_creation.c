@@ -90,8 +90,8 @@ Createmb3dsdg_mainWindow(Widget parent)
     XtAddCallback(mb3dsdg_mainWindow, XmNdestroyCallback, BxExitCB, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNwidth, 889); ac++;
-    XtSetArg(args[ac], XmNheight, 661); ac++;
+    XtSetArg(args[ac], XmNwidth, 1011); ac++;
+    XtSetArg(args[ac], XmNheight, 660); ac++;
     mb3dsdg_dialogShell = XmCreateDialogShell(mb3dsdg_mainWindow,
         (char *)"mb3dsdg_dialogShell",
         args, 
@@ -103,10 +103,10 @@ Createmb3dsdg_mainWindow(Widget parent)
         args,
         ac);
     ac = 0;
-    XtSetArg(args[ac], XmNx, 1076); ac++;
-    XtSetArg(args[ac], XmNy, 270); ac++;
-    XtSetArg(args[ac], XmNwidth, 889); ac++;
-    XtSetArg(args[ac], XmNheight, 661); ac++;
+    XtSetArg(args[ac], XmNx, 229); ac++;
+    XtSetArg(args[ac], XmNy, 1326); ac++;
+    XtSetArg(args[ac], XmNwidth, 1011); ac++;
+    XtSetArg(args[ac], XmNheight, 660); ac++;
     XtSetValues(mb3dsdg.Mb3dsdg, args, ac);
     
     

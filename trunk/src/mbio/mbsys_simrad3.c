@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.c	3.00	2/22/2008
- *	$Id: mbsys_simrad3.c,v 5.1 2008-07-10 06:40:34 caress Exp $
+ *	$Id: mbsys_simrad3.c,v 5.2 2008-11-16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -34,6 +34,9 @@
  * Date:	February 22, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2008/07/10 06:40:34  caress
+ * Fixed support for EM122
+ *
  * Revision 5.0  2008/03/01 09:11:35  caress
  * Added support for Simrad EM710 multibeam in new formats 58 and 59.
  *
@@ -52,7 +55,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad3.h"
 
-static char res_id[]="$Id: mbsys_simrad3.c,v 5.1 2008-07-10 06:40:34 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad3.c,v 5.2 2008-11-16 21:51:18 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -1311,14 +1314,7 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* deallocate memory for network attitude data structure */
 	if (store->netattitude != NULL)
-		{
-		netattitude = (struct mbsys_simrad3_netattitude_struct *) &(store->netattitude);
-		if (netattitude->nat_raw != NULL)
-			{
-			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(netattitude->nat_raw),error);
-			}
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->netattitude),error);
-		}
 
 	/* deallocate memory for heading data structure */
 	if (store->heading != NULL)
