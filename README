@@ -324,6 +324,35 @@ projected coordinates.
 
 Added format 26 to support Hydrosweep DS data format used by SOPAC.
 
+Fixed support for EM302 sonars.
+
+Augmented mbgrid footprint gridding algorithm. When used with the -F5
+option, mbgrid now does a first pass, low resolution grid to provide
+a local slope estimate. During the second pass, final gridding, 
+individual beam footprints are tilted to reflect the local slope,
+increasing the high-resolution fidelity of the resulting topographic
+model.
+
+Enhanced the patch test capability of mbeditviz. MBeditviz can now be
+used to model time lag as well as roll, pitch, and heading bias. In order
+to use the time lag function, users must place files parallel to each
+swath file containing time series of attitude, heading, and sonardepth.
+These files contain the full asynchronous times series for heading,
+sonardepth, roll, and pitch and the synchronous time series for roll
+and pitch (asynchronous means the raw sensor data sampled more frequently
+than the sonar ping rate, and synchronous means the sensor data sampled
+at ping times).
+Each time series file uses epoch times in seconds as the first column.
+These files are:
+	*.ath - asynchronous heading - time heading
+	*.ats - asynchronous sonardepth - time sonardepth
+	*.ata - asynchronous attitude - time roll pitch
+	*.sta - synchronous attitude - time roll pitch
+Asynchronous data are not available in all formats. When available, the
+asynchronous data can be extracted using mbnavlist. The synchronous
+attitude can be extracted using mblist.
+     
+
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
 
@@ -1517,10 +1546,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.118 2008-10-17 07:54:03 caress Exp $
+RCS ID: $Id: README,v 5.119 2008-11-16 21:47:00 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.118  2008/10/17 07:54:03  caress
+Check in on October 17, 2008.
+
 Revision 5.117  2008/09/27 03:27:10  caress
 Working towards release 5.1.1beta24
 
