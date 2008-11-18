@@ -27,6 +27,7 @@ adjusting survey navigation.
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
 Version 5.1.1          To be determined
+Version 5.1.1beta26    November 18, 2008
 Version 5.1.1beta25    September 28, 2008
 Version 5.1.1beta23    September 19, 2008
 Version 5.1.1beta21    July 20, 2008
@@ -1546,10 +1547,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.119 2008-11-16 21:47:00 caress Exp $
+RCS ID: $Id: README,v 5.120 2008-11-18 21:26:39 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.119  2008/11/16 21:47:00  caress
+Added recent changes.
+
 Revision 5.118  2008/10/17 07:54:03  caress
 Check in on October 17, 2008.
 
