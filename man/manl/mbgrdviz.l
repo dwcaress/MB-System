@@ -87,7 +87,7 @@ range and bearing between the two locations.
 
 The middle button can be used to pan by clicking, holding down, and 
 
-\fIStarting Up\fP
+\fIPicking, Zooming, Panning, Rotating in 3D View\fP
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -407,6 +407,10 @@ program's name, version, and authors.
 .SH MOUSE ACTIONS
 
 .SH KEYBOARD ACTIONS
+
+.SH MBGRDVIZ ROUTE FILES
+
+.SH MBGRDVIZ SITE FILES
 
 .SH SEE ALSO
 \fBmbsystem\fP(l)
