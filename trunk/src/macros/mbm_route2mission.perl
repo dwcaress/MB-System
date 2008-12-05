@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.20 2008-11-16 21:51:18 caress Exp $
+#    $Id: mbm_route2mission.perl,v 5.21 2008-12-05 17:32:51 caress Exp $
 #
 #    Copyright (c) 2004, 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.20 2008-11-16 21:51:18 caress Exp $
+# $Id: mbm_route2mission.perl,v 5.21 2008-12-05 17:32:51 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.20  2008/11/16 21:51:18  caress
+#   Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+#
 #   Revision 5.19  2008/10/17 07:52:44  caress
 #   Check in on October 17, 2008.
 #
@@ -223,7 +226,7 @@ if ($help) {
     print "\t\t[-Aaltitudemin/altitudeabort[/altitudedesired] -Abehavior -Caborttime \r\n";
     print "-Ddepthmax/depthabort[/depthdescent] -Fforwarddistance -Ggpsmode \r\n";
     print "\t\t-Jdepthprofilefile -Lapproachdepth -M[sonarlist] -N \r\n";
-    print "-Omissionfile \r\n\t\t-P[startlon/startlat | startdistance] \r\n"
+    print "-Omissionfile \r\n\t\t-P[startlon/startlat | startdistance] \r\n";
     print "\t\t-Rtransmitpower/receivegain[/rangeminfraction] \r\n";
     print "\t\t-Tstarttime -Wwaypointspacing -Z -V -H]\r\n";
     exit 0;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.c	4/11/2002
- *	$Id: mbsys_netcdf.c,v 5.11 2008-09-13 06:08:09 caress Exp $
+ *	$Id: mbsys_netcdf.c,v 5.12 2008-12-05 17:32:52 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	April 11, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.10  2008/07/10 18:02:39  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -65,10 +68,10 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_netcdf.h"
 
-static char res_id[]="$Id: mbsys_netcdf.c,v 5.11 2008-09-13 06:08:09 caress Exp $";
+static char res_id[]="$Id: mbsys_netcdf.c,v 5.12 2008-12-05 17:32:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
-int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_netcdf_alloc";
@@ -96,10 +99,12 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_netcdf_struct *) *store_ptr;
-	
+
 	/* now initialize everything */
 	if (status == MB_SUCCESS)
-	    {	
+	    {
+	    memset(store, 0, sizeof(struct mbsys_netcdf_struct));
+
 	    /* dimensions */
 	    store->CIB_BLOCK_DIM = 0 ;
 	    store->mbHistoryRecNbr = 0 ;
@@ -109,7 +114,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbBeamNbr = 0 ;
 	    store->mbCycleNbr = 0 ;
 	    store->mbVelocityProfilNbr = MBSYS_NETCDF_VELPROFNBR ;
-    
+
 	    /* global attributes */
 	    store->mbVersion = 108;
 	    strcpy(store->mbName, " ");
@@ -162,7 +167,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbMinDepth = 0.;
 	    store->mbMaxDepth = 0.;
 	    store->mbCycleCounter = 0;
-	    
+
 	    /* variable attributes */
 	    strcpy(store->mbHistDate_type, "integer");
 	    strcpy(store->mbHistDate_long_name, "History date");
@@ -195,7 +200,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbHistCode_type, "integer");
 	    strcpy(store->mbHistCode_long_name, "History code");
 	    strcpy(store->mbHistCode_name_code, "MB_HISTORY_CODE");
-	    strcpy(store->mbHistCode_units, "M");
+	    strcpy(store->mbHistCode_units, "");
 	    strcpy(store->mbHistCode_unit_code, "MB_NOT_DEFINED");
 	    store->mbHistCode_add_offset = 0;
 	    store->mbHistCode_scale_factor = 1;
@@ -218,7 +223,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbCycle_type, "integer");
 	    strcpy(store->mbCycle_long_name, "Cycle number");
 	    strcpy(store->mbCycle_name_code, "MB_CYCLE_NUMBER");
-	    strcpy(store->mbCycle_units, "M");
+	    strcpy(store->mbCycle_units, "");
 	    strcpy(store->mbCycle_unit_code, "MB_NOT_DEFINED");
 	    store->mbCycle_add_offset = 0;
 	    store->mbCycle_scale_factor = 1;
@@ -288,7 +293,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbFrequency_type, "integer");
 	    strcpy(store->mbFrequency_long_name, "Frequency of cycle");
 	    strcpy(store->mbFrequency_name_code, "MB_CYCLE_FREQUENCY");
-	    strcpy(store->mbFrequency_units, "{");
+	    strcpy(store->mbFrequency_units, "");
 	    strcpy(store->mbFrequency_unit_code, "MB_NOT_DEFINED");
 	    store->mbFrequency_add_offset = 0;
 	    store->mbFrequency_scale_factor = 1;
@@ -299,10 +304,24 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbFrequency_missing_value = 0;
 	    strcpy(store->mbFrequency_format_C, "%d");
 	    strcpy(store->mbFrequency_orientation, "direct");
+	    strcpy(store->mbSonarFrequency_type, "real");
+	    strcpy(store->mbSonarFrequency_long_name, "Sonar frequency of ping");
+	    strcpy(store->mbSonarFrequency_name_code, "MB_CYCLE_SONAR_FREQUENCY");
+	    strcpy(store->mbSonarFrequency_units, "Khz");
+	    strcpy(store->mbSonarFrequency_unit_code, "MB_KHERTZ");
+	    store->mbSonarFrequency_add_offset = 0;
+	    store->mbSonarFrequency_scale_factor = 1.e-06;
+	    store->mbSonarFrequency_minimum = 1000.;
+	    store->mbSonarFrequency_maximum = 1000000000.;
+	    store->mbSonarFrequency_valid_minimum = 1000;
+	    store->mbSonarFrequency_valid_maximum = 1000000000;
+	    store->mbSonarFrequency_missing_value = 0;
+	    strcpy(store->mbSonarFrequency_format_C, "%f");
+	    strcpy(store->mbSonarFrequency_orientation, "direct");
 	    strcpy(store->mbSounderMode_type, "integer");
 	    strcpy(store->mbSounderMode_long_name, "Sounder mode");
 	    strcpy(store->mbSounderMode_name_code, "MB_CYCLE_MODE");
-	    strcpy(store->mbSounderMode_units, "M");
+	    strcpy(store->mbSounderMode_units, "");
 	    strcpy(store->mbSounderMode_unit_code, "MB_NOT_DEFINED");
 	    store->mbSounderMode_add_offset = 0;
 	    store->mbSounderMode_scale_factor = 1;
@@ -319,12 +338,12 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbReferenceDepth_units, "m");
 	    strcpy(store->mbReferenceDepth_unit_code, "MB_M");
 	    store->mbReferenceDepth_add_offset = 0.;
-	    store->mbReferenceDepth_scale_factor = 0.1;
-	    store->mbReferenceDepth_minimum = -32767;
-	    store->mbReferenceDepth_maximum = 32767;
-	    store->mbReferenceDepth_valid_minimum = -32767;
-	    store->mbReferenceDepth_valid_maximum = 32767;
-	    store->mbReferenceDepth_missing_value = -32768;
+	    store->mbReferenceDepth_scale_factor = 0.01;
+	    store->mbReferenceDepth_minimum = -2147483647;
+	    store->mbReferenceDepth_maximum = 2147483647;
+	    store->mbReferenceDepth_valid_minimum = -2147483647;
+	    store->mbReferenceDepth_valid_maximum = 2147483647;
+	    store->mbReferenceDepth_missing_value = -2147483648;
 	    strcpy(store->mbReferenceDepth_format_C, "%.2f");
 	    strcpy(store->mbReferenceDepth_orientation, "direct");
 	    strcpy(store->mbDynamicDraught_type, "real");
@@ -439,6 +458,20 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbDistanceScale_missing_value = 0;
 	    strcpy(store->mbDistanceScale_format_C, "%.2f");
 	    strcpy(store->mbDistanceScale_orientation, "direct");
+	    strcpy(store->mbRangeScale_type, "real");
+	    strcpy(store->mbRangeScale_long_name, "Range scale");
+	    strcpy(store->mbRangeScale_name_code, "MB_CYCLE_RANGE_SCALE");
+	    strcpy(store->mbRangeScale_units, "s");
+	    strcpy(store->mbRangeScale_unit_code, "MB_S");
+	    store->mbRangeScale_add_offset = 0;
+	    store->mbRangeScale_scale_factor = 2.e-08;
+	    store->mbRangeScale_minimum = 1.;
+	    store->mbRangeScale_maximum = 65535.;
+	    store->mbRangeScale_valid_minimum = 1;
+	    store->mbRangeScale_valid_maximum = 65535;
+	    store->mbRangeScale_missing_value = 0;
+	    strcpy(store->mbRangeScale_format_C, "%.7f");
+	    strcpy(store->mbRangeScale_orientation, "direct");
 	    strcpy(store->mbDepthScale_type, "real");
 	    strcpy(store->mbDepthScale_long_name, "Depth scale");
 	    strcpy(store->mbDepthScale_name_code, "MB_CYCLE_Z_SCALE");
@@ -456,7 +489,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbVerticalDepth_type, "integer");
 	    strcpy(store->mbVerticalDepth_long_name, "Vertical depth");
 	    strcpy(store->mbVerticalDepth_name_code, "MB_CYCLE_DEPTH");
-	    strcpy(store->mbVerticalDepth_units, "M");
+	    strcpy(store->mbVerticalDepth_units, "");
 	    strcpy(store->mbVerticalDepth_unit_code, "MB_NOT_DEFINED");
 	    store->mbVerticalDepth_add_offset = 0;
 	    store->mbVerticalDepth_scale_factor = 1;
@@ -470,7 +503,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbCQuality_type, "integer");
 	    strcpy(store->mbCQuality_long_name, "Quality factor");
 	    strcpy(store->mbCQuality_name_code, "MB_CYCLE_QUALITY");
-	    strcpy(store->mbCQuality_units, "M");
+	    strcpy(store->mbCQuality_units, "");
 	    strcpy(store->mbCQuality_unit_code, "MB_NOT_DEFINED");
 	    store->mbCQuality_add_offset = 0;
 	    store->mbCQuality_scale_factor = 1;
@@ -484,7 +517,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbCFlag_type, "integer");
 	    strcpy(store->mbCFlag_long_name, "Flag of cycle");
 	    strcpy(store->mbCFlag_name_code, "MB_CYCLE_FLAG");
-	    strcpy(store->mbCFlag_units, "M");
+	    strcpy(store->mbCFlag_units, "");
 	    strcpy(store->mbCFlag_unit_code, "MB_NOT_DEFINED");
 	    store->mbCFlag_add_offset = 0;
 	    store->mbCFlag_scale_factor = 1;
@@ -498,7 +531,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbInterlacing_type, "integer");
 	    strcpy(store->mbInterlacing_long_name, "Interlacing 1=Port 2=Starboard");
 	    strcpy(store->mbInterlacing_name_code, "MB_CYCLE_INTERLACING");
-	    strcpy(store->mbInterlacing_units, "{");
+	    strcpy(store->mbInterlacing_units, "");
 	    strcpy(store->mbInterlacing_unit_code, "MB_NOT_DEFINED");
 	    store->mbInterlacing_add_offset = 0;
 	    store->mbInterlacing_scale_factor = 1;
@@ -523,10 +556,66 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbSamplingRate_missing_value = 0;
 	    strcpy(store->mbSamplingRate_format_C, "%d");
 	    strcpy(store->mbSamplingRate_orientation, "direct");
+	    strcpy(store->mbCompensationLayerMode_type, "integer");
+	    strcpy(store->mbCompensationLayerMode_long_name, "Compensation layer mode");
+	    strcpy(store->mbCompensationLayerMode_name_code, "MB_CYCLE_COMPLAYER_MODE");
+	    strcpy(store->mbCompensationLayerMode_units, "");
+	    strcpy(store->mbCompensationLayerMode_unit_code, "MB_NOT_DEFINED");
+	    store->mbCompensationLayerMode_add_offset = 0;
+	    store->mbCompensationLayerMode_scale_factor = 1;
+	    store->mbCompensationLayerMode_minimum = 1;
+	    store->mbCompensationLayerMode_maximum = 255;
+	    store->mbCompensationLayerMode_valid_minimum = 1;
+	    store->mbCompensationLayerMode_valid_maximum = 255;
+	    store->mbCompensationLayerMode_missing_value = 0;
+	    strcpy(store->mbCompensationLayerMode_format_C, "%d");
+	    strcpy(store->mbCompensationLayerMode_orientation, "direct");
+	    strcpy(store->mbTransmitBeamwidth_type, "integer");
+	    strcpy(store->mbTransmitBeamwidth_long_name, "Transmit Beamwidth");
+	    strcpy(store->mbTransmitBeamwidth_name_code, "MB_TRANSMIT_BEAMWIDTH");
+	    strcpy(store->mbTransmitBeamwidth_units, "Hz");
+	    strcpy(store->mbTransmitBeamwidth_unit_code, "MB_DEGREE");
+	    store->mbTransmitBeamwidth_add_offset = 0;
+	    store->mbTransmitBeamwidth_scale_factor = 1;
+	    store->mbTransmitBeamwidth_minimum = 1;
+	    store->mbTransmitBeamwidth_maximum = 65535;
+	    store->mbTransmitBeamwidth_valid_minimum = 1;
+	    store->mbTransmitBeamwidth_valid_maximum = 65535;
+	    store->mbTransmitBeamwidth_missing_value = 0;
+	    strcpy(store->mbTransmitBeamwidth_format_C, "%0.1f");
+	    strcpy(store->mbTransmitBeamwidth_orientation, "direct");
+	    strcpy(store->mbReceiveBeamwidth_type, "integer");
+	    strcpy(store->mbReceiveBeamwidth_long_name, "Receive Beamwidth");
+	    strcpy(store->mbReceiveBeamwidth_name_code, "MB_RECEIVE_BEAMWIDTH");
+	    strcpy(store->mbReceiveBeamwidth_units, "Hz");
+	    strcpy(store->mbReceiveBeamwidth_unit_code, "MB_DEGREE");
+	    store->mbReceiveBeamwidth_add_offset = 0;
+	    store->mbReceiveBeamwidth_scale_factor = 1;
+	    store->mbReceiveBeamwidth_minimum = 1;
+	    store->mbReceiveBeamwidth_maximum = 255;
+	    store->mbReceiveBeamwidth_valid_minimum = 1;
+	    store->mbReceiveBeamwidth_valid_maximum = 255;
+	    store->mbReceiveBeamwidth_missing_value = 0;
+	    strcpy(store->mbReceiveBeamwidth_format_C, "%0.1f");
+	    strcpy(store->mbReceiveBeamwidth_orientation, "direct");
+	    strcpy(store->mbTransmitPulseLength_type, "integer");
+	    strcpy(store->mbTransmitPulseLength_long_name, "Transmit PulseLength");
+	    strcpy(store->mbTransmitPulseLength_name_code, "MB_TRANSMIT_PULSELENGTH");
+	    strcpy(store->mbTransmitPulseLength_units, "");
+	    strcpy(store->mbTransmitPulseLength_unit_code, "MB_NOT_DEFINED");
+	    store->mbTransmitPulseLength_add_offset = 0;
+	    store->mbTransmitPulseLength_scale_factor = 1;
+	    store->mbTransmitPulseLength_minimum = 1;
+	    store->mbTransmitPulseLength_maximum = 65535;
+	    store->mbTransmitPulseLength_valid_minimum = 1;
+	    store->mbTransmitPulseLength_valid_maximum = 65535;
+	    store->mbTransmitPulseLength_missing_value = 0;
+	    strcpy(store->mbTransmitPulseLength_format_C, "%d");
+	    strcpy(store->mbTransmitPulseLength_orientation, "direct");
 	    strcpy(store->mbAlongDistance_type, "integer");
 	    strcpy(store->mbAlongDistance_long_name, "Along distance");
 	    strcpy(store->mbAlongDistance_name_code, "MB_SOUNDING_X");
-	    strcpy(store->mbAlongDistance_units, "M");
+	    strcpy(store->mbAlongDistance_units, "");
 	    strcpy(store->mbAlongDistance_unit_code, "MB_NOT_DEFINED");
 	    store->mbAlongDistance_add_offset = 0;
 	    store->mbAlongDistance_scale_factor = 1;
@@ -540,7 +629,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbAcrossDistance_type, "integer");
 	    strcpy(store->mbAcrossDistance_long_name, "Across distance");
 	    strcpy(store->mbAcrossDistance_name_code, "MB_SOUNDING_Y");
-	    strcpy(store->mbAcrossDistance_units, "M");
+	    strcpy(store->mbAcrossDistance_units, "");
 	    strcpy(store->mbAcrossDistance_unit_code, "MB_NOT_DEFINED");
 	    store->mbAcrossDistance_add_offset = 0;
 	    store->mbAcrossDistance_scale_factor = 1;
@@ -554,21 +643,77 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbDepth_type, "integer");
 	    strcpy(store->mbDepth_long_name, "Depth");
 	    strcpy(store->mbDepth_name_code, "MB_SOUNDING_Z");
-	    strcpy(store->mbDepth_units, "M");
+	    strcpy(store->mbDepth_units, "");
 	    strcpy(store->mbDepth_unit_code, "MB_NOT_DEFINED");
 	    store->mbDepth_add_offset = 0;
 	    store->mbDepth_scale_factor = 1;
-	    store->mbDepth_minimum = 1;
-	    store->mbDepth_maximum = 65535;
-	    store->mbDepth_valid_minimum = 1;
-	    store->mbDepth_valid_maximum = 65535;
-	    store->mbDepth_missing_value = 0;
+	    store->mbDepth_minimum = -2147483647;
+	    store->mbDepth_maximum = 2147483647;
+	    store->mbDepth_valid_minimum = -2147483647;
+	    store->mbDepth_valid_maximum = 2147483647;
+	    store->mbDepth_missing_value = -2147483648;
 	    strcpy(store->mbDepth_format_C, "%d");
 	    strcpy(store->mbDepth_orientation, "inverse");
+	    strcpy(store->mbAcrossBeamAngle_type, "real");
+	    strcpy(store->mbAcrossBeamAngle_long_name, "Across angle");
+	    strcpy(store->mbAcrossBeamAngle_name_code, "MB_ACROSS_BEAM_ANGLE");
+	    strcpy(store->mbAcrossBeamAngle_units, "degree");
+	    strcpy(store->mbAcrossBeamAngle_unit_code, "MB_DEGREE");
+	    store->mbAcrossBeamAngle_add_offset = 0;
+	    store->mbAcrossBeamAngle_scale_factor = 0.01;
+	    store->mbAcrossBeamAngle_minimum = -9000;
+	    store->mbAcrossBeamAngle_maximum = 9000;
+	    store->mbAcrossBeamAngle_valid_minimum = -9000;
+	    store->mbAcrossBeamAngle_valid_maximum = 9000;
+	    store->mbAcrossBeamAngle_missing_value = -32768;
+	    strcpy(store->mbAcrossBeamAngle_format_C, "%.2f");
+	    strcpy(store->mbAcrossBeamAngle_orientation, "direct");
+	    strcpy(store->mbAzimutBeamAngle_type, "real");
+	    strcpy(store->mbAzimutBeamAngle_long_name, "Beam azimut");
+	    strcpy(store->mbAzimutBeamAngle_name_code, "MB_AZIMUT_BEAM_ANGLE");
+	    strcpy(store->mbAzimutBeamAngle_units, "degree");
+	    strcpy(store->mbAzimutBeamAngle_unit_code, "MB_DEGREE");
+	    store->mbAzimutBeamAngle_add_offset = 0;
+	    store->mbAzimutBeamAngle_scale_factor = 0.01;
+	    store->mbAzimutBeamAngle_minimum = 0;
+	    store->mbAzimutBeamAngle_maximum = 35999;
+	    store->mbAzimutBeamAngle_valid_minimum = 0;
+	    store->mbAzimutBeamAngle_valid_maximum = 35999;
+	    store->mbAzimutBeamAngle_missing_value = 32767;
+	    strcpy(store->mbAzimutBeamAngle_format_C, "%.2f");
+	    strcpy(store->mbAzimutBeamAngle_orientation, "direct");
+	    strcpy(store->mbRange_type, "integer");
+	    strcpy(store->mbRange_long_name, "Range");
+	    strcpy(store->mbRange_name_code, "MB_SOUNDING_RANGE");
+	    strcpy(store->mbRange_units, "");
+	    strcpy(store->mbRange_unit_code, "MB_NOT_DEFINED");
+	    store->mbRange_add_offset = 0;
+	    store->mbRange_scale_factor = 1;
+	    store->mbRange_minimum = 1;
+	    store->mbRange_maximum = 65535;
+	    store->mbRange_valid_minimum = 1;
+	    store->mbRange_valid_maximum = 65535;
+	    store->mbRange_missing_value = 0;
+	    strcpy(store->mbRange_format_C, "%.d");
+	    strcpy(store->mbRange_orientation, "direct");
+	    strcpy(store->mbSoundingBias_type, "real");
+	    strcpy(store->mbSoundingBias_long_name, "Sounding bias");
+	    strcpy(store->mbSoundingBias_name_code, "MB_SOUNDING_BIAS");
+	    strcpy(store->mbSoundingBias_units, "m");
+	    strcpy(store->mbSoundingBias_unit_code, "MB_B");
+	    store->mbSoundingBias_add_offset = 0;
+	    store->mbSoundingBias_scale_factor = 0.01;
+	    store->mbSoundingBias_minimum = -32767.;
+	    store->mbSoundingBias_maximum = 32767.;
+	    store->mbSoundingBias_valid_minimum = -32767;
+	    store->mbSoundingBias_valid_maximum = 32767;
+	    store->mbSoundingBias_missing_value = -32768;
+	    strcpy(store->mbSoundingBias_format_C, "%d");
+	    strcpy(store->mbSoundingBias_orientation, "direct");
 	    strcpy(store->mbSQuality_type, "integer");
 	    strcpy(store->mbSQuality_long_name, "Quality factor");
 	    strcpy(store->mbSQuality_name_code, "MB_SOUNDING_QUALITY");
-	    strcpy(store->mbSQuality_units, "{");
+	    strcpy(store->mbSQuality_units, "");
 	    strcpy(store->mbSQuality_unit_code, "MB_NOT_DEFINED");
 	    store->mbSQuality_add_offset = 0;
 	    store->mbSQuality_scale_factor = 1;
@@ -579,10 +724,66 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbSQuality_missing_value = 0;
 	    strcpy(store->mbSQuality_format_C, "%d");
 	    strcpy(store->mbSQuality_orientation, "direct");
+	    strcpy(store->mbReflectivity_type, "real");
+	    strcpy(store->mbReflectivity_long_name, "Reflectivity");
+	    strcpy(store->mbReflectivity_name_code, "MB_SOUNDING_REFLECTIVITY");
+	    strcpy(store->mbReflectivity_units, "dB");
+	    strcpy(store->mbReflectivity_unit_code, "MB_DB");
+	    store->mbReflectivity_add_offset = 0;
+	    store->mbReflectivity_scale_factor = 0.5;
+	    store->mbReflectivity_minimum = -127;
+	    store->mbReflectivity_maximum = 127;
+	    store->mbReflectivity_valid_minimum = -127;
+	    store->mbReflectivity_valid_maximum = 127;
+	    store->mbReflectivity_missing_value = -128;
+	    strcpy(store->mbReflectivity_format_C, "%.2f");
+	    strcpy(store->mbReflectivity_orientation, "direct");
+	    strcpy(store->mbReceptionHeave_type, "real");
+	    strcpy(store->mbReceptionHeave_long_name, "Reception heave");
+	    strcpy(store->mbReceptionHeave_name_code, "MB_SOUNDING_HEAVE");
+	    strcpy(store->mbReceptionHeave_units, "m");
+	    strcpy(store->mbReceptionHeave_unit_code, "MB_M");
+	    store->mbReceptionHeave_add_offset = 0;
+	    store->mbReceptionHeave_scale_factor = 0.1;
+	    store->mbReceptionHeave_minimum = -127;
+	    store->mbReceptionHeave_maximum = 127;
+	    store->mbReceptionHeave_valid_minimum = -127;
+	    store->mbReceptionHeave_valid_maximum = 127;
+	    store->mbReceptionHeave_missing_value = -128;
+	    strcpy(store->mbReceptionHeave_format_C, "%.1f");
+	    strcpy(store->mbReceptionHeave_orientation, "direct");
+	    strcpy(store->mbAlongSlope_type, "real");
+	    strcpy(store->mbAlongSlope_long_name, "Along slope");
+	    strcpy(store->mbAlongSlope_name_code, "MB_SOUNDING_X_SLOPE");
+	    strcpy(store->mbAlongSlope_units, "%");
+	    strcpy(store->mbAlongSlope_unit_code, "MB_PERCENT");
+	    store->mbAlongSlope_add_offset = 0;
+	    store->mbAlongSlope_scale_factor = 0.01;
+	    store->mbAlongSlope_minimum = -32767;
+	    store->mbAlongSlope_maximum = 32767;
+	    store->mbAlongSlope_valid_minimum = -32767;
+	    store->mbAlongSlope_valid_maximum = 32767;
+	    store->mbAlongSlope_missing_value = -32768;
+	    strcpy(store->mbAlongSlope_format_C, "%.2f");
+	    strcpy(store->mbAlongSlope_orientation, "direct");
+	    strcpy(store->mbAcrossSlope_type, "real");
+	    strcpy(store->mbAcrossSlope_long_name, "Across slope");
+	    strcpy(store->mbAcrossSlope_name_code, "MB_SOUNDING_Y_SLOPE");
+	    strcpy(store->mbAcrossSlope_units, "%");
+	    strcpy(store->mbAcrossSlope_unit_code, "MB_PERCENT");
+	    store->mbAcrossSlope_add_offset = 0;
+	    store->mbAcrossSlope_scale_factor = 0.01;
+	    store->mbAcrossSlope_minimum = -32767;
+	    store->mbAcrossSlope_maximum = 32767;
+	    store->mbAcrossSlope_valid_minimum = -32767;
+	    store->mbAcrossSlope_valid_maximum = 32767;
+	    store->mbAcrossSlope_missing_value = -32768;
+	    strcpy(store->mbAcrossSlope_format_C, "%.2f");
+	    strcpy(store->mbAcrossSlope_orientation, "direct");
 	    strcpy(store->mbSFlag_type, "integer");
 	    strcpy(store->mbSFlag_long_name, "Flag of sounding");
 	    strcpy(store->mbSFlag_name_code, "MB_SOUNDING_FLAG");
-	    strcpy(store->mbSFlag_units, "M");
+	    strcpy(store->mbSFlag_units, "");
 	    strcpy(store->mbSFlag_unit_code, "MB_NOT_DEFINED");
 	    store->mbSFlag_add_offset = 0;
 	    store->mbSFlag_scale_factor = 1;
@@ -593,10 +794,24 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbSFlag_missing_value = -128;
 	    strcpy(store->mbSFlag_format_C, "%d");
 	    strcpy(store->mbSFlag_orientation, "direct");
+	    strcpy(store->mbSLengthOfDetection_type, "integer");
+	    strcpy(store->mbSLengthOfDetection_long_name, "Length of detection");
+	    strcpy(store->mbSLengthOfDetection_name_code, "MB_LENGTH_DETECTION");
+	    strcpy(store->mbSLengthOfDetection_units, "");
+	    strcpy(store->mbSLengthOfDetection_unit_code, "MB_NOT_DEFINED");
+	    store->mbSLengthOfDetection_add_offset = 0;
+	    store->mbSLengthOfDetection_scale_factor = 1;
+	    store->mbSLengthOfDetection_minimum = 1;
+	    store->mbSLengthOfDetection_maximum = 255;
+	    store->mbSLengthOfDetection_valid_minimum = 1;
+	    store->mbSLengthOfDetection_valid_maximum = 255;
+	    store->mbSLengthOfDetection_missing_value = 0;
+	    strcpy(store->mbSLengthOfDetection_format_C, "%d");
+	    strcpy(store->mbSLengthOfDetection_orientation, "direct");
 	    strcpy(store->mbAntenna_type, "integer");
 	    strcpy(store->mbAntenna_long_name, "Antenna index");
 	    strcpy(store->mbAntenna_name_code, "MB_BEAM_ANTENNA");
-	    strcpy(store->mbAntenna_units, "M");
+	    strcpy(store->mbAntenna_units, "");
 	    strcpy(store->mbAntenna_unit_code, "MB_NOT_DEFINED");
 	    store->mbAntenna_add_offset = 0;
 	    store->mbAntenna_scale_factor = 1;
@@ -624,7 +839,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbBFlag_type, "integer");
 	    strcpy(store->mbBFlag_long_name, "Flag of beam");
 	    strcpy(store->mbBFlag_name_code, "MB_BEAM_FLAG");
-	    strcpy(store->mbBFlag_units, "M");
+	    strcpy(store->mbBFlag_units, "");
 	    strcpy(store->mbBFlag_unit_code, "MB_NOT_DEFINED");
 	    store->mbBFlag_add_offset = 0;
 	    store->mbBFlag_scale_factor = 1;
@@ -638,7 +853,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbBeam_type, "integer");
 	    strcpy(store->mbBeam_long_name, "Number of beams");
 	    strcpy(store->mbBeam_name_code, "MB_ANTENNA_BEAM");
-	    strcpy(store->mbBeam_units, "M");
+	    strcpy(store->mbBeam_units, "");
 	    strcpy(store->mbBeam_unit_code, "MB_NOT_DEFINED");
 	    store->mbBeam_add_offset = 0;
 	    store->mbBeam_scale_factor = 1;
@@ -652,7 +867,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbAFlag_type, "integer");
 	    strcpy(store->mbAFlag_long_name, "Flag of antenna");
 	    strcpy(store->mbAFlag_name_code, "MB_ANTENNA_FLAG");
-	    strcpy(store->mbAFlag_units, "M");
+	    strcpy(store->mbAFlag_units, "");
 	    strcpy(store->mbAFlag_unit_code, "MB_NOT_DEFINED");
 	    store->mbAFlag_add_offset = 0;
 	    store->mbAFlag_scale_factor = 1;
@@ -669,7 +884,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    strcpy(store->mbVelProfilIdx_type, "integer");
 	    strcpy(store->mbVelProfilIdx_long_name, "Index of the sound velocity profil");
 	    strcpy(store->mbVelProfilIdx_name_code, "MB_PROFIL_IDX");
-	    strcpy(store->mbVelProfilIdx_units, "M");
+	    strcpy(store->mbVelProfilIdx_units, "");
 	    strcpy(store->mbVelProfilIdx_unit_code, "MB_NOT_DEFINED");
 	    store->mbVelProfilIdx_add_offset = 0;
 	    store->mbVelProfilIdx_scale_factor = 1;
@@ -708,7 +923,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbVelProfilTime_missing_value = -2000000000 - 147483648;
 	    strcpy(store->mbVelProfilTime_format_C, "%d");
 	    strcpy(store->mbVelProfilTime_orientation, "direct");
-    
+
 	    /* variable ids */
 	    store->mbHistDate_id = -1;
 	    store->mbHistTime_id = -1;
@@ -722,6 +937,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbOrdinate_id = -1;
 	    store->mbAbscissa_id = -1;
 	    store->mbFrequency_id = -1;
+	    store->mbSonarFrequency_id = -1;
 	    store->mbSounderMode_id = -1;
 	    store->mbReferenceDepth_id = -1;
 	    store->mbDynamicDraught_id = -1;
@@ -732,17 +948,31 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbPitch_id = -1;
 	    store->mbTransmissionHeave_id = -1;
 	    store->mbDistanceScale_id = -1;
+	    store->mbRangeScale_id = -1;
 	    store->mbDepthScale_id = -1;
 	    store->mbVerticalDepth_id = -1;
 	    store->mbCQuality_id = -1;
 	    store->mbCFlag_id = -1;
 	    store->mbInterlacing_id = -1;
 	    store->mbSamplingRate_id = -1;
+	    store->mbCompensationLayerMode_id = -1;
+	    store->mbTransmitBeamwidth_id = -1;
+	    store->mbReceiveBeamwidth_id = -1;
+	    store->mbTransmitPulseLength_id = -1;
 	    store->mbAlongDistance_id = -1;
 	    store->mbAcrossDistance_id = -1;
 	    store->mbDepth_id = -1;
+	    store->mbAcrossBeamAngle_id = -1;
+	    store->mbAzimutBeamAngle_id = -1;
+	    store->mbRange_id = -1;
+	    store->mbSoundingBias_id = -1;
 	    store->mbSQuality_id = -1;
+	    store->mbReflectivity_id = -1;
+	    store->mbReceptionHeave_id = -1;
+	    store->mbAlongSlope_id = -1;
+	    store->mbAcrossSlope_id = -1;
 	    store->mbSFlag_id = -1;
+	    store->mbSLengthOfDetection_id = -1;
 	    store->mbAntenna_id = -1;
 	    store->mbBeamBias_id = -1;
 	    store->mbBFlag_id = -1;
@@ -752,7 +982,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbVelProfilIdx_id = -1;
 	    store->mbVelProfilDate_id = -1;
 	    store->mbVelProfilTime_id = -1;
-    
+
 	    /* variable pointers */
 	    store->mbHistDate = NULL;
 	    store->mbHistTime = NULL;
@@ -766,6 +996,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbOrdinate = NULL;
 	    store->mbAbscissa = NULL;
 	    store->mbFrequency = NULL;
+	    store->mbSonarFrequency = NULL;
 	    store->mbSounderMode = NULL;
 	    store->mbReferenceDepth = NULL;
 	    store->mbDynamicDraught = NULL;
@@ -776,17 +1007,31 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbPitch = NULL;
 	    store->mbTransmissionHeave = NULL;
 	    store->mbDistanceScale = NULL;
+	    store->mbRangeScale = NULL;
 	    store->mbDepthScale = NULL;
 	    store->mbVerticalDepth = NULL;
 	    store->mbCQuality = NULL;
 	    store->mbCFlag = NULL;
 	    store->mbInterlacing = NULL;
 	    store->mbSamplingRate = NULL;
+	    store->mbCompensationLayerMode = NULL;
+	    store->mbTransmitBeamwidth = NULL;
+	    store->mbReceiveBeamwidth = NULL;
+	    store->mbSamplingRate = NULL;
 	    store->mbAlongDistance = NULL;
 	    store->mbAcrossDistance = NULL;
 	    store->mbDepth = NULL;
+	    store->mbAcrossBeamAngle = NULL;
+	    store->mbAzimutBeamAngle = NULL;
+	    store->mbRange = NULL;
+	    store->mbSoundingBias = NULL;
 	    store->mbSQuality = NULL;
+	    store->mbReflectivity = NULL;
+	    store->mbReceptionHeave = NULL;
+	    store->mbAlongSlope = NULL;
+	    store->mbAcrossSlope = NULL;
 	    store->mbSFlag = NULL;
+	    store->mbSLengthOfDetection = NULL;
 	    store->mbAntenna = NULL;
 	    store->mbBeamBias = NULL;
 	    store->mbBFlag = NULL;
@@ -796,29 +1041,29 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->mbVelProfilIdx = NULL;
 	    store->mbVelProfilDate = NULL;
 	    store->mbVelProfilTime = NULL;
-    
+
 	    /* go ahead and allocate history arrays */
-/*	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+/*	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbHistoryRecNbr * sizeof(int),
 			(void **)&store->mbHistDate,error);
 	    if (status == MB_SUCCESS)
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbHistoryRecNbr * sizeof(int),
 			(void **)&store->mbHistTime,error);
 	    if (status == MB_SUCCESS)
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbHistoryRecNbr * sizeof(char),
 			(void **)&store->mbHistCode,error);
 	    if (status == MB_SUCCESS)
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbHistoryRecNbr * store->mbNameLength * sizeof(char),
 			(void **)&store->mbHistAutor,error);
 	    if (status == MB_SUCCESS)
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbHistoryRecNbr * store->mbNameLength * sizeof(char),
 			(void **)&store->mbHistModule,error);
 	    if (status == MB_SUCCESS)
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbHistoryRecNbr * store->mbCommentLength * sizeof(char),
 			(void **)&store->mbHistComment,error);
 */
@@ -840,7 +1085,7 @@ int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_netcdf_deall";
@@ -890,6 +1135,8 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAbscissa, error);
 	if (store->mbFrequency != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbFrequency, error);
+	if (store->mbSonarFrequency != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSonarFrequency, error);
 	if (store->mbSounderMode != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSounderMode, error);
 	if (store->mbReferenceDepth != NULL)
@@ -910,6 +1157,8 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbTransmissionHeave, error);
 	if (store->mbDistanceScale != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbDistanceScale, error);
+	if (store->mbRangeScale != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbRangeScale, error);
 	if (store->mbDepthScale != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbDepthScale, error);
 	if (store->mbVerticalDepth != NULL)
@@ -922,16 +1171,42 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbInterlacing, error);
 	if (store->mbSamplingRate != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSamplingRate, error);
+	if (store->mbCompensationLayerMode != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbCompensationLayerMode, error);
+	if (store->mbTransmitBeamwidth != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbTransmitBeamwidth, error);
+	if (store->mbReceiveBeamwidth != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbReceiveBeamwidth, error);
+	if (store->mbTransmitPulseLength != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbTransmitPulseLength, error);
 	if (store->mbAlongDistance != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
 	if (store->mbAcrossDistance != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAcrossDistance, error);
 	if (store->mbDepth != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbDepth, error);
+	if (store->mbAcrossBeamAngle != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAcrossBeamAngle, error);
+	if (store->mbAzimutBeamAngle != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAzimutBeamAngle, error);
+	if (store->mbRange != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbRange, error);
+	if (store->mbSoundingBias != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSoundingBias, error);
 	if (store->mbSQuality != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSQuality, error);
+	if (store->mbReflectivity != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbReflectivity, error);
+	if (store->mbReceptionHeave != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbReceptionHeave, error);
+	if (store->mbAlongSlope != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAlongSlope, error);
+	if (store->mbAcrossSlope != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAcrossSlope, error);
 	if (store->mbSFlag != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSFlag, error);
+	if (store->mbSLengthOfDetection != NULL)
+	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSLengthOfDetection, error);
 	if (store->mbAntenna != NULL)
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAntenna, error);
 	if (store->mbBeamBias != NULL)
@@ -969,7 +1244,7 @@ int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_netcdf_dimensions";
@@ -1004,6 +1279,7 @@ int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get beam and pixel numbers */
 		*nbath = store->mbBeamNbr;
 		*namp = 0;
+		if (store->mbReflectivity_id >= 0) *namp = store->mbBeamNbr;
 		*nss = 0;
 		}
 	else
@@ -1033,12 +1309,12 @@ int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -1049,7 +1325,7 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_netcdf_struct *store;
 	double	depthscale, distancescale;
 	int	i;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -1069,7 +1345,7 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data kind */
 	*kind = store->kind;
-	
+
 	/* reset error and status */
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
@@ -1091,15 +1367,16 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* set speed to zero */
 		*speed = 0.0;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 2.0;
 		mb_io_ptr->beamwidth_xtrack = 2.0;
 
-		/* read distance, depth, and backscatter 
+		/* read distance, depth, and backscatter
 			values into storage arrays */
 		*nbath = store->mbBeamNbr;
 		*namp = 0;
+		if (store->mbReflectivity_id >= 0) *namp = store->mbBeamNbr;
 		*nss = 0;
 		depthscale = store->mbDepthScale[0] * store->mbDepthScale_scale_factor;
 		distancescale = store->mbDistanceScale[0] * store->mbDistanceScale_scale_factor;
@@ -1114,6 +1391,10 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			bath[i] = depthscale * store->mbDepth[i];
 			bathacrosstrack[i] = distancescale * store->mbAcrossDistance[i];
 			bathalongtrack[i] = distancescale * store->mbAlongDistance[i];
+			if (store->mbReflectivity_id >= 0)
+			    {
+			    amp[i] = store->mbReflectivity[i] * store->mbReflectivity_scale_factor;
+			    }
 			}
 
 		/* print debug statements */
@@ -1206,13 +1487,13 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1228,7 +1509,7 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -1259,12 +1540,12 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -1307,18 +1588,18 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
 			nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -1337,7 +1618,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* set data kind */
 	store->kind = kind;
-	
+
 	/* allocate memory if needed */
 	if (store->kind == MB_DATA_DATA
 	    && nbath > 0
@@ -1435,114 +1716,159 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->mbBeamNbr = nbath;
 		store->mbAntennaNbr = 1;
 		}
-		
+
 	    /* allocate arrays */
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(short),
 			(void **)&store->mbCycle,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(int),
 			(void **)&store->mbDate,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(int),
 			(void **)&store->mbTime,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(int),
 			(void **)&store->mbOrdinate,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(int),
 			(void **)&store->mbAbscissa,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(char),
 			(void **)&store->mbFrequency,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbAntennaNbr * sizeof(int),
+			(void **)&store->mbSonarFrequency,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(char),
 			(void **)&store->mbSounderMode,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
-			store->mbAntennaNbr * sizeof(short),
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbAntennaNbr * sizeof(int),
 			(void **)&store->mbReferenceDepth,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(short),
 			(void **)&store->mbDynamicDraught,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(short),
 			(void **)&store->mbTide,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(short),
 			(void **)&store->mbSoundVelocity,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(short),
 			(void **)&store->mbHeading,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(short),
 			(void **)&store->mbRoll,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(short),
 			(void **)&store->mbPitch,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(short),
 			(void **)&store->mbTransmissionHeave,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(char),
 			(void **)&store->mbDistanceScale,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbAntennaNbr * sizeof(short),
+			(void **)&store->mbRangeScale,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(char),
 			(void **)&store->mbDepthScale,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
-			store->mbAntennaNbr * sizeof(short),
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbAntennaNbr * sizeof(int),
 			(void **)&store->mbVerticalDepth,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(char),
 			(void **)&store->mbCQuality,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(char),
 			(void **)&store->mbCFlag,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(char),
 			(void **)&store->mbInterlacing,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(short),
 			(void **)&store->mbSamplingRate,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbAntennaNbr * sizeof(char),
+			(void **)&store->mbCompensationLayerMode,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbAntennaNbr * sizeof(short),
+			(void **)&store->mbTransmitBeamwidth,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbAntennaNbr * sizeof(char),
+			(void **)&store->mbReceiveBeamwidth,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbAntennaNbr * sizeof(short),
+			(void **)&store->mbTransmitPulseLength,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbBeamNbr * sizeof(short),
 			(void **)&store->mbAlongDistance,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbBeamNbr * sizeof(short),
 			(void **)&store->mbAcrossDistance,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
-			store->mbBeamNbr * sizeof(short),
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbBeamNbr * sizeof(int),
 			(void **)&store->mbDepth,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbBeamNbr * sizeof(short),
+			(void **)&store->mbAcrossBeamAngle,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbBeamNbr * sizeof(short),
+			(void **)&store->mbAzimutBeamAngle,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbBeamNbr * sizeof(short),
+			(void **)&store->mbRange,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbBeamNbr * sizeof(short),
+			(void **)&store->mbSoundingBias,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbBeamNbr * sizeof(char),
 			(void **)&store->mbSQuality,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbBeamNbr * sizeof(char),
+			(void **)&store->mbReflectivity,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbBeamNbr * sizeof(char),
+			(void **)&store->mbReceptionHeave,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbBeamNbr * sizeof(short),
+			(void **)&store->mbAlongSlope,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbBeamNbr * sizeof(short),
+			(void **)&store->mbAcrossSlope,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbBeamNbr * sizeof(char),
 			(void **)&store->mbSFlag,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			store->mbBeamNbr * sizeof(char),
+			(void **)&store->mbSLengthOfDetection,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbBeamNbr * sizeof(char),
 			(void **)&store->mbAntenna,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbBeamNbr * sizeof(short),
 			(void **)&store->mbBeamBias,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbBeamNbr * sizeof(char),
 			(void **)&store->mbBFlag,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(short),
 			(void **)&store->mbBeam,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbAntennaNbr * sizeof(char),
 			(void **)&store->mbAFlag,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbVelocityProfilNbr * store->mbCommentLength * sizeof(char),
 			(void **)&store->mbVelProfilRef,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbVelocityProfilNbr * sizeof(short),
 			(void **)&store->mbVelProfilIdx,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbVelocityProfilNbr * sizeof(int),
 			(void **)&store->mbVelProfilDate,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			store->mbVelocityProfilNbr * sizeof(int),
 			(void **)&store->mbVelProfilTime,error);
 
@@ -1555,6 +1881,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbOrdinate, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAbscissa, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbFrequency, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSonarFrequency, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSounderMode, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbReferenceDepth, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbDynamicDraught, error);
@@ -1565,17 +1892,31 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbPitch, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbTransmissionHeave, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbDistanceScale, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbRangeScale, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbDepthScale, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbVerticalDepth, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbCQuality, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbCFlag, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbInterlacing, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSamplingRate, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbCompensationLayerMode, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbTransmitBeamwidth, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbReceiveBeamwidth, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbTransmitPulseLength, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAlongDistance, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAcrossDistance, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbDepth, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAcrossBeamAngle, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAzimutBeamAngle, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbRange, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSoundingBias, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSQuality, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbReflectivity, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbReceptionHeave, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAlongSlope, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAcrossSlope, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSFlag, error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbSLengthOfDetection, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbAntenna, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbBeamBias, error);
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbBFlag, error);
@@ -1599,7 +1940,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		return(status);
 		}
 	    }
-	
+
 	/* insert data in structure */
 	if (store->kind == MB_DATA_DATA)
 		{
@@ -1645,15 +1986,15 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    /* get time */
 		    store->mbDate[i] = (int)(time_d / SECINDAY);
 		    store->mbTime[i] = (int)(1000 * (time_d - store->mbDate[0] * SECINDAY));
-    
+
 		    /* get navigation */
 		    store->mbAbscissa[i] = (int)(navlon / store->mbAbscissa_scale_factor);
 		    store->mbOrdinate[i] = (int)(navlat / store->mbOrdinate_scale_factor);
-    
+
 		    /* get heading */
 		    store->mbHeading[i] = heading / store->mbHeading_scale_factor;
 		    }
-		    
+
 		/* get depth and distance scales */
 		depthmax = 0.0;
 		distancemax = 0.0;
@@ -1668,7 +2009,7 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		depthscale = 2.1 * depthmax / ((double)store->mbDepth_valid_maximum);
 		distancescale = 2.1 * distancemax / store->mbAcrossDistance_valid_maximum;
 
-		/* put distance, depth, and backscatter values 
+		/* put distance, depth, and backscatter values
 			into data structure */
 		store->mbBeamNbr = nbath;
 		/* if (store->mbDepthScale[0] <= 0
@@ -1701,6 +2042,13 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    store->mbAlongDistance[i] = 0;
 			    }
 			}
+		for (i=0;i<namp;i++)
+		    {
+			if (beamflag[i] != MB_FLAG_NULL)
+			    store->mbReflectivity[i] = (char)(amp[i] / store->mbReflectivity_scale_factor);
+			else
+			    store->mbReflectivity[i] = 0;
+		    }
 		}
 
 	/* insert comment in structure */
@@ -1727,9 +2075,9 @@ int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_netcdf_ttimes";
@@ -1823,7 +2171,7 @@ int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_netcdf_extract_altitude";
@@ -1857,7 +2205,7 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data kind */
 	*kind = store->kind;
-	
+
 	/* set starting values */
 	*transducer_depth = 0.0;
 	*altitude = 0.0;
@@ -1873,10 +2221,10 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		else
 		    {
 		    *transducer_depth = store->mbDraught
-					    + store->mbTransmissionHeave[0] 
+					    + store->mbTransmissionHeave[0]
 						    * store->mbTransmissionHeave_scale_factor;
 		    }
-		    
+
 		/* get altitude if nonzero */
 		if (store->mbVerticalDepth[0] > 0)
 		    {
@@ -1961,7 +2309,7 @@ int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	double transducer_depth, double altitude, 
+	double transducer_depth, double altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_netcdf_insert_altitude";
@@ -1996,11 +2344,11 @@ int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<store->mbAntennaNbr;i++)
 		    {
 		    /* set draft */
-		    store->mbDynamicDraught[i] = (int)(transducer_depth 
+		    store->mbDynamicDraught[i] = (int)(transducer_depth
 						    / store->mbDynamicDraught_scale_factor);
-    
+
 		    /* set vertical depth */
-		    store->mbVerticalDepth[i] = (int)((altitude + transducer_depth) 
+		    store->mbVerticalDepth[i] = (int)((altitude + transducer_depth)
 						    / store->mbVerticalDepth_scale_factor);
 		    }
 
@@ -2043,8 +2391,8 @@ int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_netcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_netcdf_extract_nav";
@@ -2173,7 +2521,7 @@ int mbsys_netcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -2207,7 +2555,7 @@ int mbsys_netcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -2295,19 +2643,19 @@ int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		    /* get time */
 		    store->mbDate[i] = (int)(time_d / SECINDAY);
 		    store->mbTime[i] = (int)(1000 * (time_d - store->mbDate[0] * SECINDAY));
-    
+
 		    /* get navigation */
 		    store->mbAbscissa[i] = (int)(navlon / store->mbAbscissa_scale_factor);
 		    store->mbOrdinate[i] = (int)(navlat / store->mbOrdinate_scale_factor);
-    
+
 		    /* get heading */
 		    store->mbHeading[i] = heading / store->mbHeading_scale_factor;
-    
+
 		    /* get speed */
-		    
+
 		    /* get draft */
 		    store->mbDraught = draft;
-    
+
 		    /* get roll pitch and heave */
 		    store->mbRoll[i] = roll / store->mbRoll_scale_factor;
 		    store->mbPitch[i] = pitch / store->mbPitch_scale_factor;
@@ -2331,7 +2679,7 @@ int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_netcdf_copy(int verbose, void *mbio_ptr, 
+int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -2360,8 +2708,8 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 	/* get data structure pointers */
 	store = (struct mbsys_netcdf_struct *) store_ptr;
 	copy = (struct mbsys_netcdf_struct *) copy_ptr;
-	
-	
+
+
 	/* deallocate memory if required */
 	if (store->mbHistoryRecNbr > copy->mbHistoryRecNbr)
 	    {
@@ -2417,7 +2765,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbVelProfilDate, error);
 	    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->mbVelProfilTime, error);
 	    }
-	
+
 	/* allocate the memory in copy */
 	if (status == MB_SUCCESS)
 	    {
@@ -2428,130 +2776,130 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 	    copy->mbBeamNbr = store->mbBeamNbr;
 	    copy->mbCycleNbr = store->mbCycleNbr;
 	    copy->mbVelocityProfilNbr = store->mbVelocityProfilNbr;
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * sizeof(int),
 			(void **)&copy->mbHistDate,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * sizeof(int),
 			(void **)&copy->mbHistTime,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * sizeof(char),
 			(void **)&copy->mbHistCode,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * copy->mbNameLength * sizeof(char),
 			(void **)&copy->mbHistAutor,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * copy->mbNameLength * sizeof(char),
 			(void **)&copy->mbHistModule,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbHistoryRecNbr * copy->mbCommentLength * sizeof(char),
 			(void **)&copy->mbHistComment,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(short),
 			(void **)&copy->mbCycle,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(int),
 			(void **)&copy->mbDate,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(int),
 			(void **)&copy->mbTime,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(int),
 			(void **)&copy->mbOrdinate,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(int),
 			(void **)&copy->mbAbscissa,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(char),
 			(void **)&copy->mbFrequency,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(char),
 			(void **)&copy->mbSounderMode,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
-			copy->mbAntennaNbr * sizeof(short),
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			copy->mbAntennaNbr * sizeof(int),
 			(void **)&copy->mbReferenceDepth,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(short),
 			(void **)&copy->mbDynamicDraught,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(short),
 			(void **)&copy->mbTide,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(short),
 			(void **)&copy->mbSoundVelocity,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(short),
 			(void **)&copy->mbHeading,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(short),
 			(void **)&copy->mbRoll,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(short),
 			(void **)&copy->mbPitch,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(short),
 			(void **)&copy->mbTransmissionHeave,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(char),
 			(void **)&copy->mbDistanceScale,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(char),
 			(void **)&copy->mbDepthScale,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
-			copy->mbAntennaNbr * sizeof(short),
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			copy->mbAntennaNbr * sizeof(int),
 			(void **)&copy->mbVerticalDepth,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(char),
 			(void **)&copy->mbCQuality,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(char),
 			(void **)&copy->mbCFlag,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(char),
 			(void **)&copy->mbInterlacing,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(short),
 			(void **)&copy->mbSamplingRate,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbBeamNbr * sizeof(short),
 			(void **)&copy->mbAlongDistance,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbBeamNbr * sizeof(short),
 			(void **)&copy->mbAcrossDistance,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
-			copy->mbBeamNbr * sizeof(short),
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			copy->mbBeamNbr * sizeof(int),
 			(void **)&copy->mbDepth,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbBeamNbr * sizeof(char),
 			(void **)&copy->mbSQuality,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbBeamNbr * sizeof(char),
 			(void **)&copy->mbSFlag,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbBeamNbr * sizeof(char),
 			(void **)&copy->mbAntenna,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbBeamNbr * sizeof(short),
 			(void **)&copy->mbBeamBias,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbBeamNbr * sizeof(char),
 			(void **)&copy->mbBFlag,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(short),
 			(void **)&copy->mbBeam,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbAntennaNbr * sizeof(char),
 			(void **)&copy->mbAFlag,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbVelocityProfilNbr * copy->mbCommentLength * sizeof(char),
 			(void **)&copy->mbVelProfilRef,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbVelocityProfilNbr * sizeof(short),
 			(void **)&copy->mbVelProfilIdx,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbVelocityProfilNbr * sizeof(int),
 			(void **)&copy->mbVelProfilDate,error);
-	    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
 			copy->mbVelocityProfilNbr * sizeof(int),
 			(void **)&copy->mbVelProfilTime,error);
 	    }
@@ -2619,7 +2967,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 	if (status == MB_SUCCESS)
 	    {
 	    copy->kind = store->kind;
-    
+
 	    /* global attributes */
 	    copy->mbVersion = store->mbVersion;
 	    for (i=0;i<64;i++)
@@ -2678,7 +3026,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 	    copy->mbMinDepth = store->mbMinDepth;
 	    copy->mbMaxDepth = store->mbMaxDepth;
 	    copy->mbCycleCounter = store->mbCycleCounter;
-	    
+
 	    /* variable ids */
 	    copy->mbHistDate_id = store->mbHistDate_id;
 	    copy->mbHistTime_id = store->mbHistTime_id;
@@ -2722,7 +3070,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 	    copy->mbVelProfilIdx_id = store->mbVelProfilIdx_id;
 	    copy->mbVelProfilDate_id = store->mbVelProfilDate_id;
 	    copy->mbVelProfilTime_id = store->mbVelProfilTime_id;
-    
+
 	    /* variable pointers */
 	    for (i=0;i<copy->mbHistoryRecNbr;i++)
 	        {
@@ -2781,7 +3129,7 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 		copy->mbVelProfilDate[i] = store->mbVelProfilDate[i];
 		copy->mbVelProfilTime[i] = store->mbVelProfilTime[i];
 		}
-	    
+
 	    /* variable attributes */
 	    for (i=0;i<64;i++)
 		{
@@ -3330,10 +3678,10 @@ int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 	    copy->mbVelProfilTime_valid_minimum = store->mbVelProfilTime_valid_minimum;
 	    copy->mbVelProfilTime_valid_maximum = store->mbVelProfilTime_valid_maximum;
 	    copy->mbVelProfilTime_missing_value = store->mbVelProfilTime_missing_value;
-	
+
 	    /* storage comment string */
 	    for (i=0;i<MBSYS_NETCDF_COMMENTLEN;i++)
-	        copy->comment[i] = store->comment[i];	    
+	        copy->comment[i] = store->comment[i];
 	    }
 
 	/* print output debug statements */

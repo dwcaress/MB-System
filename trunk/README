@@ -352,6 +352,9 @@ These files are:
 Asynchronous data are not available in all formats. When available, the
 asynchronous data can be extracted using mbnavlist. The synchronous
 attitude can be extracted using mblist.
+
+Added support for EM12D data in the Caraibes netcdf form as format 76.
+Contributed by Gordon Keith.
      
 
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
@@ -1547,10 +1550,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.120 2008-11-18 21:26:39 caress Exp $
+RCS ID: $Id: README,v 5.121 2008-12-05 17:32:51 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.120  2008/11/18 21:26:39  caress
+Release 5.1.1beta26
+
 Revision 5.119  2008/11/16 21:47:00  caress
 Added recent changes.
 

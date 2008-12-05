@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.12 2008-07-10 18:16:33 caress Exp $
+ *    $Id: mbareaclean.c,v 5.13 2008-12-05 17:32:52 caress Exp $
  *
  *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -37,6 +37,9 @@
  *		Amsterdam Airport
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2008/07/10 18:16:33  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.10  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -147,10 +150,10 @@ int getsoundingptr(int verbose, int soundingid,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.12 2008-07-10 18:16:33 caress Exp $";
+	static char rcs_id[] = "$Id: mbareaclean.c,v 5.13 2008-12-05 17:32:52 caress Exp $";
 	static char program_name[] = "MBAREACLEAN";
 	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
-	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize \n\t -Mthreshold/nmin -Dthreshold/nmin -Ttype -N[-]minbeam/maxbeam]";
+	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize	\n\t -Mthreshold/nmin -Dthreshold[/nmin[/nmax]] -Ttype -N[-]minbeam/maxbeam]";
 	extern char *optarg;
 	extern int optkind;
 	int	errflg = 0;
@@ -221,6 +224,8 @@ main (int argc, char **argv)
 	int	median_filter = MB_NO;
 	double	median_filter_threshold = 0.25;
 	int	median_filter_nmin = 10;
+	int	density_filter = MB_NO;
+	int	density_filter_nmax = 0;
 	int	plane_fit = MB_NO;
 	double	plane_fit_threshold = 0.05;
 	int	plane_fit_nmin = 10;
@@ -280,10 +285,13 @@ main (int argc, char **argv)
 	int	action;
 
 	double	xx, yy;
+	int	flagsounding;
+	double	median_depth_low;
+	double	median_depth_high;
 	int	done;
 	int	ix, iy, ib, kgrid;
 	double	d1, d2;
-	int	i1, n;
+	int	i1, i2, n;
 	int	i, j, k;
 
 	/* get current default values */
@@ -357,10 +365,15 @@ main (int argc, char **argv)
 		case 'M':
 		case 'm':
 			median_filter = MB_YES;
-			n = sscanf (optarg,"%lf/%d/%lf", 
-					&d1,&i1,&d2);
+			n = sscanf (optarg,"%lf/%d/%d", 
+					&d1,&i1,&i2);
 			if (n > 0) median_filter_threshold = d1;
 			if (n > 1) median_filter_nmin = i1;
+			if (n > 2) 
+				{
+				density_filter = MB_YES;
+				density_filter_nmax = i2;
+				}
 			flag++;
 			break;
 		case 'N':
@@ -477,6 +490,8 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       median_filter:             %d\n",median_filter);
 		fprintf(stderr,"dbg2       median_filter_threshold:   %f\n",median_filter_threshold);
 		fprintf(stderr,"dbg2       median_filter_nmin:        %d\n",median_filter_nmin);
+		fprintf(stderr,"dbg2       density_filter:            %d\n",density_filter);
+		fprintf(stderr,"dbg2       density_filter_nmax:       %f\n",density_filter_nmax);
 		fprintf(stderr,"dbg2       plane_fit:                 %d\n",plane_fit);
 		fprintf(stderr,"dbg2       plane_fit_threshold:       %f\n",plane_fit_threshold);
 		fprintf(stderr,"dbg2       plane_fit_nmin:            %d\n",plane_fit_nmin);
@@ -589,6 +604,14 @@ main (int argc, char **argv)
 			}
 		else
 			fprintf(stderr,"     Median filter: OFF\n");
+		if (density_filter == MB_YES)
+			{
+			fprintf(stderr,"     Density filter: ON\n");
+			fprintf(stderr,"     Density filter maximum N:    %d\n",
+					density_filter_nmax);
+			}
+		else
+			fprintf(stderr,"     Density filter: OFF\n");
 		if (plane_fit == MB_YES)
 			{
 			fprintf(stderr,"     Plane fit:     ON\n");
@@ -1140,6 +1163,16 @@ ix,iy,kgrid,gsndg[kgrid][i],sndg->sndg_beamflag,binnum);*/
 			qsort((char *)bindepths,binnum,sizeof(double),
 				(void *)mb_double_compare);
 			median_depth = bindepths[binnum / 2];
+			if (density_filter == MB_YES
+				&& binnum / 2 - density_filter_nmax / 2 >= 0)
+				median_depth_low = bindepths[binnum / 2 + density_filter_nmax / 2];
+			else
+				median_depth_low = bindepths[0];
+			if (density_filter == MB_YES
+				&& binnum / 2 + density_filter_nmax / 2 < binnum)
+				median_depth_high = bindepths[binnum / 2 + density_filter_nmax / 2];
+			else
+				median_depth_high = bindepths[binnum-1];
 /* if (binnum>0)
 fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d median:%f\n",
 ix,iy,kgrid,xx,yy,binnum,median_depth);*/
@@ -1150,13 +1183,19 @@ ix,iy,kgrid,xx,yy,binnum,median_depth);*/
 				getsoundingptr(verbose, gsndg[kgrid][i], &sndg, &error);
 				threshold = fabs(median_filter_threshold 
 						* files[sndg->sndg_file].ping_altitude[sndg->sndg_ping]);
+				flagsounding = MB_NO;
+				if (fabs(sndg->sndg_depth - median_depth) > threshold)
+					flagsounding = MB_YES;
+				if (density_filter == MB_YES
+					&& (sndg->sndg_depth > median_depth_high
+						|| sndg->sndg_depth < median_depth_low))
+					flagsounding = MB_YES;
 /*fprintf(stderr,"sounding:%d file:%d time_d:%f depth:%f median:%f altitude:%f threshold:%f",
 gsndg[kgrid][i],sndg->sndg_file,
 files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth,median_depth,
 files[sndg->sndg_file].ping_altitude[sndg->sndg_ping],
 threshold);*/
-				flag_sounding(verbose, 
-					      fabs(sndg->sndg_depth - median_depth) > threshold,
+				flag_sounding(verbose, flagsounding,
 					      output_bad, output_good,
 					      sndg, &error);
 				}

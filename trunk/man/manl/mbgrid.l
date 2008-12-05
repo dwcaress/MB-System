@@ -1,4 +1,4 @@
-.TH mbgrid l "14 November 2008" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid l "4 December 2008" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data 
 from swath sonar data files.
@@ -249,7 +249,7 @@ bathymetry data will be gridded (positive downwards). If \fIdatatype\fP = 2,
 bathymetry data will be gridded as topography (positive upwards).  
 If \fIdatatype\fP = 3,
 amplitude data will be gridded.  If \fIdatatype\fP = 4,
-sidescan data will be gr 
+sidescan data will be gridded. Default: \fIdatatype\fP = 1 (bathymetry).
 .TP
 .B \-K
 \fIbackground\fP
@@ -258,8 +258,6 @@ Enables filling in all undefined grid cells with bathymetry or topography
 from a global or regional database accessed with the \fBGMT\fP program
 \fBgrdraster\fP. The \fIbackground\fP specifies which locally defined
 database is accessed with \fBgrdraster\fP.
-idded.  
-Default: \fIdatatype\fP = 1 (bathymetry).
 .TP
 .B \-B
 \fIborder\fP
@@ -654,7 +652,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.14 2008-11-16 21:51:17 caress Exp $
+ Version $Id: mbgrid.l,v 5.15 2008-12-05 17:32:51 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

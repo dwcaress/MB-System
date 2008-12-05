@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.26 2008-10-17 07:30:22 caress Exp $
+ *    $Id: mb_format.h,v 5.27 2008-12-05 17:32:52 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -19,6 +19,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2008/10/17 07:30:22  caress
+ * Added format 26 supporting Hydrosweep DS data used by SOPAC.
+ *
  * Revision 5.25  2008/07/19 07:41:14  caress
  * Added formats 191 and 192 to support Imagenex Delta T multibeam data.
  *
@@ -241,7 +244,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2008-10-17 07:30:22 $ $Revision: 5.26 $";
+static char mb_format_updatedate[] = "$Date: 2008-12-05 17:32:52 $ $Revision: 5.27 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0
@@ -278,7 +281,7 @@ static char mb_format_updatedate[] = "$Date: 2008-10-17 07:30:22 $ $Revision: 5.
 #define	MB_SYS_IMAGE83P		31
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	68
+#define	MB_FORMATS	69
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -382,6 +385,8 @@ static char mb_format_updatedate[] = "$Date: 2008-10-17 07:30:22 $ $Revision: 5.
  					binary, centered, L-DEO. */
 #define	MBF_MBNETCDF	75	/* CARAIBES CDF multibeam, variable beam, 
  					netCDF, IFREMER. */
+#define	MBF_MBNCDFXT	76	/* CARAIBES CDF multibeam, variable beam,
+ 					netCDF, IFREMER. - extended format */
 #define	MBF_CBAT9001	81	/* Reson SeaBat 9001 multibeam, 60 beams
  					bathymetry and amplitude,
  					binary, University of New Brunswick. */
