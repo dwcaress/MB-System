@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.26 2008-07-10 18:16:33 caress Exp $
+ *    $Id: mbcopy.c,v 5.27 2008-12-05 17:32:52 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2008/07/10 18:16:33  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.24  2007/11/16 17:53:02  caress
  * Fixes applied.
  *
@@ -249,7 +252,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.26 2008-07-10 18:16:33 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.27 2008-12-05 17:32:52 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  -Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -717,6 +720,16 @@ main (int argc, char **argv)
 		copymode = MBCOPY_RESON8K_TO_GSF;		
 	else
 		copymode = MBCOPY_PARTIAL;
+		
+	/* quit if an unsupported copy to GSF is requested */
+	if (omb_io_ptr->format == MBF_GSFGENMB && copymode == MBCOPY_PARTIAL)
+		{
+		fprintf(stderr,"Requested copy from format %d to GSF format %d is unsupported\n",
+			imb_io_ptr->format, omb_io_ptr->format);
+		fprintf(stderr,"Please consider writing the necessary translation code for mbcopy.c \n");
+		fprintf(stderr,"\tand contributing it to the MB-System community\n");
+		exit(error);
+		}
 
 	/* print debug statements */
 	if (verbose >= 2)

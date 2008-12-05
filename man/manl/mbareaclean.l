@@ -9,7 +9,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbareaclean\fP  \fB-R\fP\fIwest/east/south/north\fP  \fB-S\fP\fIbinsize\fP 
 [\fB-D\fP\fIthreshold\fP \fB-F\fP\fIformat\fP \fB-I\fP\fIinfile\fP 
-\fB-B -G -H -M\fP\fIthreshold\fP[\fI/nmin\fP]  
+\fB-B -G -H -M\fP\fIthreshold\fP[\fI/nmin\fP[\fI/nmax\fP]] 
 \fB-N\fP[-]\fImin_beam\fP[\fI/maxbeam\fP] \fB-T\fP\fItype\fP -V\fP]
 
 .SH DESCRIPTION
@@ -40,13 +40,17 @@ already exist.
 
 At present only two algorithms for identifying good and bad beams is
 implemented. The first is a simple median filter controlled by the 
-\fB-M\fP\fIthreshold/nmin\fP option. Soundings that differ from the
+\fB-M\fP\fIthreshold/nmin[/nmax]\fP option. Soundings that differ from the
 median depth by a value greater than \fIthreshold\fP times the sonar 
 altitude will be considered "bad". So, if \fIthreshold\fP = 0.05, then
 any sounding that is 5% greater or less than the median depth will be
 considered bad. The \fInmin\fP parameter sets the minimum number of 
-soundings required to use the median filter, The default values are 
-\fIthreshold\fP = 0.25 and \fInmin\fP = 10.
+soundings required to use the median filter. The \fInmax\fP parameter 
+sets the maximum number of soundings allowed within a cell. If the number
+of initially good beams in a cell exceeds \fInmax\fP, then only the \fInmax\fP
+soundings nearest the median value remain unflagged, and the rest are
+flagged even if they meet the threshold test. The default values are 
+\fIthreshold\fP = 0.25, \fInmin\fP = 10, and \fInmax\fP = infinite. 
 
 The second algorithm is a simple standard deviation filter controlled by the
 \fB-D\fP\fIthreshold/nmin\fP option. Soundings that differ from the
@@ -223,7 +227,7 @@ of the sonar altitude, and the minimum number of sounding required for
 filtering is 10. The results look like:
 
  Program MBAREACLEAN
- Version $Id: mbareaclean.l,v 5.5 2007-10-08 16:55:56 caress Exp $
+ Version $Id: mbareaclean.l,v 5.6 2008-12-05 17:32:51 caress Exp $
  MB-system Version 5.0.beta29
  Area of interest:
       Minimum Longitude: -122.425560 Maximum Longitude: -122.419740

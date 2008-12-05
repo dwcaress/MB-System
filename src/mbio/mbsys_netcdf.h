@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.h	4/8/2002
- *	$Id: mbsys_netcdf.h,v 5.5 2008-05-16 22:56:24 caress Exp $
+ *	$Id: mbsys_netcdf.h,v 5.6 2008-12-05 17:32:52 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	April 8, 2002
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.4  2008/03/01 09:14:03  caress
  * Some housekeeping changes.
  *
@@ -42,8 +45,8 @@
  */
 /*
  * Notes on the MBF_MBNETCDF data format:
- *   1. 
- *   2. 
+ *   1.
+ *   2.
  *
  */
 
@@ -143,9 +146,9 @@ struct mbsys_netcdf_struct
 	double mbMinDepth;
 	double mbMaxDepth;
 	int mbCycleCounter;
-	
+
 	/* dimensions */
-	size_t CIB_BLOCK_DIM;
+	size_t CIB_BLOCK_DIM; /* not in extended format */
 	size_t mbHistoryRecNbr;
 	size_t mbNameLength;
 	size_t mbCommentLength;
@@ -153,7 +156,7 @@ struct mbsys_netcdf_struct
 	size_t mbBeamNbr;
 	size_t mbCycleNbr;
 	size_t mbVelocityProfilNbr;
-	
+
 	/* variable ids */
 	int mbHistDate_id;
 	int mbHistTime_id;
@@ -167,6 +170,7 @@ struct mbsys_netcdf_struct
 	int mbOrdinate_id;
 	int mbAbscissa_id;
 	int mbFrequency_id;
+	int mbSonarFrequency_id;
 	int mbSounderMode_id;
 	int mbReferenceDepth_id;
 	int mbDynamicDraught_id;
@@ -177,17 +181,31 @@ struct mbsys_netcdf_struct
 	int mbPitch_id;
 	int mbTransmissionHeave_id;
 	int mbDistanceScale_id;
+	int mbRangeScale_id;
 	int mbDepthScale_id;
 	int mbVerticalDepth_id;
 	int mbCQuality_id;
 	int mbCFlag_id;
 	int mbInterlacing_id;
 	int mbSamplingRate_id;
+	int mbCompensationLayerMode_id;
+	int mbTransmitBeamwidth_id;
+	int mbReceiveBeamwidth_id;
+	int mbTransmitPulseLength_id;
 	int mbAlongDistance_id;
 	int mbAcrossDistance_id;
 	int mbDepth_id;
+	int mbAcrossBeamAngle_id;
+	int mbAzimutBeamAngle_id;
+	int mbRange_id;
+	int mbSoundingBias_id;
 	int mbSQuality_id;
+	int mbReflectivity_id;
+	int mbReceptionHeave_id;
+	int mbAlongSlope_id;
+	int mbAcrossSlope_id;
 	int mbSFlag_id;
+	int mbSLengthOfDetection_id;
 	int mbAntenna_id;
 	int mbBeamBias_id;
 	int mbBFlag_id;
@@ -205,14 +223,16 @@ struct mbsys_netcdf_struct
         char *mbHistAutor;
         char *mbHistModule;
         char *mbHistComment;
+
         int *mbCycle;
         int *mbDate;
         int *mbTime;
         int *mbOrdinate;
         int *mbAbscissa;
         char *mbFrequency;
+        int *mbSonarFrequency;	/* extended mode */
         char *mbSounderMode;
-        short *mbReferenceDepth;
+        int *mbReferenceDepth;
         short *mbDynamicDraught;
         short *mbTide;
         short *mbSoundVelocity;
@@ -221,27 +241,45 @@ struct mbsys_netcdf_struct
         short *mbPitch;
         short *mbTransmissionHeave;
         char *mbDistanceScale;
+        short *mbRangeScale;	/* extended mode */
         char *mbDepthScale;
         int *mbVerticalDepth;
         char *mbCQuality;
         char *mbCFlag;
         char *mbInterlacing;
         short *mbSamplingRate;
+        char *mbCompensationLayerMode;	/* extended mode */
+        short *mbTransmitBeamwidth;	/* extended mode */
+        char *mbReceiveBeamwidth;	/* extended mode */
+        short *mbTransmitPulseLength;	/* extended mode */
+
         short *mbAlongDistance;
         short *mbAcrossDistance;
-        short *mbDepth;
+        int *mbDepth;
+        short *mbAcrossBeamAngle;	/* extended mode */
+        short *mbAzimutBeamAngle;	/* extended mode */
+        short *mbRange;		/* extended mode */
+        short *mbSoundingBias;	/* extended mode */
         char *mbSQuality;
+        char *mbReflectivity ;	/* extended mode */
+        char *mbReceptionHeave;	/* extended mode */
+        short *mbAlongSlope;	/* extended mode */
+        short *mbAcrossSlope;	/* extended mode */
         char *mbSFlag;
+        char *mbSLengthOfDetection;	/* extended mode */
+
         char *mbAntenna;
-        short *mbBeamBias;
+        short *mbBeamBias;	/* not in extended mode */
         char *mbBFlag;
+
         short *mbBeam;
         char *mbAFlag;
+
         char *mbVelProfilRef;
         short *mbVelProfilIdx;
         int *mbVelProfilDate;
         int *mbVelProfilTime;
-	
+
 	/* variable attributes */
 	char mbHistDate_type[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbHistDate_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
@@ -345,8 +383,8 @@ struct mbsys_netcdf_struct
 	char mbOrdinate_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbOrdinate_add_offset;
 	double mbOrdinate_scale_factor;
-	int mbOrdinate_minimum;
-	int mbOrdinate_maximum;
+	double mbOrdinate_minimum;
+	double mbOrdinate_maximum;
 	int mbOrdinate_valid_minimum;
 	int mbOrdinate_valid_maximum;
 	int mbOrdinate_missing_value;
@@ -359,8 +397,8 @@ struct mbsys_netcdf_struct
 	char mbAbscissa_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbAbscissa_add_offset;
 	double mbAbscissa_scale_factor;
-	int mbAbscissa_minimum;
-	int mbAbscissa_maximum;
+	double mbAbscissa_minimum;
+	double mbAbscissa_maximum;
 	int mbAbscissa_valid_minimum;
 	int mbAbscissa_valid_maximum;
 	int mbAbscissa_missing_value;
@@ -378,6 +416,20 @@ struct mbsys_netcdf_struct
 	int mbFrequency_valid_minimum;
 	int mbFrequency_valid_maximum;
 	int mbFrequency_missing_value;
+	char mbSonarFrequency_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSonarFrequency_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSonarFrequency_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSonarFrequency_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSonarFrequency_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSonarFrequency_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSonarFrequency_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	double mbSonarFrequency_add_offset;
+	double mbSonarFrequency_scale_factor;
+	double mbSonarFrequency_minimum;
+	double mbSonarFrequency_maximum;
+	int mbSonarFrequency_valid_minimum;
+	int mbSonarFrequency_valid_maximum;
+	int mbSonarFrequency_missing_value;
 	char mbSounderMode_type[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbSounderMode_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbSounderMode_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
@@ -401,8 +453,8 @@ struct mbsys_netcdf_struct
 	char mbReferenceDepth_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbReferenceDepth_add_offset;
 	double mbReferenceDepth_scale_factor;
-	int mbReferenceDepth_minimum;
-	int mbReferenceDepth_maximum;
+	double mbReferenceDepth_minimum;
+	double mbReferenceDepth_maximum;
 	int mbReferenceDepth_valid_minimum;
 	int mbReferenceDepth_valid_maximum;
 	int mbReferenceDepth_missing_value;
@@ -415,8 +467,8 @@ struct mbsys_netcdf_struct
 	char mbDynamicDraught_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbDynamicDraught_add_offset;
 	double mbDynamicDraught_scale_factor;
-	int mbDynamicDraught_minimum;
-	int mbDynamicDraught_maximum;
+	double mbDynamicDraught_minimum;
+	double mbDynamicDraught_maximum;
 	int mbDynamicDraught_valid_minimum;
 	int mbDynamicDraught_valid_maximum;
 	int mbDynamicDraught_missing_value;
@@ -429,8 +481,8 @@ struct mbsys_netcdf_struct
 	char mbTide_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbTide_add_offset;
 	double mbTide_scale_factor;
-	int mbTide_minimum;
-	int mbTide_maximum;
+	double mbTide_minimum;
+	double mbTide_maximum;
 	int mbTide_valid_minimum;
 	int mbTide_valid_maximum;
 	int mbTide_missing_value;
@@ -443,8 +495,8 @@ struct mbsys_netcdf_struct
 	char mbSoundVelocity_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbSoundVelocity_add_offset;
 	double mbSoundVelocity_scale_factor;
-	int mbSoundVelocity_minimum;
-	int mbSoundVelocity_maximum;
+	double mbSoundVelocity_minimum;
+	double mbSoundVelocity_maximum;
 	int mbSoundVelocity_valid_minimum;
 	int mbSoundVelocity_valid_maximum;
 	int mbSoundVelocity_missing_value;
@@ -457,8 +509,8 @@ struct mbsys_netcdf_struct
 	char mbHeading_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbHeading_add_offset;
 	double mbHeading_scale_factor;
-	int mbHeading_minimum;
-	int mbHeading_maximum;
+	double mbHeading_minimum;
+	double mbHeading_maximum;
 	int mbHeading_valid_minimum;
 	int mbHeading_valid_maximum;
 	int mbHeading_missing_value;
@@ -471,8 +523,8 @@ struct mbsys_netcdf_struct
 	char mbRoll_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbRoll_add_offset;
 	double mbRoll_scale_factor;
-	int mbRoll_minimum;
-	int mbRoll_maximum;
+	double mbRoll_minimum;
+	double mbRoll_maximum;
 	int mbRoll_valid_minimum;
 	int mbRoll_valid_maximum;
 	int mbRoll_missing_value;
@@ -485,8 +537,8 @@ struct mbsys_netcdf_struct
 	char mbPitch_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbPitch_add_offset;
 	double mbPitch_scale_factor;
-	int mbPitch_minimum;
-	int mbPitch_maximum;
+	double mbPitch_minimum;
+	double mbPitch_maximum;
 	int mbPitch_valid_minimum;
 	int mbPitch_valid_maximum;
 	int mbPitch_missing_value;
@@ -499,8 +551,8 @@ struct mbsys_netcdf_struct
 	char mbTransmissionHeave_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbTransmissionHeave_add_offset;
 	double mbTransmissionHeave_scale_factor;
-	int mbTransmissionHeave_minimum;
-	int mbTransmissionHeave_maximum;
+	double mbTransmissionHeave_minimum;
+	double mbTransmissionHeave_maximum;
 	int mbTransmissionHeave_valid_minimum;
 	int mbTransmissionHeave_valid_maximum;
 	int mbTransmissionHeave_missing_value;
@@ -513,11 +565,25 @@ struct mbsys_netcdf_struct
 	char mbDistanceScale_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbDistanceScale_add_offset;
 	double mbDistanceScale_scale_factor;
-	int mbDistanceScale_minimum;
-	int mbDistanceScale_maximum;
+	double mbDistanceScale_minimum;
+	double mbDistanceScale_maximum;
 	int mbDistanceScale_valid_minimum;
 	int mbDistanceScale_valid_maximum;
 	int mbDistanceScale_missing_value;
+	char mbRangeScale_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRangeScale_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRangeScale_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRangeScale_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRangeScale_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRangeScale_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRangeScale_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	double mbRangeScale_add_offset;
+	double mbRangeScale_scale_factor;
+	double mbRangeScale_minimum;
+	double mbRangeScale_maximum;
+	int mbRangeScale_valid_minimum;
+	int mbRangeScale_valid_maximum;
+	int mbRangeScale_missing_value;
 	char mbDepthScale_type[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbDepthScale_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbDepthScale_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
@@ -527,8 +593,8 @@ struct mbsys_netcdf_struct
 	char mbDepthScale_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
 	double mbDepthScale_add_offset;
 	double mbDepthScale_scale_factor;
-	int mbDepthScale_minimum;
-	int mbDepthScale_maximum;
+	double mbDepthScale_minimum;
+	double mbDepthScale_maximum;
 	int mbDepthScale_valid_minimum;
 	int mbDepthScale_valid_maximum;
 	int mbDepthScale_missing_value;
@@ -602,6 +668,62 @@ struct mbsys_netcdf_struct
 	int mbSamplingRate_valid_minimum;
 	int mbSamplingRate_valid_maximum;
 	int mbSamplingRate_missing_value;
+	char mbCompensationLayerMode_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbCompensationLayerMode_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbCompensationLayerMode_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbCompensationLayerMode_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbCompensationLayerMode_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbCompensationLayerMode_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbCompensationLayerMode_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	int mbCompensationLayerMode_add_offset;
+	int mbCompensationLayerMode_scale_factor;
+	int mbCompensationLayerMode_minimum;
+	int mbCompensationLayerMode_maximum;
+	int mbCompensationLayerMode_valid_minimum;
+	int mbCompensationLayerMode_valid_maximum;
+	int mbCompensationLayerMode_missing_value;
+	char mbTransmitBeamwidth_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitBeamwidth_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitBeamwidth_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitBeamwidth_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitBeamwidth_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitBeamwidth_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitBeamwidth_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	int mbTransmitBeamwidth_add_offset;
+	int mbTransmitBeamwidth_scale_factor;
+	int mbTransmitBeamwidth_minimum;
+	int mbTransmitBeamwidth_maximum;
+	int mbTransmitBeamwidth_valid_minimum;
+	int mbTransmitBeamwidth_valid_maximum;
+	int mbTransmitBeamwidth_missing_value;
+	char mbReceiveBeamwidth_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceiveBeamwidth_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceiveBeamwidth_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceiveBeamwidth_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceiveBeamwidth_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceiveBeamwidth_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceiveBeamwidth_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	int mbReceiveBeamwidth_add_offset;
+	int mbReceiveBeamwidth_scale_factor;
+	int mbReceiveBeamwidth_minimum;
+	int mbReceiveBeamwidth_maximum;
+	int mbReceiveBeamwidth_valid_minimum;
+	int mbReceiveBeamwidth_valid_maximum;
+	int mbReceiveBeamwidth_missing_value;
+	char mbTransmitPulseLength_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitPulseLength_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitPulseLength_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitPulseLength_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitPulseLength_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitPulseLength_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbTransmitPulseLength_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	int mbTransmitPulseLength_add_offset;
+	int mbTransmitPulseLength_scale_factor;
+	int mbTransmitPulseLength_minimum;
+	int mbTransmitPulseLength_maximum;
+	int mbTransmitPulseLength_valid_minimum;
+	int mbTransmitPulseLength_valid_maximum;
+	int mbTransmitPulseLength_missing_value;
 	char mbAlongDistance_type[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbAlongDistance_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbAlongDistance_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
@@ -644,6 +766,62 @@ struct mbsys_netcdf_struct
 	int mbDepth_valid_minimum;
 	int mbDepth_valid_maximum;
 	int mbDepth_missing_value;
+	char mbAcrossBeamAngle_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossBeamAngle_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossBeamAngle_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossBeamAngle_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossBeamAngle_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossBeamAngle_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossBeamAngle_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	double mbAcrossBeamAngle_add_offset;
+	double mbAcrossBeamAngle_scale_factor;
+	double mbAcrossBeamAngle_minimum;
+	double mbAcrossBeamAngle_maximum;
+	int mbAcrossBeamAngle_valid_minimum;
+	int mbAcrossBeamAngle_valid_maximum;
+	int mbAcrossBeamAngle_missing_value;
+	char mbAzimutBeamAngle_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAzimutBeamAngle_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAzimutBeamAngle_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAzimutBeamAngle_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAzimutBeamAngle_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAzimutBeamAngle_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAzimutBeamAngle_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	double mbAzimutBeamAngle_add_offset;
+	double mbAzimutBeamAngle_scale_factor;
+	double mbAzimutBeamAngle_minimum;
+	double mbAzimutBeamAngle_maximum;
+	int mbAzimutBeamAngle_valid_minimum;
+	int mbAzimutBeamAngle_valid_maximum;
+	int mbAzimutBeamAngle_missing_value;
+	char mbRange_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRange_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRange_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRange_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRange_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRange_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbRange_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	int mbRange_add_offset;
+	int mbRange_scale_factor;
+	int mbRange_minimum;
+	int mbRange_maximum;
+	int mbRange_valid_minimum;
+	int mbRange_valid_maximum;
+	int mbRange_missing_value;
+	char mbSoundingBias_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSoundingBias_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSoundingBias_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSoundingBias_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSoundingBias_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSoundingBias_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSoundingBias_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	double mbSoundingBias_add_offset;
+	double mbSoundingBias_scale_factor;
+	double mbSoundingBias_minimum;
+	double mbSoundingBias_maximum;
+	int mbSoundingBias_valid_minimum;
+	int mbSoundingBias_valid_maximum;
+	int mbSoundingBias_missing_value;
 	char mbSQuality_type[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbSQuality_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbSQuality_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
@@ -658,6 +836,62 @@ struct mbsys_netcdf_struct
 	int mbSQuality_valid_minimum;
 	int mbSQuality_valid_maximum;
 	int mbSQuality_missing_value;
+	char mbReflectivity_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReflectivity_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReflectivity_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReflectivity_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReflectivity_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReflectivity_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReflectivity_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	double mbReflectivity_add_offset;
+	double mbReflectivity_scale_factor;
+	double mbReflectivity_minimum;
+	double mbReflectivity_maximum;
+	int mbReflectivity_valid_minimum;
+	int mbReflectivity_valid_maximum;
+	int mbReflectivity_missing_value;
+	char mbReceptionHeave_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceptionHeave_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceptionHeave_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceptionHeave_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceptionHeave_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceptionHeave_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbReceptionHeave_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	double mbReceptionHeave_add_offset;
+	double mbReceptionHeave_scale_factor;
+	double mbReceptionHeave_minimum;
+	double mbReceptionHeave_maximum;
+	int mbReceptionHeave_valid_minimum;
+	int mbReceptionHeave_valid_maximum;
+	int mbReceptionHeave_missing_value;
+	char mbAlongSlope_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAlongSlope_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAlongSlope_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAlongSlope_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAlongSlope_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAlongSlope_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAlongSlope_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	double mbAlongSlope_add_offset;
+	double mbAlongSlope_scale_factor;
+	double mbAlongSlope_minimum;
+	double mbAlongSlope_maximum;
+	int mbAlongSlope_valid_minimum;
+	int mbAlongSlope_valid_maximum;
+	int mbAlongSlope_missing_value;
+	char mbAcrossSlope_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossSlope_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossSlope_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossSlope_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossSlope_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossSlope_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbAcrossSlope_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	double mbAcrossSlope_add_offset;
+	double mbAcrossSlope_scale_factor;
+	double mbAcrossSlope_minimum;
+	double mbAcrossSlope_maximum;
+	int mbAcrossSlope_valid_minimum;
+	int mbAcrossSlope_valid_maximum;
+	int mbAcrossSlope_missing_value;
 	char mbSFlag_type[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbSFlag_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbSFlag_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
@@ -672,6 +906,20 @@ struct mbsys_netcdf_struct
 	int mbSFlag_valid_minimum;
 	int mbSFlag_valid_maximum;
 	int mbSFlag_missing_value;
+	char mbSLengthOfDetection_type[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSLengthOfDetection_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSLengthOfDetection_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSLengthOfDetection_units[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSLengthOfDetection_unit_code[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSLengthOfDetection_format_C[MBSYS_NETCDF_ATTRIBUTELEN];
+	char mbSLengthOfDetection_orientation[MBSYS_NETCDF_ATTRIBUTELEN];
+	int mbSLengthOfDetection_add_offset;
+	int mbSLengthOfDetection_scale_factor;
+	int mbSLengthOfDetection_minimum;
+	int mbSLengthOfDetection_maximum;
+	int mbSLengthOfDetection_valid_minimum;
+	int mbSLengthOfDetection_valid_maximum;
+	int mbSLengthOfDetection_missing_value;
 	char mbAntenna_type[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbAntenna_long_name[MBSYS_NETCDF_ATTRIBUTELEN];
 	char mbAntenna_name_code[MBSYS_NETCDF_ATTRIBUTELEN];
@@ -787,70 +1035,70 @@ struct mbsys_netcdf_struct
 	int mbVelProfilTime_valid_minimum;
 	int mbVelProfilTime_valid_maximum;
 	int mbVelProfilTime_missing_value;
-	
+
 	/* storage comment string */
 	char	comment[MBSYS_NETCDF_COMMENTLEN];
 	};
 
 /* system specific function prototypes */
-int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_netcdf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_netcdf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_netcdf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_netcdf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_netcdf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_netcdf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			double transducer_depth, double altitude, 
+			double transducer_depth, double altitude,
 			int *error);
 int mbsys_netcdf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_netcdf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
 int mbsys_netcdf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, 
-			int *nsvp, 
+			int *kind,
+			int *nsvp,
 			double *depth, double *velocity,
 			int *error);
 int mbsys_netcdf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp, 
+			int nsvp,
 			double *depth, double *velocity,
 			int *error);
-int mbsys_netcdf_copy(int verbose, void *mbio_ptr, 
+int mbsys_netcdf_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
 
