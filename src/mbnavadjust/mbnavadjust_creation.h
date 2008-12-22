@@ -35,6 +35,9 @@
  * Start Global Widget Declarations.
  */
 EXTERNAL Widget   bulletinBoard_modelplot;
+EXTERNAL Widget   radioBox;
+EXTERNAL Widget   toggleButton_modelplot_sequential;
+EXTERNAL Widget   toggleButton_modelplot_block;
 EXTERNAL Widget   drawingArea_modelplot;
 EXTERNAL Widget   scale_controls_zoffset;
 EXTERNAL Widget   scale_controls_precision;
@@ -104,7 +107,7 @@ EXTERNAL Widget   pushButton_unfix;
 EXTERNAL Widget   pushButton_autopick;
 EXTERNAL Widget   pushButton_analyzecrossings;
 EXTERNAL Widget   pushButton_invertnav;
-EXTERNAL Widget   pushButton_updateproject;
+EXTERNAL Widget   pushButton_applynav;
 EXTERNAL Widget   form_mbnavadjust;
 EXTERNAL Widget   scrolledWindow_messages;
 EXTERNAL Widget   text_messages;

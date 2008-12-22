@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.11 2008-09-11 20:12:43 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.12 2008-12-22 08:32:52 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,6 +23,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2008/09/11 20:12:43  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.10  2008/05/16 22:42:32  caress
  * Release 5.1.1beta18 - working towards use of 3D uncertainty.
  *
@@ -123,6 +126,8 @@
 #define MBNA_BIAS_DIFFERENT		1
 #define MBNA_OVERLAP_THRESHOLD		25
 
+#define	MBNA_MODELPLOT_SEQUENTIAL	0
+#define	MBNA_MODELPLOT_SURVEY		1
 #define	MBNA_MODELPLOT_LEFT_WIDTH	25
 #define	MBNA_MODELPLOT_LEFT_HEIGHT	65
 #define	MBNA_MODELPLOT_X_SPACE		10
@@ -210,6 +215,9 @@ struct mbna_tie {
 	double	inversion_offset_x_m;
 	double	inversion_offset_y_m;
 	double	inversion_offset_z_m;
+	int	block_1;
+	int	block_2;
+	int	isurveyplotindex;
 };
 struct mbna_crossing {
 	int	status;
@@ -256,6 +264,7 @@ struct mbna_project {
 	double	zoffsetwidth;
 	int	inversion;
 	int	modelplot;
+	int	modelplot_style;
 	FILE	*logfp;
 };
 struct mbna_plot_vector 
