@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_zgrid.c	    4/25/95
- *    $Id: mb_zgrid.c,v 5.4 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mb_zgrid.c,v 5.5 2008-12-22 08:36:18 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -53,6 +53,9 @@
  * Date:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.4  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.3  2008/10/17 07:52:44  caress
  * Check in on October 17, 2008.
  *
@@ -164,6 +167,7 @@ int mb_zgrid(float *z, int *nx, int *ny,
     float dzrms8, z00, dz, ze, hrange, zn, zs, zw, zrange, dzmaxf, convtest, 
 	    relaxn, rootgs, dzrmsp, big, abz;
     int npg;
+    int nmax;
     float eps, zim, zjm;
     int npt;
     float wgt, zip, zjp, tpy, zxy;
@@ -176,7 +180,17 @@ int mb_zgrid(float *z, int *nx, int *ny,
 
     /* Function Body */
     eps = (float).002;
+    if (*nx > *ny)
+    	nmax = *nx;
+    else
+        nmax = *ny;
+    if (*nrng < nmax)
+    	nmax = *nrng;
+    eps = ((float) nmax) * 0.000016;
+    if (eps < 0.02)
+    	eps = 0.02;
     big = (float)9e29;
+fprintf(stderr,"CLIP: %d nmax:%d eps:%f\n",*nrng,nmax,eps);
 
 /*     get zbase which will make all zp values positive by 20*(zmax-zmin) 
 */
@@ -824,6 +838,7 @@ L3715:
 L3720:
 	root = sqrt(sqrt(sqrt(dzrms / dzrms8)));
 	if (root - (float).9999 >= (float)0.) {
+	    fprintf(stderr,"Zgrid iteration %d convergence test skipped root: %f\n",iter,root);
 	    goto L4000;
 	} else {
 	    goto L3730;

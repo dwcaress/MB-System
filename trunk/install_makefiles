@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.31 2008-09-11 19:58:27 caress Exp $
+#    $Id: install_makefiles,v 5.32 2008-12-22 08:36:18 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 1996, 1997, 2001, 2002, 2003, 2005, 2006 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -111,15 +111,18 @@ $NETCDFINCDIR = "/sw/include";
 $LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 $PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
 $CFLAGS = "-g -I/usr/X11R6/include";
-$LFLAGS = "-Wl -lm -bind_at_load";
+$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Freameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
 #
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.31 2008-09-11 19:58:27 caress Exp $
+#   $Id: install_makefiles,v 5.32 2008-12-22 08:36:18 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.31  2008/09/11 19:58:27  caress
+#   Update to Mac templates.
+#
 #   Revision 5.30  2008/05/24 19:28:41  caress
 #   Updated description on how to build MB-System on MacOs X.
 #

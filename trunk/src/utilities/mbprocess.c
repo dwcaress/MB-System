@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.57 2008-09-11 20:20:14 caress Exp $
+ *    $Id: mbprocess.c,v 5.58 2008-12-22 08:36:18 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.57  2008/09/11 20:20:14  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.56  2008/07/19 07:45:30  caress
  * Fix for crashes provided by Gordon Keith.
  *
@@ -289,7 +292,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.57 2008-09-11 20:20:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.58 2008-12-22 08:36:18 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -5718,7 +5721,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				{
 				mb_pr_set_bathyslope(verbose, 
 						nsmooth, 
-						beams_bath,
+						nbath,
 						beamflag,
 						bath,
 						bathacrosstrack,
@@ -5771,7 +5774,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 	i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]);*/
 
 				/* get seafloor slopes */
-		    		for (i=0;i<beams_amp;i++)
+		    		for (i=0;i<namp;i++)
 					{
 					if (mb_beam_ok(beamflag[i]))
 			    			{
@@ -5982,7 +5985,7 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 	i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]);*/
 
 				/* get seafloor slopes */
-		    		for (i=0;i<beams_amp;i++)
+		    		for (i=0;i<namp;i++)
 					{
 					if (mb_beam_ok(beamflag[i]))
 			    			{
