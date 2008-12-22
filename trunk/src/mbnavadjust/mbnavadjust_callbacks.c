@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.18 2008-10-17 07:52:44 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.19 2008-12-22 08:32:52 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	March 22, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2008/10/17 07:52:44  caress
+ * Check in on October 17, 2008.
+ *
  * Revision 5.17  2008/09/11 20:12:43  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -765,6 +768,18 @@ void do_set_controls()
 	sprintf(string,"%2.2d",format);
 	XmTextFieldSetString(textField_format, string);
 
+	/* set model view style togglebuttons */
+	if (project.modelplot_style == MBNA_MODELPLOT_SEQUENTIAL)
+	    {
+	    XmToggleButtonSetState(toggleButton_modelplot_sequential, 
+			TRUE, TRUE);
+	    }
+	else
+	    {
+	    XmToggleButtonSetState(toggleButton_modelplot_block, 
+			TRUE, TRUE);
+	    }
+
 }
 /*--------------------------------------------------------------------*/
 
@@ -1430,11 +1445,11 @@ void do_update_status()
 				XmNsensitive, False,
 				NULL);
         	if (project.inversion == MBNA_INVERSION_CURRENT)
-			XtVaSetValues(pushButton_updateproject,
+			XtVaSetValues(pushButton_applynav,
 				XmNsensitive, True,
 				NULL);
         	else
-			XtVaSetValues(pushButton_updateproject,
+			XtVaSetValues(pushButton_applynav,
 				XmNsensitive, False,
 				NULL);
 		}
@@ -1452,7 +1467,7 @@ void do_update_status()
 		XtVaSetValues(pushButton_invertnav,
 			XmNsensitive, False,
 			NULL);
-		XtVaSetValues(pushButton_updateproject,
+		XtVaSetValues(pushButton_applynav,
 			XmNsensitive, False,
 			NULL);
 		if (project.inversion != MBNA_INVERSION_NONE)
@@ -3391,7 +3406,7 @@ do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_update_project( Widget w, XtPointer client_data, XtPointer call_data)
+do_apply_nav( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
     mbnavadjust_applynav();
@@ -3661,6 +3676,44 @@ do_modelplot_expose( Widget w, XtPointer client_data, XtPointer call_data)
 
     /* replot the model */
     mbnavadjust_modelplot_plot();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_modelplot_block( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_modelplot_block\n");
+
+	if (XmToggleButtonGetState(toggleButton_modelplot_block))
+	    {
+	    project.modelplot_style = MBNA_MODELPLOT_SURVEY;
+
+	    /* replot the model */
+    	    mbnavadjust_modelplot_plot();
+	    }
+	else
+	    project.modelplot_style = MBNA_MODELPLOT_SEQUENTIAL;
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_modelplot_sequential( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"Called do_modelplot_sequential\n");
+
+	if (XmToggleButtonGetState(toggleButton_modelplot_sequential))
+	    {
+	    project.modelplot_style = MBNA_MODELPLOT_SEQUENTIAL;
+
+	    /* replot the model */
+    	    mbnavadjust_modelplot_plot();
+	    }
+	else
+	    project.modelplot_style = MBNA_MODELPLOT_SURVEY;
 }
 
 /*--------------------------------------------------------------------*/
