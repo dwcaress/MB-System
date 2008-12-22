@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.29 2008-09-27 03:27:11 caress Exp $
+ *    $Id: mbmosaic.c,v 5.30 2008-12-22 08:36:18 caress Exp $
  *
  *    Copyright (c) 1997-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2008/09/27 03:27:11  caress
+ * Working towards release 5.1.1beta24
+ *
  * Revision 5.28  2008/08/12 00:04:04  caress
  * Gordon Keith's addition of a weighting option.
  *
@@ -248,7 +251,7 @@ int mbmosaic_get_priorities(
 		int	*error);
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.29 2008-09-27 03:27:11 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.30 2008-12-22 08:36:18 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -1418,7 +1421,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		ndatafile = 0;
 
 		/* if format > 0 then input is multibeam file */
-		if (format > 0 && file[0] != '#')
+		if (format > 0)
 		{
 		/* apply pstatus */
 		if (pstatus == MB_PROCESSED_USE)
@@ -1491,7 +1494,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		    if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
 							    sizeof(double), (void **)&sslat, &error);
-		    if (beams_amp > pixels_ss)
+		    if (datatype != MBMOSAIC_DATA_SIDESCAN)
 		    	{
 		    	if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, 
@@ -2028,7 +2031,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		    if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
 							    sizeof(double), (void **)&sslat, &error);
-		    if (beams_amp > pixels_ss)
+		    if (datatype != MBMOSAIC_DATA_SIDESCAN)
 		    	{
 		    	if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE, 

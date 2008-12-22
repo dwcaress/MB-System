@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.47 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mbgrid.c,v 5.48 2008-12-22 08:36:18 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.47  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.46  2008/10/17 07:52:44  caress
  * Check in on October 17, 2008.
  *
@@ -459,7 +462,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.47 2008-11-16 21:51:18 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.48 2008-12-22 08:36:18 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1647,7 +1650,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 	sdy = 2.0 * dy;
 	sxdim = gxdim  / 2;
 	sydim = gydim  / 2;
-	sclip = gxdim * gydim;
+	sclip = MAX(gxdim, gydim);
 
 	/* allocate memory for additional arrays */
 	status = mb_mallocd(verbose,__FILE__,__LINE__,gxdim*gydim*sizeof(double),(void **)&norm,&error);
@@ -1842,8 +1845,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			    if (mb_beam_ok(beamflag[ib]))
 			      {
 			      /* get position in grid */
-			      ix = (bathlon[ib] - wbnd[0] + dx) / (2.0 * dx);
-			      iy = (bathlat[ib] - wbnd[2] + dy) / (2.0 * dy);
+			      ix = (bathlon[ib] - wbnd[0] + dx) / sdx;
+			      iy = (bathlat[ib] - wbnd[2] + dy) / sdy;
 /*fprintf(outfp, "\nib:%d ix:%d iy:%d   bath: lon:%f lat:%f bath:%f   nav: lon:%f lat:%f\n", 
 ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 
@@ -2012,7 +2015,14 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 			{
 			gridsmall[kgrid] = sgrid[kint];
 			nbinspline++;
+/*fprintf(stderr,"YES i:%d j:%d kgrid:%d kint:%d sgrid:%f gridsmall:%f\n",
+i,j,kgrid,kint,sgrid[kint],gridsmall[kgrid]);*/
 			}
+/*		else
+			{
+fprintf(stderr,"NO  i:%d j:%d kgrid:%d kint:%d sgrid:%f gridsmall:%f\n",
+i,j,kgrid,kint,sgrid[kint],gridsmall[kgrid]);
+			}*/
 		}
 
 			
@@ -2028,6 +2038,46 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&work3,&error);
 #endif
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&sgrid,&error);	
+
+
+for (i=0;i<sxdim;i++)
+	for (j=0;j<sydim;j++)
+		{
+		kgrid = i * sydim + j;
+		kout = i*sydim + j;
+		output[kout] = (float) gridsmall[kgrid];
+		if (gridsmall[kgrid] >= clipvalue)
+			output[kout] = outclipvalue;
+		}
+zclip = clipvalue;
+zmin = zclip;
+zmax = zclip;
+for (i=0;i<sxdim;i++)
+	for (j=0;j<sydim;j++)
+		{
+		kgrid = i * sydim + j;
+		if (zmin == zclip 
+			&& gridsmall[kgrid] < zclip)
+			zmin = gridsmall[kgrid];
+		if (zmax == zclip 
+			&& gridsmall[kgrid] < zclip)
+			zmax = gridsmall[kgrid];
+		if (gridsmall[kgrid] < zmin && gridsmall[kgrid] < zclip)
+			zmin = gridsmall[kgrid];
+		if (gridsmall[kgrid] > zmax && gridsmall[kgrid] < zclip)
+			zmax = gridsmall[kgrid];
+		}
+if (zmin == zclip)
+	zmin = 0.0;
+if (zmax == zclip)
+	zmax = 0.0;
+strcpy(ofile,fileroot);
+strcat(ofile,"_lowrezslope.grd");
+status = write_cdfgrd(verbose,ofile,output,sxdim,sydim,
+wbnd[0],wbnd[1],wbnd[2],wbnd[3],
+zmin,zmax,sdx,sdy,
+xlabel,ylabel,zlabel,title,projection_id, 
+argc,argv,&error);
 
 	/* do second pass footprint gridding using slope estimates from first pass interpolated grid */
 
