@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.5 2006-06-16 19:30:58 caress Exp $
+#	$Id: Makefile.template,v 5.6 2008-12-31 08:47:38 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000, 2003, 2006 by
+#     Copyright (c) 1993-2008 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.5  2006/06/16 19:30:58  caress
+# Check in after the Santa Monica Basin Mapping AUV Expedition.
+#
 # Revision 5.4  2006/02/03 21:06:55  caress
 # Added mbm_makedatalist.
 #
@@ -89,15 +92,11 @@ INCDIR = ../../include
 
 ### make all makes the MB-system macros and man pages
 all:	$(BINDIR)/mbm_xbt \
-	$(BINDIR)/mbm_fmtvel \
-	$(BINDIR)/mbm_vrefcheck \
-	$(BINDIR)/mbm_rollerror \
 	$(BINDIR)/mbm_plot \
 	$(BINDIR)/mbm_grdplot \
 	$(BINDIR)/mbm_grd3dplot \
 	$(BINDIR)/mbm_xyplot \
 	$(BINDIR)/mbm_stat \
-	$(BINDIR)/mbm_dslnavfix \
 	$(BINDIR)/mbm_grid \
 	$(BINDIR)/mbm_grd2arc \
 	$(BINDIR)/mbm_arc2grd \
@@ -118,15 +117,6 @@ clean:
 $(BINDIR)/mbm_xbt:	mbm_xbt.perl
 	cp mbm_xbt.perl $(BINDIR)/mbm_xbt
 	chmod 775 $(BINDIR)/mbm_xbt
-$(BINDIR)/mbm_fmtvel:	mbm_fmtvel.perl
-	cp mbm_fmtvel.perl $(BINDIR)/mbm_fmtvel
-	chmod 775 $(BINDIR)/mbm_fmtvel
-$(BINDIR)/mbm_vrefcheck:	mbm_vrefcheck.perl
-	cp mbm_vrefcheck.perl $(BINDIR)/mbm_vrefcheck
-	chmod 775 $(BINDIR)/mbm_vrefcheck
-$(BINDIR)/mbm_rollerror:	mbm_rollerror.perl
-	cp mbm_rollerror.perl $(BINDIR)/mbm_rollerror
-	chmod 775 $(BINDIR)/mbm_rollerror
 $(BINDIR)/mbm_plot:	mbm_plot.perl
 	cp mbm_plot.perl $(BINDIR)/mbm_plot
 	chmod 775 $(BINDIR)/mbm_plot
@@ -142,9 +132,6 @@ $(BINDIR)/mbm_xyplot:	mbm_xyplot.perl
 $(BINDIR)/mbm_stat:	mbm_stat.perl
 	cp mbm_stat.perl $(BINDIR)/mbm_stat
 	chmod 775 $(BINDIR)/mbm_stat
-$(BINDIR)/mbm_dslnavfix:	mbm_dslnavfix.perl
-	cp mbm_dslnavfix.perl $(BINDIR)/mbm_dslnavfix
-	chmod 775 $(BINDIR)/mbm_dslnavfix
 $(BINDIR)/mbm_grid:	mbm_grid.perl
 	cp mbm_grid.perl $(BINDIR)/mbm_grid
 	chmod 775 $(BINDIR)/mbm_grid

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdefaults.c	1/23/93
- *	$Id: mbdefaults.c,v 5.5 2006-01-18 15:17:00 caress Exp $
+ *	$Id: mbdefaults.c,v 5.6 2008-12-31 08:47:38 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Author:	D. W. Caress
  * Date:	January 23, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.4  2003/04/17 21:17:10  caress
  * Release 5.0.beta30
  *
@@ -96,7 +99,7 @@
 
 main (int argc, char **argv)
 {
-static char rcs_id[]="$Id: mbdefaults.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
+static char rcs_id[]="$Id: mbdefaults.c,v 5.6 2008-12-31 08:47:38 caress Exp $";
 	static char program_name[] = "MBDEFAULTS";
 	static char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
 	static char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Iimagedisplay\n\t-Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";
@@ -238,7 +241,7 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.5 2006-01-18 15:17:00 caress Exp $";
 		}
 
 	/* write out new ~/.mbio_defaults file if needed */
-	if (flag || status == MB_FAILURE)
+	if (flag)
 		{
 		strcpy(file,getenv(HOME));
 		strcat(file,"/.mbio_defaults");

@@ -17,187 +17,192 @@ improvements relative to the version 4 releases. The most significant changes
 include: </P>
 
 <UL>
-<LI>A new approach to managing data processing.</LI>
-
-<UL>
-<LI>Many tools - one output file. In previous versions of MB-System, each
-processing program read an input swath data file and produced an output
-swath data file. This &quot;serial&quot; processing scheme generally produced
-a large number of intermediate data files. MB-System version 5.0 features
-the integration of the editing and analysis tools with a single program,
-mbprocess, that outputs processed data files. The new &quot;parallel&quot;
-processing scheme covers bathymetry data processing, but does not yet incorporate
-the sidescan processing capabilities. All of the old tools and capabilities
-are still part of the distribution.</LI>
-
-<LI>Recursive datalists. The lists of data files used by gridding and plotting
-programs can now be recursive, making it simpler to manage data from many
-different surveys.</LI>
-
-<LI>Automatic format identification. MB-System programs will now attempt
-to automatically identify the swath data format based on the filename suffix.</LI>
-
-<LI>Extended inf files. Users can generate inf files by directing the output
-of mbinfo to a file named by adding an &quot;.inf&quot; suffix to the swath
-data file name. Several programs can parse inf files, if they exist, to
-quickly obtain data locations or ranges. This feature speeds operations
-such as gridding, mosaicing, and automated plotting.<BR>
-<BR>
-</LI>
+  <LI>A new approach to managing data processing.</LI>
+  
+  <UL>
+  <LI>Many tools - one output file. In previous versions of MB-System, each
+    processing program read an input swath data file and produced an output
+    swath data file. This &quot;serial&quot; processing scheme generally produced
+    a large number of intermediate data files. MB-System version 5.0 features
+    the integration of the editing and analysis tools with a single program,
+    mbprocess, that outputs processed data files. The new &quot;parallel&quot;
+    processing scheme covers bathymetry data processing, but does not yet incorporate
+    the sidescan processing capabilities. All of the old tools and capabilities
+    are still part of the distribution.</LI>
+    
+  <LI>Recursive datalists. The lists of data files used by gridding and plotting
+    programs can now be recursive, making it simpler to manage data from many
+    different surveys.</LI>
+    
+  <LI>Automatic format identification. MB-System programs will now attempt
+    to automatically identify the swath data format based on the filename suffix.</LI>
+    
+  <LI>Extended inf files. Users can generate inf files by directing the output
+    of mbinfo to a file named by adding an &quot;.inf&quot; suffix to the swath
+    data file name. Several programs can parse inf files, if they exist, to
+    quickly obtain data locations or ranges. This feature speeds operations
+    such as gridding, mosaicing, and automated plotting.<BR>
+  <BR>
+  </LI>
+  </UL>
+  
+  <LI>New command line tools.</LI>
+  
+  <UL>
+  <LI>MBprocess. This new tool performs a variety of processing tasks and
+    produces a single output processed swath data file. The program mbprocess
+    can apply bathymetry edits from mbedit and mbclean, navigation edits from
+    mbnavedit, sound velocity profile changes from mbvelocitytool, and a variety
+    of other corrections.</LI>
+    
+  <LI>MBset. This new tool allows users to create and modify the parameter
+    files used to control the operation of mbprocess.</LI>
+    
+  <LI>MBdatalist. This new tool allows users to list the files referenced by
+    a recursive datalist structure. It can also be used to create the ancillary ".inf",
+  ".fbt", and ".fnv" files for all of the data files referenced in a recursive datalist
+    structure. </LI>
+    
+  <LI>MBsvplist. This new tool lists water sound velocity profiles embedded
+    in swath data files, creating secondary files that 
+    can be read into MBvelocitytool.</LI>
+    
+  <LI>MBareaclean. This new tool identifies and flags artifacts in swath sonar
+    bathymetry data within a specified area of interest. The
+    area is divided into a grid with square cells or bins, and the
+    data are grouped according to these bins. Once all
+    of  data  are read, statistical tests are applied 
+    to the soundings within each bin.</LI>
+    
+  <LI>MBextractsegy. This new tool extracts subbottom profiler data
+    from swath files to SEGY format files.</LI>
+    
+  <LI>MBsegyinfo. This new tool extracts SEGY data file information and statistics.
+    
+  <LI>MBsegylist. This new tool produces arbitrary ascii tables from SEGY data files.
+    
+  <LI>MBsegygrid. This new tool grids seismic and subbottom data from SEGY data files.
+  <BR>
+  <BR>
+  </UL>
+  
+  <LI>Improved bathymetry and navigation editors.</LI>
+  
+  <UL>
+  <LI>MBedit and MBnavedit now swallow data files whole rather than reading
+    in limited size buffers.</LI>
+    
+  <LI>MBedit now outputs beam edit events rather than an entire swath file.
+    The edits are applied by MBprocess.</LI>
+    
+  <LI>MBnavedit now outputs the edited navigation rather than an entire swath
+    file. The edited navigation is merged using MBprocess.</LI>
+    
+  <LI>Both editors show the position of the currently displayed data within
+    the entire data file.</LI>
+  <LI>MBnavedit has two navigation modeling modes relevant to swath data
+    collected using poorly navigated ROVs and towfishes. One mode applies a
+    dead reckoning model with interactively set drifts, and the other involves
+    inverting for an optimally smooth navigation by penalizing speed and acceleration.<BR>
+  </LI>
+  <LI>MBnavadjust. This new tool allows users to adjust poorly navigated
+    surveys by matching features in overlapping swathes. It is particularly
+    useful for processing surveys conducted from submerged platforms.</LI>
+  </UL>
 </UL>
-
-<LI>New tools.</LI>
-
 <UL>
-<LI>MBnavadjust. This new tool allows users to adjust poorly navigated
-surveys by matching features in overlapping swathes. It is particularly
-useful for processing surveys conducted from submerged platforms.</LI>
-
-<LI>MBprocess. This new tool performs a variety of processing tasks and
-produces a single output processed swath data file. The program mbprocess
-can apply bathymetry edits from mbedit and mbclean, navigation edits from
-mbnavedit, sound velocity profile changes from mbvelocitytool, and a variety
-of other corrections.</LI>
-
-<LI>MBset. This new tool allows users to create and modify the parameter
-files used to control the operation of mbprocess.</LI>
-
-<LI>MBdatalist. This new tool allows users to list the files referenced by
-a recursive datalist structure. It can also be used to create the ancillary ".inf",
-".fbt", and ".fnv" files for all of the data files referenced in a recursive datalist
-structure. </LI>
-
-<LI>MBsvplist. This new tool lists water sound velocity profiles embedded
-in swath data files, creating secondary files that 
-can be read into MBvelocitytool.</LI>
-
-<LI>MBareaclean. This new tool identifies and flags artifacts in swath sonar
-bathymetry data within a specified area of interest. The
-area is divided into a grid with square cells or bins, and the
-data are grouped according to these bins. Once all
-of  data  are read, statistical tests are applied 
-to the soundings within each bin.</LI>
-
-<LI>MBgrdviz. This new tool is a simple GMT grid 2D/3D vizualization utility
-that demonstrates a vizualization API that will be used for future MB-System
-tools.</LI>
-
-<LI>MBextractsegy. This new tool extracts subbottom profiler data
-from swath files to SEGY format files.</LI>
-
-<LI>MBsegyinfo. This new tool extracts SEGY data file information and statistics.
-
-<LI>MBsegylist. This new tool produces arbitrary ascii tables from SEGY data files.
-
-<LI>MBsegygrid. This new tool grids seismic and subbottom data from SEGY data files.
-<BR>
-<BR>
+  <li>New Visualization Based Tools
+  </li>
+  <ul>
+    <li>MBgrdviz is a  GMT grid 2D/3D visualization utility. MBgrdviz also allows the display of sonar navigation, sites, and routes, and interactive survey planning.</li>
+  </ul>
+  <UL>
+    <LI>MBeditviz is an interactive 3D visualization bathymetry editor and patch test tool.</LI>
+  </UL>
 </UL>
-
-<LI>Improved bathymetry and navigation editors.</LI>
-
 <UL>
-<LI>MBedit and MBnavedit now swallow data files whole rather than reading
-in limited size buffers.</LI>
-
-<LI>MBedit now outputs beam edit events rather than an entire swath file.
-The edits are applied by MBprocess.</LI>
-
-<LI>MBnavedit now outputs the edited navigation rather than an entire swath
-file. The edited navigation is merged using MBprocess.</LI>
-
-<LI>Both editors show the position of the currently displayed data within
-the entire data file.</LI>
-
-<LI>MBnavedit has two navigation modeling modes relevant to swath data
-collected using poorly navigated ROVs and towfishes. One mode applies a
-dead reckoning model with interactively set drifts, and the other involves
-inverting for an optimally smooth navigation by penalizing speed and acceleration.<BR>
-<BR>
-</LI>
+  <li>Support for Projected Coordinate Systems
+  </li>
+  <ul>
+    <li>MB-System now incorporates the  source  code  for  the
+      PROJ.4  Cartographic  Projections  library,  providing
+      support for (apparently) all  commonly  used  geodetic
+      coordinate  systems.   PROJ.4  was developed by Gerald
+      Evenden (then of the USGS), and was obtained from  the
+      www.remotesensing.org website.</li>
+  </ul>
+  <UL>
+    
+    <LI>A  large  number of commonly used projected coordinate
+      systems (e.g. UTM)  are  defined  in  a  file  
+      (mbsystem/share/projections.dat) distributed with MB-System.
+      These include all of the standard UTM  zones,  all  of
+      the  standard state plate coordinate systems, and most
+      of the European Petroleum Survey Group (EPSG)  coordinate 
+    systems (also including UTM).</LI>
+    
+    <LI>MB-System  can now handle swath data that is navigated
+      in a supported projected coordinate system. In particular, 
+      data files that are navigated with UTM eastings
+      and northings instead of longitude  and  latitude  can
+    now be plotted and processed with MB-System.</LI>
+    
+    <LI>The  programs mbgrid and mbmosaic can now output grids
+      and mosaics in any of the projected coordinate systems
+    specified in mbsystem/share/projections.dat.</LI>
+    
+    <LI>The   TIFF   images  generated  with  mbm_grdtiff  and
+      mbgrdtiff now fully conform to  the  GeoTIFF  standard,
+      providing that the source grids or mosaics were generated 
+      using mbgrid or  mbmosaic  in  either  Geographic
+      coordinates, UTM coordinates, or any of the EPSG coordinate 
+      systems specified in the projections.dat  file.
+      This  means,  for instance, that GeoTIFF images generated 
+      with mbgrdtiff  will  be  properly  georeferenced
+      when  they  are imported into ESRI ArcGIS or other GIS
+      packages.<BR>
+      <BR>
+    </LI>
+  </UL>
+  
+  <LI>Restructuring the code.</LI>
+  
+  <UL>
+    <LI>All of the C code now conforms to the ANSI C standard.</LI>
+    
+    <LI>The underlying input/output library (MBIO) has been substantially rewritten.
+      The structure has been streamlined, simplifying both future development
+    and support of the existing code. The MBIO API has been greatly modified.</LI>
+  </UL>
 </UL>
-
-<LI>Support for Projected Coordinate Systems</LI>
-
 <UL>
-<LI>MB-System now incorporates the  source  code  for  the
-PROJ.4  Cartographic  Projections  library,  providing
-support for (apparently) all  commonly  used  geodetic
-coordinate  systems.   PROJ.4  was developed by Gerald
-Evenden (then of the USGS), and was obtained from  the
-www.remotesensing.org website.</LI>
-
-<LI>A  large  number of commonly used projected coordinate
-systems (e.g. UTM)  are  defined  in  a  file  
-(mbsystem/share/projections.dat) distributed with MB-System.
-These include all of the standard UTM  zones,  all  of
-the  standard state plate coordinate systems, and most
-of the European Petroleum Survey Group (EPSG)  coordinate 
-systems (also including UTM).</LI>
-
-<LI>MB-System  can now handle swath data that is navigated
-in a supported projected coordinate system. In particular, 
-data files that are navigated with UTM eastings
-and northings instead of longitude  and  latitude  can
-now be plotted and processed with MB-System.</LI>
-
-<LI>The  programs mbgrid and mbmosaic can now output grids
-and mosaics in any of the projected coordinate systems
-specified in mbsystem/share/projections.dat.</LI>
-
-<LI>The   TIFF   images  generated  with  mbm_grdtiff  and
-mbgrdtiff now fully conform to  the  GeoTIFF  standard,
-providing that the source grids or mosaics were generated 
-using mbgrid or  mbmosaic  in  either  Geographic
-coordinates, UTM coordinates, or any of the EPSG coordinate 
-systems specified in the projections.dat  file.
-This  means,  for instance, that GeoTIFF images generated 
-with mbgrdtiff  will  be  properly  georeferenced
-when  they  are imported into ESRI ArcGIS or other GIS
-packages.<BR>
-<BR>
-</LI>
-</UL>
-
-<LI>Restructuring the code.</LI>
-
-<UL>
-<LI>All of the C code now conforms to the ANSI C standard.</LI>
-
-<LI>The underlying input/output library (MBIO) has been substantially rewritten.
-The structure has been streamlined, simplifying both future development
-and support of the existing code. The MBIO API has been greatly modified.</LI>
-</UL>
-</UL>
-
-<UL>
-<LI>Handling of old Simrad multibeam data.</LI>
-
-<UL>
-<LI>Vendor format data from the old Simrad multibeams (pre-1997 sonars)
-are now supported by a single format id (51) rather than a separate format
-id for each sonar model. The old format id's are automatically aliased
-to 51, so existing shellscripts will continue to work.</LI>
-
-<LI>MB-System no longer supports beam flagging in format 51 data. The
-use of mbedit and mbclean on format 51 data will cause the flagged
-beams to be irrevocably nulled. Previous versions of MB-System used
-the highest bit in the depth values to represent beam flags because
-no Simrad data seemed to use that bit. We have not obtained data 
-with depth values using the full bit-range, conflicting with the
-old beam flagging scheme. We recommend that old Simrad data be translated
-to the extended processing format (57) which contains proper beam
-flags and supports all processing functions. Format 57 is also used for processing data from
-the current Simrad multibeam sonars.
-
-<LI>Sidescan data from old Simrad multibeams (pre-1997 sonars) are now
-handled in the same manner as data from the newer sonars (e.g. EM3000,
-EM3000, EM120). The raw samples in the vendor data format are binned, averaged,
-and interpolated into a 1024 pixel sidescan swath. This binned sidescan
-is not saved in the vendor format, so (as above) it is recommended that the data be
-translated to an extended format (57) that stores both bathymetry beam flags
-and processed sidescan. </LI>
-</UL>
+  <LI>Handling of old Simrad multibeam data.</LI>
+  
+  <UL>
+  <LI>Vendor format data from the old Simrad multibeams (pre-1997 sonars)
+    are now supported by a single format id (51) rather than a separate format
+    id for each sonar model. The old format id's are automatically aliased
+    to 51, so existing shellscripts will continue to work.</LI>
+    
+  <LI>MB-System no longer supports beam flagging in format 51 data. The
+    use of mbedit and mbclean on format 51 data will cause the flagged
+    beams to be irrevocably nulled. Previous versions of MB-System used
+    the highest bit in the depth values to represent beam flags because
+    no Simrad data seemed to use that bit. We have not obtained data 
+    with depth values using the full bit-range, conflicting with the
+    old beam flagging scheme. We recommend that old Simrad data be translated
+    to the extended processing format (57) which contains proper beam
+    flags and supports all processing functions. Format 57 is also used for processing data from
+    the current Simrad multibeam sonars.
+    
+  <LI>Sidescan data from old Simrad multibeams (pre-1997 sonars) are now
+    handled in the same manner as data from the newer sonars (e.g. EM3000,
+    EM3000, EM120). The raw samples in the vendor data format are binned, averaged,
+    and interpolated into a 1024 pixel sidescan swath. This binned sidescan
+    is not saved in the vendor format, so (as above) it is recommended that the data be
+    translated to an extended format (57) that stores both bathymetry beam flags
+    and processed sidescan. </LI>
+  </UL>
 </UL>
 
 <UL>
@@ -244,7 +249,7 @@ of the SURF data, but not processing. Writing or translating the SURF data to
 allow processing will be supported in a later version.
 </LI>
 
-<LI>The Hawaii Mapping Research Group's new MR1 format is supported as
+<LI>The Hawaii Mapping Research Group's  MR1 format is supported as
 format 64. This format is used to disseminate data from both the
 HMRG interferometric sonars (e.g. MR1) and the WHOI DSL 120 deep-towed
 inteferometric sonar. This format has been supported by including
@@ -255,11 +260,13 @@ to Roger Davis and HMRG for making the code available under the GPL.</LI>
 and the Reson 6046 datalogger is now supported as format 88. This format
 can incoporate sidescan sonar and subbottom profiler data as well as the
 multibeam data.</LI>
+<LI>Third generation Simrad multibeams (EM122, EM302, EM710) are supported by formats 58 and 59.</LI>
+<LI>Imagenex and Odom DeltaT multibeams are supported by formats 191 and 192.</LI>
 </UL>
 </UL>
 
 <CENTER><P><BR>
-Last Updated: $Date: 2005-02-19 20:16:04 $ $Revision: 5.12 $ </P></CENTER>
+Last Updated: $Date: 2008-12-31 08:47:38 $ $Revision: 5.13 $ </P></CENTER>
 
 <P>
 <HR WIDTH="67%"></P>
