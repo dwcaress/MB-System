@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_defaults.c	10/7/94
- *    $Id: mb_defaults.c,v 5.8 2007-10-08 15:59:34 caress Exp $
+ *    $Id: mb_defaults.c,v 5.9 2008-12-31 08:47:38 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Date:	January 23, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.7  2006/09/11 18:55:52  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -117,7 +120,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 		int *btime_i, int *etime_i,
 		double *speedmin, double *timegap)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.8 2007-10-08 15:59:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.9 2008-12-31 08:47:38 caress Exp $";
 	char	*function_name = "mb_defaults";
 	int	status;
 	FILE	*fp;
@@ -226,7 +229,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 /*--------------------------------------------------------------------*/
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.8 2007-10-08 15:59:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.9 2008-12-31 08:47:38 caress Exp $";
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;
@@ -336,7 +339,7 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 /*--------------------------------------------------------------------*/
 int mb_lonflip(int verbose, int *lonflip)
 {
-  static char rcs_id[]="$Id: mb_defaults.c,v 5.8 2007-10-08 15:59:34 caress Exp $";
+  static char rcs_id[]="$Id: mb_defaults.c,v 5.9 2008-12-31 08:47:38 caress Exp $";
 	char	*function_name = "mb_lonflip";
 	int	status;
 	FILE	*fp;

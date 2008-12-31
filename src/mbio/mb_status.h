@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.95 2008-11-18 21:26:39 caress Exp $
+ *    $Id: mb_status.h,v 5.96 2008-12-31 08:53:32 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.95  2008/11/18 21:26:39  caress
+ * Release 5.1.1beta26
+ *
  * Revision 5.94  2008/10/17 07:30:22  caress
  * Added format 26 supporting Hydrosweep DS data used by SOPAC.
  *
@@ -397,8 +400,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.1beta26"
-#define	MB_BUILD_DATE	"18 November 2008"
+#define	MB_VERSION	"5.1.1"
+#define	MB_BUILD_DATE	"31 December 2008"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1

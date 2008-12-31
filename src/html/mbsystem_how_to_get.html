@@ -14,7 +14,8 @@
 </head>
 <body alink="#cc9900" vlink="#997040" link="#336699" bgcolor="#ffffff"
  text="#000000">
-<center><dd><a name="MB-get"></a><b><font size="+2">How To Get MB-System</font></b></dd>
+<center>
+  <dd><a name="MB-get"></a><b><font size="+2">How To Get The MB-System Source Distribution</font></b></dd>
 </center>
 <p>The source code for MB-System is available as a compressed tar
 archive
@@ -37,10 +38,8 @@ terminal shell.
 The following commands represent a typical anonymous ftp session (note
 that
 your@email.address literally means to enter your email address).</p>
-<p>
-</p>
 <ul>
-% ftp ftp.ldeo.columbia.edu<br>
+  % ftp ftp.ldeo.columbia.edu<br>
 Name: anonymous<br>
 Password: your@email.address<br>
 &gt; cd pub/MB-System<br>
@@ -48,7 +47,6 @@ Password: your@email.address<br>
 &gt; get MB-System.tar.gz<br>
 &gt; quit<br>
 </ul>
-<p></p>
 If anonymous ftp fails with an error message like: "Sorry no DNS entry"
 after the email address is entered as the anonymous password, this
 means that the internet address (also called IP address) of the
@@ -72,8 +70,24 @@ provider or their network/computing support staff.
 <center>
 <p></p>
 <hr width="67%">
-<p></p>
 </center>
+
+<center><a name="MB-dist"></a><b><font size="+2">Packaged MB-System Distributions</font></b></dd>
+</center>
+<p>MacOs X:</p>
+<blockquote>
+  <p>MB-System has been packaged for MacOS X as part of the <a href="http://www.finkproject.org/">Fink Project</a>. The <a href="http://pdb.finkproject.org/pdb/package.php/mbsystem">MB-System fink package</a> is maintained by <a href="http://vislab-ccom.unh.edu/~schwehr/">Kurt Schwehr</a> of CCOM/JHC UNH.</p>
+</blockquote>
+<p>Poseidon Linux:</p>
+<blockquote>
+  <p>MB-System is included in  <a href="https://sites.google.com/site/poseidonlinux/">Poseidon Linux</a>, an Ubuntu Linux based distribution that is pre-loaded with a number of software packages used for scientific research.</p>
+</blockquote>
+<center>
+  <p></p>
+  <hr width="67%">
+  <p></p>
+</center>
+
 <center><dd><a name="MB-required"></a><b><font size="+2">Other Required
 and
 Suggested Software and Data</font></b></dd>
@@ -157,7 +171,6 @@ painlessly installed using the fink package available from the
 <center>
 <p></p>
 <hr width="67%">
-<p></p>
 </center>
 <center>
 <p><a name="MB-install"></a><b><font size="+2">How to Install MB-System</font></b></p>
@@ -169,13 +182,13 @@ file and then running tar:</p>
   <pre>% gunzip MB-System.tar.gz</pre>
   <pre>% tar xvf MB-System.tar</pre>
 </ul>
-<p>This will create a directory called (for the 5.0.1 distribution): </p>
+<p>This will create a directory called (for the 5.1.1 distribution): </p>
 <ul>
-  <pre>mbsystem-5.0.1</pre>
+  <pre>mbsystem-5.1.1</pre>
 </ul>
 <p>In order to
 configure your installation, you must edit the shellscript
-mbsystem-5.0.1/install_makefiles.
+mbsystem-5.1.1/install_makefiles.
 This is perl script will read template makefiles in the MB-System
 source
 directories and create makefiles with the correct attributes. This
@@ -192,11 +205,11 @@ and so that the compile and link flags are correct.</p>
   <li>MBSYSTEM_HOME - Absolute path to the directory containing this
 file.
   </li>
-  <li>OS Operating system - (e.g. SUN, IRIX, HPUX, LINUX, LYNX). </li>
+  <li>OS Operating system - (e.g. DARWIN, LINUX, SUN, IRIX, HPUX, LYNX). </li>
   <li>BYTESWAPPED - If set to "YES" will enable byte swapping of
 input and output binary data. Otherwise byte swapping is disabled. Byte
 swapping needs to be enabled when installing on "little endian"
-machines such as PCs or VAXs. </li>
+machines such as PCs, current Macs, or, in the old days, VAXs. </li>
   <li>CC - C compiler to be used (optional). </li>
   <li>GRAPHICAL - If set to "YES" will enable the installation
 of the Motif based graphical utilities mbedit, mbnavedit, and
@@ -206,13 +219,9 @@ then
 disable with "NO" (optional, default is "YES"). </li>
   <li>MOTIFINCDIR - Location of Motif include files. </li>
   <li>MOTIFLIBS - X and Motif libraries required for graphical tools. </li>
-  <li>GMTVERSION - GMT version used. GMT version 3.2 is used by
-default;
-this parameter must be set to "3.0" or "3.1" to successfully
-link with libraries from either of those versions.</li>
   <li>GMTLIBDIR - Location of GMT libraries libgmt.a and libpsl.a </li>
   <li>GMTINCDIR - Location of GMT include files gmt.h, grd.h, and
-pslib.h
+    pslib.h
   </li>
   <li>NETCDFDIR - Location of NetCDF library libnetcdf.a </li>
   <li>LEVITUS - Path for Levitus data file annual.</li>
@@ -220,12 +229,12 @@ pslib.h
   <li>LFLAGS - Load flags for all object files. </li>
 </ul>
 <p>Examples of appropriate values for several different installations
-(e.g.
-Sun, SGI, PC) are included in the comments in install_makefiles. To
+(e.g. Mac, Linux,
+Sun) are included in the comments in install_makefiles. To
 execute
 install_makefiles, do the following:</p>
 <ul>
-  <pre>% cd mbsystem-5.0.1 </pre>
+  <pre>% cd mbsystem-5.1.1 </pre>
   <pre>% install_makefiles</pre>
 </ul>
 <p>Because install_makefiles is a perl script, the executable perl must
@@ -241,9 +250,9 @@ structure, compiling source files, linking object files, and copying
 executables
 and manual pages to the appropriate directories. The executables will
 be
-placed in mbsystem-5.0.1/bin, the libraries in mbsystem-5.0.1/lib, and
+placed in mbsystem-5.1.1/bin, the libraries in mbsystem-5.1.1/lib, and
 the manual pages
-in mbsystem-5.0.1/man/man1.</p>
+in mbsystem-5.1.1/man/man1.</p>
 <p>Naturally, in order for users to use the MB-System utilities, the
 directory
 containing the executables must be included in their path (usually this
@@ -254,18 +263,15 @@ to
 work.</p>
 <p>Most users will also wish to specify which program they generally
 use
-to view Postscript plots on their screen. This parameter can be set
-either
-with the mbdefaults program or using the PS_VIEWER environment variable
-- the former is recommended (see the mbdefaults manual page for
+to view Postscript plots on their screen. This parameter is set
+
+with the mbdefaults program (see the mbdefaults manual page for
 details).
-On Sun workstations pageview is a popular Postscript viewer; on Silicon
-Graphics machines xpsview is commonly used. Popular open source
-alternatives
-to these platform specific programs include ghostview and gv.</p>
+Popular open source options for Postscript display include ghostview and gv. The postscript plots can also be imported into proprietary tools like Adobe Illustrator, Adobe Acrobat, or Preview on MacOs X. On old Unix machines,  pageview worked well on Sun workstations running Solaris, and xpsview on on Silicon
+Graphics machines running Irix.</p>
 <center>
 <p><br>
-Last Updated: $Date: 2008-09-11 20:02:33 $ $Revision: 5.19 $</p>
+Last Updated: $Date: 2008-12-31 08:47:38 $ $Revision: 5.20 $</p>
 </center>
 <p>
 </p>

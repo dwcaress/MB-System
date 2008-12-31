@@ -119,6 +119,9 @@ bathymetry by raytracing, and applying a variety of other corrections.</li>
   <li> <a href="mbps.html">mbps</a>: Simple perspective views of swath
 bathymetry
 in Postscript.</li>
+  <li> <a href="mbrollbias.html">mbrollbias</a>: Evaluate the roll bias of a 
+swath sonar system using two pieces of coincident bathymetry data 
+collected with opposing ship headings.</li>
   <li><a href="mbrolltimelag.html">mbrolltimelag</a> Estimate attitude
 time lag by cross correlation of apparent bottom slope with the roll
 time series: </li>
@@ -228,85 +231,7 @@ data
 files
 and writes a shellscript which will generate GMT plot of the data.</li>
 </ul>
-
-A number of obsolete MB-System programs and macros are distributed
-with current releases to allow backward compatibility with the
-previous serial processing scheme of the version 4 releases. These obsolete but functional
-programs and macros are:
-<ul>
-  <li> <a href="hsdump.html">hsdump</a>: Lists contents of the various
-sorts of data records in Hydrosweep DS data.</li>
-  <li> <a href="mbbackangleold.html">mbbackangleold</a>: Old tool that
-generates a table of the average
-amplitude or sidescan values as a function of the grazing angle with
-the
-seafloor.</li>
-  <li> <a href="mbbath.html">mbbath</a>: Recalculates or corrects
-swath
-bathymetry.</li>
-  <li> <a href="mbcleanold.html">mbcleanold</a>: Old tool that
-identifies
-and
-flags bad beams in swath sonar bathymetry data.</li>
-  <li> <a href="mbcut.html">mbcut</a>: Removes data from portions of
-swath as specified by the user.</li>
-  <li><a href="mbeditold.html">mbeditold</a>:
-Old interactive editor used to
-flag bad beams in swath sonar bathymetry data.</li>
-  <li><a href="mbfilter.html">mbfilter</a>: Apply some simple filter
-functions
-to sidescan, beam amplitude, or bathymetry data.</li>
-  <li> <a href="mbgetmask.html">mbgetmask</a>: Extract list of flagged
-or
-edited
-beams from a swath sonar data file.</li>
-  <li> <a href="mbmask.html">mbmask</a>: Apply editing information
-obtained from
-one file with mbgetmask to another file.</li>
-  <li> <a href="mbmerge.html">mbmerge</a>: Merge swath sonar data with
-new
-navigation.</li>
-  <li> <a href="mbm_fmtvel.html">mbm_fmtvel</a>: Scans a Hydrosweep DS
-data file and outputs a formatted table of the mean water velocity and surface
-water velocity values used in processing that data.</li>
-  <li> <a href="mbm_dslnavfix.html">mbm_dslnavfix</a>: Reads a WHOI
-DSL AMS-120 processed navigation file containing UTM northings and eastings and
-outputs a navigation file containing longitude and latitude which is suitable
-for use with mbmerge.</li>
-  <li> <a href="mbm_rollerror.html">mbm_rollerror</a>: Reads a swath
-sonar data file, calculates the noise in the vertical reference used by the sonar,
-and generates a file containing roll corrections which can be applied
-to the data.</li>
-  <li> <a href="mbm_vrefcheck.html">mbm_vrefcheck</a>: Generates a
-plot of high pass filtered apparent crosstrack seafloor slope.</li>
-  <li> <a href="mbnaveditold.html">mbnaveditold</a>: Old interactive
-editor used
-to fix problems with navigation in swath sonar data files.</li>
-  <li> <a href="mbrollbias.html">mbrollbias</a>: Evaluate the roll
-bias of
-a swath
-sonar system using two pieces of coincident bathymetry data collected
-with
-opposing ship headings.</li>
-  <li><a href="mbsimradmakess.html">mbsimradmakess</a>: Regenerate
-sidescan imagery
-from the raw amplitude samples contained in data from Simrad EM300 and
-EM3000 sonars.</li>
-  <li> <a href="mbsmooth.html">mbsmooth</a>: Smooth swath bathymetry
-using
-a spatial
-domain Gaussian filter.</li>
-  <li> <a href="mbtide.html">mbtide</a>: Corrects swath sonar
-bathymetry
-for tide
-data.</li>
-  <li> <a href="mbunclean.html">mbunclean</a>: Unflags edited beams in
-swath sonar
-bathymetry data.</li>
-
-<center>
-<p><br>
-Last Updated: $Date: 2008-09-20 00:57:40 $ $Revision: 5.22 $</p>
+<center>Last Updated: $Date: 2008-12-31 08:47:38 $ $Revision: 5.23 $
 </center>
 <p>
 </p>
