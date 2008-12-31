@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template	5/24/94
-#	$Id: Makefile.template,v 5.3 2007-05-28 17:00:45 caress Exp $
+#	$Id: Makefile.template,v 5.4 2008-12-31 08:47:38 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000, 2003 by
+#     Copyright (c) 1993-2008 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 5.3  2007/05/28 17:00:45  caress
+# Removed glw directory - that code is now in mbview
+#
 # Revision 5.2  2007/05/23 16:40:48  caress
 # Added library for Motif OpenGL widget because this library is no longer uniformly available in Xfree86 distributions.
 #
@@ -86,9 +89,7 @@ all:
 	cd utilities; make all
 	cd gmt; make all
 	cd macros; make all
-	cd mbeditold; make all
 	cd mbedit; make all
-	cd mbnaveditold; make all
 	cd mbnavedit; make all
 	cd mbnavadjust; make all
 	cd mbvelocitytool; make all
@@ -104,9 +105,7 @@ clean:
 	- cd utilities; make clean
 	- cd gmt; make clean
 	- cd macros; make clean
-	- cd mbeditold; make clean
 	- cd mbedit; make clean
-	- cd mbnaveditold; make clean
 	- cd mbnavedit; make clean
 	- cd mbnavadjust; make clean
 	- cd mbvelocitytool; make clean
