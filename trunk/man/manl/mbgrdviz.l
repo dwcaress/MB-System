@@ -85,9 +85,25 @@ the pick and release points will be shown as red Xs and a red line will be displ
 in between. The info window will show both the start and end positions and also the
 range and bearing between the two locations.
 
-The middle button can be used to pan by clicking, holding down, and 
+The middle button can be used to pan by clicking, holding down, and moving the cursor.
 
-\fIPicking, Zooming, Panning, Rotating in 3D View\fP
+The right button can be used to zoom the display by clicking, holding down,
+and moving the cursor up to zoom in or down to zoom out.
+
+\fIManipulating a 3D View\fP
+
+The user can switch from 2D map view to 3D view mode using the <View->3D Display> menu item 
+(and can switch back using the<View->Map Display> menu item). In the 3D view mode, picking,
+panning, and zooming are done in the same fashion as in the map view. However, the
+display is a perspective view that includes both rotation of the topographic model and
+of the viewpoint. To rotate the model, select the "Rotate Model" button (or the <Mouse->Rotate Model>
+menu item). The left button can be used to pick topography, the middle button will rotate the model
+when clicked and dragged, and the right button will change the vertical exageration when
+clicked and moved up (more exageration) or down (less exageration). To rotate the viewpoint,
+select the "Rotate View" button (or the <Mouse->Rotate View>
+menu item). The left button can be used to pick topography, the middle button will rotate the model
+when clicked and dragged, and the right button will change the vertical exageration when
+clicked and moved up (more exageration) or down (less exageration). 
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
