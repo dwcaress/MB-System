@@ -355,7 +355,26 @@ attitude can be extracted using mblist.
 
 Added support for EM12D data in the Caraibes netcdf form as format 76.
 Contributed by Gordon Keith.
-     
+
+Removed a number of obsolete programs and macros from the distribution.
+The following are no longer distributed with MB-System:
+ 	mbanglecorrect
+ 	mbbackangleold
+ 	mbbath
+ 	mbcleanold
+ 	mbeditold
+ 	mbfilter
+ 	mbgetmask
+ 	mbmask
+ 	mbmerge
+ 	mbm_dslnavfix.perl
+ 	mbm_fmtvel.perl
+ 	mbm_vrefcheck.perl
+ 	mbm_rollerror.perl
+ 	mbnaveditold
+ 	mbsmooth
+ 	mbtide
+ 	mbunclean
 
 MB-SYSTEM VERSION 5.1.0 RELEASE NOTES:
 ------------------------------------------
@@ -1550,10 +1569,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.122 2008-12-31 08:53:31 caress Exp $
+RCS ID: $Id: README,v 5.123 2008-12-31 09:06:56 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.122  2008/12/31 08:53:31  caress
+Updates towards release 5.1.1
+
 Revision 5.121  2008/12/05 17:32:51  caress
 Check-in mods 5 December 2008 including contributions from Gordon Keith.
 
