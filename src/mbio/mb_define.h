@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.37 2008-09-20 00:57:40 caress Exp $
+ *    $Id: mb_define.h,v 5.38 2009-01-07 17:46:44 caress Exp $
  *
  *    Copyright (c) 1996-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.37  2008/09/20 00:57:40  caress
+ * Release 5.1.1beta23
+ *
  * Revision 5.36  2008/09/13 06:08:09  caress
  * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
  *
@@ -254,12 +257,15 @@ typedef char mb_name[MB_NAME_LENGTH];
 /* multiply this by radians to get degrees */
 #define RTD	57.2957795130823230000
 
-/* min max define */
+/* min max round define */
 #ifndef MIN
 #define	MIN(A, B)	((A) < (B) ? (A) : (B))
 #endif
 #ifndef MAX
 #define	MAX(A, B)	((A) > (B) ? (A) : (B))
+#endif
+#ifndef ROUND
+#define	ROUND(X)	X < 0.0 ? ceil(X - 0.5) : floor(X + 0.5)
 #endif
 
 /* position projection flag (0 = longitude latitude, 1 = projected eastings northings) */
