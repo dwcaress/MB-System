@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 5.7 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_truecont.c,v 5.8 2009-01-07 17:48:25 caress Exp $
  *
  *    Copyright (c) 1994-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -77,7 +77,7 @@ int mb_contour_init(
 		double	pingnumber_tick_len,
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.8 2009-01-07 17:48:25 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -354,7 +354,7 @@ int mb_contour_deall(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.8 2009-01-07 17:48:25 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -490,7 +490,7 @@ int mb_tcontour(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.8 2009-01-07 17:48:25 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -746,7 +746,7 @@ int mb_tcontour(
 			else
 				{
 				ratio = data->level_list[i] / data->tick_int;
-				if (fabs(round(ratio) - ratio) < 0.005 * data->contour_int)
+				if (fabs(ROUND(ratio) - ratio) < 0.005 * data->contour_int)
 					data->tick_list[i] = 1;
 				else
 					data->tick_list[i] = 0;
@@ -756,7 +756,7 @@ int mb_tcontour(
 			else
 				{
 				ratio = data->level_list[i] / data->label_int;
-				if (fabs(round(ratio) - ratio) < 0.005 * data->contour_int)
+				if (fabs(ROUND(ratio) - ratio) < 0.005 * data->contour_int)
 					data->label_list[i] = 1;
 				else
 					data->label_list[i] = 0;
@@ -1280,7 +1280,7 @@ int dump_contour(struct swath *data, double value)
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
+  	static char rcs_id[]="$Id: mb_truecont.c,v 5.8 2009-01-07 17:48:25 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1449,7 +1449,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 			else
 				{
 				ratio = data->level_list[i] / data->tick_int;
-				if (fabs(round(ratio) - ratio) < 0.005 * data->contour_int)
+				if (fabs(ROUND(ratio) - ratio) < 0.005 * data->contour_int)
 					data->tick_list[i] = 1;
 				else
 					data->tick_list[i] = 0;
@@ -1459,7 +1459,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 			else
 				{
 				ratio = data->level_list[i] / data->label_int;
-				if (fabs(round(ratio) - ratio) < 0.005 * data->contour_int)
+				if (fabs(ROUND(ratio) - ratio) < 0.005 * data->contour_int)
 					data->label_list[i] = 1;
 				else
 					data->label_list[i] = 0;

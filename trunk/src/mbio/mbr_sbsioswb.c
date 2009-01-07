@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 5.11 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 5.12 2009-01-07 17:46:44 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.10  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -126,9 +129,6 @@
 #include "../../include/mb_swap.h"
 #endif
 
-/* macro for rounding values to nearest integer */
-#define	round(X)	X < 0.0 ? ceil(X - 0.5) : floor(X + 0.5)
-
 /* essential function prototypes */
 int mbr_register_sbsioswb(int verbose, void *mbio_ptr, 
 		int *error);
@@ -157,7 +157,7 @@ int mbr_dem_sbsioswb(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sbsioswb.c,v 5.11 2005-11-05 00:48:04 caress Exp $";
+static char res_id[]="$Id: mbr_sbsioswb.c,v 5.12 2009-01-07 17:46:44 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error)
@@ -883,11 +883,11 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			lon = 0.0000001*data->lon;
 			if (lon < 0.0) lon = lon + 360.0;
 			store->lon2u = (short) 60.0*lon;
-			store->lon2b = (short) round(600000.0*
+			store->lon2b = (short) ROUND(600000.0*
 				(lon - store->lon2u/60.0));
 			lat = 0.0000001*data->lat + 90.0;
 			store->lat2u = (short) 60.0*lat;
-			store->lat2b = (short) round(600000.0*
+			store->lat2b = (short) ROUND(600000.0*
 				(lat - store->lat2u/60.0));
 
 			/* time stamp */
@@ -898,8 +898,8 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 			/* heading */
 			store->sbhdg = (data->heading < (short) 0) 
-			    ? (unsigned short) round(((int)data->heading + 3600)*18.204444444)
-			    : (unsigned short) round(data->heading*18.204444444);
+			    ? (unsigned short) ROUND(((int)data->heading + 3600)*18.204444444)
+			    : (unsigned short) ROUND(data->heading*18.204444444);
 
 			/* depths and distances */
 			id = data->beams_bath - 1;
@@ -1049,7 +1049,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* heading */
 		data->heading =  
-		    (short) round(((int)store->sbhdg)*0.054931641625);
+		    (short) ROUND(((int)store->sbhdg)*0.054931641625);
 
 		/* additional values */
 		data->eclipse_time = store->sbtim;
