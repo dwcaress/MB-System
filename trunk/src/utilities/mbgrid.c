@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.48 2008-12-22 08:36:18 caress Exp $
+ *    $Id: mbgrid.c,v 5.49 2009-01-15 17:37:28 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.48  2008/12/22 08:36:18  caress
+ * Check in of 22 Dec 2008.
+ *
  * Revision 5.47  2008/11/16 21:51:18  caress
  * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
  *
@@ -462,7 +465,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.48 2008-12-22 08:36:18 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.49 2009-01-15 17:37:28 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -4145,6 +4148,33 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		    fprintf(outfp,"Applying spline interpolation to fill %d cells from data...\n",clip);
 		else if (clipmode == MBGRID_INTERP_ALL)
 		    fprintf(outfp,"Applying spline interpolation to fill all undefined cells in the grid...\n");
+
+zflag = 5.0e34;
+zclip = clipvalue;
+zmin = zclip;
+zmax = zclip;
+for (i=0;i<xdim;i++)
+for (j=0;j<ydim;j++)
+	{
+	kgrid = (i + offx)*gydim + (j + offy);
+	kint = i + j*gxdim;
+	kout = i*ydim + j;
+	if (sgrid[kint] < zflag)
+		output[kout] = (float) sgrid[kint];
+	else
+		output[kout] = outclipvalue;
+	}
+if (zmin == zclip)
+	zmin = 0.0;
+if (zmax == zclip)
+	zmax = 0.0;
+strcpy(ofile,fileroot);
+strcat(ofile,"_interpolation.grd");
+status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
+	gbnd[0],gbnd[1],gbnd[2],gbnd[3],
+	zmin,zmax,dx,dy,
+	xlabel,ylabel,zlabel,title,projection_id, 
+	argc,argv,&error);
 
 		/* translate the interpolation into the grid array 
 		    filling only data gaps */
