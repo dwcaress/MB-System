@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.58 2008-12-22 08:36:18 caress Exp $
+ *    $Id: mbprocess.c,v 5.59 2009-01-15 17:37:28 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.58  2008/12/22 08:36:18  caress
+ * Check in of 22 Dec 2008.
+ *
  * Revision 5.57  2008/09/11 20:20:14  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -292,7 +295,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.58 2008-12-22 08:36:18 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.59 2009-01-15 17:37:28 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -518,8 +521,8 @@ and mbedit edit save files.\n";
 	int	nsscorrangle = 0;
 	struct mbprocess_sscorr_struct	*sscorrtable = NULL;
 	struct mbprocess_sscorr_struct	sscorrtableuse;
-	int	nampcorrtable;
-	int	nampcorrangle;
+	int	nampcorrtable = 0;
+	int	nampcorrangle = 0;
 	struct mbprocess_sscorr_struct	*ampcorrtable = NULL;
 	struct mbprocess_sscorr_struct	ampcorrtableuse;
 	int	ndepths;

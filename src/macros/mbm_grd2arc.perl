@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd2arc.perl	6/11/99
-#    $Id: mbm_grd2arc.perl,v 5.3 2006-02-10 01:27:40 caress Exp $
+#    $Id: mbm_grd2arc.perl,v 5.4 2009-01-15 17:37:28 caress Exp $
 #
 #    Copyright (c) 1999, 2000, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -38,10 +38,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 5, 1999
 #
 # Version:
-#   $Id: mbm_grd2arc.perl,v 5.3 2006-02-10 01:27:40 caress Exp $
+#   $Id: mbm_grd2arc.perl,v 5.4 2009-01-15 17:37:28 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.3  2006/02/10 01:27:40  caress
+#   Fixed parsing of grdinfo output to handle changes to GMT4.1.
+#
 #   Revision 5.2  2003/04/17 20:42:48  caress
 #   Release 5.0.beta30
 #
@@ -230,7 +233,7 @@ if ($verbose > 0)
 	{
 	print "\nGenerating temporary file...\n";
 	}
-$tmpfile = $program_name . "_tmp_" . "$PID";
+$tmpfile = $program_name . "_tmp_" . "$$";
 @grd2xyz = `grd2xyz $ifile -ZTLa > $tmpfile`;
 if (!open(TMP,"<$tmpfile"))
 	{

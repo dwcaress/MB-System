@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
-#    $Id: mbm_arc2grd.perl,v 5.6 2005-06-04 04:25:57 caress Exp $
+#    $Id: mbm_arc2grd.perl,v 5.7 2009-01-15 17:37:28 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward side of Oahu)
 #
 # Version:
-#   $Id: mbm_arc2grd.perl,v 5.6 2005-06-04 04:25:57 caress Exp $
+#   $Id: mbm_arc2grd.perl,v 5.7 2009-01-15 17:37:28 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.6  2005/06/04 04:25:57  caress
+#   Macros now handles both upper case and lower case characters in Arc grid headers.
+#
 #   Revision 5.5  2003/09/23 21:13:51  caress
 #   Fixed bug in applying xyz2grd to temporary file of xyz triples.
 #
@@ -103,7 +106,7 @@ if (!$ofile)
 	print "\a";
 	die "No output file specified\nMacro $program_name aborted\n";
 	}
-$tmpfile = $program_name . "_tmp_" . "$PID";
+$tmpfile = $program_name . "_tmp_" . "$$";
 if (!open(TMP,">$tmpfile"))
 	{
 	print "\a";
@@ -140,7 +143,7 @@ while (<INP>) {
 	}
 	elsif ($cnt > 6) {
 		chop($_);
-		@values = split(/ /, $_);
+		@values = split(/\s+/, $_);
 		foreach $value (@values) {
 			$ndata++;
 			print TMP "$value\n";
