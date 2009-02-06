@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 5.8 2008-05-16 22:56:24 caress Exp $
+ *    $Id: mb_angle.c,v 5.9 2009-02-06 19:12:43 caress Exp $
  *
  *    Copyright (c) 1998-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,7 @@
  * 
  * David W. Caress
  * April 22, 1996
+ * Updated January 16, 2009
  * R/V Maurice Ewing, EW9602
  * 
  * I. Introduction
@@ -109,7 +110,7 @@
  * 	roll = PI/2   ---> in y-z plane rotated by pitch
  * 	roll = PI     ---> port, along negative x-axis
  * 
- * IV. SeaBeam Coordinates
+ * IV. An Example of Vendor-Specific Coordinates: SeaBeam 2100
  * ----------------------
  * The per-beam parameters in the SB2100 data format include
  * angle-from-vertical and angle-forward. Angle-from-vertical
@@ -165,16 +166,23 @@
  * converted to roll-pitch coordinates, corrected, and then
  * converted back prior to raytracing.
  * 
- * The SeaBeam patch test tool SeaPatch calculates angles
- * in roll-pitch coordinates from the initial bathymetry
- * and then applies whatever roll and pitch corrections are
- * set interactively by the user.
+ * When used for the patch test function, MBeditviz can apply
+ * roll and pitch bias corrections interactively. This is 
+ * accomplished by first calculating the effective angles in 
+ * roll-pitch coordinates from each beam (sounding) using the depth
+ * (relative to the sonar), the acrosstrack distance, and the
+ * alongtrack distance, The corrections in roll and pitch are
+ * then applied, and the depth and distances recalculated from
+ * from the corrected angles.
  * 
  *
  * Author:	D. W. Caress
  * Date:	December 30, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2008/05/16 22:56:24  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.7  2006/12/15 21:35:31  caress
  * Fixed longstanding bug in coordinate translation code. Previously, the application of roll and pitch angles was done in the wrong order (pitch first). The errors due to this bug only became significant with large pitch values. The rotations are now done properly.
  *

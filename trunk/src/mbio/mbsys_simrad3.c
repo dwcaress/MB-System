@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.c	3.00	2/22/2008
- *	$Id: mbsys_simrad3.c,v 5.2 2008-11-16 21:51:18 caress Exp $
+ *	$Id: mbsys_simrad3.c,v 5.3 2009-02-06 19:12:43 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -34,6 +34,9 @@
  * Date:	February 22, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.1  2008/07/10 06:40:34  caress
  * Fixed support for EM122
  *
@@ -55,7 +58,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad3.h"
 
-static char res_id[]="$Id: mbsys_simrad3.c,v 5.2 2008-11-16 21:51:18 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad3.c,v 5.3 2009-02-06 19:12:43 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -2188,7 +2191,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_simrad3_ping_struct *ping;
 	double	heave_use;
 	int	i;
-
+	
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -2231,9 +2234,9 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		*nbeams = ping->png_nbeams;
 		for (i=0;i<ping->png_nbeams;i++)
 			{
-			ttimes[i] = ping->png_raw_rxrange[i];
-			angles[i] = 90.0 - ping->png_depression[i];
-			angles_forward[i] = 90 - ping->png_azimuth[i];
+			ttimes[i] = ping->png_range[i];
+			angles[i] = ping->png_depression[i];
+			angles_forward[i] = 180.0 - ping->png_azimuth[i];
 			if (angles_forward[i] < 0.0) angles_forward[i] += 360.0;
 			angles_null[i] = 0.0;
 			heave[i] = heave_use;
