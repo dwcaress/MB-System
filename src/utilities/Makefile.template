@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.30 2008-12-31 08:47:38 caress Exp $
+#	$Id: Makefile.template,v 5.31 2009-03-02 18:54:40 caress Exp $
 #
-#     Copyright (c) 1993-2008 by
+#     Copyright (c) 1993-2009 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.30  2008/12/31 08:47:38  caress
+# Updates towards release 5.1.1
+#
 # Revision 5.29  2008/09/20 00:57:41  caress
 # Release 5.1.1beta23
 #
@@ -238,7 +241,8 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbabsorption \
 	$(BINDIR)/mbdumpesf\
 	$(BINDIR)/mbtime \
-	$(BINDIR)/mbctdlist
+	$(BINDIR)/mbctdlist \
+	$(BINDIR)/mbfilter
 
 ### make clean removes the object files
 clean:
@@ -359,6 +363,9 @@ $(BINDIR)/mbtime:	mbtime.o $(LIBDIR)/libmbio.a
 $(BINDIR)/mbctdlist:	mbctdlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbctdlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbctdlist
+$(BINDIR)/mbfilter:	mbfilter.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbfilter.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(LIBDIR)/libmbproj.a $(LIBDIR)/libmbgsf.a $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mbfilter
 
 ### compile the source files
 mbformat.o:	mbformat.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -434,3 +441,5 @@ mbtime.o:	mbtime.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbtime.c
 mbctdlist.o:	mbctdlist.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbctdlist.c
+mbfilter.o:	mbfilter.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbfilter.c

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.18 2008-05-16 22:44:37 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.19 2009-03-02 18:54:40 caress Exp $
  *
  *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.18  2008/05/16 22:44:37  caress
+ * Release 5.1.1beta18
+ *
  * Revision 5.17  2007/11/16 17:53:03  caress
  * Fixes applied.
  *
@@ -102,7 +105,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.18 2008-05-16 22:44:37 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.19 2009-03-02 18:54:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -179,7 +182,7 @@ main (int argc, char **argv)
 	int	icomment = 0;
 	
 	/* segy data */
-	int	sampleformat = MB_SEGY_SAMPLEFORMAT_NONE;
+	int	sampleformat = MB_SEGY_SAMPLEFORMAT_ENVELOPE;
 	int	samplesize = 0;
 	struct mb_segyasciiheader_struct segyasciiheader;
 	struct mb_segyfileheader_struct segyfileheader;
@@ -233,6 +236,9 @@ main (int argc, char **argv)
 	double	xscale = 0.01;
 	double	yscale = 50.0;
 	double	maxwidth = 30.0;
+	char	*zbounds = NULL;
+	char	*zbounds_envelope = "0/400/1";
+	char	*zbounds_trace = "-400/400";
 
 	char	command[MB_PATH_MAXLINE];
 	char	scale[MB_PATH_MAXLINE];
@@ -571,6 +577,12 @@ main (int argc, char **argv)
 		samplesize = 2 * sizeof(float);
 	else
 		samplesize = sizeof(float);
+		
+	/* get plot zbounds from sampleformat */
+	if (sampleformat == MB_SEGY_SAMPLEFORMAT_ENVELOPE)
+		zbounds = zbounds_envelope;
+	else
+		zbounds = zbounds_trace;
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
@@ -775,8 +787,8 @@ main (int argc, char **argv)
 							output_file, (startshot + i * nshotmax),
 							MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
 							sweep, delay, sweep, lineroot, linenumber, i + 1);
-					fprintf(stderr, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
-							lineroot, linenumber, i + 1, scale, 
+					fprintf(stderr, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+							lineroot, linenumber, i + 1, scale, zbounds, 
 							lineroot, linenumber, i + 1, lineroot, linenumber,
 							i + 1, nplot);
 					fprintf(stderr, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
@@ -786,8 +798,8 @@ main (int argc, char **argv)
 							output_file, (startshot + i * nshotmax),
 							MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
 							sweep, delay, sweep, lineroot, linenumber, i + 1);
-					fprintf(sfp, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
-							lineroot, linenumber, i + 1, scale, 
+					fprintf(sfp, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+							lineroot, linenumber, i + 1, scale, zbounds, 
 							lineroot, linenumber, i + 1, lineroot, linenumber,
 							i + 1, nplot);
 					fprintf(sfp, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
@@ -1264,8 +1276,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					output_file, (startshot + i * nshotmax),
 					MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
 					sweep, delay, sweep, lineroot, linenumber, i + 1);
-			fprintf(stderr, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
-					lineroot, linenumber, i + 1, scale, 
+			fprintf(stderr, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+					lineroot, linenumber, i + 1, scale, zbounds, 
 					lineroot, linenumber, i + 1, lineroot, linenumber,
 					i + 1, nplot);
 			fprintf(stderr, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
@@ -1275,8 +1287,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					output_file, (startshot + i * nshotmax),
 					MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
 					sweep, delay, sweep, lineroot, linenumber, i + 1);
-			fprintf(sfp, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z0/400/1 \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
-					lineroot, linenumber, i + 1, scale, 
+			fprintf(sfp, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+					lineroot, linenumber, i + 1, scale, zbounds,
 					lineroot, linenumber, i + 1, lineroot, linenumber,
 					i + 1, nplot);
 			fprintf(sfp, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",

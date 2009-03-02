@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.59 2009-01-15 17:37:28 caress Exp $
+ *    $Id: mbprocess.c,v 5.60 2009-03-02 18:54:40 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.59  2009/01/15 17:37:28  caress
+ * Update on 15 Jan 2009 - fix to mbm_grd2arc and mbm_arc2grd
+ *
  * Revision 5.58  2008/12/22 08:36:18  caress
  * Check in of 22 Dec 2008.
  *
@@ -295,7 +298,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.59 2009-01-15 17:37:28 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.60 2009-03-02 18:54:40 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -1388,6 +1391,9 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"  Kluge005:                      %d\n",process.mbp_kluge005);
 	    fprintf(stderr,"  Kluge006:                      %d\n",process.mbp_kluge006);
 	    fprintf(stderr,"  Kluge007:                      %d\n",process.mbp_kluge007);
+	    fprintf(stderr,"  Kluge008:                      %d\n",process.mbp_kluge008);
+	    fprintf(stderr,"  Kluge009:                      %d\n",process.mbp_kluge009);
+	    fprintf(stderr,"  Kluge010:                      %d\n",process.mbp_kluge010);
 	    }
 
 	/*--------------------------------------------
@@ -4473,7 +4479,28 @@ and mbedit edit save files.\n";
 		else if (process.mbp_kluge007 == MB_YES)
 			{
 			strncpy(comment,"\0",MBP_FILENAMESIZE);
-			sprintf(comment,"  Processing Kluge007 applied (undefined)");
+			sprintf(comment,"  Processing Kluge007 applied (zero alongtrack values > half altitude)");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		else if (process.mbp_kluge008 == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Processing Kluge008 applied (undefined)");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		else if (process.mbp_kluge009 == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Processing Kluge009 applied (undefined)");
+			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+			if (error == MB_ERROR_NO_ERROR) ocomment++;
+			}
+		else if (process.mbp_kluge010 == MB_YES)
+			{
+			strncpy(comment,"\0",MBP_FILENAMESIZE);
+			sprintf(comment,"  Processing Kluge010 applied (undefined)");
 			status = mb_put_comment(verbose,ombio_ptr,comment,&error);
 			if (error == MB_ERROR_NO_ERROR) ocomment++;
 			}
@@ -4563,7 +4590,7 @@ and mbedit edit save files.\n";
 			&& error == MB_ERROR_NO_ERROR 
 			&& kind == MB_DATA_DATA)
 			{
-			if (time_d < time_d_lastping)
+			if (time_d <= time_d_lastping)
 				{
 				error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
@@ -4621,7 +4648,7 @@ and mbedit edit save files.\n";
 			}
 
 	/*--------------------------------------------
-	  handle navigation merging
+	  handle kluges 1 and 7
 	  --------------------------------------------*/
 
 		/* apply kluge001 - enables correction of travel times in
@@ -4631,6 +4658,26 @@ and mbedit edit save files.\n";
 			&& kind == MB_DATA_DATA
 			&& (format == 182 || format == 183))
 			status = mbsys_atlas_ttcorr(verbose,imbio_ptr,store_ptr,&error);
+
+		/* apply kluge007 - zero alongtrack distances > half the altitude */
+		if (process.mbp_kluge007== MB_YES
+			&& kind == MB_DATA_DATA)
+			{
+			for (i=0;i<nbath;i++)
+				{
+				if (fabs(bathalongtrack[i]) > 0.5 * altitude)
+					bathalongtrack[i] = 0.0;
+				}
+			for (i=0;i<nss;i++)
+				{
+				if (fabs(ssalongtrack[i]) > 0.5 * altitude)
+					ssalongtrack[i] = 0.0;
+				}
+			}
+
+	/*--------------------------------------------
+	  handle navigation merging
+	  --------------------------------------------*/
 
 		/* extract the navigation if available */
 		if (error == MB_ERROR_NO_ERROR

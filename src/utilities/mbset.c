@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	1/4/2000
- *    $Id: mbset.c,v 5.31 2008-09-11 20:20:14 caress Exp $
+ *    $Id: mbset.c,v 5.32 2009-03-02 18:54:40 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -30,6 +30,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.31  2008/09/11 20:20:14  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.30  2008/05/24 19:41:44  caress
  * Added processing kluge (kluge006) allowing the sonar draft to be be changed without changing the calculated bathymetry.
  *
@@ -151,7 +154,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.31 2008-09-11 20:20:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.32 2009-03-02 18:54:40 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
@@ -1091,6 +1094,18 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			sscanf(pargv[i], "KLUGE007:%d", &(process.mbp_kluge007));
 			}
+		else if (strncmp(pargv[i], "KLUGE008:", 8) == 0)
+			{
+			sscanf(pargv[i], "KLUGE008:%d", &(process.mbp_kluge008));
+			}
+		else if (strncmp(pargv[i], "KLUGE009:", 8) == 0)
+			{
+			sscanf(pargv[i], "KLUGE009:%d", &(process.mbp_kluge009));
+			}
+		else if (strncmp(pargv[i], "KLUGE010:", 8) == 0)
+			{
+			sscanf(pargv[i], "KLUGE010:%d", &(process.mbp_kluge010));
+			}
 
 		/* unrecognized command */
 		else
@@ -1448,6 +1463,9 @@ the manual pages for mbprocess and mbset. \n\n";
 	    fprintf(stderr,"  Kluge005:                      %d\n",process.mbp_kluge005);
 	    fprintf(stderr,"  Kluge006:                      %d\n",process.mbp_kluge006);
 	    fprintf(stderr,"  Kluge007:                      %d\n",process.mbp_kluge007);
+	    fprintf(stderr,"  Kluge008:                      %d\n",process.mbp_kluge008);
+	    fprintf(stderr,"  Kluge009:                      %d\n",process.mbp_kluge009);
+	    fprintf(stderr,"  Kluge010:                      %d\n",process.mbp_kluge010);
 	    }
 
 	/* write parameters */

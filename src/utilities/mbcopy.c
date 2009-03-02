@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.27 2008-12-05 17:32:52 caress Exp $
+ *    $Id: mbcopy.c,v 5.28 2009-03-02 18:54:40 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	February 4, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.27  2008/12/05 17:32:52  caress
+ * Check-in mods 5 December 2008 including contributions from Gordon Keith.
+ *
  * Revision 5.26  2008/07/10 18:16:33  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -237,7 +240,8 @@ int mbcopy_simrad_time_convert(int verbose,
 int mbcopy_any_to_mbldeoih(int verbose, 
 		int kind, int *time_i, double time_d, 
 		double navlon, double navlat, double speed, double heading, 
-		double draft, double roll, double pitch, double heave, 
+		double draft, double altitude, 
+		double roll, double pitch, double heave, 
 		double	beamwidth_xtrack, double beamwidth_ltrack, 
 		int nbath, int namp, int nss,
 		char *beamflag, double *bath, double *amp, 
@@ -252,7 +256,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.27 2008-12-05 17:32:52 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.28 2009-03-02 18:54:40 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  -Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
@@ -1324,7 +1328,7 @@ main (int argc, char **argv)
 					status = mbcopy_any_to_mbldeoih(verbose, 
 						kind, time_i, time_d, 
 						navlon, navlat, speed, heading, 
-						draft, roll, pitch, heave, 
+						draft, altitude, roll, pitch, heave, 
 						imb_io_ptr->beamwidth_xtrack, 
 						imb_io_ptr->beamwidth_ltrack, 
 						nbath,namp,nss,
@@ -1339,7 +1343,7 @@ main (int argc, char **argv)
 					  status = mbcopy_any_to_mbldeoih(verbose, 
 						kind, time_i, time_d, 
 						navlon, navlat, speed, heading, 
-						draft, roll, pitch, heave, 
+						draft, altitude, roll, pitch, heave, 
 						imb_io_ptr->beamwidth_xtrack, 
 						imb_io_ptr->beamwidth_ltrack, 
 						nbath,namp,nss,
@@ -2930,7 +2934,8 @@ int mbcopy_simrad_time_convert(int verbose,
 int mbcopy_any_to_mbldeoih(int verbose, 
 		int kind, int *time_i, double time_d, 
 		double navlon, double navlat, double speed, double heading, 
-		double draft, double roll, double pitch, double heave, 
+		double draft, double altitude, 
+		double roll, double pitch, double heave, 
 		double	beamwidth_xtrack, double beamwidth_ltrack, 
 		int nbath, int namp, int nss,
 		char *beamflag, double *bath, double *amp, 
@@ -2974,6 +2979,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		fprintf(stderr,"dbg2       speed:      %f\n",speed);
 		fprintf(stderr,"dbg2       heading:    %f\n",heading);
 		fprintf(stderr,"dbg2       draft:      %f\n",draft);
+		fprintf(stderr,"dbg2       altitude:   %f\n",altitude);
 		fprintf(stderr,"dbg2       roll:       %f\n",roll);
 		fprintf(stderr,"dbg2       pitch:      %f\n",pitch);
 		fprintf(stderr,"dbg2       heave:      %f\n",heave);
@@ -3021,6 +3027,9 @@ int mbcopy_any_to_mbldeoih(int verbose,
 					time_i, time_d, 
 					navlon, navlat, speed, heading, draft, 
 					roll, pitch, heave, 
+					error);
+			mb_insert_altitude(verbose, ombio_ptr, (void *)ostore, 
+					draft, altitude, 
 					error);
 			}
 		status = mb_insert(verbose, ombio_ptr, (void *)ostore,
