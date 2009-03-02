@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbcleanold.c,v 5.7 2008-09-11 20:20:14 caress Exp $
+ *    $Id: mbcleanold.c,v 5.8 2009-03-02 18:54:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * by David Caress.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2008/09/11 20:20:14  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.6  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -204,7 +207,7 @@ struct bad_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbcleanold.c,v 5.7 2008-09-11 20:20:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbcleanold.c,v 5.8 2009-03-02 18:54:41 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Xzap_beams \n\t-V -H]";
@@ -1489,7 +1492,7 @@ main (int argc, char **argv)
 		if (nbuff > 0)
 			{
 			error = MB_ERROR_NO_ERROR;
-			status = mb_buffer_dump(verbose,buff_ptr,ombio_ptr,
+			status = mb_buffer_dump(verbose,buff_ptr,imbio_ptr,ombio_ptr,
 				nhold,&ndump,&nbuff,&error);
 			ping[1].id = ping[1].id - ndump;
 			ping[0].id = ping[0].id - ndump;

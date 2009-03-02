@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsmooth.c	6/12/93
- *    $Id: mbsmooth.c,v 5.6 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mbsmooth.c,v 5.7 2009-03-02 18:54:41 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -31,6 +31,9 @@
  * in the current version.
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.5  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -185,7 +188,7 @@ double	width_def = 250.0;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsmooth.c,v 5.6 2008-09-13 06:08:09 caress Exp $";
+	static char rcs_id[] = "$Id: mbsmooth.c,v 5.7 2009-03-02 18:54:41 caress Exp $";
 	static char program_name[] = "MBSMOOTH";
 	static char help_message[] =  "MBSMOOTH applies a spatial \
 domain gaussian filter to swath \nbathymetry data in order to \
@@ -747,7 +750,7 @@ smooth out noise in the data.";
 		ndump = 0;
 		if (nbuff > 0)
 			{
-			status = mb_buffer_dump(verbose,buff_ptr,ombio_ptr,
+			status = mb_buffer_dump(verbose,buff_ptr,imbio_ptr,ombio_ptr,
 				nhold,&ndump,&nbuff,&error);
 			}
 

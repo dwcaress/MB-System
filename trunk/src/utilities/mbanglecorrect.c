@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 5.7 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mbanglecorrect.c,v 5.8 2009-03-02 18:54:40 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -47,6 +47,9 @@ The default input and output streams are stdin and stdout.\n";
  * Date:	January 12, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.6  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -188,7 +191,7 @@ struct mbanglecorrect_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.7 2008-09-13 06:08:09 caress Exp $";
+	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.8 2009-03-02 18:54:40 caress Exp $";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\
@@ -1510,7 +1513,7 @@ j, i, slopeangle, rawangle, correction, ping[j].ss[i], ping[j].dataprocess[i]);*
 		ndump = 0;
 		if (nbuff > 0)
 			{
-			status = mb_buffer_dump(verbose,buff_ptr,ombio_ptr,
+			status = mb_buffer_dump(verbose,buff_ptr,imbio_ptr,ombio_ptr,
 				nhold,&ndump,&nbuff,&error);
 			ndumptot += ndump;
 			}

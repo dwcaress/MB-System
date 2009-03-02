@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.29 2008-10-17 07:52:44 caress Exp $
+ *    $Id: mbinfo.c,v 5.30 2009-03-02 18:54:40 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2004 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -26,6 +26,9 @@
  * Date:	February 1, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.29  2008/10/17 07:52:44  caress
+ * Check in on October 17, 2008.
+ *
  * Revision 5.28  2008/07/10 18:16:33  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -240,7 +243,7 @@ struct ping
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.29 2008-10-17 07:52:44 caress Exp $";
+	static char rcs_id[] = "$Id: mbinfo.c,v 5.30 2009-03-02 18:54:40 caress Exp $";
 	static char program_name[] = "MBINFO";
 	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs\n"
 		"some basic statistics.  If pings are averaged (pings > 2)\n"

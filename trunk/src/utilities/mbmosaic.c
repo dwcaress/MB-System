@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.30 2008-12-22 08:36:18 caress Exp $
+ *    $Id: mbmosaic.c,v 5.31 2009-03-02 18:54:40 caress Exp $
  *
- *    Copyright (c) 1997-2008 by
+ *    Copyright (c) 1997-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Date:	February 10, 1997
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.30  2008/12/22 08:36:18  caress
+ * Check in of 22 Dec 2008.
+ *
  * Revision 5.29  2008/09/27 03:27:11  caress
  * Working towards release 5.1.1beta24
  *
@@ -199,8 +202,43 @@
 /* prioritization mode */
 #define	MBMOSAIC_PRIORITY_NONE		0
 #define	MBMOSAIC_PRIORITY_ANGLE		1
-#define	MBMOSAIC_PRIORITY_AZIMUTH		2
+#define	MBMOSAIC_PRIORITY_AZIMUTH	2
 #define	MBMOSAIC_PRIORITY_BOTH		3
+
+/* priority tables */
+#define	MBMOSAIC_PRIORITYTABLE_FILE		0
+#define	MBMOSAIC_PRIORITYTABLE_60DEGREESUP	1
+#define	MBMOSAIC_PRIORITYTABLE_67DEGREESUP	2
+#define	MBMOSAIC_PRIORITYTABLE_75DEGREESUP	3
+#define	MBMOSAIC_PRIORITYTABLE_85DEGREESUP	4
+#define	MBMOSAIC_PRIORITYTABLE_60DEGREESDN	5
+#define	MBMOSAIC_PRIORITYTABLE_67DEGREESDN	6
+#define	MBMOSAIC_PRIORITYTABLE_75DEGREESDN	7
+#define	MBMOSAIC_PRIORITYTABLE_85DEGREESDN	8
+int	n_priority_angle_60degreesup = 3;
+double	priority_angle_60degreesup_angle[] = {-60, 0, 60};
+double	priority_angle_60degreesup_priority[] = {1.0, 0.0, 1.0};
+int	n_priority_angle_67degreesup = 3;
+double	priority_angle_67degreesup_angle[] = {-67, 0, 67};
+double	priority_angle_67degreesup_priority[] = {1.0, 0.0, 1.0};
+int	n_priority_angle_75degreesup = 3;
+double	priority_angle_75degreesup_angle[] = {-75, 0, 75};
+double	priority_angle_75degreesup_priority[] = {1.0, 0.0, 1.0};
+int	n_priority_angle_85degreesup = 3;
+double	priority_angle_85degreesup_angle[] = {-85, 0, 85};
+double	priority_angle_85degreesup_priority[] = {1.0, 0.0, 1.0};
+int	n_priority_angle_60degreesdn = 3;
+double	priority_angle_60degreesdn_angle[] = {-60, 0, 60};
+double	priority_angle_60degreesdn_priority[] = {0.0, 1.0, 0.0};
+int	n_priority_angle_67degreesdn = 3;
+double	priority_angle_67degreesdn_angle[] = {-67, 0, 67};
+double	priority_angle_67degreesdn_priority[] = {0.0, 1.0, 0.0};
+int	n_priority_angle_75degreesdn = 3;
+double	priority_angle_75degreesdn_angle[] = {-75, 0, 75};
+double	priority_angle_75degreesdn_priority[] = {0.0, 1.0, 0.0};
+int	n_priority_angle_85degreesdn = 3;
+double	priority_angle_85degreesdn_angle[] = {-85, 0, 85};
+double	priority_angle_85degreesdn_priority[] = {0.0, 1.0, 0.0};
 
 /* flag for no data in grid */
 #define	NO_DATA_FLAG	99999
@@ -251,7 +289,7 @@ int mbmosaic_get_priorities(
 		int	*error);
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.30 2008-12-22 08:36:18 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.31 2009-03-02 18:54:40 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -259,7 +297,7 @@ static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
           -Bborder -Cclip -Dxdim/ydim -Edx/dy/units \n\
           -Fpriority_range -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings \n\
           -Sspeed -Ttension -Uazimuth/factor -V -Wscale -Xextend \n\
-          -Ypriority_file -Zbathdef]";
+          -Ypriority_source -Zbathdef]";
 
 /*--------------------------------------------------------------------*/
 
@@ -315,6 +353,7 @@ main (int argc, char **argv)
 	int	clip = 0;
 	int	grid_mode = MBMOSAIC_SINGLE_BEST;
 	int	datatype = MBMOSAIC_DATA_SIDESCAN;
+	int	usefiltered = MB_NO;
 	char	gridkindstring[MB_PATH_MAXLINE];
 	int	gridkind = MBMOSAIC_GMTGRD;
 	int	more = MB_NO;
@@ -326,6 +365,7 @@ main (int argc, char **argv)
 	double	extend = 0.0;
 	double	tension = 1e10;
 	int	priority_mode = MBMOSAIC_PRIORITY_NONE;
+	int	priority_source = MBMOSAIC_PRIORITYTABLE_FILE;
 	double	priority_range = 0.0;
 	double	priority_azimuth = 0.0;
 	double	priority_azimuth_factor = 1.0;
@@ -454,6 +494,7 @@ main (int argc, char **argv)
 	double	xsmin, xsmax;
 	int	ismin, ismax;
 	int	footprint_mode;
+	int	inside;
 	double	acrosstrackspacing;
 	int	i, j, ii, jj, iii, jjj, kkk, n;
 	int	i1, i2, j1, j2;
@@ -491,6 +532,8 @@ main (int argc, char **argv)
 		case 'A':
 		case 'a':
 			sscanf (optarg,"%d", &datatype);
+                        if (optarg[1] == 'f' || optarg[1] == 'F')
+				usefiltered = MB_YES;
 			flag++;
 			break;
 		case 'B':
@@ -636,7 +679,59 @@ main (int argc, char **argv)
 			break;
 		case 'Y':
 		case 'y':
-			sscanf (optarg,"%s", pfile);
+			sscanf (optarg,"%d", &priority_source);
+			if (priority_source == MBMOSAIC_PRIORITYTABLE_60DEGREESUP)
+				{
+				n_priority_angle = n_priority_angle_60degreesup;
+				priority_angle_angle = priority_angle_60degreesup_angle;
+				priority_angle_priority = priority_angle_60degreesup_priority;
+				}
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_67DEGREESUP)
+				{
+				n_priority_angle = n_priority_angle_67degreesup;
+				priority_angle_angle = priority_angle_67degreesup_angle;
+				priority_angle_priority = priority_angle_67degreesup_priority;
+				}
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_75DEGREESUP)
+				{
+				n_priority_angle = n_priority_angle_75degreesup;
+				priority_angle_angle = priority_angle_75degreesup_angle;
+				priority_angle_priority = priority_angle_75degreesup_priority;
+				}
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_85DEGREESUP)
+				{
+				n_priority_angle = n_priority_angle_85degreesup;
+				priority_angle_angle = priority_angle_85degreesup_angle;
+				priority_angle_priority = priority_angle_85degreesup_priority;
+				}
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_60DEGREESDN)
+				{
+				n_priority_angle = n_priority_angle_60degreesdn;
+				priority_angle_angle = priority_angle_60degreesdn_angle;
+				priority_angle_priority = priority_angle_60degreesdn_priority;
+				}
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_67DEGREESDN)
+				{
+				n_priority_angle = n_priority_angle_67degreesdn;
+				priority_angle_angle = priority_angle_67degreesdn_angle;
+				priority_angle_priority = priority_angle_67degreesdn_priority;
+				}
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_75DEGREESDN)
+				{
+				n_priority_angle = n_priority_angle_75degreesdn;
+				priority_angle_angle = priority_angle_75degreesdn_angle;
+				priority_angle_priority = priority_angle_75degreesdn_priority;
+				}
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_85DEGREESDN)
+				{
+				n_priority_angle = n_priority_angle_85degreesdn;
+				priority_angle_angle = priority_angle_85degreesdn_angle;
+				priority_angle_priority = priority_angle_85degreesdn_priority;
+				}
+			else
+				{
+				sscanf (optarg,"%s", pfile);
+				}
 			if (priority_mode == MBMOSAIC_PRIORITY_AZIMUTH)
 			    priority_mode = MBMOSAIC_PRIORITY_BOTH;
 			else
@@ -716,6 +811,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       more:                 %d\n",more);
 		fprintf(outfp,"dbg2       use_NaN:              %d\n",use_NaN);
 		fprintf(outfp,"dbg2       data type:            %d\n",datatype);
+		fprintf(outfp,"dbg2       usefiltered:          %d\n",usefiltered);
 		fprintf(outfp,"dbg2       grid format:          %d\n",gridkind);
 		if (gridkind == MBMOSAIC_GMTGRD)
 		fprintf(outfp,"dbg2       gmt grid format id:   %s\n",gridkindstring);
@@ -727,6 +823,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       priority_mode:        %d\n",priority_mode);
 		fprintf(outfp,"dbg2       priority_range:       %f\n",priority_range);
 		fprintf(outfp,"dbg2       weight_priorities:    %d\n",weight_priorities);
+		fprintf(outfp,"dbg2       priority_source:      %d\n",priority_source);
 		fprintf(outfp,"dbg2       pfile:                %s\n",pfile);
 		fprintf(outfp,"dbg2       priority_azimuth:     %f\n",priority_azimuth);
 		fprintf(outfp,"dbg2       priority_azimuth_fac: %f\n",priority_azimuth_factor);
@@ -1145,8 +1242,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		lonflip = 0;
 
 	/* if specified get static angle priorities */
-	if (priority_mode == MBMOSAIC_PRIORITY_ANGLE
-		|| priority_mode == MBMOSAIC_PRIORITY_BOTH)
+	if (priority_source == MBMOSAIC_PRIORITYTABLE_FILE
+		&& (priority_mode == MBMOSAIC_PRIORITY_ANGLE
+			|| priority_mode == MBMOSAIC_PRIORITY_BOTH))
 		{
 		/* count priorities */
 		if ((fp = fopen(pfile, "r")) == NULL) 
@@ -1216,10 +1314,14 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		fprintf(outfp,"List of input files: %s\n",filelist);
 		fprintf(outfp,"Output fileroot:     %s\n",fileroot);
 		fprintf(outfp,"Input Data Type:     ");
-		if (datatype == MBMOSAIC_DATA_AMPLITUDE)
-			fprintf(outfp,"Amplitude\n");
-		else if (datatype == MBMOSAIC_DATA_SIDESCAN)
-			fprintf(outfp,"Sidescan\n");
+		if (datatype == MBMOSAIC_DATA_AMPLITUDE && usefiltered == MB_NO)
+			fprintf(outfp,"Amplitude (unfiltered)\n");
+		else if (datatype == MBMOSAIC_DATA_AMPLITUDE && usefiltered == MB_YES)
+			fprintf(outfp,"Amplitude (filtered)\n");
+		else if (datatype == MBMOSAIC_DATA_SIDESCAN && usefiltered == MB_NO)
+			fprintf(outfp,"Sidescan (unfiltered)\n");
+		else if (datatype == MBMOSAIC_DATA_SIDESCAN && usefiltered == MB_YES)
+			fprintf(outfp,"Sidescan (filtered)\n");
 		else if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
 			fprintf(outfp,"Flat bottom grazing angle\n");
 		else if (datatype == MBMOSAIC_DATA_GRAZING)
@@ -1299,7 +1401,24 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			|| priority_mode == MBMOSAIC_PRIORITY_BOTH)
 			{
 			fprintf(outfp, "  Pixels prioritized by grazing angle\n");
-			fprintf(outfp, "  Pixel prioritization file: %s\n", pfile);
+			if (priority_source == MBMOSAIC_PRIORITYTABLE_FILE)
+				fprintf(outfp, "  Pixel prioritization file: %s\n", pfile);
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_60DEGREESUP)
+				fprintf(outfp, "  Pixel prioritization model: default 120 degree swath increasing out\n");
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_67DEGREESUP)
+				fprintf(outfp, "  Pixel prioritization model: default 134 degree swath increasing out\n");
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_75DEGREESUP)
+				fprintf(outfp, "  Pixel prioritization model: default 150 degree swath increasing out\n");
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_85DEGREESUP)
+				fprintf(outfp, "  Pixel prioritization model: default 170 degree swath increasing out\n");
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_60DEGREESDN)
+				fprintf(outfp, "  Pixel prioritization model: default 120 degree swath decreasing out\n");
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_67DEGREESDN)
+				fprintf(outfp, "  Pixel prioritization model: default 134 degree swath decreasing out\n");
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_75DEGREESDN)
+				fprintf(outfp, "  Pixel prioritization model: default 150 degree swath decreasing out\n");
+			else if (priority_source == MBMOSAIC_PRIORITYTABLE_85DEGREESDN)
+				fprintf(outfp, "  Pixel prioritization model: default 170 degree swath decreasing out\n");
 			fprintf(outfp, "  Grazing angle priorities:\n");
 			for (i=0;i<n_priority_angle;i++)
 				{
@@ -1442,6 +1561,35 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		/* initialize the multibeam file */
 		if (file_in_bounds == MB_YES)
 		    {
+		    /* check for filtered amplitude or sidescan file */
+		    if (usefiltered == MB_YES && datatype == MBMOSAIC_DATA_AMPLITUDE)
+			{
+			if (status = mb_get_ffa(verbose, file, &format, &error) != MB_SUCCESS)
+			    {
+			    mb_error(verbose,error,&message);
+			    fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
+			    fprintf(stderr,"Requested filtered amplitude file missing\n");
+			    fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
+			    fprintf(stderr,"\nProgram <%s> Terminated\n",
+				    program_name);
+			    exit(error);
+			    }
+			}
+		    else if (usefiltered == MB_YES && datatype == MBMOSAIC_DATA_SIDESCAN)
+			{
+			if (status = mb_get_ffs(verbose, file, &format, &error) != MB_SUCCESS)
+			    {
+			    mb_error(verbose,error,&message);
+			    fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
+			    fprintf(stderr,"Requested filtered sidescan file missing\n");
+			    fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
+			    fprintf(stderr,"\nProgram <%s> Terminated\n",
+				    program_name);
+			    exit(error);
+			    }
+			}
+
+		    /* open the file */
 		    if ((status = mb_read_init(
 			verbose,file,format,pings,lonflip,bounds,
 			btime_i,etime_i,speedmin,timegap,
@@ -1686,12 +1834,16 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			      	 ix2 = MAX(ix2, ixx[j]);
 			      	 iy2 = MAX(iy2, iyy[j]);
 				 }
-		              dix = (int)(scale * (ix2 - ix1));
+/*		              dix = (int)(scale * (ix2 - ix1));
 		              diy = (int)(scale * (iy2 - iy1));
 			      ix1 = MAX(ix1 - dix, 0);
 			      ix2 = MIN(ix2 + dix, gxdim - 1);
 			      iy1 = MAX(iy1 - diy, 0);
-			      iy2 = MIN(iy2 + diy, gydim - 1);
+			      iy2 = MIN(iy2 + diy, gydim - 1);*/
+			      ix1 = MAX(ix1, 0);
+			      ix2 = MIN(ix2, gxdim - 1);
+			      iy1 = MAX(iy1, 0);
+			      iy2 = MIN(iy2, gydim - 1);
 
 			      /* process if in region of interest */
 			        for (ii=ix1;ii<=ix2;ii++)
@@ -1699,7 +1851,13 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    {
 				    /* set grid if highest weight */
 				    kgrid = ii*gydim + jj;
-				    if (priorities[ib] > maxpriority[kgrid])
+				    xx = dx * ixx[ii] + wbnd[0];
+				    yy = dy * iyy[jj] + wbnd[2];
+				    inside = mb_pr_point_in_quad(verbose, xx, yy,
+				    				footprints[ib].x, footprints[ib].y,
+								&error);
+				    if (inside == MB_YES
+				    	&& priorities[ib] > maxpriority[kgrid])
 					{
 					if (use_slope)
 						status = get_bathyslope(verbose,
@@ -1789,6 +1947,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 					* ssacrosstrack[ib]
 				    + headingy * mtodeglat
 					* ssalongtrack[ib];
+/*fprintf(stderr,"ib:%d ss:%f  x:%f l:%f  lon:%f lat:%f fprnt:",
+ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 			        
 				/* get footprints */
 				mbmosaic_get_footprint(verbose, footprint_mode, 
@@ -1808,9 +1968,11 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 						* footprints[ib].x[j]
 					    + headingy * mtodeglat
 						* footprints[ib].y[j];
+/*fprintf(stderr," %f %f",footprints[ib].x[j],footprints[ib].y[j]);*/
 					footprints[ib].x[j] = xx;
 					footprints[ib].y[j] = yy;
 					}
+/*fprintf(stderr,"\n");*/
 				}
 			    }
 
@@ -1865,12 +2027,16 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			      	 ix2 = MAX(ix2, ixx[j]);
 			      	 iy2 = MAX(iy2, iyy[j]);
 				 }
-		              dix = (int)(scale * (ix2 - ix1));
+/*		              dix = (int)(scale * (ix2 - ix1));
 		              diy = (int)(scale * (iy2 - iy1));
 			      ix1 = MAX(ix1 - dix, 0);
 			      ix2 = MIN(ix2 + dix, gxdim - 1);
 			      iy1 = MAX(iy1 - diy, 0);
-			      iy2 = MIN(iy2 + diy, gydim - 1);
+			      iy2 = MIN(iy2 + diy, gydim - 1);*/
+			      ix1 = MAX(ix1, 0);
+			      ix2 = MIN(ix2, gxdim - 1);
+			      iy1 = MAX(iy1, 0);
+			      iy2 = MIN(iy2, gydim - 1);
 			      
 			      /* process if in region of interest */
 			        for (ii=ix1;ii<=ix2;ii++)
@@ -1878,7 +2044,13 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    {
 				    /* set grid if highest weight */
 				    kgrid = ii*gydim + jj;
-				    if (priorities[ib] > maxpriority[kgrid])
+				    xx = dx * ixx[ii] + wbnd[0];
+				    yy = dy * iyy[jj] + wbnd[2];
+				    inside = mb_pr_point_in_quad(verbose, xx, yy,
+				    				footprints[ib].x, footprints[ib].y,
+								&error);
+				    if (inside == MB_YES 
+				    	&& priorities[ib] > maxpriority[kgrid])
 					{
 					grid[kgrid] = ss[ib];
 					cnt[kgrid] = 1;
@@ -1979,6 +2151,35 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		/* initialize the multibeam file */
 		if (file_in_bounds == MB_YES)
 		    {
+		    /* check for filtered amplitude or sidescan file */
+		    if (usefiltered == MB_YES && datatype == MBMOSAIC_DATA_AMPLITUDE)
+			{
+			if (status = mb_get_ffa(verbose, file, &format, &error) != MB_SUCCESS)
+			    {
+			    mb_error(verbose,error,&message);
+			    fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
+			    fprintf(stderr,"Requested filtered amplitude file missing\n");
+			    fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
+			    fprintf(stderr,"\nProgram <%s> Terminated\n",
+				    program_name);
+			    exit(error);
+			    }
+			}
+		    else if (usefiltered == MB_YES && datatype == MBMOSAIC_DATA_SIDESCAN)
+			{
+			if (status = mb_get_ffs(verbose, file, &format, &error) != MB_SUCCESS)
+			    {
+			    mb_error(verbose,error,&message);
+			    fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
+			    fprintf(stderr,"Requested filtered sidescan file missing\n");
+			    fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
+			    fprintf(stderr,"\nProgram <%s> Terminated\n",
+				    program_name);
+			    exit(error);
+			    }
+			}
+
+		    /* open the file */
 		    if ((status = mb_read_init(
 			verbose,file,format,pings,lonflip,bounds,
 			btime_i,etime_i,speedmin,timegap,
@@ -2223,12 +2424,16 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			      	 ix2 = MAX(ix2, ixx[j]);
 			      	 iy2 = MAX(iy2, iyy[j]);
 				 }
-		              dix = (int)(scale * (ix2 - ix1));
+/*		              dix = (int)(scale * (ix2 - ix1));
 		              diy = (int)(scale * (iy2 - iy1));
 			      ix1 = MAX(ix1 - dix, 0);
 			      ix2 = MIN(ix2 + dix, gxdim - 1);
 			      iy1 = MAX(iy1 - diy, 0);
-			      iy2 = MIN(iy2 + diy, gydim - 1);
+			      iy2 = MIN(iy2 + diy, gydim - 1);*/
+			      ix1 = MAX(ix1, 0);
+			      ix2 = MIN(ix2, gxdim - 1);
+			      iy1 = MAX(iy1, 0);
+			      iy2 = MIN(iy2, gydim - 1);
 
 			      /* process if in region of interest */
 			        for (ii=ix1;ii<=ix2;ii++)
@@ -2236,7 +2441,13 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    {
 				    /* add to cell if weight high enough */
 				    kgrid = ii*gydim + jj;
-				    if (priorities[ib] > 0.0 
+				    xx = dx * ixx[ii] + wbnd[0];
+				    yy = dy * iyy[jj] + wbnd[2];
+				    inside = mb_pr_point_in_quad(verbose, xx, yy,
+				    				footprints[ib].x, footprints[ib].y,
+								&error);
+				    if (inside == MB_YES 
+				    	&& priorities[ib] > 0.0 
 					&& priorities[ib] >= maxpriority[kgrid] - priority_range)
 					{
 					if (use_slope)
@@ -2415,12 +2626,16 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			      	 ix2 = MAX(ix2, ixx[j]);
 			      	 iy2 = MAX(iy2, iyy[j]);
 				 }
-		              dix = (int)(scale * (ix2 - ix1));
+/*		              dix = (int)(scale * (ix2 - ix1));
 		              diy = (int)(scale * (iy2 - iy1));
 			      ix1 = MAX(ix1 - dix, 0);
 			      ix2 = MIN(ix2 + dix, gxdim - 1);
 			      iy1 = MAX(iy1 - diy, 0);
-			      iy2 = MIN(iy2 + diy, gydim - 1);
+			      iy2 = MIN(iy2 + diy, gydim - 1);*/
+			      ix1 = MAX(ix1, 0);
+			      ix2 = MIN(ix2, gxdim - 1);
+			      iy1 = MAX(iy1, 0);
+			      iy2 = MIN(iy2, gydim - 1);
 			      
 			      /* process if in region of interest */
 			        for (ii=ix1;ii<=ix2;ii++)
@@ -2428,9 +2643,15 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    {
 				    /* set grid if highest weight */
 				    kgrid = ii*gydim + jj;
+				    xx = dx * ixx[ii] + wbnd[0];
+				    yy = dy * iyy[jj] + wbnd[2];
+				    inside = mb_pr_point_in_quad(verbose, xx, yy,
+				    				footprints[ib].x, footprints[ib].y,
+								&error);
 /* fprintf(stderr,"priorities[%d]:%f maxpriority[%d]:%f range:%f",
 ib,priorities[ib],kgrid,maxpriority[kgrid],priority_range); */
-				    if (priorities[ib] > 0.0 
+				    if (inside = MB_YES
+				    	&& priorities[ib] > 0.0 
 					&& priorities[ib] >= maxpriority[kgrid] - priority_range)
 					{
 /*fprintf(stderr," - USE DATA!"); */
@@ -3028,7 +3249,8 @@ kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 	    mb_freed(verbose,__FILE__,__LINE__,(void **)&num,&error); 
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&sigma,&error); 
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&output,&error); 
-	if (n_priority_angle > 0)
+	if (priority_source == MBMOSAIC_PRIORITYTABLE_FILE
+		&& n_priority_angle > 0)
 		{
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&priority_angle_angle,&error); 
 		mb_freed(verbose,__FILE__,__LINE__,(void **)&priority_angle_priority,&error); 
