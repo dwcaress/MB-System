@@ -55,7 +55,8 @@ The \fB-V\fP option causes \fBmbm_arc2grd\fP to print out status messages.
 Suppose that we have obtained an ascii ArcView grid called
 kohalab.asc. To translate this file to a GMT grd file,
 the following will suffice:
- 	
+.br
+  	mbm_arc2grd -I kohalab.asc -O kohalab.grd -V
 .br
 Running the example above produced the following output:
  	Program mbm_arc2grd status:

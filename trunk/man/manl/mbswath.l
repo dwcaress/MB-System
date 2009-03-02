@@ -1,4 +1,4 @@
-.TH mbswath l "3 April 2002" "MB-System 5.0" "MB-System 5.0"
+.TH mbswath l "17 February 2009" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbswath\fP - GMT compatible utility for color fill or color shaded relief
 swath plots of swath sonar data using Postscript.
@@ -15,7 +15,7 @@ Version 5.0
 \fB-f\fIformat\fP \fB-F\fIred/green/blue\fP 
 \fB-G\fImagnitude/azimuth\fP \fB-I\fIdatalist\fP \fB-K\fP 
 \fB-N\fIcptfile\fP \fB-O\fP \fB-P\fP \fB-p\fIpings \fB-Q\fIdpi\fP \fB-S\fIspeed\fP 
-\fB-T\fItimegap\fP \fB-U\fP \fB-W\fP \fB-X\fIx-shift\fP \fB-Y\fIy-shift\fP \fB-Z\fImode\fP 
+\fB-T\fItimegap\fP \fB-U\fP \fB-W\fP \fB-X\fIx-shift\fP \fB-Y\fIy-shift\fP \fB-Z\fImode[F]\fP 
 \fB-0 -1 -2\fP
 \fB-V -H\fP]
 
@@ -47,6 +47,10 @@ with no relevent data. We recommend that users maintain a ".inf"
 file for each swath data file used for gridding or plotting. The
 programs \fBmbcontour\fP and \fBmbgrid\fP also use ".inf" files
 in the same fashion.
+
+If \fBmbfilter\fP has been used to filter amplitude and/or sidescan 
+data in the desired input, then the \fB-Z\fP option can be used
+to specify plotting the filtered rather than unfiltered data.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -358,7 +362,7 @@ range of bathymetry values in feet.
 Shift origin of plot by (\fIx-shift,y-shift\fP) inches  [Default is (1,1) for new plots, (0,0) for overlays].
 .TP
 .B \-Z
-\fImode\fP
+\fImode[F]\fP
 .br
 Sets the style of the plot.
  	\fImode\fP = 1:	Color fill of bathymetry data.
@@ -367,6 +371,13 @@ Sets the style of the plot.
  	\fImode\fP = 4:	Color fill of amplitude data.
  	\fImode\fP = 5:	Color fill of sidescan data.
 .br
+If "F" is appended to \fImode\fP, then \fBmbswath\fP will attempt
+to plot amplitude or sidescan data that have been filtered with \fBmbfilter\fP. 
+If the desired filtered data files do not exist, plotting will fail and
+\fBmbswath\fP will exit with an error message. Filtered amplitude
+data are stored in ancilliary files ending with ".ffa", and filtered
+sidescan files end in ".ffs". Filtering of bathymetry data is not supported,
+and so appending "F" to \fImode\fP values of 1 or 2 will have no effect.
 Default: \fImode\fP = 1;
 .TP
 .B \-0
@@ -456,7 +467,7 @@ you have a Sun workstation):
  echo All done!
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbm_plot\fP(l), \fBmbcontour\fP(l), 
+\fBmbsystem\fP(l), \fBmbm_plot\fP(l), \fBmbcontour\fP(l),  \fBmbfilter\fP(l),
 \fBgmtsystem\fP(l), \fBpsbasemap\fP(l), \fBpsto24\fP(l)
 
 .SH BUGS
