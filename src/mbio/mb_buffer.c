@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 5.7 2005-11-05 00:48:05 caress Exp $
+ *    $Id: mb_buffer.c,v 5.8 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -39,6 +39,9 @@
  * Date:	February 25, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.7  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.6  2004/04/27 01:46:13  caress
  * Various updates of April 26, 2004.
  *
@@ -182,7 +185,7 @@
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(int verbose, void **buff_ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 5.7 2005-11-05 00:48:05 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 5.8 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
@@ -446,7 +449,7 @@ int mb_buffer_load(int verbose, void *buff_ptr,void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr,
+int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 		    int nhold, int *ndump, int *nbuff, int *error)
 {
 	char	*function_name = "mb_buffer_dump";
@@ -465,6 +468,7 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
 		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       omb_ptr:    %d\n",ombio_ptr);
 		fprintf(stderr,"dbg2       nhold:      %d\n",nhold);
 		}
 
@@ -520,7 +524,9 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr,
 					buff->buffer_kind[i]);
 				}
 
-			status = mb_write_ping(verbose,mbio_ptr,buff->buffer[i],error);
+			/* only write out data if output defined */
+			if (ombio_ptr != NULL)
+				status = mb_write_ping(verbose,ombio_ptr,buff->buffer[i],error);
 
 			/* print debug statements */
 			if (verbose >= 4)

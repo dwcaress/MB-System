@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.52 2008-12-05 17:32:52 caress Exp $
+ *    $Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.52  2008/12/05 17:32:52  caress
+ * Check-in mods 5 December 2008 including contributions from Gordon Keith.
+ *
  * Revision 5.51  2008/11/16 21:51:18  caress
  * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
  *
@@ -261,7 +264,7 @@
 #include "../../include/mbsys_simrad2.h"
 #include "../../include/mbsys_simrad3.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.52 2008-12-05 17:32:52 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1640,7 +1643,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.52 2008-12-05 17:32:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1710,7 +1713,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.52 2008-12-05 17:32:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1779,7 +1782,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.52 2008-12-05 17:32:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1845,7 +1848,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.52 2008-12-05 17:32:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1918,7 +1921,7 @@ int mb_format_source(int verbose, int *format,
 		int *vru_source, int *svp_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.52 2008-12-05 17:32:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1989,7 +1992,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.52 2008-12-05 17:32:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -2164,6 +2167,78 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = 0;
 	    if ((suffix = strstr(&filename[i],".fbt")) != NULL 
 	    	|| (suffix = strstr(&filename[i],".FBT")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len == 4)
+		    {
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
+		    *format = MBF_MBLDEOIH;
+		    found = MB_YES;
+		    }
+		}
+	    }
+
+	/* look for "fast filtered bath" or .ffb suffix */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 4)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".ffb")) != NULL 
+	    	|| (suffix = strstr(&filename[i],".FFB")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len == 4)
+		    {
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
+		    *format = MBF_MBLDEOIH;
+		    found = MB_YES;
+		    }
+		}
+	    }
+
+	/* look for "fast filtered amplitude" or .ffa suffix */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 4)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".ffa")) != NULL 
+	    	|| (suffix = strstr(&filename[i],".FFA")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len == 4)
+		    {
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
+		    *format = MBF_MBLDEOIH;
+		    found = MB_YES;
+		    }
+		}
+	    }
+
+	/* look for "fast filtered sidescan" or .ffs suffix */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 4)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".ffs")) != NULL 
+	    	|| (suffix = strstr(&filename[i],".FFS")) != NULL)
 		{
 		suffix_len = strlen(suffix);
 		if (suffix_len == 4)

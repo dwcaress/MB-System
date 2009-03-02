@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.32 2008-07-10 18:02:39 caress Exp $
+ *	$Id: mbsys_simrad2.c,v 5.33 2009-03-02 18:51:52 caress Exp $
  *
- *    Copyright (c) 1998-2008 by
+ *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -31,6 +31,9 @@
  * Date:	October 9, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.32  2008/07/10 18:02:39  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.29  2008/03/01 09:14:03  caress
  * Some housekeeping changes.
  *
@@ -154,7 +157,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char res_id[]="$Id: mbsys_simrad2.c,v 5.32 2008-07-10 18:02:39 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad2.c,v 5.33 2009-03-02 18:51:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -2723,7 +2726,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_simrad2_struct *store;
 	struct mbsys_simrad2_ping_struct *ping;
 	double	depthscale, dacrscale;
-	double	bath_best;
+	double	altitude_best;
 	double	xtrack_min;
 	int	found;
 	int	i;
@@ -2761,7 +2764,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		depthscale = 0.01 * ping->png_depth_res;
 		dacrscale  = 0.01 * ping->png_distance_res;
 		found = MB_NO;
-		bath_best = 0.0;
+		altitude_best = 0.0;
 		xtrack_min = 99999999.9;
 		for (i=0;i<ping->png_nbeams;i++)
 		    {
@@ -2769,7 +2772,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			&& fabs(dacrscale * ping->png_acrosstrack[i]) < xtrack_min)
 			{
 			xtrack_min = fabs(dacrscale * ping->png_acrosstrack[i]);
-			bath_best = depthscale * ping->png_depth[i];
+			altitude_best = depthscale * ping->png_depth[i];
 			found = MB_YES;
 			}
 		    }		
@@ -2782,14 +2785,14 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    && fabs(dacrscale * ping->png_acrosstrack[i]) < xtrack_min)
 			    {
 			    xtrack_min = fabs(dacrscale * ping->png_acrosstrack[i]);
-			    bath_best = depthscale * ping->png_depth[i];
+			    altitude_best = depthscale * ping->png_depth[i];
 			    found = MB_YES;
 			    }
 			}		
 		    }
 		if (found == MB_YES)
 		    {
-		    *altitude = bath_best - *transducer_depth;
+		    *altitude = altitude_best;
 		    }
 		else
 		    *altitude = 0.0;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.38 2008-09-11 20:11:52 caress Exp $
+ *    $Id: mb_process.c,v 5.39 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.38  2008/09/11 20:11:52  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.37  2008/05/26 04:43:15  caress
  * Getting ready for release 5.1.1beta19.
  *
@@ -164,7 +167,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.38 2008-09-11 20:11:52 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.39 2009-03-02 18:51:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
@@ -360,6 +363,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_kluge005 = MB_NO;
 	process->mbp_kluge006 = MB_NO;
 	process->mbp_kluge007 = MB_NO;
+	process->mbp_kluge008 = MB_NO;
+	process->mbp_kluge009 = MB_NO;
+	process->mbp_kluge010 = MB_NO;
 
 	/* open and read parameter file */
 	if ((fp = fopen(parfile, "r")) != NULL) 
@@ -1037,6 +1043,18 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			process->mbp_kluge007 = MB_YES;
 			}			
+		    else if (strncmp(buffer, "KLUGE008", 8) == 0)
+			{
+			process->mbp_kluge008 = MB_YES;
+			}			
+		    else if (strncmp(buffer, "KLUGE009", 8) == 0)
+			{
+			process->mbp_kluge009 = MB_YES;
+			}			
+		    else if (strncmp(buffer, "KLUGE010", 8) == 0)
+			{
+			process->mbp_kluge010 = MB_YES;
+			}			
 		    }
 		}
 		
@@ -1530,6 +1548,9 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_kluge005:           %d\n",process->mbp_kluge005);
 		fprintf(stderr,"dbg2       mbp_kluge006:           %d\n",process->mbp_kluge006);
 		fprintf(stderr,"dbg2       mbp_kluge007:           %d\n",process->mbp_kluge007);
+		fprintf(stderr,"dbg2       mbp_kluge008:           %d\n",process->mbp_kluge008);
+		fprintf(stderr,"dbg2       mbp_kluge009:           %d\n",process->mbp_kluge009);
+		fprintf(stderr,"dbg2       mbp_kluge010:           %d\n",process->mbp_kluge010);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
@@ -1682,6 +1703,9 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_kluge005:           %d\n",process->mbp_kluge005);
 		fprintf(stderr,"dbg2       mbp_kluge006:           %d\n",process->mbp_kluge006);
 		fprintf(stderr,"dbg2       mbp_kluge007:           %d\n",process->mbp_kluge007);
+		fprintf(stderr,"dbg2       mbp_kluge008:           %d\n",process->mbp_kluge008);
+		fprintf(stderr,"dbg2       mbp_kluge009:           %d\n",process->mbp_kluge009);
+		fprintf(stderr,"dbg2       mbp_kluge010:           %d\n",process->mbp_kluge010);
 		}
 		
 	/* try to avoid absolute pathnames - get pwd */
@@ -1964,6 +1988,12 @@ int mb_pr_writepar(int verbose, char *file,
 	    	fprintf(fp, "KLUGE006\n");
 	    if (process->mbp_kluge007 == MB_YES)
 	    	fprintf(fp, "KLUGE007\n");
+	    if (process->mbp_kluge008 == MB_YES)
+	    	fprintf(fp, "KLUGE008\n");
+	    if (process->mbp_kluge009 == MB_YES)
+	    	fprintf(fp, "KLUGE009\n");
+	    if (process->mbp_kluge010 == MB_YES)
+	    	fprintf(fp, "KLUGE010\n");
   	
 	    /* close file */
 	    fclose(fp);
@@ -3830,6 +3860,9 @@ int mb_pr_update_kluges(int verbose, char *file,
 			int	mbp_kluge005,
 			int	mbp_kluge006,
 			int	mbp_kluge007,
+			int	mbp_kluge008,
+			int	mbp_kluge009,
+			int	mbp_kluge010,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_kluges";
@@ -3851,6 +3884,9 @@ int mb_pr_update_kluges(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_kluge005:             %d\n",mbp_kluge005);
 		fprintf(stderr,"dbg2       mbp_kluge006:             %d\n",mbp_kluge006);
 		fprintf(stderr,"dbg2       mbp_kluge007:             %d\n",mbp_kluge007);
+		fprintf(stderr,"dbg2       mbp_kluge008:             %d\n",mbp_kluge008);
+		fprintf(stderr,"dbg2       mbp_kluge009:             %d\n",mbp_kluge009);
+		fprintf(stderr,"dbg2       mbp_kluge010:             %d\n",mbp_kluge010);
 		}
 
 	/* get known process parameters */
@@ -3864,6 +3900,9 @@ int mb_pr_update_kluges(int verbose, char *file,
         process.mbp_kluge005 = mbp_kluge005;
         process.mbp_kluge006 = mbp_kluge006;
         process.mbp_kluge007 = mbp_kluge007;
+        process.mbp_kluge008 = mbp_kluge008;
+        process.mbp_kluge009 = mbp_kluge009;
+        process.mbp_kluge010 = mbp_kluge010;
  
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
@@ -5144,6 +5183,9 @@ int mb_pr_get_kluges(int verbose, char *file,
 			int	*mbp_kluge005,
 			int	*mbp_kluge006,
 			int	*mbp_kluge007,
+			int	*mbp_kluge008,
+			int	*mbp_kluge009,
+			int	*mbp_kluge010,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_kluges";
@@ -5171,6 +5213,9 @@ int mb_pr_get_kluges(int verbose, char *file,
         *mbp_kluge005 = process.mbp_kluge005;
         *mbp_kluge006 = process.mbp_kluge006;
         *mbp_kluge007 = process.mbp_kluge007;
+        *mbp_kluge008 = process.mbp_kluge008;
+        *mbp_kluge009 = process.mbp_kluge009;
+        *mbp_kluge010 = process.mbp_kluge010;
  
 
 	/* print output debug statements */
@@ -5186,6 +5231,9 @@ int mb_pr_get_kluges(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_kluge005:             %d\n",mbp_kluge005);
 		fprintf(stderr,"dbg2       mbp_kluge006:             %d\n",mbp_kluge006);
 		fprintf(stderr,"dbg2       mbp_kluge007:             %d\n",mbp_kluge007);
+		fprintf(stderr,"dbg2       mbp_kluge008:             %d\n",mbp_kluge008);
+		fprintf(stderr,"dbg2       mbp_kluge009:             %d\n",mbp_kluge009);
+		fprintf(stderr,"dbg2       mbp_kluge010:             %d\n",mbp_kluge010);
 		fprintf(stderr,"dbg2       error:                    %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                   %d\n",status);
@@ -5629,6 +5677,83 @@ int mb_pr_get_bathyslope(int verbose,
 
 	/* return status */
 	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_point_in_quad(int verbose,
+	double px, double py, double *x, double *y, int *error)
+{
+	char	*function_name = "mb_pr_point_in_quad";
+	int	inside = MB_YES;
+	double	ax, ay, bx, by;
+	double	z1, z2, z3, z4, z;
+	
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       px:              %f\n",px);
+		fprintf(stderr,"dbg2       py:              %f\n",px);
+		fprintf(stderr,"dbg2       x[0]: %f   y[0]: %f\n",x[0],y[0]);
+		fprintf(stderr,"dbg2       x[1]: %f   y[1]: %f\n",x[1],y[1]);
+		fprintf(stderr,"dbg2       x[2]: %f   y[2]: %f\n",x[2],y[2]);
+		fprintf(stderr,"dbg2       x[3]: %f   y[3]: %f\n",x[3],y[3]);
+		}
+
+	/* check if point is inside defined quadrilateral 
+		- the quad should be defined by four points
+		in counterclockwise order
+		- this is accomplished by calculating the
+		z component of the cross product of the vector from 
+		each quad point to the next with the vector from the
+		quad point to the candidate point - if all four cross
+		product z components are positive, the point is inside
+		the quad */
+	inside = MB_YES;
+
+	ax = x[1] - x[0];
+	ay = y[1] - y[0];
+	bx = px - x[0];
+	by = py - y[0];
+	z1 = ax * by - ay * bx;
+
+	ax = x[2] - x[1];
+	ay = y[2] - y[1];
+	bx = px - x[1];
+	by = py - y[1];
+	z2 = ax * by - ay * bx;
+
+	ax = x[3] - x[2];
+	ay = y[3] - y[2];
+	bx = px - x[2];
+	by = py - y[2];
+	z3 = ax * by - ay * bx;
+
+	ax = x[0] - x[3];
+	ay = y[0] - y[3];
+	bx = px - x[3];
+	by = py - y[3];
+	z4 = ax * by - ay * bx;
+	
+	z = z1 * z2 * z3 *z4;
+	if (z <= 0.0)
+		inside = MB_NO;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       inside:          %d\n",inside);
+		}
+
+	/* return status */
+	return(inside);
 }
 /*--------------------------------------------------------------------*/
 

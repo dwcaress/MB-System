@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.21 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_check_info.c,v 5.22 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	September 3, 1996
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.20  2008/01/14 18:05:09  caress
  * Made checking for data min maxes and bounds more robust.
  *
@@ -127,7 +130,7 @@
 /*--------------------------------------------------------------------*/
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -364,7 +367,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_get_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -874,8 +877,7 @@ int mb_make_info(int verbose, int force,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_get_fbt(int verbose, 
-		    char *file, int *format, int *error)
+int mb_get_fbt(int verbose, char *file, int *format, int *error)
 {
 	char	*function_name = "mb_get_fbt";
 	int	status = MB_SUCCESS;
@@ -933,8 +935,7 @@ int mb_get_fbt(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_get_fnv(int verbose, 
-		    char *file, int *format, int *error)
+int mb_get_fnv(int verbose, char *file, int *format, int *error)
 {
 	char	*function_name = "mb_get_fnv";
 	int	status = MB_SUCCESS;
@@ -973,6 +974,132 @@ int mb_get_fnv(int verbose,
 	    {
 	    strcpy(file, fnvfile);
 	    *format = 166;
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       format:     %d\n",*format);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_get_ffa(int verbose, char *file, int *format, int *error)
+{
+	char	*function_name = "mb_get_ffa";
+	int	status = MB_SUCCESS;
+	char	ffafile[MB_PATH_MAXLINE];
+	int	datmodtime = 0;
+	int	ffamodtime = 0;
+	struct stat file_status;
+	int	fstat;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       format:     %d\n",*format);
+		}
+		
+	/* check for existing ffa file */
+	sprintf(ffafile, "%s.ffa", file);
+	if ((fstat = stat(file, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		datmodtime = file_status.st_mtime;
+		}
+	if ((fstat = stat(ffafile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		ffamodtime = file_status.st_mtime;
+		}
+		
+	/* replace file with ffa file if ffa file exists */
+	if (datmodtime > 0 && ffamodtime > 0)
+	    {
+	    strcpy(file, ffafile);
+	    *format = 71;
+	    }
+	else
+	    {
+	    status = MB_FAILURE;
+	    *error = MB_ERROR_FILE_NOT_FOUND;
+	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       format:     %d\n",*format);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_get_ffs(int verbose, char *file, int *format, int *error)
+{
+	char	*function_name = "mb_get_ffs";
+	int	status = MB_SUCCESS;
+	char	ffsfile[MB_PATH_MAXLINE];
+	int	datmodtime = 0;
+	int	ffsmodtime = 0;
+	struct stat file_status;
+	int	fstat;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       format:     %d\n",*format);
+		}
+		
+	/* check for existing ffs file */
+	sprintf(ffsfile, "%s.ffs", file);
+	if ((fstat = stat(file, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		datmodtime = file_status.st_mtime;
+		}
+	if ((fstat = stat(ffsfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+		ffsmodtime = file_status.st_mtime;
+		}
+		
+	/* replace file with ffs file if ffs file exists */
+	if (datmodtime > 0 && ffsmodtime > 0)
+	    {
+	    strcpy(file, ffsfile);
+	    *format = 71;
+	    }
+	else
+	    {
+	    status = MB_FAILURE;
+	    *error = MB_ERROR_FILE_NOT_FOUND;
 	    }
 
 	/* print output debug statements */
@@ -1162,7 +1289,7 @@ int mb_swathbounds(int verbose, int checkgood,
 /*--------------------------------------------------------------------*/
 int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_info_init";
 	int	status = MB_SUCCESS;
 
@@ -1270,7 +1397,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 int mb_get_info_datalist(int verbose, char *read_file, int *format, 
 			struct mb_info_struct *mb_info, int lonflip, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.21 2008-07-10 06:43:40 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_get_info_datalist";
 	int	status = MB_SUCCESS;
 	char	file_inf[MB_PATH_MAXLINE];

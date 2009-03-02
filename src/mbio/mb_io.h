@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.26 2008-09-20 00:57:40 caress Exp $
+ *    $Id: mb_io.h,v 5.27 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	January 19, 1993
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.26  2008/09/20 00:57:40  caress
+ * Release 5.1.1beta23
+ *
  * Revision 5.25  2008/03/01 09:12:52  caress
  * Added support for Simrad EM710 multibeam in new formats 58 and 59.
  *
@@ -188,6 +191,29 @@
 #ifndef MB_STATUS_DEF
 #include "mb_status.h"
 #endif
+
+struct mb_io_ping_struct
+	{
+	double	time_d;
+	double	navlon;
+	double	navlat;
+	double	speed;
+	double	heading;
+	double	distance;
+	double	altitude;
+	double	sonardepth;
+	int	nbath;
+	int	namp;
+	int	nss;
+	char	*beamflag;
+	double	*bath;
+	double	*bathlon;
+	double	*bathlat;
+	double	*amp;
+	double	*ss;
+	double	*sslon;
+	double	*sslat;
+	};
 
 /* MBIO input/output control structure */
 struct mb_io_struct
@@ -396,7 +422,7 @@ struct mb_io_struct
 	void	**regarray_oldptr;
 	int	*regarray_type;
 	int	*regarray_size;
-	
+
 	/* variables for saving information */
 	char	save_label[12];
 	int	save_label_flag;
