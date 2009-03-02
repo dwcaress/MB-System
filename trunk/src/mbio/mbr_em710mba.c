@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em710mba.c	2/26/2008
- *	$Id: mbr_em710mba.c,v 5.2 2008-11-16 21:51:18 caress Exp $
+ *	$Id: mbr_em710mba.c,v 5.3 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Date:	February 26, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.1  2008/07/10 06:41:31  caress
  * Fixed support for EM122
  *
@@ -174,7 +177,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad3_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em710mba.c,v 5.2 2008-11-16 21:51:18 caress Exp $";
+static char res_id[]="$Id: mbr_em710mba.c,v 5.3 2009-03-02 18:51:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em710mba(int verbose, void *mbio_ptr, int *error)
@@ -4577,7 +4580,7 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 				ping->png_raw_txsector[i], ping->png_raw_txbandwidth[i]);
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		fprintf(stderr,"dbg5       beam values:\n");
-		fprintf(stderr,"dbg5       angle range sector amp quality window beam\n");
+		fprintf(stderr,"dbg5       beam angle sector detect win quality spare range amp clean spare\n");
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_raw_nbeams;i++)
 			fprintf(stderr,"dbg5       %3d %5d %3d %3d %4d %3d %5d %f %5d %5d %5d\n",

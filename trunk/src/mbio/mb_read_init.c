@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.25 2008-10-17 07:30:22 caress Exp $
+ *    $Id: mb_read_init.c,v 5.26 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	January 25, 1993
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.25  2008/10/17 07:30:22  caress
+ * Added format 26 supporting Hydrosweep DS data used by SOPAC.
+ *
  * Revision 5.24  2008/09/20 00:57:40  caress
  * Release 5.1.1beta23
  *
@@ -247,7 +250,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.25 2008-10-17 07:30:22 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.26 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -889,7 +892,6 @@ int mb_read_init(int verbose, char *file,
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		}
-		
 
 	/* set error and status (if you got here you succeeded */
 	*error = MB_ERROR_NO_ERROR;

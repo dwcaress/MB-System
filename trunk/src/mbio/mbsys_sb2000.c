@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.c	10/4/94
- *	$Id: mbsys_sb2000.c,v 5.10 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_sb2000.c,v 5.11 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.10  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.9  2003/08/07 22:32:59  caress
  * Fixed problem with broken SB2000 records in data sample supplied by Mike Sexton.
  *
@@ -127,7 +130,7 @@
 int mbsys_sb2000_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb2000.c,v 5.10 2005-11-05 00:48:05 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2000.c,v 5.11 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mbsys_sb2000_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -361,6 +364,8 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			for (i=0;i<*nss;i++)
 				{
 				ss[i] = store->ss[i];
+				if (ss[i] <= 0.0)
+					ss[i] = MB_SIDESCAN_NULL;
 				ssacrosstrack[i] = 
 					(i-*nss/2)*store->pixel_size;
 				ssalongtrack[i] = 0.0;
@@ -373,6 +378,8 @@ int mbsys_sb2000_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				short_ptr = (unsigned short *) 
 					&store->ss[2*i];
 				ss[i] = (double) (*short_ptr);
+				if (ss[i] <= 0.0)
+					ss[i] = MB_SIDESCAN_NULL;
 				ssacrosstrack[i] = 
 					(i-*nss/2)*store->pixel_size;
 				ssalongtrack[i] = 0.0;
@@ -637,7 +644,10 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			for (i=0;i<nss;i++)
 				{
-				store->ss[i] = (mb_u_char) ss[i];
+				if (ss[i] > MB_SIDESCAN_NULL)
+					store->ss[i] = (mb_u_char) ss[i];
+				else
+					store->ss[i] = 0;
 				}
 			}
 		else
@@ -646,7 +656,10 @@ int mbsys_sb2000_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				short_ptr = (unsigned short *) 
 					&store->ss[2*i];
-				*short_ptr = (unsigned short) ss[i];
+				if (ss[i] > MB_SIDESCAN_NULL)
+					*short_ptr = (unsigned short) ss[i];
+				else
+					*short_ptr = 0;
 				}
 			}
 		}

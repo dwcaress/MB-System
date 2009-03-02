@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.c	3.00	2/22/2008
- *	$Id: mbsys_simrad3.c,v 5.3 2009-02-06 19:12:43 caress Exp $
+ *	$Id: mbsys_simrad3.c,v 5.4 2009-03-02 18:51:52 caress Exp $
  *
- *    Copyright (c) 2008 by
+ *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -34,6 +34,9 @@
  * Date:	February 22, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2009/02/06 19:12:43  caress
+ * Fixed description in mb_angle.c and angle extraction in mb_simrad3.c
+ *
  * Revision 5.2  2008/11/16 21:51:18  caress
  * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
  *
@@ -58,7 +61,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad3.h"
 
-static char res_id[]="$Id: mbsys_simrad3.c,v 5.3 2009-02-06 19:12:43 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad3.c,v 5.4 2009-03-02 18:51:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -2043,7 +2046,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ping->png_speed = (int) rint(speed / 0.036);		
 			
 		/* insert bathymetry and amplitude */
-		reflscale  = 0.1;		
+		reflscale  = 0.1;
 		if (status == MB_SUCCESS && ping->png_nbeams == 0)
 			{
 			ping->png_nbeams_valid = 0;
@@ -2051,7 +2054,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    {
 			    if (beamflag[i] != MB_FLAG_NULL)
 				{
-				ping->png_depth[i] = bath[i] - depthoffset;
+				ping->png_depth[i] = bath[i] - ping->png_xducer_depth;
 				ping->png_beamflag[i] = beamflag[i];
 				ping->png_acrosstrack[i] = bathacrosstrack[i];
 				ping->png_alongtrack[i] = bathalongtrack[i];
@@ -2075,7 +2078,7 @@ int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			for (i=0;i<ping->png_nbeams;i++)
 				{
-				ping->png_depth[i] = bath[i] - depthoffset;
+				ping->png_depth[i] = bath[i] - ping->png_xducer_depth;
 				ping->png_beamflag[i] = beamflag[i];
 				ping->png_acrosstrack[i] = bathacrosstrack[i];
 				ping->png_alongtrack[i] = bathalongtrack[i];
@@ -2190,6 +2193,14 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
 	double	heave_use;
+	int	time_i[7];
+	double	ptime_d;
+	double	soundspeed;
+	double	receive_time_d, receive_roll, receive_pitch, receive_heave;
+	double	transmit_time_d, transmit_roll, transmit_pitch, transmit_heave;
+	double	transmit_alongtrack;
+	double	rolloffset, pitchoffset;
+	double	alpha, beta, theta, phi;
 	int	i;
 	
 	/* print input debug statements */
@@ -2225,6 +2236,16 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get survey data structure */
 		ping = (struct mbsys_simrad3_ping_struct *) store->ping;
 
+		/* get ping time */
+		time_i[0] = ping->png_date / 10000;
+		time_i[1] = (ping->png_date % 10000) / 100;
+		time_i[2] = ping->png_date % 100;
+		time_i[3] = ping->png_msec / 3600000;
+		time_i[4] = (ping->png_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_msec % 60000) / 1000;
+		time_i[6] = (ping->png_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &ptime_d);
+
 		/* get depth offset (heave + heave offset) */
 		heave_use =  0.0;
 		*ssv = 0.1 * ping->png_ssv;
@@ -2232,15 +2253,34 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get travel times, angles */
 		*nbeams = ping->png_nbeams;
+		soundspeed = 0.1 * ((double)ping->png_ssv);
 		for (i=0;i<ping->png_nbeams;i++)
 			{
+			/* get corrected range */
+			ping->png_range[i] = ping->png_raw_rxrange[i] 
+						- (receive_heave - transmit_heave) / soundspeed;
+
+			/* calculate angles */
+			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) 
+					+ 0.01 * ((double)ping->png_pitch);
+			beta = 90.0 - (0.01 * (double)ping->png_raw_rxpointangle[i]) 
+					+ 0.01 * ((double)ping->png_roll);
+			mb_rollpitch_to_takeoff(
+				verbose, 
+				alpha, beta, 
+				&theta, &phi, 
+				error);
+			ping->png_depression[i] = theta;
+			ping->png_azimuth[i] = phi;
+			
 			ttimes[i] = ping->png_range[i];
 			angles[i] = ping->png_depression[i];
 			angles_forward[i] = 180.0 - ping->png_azimuth[i];
 			if (angles_forward[i] < 0.0) angles_forward[i] += 360.0;
 			angles_null[i] = 0.0;
 			heave[i] = heave_use;
-			alongtrack_offset[i] = 0.0;
+			alongtrack_offset[i] = (100.0 * ((double)ping->png_speed)) 
+						* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
 			}
 
 		/* set status */
@@ -2502,7 +2542,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
-	double	bath_best;
+	double	altitude_best;
 	double	xtrack_min;
 	int	found;
 	int	i;
@@ -2537,7 +2577,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get transducer depth and altitude */
 		*transducer_depth = ping->png_xducer_depth;
 		found = MB_NO;
-		bath_best = 0.0;
+		altitude_best = 0.0;
 		xtrack_min = 99999999.9;
 		for (i=0;i<ping->png_nbeams;i++)
 		    {
@@ -2545,7 +2585,7 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			&& fabs(ping->png_acrosstrack[i]) < xtrack_min)
 			{
 			xtrack_min = fabs(ping->png_acrosstrack[i]);
-			bath_best = ping->png_depth[i];
+			altitude_best = ping->png_depth[i];
 			found = MB_YES;
 			}
 		    }		
@@ -2558,13 +2598,13 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    && fabs(ping->png_acrosstrack[i]) < xtrack_min)
 			    {
 			    xtrack_min = fabs(ping->png_acrosstrack[i]);
-			    bath_best = ping->png_depth[i];
+			    altitude_best = ping->png_depth[i];
 			    found = MB_YES;
 			    }
 			}		
 		    }
 		if (found == MB_YES)
-		    *altitude = bath_best - *transducer_depth;
+		    *altitude = altitude_best;
 		else
 		    *altitude = 0.0;
 

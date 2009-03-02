@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2120.c	3/27/2000
- *	$Id: mbsys_sb2120.c,v 5.3 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_sb2120.c,v 5.4 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -28,6 +28,9 @@
  * Date:	December 7,  2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.3  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.2  2001/01/22 07:43:34  caress
  * Version 5.0.beta01
  *
@@ -60,7 +63,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2120.c,v 5.3 2005-11-05 00:48:04 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2120.c,v 5.4 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mbsys_sb2120_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -497,6 +500,8 @@ int	*error;
 		    for (i=0;i<store->sid_num_pixels;i++)
 			{
 			ss[i] = store->ss[i];
+			if (ss[i] <= 0.0)
+				ss[i] = MB_SIDESCAN_NULL;
 			ssacrosstrack[i] 
 			    = 0.001 * store->sid_bin_size 
 				* (i - store->sid_num_pixels / 2);
@@ -791,7 +796,10 @@ int mbsys_sb2120_insert(int verbose, char *mbio_ptr, char *store_ptr,
 			}
 		    for (i=0;i<nss;i++)
 			{
-			store->ss[i]= ss[i];
+			if (ss[i] > MB_SIDESCAN_NULL)
+				store->ss[i]= ss[i];
+			else
+				store->ss[i] = 0;
 			}
 		    }
 		}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.28 2008-09-11 20:11:52 caress Exp $
+ *    $Id: mb_process.h,v 5.29 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -490,7 +490,29 @@
  *   KLUGE006                       # processing kluge 006
  *                                  #   changes sonar depth / draft values without 
  *                                  #   changing bathymetry values
- *   KLUGE007                       # processing kluge 007 (not yet defined)
+ *   KLUGE007                       # processing kluge 007
+ *				    #   zeros alongtrack values greater than half
+ *				    #   the altitude
+ *				    #   - this targets some SeaBeam 2112 data originally
+ *                                  #     processed using MB-System 4.6.10 that had
+ *                                  #     a few pings with bad sidescan alongtrack values
+ *				    #   - its not clear if this problem originated with
+ *				    #     the data or a bug in MB-System 4.6.10
+ *   KLUGE008                       # processing kluge 008 (not yet defined)
+ *				    #   - occasionaly odd processing problems will
+ *				    #     occur that are specific to a particular
+ *				    #     survey or sonar version
+ *				    #   - mbprocess will allow one-time fixes to
+ *				    #     be defined as "kluges" that can be turned
+ *				    #     on through the parameter files.
+ *   KLUGE009                       # processing kluge 009 (not yet defined)
+ *				    #   - occasionaly odd processing problems will
+ *				    #     occur that are specific to a particular
+ *				    #     survey or sonar version
+ *				    #   - mbprocess will allow one-time fixes to
+ *				    #     be defined as "kluges" that can be turned
+ *				    #     on through the parameter files.
+ *   KLUGE010                       # processing kluge 010 (not yet defined)
  *				    #   - occasionaly odd processing problems will
  *				    #     occur that are specific to a particular
  *				    #     survey or sonar version
@@ -518,6 +540,9 @@
  * Date:	September 11, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.28  2008/09/11 20:11:52  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.27  2008/05/26 04:43:15  caress
  * Getting ready for release 5.1.1beta19.
  *
@@ -875,6 +900,9 @@ struct mb_process_struct
 	int	mbp_kluge005;
 	int	mbp_kluge006;
 	int	mbp_kluge007;
+	int	mbp_kluge008;
+	int	mbp_kluge009;
+	int	mbp_kluge010;
 	};
 	
 /* edit save file definitions */
@@ -1067,6 +1095,9 @@ int mb_pr_update_kluges(int verbose, char *file,
 			int	mbp_kluge005,
 			int	mbp_kluge006,
 			int	mbp_kluge007,
+			int	mbp_kluge008,
+			int	mbp_kluge009,
+			int	mbp_kluge010,
 			int *error);
 int mb_pr_get_ofile(int verbose, char *file, 
 			int	*mbp_ofile_specified, 
@@ -1230,6 +1261,9 @@ int mb_pr_get_kluges(int verbose, char *file,
 			int	*mbp_kluge005,
 			int	*mbp_kluge006,
 			int	*mbp_kluge007,
+			int	*mbp_kluge008,
+			int	*mbp_kluge009,
+			int	*mbp_kluge010,
 			int *error);
 int mb_pr_set_bathyslope(int verbose,
 			int nsmooth, 
@@ -1243,6 +1277,8 @@ int mb_pr_get_bathyslope(int verbose,
 			int nslopes, double *slopes, double *slopeacrosstrack, 
 			double acrosstrack, double *depth, double *slope,
 			int *error);
+int mb_pr_point_in_quad(int verbose, double px, double py, 
+			double *x, double *y, int *error);
 int mb_esf_check(int verbose, char *swathfile, char *esffile, 
 			int *found, int *error);
 int mb_esf_load(int verbose, char *swathfile,

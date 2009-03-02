@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 5.8 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 5.9 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,6 +25,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.8  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.7  2005/11/05 00:48:03  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -140,7 +143,7 @@
 int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 5.8 2008-03-01 09:14:03 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 5.9 2009-03-02 18:51:52 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -386,7 +389,10 @@ int mbsys_sb2100_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		for (i=0;i<*nss;i++)
 			{
-			ss[i] = gain_factor * store->pixels[i].amplitude;
+			if (store->pixels[i].amplitude > 0)
+				ss[i] = gain_factor * store->pixels[i].amplitude;
+			else
+				ss[i] = MB_SIDESCAN_NULL;
 			ssacrosstrack[i] = store->pixel_size
 				* (i - center_pixel);
 			ssalongtrack[i] = store->pixels[i].alongtrack;
@@ -670,7 +676,10 @@ int mbsys_sb2100_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			set_pixel_size = MB_NO;
 		for (i=0;i<nss;i++)
 			{
-			store->pixels[i].amplitude = gain_factor * ss[i];
+			if (ss[i] > MB_SIDESCAN_NULL)
+				store->pixels[i].amplitude = gain_factor * ss[i];
+			else
+				store->pixels[i].amplitude = 0;
 			store->pixels[i].alongtrack = ssalongtrack[i];
 			if (set_pixel_size == MB_YES
 				&& ssacrosstrack[i] > 0)

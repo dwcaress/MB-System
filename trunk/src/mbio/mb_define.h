@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.38 2009-01-07 17:46:44 caress Exp $
+ *    $Id: mb_define.h,v 5.39 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1996-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.38  2009/01/07 17:46:44  caress
+ * Moved macro round() into mb_define.h as ROUND()
+ *
  * Revision 5.37  2008/09/20 00:57:40  caress
  * Release 5.1.1beta23
  *
@@ -171,7 +174,7 @@
 #define MB_DESCRIPTION_LENGTH	2048
 
 /* maximum number of asynchronous data saved */
-#define MB_ASYNCH_SAVE_MAX 500
+#define MB_ASYNCH_SAVE_MAX 10000
 
 /* maximum size of SVP profiles */
 #define MB_SVP_MAX 1024
@@ -332,6 +335,10 @@ int mb_check_info(int verbose, char *file, int lonflip,
 		    int *error);
 int mb_make_info(int verbose, int force,
 		    char *file, int format, int *error);
+int mb_get_fbt(int verbose, char *file, int *format, int *error);
+int mb_get_fnv(int verbose, char *file, int *format, int *error);
+int mb_get_ffa(int verbose, char *file, int *format, int *error);
+int mb_get_ffs(int verbose, char *file, int *format, int *error);
 int mb_swathbounds(int verbose, int checkgood,
 		double navlon, double navlat, double heading, 
 		int nbath, int nss,
@@ -516,13 +523,28 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		int *error);
 int mb_copyrecord(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);
+		
+int mb_read_filter_add(int verbose, void *mbio_ptr,
+		int kind, int mode, int xdim, int ldim, int iteration,
+		double threshold_lo, double threshold_hi,
+		int *error);
+int mb_read_filter(int verbose, void *mbio_ptr,
+		int time_i[7], double *time_d,
+		double *navlon, double *navlat, 
+		double *speed, double *heading, 
+		double *distance, double *altitude, double *sonardepth, 
+		int *nbath, int *namp, int *nss,
+		char *beamflag, double *bath, double *amp, 
+		double *bathlon, double *bathlat,
+		double *ss, double *sslon, double *sslat,
+		int *error);
 
 int mb_buffer_init(int verbose, void **buff_ptr, int *error);
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, 
 		int *error);
 int mb_buffer_load(int verbose, void *buff_ptr,void *mbio_ptr,
 		int nwant, int *nload, int *nbuff, int *error);
-int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr,
+int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 		int nhold, int *ndump, int *nbuff, int *error);
 int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 		int nhold, int *ndump, int *nbuff, int *error);

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
- *	$Id: mbsys_simrad3.h,v 5.1 2008-07-10 06:40:34 caress Exp $
+ *	$Id: mbsys_simrad3.h,v 5.2 2009-03-02 18:51:52 caress Exp $
  *
- *    Copyright (c) 2008 by
+ *    Copyright (c) 2008-2009ß by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -35,6 +35,9 @@
  * Date:	February 22, 2008
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2008/07/10 06:40:34  caress
+ * Fixed support for EM122
+ *
  * Revision 5.0  2008/03/01 09:11:35  caress
  * Added support for Simrad EM710 multibeam in new formats 58 and 59.
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 5.16 2008-09-27 03:27:10 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 5.17 2009-03-02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.16  2008/09/27 03:27:10  caress
+ * Working towards release 5.1.1beta24
+ *
  * Revision 5.15  2008/07/10 18:02:39  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -147,7 +150,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_ldeoih.h"
 
-static char res_id[]="$Id: mbsys_ldeoih.c,v 5.16 2008-09-27 03:27:10 caress Exp $";
+static char res_id[]="$Id: mbsys_ldeoih.c,v 5.17 2009-03-02 18:51:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
@@ -482,7 +485,7 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		for (i=0;i<*nss;i++)
 			{
-			if (store->ss[i] > 0)
+			if (store->ss[i] != 0)
 				ss[i] = store->ss[i];
 			else
 				ss[i] = MB_SIDESCAN_NULL;
@@ -1208,6 +1211,7 @@ int mbsys_ldeoih_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		if (store->depth_scale <= 0)
 			{
 		 	store->depth_scale = MAX((int) (1 + transducer_depth / 30.0), 1);
+		 	store->depth_scale = MAX((int) (1 + altitude / 30.0), store->depth_scale);
 			}
 		depthscale = 0.001 * store->depth_scale;
 		store->transducer_depth = transducer_depth / depthscale;
