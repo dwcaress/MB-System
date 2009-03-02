@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.27 2008-09-11 20:06:45 caress Exp $
+#    $Id: mbm_plot.perl,v 5.28 2009-03-02 18:59:05 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2005 by 
+#    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -74,10 +74,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.27 2008-09-11 20:06:45 caress Exp $
+#   $Id: mbm_plot.perl,v 5.28 2009-03-02 18:59:05 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.27  2008/09/11 20:06:45  caress
+#   Checking in updates made during cruise AT15-36.
+#
 #   Revision 5.26  2007/11/16 17:54:10  caress
 #   Changes as of 11/16/2007
 #
@@ -509,7 +512,7 @@ if ($help)
 	print "\nBasic Usage: \n";
 	print "\t$program_name -Fformat -Ifile [-Amagnitude[/azimuth | zero_level]\n";
 	print "\t\t-C[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\n";
-	print "\t\t-Gcolor_mode -H\n";
+	print "\t\t-Gcolor_mode[F] -H\n";
 	print "\t\t-N[time_tick/time_annot/date_annot/time_tick_len[/name_hgt[/name_perp]] | F | FP]\n";
 	print "\t\t-Oroot -Ppagesize -S[color/shade] -T -Uorientation -V \n";
 	print "\t\t-Wcolor_style[/pallette] ]\n";
@@ -554,6 +557,23 @@ elsif (! -e $file_data)
 if ($verbose) 
 	{
 	print "\nRunning $program_name...\n";
+	}
+
+# parse color mode
+if ($color_mode)
+	{
+	if ($color_mode =~ /^\Sf/)
+		{
+		($color_mode) = $color_mode =~/^(\S)f/;
+		$use_filtered_data = 1;
+print "Filtering turned on: color_mode:$color_mode\n";
+		}
+	elsif ($color_mode =~ /^\SF/)
+		{
+		($color_mode) = $color_mode =~/^(\S)F/;
+		$use_filtered_data = 1;
+print "Filtering turned on: color_mode:$color_mode\n";
+		}
 	}
 
 # set up user defined geographic limits
@@ -2504,7 +2524,14 @@ if ($color_mode)
 	printf FCMD "-J\$MAP_PROJECTION\$MAP_SCALE \\\n\t";
 	printf FCMD "-R\$MAP_REGION \\\n\t";
 	printf FCMD "-C\$CPT_FILE \\\n\t";
-	print FCMD "-Z$color_mode \\\n\t";
+	if ($use_filtered_data)
+		{
+		print FCMD "-Z$color_mode"."F \\\n\t";
+		}
+	else
+		{
+		print FCMD "-Z$color_mode \\\n\t";
+		}
 	if ($swath_footprint)
 		{
 		printf FCMD "-A$swath_footprint \\\n\t";
@@ -2895,17 +2922,29 @@ if ($verbose)
 		{
 		print "    Color Shaded Relief Bathymetry\n";
 		}
+	elsif ($color_mode == 3 && $use_filtered_data)
+		{
+		print "    Color Bathymetry Shaded with Filtered Amplitude\n";
+		}
 	elsif ($color_mode == 3)
 		{
-		print "    Color Bathymetry Shaded with Amplitude\n";
+		print "    Color Bathymetry Shaded with Unfiltered Amplitude\n";
+		}
+	elsif ($color_mode == 4 && $use_filtered_data)
+		{
+		print "    Grayscale Filtered Amplitude\n";
 		}
 	elsif ($color_mode == 4)
 		{
-		print "    Grayscale Amplitude\n";
+		print "    Grayscale Unfiltered Amplitude\n";
+		}
+	elsif ($color_mode == 5 && $use_filtered_data)
+		{
+		print "    Grayscale Filtered Sidescan\n";
 		}
 	elsif ($color_mode == 5)
 		{
-		print "    Grayscale Sidescan\n";
+		print "    Grayscale Unfiltered Sidescan\n";
 		}
 	if ($contour_mode)
 		{

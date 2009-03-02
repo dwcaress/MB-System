@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.1.2beta1     TDB
 Version 5.1.1          December 31, 2008
 Version 5.1.1beta26    November 18, 2008
 Version 5.1.1beta25    September 28, 2008
@@ -153,6 +154,29 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.1.2 RELEASE NOTES:
+------------------------------------------
+
+Fixed pixel calculation algorithm in mbmosaic. Previously, sidescan
+data from each pixel were being treated as extending over a 
+larger area than is correct.
+
+Ressurected program mbfilter with an new implementation. Allows
+low pass, high pass, and contrast enhancement filtering of amplitude
+and sidescan data. Implemented so that filtered data are stored
+in ancilliary files ending in *.ffa (amplitude) and *.ffs (sidescan).
+The data type selection options of mbswath, mbm_plot, and mbmosaic
+all now allow users to select filtered data.
+
+Improved handling current generation Simrad multibeam data (e.g.
+EM710, EM122) through formats 58 (MBF_EM710RAW) and 59 (MBF_EM710MBA).
+There still seems to be a problem with 
+
+Changed processing kluge 004. Previously kluge 004 caused mbprocess
+to not output survey data with time stamps prior to the last good ping.
+Now the dropped data will have time stamps prior to or equal to that
+of the last good ping.
 
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
@@ -1569,10 +1593,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.123 2008-12-31 09:06:56 caress Exp $
+RCS ID: $Id: README,v 5.124 2009-03-02 18:59:05 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.123  2008/12/31 09:06:56  caress
+Release 5.1.1
+
 Revision 5.122  2008/12/31 08:53:31  caress
 Updates towards release 5.1.1
 

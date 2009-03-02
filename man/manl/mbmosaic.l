@@ -1,4 +1,4 @@
-.TH mbmosaic l "29 September 2008" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic l "27 February 2009" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -8,14 +8,14 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
-\fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP 
+\fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype[F]\fP 
 \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
 \fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range[/weight]\fP 
 \fB-G\fIgridkind\fP  \fB-J\fIprojection\fP
 \fB-H -L\fIlonflip\fP \fB-M -N -P\fIpings\fP
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fIazimuth/factor\fP 
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP 
-\fB-Y\fIpriority_file\fP \fB-Z\fIbath_default\fP]
+\fB-Y\fIpriority_source\fP \fB-Z\fIbath_default\fP]
 
 .SH DESCRIPTION
 \fBmbmosaic\fP is a utility used to mosaic amplitude or sidescan 
@@ -41,8 +41,13 @@ either the dimensions (\fB-D\fP) or node spacing \fB-E\fP of the grid,
 If the bounds and grid dimensions (or spacing) are not specified, the
 program will select the region encompassing all of the data in the
 input files and a grid spacing equivalent to 0.02 times the maximum
-sonar altitude. The user can also specify the  type of the input 
-data (\fB-A\fP), the range of allowable sample priorities used in 
+sonar altitude. 
+The input data type (beam amplitude or sidescan) is specified using
+the \fB-A\fP option. Depending on the input datalist, the amplitude or 
+sidescan data may be raw or corrected for variations in amplitude with
+grazing angle (see \fBmbbackangle\fP and \fBmbprocess\fP), and may be
+unfiltered or have been filtered using \fBmbfilter\fP.
+The user can also specify the range of allowable sample priorities used in 
 the mosaicing (\fB-F\fP), the preferred look azimuth (\fB-U\fP), the 
 maximum distance from data points that the spline interpolation is 
 used (\fB-C\fP), the format of the output files, and other parameters.
@@ -210,6 +215,15 @@ Sets the type of data to be read and mosaiced.
  	\fIdatatype\fP = 6, acrosstrack grazing angle will be mosaiced.  
  	\fIdatatype\fP = 7, acrosstrack slope will be mosaiced.  
 .br
+Mosaicing of bathymetry is not supported, and so \fIdatatype\fP values of 1 (bathymetry)
+and 2 (topography) are not allowed. Bathymetry and topography should be gridded with
+\fBmbgrid\fP.
+If "F" is appended to \fIdatatype\fP, then \fBmbmosaic\fP will attempt
+to mosaic amplitude or sidescan data that have been filtered with \fBmbfilter\fP. 
+If the desired filtered data files do not exist, data input will fail and
+\fBmbmosiac\fP will exit with an error message. Filtered amplitude
+data are stored in ancilliary files ending with ".ffa", and filtered
+sidescan files end in ".ffs". Appending "F" to \fImode\fP values of 5-7 will have no effect.
 Default: \fIdatatype\fP = 4 (sidescan).
 .TP
 .B \-B
@@ -257,7 +271,7 @@ the grid bounds as specified. Appending an ! to the end of
 the \fB-E\fP arguments forces \fBmbmosaic\fP to use the
 exact grid cell spacing values specified by adjusting the 
 grid bounds.
-Default: If neither the \fB-E\fP or \fB-D\P options are specified,
+Default: If neither the \fB-E\fP or \fB-D\fP options are specified,
 the program sets the grid cell spacing to be 0.02 times the maximum 
 sonar altitude in the input files.
 .TP
@@ -571,16 +585,54 @@ three times the output grid.
 Default: \fIextend\fP = 0.0
 .TP
 .B \-Y
-\fIpriority_file\fP
+\fIpriority_source\fP
 .br
 Enables priortization of data points based on their apparent
-grazing angle (this angle is the
-arctan(x/z) where x is acrosstrack distance and z is depth, so
+grazing angle (this angle is arctan(x/z) where x is acrosstrack distance 
+and z is sonar altitude, so
 that the center of the swath has an apparent grazing angle of
 zero, the port swath edge has a large negative angle, and the
-starboard swath edge has a large positive angle). The file
-\fIpriority_file\fP must contain a list of data priorities
-as a function of apparent grazing angle. The first line of
+starboard swath edge has a large positive angle). If \fIpriority_source\fP
+is 1 or 2, then default tables of priority as a function of
+apparent grazing angle are used. Specifying \fIpriority_source\fP = 1
+gives a default table intended for use with multibeam sonar data:
+.br
+      Angle (deg)  Priority
+      ---------------------
+ 	-85          0.0
+ 	-65          0.2
+ 	-45          1.0
+ 	-15          0.8
+ 	-14.9        0.1
+ 	  0          0.1
+ 	 14.9        0.1
+ 	 15          0.8
+ 	 45          1.0
+ 	 65          0.2
+ 	 85          0.0
+.br
+Specifying \fIpriority_source\fP = 2
+gives a default table intended for use with sidescan sonar data:
+.br
+      Angle (deg)  Priority
+      ---------------------
+ 	-85          0.0
+ 	-79          1.0
+ 	-60          0.7
+ 	-30          0.4
+ 	-29          0.1
+ 	  0          0.1
+ 	 29          0.1
+ 	 30          0.4
+ 	 60          0.7
+ 	 79          1.0
+ 	 85          0.0
+.br
+Alternatively, if \fIpriority_source\fP specifies a file name, then the data
+priority table will be read from this file.
+The priority file should contain two columns: apparent grazing angles
+in degrees from vertical followed by data priority values between 0.0 
+and 1.0. The first line of
 the file should contain the minimum, or port-most grazing angle
 followed by the associated priority. The following lines
 should contain increasingly large grazing angles (and associated
@@ -588,7 +640,7 @@ priorities) up to the maximum, or starboard-most, grazing angle.
 The highest priority assigned should be one, and the lowest zero.
 Priorities for grazing angles less than the minimum or greater
 than the maximum will be zero. See the examples below for a
-further explanation of the use of \fIpriority_file\fP.
+further explanation of the use of \fIpriority_source\fP.
 .TP
 .B \-Z
 \fIbath_default\fP
@@ -654,7 +706,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.10 2008-11-16 21:51:17 caress Exp $
+ Version $Id: mbmosaic.l,v 5.11 2009-03-02 18:59:05 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

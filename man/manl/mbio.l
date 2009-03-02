@@ -2361,6 +2361,7 @@ int \fBmb_buffer_dump\fP(
  		int \fIverbose\fP,
  		char \fI*buff_ptr\fP,
  		char \fI*mbio_ptr\fP,
+ 		char \fI*ombio_ptr\fP,
  		int \fInhold\fP,
  		int \fI*ndump\fP,
  		int \fI*nbuff\fP,
@@ -2368,12 +2369,15 @@ int \fBmb_buffer_dump\fP(
 
 The function \fBmb_buffer_dump\fP dumps data from the buffer pointed
 to by *\fIbuff_ptr\fP into the output file initialized in the 
-\fBMBIO\fP descriptor pointed to by \fImbio_ptr\fP.
+\fBMBIO\fP descriptor pointed to by \fIombio_ptr\fP. The data in the
+buffer were read from the input file initialized in the \fBMBIO\fP 
+descriptor pointed to by \fImbio_ptr\fP.
+.
 The \fIverbose\fP
 value controls the standard error output verbosity of the function.
   
 The input control parameters have the following significance:
- 	\fInwant\fP:		The number of data records desired to be held
+ 	\fInhold\fP:		The number of data records desired to be held
  				in the buffer.
 
 The returned values are:

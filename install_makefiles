@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.33 2008-12-31 08:47:38 caress Exp $
+#    $Id: install_makefiles,v 5.34 2009-03-02 18:59:05 caress Exp $
 #
 #    Copyright (c) 1993-2008 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -111,15 +111,18 @@ $NETCDFINCDIR = "/sw/include";
 $LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 $PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
 $CFLAGS = "-g -I/usr/X11R6/include";
-$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Freameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
+$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
 #
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.33 2008-12-31 08:47:38 caress Exp $
+#   $Id: install_makefiles,v 5.34 2009-03-02 18:59:05 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.33  2008/12/31 08:47:38  caress
+#   Updates towards release 5.1.1
+#
 #   Revision 5.32  2008/12/22 08:36:18  caress
 #   Check in of 22 Dec 2008.
 #
@@ -353,7 +356,7 @@ elsif ($preset eq "macosxusrlocal")
 	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
 	$CFLAGS = "-g -I/usr/X11R6/include";
-	$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Freameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
+	$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
 	}
 # 
 # Preset configuration for Cygwin on Windows when building in /usr/local
@@ -460,7 +463,7 @@ else
 #	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 #	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
 #	$CFLAGS = "-g -I/usr/X11R6/include";
-#	$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Freameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
+#	$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
 #
 # Example for installing on L-DEO Sun workstations running SunOs 4.1.x:
 #	$MBSYSTEM_HOME = "/home/hs/caress/dev/mbsystem";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.6 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mbedit_prog.c,v 5.7 2009-03-02 18:59:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -26,6 +26,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.5  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -267,7 +270,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.6 2008-09-13 06:08:09 caress Exp $";
+static char rcs_id[] = "$Id: mbedit_prog.c,v 5.7 2009-03-02 18:59:05 caress Exp $";
 static char program_name[] = "MBeditold";
 static char help_message[] =  
 "MBeditold is an interactive editor used to identify and flag\n\
@@ -4268,7 +4271,7 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 			do_message_on("MBeditold is dumping data...");
 
 			status = mb_buffer_dump(verbose,
-					buff_ptr,ombio_ptr,
+					buff_ptr,imbio_ptr,ombio_ptr,
 					hold_size,&ndump,&nbuff,
 					&error);
 			}
