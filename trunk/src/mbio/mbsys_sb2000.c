@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2000.c	10/4/94
- *	$Id: mbsys_sb2000.c,v 5.11 2009-03-02 18:51:52 caress Exp $
+ *	$Id: mbsys_sb2000.c,v 5.12 2009-03-08 09:21:00 caress Exp $
  *
- *    Copyright (c) 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	October 4, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.11  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.10  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -130,7 +133,7 @@
 int mbsys_sb2000_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb2000.c,v 5.11 2009-03-02 18:51:52 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2000.c,v 5.12 2009-03-08 09:21:00 caress Exp $";
 	char	*function_name = "mbsys_sb2000_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

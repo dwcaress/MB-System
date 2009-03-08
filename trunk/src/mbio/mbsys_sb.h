@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb.h	2/17/93
- *	$Id: mbsys_sb.h,v 5.5 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_sb.h,v 5.6 2009-03-08 09:21:00 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Author:	D. W. Caress
  * Date:	February 17, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.4  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

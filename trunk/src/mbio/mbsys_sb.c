@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb.c	2/26/93
- *	$Id: mbsys_sb.c,v 5.6 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_sb.c,v 5.7 2009-03-08 09:21:00 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -29,6 +29,9 @@
  * Author:	D. W. Caress
  * Date:	February 26, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.5  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -133,7 +136,7 @@
 int mbsys_sb_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb.c,v 5.6 2005-11-05 00:48:04 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb.c,v 5.7 2009-03-08 09:21:00 caress Exp $";
 	char	*function_name = "mbsys_sb_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -422,7 +425,7 @@ int mbsys_sb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				function_name);
 			fprintf(stderr,"dbg4  New ping values:\n");
 			fprintf(stderr,"dbg4       error:      %d\n",
-				error);
+				*error);
 			fprintf(stderr,"dbg4       comment:    %s\n",
 				comment);
 			}
@@ -596,6 +599,37 @@ int mbsys_sb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	else if (store->kind == MB_DATA_COMMENT)
 		{
 		strcpy(store->comment,comment);
+		}
+		
+	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
+		{
+		fprintf(stderr,"dbg2   Data inserted into storage structure:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",store->kind);
+		fprintf(stderr,"dbg2       lon2u:      %d\n",store->lon2u);
+		fprintf(stderr,"dbg2       lon2b:      %d\n",store->lon2b);
+		fprintf(stderr,"dbg2       lat2u:      %d\n",store->lat2u);
+		fprintf(stderr,"dbg2       lat2b:      %d\n",store->lat2b);
+		fprintf(stderr,"dbg2       year:       %d\n",store->year);
+		fprintf(stderr,"dbg2       day:        %d\n",store->day);
+		fprintf(stderr,"dbg2       min:        %d\n",store->min);
+		fprintf(stderr,"dbg2       sec:        %d\n",store->sec);
+		}
+	if (verbose >= 2 && kind == MB_DATA_DATA)
+		{
+		for (i=0;i<MBSYS_SB_BEAMS;i++)
+		  fprintf(stderr,"dbg3       dist[%d]: %d  deph[%d]: %d\n",
+			i,store->dist[i],i,store->deph[i]);
+		fprintf(stderr,"dbg2       sbtim:        %d\n",store->sbtim);
+		fprintf(stderr,"dbg2       sbhdg:        %d\n",store->sbhdg);
+		fprintf(stderr,"dbg2       axis:         %d\n",store->axis);
+		fprintf(stderr,"dbg2       major:        %d\n",store->major);
+		fprintf(stderr,"dbg2       minor:        %d\n",store->minor);
+		}
+	if (verbose >= 2 && kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2   Data inserted into storage structure:\n");
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			store->comment);
 		}
 
 	/* print output debug statements */

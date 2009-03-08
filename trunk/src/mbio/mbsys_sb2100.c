@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.c	3/2/94
- *	$Id: mbsys_sb2100.c,v 5.9 2009-03-02 18:51:52 caress Exp $
+ *	$Id: mbsys_sb2100.c,v 5.10 2009-03-08 09:21:00 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -25,6 +25,9 @@
  * Author:	D. W. Caress
  * Date:	March 2, 1994
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.8  2008/03/01 09:14:03  caress
  * Some housekeeping changes.
  *
@@ -143,7 +146,7 @@
 int mbsys_sb2100_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb2100.c,v 5.9 2009-03-02 18:51:52 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2100.c,v 5.10 2009-03-08 09:21:00 caress Exp $";
 	char	*function_name = "mbsys_sb2100_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
