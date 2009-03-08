@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2120.h	3/27/2000
- *	$Id: mbsys_sb2120.h,v 5.2 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_sb2120.h,v 5.3 2009-03-08 09:21:00 caress Exp $
  *
- *    Copyright (c) 2000 by 
+ *    Copyright (c) 2000-2009 by 
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -29,6 +29,9 @@
  * Date:	December 7,  2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.1  2001/01/22 07:43:34  caress
  * Version 5.0.beta01
  *

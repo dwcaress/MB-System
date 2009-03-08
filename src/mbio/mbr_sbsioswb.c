@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 5.12 2009-01-07 17:46:44 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 5.13 2009-03-08 09:21:00 caress Exp $
  *
- *    Copyright (c) 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.12  2009/01/07 17:46:44  caress
+ * Moved macro round() into mb_define.h as ROUND()
+ *
  * Revision 5.11  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -157,7 +160,7 @@ int mbr_dem_sbsioswb(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sbsioswb.c,v 5.12 2009-01-07 17:46:44 caress Exp $";
+static char res_id[]="$Id: mbr_sbsioswb.c,v 5.13 2009-03-08 09:21:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error)
@@ -459,6 +462,8 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	lon, lat;
 	int	id;
 	int	skip;
+	int	sensor_size;
+	int	data_size;
 	int	i, k;
 
 	/* print input debug statements */
@@ -846,7 +851,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
-			for (i=data->data_size;i<MB_SBSIOSWB_COMMENT_LENGTH;i++)
+			for (i=data->data_size;i<MBSYS_SB_MAXLINE;i++)
 				commentptr[i] = '\0';
 			}
 		else
@@ -953,6 +958,8 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	*commentptr;
 	double	lon, lat;
 	int	id;
+	int	sensor_size;
+	int	data_size;
 	int	i;
 
 	/* print input debug statements */
@@ -978,6 +985,39 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	sensorptr = (char *) &data->eclipse_time;
 	datarecptr = (char *) &data->beams_bath;
 	commentptr = (char *) &data->comment[0];
+	
+	/* print output debug statements */
+	if (verbose >= 2 && (store->kind == MB_DATA_DATA || store->kind == MB_DATA_NAV))
+		{
+		fprintf(stderr,"dbg2   Data to be extracted from storage structure: %d %d\n",
+			store_ptr,store);
+		fprintf(stderr,"dbg2       kind:       %d\n",store->kind);
+		fprintf(stderr,"dbg2       lon2u:      %d\n",store->lon2u);
+		fprintf(stderr,"dbg2       lon2b:      %d\n",store->lon2b);
+		fprintf(stderr,"dbg2       lat2u:      %d\n",store->lat2u);
+		fprintf(stderr,"dbg2       lat2b:      %d\n",store->lat2b);
+		fprintf(stderr,"dbg2       year:       %d\n",store->year);
+		fprintf(stderr,"dbg2       day:        %d\n",store->day);
+		fprintf(stderr,"dbg2       min:        %d\n",store->min);
+		fprintf(stderr,"dbg2       sec:        %d\n",store->sec);
+		}
+	if (verbose >= 2 && store->kind == MB_DATA_DATA)
+		{
+		for (i=0;i<MBSYS_SB_BEAMS;i++)
+		  fprintf(stderr,"dbg3       dist[%d]: %d  deph[%d]: %d\n",
+			i,store->dist[i],i,store->deph[i]);
+		fprintf(stderr,"dbg2       sbtim:        %d\n",store->sbtim);
+		fprintf(stderr,"dbg2       sbhdg:        %d\n",store->sbhdg);
+		fprintf(stderr,"dbg2       axis:         %d\n",store->axis);
+		fprintf(stderr,"dbg2       major:        %d\n",store->major);
+		fprintf(stderr,"dbg2       minor:        %d\n",store->minor);
+		}
+	if (verbose >= 2 && store->kind == MB_DATA_COMMENT)
+		{
+		fprintf(stderr,"dbg2   Data inserted into storage structure:\n");
+		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
+			store->comment);
+		}
 
 	/* first set some plausible amounts for some of the 
 		variables in the SBSIOSWB record */
@@ -996,7 +1036,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	data->data_size = 0;
 	data->speed_ref[0] = 0;
 	data->speed_ref[1] = 0;
-	if (mb_io_ptr->new_kind == MB_DATA_DATA)
+	if (store->kind == MB_DATA_DATA)
 		{
 		data->sensor_type[0] = 'S';
 		data->sensor_type[1] = 'B';
@@ -1064,34 +1104,6 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->bath_struct[id-i].bath_acrosstrack = 
 				store->dist[i];;
 			}
-
-		/* byte swap the data if necessary */
-#ifdef BYTESWAPPED
-		data->year = mb_swap_short(data->year);
-		data->day = mb_swap_short(data->day);
-		data->min = mb_swap_short(data->min);
-		data->sec = mb_swap_short(data->sec);
-		data->lat = mb_swap_int(data->lat);
-		data->lon = mb_swap_int(data->lon);
-		data->heading = mb_swap_short(data->heading);
-		data->course = mb_swap_short(data->course);
-		data->speed = mb_swap_short(data->speed);
-		data->speed_ps = mb_swap_short(data->speed_ps);
-		data->quality = mb_swap_short(data->quality);
-		data->sensor_size = mb_swap_short(data->sensor_size);
-		data->data_size = mb_swap_short(data->data_size);
-		data->eclipse_time = mb_swap_short(data->eclipse_time);
-		data->eclipse_heading = mb_swap_short(data->eclipse_heading);
-		data->beams_bath = mb_swap_short(data->beams_bath);
-		data->scale_factor = mb_swap_short(data->scale_factor);
-		for (i=0;i<data->beams_bath;i++)
-			{
-			data->bath_struct[i].bath = 
-				mb_swap_short(data->bath_struct[i].bath);
-			data->bath_struct[i].bath_acrosstrack = 
-				mb_swap_short(data->bath_struct[i].bath_acrosstrack);
-			}
-#endif
 		}
 
 	/* comment */
@@ -1102,12 +1114,18 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		data->data_type[0] = 'T';
 		data->data_type[1] = 'R';
 
-		strncpy(commentptr,store->comment,
-			MB_SBSIOSWB_COMMENT_LENGTH-1);
-		data->data_size = strlen(commentptr);
+		data->data_size = strlen(store->comment);
+		if (data->data_size > MBSYS_SB_MAXLINE - 1)
+			data->data_size = MBSYS_SB_MAXLINE - 1;
+		strncpy(commentptr,store->comment,data->data_size);
+		commentptr[data->data_size] = 0;
 		data->sensor_size = 0;
 		}
-
+		
+	/* save sensor_size and data_size before possible byte swapping */
+	sensor_size = data->sensor_size;
+	data_size = data->data_size;
+	
 	/* print debug statements */
 	if (verbose >= 5)
 		{
@@ -1187,6 +1205,37 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->comment);
 		}
 
+	/* byte swap the data if necessary */
+#ifdef BYTESWAPPED
+	data->year = mb_swap_short(data->year);
+	data->day = mb_swap_short(data->day);
+	data->min = mb_swap_short(data->min);
+	data->sec = mb_swap_short(data->sec);
+	data->lat = mb_swap_int(data->lat);
+	data->lon = mb_swap_int(data->lon);
+	data->heading = mb_swap_short(data->heading);
+	data->course = mb_swap_short(data->course);
+	data->speed = mb_swap_short(data->speed);
+	data->speed_ps = mb_swap_short(data->speed_ps);
+	data->quality = mb_swap_short(data->quality);
+	data->sensor_size = mb_swap_short(data->sensor_size);
+	data->data_size = mb_swap_short(data->data_size);
+	data->eclipse_time = mb_swap_short(data->eclipse_time);
+	data->eclipse_heading = mb_swap_short(data->eclipse_heading);
+	data->beams_bath = mb_swap_short(data->beams_bath);
+	data->scale_factor = mb_swap_short(data->scale_factor);
+	if (store->kind == MB_DATA_DATA)
+		{
+		for (i=0;i<MB_BEAMS_SBSIOSWB;i++)
+			{
+			data->bath_struct[i].bath = 
+				mb_swap_short(data->bath_struct[i].bath);
+			data->bath_struct[i].bath_acrosstrack = 
+				mb_swap_short(data->bath_struct[i].bath_acrosstrack);
+			}
+		}
+#endif
+
 	/* write header record to file */
 	if (status == MB_SUCCESS)
 		{
@@ -1206,8 +1255,8 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* write sensor record to file */
 	if (status == MB_SUCCESS)
 		{
-		if ((status = fwrite(sensorptr,1,data->sensor_size,
-			mb_io_ptr->mbfp)) == data->sensor_size) 
+		if ((status = fwrite(sensorptr,1,sensor_size,
+			mb_io_ptr->mbfp)) == sensor_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1222,8 +1271,8 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* write data record to file */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
 		{
-		if ((status = fwrite(datarecptr,1,data->data_size,
-			mb_io_ptr->mbfp)) == data->data_size) 
+		if ((status = fwrite(datarecptr,1,data_size,
+			mb_io_ptr->mbfp)) == data_size) 
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;

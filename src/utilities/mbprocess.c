@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.60 2009-03-02 18:54:40 caress Exp $
+ *    $Id: mbprocess.c,v 5.61 2009-03-08 09:21:00 caress Exp $
  *
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -36,6 +36,9 @@
  * Date:	January 4, 2000
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.60  2009/03/02 18:54:40  caress
+ * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
+ *
  * Revision 5.59  2009/01/15 17:37:28  caress
  * Update on 15 Jan 2009 - fix to mbm_grd2arc and mbm_arc2grd
  *
@@ -298,7 +301,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.60 2009-03-02 18:54:40 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.61 2009-03-08 09:21:00 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -6276,6 +6279,7 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 			&& (kind == MB_DATA_DATA
 			    || kind == MB_DATA_COMMENT))
 			{
+
 			status = mb_insert(verbose,imbio_ptr,
 					store_ptr,kind, 
 					time_i,time_d,

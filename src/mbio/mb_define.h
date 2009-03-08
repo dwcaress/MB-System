@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.39 2009-03-02 18:51:52 caress Exp $
+ *    $Id: mb_define.h,v 5.40 2009-03-08 09:21:00 caress Exp $
  *
  *    Copyright (c) 1996-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,6 +20,9 @@
  * Date:	April 21, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.39  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.38  2009/01/07 17:46:44  caress
  * Moved macro round() into mb_define.h as ROUND()
  *
@@ -370,6 +373,7 @@ int mb_update_arrays(int verbose, void *mbio_ptr,
 		int nbath, int namp, int nss, int *error);
 int mb_update_arrayptr(int verbose, void *mbio_ptr, 
 		void **handle, int *error);
+int mb_list_arrays(int verbose, void *mbio_ptr, int *error);
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int *error);
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sbsioswb.h	9/18/94
- *	$Id: mbf_sbsioswb.h,v 5.2 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbf_sbsioswb.h,v 5.3 2009-03-08 09:21:00 caress Exp $
  *
- *    Copyright (c) 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	January 20, 1993
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -79,9 +82,6 @@
 /* number of beams in pings */
 #define	MB_BEAMS_SBSIOSWB	19
 
-/* maximum length of comments in data */
-#define	MB_SBSIOSWB_COMMENT_LENGTH	250
-
 /* size in bytes of header records */
 #define	MB_SBSIOSWB_HEADER_SIZE	36
 
@@ -115,5 +115,5 @@ struct mbf_sbsioswb_struct
 	short	beams_bath;	/* number of bathymetry beams */
 	short	scale_factor;	/* scale factor */
 	struct mbf_sbsioswb_bath_struct bath_struct[MB_BEAMS_SBSIOSWB];
-	char	comment[MB_SBSIOSWB_COMMENT_LENGTH];
+	char	comment[MBSYS_SB_MAXLINE];
 	};
