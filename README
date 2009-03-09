@@ -183,6 +183,8 @@ of the last good ping.
 Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on
 little-endian systems.
 
+Added support for new ROV Doc Ricketts navigation data as format 165.
+
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
 
@@ -1598,10 +1600,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.127 2009-03-09 15:11:31 caress Exp $
+RCS ID: $Id: README,v 5.128 2009-03-09 16:58:31 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.127  2009/03/09 15:11:31  caress
+Release 5.1.2beta01
+
 Revision 5.126  2009/03/08 09:20:59  caress
 Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
 

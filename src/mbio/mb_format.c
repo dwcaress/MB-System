@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $
+ *    $Id: mb_format.c,v 5.54 2009-03-09 16:58:31 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,6 +20,9 @@
  * Date:	Februrary 18, 1994
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.53  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.52  2008/12/05 17:32:52  caress
  * Check-in mods 5 December 2008 including contributions from Gordon Keith.
  *
@@ -264,7 +267,7 @@
 #include "../../include/mbsys_simrad2.h"
 #include "../../include/mbsys_simrad3.h"
 
-static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
+static char rcs_id[]="$Id: mb_format.c,v 5.54 2009-03-09 16:58:31 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1643,7 +1646,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009-03-09 16:58:31 caress Exp $";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1713,7 +1716,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009-03-09 16:58:31 caress Exp $";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1782,7 +1785,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009-03-09 16:58:31 caress Exp $";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1848,7 +1851,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009-03-09 16:58:31 caress Exp $";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1921,7 +1924,7 @@ int mb_format_source(int verbose, int *format,
 		int *vru_source, int *svp_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009-03-09 16:58:31 caress Exp $";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -1992,7 +1995,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.53 2009-03-02 18:51:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009-03-09 16:58:31 caress Exp $";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 
@@ -2605,6 +2608,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		i = 0;
 	    if ((suffix = strstr(&filename[i],"tibr.txt")) != NULL)
 		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],"docr.txt")) != NULL)
+		suffix_len = 4;
 	    else if ((suffix = strstr(&filename[i],"vnta.txt")) != NULL)
 		suffix_len = 4;
 	    else if ((suffix = strstr(&filename[i],"ptlo.txt")) != NULL)
@@ -2633,6 +2638,8 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	    else
 		i = 0;
 	    if ((suffix = strstr(&filename[i],"tibredited.txt")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],"docredited.txt")) != NULL)
 		suffix_len = 4;
 	    else if ((suffix = strstr(&filename[i],"vntaedited.txt")) != NULL)
 		suffix_len = 4;

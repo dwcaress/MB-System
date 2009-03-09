@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.39 2009-03-02 18:51:52 caress Exp $
+ *    $Id: mb_process.c,v 5.40 2009-03-09 16:58:31 caress Exp $
  *
- *    Copyright (c) 2000-2008 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	September 11, 2000
  * 
  * $Log: not supported by cvs2svn $
+ * Revision 5.39  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.38  2008/09/11 20:11:52  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -167,7 +170,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.39 2009-03-02 18:51:52 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.40 2009-03-09 16:58:31 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
