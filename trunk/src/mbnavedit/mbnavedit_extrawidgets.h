@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_extrawidgets.h	8/7/95
- *    $Id: mbnavedit_extrawidgets.h,v 5.1 2003-04-17 21:09:06 caress Exp $
+ *    $Id: mbnavedit_extrawidgets.h,v 5.2 2009-03-10 05:11:22 caress Exp $
  *
- *    Copyright (c) 1995, 2000, 2003 by
+ *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,6 +22,9 @@
  * Date:	June 24,  1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.1  2003/04/17 21:09:06  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.0  2000/12/01 22:56:08  caress
  * First cut at Version 5.0.
  *

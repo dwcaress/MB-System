@@ -115,12 +115,14 @@ identifier BXG_label_timestep_1;
 identifier BXG_label_timespan_2;
 identifier BXG_scale_timespan;
 identifier BXG_label_timespan_1;
+identifier BXG_scale_meantimewindow;
 identifier BXG_textField_modeling_acceleration;
 identifier BXG_textField_modeling_speed;
 identifier BXG_scale_driftlat;
 identifier BXG_scale_driftlon;
 identifier BXG_toggleButton_modeling_inversion;
 identifier BXG_toggleButton_modeling_dr;
+identifier BXG_toggleButton_modeling_meanfilter;
 identifier BXG_toggleButton_modeling_off;
 identifier BXG_bulletinBoard_useprevious;
 identifier BXG_bulletinBoard_timeinterpolation;
@@ -150,6 +152,7 @@ procedure do_flag();
 procedure do_forward();
 procedure do_interpolation();
 procedure do_interpolationrepeats();
+procedure do_meantimewindow();
 procedure do_model_mode();
 procedure do_modeling_apply();
 procedure do_nextbuffer();
@@ -379,8 +382,8 @@ object form_offset : XmFormDialog widget {
         arguments Style_use;
         XmNdialogTitle = compound_string("Position Offset");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 520;
-        XmNy = 416;
+        XmNx = 0;
+        XmNy = 986;
         XmNwidth = 401;
         XmNheight = 174;
     };
@@ -488,8 +491,8 @@ object bulletinBoard_deletebadtimetag : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 566;
-        XmNy = 428;
+        XmNx = 0;
+        XmNy = 998;
         XmNwidth = 310;
         XmNheight = 149;
     };
@@ -597,8 +600,8 @@ object bulletinBoard_timeinterpolation : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 567;
-        XmNy = 428;
+        XmNx = 0;
+        XmNy = 998;
         XmNwidth = 307;
         XmNheight = 149;
     };
@@ -702,8 +705,8 @@ object bulletinBoard_useprevious : XmBulletinBoardDialog widget {
  "?");
         XmNautoUnmanage = true;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 469;
-        XmNy = 440;
+        XmNx = 0;
+        XmNy = 1010;
         XmNwidth = 503;
         XmNheight = 126;
     };
@@ -742,7 +745,7 @@ object toggleButton_modeling_off : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Off");
-        XmNwidth = 151;
+        XmNwidth = 48;
         XmNheight = 28;
     };
     controls {
@@ -757,11 +760,30 @@ object toggleButton_modeling_off : XmToggleButton widget {
 !(BX)    };
 };
 
+object toggleButton_modeling_meanfilter : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Gaussian Mean");
+        XmNwidth = 135;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_modeling_meanfilter);
+        XmNvalueChangedCallback = procedure do_model_mode();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object toggleButton_modeling_dr : XmToggleButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Dead Reckoning");
-        XmNwidth = 151;
+        XmNwidth = 143;
         XmNheight = 28;
     };
     controls {
@@ -779,8 +801,8 @@ object toggleButton_modeling_dr : XmToggleButton widget {
 object toggleButton_modeling_inversion : XmToggleButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Smooth Inversion");
-        XmNwidth = 151;
+        XmNlabelString = compound_string("Inversion");
+        XmNwidth = 93;
         XmNheight = 28;
     };
     controls {
@@ -798,14 +820,16 @@ object toggleButton_modeling_inversion : XmToggleButton widget {
 object radioBox_modeling : XmRadioBox widget {
     arguments {
         arguments Style_use;
+        XmNpacking = XmPACK_TIGHT;
         XmNorientation = XmHORIZONTAL;
         XmNx = 20;
         XmNy = 40;
-        XmNwidth = 465;
+        XmNwidth = 434;
         XmNheight = 34;
     };
     controls {
          managed XmToggleButton toggleButton_modeling_off;
+         managed XmToggleButton toggleButton_modeling_meanfilter;
          managed XmToggleButton toggleButton_modeling_dr;
          managed XmToggleButton toggleButton_modeling_inversion;
     };
@@ -840,9 +864,9 @@ object label_modeling_mode : XmLabel widget {
 object separator2 : XmSeparator widget {
     arguments {
         XmNx = 10;
-        XmNy = 80;
+        XmNy = 160;
         XmNwidth = 470;
-        XmNheight = 20;
+        XmNheight = 30;
     };
     controls {
     };
@@ -862,7 +886,7 @@ object scale_driftlon : XmScale widget {
         XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 10;
-        XmNy = 100;
+        XmNy = 180;
         XmNwidth = 470;
         XmNheight = 63;
     };
@@ -890,7 +914,7 @@ object scale_driftlat : XmScale widget {
         XmNshowValue = TRUE;
         XmNorientation = XmHORIZONTAL;
         XmNx = 10;
-        XmNy = 170;
+        XmNy = 250;
         XmNwidth = 470;
         XmNheight = 63;
     };
@@ -909,7 +933,7 @@ object scale_driftlat : XmScale widget {
 object separator3 : XmSeparator widget {
     arguments {
         XmNx = 10;
-        XmNy = 230;
+        XmNy = 310;
         XmNwidth = 470;
         XmNheight = 20;
     };
@@ -924,7 +948,7 @@ object pushButton_modeling_dismiss : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Dismiss");
         XmNx = 190;
-        XmNy = 400;
+        XmNy = 490;
         XmNwidth = 110;
         XmNheight = 40;
     };
@@ -943,7 +967,7 @@ object textField_modeling_speed : XmTextField widget {
     arguments {
         arguments Style_use;
         XmNx = 320;
-        XmNy = 280;
+        XmNy = 360;
         XmNwidth = 140;
         XmNheight = 40;
     };
@@ -962,7 +986,7 @@ object textField_modeling_acceleration : XmTextField widget {
     arguments {
         arguments Style_use;
         XmNx = 320;
-        XmNy = 330;
+        XmNy = 410;
         XmNwidth = 140;
         XmNheight = 40;
     };
@@ -983,7 +1007,7 @@ object label_modeling_inversion : XmLabel widget {
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Inversion Penalty Weighting:");
         XmNx = 10;
-        XmNy = 250;
+        XmNy = 330;
         XmNwidth = 220;
         XmNheight = 30;
     };
@@ -1003,7 +1027,7 @@ object label_modeling_speed : XmLabel widget {
         XmNalignment = XmALIGNMENT_END;
         XmNlabelString = compound_string("Speed Deviation:");
         XmNx = 170;
-        XmNy = 280;
+        XmNy = 360;
         XmNwidth = 140;
         XmNheight = 40;
     };
@@ -1023,7 +1047,7 @@ object label_modeling_acceleration : XmLabel widget {
         XmNalignment = XmALIGNMENT_END;
         XmNlabelString = compound_string("Acceleration:");
         XmNx = 160;
-        XmNy = 330;
+        XmNy = 410;
         XmNwidth = 150;
         XmNheight = 40;
     };
@@ -1040,7 +1064,7 @@ object label_modeling_acceleration : XmLabel widget {
 object separator4 : XmSeparator widget {
     arguments {
         XmNx = 10;
-        XmNy = 370;
+        XmNy = 450;
         XmNwidth = 470;
         XmNheight = 30;
     };
@@ -1055,7 +1079,7 @@ object pushButton_modeling_apply : XmPushButton widget {
         arguments Style_use;
         XmNlabelString = compound_string("Apply");
         XmNx = 30;
-        XmNy = 310;
+        XmNy = 390;
         XmNwidth = 110;
         XmNheight = 40;
     };
@@ -1070,18 +1094,63 @@ object pushButton_modeling_apply : XmPushButton widget {
 !(BX)    };
 };
 
+object separator5 : XmSeparator widget {
+    arguments {
+        XmNx = 10;
+        XmNy = 70;
+        XmNwidth = 470;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object scale_meantimewindow : XmScale widget {
+    arguments {
+        arguments Style_use;
+        XmNminimum = 1;
+        XmNdecimalPoints = 1;
+        XmNvalue = 100;
+        XmNtitleString = compound_string("Gaussian Mean Time Window (secon" &
+ "ds)");
+        XmNmaximum = 10000;
+        XmNshowArrows = TRUE;
+        XmNscaleMultiple = 1;
+        XmNshowValue = TRUE;
+        XmNorientation = XmHORIZONTAL;
+        XmNx = 10;
+        XmNy = 100;
+        XmNwidth = 470;
+        XmNheight = 63;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_meantimewindow);
+        XmNvalueChangedCallback = procedure do_meantimewindow();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object bulletinBoard_modeling : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNdialogTitle = compound_string("Navigation Modeling");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 98;
-        XmNy = 313;
-        XmNwidth = 496;
-        XmNheight = 451;
+        XmNx = 1090;
+        XmNy = 507;
+        XmNwidth = 492;
+        XmNheight = 548;
     };
     controls {
+         managed XmScale scale_meantimewindow;
+         managed XmSeparator separator5;
          managed XmPushButton pushButton_modeling_apply;
          managed XmSeparator separator4;
          managed XmLabel label_modeling_acceleration;
@@ -1109,8 +1178,8 @@ object bulletinBoard_modeling : XmBulletinBoardDialog widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "Navigation Modeling";
-!(BX)        XmNwidth = 496;
-!(BX)        XmNheight = 451;
+!(BX)        XmNwidth = 492;
+!(BX)        XmNheight = 548;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_modeling;
@@ -1315,8 +1384,8 @@ object bulletinBoard_timestepping : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Time Stepping");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 475;
-        XmNy = 405;
+        XmNx = 0;
+        XmNy = 975;
         XmNwidth = 491;
         XmNheight = 195;
     };
@@ -1530,8 +1599,8 @@ object textField_output_file : XmTextField widget {
 object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 49;
-        XmNy = 254;
+        XmNx = 110;
+        XmNy = 425;
         XmNwidth = 614;
         XmNheight = 606;
     };
@@ -1651,8 +1720,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 565;
-        XmNy = 422;
+        XmNx = 0;
+        XmNy = 992;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1732,8 +1801,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 531;
-        XmNy = 460;
+        XmNx = 0;
+        XmNy = 1030;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -2001,8 +2070,8 @@ object label_about_create1 : XmLabel widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 57;
-        XmNy = 329;
+        XmNx = 176;
+        XmNy = 542;
         XmNwidth = 481;
         XmNheight = 466;
     };
@@ -3260,7 +3329,7 @@ object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 89;
-        XmNy = 83;
+        XmNy = 127;
         XmNwidth = 1018;
         XmNheight = 695;
     };
@@ -3292,7 +3361,7 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNiconName = "MBnavedit";
 !(BX)        XmNallowShellResize = true;
 !(BX)        XmNx = 89;
-!(BX)        XmNy = 83;
+!(BX)        XmNy = 127;
 !(BX)        XmNwidth = 1018;
 !(BX)        XmNheight = 695;
 !(BX)    };
