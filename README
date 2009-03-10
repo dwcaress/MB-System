@@ -185,6 +185,10 @@ little-endian systems.
 
 Added support for new ROV Doc Ricketts navigation data as format 165.
 
+Added a Gaussian mean smoothing algorithm to MBnavedit. This is primarily
+intended for smoothing USBL or LBL based navigation of submerged platforms
+(e.g. ROVs or submersibles).
+
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
 
@@ -1600,10 +1604,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.128 2009-03-09 16:58:31 caress Exp $
+RCS ID: $Id: README,v 5.129 2009-03-10 05:11:21 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.128  2009/03/09 16:58:31  caress
+Release 5.1.2beta01
+
 Revision 5.127  2009/03/09 15:11:31  caress
 Release 5.1.2beta01
 

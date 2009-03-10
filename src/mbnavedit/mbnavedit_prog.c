@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.23 2009-03-09 16:58:31 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.24 2009-03-10 05:11:22 caress Exp $
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.23  2009/03/09 16:58:31  caress
+ * Release 5.1.2beta01
+ *
  * Revision 5.22  2008/07/20 15:32:14  caress
  * Lengthened filename char arrays to prevent possible overflows.
  *
@@ -213,6 +216,7 @@ struct mbnavedit_ping_struct
 	double	tint_org;
 	double	lon_org;
 	double	lat_org;
+	int	mean_ok;
 	double	lon_dr;
 	double	lat_dr;
 	double	speed_org;
@@ -263,7 +267,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.23 2009-03-09 16:58:31 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.24 2009-03-10 05:11:22 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";
@@ -402,6 +406,7 @@ int mbnavedit_init_globals()
 	plot_roll = MB_NO;
 	plot_pitch = MB_NO;
 	plot_heave = MB_NO;
+	mean_time_window = 100;
 	drift_lon = 0;
 	drift_lat = 0;
 	strcpy(ifile,"\0");
@@ -1266,6 +1271,7 @@ int mbnavedit_load_data()
 			ping[nbuff].lat += offset_lat;
 			
 			/* set starting dr */
+			ping[nbuff].mean_ok = MB_NO;
 			ping[nbuff].lon_dr = ping[nbuff].lon;
 			ping[nbuff].lat_dr = ping[nbuff].lat;
 
@@ -4143,11 +4149,137 @@ int mbnavedit_get_model()
 	if (nbuff > 0)
 	    {
 	    /* call correct modeling function */
-	    if (model_mode == MODEL_MODE_DR)
+	    if (model_mode == MODEL_MODE_MEAN)
+		mbnavedit_get_gaussianmean();
+	    else if (model_mode == MODEL_MODE_DR)
 		mbnavedit_get_dr();
 	    else if (model_mode == MODEL_MODE_INVERT)
 		mbnavedit_get_inversion();
 	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_get_gaussianmean()
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_get_gaussianmean";
+	int	status = MB_SUCCESS;
+	double	mtodeglon, mtodeglat;
+	double	timewindow;
+	double	sumlon, sumlat, w, weight;
+	double	meanlon, meanlat;
+	double	dt, a;
+	int	jstart, nsum, npos, nneg;
+	int	jbefore, jafter;
+	int	i, j;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		}
+
+	/* loop over navigation calculating gaussian mean positions */
+	timewindow = 0.1 * mean_time_window;
+	a = -4.0 / (timewindow * timewindow);
+	jstart = 0;
+	for (i=0;i<nbuff;i++)
+		{
+		dt = 0.0;
+		weight = 0.0;
+		sumlon = 0.0;
+		sumlat = 0.0;
+		nsum = 0;
+		npos = 0;
+		nneg = 0;
+		for (j=jstart;j<nbuff && dt<=timewindow;j++)
+			{
+			dt = ping[j].time_d - ping[i].time_d;
+			if (ping[j].lonlat_flag == MB_NO 
+				&& fabs(dt) <= timewindow)
+				{
+				w = exp(a * dt * dt);
+				nsum++;
+				if (dt < 0.0) nneg++;
+				if (dt >= 0.0) npos++;
+				weight += w;
+				sumlon += w * ping[j].lon;
+				sumlat += w * ping[j].lat;
+				if (nsum == 1)
+					jstart = j;
+				}
+			}
+		if (npos > 0 && nneg > 0)
+			{
+			ping[i].mean_ok = MB_YES;
+			ping[i].lon_dr = sumlon / weight;
+			ping[i].lat_dr = sumlat / weight;
+			}
+		else
+			{
+			ping[i].mean_ok = MB_NO;
+			ping[i].lon_dr = ping[i].lon;
+			ping[i].lat_dr = ping[i].lat;
+			}
+		}
+
+	/* loop over navigation performing linear interpolation to fill gaps */
+	jbefore = -1;
+	for (i=0;i<nbuff;i++)
+		{
+		/* only work on nav not smoothed in first past due to lack of nearby data */
+		if (ping[i].mean_ok == MB_NO)
+			{
+			/* find valid points before and after */
+			jafter = i;
+			for (j=jbefore;j<nbuff && jafter == i;j++)
+				{
+				if (j < i && ping[j].lonlat_flag == MB_NO)
+					jbefore = j;
+				if (j > i && ping[j].lonlat_flag == MB_NO)
+					jafter = j;
+				}
+			if (jbefore >= 0 && jafter > i)
+				{
+				dt = (ping[i].time_d - ping[jbefore].time_d)
+					/ (ping[jafter].time_d - ping[jbefore].time_d);
+				ping[i].lon_dr = ping[jbefore].lon + dt 
+							* (ping[jafter].lon - ping[jbefore].lon);
+				ping[i].lat_dr = ping[jbefore].lat + dt 
+							* (ping[jafter].lat - ping[jbefore].lat);
+				}
+			else if (jbefore >= 0)
+				{
+				ping[i].lon_dr = ping[jbefore].lon;
+				ping[i].lat_dr = ping[jbefore].lat;
+				}
+			else if (jafter > i)
+				{
+				ping[i].lon_dr = ping[jafter].lon;
+				ping[i].lat_dr = ping[jafter].lat;
+				}
+			else
+				{
+				ping[i].lon_dr = ping[i].lon;
+				ping[i].lat_dr = ping[i].lat;
+				}
+			}
+		}
 
 	/* print output debug statements */
 	if (verbose >= 2)

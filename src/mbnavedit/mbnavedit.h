@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 5.5 2005-06-04 04:45:50 caress Exp $
+ *    $Id: mbnavedit.h,v 5.6 2009-03-10 05:11:22 caress Exp $
  *
- *    Copyright (c) 1995, 2000, 2003 by
+ *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2005/06/04 04:45:50  caress
+ * Added feature to apply longitude and latitude offsets to the navigation.
+ *
  * Revision 5.4  2004/05/21 23:33:03  caress
  * Moved to new version of BX GUI builder
  *
@@ -115,6 +118,7 @@ EXTERNAL int	plot_draft_dr;
 EXTERNAL int	plot_roll;
 EXTERNAL int	plot_pitch;
 EXTERNAL int	plot_heave;
+EXTERNAL int	mean_time_window;
 EXTERNAL int	drift_lon;
 EXTERNAL int	drift_lat;
 EXTERNAL int	timestamp_problem;
@@ -158,6 +162,7 @@ EXTERNAL int	window_height;
 #define	PLOT_PITCH	7
 #define	PLOT_HEAVE	8
 #define	MODEL_MODE_OFF		0
-#define	MODEL_MODE_DR		1
-#define	MODEL_MODE_INVERT	2
+#define	MODEL_MODE_MEAN		1
+#define	MODEL_MODE_DR		2
+#define	MODEL_MODE_INVERT	3
 /*--------------------------------------------------------------------*/

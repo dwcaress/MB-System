@@ -1,4 +1,4 @@
-.TH mbnavedit l "3 June 2005" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavedit l "9 March 2009" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavedit\fP - Interactive navigation editor for swath sonar data.
 
@@ -36,11 +36,6 @@ amount of data that could be handled
 at once, frequently requiring users to process files in
 small pieces. The current version only stores 
 and outputs the navigation data.
-The previous form of \fBMBnavedit\fP is now distributed
-as \fBMBnaveditold\fP. The old version will continue to
-be supported for \fBMB-System\fP version 5.0. However,
-no improvements will be made to the old program, and
-it may be dropped from later \fBMB-System\fP distributions.
 
 Once the navigation
 from a swath data file has been
@@ -80,22 +75,25 @@ can be operated in a "browse" mode where no data is output.
 
 .SH SMOOTHING NAVIGATION
 
-Two algorithms for obtaining and using smooth navigation models are
+Three algorithms for obtaining and using smooth navigation models are
 available. Replacing the original navigation with a smoothed
 version can be advantageous in some cases of very noisy 
 navigation (typically from sonars on towed platforms or 
-submerged vehicles). The first approach is simple dead reckoning 
+submerged vehicles). The first smoothing scheme is the covolution
+of a Gaussian kernal of user-defined time width with the data.
+Users may select and flag outlier navigation points; any flagged
+points are not used to calculate the Gaussian-weighted mean
+navigation values.
+The second approach is simple dead reckoning 
 from the initial position using the current (possibly edited)
 heading and speed values. The dead reckoning navigation can also
 incorporate user-specified longitude and latitude drift rates.
-The second algorithm is an inversion for a smooth 
+The third algorithm is an inversion for a smooth 
 navigation that minimizes
 speed and acceleration while fitting the original navigation
 in a least squares sense. The inversion weighting against 
-speed and acceleration are user specified, and only unaltered
-navigation values are used in the inversion (this means that
-longitude and latitude values that have previously been selected and
-interpolated are not used to generate the smooth model).
+speed and acceleration are user specified, and only unflagged
+navigation values are used in the inversion.
 
 .SH HANDLING BAD TIME STAMPS
 
@@ -280,6 +278,18 @@ or \fBReverse\fP buttons are pushed.
 .B Controls->Navigation Modeling->Off
 This toggle button turns navigation modeling off.
 .TP
+.B Controls->Navigation Modeling->Gaussian Mean
+This toggle button enables navigation smoothing by convolution
+with a Gaussian kernel of user defined time width.
+When this toggle button is highlighted, a smooth 
+navigation model is calculated and displayed
+as a blue line in both the longitude and latitude plots.
+The \fBShow Smooth Inversion\fP toggle buttons 
+also appear (already enabled)
+for both the longitude and latitude plots
+among the plot display toggles on the left side of the main
+\fBMBnavedit\fP window.
+.TP
 .B Controls->Navigation Modeling->Dead Reckoning
 This toggle button enables dead reckoning navigation calculation.
 When this toggle button is highlighted, a dead reckoning 
@@ -303,6 +313,12 @@ also appear (already enabled)
 for both the longitude and latitude plots
 among the plot display toggles on the left side of the main
 \fBMBnavedit\fP window.
+.TP
+.B Controls->Navigation Modeling->Gaussian Mean Time Window
+This slider sets the width in seconds of the Gaussian smoothing
+kernel. If Gaussian mean smoothing is enabled, changing this slider
+causes the smoothing to be recalculated and the results shown on
+the longitude and latitude plots. 
 .TP
 .B Controls->Navigation Modeling->Dead Reckoning Longitude Drift
 This slider sets the longitude drift rate in degrees/hour
@@ -466,21 +482,21 @@ vice versa). The typical sequence is to:
        and latitude values
 .TP
 .B Flag
-This button only appears when the smooth inversion navigation
-modeling algorithms is activated from the Navigation Modeling
+This button only appears when either of the Gaussian mean or the smooth inversion navigation
+modeling algorithm is activated from the Navigation Modeling
 dialog.
 This button causes any selected longitude or latitude values
-to be flagged to be ignored by the smooth inversion modeling
+to be flagged to be ignored by the navigation smoothing
 algorithm. Flagged positions are shown in orange.
 .TP
 .B Unflag
-This button only appears when the smooth inversion navigation
-modeling algorithms is activated from the Navigation Modeling
+This button only appears when the Gaussian mean or smooth inversion navigation
+modeling algorithm is activated from the Navigation Modeling
 dialog.
 This button causes any selected longitude or latitude values
-to be unflagged. Flagged positions are ignored by the smooth inversion modeling
+to be unflagged. Flagged positions are ignored by the navigation smoothing
 algorithm. Any positions which are unflagged will once again be
-used by the inversion. Flagged positions are shown in orange.
+used by the modeling method. Flagged positions are shown in orange.
 Unflagged positions are shown in either black (if they are unchanged)
 or purple (if they have been altered by interpolation or application
 of a modeling solution).

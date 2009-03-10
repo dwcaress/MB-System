@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.15 2009-03-09 16:58:31 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.16 2009-03-10 05:11:22 caress Exp $
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -22,6 +22,9 @@
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.15  2009/03/09 16:58:31  caress
+ * Release 5.1.2beta01
+ *
  * Revision 5.14  2008/07/20 15:32:14  caress
  * Lengthened filename char arrays to prevent possible overflows.
  *
@@ -808,6 +811,11 @@ void do_set_controls()
 		    {
 		    XtUnmanageChild(toggleButton_dr_lon);
 		    }
+		else if (model_mode == MODEL_MODE_MEAN)
+		    {
+		    set_label_string(toggleButton_dr_lon, "Show Gaussian Mean");
+		    XtManageChild(toggleButton_dr_lon);		    
+		    }
 		else if (model_mode == MODEL_MODE_DR)
 		    {
 		    set_label_string(toggleButton_dr_lon, "Show Dead Reckoning");
@@ -830,6 +838,11 @@ void do_set_controls()
 		if (model_mode == MODEL_MODE_OFF)
 		    {
 		    XtUnmanageChild(toggleButton_dr_lat);
+		    }
+		else if (model_mode == MODEL_MODE_MEAN)
+		    {
+		    set_label_string(toggleButton_dr_lat, "Show Gaussian Mean");
+		    XtManageChild(toggleButton_dr_lat);		    
 		    }
 		else if (model_mode == MODEL_MODE_DR)
 		    {
@@ -915,6 +928,14 @@ void do_set_controls()
 		XtUnmanageChild(pushButton_unflag);
 
 		}
+	else if (model_mode == MODEL_MODE_MEAN)
+		{
+		XmToggleButtonSetState(toggleButton_modeling_meanfilter, 
+			TRUE, FALSE);
+		XtManageChild(pushButton_solution);
+		XtManageChild(pushButton_flag);
+		XtManageChild(pushButton_unflag);
+		}
 	else if (model_mode == MODEL_MODE_DR)
 		{
 		XmToggleButtonSetState(toggleButton_modeling_dr, 
@@ -923,7 +944,7 @@ void do_set_controls()
 		XtUnmanageChild(pushButton_flag);
 		XtUnmanageChild(pushButton_unflag);
 		}
-	if (model_mode == MODEL_MODE_INVERT)
+	else if (model_mode == MODEL_MODE_INVERT)
 		{
 		XmToggleButtonSetState(toggleButton_modeling_inversion, 
 			TRUE, FALSE);
@@ -931,6 +952,9 @@ void do_set_controls()
 		XtManageChild(pushButton_flag);
 		XtManageChild(pushButton_unflag);
 		}
+	XtVaSetValues(scale_meantimewindow, 
+			XmNvalue, mean_time_window, 
+			NULL);
 	XtVaSetValues(scale_driftlon, 
 			XmNvalue, drift_lon, 
 			NULL);
@@ -1877,6 +1901,8 @@ do_model_mode( Widget w, XtPointer client_data, XtPointer call_data)
 
 	if (XmToggleButtonGetState(toggleButton_modeling_off))
 	    model_mode = MODEL_MODE_OFF;
+	else if (XmToggleButtonGetState(toggleButton_modeling_meanfilter))
+	    model_mode = MODEL_MODE_MEAN;
 	else if (XmToggleButtonGetState(toggleButton_modeling_dr))
 	    model_mode = MODEL_MODE_DR;
 	else
@@ -1940,6 +1966,25 @@ do_deletebadtimetag_apply( Widget w, XtPointer client_data, XtPointer call_data)
 
 /*--------------------------------------------------------------------*/
 
+
+void
+do_meantimewindow( Widget w, XtPointer client_data, XtPointer call_data)
+{
+        XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+
+	XtVaGetValues(scale_meantimewindow, 
+			XmNvalue, &mean_time_window, 
+			NULL);
+	
+	/* recalculate model */
+	mbnavedit_get_model();
+	
+	/* replot */
+	mbnavedit_plot_all();
+}
+
+/*--------------------------------------------------------------------*/
+
 void
 do_driftlon( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -1972,7 +2017,6 @@ do_driftlat( Widget w, XtPointer client_data, XtPointer call_data)
 	/* replot */
 	mbnavedit_plot_all();
 }
-
 /*--------------------------------------------------------------------*/
 
 void
