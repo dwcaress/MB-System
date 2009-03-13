@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
- *	$Id: mbr_gsfgenmb.c,v 5.9 2008-01-14 18:08:17 caress Exp $
+ *	$Id: mbr_gsfgenmb.c,v 5.10 2009-03-13 07:05:58 caress Exp $
  *
- *    Copyright (c) 1998, 2000, 2002, 2003 by
+ *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,6 +24,9 @@
  * Author:	D. W. Caress
  * Date:	February 27, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.9  2008/01/14 18:08:17  caress
+ * Added debug message.
+ *
  * Revision 5.8  2006/03/06 21:47:48  caress
  * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
  *
@@ -82,7 +85,6 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
-#include "../../include/gsf.h"
 #include "../../include/mbf_gsfgenmb.h"
 #include "../../include/mbsys_gsf.h"
 
@@ -120,7 +122,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.9 2008-01-14 18:08:17 caress Exp $";
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.10 2009-03-13 07:05:58 caress Exp $";
 	char	*function_name = "mbr_register_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -253,7 +255,7 @@ int mbr_info_gsfgenmb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.9 2008-01-14 18:08:17 caress Exp $";
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.10 2009-03-13 07:05:58 caress Exp $";
 	char	*function_name = "mbr_info_gsfgenmb";
 	int	status = MB_SUCCESS;
 
@@ -323,7 +325,7 @@ int mbr_info_gsfgenmb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.9 2008-01-14 18:08:17 caress Exp $";
+ static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.10 2009-03-13 07:05:58 caress Exp $";
 	char	*function_name = "mbr_alm_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  8/2/94
-#	$Id: Makefile.template,v 5.1 2006-03-06 21:36:26 caress Exp $
+#	$Id: Makefile.template,v 5.2 2009-03-13 07:05:58 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000, 2003 by
+#     Copyright (c) 1993-2009 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		August 2, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.1  2006/03/06 21:36:26  caress
+# Changed libproj and libgsf to libmbproj and libmbgsf.
+#
 # Revision 5.0  2003/07/27 20:52:58  caress
 # Release 5.0.0
 #
@@ -63,6 +66,11 @@
 #
 #
 #
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
+
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 #
 # Locations of Motif include files:
@@ -75,13 +83,14 @@ CC = cc
 # Compile and load flags:
 CFLAGS = -O2 -DSUN
 LFLAGS = -lm
+
+### set gsflib - could be version supplied with MB-System or other installation
+GSFLIB  = $(LIBDIR)/libmbgsf.a
+
+### set projlib - could be version supplied with MB-System or other installation
+PROJLIB  = $(LIBDIR)/libmbproj.a
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
-
-### sets locations of vital objects
-BINDIR = ../../bin
-LIBDIR = ../../lib
-INCDIR = ../../include
 
 ### make all makes the executable and man page
 all: $(BINDIR)/mbedit
@@ -89,8 +98,8 @@ all: $(BINDIR)/mbedit
 ### link the executable
 $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbproj.a \
-		$(LIBDIR)/libmbgsf.a \
+		$(PROJLIB) \
+		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbps.a \
@@ -99,8 +108,8 @@ $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		mbedit_creation.o mbedit_bxutils.o
 	$(CC) $(CFLAGS) mbedit.o mbedit_prog.o \
 		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbproj.a \
-		$(LIBDIR)/libmbgsf.a \
+		$(PROJLIB) \
+		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbps.a \

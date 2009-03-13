@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_gsfgenmb.h	2/27/98
- *	$Id: mbf_gsfgenmb.h,v 5.2 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbf_gsfgenmb.h,v 5.3 2009-03-13 07:05:58 caress Exp $
  *
- *    Copyright (c) 1998, 2000, 2002, 2003 by
+ *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,6 +19,9 @@
  * Author:	D. W. Caress
  * Date:	February 27, 1998
  * $Log: not supported by cvs2svn $
+ * Revision 5.2  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -56,7 +59,7 @@
  */
  
 #ifndef __GSF_H__
-#include "../../include/gsf.h"
+#include "gsf.h"
 #endif
 
 struct mbf_gsfgenmb_struct

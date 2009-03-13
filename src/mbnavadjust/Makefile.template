@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  6/23/95
-#	$Id: Makefile.template,v 5.7 2006-11-10 22:36:05 caress Exp $
+#	$Id: Makefile.template,v 5.8 2009-03-13 07:05:58 caress Exp $
 #
-#     Copyright (c) 2000, 2003 by 
+#     Copyright (c) 2000-2009 by 
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		September 7, 2000
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.7  2006/11/10 22:36:05  caress
+# Working towards release 5.1.0
+#
 # Revision 5.6  2006/06/16 19:30:58  caress
 # Check in after the Santa Monica Basin Mapping AUV Expedition.
 #
@@ -42,7 +45,12 @@
 #
 #
 #
-#
+
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
+
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 #
 # Locations of Motif include files:
@@ -55,13 +63,14 @@ CC = cc
 # Compile and load flags:
 CFLAGS = -g -DIRIX
 LFLAGS =  -lmalloc -lm -lsun -g
+
+### set gsflib - could be version supplied with MB-System or other installation
+GSFLIB  = $(LIBDIR)/libmbgsf.a
+
+### set projlib - could be version supplied with MB-System or other installation
+PROJLIB  = $(LIBDIR)/libmbproj.a
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
-
-### sets locations of vital objects
-BINDIR = ../../bin
-LIBDIR = ../../lib
-INCDIR = ../../include
 
 ### make all makes the executable and man page
 all: $(BINDIR)/mbnavadjust
@@ -73,8 +82,8 @@ $(BINDIR)/mbnavadjust: mbnavadjust.o \
 		mbnavadjust_util.o \
 		mbnavadjust_prog.o \
 		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbproj.a \
-		$(LIBDIR)/libmbgsf.a \
+		$(PROJLIB) \
+		$(GSFLIB) \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbaux.a \
@@ -86,8 +95,8 @@ $(BINDIR)/mbnavadjust: mbnavadjust.o \
 		mbnavadjust_util.o \
 		mbnavadjust_prog.o \
 		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbproj.a \
-		$(LIBDIR)/libmbgsf.a \
+		$(PROJLIB) \
+		$(GSFLIB) \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbaux.a \

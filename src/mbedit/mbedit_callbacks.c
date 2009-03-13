@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.21 2008-07-19 07:28:06 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.22 2009-03-13 07:05:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,6 +24,9 @@
  * Date:	March 28, 1997  GUI recast
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.21  2008/07/19 07:28:06  caress
+ * Fixed scaling for swath widths less than 6 m.
+ *
  * Revision 5.20  2006/09/11 18:55:52  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -259,7 +262,6 @@ int	mexager;
 int	mplot_width;
 int	mx_interval;
 int	my_interval;
-int	mode_view = VIEW_WATERFALL;
 int	mode_pick = MODE_TOGGLE;
 int	mshow_detects = MB_NO;
 int	mshow_flagged = MB_NO;
@@ -1839,8 +1841,9 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    case '@':
 			    {
 			    /* set the view mode */
-			    mode_view = VIEW_WATERFALL;
-			    mbedit_set_viewmode(mode_view);
+			    mview_mode = VIEW_WATERFALL;
+			    mbedit_set_viewmode(mview_mode);
+			    XmToggleButtonSetState(toggleButton_view_waterfall, MB_YES, FALSE);
 
 			    /* replot the data */
 			    status = mbedit_action_plot(mplot_width, mexager,
@@ -1853,8 +1856,9 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    case '#':
 			    {
 			    /* set the view mode */
-			    mode_view = VIEW_ALONGTRACK;
-			    mbedit_set_viewmode(mode_view);
+			    mview_mode = VIEW_ALONGTRACK;
+			    mbedit_set_viewmode(mview_mode);
+			    XmToggleButtonSetState(toggleButton_view_alongtrack, MB_YES, FALSE);
 
 			    /* replot the data */
 			    status = mbedit_action_plot(mplot_width, mexager,
@@ -1867,8 +1871,9 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    case '$':
 			    {
 			    /* set the view mode */
-			    mode_view = VIEW_ACROSSTRACK;
-			    mbedit_set_viewmode(mode_view);
+			    mview_mode = VIEW_ACROSSTRACK;
+			    mbedit_set_viewmode(mview_mode);
+			    XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_YES, FALSE);
 
 			    /* replot the data */
 			    status = mbedit_action_plot(mplot_width, mexager,

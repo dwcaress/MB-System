@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.3 2006-03-06 21:34:42 caress Exp $
+#	$Id: Makefile.template,v 5.4 2009-03-13 07:05:58 caress Exp $
 #
-#     Copyright (c) 1993, 1994, 2000, 2003 by 
+#     Copyright (c) 1993-2009 by 
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		May 23, 1994
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.3  2006/03/06 21:34:42  caress
+# Changed libproj and libgsf to libmbproj and libmbgsf.
+#
 # Revision 5.2  2006/01/11 07:25:53  caress
 # Working towards 5.0.8
 #
@@ -82,6 +85,11 @@
 #
 #
 
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
+
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 #
 # Locations of GMT libraries, binaries, and include files:
@@ -95,13 +103,14 @@ CC = cc
 # Compile and load flags:
 CFLAGS = -O2
 LFLAGS = -lm
+
+### set gsflib - could be version supplied with MB-System or other installation
+GSFLIB  = $(LIBDIR)/libmbgsf.a
+
+### set projlib - could be version supplied with MB-System or other installation
+PROJLIB  = $(LIBDIR)/libmbproj.a
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
-
-### sets locations of vital objects
-BINDIR = ../../bin
-LIBDIR = ../../lib
-INCDIR = ../../include
 
 ### make all makes the MB-system macros and man pages
 all:	$(BINDIR)/mbcontour \
@@ -115,16 +124,16 @@ clean:
 ### link or copy the executables
 $(BINDIR)/mbcontour: mbcontour.o \
 		$(LIBDIR)/libmbio.a  \
-		$(LIBDIR)/libmbproj.a \
-		$(LIBDIR)/libmbgsf.a \
+		$(PROJLIB) \
+		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a  \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbps.a
 	$(CC) $(CFLAGS) mbcontour.o \
 		$(LIBDIR)/libmbio.a \
-		$(LIBDIR)/libmbproj.a \
-		$(LIBDIR)/libmbgsf.a \
+		$(PROJLIB) \
+		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \
 		$(LIBDIR)/libmbaux.a \
@@ -133,14 +142,14 @@ $(BINDIR)/mbcontour: mbcontour.o \
 		$(LFLAGS) -o $(BINDIR)/mbcontour
 $(BINDIR)/mbswath: mbswath.o \
 		$(LIBDIR)/libmbio.a  \
-		$(LIBDIR)/libmbproj.a \
-		$(LIBDIR)/libmbgsf.a \
+		$(PROJLIB) \
+		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a
 	$(CC) $(CFLAGS) mbswath.o \
 		$(LIBDIR)/libmbio.a  \
-		$(LIBDIR)/libmbproj.a \
-		$(LIBDIR)/libmbgsf.a \
+		$(PROJLIB) \
+		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(GMTLIBDIR)/libgmtps.a \

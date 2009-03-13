@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbextractsegy.c	4/18/2004
- *    $Id: mbextractsegy.c,v 5.19 2009-03-02 18:54:40 caress Exp $
+ *    $Id: mbextractsegy.c,v 5.20 2009-03-13 07:05:58 caress Exp $
  *
  *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,6 +21,9 @@
  * Date:	April 18, 2004
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.19  2009/03/02 18:54:40  caress
+ * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
+ *
  * Revision 5.18  2008/05/16 22:44:37  caress
  * Release 5.1.1beta18
  *
@@ -105,7 +108,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mbextractsegy.c,v 5.19 2009-03-02 18:54:40 caress Exp $";
+static char rcs_id[] = "$Id: mbextractsegy.c,v 5.20 2009-03-13 07:05:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -822,9 +825,10 @@ main (int argc, char **argv)
 				}
 			else
 				rangelast = range;
-/* fprintf(stderr,"> activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
-activewaypoint,linenumber,range, navlon, 
-routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite); */
+			if (verbose > 0)
+				fprintf(stderr,"> activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
+					activewaypoint,linenumber,range, navlon, 
+					routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);
 			}
 
 		/* if desired extract subbottom data */

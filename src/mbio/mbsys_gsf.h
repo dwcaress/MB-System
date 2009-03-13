@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.h	6/10/97
- *	$Id: mbsys_gsf.h,v 5.6 2006-03-06 21:47:48 caress Exp $
+ *	$Id: mbsys_gsf.h,v 5.7 2009-03-13 07:05:58 caress Exp $
  *
- *    Copyright (c) 1998, 2000, 2002, 2003 by
+ *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,6 +23,9 @@
  * Date:	March 5, 1998
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.6  2006/03/06 21:47:48  caress
+ * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
+ *
  * Revision 5.5  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
