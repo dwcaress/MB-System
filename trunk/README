@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+Version 5.1.2beta02    March 13, 2009
 Version 5.1.2beta01    March 9, 2009
 Version 5.1.1          December 31, 2008
 Version 5.1.1beta26    November 18, 2008
@@ -125,9 +126,9 @@ All Wrongs Remembered
 
 The MB-System source code is distributed under the GNU
 General Public License as formulated by the GNU Project.
-Previous MB-System distributions have been described as
-"public domain", which meant there was no restrictions
-whatsoever on the use of the code. We have now adopted the
+Early MB-System distributions were described as "public 
+domain", which meant there was no restrictions whatsoever 
+on the use of the code. For over a decade we have adopted the
 more restrictive GNU GPL license in order to insure that
 anyone who distributes software based in whole or in part on
 MB-System also distributes the modified MB-System source
@@ -188,6 +189,21 @@ Added support for new ROV Doc Ricketts navigation data as format 165.
 Added a Gaussian mean smoothing algorithm to MBnavedit. This is primarily
 intended for smoothing USBL or LBL based navigation of submerged platforms
 (e.g. ROVs or submersibles).
+
+Altered the install_makefiles perl script used to generate the makefiles
+during installation of MB-System. The install_makefiles script now
+automatically determines whether the local architecture is big or
+little "endian". Consequently, the "BYTESWAPPED" parameter no longer
+needs to be set in install_makefiles, and has been removed. The "GRAPHICAL"
+parameter has also been removed. Now, install_makefiles builds the
+graphical utilities only if the Motif libraries and header file
+location are specified with the MOTIFLIBs and MOTIFINCDIR parameters.
+Also, install_makefiles now allows users to specify the use of independent
+installations of the GSF and PROJ4 libraries. By default, the versions of
+these libraries distributed with MB-System will be built and used.
+
+Fixed bug in mbedit in which the view mode switched spontaneously after 
+loading a new file and advancing the view buffer.
 
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
@@ -1414,13 +1430,10 @@ edits, one just runs mbprocess again. One can similarly
 change the SVP file without impacting on the bathymetry
 editing or navigation editing components of the processing.
 
-All of the old, serial processing utilities are still
-distributed with MB-System. However, some of the serial
-tools have been replaced by new versions of the same name
-(e.g. mbedit, mbclean, mbbackangle, and mbnavedit).  In 
-these cases, the old versions are preserved as programs 
-with "old" added to their names (e.g. mbeditold, mbcleanold, 
-mbbackangleold, and mbnaveditold). 
+Starting with the 5.1.1 release, the old, serial processing 
+utilities have been removed from MB-System. However, some 
+of the serial tools have been replaced by new versions with 
+the same name (e.g. mbedit, mbclean, mbbackangle, and mbnavedit).  
 
 OTHER REQUIRED AND SUGGESTED SOFTWARE AND DATA
 ----------------------------------------------
@@ -1428,7 +1441,7 @@ OTHER REQUIRED AND SUGGESTED SOFTWARE AND DATA
 MB-System requires a number of other software packages 
 and databases to be fully functional. These are:
 
-- GMT version 4l.1.4 or later: MB-System makes use of the Generic Mapping Tools (GMT)
+- GMT version 4.2.0 or later: MB-System makes use of the Generic Mapping Tools (GMT)
      libraries and programs for much of its graphics. GMT also includes a detailed global
      coastline database. GMT has been developed by Professor Paul Wessel of SOEST (School
      of Ocean and Earth Science and Technology at the Univeristy of Hawaii) and Dr. Walter
@@ -1466,8 +1479,7 @@ HOW TO INSTALL MB-SYSTEM:
 ------------------------
 
 The MB-System source code is extracted by first uncompressing the tar file and then running tar:
-     % uncompress MB-System.tar.gz
-     % tar xvf MB-System.tar
+     % tar xvzf MB-System.tar.gz
 
 This will create a directory structure called mbsystem. In order to configure your installation,
 you must edit the shellscript mbsystem/install_makefiles. This is perl script will read template
@@ -1604,10 +1616,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.129 2009-03-10 05:11:21 caress Exp $
+RCS ID: $Id: README,v 5.130 2009-03-13 07:05:58 caress Exp $
 
 Revision History:
 $Log: not supported by cvs2svn $
+Revision 5.129  2009/03/10 05:11:21  caress
+Added Gaussian mean smoothing to MBnavedit.
+
 Revision 5.128  2009/03/09 16:58:31  caress
 Release 5.1.2beta01
 

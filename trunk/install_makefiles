@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.34 2009-03-02 18:59:05 caress Exp $
+#    $Id: install_makefiles,v 5.35 2009-03-13 07:05:58 caress Exp $
 #
-#    Copyright (c) 1993-2008 by 
+#    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
 #    and D. N. Chayes (dale@lamont.ldgo.columbia.edu)
 #    Lamont-Doherty Earth Observatory
@@ -37,44 +37,42 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   important libraries and include files are accurate and so that
 #   the compile and link flags are correct.
 #
-#   The important parameters to be set are:
-#	MBSYSTEM_HOME	Absolute path to the directory containing
-#				this file.
+#   The required and optional installation parameters are:
+#
+#   REQUIRED:
+#	MBSYSTEM_HOME	Absolute path to the directory containing this file.
 #	OS		Operating system (Recognized options are:
 #				DARWIN, LINUX, CYGWIN, SUN, IRIX, IRIX64,
 #				SOLARIS, HPUX, LYNX, CYGWIN or OTHER).
-#	BYTESWAPPED	If set to "YES" will enable byte swapping
-#				of input and output binary data.
-#				Otherwise byte swapping is disabled.
-#				Byte swapping needs to be enabled
-#				when installing on "little endian"
-#				machines such as PCs or VAXs.
-#	CC		C compiler to be used (optional).
-#	GRAPHICAL	If set to "YES" will enable the installation
-#			of the Motif based graphical utilities mbedit,
-#			mbnavedit, and mbvelocitytool. If Motif 
-#                       is not available but the nongraphical utilities 
-#                       are desired then disable with "NO". 
-#			(optional, default is "YES")
-#       MOTIFINCDIR	Location of Motif include files.
-#       MOTIFLIBS	X and Motif libraries required for graphical tools.
-#       OPENGLLIBS	OpenGL libraries required for new graphical tools,
-#.                              including MBgrdviz. If this parameter is 
-#                               not set, 
-#                            
-#	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
-#	GMTINCDIR	Location of GMT include files gmt.h, grd.h,
-#				and pslib.h
-#	NETCDFLIBDIR	Location of NetCDF library libnetcdf.a
-#	NETCDFINCDIR	Location of NetCDF include file netcdf.h
-#	LEVITUS		Path for Levitus data file annual
-#                       This is usually $MBSYSTEM_HOME/share/annual.
 #	CFLAGS		Compile flags for C source files. These vary with
 #				different operating systems and installations.
-#				In order to build MB-System with GMT 4.1, 4.1.1,
-#				or 4.1.2, add -DGMT4_1_2. No such flag is needed
-#				to build with GMT 4.1.3
 #	LFLAGS		Load flags for all object files.
+#	NETCDFLIBDIR	Location of NetCDF library libnetcdf.a
+#	NETCDFINCDIR	Location of NetCDF include file netcdf.h
+#	GMTLIBDIR	Location of GMT libraries libgmt.a and libpsl.a
+#	GMTINCDIR	Location of GMT include files gmt.h, grd.h, and pslib.h
+#	LEVITUS		Path of Levitus global water properties data file. This is usually 
+#                               $MBSYSTEM_HOME/share/annual.
+#	PROJECTIONS	Path of PROJ4 projections database. This is usually 
+#                               $MBSYSTEM_HOME/share/Projections.dat.
+#   REQUIRED for graphical tools mbedit, mbnavedit, mbvelocitytool, mbnavadjust, 
+#                               mbgrdviz, and mbeditviz. If these paramters are not 
+#                               both set, no graphicals tools will be built.
+#       MOTIFINCDIR	Location of Motif include files.
+#       MOTIFLIBS	X and Motif libraries required for graphical tools.
+#   REQUIRED for openGL tools mbgrdviz and mbeditviz:
+#       OPENGLLIBS	OpenGL libraries required for new graphical tools,
+#.                              including mbgrdviz and mbeditviz. If this  
+#                               parameter is not set, mbgrdviz and mbeditviz
+#                               will not be built
+#   OPTIONAL - use non-default C compiler:
+#	CC		C compiler to be used (optional).
+#   OPTIONAL - use independent installation of the PROJ4 library:
+#       PROJLIB         Path to PROJ4 library (usually libproj.a)
+#       PROJINCDIR      Location of PROJ4 include file proj_api.h
+#   OPTIONAL - use independent installation of the GSF library:
+#       GSFLIB          Path to GSF library (usually libgsf.a)
+#       GSFINCDIR       Location of GSF include file gsf.h
 #
 #   A few preset variable configurations are defined and can be
 #   specified using the -P option. These include:
@@ -96,30 +94,60 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # EDIT THE PARAMETERS HERE IF NO APPROPRIATE PRESET CONFIGURATION IS DEFINED
 # Set the configuration parameters manually:
 #--------------------------------------------------------------------
+#
+# Required parameters:
 $MBSYSTEM_HOME = "/Users/caress/sandbox/mbsystem";
 $OS = "DARWIN";
-$CC = "cc";
-$BYTESWAPPED = "YES";
-$GRAPHICAL = "YES";
-$MOTIFINCDIR = "/sw/include";
-$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
-$OPENGLLIBS = "-lGLU -lGL";
-$GMTLIBDIR = "/usr/local/gmt/lib";
-$GMTINCDIR = "/usr/local/gmt/include";
-$NETCDFLIBDIR = "/sw/lib";
-$NETCDFINCDIR = "/sw/include";
-$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
-$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
 $CFLAGS = "-g -I/usr/X11R6/include";
 $LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
+$NETCDFLIBDIR = "/sw/lib";
+$NETCDFINCDIR = "/sw/include";
+$GMTLIBDIR = "/usr/local/gmt/lib";
+$GMTINCDIR = "/usr/local/gmt/include";
+$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
 #
+# Required paramters for graphical tools
+#   - graphical tools will not be built if these
+#     are commented out
+$MOTIFINCDIR = "/sw/include";
+$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+#
+# Required paramter for visualization tools
+#   - visualization tools will not be built if this
+#     is commented out
+$OPENGLLIBS = "-lGLU -lGL";
+#
+# Required paramter for mblevitus program
+$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+#
+# Optional paramter for use of non-default C compiler
+#$CC = "cc";
+#
+# Optional paramters for use of independent GSF library installation
+#   - GSF library included with MB-System will be used 
+#     if these are commented out
+#$GSFLIB = "/usr/local/gsf/lib/libgsf.a";
+#$GSFINCDIR = "/usr/local/gsf/include/";
+#
+# Optional paramters for use of independent PROJ4 library installation
+#   - PROJ4 library included with MB-System will be used 
+#     if these are commented out
+#$PROJLIB = "/usr/local/proj/lib/libproj.a";
+#$PROJINCDIR = "/usr/local/proj/include/";
+#
+#--------------------------------------------------------------------
+# END OF PARAMETER EDITING SECTION
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.34 2009-03-02 18:59:05 caress Exp $
+#   $Id: install_makefiles,v 5.35 2009-03-13 07:05:58 caress Exp $
 #
 # Revisions:
 #   $Log: not supported by cvs2svn $
+#   Revision 5.34  2009/03/02 18:59:05  caress
+#   Moving towards 5.1.2beta1.
+#
 #   Revision 5.33  2008/12/31 08:47:38  caress
 #   Updates towards release 5.1.1
 #
@@ -320,8 +348,6 @@ elsif ($preset eq "macosxfink")
 	$MBSYSTEM_HOME = "$FINKPREFIX";
 	$OS = "DARWIN";
 	$CC = "cc";
-	$BYTESWAPPED = "NO";
-	$GRAPHICAL = "YES";
 	$MOTIFINCDIR = "$FINKPREFIX/include";
 	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 	$OPENGLLIBS = "-lGLU -lGL";
@@ -344,8 +370,6 @@ elsif ($preset eq "macosxusrlocal")
 	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 	$OS = "DARWIN";
 	$CC = "cc";
-	$BYTESWAPPED = "NO";
-	$GRAPHICAL = "YES";
 	$MOTIFINCDIR = "$FINKPREFIX/include";
 	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 	$OPENGLLIBS = "-lGLU -lGL";
@@ -367,8 +391,6 @@ elsif ($preset eq "CYGWIN")
 	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 	$OS = "CYGWIN";
 	$CC = "gcc";
-	$BYTESWAPPED = "YES";
-	$GRAPHICAL = "YES";
 	$MOTIFINCDIR = "/usr/X11R6/include/Xm";
 	$MOTIFLIBS = "-L/usr/X11R6/lib -lXm -lXt -lX11";
 	$OPENGLLIBS = "-lGLU -lGL";
@@ -390,8 +412,6 @@ elsif ($preset eq "irixusrlocal")
 	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 	$OS = "IRIX64";
 	$CC = "cc";
-	$BYTESWAPPED = "NO";
-	$GRAPHICAL = "YES";
 	$MOTIFINCDIR = "/usr/include/Xm";
 	$MOTIFLIBS = "-lXm -lXt -lX11";
 	$OPENGLLIBS = "-lGLU -lGL";
@@ -428,8 +448,6 @@ else
 #	$MBSYSTEM_HOME = "cmbsystem";
 #	$OS = "DARWIN";
 #	$CC = "cc";
-#	$BYTESWAPPED = "NO";
-#	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/sw/include";
 #	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 #	$GMTLIBDIR = "/sw/lib";
@@ -447,13 +465,9 @@ else
 # port provided by Fink (www.fink.org). GMT and netCDF have
 # also been installed using fink (note: current versions of
 # GMT are only available through the "unstable" fink tree).
-# If building on a newer Intel Mac then $BYTESWAPPED = "YES";
-# else if building on an older PowerPC Mac then $BYTESWAPPED = "NO";
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "DARWIN";
 #	$CC = "cc";
-#	$BYTESWAPPED = "NO";
-#	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/sw/include";
 #	$MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 #	$GMTLIBDIR = "/sw/lib";
@@ -468,10 +482,8 @@ else
 # Example for installing on L-DEO Sun workstations running SunOs 4.1.x:
 #	$MBSYSTEM_HOME = "/home/hs/caress/dev/mbsystem";
 #	$OS = "SUN";
-#	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O2";
 #	$LFLAGS = "-lm";
-#	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/include/Xm";
 #	$MOTIFLIBS = "-lXm -lXt -lX11";
 #	$GMTLIBDIR = "/ocean/mgg/gmt2/sun4/lib";
@@ -485,10 +497,8 @@ else
 # Example for installing on R/V Ewing Sun workstations:
 #	$MBSYSTEM_HOME = "/net/heezen/packages/mbsystem";
 #	$OS = "SUN";
-#	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O2";
 #	$LFLAGS = "-lm";
-#	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/include/Xm";
 #	$MOTIFLIBS = "-lXm -lXt -lX11";
 #	$GMTLIBDIR = "/net/heezen/packages/gmt2/bin";
@@ -501,10 +511,8 @@ else
 #
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "SOLARIS";
-#	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O -I/usr/openwin/include -I/usr/ucbinclude";
 #	$LFLAGS = "-lnsl -lm";
-#	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/dt/include";
 #	$MOTIFLIBS = "-L/usr/openwin/lib -L/usr/dt/lib -lXm -lXt -lX11";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
@@ -519,8 +527,6 @@ else
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "SOLARIS";
 #	$CC = "cc";
-#	$BYTESWAPPED = "NO";
-#	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/dt/include";
 #	$MOTIFLIBS = "-L/usr/openwin/lib -L/usr/dt/lib -lXm -lXt -lX11";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
@@ -537,8 +543,6 @@ else
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "SOLARIS";
 #	$CC = "gcc";
-#	$BYTESWAPPED = "NO";
-#	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/dt/include/Xm";
 #	$MOTIFLIBS = "-L/usr/dt/lib -lXm -lXt -lX11";
 #	$OPENGLLIBS = "-lGLU -lGL";
@@ -554,10 +558,8 @@ else
 # Example for installing on SeaBeam Instruments SGI IRIX workstations:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "IRIX";
-#	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O2";
 #	$LFLAGS = "-lm -lsun";
-#	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/include/Xm";
 #	$MOTIFLIBS = "-lXm -lXt -lX11";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
@@ -569,10 +571,8 @@ else
 # Example for installing on SeaBeam Instruments SGI IRIX 6.4 workstations:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "IRIX64";
-#	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-O2";
 #	$LFLAGS = "-lm -lsun";
-#	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/include/Xm";
 #	$MOTIFLIBS = "-lXm -lXt -lX11";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
@@ -584,7 +584,6 @@ else
 # Example for installing on PC running LINUX:
 #       $MBSYSTEM_HOME = "/usr/local/mbsystem";
 #       $OS = "LINUX";
-#       $BYTESWAPPED = "YES";
 #       $CC = "cc";
 #       $CFLAGS = "-g -w";
 #       $LFLAGS = "-L$NETCDFLIBDIR -lm -lnetcdf";
@@ -601,10 +600,8 @@ else
 # running HPUX version 9.0X or later:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
 #	$OS = "HPUX";
-#	$BYTESWAPPED = "NO";
 #	$CFLAGS = "-Ae +O3 -I/usr/include/X11R5 -I/usr/include/Motif1.2";
 #	$LFLAGS = "-lm ";
-#	$GRAPHICAL = "YES";
 #	$MOTIFINCDIR = "/usr/lib/Motif1.2/Xm";
 #	$MOTIFLIBS = "-Wl,-L/usr/lib/Motif1.2 -Wl, -Wl,-lXm -Wl,-L/usr/lib/X11R5 -Wl,-lX11 -Wl,-lXt";
 #	$GMTLIBDIR = "/usr/local/gmt/src";
@@ -646,8 +643,10 @@ $CFLAGS = "$CFLAGS -D$OS";
 $LFLAGS = "$LFLAGS -L$NETCDFLIBDIR -lnetcdf";
 
 # add byte swapping to CFLAGS if necessary
-if ($BYTESWAPPED eq "YES")
+$BYTESWAPTESTSTRING = join(" ", map { sprintf "%#02x", $_ } unpack("C*",pack("L",0x12345678))), "\n";
+if ($BYTESWAPTESTSTRING eq "0x78 0x56 0x34 0x12")
 	{
+	$BYTESWAPPED = "YES";
 	$CFLAGS = "$CFLAGS -DBYTESWAPPED";
 	}
 	
@@ -667,10 +666,14 @@ else
 	$ARCHIVE = "ar rcv";
 	}
 
-# set $GRAPHICAL if not set
-if (!$GRAPHICAL)
+# set $GRAPHICAL according to Motif settings
+if ($MOTIFINCDIR && $MOTIFLIBS)
 	{
 	$GRAPHICAL = "YES";
+	}
+else
+	{
+	$GRAPHICAL = "NO";
 	}
 
 # set $BIGFLAG for compiling mbgrid.c under IRIX
@@ -692,6 +695,7 @@ else
 print "\nParameters defined for Makefiles:\n";
 print "Mb-System Home:            $MBSYSTEM_HOME\n";
 print "Operating System:          $OS\n";
+print join(" ", map { sprintf "%#02x", $_ } unpack("C*",pack("L",0x12345678))), "\n";
 if ($BYTESWAPPED eq "YES")
 	{
 	print "Byte swapping:             enabled\n";
@@ -827,6 +831,22 @@ while (@files)
 			{
 			print MAK "NETCDFINCDIR = $NETCDFINCDIR\n";
 			}
+		elsif ($GSFINCDIR && index($_,"GSFINCDIR",0) == 0)
+			{
+			print MAK "GSFINCDIR = $GSFINCDIR\n";
+			}
+		elsif ($GSFLIB && index($_,"GSFLIB",0) == 0)
+			{
+			print MAK "GSFLIB = $GSFLIB\n";
+			}
+		elsif ($PROJINCDIR && index($_,"PROJINCDIR",0) == 0)
+			{
+			print MAK "PROJINCDIR = $PROJINCDIR\n";
+			}
+		elsif ($PROJLIB && index($_,"PROJLIB",0) == 0)
+			{
+			print MAK "PROJLIB = $PROJLIB\n";
+			}
 		elsif (index($_,"LEVITUS",0) == 0)
 			{
 			print MAK "LEVITUS = $LEVITUS\n";
@@ -847,6 +867,12 @@ while (@files)
 			{
 			}
 		elsif (index($_,"catman",0) >= 0 && $OS ne "SUN")
+			{
+			}
+		elsif (index($_,"cd gsf",0) >= 0 && $GSFLIB && $GSFINCDIR)
+			{
+			}
+		elsif (index($_,"cd proj",0) >= 0 && $PROJLIB && $PROJINCDIR)
 			{
 			}
 		elsif (index($_,"cd mbedit",0) >= 0 && $GRAPHICAL ne "YES")

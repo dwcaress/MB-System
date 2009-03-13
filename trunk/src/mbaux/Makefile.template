@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  9/8/00
-#	$Id: Makefile.template,v 5.6 2007-10-08 06:09:51 caress Exp $
+#	$Id: Makefile.template,v 5.7 2009-03-13 07:05:58 caress Exp $
 #
-#     Copyright (c) 2000, 2003 by
+#     Copyright (c) 2000-2009 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		September 8, 2000
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.6  2007/10/08 06:09:51  caress
+# Added mb_readgrd.c
+#
 # Revision 5.5  2003/07/27 20:49:13  caress
 # Release 5.0.0
 #
@@ -44,6 +47,11 @@
 #
 #
 
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
+
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 #
 # Locations of GMT and netcdf include files:
@@ -58,9 +66,6 @@ CFLAGS = -O2
 ARCHIVE = ar rcv
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
-
-LIBDIR = ../../lib
-INCDIR = ../../include
 
 ### make all makes the mbaux library and associated include files
 all:	$(LIBDIR)/libmbaux.a \

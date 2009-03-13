@@ -37,7 +37,7 @@ of MB-System ).</p>
 terminal shell.
 The following commands represent a typical anonymous ftp session (note
 that
-your@email.address literally means to enter your email address).</p>
+your@email.address literally means to enter your email address, and that many modern ftp clients do not require the &quot;binary&quot; command).</p>
 <ul>
   % ftp ftp.ldeo.columbia.edu<br>
 Name: anonymous<br>
@@ -95,7 +95,7 @@ Suggested Software and Data</font></b></dd>
 <p>MB-System requires a number of other software packages and databases
 to be fully functional. These are:</p>
 <ul>
-  <li><b>GMT</b> version 4.1.4 or later: MB-System makes use of the
+  <li><b>GMT</b> version 4.2.0 or later: MB-System makes use of the
 Generic
 Mapping Tools (GMT) libraries and programs for much of its graphics.
 GMT
@@ -107,7 +107,7 @@ Technology at the Univeristy of Hawaii) and Dr. Walter H. F. Smith of
 NOAA.
 The GMT source code is available from the <a
  href="http://gmt.soest.hawaii.edu/">GMT
-web page</a>. Use of GMT version 4.1.4 or later is required.</li>
+web page</a>.</li>
   <li><b>NetCDF</b> version 3.5.1 or later: Both GMT and MB-System
 require
 the <a href="http://www.unidata.ucar.edu/software/netcdf/">NCAR
@@ -179,60 +179,62 @@ painlessly installed using the fink package available from the
 tar
 file and then running tar:</p>
 <ul>
-  <pre>% gunzip MB-System.tar.gz</pre>
-  <pre>% tar xvf MB-System.tar</pre>
+  <pre>% tar xvzf MB-System.tar.gz</pre>
 </ul>
 <p>This will create a directory called (for the 5.1.2 distribution): </p>
 <ul>
   <pre>mbsystem-5.1.2</pre>
 </ul>
 <p>In order to
-configure your installation, you must edit the shellscript
-mbsystem-5.1.2/install_makefiles.
-This is perl script will read template makefiles in the MB-System
+configure your installation, you must edit the perl script
+mbsystem-5.1.2/install_makefiles, and set a number of parameters to reflect the system architecture, the location of the installation, and the locations of certain required libraries.
+This script will read template makefiles in the MB-System
 source
-directories and create makefiles with the correct attributes. This
-enables
-users to install MB-System without having to edit the makefiles.
-Instead
-of editing the makefiles directly, the installer should edit this
-script
-so that the locations of important libraries and include files are
-accurate
-and so that the compile and link flags are correct.</p>
-<p>The important parameters to be set in install_makefiles are:</p>
+directories and create makefiles with the correct dependencies, compile flags, and link flags. The important parameters to be set in install_makefiles are listed below. The install_makefiles script includes comments suggesting parameters to use for many common computer systems.</p>
+<p>These parameters must be set for all installations:</p>
 <ul>
-  <li>MBSYSTEM_HOME - Absolute path to the directory containing this
-file.
+  <li> MBSYSTEM_HOME	- Absolute path to the directory containing install_makefiles.</li>
+  <li>OS		- Operating system (Recognized options are: DARWIN, LINUX, CYGWIN, SUN, IRIX, IRIX64, SOLARIS, HPUX, LYNX, CYGWIN or OTHER).</li>
+  <li>CFLAGS		- Compile flags for C source files. These vary with different operating systems and installations.</li>
+  <li>LFLAGS		- Load flags for all object files.</li>
+  <li>NETCDFLIBDIR	- Location of NetCDF library libnetcdf.a</li>
+  <li>NETCDFINCDIR	- Location of NetCDF include file netcdf.h</li>
+  <li>GMTLIBDIR-	Location of GMT libraries libgmt.a and libpsl.a</li>
+  <li>GMTINCDIR	- Location of GMT include files gmt.h, grd.h, and pslib.h</li>
+  <li>LEVITUS		- Path of Levitus global water properties data file. This is usually $MBSYSTEM_HOME/share/annual.</li>
+  <li>PROJECTIONS	- Path of PROJ4 projections database. This is usually $MBSYSTEM_HOME/share/Projections.dat.<br>
   </li>
-  <li>OS Operating system - (e.g. DARWIN, LINUX, SUN, IRIX, HPUX, LYNX). </li>
-  <li>BYTESWAPPED - If set to "YES" will enable byte swapping of
-input and output binary data. Otherwise byte swapping is disabled. Byte
-swapping needs to be enabled when installing on "little endian"
-machines such as PCs, current Macs, or, in the old days, VAXs. </li>
-  <li>CC - C compiler to be used (optional). </li>
-  <li>GRAPHICAL - If set to "YES" will enable the installation
-of the Motif based graphical utilities mbedit, mbnavedit, and
-mbvelocitytool.
-If Motif is not available but the nongraphical utilities are desired
-then
-disable with "NO" (optional, default is "YES"). </li>
-  <li>MOTIFINCDIR - Location of Motif include files. </li>
-  <li>MOTIFLIBS - X and Motif libraries required for graphical tools. </li>
-  <li>GMTLIBDIR - Location of GMT libraries libgmt.a and libpsl.a </li>
-  <li>GMTINCDIR - Location of GMT include files gmt.h, grd.h, and
-    pslib.h
-  </li>
-  <li>NETCDFDIR - Location of NetCDF library libnetcdf.a </li>
-  <li>LEVITUS - Path for Levitus data file annual.</li>
-  <li>CFLAGS - Compile flags for C source files. </li>
-  <li>LFLAGS - Load flags for all object files. </li>
 </ul>
-<p>Examples of appropriate values for several different installations
-(e.g. Mac, Linux,
-Sun) are included in the comments in install_makefiles. To
-execute
-install_makefiles, do the following:</p>
+<p>These two parameters are required to build the graphical tools mbedit, mbnavedit, mbvelocitytool, mbnavadjust,                                mbgrdviz, and mbeditviz. If these parameters are not both set, no graphical tools will be built.</p>
+<ul>
+  <li>MOTIFINCDIR	- Location of Motif include files.</li>
+  <li>MOTIFLIBS	- X11 and Motif libraries required for graphical tools.<br>
+  </li>
+</ul>
+<p>This parameter must be set to build the  openGL tools mbgrdviz and mbeditviz:</p>
+<ul>
+  <li>OPENGLLIBS	- OpenGL libraries required for new graphical tools, including mbgrdviz and mbeditviz. If this parameter is not set, mbgrdviz and mbeditviz will not be built<br>
+  </li>
+</ul>
+<p>This optional parameter can be used to specify a  non-default C compiler:</p>
+<ul>
+  <li>CC		- C compiler to be used.<br>
+  </li>
+</ul>
+<p>These optional parameters can be used to  specify linking with an independent installation of the PROJ4 library. In this case, the PROJ4 library included with MB-System will not be built.</p>
+<ul>
+  <li>PROJLIB         - Path to PROJ4 library (usually libproj.a)</li>
+  <li>PROJINCDIR      - Location of PROJ4 include file proj_api.h<br>
+  </li>
+</ul>
+<p>These optional parameters can be used to  specify linking with an independent installation of the GSF library. In this case, the GSF library included with MB-System will not be built.</p>
+<ul>
+  <li>GSFLIB          - Path to GSF library (usually libgsf.a)</li>
+  <li>GSFINCDIR       - Location of GSF include file gsf.h</li>
+</ul>
+<p>To
+  execute
+  install_makefiles, do the following:</p>
 <ul>
   <pre>% cd mbsystem-5.1.2 </pre>
   <pre>% install_makefiles</pre>
@@ -255,10 +257,9 @@ the manual pages
 in mbsystem-5.1.2/man/man1.</p>
 <p>Naturally, in order for users to use the MB-System utilities, the
 directory
-containing the executables must be included in their path (usually this
-is done by editing the .cshrc file in the user's home directory). The
+containing the executables must be included in their path. Altering the user path variable is generally accomplished by editing the initialization files hidden in the user's home directory. Which files need to be edited depends on which command line shell is being used. If the user works with <em>csh</em>, then the <em>.cshrc</em> and <em>.login </em>files need to be changed. If the shell is <em>bash</em>, then the <em>.bashrc</em> and <em>.profile</em> files must be altered. See the manual pages for the relevant shell program to determine how to set the user environment. The
 executable
-perl must also be available in the user's path for most of the macros
+<em>perl</em> must also be available in the user's path for most of the macros
 to
 work.</p>
 <p>Most users will also wish to specify which program they generally
@@ -271,7 +272,7 @@ Popular open source options for Postscript display include ghostview and gv. The
 Graphics machines running Irix.</p>
 <center>
 <p><br>
-Last Updated: $Date: 2009-03-06 21:46:47 $ $Revision: 5.21 $</p>
+Last Updated: $Date: 2009-03-13 07:05:58 $ $Revision: 5.22 $</p>
 </center>
 <p>
 </p>

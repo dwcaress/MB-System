@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_zgrid.c	    4/25/95
- *    $Id: mb_zgrid.c,v 5.5 2008-12-22 08:36:18 caress Exp $
+ *    $Id: mb_zgrid.c,v 5.6 2009-03-13 07:05:58 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -53,6 +53,9 @@
  * Date:	April 25, 1995
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.5  2008/12/22 08:36:18  caress
+ * Check in of 22 Dec 2008.
+ *
  * Revision 5.4  2008/11/16 21:51:18  caress
  * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
  *
@@ -190,7 +193,7 @@ int mb_zgrid(float *z, int *nx, int *ny,
     if (eps < 0.02)
     	eps = 0.02;
     big = (float)9e29;
-fprintf(stderr,"CLIP: %d nmax:%d eps:%f\n",*nrng,nmax,eps);
+/* fprintf(stderr,"CLIP: %d nmax:%d eps:%f\n",*nrng,nmax,eps); */
 
 /*     get zbase which will make all zp values positive by 20*(zmax-zmin) 
 */

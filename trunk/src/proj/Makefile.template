@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  7/16/2002
-#	$Id: Makefile.template,v 5.8 2008-09-29 04:56:21 caress Exp $
+#	$Id: Makefile.template,v 5.9 2009-03-13 07:05:58 caress Exp $
 #
-#     Copyright (c) 2002, 2003 by
+#     Copyright (c) 2002-2009 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		July 16, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.8  2008/09/29 04:56:21  caress
+# Proj 4.6.1
+#
 # Revision 5.7  2008/01/14 18:21:58  caress
 # Upgraded to Proj 4.6.0 release.
 #
@@ -42,6 +45,10 @@
 #
 #
 #
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 # 
@@ -53,10 +60,6 @@ CFLAGS = -g -DIRIX
 ARCHIVE = ar rcv
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
-
-BINDIR = ../../bin
-LIBDIR = ../../lib
-INCDIR = ../../include
 
 ### make all makes the proj library, executables, man pages, 
 ### and associated include files

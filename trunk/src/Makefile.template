@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template	5/24/94
-#	$Id: Makefile.template,v 5.4 2008-12-31 08:47:38 caress Exp $
+#	$Id: Makefile.template,v 5.5 2009-03-13 07:05:58 caress Exp $
 #
-#     Copyright (c) 1993-2008 by
+#     Copyright (c) 1993-2009 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		January 21, 1993
 # 
 # $Log: not supported by cvs2svn $
+# Revision 5.4  2008/12/31 08:47:38  caress
+# Updates towards release 5.1.1
+#
 # Revision 5.3  2007/05/28 17:00:45  caress
 # Removed glw directory - that code is now in mbview
 #

@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  6/1/2002
-#	$Id: Makefile.template,v 5.2 2003-07-27 20:50:25 caress Exp $
+#	$Id: Makefile.template,v 5.3 2009-03-13 07:05:58 caress Exp $
 #
-#     Copyright (c) 2002, 2003 by
+#     Copyright (c) 2002-2009 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -16,6 +16,9 @@
 # Date:		June 1, 2002
 #
 # $Log: not supported by cvs2svn $
+# Revision 5.2  2003/07/27 20:50:25  caress
+# Release 5.0.0
+#
 # Revision 5.1  2002/07/20 20:56:37  caress
 # Release 5.0.beta20
 #
@@ -24,6 +27,11 @@
 #
 #
 #
+
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 # 
@@ -35,9 +43,6 @@ CFLAGS = -g -DIRIX
 ARCHIVE = ar rcv
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
-
-LIBDIR = ../../lib
-INCDIR = ../../include
 
 ### make all makes the sapi library, man page, and associated include files
 all:	$(LIBDIR)/libsapi.a \

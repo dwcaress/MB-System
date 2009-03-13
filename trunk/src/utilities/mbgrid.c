@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.50 2009-03-08 09:21:00 caress Exp $
+ *    $Id: mbgrid.c,v 5.51 2009-03-13 07:05:58 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -38,6 +38,9 @@
  * Rererewrite:	January 2, 1996
  *
  * $Log: not supported by cvs2svn $
+ * Revision 5.50  2009/03/08 09:21:00  caress
+ * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
+ *
  * Revision 5.49  2009/01/15 17:37:28  caress
  * Update on 15 Jan 2009 - fix to mbm_grd2arc and mbm_arc2grd
  *
@@ -468,7 +471,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.50 2009-03-08 09:21:00 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.51 2009-03-13 07:05:58 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -1752,8 +1755,6 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
-fprintf(stderr,"\nCalling mb_list_arrays 0");
-mb_list_arrays(verbose,mbio_ptr,&error);
 			
 		    /* get mb_io_ptr */
 		    mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -1796,8 +1797,6 @@ mb_list_arrays(verbose,mbio_ptr,&error);
 			exit(error);
 			}
 
-fprintf(stderr,"\nCalling mb_list_arrays 1");
-mb_list_arrays(verbose,mbio_ptr,&error);
 		    /* loop over reading */
 		    while (error <= MB_ERROR_NO_ERROR)
 			{
@@ -1875,8 +1874,6 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 			      }
 			  }
 			}
-fprintf(stderr,"\nCalling mb_list_arrays c1");
-mb_list_arrays(verbose,mbio_ptr,&error);
 		    status = mb_close(verbose,&mbio_ptr,&error);
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
@@ -2079,17 +2076,6 @@ for (i=0;i<sxdim;i++)
 		if (gridsmall[kgrid] > zmax && gridsmall[kgrid] < zclip)
 			zmax = gridsmall[kgrid];
 		}
-if (zmin == zclip)
-	zmin = 0.0;
-if (zmax == zclip)
-	zmax = 0.0;
-strcpy(ofile,fileroot);
-strcat(ofile,"_lowrezslope.grd");
-status = write_cdfgrd(verbose,ofile,output,sxdim,sydim,
-wbnd[0],wbnd[1],wbnd[2],wbnd[3],
-zmin,zmax,sdx,sdy,
-xlabel,ylabel,zlabel,title,projection_id, 
-argc,argv,&error);
 
 	/* do second pass footprint gridding using slope estimates from first pass interpolated grid */
 
@@ -2172,8 +2158,6 @@ argc,argv,&error);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
-fprintf(stderr,"\nCalling mb_list_arrays 2");
-mb_list_arrays(verbose,mbio_ptr,&error);
 			
 		    /* get mb_io_ptr */
 		    mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -2215,8 +2199,6 @@ mb_list_arrays(verbose,mbio_ptr,&error);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
-fprintf(stderr,"\nCalling mb_list_arrays 3");
-mb_list_arrays(verbose,mbio_ptr,&error);
 
 		    /* loop over reading */
 		    while (error <= MB_ERROR_NO_ERROR)
@@ -2536,8 +2518,6 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 			      }
 			  }
 			}
-fprintf(stderr,"\nCalling mb_list_arrays c2");
-mb_list_arrays(verbose,mbio_ptr,&error);
 		    status = mb_close(verbose,&mbio_ptr,&error);
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
@@ -2697,8 +2677,6 @@ num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
-fprintf(stderr,"\nCalling mb_list_arrays 4");
-mb_list_arrays(verbose,mbio_ptr,&error);
 
 		    /* allocate memory for reading data arrays */
 		    if (error == MB_ERROR_NO_ERROR)
@@ -2737,14 +2715,10 @@ mb_list_arrays(verbose,mbio_ptr,&error);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
-fprintf(stderr,"\nCalling mb_list_arrays 5");
-mb_list_arrays(verbose,mbio_ptr,&error);
 
 		    /* loop over reading */
 		    while (error <= MB_ERROR_NO_ERROR)
 			{
-fprintf(stderr,"\nCalling mb_list_arrays before mb_read");
-mb_list_arrays(verbose,mbio_ptr,&error);
 			status = mb_read(verbose,mbio_ptr,&kind,
 				&rpings,time_i,&time_d,
 				&navlon,&navlat,
@@ -2754,8 +2728,6 @@ mb_list_arrays(verbose,mbio_ptr,&error);
 				beamflag,bath,amp,bathlon,bathlat,
 				ss,sslon,sslat,
 				comment,&error);
-fprintf(stderr,"\nCalling mb_list_arrays after mb_read");
-mb_list_arrays(verbose,mbio_ptr,&error);
 
 			/* time gaps are not a problem here */
 			if (error == MB_ERROR_TIME_GAP)
@@ -2901,8 +2873,6 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 				ndatafile++;
 				}
 			      }
-fprintf(stderr,"\nCalling mb_list_arrays c3a");
-mb_list_arrays(verbose,mbio_ptr,&error);
 			  }
 			else if (datatype == MBGRID_DATA_AMPLITUDE
 				&& error == MB_ERROR_NO_ERROR)
@@ -3144,11 +3114,7 @@ mb_list_arrays(verbose,mbio_ptr,&error);
 				}
 			      }
 			  }
-fprintf(stderr,"\nCalling mb_list_arrays c3b");
-mb_list_arrays(verbose,mbio_ptr,&error);
 			}
-fprintf(stderr,"\nCalling mb_list_arrays c3c");
-mb_list_arrays(verbose,mbio_ptr,&error);
 		    status = mb_close(verbose,&mbio_ptr,&error);
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
@@ -3435,8 +3401,6 @@ mb_list_arrays(verbose,mbio_ptr,&error);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
-fprintf(stderr,"\nCalling mb_list_arrays 6");
-mb_list_arrays(verbose,mbio_ptr,&error);
 
 		    /* allocate memory for reading data arrays */
 		    if (error == MB_ERROR_NO_ERROR)
@@ -3475,8 +3439,6 @@ mb_list_arrays(verbose,mbio_ptr,&error);
 			mb_memory_clear(verbose, &error);
 			exit(error);
 			}
-fprintf(stderr,"\nCalling mb_list_arrays 7");
-mb_list_arrays(verbose,mbio_ptr,&error);
 
 		    /* loop over reading */
 		    while (error <= MB_ERROR_NO_ERROR)
@@ -3779,8 +3741,6 @@ mb_list_arrays(verbose,mbio_ptr,&error);
 			      }
 			  }
 			}
-fprintf(stderr,"\nCalling mb_list_arrays c4");
-mb_list_arrays(verbose,mbio_ptr,&error);
 		    status = mb_close(verbose,&mbio_ptr,&error);
 		    status = MB_SUCCESS;
 		    error = MB_ERROR_NO_ERROR;
@@ -4183,33 +4143,6 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		    fprintf(outfp,"Applying spline interpolation to fill %d cells from data...\n",clip);
 		else if (clipmode == MBGRID_INTERP_ALL)
 		    fprintf(outfp,"Applying spline interpolation to fill all undefined cells in the grid...\n");
-
-zflag = 5.0e34;
-zclip = clipvalue;
-zmin = zclip;
-zmax = zclip;
-for (i=0;i<xdim;i++)
-for (j=0;j<ydim;j++)
-	{
-	kgrid = (i + offx)*gydim + (j + offy);
-	kint = i + j*gxdim;
-	kout = i*ydim + j;
-	if (sgrid[kint] < zflag)
-		output[kout] = (float) sgrid[kint];
-	else
-		output[kout] = outclipvalue;
-	}
-if (zmin == zclip)
-	zmin = 0.0;
-if (zmax == zclip)
-	zmax = 0.0;
-strcpy(ofile,fileroot);
-strcat(ofile,"_interpolation.grd");
-status = write_cdfgrd(verbose,ofile,output,xdim,ydim,
-	gbnd[0],gbnd[1],gbnd[2],gbnd[3],
-	zmin,zmax,dx,dy,
-	xlabel,ylabel,zlabel,title,projection_id, 
-	argc,argv,&error);
 
 		/* translate the interpolation into the grid array 
 		    filling only data gaps */
