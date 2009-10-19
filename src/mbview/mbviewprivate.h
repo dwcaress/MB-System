@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.14 2008-03-14 19:04:32 caress Exp $
+ *    $Id: mbviewprivate.h,v 5.14 2008/03/14 19:04:32 caress Exp $
  *
  *    Copyright (c) 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -17,7 +17,10 @@
  * Author:	D. W. Caress
  * Date:	September 24,  2003
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbviewprivate.h,v $
+ * Revision 5.14  2008/03/14 19:04:32  caress
+ * Fixed memory problems with route editing.
+ *
  * Revision 5.13  2007/10/08 16:32:08  caress
  * Code status as of 8 October 2007.
  *
@@ -99,6 +102,7 @@
 #define MBV_EVENTCHECKCOARSENESS	5
 
 #define	MBV_NUMBACKGROUNDCALC	500
+#define	MBV_BACKGROUND_NONE	0
 #define	MBV_BACKGROUND_ZSCALE	1
 #define	MBV_BACKGROUND_COLOR	2
 #define	MBV_BACKGROUND_FULLPLOT	3
@@ -182,7 +186,6 @@ struct mbview_world_struct
     int			plot_recursion;
     int			plot_done;
     int			plot_interrupt_allowed;
-    int			work_function_set;
     int			naction;
     int			actionsensitive[MBV_NUM_ACTIONS];
     Widget		pushButton_action[MBV_NUM_ACTIONS];
@@ -334,7 +337,10 @@ EXTERNAL int	mbv_verbose;
 EXTERNAL int	mbv_ninstance;
 EXTERNAL Widget	parent_widget;
 EXTERNAL XtAppContext	app_context;
+EXTERNAL int	work_function_enabled;
 EXTERNAL int	work_function_set;
+EXTERNAL unsigned long	timer_timeout_time;
+EXTERNAL int	timer_timeout_count;
 EXTERNAL int	timer_count;
 EXTERNAL struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
 EXTERNAL struct mbview_shared_struct shared;

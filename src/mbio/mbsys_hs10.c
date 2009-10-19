@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hs10.c	12/4/00
- *	$Id: mbsys_hs10.c,v 5.6 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbsys_hs10.c,v 5.6 2005/11/05 00:48:03 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  *
  * Author:	D. W. Caress
  * Date:	December 4, 2000
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_hs10.c,v $
+ * Revision 5.6  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.5  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -60,7 +63,7 @@
 int mbsys_hs10_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hs10.c,v 5.6 2005-11-05 00:48:03 caress Exp $";
+ static char res_id[]="$Id: mbsys_hs10.c,v 5.6 2005/11/05 00:48:03 caress Exp $";
 	char	*function_name = "mbsys_hs10_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

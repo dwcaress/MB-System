@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mem.h			3/7/2003
- *	$Id: mem.h,v 5.1 2003-04-17 21:12:03 caress Exp $
+ *	$Id: mem.h,v 5.1 2003/04/17 21:12:03 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Author:	Roger Davis (primary author)
  * Author:	D. W. Caress (MB-System revisions)
  * Date:	March 7, 2003 (MB-System revisions)
- * $Log: not supported by cvs2svn $
+ * $Log: mem.h,v $
+ * Revision 5.1  2003/04/17 21:12:03  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.0  2003/03/11 19:09:14  caress
  * Initial version.
  *

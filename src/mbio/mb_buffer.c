@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c,v 5.8 2009-03-02 18:51:52 caress Exp $
+ *    $Id: mb_buffer.c,v 5.8 2009/03/02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -38,7 +38,10 @@
  * Author:	D. W. Caress
  * Date:	February 25, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_buffer.c,v $
+ * Revision 5.8  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.7  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -185,7 +188,7 @@
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(int verbose, void **buff_ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 5.8 2009-03-02 18:51:52 caress Exp $";
+  static char rcs_id[]="$Id: mb_buffer.c,v 5.8 2009/03/02 18:51:52 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;

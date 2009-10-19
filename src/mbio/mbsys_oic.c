@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_oic.c	3/1/99
- *	$Id: mbsys_oic.c,v 5.10 2008-07-10 18:02:39 caress Exp $
+ *	$Id: mbsys_oic.c,v 5.10 2008/07/10 18:02:39 caress Exp $
  *
  *    Copyright (c) 1999-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Author:	D. W. Caress
  * Date:	March 1, 1999
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_oic.c,v $
+ * Revision 5.10  2008/07/10 18:02:39  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.7  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -78,7 +81,7 @@
 int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_oic.c,v 5.10 2008-07-10 18:02:39 caress Exp $";
+ static char res_id[]="$Id: mbsys_oic.c,v 5.10 2008/07/10 18:02:39 caress Exp $";
 	char	*function_name = "mbsys_oic_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

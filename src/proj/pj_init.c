@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_init.c,v 5.5 2008-09-29 04:56:21 caress Exp $
+ * $Id: pj_init.c,v 5.5 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Initialize projection object from string definition.  Includes
@@ -29,7 +29,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: pj_init.c,v $
+ * Revision 5.5  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.18  2006/10/12 21:04:39  fwarmerdam
  * Added experimental +lon_wrap argument to set a "center point" for
  * longitude wrapping of longitude values coming out of pj_transform().
@@ -73,7 +76,7 @@
 #include <string.h>
 #include <errno.h>
 
-PJ_CVSID("$Id: pj_init.c,v 5.5 2008-09-29 04:56:21 caress Exp $");
+PJ_CVSID("$Id: pj_init.c,v 5.5 2008/09/29 04:56:21 caress Exp $");
 
 extern FILE *pj_open_lib(char *, char *);
 

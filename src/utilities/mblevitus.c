@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c,v 5.3 2006-01-18 15:17:00 caress Exp $
+ *    $Id: mblevitus.c,v 5.3 2006/01/18 15:17:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -33,7 +33,10 @@
  * Date:	April 15, 1993
  * Rewrite:	March 26, 1997
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mblevitus.c,v $
+ * Revision 5.3  2006/01/18 15:17:00  caress
+ * Added stdlib.h include.
+ *
  * Revision 5.2  2003/04/17 21:18:57  caress
  * Release 5.0.beta30
  *
@@ -133,7 +136,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 5.3 2006-01-18 15:17:00 caress Exp $";
+	static char rcs_id[] = "$Id: mblevitus.c,v 5.3 2006/01/18 15:17:00 caress Exp $";
 	static char program_name[] = "MBLEVITUS";
 	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
 	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";

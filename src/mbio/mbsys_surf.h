@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.h	6/13/02
- *	$Id: mbsys_surf.h,v 5.9 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_surf.h,v 5.9 2005/11/05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,7 +27,10 @@
  * Author:	D. N. Chayes
  * Date:	June 13, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_surf.h,v $
+ * Revision 5.9  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.8  2003/11/24 21:09:09  caress
  * Implement Reinhard Holtkamp's suggested mods for better SURF format support.
  *

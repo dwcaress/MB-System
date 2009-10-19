@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.h	1/19/93
- *    $Id: mb_format.h,v 5.27 2008-12-05 17:32:52 caress Exp $
+ *    $Id: mb_format.h,v 5.27 2008/12/05 17:32:52 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -18,7 +18,10 @@
  * Author:	D. W. Caress
  * Date:	January 19, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_format.h,v $
+ * Revision 5.27  2008/12/05 17:32:52  caress
+ * Check-in mods 5 December 2008 including contributions from Gordon Keith.
+ *
  * Revision 5.26  2008/10/17 07:30:22  caress
  * Added format 26 supporting Hydrosweep DS data used by SOPAC.
  *
@@ -244,7 +247,7 @@
 #define MB_FORMAT_DEF
 
 /* define date of last format update */
-static char mb_format_updatedate[] = "$Date: 2008-12-05 17:32:52 $ $Revision: 5.27 $";
+static char mb_format_updatedate[] = "$Date: 2008/12/05 17:32:52 $ $Revision: 5.27 $";
 
 /* Supported swath sonar systems */
 #define	MB_SYS_NONE		0

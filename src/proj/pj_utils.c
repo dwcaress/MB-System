@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_utils.c,v 5.6 2008-09-29 04:56:21 caress Exp $
+ * $Id: pj_utils.c,v 5.6 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Some utility functions we don't want to bother putting in
@@ -28,7 +28,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: pj_utils.c,v $
+ * Revision 5.6  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.4  2005/07/06 14:04:09  fwarmerdam
  * Improved precision of es encoding for pj_latlong_from_proj() per:
  *   http://bugzilla.remotesensing.org/show_bug.cgi?id=881

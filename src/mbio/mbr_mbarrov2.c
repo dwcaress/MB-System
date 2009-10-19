@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarrov2.c	10/3/2006
- *	$Id: mbr_mbarrov2.c,v 5.0 2006-10-05 18:56:44 caress Exp $
+ *	$Id: mbr_mbarrov2.c,v 5.0 2006/10/05 18:56:44 caress Exp $
  *
  *    Copyright (c) 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  * Author:	D. W. Caress
  * Date:	May 20, 1999
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_mbarrov2.c,v $
+ * Revision 5.0  2006/10/05 18:56:44  caress
+ * New files for 5.1.0
+ *
  *
  *
  */
@@ -75,7 +78,7 @@ static char header[] = "RovName,DiveNumber,DateTime24,EpochSecs,Latitude,Longitu
 /*--------------------------------------------------------------------*/
 int mbr_register_mbarrov2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mbarrov2.c,v 5.0 2006-10-05 18:56:44 caress Exp $";
+	static char res_id[]="$Id: mbr_mbarrov2.c,v 5.0 2006/10/05 18:56:44 caress Exp $";
 	char	*function_name = "mbr_register_mbarrov2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -208,7 +211,7 @@ int mbr_info_mbarrov2(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mbarrov2.c,v 5.0 2006-10-05 18:56:44 caress Exp $";
+	static char res_id[]="$Id: mbr_mbarrov2.c,v 5.0 2006/10/05 18:56:44 caress Exp $";
 	char	*function_name = "mbr_info_mbarrov2";
 	int	status = MB_SUCCESS;
 
@@ -278,7 +281,7 @@ int mbr_info_mbarrov2(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mbarrov2(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_mbarrov2.c,v 5.0 2006-10-05 18:56:44 caress Exp $";
+ static char res_id[]="$Id: mbr_mbarrov2.c,v 5.0 2006/10/05 18:56:44 caress Exp $";
 	char	*function_name = "mbr_alm_mbarrov2";
 	int	status = MB_SUCCESS;
 	int	i;

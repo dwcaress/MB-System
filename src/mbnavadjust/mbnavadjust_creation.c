@@ -148,8 +148,8 @@ extern void do_view_showtruecrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showties(Widget, XtPointer, XtPointer);
 extern void do_make_grid(Widget, XtPointer, XtPointer);
 extern void do_modelplot_show(Widget, XtPointer, XtPointer);
-extern void do_action_fix(Widget, XtPointer, XtPointer);
-extern void do_action_unfix(Widget, XtPointer, XtPointer);
+extern void do_action_poornav(Widget, XtPointer, XtPointer);
+extern void do_action_goodnav(Widget, XtPointer, XtPointer);
 extern void do_action_autopick(Widget, XtPointer, XtPointer);
 extern void do_naverr_init(Widget, XtPointer, XtPointer);
 extern void do_action_analyzecrossings(Widget, XtPointer, XtPointer);
@@ -799,17 +799,17 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Fix File", 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set Poor Navigation", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_fix = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_fix",
+        pushButton_poornav = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_poornav",
             args, 
             ac);
-        XtManageChild(pushButton_fix);
+        XtManageChild(pushButton_poornav);
         
         /**
          * Free any memory allocated for resources.
@@ -817,23 +817,23 @@ CreatemainWindow(Widget parent)
         XmStringFree((XmString)tmp0);
     }
     
-    XtAddCallback(pushButton_fix, XmNactivateCallback, do_action_fix, (XtPointer)0);
+    XtAddCallback(pushButton_poornav, XmNactivateCallback, do_action_poornav, (XtPointer)0);
     
     ac = 0;
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Unfix File", 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set Good Navigation", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        pushButton_unfix = XmCreatePushButton(pulldownMenu_action,
-            (char *)"pushButton_unfix",
+        pushButton_goodnav = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_goodnav",
             args, 
             ac);
-        XtManageChild(pushButton_unfix);
+        XtManageChild(pushButton_goodnav);
         
         /**
          * Free any memory allocated for resources.
@@ -841,7 +841,7 @@ CreatemainWindow(Widget parent)
         XmStringFree((XmString)tmp0);
     }
     
-    XtAddCallback(pushButton_unfix, XmNactivateCallback, do_action_unfix, (XtPointer)0);
+    XtAddCallback(pushButton_goodnav, XmNactivateCallback, do_action_goodnav, (XtPointer)0);
     
     ac = 0;
     separator7 = XmCreateSeparator(pulldownMenu_action,

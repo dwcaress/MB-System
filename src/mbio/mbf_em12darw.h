@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12darw.h	1/20/93
- *	$Id: mbf_em12darw.h,v 5.3 2003-12-04 23:10:22 caress Exp $
+ *	$Id: mbf_em12darw.h,v 5.3 2003/12/04 23:10:22 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Authors:	D. W. Caress (L-DEO)
  *		R. B. Owens (University of Oxford)
  * Date:	January 20, 1994
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_em12darw.h,v $
+ * Revision 5.3  2003/12/04 23:10:22  caress
+ * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
+ *
  * Revision 5.2  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

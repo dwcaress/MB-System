@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.h	8/5/94
- *	$Id: mbsys_simrad.h,v 5.12 2009-03-02 18:51:52 caress Exp $
+ *	$Id: mbsys_simrad.h,v 5.12 2009/03/02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -31,7 +31,10 @@
  * Author:	D. W. Caress (L-DEO)
  * Date:	August 5, 1994
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_simrad.h,v $
+ * Revision 5.12  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.11  2008/03/01 09:14:03  caress
  * Some housekeeping changes.
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbabsorption.c	2/10/2008
- *    $Id: mbabsorption.c,v 5.0 2008-02-12 02:33:49 caress Exp $
+ *    $Id: mbabsorption.c,v 5.0 2008/02/12 02:33:49 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -91,7 +91,10 @@
  *              Note: as I was writing this code the Flyer was refloated
  *              and successfully backed off the reef.
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbabsorption.c,v $
+ * Revision 5.0  2008/02/12 02:33:49  caress
+ * Initial version.
+ *
  *
  */
 
@@ -108,7 +111,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbabsorption.c,v 5.0 2008-02-12 02:33:49 caress Exp $";
+	static char rcs_id[] = "$Id: mbabsorption.c,v 5.0 2008/02/12 02:33:49 caress Exp $";
 	static char program_name[] = "MBabsorption";
 	static char help_message[] = "MBabsorption calculates the absorption of sound in sea water\nin dB/km as a function of frequency, temperature, salinity, \nsound speed, pH, and depth.";
 	static char usage_message[] = "mbabsorption [-Csoundspeed -Ddepth -Ffrequency -Pph -Ssalinity -Ttemperature -V -H]";

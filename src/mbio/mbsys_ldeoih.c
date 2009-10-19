@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 5.17 2009-03-02 18:51:52 caress Exp $
+ *	$Id: mbsys_ldeoih.c,v 5.17 2009/03/02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 26, 1993
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_ldeoih.c,v $
+ * Revision 5.17  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.16  2008/09/27 03:27:10  caress
  * Working towards release 5.1.1beta24
  *
@@ -150,7 +153,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_ldeoih.h"
 
-static char res_id[]="$Id: mbsys_ldeoih.c,v 5.17 2009-03-02 18:51:52 caress Exp $";
+static char res_id[]="$Id: mbsys_ldeoih.c,v 5.17 2009/03/02 18:51:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

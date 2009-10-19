@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_open_lib.c,v 5.7 2008-09-29 04:56:21 caress Exp $
+ * $Id: pj_open_lib.c,v 5.7 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of pj_open_lib(), and pj_set_finder().  These
@@ -30,7 +30,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: pj_open_lib.c,v $
+ * Revision 5.7  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.6  2004/09/16 15:14:01  fwarmerdam
  * * src/pj_open_lib.c: added pj_set_searchpath() provided by Eric Miller.
  *
@@ -45,7 +48,7 @@
 #include <string.h>
 #include <errno.h>
 
-PJ_CVSID("$Id: pj_open_lib.c,v 5.7 2008-09-29 04:56:21 caress Exp $");
+PJ_CVSID("$Id: pj_open_lib.c,v 5.7 2008/09/29 04:56:21 caress Exp $");
 
 static const char *(*pj_finder)(const char *) = NULL;
 static int path_count = 0;

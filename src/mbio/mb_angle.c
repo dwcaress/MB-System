@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 5.9 2009-02-06 19:12:43 caress Exp $
+ *    $Id: mb_angle.c,v 5.9 2009/02/06 19:12:43 caress Exp $
  *
  *    Copyright (c) 1998-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -179,7 +179,10 @@
  * Author:	D. W. Caress
  * Date:	December 30, 1998
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_angle.c,v $
+ * Revision 5.9  2009/02/06 19:12:43  caress
+ * Fixed description in mb_angle.c and angle extraction in mb_simrad3.c
+ *
  * Revision 5.8  2008/05/16 22:56:24  caress
  * Release 5.1.1beta18.
  *

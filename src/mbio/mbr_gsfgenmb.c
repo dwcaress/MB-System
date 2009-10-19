@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
- *	$Id: mbr_gsfgenmb.c,v 5.10 2009-03-13 07:05:58 caress Exp $
+ *	$Id: mbr_gsfgenmb.c,v 5.10 2009/03/13 07:05:58 caress Exp $
  *
  *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 27, 1998
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_gsfgenmb.c,v $
+ * Revision 5.10  2009/03/13 07:05:58  caress
+ * Release 5.1.2beta02
+ *
  * Revision 5.9  2008/01/14 18:08:17  caress
  * Added debug message.
  *
@@ -122,7 +125,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.10 2009-03-13 07:05:58 caress Exp $";
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.10 2009/03/13 07:05:58 caress Exp $";
 	char	*function_name = "mbr_register_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -255,7 +258,7 @@ int mbr_info_gsfgenmb(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.10 2009-03-13 07:05:58 caress Exp $";
+	static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.10 2009/03/13 07:05:58 caress Exp $";
 	char	*function_name = "mbr_info_gsfgenmb";
 	int	status = MB_SUCCESS;
 
@@ -325,7 +328,7 @@ int mbr_info_gsfgenmb(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.10 2009-03-13 07:05:58 caress Exp $";
+ static char res_id[]="$Id: mbr_gsfgenmb.c,v 5.10 2009/03/13 07:05:58 caress Exp $";
 	char	*function_name = "mbr_alm_gsfgenmb";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/23/01
-#    $Id: mbm_grdcut.perl,v 5.6 2006-11-26 09:42:01 caress Exp $
+#    $Id: mbm_grdcut.perl,v 5.6 2006/11/26 09:42:01 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -40,10 +40,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the Kohala coast of Hawaii)
 #
 # Version:
-#   $Id: mbm_grdcut.perl,v 5.6 2006-11-26 09:42:01 caress Exp $
+#   $Id: mbm_grdcut.perl,v 5.6 2006/11/26 09:42:01 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_grdcut.perl,v $
+#   Revision 5.6  2006/11/26 09:42:01  caress
+#   Making distribution 5.1.0.
+#
 #   Revision 5.5  2006/09/11 18:55:52  caress
 #   Changes during Western Flyer and Thomas Thompson cruises, August-September
 #   2006.

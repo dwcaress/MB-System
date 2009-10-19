@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.40 2009-03-08 09:21:00 caress Exp $
+ *    $Id: mb_define.h,v 5.40 2009/03/08 09:21:00 caress Exp $
  *
- *    Copyright (c) 1996-2008 by
+ *    Copyright (c) 1996-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	April 21, 1996
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_define.h,v $
+ * Revision 5.40  2009/03/08 09:21:00  caress
+ * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
+ *
  * Revision 5.39  2009/03/02 18:51:52  caress
  * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
  *
@@ -429,6 +432,8 @@ int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error);
 int mb_pingnumber(int verbose, void *mbio_ptr, 
 		int *pingnumber, int *error);
+int mb_segynumber(int verbose, void *mbio_ptr, 
+		int *line, int *shot, int *cdp, int *error);
 int mb_beamwidths(int verbose, void *mbio_ptr, 
 		double *beamwidth_xtrack, double *beamwidth_ltrack, int *error);
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
@@ -525,6 +530,15 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		void *segyheader_ptr, 
 		float *segydata, 
 		int *error);
+int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, int *nctd, double *time_d, 
+		double *conductivity, double *temperature, 
+		double *depth, double *salinity, double *soundspeed, int *error);
+int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, int *nsensor, double *time_d, 
+		double *sensor1, double *sensor2, double *sensor3, 
+		double *sensor4, double *sensor5, double *sensor6, 
+		double *sensor7, double *sensor8, int *error);
 int mb_copyrecord(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);
 		
@@ -628,12 +642,17 @@ int mb_navint_interp(int verbose, void *mbio_ptr,
 int mb_attint_add(int verbose, void *mbio_ptr, 
 		double time_d, double heave, 
 		double roll, double pitch, int *error);
+int mb_attint_nadd(int verbose, void *mbio_ptr, 
+		int nsamples, double *time_d, double *heave, 
+		double *roll, double *pitch, int *error);
 int mb_attint_interp(int verbose, void *mbio_ptr, 
 		double time_d, double *heave, 
 		double *roll, double *pitch, 
 		int *error);
 int mb_hedint_add(int verbose, void *mbio_ptr, 
 		double time_d, double heading, int *error);
+int mb_hedint_nadd(int verbose, void *mbio_ptr, 
+		int nsamples, double *time_d, double *heading, int *error);
 int mb_hedint_interp(int verbose, void *mbio_ptr, 
 		double time_d, double *heading, 
 		int *error);

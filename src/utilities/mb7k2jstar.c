@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c,v 5.9 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mb7k2jstar.c,v 5.9 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2005, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	May 19, 2005
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb7k2jstar.c,v $
+ * Revision 5.9  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.8  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -86,7 +89,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.9 2008-09-13 06:08:09 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.9 2008/09/13 06:08:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

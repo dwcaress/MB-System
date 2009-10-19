@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h,v 5.12 2007-07-03 17:28:08 caress Exp $
+ *	$Id: mbsys_xse.h,v 5.12 2007/07/03 17:28:08 caress Exp $
  *
  *    Copyright (c) 2000, 2001, 2002, 2003 by 
  *    D. W. Caress (caress@mbari.org)
@@ -27,7 +27,10 @@
  * Date:	August 1,  1999
  * Additional Authors:	P. A. Cohen and S. Dzurenko
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_xse.h,v $
+ * Revision 5.12  2007/07/03 17:28:08  caress
+ * Fixes to XSE format.
+ *
  * Revision 5.11  2007/06/18 01:19:48  caress
  * Changes as of 17 June 2007.
  *

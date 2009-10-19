@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb.c	2/26/93
- *	$Id: mbsys_sb.c,v 5.7 2009-03-08 09:21:00 caress Exp $
+ *	$Id: mbsys_sb.c,v 5.7 2009/03/08 09:21:00 caress Exp $
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -28,7 +28,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 26, 1993
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_sb.c,v $
+ * Revision 5.7  2009/03/08 09:21:00  caress
+ * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
+ *
  * Revision 5.6  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -136,7 +139,7 @@
 int mbsys_sb_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_sb.c,v 5.7 2009-03-08 09:21:00 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb.c,v 5.7 2009/03/08 09:21:00 caress Exp $";
 	char	*function_name = "mbsys_sb_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.c	3/1/99
- *	$Id: mbsys_hdcs.c,v 5.13 2008-09-13 06:08:09 caress Exp $
+ *	$Id: mbsys_hdcs.c,v 5.13 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	March 16, 1999
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_hdcs.c,v $
+ * Revision 5.13  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.12  2008/07/10 18:02:39  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -89,7 +92,7 @@
 int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_hdcs.c,v 5.13 2008-09-13 06:08:09 caress Exp $";
+ static char res_id[]="$Id: mbsys_hdcs.c,v 5.13 2008/09/13 06:08:09 caress Exp $";
 	char	*function_name = "mbsys_hdcs_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

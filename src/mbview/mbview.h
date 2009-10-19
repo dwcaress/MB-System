@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h,v 5.23 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mbview.h,v 5.23 2008/11/16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -17,7 +17,10 @@
  * Author:	D. W. Caress
  * Date:	October 10,  2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbview.h,v $
+ * Revision 5.23  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.22  2008/09/11 20:17:33  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -319,6 +322,7 @@ struct mbview_navpoint_struct {
 	struct mbview_point_struct pointport;
 	struct mbview_point_struct pointcntr;
 	struct mbview_point_struct pointstbd;
+	int	line;
 	int	shot;
 	int	cdp;
 	};
@@ -333,6 +337,7 @@ struct mbview_navpointw_struct {
 	struct mbview_pointw_struct pointport;
 	struct mbview_pointw_struct pointcntr;
 	struct mbview_pointw_struct pointstbd;
+	int	line;
 	int	shot;
 	int	cdp;
 	};
@@ -433,6 +438,7 @@ struct mbview_nav_struct {
 	mb_path	pathprocessed;
 	int	format;
 	int	swathbounds;
+	int	line;
 	int	shot;
 	int	cdp;
 	int	decimation;
@@ -945,8 +951,9 @@ int mbview_allocnavarrays(int verbose,
 			double	**navportlat,
 			double	**navstbdlon,
 			double	**navstbdlat,
-			int	**cdp,
+			int	**line,
 			int	**shot,
+			int	**cdp,
 			int *error);
 int mbview_freenavarrays(int verbose,
 			double	**time_d,
@@ -959,8 +966,9 @@ int mbview_freenavarrays(int verbose,
 			double	**navportlat,
 			double	**navstbdlon,
 			double	**navstbdlat,
-			int	**cdp,
+			int	**line,
 			int	**shot,
+			int	**cdp,
 			int *error);
 int mbview_addnav(int verbose, int instance,
 			int	npoint,
@@ -974,8 +982,9 @@ int mbview_addnav(int verbose, int instance,
 			double	*navportlat,
 			double	*navstbdlon,
 			double	*navstbdlat,
-			int	*cdp,
+			int	*line,
 			int	*shot,
+			int	*cdp,
 			int	navcolor,
 			int	navsize,
 			mb_path	navname,
@@ -984,6 +993,7 @@ int mbview_addnav(int verbose, int instance,
 			mb_path	navpathprocessed,
 			int	navformat,
 			int	navswathbounds,
+			int	navline,
 			int	navshot,
 			int	navcdp,
 			int	decimation,

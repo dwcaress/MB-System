@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.28 2009-03-02 18:59:05 caress Exp $
+#    $Id: mbm_plot.perl,v 5.28 2009/03/02 18:59:05 caress Exp $
 #
 #    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@mbari.org)
@@ -74,10 +74,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.28 2009-03-02 18:59:05 caress Exp $
+#   $Id: mbm_plot.perl,v 5.28 2009/03/02 18:59:05 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_plot.perl,v $
+#   Revision 5.28  2009/03/02 18:59:05  caress
+#   Moving towards 5.1.2beta1.
+#
 #   Revision 5.27  2008/09/11 20:06:45  caress
 #   Checking in updates made during cruise AT15-36.
 #

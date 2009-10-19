@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_ping.c	2/3/93
- *    $Id: mb_read_ping.c,v 5.5 2005-11-05 00:48:03 caress Exp $
+ *    $Id: mb_read_ping.c,v 5.5 2005/11/05 00:48:03 caress Exp $
 
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	February 3, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_read_ping.c,v $
+ * Revision 5.5  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.4  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -150,7 +153,7 @@
 /*--------------------------------------------------------------------*/
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *error)
 {
-  static char rcs_id[]="$Id: mb_read_ping.c,v 5.5 2005-11-05 00:48:03 caress Exp $";
+  static char rcs_id[]="$Id: mb_read_ping.c,v 5.5 2005/11/05 00:48:03 caress Exp $";
 	char	*function_name = "mb_read_ping";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_navnetcdf.c	4/11/2002
- *	$Id: mbsys_navnetcdf.c,v 5.8 2008-09-13 06:08:09 caress Exp $
+ *	$Id: mbsys_navnetcdf.c,v 5.8 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	April 11, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_navnetcdf.c,v $
+ * Revision 5.8  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.7  2008/07/10 18:02:39  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -55,7 +58,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_navnetcdf.h"
 
-static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.8 2008-09-13 06:08:09 caress Exp $";
+static char res_id[]="$Id: mbsys_navnetcdf.c,v 5.8 2008/09/13 06:08:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_navnetcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

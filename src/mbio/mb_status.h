@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbio_status.h	2/1/93
- *    $Id: mb_status.h,v 5.99 2009-03-13 07:05:58 caress Exp $
+ *    $Id: mb_status.h,v 5.99 2009/03/13 07:05:58 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	January 19, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_status.h,v $
+ * Revision 5.99  2009/03/13 07:05:58  caress
+ * Release 5.1.2beta02
+ *
  * Revision 5.98  2009/03/09 15:11:31  caress
  * Release 5.1.2beta01
  *
@@ -409,8 +412,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.2beta02"
-#define	MB_BUILD_DATE	"13 March 2009"
+#define	MB_VERSION	"5.1.2beta11"
+#define	MB_BUILD_DATE	"26 August 2009"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
@@ -471,7 +474,7 @@
 #define	MB_FAILURE			0
 
 /* MBIO minimum and maximum error values */
-#define	MB_ERROR_MIN			-22
+#define	MB_ERROR_MIN			-23
 #define	MB_ERROR_MAX			15
 
 /* MBIO function fatal error values */
@@ -515,6 +518,7 @@
 #define	MB_ERROR_MISSING_NAVATTITUDE	-20
 #define	MB_ERROR_NOT_ENOUGH_DATA	-21
 #define	MB_ERROR_FILE_NOT_FOUND		-22
+#define	MB_ERROR_FILE_LOCKED		-23
 
 /* MBIO problem values */
 #define	MB_PROBLEM_MAX			6
@@ -548,7 +552,7 @@ static char *fatal_error_msg[] =
 	"Invalid control parameter specified by user",
 	"Invalid buffer id",
 	"Invalid system id - this should not happen!", 
-	"These data file is not in the specified format!"
+	"This data file is not in the specified format!"
 	};
 static char *nonfatal_error_msg[] =
 	{
@@ -575,6 +579,7 @@ static char *nonfatal_error_msg[] =
 	"Missing navigation and/or attitude data", 
 	"Not enough data available to perform operation", 
 	"Requested file not found", 
+	"Requested file locked", 
 	};
 static char *unknown_error_msg[] =
 	{
@@ -659,6 +664,7 @@ static char *notice_msg[] =
 	"MB_ERROR_MISSING_NAVATTITUDE (ID=-20): Attitude data are missing for this ping",
 	"MB_ERROR_NOT_ENOUGH_DATA (ID=-21): Not enough data to perform spline interpolation",
 	"MB_ERROR_FILE_NOT_FOUND (ID=-22): Required file cannot be found",
+	"MB_ERROR_FILE_LOCKED (ID=-23): Required file locked",
 	
 	/* problem notices */
 	"DATA PROBLEM (ID=1): No survey data found",

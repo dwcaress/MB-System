@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1v2001.c	3/6/2003
- *	$Id: mbsys_mr1v2001.c,v 5.2 2006-01-24 19:11:17 caress Exp $
+ *	$Id: mbsys_mr1v2001.c,v 5.2 2006/01/24 19:11:17 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	March 6, 2003
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_mr1v2001.c,v $
+ * Revision 5.2  2006/01/24 19:11:17  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.1  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -52,7 +55,7 @@
 int mbsys_mr1v2001_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_mr1v2001.c,v 5.2 2006-01-24 19:11:17 caress Exp $";
+ static char res_id[]="$Id: mbsys_mr1v2001.c,v 5.2 2006/01/24 19:11:17 caress Exp $";
 	char	*function_name = "mbsys_mr1v2001_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

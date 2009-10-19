@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prvr2.c	3/6/2003
- *	$Id: mbr_mr1prvr2.c,v 5.4 2008-07-10 06:43:41 caress Exp $
+ *	$Id: mbr_mr1prvr2.c,v 5.4 2008/07/10 06:43:41 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  * Author:	D. W. Caress
  * Date:	March 6, 2003
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_mr1prvr2.c,v $
+ * Revision 5.4  2008/07/10 06:43:41  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.3  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -85,7 +88,7 @@ int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.4 2008-07-10 06:43:41 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.4 2008/07/10 06:43:41 caress Exp $";
 	char	*function_name = "mbr_register_mr1prvr2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -218,7 +221,7 @@ int mbr_info_mr1prvr2(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.4 2008-07-10 06:43:41 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.4 2008/07/10 06:43:41 caress Exp $";
 	char	*function_name = "mbr_info_mr1prvr2";
 	int	status = MB_SUCCESS;
 
@@ -288,7 +291,7 @@ int mbr_info_mr1prvr2(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.4 2008-07-10 06:43:41 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1prvr2.c,v 5.4 2008/07/10 06:43:41 caress Exp $";
 	char	*function_name = "mbr_alm_mr1prvr2";
 	int	status = MB_SUCCESS;
 	int	i;

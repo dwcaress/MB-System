@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_datums.c,v 5.6 2008-09-29 04:56:21 caress Exp $
+ * $Id: pj_datums.c,v 5.6 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Built in datum list.
@@ -27,7 +27,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: pj_datums.c,v $
+ * Revision 5.6  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.12  2006/04/21 02:46:10  fwarmerdam
  * fixed bogota direction
  *

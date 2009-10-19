@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h,v 5.27 2009-03-02 18:51:52 caress Exp $
+ *    $Id: mb_io.h,v 5.27 2009/03/02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Author:	D. W. Caress
  * Date:	January 19, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_io.h,v $
+ * Revision 5.27  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.26  2008/09/20 00:57:40  caress
  * Release 5.1.1beta23
  *
@@ -467,6 +470,8 @@ struct mb_io_struct
 		int *kind, int *nbath, int *namp, int *nss, int *error);
 	int (*mb_io_pingnumber)(int verbose, void *mbio_ptr, 
 		int *pingnumber, int *error);
+	int (*mb_io_segynumber)(int verbose, void *mbio_ptr, 
+		int *line, int *shot, int *cdp, int *error);
 	int (*mb_io_sidescantype)(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *ss_type, int *error);
 	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr, 
@@ -564,6 +569,11 @@ struct mb_io_struct
 		int *kind, int *nctd, double *time_d, 
 		double *conductivity, double *temperature, 
 		double *depth, double *salinity, double *soundspeed, int *error);
+	int (*mb_io_ancilliarysensor)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, int *nsensor, double *time_d, 
+		double *sensor1, double *sensor2, double *sensor3, 
+		double *sensor4, double *sensor5, double *sensor6, 
+		double *sensor7, double *sensor8, int *error);
 	int (*mb_io_copyrecord)(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
- *    $Id: mbgrdviz_callbacks.c,v 5.31 2008-10-17 07:52:44 caress Exp $
+ *    $Id: mbgrdviz_callbacks.c,v 5.31 2008/10/17 07:52:44 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -122,7 +122,7 @@ static int	realtime_update = 5;
 static int	realtime_icon = MBGRDVIZ_REALTIME_ICON_SHIP;
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.31 2008-10-17 07:52:44 caress Exp $";
+static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.31 2008/10/17 07:52:44 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] = "MBgrdviz is an interactive 2D/3D visualization tool for GMT grid files.";
 static char usage_message[] = "mbgrdviz [-H -T -V]";
@@ -1094,6 +1094,8 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
         Arg      args[256];
     XmFileSelectionBoxCallbackStruct *acs=(XmFileSelectionBoxCallbackStruct*)call_data;
 
+	acs=(XmFileSelectionBoxCallbackStruct*)call_data;
+	
     	/* figure out what kind of file is to be opened */
 
 	ac = 0;
@@ -3084,12 +3086,14 @@ int do_mbgrdviz_readnav(int instance, char *swathfile,
 	double	*navportlat = NULL;
 	double	*navstbdlon = NULL;
 	double	*navstbdlat = NULL;
-	int	*navcdp = NULL;
+	int	*navline = NULL;
 	int	*navshot = NULL;
+	int	*navcdp = NULL;
 	int	color;
 	int	size;
 	mb_path	name;
 	int	swathbounds;
+	int	line;
 	int	shot;
 	int	cdp;
 	int	decimation;
@@ -3122,7 +3126,8 @@ int do_mbgrdviz_readnav(int instance, char *swathfile,
 		strcpy(name,swathfile);
 
 	swathbounds = MB_NO;
-	shot = MB_NO;
+	line = MB_NO;
+	shot = MB_YES;
 	cdp = MB_NO;
 	npoint = 0;
 	npointread = 0;
@@ -3223,6 +3228,13 @@ int do_mbgrdviz_readnav(int instance, char *swathfile,
 		/* set swathbounds true if nore than one beam is expected */
 		if (beams_bath > 1)
 			swathbounds = MB_YES;
+			
+		/* enable line and cdp values if segy data */
+		if (format == MBF_SEGYSEGY)
+			{
+			line = MB_YES;
+			cdp = MB_YES;
+			}
 		
 		/* loop over successful reads and nonfatal errors 
 		   until a fatal error is encountered */
@@ -3303,10 +3315,13 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 									(void **)&navstbdlat,error);
 					if (status == MB_SUCCESS)
 						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(int),
-									(void **)&navcdp,error);
+									(void **)&navline,error);
 					if (status == MB_SUCCESS)
 						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(int),
 									(void **)&navshot,error);
+					if (status == MB_SUCCESS)
+						status = mb_reallocd(verbose, __FILE__, __LINE__, npointalloc*sizeof(int),
+									(void **)&navcdp,error);
 
 					/* if error initializing memory then don't read the file */
 					if (*error != MB_ERROR_NO_ERROR)
@@ -3399,8 +3414,8 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 				navheading[npoint] = heading;
 				navspeed[npoint] = speed;				
 				
-				navcdp[npoint] = 0;
-				navshot[npoint] = 0;
+				mb_segynumber(verbose, mbio_ptr, &(navline[npoint]), &(navshot[npoint]), 
+							&(navcdp[npoint]), error);
 				
 				/* increment npoint */
 				npoint++;
@@ -3427,8 +3442,9 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 				navportlat,
 				navstbdlon,
 				navstbdlat,
-				navcdp,
+				navline,
 				navshot,
+				navcdp,
 				color,
 				size,
 				name,
@@ -3437,6 +3453,7 @@ npoint,time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],lon
 				pathprocessed,
 				formatorg,
 				swathbounds,
+				line,
 				shot,
 				cdp,
 				decimation,
@@ -3465,8 +3482,9 @@ fprintf(stderr,"    Skipping %s because of 0 nav points read\n",name);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&navportlat, error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&navstbdlon, error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&navstbdlat, error);
-	mb_freed(verbose, __FILE__, __LINE__, (void **)&navcdp, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navline, error);
 	mb_freed(verbose, __FILE__, __LINE__, (void **)&navshot, error);
+	mb_freed(verbose, __FILE__, __LINE__, (void **)&navcdp, error);
 	}
 			
 }
@@ -3496,7 +3514,7 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 	int	projectionid;
         char    projectionname[MB_PATH_MAXLINE];
 	int	off;
-	int	pad[4];
+	GMT_LONG	pad[4];
 	int	nscan;
 	int	utmzone;
         float   NaN;
@@ -3704,7 +3722,11 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 	/* Determine the wesn to be used to read the grdfile */
 	off = (header.node_offset) ? 0 : 1;
 	GMT_map_setup (*xmin, *xmax, *ymin, *ymax);
+#ifdef GMT_MINOR_VERSION
+	GMT_grd_setregion (&header, xmin,  xmax, ymin, ymax, BCR_BILINEAR);
+#else
 	GMT_grd_setregion (&header, xmin,  xmax, ymin, ymax);
+#endif
 
 	/* read the grid */
 	pad[0] = 0;
@@ -3925,7 +3947,7 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
    
     	/* get source mbview instance */
 	instance_source = (int) client_data;
-fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);
+/*fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);*/
 
 	/* get new instance number */
 	if (instance_source >= 0 && instance_source < MBV_MAX_WINDOWS)
@@ -4127,13 +4149,13 @@ fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);
 		/* open up mbview window */
 		if (status == MB_SUCCESS)
 			{
-fprintf(stderr,"about to open mbview instance:%d\n",instance);
+/*fprintf(stderr,"about to open mbview instance:%d\n",instance);*/
 			status = mbview_open(verbose, instance, &error);
 			if (status == MB_SUCCESS)
 				mbview_id[instance] = MB_YES;
 			else
 				mbview_id[instance] = MB_NO;
-fprintf(stderr,"done opening mbview instance:%d\n",instance);
+/*fprintf(stderr,"done opening mbview instance:%d\n",instance);*/
 
 			/* add action button */
 			if (status == MB_SUCCESS)
@@ -4427,6 +4449,8 @@ fprintf(stderr,"Called do_mbgrdviz_make_survey instance:%d\n", instance);
 		XtSetValues(spinText_arearoute_linespacing, args, ac);
 		XtSetValues(spinBox_arearoute_crosslinesfirstlast, args, ac);
 		XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
+		XtSetValues(spinBox_arearoute_interleaving, args, ac);
+		XtSetValues(spinText_arearoute_interleaving, args, ac);
 		XtSetValues(label_arearoute_info, args, ac);
 		XtSetValues(spinBox_arearoute_linecontrol, args, ac);
 		XtSetValues(spinText_arearoute_linecontrol, args, ac);
@@ -4456,6 +4480,10 @@ fprintf(stderr,"Called do_mbgrdviz_make_survey instance:%d\n", instance);
 		ac = 0;
 		XtSetArg(args[ac], XmNposition, survey_crosslines_last); ac++;
 		XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNposition, survey_interleaving); ac++;
+		XtSetValues(spinText_arearoute_interleaving, args, ac);
 
 		ac = 0;
 		XtSetArg(args[ac], XmNposition, survey_color); ac++;
@@ -5347,6 +5375,10 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_parameterchange instance:%d\n", ins
 		XtGetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
 
 		ac = 0;
+		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_interleaving); ac++;
+		XtGetValues(spinText_arearoute_interleaving, args, ac);
+
+		ac = 0;
 		XtSetArg(args[ac], XmNposition, (XtPointer) &survey_color); ac++;
 		XtGetValues(spinText_arearoute_color, args, ac);
 
@@ -5446,6 +5478,10 @@ fprintf(stderr,"Called do_mbgrdviz_arearoute_recalc instance:%d\n", instance);
 		ac = 0;
 		XtSetArg(args[ac], XmNsensitive, True); ac++; 
 		XtSetValues(spinText_arearoute_crosslinesfirstlast, args, ac);
+
+		ac = 0;
+		XtSetArg(args[ac], XmNsensitive, True); ac++; 
+		XtSetValues(spinText_arearoute_interleaving, args, ac);
 
 		ac = 0;
 		XtSetArg(args[ac], XmNsensitive, True); ac++; 

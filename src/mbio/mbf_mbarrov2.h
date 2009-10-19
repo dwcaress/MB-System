@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbarrov2.h	10/3/2006
- *	$Id: mbf_mbarrov2.h,v 5.0 2006-10-05 18:56:44 caress Exp $
+ *	$Id: mbf_mbarrov2.h,v 5.0 2006/10/05 18:56:44 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	October 3, 2006
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_mbarrov2.h,v $
+ * Revision 5.0  2006/10/05 18:56:44  caress
+ * New files for 5.1.0
+ *
  */
 /*
  * Notes on the MBF_MBARROV2 data format:

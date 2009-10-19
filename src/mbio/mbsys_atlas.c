@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_atlas.c	3.00	6/25/01
- *	$Id: mbsys_atlas.c,v 5.11 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbsys_atlas.c,v 5.11 2005/11/05 00:48:05 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,7 +28,10 @@
  * Author:	D. N. Chayes
  * Date:	June 25, 2001
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_atlas.c,v $
+ * Revision 5.11  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.10  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -83,7 +86,7 @@
 int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_atlas.c,v 5.11 2005-11-05 00:48:05 caress Exp $";
+ static char res_id[]="$Id: mbsys_atlas.c,v 5.11 2005/11/05 00:48:05 caress Exp $";
 	char	*function_name = "mbsys_atlas_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

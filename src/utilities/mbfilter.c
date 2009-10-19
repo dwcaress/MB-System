@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 5.9 2009-03-02 18:54:40 caress Exp $
+ *    $Id: mbfilter.c,v 5.9 2009/03/02 18:54:40 caress Exp $
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -31,7 +31,10 @@
  * Author:	D. W. Caress
  * Date:	January 16, 1995
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbfilter.c,v $
+ * Revision 5.9  2009/03/02 18:54:40  caress
+ * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
+ *
  * Revision 5.8  2008/09/13 06:08:09  caress
  * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
  *
@@ -249,7 +252,7 @@ int mbcopy_any_to_mbldeoih(int verbose, int system,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 5.9 2009-03-02 18:54:40 caress Exp $";
+	static char rcs_id[] = "$Id: mbfilter.c,v 5.9 2009/03/02 18:54:40 caress Exp $";
 	static char program_name[] = "MBFILTER";
 	static char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\

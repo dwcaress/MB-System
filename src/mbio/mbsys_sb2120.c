@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2120.c	3/27/2000
- *	$Id: mbsys_sb2120.c,v 5.5 2009-03-08 09:21:00 caress Exp $
+ *	$Id: mbsys_sb2120.c,v 5.5 2009/03/08 09:21:00 caress Exp $
  *
  *    Copyright (c) 2000-2009 by 
  *    D. W. Caress (caress@mbari.org)
@@ -27,7 +27,10 @@
  * Author:	D. W. Caress
  * Date:	December 7,  2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_sb2120.c,v $
+ * Revision 5.5  2009/03/08 09:21:00  caress
+ * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
+ *
  * Revision 5.4  2009/03/02 18:51:52  caress
  * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
  *
@@ -66,7 +69,7 @@ char	*mbio_ptr;
 char	**store_ptr;
 int	*error;
 {
- static char res_id[]="$Id: mbsys_sb2120.c,v 5.5 2009-03-08 09:21:00 caress Exp $";
+ static char res_id[]="$Id: mbsys_sb2120.c,v 5.5 2009/03/08 09:21:00 caress Exp $";
 	char	*function_name = "mbsys_sb2120_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

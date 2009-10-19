@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.32 2009-03-13 07:05:58 caress Exp $
+#	$Id: Makefile.template,v 5.32 2009/03/13 07:05:58 caress Exp $
 #
 #     Copyright (c) 1993-2009 by
 #     David W. Caress (caress@mbari.org)
@@ -15,7 +15,10 @@
 # Author:	D. W. Caress
 # Date:		May 23, 1994
 #
-# $Log: not supported by cvs2svn $
+# $Log: Makefile.template,v $
+# Revision 5.32  2009/03/13 07:05:58  caress
+# Release 5.1.2beta02
+#
 # Revision 5.31  2009/03/02 18:54:40  caress
 # Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
 #
@@ -252,7 +255,9 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbdumpesf\
 	$(BINDIR)/mbtime \
 	$(BINDIR)/mbctdlist \
-	$(BINDIR)/mbfilter
+	$(BINDIR)/mbfilter \
+	$(BINDIR)/mbroutetime \
+	$(BINDIR)/mbsm20002gsf
 
 ### make clean removes the object files
 clean:
@@ -376,6 +381,12 @@ $(BINDIR)/mbctdlist:	mbctdlist.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJ
 $(BINDIR)/mbfilter:	mbfilter.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbfilter.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbfilter
+$(BINDIR)/mbroutetime:	mbroutetime.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbroutetime.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mbroutetime
+$(BINDIR)/mbsm20002gsf:	mbsm20002gsf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbsm20002gsf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mbsm20002gsf
 
 ### compile the source files
 mbformat.o:	mbformat.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -453,3 +464,7 @@ mbctdlist.o:	mbctdlist.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/m
 	$(CC) -c $(CFLAGS) mbctdlist.c
 mbfilter.o:	mbfilter.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbfilter.c
+mbroutetime.o:	mbroutetime.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbroutetime.c
+mbsm20002gsf.o:	mbsm20002gsf.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbsm20002gsf.c

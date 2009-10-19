@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit_callbacks.c	3/28/97
- *    $Id: mbedit_callbacks.c,v 5.22 2009-03-13 07:05:58 caress Exp $
+ *    $Id: mbedit_callbacks.c,v 5.22 2009/03/13 07:05:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  * Date:	April 8, 1993
  * Date:	March 28, 1997  GUI recast
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbedit_callbacks.c,v $
+ * Revision 5.22  2009/03/13 07:05:58  caress
+ * Release 5.1.2beta02
+ *
  * Revision 5.21  2008/07/19 07:28:06  caress
  * Fixed scaling for swath widths less than 6 m.
  *

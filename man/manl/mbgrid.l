@@ -652,7 +652,7 @@ will be filled in through spine interpolation even in the areas
 not covered by data. The output looks like:
  
  Program MBGRID
- Version $Id: mbgrid.l,v 5.15 2008-12-05 17:32:51 caress Exp $
+ Version $Id: mbgrid.l,v 5.15 2008/12/05 17:32:51 caress Exp $
  MB-system Version 4.5
  
  MBGRID Parameters:

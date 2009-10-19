@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.22 2008-07-10 18:16:33 caress Exp $
+ *    $Id: mbbackangle.c,v 5.22 2008/07/10 18:16:33 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003, 2004m 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  * Author:	D. W. Caress
  * Date:	January 6, 1995
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbbackangle.c,v $
+ * Revision 5.22  2008/07/10 18:16:33  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.20  2008/01/14 18:25:52  caress
  * Fixed bug in handling pixel acrosstrack distances.
  *
@@ -209,7 +212,7 @@ int output_model(int verbose, FILE *tfp,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.22 2008-07-10 18:16:33 caress Exp $";
+static char rcs_id[] = "$Id: mbbackangle.c,v 5.22 2008/07/10 18:16:33 caress Exp $";
 static char program_name[] = "mbbackangle";
 static int	pargc;
 static char	**pargv;
@@ -2160,8 +2163,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	status = MB_SUCCESS;
 	struct GRD_HEADER grd;
 	double	w, e, s, n;
-	int	pad[4];
-	int	complex;
+	GMT_LONG	pad[4];
 	float	*a;
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
@@ -2244,7 +2246,6 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	n = 0.0;
 	for (i=0;i<4;i++)
 		pad[i] = 0;
-	complex = 0;
 
 	/* allocate memory for output array */
 	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
@@ -2272,7 +2273,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 				}
 
 		/* write the GMT netCDF grd file */
-		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
+		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, FALSE);
 
 		/* free memory for output array */
 		mb_freed(verbose,__FILE__, __LINE__, (void **) &a, error);

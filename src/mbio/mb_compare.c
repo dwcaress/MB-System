@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_compare.c	11/19/98
- *    $Id: mb_compare.c,v 5.4 2003-07-26 17:59:32 caress Exp $
+ *    $Id: mb_compare.c,v 5.4 2003/07/26 17:59:32 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	November 19,  1998
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_compare.c,v $
+ * Revision 5.4  2003/07/26 17:59:32  caress
+ * Changed beamflag handling code.
+ *
  * Revision 5.3  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -50,7 +53,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_compare.c,v 5.4 2003-07-26 17:59:32 caress Exp $";
+static char rcs_id[]="$Id: mb_compare.c,v 5.4 2003/07/26 17:59:32 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_int_compare compares int values. */

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.c	10/4/94
- *	$Id: mbsys_jstar.c,v 5.8 2008-07-10 18:02:39 caress Exp $
+ *	$Id: mbsys_jstar.c,v 5.8 2008/07/10 18:02:39 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  *
  * Author:	D. W. Caress
  * Date:	May 4, 2005
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_jstar.c,v $
+ * Revision 5.8  2008/07/10 18:02:39  caress
+ * Proceeding towards 5.1.1beta20.
+ *
  * Revision 5.5  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -62,7 +65,7 @@
 int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_jstar.c,v 5.8 2008-07-10 18:02:39 caress Exp $";
+ static char res_id[]="$Id: mbsys_jstar.c,v 5.8 2008/07/10 18:02:39 caress Exp $";
 	char	*function_name = "mbsys_jstar_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

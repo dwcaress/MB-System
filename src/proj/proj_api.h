@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: proj_api.h,v 5.6 2008-09-29 04:56:21 caress Exp $
+ * $Id: proj_api.h,v 5.6 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Public (application) include file for PROJ.4 API, and constants.
@@ -27,7 +27,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: proj_api.h,v $
+ * Revision 5.6  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.14  2006/04/20 04:19:59  fwarmerdam
  * updated version
  *

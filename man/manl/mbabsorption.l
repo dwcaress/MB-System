@@ -164,7 +164,7 @@ In order to obtain a more readable result, use the \fB-V\fP option:
 The output will be:
 .br
  Program MBabsorption
- Version $Id: mbabsorption.l,v 5.0 2008-02-12 02:35:16 caress Exp $
+ Version $Id: mbabsorption.l,v 5.0 2008/02/12 02:35:16 caress Exp $
  MB-system Version 5.1.1beta15
  
  Input Parameters:

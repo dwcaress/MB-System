@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvnavusbl.c	11/21/2004
  *
- *    $Id: mbauvnavusbl.c,v 5.3 2008-09-11 20:20:14 caress Exp $
+ *    $Id: mbauvnavusbl.c,v 5.3 2008/09/11 20:20:14 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  * Author:	D. W. Caress
  * Date:	November 21, 2004
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbauvnavusbl.c,v $
+ * Revision 5.3  2008/09/11 20:20:14  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.2  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -58,7 +61,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbauvnavusbl.c,v 5.3 2008-09-11 20:20:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbauvnavusbl.c,v 5.3 2008/09/11 20:20:14 caress Exp $";
 	static char program_name[] = "MBauvnavusbl";
 	static char help_message[] = "MBauvnavusbl reads a primary navigation file (usually from a submerged platform\n swath survey) and also reads secondary navigation (e.g. USBL fixes).\n The program calculates position offsets between the raw survey navigation\n and the secondary navigation every 3600 seconds (10 minutes), and then\n linearly interpolates and applies this adjustment vector for each\n primary navigation position. The adjusted navigation is output.";
 	static char usage_message[] = "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";

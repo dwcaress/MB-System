@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb2100.h	2/4/94
- *	$Id: mbsys_sb2100.h,v 5.9 2009-03-08 09:21:00 caress Exp $
+ *	$Id: mbsys_sb2100.h,v 5.9 2009/03/08 09:21:00 caress Exp $
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 4, 1994
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_sb2100.h,v $
+ * Revision 5.9  2009/03/08 09:21:00  caress
+ * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
+ *
  * Revision 5.8  2008/03/01 09:14:03  caress
  * Some housekeeping changes.
  *

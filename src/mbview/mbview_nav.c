@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.18 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbview_nav.c,v 5.18 2008/05/16 22:59:42 caress Exp $
  *
  *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -17,7 +17,10 @@
  * Author:	D. W. Caress
  * Date:	October 28, 2003
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbview_nav.c,v $
+ * Revision 5.18  2008/05/16 22:59:42  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.17  2008/03/14 19:04:32  caress
  * Fixed memory problems with route editing.
  *
@@ -123,7 +126,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.18 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_nav.c,v 5.18 2008/05/16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,
@@ -246,8 +249,9 @@ int mbview_allocnavarrays(int verbose,
 			double	**navportlat,
 			double	**navstbdlon,
 			double	**navstbdlat,
-			int	**cdp,
+			int	**line,
 			int	**shot,
+			int	**cdp,
 			int 	*error)
 {
 	/* local variables */
@@ -279,10 +283,12 @@ fprintf(stderr,"mbview_allocnavarrays: %d points\n",npointtotal);
 		fprintf(stderr,"dbg2       navstbdlon:                %d\n", *navstbdlon);
 		if (navstbdlat != NULL)
 		fprintf(stderr,"dbg2       navstbdlat:                %d\n", *navstbdlat);
-		if (cdp != NULL)
-		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
+		if (line != NULL)
+		fprintf(stderr,"dbg2       line:                      %d\n", *line);
 		if (shot != NULL)
 		fprintf(stderr,"dbg2       shot:                      %d\n", *shot);
+		if (cdp != NULL)
+		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
 		}
 
 	/* allocate the arrays using mb_realloc */
@@ -305,10 +311,12 @@ fprintf(stderr,"mbview_allocnavarrays: %d points\n",npointtotal);
 		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)navstbdlon,error);
 	if (status == MB_SUCCESS && navstbdlat != NULL)
 		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(double),(void **)navstbdlat,error);
-	if (status == MB_SUCCESS && cdp != NULL)
-		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(int),(void **)cdp,error);
+	if (status == MB_SUCCESS && line != NULL)
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(int),(void **)line,error);
 	if (status == MB_SUCCESS && shot != NULL)
 		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(int),(void **)shot,error);
+	if (status == MB_SUCCESS && cdp != NULL)
+		status = mb_reallocd(verbose,__FILE__,__LINE__,npointtotal*sizeof(int),(void **)cdp,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -330,10 +338,12 @@ fprintf(stderr,"mbview_allocnavarrays: %d points\n",npointtotal);
 		fprintf(stderr,"dbg2       navstbdlon:                %d\n", *navstbdlon);
 		if (navstbdlat != NULL)
 		fprintf(stderr,"dbg2       navstbdlat:                %d\n", *navstbdlat);
-		if (cdp != NULL)
-		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
+		if (line != NULL)
+		fprintf(stderr,"dbg2       line:                      %d\n", *line);
 		if (shot != NULL)
 		fprintf(stderr,"dbg2       shot:                      %d\n", *shot);
+		if (cdp != NULL)
+		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -356,8 +366,9 @@ int mbview_freenavarrays(int verbose,
 			double	**navportlat,
 			double	**navstbdlon,
 			double	**navstbdlat,
-			int	**cdp,
+			int	**line,
 			int	**shot,
+			int	**cdp,
 			int *error)
 {
 	/* local variables */
@@ -387,10 +398,12 @@ int mbview_freenavarrays(int verbose,
 		fprintf(stderr,"dbg2       navstbdlon:                %d\n", *navstbdlon);
 		if (navstbdlat != NULL)
 		fprintf(stderr,"dbg2       navstbdlat:                %d\n", *navstbdlat);
-		if (cdp != NULL)
-		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
+		if (line != NULL)
+		fprintf(stderr,"dbg2       line:                      %d\n", *line);
 		if (shot != NULL)
 		fprintf(stderr,"dbg2       shot:                      %d\n", *shot);
+		if (cdp != NULL)
+		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
 		}
 
 	/* free the arrays using mb_free */
@@ -408,10 +421,12 @@ int mbview_freenavarrays(int verbose,
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)navstbdlon,error);
 	if (navstbdlat != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)navstbdlat,error);
-	if (cdp != NULL)
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)cdp,error);
+	if (line != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)line,error);
 	if (shot != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)shot,error);
+	if (cdp != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)cdp,error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -433,10 +448,12 @@ int mbview_freenavarrays(int verbose,
 		fprintf(stderr,"dbg2       navstbdlon:                %d\n", *navstbdlon);
 		if (navstbdlat != NULL)
 		fprintf(stderr,"dbg2       navstbdlat:                %d\n", *navstbdlat);
-		if (cdp != NULL)
-		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
+		if (line != NULL)
+		fprintf(stderr,"dbg2       line:                      %d\n", *line);
 		if (shot != NULL)
 		fprintf(stderr,"dbg2       shot:                      %d\n", *shot);
+		if (cdp != NULL)
+		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -459,8 +476,9 @@ int mbview_addnav(int verbose, int instance,
 			double	*navportlat,
 			double	*navstbdlon,
 			double	*navstbdlat,
-			int	*cdp,
+			int	*line,
 			int	*shot,
+			int	*cdp,
 			int	navcolor,
 			int	navsize,
 			mb_path	navname,
@@ -469,6 +487,7 @@ int mbview_addnav(int verbose, int instance,
 			mb_path	navpathprocessed,
 			int	navformat,
 			int	navswathbounds,
+			int	navline,
 			int	navshot,
 			int	navcdp,
 			int	decimation,
@@ -495,9 +514,6 @@ int mbview_addnav(int verbose, int instance,
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
 		fprintf(stderr,"dbg2       npoint:                    %d\n", npoint);
-		fprintf(stderr,"dbg2       navlon:                    %d\n", navlon);
-		fprintf(stderr,"dbg2       navlat:                    %d\n", navlat);
-		fprintf(stderr,"dbg2       navz:                      %d\n", navz);
 		for (i=0;i<npoint;i++)
 			{
 			fprintf(stderr,"dbg2       point:%d time_d:%f lon:%f lat:%f z:%f heading:%f zpeed:%f\n", 
@@ -510,15 +526,20 @@ int mbview_addnav(int verbose, int instance,
 			fprintf(stderr,"dbg2       point:%d port: lon:%f lat:%f  stbd: lon:%f lat:%f\n", 
 					i, navportlon[i], navportlat[i], navstbdlon[i], navstbdlat[i]);
 			}
-		if (navcdp == MB_YES)
+		if (navline == MB_YES)
 		for (i=0;i<npoint;i++)
 			{
-			fprintf(stderr,"dbg2       point:%d cdp:%d\n", i, cdp[i]);
+			fprintf(stderr,"dbg2       point:%d line:%d\n", i, line[i]);
 			}
 		if (navshot == MB_YES)
 		for (i=0;i<npoint;i++)
 			{
 			fprintf(stderr,"dbg2       point:%d shot:%d\n", i, shot[i]);
+			}
+		if (navcdp == MB_YES)
+		for (i=0;i<npoint;i++)
+			{
+			fprintf(stderr,"dbg2       point:%d cdp: %d\n", i, cdp[i]);
 			}
 		fprintf(stderr,"dbg2       navcolor:                  %d\n", navcolor);
 		fprintf(stderr,"dbg2       navsize:                   %d\n", navsize);
@@ -528,6 +549,7 @@ int mbview_addnav(int verbose, int instance,
 		fprintf(stderr,"dbg2       navpathprocessed:          %s\n", navpathprocessed);
 		fprintf(stderr,"dbg2       navformat:                 %d\n", navformat);
 		fprintf(stderr,"dbg2       navswathbounds:            %d\n", navswathbounds);
+		fprintf(stderr,"dbg2       navline:                   %d\n", navline);
 		fprintf(stderr,"dbg2       navshot:                   %d\n", navshot);
 		fprintf(stderr,"dbg2       navcdp:                    %d\n", navcdp);
 		fprintf(stderr,"dbg2       decimation:                %d\n", decimation);
@@ -567,6 +589,7 @@ int mbview_addnav(int verbose, int instance,
 				shared.shareddata.navs[i].pathprocessed[0] = '\0';
 				shared.shareddata.navs[i].format = 0;
 				shared.shareddata.navs[i].swathbounds = MB_NO;
+				shared.shareddata.navs[i].line = MB_NO;
 				shared.shareddata.navs[i].shot = MB_NO;
 				shared.shareddata.navs[i].cdp = MB_NO;
 				shared.shareddata.navs[i].decimation = MB_NO;
@@ -614,6 +637,7 @@ int mbview_addnav(int verbose, int instance,
 		strcpy(shared.shareddata.navs[inav].pathprocessed,navpathprocessed);
 		shared.shareddata.navs[inav].format = navformat;
 		shared.shareddata.navs[inav].swathbounds = navswathbounds;
+		shared.shareddata.navs[inav].line = navline;
 		shared.shareddata.navs[inav].shot = navshot;
 		shared.shareddata.navs[inav].cdp = navcdp;
 		shared.shareddata.navs[inav].decimation = decimation;
@@ -630,6 +654,8 @@ int mbview_addnav(int verbose, int instance,
 			shared.shareddata.navs[inav].navpts[i].time_d = time_d[i];
 			shared.shareddata.navs[inav].navpts[i].heading = heading[i];
 			shared.shareddata.navs[inav].navpts[i].speed = speed[i];
+			if (shared.shareddata.navs[inav].line == MB_YES)
+				shared.shareddata.navs[inav].navpts[i].line = line[i];
 			if (shared.shareddata.navs[inav].shot == MB_YES)
 				shared.shareddata.navs[inav].navpts[i].shot = shot[i];
 			if (shared.shareddata.navs[inav].cdp == MB_YES)
@@ -775,6 +801,7 @@ shared.shareddata.navs[inav].navpts[i].point.zdisplay[instance]);*/
 			fprintf(stderr,"dbg2       nav %d pathraw:       %s\n",i,shared.shareddata.navs[i].pathraw);
 			fprintf(stderr,"dbg2       nav %d pathprocessed: %s\n",i,shared.shareddata.navs[i].pathprocessed);
 			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,shared.shareddata.navs[i].swathbounds);
+			fprintf(stderr,"dbg2       nav %d line:          %d\n",i,shared.shareddata.navs[i].line);
 			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,shared.shareddata.navs[i].shot);
 			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,shared.shareddata.navs[i].cdp);
 			fprintf(stderr,"dbg2       nav %d decimation:    %d\n",i,shared.shareddata.navs[i].decimation);
@@ -788,6 +815,7 @@ shared.shareddata.navs[inav].navpts[i].point.zdisplay[instance]);*/
 				fprintf(stderr,"dbg2       nav %d %d time_d:   %f\n",i,j,shared.shareddata.navs[i].navpts[j].time_d);
 				fprintf(stderr,"dbg2       nav %d %d heading:  %f\n",i,j,shared.shareddata.navs[i].navpts[j].heading);
 				fprintf(stderr,"dbg2       nav %d %d speed:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].speed);
+				fprintf(stderr,"dbg2       nav %d %d line:     %d\n",i,j,shared.shareddata.navs[i].navpts[j].line);
 				fprintf(stderr,"dbg2       nav %d %d shot:     %d\n",i,j,shared.shareddata.navs[i].navpts[j].shot);
 				fprintf(stderr,"dbg2       nav %d %d cdp:      %d\n",i,j,shared.shareddata.navs[i].navpts[j].cdp);
 
@@ -876,16 +904,20 @@ int mbview_enableviewnavs(int verbose, int instance,
 		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
 		}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
 	/* set values */
         shared.shareddata.nav_mode = MBV_NAV_VIEW;
 		
-	/* set widget sensitivity */
-	if (data->active == MB_YES)
-		mbview_update_sensitivity(verbose, instance, error);
+	/* set widget sensitivity on all active instances */
+	for (instance=0;instance<MBV_MAX_WINDOWS;instance++)
+		{
+		/* get view */
+		view = &(mbviews[instance]);
+		data = &(view->data);
+		
+		/* if instance active reset action sensitivity */
+		if (data->active == MB_YES)
+			mbview_update_sensitivity(verbose, instance, error);
+		}
 		
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -901,7 +933,6 @@ int mbview_enableviewnavs(int verbose, int instance,
 	/* return */
 	return(status);
 }
-
 
 /*------------------------------------------------------------------------------*/
 int mbview_pick_nav_select(int instance, int select, int which, int xpixel, int ypixel)
@@ -1238,6 +1269,7 @@ shared.shareddata.nav_selected[0],shared.shareddata.nav_selected[1],select);*/
 			fprintf(stderr,"dbg2       nav %d size:          %d\n",i,shared.shareddata.navs[i].size);
 			fprintf(stderr,"dbg2       nav %d name:          %s\n",i,shared.shareddata.navs[i].name);
 			fprintf(stderr,"dbg2       nav %d swathbounds:   %d\n",i,shared.shareddata.navs[i].swathbounds);
+			fprintf(stderr,"dbg2       nav %d line:          %d\n",i,shared.shareddata.navs[i].line);
 			fprintf(stderr,"dbg2       nav %d shot:          %d\n",i,shared.shareddata.navs[i].shot);
 			fprintf(stderr,"dbg2       nav %d cdp:           %d\n",i,shared.shareddata.navs[i].cdp);
 			fprintf(stderr,"dbg2       nav %d decimation:    %d\n",i,shared.shareddata.navs[i].decimation);
@@ -1251,6 +1283,7 @@ shared.shareddata.nav_selected[0],shared.shareddata.nav_selected[1],select);*/
 				fprintf(stderr,"dbg2       nav %d %d time_d:   %f\n",i,j,shared.shareddata.navs[i].navpts[j].time_d);
 				fprintf(stderr,"dbg2       nav %d %d heading:  %f\n",i,j,shared.shareddata.navs[i].navpts[j].heading);
 				fprintf(stderr,"dbg2       nav %d %d speed:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].speed);
+				fprintf(stderr,"dbg2       nav %d %d line:     %d\n",i,j,shared.shareddata.navs[i].navpts[j].line);
 				fprintf(stderr,"dbg2       nav %d %d shot:     %d\n",i,j,shared.shareddata.navs[i].navpts[j].shot);
 				fprintf(stderr,"dbg2       nav %d %d cdp:      %d\n",i,j,shared.shareddata.navs[i].navpts[j].cdp);
 
@@ -1580,6 +1613,7 @@ int mbview_nav_delete(int instance, int inav)
 		shared.shareddata.navs[shared.shareddata.nnav-1].pathprocessed[0] = '\0';
 		shared.shareddata.navs[shared.shareddata.nnav-1].format = 0;
 		shared.shareddata.navs[shared.shareddata.nnav-1].swathbounds = MB_NO;
+		shared.shareddata.navs[shared.shareddata.nnav-1].line = MB_NO;
 		shared.shareddata.navs[shared.shareddata.nnav-1].shot = MB_NO;
 		shared.shareddata.navs[shared.shareddata.nnav-1].cdp = MB_NO;
 		shared.shareddata.navs[shared.shareddata.nnav-1].decimation = 1;

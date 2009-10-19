@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.35 2008-12-22 08:32:52 caress Exp $
+ *    $Id: mbnavadjust_prog.c,v 5.35 2008/12/22 08:32:52 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Author:	D. W. Caress
  * Date:	March 23, 2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbnavadjust_prog.c,v $
+ * Revision 5.35  2008/12/22 08:32:52  caress
+ * Added additional model view - survey vs survey rather than sequential.
+ *
  * Revision 5.34  2008/10/17 07:52:44  caress
  * Check in on October 17, 2008.
  *
@@ -181,7 +184,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.35 2008-12-22 08:32:52 caress Exp $";
+static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.35 2008/12/22 08:32:52 caress Exp $";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";
@@ -291,6 +294,7 @@ int mbnavadjust_init_globals()
 	project.num_files = 0;
 	project.num_files_alloc = 0;
 	project.files = NULL;
+	project.num_blocks = 0;
 	project.num_snavs = 0;
 	project.num_pings = 0;
 	project.num_beams = 0;
@@ -1246,7 +1250,6 @@ int mbnavadjust_read_project()
 	int	versionmajor, versionminor;
 	int	nscan, idummy;
 	double	lonmin, lonmax, latmin, latmax;
-	int	nblock;
 	int	i, j, k, l;
 
 	/* print input debug statements */
@@ -1552,15 +1555,15 @@ fprintf(stderr, "read failed on snav: %s\n", buffer);
 			}
 			
 		/* count the number of blocks */
-		nblock = 0;
+		project.num_blocks = 0;
 		for (i=0;i<project.num_files;i++)
 		    {
 		    file = &project.files[i];
 		    if (i==0 || file->sections[0].continuity == MB_NO)
 		    	{
-			nblock++;
+			project.num_blocks++;
 			}
-		    file->block = nblock - 1;
+		    file->block = project.num_blocks - 1;
 		    file->block_offset_x = 0.0;
 		    file->block_offset_y = 0.0;
 		    file->block_offset_z = 0.0;
@@ -1915,10 +1918,12 @@ int mbnavadjust_import_data(char *path, int iformat)
 	/* local variables */
 	char	*function_name = "mbnavadjust_import_data";
 	int	status = MB_SUCCESS;
+	struct mbna_file *file;
 	int	done;
-	char	file[STRING_MAX];
+	char	filename[STRING_MAX];
 	double	weight;
 	int	form;
+	int	i;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -1946,10 +1951,10 @@ int mbnavadjust_import_data(char *path, int iformat)
 				while (done == MB_NO)
 					{
 					if (status = mb_datalist_read(mbna_verbose,datalist,
-							file,&form,&weight,&error)
+							filename,&form,&weight,&error)
 							== MB_SUCCESS)
 						{
-						status = mbnavadjust_import_file(file,form);
+						status = mbnavadjust_import_file(filename,form);
 						}
 					else
 						{
@@ -1960,6 +1965,21 @@ int mbnavadjust_import_data(char *path, int iformat)
 				}
 			}
 		}
+			
+	/* count the number of blocks */
+	project.num_blocks = 0;
+	for (i=0;i<project.num_files;i++)
+	    {
+	    file = &project.files[i];
+	    if (i==0 || file->sections[0].continuity == MB_NO)
+		{
+		project.num_blocks++;
+		}
+	    file->block = project.num_blocks - 1;
+	    file->block_offset_x = 0.0;
+	    file->block_offset_y = 0.0;
+	    file->block_offset_z = 0.0;
+	    }
 		
 	/* write updated project */
 	mbnavadjust_write_project();
@@ -2269,7 +2289,7 @@ int mbnavadjust_import_file(char *path, int iformat)
 			if (good_bath == MB_YES && first == MB_YES)
 				{
 				file = &project.files[project.num_files];
-				file->status = MBNA_FILE_OK;
+				file->status = MBNA_FILE_GOODNAV;
 				file->id = project.num_files;
 				file->output_id = output_id;
 				strcpy(file->path,path);
@@ -3010,12 +3030,13 @@ crossing->file_id_2,crossing->section_2);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_fix_file()
+int mbnavadjust_poornav_file()
 {
 	/* local variables */
-	char	*function_name = "mbnavadjust_fix_file";
+	char	*function_name = "mbnavadjust_poornav_file";
 	int	status = MB_SUCCESS;
 	struct mbna_crossing *crossing;
+	int	block;
  	int	i;
 
  	/* print input debug statements */
@@ -3025,47 +3046,29 @@ int mbnavadjust_fix_file()
 			function_name);
 		}
 		
-     	/* fix selected file */
+     	/* set selected file's block to poor nav */
     	if (project.open == MB_YES
     		&& project.num_files > 0
 		&& mbna_file_select >= 0
 		&& mbna_file_select < project.num_files
 		&& project.files[mbna_file_select].status 
-		    == MBNA_FILE_OK)
+		    == MBNA_FILE_GOODNAV)
 		{
-		/* fix file */
-		project.files[mbna_file_select].status = MBNA_FILE_FIXED;
-		if (project.inversion == MBNA_INVERSION_CURRENT)
-			project.inversion = MBNA_INVERSION_OLD;
-			
-		/* now set all all crossings between this
-		   file and other fixed files to skip status */
-		for (i=0;i<project.num_crossings;i++)
-		    {
-		    crossing = &project.crossings[i];
-		    if (crossing->status != MBNA_CROSSING_STATUS_SKIP
-			&& ((crossing->file_id_1 == mbna_file_select
-				&& project.files[crossing->file_id_2].status 
-				    == MBNA_FILE_FIXED)
-			    || (crossing->file_id_2 == mbna_file_select
-				&& project.files[crossing->file_id_1].status 
-				    == MBNA_FILE_FIXED)))
+		/* set all files in block of selected file to poor nav */
+		block = project.files[mbna_file_select].block;
+		for (i=0;i<project.num_files;i++)
 			{
-			if (crossing->status == MBNA_CROSSING_STATUS_NONE)
-			    	{
-				project.num_crossings_analyzed++;
-				if (crossing->truecrossing == MB_YES)
- 					project.num_truecrossings_analyzed++;
+			if (project.files[i].block == block)
+				{
+				project.files[i].status = MBNA_FILE_POORNAV;
 				}
-			crossing->status = MBNA_CROSSING_STATUS_SKIP;
 			}
-		    }
 			
 		/* write out updated project */
 		mbnavadjust_write_project();
 		
 		/* add info text */
-		sprintf(message, "Set file %d fixed: %s\n",
+		sprintf(message, "Set file %d to have poor nav: %s\n",
 			    mbna_file_select,project.files[mbna_file_select].file);
 		do_info_add(message, MB_YES);
    		}
@@ -3084,13 +3087,14 @@ int mbnavadjust_fix_file()
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_unfix_file()
+int mbnavadjust_goodnav_file()
 {
 	/* local variables */
-	char	*function_name = "mbnavadjust_unfix_file";
+	char	*function_name = "mbnavadjust_goodnav_file";
 	int	status = MB_SUCCESS;
 	struct mbna_crossing *crossing;
- 	int	i;
+ 	int	block;
+	int	i;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -3099,42 +3103,31 @@ int mbnavadjust_unfix_file()
 			function_name);
 		}
 		
-     	/* unfix selected file */
+     	/* set selected file's block to good nav */
     	if (project.open == MB_YES
     		&& project.num_files > 0
 		&& mbna_file_select >= 0
 		&& mbna_file_select < project.num_files
 		&& project.files[mbna_file_select].status 
-		    == MBNA_FILE_OK)
+		    == MBNA_FILE_POORNAV)
 		{
-		/* unfix file */
-		project.files[mbna_file_select].status = MBNA_FILE_OK;
+		/* set all files in block of selected file to good nav */
+		block = project.files[mbna_file_select].block;
+		for (i=0;i<project.num_files;i++)
+			{
+			if (project.files[i].block == block)
+				{
+				project.files[i].status = MBNA_FILE_GOODNAV;
+				}
+			}
 		if (project.inversion == MBNA_INVERSION_CURRENT)
 			project.inversion = MBNA_INVERSION_OLD;
-			
-		/* now set all all crossings between this
-		   file and other fixed files to none status */
-		for (i=0;i<project.num_crossings;i++)
-		    {
-		    crossing = &project.crossings[i];
-		    if (crossing->status == MBNA_CROSSING_STATUS_SKIP
-			&& ((crossing->file_id_1 == mbna_file_select
-				&& project.files[crossing->file_id_2].status 
-				    == MBNA_FILE_FIXED)
-			    || (crossing->file_id_2 == mbna_file_select
-				&& project.files[crossing->file_id_1].status 
-				    == MBNA_FILE_FIXED)))
-			{
-			project.num_crossings_analyzed--;
-			crossing->status = MBNA_CROSSING_STATUS_NONE;
-			}
-		    }
-			
+						
 		/* write out updated project */
 		mbnavadjust_write_project();
 		
 		/* add info text */
-		sprintf(message, "Set file %d unfixed: %s\n",
+		sprintf(message, "Set file %d to have good nav: %s\n",
 			    mbna_file_select,project.files[mbna_file_select].file);
 		do_info_add(message, MB_YES);
    		}
@@ -5942,9 +5935,6 @@ mbna_minmisfit_z);*/
 /*fprintf(stderr,"Misfit bounds: nmin:%d best:%f min:%f max:%f min loc: %f %f %f\n",
 mbna_minmisfit_n,mbna_minmisfit,misfit_min,misfit_max,
 mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z);*/
-		
-		/* get minimum misfit in 2D plane at current z offset */
-		mbnavadjust_get_misfitxy();
 
     		/* set message on */
     		if (mbna_verbose > 1)
@@ -5982,6 +5972,9 @@ mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z
 			    misfit_intervals[l] = gridmeq[ll];
 			    }
 		    }
+		
+		/* get minimum misfit in 2D plane at current z offset */
+		mbnavadjust_get_misfitxy();
 		
    		/* set message on */
     		if (mbna_verbose > 1)
@@ -6229,9 +6222,13 @@ int mbnavadjust_get_misfitxy()
 				    }
 				}
 			    }
+fprintf(stderr,"mbnavadjust_get_misfitxy a mbna_minmisfit_xh:%f mbna_minmisfit_yh:%f mbna_minmisfit_zh:%f\n",
+mbna_minmisfit_xh,mbna_minmisfit_yh,mbna_minmisfit_zh);
 		    }
+fprintf(stderr,"mbnavadjust_get_misfitxy b mbna_minmisfit_xh:%f mbna_minmisfit_yh:%f mbna_minmisfit_zh:%f\n",
+mbna_minmisfit_xh,mbna_minmisfit_yh,mbna_minmisfit_zh);
 		}
-fprintf(stderr,"mbna_minmisfit_xh:%f mbna_minmisfit_yh:%f mbna_minmisfit_zh:%f\n",
+fprintf(stderr,"mbnavadjust_get_misfitxy c mbna_minmisfit_xh:%f mbna_minmisfit_yh:%f mbna_minmisfit_zh:%f\n",
 mbna_minmisfit_xh,mbna_minmisfit_yh,mbna_minmisfit_zh);
 			
  	/* print output debug statements */
@@ -7137,7 +7134,6 @@ mbnavadjust_invertnav()
 	int	nnav;
 	int	nsnav;
 	int	ndf = 3;
-	int	nblock = 0;
 	int	ncols = 0;
 	int	ntie = 0;
 	double	*x = NULL;
@@ -7191,6 +7187,11 @@ mbnavadjust_invertnav()
 	double	mbp_rollbias_port;
 	double	mbp_rollbias_stbd;
 	double	time_d1, time_d2, time_d3;
+	double	block_offset_avg_x;
+	double	block_offset_avg_y;
+	double	block_offset_avg_z;
+	int	navg;
+	int	use;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -7214,20 +7215,7 @@ mbnavadjust_invertnav()
 		/* figure out the average offsets between connected sets of files 
 			- invert for x y z offsets for the blocks */
 			
-		/* count the number of blocks */
-		nblock = 0;
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    if (i==0 || file->sections[0].continuity == MB_NO)
-		    	{
-			nblock++;
-			}
-		    file->block = nblock - 1;
-		    file->block_offset_x = 0.0;
-		    file->block_offset_y = 0.0;
-		    file->block_offset_z = 0.0;
-		    }
+		/* calculate the initial misfit */
 		ntie = 0;
 		misfit_initial = 0.0;
 		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
@@ -7248,15 +7236,15 @@ mbnavadjust_invertnav()
 		misfit_initial = sqrt(misfit_initial) / ntie;
 		
 		/* invert for block offsets only if there is more than one block */
-		if (nblock > 1)
+		if (project.num_blocks > 1)
 		    {
 		    /* allocate space for the inverse problem */
-		    ncols = ndf * nblock;
+		    ncols = ndf * project.num_blocks;
 		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&x,&error);
 		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&xx,&error);
 
 		    /* initialize x array */
-		    for (i=0;i<ndf*nblock;i++)
+		    for (i=0;i<ndf*project.num_blocks;i++)
 			{
 			x[i] = 0.0;
 			}
@@ -7270,13 +7258,13 @@ mbnavadjust_invertnav()
 		    while (done == MB_NO)
 		    	{
 			/* initialize xx array */
-			for (i=0;i<ndf*nblock;i++)
+			for (i=0;i<ndf*project.num_blocks;i++)
 			    {
 			    xx[i] = 0.0;
 			    }
 		    
 			/* loop over crossings getting set ties */
-			nc = ndf * nblock;
+			nc = ndf * project.num_blocks;
 			ntie = 0;
 			for (icrossing=0;icrossing<project.num_crossings;icrossing++)
 			    {
@@ -7303,27 +7291,12 @@ mbnavadjust_invertnav()
 				offsety = tie->offset_y_m - (x[3*nc2+1] + xx[3*nc2+1] - x[3*nc1+1] - xx[3*nc1+1]);
 				offsetz = tie->offset_z_m  - (x[3*nc2+2] + xx[3*nc2+2] - x[3*nc1+2] - xx[3*nc1+2]);
 
-				if (file1->status == MBNA_FILE_FIXED)
-			    	    {
-				    xx[3*nc2]   +=  offsetx;
-				    xx[3*nc2+1] +=  offsety;
-				    xx[3*nc2+2] +=  offsetz;
-				    }
-				else if (file2->status == MBNA_FILE_FIXED)
-			    	    {
-				    xx[3*nc1]   += -offsetx;
-				    xx[3*nc1+1] += -offsety;
-				    xx[3*nc1+2] += -offsetz;
-				    }
-				else
-			    	    {
-				    xx[3*nc1]   += -0.5 * offsetx;
-				    xx[3*nc1+1] += -0.5 * offsety;
-				    xx[3*nc1+2] += -0.5 * offsetz;
-				    xx[3*nc2]   +=  0.5 * offsetx;
-				    xx[3*nc2+1] +=  0.5 * offsety;
-				    xx[3*nc2+2] +=  0.5 * offsetz;
-				    }
+				xx[3*nc1]   += -0.5 * offsetx;
+				xx[3*nc1+1] += -0.5 * offsety;
+				xx[3*nc1+2] += -0.5 * offsetz;
+				xx[3*nc2]   +=  0.5 * offsetx;
+				xx[3*nc2+1] +=  0.5 * offsety;
+				xx[3*nc2+2] +=  0.5 * offsetz;
 				}
 			    }
 
@@ -7346,6 +7319,39 @@ mbnavadjust_invertnav()
 			 if (perturbationsize / misfit_initial < 0.00001 || iter > 100)
 			 	done = MB_YES;
 			 }
+			 
+		    /* get average offsets of blocks not flagged as bad */
+		    block_offset_avg_x = 0.0;
+		    block_offset_avg_y = 0.0;
+		    block_offset_avg_z = 0.0;
+		    navg = 0;
+		    for (i=0;i<project.num_blocks;i++)
+			{
+			use = MB_YES;
+			for (j=0;j<project.num_files;j++)
+				{
+				file = &project.files[j];
+				if (file->block == i && file->status == MBNA_FILE_POORNAV)
+					use = MB_NO;
+				}
+			if (use == MB_YES)
+				{
+				block_offset_avg_x += x[3 * i];
+				block_offset_avg_y += x[3 * i + 1];
+				block_offset_avg_z += x[3 * i + 2];
+				navg++;
+				}
+			}
+		    if (navg > 0)
+		    	{
+			block_offset_avg_x /= navg;
+			block_offset_avg_y /= navg;
+			block_offset_avg_z /= navg;
+fprintf(stderr,"Average block offsets: x:%f y:%f z:%f  Used %d of %d blocks\n",
+block_offset_avg_x,block_offset_avg_y,block_offset_avg_z,
+navg,project.num_blocks);
+			}
+		    
 
 		    /* output solution */
 		    if (mbna_verbose > 1)
@@ -7526,27 +7532,12 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 			    	weight = MAX(mbna_offsetweight / tie->sigmar1, 1.0);
 			    else
 			    	weight = 1.0;
-			    if (file1->status == MBNA_FILE_FIXED)
-			    	{
-				xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax1[0];
-				xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax1[1];
-				xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax1[2];
-				}
-			    else if (file2->status == MBNA_FILE_FIXED)
-			    	{
-				xx[3*nc1]   += -weight * offsetsigma * tie->sigmax1[0];
-				xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax1[1];
-				xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax1[2];
-				}
-			    else
-			    	{
-				xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax1[0];
-				xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax1[1];
-				xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax1[2];
-				xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax1[0];
-				xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax1[1];
-				xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax1[2];
-				}
+			    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax1[0];
+			    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax1[1];
+			    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax1[2];
+			    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax1[0];
+			    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax1[1];
+			    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax1[2];
 /*fprintf(stderr,"long axis:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xx[3*nc1],xx[3*nc1+1],xx[3*nc1+2],
 nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
@@ -7559,27 +7550,12 @@ nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
 			    	weight = MAX(mbna_offsetweight / tie->sigmar2, 1.0);
 			    else
 			    	weight = 1.0;
-			    if (file1->status == MBNA_FILE_FIXED)
-			    	{
-				xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax2[0];
-				xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax2[1];
-				xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax2[2];
-				}
-			    else if (file2->status == MBNA_FILE_FIXED)
-			    	{
-				xx[3*nc1]   += -weight * offsetsigma * tie->sigmax2[0];
-				xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax2[1];
-				xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax2[2];
-				}
-			    else
-			    	{
-				xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax2[0];
-				xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax2[1];
-				xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax2[2];
-				xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax2[0];
-				xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax2[1];
-				xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax2[2];
-				}
+			    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax2[0];
+			    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax2[1];
+			    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax2[2];
+			    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax2[0];
+			    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax2[1];
+			    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax2[2];
 /*fprintf(stderr,"horizontal:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xx[3*nc1],xx[3*nc1+1],xx[3*nc1+2],
 nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
@@ -7592,27 +7568,12 @@ nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
 			    	weight = MAX(mbna_offsetweight / tie->sigmar3, 1.0);
 			    else
 			    	weight = 1.0;
-			    if (file1->status == MBNA_FILE_FIXED)
-			    	{
-				xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax3[0];
-				xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax3[1];
-				xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax3[2];
-				}
-			    else if (file2->status == MBNA_FILE_FIXED)
-			    	{
-				xx[3*nc1]   += -weight * offsetsigma * tie->sigmax3[0];
-				xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax3[1];
-				xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax3[2];
-				}
-			    else
-			    	{
-				xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax3[0];
-				xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax3[1];
-				xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax3[2];
-				xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax3[0];
-				xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax3[1];
-				xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax3[2];
-				}
+			    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax3[0];
+			    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax3[1];
+			    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax3[2];
+			    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax3[0];
+			    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax3[1];
+			    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax3[2];
 /*fprintf(stderr,"semi-vertical:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xx[3*nc1],xx[3*nc1+1],xx[3*nc1+2],
 nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);
@@ -7819,9 +7780,9 @@ iter,ntie,misfit_initial,misfit_ties,perturbationsize);*/
 				if (section->snav_num_ties[isnav] > 0)
 				    {
 				    k = section->snav_invert_id[isnav];
-				    section->snav_lon_offset[isnav] = (x[3*k] + file->block_offset_x) * mbna_mtodeglon;
-				    section->snav_lat_offset[isnav] = (x[3*k+1] + file->block_offset_y) * mbna_mtodeglat;
-				    section->snav_z_offset[isnav] = (x[3*k+2] + file->block_offset_z);
+				    section->snav_lon_offset[isnav] = (x[3*k] + file->block_offset_x - block_offset_avg_x) * mbna_mtodeglon;
+				    section->snav_lat_offset[isnav] = (x[3*k+1] + file->block_offset_y - block_offset_avg_y) * mbna_mtodeglat;
+				    section->snav_z_offset[isnav] = (x[3*k+2] + file->block_offset_z - block_offset_avg_z);
 				    }
 				}
 			    }
@@ -8010,2821 +7971,220 @@ mbnavadjust_applynav()
 		for (i=0;i<project.num_files;i++)
 		    {
 		    file = &project.files[i];
-		    if (file->status != MBNA_FILE_FIXED)
-		    	{
-		    	sprintf(npath,"%s/nvs_%4.4d.mb166",
-			    project.datadir,i);
-		    	sprintf(apath,"%s/nvs_%4.4d.na%d",
-			    project.datadir,i,file->output_id);
-		    	sprintf(opath,"%s.na%d", file->path, file->output_id);
-		    	if ((nfp = fopen(npath,"r")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		    	else if ((afp = fopen(apath,"w")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		   	else if ((ofp = fopen(opath,"w")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		    	else
-			    {
-			    sprintf(message, " > Output updated nav to %s\n", opath);
-			    do_info_add(message, MB_NO);
-
-			    /* read the input nav */
-			    isection = 0;
-			    section = &file->sections[isection];
-			    isnav = 0;
-			    done = MB_NO;
-			    while (done == MB_NO)
-			    	{
-			    	if ((result = fgets(buffer,BUFFER_MAX,nfp)) != buffer)
-				    {
-				    done = MB_YES;
-				    }
-			    	else if ((nscan = sscanf(buffer, "%d %d %d %d %d %d.%d %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-							&time_i[0], &time_i[1], &time_i[2], &time_i[3],
-							&time_i[4], &time_i[5], &time_i[6], &time_d,
-							&navlon, &navlat, &heading, &speed, 
-							&draft, &roll, &pitch, &heave)) >= 12)
-				    {
-				    /* fix nav from early version */
-				    if (nscan < 16)
-					{
-					draft = 0.0;
-					roll = 0.0;
-					pitch = 0.0;
-					heave = 0.0;
-					}
-					
-				    /* get next snav interval if needed */
-				    while (time_d > section->snav_time_d[isnav+1]
-				    	&& !(isection == file->num_sections - 1
-					    && isnav == section->num_snav - 2))
-				    	{
-				    	if (isnav < section->num_snav - 2)
-					    {
-					    isnav++;
-					    }
-				    	else if (isection < file->num_sections)
-					    {
-					    isection++;
-					    section = &file->sections[isection];
-					    isnav = 0;
-					    }
-				    	}
-				
-				    /* update the nav if possible (and it should be...) */
-				    if (time_d < section->snav_time_d[isnav])
-					{
-					factor = 0.0;
-					}
-				    else if (time_d > section->snav_time_d[isnav+1])
-					{
-					factor = 1.0;
-					}
-				    else
-				    	{
-				    	if (section->snav_time_d[isnav+1] > section->snav_time_d[isnav])
-					    {
-					    factor = (time_d - section->snav_time_d[isnav])
-							/ (section->snav_time_d[isnav+1] - section->snav_time_d[isnav]);
-/*if (fabs(time_d - section->snav_time_d[isnav]) < 1.0)
-fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav]);
-else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
-fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
-					    }
-				    	else
-					    factor = 0.0;
-				    	}
-					
-				    /* update and output only nonzero navigation */
-				    if (fabs(navlon) > 0.0000001 && fabs(navlat) > 0.0000001)
-				    	{
-					navlon -= section->snav_lon_offset[isnav]
-							+ factor * (section->snav_lon_offset[isnav+1]
-								- section->snav_lon_offset[isnav]);
-					navlat -= section->snav_lat_offset[isnav]
-							+ factor * (section->snav_lat_offset[isnav+1]
-								- section->snav_lat_offset[isnav]);
-					zoffset = section->snav_z_offset[isnav]
-							+ factor * (section->snav_z_offset[isnav+1]
-								- section->snav_z_offset[isnav]);
-
-					/* write the updated nav out */
-					/* printing this string twice because in some situations the first
-						print has the time_d value come out as "nan" - this is the worst sort
-						of kluge for a real but mysterious bug - apologies to all who find this
-						- DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
-					sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-						    time_i[0], time_i[1], time_i[2], time_i[3],
-						    time_i[4], time_i[5], time_i[6], time_d,
-						    navlon, navlat, heading, speed, 
-						    draft, roll, pitch, heave, zoffset);
-					sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-						    time_i[0], time_i[1], time_i[2], time_i[3],
-						    time_i[4], time_i[5], time_i[6], time_d,
-						    navlon, navlat, heading, speed, 
-						    draft, roll, pitch, heave, zoffset);
-					fprintf(ofp, "%s", ostring);
-					fprintf(afp, "%s", ostring);
-/*fprintf(stderr, "%2.2d:%2.2d:%2.2d:%5.3f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f\n\n",
-i, isection, isnav, factor, 
-time_i[0], time_i[1], time_i[2], time_i[3],
-time_i[4], time_i[5], time_i[6], time_d,
-navlon, navlat, heading, speed, zoffset);*/
-					}
-				    }
-			    	}
-			    }
-		    	if (nfp != NULL) fclose(nfp);
-		    	if (afp != NULL) fclose(afp);
-		    	if (ofp != NULL) 
-			    {
-			    fclose(ofp);
-			    
-			    /* get bias values */
-			    mb_pr_get_heading(mbna_verbose, file->path, 
-						&mbp_heading_mode, 
-						&mbp_headingbias, 
-						&error);
-			    mb_pr_get_rollbias(mbna_verbose, file->path, 
-						&mbp_rollbias_mode, 
-						&mbp_rollbias, 
-						&mbp_rollbias_port, 
-						&mbp_rollbias_stbd, 
-						&error);
-	    
-			    /* update output file in mbprocess parameter file */
-			    status = mb_pr_update_format(mbna_verbose, file->path, 
-					MB_YES, file->format, 
-					&error);
-			    status = mb_pr_update_navadj(mbna_verbose, file->path, 
-					MBP_NAVADJ_LLZ, opath, 
-					MBP_NAV_LINEAR, 
-					&error);
-
-			    /* update heading bias in mbprocess parameter file */
-			    mbp_headingbias = file->heading_bias + file->heading_bias_import;
-			    if (mbp_headingbias == 0.0)
-				{
-				if (mbp_heading_mode == MBP_HEADING_OFF
-				    || mbp_heading_mode == MBP_HEADING_OFFSET)
-				    mbp_heading_mode = MBP_HEADING_OFF;
-				else if (mbp_heading_mode == MBP_HEADING_CALC
-				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-				    mbp_heading_mode = MBP_HEADING_CALC;
-				}
-			    else
-				{
-				if (mbp_heading_mode == MBP_HEADING_OFF
-				    || mbp_heading_mode == MBP_HEADING_OFFSET)
-				    mbp_heading_mode = MBP_HEADING_OFFSET;
-				else if (mbp_heading_mode == MBP_HEADING_CALC
-				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-				    mbp_heading_mode = MBP_HEADING_CALCOFFSET;
-				}
-			    status = mb_pr_update_heading(mbna_verbose, file->path, 
-					mbp_heading_mode, mbp_headingbias, 
-					&error);
-
-			    /* update roll bias in mbprocess parameter file */
-			    mbp_rollbias = file->roll_bias + file->roll_bias_import;
-			    if (mbp_rollbias == 0.0)
-				{
-				if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-				    {
-				    mbp_rollbias_port = mbp_rollbias 
-					    + mbp_rollbias_port - file->roll_bias_import;
-				    mbp_rollbias_stbd = mbp_rollbias 
-					    + mbp_rollbias_stbd - file->roll_bias_import;
-				    }
-				else
-				    mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
-				}
-			    else
-				{
-				if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-				    {
-				    mbp_rollbias_port = mbp_rollbias 
-					    + mbp_rollbias_port - file->roll_bias_import;
-				    mbp_rollbias_stbd = mbp_rollbias 
-					    + mbp_rollbias_stbd - file->roll_bias_import;
-				    }
-				else
-				    {
-				    mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
-				    }
-				}
-			    status = mb_pr_update_rollbias(mbna_verbose, file->path, 
-					mbp_rollbias_mode, mbp_rollbias, 
-					mbp_rollbias_port, mbp_rollbias_stbd, 
-					&error);
-			    }
-			}
-		    }
-		
-		/* turn off message dialog */
-		do_message_off();
-		}
-
- 	/* print output debug statements */
-	if (mbna_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:       %d\n",error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
-
-	return(status);
-}
-			
-/*--------------------------------------------------------------------*/
-
-int
-mbnavadjust_invertnav0()
-{
-	/* local variables */
-	char	*function_name = "mbnavadjust_invertnav0";
-	int	status = MB_SUCCESS;
-	struct mbna_file *file;
-	struct mbna_file *file1;
-	struct mbna_file *file2;
-	struct mbna_section *section;
-	struct mbna_crossing *crossing;
-	struct mbna_tie *tie;
-	int	nnav, nsnav, nfix, ndx, ndx2, ntie, nconstraint;
-	int	nblock;
-	int	nseq;
-	int	nnz;
-	int	ndf = 3;
-	int	nrows = 0;
-	int	ncols = 0;
-	double	*a;
-	int	*ia;
-	int	*nia;
-	int	*nx;
-	double	*x;
-	double	*dx;
-	double	*d;
-	double	*w;
-	double	*sigma;
-	double	*work;
-	double	time_d, time_d_old, time_d_older, dtime_d;
-	double	avg_dtime_d, avg_offset;
-	int	ifile, icrossing, isection, isnav;
-	int	nr, nc, nc1, nc2;
-	int	ncyc, nsig;
-	double	smax, sup, err, supt, slo, errlsq, s;
-	int	ncycle = 2048;
-	double	bandwidth = 10000.0;
-	double	smoothweight, sigma_total, sigma_crossing;
-	double	sigma_crossing_first;
-	double	smoothweight_old, smoothweight_best, sigma_total_best, sigma_crossing_best;
-	double	smoothfactor, smoothmin, smoothmax;
-	double	offset_x, offset_y, offset_z;
-	int	first;
-	int	iter;
-	char	npath[STRING_MAX];
-	char	apath[STRING_MAX];
-	char	opath[STRING_MAX];
-	char	ostring[STRING_MAX];
-	FILE	*nfp, *afp, *ofp;
-	char	*result;
-	char	buffer[BUFFER_MAX];
-	int	done, nscan;
-	double	factor;
-	int	time_i[7];
-	double	navlon;
-	double	navlat;
-	double	speed;
-	double	heading;
-	double	distance;
-	double	draft;
-	double	roll;
-	double	pitch;
-	double	heave;
-	double	zoffset;
-	int	mbp_heading_mode;
-	double	mbp_headingbias;
-	int	mbp_rollbias_mode;
-	double	mbp_rollbias;
-	double	mbp_rollbias_port;
-	double	mbp_rollbias_stbd;
-	double	fixed_block_offset_x;
-	double	fixed_block_offset_y;
-	double	fixed_block_offset_z;
-	int	nfixed_block_offset;
-	double	offsetx, offsety, offsetz;
-	double	kluge;
-	int	i, j, k;
-
- 	/* print input debug statements */
-	if (mbna_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		}
-
-	/* invert if there is a project and all crossings have been analyzed */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
-		&& (project.num_crossings_analyzed == project.num_crossings
-			|| project.num_truecrossings_analyzed == project.num_truecrossings))
-			
-    		{
-		/* set message dialog on */
-		sprintf(message,"Setting up navigation inversion...");
-		do_message_on(message);
-		
-		/*----------------------------------------------------------------*/
-		
-		/* figure out the average offsets between connected sets of files 
-			- invert for x y z offsets for the blocks */
-			
-		/* count the number of blocks */
-		nblock = 0;
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    if (i==0 || file->sections[0].continuity == MB_NO)
-		    	{
-			nblock++;
-			}
-		    file->block = nblock - 1;
-		    file->block_offset_x = 0.0;
-		    file->block_offset_y = 0.0;
-		    file->block_offset_z = 0.0;
-		    }
-		ntie = 0;
-		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    ntie += crossing->num_ties;
-		    }
-		
-		/* invert for block offsets only if there is more than one block */
-		if (nblock > 1)
-		    {
-		    /* allocate space for the inverse problem */
-		    nconstraint = ndf * ntie;
-		    nrows = nconstraint;
-		    ncols = ndf * nblock;
-		    nnz = 3;
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnz * nrows * sizeof(double), (void **)&a,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnz * nrows * sizeof(int), (void **)&ia,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(int), (void **)&nia,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(double), (void **)&d,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&x,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(int), (void **)&nx,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&dx,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&sigma,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&work,&error);
-
-		    /* initialize arrays */
-		    for (i=0;i<nrows;i++)
+		    sprintf(npath,"%s/nvs_%4.4d.mb166",
+			project.datadir,i);
+		    sprintf(apath,"%s/nvs_%4.4d.na%d",
+			project.datadir,i,file->output_id);
+		    sprintf(opath,"%s.na%d", file->path, file->output_id);
+		    if ((nfp = fopen(npath,"r")) == NULL)
 			{
-			nia[i] = 0;
-			d[i] = 0.0;
-			for (j=0;j<nnz;j++)
-			    {
-			    k = nnz * i + j;
-			    ia[k] = 0;
-			    a[k] = 0.0;
-			    }
+			status = MB_FAILURE;
+			error = MB_ERROR_OPEN_FAIL;
 			}
-		    for (i=0;i<ndf*nblock;i++)
+		    else if ((afp = fopen(apath,"w")) == NULL)
 			{
-			nx[i] = 0;
-			x[i] = 0;
-			dx[i] = 0.0;
+			status = MB_FAILURE;
+			error = MB_ERROR_OPEN_FAIL;
 			}
-		    for (i=0;i<ncycle;i++)
+		    else if ((ofp = fopen(opath,"w")) == NULL)
 			{
-			sigma[i] = 0;
-			work[i] = 0.0;
-			}
-
-		    /* construct the inverse problem */
-		    sprintf(message,"Solving for block offsets...");
-		    do_message_on(message);
-		    
-		    /* loop over crossings getting set ties */
-		    nr = 0;
-		    nc = ndf * nblock;
-		    ntie = 0;
-		    for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-			{
-			crossing = &project.crossings[icrossing];
-
-			/* use only set crossings */
-			if (crossing->status == MBNA_CROSSING_STATUS_SET)
-			for (j=0;j<crossing->num_ties;j++)
-			    {
-			    /* get tie */
-			    tie = (struct mbna_tie *) &crossing->ties[j];
-			    ntie++;
-
-			    /* get block id for first snav point */
-			    file = &project.files[crossing->file_id_1];
-			    nc1 = file->block;
-
-			    /* get block id for second snav point */
-			    file = &project.files[crossing->file_id_2];
-			    nc2 = file->block;
-
-			    /* make longitude constraint */
-			    k = nnz * nr;
-			    a[k] = -1.0;
-			    a[k+1] = 1.0;
-			    d[nr] = tie->offset_x_m;
-			    ia[k] = 3 * nc1;
-			    ia[k+1] = 3 * nc2;
-			    nia[nr] = 2;
-			    nx[3 * nc1]++;
-			    nx[3 * nc2]++;
-/* fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%g\n", nr,k, a[k],a[k+1],d[nr]); */
-			    nr++;
-
-			    /* make latitude constraint */
-			    k = nnz * nr;
-			    a[k] = -1.0;
-			    a[k+1] = 1.0;
-			    d[nr] = tie->offset_y_m;
-			    ia[k] = 3 * nc1 + 1;
-			    ia[k+1] = 3 * nc2 + 1;
-			    nia[nr] = 2;
-			    nx[3 * nc1 + 1]++;
-			    nx[3 * nc2 + 1]++;
-/* fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%g\n", nr,k, a[k],a[k+1],d[nr]); */
-			    nr++;
-
-			    /* make depth constraint */
-			    k = nnz * nr;
-			    a[k] = -1.0;
-			    a[k+1] = 1.0;
-			    d[nr] = tie->offset_z_m;
-			    ia[k] = 3 * nc1 + 2;
-			    ia[k+1] = 3 * nc2 + 2;
-			    nia[nr] = 2;
-			    nx[3 * nc1 + 2]++;
-			    nx[3 * nc2 + 2]++;
-/* fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%g\n", nr,k, a[k],a[k+1],d[nr]); */
-			    nr++;
-			    }
-			}
-
-		    /* solve the inverse problem */
-
-		    /* compute upper bound on maximum eigenvalue */
-		    ncyc = 0;
-		    nsig = 0;
-		    lspeig(a, ia, nia, nnz, nc, nr, ncyc,
-			    &nsig, x, dx, sigma, work, &smax, &err, &sup);
-		    supt = smax + err;
-		    if (sup > supt)
-			supt = sup;
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "Initial lspeig: sup:%g smax:%g err:%g supt:%g\n",
-			sup, smax, err, supt);
-		    ncyc = 16;
-		    for (i=0;i<4;i++)
-			{
-			lspeig(a, ia, nia, nnz, nc, nr, ncyc,
-				&nsig, x, dx, sigma, work, &smax, &err, &sup);
-			supt = smax + err;
-			if (sup > supt)
-			    supt = sup;
-			if (mbna_verbose > 0)
-			fprintf(stderr, "lspeig[%d]: sup:%g smax:%g err:%g supt:%g\n",
-			    i, sup, smax, err, supt);
-			}
-
-		    /* calculate chebyshev factors (errlsq is the theoretical error) */
-		    slo = supt / bandwidth;
-		    chebyu(sigma, ncycle, supt, slo, work);
-		    errlsq = errlim(sigma, ncycle, supt, slo);
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "Theoretical error: %f\n", errlsq);
-		    if (mbna_verbose > 1)
-		    for (i=0;i<ncycle;i++)
-			fprintf(stderr, "sigma[%d]: %f\n", i, sigma[i]);
-
-		    /* solve the problem */
-		    for (i=0;i<nc;i++)
-			x[i] = 0.0;
-		    lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
-
-		    /* output solution */
-		    if (mbna_verbose > 1)
-		    for (i=0;i<nc/3;i++)
-			{
-			fprintf(stderr, "block:%d  offsets: %f %f %f  nties: %d %d %d\n",
-				i, x[3*i], x[3*i+1], x[3*i+2], nx[3*i], nx[3*i+1], nx[3*i+2]);
-			}
-
-		    /* calculate error */
-		    sigma_total = 0.0;
-		    sigma_crossing = 0.0;
-		    for (i=0;i<nr;i++)
-			{
-			s = 0.0;
-			for (j=0;j<nia[i];j++)
-			    {
-			    k = nnz * i + j;
-			    s += x[ia[k]] * a[k];
-			    }
-			sigma_total += (d[i] - s) * (d[i] - s);
-			if (i >= (nr - 3 * ntie))
-			    sigma_crossing += (d[i] - s) * (d[i] - s);
-			}
-		    sigma_total = sqrt(sigma_total) / nr;
-		    sigma_crossing = sqrt(sigma_crossing) / ntie;
-
-		    /* extract results */
-		    fixed_block_offset_x = 0.0;
-		    fixed_block_offset_y = 0.0;
-		    fixed_block_offset_z = 0.0;
-		    nfixed_block_offset = 0;
-		    for (i=0;i<project.num_files;i++)
-			{
-			file = &project.files[i];
-			if (file->status == MBNA_FILE_FIXED)
-				{
-				fixed_block_offset_x -= x[3 * file->block];
-				fixed_block_offset_y -= x[3 * file->block + 1];
-				fixed_block_offset_z -= x[3 * file->block + 2];
-				nfixed_block_offset++;
-				}
-			file->block_offset_x = x[3 * file->block];
-			file->block_offset_y = x[3 * file->block + 1];
-			file->block_offset_z = x[3 * file->block + 2];
-			}
-		    if (nfixed_block_offset > 0)
-		        {
-			fixed_block_offset_x /= (double)nfixed_block_offset;
-			fixed_block_offset_y /= (double)nfixed_block_offset;
-			fixed_block_offset_z /= (double)nfixed_block_offset;
-			for (i=0;i<project.num_files;i++)
-			    {
-			    file = &project.files[i];
-			    file->block_offset_x += fixed_block_offset_x;
-			    file->block_offset_y += fixed_block_offset_y;
-			    file->block_offset_z += fixed_block_offset_z;
-			    }
-			}
-		    for (i=0;i<project.num_files;i++)
-			{
-			file = &project.files[i];
-fprintf(stderr,"file:%d block: %d block offsets: %f %f %f\n",
-i,file->block,file->block_offset_x,file->block_offset_y,file->block_offset_z);
-			}
-
-		    /* deallocate arrays */
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&a,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&ia,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nia,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&d,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&x,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nx,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&dx,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&sigma,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&work,&error);
-		    }
-		
-		/*----------------------------------------------------------------*/		
-
-     		/* retrieve crossing parameters */
-		/* count up the unknowns and constraints to get size of
-		 * inverse problem:
-		 *	    nconstraint = ndf * nsnav + ntie
-		 */
-		nnav = 0;
-		nsnav = 0;
-		nfix = 0;
-		ntie = 0;
-		nseq = 0;
-		ndx = 0;
-		ndx2 = 0;
-		avg_dtime_d = 0.0;
-		for (i=0;i<project.num_files;i++)
-		    {
-sprintf(message,"Processing file %d of %d...", i, project.num_files);
-do_message_on(message);
-		    file = &project.files[i];
-		    for (j=0;j<file->num_sections;j++)
-			{
-			section = &file->sections[j];
-			nnav += section->num_pings;
-			nsnav += section->num_snav - section->continuity;
-			if (file->status == MBNA_FILE_FIXED)
-			    nfix += section->num_snav - section->continuity;
-			for (isnav=0;isnav<section->num_snav;isnav++)
-			    {
-			    if (isnav > 0 || section->continuity == MB_NO)
-				{
-				/* handle sequence count */
-				if (isnav > 0)
-				    nseq++;
-				else
-				    nseq = 1;
-				    
-				/* get time difference between current and previous nav point */
-				dtime_d = section->snav_time_d[isnav] - time_d_old;
-				
-				/* add first derivative constraint if nseq > 1 AND dtime_d > 0.0 */
-				if (nseq > 1 && dtime_d > 0.0)
-				    {
-				    avg_dtime_d += dtime_d;
-				    ndx++;
-				    }
-				
-				/* add second derivative constraint if nseq > 2 */
-				if (nseq > 2 && dtime_d > 0.0)
-				    ndx2++;
-				
-				/* save time_d values */
-				time_d_old = section->snav_time_d[isnav];
-				}
-			    }
-			}
-		    }
-		if (ndx > 0)
-		    avg_dtime_d /= ndx;
-		avg_offset = 0.0;
-		for (i=0;i<project.num_crossings;i++)
-		    {
-		    crossing = &project.crossings[i];
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET
-		    	&& crossing->num_ties > 0)
-			{
-			ntie += crossing->num_ties;
-			for (j=0;j<crossing->num_ties;j++)
-			    {
-			    avg_offset += fabs(crossing->ties[j].offset_x);
-			    }
-			}
-		    }
-		if (ntie > 0)
-		    avg_offset /= ntie;
-		
-		/* allocate space for the inverse problem */
-		nconstraint = ndf * (nfix + ndx + ndx2 + ntie);
-		nrows = nconstraint;
-		ncols = ndf * nsnav;
-		nnz = 6;
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnz * nrows * sizeof(double), (void **)&a,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnz * nrows * sizeof(int), (void **)&ia,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(int), (void **)&nia,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(double), (void **)&d,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(double), (void **)&w,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&x,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(int), (void **)&nx,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&dx,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&sigma,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&work,&error);
-
-		/* if error initializing memory then don't invert */
-		if (error != MB_ERROR_NO_ERROR)
-			{
-			mb_error(mbna_verbose,error,&error_message);
-			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-				error_message);
-			}
-		}
-		
-	/* proceed with construction of inverse problems */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
-		&& (project.num_crossings_analyzed == project.num_crossings
-			|| project.num_truecrossings_analyzed == project.num_truecrossings)
-		&& error == MB_ERROR_NO_ERROR)
-    		{
-		/* add info text */
-		sprintf(message, "Inverting for optimal navigation\n");
-		do_info_add(message, MB_YES);
-		sprintf(message, " > Inverse problem size:\n");
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Nav points:                    %d\n", nnav);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Independent nav snav points:   %d\n", nsnav);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Fixed nav snav points:         %d\n", nfix);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   First derivative constraints:  %d\n", ndx);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Second derivative constraints: %d\n", ndx2);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Nav ties:                      %d\n", ntie);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Total Unknowns:                %d\n", 3 * nsnav);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Total Constraints:             %d\n", nconstraint);
-		do_info_add(message, MB_NO);
-		sprintf(message, " > Iteration Smoothing S_total S_crossing Ratio\n > --------------------------------------\n");
-		do_info_add(message, MB_NO);
-		
-		/* initialize arrays */
-		for (i=0;i<nrows;i++)
-		    {
-		    nia[i] = 0;
-		    d[i] = 0.0;
-		    w[i] = 0.0;
-		    for (j=0;j<nnz;j++)
-			{
-			k = nnz * i + j;
-			ia[k] = 0;
-			a[k] = 0.0;
-			}
-		    }
-		for (i=0;i<ndf*nsnav;i++)
-		    {
-		    nx[i] = 0;
-		    x[i] = 0;
-		    dx[i] = 0.0;
-		    }
-		for (i=0;i<ncycle;i++)
-		    {
-		    sigma[i] = 0;
-		    work[i] = 0.0;
-		    }
-		
-		/* make inverse problem */
-		/*------------------------*/
-		nr = 0;
-		smoothweight = avg_dtime_d * avg_offset / 100000000;
-		smoothweight_old = smoothweight;
-		
-		/* apply first and second derivative constraints */
-		nc = 0;
-		nseq = 0;
-		for (ifile=0;ifile<project.num_files;ifile++)
-		    {
-sprintf(message,"Applying derivatives to file %d of %d...", ifile, project.num_files);
-do_message_on(message);
-		    file = &project.files[ifile];
-		    for (isection=0;isection<file->num_sections;isection++)
-			{
-			section = &file->sections[isection];
-			for (isnav=0;isnav<section->num_snav;isnav++)
-			    {			
-			    /* if continuity true first snav point is same as the last
-			       snav point of previous section */
-			    if (isnav > 0 || section->continuity == MB_NO)
-				{
-				/* handle sequence count */
-				if (isnav > 0)
-				    nseq++;
-				else
-				    nseq = 1;
-				    
-			    	/* if file fixed then fix snav point */
-			    	if (file->status == MBNA_FILE_FIXED)
-				    {
-				    /* longitude component */
-				    k = nnz * nr;
-				    a[k] = 1.0;
-				    d[nr] = 0.0;
-				    w[nr] = 1.0;
-				    ia[k] = nc;
-				    nia[nr] = 1;
-				    nr++;
-				
-				    /* latitude component */
-				    k = nnz * nr;
-				    a[k] = 1.0;
-				    d[nr] = 0.0;
-				    w[nr] = 1.0;
-				    ia[k] = nc + 1;
-				    nia[nr] = 1;
-				    nr++;
-				
-				    /* depth component */
-				    k = nnz * nr;
-				    a[k] = 100.0;
-				    d[nr] = 0.0;
-				    w[nr] = 100.0;
-				    ia[k] = nc + 2;
-				    nia[nr] = 1;
-				    nr++;
-				    }
-				    
-				/* get time difference between current and previous nav point */
-				dtime_d = section->snav_time_d[isnav] - time_d_old;
-				
-				/* add first derivative constraint if nseq > 1 AND dtime_d > 0.0 */
-				if (nseq > 1 && dtime_d > 0.0)
-				    {
-				    /* longitude component */
-				    k = nnz * nr;
-				    a[k] = -0.01 *smoothweight_old / dtime_d;
-				    a[k+1] = 0.01 *smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    w[nr] = 0.01 *smoothweight_old;
-				    ia[k] = nc - 3;
-				    ia[k+1] = nc;
-				    nia[nr] = 2;
-				    nr++;
-				
-				    /* latitude component */
-				    k = nnz * nr;
-				    a[k] = -0.01 *smoothweight_old / dtime_d;
-				    a[k+1] = 0.01 *smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    w[nr] = 0.01 *smoothweight_old;
-				    ia[k] = nc - 2;
-				    ia[k+1] = nc + 1;
-				    nia[nr] = 2;
-				    nr++;
-				
-				    /* depth component */
-				    k = nnz * nr;
-				    a[k] = -0.01 *smoothweight_old / dtime_d;
-				    a[k+1] = 0.01 *smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    w[nr] = 0.01 *smoothweight_old;
-				    ia[k] = nc - 1;
-				    ia[k+1] = nc + 2;
-				    nia[nr] = 2;
-				    nr++;
-				    }
-				
-				/* add second derivative constraint if nseq > 2  AND dtime_d > 0.0 */
-				if (nseq > 2 && dtime_d > 0.0)
-				    {
-				    /* longitude component */
-				    k = nnz * nr;
-				    a[k] = smoothweight_old / dtime_d;
-				    a[k+1] = -2.0 * smoothweight_old / dtime_d;
-				    a[k+2] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    w[nr] = smoothweight_old;
-				    ia[k] = nc - 6;
-				    ia[k+1] = nc - 3;
-				    ia[k+2] = nc;
-				    nia[nr] = 3;
-				    nr++;
-				
-				    /* latitude component */
-				    k = nnz * nr;
-				    a[k] = smoothweight_old / dtime_d;
-				    a[k+1] = -2.0 * smoothweight_old / dtime_d;
-				    a[k+2] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    w[nr] = smoothweight_old;
-				    ia[k] = nc - 5;
-				    ia[k+1] = nc - 2;
-				    ia[k+2] = nc + 1;
-				    nia[nr] = 3;
-				    nr++;
-				
-				    /* depth component */
-				    k = nnz * nr;
-				    a[k] = smoothweight_old / dtime_d;
-				    a[k+1] = -2.0 * smoothweight_old / dtime_d;
-				    a[k+2] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    w[nr] = smoothweight_old;
-				    ia[k] = nc - 4;
-				    ia[k+1] = nc - 1;
-				    ia[k+2] = nc + 2;
-				    nia[nr] = 3;
-				    nr++;
-				    }
-				
-				/* save time_d values */
-				time_d_older = time_d_old;
-				time_d_old = section->snav_time_d[isnav];
-
-				/* add to unknown count */
-				nc += ndf;
-				}
-			    }
-			}
-		    }
-		
-		/* apply crossing offset constraints */
-sprintf(message,"Applying %d crossing constraints...", project.num_crossings);
-do_message_on(message);
-		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
-		
-		    /* use only set crossings */
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    for (j=0;j<crossing->num_ties;j++)
-			{
-			/* get tie */
-			tie = (struct mbna_tie *) &crossing->ties[j];
-			
-			/* get absolute id for first snav point */
-			file1 = &project.files[crossing->file_id_1];
-			section = &file1->sections[crossing->section_1];
-			nc1 = section->global_start_snav + tie->snav_1;
-
-			/* get absolute id for second snav point */
-			file2 = &project.files[crossing->file_id_2];
-			section = &file2->sections[crossing->section_2];
-			nc2 = section->global_start_snav + tie->snav_2;
-if (nc1 > nsnav - 1 || nc2 > nsnav -1
-|| nc1 < 0 || nc2 < 0)
-fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
-
-			/* get observed offset vector including reduction of block solution */
-			offsetx = tie->offset_x_m - file2->block_offset_x + file1->block_offset_x;
-			offsety = tie->offset_y_m - file2->block_offset_y + file1->block_offset_y;
-			offsetz = tie->offset_z_m - file2->block_offset_z + file1->block_offset_z;
-			
-			/* make long axis constraint */
-			k = nnz * nr;
-			w[nr] = mbna_offsetweight / tie->sigmar1;
-			a[k] = -w[nr] * tie->sigmax1[0];
-			a[k+1] = w[nr] * tie->sigmax1[0];
-			a[k+2] = -w[nr] * tie->sigmax1[1];
-			a[k+3] = w[nr] * tie->sigmax1[1];
-			a[k+4] = -w[nr] * tie->sigmax1[2];
-			a[k+5] = w[nr] * tie->sigmax1[2];
-			d[nr] = w[nr] * (offsetx * tie->sigmax1[0]
-							+ offsety * tie->sigmax1[1]
-							+ offsetz * tie->sigmax1[2]);
-			ia[k] = 3 * nc1;
-			ia[k+1] = 3 * nc2;
-			ia[k+2] = 3 * nc1 + 1;
-			ia[k+3] = 3 * nc2 + 1;
-			ia[k+4] = 3 * nc1 + 2;
-			ia[k+5] = 3 * nc2 + 2;
-			nia[nr] = 6;
-/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
-			nr++;
-			
-			/* make horizontal axis constraint */
-			k = nnz * nr;
-			w[nr] = mbna_offsetweight / tie->sigmar2;
-			a[k] = -w[nr] * tie->sigmax2[0];
-			a[k+1] = w[nr] * tie->sigmax2[0];
-			a[k+2] = -w[nr] * tie->sigmax2[1];
-			a[k+3] = w[nr] * tie->sigmax2[1];
-			a[k+4] = -w[nr] * tie->sigmax2[2];
-			a[k+5] = w[nr] * tie->sigmax2[2];
-			d[nr] = w[nr] * (offsetx * tie->sigmax2[0]
-							+ offsety * tie->sigmax2[1]
-							+ offsetz * tie->sigmax2[2]);
-			ia[k] = 3 * nc1;
-			ia[k+1] = 3 * nc2;
-			ia[k+2] = 3 * nc1 + 1;
-			ia[k+3] = 3 * nc2 + 1;
-			ia[k+4] = 3 * nc1 + 2;
-			ia[k+5] = 3 * nc2 + 2;
-			nia[nr] = 6;
-/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
-			nr++;
-			
-			/* make semi-vertical constraint */
-			k = nnz * nr;
-			kluge = 1.0;
-			w[nr] = kluge * mbna_offsetweight / tie->sigmar3;
-			a[k] = -w[nr] * tie->sigmax3[0];
-			a[k+1] = w[nr] * tie->sigmax3[0];
-			a[k+2] = -w[nr] * tie->sigmax3[1];
-			a[k+3] = w[nr] * tie->sigmax3[1];
-			a[k+4] = -w[nr] * tie->sigmax3[2];
-			a[k+5] = w[nr] * tie->sigmax3[2];
-			d[nr] = w[nr] * (offsetx * tie->sigmax3[0]
-							+ offsety * tie->sigmax3[1]
-							+ offsetz * tie->sigmax3[2]);
-			ia[k] = 3 * nc1;
-			ia[k+1] = 3 * nc2;
-			ia[k+2] = 3 * nc1 + 1;
-			ia[k+3] = 3 * nc2 + 1;
-			ia[k+4] = 3 * nc1 + 2;
-			ia[k+5] = 3 * nc2 + 2;
-			nia[nr] = 6;
-			
-			/* count the tie */
-			nx[3 * nc1]++;
-			nx[3 * nc2]++;
-			nx[3 * nc1 + 1]++;
-			nx[3 * nc2 + 1]++;
-			nx[3 * nc1 + 2]++;
-			nx[3 * nc2 + 2]++;
-/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
-			nr++;
-			}
-		    }
-		    
-/* print out matrix problem & calculate error */
-/*sigma_total = 0.0;
-sigma_crossing = 0.0;
-fprintf(stderr,"START PROBLEM: smoothweight:%g avg_dtime_d:%g avg_offset:%g\n",
-smoothweight,avg_dtime_d,avg_offset);
-
-for (i=0;i<nr;i++)
-{
-fprintf(stderr,"row %d with %d elements\n", i, nia[i]);
-s = 0.0;
-for (j=0;j<nia[i];j++)
-    {
-    k = nnz * i + j;
-    s += x[ia[k]] * a[k];
-fprintf(stderr,"element %d column %d    a:%g  x:%g  s:%g\n", j, ia[k], a[k], x[ia[k]], x[ia[k]] * a[k]);
-    }
-sigma_total += (d[i] - s) * (d[i] - s);
-fprintf(stderr,"row %d result:  s:%g d:%g sigma_total:%g %g\n\n", i, s, d[i], (d[i] - s) * (d[i] - s), sigma_total);
-if (i >= (nr - ndf * ntie))
-    sigma_crossing += (d[i] - s) * (d[i] - s);
-}
-sigma_total = sqrt(sigma_total) / nr;
-sigma_crossing = sqrt(sigma_crossing) / ntie;
-fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total, sigma_crossing);
-*/
-
-		/* now do a bunch of test solutions to find what level of smoothing
-		 * starts to impact the solution - we want to use this much and no more
-		 */
-		first = MB_YES;
-		done = MB_NO;
-		iter=0;
-		smoothfactor = 100.0;
-		smoothmin = -1.0;
-		smoothmax = -1.0;
-		while (done == MB_NO)
-		    {
-		    /* first change the smoothing weight in the matrix problem */
-		    smoothweight = smoothweight * smoothfactor;
-		    iter++;
-		    for (i=0;i<ndf*(nfix+ndx+ndx2);i++)
-			{
-			for (j=0;j<nia[i];j++)
-			    {
-			    if (nia[i] > 1)
-				{
-				k = nnz * i + j;
-				a[k] *= smoothfactor;
-				}
-			    }
-			}
-		
-		    /* now solve inverse problem */
-		    if (first == MB_YES)
-			{
-			sprintf(message,"Inverting %dx%d: iter:%d smooth:%.2g",
-				nc, nr, iter, smoothweight);
+			status = MB_FAILURE;
+			error = MB_ERROR_OPEN_FAIL;
 			}
 		    else
 			{
-			sprintf(message,"Inverting %dx%d: iter:%d smooth:%.2g ratio:%.3f iter:%d smooth:%.2g ",
-				nc, nr, iter-1, smoothweight_old,
-				(sigma_crossing / sigma_crossing_first), iter, smoothweight);
-			}
-		    do_message_on(message);
-		
-		    /* compute upper bound on maximum eigenvalue */
-		    ncyc = 0;
-		    nsig = 0;
-		    lspeig(a, ia, nia, nnz, nc, nr, ncyc,
-			    &nsig, x, dx, sigma, work, &smax, &err, &sup);
-		    supt = smax + err;
-		    if (sup > supt)
-			supt = sup;
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "Initial lspeig: sup:%g smax:%g err:%g supt:%g\n",
-			sup, smax, err, supt);
-		    ncyc = 16;
-		    for (i=0;i<4;i++)
-			{
-			lspeig(a, ia, nia, nnz, nc, nr, ncyc,
-				&nsig, x, dx, sigma, work, &smax, &err, &sup);
-			supt = smax + err;
-			if (sup > supt)
-			    supt = sup;
-			if (mbna_verbose > 0)
-			fprintf(stderr, "lspeig[%d]: sup:%g smax:%g err:%g supt:%g\n",
-			    i, sup, smax, err, supt);
-			}
-			
-		    /* calculate chebyshev factors (errlsq is the theoretical error) */
-		    slo = supt / bandwidth;
-		    chebyu(sigma, ncycle, supt, slo, work);
-		    errlsq = errlim(sigma, ncycle, supt, slo);
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "Theoretical error: %f\n", errlsq);
-		    if (mbna_verbose > 1)
-		    for (i=0;i<ncycle;i++)
-			fprintf(stderr, "sigma[%d]: %f\n", i, sigma[i]);
-			
-		    /* solve the problem */
-		    for (i=0;i<nc;i++)
-			x[i] = 0.0;
-		    lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
-	
-		    /* output solution */
-		    if (mbna_verbose > 1)
-		    for (i=0;i<nc/3;i++)
-			{
-			fprintf(stderr, "i:%d  offsets: %f %f %f  nties: %d %d %d\n",
-				i, x[3*i], x[3*i+1], x[3*i+2], nx[3*i], nx[3*i+1], nx[3*i+2]);
-			}
-		
-		    /* calculate total error */
-		    sigma_total = 0.0;
-		    sigma_crossing = 0.0;
-		    for (i=0;i<nr;i++)
-			{
-			s = 0.0;
-			for (j=0;j<nia[i];j++)
-			    {
-			    k = nnz * i + j;
-			    s += x[ia[k]] * a[k];
-			    }
-			sigma_total += (d[i] - s) * (d[i] - s);
-			if (i >= (nr - ndf * ntie))
-			    sigma_crossing += (d[i] - s) * (d[i] - s);
-			}
-		    sigma_total = sqrt(sigma_total) / nr;
-		    sigma_crossing = sqrt(sigma_crossing) / ntie;
-		
-		    /* calculate tie error */
-		    sigma_crossing = 0.0;
-		    for (i=(nr - ndf * ntie);i<nr;i++)
-			{
-			s = 0.0;
-			for (j=0;j<nia[i];j++)
-			    {
-			    k = nnz * i + j;
-			    s += x[ia[k]] * a[k] / w[i];
-			    }
-			sigma_crossing += (d[i] / w[i] - s) * (d[i] / w[i] - s);
-			}
-		    sigma_crossing = sqrt(sigma_crossing) / ntie;
-		
-		    /* keep track of results */
-		    if (first == MB_YES)
-			{
-			first = MB_NO;
-			sigma_crossing_first = MAX(sigma_crossing, project.precision);
-			smoothweight_old = smoothweight;
-			smoothmin = smoothweight;
-			}
-		    else if (sigma_crossing >= 1.005 * sigma_crossing_first
-			    && sigma_crossing <= 1.01 * sigma_crossing_first
-			    && sigma_crossing > 0.0)
-			{
-			done = MB_YES;
-			smoothweight_best = smoothweight;
-			sigma_total_best = sigma_total;
-			sigma_crossing_best = sigma_crossing;
-			smoothweight_old = smoothweight;
-			}
-		    else if (sigma_crossing < 1.005 * sigma_crossing_first)
-			{
-			if (smoothweight > smoothmin)
-			    {
-			    smoothmin = smoothweight;
-			    }
-			if (smoothmax > 0.0)
-			    smoothfactor = (smoothmin + 0.3 * (smoothmax - smoothmin))
-						/ smoothweight;				
-			smoothweight_old = smoothweight;
-			}
-		    else if (sigma_crossing > 1.01 * sigma_crossing_first
-			    && sigma_crossing > 0.0)
-			{
-			if (smoothweight < smoothmax || smoothmax < 0.0)
-			    {
-			    smoothmax = smoothweight;
-			    }
-			smoothfactor = (smoothmin + 0.3 * (smoothmax - smoothmin))
-					    / smoothweight;				
-			smoothweight_old = smoothweight;
-			}
-		    else
-			{
-			smoothweight_old = smoothweight;
-			}
-		
-		    /* do message */
-		    sprintf(message, " >   %d %12g %12g %12g %12g\n",
-			    iter, smoothweight, sigma_total, 
-			    sigma_crossing, 
-			    (sigma_crossing / sigma_crossing_first));
-		    do_info_add(message, MB_NO);
-fprintf(stderr,"iteration:%3d smooth:%12g sigmatot:%12g sigmacrossing:%12g ratio:%12g\n",
-iter,smoothweight,sigma_total, 
-sigma_crossing,
-(sigma_crossing / sigma_crossing_first));
-		    }
-		
-		/* save solution */
-		k = 0;
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    for (j=0;j<file->num_sections;j++)
-			{
-			section = &file->sections[j];
-			for (isnav=0;isnav<section->num_snav;isnav++)
-			    {
-			    if (isnav == 0 && section->continuity == MB_YES)
-				k -= 3;
-			    section->snav_lon_offset[isnav] = (x[k] + file->block_offset_x) * mbna_mtodeglon;
-			    section->snav_lat_offset[isnav] = (x[k+1] + file->block_offset_y) * mbna_mtodeglat;
-			    section->snav_z_offset[isnav] = (x[k+2] + file->block_offset_z);
-			    k += 3;
-			    }
-			}
-		    }
-
-		/* interpolate the solution */
-		mbnavadjust_interpolatesolution();
-		}
-		
-	/* output results from navigation solution */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
-		&& (project.num_crossings_analyzed == project.num_crossings
-			|| project.num_truecrossings_analyzed == project.num_truecrossings)
-		&& error == MB_ERROR_NO_ERROR)
-    		{
-		
-		/* now output inverse solution */
-		sprintf(message,"Outputting navigation solution...");
-		do_message_on(message);
-
-		sprintf(message, " > Final smoothing weight:%12g\n > Final crossing sigma:%12g\n > Final total sigma:%12g\n",
-			smoothweight_best, sigma_crossing_best, sigma_total_best);
-		do_info_add(message, MB_NO);
-		
-		/* get crossing offset results */
-		sprintf(message, " > Nav Tie Offsets (m):  id  observed  solution  error\n");
-		do_info_add(message, MB_NO);
-		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
-		
-		    /* check only set ties */
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    for (j=0;j<crossing->num_ties;j++)
-			{
-			tie = (struct mbna_tie *) &crossing->ties[j];
-			offset_x =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lon_offset[tie->snav_1];
-			offset_y =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lat_offset[tie->snav_1];
-			offset_z =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_z_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_z_offset[tie->snav_1];
-			tie->inversion_status = MBNA_INVERSION_CURRENT;
-    			tie->inversion_offset_x = offset_x;
-    			tie->inversion_offset_y = offset_y;
-   			tie->inversion_offset_x_m = offset_x / mbna_mtodeglon;
-    			tie->inversion_offset_y_m = offset_y / mbna_mtodeglat;
-    			tie->inversion_offset_z_m = offset_z;
-
-			sprintf(message, " >     %4d   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f\n",
-				icrossing,
-				tie->offset_x_m,
-				tie->offset_y_m,
-				tie->offset_z_m,
-				tie->inversion_offset_x_m,
-				tie->inversion_offset_y_m,
-				tie->inversion_offset_z_m,
-				(tie->inversion_offset_x_m - tie->offset_x_m),
-				(tie->inversion_offset_y_m - tie->offset_y_m),
-				(tie->inversion_offset_z_m - tie->offset_z_m));
+			sprintf(message, " > Output updated nav to %s\n", opath);
 			do_info_add(message, MB_NO);
-			}
-		    }
 
-		if (mbna_verbose > 0)
-		for (i=0;i<nc/3;i++)
-		    {
-		    fprintf(stderr, "i:%d  offsets: %f %f %f  crossings: %d %d %d\n",
-		    		i, x[3*i], x[3*i+1], x[3*i+2], nx[3*i], nx[3*i+1], nx[3*i+1]);
-		    }
-		if (mbna_verbose > 0)
-		for (i=0;i<nr;i++)
-		    {
-		    s = 0.0;
-		    for (j=0;j<nia[i];j++)
-			{
-			k = nnz * i + j;
-			s += x[ia[k]] * a[k];
-			if (mbna_verbose > 0)
-			fprintf(stderr, "i:%4d j:%4d k:%4d ia[k]:%4d a[k]:%12g\n", i, j, k, ia[k], a[k]);
-			}
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "i:%5d n:%5d  d:%12g s:%12g err:%12g\n",i,nia[i],d[i],s,d[i]-s);
-		    }
-		
-		/* write updated project */
-		project.inversion = MBNA_INVERSION_CURRENT;
-		mbnavadjust_write_project();
-
-		/* deallocate arrays */
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&a,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&ia,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nia,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&d,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&w,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&x,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nx,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&dx,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&sigma,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&work,&error);
-
-		/* generate new nav files */
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    if (file->status != MBNA_FILE_FIXED)
-		    	{
-		    	sprintf(npath,"%s/nvs_%4.4d.mb166",
-			    project.datadir,i);
-		    	sprintf(apath,"%s/nvs_%4.4d.na%d",
-			    project.datadir,i,file->output_id);
-		    	sprintf(opath,"%s.na%d", file->path, file->output_id);
-		    	if ((nfp = fopen(npath,"r")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		    	else if ((afp = fopen(apath,"w")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		   	else if ((ofp = fopen(opath,"w")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		    	else
-			    {
-			    sprintf(message, " > Output updated nav to %s\n", opath);
-			    do_info_add(message, MB_NO);
-
-			    /* read the input nav */
-			    isection = 0;
-			    section = &file->sections[isection];
-			    isnav = 0;
-			    done = MB_NO;
-			    while (done == MB_NO)
-			    	{
-			    	if ((result = fgets(buffer,BUFFER_MAX,nfp)) != buffer)
-				    {
-				    done = MB_YES;
-				    }
-			    	else if ((nscan = sscanf(buffer, "%d %d %d %d %d %d.%d %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-							&time_i[0], &time_i[1], &time_i[2], &time_i[3],
-							&time_i[4], &time_i[5], &time_i[6], &time_d,
-							&navlon, &navlat, &heading, &speed, 
-							&draft, &roll, &pitch, &heave)) >= 12)
-				    {
-				    /* fix nav from early version */
-				    if (nscan < 16)
-					{
-					draft = 0.0;
-					roll = 0.0;
-					pitch = 0.0;
-					heave = 0.0;
-					}
-					
-				    /* get next snav interval if needed */
-				    while (time_d > section->snav_time_d[isnav+1]
-				    	&& !(isection == file->num_sections - 1
-					    && isnav == section->num_snav - 2))
-				    	{
-				    	if (isnav < section->num_snav - 2)
-					    {
-					    isnav++;
-					    }
-				    	else if (isection < file->num_sections)
-					    {
-					    isection++;
-					    section = &file->sections[isection];
-					    isnav = 0;
-					    }
-				    	}
-				
-				    /* update the nav if possible (and it should be...) */
-				    if (time_d < section->snav_time_d[isnav])
-					{
-					factor = 0.0;
-					}
-				    else if (time_d > section->snav_time_d[isnav+1])
-					{
-					factor = 1.0;
-					}
-				    else
-				    	{
-				    	if (section->snav_time_d[isnav+1] > section->snav_time_d[isnav])
-					    {
-					    factor = (time_d - section->snav_time_d[isnav])
-							/ (section->snav_time_d[isnav+1] - section->snav_time_d[isnav]);
-/*if (fabs(time_d - section->snav_time_d[isnav]) < 1.0)
-fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav]);
-else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
-fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
-					    }
-				    	else
-					    factor = 0.0;
-				    	}
-					
-				    /* update and output only nonzero navigation */
-				    if (fabs(navlon) > 0.0000001 && fabs(navlat) > 0.0000001)
-				    	{
-					navlon -= section->snav_lon_offset[isnav]
-							+ factor * (section->snav_lon_offset[isnav+1]
-								- section->snav_lon_offset[isnav]);
-					navlat -= section->snav_lat_offset[isnav]
-							+ factor * (section->snav_lat_offset[isnav+1]
-								- section->snav_lat_offset[isnav]);
-					zoffset = section->snav_z_offset[isnav]
-							+ factor * (section->snav_z_offset[isnav+1]
-								- section->snav_z_offset[isnav]);
-
-					/* write the updated nav out */
-					/* printing this string twice because in some situations the first
-						print has the time_d value come out as "nan" - this is the worst sort
-						of kluge for a real but mysterious bug - apologies to all who find this
-						- DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
-					sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-						    time_i[0], time_i[1], time_i[2], time_i[3],
-						    time_i[4], time_i[5], time_i[6], time_d,
-						    navlon, navlat, heading, speed, 
-						    draft, roll, pitch, heave, zoffset);
-					sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-						    time_i[0], time_i[1], time_i[2], time_i[3],
-						    time_i[4], time_i[5], time_i[6], time_d,
-						    navlon, navlat, heading, speed, 
-						    draft, roll, pitch, heave, zoffset);
-					fprintf(ofp, "%s", ostring);
-					fprintf(afp, "%s", ostring);
-/*fprintf(stderr, "%2.2d:%2.2d:%2.2d:%5.3f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f\n\n",
-i, isection, isnav, factor, 
-time_i[0], time_i[1], time_i[2], time_i[3],
-time_i[4], time_i[5], time_i[6], time_d,
-navlon, navlat, heading, speed, zoffset);*/
-					}
-				    }
-			    	}
-			    }
-		    	if (nfp != NULL) fclose(nfp);
-		    	if (afp != NULL) fclose(afp);
-		    	if (ofp != NULL) 
-			    {
-			    fclose(ofp);
-			    
-			    /* get bias values */
-			    mb_pr_get_heading(mbna_verbose, file->path, 
-						&mbp_heading_mode, 
-						&mbp_headingbias, 
-						&error);
-			    mb_pr_get_rollbias(mbna_verbose, file->path, 
-						&mbp_rollbias_mode, 
-						&mbp_rollbias, 
-						&mbp_rollbias_port, 
-						&mbp_rollbias_stbd, 
-						&error);
-	    
-			    /* update output file in mbprocess parameter file */
-			    status = mb_pr_update_format(mbna_verbose, file->path, 
-					MB_YES, file->format, 
-					&error);
-			    status = mb_pr_update_navadj(mbna_verbose, file->path, 
-					MBP_NAVADJ_LLZ, opath, 
-					MBP_NAV_LINEAR, 
-					&error);
-
-			    /* update heading bias in mbprocess parameter file */
-			    mbp_headingbias = file->heading_bias + file->heading_bias_import;
-			    if (mbp_headingbias == 0.0)
-				{
-				if (mbp_heading_mode == MBP_HEADING_OFF
-				    || mbp_heading_mode == MBP_HEADING_OFFSET)
-				    mbp_heading_mode = MBP_HEADING_OFF;
-				else if (mbp_heading_mode == MBP_HEADING_CALC
-				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-				    mbp_heading_mode = MBP_HEADING_CALC;
-				}
-			    else
-				{
-				if (mbp_heading_mode == MBP_HEADING_OFF
-				    || mbp_heading_mode == MBP_HEADING_OFFSET)
-				    mbp_heading_mode = MBP_HEADING_OFFSET;
-				else if (mbp_heading_mode == MBP_HEADING_CALC
-				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-				    mbp_heading_mode = MBP_HEADING_CALCOFFSET;
-				}
-			    status = mb_pr_update_heading(mbna_verbose, file->path, 
-					mbp_heading_mode, mbp_headingbias, 
-					&error);
-
-			    /* update roll bias in mbprocess parameter file */
-			    mbp_rollbias = file->roll_bias + file->roll_bias_import;
-			    if (mbp_rollbias == 0.0)
-				{
-				if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-				    {
-				    mbp_rollbias_port = mbp_rollbias 
-					    + mbp_rollbias_port - file->roll_bias_import;
-				    mbp_rollbias_stbd = mbp_rollbias 
-					    + mbp_rollbias_stbd - file->roll_bias_import;
-				    }
-				else
-				    mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
-				}
-			    else
-				{
-				if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-				    {
-				    mbp_rollbias_port = mbp_rollbias 
-					    + mbp_rollbias_port - file->roll_bias_import;
-				    mbp_rollbias_stbd = mbp_rollbias 
-					    + mbp_rollbias_stbd - file->roll_bias_import;
-				    }
-				else
-				    {
-				    mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
-				    }
-				}
-			    status = mb_pr_update_rollbias(mbna_verbose, file->path, 
-					mbp_rollbias_mode, mbp_rollbias, 
-					mbp_rollbias_port, mbp_rollbias_stbd, 
-					&error);
-			    }
-			}
-		    }
-		
-		/* turn off message dialog */
-		do_message_off();
-		}
-
- 	/* print output debug statements */
-	if (mbna_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:       %d\n",error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
-
-	return(status);
-}
-
-/*--------------------------------------------------------------------*/
-
-int
-mbnavadjust_invertnavold()
-{
-	/* local variables */
-	char	*function_name = "mbnavadjust_invertnavold";
-	int	status = MB_SUCCESS;
-	struct mbna_file *file;
-	struct mbna_file *file1;
-	struct mbna_file *file2;
-	struct mbna_section *section;
-	struct mbna_crossing *crossing;
-	struct mbna_tie *tie;
-	int	nnav, nsnav, nfix, ndx, ndx2, ntie, nconstraint;
-	int	nblock;
-	int	nseq;
-	int	nnz = 3;
-	int	ndf = 3;
-	int	nrows = 0;
-	int	ncols = 0;
-	double	*a;
-	int	*ia;
-	int	*nia;
-	int	*nx;
-	double	*x;
-	double	*dx;
-	double	*d;
-	double	*sigma;
-	double	*work;
-	double	time_d, time_d_old, time_d_older, dtime_d;
-	double	avg_dtime_d, avg_offset;
-	int	ifile, icrossing, isection, isnav;
-	int	nr, nc, nc1, nc2;
-	int	ncyc, nsig;
-	double	smax, sup, err, supt, slo, errlsq, s;
-	int	ncycle = 2048;
-	double	bandwidth = 10000.0;
-	double	smoothweight, sigma_total, sigma_crossing;
-	double	sigma_crossing_first;
-	double	smoothweight_old, smoothweight_best, sigma_total_best, sigma_crossing_best;
-	double	smoothfactor, smoothmin, smoothmax;
-	double	offset_x, offset_y, offset_z;
-	int	first;
-	int	iter;
-	char	npath[STRING_MAX];
-	char	apath[STRING_MAX];
-	char	opath[STRING_MAX];
-	char	ostring[STRING_MAX];
-	FILE	*nfp, *afp, *ofp;
-	char	*result;
-	char	buffer[BUFFER_MAX];
-	int	done, nscan;
-	double	factor;
-	int	time_i[7];
-	double	navlon;
-	double	navlat;
-	double	speed;
-	double	heading;
-	double	distance;
-	double	draft;
-	double	roll;
-	double	pitch;
-	double	heave;
-	double	zoffset;
-	int	mbp_heading_mode;
-	double	mbp_headingbias;
-	int	mbp_rollbias_mode;
-	double	mbp_rollbias;
-	double	mbp_rollbias_port;
-	double	mbp_rollbias_stbd;
-	double	fixed_block_offset_x;
-	double	fixed_block_offset_y;
-	double	fixed_block_offset_z;
-	int	nfixed_block_offset;
-	int	i, j, k;
-
- 	/* print input debug statements */
-	if (mbna_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		}
-
-	/* invert if there is a project and all crossings have been analyzed */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
-		&& (project.num_crossings_analyzed == project.num_crossings
-			|| project.num_truecrossings_analyzed == project.num_truecrossings))
-			
-    		{
-		/* set message dialog on */
-		sprintf(message,"Setting up navigation inversion...");
-		do_message_on(message);
-		
-		/*----------------------------------------------------------------*/
-		
-		/* figure out the average offsets between connected sets of files 
-			- invert for x y z offsets for the blocks */
-			
-		/* count the number of blocks */
-		nblock = 0;
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    if (i==0 || file->sections[0].continuity == MB_NO)
-		    	{
-			nblock++;
-			}
-		    file->block = nblock - 1;
-		    file->block_offset_x = 0.0;
-		    file->block_offset_y = 0.0;
-		    file->block_offset_z = 0.0;
-		    }
-		ntie = 0;
-		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    ntie += crossing->num_ties;
-		    }
-		
-		/* invert for block offsets only if there is more than one block */
-		if (nblock > 1)
-		    {
-		    /* allocate space for the inverse problem */
-		    nconstraint = ndf * ntie;
-		    nrows = nconstraint;
-		    ncols = ndf * nblock;
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnz * nrows * sizeof(double), (void **)&a,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnz * nrows * sizeof(int), (void **)&ia,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(int), (void **)&nia,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(double), (void **)&d,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&x,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(int), (void **)&nx,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&dx,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&sigma,&error);
-		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&work,&error);
-
-		    /* initialize arrays */
-		    for (i=0;i<nrows;i++)
-			{
-			nia[i] = 0;
-			d[i] = 0.0;
-			for (j=0;j<nnz;j++)
-			    {
-			    k = nnz * i + j;
-			    ia[k] = 0;
-			    a[k] = 0.0;
-			    }
-			}
-		    for (i=0;i<ndf*nblock;i++)
-			{
-			nx[i] = 0;
-			x[i] = 0;
-			dx[i] = 0.0;
-			}
-		    for (i=0;i<ncycle;i++)
-			{
-			sigma[i] = 0;
-			work[i] = 0.0;
-			}
-
-		    /* construct the inverse problem */
-		    sprintf(message,"Solving for block offsets...");
-		    do_message_on(message);
-		    
-		    /* loop over crossings getting set ties */
-		    nr = 0;
-		    nc = ndf * nblock;
-		    ntie = 0;
-		    for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-			{
-			crossing = &project.crossings[icrossing];
-
-			/* use only set crossings */
-			if (crossing->status == MBNA_CROSSING_STATUS_SET)
-			for (j=0;j<crossing->num_ties;j++)
-			    {
-			    /* get tie */
-			    tie = (struct mbna_tie *) &crossing->ties[j];
-			    ntie++;
-
-			    /* get block id for first snav point */
-			    file = &project.files[crossing->file_id_1];
-			    nc1 = file->block;
-
-			    /* get block id for second snav point */
-			    file = &project.files[crossing->file_id_2];
-			    nc2 = file->block;
-
-			    /* make longitude constraint */
-			    k = nnz * nr;
-			    a[k] = -1.0;
-			    a[k+1] = 1.0;
-			    d[nr] = tie->offset_x_m;
-			    ia[k] = 3 * nc1;
-			    ia[k+1] = 3 * nc2;
-			    nia[nr] = 2;
-			    nx[3 * nc1]++;
-			    nx[3 * nc2]++;
-/* fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%g\n", nr,k, a[k],a[k+1],d[nr]); */
-			    nr++;
-
-			    /* make latitude constraint */
-			    k = nnz * nr;
-			    a[k] = -1.0;
-			    a[k+1] = 1.0;
-			    d[nr] = tie->offset_y_m;
-			    ia[k] = 3 * nc1 + 1;
-			    ia[k+1] = 3 * nc2 + 1;
-			    nia[nr] = 2;
-			    nx[3 * nc1 + 1]++;
-			    nx[3 * nc2 + 1]++;
-/* fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%g\n", nr,k, a[k],a[k+1],d[nr]); */
-			    nr++;
-
-			    /* make depth constraint */
-			    k = nnz * nr;
-			    a[k] = -1.0;
-			    a[k+1] = 1.0;
-			    d[nr] = tie->offset_z_m;
-			    ia[k] = 3 * nc1 + 2;
-			    ia[k+1] = 3 * nc2 + 2;
-			    nia[nr] = 2;
-			    nx[3 * nc1 + 2]++;
-			    nx[3 * nc2 + 2]++;
-/* fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%g\n", nr,k, a[k],a[k+1],d[nr]); */
-			    nr++;
-			    }
-			}
-
-		    /* solve the inverse problem */
-
-		    /* compute upper bound on maximum eigenvalue */
-		    ncyc = 0;
-		    nsig = 0;
-		    lspeig(a, ia, nia, nnz, nc, nr, ncyc,
-			    &nsig, x, dx, sigma, work, &smax, &err, &sup);
-		    supt = smax + err;
-		    if (sup > supt)
-			supt = sup;
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "Initial lspeig: sup:%g smax:%g err:%g supt:%g\n",
-			sup, smax, err, supt);
-		    ncyc = 16;
-		    for (i=0;i<4;i++)
-			{
-			lspeig(a, ia, nia, nnz, nc, nr, ncyc,
-				&nsig, x, dx, sigma, work, &smax, &err, &sup);
-			supt = smax + err;
-			if (sup > supt)
-			    supt = sup;
-			if (mbna_verbose > 0)
-			fprintf(stderr, "lspeig[%d]: sup:%g smax:%g err:%g supt:%g\n",
-			    i, sup, smax, err, supt);
-			}
-
-		    /* calculate chebyshev factors (errlsq is the theoretical error) */
-		    slo = supt / bandwidth;
-		    chebyu(sigma, ncycle, supt, slo, work);
-		    errlsq = errlim(sigma, ncycle, supt, slo);
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "Theoretical error: %f\n", errlsq);
-		    if (mbna_verbose > 1)
-		    for (i=0;i<ncycle;i++)
-			fprintf(stderr, "sigma[%d]: %f\n", i, sigma[i]);
-
-		    /* solve the problem */
-		    for (i=0;i<nc;i++)
-			x[i] = 0.0;
-		    lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
-
-		    /* output solution */
-		    if (mbna_verbose > 1)
-		    for (i=0;i<nc/3;i++)
-			{
-			fprintf(stderr, "block:%d  offsets: %f %f %f  nties: %d %d %d\n",
-				i, x[3*i], x[3*i+1], x[3*i+2], nx[3*i], nx[3*i+1], nx[3*i+2]);
-			}
-
-		    /* calculate error */
-		    sigma_total = 0.0;
-		    sigma_crossing = 0.0;
-		    for (i=0;i<nr;i++)
-			{
-			s = 0.0;
-			for (j=0;j<nia[i];j++)
-			    {
-			    k = nnz * i + j;
-			    s += x[ia[k]] * a[k];
-			    }
-			sigma_total += (d[i] - s) * (d[i] - s);
-			if (i >= (nr - 3 * ntie))
-			    sigma_crossing += (d[i] - s) * (d[i] - s);
-			}
-		    sigma_total = sqrt(sigma_total) / nr;
-		    sigma_crossing = sqrt(sigma_crossing) / ntie;
-
-		    /* extract results */
-		    fixed_block_offset_x = 0.0;
-		    fixed_block_offset_y = 0.0;
-		    fixed_block_offset_z = 0.0;
-		    nfixed_block_offset = 0;
-		    for (i=0;i<project.num_files;i++)
-			{
-			file = &project.files[i];
-			if (file->status == MBNA_FILE_FIXED)
-				{
-				fixed_block_offset_x -= x[3 * file->block];
-				fixed_block_offset_y -= x[3 * file->block + 1];
-				fixed_block_offset_z -= x[3 * file->block + 2];
-				nfixed_block_offset++;
-				}
-			file->block_offset_x = x[3 * file->block];
-			file->block_offset_y = x[3 * file->block + 1];
-			file->block_offset_z = x[3 * file->block + 2];
-			}
-		    if (nfixed_block_offset > 0)
-		        {
-			fixed_block_offset_x /= (double)nfixed_block_offset;
-			fixed_block_offset_y /= (double)nfixed_block_offset;
-			fixed_block_offset_z /= (double)nfixed_block_offset;
-			for (i=0;i<project.num_files;i++)
-			    {
-			    file = &project.files[i];
-			    file->block_offset_x += fixed_block_offset_x;
-			    file->block_offset_y += fixed_block_offset_y;
-			    file->block_offset_z += fixed_block_offset_z;
-			    }
-			}
-		    for (i=0;i<project.num_files;i++)
-			{
-			file = &project.files[i];
-fprintf(stderr,"file:%d block: %d block offsets: %f %f %f\n",
-i,file->block,file->block_offset_x,file->block_offset_y,file->block_offset_z);
-			}
-
-		    /* deallocate arrays */
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&a,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&ia,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nia,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&d,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&x,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nx,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&dx,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&sigma,&error);
-		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&work,&error);
-		    }
-		
-		/*----------------------------------------------------------------*/		
-
-     		/* retrieve crossing parameters */
-		/* count up the unknowns and constraints to get size of
-		 * inverse problem:
-		 *	    nconstraint = ndf * nsnav + ntie
-		 */
-		nnav = 0;
-		nsnav = 0;
-		nfix = 0;
-		ntie = 0;
-		nseq = 0;
-		ndx = 0;
-		ndx2 = 0;
-		avg_dtime_d = 0.0;
-		for (i=0;i<project.num_files;i++)
-		    {
-sprintf(message,"Processing file %d of %d...", i, project.num_files);
-do_message_on(message);
-		    file = &project.files[i];
-		    for (j=0;j<file->num_sections;j++)
-			{
-			section = &file->sections[j];
-			nnav += section->num_pings;
-			nsnav += section->num_snav - section->continuity;
-			if (file->status == MBNA_FILE_FIXED)
-			    nfix += section->num_snav - section->continuity;
-			for (isnav=0;isnav<section->num_snav;isnav++)
-			    {
-			    if (isnav > 0 || section->continuity == MB_NO)
-				{
-				/* handle sequence count */
-				if (isnav > 0)
-				    nseq++;
-				else
-				    nseq = 1;
-				    
-				/* get time difference between current and previous nav point */
-				dtime_d = section->snav_time_d[isnav] - time_d_old;
-				
-				/* add first derivative constraint if nseq > 1 AND dtime_d > 0.0 */
-				if (nseq > 1 && dtime_d > 0.0)
-				    {
-				    avg_dtime_d += dtime_d;
-				    ndx++;
-				    }
-				
-				/* add second derivative constraint if nseq > 2 */
-				if (nseq > 2 && dtime_d > 0.0)
-				    ndx2++;
-				
-				/* save time_d values */
-				time_d_old = section->snav_time_d[isnav];
-				}
-			    }
-			}
-		    }
-		if (ndx > 0)
-		    avg_dtime_d /= ndx;
-		avg_offset = 0.0;
-		for (i=0;i<project.num_crossings;i++)
-		    {
-		    crossing = &project.crossings[i];
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET
-		    	&& crossing->num_ties > 0)
-			{
-			ntie += crossing->num_ties;
-			for (j=0;j<crossing->num_ties;j++)
-			    {
-			    avg_offset += fabs(crossing->ties[j].offset_x);
-			    }
-			}
-		    }
-		if (ntie > 0)
-		    avg_offset /= ntie;
-		
-		/* allocate space for the inverse problem */
-		nconstraint = ndf * (nfix + ndx + ndx2 + ntie);
-		nrows = nconstraint;
-		ncols = ndf * nsnav;
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnz * nrows * sizeof(double), (void **)&a,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnz * nrows * sizeof(int), (void **)&ia,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(int), (void **)&nia,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(double), (void **)&d,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&x,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(int), (void **)&nx,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&dx,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&sigma,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&work,&error);
-
-		/* if error initializing memory then don't invert */
-		if (error != MB_ERROR_NO_ERROR)
-			{
-			mb_error(mbna_verbose,error,&error_message);
-			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-				error_message);
-			}
-		}
-		
-	/* proceed with construction of inverse problems */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
-		&& (project.num_crossings_analyzed == project.num_crossings
-			|| project.num_truecrossings_analyzed == project.num_truecrossings)
-		&& error == MB_ERROR_NO_ERROR)
-    		{
-		/* add info text */
-		sprintf(message, "Inverting for optimal navigation\n");
-		do_info_add(message, MB_YES);
-		sprintf(message, " > Inverse problem size:\n");
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Nav points:                    %d\n", nnav);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Independent nav snav points:   %d\n", nsnav);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Fixed nav snav points:         %d\n", nfix);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   First derivative constraints:  %d\n", ndx);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Second derivative constraints: %d\n", ndx2);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Nav ties:                      %d\n", ntie);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Total Unknowns:                %d\n", 3 * nsnav);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Total Constraints:             %d\n", nconstraint);
-		do_info_add(message, MB_NO);
-		sprintf(message, " > Iteration Smoothing S_total S_crossing Ratio\n > --------------------------------------\n");
-		do_info_add(message, MB_NO);
-		
-		/* initialize arrays */
-		for (i=0;i<nrows;i++)
-		    {
-		    nia[i] = 0;
-		    d[i] = 0.0;
-		    for (j=0;j<nnz;j++)
-			{
-			k = nnz * i + j;
-			ia[k] = 0;
-			a[k] = 0.0;
-			}
-		    }
-		for (i=0;i<ndf*nsnav;i++)
-		    {
-		    nx[i] = 0;
-		    x[i] = 0;
-		    dx[i] = 0.0;
-		    }
-		for (i=0;i<ncycle;i++)
-		    {
-		    sigma[i] = 0;
-		    work[i] = 0.0;
-		    }
-		
-		/* make inverse problem */
-		/*------------------------*/
-		nr = 0;
-		smoothweight = avg_dtime_d * avg_offset / 100000000;
-		smoothweight_old = smoothweight;
-		
-		/* apply first and second derivative constraints */
-		nc = 0;
-		nseq = 0;
-		for (ifile=0;ifile<project.num_files;ifile++)
-		    {
-sprintf(message,"Applying derivatives to file %d of %d...", ifile, project.num_files);
-do_message_on(message);
-		    file = &project.files[ifile];
-		    for (isection=0;isection<file->num_sections;isection++)
-			{
+			/* read the input nav */
+			isection = 0;
 			section = &file->sections[isection];
-			for (isnav=0;isnav<section->num_snav;isnav++)
-			    {			
-			    /* if continuity true first snav point is same as the last
-			       snav point of previous section */
-			    if (isnav > 0 || section->continuity == MB_NO)
+			isnav = 0;
+			done = MB_NO;
+			while (done == MB_NO)
+			    {
+			    if ((result = fgets(buffer,BUFFER_MAX,nfp)) != buffer)
 				{
-				/* handle sequence count */
-				if (isnav > 0)
-				    nseq++;
+				done = MB_YES;
+				}
+			    else if ((nscan = sscanf(buffer, "%d %d %d %d %d %d.%d %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+						    &time_i[0], &time_i[1], &time_i[2], &time_i[3],
+						    &time_i[4], &time_i[5], &time_i[6], &time_d,
+						    &navlon, &navlat, &heading, &speed, 
+						    &draft, &roll, &pitch, &heave)) >= 12)
+				{
+				/* fix nav from early version */
+				if (nscan < 16)
+				    {
+				    draft = 0.0;
+				    roll = 0.0;
+				    pitch = 0.0;
+				    heave = 0.0;
+				    }
+
+				/* get next snav interval if needed */
+				while (time_d > section->snav_time_d[isnav+1]
+				    && !(isection == file->num_sections - 1
+					&& isnav == section->num_snav - 2))
+				    {
+				    if (isnav < section->num_snav - 2)
+					{
+					isnav++;
+					}
+				    else if (isection < file->num_sections)
+					{
+					isection++;
+					section = &file->sections[isection];
+					isnav = 0;
+					}
+				    }
+
+				/* update the nav if possible (and it should be...) */
+				if (time_d < section->snav_time_d[isnav])
+				    {
+				    factor = 0.0;
+				    }
+				else if (time_d > section->snav_time_d[isnav+1])
+				    {
+				    factor = 1.0;
+				    }
 				else
-				    nseq = 1;
-				    
-			    	/* if file fixed then fix snav point */
-			    	if (file->status == MBNA_FILE_FIXED)
 				    {
-				    /* longitude component */
-				    k = nnz * nr;
-				    a[k] = 1.0;
-				    d[nr] = 0.0;
-				    ia[k] = nc;
-				    nia[nr] = 1;
-				    nr++;
-				
-				    /* latitude component */
-				    k = nnz * nr;
-				    a[k] = 1.0;
-				    d[nr] = 0.0;
-				    ia[k] = nc + 1;
-				    nia[nr] = 1;
-				    nr++;
-				
-				    /* depth component */
-				    k = nnz * nr;
-				    a[k] = 100.0;
-				    d[nr] = 0.0;
-				    ia[k] = nc + 2;
-				    nia[nr] = 1;
-				    nr++;
-				    }
-				    
-				/* get time difference between current and previous nav point */
-				dtime_d = section->snav_time_d[isnav] - time_d_old;
-				
-				/* add first derivative constraint if nseq > 1 AND dtime_d > 0.0 */
-				if (nseq > 1 && dtime_d > 0.0)
-				    {
-				    /* longitude component */
-				    k = nnz * nr;
-				    a[k] = -smoothweight_old / dtime_d;
-				    a[k+1] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 3;
-				    ia[k+1] = nc;
-				    nia[nr] = 2;
-				    nr++;
-				
-				    /* latitude component */
-				    k = nnz * nr;
-				    a[k] = -smoothweight_old / dtime_d;
-				    a[k+1] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 2;
-				    ia[k+1] = nc + 1;
-				    nia[nr] = 2;
-				    nr++;
-				
-				    /* depth component */
-				    k = nnz * nr;
-				    a[k] = -smoothweight_old / dtime_d;
-				    a[k+1] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 1;
-				    ia[k+1] = nc + 2;
-				    nia[nr] = 2;
-				    nr++;
-				    }
-				
-				/* add second derivative constraint if nseq > 2  AND dtime_d > 0.0 */
-				if (nseq > 2 && dtime_d > 0.0)
-				    {
-				    /* longitude component */
-				    k = nnz * nr;
-				    a[k] = smoothweight_old / dtime_d;
-				    a[k+1] = -2.0 * smoothweight_old / dtime_d;
-				    a[k+2] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 6;
-				    ia[k+1] = nc - 3;
-				    ia[k+2] = nc;
-				    nia[nr] = 3;
-				    nr++;
-				
-				    /* latitude component */
-				    k = nnz * nr;
-				    a[k] = smoothweight_old / dtime_d;
-				    a[k+1] = -2.0 * smoothweight_old / dtime_d;
-				    a[k+2] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 5;
-				    ia[k+1] = nc - 2;
-				    ia[k+2] = nc + 1;
-				    nia[nr] = 3;
-				    nr++;
-				
-				    /* depth component */
-				    k = nnz * nr;
-				    a[k] = smoothweight_old / dtime_d;
-				    a[k+1] = -2.0 * smoothweight_old / dtime_d;
-				    a[k+2] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 4;
-				    ia[k+1] = nc - 1;
-				    ia[k+2] = nc + 2;
-				    nia[nr] = 3;
-				    nr++;
-				    }
-				
-				/* save time_d values */
-				time_d_older = time_d_old;
-				time_d_old = section->snav_time_d[isnav];
-
-				/* add to unknown count */
-				nc += ndf;
-				}
-			    }
-			}
-		    }
-		
-		/* apply crossing offset constraints */
-sprintf(message,"Applying %d crossing constraints...", project.num_crossings);
-do_message_on(message);
-		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
-		
-		    /* use only set crossings */
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    for (j=0;j<crossing->num_ties;j++)
-			{
-			/* get tie */
-			tie = (struct mbna_tie *) &crossing->ties[j];
-			
-			/* get absolute id for first snav point */
-			file1 = &project.files[crossing->file_id_1];
-			section = &file1->sections[crossing->section_1];
-			nc1 = section->global_start_snav + tie->snav_1;
-
-			/* get absolute id for second snav point */
-			file2 = &project.files[crossing->file_id_2];
-			section = &file2->sections[crossing->section_2];
-			nc2 = section->global_start_snav + tie->snav_2;
-if (nc1 > nsnav - 1 || nc2 > nsnav -1
-|| nc1 < 0 || nc2 < 0)
-fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
-			
-			/* make longitude constraint */
-			k = nnz * nr;
-			a[k] = -mbna_offsetweight;
-			a[k+1] = mbna_offsetweight;
-			d[nr] = mbna_offsetweight * (tie->offset_x_m - file2->block_offset_x + file1->block_offset_x);
-			ia[k] = 3 * nc1;
-			ia[k+1] = 3 * nc2;
-			nia[nr] = 2;
-			nx[3 * nc1]++;
-			nx[3 * nc2]++;
-/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
-			nr++;
-			
-			/* make latitude constraint */
-			k = nnz * nr;
-			a[k] = -mbna_offsetweight;
-			a[k+1] = mbna_offsetweight;
-			d[nr] = mbna_offsetweight * (tie->offset_y_m  - file2->block_offset_y + file1->block_offset_y);
-			ia[k] = 3 * nc1 + 1;
-			ia[k+1] = 3 * nc2 + 1;
-			nia[nr] = 2;
-			nx[3 * nc1 + 1]++;
-			nx[3 * nc2 + 1]++;
-/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
-			nr++;
-			
-			/* make depth constraint */
-			k = nnz * nr;
-			a[k] = -mbna_offsetweight;
-			a[k+1] = mbna_offsetweight;
-			d[nr] = mbna_offsetweight * (tie->offset_z_m - file2->block_offset_z + file1->block_offset_z);
-			ia[k] = 3 * nc1 + 2;
-			ia[k+1] = 3 * nc2 + 2;
-			nia[nr] = 2;
-			nx[3 * nc1 + 2]++;
-			nx[3 * nc2 + 2]++;
-/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
-			nr++;
-			}
-		    }
-		    
-/* print out matrix problem & calculate error */
-/*sigma_total = 0.0;
-sigma_crossing = 0.0;
-fprintf(stderr,"START PROBLEM: smoothweight:%g avg_dtime_d:%g avg_offset:%g\n",
-smoothweight,avg_dtime_d,avg_offset);
-
-for (i=0;i<nr;i++)
-{
-fprintf(stderr,"row %d with %d elements\n", i, nia[i]);
-s = 0.0;
-for (j=0;j<nia[i];j++)
-    {
-    k = nnz * i + j;
-    s += x[ia[k]] * a[k];
-fprintf(stderr,"element %d column %d    a:%g  x:%g  s:%g\n", j, ia[k], a[k], x[ia[k]], x[ia[k]] * a[k]);
-    }
-sigma_total += (d[i] - s) * (d[i] - s);
-fprintf(stderr,"row %d result:  s:%g d:%g sigma_total:%g %g\n\n", i, s, d[i], (d[i] - s) * (d[i] - s), sigma_total);
-if (i >= (nr - ndf * ntie))
-    sigma_crossing += (d[i] - s) * (d[i] - s);
-}
-sigma_total = sqrt(sigma_total) / nr;
-sigma_crossing = sqrt(sigma_crossing) / ntie;
-fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total, sigma_crossing);
-*/
-
-		/* now do a bunch of test solutions to find what level of smoothing
-		 * starts to impact the solution - we want to use this much and no more
-		 */
-		first = MB_YES;
-		done = MB_NO;
-		iter=0;
-		smoothfactor = 100.0;
-		smoothmin = -1.0;
-		smoothmax = -1.0;
-		while (done == MB_NO)
-		    {
-		    /* first change the smoothing weight in the matrix problem */
-		    smoothweight = smoothweight * smoothfactor;
-		    iter++;
-		    for (i=0;i<ndf*(nfix+ndx+ndx2);i++)
-			{
-			for (j=0;j<nia[i];j++)
-			    {
-			    if (nia[i] > 1)
-				{
-				k = nnz * i + j;
-				a[k] *= smoothfactor;
-				}
-			    }
-			}
-		
-		    /* now solve inverse problem */
-		    if (first == MB_YES)
-			{
-			sprintf(message,"Inverting %dx%d: iter:%d smooth:%.2g",
-				nc, nr, iter, smoothweight);
-			}
-		    else
-			{
-			sprintf(message,"Inverting %dx%d: iter:%d smooth:%.2g ratio:%.3f iter:%d smooth:%.2g ",
-				nc, nr, iter-1, smoothweight_old,
-				(sigma_crossing / sigma_crossing_first), iter, smoothweight);
-			}
-		    do_message_on(message);
-		
-		    /* compute upper bound on maximum eigenvalue */
-		    ncyc = 0;
-		    nsig = 0;
-		    lspeig(a, ia, nia, nnz, nc, nr, ncyc,
-			    &nsig, x, dx, sigma, work, &smax, &err, &sup);
-		    supt = smax + err;
-		    if (sup > supt)
-			supt = sup;
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "Initial lspeig: sup:%g smax:%g err:%g supt:%g\n",
-			sup, smax, err, supt);
-		    ncyc = 16;
-		    for (i=0;i<4;i++)
-			{
-			lspeig(a, ia, nia, nnz, nc, nr, ncyc,
-				&nsig, x, dx, sigma, work, &smax, &err, &sup);
-			supt = smax + err;
-			if (sup > supt)
-			    supt = sup;
-			if (mbna_verbose > 0)
-			fprintf(stderr, "lspeig[%d]: sup:%g smax:%g err:%g supt:%g\n",
-			    i, sup, smax, err, supt);
-			}
-			
-		    /* calculate chebyshev factors (errlsq is the theoretical error) */
-		    slo = supt / bandwidth;
-		    chebyu(sigma, ncycle, supt, slo, work);
-		    errlsq = errlim(sigma, ncycle, supt, slo);
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "Theoretical error: %f\n", errlsq);
-		    if (mbna_verbose > 1)
-		    for (i=0;i<ncycle;i++)
-			fprintf(stderr, "sigma[%d]: %f\n", i, sigma[i]);
-			
-		    /* solve the problem */
-		    for (i=0;i<nc;i++)
-			x[i] = 0.0;
-		    lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
-	
-		    /* output solution */
-		    if (mbna_verbose > 1)
-		    for (i=0;i<nc/3;i++)
-			{
-			fprintf(stderr, "i:%d  offsets: %f %f %f  crossings: %d %d %d\n",
-				i, x[3*i], x[3*i+1], x[3*i+2], nx[3*i], nx[3*i+1], nx[3*i+2]);
-			}
-		
-		    /* calculate error */
-		    sigma_total = 0.0;
-		    sigma_crossing = 0.0;
-		    for (i=0;i<nr;i++)
-			{
-			s = 0.0;
-			for (j=0;j<nia[i];j++)
-			    {
-			    k = nnz * i + j;
-			    s += x[ia[k]] * a[k];
-			    }
-			sigma_total += (d[i] - s) * (d[i] - s);
-			if (i >= (nr - ndf * ntie))
-			    sigma_crossing += (d[i] - s) * (d[i] - s);
-			}
-		    sigma_total = sqrt(sigma_total) / nr;
-		    sigma_crossing = sqrt(sigma_crossing) / ntie;
-		
-		    /* keep track of results */
-		    if (first == MB_YES)
-			{
-			first = MB_NO;
-			sigma_crossing_first = MAX(sigma_crossing, project.precision);
-			smoothweight_old = smoothweight;
-			smoothmin = smoothweight;
-			}
-		    else if (sigma_crossing >= 1.005 * sigma_crossing_first
-			    && sigma_crossing <= 1.01 * sigma_crossing_first
-			    && sigma_crossing > 0.0)
-			{
-			done = MB_YES;
-			smoothweight_best = smoothweight;
-			sigma_total_best = sigma_total;
-			sigma_crossing_best = sigma_crossing;
-			smoothweight_old = smoothweight;
-			}
-		    else if (sigma_crossing < 1.005 * sigma_crossing_first)
-			{
-			if (smoothweight > smoothmin)
-			    {
-			    smoothmin = smoothweight;
-			    }
-			if (smoothmax > 0.0)
-			    smoothfactor = (smoothmin + 0.3 * (smoothmax - smoothmin))
-						/ smoothweight;				
-			smoothweight_old = smoothweight;
-			}
-		    else if (sigma_crossing > 1.01 * sigma_crossing_first
-			    && sigma_crossing > 0.0)
-			{
-			if (smoothweight < smoothmax || smoothmax < 0.0)
-			    {
-			    smoothmax = smoothweight;
-			    }
-			smoothfactor = (smoothmin + 0.3 * (smoothmax - smoothmin))
-					    / smoothweight;				
-			smoothweight_old = smoothweight;
-			}
-		    else
-			{
-			smoothweight_old = smoothweight;
-			}
-		
-		    /* do message */
-		    sprintf(message, " >   %d %12g %12g %12g %12g\n",
-			    iter, smoothweight, sigma_total, 
-			    sigma_crossing, 
-			    (sigma_crossing / sigma_crossing_first));
-		    do_info_add(message, MB_NO);
-/* fprintf(stderr,"iteration:%3d smooth:%12g sigmatot:%12g sigmacrossing:%12g ratio:%12g\n",
-iter,smoothweight,sigma_total, 
-sigma_crossing,
-(sigma_crossing / sigma_crossing_first));*/
-		    }
-		
-		/* save solution */
-		k = 0;
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    for (j=0;j<file->num_sections;j++)
-			{
-			section = &file->sections[j];
-			for (isnav=0;isnav<section->num_snav;isnav++)
-			    {
-			    if (isnav == 0 && section->continuity == MB_YES)
-				k -= 3;
-			    section->snav_lon_offset[isnav] = (x[k] + file->block_offset_x) * mbna_mtodeglon;
-			    section->snav_lat_offset[isnav] = (x[k+1] + file->block_offset_y) * mbna_mtodeglat;
-			    section->snav_z_offset[isnav] = (x[k+2] + file->block_offset_z);
-			    k += 3;
-			    }
-			}
-		    }
-
-		/* interpolate the solution */
-		mbnavadjust_interpolatesolution();
-		}
-		
-	/* output results from navigation solution */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
-		&& (project.num_crossings_analyzed == project.num_crossings
-			|| project.num_truecrossings_analyzed == project.num_truecrossings)
-		&& error == MB_ERROR_NO_ERROR)
-    		{
-		
-		/* now output inverse solution */
-		sprintf(message,"Outputting navigation solution...");
-		do_message_on(message);
-
-		sprintf(message, " > Final smoothing weight:%12g\n > Final crossing sigma:%12g\n > Final total sigma:%12g\n",
-			smoothweight_best, sigma_crossing_best, sigma_total_best);
-		do_info_add(message, MB_NO);
-		
-		/* get crossing offset results */
-		sprintf(message, " > Nav Tie Offsets (m):  id  observed  solution  error\n");
-		do_info_add(message, MB_NO);
-		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
-		
-		    /* check only set ties */
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    for (j=0;j<crossing->num_ties;j++)
-			{
-			tie = (struct mbna_tie *) &crossing->ties[j];
-			offset_x =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lon_offset[tie->snav_1];
-			offset_y =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lat_offset[tie->snav_1];
-			offset_z =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_z_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_z_offset[tie->snav_1];
-			tie->inversion_status = MBNA_INVERSION_CURRENT;
-    			tie->inversion_offset_x = offset_x;
-    			tie->inversion_offset_y = offset_y;
-   			tie->inversion_offset_x_m = offset_x / mbna_mtodeglon;
-    			tie->inversion_offset_y_m = offset_y / mbna_mtodeglat;
-    			tie->inversion_offset_z_m = offset_z;
-
-			sprintf(message, " >     %4d   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f\n",
-				icrossing,
-				tie->offset_x_m,
-				tie->offset_y_m,
-				tie->offset_z_m,
-				tie->inversion_offset_x_m,
-				tie->inversion_offset_y_m,
-				tie->inversion_offset_z_m,
-				(tie->inversion_offset_x_m - tie->offset_x_m),
-				(tie->inversion_offset_y_m - tie->offset_y_m),
-				(tie->inversion_offset_z_m - tie->offset_z_m));
-			do_info_add(message, MB_NO);
-			}
-		    }
-
-		if (mbna_verbose > 0)
-		for (i=0;i<nc/3;i++)
-		    {
-		    fprintf(stderr, "i:%d  offsets: %f %f %f  crossings: %d %d %d\n",
-		    		i, x[3*i], x[3*i+1], x[3*i+2], nx[3*i], nx[3*i+1], nx[3*i+1]);
-		    }
-		if (mbna_verbose > 0)
-		for (i=0;i<nr;i++)
-		    {
-		    s = 0.0;
-		    for (j=0;j<nia[i];j++)
-			{
-			k = nnz * i + j;
-			s += x[ia[k]] * a[k];
-			if (mbna_verbose > 0)
-			fprintf(stderr, "i:%4d j:%4d k:%4d ia[k]:%4d a[k]:%12g\n", i, j, k, ia[k], a[k]);
-			}
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "i:%5d n:%5d  d:%12g s:%12g err:%12g\n",i,nia[i],d[i],s,d[i]-s);
-		    }
-		
-		/* write updated project */
-		project.inversion = MBNA_INVERSION_CURRENT;
-		mbnavadjust_write_project();
-
-		/* deallocate arrays */
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&a,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&ia,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nia,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&d,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&x,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nx,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&dx,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&sigma,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&work,&error);
-
-		/* generate new nav files */
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    if (file->status != MBNA_FILE_FIXED)
-		    	{
-		    	sprintf(npath,"%s/nvs_%4.4d.mb166",
-			    project.datadir,i);
-		    	sprintf(apath,"%s/nvs_%4.4d.na%d",
-			    project.datadir,i,file->output_id);
-		    	sprintf(opath,"%s.na%d", file->path, file->output_id);
-		    	if ((nfp = fopen(npath,"r")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		    	else if ((afp = fopen(apath,"w")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		   	else if ((ofp = fopen(opath,"w")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		    	else
-			    {
-			    sprintf(message, " > Output updated nav to %s\n", opath);
-			    do_info_add(message, MB_NO);
-
-			    /* read the input nav */
-			    isection = 0;
-			    section = &file->sections[isection];
-			    isnav = 0;
-			    done = MB_NO;
-			    while (done == MB_NO)
-			    	{
-			    	if ((result = fgets(buffer,BUFFER_MAX,nfp)) != buffer)
-				    {
-				    done = MB_YES;
-				    }
-			    	else if ((nscan = sscanf(buffer, "%d %d %d %d %d %d.%d %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-							&time_i[0], &time_i[1], &time_i[2], &time_i[3],
-							&time_i[4], &time_i[5], &time_i[6], &time_d,
-							&navlon, &navlat, &heading, &speed, 
-							&draft, &roll, &pitch, &heave)) >= 12)
-				    {
-				    /* fix nav from early version */
-				    if (nscan < 16)
+				    if (section->snav_time_d[isnav+1] > section->snav_time_d[isnav])
 					{
-					draft = 0.0;
-					roll = 0.0;
-					pitch = 0.0;
-					heave = 0.0;
-					}
-					
-				    /* get next snav interval if needed */
-				    while (time_d > section->snav_time_d[isnav+1]
-				    	&& !(isection == file->num_sections - 1
-					    && isnav == section->num_snav - 2))
-				    	{
-				    	if (isnav < section->num_snav - 2)
-					    {
-					    isnav++;
-					    }
-				    	else if (isection < file->num_sections)
-					    {
-					    isection++;
-					    section = &file->sections[isection];
-					    isnav = 0;
-					    }
-				    	}
-				
-				    /* update the nav if possible (and it should be...) */
-				    if (time_d < section->snav_time_d[isnav])
-					{
-					factor = 0.0;
-					}
-				    else if (time_d > section->snav_time_d[isnav+1])
-					{
-					factor = 1.0;
+					factor = (time_d - section->snav_time_d[isnav])
+						    / (section->snav_time_d[isnav+1] - section->snav_time_d[isnav]);
+    /*if (fabs(time_d - section->snav_time_d[isnav]) < 1.0)
+    fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav]);
+    else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
+    fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
 					}
 				    else
-				    	{
-				    	if (section->snav_time_d[isnav+1] > section->snav_time_d[isnav])
-					    {
-					    factor = (time_d - section->snav_time_d[isnav])
-							/ (section->snav_time_d[isnav+1] - section->snav_time_d[isnav]);
-/*if (fabs(time_d - section->snav_time_d[isnav]) < 1.0)
-fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav]);
-else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
-fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
-					    }
-				    	else
-					    factor = 0.0;
-				    	}
-					
-				    /* update and output only nonzero navigation */
-				    if (fabs(navlon) > 0.0000001 && fabs(navlat) > 0.0000001)
-				    	{
-					navlon -= section->snav_lon_offset[isnav]
-							+ factor * (section->snav_lon_offset[isnav+1]
-								- section->snav_lon_offset[isnav]);
-					navlat -= section->snav_lat_offset[isnav]
-							+ factor * (section->snav_lat_offset[isnav+1]
-								- section->snav_lat_offset[isnav]);
-					zoffset = section->snav_z_offset[isnav]
-							+ factor * (section->snav_z_offset[isnav+1]
-								- section->snav_z_offset[isnav]);
-
-					/* write the updated nav out */
-					/* printing this string twice because in some situations the first
-						print has the time_d value come out as "nan" - this is the worst sort
-						of kluge for a real but mysterious bug - apologies to all who find this
-						- DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
-					sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-						    time_i[0], time_i[1], time_i[2], time_i[3],
-						    time_i[4], time_i[5], time_i[6], time_d,
-						    navlon, navlat, heading, speed, 
-						    draft, roll, pitch, heave, zoffset);
-					sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-						    time_i[0], time_i[1], time_i[2], time_i[3],
-						    time_i[4], time_i[5], time_i[6], time_d,
-						    navlon, navlat, heading, speed, 
-						    draft, roll, pitch, heave, zoffset);
-					fprintf(ofp, "%s", ostring);
-					fprintf(afp, "%s", ostring);
-/*fprintf(stderr, "%2.2d:%2.2d:%2.2d:%5.3f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f\n\n",
-i, isection, isnav, factor, 
-time_i[0], time_i[1], time_i[2], time_i[3],
-time_i[4], time_i[5], time_i[6], time_d,
-navlon, navlat, heading, speed, zoffset);*/
-					}
+					factor = 0.0;
 				    }
-			    	}
+
+				/* update and output only nonzero navigation */
+				if (fabs(navlon) > 0.0000001 && fabs(navlat) > 0.0000001)
+				    {
+				    navlon -= section->snav_lon_offset[isnav]
+						    + factor * (section->snav_lon_offset[isnav+1]
+							    - section->snav_lon_offset[isnav]);
+				    navlat -= section->snav_lat_offset[isnav]
+						    + factor * (section->snav_lat_offset[isnav+1]
+							    - section->snav_lat_offset[isnav]);
+				    zoffset = section->snav_z_offset[isnav]
+						    + factor * (section->snav_z_offset[isnav+1]
+							    - section->snav_z_offset[isnav]);
+
+				    /* write the updated nav out */
+				    /* printing this string twice because in some situations the first
+					    print has the time_d value come out as "nan" - this is the worst sort
+					    of kluge for a real but mysterious bug - apologies to all who find this
+					    - DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
+				    sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+						time_i[0], time_i[1], time_i[2], time_i[3],
+						time_i[4], time_i[5], time_i[6], time_d,
+						navlon, navlat, heading, speed, 
+						draft, roll, pitch, heave, zoffset);
+				    sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+						time_i[0], time_i[1], time_i[2], time_i[3],
+						time_i[4], time_i[5], time_i[6], time_d,
+						navlon, navlat, heading, speed, 
+						draft, roll, pitch, heave, zoffset);
+				    fprintf(ofp, "%s", ostring);
+				    fprintf(afp, "%s", ostring);
+    /*fprintf(stderr, "%2.2d:%2.2d:%2.2d:%5.3f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f\n\n",
+    i, isection, isnav, factor, 
+    time_i[0], time_i[1], time_i[2], time_i[3],
+    time_i[4], time_i[5], time_i[6], time_d,
+    navlon, navlat, heading, speed, zoffset);*/
+				    }
+				}
 			    }
-		    	if (nfp != NULL) fclose(nfp);
-		    	if (afp != NULL) fclose(afp);
-		    	if (ofp != NULL) 
+			}
+		    if (nfp != NULL) fclose(nfp);
+		    if (afp != NULL) fclose(afp);
+		    if (ofp != NULL) 
+			{
+			fclose(ofp);
+
+			/* get bias values */
+			mb_pr_get_heading(mbna_verbose, file->path, 
+					    &mbp_heading_mode, 
+					    &mbp_headingbias, 
+					    &error);
+			mb_pr_get_rollbias(mbna_verbose, file->path, 
+					    &mbp_rollbias_mode, 
+					    &mbp_rollbias, 
+					    &mbp_rollbias_port, 
+					    &mbp_rollbias_stbd, 
+					    &error);
+
+			/* update output file in mbprocess parameter file */
+			status = mb_pr_update_format(mbna_verbose, file->path, 
+				    MB_YES, file->format, 
+				    &error);
+			status = mb_pr_update_navadj(mbna_verbose, file->path, 
+				    MBP_NAVADJ_LLZ, opath, 
+				    MBP_NAV_LINEAR, 
+				    &error);
+
+			/* update heading bias in mbprocess parameter file */
+			mbp_headingbias = file->heading_bias + file->heading_bias_import;
+			if (mbp_headingbias == 0.0)
 			    {
-			    fclose(ofp);
-			    
-			    /* get bias values */
-			    mb_pr_get_heading(mbna_verbose, file->path, 
-						&mbp_heading_mode, 
-						&mbp_headingbias, 
-						&error);
-			    mb_pr_get_rollbias(mbna_verbose, file->path, 
-						&mbp_rollbias_mode, 
-						&mbp_rollbias, 
-						&mbp_rollbias_port, 
-						&mbp_rollbias_stbd, 
-						&error);
-	    
-			    /* update output file in mbprocess parameter file */
-			    status = mb_pr_update_format(mbna_verbose, file->path, 
-					MB_YES, file->format, 
-					&error);
-			    status = mb_pr_update_navadj(mbna_verbose, file->path, 
-					MBP_NAVADJ_LLZ, opath, 
-					MBP_NAV_LINEAR, 
-					&error);
-
-			    /* update heading bias in mbprocess parameter file */
-			    mbp_headingbias = file->heading_bias + file->heading_bias_import;
-			    if (mbp_headingbias == 0.0)
-				{
-				if (mbp_heading_mode == MBP_HEADING_OFF
-				    || mbp_heading_mode == MBP_HEADING_OFFSET)
-				    mbp_heading_mode = MBP_HEADING_OFF;
-				else if (mbp_heading_mode == MBP_HEADING_CALC
-				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-				    mbp_heading_mode = MBP_HEADING_CALC;
-				}
-			    else
-				{
-				if (mbp_heading_mode == MBP_HEADING_OFF
-				    || mbp_heading_mode == MBP_HEADING_OFFSET)
-				    mbp_heading_mode = MBP_HEADING_OFFSET;
-				else if (mbp_heading_mode == MBP_HEADING_CALC
-				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-				    mbp_heading_mode = MBP_HEADING_CALCOFFSET;
-				}
-			    status = mb_pr_update_heading(mbna_verbose, file->path, 
-					mbp_heading_mode, mbp_headingbias, 
-					&error);
-
-			    /* update roll bias in mbprocess parameter file */
-			    mbp_rollbias = file->roll_bias + file->roll_bias_import;
-			    if (mbp_rollbias == 0.0)
-				{
-				if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-				    {
-				    mbp_rollbias_port = mbp_rollbias 
-					    + mbp_rollbias_port - file->roll_bias_import;
-				    mbp_rollbias_stbd = mbp_rollbias 
-					    + mbp_rollbias_stbd - file->roll_bias_import;
-				    }
-				else
-				    mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
-				}
-			    else
-				{
-				if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-				    {
-				    mbp_rollbias_port = mbp_rollbias 
-					    + mbp_rollbias_port - file->roll_bias_import;
-				    mbp_rollbias_stbd = mbp_rollbias 
-					    + mbp_rollbias_stbd - file->roll_bias_import;
-				    }
-				else
-				    {
-				    mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
-				    }
-				}
-			    status = mb_pr_update_rollbias(mbna_verbose, file->path, 
-					mbp_rollbias_mode, mbp_rollbias, 
-					mbp_rollbias_port, mbp_rollbias_stbd, 
-					&error);
+			    if (mbp_heading_mode == MBP_HEADING_OFF
+				|| mbp_heading_mode == MBP_HEADING_OFFSET)
+				mbp_heading_mode = MBP_HEADING_OFF;
+			    else if (mbp_heading_mode == MBP_HEADING_CALC
+				|| mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+				mbp_heading_mode = MBP_HEADING_CALC;
 			    }
+			else
+			    {
+			    if (mbp_heading_mode == MBP_HEADING_OFF
+				|| mbp_heading_mode == MBP_HEADING_OFFSET)
+				mbp_heading_mode = MBP_HEADING_OFFSET;
+			    else if (mbp_heading_mode == MBP_HEADING_CALC
+				|| mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+				mbp_heading_mode = MBP_HEADING_CALCOFFSET;
+			    }
+			status = mb_pr_update_heading(mbna_verbose, file->path, 
+				    mbp_heading_mode, mbp_headingbias, 
+				    &error);
+
+			/* update roll bias in mbprocess parameter file */
+			mbp_rollbias = file->roll_bias + file->roll_bias_import;
+			if (mbp_rollbias == 0.0)
+			    {
+			    if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+				{
+				mbp_rollbias_port = mbp_rollbias 
+					+ mbp_rollbias_port - file->roll_bias_import;
+				mbp_rollbias_stbd = mbp_rollbias 
+					+ mbp_rollbias_stbd - file->roll_bias_import;
+				}
+			    else
+				mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
+			    }
+			else
+			    {
+			    if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
+				{
+				mbp_rollbias_port = mbp_rollbias 
+					+ mbp_rollbias_port - file->roll_bias_import;
+				mbp_rollbias_stbd = mbp_rollbias 
+					+ mbp_rollbias_stbd - file->roll_bias_import;
+				}
+			    else
+				{
+				mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
+				}
+			    }
+			status = mb_pr_update_rollbias(mbna_verbose, file->path, 
+				    mbp_rollbias_mode, mbp_rollbias, 
+				    mbp_rollbias_port, mbp_rollbias_stbd, 
+				    &error);
 			}
 		    }
 		
@@ -10845,6 +8205,7 @@ navlon, navlat, heading, speed, zoffset);*/
 
 	return(status);
 }
+			
 
 /*--------------------------------------------------------------------*/
 
@@ -11127,1085 +8488,6 @@ section->snav_z_offset_int[isnav]);
 }
 }
 }*/
-
- 	/* print output debug statements */
-	if (mbna_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:       %d\n",error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
-
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-
-int
-mbnavadjust_invertnav2()
-{
-	/* local variables */
-	char	*function_name = "mbnavadjust_invertnav2";
-	int	status = MB_SUCCESS;
-	struct mbna_file *file;
-	struct mbna_section *section;
-	struct mbna_crossing *crossing;
-	struct mbna_tie *tie;
-	int	nnav, nsnav, nsnavuse, nfix, ndx, ndx2, ntie, nconstraint;
-	int	nseq;
-	int	nnz = 3;
-	int	ndf = 3;
-	int	nrows = 0;
-	int	ncols = 0;
-	double	*a;
-	int	*ia;
-	int	*nia;
-	int	*nx;
-	double	*x;
-	double	*dx;
-	double	*d;
-	double	*sigma;
-	double	*work;
-	double	*xtime_d;
-	int	*xcontinuity;
-	double	time_d, time_d_old, dtime_d;
-	double	avg_dtime_d, avg_offset;
-	int	ifile, icrossing, isection, isnav;
-	int	nr, nc, nc1, nc2;
-	int	ncyc, nsig;
-	double	smax, sup, err, supt, slo, errlsq, s;
-	int	ncycle = 2048;
-	double	bandwidth = 10000.0;
-	double	smoothweight, sigma_total, sigma_crossing;
-	double	sigma_crossing_first;
-	double	smoothweight_old, smoothweight_best, sigma_total_best, sigma_crossing_best;
-	double	smoothfactor, smoothmin, smoothmax;
-	double	offset_x, offset_y, offset_z;
-	int	first, last;
-	int	iter;
-	char	npath[STRING_MAX];
-	char	apath[STRING_MAX];
-	char	opath[STRING_MAX];
-	FILE	*nfp, *afp, *ofp;
-	char	*result;
-	char	buffer[BUFFER_MAX];
-	int	done, nscan;
-	double	factor;
-	int	time_i[7];
-	double	navlon;
-	double	navlat;
-	double	speed;
-	double	heading;
-	double	distance;
-	double	draft;
-	double	roll;
-	double	pitch;
-	double	heave;
-	double	zoffset;
-	int	mbp_heading_mode;
-	double	mbp_headingbias;
-	int	mbp_rollbias_mode;
-	double	mbp_rollbias;
-	double	mbp_rollbias_port;
-	double	mbp_rollbias_stbd;
-	double	interp_value_lon, interp_value_lat, interp_value_z;
-	int	interp_mode;
-	int	i0, i1, ii, ic;
-	int	i, j, k;
-
- 	/* print input debug statements */
-	if (mbna_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		}
-
-	/* invert if there is a project and all crossings have been analyzed */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
-		&& (project.num_crossings_analyzed == project.num_crossings
-			|| project.num_truecrossings_analyzed == project.num_truecrossings))
-    		{
-     		/* retrieve crossing parameters */
-		/* count up the unknowns and constraints to get size of
-		 * inverse problem:
-		 *	    nconstraint = ndf * (nsnav + ntie)
-		 */
-		/* set message dialog on */
-		sprintf(message,"Setting up navigation inversion...");
-		do_message_on(message);
-
-		/* count constraints */
-		nnav = 0;
-		nsnav = 0;
-		nsnavuse = 0;
-		nfix = 0;
-		ntie = 0;
-		nseq = 0;
-		ndx = 0;
-		ndx2 = 0;
-		avg_dtime_d = 0.0;
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    for (j=0;j<file->num_sections;j++)
-			{
-			section = &file->sections[j];
-			nnav += section->num_pings;
-			nsnav += section->num_snav - section->continuity;
-			if (section->continuity == MB_NO)
-			    nseq = 0;
-			for (isnav=0;isnav<section->num_snav;isnav++)
-			    {
-			    if (section->snav_num_ties[isnav] > 0)
-				{
-			    	nseq++;
-				nsnavuse++;
-				if (nseq > 1)
-				    {
-				    dtime_d = section->snav_time_d[isnav] - time_d_old;
-				    avg_dtime_d += dtime_d;
-				    ndx++;
-				    }
-				if (nseq > 2)
-				    ndx2++;
-				if (file->status == MBNA_FILE_FIXED)
-				    nfix ++;
-				
-				/* save time_d values */
-				time_d_old = section->snav_time_d[isnav];
-				}
-			    if (nseq > 0)
-			    	section->snav_invert_constraint[isnav] = 1;
-			    else
-			    	section->snav_invert_constraint[isnav] = 0;
-			    }
-			}
-		    }
-		nseq = 0;
-		for (i=project.num_files-1;i>=0;i--)
-		    {
-		    file = &project.files[i];
-		    for (j=file->num_sections-1;j>=0;j--)
-			{
-			section = &file->sections[j];
-			for (isnav=section->num_snav-1;isnav>=0;isnav--)
-			    {
-			    if (section->snav_num_ties[isnav] > 0)
-				{
-			    	nseq++;
-				}
-			    if (nseq > 0)
-			    	section->snav_invert_constraint[isnav] += 2;
-			    }
-			if (section->continuity == MB_NO)
-			    nseq = 0;
-			}
-		    }
-		if (ndx > 0)
-		    avg_dtime_d /= ndx;
-		avg_offset = 0.0;
-		for (i=0;i<project.num_crossings;i++)
-		    {
-		    crossing = &project.crossings[i];
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET
-		    	&& crossing->num_ties > 0)
-			{
-			ntie += crossing->num_ties;
-			for (j=0;j<crossing->num_ties;j++)
-			    {
-			    avg_offset += fabs(crossing->ties[j].offset_x);
-			    }
-			}
-		    }
-		if (ntie > 0)
-		    avg_offset /= ntie;
-		
-		/* allocate space for the inverse problem */
-		nconstraint = ndf * (nfix + ndx + ndx2 + ntie);
-		nrows = nconstraint;
-		ncols = ndf * nsnavuse;
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnz * nrows * sizeof(double), (void **)&a,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnz * nrows * sizeof(int), (void **)&ia,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(int), (void **)&nia,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nrows * sizeof(double), (void **)&d,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&x,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(int), (void **)&nx,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&dx,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&sigma,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncycle * sizeof(double), (void **)&work,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nsnavuse * sizeof(double), (void **)&xtime_d,&error);
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nsnavuse * sizeof(int), (void **)&xcontinuity,&error);
-
-		/* if error initializing memory then don't invert */
-		if (error != MB_ERROR_NO_ERROR)
-			{
-			mb_error(mbna_verbose,error,&error_message);
-			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",
-				error_message);
-			}
-		}
-		
-	/* proceed with construction of inverse problems */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
-		&& (project.num_crossings_analyzed == project.num_crossings
-			|| project.num_truecrossings_analyzed == project.num_truecrossings)
-		&& error == MB_ERROR_NO_ERROR)
-    		{
-		/* add info text */
-		sprintf(message, "Inverting for optimal navigation\n");
-		do_info_add(message, MB_YES);
-		sprintf(message, " > Inverse problem size:\n");
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Nav points:                    %d\n", nnav);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Independent nav snav points:   %d\n", nsnav);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Used nav snav points:          %d\n", nsnavuse);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Fixed nav snav points:         %d\n", nfix);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   First derivative constraints:  %d\n", ndx);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Second derivative constraints: %d\n", ndx2);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Useful ties:                   %d\n", ntie);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Total Unknowns:                %d\n", 3 * nsnavuse);
-		do_info_add(message, MB_NO);
-		sprintf(message, " >   Total Constraints:             %d\n", nconstraint);
-		do_info_add(message, MB_NO);
-		sprintf(message, " > Iteration Smoothing S_total S_crossing Ratio\n > --------------------------------------\n");
-		do_info_add(message, MB_NO);
-		
-		/* initialize arrays */
-		for (i=0;i<nrows;i++)
-		    {
-		    nia[i] = 0;
-		    d[i] = 0.0;
-		    for (j=0;j<nnz;j++)
-			{
-			k = nnz * i + j;
-			ia[k] = 0;
-			a[k] = 0.0;
-			}
-		    }
-		for (i=0;i<ncols;i++)
-		    {
-		    nx[i] = 0;
-		    x[i] = 0;
-		    dx[i] = 0.0;
-		    }
-		for (i=0;i<ncycle;i++)
-		    {
-		    sigma[i] = 0;
-		    work[i] = 0.0;
-		    }
-		
-		/* make inverse problem */
-		/*------------------------*/
-		nr = 0;
-		smoothweight = avg_dtime_d * avg_offset / 100000000;
-		smoothweight_old = smoothweight;
-		
-		/* apply first and second derivative constraints */
-		nc = 0;
-		nseq = 0;
-		for (ifile=0;ifile<project.num_files;ifile++)
-		    {
-		    file = &project.files[ifile];
-		    for (isection=0;isection<file->num_sections;isection++)
-			{
-			section = &file->sections[isection];
-			if (section->continuity == MB_NO)
-			    nseq = 0;
-			for (isnav=0;isnav<section->num_snav;isnav++)
-			    {			
-			    if (section->snav_num_ties[isnav] > 0)
-				{
-			    	nseq++;
-				
-				/* save time and continuity */
-				xtime_d[nc/3] = section->snav_time_d[isnav];
-				section->snav_invert_id[isnav] = nc / 3;
-				if (nseq > 1)
-				    xcontinuity[nc/3] = MB_YES;
-				else
-				    xcontinuity[nc/3] = MB_NO;
-
-				/* add first derivative constraint */
-				if (nseq > 1)
-				    {
-				    dtime_d = xtime_d[nc/3] - xtime_d[(nc-1)/3];
-				    avg_dtime_d += dtime_d;
-
-				    /* longitude component */
-				    k = nnz * nr;
-				    a[k] = -smoothweight_old / dtime_d;
-				    a[k+1] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 3;
-				    ia[k+1] = nc;
-				    nia[nr] = 2;
-				    nr++;
-				
-				    /* latitude component */
-				    k = nnz * nr;
-				    a[k] = -smoothweight_old / dtime_d;
-				    a[k+1] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 2;
-				    ia[k+1] = nc + 1;
-				    nia[nr] = 2;
-				    nr++;
-				
-				    /* depth offset component */
-				    k = nnz * nr;
-				    a[k] = -smoothweight_old / dtime_d;
-				    a[k+1] = smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 1;
-				    ia[k+1] = nc + 2;
-				    nia[nr] = 2;
-				    nr++;
-				    }
-				
-				/* add second derivative constraint */
-				if (nseq > 2)
-				    {
-				    dtime_d = xtime_d[nc/3] - xtime_d[(nc-2)/3];
-
-				    /* longitude component */
-				    k = nnz * nr;
-				    a[k] = 10.0 * smoothweight_old / dtime_d;
-				    a[k+1] = -2.0 * 10.0 * smoothweight_old / dtime_d;
-				    a[k+2] = 10.0 * smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 6;
-				    ia[k+1] = nc - 3;
-				    ia[k+2] = nc;
-				    nia[nr] = 3;
-				    nr++;
-				
-				    /* latitude component */
-				    k = nnz * nr;
-				    a[k] = 10.0 * smoothweight_old / dtime_d;
-				    a[k+1] = -2.0 * 10.0 * smoothweight_old / dtime_d;
-				    a[k+2] = 10.0 * smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 5;
-				    ia[k+1] = nc - 2;
-				    ia[k+2] = nc + 1;
-				    nia[nr] = 3;
-				    nr++;
-				
-				    /* depth offset component */
-				    k = nnz * nr;
-				    a[k] = 10.0 * smoothweight_old / dtime_d;
-				    a[k+1] = -2.0 * 10.0 * smoothweight_old / dtime_d;
-				    a[k+2] = 10.0 * smoothweight_old / dtime_d;
-				    d[nr] = 0.0;
-				    ia[k] = nc - 4;
-				    ia[k+1] = nc - 1;
-				    ia[k+2] = nc + 2;
-				    nia[nr] = 3;
-				    nr++;
-				    }
-				    
-				/* add fixed point constraint */
-				if (file->status == MBNA_FILE_FIXED)
-				    {
-				    /* longitude component */
-				    k = nnz * nr;
-				    a[k] = 1.0;
-				    d[nr] = 0.0;
-				    ia[k] = nc;
-				    nia[nr] = 1;
-				    nr++;
-				
-				    /* latitude component */
-				    k = nnz * nr;
-				    a[k] = 1.0;
-				    d[nr] = 0.0;
-				    ia[k] = nc + 1;
-				    nia[nr] = 1;
-				    nr++;
-				
-				    /* depth offset component */
-				    k = nnz * nr;
-				    a[k] = 1.0;
-				    d[nr] = 0.0;
-				    ia[k] = nc + 2;
-				    nia[nr] = 1;
-				    nr++;
-				    }
-				
-				/* increment columns */
-				nc += 3;
-				}
-				
-			    else
-				section->snav_invert_id[isnav] = -1;
-			    }
-			}
-		    }
-		
-		/* apply crossing offset constraints */
-		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
-		
-		    /* use only set crossings */
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    for (j=0;j<crossing->num_ties;j++)
-			{
-			/* get tie */
-			tie = (struct mbna_tie *) &crossing->ties[j];
-			
-			/* get absolute id for first snav point */
-			file = &project.files[crossing->file_id_1];
-			section = &file->sections[crossing->section_1];
-			nc1 = section->snav_invert_id[tie->snav_1];
-
-			/* get absolute id for second snav point */
-			file = &project.files[crossing->file_id_2];
-			section = &file->sections[crossing->section_2];
-			nc2 = section->snav_invert_id[tie->snav_2];
-if (nc1 > nsnav - 1 || nc2 > nsnav -1
-|| nc1 < 0 || nc2 < 0)
-fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
-			
-			/* make longitude constraint */
-			k = nnz * nr;
-			a[k] = -mbna_offsetweight;
-			a[k+1] = mbna_offsetweight;
-			d[nr] = mbna_offsetweight * tie->offset_x;
-			ia[k] = 3 * nc1;
-			ia[k+1] = 3 * nc2;
-			nia[nr] = 2;
-			nx[3 * nc1]++;
-			nx[3 * nc2]++;
-/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
-			nr++;
-			
-			/* make latitude constraint */
-			k = nnz * nr;
-			a[k] = -mbna_offsetweight;
-			a[k+1] = mbna_offsetweight;
-			d[nr] = mbna_offsetweight * tie->offset_y;
-			ia[k] = 3 * nc1 + 1;
-			ia[k+1] = 3 * nc2 + 1;
-			nia[nr] = 2;
-			nx[3 * nc1 + 1]++;
-			nx[3 * nc2 + 1]++;
-/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
-			nr++;
-			
-			/* make depth offset constraint */
-			k = nnz * nr;
-			a[k] = -mbna_offsetweight;
-			a[k+1] = mbna_offsetweight;
-			d[nr] = mbna_offsetweight * tie->offset_z_m;
-			ia[k] = 3 * nc1 + 2;
-			ia[k+1] = 3 * nc2 + 2;
-			nia[nr] = 2;
-			nx[3 * nc1 + 2]++;
-			nx[3 * nc2 + 2]++;
-/*fprintf(stderr,"nr:%d k:%d a1:%g a2:%g d:%d\n", nr,k, a[k],a[k+1],d[nr]);*/
-			nr++;
-			}
-		    }
-		    
-/* print out matrix problem & calculate error */
-/*sigma_total = 0.0;
-sigma_crossing = 0.0;
-fprintf(stderr,"START PROBLEM: smoothweight:%g avg_dtime_d:%g avg_offset:%g\n",
-smoothweight,avg_dtime_d,avg_offset);
-
-for (i=0;i<nr;i++)
-{
-fprintf(stderr,"row %d with %d elements\n", i, nia[i]);
-s = 0.0;
-for (j=0;j<nia[i];j++)
-    {
-    k = nnz * i + j;
-    s += x[ia[k]] * a[k];
-fprintf(stderr,"element %d column %d    a:%g  x:%g  s:%g\n", j, ia[k], a[k], x[ia[k]], x[ia[k]] * a[k]);
-    }
-sigma_total += (d[i] - s) * (d[i] - s);
-fprintf(stderr,"row %d result:  s:%g d:%g sigma_total:%g %g\n\n", i, s, d[i], (d[i] - s) * (d[i] - s), sigma_total);
-if (i >= (nr - ndf * ntie))
-    sigma_crossing += (d[i] - s) * (d[i] - s);
-}
-sigma_total = sqrt(sigma_total) / nr;
-sigma_crossing = sqrt(sigma_crossing) / ntie;
-fprintf(stderr,"INITIAL SIGMA: sigma_total:%g sigma_crossing:%g\n", sigma_total, sigma_crossing);
-*/
-
-		/* now do a bunch of test solutions to find what level of smoothing
-		 * starts to impact the solution - we want to use this much and no more
-		 */
-		first = MB_YES;
-		last = MB_NO;
-		done = MB_NO;
-		iter=0;
-		smoothfactor = 100.0;
-		smoothmin = -1.0;
-		smoothmax = -1.0;
-		while (done == MB_NO)
-		    {
-		    /* first change the smoothing weight in the matrix problem */
-		    smoothweight = smoothweight * smoothfactor;
-		    iter++;
-		    for (i=0;i<3*(nfix+ndx+ndx2);i++)
-			{
-			for (j=0;j<nia[i];j++)
-			    {
-			    if (nia[i] > 1)
-				{
-				k = nnz * i + j;
-				a[k] *= smoothfactor;
-				}
-			    }
-			}
-		
-		    /* now solve inverse problem */
-		    if (first == MB_YES)
-			{
-			sprintf(message,"Inverting %dx%d: iter:%d smooth:%.2g",
-				nc, nr, iter, smoothweight);
-			}
-		    else
-			{
-			sprintf(message,"Inverting %dx%d: iter:%d smooth:%.2g ratio:%.3f iter:%d smooth:%.2g ",
-				nc, nr, iter-1, smoothweight_old,
-				(sigma_crossing / sigma_crossing_first), iter, smoothweight);
-			}
-		    do_message_on(message);
-		
-		    /* compute upper bound on maximum eigenvalue */
-		    ncyc = 0;
-		    nsig = 0;
-		    lspeig(a, ia, nia, nnz, nc, nr, ncyc,
-			    &nsig, x, dx, sigma, work, &smax, &err, &sup);
-		    supt = smax + err;
-		    if (sup > supt)
-			supt = sup;
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "Initial lspeig: sup:%g smax:%g err:%g supt:%g\n",
-			sup, smax, err, supt);
-		    ncyc = 16;
-		    for (i=0;i<4;i++)
-			{
-			lspeig(a, ia, nia, nnz, nc, nr, ncyc,
-				&nsig, x, dx, sigma, work, &smax, &err, &sup);
-			supt = smax + err;
-			if (sup > supt)
-			    supt = sup;
-			if (mbna_verbose > 0)
-			fprintf(stderr, "lspeig[%d]: sup:%g smax:%g err:%g supt:%g\n",
-			    i, sup, smax, err, supt);
-			}
-			
-		    /* calculate chebyshev factors (errlsq is the theoretical error) */
-		    slo = supt / bandwidth;
-		    chebyu(sigma, ncycle, supt, slo, work);
-		    errlsq = errlim(sigma, ncycle, supt, slo);
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "Theoretical error: %f\n", errlsq);
-		    if (mbna_verbose > 1)
-		    for (i=0;i<ncycle;i++)
-			fprintf(stderr, "sigma[%d]: %f\n", i, sigma[i]);
-			
-		    /* solve the problem */
-		    if (first == MB_YES)
-		    	{
-			for (i=0;i<nc;i++)
-			    x[i] = 0.0;
-			}
-		    lsqup(a, ia, nia, nnz, nc, nr, x, dx, d, 0, NULL, NULL, ncycle, sigma);
-	
-		    /* output solution */
-		    if (mbna_verbose > 1)
-		    for (i=0;i<nc/2;i++)
-			{
-			fprintf(stderr, "i:%d  offsets: %f %f %f  crossings: %d %d %d\n",
-				i, x[3*i], x[3*i+1], x[3*i+2], nx[3*i], nx[3*i+1], nx[3*i+2]);
-			}
-		
-		    /* calculate error */
-		    sigma_total = 0.0;
-		    sigma_crossing = 0.0;
-		    for (i=0;i<nr;i++)
-			{
-			s = 0.0;
-			for (j=0;j<nia[i];j++)
-			    {
-			    k = nnz * i + j;
-			    s += x[ia[k]] * a[k];
-			    }
-			sigma_total += (d[i] - s) * (d[i] - s);
-			if (i >= (nr - ndf * ntie))
-			    sigma_crossing += (d[i] - s) * (d[i] - s);
-			}
-		    sigma_total = sqrt(sigma_total / nr);
-		    sigma_crossing = sqrt(sigma_crossing / ntie);
-		
-		    /* keep track of results */
-		    if (first == MB_YES)
-			{
-			first = MB_NO;
-			sigma_crossing_first = project.precision * mbna_mtodeglat;
-			sigma_crossing_first = MAX(sigma_crossing, sigma_crossing_first);
-			smoothweight_old = smoothweight;
-			smoothmin = smoothweight;
-			}
-		    else if (sigma_crossing >= 2.005 * sigma_crossing_first
-			    && sigma_crossing <= 2.01 * sigma_crossing_first
-			    && sigma_crossing > 0.0)
-			{
-			/* set to do last inversion with initial data guess set
-				to linear interpolation of current model */
-			last = MB_YES;
-			}
-		    else if (last == MB_YES)
-			{
-			done = MB_YES;
-			smoothweight_best = smoothweight;
-			sigma_total_best = sigma_total;
-			sigma_crossing_best = sigma_crossing;
-			}
-		    else if (sigma_crossing < 2.005 * sigma_crossing_first)
-			{
-			if (smoothweight > smoothmin)
-			    {
-			    smoothmin = smoothweight;
-			    }
-			if (smoothmax > 0.0)
-			    smoothfactor = (smoothmin + 0.3 * (smoothmax - smoothmin))
-						/ smoothweight;				
-			smoothweight_old = smoothweight;
-			}
-		    else if (sigma_crossing > 2.01 * sigma_crossing_first
-			    && sigma_crossing > 0.0)
-			{
-			if (smoothweight < smoothmax || smoothmax < 0.0)
-			    {
-			    smoothmax = smoothweight;
-			    }
-			smoothfactor = (smoothmin + 0.3 * (smoothmax - smoothmin))
-					    / smoothweight;				
-			smoothweight_old = smoothweight;
-			}
-		    else
-			{
-			smoothweight_old = smoothweight;
-			}
-		
-		    /* do message */
-		    sprintf(message, " >   %d %12g %12g %12g %12g\n",
-			    iter, smoothweight, sigma_total/ mbna_mtodeglat, 
-			    sigma_crossing/ mbna_mtodeglat, 
-			    (sigma_crossing / sigma_crossing_first));
-		    do_info_add(message, MB_NO);
-/* fprintf(stderr,"iteration:%3d smooth:%12g sigmatot:%12g sigmacrossing:%12g ratio:%12g\n",
-iter,smoothweight,sigma_total / mbna_mtodeglat, 
-sigma_crossing / mbna_mtodeglat,
-(sigma_crossing / sigma_crossing_first));*/
-		    }
-
-		/* save linear interpolation of solution onto the navigation */
-		k = 0;
-		nseq = 0;
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    for (j=0;j<file->num_sections;j++)
-			{
-			section = &file->sections[j];
-			for (isnav=0;isnav<section->num_snav;isnav++)
-			    {
-			    if (section->continuity == MB_YES)
-			    	nseq++;
-			    else
-			    	nseq = 0;
-			    if (section->snav_num_ties[isnav] > 0)
-			    	{
-				section->snav_lon_offset[isnav] = x[k];
-			    	section->snav_lat_offset[isnav] = x[k+1];
-			    	section->snav_z_offset[isnav] = x[k+2];
-				}
-			    else if (k == 0)
-			    	{
-				section->snav_lon_offset[isnav] = x[k];
-			    	section->snav_lat_offset[isnav] = x[k+1];
-			    	section->snav_z_offset[isnav] = x[k+2];
-				}
-			    else if (k == nc)
-			    	{
-				section->snav_lon_offset[isnav] = x[k-3];
-			    	section->snav_lat_offset[isnav] = x[k-2];
-			    	section->snav_z_offset[isnav] = x[k-1];
-				}
-			    else if (section->snav_invert_constraint[isnav] == 0)
-			    	{
-				section->snav_lon_offset[isnav] = 0.0;
-			    	section->snav_lat_offset[isnav] = 0.0;
-			    	section->snav_z_offset[isnav] = 0.0;
-				}
-			    else if (section->snav_invert_constraint[isnav] == 1)
-			    	{
-				section->snav_lon_offset[isnav] = x[k-3];
-			    	section->snav_lat_offset[isnav] = x[k-2];
-			    	section->snav_z_offset[isnav] = x[k-1];
-				}
-			    else if (section->snav_invert_constraint[isnav] == 2)
-			    	{
-				section->snav_lon_offset[isnav] = x[k];
-			    	section->snav_lat_offset[isnav] = x[k+1];
-			    	section->snav_z_offset[isnav] = x[k+2];
-				}
-			    else
-			    	{
-				factor = (section->snav_time_d[isnav] - xtime_d[(k-3)/3]) / (xtime_d[k/3] - xtime_d[(k-3)/3]);
-				section->snav_lon_offset[isnav] = x[k-3] + (x[k] - x[k-3]) * factor;
-			    	section->snav_lat_offset[isnav] = x[k-2] + (x[k+1] - x[k-2]) * factor;
-			    	section->snav_z_offset[isnav] = x[k-1] + (x[k+2] - x[k-1]) * factor;
-				}
-			    if (section->snav_num_ties[isnav] > 0)
-				k += 3;
-			    }
-			}
-		    }
-		    
-		/* look for unconstrained sections and set accordingly */
-		k = 0;
-		i0 = 0;
-		i1 = 0;
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    for (j=0;j<file->num_sections;j++)
-			{
-			section = &file->sections[j];
-			for (isnav=0;isnav<section->num_snav;isnav++)
-			    {
-			    }
-			}
-		    }
-		
-		}
-		
-	/* output results from navigation solution */
-    	if (project.open == MB_YES
-    		&& project.num_crossings > 0
-		&& (project.num_crossings_analyzed == project.num_crossings
-			|| project.num_truecrossings_analyzed == project.num_truecrossings)
-		&& error == MB_ERROR_NO_ERROR)
-    		{
-		
-		/* now output inverse solution */
-		sprintf(message,"Outputting navigation solution...");
-		do_message_on(message);
-
-		sprintf(message, " > Final smoothing weight:%12g\n > Final crossing sigma:%12g\n > Final total sigma:%12g\n",
-			smoothweight_best, sigma_crossing_best / mbna_mtodeglat, sigma_total_best / mbna_mtodeglat);
-		do_info_add(message, MB_NO);
-		
-		/* get crossing offset results */
-		sprintf(message, " > Nav Tie Offsets (m):  id  observed  solution  error\n");
-		do_info_add(message, MB_NO);
-		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
-		    {
-		    crossing = &project.crossings[icrossing];
-		
-		    /* check only set ties */
-		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
-		    for (j=0;j<crossing->num_ties;j++)
-			{
-			tie = (struct mbna_tie *) &crossing->ties[j];
-			offset_x =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lon_offset[tie->snav_1];
-			offset_y =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_lat_offset[tie->snav_1];
-			offset_z =  project.files[crossing->file_id_2].sections[crossing->section_2].snav_z_offset[tie->snav_2]
-				- project.files[crossing->file_id_1].sections[crossing->section_1].snav_z_offset[tie->snav_1];
-			tie->inversion_status = MBNA_INVERSION_CURRENT;
-    			tie->inversion_offset_x = offset_x;
-    			tie->inversion_offset_y = offset_y;
-    			tie->inversion_offset_x_m = offset_x / mbna_mtodeglon;
-    			tie->inversion_offset_y_m = offset_y / mbna_mtodeglat;
-   			tie->inversion_offset_z_m = offset_z;
-
-			sprintf(message, " >     %4d   %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f\n",
-				icrossing,
-				tie->offset_x / mbna_mtodeglon,
-				tie->offset_y / mbna_mtodeglat,
-				offset_x / mbna_mtodeglon,
-				offset_y / mbna_mtodeglat,
-				offset_z,
-				(offset_x - tie->offset_x) / mbna_mtodeglon,
-				(offset_y - tie->offset_y) / mbna_mtodeglat,
-				(offset_z - tie->offset_z_m));
-			do_info_add(message, MB_NO);
-			}
-		    }
-
-		if (mbna_verbose > 0)
-		for (i=0;i<nc/3;i++)
-		    {
-		    fprintf(stderr, "i:%d  offsets: %f %f %f  crossings: %d %d %d\n",
-		    		i, x[3*i], x[3*i+1], x[3*i+2], nx[3*i], nx[3*i+1], nx[3*i+1]);
-		    }
-		if (mbna_verbose > 0)
-		for (i=0;i<nr;i++)
-		    {
-		    s = 0.0;
-		    for (j=0;j<nia[i];j++)
-			{
-			k = nnz * i + j;
-			s += x[ia[k]] * a[k];
-			if (mbna_verbose > 0)
-			fprintf(stderr, "i:%4d j:%4d k:%4d ia[k]:%4d a[k]:%12g\n", i, j, k, ia[k], a[k]);
-			}
-		    if (mbna_verbose > 0)
-		    fprintf(stderr, "i:%5d n:%5d  d:%12g s:%12g err:%12g\n",i,nia[i],d[i],s,d[i]-s);
-		    }
-		
-		/* write updated project */
-		project.inversion = MBNA_INVERSION_CURRENT;
-		mbnavadjust_write_project();
-
-		/* deallocate arrays */
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&a,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&ia,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nia,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&d,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&x,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&nx,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&dx,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&sigma,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&work,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&xtime_d,&error);
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&xcontinuity,&error);
-
-		/* generate new nav files */
-		for (i=0;i<project.num_files;i++)
-		    {
-		    file = &project.files[i];
-		    if (file->status != MBNA_FILE_FIXED)
-		    	{
-		    	sprintf(npath,"%s/nvs_%4.4d.mb166",
-			    project.datadir,i);
-		    	sprintf(apath,"%s/nvs_%4.4d.na%d",
-			    project.datadir,i,file->output_id);
-		    	sprintf(opath,"%s.na%d", file->path, file->output_id);
-		    	if ((nfp = fopen(npath,"r")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		    	else if ((afp = fopen(apath,"w")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		   	else if ((ofp = fopen(opath,"w")) == NULL)
-			    {
-			    status = MB_FAILURE;
-			    error = MB_ERROR_OPEN_FAIL;
-			    }
-		    	else
-			    {
-			    sprintf(message, " > Output updated nav to %s\n", opath);
-			    do_info_add(message, MB_NO);
-
-			    /* read the input nav */
-			    isection = 0;
-			    section = &file->sections[isection];
-			    isnav = 0;
-			    done = MB_NO;
-			    while (done == MB_NO)
-			    	{
-			    	if ((result = fgets(buffer,BUFFER_MAX,nfp)) != buffer)
-				    {
-				    done = MB_YES;
-				    }
-			    	else if ((nscan = sscanf(buffer, "%d %d %d %d %d %d.%d %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-							&time_i[0], &time_i[1], &time_i[2], &time_i[3],
-							&time_i[4], &time_i[5], &time_i[6], &time_d,
-							&navlon, &navlat, &heading, &speed, 
-							&draft, &roll, &pitch, &heave)) >= 12)
-				    {
-				    /* fix nav from early version */
-				    if (nscan < 16)
-					{
-					draft = 0.0;
-					roll = 0.0;
-					pitch = 0.0;
-					heave = 0.0;
-					}
-					
-				    /* get next snav interval if needed */
-				    while (time_d > section->snav_time_d[isnav+1]
-				    	&& !(isection == file->num_sections - 1
-					    && isnav == section->num_snav - 2))
-				    	{
-				    	if (isnav < section->num_snav - 2)
-					    {
-					    isnav++;
-					    }
-				    	else if (isection < file->num_sections)
-					    {
-					    isection++;
-					    section = &file->sections[isection];
-					    isnav = 0;
-					    }
-				    	}
-				
-				    /* update the nav if possible (and it should be...) */
-				    if (time_d < section->snav_time_d[isnav])
-					{
-					factor = 0.0;
-					}
-				    else if (time_d > section->snav_time_d[isnav+1])
-					{
-					factor = 1.0;
-					}
-				    else
-				    	{
-				    	if (section->snav_time_d[isnav+1] > section->snav_time_d[isnav])
-					    factor = (time_d - section->snav_time_d[isnav])
-							/ (section->snav_time_d[isnav+1] - section->snav_time_d[isnav]);
-				    	else
-					    factor = 0.0;
-				    	}
-				    /* update and output only nonzero navigation */
-				    if (fabs(navlon) > 0.0000001 && fabs(navlat) > 0.0000001)
-				    	{
-					navlon -= section->snav_lon_offset_int[isnav]
-							+ factor * (section->snav_lon_offset_int[isnav+1]
-								- section->snav_lon_offset_int[isnav]);
-					navlat -= section->snav_lat_offset_int[isnav]
-							+ factor * (section->snav_lat_offset_int[isnav+1]
-								- section->snav_lat_offset_int[isnav]);
-					zoffset = section->snav_z_offset_int[isnav]
-							+ factor * (section->snav_z_offset_int[isnav+1]
-								- section->snav_z_offset_int[isnav]);
-
-					/* write the updated nav out */
-					fprintf(ofp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-						    time_i[0], time_i[1], time_i[2], time_i[3],
-						    time_i[4], time_i[5], time_i[6], time_d,
-						    navlon, navlat, heading, speed, 
-						    draft, roll, pitch, heave, zoffset);
-					fprintf(afp, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
-						    time_i[0], time_i[1], time_i[2], time_i[3],
-						    time_i[4], time_i[5], time_i[6], time_d,
-						    navlon, navlat, heading, speed, 
-						    draft, roll, pitch, heave, zoffset);
-/*fprintf(stderr, "%2.2d:%2.2d:%2.2d:%5.3f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f\n",
-i, isection, isnav, factor, 
-time_i[0], time_i[1], time_i[2], time_i[3],
-time_i[4], time_i[5], time_i[6], time_d,
-navlon, navlat, heading, speed, zoffset);*/
-					}
-				    }
-			    	}
-			    }
-		    	if (nfp != NULL) fclose(nfp);
-		    	if (afp != NULL) fclose(afp);
-		    	if (ofp != NULL) 
-			    {
-			    fclose(ofp);
-			    
-			    /* get bias values */
-			    mb_pr_get_heading(mbna_verbose, file->path, 
-						&mbp_heading_mode, 
-						&mbp_headingbias, 
-						&error);
-			    mb_pr_get_rollbias(mbna_verbose, file->path, 
-						&mbp_rollbias_mode, 
-						&mbp_rollbias, 
-						&mbp_rollbias_port, 
-						&mbp_rollbias_stbd, 
-						&error);
-	    
-			    /* update output file in mbprocess parameter file */
-			    status = mb_pr_update_format(mbna_verbose, file->path, 
-					MB_YES, file->format, 
-					&error);
-			    status = mb_pr_update_navadj(mbna_verbose, file->path, 
-					MBP_NAVADJ_LLZ, opath, 
-					MBP_NAV_LINEAR, 
-					&error);
-
-			    /* update heading bias in mbprocess parameter file */
-			    mbp_headingbias = file->heading_bias + file->heading_bias_import;
-			    if (mbp_headingbias == 0.0)
-				{
-				if (mbp_heading_mode == MBP_HEADING_OFF
-				    || mbp_heading_mode == MBP_HEADING_OFFSET)
-				    mbp_heading_mode = MBP_HEADING_OFF;
-				else if (mbp_heading_mode == MBP_HEADING_CALC
-				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-				    mbp_heading_mode = MBP_HEADING_CALC;
-				}
-			    else
-				{
-				if (mbp_heading_mode == MBP_HEADING_OFF
-				    || mbp_heading_mode == MBP_HEADING_OFFSET)
-				    mbp_heading_mode = MBP_HEADING_OFFSET;
-				else if (mbp_heading_mode == MBP_HEADING_CALC
-				    || mbp_heading_mode == MBP_HEADING_CALCOFFSET)
-				    mbp_heading_mode = MBP_HEADING_CALCOFFSET;
-				}
-			    status = mb_pr_update_heading(mbna_verbose, file->path, 
-					mbp_heading_mode, mbp_headingbias, 
-					&error);
-
-			    /* update roll bias in mbprocess parameter file */
-			    mbp_rollbias = file->roll_bias + file->roll_bias_import;
-			    if (mbp_rollbias == 0.0)
-				{
-				if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-				    {
-				    mbp_rollbias_port = mbp_rollbias 
-					    + mbp_rollbias_port - file->roll_bias_import;
-				    mbp_rollbias_stbd = mbp_rollbias 
-					    + mbp_rollbias_stbd - file->roll_bias_import;
-				    }
-				else
-				    mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
-				}
-			    else
-				{
-				if (mbp_rollbias_mode == MBP_ROLLBIAS_DOUBLE)
-				    {
-				    mbp_rollbias_port = mbp_rollbias 
-					    + mbp_rollbias_port - file->roll_bias_import;
-				    mbp_rollbias_stbd = mbp_rollbias 
-					    + mbp_rollbias_stbd - file->roll_bias_import;
-				    }
-				else
-				    {
-				    mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
-				    }
-				}
-			    status = mb_pr_update_rollbias(mbna_verbose, file->path, 
-					mbp_rollbias_mode, mbp_rollbias, 
-					mbp_rollbias_port, mbp_rollbias_stbd, 
-					&error);
-			    }
-			}
-		    }
-		
-		/* turn off message dialog */
-		do_message_off();
-		}
 
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -13029,24 +9311,28 @@ fprintf(stderr,"Called %s\n",function_name);
 			section = &file->sections[j];
 			for (isnav=0;isnav<section->num_snav;isnav++)
 			    {
-			    if (first == MB_YES)
+			    iping = section->global_start_ping + section->snav_id[isnav];
+			    if (iping >= mbna_modelplot_pingstart && iping <= mbna_modelplot_pingend)
 			    	{
-				lon_offset_min = section->snav_lon_offset[isnav] / mbna_mtodeglon;
-				lon_offset_max = section->snav_lon_offset[isnav] / mbna_mtodeglon;
-				lat_offset_min = section->snav_lat_offset[isnav] / mbna_mtodeglat;
-				lat_offset_max = section->snav_lat_offset[isnav] / mbna_mtodeglat;
-				z_offset_min = section->snav_z_offset[isnav];
-				z_offset_max = section->snav_z_offset[isnav];
-				first = MB_NO;
-				}
-			    else
-			    	{
-				lon_offset_min = MIN(lon_offset_min, section->snav_lon_offset[isnav] / mbna_mtodeglon);
-				lon_offset_max = MAX(lon_offset_max, section->snav_lon_offset[isnav] / mbna_mtodeglon);
-				lat_offset_min = MIN(lat_offset_min, section->snav_lat_offset[isnav] / mbna_mtodeglat);
-				lat_offset_max = MAX(lat_offset_max, section->snav_lat_offset[isnav] / mbna_mtodeglat);
-				z_offset_min = MIN(z_offset_min, section->snav_z_offset[isnav]);
-				z_offset_max = MAX(z_offset_max, section->snav_z_offset[isnav]);
+				if (first == MB_YES)
+			    	    {
+				    lon_offset_min = section->snav_lon_offset[isnav] / mbna_mtodeglon;
+				    lon_offset_max = section->snav_lon_offset[isnav] / mbna_mtodeglon;
+				    lat_offset_min = section->snav_lat_offset[isnav] / mbna_mtodeglat;
+				    lat_offset_max = section->snav_lat_offset[isnav] / mbna_mtodeglat;
+				    z_offset_min = section->snav_z_offset[isnav];
+				    z_offset_max = section->snav_z_offset[isnav];
+				    first = MB_NO;
+				    }
+				else
+			    	    {
+				    lon_offset_min = MIN(lon_offset_min, section->snav_lon_offset[isnav] / mbna_mtodeglon);
+				    lon_offset_max = MAX(lon_offset_max, section->snav_lon_offset[isnav] / mbna_mtodeglon);
+				    lat_offset_min = MIN(lat_offset_min, section->snav_lat_offset[isnav] / mbna_mtodeglat);
+				    lat_offset_max = MAX(lat_offset_max, section->snav_lat_offset[isnav] / mbna_mtodeglat);
+				    z_offset_min = MIN(z_offset_min, section->snav_z_offset[isnav]);
+				    z_offset_max = MAX(z_offset_max, section->snav_z_offset[isnav]);
+				    }
 				}
 			    }
 			}

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
- *	$Id: mbr_reson7kr.c,v 5.21 2008-09-27 03:27:10 caress Exp $
+ *	$Id: mbr_reson7kr.c,v 5.21 2008/09/27 03:27:10 caress Exp $
  *
  *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	April 4,2004
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_reson7kr.c,v $
+ * Revision 5.21  2008/09/27 03:27:10  caress
+ * Working towards release 5.1.1beta24
+ *
  * Revision 5.20  2008/09/20 00:57:41  caress
  * Release 5.1.1beta23
  *
@@ -226,7 +229,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.21 2008-09-27 03:27:10 caress Exp $";
+static char res_id[]="$Id: mbr_reson7kr.c,v 5.21 2008/09/27 03:27:10 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -298,6 +301,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_segy = &mbsys_reson7k_extract_segy; 
 	mb_io_ptr->mb_io_insert_segy = &mbsys_reson7k_insert_segy; 
 	mb_io_ptr->mb_io_ctd = &mbsys_reson7k_ctd; 
+	mb_io_ptr->mb_io_ancilliarysensor = &mbsys_reson7k_ancilliarysensor; 
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -5083,7 +5087,17 @@ time_d);
 			mb_get_binary_float(MB_YES, &buffer[index], &(bluefin->environmental[i].conductivity_frequency)); index += 4;
 			mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->environmental[i].pressure_counts)); index += 4;
 			mb_get_binary_float(MB_YES, &buffer[index], &(bluefin->environmental[i].pressure_comp_voltage)); index += 4;
-			for (j=0;j<32;j++)
+			mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor_time_sec)); index += 4;
+			mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor_time_nsec)); index += 4;
+			mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor1)); index += 2;
+			mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor2)); index += 2;
+			mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor3)); index += 2;
+			mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor4)); index += 2;
+			mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor5)); index += 2;
+			mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor6)); index += 2;
+			mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor7)); index += 2;
+			mb_get_binary_short(MB_YES, &buffer[index], &(bluefin->environmental[i].sensor8)); index += 2;
+			for (j=0;j<8;j++)
 				{
 				bluefin->environmental[i].reserved2[j] = buffer[index]; index++;
 				}
@@ -5096,11 +5110,13 @@ time_j[2] = 60 * bluefin->environmental[i].s7kTime.Hours + bluefin->environmenta
 time_j[3] = (int) bluefin->environmental[i].s7kTime.Seconds;
 time_j[4] = (int) (1000000 * (bluefin->environmental[i].s7kTime.Seconds - time_j[3]));
 mb_get_itime(verbose, time_j, time_i);
-fprintf(stderr,"                       %2.2d          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) CTD_time:%f T_time:%f\n",
+fprintf(stderr,"                       %2.2d          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) CTD_time:%f T_time:%f S_time:%d.%9.9d\n",
 i,time_i[0],time_i[1],time_i[2],
 time_i[3],time_i[4],time_i[5],time_i[6],
 bluefin->environmental[i].ctd_time,
-bluefin->environmental[i].temperature_time);
+bluefin->environmental[i].temperature_time,
+bluefin->environmental[i].sensor_time_sec,
+bluefin->environmental[i].sensor_time_nsec);
 #endif
 			}
 			
@@ -9791,6 +9807,7 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_Attitude;
+	*size += attitude->n * R7KRDTSIZE_Attitude;
 	
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
@@ -10789,7 +10806,17 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 				mb_put_binary_float(MB_YES, bluefin->environmental[i].conductivity_frequency, &buffer[index]); index += 4;
 				mb_put_binary_int(MB_YES, bluefin->environmental[i].pressure_counts, &buffer[index]); index += 4;
 				mb_put_binary_float(MB_YES, bluefin->environmental[i].pressure_comp_voltage, &buffer[index]); index += 4;
-				for (j=0;j<32;j++)
+				mb_put_binary_int(MB_YES, bluefin->environmental[i].sensor_time_sec, &buffer[index]); index += 4;
+				mb_put_binary_int(MB_YES, bluefin->environmental[i].sensor_time_nsec, &buffer[index]); index += 4;
+				mb_put_binary_short(MB_YES, bluefin->environmental[i].sensor1, &buffer[index]); index += 2;
+				mb_put_binary_short(MB_YES, bluefin->environmental[i].sensor2, &buffer[index]); index += 2;
+				mb_put_binary_short(MB_YES, bluefin->environmental[i].sensor3, &buffer[index]); index += 2;
+				mb_put_binary_short(MB_YES, bluefin->environmental[i].sensor4, &buffer[index]); index += 2;
+				mb_put_binary_short(MB_YES, bluefin->environmental[i].sensor5, &buffer[index]); index += 2;
+				mb_put_binary_short(MB_YES, bluefin->environmental[i].sensor6, &buffer[index]); index += 2;
+				mb_put_binary_short(MB_YES, bluefin->environmental[i].sensor7, &buffer[index]); index += 2;
+				mb_put_binary_short(MB_YES, bluefin->environmental[i].sensor8, &buffer[index]); index += 2;
+				for (j=0;j<8;j++)
 					{
 					buffer[index] = bluefin->environmental[i].reserved2[j]; index++;
 					}

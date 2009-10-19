@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_transform.c,v 5.6 2008-09-29 04:56:21 caress Exp $
+ * $Id: pj_transform.c,v 5.6 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Perform overall coordinate system to coordinate system 
@@ -29,7 +29,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: pj_transform.c,v $
+ * Revision 5.6  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.20  2006/10/12 21:04:39  fwarmerdam
  * Added experimental +lon_wrap argument to set a "center point" for
  * longitude wrapping of longitude values coming out of pj_transform().
@@ -110,7 +113,7 @@
 #include <math.h>
 #include "geocent.h"
 
-PJ_CVSID("$Id: pj_transform.c,v 5.6 2008-09-29 04:56:21 caress Exp $");
+PJ_CVSID("$Id: pj_transform.c,v 5.6 2008/09/29 04:56:21 caress Exp $");
 
 #ifndef SRS_WGS84_SEMIMAJOR
 #define SRS_WGS84_SEMIMAJOR 6378137.0

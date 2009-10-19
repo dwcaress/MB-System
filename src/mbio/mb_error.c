@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_error.c	2/2/93
- *    $Id: mb_error.c,v 5.6 2006-06-16 19:30:58 caress Exp $
+ *    $Id: mb_error.c,v 5.6 2006/06/16 19:30:58 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	February 2, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_error.c,v $
+ * Revision 5.6  2006/06/16 19:30:58  caress
+ * Check in after the Santa Monica Basin Mapping AUV Expedition.
+ *
  * Revision 5.5  2006/01/06 18:27:19  caress
  * Working towards 5.0.8
  *
@@ -96,7 +99,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
 
-static char rcs_id[]="$Id: mb_error.c,v 5.6 2006-06-16 19:30:58 caress Exp $";
+static char rcs_id[]="$Id: mb_error.c,v 5.6 2006/06/16 19:30:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_error(int verbose, int error, char **message)

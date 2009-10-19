@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.16 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mbgrdtiff.c,v 5.16 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -214,7 +214,10 @@
  *
  *
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbgrdtiff.c,v $
+ * Revision 5.16  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.15  2006/09/11 18:55:52  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -392,7 +395,7 @@ int              tiff_offset[] =
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.16 2008-09-13 06:08:09 caress Exp $";
+	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.16 2008/09/13 06:08:09 caress Exp $";
 	static char program_name[] = "mbgrdtiff";
 	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
 	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
@@ -417,7 +420,7 @@ main (int argc, char **argv)
         char    tiff_file[MB_PATH_MAXLINE];
 	int	intensity;
         double  bounds[4];
-	int	pad[4];
+	GMT_LONG	pad[4];
         int     nx,ny,nxy;
         float   *grid = NULL;
         float   *igrid = NULL;
@@ -689,7 +692,11 @@ main (int argc, char **argv)
 	/* Determine the wesn to be used to read the grdfile */
 	off = (header.node_offset) ? 0 : 1;
 	GMT_map_setup (bounds[0], bounds[1], bounds[2], bounds[3]);
+#ifdef GMT_MINOR_VERSION
+	GMT_grd_setregion (&header, &bounds[0], &bounds[1], &bounds[2], &bounds[3], BCR_BILINEAR);
+#else
 	GMT_grd_setregion (&header, &bounds[0], &bounds[1], &bounds[2], &bounds[3]);
+#endif
 
 	/* allocate memory */
 	nx = irint ( (bounds[1] - bounds[0]) / header.x_inc) + off;

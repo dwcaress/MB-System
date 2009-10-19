@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrid.c	5/2/94
- *    $Id: mbgrid.c,v 5.51 2009-03-13 07:05:58 caress Exp $
+ *    $Id: mbgrid.c,v 5.51 2009/03/13 07:05:58 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -37,7 +37,10 @@
  * Rerewrite:	April 25, 1995
  * Rererewrite:	January 2, 1996
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbgrid.c,v $
+ * Revision 5.51  2009/03/13 07:05:58  caress
+ * Release 5.1.2beta02
+ *
  * Revision 5.50  2009/03/08 09:21:00  caress
  * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
  *
@@ -471,7 +474,7 @@ double mbgrid_erf();
 FILE	*outfp;
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbgrid.c,v 5.51 2009-03-13 07:05:58 caress Exp $";
+static char rcs_id[] = "$Id: mbgrid.c,v 5.51 2009/03/13 07:05:58 caress Exp $";
 static char program_name[] = "mbgrid";
 static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbgrid -Ifilelist -Oroot \
@@ -2049,7 +2052,7 @@ i,j,kgrid,kint,sgrid[kint],gridsmall[kgrid]);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&sgrid,&error);	
 
 
-for (i=0;i<sxdim;i++)
+/*for (i=0;i<sxdim;i++)
 	for (j=0;j<sydim;j++)
 		{
 		kgrid = i * sydim + j;
@@ -2076,6 +2079,13 @@ for (i=0;i<sxdim;i++)
 		if (gridsmall[kgrid] > zmax && gridsmall[kgrid] < zclip)
 			zmax = gridsmall[kgrid];
 		}
+strcpy(ofile,fileroot);
+strcat(ofile,"_lorez.grd");
+status = write_cdfgrd(verbose,ofile,output,sxdim,sydim,
+	wbnd[0],wbnd[1],wbnd[2],wbnd[3],
+	zmin,zmax,sdx,sdy,
+	xlabel,ylabel,zlabel,title,projection_id, 
+	argc,argv,&error);*/
 
 	/* do second pass footprint gridding using slope estimates from first pass interpolated grid */
 
@@ -2291,7 +2301,7 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				k2 = isx * sydim + (isy + 1);
 			      	dzdy = (gridsmall[k2] - gridsmall[k1]) / sdy;
 				}
-			      else if (isx == sxdim - 1)
+			      else if (isy == sydim - 1)
 			      	{
 				k1 = isx * sydim + (isy - 1);
 				k2 = isx * sydim + isy;
@@ -5329,8 +5339,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	status = MB_SUCCESS;
 	struct GRD_HEADER grd;
 	double	w, e, s, n;
-	int	pad[4];
-	int	complex;
+	GMT_LONG	pad[4];
 	float	*a;
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
@@ -5404,14 +5413,13 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	sprintf(grd.remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
 		projection,program_name,MB_VERSION,user,host,date);
 
-	/* set extract wesn,pad and complex */
+	/* set extract wesn,pad */
 	w = 0.0;
 	e = 0.0;
 	s = 0.0;
 	n = 0.0;
 	for (i=0;i<4;i++)
 		pad[i] = 0;
-	complex = 0;
 
 	/* allocate memory for output array */
 	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
@@ -5439,7 +5447,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 				}
 
 		/* write the GMT netCDF grd file */
-		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
+		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, FALSE);
 
 		/* free memory for output array */
 		mb_freed(verbose,__FILE__,__LINE__,(void **) &a, error);

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
-#    $Id: mbm_arc2grd.perl,v 5.7 2009-01-15 17:37:28 caress Exp $
+#    $Id: mbm_arc2grd.perl,v 5.7 2009/01/15 17:37:28 caress Exp $
 #
 #    Copyright (c) 2001, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -37,10 +37,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward side of Oahu)
 #
 # Version:
-#   $Id: mbm_arc2grd.perl,v 5.7 2009-01-15 17:37:28 caress Exp $
+#   $Id: mbm_arc2grd.perl,v 5.7 2009/01/15 17:37:28 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_arc2grd.perl,v $
+#   Revision 5.7  2009/01/15 17:37:28  caress
+#   Update on 15 Jan 2009 - fix to mbm_grd2arc and mbm_arc2grd
+#
 #   Revision 5.6  2005/06/04 04:25:57  caress
 #   Macros now handles both upper case and lower case characters in Arc grid headers.
 #

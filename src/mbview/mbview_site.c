@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.10 2008-09-11 20:17:33 caress Exp $
+ *    $Id: mbview_site.c,v 5.10 2008/09/11 20:17:33 caress Exp $
  *
  *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbview_site.c,v $
+ * Revision 5.10  2008/09/11 20:17:33  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.9  2008/05/16 22:59:42  caress
  * Release 5.1.1beta18.
  *
@@ -110,7 +113,7 @@ static Arg      	args[256];
 static char	value_string[MB_PATH_MAXLINE];
 static char	value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.10 2008-09-11 20:17:33 caress Exp $";
+static char rcs_id[]="$Id: mbview_site.c,v 5.10 2008/09/11 20:17:33 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,
@@ -546,16 +549,20 @@ int mbview_enableviewsites(int verbose, int instance,
 		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
 		}
 
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
 	/* set values */
         shared.shareddata.site_mode = MBV_SITE_VIEW;
 		
-	/* set widget sensitivity */
-	if (data->active == MB_YES)
-		mbview_update_sensitivity(mbv_verbose, instance, error);
+	/* set widget sensitivity on all active instances */
+	for (instance=0;instance<MBV_MAX_WINDOWS;instance++)
+		{
+		/* get view */
+		view = &(mbviews[instance]);
+		data = &(view->data);
+		
+		/* if instance active reset action sensitivity */
+		if (data->active == MB_YES)
+			mbview_update_sensitivity(verbose, instance, error);
+		}
 		
 	/* print output debug statements */
 	if (verbose >= 2)

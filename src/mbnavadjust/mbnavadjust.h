@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h,v 5.12 2008-12-22 08:32:52 caress Exp $
+ *    $Id: mbnavadjust.h,v 5.12 2008/12/22 08:32:52 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Author:	D. W. Caress
  * Date:	March 22, 2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbnavadjust.h,v $
+ * Revision 5.12  2008/12/22 08:32:52  caress
+ * Added additional model view - survey vs survey rather than sequential.
+ *
  * Revision 5.11  2008/09/11 20:12:43  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -94,8 +97,8 @@
 #define	MBNA_INVERSION_NONE		0
 #define	MBNA_INVERSION_OLD		1
 #define	MBNA_INVERSION_CURRENT		2
-#define	MBNA_FILE_OK			1
-#define	MBNA_FILE_FIXED			2
+#define	MBNA_FILE_GOODNAV		1
+#define	MBNA_FILE_POORNAV		2
 #define	MBNA_CROSSING_STATUS_NONE	0
 #define	MBNA_CROSSING_STATUS_SET	1
 #define	MBNA_CROSSING_STATUS_SKIP	2
@@ -240,6 +243,7 @@ struct mbna_project {
 	int	num_files_good;
 	int	num_files_alloc;
 	struct mbna_file *files;
+	int	num_blocks;
 	int	num_snavs;
 	int	num_pings;
 	int	num_beams;

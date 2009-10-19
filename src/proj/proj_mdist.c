@@ -4,7 +4,7 @@
 ** Copyright (c) 2003, 2006   Gerald I. Evenden
 */
 static const char
-LIBPROJ_ID[] = "$Id: proj_mdist.c,v 5.2 2008-09-29 04:56:21 caress Exp $";
+LIBPROJ_ID[] = "$Id: proj_mdist.c,v 5.2 2008/09/29 04:56:21 caress Exp $";
 /*
 ** Permission is hereby granted, free of charge, to any person obtaining
 ** a copy of this software and associated documentation files (the
@@ -122,7 +122,10 @@ proj_inv_mdist(double dist, const void *b) {
 	return phi;
 }
 /* Revision Log:
-** $Log: not supported by cvs2svn $
+** $Log: proj_mdist.c,v $
+** Revision 5.2  2008/09/29 04:56:21  caress
+** Proj 4.6.1
+**
 ** Revision 1.1  2006/10/18 05:21:31  fwarmerdam
 ** New
 **

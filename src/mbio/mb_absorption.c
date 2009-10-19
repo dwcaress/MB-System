@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_absorption.c		2/10/2008
- *    $Id: mb_absorption.c,v 5.0 2008-03-01 09:19:29 caress Exp $
+ *    $Id: mb_absorption.c,v 5.0 2008/03/01 09:19:29 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -91,7 +91,10 @@
  *              Note: as I was writing this code the Flyer was refloated
  *              and successfully backed off the reef.
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_absorption.c,v $
+ * Revision 5.0  2008/03/01 09:19:29  caress
+ * Added function to calculate sound absoprtion in water from water properties parameters.
+ *
  *
  */
 

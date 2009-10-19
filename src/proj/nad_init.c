@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nad_init.c,v 5.6 2008-09-29 04:56:21 caress Exp $
+ * $Id: nad_init.c,v 5.6 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Load datum shift files into memory.
@@ -27,7 +27,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: nad_init.c,v $
+ * Revision 5.6  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.8  2003/03/17 18:56:01  warmerda
  * implement delayed loading of ctable format files
  *

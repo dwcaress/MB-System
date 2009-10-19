@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template	5/24/94
-#	$Id: Makefile.template,v 5.5 2009-03-13 07:05:58 caress Exp $
+#	$Id: Makefile.template,v 5.5 2009/03/13 07:05:58 caress Exp $
 #
 #     Copyright (c) 1993-2009 by
 #     David W. Caress (caress@mbari.org)
@@ -15,7 +15,10 @@
 # Author:	D. W. Caress
 # Date:		January 21, 1993
 # 
-# $Log: not supported by cvs2svn $
+# $Log: Makefile.template,v $
+# Revision 5.5  2009/03/13 07:05:58  caress
+# Release 5.1.2beta02
+#
 # Revision 5.4  2008/12/31 08:47:38  caress
 # Updates towards release 5.1.1
 #
@@ -97,6 +100,7 @@ all:
 	cd mbnavadjust; make all
 	cd mbvelocitytool; make all
 	cd mbview; make all
+	cd otps; make all
 
 clean:
 	- cd gsf; make clean
@@ -113,4 +117,5 @@ clean:
 	- cd mbnavadjust; make clean
 	- cd mbvelocitytool; make clean
 	- cd mbview; make clean
+	- cd otps; make clean
 

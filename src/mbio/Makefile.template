@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  5/23/94
-#	$Id: Makefile.template,v 5.28 2009-03-13 07:05:58 caress Exp $
+#	$Id: Makefile.template,v 5.28 2009/03/13 07:05:58 caress Exp $
 #
 #     Copyright (c) 1993-2009 by
 #     David W. Caress (caress@mbari.org)
@@ -15,7 +15,10 @@
 # Author:	D. W. Caress
 # Date:		May 23, 1994
 #
-# $Log: not supported by cvs2svn $
+# $Log: Makefile.template,v $
+# Revision 5.28  2009/03/13 07:05:58  caress
+# Release 5.1.2beta02
+#
 # Revision 5.27  2008/10/17 07:30:22  caress
 # Added format 26 supporting Hydrosweep DS data used by SOPAC.
 #

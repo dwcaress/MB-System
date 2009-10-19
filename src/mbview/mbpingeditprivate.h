@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	11/19/2007
- *    $Id: mbpingeditprivate.h,v 5.1 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mbpingeditprivate.h,v 5.1 2008/11/16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -17,7 +17,10 @@
  * Author:	D. W. Caress
  * Date:	November 11,  2007
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbpingeditprivate.h,v $
+ * Revision 5.1  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.0  2007/11/16 17:48:07  caress
  * Working to add an MBedit-like ping edit interface to MBeditviz
  *

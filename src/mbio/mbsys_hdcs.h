@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.h	3/16/99
- *	$Id: mbsys_hdcs.h,v 5.6 2008-03-14 18:33:03 caress Exp $
+ *	$Id: mbsys_hdcs.h,v 5.6 2008/03/14 18:33:03 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Author:	D. W. Caress
  * Date:	March 16, 1999
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_hdcs.h,v $
+ * Revision 5.6  2008/03/14 18:33:03  caress
+ * Updated support for JHC format 151.
+ *
  * Revision 5.5  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *

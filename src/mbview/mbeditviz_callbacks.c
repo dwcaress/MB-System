@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
- *    $Id: mbeditviz_callbacks.c,v 5.9 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mbeditviz_callbacks.c,v 5.9 2008/11/16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  * Author:	D. W. Caress
  * Date:	April 27, 2007
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbeditviz_callbacks.c,v $
+ * Revision 5.9  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.8  2008/05/16 22:59:42  caress
  * Release 5.1.1beta18.
  *
@@ -304,6 +307,7 @@ int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon)
 	app = appcon;
 	mbev_message_on = MB_NO;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_init\n");
 			
 	/* set about version label */
@@ -364,6 +368,7 @@ fprintf(stderr,"do_mbeditviz_init\n");
 	/* set sensitivity of widgets that require an mbview instance to be active */
 	do_mbeditviz_update_gui( );
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_init status:%d\n", mbev_status);
 
 	return(0);
@@ -375,6 +380,9 @@ do_mbeditviz_mode_change( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
 
+    acs=(XmToggleButtonCallbackStruct*)call_data;
+
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_mode_change\n");
 
     /* set values if needed */
@@ -406,9 +414,11 @@ fprintf(stderr,"do_mbeditviz_mode_change\n");
 		    XmToggleButtonSetState(toggleButton_openmodebrowse, 
 			     TRUE, FALSE);
 		    }
+if (mbev_verbose > 0)
 fprintf(stderr,"acs->set:%d mode:%d\n",acs->set,mbev_mode_output);
 	    }
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_mode_change status:%d\n", mbev_status);
 
 }
@@ -421,7 +431,11 @@ do_mbeditviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 	char function_name[] = "do_mbeditviz_openfile";
 	char    *file_ptr;
 	int	format;
+
+    acs=(XmFileSelectionBoxCallbackStruct*)call_data;
     
+if (mbev_verbose > 0)
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_openfile\n");
 	/* read the mbio format number */
 	get_text_string(text_format, value_text);
@@ -439,6 +453,7 @@ fprintf(stderr,"do_mbeditviz_openfile\n");
 	/* open data */
 	mbev_status = do_mbeditviz_opendata(file_ptr, format);
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_openfile status:%d\n", mbev_status);
 }
 
@@ -448,6 +463,7 @@ do_mbeditviz_fileselection_list( Widget w, XtPointer client_data, XtPointer call
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_fileselection_list\n");
 
     static char selection_text[128];
@@ -472,6 +488,7 @@ fprintf(stderr,"do_mbeditviz_fileselection_list\n");
 		    value_text);
 		}
 	    }
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_fileselection_list status:%d\n", mbev_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -480,6 +497,7 @@ do_mbeditviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPoin
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_fileSelectionBox_openswath\n");
         XmString	tmp0;
 	int	argok;
@@ -498,6 +516,7 @@ fprintf(stderr,"do_mbeditviz_fileSelectionBox_openswath\n");
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_fileSelectionBox_openswath status:%d\n", mbev_status);
     
 }
@@ -508,6 +527,7 @@ do_mbeditviz_quit( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_quit\n");
 	
 	/* destroy any mbview window */
@@ -528,6 +548,7 @@ fprintf(stderr,"do_mbeditviz_quit\n");
 	/* reset the gui */
 	do_mbeditviz_update_gui();
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_quit status:%d\n", mbev_status);
     
 }
@@ -542,6 +563,7 @@ do_mbeditviz_viewall( Widget w, XtPointer client_data, XtPointer call_data)
     int	loadcount;
     int	i;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewall\n");
 	
 	/* destroy any mbview window */
@@ -553,6 +575,7 @@ fprintf(stderr,"do_mbeditviz_viewall\n");
 
 		mbev_status = mbview_destroy(mbev_verbose, 0, MB_YES, &mbev_error);
 		mbev_grid.status == MBEV_GRID_NOTVIEWED;
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewall destroyed previous windows\n");
 		}
 
@@ -560,33 +583,40 @@ fprintf(stderr,"do_mbeditviz_viewall destroyed previous windows\n");
 	if (mbev_grid.status != MBEV_GRID_NONE)
 		{
 		mbeditviz_destroy_grid();
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewall destroyed old grid\n");
 		}
 	
 	/* loop over all files to be sure all files are loaded */
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewall loading files...\n");
 	do_mbeditviz_message_on("Loading files...");
 	loadcount = 0;
 	for (ifile=0;ifile<mbev_num_files;ifile++)
 		{
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewall loading file %d\n",ifile);
 		file = &(mbev_files[ifile]);
 		if (file->load_status == MB_NO)
 			{
 			sprintf(value_text, "Loading file %d of %d...", ifile+1, mbev_num_files);
 			do_mbeditviz_message_on(value_text);
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewall loading file %d of %d...\n", ifile+1, mbev_num_files);
 			mbeditviz_load_file(ifile);
 			}
 		loadcount++;
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewall mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 		}
 	do_mbeditviz_message_off();
 		
 	/* put up dialog on grid parameters */
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewall mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 	if (mbev_status == MB_SUCCESS && loadcount > 0)
 		{
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewall calling do_mbeditviz_gridparameters\n");
 		do_mbeditviz_gridparameters(w, client_data, call_data);
 		}
@@ -596,9 +626,11 @@ fprintf(stderr,"do_mbeditviz_viewall calling do_mbeditviz_gridparameters\n");
 		}
 	
 	/* reset the gui */
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewall calling do_mbeditviz_update_gui\n");
 	do_mbeditviz_update_gui();
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_viewall status:%d\n", mbev_status);
 }
 
@@ -615,6 +647,7 @@ do_mbeditviz_viewselected( Widget w, XtPointer client_data, XtPointer call_data)
     int	loadcount;
     int	i;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewselected\n");
 	
 	/* destroy any mbview window */
@@ -637,9 +670,12 @@ fprintf(stderr,"do_mbeditviz_viewselected\n");
 	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
 	XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
 	XtGetValues(list_filelist, args, ac);
+if (mbev_verbose > 0)
+{
 fprintf(stderr,"position_count:%d\n",position_count);
 for(i=0;i<position_count;i++)
 fprintf(stderr,"  %d %d\n",i,position_list[i]);
+}
 	
 	/* loop over all files to be sure selected files are loaded */
 	do_mbeditviz_message_on("Loading files...");
@@ -675,6 +711,7 @@ fprintf(stderr,"  %d %d\n",i,position_list[i]);
 	do_mbeditviz_message_off();
 		
 	/* put up dialog on grid parameters */
+if (mbev_verbose > 0)
 fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 	if (mbev_status == MB_SUCCESS && loadcount > 0)
 		{
@@ -692,6 +729,7 @@ fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_viewselected status:%d\n", mbev_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -707,6 +745,7 @@ do_mbeditviz_regrid( Widget w, XtPointer client_data, XtPointer call_data)
     int	loadcount;
     int	i;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_regrid\n");
 	
 	/* destroy any mbview window */
@@ -734,6 +773,7 @@ fprintf(stderr,"do_mbeditviz_regrid\n");
 		}
 		
 	/* put up dialog on grid parameters */
+if (mbev_verbose > 0)
 fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 	if (mbev_status == MB_SUCCESS && loadcount > 0)
 		{
@@ -751,6 +791,7 @@ fprintf(stderr," mbev_status:%d loadcount:%d\n",mbev_status,loadcount);
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_regrid status:%d\n", mbev_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -763,6 +804,7 @@ do_mbeditviz_updategrid( Widget w, XtPointer client_data, XtPointer call_data)
 	int	loadcount;
 	int	ifile;
 
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_updategrid\n");
 	do_mbeditviz_mbview_dismiss_notify(0);
 	
@@ -802,6 +844,7 @@ fprintf(stderr,"do_mbeditviz_updategrid\n");
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_updategrid status:%d\n", mbev_status);
 
 }
@@ -814,6 +857,7 @@ do_mbeditviz_chengecellsize( Widget w, XtPointer client_data, XtPointer call_dat
 	char	string[MB_PATH_MAXLINE];
 	int	icellsize;
 
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_chengecellsize\n");
     
     	/* get cell size value */
@@ -825,11 +869,14 @@ fprintf(stderr,"do_mbeditviz_chengecellsize\n");
 	/* get updated grid dimensions */
 	mbev_grid_nx = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
 	mbev_grid_ny = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
+if (mbev_verbose > 0)
+{
 fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
 mbev_grid_bounds[0], mbev_grid_bounds[1], mbev_grid_bounds[2], mbev_grid_bounds[3],
 mbev_grid_boundsutm[0], mbev_grid_boundsutm[1], mbev_grid_boundsutm[2], mbev_grid_boundsutm[3]);
 fprintf(stderr,"cell size:%f dimensions: %d %d\n",
 mbev_grid_cellsize, mbev_grid_nx, mbev_grid_ny);
+}
 	
 	/* reset the widgets */
 	sprintf(string,":::t\"Selected Grid Parameters:\":t\"    Cell Size: %.1f m\":t\"    Dimensions: %d %d\"", 
@@ -847,6 +894,7 @@ do_mbeditviz_gridparameters( Widget w, XtPointer client_data, XtPointer call_dat
 	int	icellsize;
 	char	string[MB_PATH_MAXLINE];
 
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_gridparameters\n");
 
 	/* get calculated grid parameters */
@@ -932,10 +980,12 @@ do_mbeditviz_viewgrid()
 	double	*navportlat = NULL;
 	double	*navstbdlon = NULL;
 	double	*navstbdlat = NULL;
-	int	*navcdp = NULL;
+	int	*navline = NULL;
 	int	*navshot = NULL;
+	int	*navcdp = NULL;
 	int	ifile, iping;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_viewgrid\n");
 	
 	/* display grid */
@@ -1164,10 +1214,13 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 				if ((navstbdlat = malloc(file->num_pings*sizeof(double))) == NULL)
 					mbev_status = MB_FAILURE;
 				if (mbev_status == MB_SUCCESS)
-				if ((navcdp = malloc(file->num_pings*sizeof(double))) == NULL)
+				if ((navline = malloc(file->num_pings*sizeof(double))) == NULL)
 					mbev_status = MB_FAILURE;
 				if (mbev_status == MB_SUCCESS)
 				if ((navshot = malloc(file->num_pings*sizeof(double))) == NULL)
+					mbev_status = MB_FAILURE;
+				if (mbev_status == MB_SUCCESS)
+				if ((navcdp = malloc(file->num_pings*sizeof(double))) == NULL)
 					mbev_status = MB_FAILURE;
 				
 				/* copy nav data */
@@ -1185,8 +1238,9 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 					navportlat[iping] = ping->portlat;
 					navstbdlon[iping] = ping->stbdlon;
 					navstbdlat[iping] = ping->stbdlat;
-					navcdp[iping] = 0;
+					navline[iping] = 0;
 					navshot[iping] = iping;
+					navcdp[iping] = 0;
 					}
 					
 				/* add nav data to mbview */
@@ -1203,8 +1257,9 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 						navportlat,
 						navstbdlon,
 						navstbdlat,
-						navcdp,
+						navline,
 						navshot,
+						navcdp,
 						MBV_COLOR_BLACK,
 						2,
 						file->name,
@@ -1213,6 +1268,7 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 						file->path,
 						file->format,
 						MB_YES,
+						MB_NO,
 						MB_NO,
 						MB_NO,
 						1,
@@ -1239,10 +1295,12 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 				navstbdlon = NULL;
 				free(navstbdlat);
 				navstbdlat = NULL;
-				free(navcdp);
-				navcdp = NULL;
+				free(navline);
+				navline = NULL;
 				free(navshot);
 				navshot = NULL;
+				free(navcdp);
+				navcdp = NULL;
 				}
 			}
 		mbview_enableviewnavs(mbev_verbose, mbev_instance, &mbev_error);
@@ -1289,6 +1347,7 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 	/* reset the gui */
 	do_mbeditviz_update_gui();
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_viewgrid status:%d\n", mbev_status);
 
 }
@@ -1298,22 +1357,27 @@ int do_mbeditviz_mbview_dismiss_notify(int instance)
 {
 	char function_name[] = "do_mbeditviz_mbview_dismiss_notify";
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 	
 	/* destroy any mb3dsoundings window */
 	mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_verbose);
 	mbeditviz_mb3dsoundings_dismiss();
+if (mbev_verbose > 0)
 fprintf(stderr,"1 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 	
 	/* destroy the grid */
+if (mbev_verbose > 0)
 fprintf(stderr,"mbev_grid.status:%d\n",mbev_grid.status);
 	if (mbev_grid.status != MBEV_GRID_NONE)
 		mbeditviz_destroy_grid();
+if (mbev_verbose > 0)
 fprintf(stderr,"2 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 	
 	/* reset the gui */
 	do_mbeditviz_update_gui();
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 
 	return(mbev_status);
@@ -1327,6 +1391,7 @@ do_mbeditviz_deleteselected( Widget w, XtPointer client_data, XtPointer call_dat
     int position_count = 0;
     int	i;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_deleteselected\n");
 
 	/* get positions of selected list items */
@@ -1342,6 +1407,7 @@ fprintf(stderr,"do_mbeditviz_deleteselected\n");
 	/* reset the gui */
 	do_mbeditviz_update_gui();
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_deleteselected status:%d\n", mbev_status);
 
 }
@@ -1352,6 +1418,9 @@ do_mbeditviz_changeoutputmode( Widget w, XtPointer client_data, XtPointer call_d
 {
     XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
 
+    acs = (XmToggleButtonCallbackStruct*)call_data;
+
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_changeoutputmode\n");
 
     /* set values if needed */
@@ -1383,9 +1452,11 @@ fprintf(stderr,"do_mbeditviz_changeoutputmode\n");
 		XmToggleButtonSetState(toggleButton_openmodebrowse, 
 			    TRUE, FALSE);
 		}
+if (mbev_verbose > 0)
 fprintf(stderr,"acs->set:%d mbev_mode_output:%d\n",acs->set,mbev_mode_output);
 	    }
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_changeoutputmode status:%d\n", mbev_status);
 
 }
@@ -1395,6 +1466,7 @@ int do_mbeditviz_opendata(char *input_file_ptr, int format)
 {
 	char function_name[] = "do_mbeditviz_opendata";
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_opendata:%s %d\n", input_file_ptr, format);
 	do_mbeditviz_message_on("Reading datalist...");
 	
@@ -1402,6 +1474,7 @@ fprintf(stderr,"do_mbeditviz_opendata:%s %d\n", input_file_ptr, format);
 	
 	do_mbeditviz_message_off();
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_opendata status:%d\n", mbev_status);
 	
 	return(mbev_status);
@@ -1421,6 +1494,7 @@ do_mbeditviz_update_gui( )
     	XmString *xstr;
 	int	i, j, k;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_update_gui status:%d\n", mbev_status);
 
 	/* set status text */
@@ -1548,6 +1622,7 @@ fprintf(stderr,"do_mbeditviz_update_gui status:%d\n", mbev_status);
 			NULL);
 		}
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_update_gui status:%d\n", mbev_status);
 }
 /*---------------------------------------------------------------------------------------*/
@@ -1555,9 +1630,11 @@ void do_mbeditviz_pickonepoint_notify(int instance)
 {
 	char function_name[] = "do_mbeditviz_pickonepoint_notify";
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_pickonepoint_notify:%d\n", instance);
 	
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_pickonepoint_notify status:%d\n", mbev_status);
 }	
 /*------------------------------------------------------------------------------*/
@@ -1566,9 +1643,11 @@ void do_mbeditviz_picktwopoint_notify(int instance)
 {
 	char function_name[] = "do_mbeditviz_picktwopoint_notify";
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_picktwopoint_notify:%d\n", instance);
 	
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_picktwopoint_notify status:%d\n", mbev_status);
 }	
 /*------------------------------------------------------------------------------*/
@@ -1577,6 +1656,7 @@ void do_mbeditviz_pickarea_notify(int instance)
 {
 	char function_name[] = "do_mbeditviz_pickarea_notify";
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_pickarea_notify:%d\n", instance);
 
 	mbeditviz_selectarea(instance);
@@ -1587,6 +1667,7 @@ fprintf(stderr,"do_mbeditviz_pickarea_notify:%d\n", instance);
 	mbev_status = mb3dsoundings_set_bias_notify(mbev_verbose, &mbeditviz_mb3dsoundings_bias, &mbev_error);
 	mbev_status = mb3dsoundings_set_biasapply_notify(mbev_verbose, &mbeditviz_mb3dsoundings_biasapply, &mbev_error);
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_picktwopoint_notify status:%d\n", mbev_status);
 	
 }	
@@ -1597,6 +1678,7 @@ void do_mbeditviz_pickregion_notify(int instance)
 	char function_name[] = "do_mbeditviz_pickregion_notify";
 	int	ifile, iping, ibeam;
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_pickregion_notify:%d\n", instance);
 
 	mbeditviz_selectregion(instance);
@@ -1607,6 +1689,7 @@ fprintf(stderr,"do_mbeditviz_pickregion_notify:%d\n", instance);
 	mbev_status = mb3dsoundings_set_bias_notify(mbev_verbose, &mbeditviz_mb3dsoundings_bias, &mbev_error);
 	mbev_status = mb3dsoundings_set_biasapply_notify(mbev_verbose, &mbeditviz_mb3dsoundings_biasapply, &mbev_error);
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_pickregion_notify status:%d\n", mbev_status);
 }	
 /*------------------------------------------------------------------------------*/
@@ -1615,9 +1698,11 @@ void do_mbeditviz_picksite_notify(int instance)
 {
 	char function_name[] = "do_mbeditviz_picksite_notify";
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_picksite_notify:%d\n", instance);
 	
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_picksite_notify status:%d\n", mbev_status);
 }	
 /*------------------------------------------------------------------------------*/
@@ -1626,9 +1711,11 @@ void do_mbeditviz_pickroute_notify(int instance)
 {
 	char function_name[] = "do_mbeditviz_pickroute_notify";
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_pickroute_notify:%d\n", instance);
 	
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_pickroute_notify status:%d\n", mbev_status);
 }	
 /*------------------------------------------------------------------------------*/
@@ -1637,13 +1724,14 @@ void do_mbeditviz_picknav_notify(int instance)
 {
 	char function_name[] = "do_mbeditviz_picknav_notify";
 	
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_picknav_notify:%d\n", instance);
 	
 
 	mbeditviz_selectnav(instance);
 	
 	/* open ping editor */
-	BxManageCB(parent, (XtPointer)"form_pingedit", NULL);
+	/* BxManageCB(parent, (XtPointer)"form_pingedit", NULL); */
 	
 	/* open mb3dsoundings 3d editor */
 	mbev_status = mb3dsoundings_open(mbev_verbose, &mbev_selected, &mbev_error);
@@ -1653,6 +1741,7 @@ fprintf(stderr,"do_mbeditviz_picknav_notify:%d\n", instance);
 	mbev_status = mb3dsoundings_set_bias_notify(mbev_verbose, &mbeditviz_mb3dsoundings_bias, &mbev_error);
 	mbev_status = mb3dsoundings_set_biasapply_notify(mbev_verbose, &mbeditviz_mb3dsoundings_biasapply, &mbev_error);
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_picknav_notify status:%d\n", mbev_status);
 }	
 /*------------------------------------------------------------------------------*/
@@ -1665,6 +1754,7 @@ do_mbeditviz_regrid_notify( Widget w, XtPointer client_data, XtPointer call_data
     double	headingbias;
     double	timelag;
     
+if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_regrid_notify\n");
 
 	/* get current bias parameters */
@@ -1676,6 +1766,7 @@ fprintf(stderr,"do_mbeditviz_regrid_notify\n");
 	/* reset the gui */
 	do_mbeditviz_update_gui();
 
+if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_regrid_notify status:%d\n", mbev_status);
 
 }

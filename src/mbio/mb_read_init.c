@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c,v 5.27 2009-03-13 07:05:58 caress Exp $
+ *    $Id: mb_read_init.c,v 5.27 2009/03/13 07:05:58 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	January 25, 1993
  * 
- * $Log: not supported by cvs2svn $
+ * $Log: mb_read_init.c,v $
+ * Revision 5.27  2009/03/13 07:05:58  caress
+ * Release 5.1.2beta02
+ *
  * Revision 5.26  2009/03/02 18:51:52  caress
  * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
  *
@@ -253,7 +256,7 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.27 2009-03-13 07:05:58 caress Exp $";
+	static char rcs_id[]="$Id: mb_read_init.c,v 5.27 2009/03/13 07:05:58 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

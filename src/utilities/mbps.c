@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 5.9 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mbps.c,v 5.9 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Date:	September 15, 1993 (version 3)
  * Date:	August 31, 1991 (original version)
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbps.c,v $
+ * Revision 5.9  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.8  2006/01/18 15:15:10  caress
  * Had to change ps_text calls to work with pslib from GMT 4.1.
  *
@@ -170,7 +173,7 @@ int rgb_white[] = {255, 255, 255};
 main (int argc, char **argv)
 {
 
-	static char rcs_id[] = "$Id: mbps.c,v 5.9 2008-09-13 06:08:09 caress Exp $";
+	static char rcs_id[] = "$Id: mbps.c,v 5.9 2008/09/13 06:08:09 caress Exp $";
 	static char program_name[] = "MBPS";
 	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
 	static char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
@@ -489,10 +492,26 @@ main (int argc, char **argv)
 	max_z = -9999.0;
 
 	/* allocate memory for data arrays */
+	beamflag = NULL;
+	bath = NULL;
+	bathacrosstrack = NULL;
+	bathalongtrack = NULL;
 	amp = NULL;
 	ss = NULL;
 	ssacrosstrack = NULL;
 	ssalongtrack = NULL;
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(char), (void **)&beamflag, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bath, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
 						sizeof(double), (void **)&amp, &error);
@@ -507,37 +526,14 @@ main (int argc, char **argv)
 						sizeof(double), (void **)&ssalongtrack, &error);
 	for (i=0;i<num_pings_max+3;i++) 
 		{
-		if (error == MB_ERROR_NO_ERROR) 
-			{
-			data[i].beams_bath = 0;
-			data[i].beamflag = NULL;
-			data[i].bath = NULL;
-			data[i].bathacrosstrack = NULL;
-			data[i].bathalongtrack = NULL;
-			data[i].xp = NULL;
-			data[i].yp = NULL;
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-								sizeof(char), (void **)&beamflag, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-								sizeof(double), (void **)&bath, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-								sizeof(double), (void **)&bathacrosstrack, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-								sizeof(double), (void **)&bathalongtrack, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-								sizeof(double), (void **)&xp, &error);
-			if (error == MB_ERROR_NO_ERROR)
-				status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-								sizeof(double), (void **)&yp, &error);
-			for (j=0; j<beams_bath; j++)
-				data[i].beamflag[j] = MB_FLAG_NULL;
-			} /* if data[i] */
-		} 	 /* for i */	  
+		data[i].beams_bath = 0;
+		data[i].beamflag = NULL;
+		data[i].bath = NULL;
+		data[i].bathacrosstrack = NULL;
+		data[i].bathalongtrack = NULL;
+		data[i].xp = NULL;
+		data[i].yp = NULL;
+		}  
 
 
 	/* if error initializing memory then quit */
@@ -557,155 +553,179 @@ main (int argc, char **argv)
 	while (done == MB_NO && error <= MB_ERROR_NO_ERROR)
 		{
 		/* read a ping of data */
-		beamflag = data[nread].beamflag;
-		bath = data[nread].bath;
-		bathacrosstrack = data[nread].bathacrosstrack;
-		bathalongtrack = data[nread].bathalongtrack;
-		xp = data[nread].xp;
-		yp = data[nread].yp;
 		status = mb_get(verbose,mbio_ptr,&kind,&pings,
 			time_i,&time_d,
 			&navlon,&navlat,
 			&speed,&heading,
 			&distance,&altitude,&sonardepth,
-			&data[nread].beams_bath,&beams_amp,&pixels_ss,
-			beamflag,bath,amp,bathacrosstrack,
+			&beams_bath,&beams_amp,&pixels_ss,
+			beamflag,bath,amp,
+			bathacrosstrack,
 			bathalongtrack,
-			ss,ssacrosstrack,ssalongtrack,
+			ss,
+			ssacrosstrack,
+			ssalongtrack,
 			comment,&error);
-
-		/* ignore time gaps */
-		if (error == MB_ERROR_TIME_GAP)
-			{
-			error = MB_ERROR_NO_ERROR;
-			status = MB_SUCCESS;
-			}
-
-		/* output error messages */
-		if (error == MB_ERROR_COMMENT)
-			{
-			/* do nothing */
-			}
-		else if (verbose >= 1 && error < MB_ERROR_NO_ERROR
-			&& error >= MB_ERROR_OTHER)
-			{
-			mb_error(verbose,error,&message);
-			fprintf(stderr,"\nNonfatal MBIO Error:\n%s\n",
-				message);
-			fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
-				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5],
-				time_i[6]);
-			}
-		else if (verbose >= 1 && error < MB_ERROR_NO_ERROR)
-			{
-			mb_error(verbose,error,&message);
-			fprintf(stderr,"\nNonfatal MBIO Error:\n%s\n",
-				message);
-			fprintf(stderr,"Number of good records so far: %d\n",nread);
-			}
-		else if (verbose >= 1 && error > MB_ERROR_NO_ERROR 
-			&& error != MB_ERROR_EOF)
-			{
-			mb_error(verbose,error,&message);
-			fprintf(stderr,"\nFatal MBIO Error:\n%s\n",
-				message);
-			fprintf(stderr,"Last Good Time: %d %d %d %d %d %d %d\n",
-				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5],
-				time_i[6]);
-			}
-
-		/* calculate raw x,y locations for each beam */
-		if (status == MB_SUCCESS) 
-			{
-			/* set initial heading */
-			if (nread == 1)
-				heading_start = heading;
-
-			/* get heading x and y components */
-			dheading = heading - heading_start;
-			if (dheading > 360.0)
-			    dheading -= 360.0;
-			else if (dheading < 0.0)
-			    dheading += 360.0;
-			dheadingx = sin(DTR * dheading);
-			dheadingy = cos(DTR * dheading);
-
-			/* get alongtrack distance in nav */
-			distot += distance * 1000.0;	/* distance in meters */
 			
-			/* loop over the beams */
-			for (j=0; j<beams_bath; j++) 
-				{
-				if (j >= data[nread].beams_bath)
-					{
-					beamflag[j] = MB_FLAG_NULL;
-					xp[j] = BAD;
-					yp[j] = BAD;
-					}
-				else if (mb_beam_ok(beamflag[j])) 
-					{
-					xx = dheadingy * bathacrosstrack[j]
-					    + dheadingx * bathalongtrack[j];
-					yy = distot
-					    - dheadingx * bathacrosstrack[j]
-					    + dheadingy * bathalongtrack[j];
-					zz = -bath[j];
-					if (viewdir=='S' || viewdir=='s') 
-						{
-						xp[j] = yy 
-						    + xx * sin_eta * cos_alpha;
-						yp[j] = zz * cos_eta * ve
-						    - xx * sin_eta * sin_alpha;
-						}
-					else if (viewdir=='P' || viewdir=='p') 
-						{
-						xp[j]= -yy 
-						    - xx * sin_eta * cos_alpha;
-						yp[j]= zz * cos_eta * ve
-						    + xx * sin_eta * sin_alpha;
-						}
-					else if (viewdir=='B' || viewdir=='b') 
-						{
-						xp[j] = xx
-						    + yy * sin_eta * cos_alpha;
-						yp[j]= zz * cos_eta * ve
-						    + yy * sin_eta * sin_alpha;
-						}
-					mean_lat += navlat;
-					mean_lon += navlon;
-					mean_hdg += heading;
-					mean_xp += xp[j];
-					mean_yp += yp[j];
-					mean_knt++;
-
-					if (-bath[j] < min_z) 
-					    min_z= -bath[j];
-					if (-bath[j] > max_z) 
-					    max_z= -bath[j];
-					}
-				else 
-					{
-					xp[j] = BAD;
-					yp[j] = BAD;
-					}
-				} /* for j=0 ... */
-
-
-			if ((nread-1) == 0)
-				for (k=0; k<7; k++)
-					timbeg_i[k] = time_i[k];
-			else
-				for (k=0; k<7; k++)
-					timend_i[k]=time_i[k];
-
-			}	/* if status==MB_SUCCESS */
-
-		/* increment counters */
-		if (error == MB_ERROR_NO_ERROR)
+		/* only work with survey data */
+		if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
 			{
-			nread++;
+
+			/* allocate arrays */
+			data[nread].beams_bath = beams_bath;
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(char), (void **)&(data[nread].beamflag), &error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(double), (void **)&(data[nread].bath), &error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(double), (void **)&(data[nread].bathacrosstrack), &error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(double), (void **)&(data[nread].bathalongtrack), &error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(double), (void **)&(data[nread].xp), &error);
+			status = mb_mallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(double), (void **)&(data[nread].yp), &error);
+
+			/* copy data to storage arrays */
+			for (i=0;i<beams_bath;i++)
+				{
+				data[nread].beamflag[i] = beamflag[i];
+				data[nread].bath[i] = bath[i];
+				data[nread].bathacrosstrack[i] = bathacrosstrack[i];
+				data[nread].bathalongtrack[i] = bathalongtrack[i];
+				data[nread].xp[i] = BAD;
+				data[nread].yp[i] = BAD;
+				}
+
+			/* ignore time gaps */
+			if (error == MB_ERROR_TIME_GAP)
+				{
+				error = MB_ERROR_NO_ERROR;
+				status = MB_SUCCESS;
+				}
+
+			/* output error messages */
+			if (error == MB_ERROR_COMMENT)
+				{
+				/* do nothing */
+				}
+			else if (verbose >= 1 && error < MB_ERROR_NO_ERROR
+				&& error >= MB_ERROR_OTHER)
+				{
+				mb_error(verbose,error,&message);
+				fprintf(stderr,"\nNonfatal MBIO Error:\n%s\n",
+					message);
+				fprintf(stderr,"Time: %d %d %d %d %d %d %d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
+				}
+			else if (verbose >= 1 && error < MB_ERROR_NO_ERROR)
+				{
+				mb_error(verbose,error,&message);
+				fprintf(stderr,"\nNonfatal MBIO Error:\n%s\n",
+					message);
+				fprintf(stderr,"Number of good records so far: %d\n",nread);
+				}
+			else if (verbose >= 1 && error > MB_ERROR_NO_ERROR 
+				&& error != MB_ERROR_EOF)
+				{
+				mb_error(verbose,error,&message);
+				fprintf(stderr,"\nFatal MBIO Error:\n%s\n",
+					message);
+				fprintf(stderr,"Last Good Time: %d %d %d %d %d %d %d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],
+					time_i[6]);
+				}
+
+			/* calculate raw x,y locations for each beam */
+			if (status == MB_SUCCESS) 
+				{
+				/* set initial heading */
+				if (nread == 0)
+					heading_start = heading;
+
+				/* get heading x and y components */
+				dheading = heading - heading_start;
+				if (dheading > 360.0)
+				    dheading -= 360.0;
+				else if (dheading < 0.0)
+				    dheading += 360.0;
+				dheadingx = sin(DTR * dheading);
+				dheadingy = cos(DTR * dheading);
+
+				/* get alongtrack distance in nav */
+				distot += distance * 1000.0;	/* distance in meters */
+
+				/* loop over the beams */
+				for (j=0; j<beams_bath; j++) 
+					{
+					if (j >= data[nread].beams_bath)
+						{
+						data[nread].beamflag[j] = MB_FLAG_NULL;
+						data[nread].xp[j] = BAD;
+						data[nread].yp[j] = BAD;
+						}
+					else if (mb_beam_ok(beamflag[j])) 
+						{
+						xx = dheadingy * bathacrosstrack[j]
+						    + dheadingx * bathalongtrack[j];
+						yy = distot
+						    - dheadingx * bathacrosstrack[j]
+						    + dheadingy * bathalongtrack[j];
+						zz = -bath[j];
+						if (viewdir=='S' || viewdir=='s') 
+							{
+							data[nread].xp[j] = yy 
+							    + xx * sin_eta * cos_alpha;
+							data[nread].yp[j] = zz * cos_eta * ve
+							    - xx * sin_eta * sin_alpha;
+							}
+						else if (viewdir=='P' || viewdir=='p') 
+							{
+							data[nread].xp[j]= -yy 
+							    - xx * sin_eta * cos_alpha;
+							data[nread].yp[j]= zz * cos_eta * ve
+							    + xx * sin_eta * sin_alpha;
+							}
+						else if (viewdir=='B' || viewdir=='b') 
+							{
+							data[nread].xp[j] = xx
+							    + yy * sin_eta * cos_alpha;
+							data[nread].yp[j]= zz * cos_eta * ve
+							    + yy * sin_eta * sin_alpha;
+							}
+						mean_lat += navlat;
+						mean_lon += navlon;
+						mean_hdg += heading;
+						mean_xp += data[nread].xp[j];
+						mean_yp += data[nread].yp[j];
+						mean_knt++;
+
+						if (-data[nread].bath[j] < min_z) 
+						    min_z= -data[nread].bath[j];
+						if (-data[nread].bath[j] > max_z) 
+						    max_z= -data[nread].bath[j];
+						}
+					else 
+						{
+						data[nread].xp[j] = BAD;
+						data[nread].yp[j] = BAD;
+						}
+					} /* for j=0 ... */
+
+				if (nread == 0)
+					{
+					for (k=0; k<7; k++)
+						timbeg_i[k] = time_i[k];
+					}
+				else
+					{
+					for (k=0; k<7; k++)
+						timend_i[k]=time_i[k];
+					}
+				}	/* if status==MB_SUCCESS */
+
+			/* increment counters */
+			if (error == MB_ERROR_NO_ERROR)
+				{
+				nread++;
+				}
 			}
 
 		/* print debug statements */
@@ -727,7 +747,7 @@ main (int argc, char **argv)
 			    program_name, num_pings_max);
 			done = MB_YES;
 			}
-		if (error > MB_ERROR_NO_ERROR) 
+		if (nread >= num_pings_max || error > MB_ERROR_NO_ERROR) 
 			{
 			done = MB_YES;
 			}
@@ -822,7 +842,7 @@ main (int argc, char **argv)
 		}
 		
 	/* initialize the Postscript plotting */
-	ps_plotinit(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
+	ps_plotinit_hires(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
 		gmtdefs.paper_width, gmtdefs.page_rgb, 
 		gmtdefs.encoding.name, 
 		GMT_epsinfo (argv[0]));
@@ -890,14 +910,14 @@ main (int argc, char **argv)
 		sprintf(label,"%s",title);
 		ps_text(xl[0],yl[0],20.,label,0.,6,0);
 
-		xl[0]-=3.25;
+		/*xl[0]-=3.25;*/
 		yl[0]-=0.3;
 		sprintf(label,"Mean Lat.: %3d@+o@+ %4.1f'   Mean Lon.: %4d@+o @+%4.1f'   Heading: %.1lf@+o @+",(int)mean_lat, mean_latmin, (int)mean_lon, mean_lonmin, mean_hdg);
-		ps_text(xl[0],yl[0],15.,label,0.,4,0);
+		ps_text(xl[0],yl[0],15.,label,0.,6,0);
 
 		yl[0]-=0.3;
 		sprintf(label,"View Angle: %.1lf@+o @+  V.E.: %.1lfX   Scale: %.0lf m/inch   Track Length: %.1lf km",eta,ve,1.0/scaling,track_length/1000.0);
-		ps_text(xl[0],yl[0],15.,label,0.,4,0);
+		ps_text(xl[0],yl[0],15.,label,0.,6,0);
 
 		yl[0]-=0.3;
 		sprintf(label,
@@ -905,7 +925,7 @@ main (int argc, char **argv)
 		timbeg_i[0],timbeg_i[1],timbeg_i[2],timbeg_i[3],
 		timbeg_i[4],timbeg_i[5],timend_i[0],timend_i[1],
 		timend_i[2],timend_i[3],timend_i[4],timend_i[5]);
-		ps_text(xl[0],yl[0],15.,label,0.,4,0);
+		ps_text(xl[0],yl[0],15.,label,0.,6,0);
 		} /* else after if display_stats */
 
 
@@ -922,7 +942,11 @@ main (int argc, char **argv)
 		yl[1]=yl[2]= min_yp*scaling-1.;
 		yl[0]=yl[3]= yl[1]+0.1;
 	
+#ifdef GMT_MINOR_VERSION
+		ps_line(xl,yl,4,3,0);
+#else
 		ps_line(xl,yl,4,3,0,0);
+#endif
 		sprintf(label,"%.0f km",xscale/1000.0);
 		ps_text(xl[0]+.5,yl[0]+.05,15.,label,0.,6,0);
 
@@ -941,7 +965,11 @@ main (int argc, char **argv)
 		yl[0]=yl[1]= min_yp*scaling-1.;
 		yl[2]=yl[3]= yl[0]+zscale_inch;
 
+#ifdef GMT_MINOR_VERSION
+		ps_line(xl,yl,4,3,0);
+#else
 		ps_line(xl,yl,4,3,0,0);
+#endif
 		sprintf(label,"%.0f m",zscale);
 		ps_text(xl[0]+0.3,yl[0]+zscale_inch/2.0,15.,label,0.,6,0);
 
@@ -1044,6 +1072,17 @@ main (int argc, char **argv)
 
 	/* end the postscript file */
 	ps_plotend(1);
+	
+	/* deallocate arrays */
+	for (i=0;i<nread;i++)
+		{
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&(data[i].beams_bath), &error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&(data[i].bath), &error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&(data[i].bathacrosstrack), &error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&(data[i].bathalongtrack), &error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&(data[i].xp), &error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&(data[i].yp), &error);
+		}
 
 	/* check memory */
 	if (verbose >= 4)

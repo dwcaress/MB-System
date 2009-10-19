@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview_callbacks.c	10/7/2002
- *    $Id: mbview_callbacks.c,v 5.21 2008-09-11 20:17:33 caress Exp $
+ *    $Id: mbview_callbacks.c,v 5.21 2008/09/11 20:17:33 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -17,7 +17,10 @@
  * Author:	D. W. Caress
  * Date:	October 7, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbview_callbacks.c,v $
+ * Revision 5.21  2008/09/11 20:17:33  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.20  2008/05/16 22:59:42  caress
  * Release 5.1.1beta18.
  *
@@ -154,7 +157,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_callbacks.c,v 5.21 2008-09-11 20:17:33 caress Exp $";
+static char rcs_id[]="$Id: mbview_callbacks.c,v 5.21 2008/09/11 20:17:33 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -340,7 +343,12 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 	/* set parent widget and app context */
 	parent_widget = parent;
 	app_context = app;
+	
+	/* set global work function parameters */
+	work_function_enabled = MB_YES;
 	work_function_set = MB_NO;
+	timer_timeout_time = 100;
+	timer_timeout_count = 10;
 	timer_count = 0;
 	
 	/* set starting number of windows */
@@ -440,7 +448,7 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
     	XtManageChild(shared.mb3d_navlist.MB3DNavList);
 
 	/* set timer function */
-	/*do_mbview_settimer();*/
+	do_mbview_settimer();
 		
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -874,7 +882,6 @@ int mbview_reset(int instance)
 		view->plot_recursion = 0;
 		view->plot_done = MB_NO;
 		view->plot_interrupt_allowed = MB_YES;
-		view->work_function_set = MB_NO;
 		view->naction = 0;
 		for (i=0;i<MBV_NUM_ACTIONS;i++)
 			{
@@ -3599,6 +3606,8 @@ do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
     ac = 0;
     XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
     XtGetValues(w, args, ac);
+
+    acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_glwda_input: %d %d  instance:%d type:%d\n",
 acs->width, acs->height, instance, event->xany.type);
@@ -3614,6 +3623,7 @@ acs->width, acs->height, instance, event->xany.type);
     replotprofile = MB_NO;
 	
     /* get event */
+    acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
     event = acs->event;
     
     /* If there is input in the drawing area */
@@ -5534,7 +5544,7 @@ do_mbview_histogram( Widget w, XtPointer client_data, XtPointer call_data)
     ac = 0;
     XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
     XtGetValues(w, args, ac);
-fprintf(stderr,"do_mbview_histogram instance:%d\n", instance);
+/*fprintf(stderr,"do_mbview_histogram instance:%d\n", instance);*/
 	    
     /* get view */
     view = &(mbviews[instance]);
@@ -5568,7 +5578,7 @@ instance, data->grid_mode);
     
     /* draw */
 if (mbv_verbose >= 2)
-fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_data_secondary\n");
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_histogram\n");
     mbview_plotlowhigh(instance);
 }
 
@@ -6329,6 +6339,8 @@ do_mbview_mouse_rmode( Widget w, XtPointer client_data, XtPointer call_data)
     
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_mouse_rmode: \n");
+
+    acs = (XmToggleButtonCallbackStruct*)call_data;
 	    
     /* do nothing unless calling widget is set */
     if (acs->event != NULL && acs->set > 0)
@@ -6452,6 +6464,8 @@ do_mbview_mouse_mode( Widget w, XtPointer client_data, XtPointer call_data)
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_mouse_mode: \n");
 
+	acs = (XmToggleButtonCallbackStruct*)call_data;
+	
     /* do nothing unless calling widget is set */
 /*    if (acs->event != NULL && acs->set > 0)*/
     	{
@@ -8934,6 +8948,268 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_clearpicks\n");
 }
 /*------------------------------------------------------------------------------*/
 
+
+void
+do_mbview_profile_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    	int	error;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_profile_dismiss: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	if (data->profile_view_mode == MBV_VIEW_ON)
+		{
+		/* destroy opengl context */
+		mbview_destroy_prglx(instance);
+
+		/* turn off profile viewing */
+    		XtUnmanageChild(view->mb3dview.mbview_form_profile);
+		data->profile_view_mode = MBV_VIEW_OFF;
+		}
+		
+	/* reset the togglebutton */
+	ac = 0;
+	if (data->profile_view_mode == MBV_VIEW_ON)
+		{
+		XtSetArg(args[ac], XmNset, XmSET); ac++;
+		}
+	else
+		{
+		XtSetArg(args[ac], XmNset, XmUNSET); ac++;
+		}
+	XtSetValues(view->mb3dview.mbview_toggleButton_profile, args, ac);
+	
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_view_profile( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    	int	error;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_view_profile: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+	
+	if (data->profile_view_mode == MBV_VIEW_OFF)
+		{
+
+    		XtManageChild(view->mb3dview.mbview_form_profile);
+		data->profile_view_mode = MBV_VIEW_ON;
+
+		/* intitialize OpenGL graphics */
+		ac = 0;
+		XtSetArg(args[ac], mbGLwNrgba, TRUE);
+		ac++;
+		XtSetArg(args[ac], mbGLwNdepthSize, 1);
+		ac++;
+		XtSetArg(args[ac], mbGLwNdoublebuffer, True);
+		ac++;
+		XtSetArg(args[ac], mbGLwNallocateBackground, FALSE);
+		ac++;
+		XtSetArg(args[ac], XmNwidth, data->prwidth);
+		ac++;
+		XtSetArg(args[ac], XmNheight, data->prheight);
+		ac++;
+		view->dpy = (Display *) XtDisplay(view->mb3dview.MB3DView);
+		view->prglwmda = mbGLwCreateMDrawingArea(view->mb3dview.mbview_drawingArea_profile, 
+			"glwidget", args, ac);
+		/* view->prglwmda = XtCreateWidget("glwidget", mbGLwDrawingAreaWidgetClass, view->mb3dview.mbview_drawingArea_profile, args, ac);*/
+		XtManageChild (view->prglwmda);
+		XSelectInput(view->dpy, XtWindow(view->prglwmda), 
+			(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask 
+				| KeyPressMask | KeyReleaseMask | ExposureMask ) );
+
+		/* initialize the opengl widget */
+		mbview_reset_prglx(instance);
+
+		/* draw the profile */
+		mbview_plotprofile(instance);
+		}
+		
+	/* reset the togglebutton */
+	ac = 0;
+	if (data->profile_view_mode == MBV_VIEW_ON)
+		{
+		XtSetArg(args[ac], XmNset, XmSET); ac++;
+		}
+	else
+		{
+		XtSetArg(args[ac], XmNset, XmUNSET); ac++;
+		}
+	XtSetValues(view->mb3dview.mbview_toggleButton_profile, args, ac);
+	
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_profile_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
+{
+	int	instance;
+	Dimension	width;
+	Dimension	height;
+	XConfigureEvent *cevent = (XConfigureEvent *) event;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	
+if (mbv_verbose >= 0)
+fprintf(stderr,"do_mbview_profile_resize: instance:%d\n", instance);
+
+	/* do this only if a resize event happens */
+	if (cevent->type == ConfigureNotify)
+		{
+		/* get view */
+		instance = (int)client_data;
+		view = &(mbviews[instance]);
+		data = &(view->data);
+
+		/* get new shell size */
+		XtVaGetValues(view->mb3dview.mbview_scrolledWindow_profile, 
+			XmNwidth, &width, 
+			XmNheight, &height, 
+			NULL);
+fprintf(stderr,"view->mbview_scrolledWindow_profile: width:%d height:%d\n",width,height);
+				
+		/* reinitialize the opengl widget */
+		mbview_reset_prglx(instance);
+
+		/* draw the profile */
+		mbview_plotprofile(instance);
+
+		}	
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_profile_exager( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	profile_exager;
+
+	acs = (XmScaleCallbackStruct*)call_data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_profile_exager: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	profile_exager = acs->value;
+	data->profile_exageration = 0.1 * ((double)profile_exager);
+				
+	/* reinitialize the opengl widget */
+	mbview_reset_prglx(instance);
+
+	/* draw the profile */
+	mbview_plotprofile(instance);
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_profile_width( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	profile_widthfactor;
+
+	acs = (XmScaleCallbackStruct*)call_data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_profile_width: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	profile_widthfactor = acs->value;
+	data->profile_widthfactor = profile_widthfactor;
+				
+	/* reinitialize the opengl widget */
+	mbview_reset_prglx(instance);
+
+	/* draw the profile */
+	mbview_plotprofile(instance);
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_profile_slope( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+	int	instance;
+	struct mbview_world_struct *view;
+	struct mbview_struct *data;
+	int	profile_slopethreshold;
+
+	acs = (XmScaleCallbackStruct*)call_data;
+
+	/* get instance */
+	ac = 0;
+	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+	XtGetValues(w, args, ac);
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_profile_slope: instance:%d\n", instance);
+	    
+	/* get view */
+	view = &(mbviews[instance]);
+	data = &(view->data);
+
+	acs = (XmScaleCallbackStruct*)call_data;
+	profile_slopethreshold = acs->value;
+	data->profile_slopethreshold = 0.01 * ((double)profile_slopethreshold);
+				
+	/* reinitialize the opengl widget */
+	mbview_reset_prglx(instance);
+
+	/* draw the profile */
+	mbview_plotprofile(instance);
+}
+/*------------------------------------------------------------------------------*/
+/* MBview status and message functions */
+/*------------------------------------------------------------------------------*/
+
 int
 do_mbview_status(char *message, int instance)
 {
@@ -9121,9 +9397,9 @@ int do_mbview_setbackgroundwork(int instance)
 instance, id);*/
 		}
 
-/*else
+else
 fprintf(stderr,"do_mbview_setbackgroundwork: FUNCTION ALREADY SET for instance:%d!!\n",
-instance);*/
+instance);
 
 	return(status);
 }
@@ -9133,14 +9409,13 @@ instance);*/
 int do_mbview_settimer()
 {
 	int	status = MB_SUCCESS;
-	unsigned long	timeout_time;
 	int		id;
 	    
 	/* set timer function if none set for this instance */
 	if (work_function_set == MB_NO)
 		{
 		id =  XtAppAddTimeOut(app_context, 
-				(unsigned long) 100,
+				(unsigned long) timer_timeout_time,
 				(XtTimerCallbackProc)do_mbview_workfunction, 
 				(XtPointer) -1);
 		if (id > 0)
@@ -9150,8 +9425,8 @@ int do_mbview_settimer()
 /*fprintf(stderr,"do_mbview_settimer: \n");*/
 		}
 
-/*else
-fprintf(stderr,"do_mbview_settimer: FUNCTION ALREADY SET!!\n");*/
+else
+fprintf(stderr,"do_mbview_settimer: FUNCTION ALREADY SET!!\n");
 
 	return(status);
 }
@@ -9168,6 +9443,9 @@ int do_mbview_workfunction(XtPointer client_data)
 	int	plotting;
 	int	found;
 	int	mode;
+	int	use_histogram;
+	float	*histogram;
+	int	ncalc;
 	int	kstart, kend;
 	int	i, j, k;
  
@@ -9175,24 +9453,28 @@ int do_mbview_workfunction(XtPointer client_data)
 	instance = (int) client_data;
 	plotting = MB_NO;
 	found = MB_NO;
+	mode = MBV_BACKGROUND_NONE;
 
-/*fprintf(stderr,"do_mbview_workfunction called: instance:%d\n", instance);*/
+/*fprintf(stderr,"\ndo_mbview_workfunction called: instance:%d timer_count:%d\n", instance, timer_count);*/
 
 	/* first make sure no plotting is active */
-	for (i=0;i<MBV_MAX_WINDOWS;i++)
+	for (i = 0; i < MBV_MAX_WINDOWS && plotting == MB_NO; i++)
 		{
     		/* get view */
     		view = &(mbviews[i]);
     		data = &(view->data);
 			
 		/* check it if nothing already found */
-		if (data->primary_nxy > 0
-			&& view->plot_recursion > 0)
+		if (data->primary_nxy > 0 &&
+			(view->plot_recursion > 0
+				|| view->plot_interrupt_allowed == MB_NO
+				|| view->button1down == MB_YES
+				|| view->button2down == MB_YES
+				|| view->button3down == MB_YES))
 			{
 			plotting = MB_YES;
 			}
 		}
-	
 
 	/* first see if possible to work with instance value */
 	if (plotting == MB_NO
@@ -9221,7 +9503,7 @@ int do_mbview_workfunction(XtPointer client_data)
 
 		/* finally do the full rez plot */
 		else if (view->lastdrawrez != MBV_REZ_FULL
-			&& timer_count > 100)
+			&& timer_count > timer_timeout_count)
 			{
 			/* set found */
 			found = MB_YES;
@@ -9262,7 +9544,7 @@ int do_mbview_workfunction(XtPointer client_data)
 
 			/* finally do the full rez plot */
 			else if (view->lastdrawrez != MBV_REZ_FULL
-				&& timer_count > 100)
+				&& timer_count > timer_timeout_count)
 				{
 				/* set found */
 				found = MB_YES;
@@ -9272,6 +9554,8 @@ int do_mbview_workfunction(XtPointer client_data)
 			}
 		}
 	    }
+/*fprintf(stderr, "do_mbview_workfunction: plotting:%d found:%d instance:%d mode:%d\n",
+plotting,found,instance,mode);*/
 	
 	/* do the work if instance found */
 	if (plotting == MB_NO
@@ -9284,42 +9568,72 @@ int do_mbview_workfunction(XtPointer client_data)
 		/* first work on zscale */
 		if (mode == MBV_BACKGROUND_ZSCALE)
 			{
+/*fprintf(stderr,"do_mbview_workfunction: recalculating zscale in background %d of %d...\n",
+view->zscaledonecount,data->primary_nxy);*/
 			/* recalculate zscale for MBV_NUMBACKGROUNDCALC cells */
-			kstart = MIN(view->zscaledonecount + 1, data->primary_nxy - 1);
-			kend = MIN(view->zscaledonecount + 1 + MBV_NUMBACKGROUNDCALC, 
-					data->primary_nxy - 1);
-			for (k=kstart;k<kend;k++)
+			ncalc = 0;
+			for (k = view->zscaledonecount; k < data->primary_nxy && ncalc < MBV_NUMBACKGROUNDCALC; k++)
 				{
 				if (!(data->primary_stat_z[k/8] & statmask[k%8]))
+					{
 					mbview_zscalegridpoint(instance, k);
+					ncalc++;
+					}
+				view->zscaledonecount = k;
 				}
-			view->zscaledonecount = kend;
 			}
 
 		/* then work on color */
 		else if (mode == MBV_BACKGROUND_COLOR)
 			{
+/* fprintf(stderr,"do_mbview_workfunction: recalculating color in background %d of %d...\n",
+view->colordonecount,data->primary_nxy);*/
+
+			/* use histogram equalization if needed */
+			use_histogram = MB_NO;
+			if (data->grid_mode == MBV_GRID_VIEW_PRIMARY
+				&& data->primary_histogram == MB_YES)
+				{
+				use_histogram = MB_YES;
+				histogram = view->primary_histogram;
+				}
+			else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE
+				&& data->primaryslope_histogram == MB_YES)
+				{
+				use_histogram = MB_YES;
+				histogram = view->primaryslope_histogram;
+				}
+			else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY
+				&& data->secondary_histogram == MB_YES)
+				{
+				use_histogram = MB_YES;
+				histogram = view->secondary_histogram;
+				}
+
 			/* recalculate color for MBV_NUMBACKGROUNDCALC cells */
-			kstart = MIN(view->colordonecount + 1, data->primary_nxy - 1);
-			kend = MIN(view->colordonecount + 1 + MBV_NUMBACKGROUNDCALC, 
-					data->primary_nxy - 1);
-			for (k=kstart;k<kend;k++)
+			ncalc = 0;
+			for (k = view->colordonecount; k < data->primary_nxy && ncalc < MBV_NUMBACKGROUNDCALC; k++)
 				{
 				if (!(data->primary_stat_color[k/8] & statmask[k%8]))
 					{
 					i = k / data->primary_ny;
 					j = k % data->primary_ny;
-					mbview_colorpoint(view, data, i, j, k);
+					if (use_histogram == MB_NO)
+						mbview_colorpoint(view, data, i, j, k);
+					else
+						mbview_colorpoint_histogram(view, data, histogram, i, j, k);
+					ncalc++;
 					}
+				view->colordonecount = k;
 				}
-			view->colordonecount = kend;
 			}
 
 		/* finally do the full rez plot */
 		else if (mode == MBV_BACKGROUND_FULLPLOT)
 			{
+/*fprintf(stderr,"do_mbview_workfunction: plotting instance %d full resolution on timeout...\n", instance);*/
 			/* do full rez plot */
-			/*mbview_plotfull(instance);*/
+			mbview_plotfull(instance);
 			}
 		}
 		
@@ -9333,264 +9647,14 @@ int do_mbview_workfunction(XtPointer client_data)
 	else
 		{
 		do_mbview_settimer();
-		timer_count++;
+		if (plotting == MB_YES)
+			timer_count = 0;
+		else
+			timer_count++;
 		}
 		
 	return(status);
 	
 }
 
-/*------------------------------------------------------------------------------*/
-
-
-void
-do_mbview_profile_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-    	int	error;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_profile_dismiss: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	if (data->profile_view_mode == MBV_VIEW_ON)
-		{
-		/* destroy opengl context */
-		mbview_destroy_prglx(instance);
-
-		/* turn off profile viewing */
-    		XtUnmanageChild(view->mb3dview.mbview_form_profile);
-		data->profile_view_mode = MBV_VIEW_OFF;
-		}
-		
-	/* reset the togglebutton */
-	ac = 0;
-	if (data->profile_view_mode == MBV_VIEW_ON)
-		{
-		XtSetArg(args[ac], XmNset, XmSET); ac++;
-		}
-	else
-		{
-		XtSetArg(args[ac], XmNset, XmUNSET); ac++;
-		}
-	XtSetValues(view->mb3dview.mbview_toggleButton_profile, args, ac);
-	
-}
-/*------------------------------------------------------------------------------*/
-
-void
-do_mbview_view_profile( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-    	int	error;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_view_profile: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	if (data->profile_view_mode == MBV_VIEW_OFF)
-		{
-
-    		XtManageChild(view->mb3dview.mbview_form_profile);
-		data->profile_view_mode = MBV_VIEW_ON;
-
-		/* intitialize OpenGL graphics */
-		ac = 0;
-		XtSetArg(args[ac], mbGLwNrgba, TRUE);
-		ac++;
-		XtSetArg(args[ac], mbGLwNdepthSize, 1);
-		ac++;
-		XtSetArg(args[ac], mbGLwNdoublebuffer, True);
-		ac++;
-		XtSetArg(args[ac], mbGLwNallocateBackground, FALSE);
-		ac++;
-		XtSetArg(args[ac], XmNwidth, data->prwidth);
-		ac++;
-		XtSetArg(args[ac], XmNheight, data->prheight);
-		ac++;
-		view->dpy = (Display *) XtDisplay(view->mb3dview.MB3DView);
-		view->prglwmda = mbGLwCreateMDrawingArea(view->mb3dview.mbview_drawingArea_profile, 
-			"glwidget", args, ac);
-		/* view->prglwmda = XtCreateWidget("glwidget", mbGLwDrawingAreaWidgetClass, view->mb3dview.mbview_drawingArea_profile, args, ac);*/
-		XtManageChild (view->prglwmda);
-		XSelectInput(view->dpy, XtWindow(view->prglwmda), 
-			(ButtonPressMask | ButtonReleaseMask | ButtonMotionMask 
-				| KeyPressMask | KeyReleaseMask | ExposureMask ) );
-
-		/* initialize the opengl widget */
-		mbview_reset_prglx(instance);
-
-		/* draw the profile */
-		mbview_plotprofile(instance);
-		}
-		
-	/* reset the togglebutton */
-	ac = 0;
-	if (data->profile_view_mode == MBV_VIEW_ON)
-		{
-		XtSetArg(args[ac], XmNset, XmSET); ac++;
-		}
-	else
-		{
-		XtSetArg(args[ac], XmNset, XmUNSET); ac++;
-		}
-	XtSetValues(view->mb3dview.mbview_toggleButton_profile, args, ac);
-	
-}
-/*------------------------------------------------------------------------------*/
-
-void
-do_mbview_profile_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
-{
-	int	instance;
-	Dimension	width;
-	Dimension	height;
-	XConfigureEvent *cevent = (XConfigureEvent *) event;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	
-if (mbv_verbose >= 0)
-fprintf(stderr,"do_mbview_profile_resize: instance:%d\n", instance);
-
-	/* do this only if a resize event happens */
-	if (cevent->type == ConfigureNotify)
-		{
-		/* get view */
-		instance = (int)client_data;
-		view = &(mbviews[instance]);
-		data = &(view->data);
-
-		/* get new shell size */
-		XtVaGetValues(view->mb3dview.mbview_scrolledWindow_profile, 
-			XmNwidth, &width, 
-			XmNheight, &height, 
-			NULL);
-fprintf(stderr,"view->mbview_scrolledWindow_profile: width:%d height:%d\n",width,height);
-				
-		/* reinitialize the opengl widget */
-		mbview_reset_prglx(instance);
-
-		/* draw the profile */
-		mbview_plotprofile(instance);
-
-		}	
-}
-/*------------------------------------------------------------------------------*/
-
-void
-do_mbview_profile_exager( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	profile_exager;
-
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_profile_exager: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	profile_exager = acs->value;
-	data->profile_exageration = 0.1 * ((double)profile_exager);
-				
-	/* reinitialize the opengl widget */
-	mbview_reset_prglx(instance);
-
-	/* draw the profile */
-	mbview_plotprofile(instance);
-}
-/*------------------------------------------------------------------------------*/
-
-void
-do_mbview_profile_width( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	profile_widthfactor;
-
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_profile_width: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	profile_widthfactor = acs->value;
-	data->profile_widthfactor = profile_widthfactor;
-				
-	/* reinitialize the opengl widget */
-	mbview_reset_prglx(instance);
-
-	/* draw the profile */
-	mbview_plotprofile(instance);
-}
-/*------------------------------------------------------------------------------*/
-
-void
-do_mbview_profile_slope( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
-	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	profile_slopethreshold;
-
-	/* get instance */
-	ac = 0;
-	XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
-	XtGetValues(w, args, ac);
-
-if (mbv_verbose >= 2)
-fprintf(stderr,"do_mbview_profile_slope: instance:%d\n", instance);
-	    
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-
-	profile_slopethreshold = acs->value;
-	data->profile_slopethreshold = 0.01 * ((double)profile_slopethreshold);
-				
-	/* reinitialize the opengl widget */
-	mbview_reset_prglx(instance);
-
-	/* draw the profile */
-	mbview_plotprofile(instance);
-}
 /*------------------------------------------------------------------------------*/

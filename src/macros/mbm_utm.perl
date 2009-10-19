@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_utm.perl	5/13/2002
-#    $Id: mbm_utm.perl,v 5.4 2007-10-08 04:27:20 caress Exp $
+#    $Id: mbm_utm.perl,v 5.4 2007/10/08 04:27:20 caress Exp $
 #
 #    Copyright (c) 2002, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -36,10 +36,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 13, 2002
 #
 # Version:
-#   $Id: mbm_utm.perl,v 5.4 2007-10-08 04:27:20 caress Exp $
+#   $Id: mbm_utm.perl,v 5.4 2007/10/08 04:27:20 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_utm.perl,v $
+#   Revision 5.4  2007/10/08 04:27:20  caress
+#   Now handles comma delimited xyz data along with white space delimited data.
+#
 #   Revision 5.3  2003/04/17 20:42:48  caress
 #   Release 5.0.beta30
 #

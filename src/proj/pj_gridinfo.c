@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_gridinfo.c,v 5.4 2008-09-29 04:56:21 caress Exp $
+ * $Id: pj_gridinfo.c,v 5.4 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Functions for handling individual PJ_GRIDINFO's.  Includes
@@ -28,7 +28,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: pj_gridinfo.c,v $
+ * Revision 5.4  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.7  2005/07/07 00:16:03  fwarmerdam
  * Fixed debug fprintf syntax per:
  * http://bugzilla.remotesensing.org/show_bug.cgi?id=886

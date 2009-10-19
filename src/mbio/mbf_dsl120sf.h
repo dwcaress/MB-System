@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_dsl120sf.h	8/9/96
- *	$Id: mbf_dsl120sf.h,v 5.3 2006-09-11 18:55:52 caress Exp $
+ *	$Id: mbf_dsl120sf.h,v 5.3 2006/09/11 18:55:52 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,11 @@
  *
  * Author:	D. W. Caress
  * Date:	August 9, 1996
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_dsl120sf.h,v $
+ * Revision 5.3  2006/09/11 18:55:52  caress
+ * Changes during Western Flyer and Thomas Thompson cruises, August-September
+ * 2006.
+ *
  * Revision 5.2  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

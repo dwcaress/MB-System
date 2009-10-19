@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbneptune2esf.c	2004/11/11
- *    $Id: mbneptune2esf.c,v 5.5 2008-09-11 20:20:14 caress Exp $
+ *    $Id: mbneptune2esf.c,v 5.5 2008/09/11 20:20:14 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    Gordon Keith
@@ -45,7 +45,10 @@
  * Acknowledgments:
  * This program is based on a skeleton derived from mbclean.
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbneptune2esf.c,v $
+ * Revision 5.5  2008/09/11 20:20:14  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.4  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -150,7 +153,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.5 2008-09-11 20:20:14 caress Exp $";
+	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.5 2008/09/11 20:20:14 caress Exp $";
 	static char program_name[] = "mbneptune2esf";
 	static char help_message[] =  "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand applies the flags in the rules file to the esf file of the coresponding line";
 	static char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";

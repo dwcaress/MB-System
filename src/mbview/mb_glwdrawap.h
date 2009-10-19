@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_glwdrawap.c	5/22/2007
- *    $Id: mb_glwdrawap.h,v 5.0 2007-06-17 23:16:14 caress Exp $
+ *    $Id: mb_glwdrawap.h,v 5.0 2007/06/17 23:16:14 caress Exp $
  *
  *    Altered from original code for MB-System by
  *    David W. Caress (caress@mbari.org)
@@ -17,7 +17,10 @@
  * Author:	D. W. Caress
  * Date:	May 22, 2007
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_glwdrawap.h,v $
+ * Revision 5.0  2007/06/17 23:16:14  caress
+ * Added MBeditviz.
+ *
  * Revision 5.0  2007/05/23 16:39:54  caress
  * Added library for Motif OpenGL widget because this library is no longer uniformly available in Xfree86 distributions.
  *

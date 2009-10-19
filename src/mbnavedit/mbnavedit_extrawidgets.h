@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_extrawidgets.h	8/7/95
- *    $Id: mbnavedit_extrawidgets.h,v 5.2 2009-03-10 05:11:22 caress Exp $
+ *    $Id: mbnavedit_extrawidgets.h,v 5.2 2009/03/10 05:11:22 caress Exp $
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	June 24,  1995
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbnavedit_extrawidgets.h,v $
+ * Revision 5.2  2009/03/10 05:11:22  caress
+ * Added Gaussian mean smoothing to MBnavedit.
+ *
  * Revision 5.1  2003/04/17 21:09:06  caress
  * Release 5.0.beta30
  *

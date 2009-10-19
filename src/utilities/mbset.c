@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	1/4/2000
- *    $Id: mbset.c,v 5.32 2009-03-02 18:54:40 caress Exp $
+ *    $Id: mbset.c,v 5.32 2009/03/02 18:54:40 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -29,7 +29,10 @@
  * Author:	D. W. Caress
  * Date:	January 4, 2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbset.c,v $
+ * Revision 5.32  2009/03/02 18:54:40  caress
+ * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
+ *
  * Revision 5.31  2008/09/11 20:20:14  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -154,7 +157,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.32 2009-03-02 18:54:40 caress Exp $";
+	static char rcs_id[] = "$Id: mbset.c,v 5.32 2009/03/02 18:54:40 caress Exp $";
 	static char program_name[] = "mbset";
 	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsioswb.c	9/18/93
- *	$Id: mbr_sbsioswb.c,v 5.13 2009-03-08 09:21:00 caress Exp $
+ *	$Id: mbr_sbsioswb.c,v 5.13 2009/03/08 09:21:00 caress Exp $
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 2, 1993
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_sbsioswb.c,v $
+ * Revision 5.13  2009/03/08 09:21:00  caress
+ * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
+ *
  * Revision 5.12  2009/01/07 17:46:44  caress
  * Moved macro round() into mb_define.h as ROUND()
  *
@@ -160,7 +163,7 @@ int mbr_dem_sbsioswb(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sbsioswb.c,v 5.13 2009-03-08 09:21:00 caress Exp $";
+static char res_id[]="$Id: mbr_sbsioswb.c,v 5.13 2009/03/08 09:21:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1aldeo.c	10/24/95
- *	$Id: mbr_mr1aldeo.c,v 5.8 2008-07-10 06:43:40 caress Exp $
+ *	$Id: mbr_mr1aldeo.c,v 5.8 2008/07/10 06:43:40 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	October 24, 1995
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_mr1aldeo.c,v $
+ * Revision 5.8  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.7  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -132,7 +135,7 @@ int mbr_wt_mr1aldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1aldeo(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.8 2008-07-10 06:43:40 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.8 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_register_mr1aldeo";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -265,7 +268,7 @@ int mbr_info_mr1aldeo(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.8 2008-07-10 06:43:40 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.8 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_info_mr1aldeo";
 	int	status = MB_SUCCESS;
 
@@ -335,7 +338,7 @@ int mbr_info_mr1aldeo(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_mr1aldeo(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.8 2008-07-10 06:43:40 caress Exp $";
+	static char res_id[]="$Id: mbr_mr1aldeo.c,v 5.8 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_alm_mr1aldeo";
 	int	status = MB_SUCCESS;
 	int	i;

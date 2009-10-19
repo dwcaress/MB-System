@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_prog.c	6/23/95
- *    $Id: mbnavedit_prog.c,v 5.24 2009-03-10 05:11:22 caress Exp $
+ *    $Id: mbnavedit_prog.c,v 5.24 2009/03/10 05:11:22 caress Exp $
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  * Date:	June 23,  1995
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbnavedit_prog.c,v $
+ * Revision 5.24  2009/03/10 05:11:22  caress
+ * Added Gaussian mean smoothing to MBnavedit.
+ *
  * Revision 5.23  2009/03/09 16:58:31  caress
  * Release 5.1.2beta01
  *
@@ -267,7 +270,7 @@ struct mbnavedit_plot_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.24 2009-03-10 05:11:22 caress Exp $";
+static char rcs_id[] = "$Id: mbnavedit_prog.c,v 5.24 2009/03/10 05:11:22 caress Exp $";
 static char program_name[] = "MBNAVEDIT";
 static char help_message[] =  "MBNAVEDIT is an interactive navigation editor for swath sonar data.\n\tIt can work with any data format supported by the MBIO library.\n";
 static char usage_message[] = "mbnavedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -X -V -H]";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
- *    $Id: mb7kpreprocess.c,v 5.23 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mb7kpreprocess.c,v 5.23 2008/11/16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2005-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  * Author:	D. W. Caress
  * Date:	October 12, 2005
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb7kpreprocess.c,v $
+ * Revision 5.23  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.22  2008/10/17 07:52:44  caress
  * Check in on October 17, 2008.
  *
@@ -116,7 +119,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 
-static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.23 2008-11-16 21:51:18 caress Exp $";
+static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.23 2008/11/16 21:51:18 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
@@ -2116,7 +2119,7 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 	/* apply filtering to sonardepth data */
 	if (nsonardepth > 0 && sonardepthfilter == MB_YES)
 		{
-		/* correct time_d of sonardepth data */
+		/* filter sonardepth data */
 		for (i=0;i<nsonardepth;i++)
 			{
 			sonardepth_filter[i] = 0.0;

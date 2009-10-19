@@ -18,7 +18,10 @@
 # Author:	D. W. Caress
 # Date:		September 13, 2002
 #
-# $Log: not supported by cvs2svn $
+# $Log: Projections.dat,v $
+# Revision 5.3  2008/11/16 21:51:17  caress
+# Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+#
 # Revision 5.2  2008/05/26 04:43:15  caress
 # Getting ready for release 5.1.1beta19.
 #

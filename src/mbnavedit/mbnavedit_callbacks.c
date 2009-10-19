@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_callbacks.c	6/24/95
- *    $Id: mbnavedit_callbacks.c,v 5.16 2009-03-10 05:11:22 caress Exp $
+ *    $Id: mbnavedit_callbacks.c,v 5.16 2009/03/10 05:11:22 caress Exp $
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Date:	June 24,  1995
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbnavedit_callbacks.c,v $
+ * Revision 5.16  2009/03/10 05:11:22  caress
+ * Added Gaussian mean smoothing to MBnavedit.
+ *
  * Revision 5.15  2009/03/09 16:58:31  caress
  * Release 5.1.2beta01
  *

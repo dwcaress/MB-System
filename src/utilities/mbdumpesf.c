@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdumpesf.c	3/20/2008
- *    $Id: mbdumpesf.c,v 5.0 2008-05-26 03:27:31 caress Exp $
+ *    $Id: mbdumpesf.c,v 5.0 2008/05/26 03:27:31 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Author:	D. W. Caress
  * Date:	March 20, 2008
  * 
- * $Log: not supported by cvs2svn $
+ * $Log: mbdumpesf.c,v $
+ * Revision 5.0  2008/05/26 03:27:31  caress
+ * Program for dumping edit events from edit save files.
+ *
  *
  *
  */
@@ -45,7 +48,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbdumpesf.c,v 5.0 2008-05-26 03:27:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbdumpesf.c,v 5.0 2008/05/26 03:27:31 caress Exp $";
 	static char program_name[] = "mbdumpesf";
 	static char help_message[] =  "mbdumpesf reads an MB-System edit save file and dumps the \ncontents as an ascii table to stdout.";
 	static char usage_message[] = "mbdumpesf [-Iesffile -V -H]";

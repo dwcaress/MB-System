@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsunknwn.c	10/13/2008
- *	$Id: mbr_hsunknwn.c,v 5.0 2008-10-17 07:28:41 caress Exp $
+ *	$Id: mbr_hsunknwn.c,v 5.0 2008/10/17 07:28:41 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  * Author:	D. W. Caress
  * Date:	October 13, 2008
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_hsunknwn.c,v $
+ * Revision 5.0  2008/10/17 07:28:41  caress
+ * Supporting Hydrosweep DS data in format used by SOPAC.
+ *
  *
  *--------------------------------------------------------------------
  *
@@ -107,7 +110,7 @@ int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsunknwn.c,v 5.0 2008-10-17 07:28:41 caress Exp $";
+	static char res_id[]="$Id: mbr_hsunknwn.c,v 5.0 2008/10/17 07:28:41 caress Exp $";
 	char	*function_name = "mbr_register_hsunknwn";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -240,7 +243,7 @@ int mbr_info_hsunknwn(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsunknwn.c,v 5.0 2008-10-17 07:28:41 caress Exp $";
+	static char res_id[]="$Id: mbr_hsunknwn.c,v 5.0 2008/10/17 07:28:41 caress Exp $";
 	char	*function_name = "mbr_info_hsunknwn";
 	int	status = MB_SUCCESS;
 
@@ -310,7 +313,7 @@ int mbr_info_hsunknwn(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsunknwn(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_hsunknwn.c,v 5.0 2008-10-17 07:28:41 caress Exp $";
+ static char res_id[]="$Id: mbr_hsunknwn.c,v 5.0 2008/10/17 07:28:41 caress Exp $";
 	char	*function_name = "mbr_alm_hsunknwn";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

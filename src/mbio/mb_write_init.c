@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 5.24 2009-03-13 07:05:58 caress Exp $
+ *    $Id: mb_write_init.c,v 5.24 2009/03/13 07:05:58 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	January 25, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_write_init.c,v $
+ * Revision 5.24  2009/03/13 07:05:58  caress
+ * Release 5.1.2beta02
+ *
  * Revision 5.23  2008/10/17 07:30:22  caress
  * Added format 26 supporting Hydrosweep DS data used by SOPAC.
  *
@@ -225,7 +228,7 @@ int mb_write_init(int verbose,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 5.24 2009-03-13 07:05:58 caress Exp $";
+	static char rcs_id[]="$Id: mb_write_init.c,v 5.24 2009/03/13 07:05:58 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

@@ -1,4 +1,4 @@
-.TH mbm_route2mission l "27 October 2008" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_route2mission l "30 July 2009" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_route2mission\fP - Macro to convert an \fBmbgrdviz\fP route file into an
 MBARI AUV mission script. 
@@ -9,9 +9,10 @@ Version 5.0\fP
 .SH SYNOPSIS
 \fBmbm_route2mission\fP \fB-I\fP\fIroutefile\fP 
 [\fB-A\fP\fIaltitudemin/altitudeabort[/altitudedepthcom]\fP 
-\fB-B\fP\fIbehavior\fP \fB-C\fP\fImissiontime\fP \fB-D\fP\fIdepthmax/depthabort/depthdescent\fP 
-\fB-F\fP\fIforwarddistance\fP \fB-G\fP\fIgpsmode\fP \fB-J\fP\fIdepthprofilefile\fP \fB-L\fP\fIapproachdepth\fP 
-\fB-M\fP\fI[sonarlist]\fP \fB-N\fP \fB-O\fP\fImissionfile\fP 
+\fB-B\fP\fIbehavior\fP \fB-C\fP\fImissiontime\fP 
+\fB-F\fP\fIforwarddistance\fP \fB-G\fP\fIgpsmode\fP 
+\fB-J\fP\fIdepthprofilefile\fP \fB-L\fP\fIapproachdepth\fP 
+\fB-M\fP\fI[sonarlist]\fP \fB-N\fP[\fIspiraldescentaltitude\fP] \fB-O\fP\fImissionfile\fP 
 \fB-P\fP\fI[startlon/startlat | startdistance]\fP 
 \fB-R\fP\fItransmitpower/receivegain[/rangeminfraction]\fP
 \fB-S\fP\fIspeed\fP \fB-T\fP\fIstarttime\fP
@@ -56,11 +57,11 @@ single vehicle depth while flying to the next mission; as it begins each segment
 the vehicle will ascend or descend sharply to the desired depth and then fly
 level until the next waypoint is reached.
 
-The \fB-A\fP and \fB-D\fP options allows the user to set the basic vehicle depth and
-altitude controls. The vehicle's vertical position will be simulatneously controlled
+The \fB-A\fP option allows the user to set the basic vehicle
+altitude control. The vehicle's vertical position will be simulatneously controlled
 in terms of both altitude above the bottom and depth below the sea surface. The commanded
 depth between each waypoint is calculated by \fBmbm_route2mission\fP (using the bathymetry
-profiles in the input route file) to produce a vehicle altitude that is a\fIaltitudedepthcom\fP
+profiles in the input route file) to produce a vehicle altitude that is \fIaltitudedepthcom\fP
 meters above the shallowest depth looking \fIforwarddistance\fP meters ahead. The
 forward looking feature allows the vehicle to be commanded to ascend prior to reaching
 large scarps. As the mission commences, the AUV attempts to fly at the commanded depth 
@@ -77,7 +78,10 @@ and reset positioning  with GPS at the beginning and/or end of survey lines.
 The \fB-N\fP option allows the user to specify that the vehicle first move to the
 initial survey waypoint, and then follow a spiral descent to the desired survey depth. 
 The \fB-L\fP\fIapproachdepth\fP option sets the vehicle depth as it approaches the
-first waypoint before the spiral descent. These options are used for deepwater missions
+first waypoint before the spiral descent. The optional \fIspiraldescentaltitude\fP
+parameter sets the altitude at which the spiral descent is terminated; if \fB-N\fP
+is given alone then \fIaltitudedepthcom\fP from the \fB-A\fP option is used.
+These options are used for deepwater missions
 in which the vehicle navigation is updated by acoustic modem during the free
 inertial descents.
 
@@ -130,14 +134,6 @@ profile that is a linear ramp between the two depths. Default: \fIbehavior\fP = 
 Sets the maximum time allowed for the AUV mission. If the \fImissiontime\fP is
 exceeded, the AUV will transition to it's internal abort plan. 
 Default: mission abort time calculated from mission parameters.
-.TP
-.B \-D
-\fIdepthmax/depthabort/depthdescent\fP
-.br
-Sets the maximum vehicle depth \fIdepthmax\fP in meters that the AUV will be 
-commanded to fly. The \fIdepthabort\fP value sets the AUV depth at which a
-mission will be aborted. The \fIdepthdescent\fP value is the depth to which
-the vehicle descends before beginning to follow waypoints.
 .TP
 .B \-F
 \fIforwarddistance\fP
@@ -201,10 +197,11 @@ the low frequency sidescan to be enabled while leaving the high frequency
 sidescan off.
 .TP
 .B \-N
-\fIapproachdepth\fP
-.br
+\fIspiraldescentaltitude\fP
 Sets the mission to include a shallow transit to the first waypoint followed by a
-spiral descent to depth to start the survey.
+spiral descent to depth to start the survey. The descent is terminated at the 
+altitude \fIspiraldescentaltitude\fP if specified here. Otherwise, the descent is
+terminated at the altitude \fIaltitudedepthcom\fP from the \fB-A\fP option.
 .TP
 .B \-O
 \fImissionfile\fP
@@ -255,7 +252,137 @@ Sets the spacing in meters of the waypoints output to the mission script.
 The \fB-V\fP option causes \fBmbm_route2mission\fP to print out status messages.
 
 .SH EXAMPLES
-Soon...
+Suppose you are going to run the MBARI Mapping AUV on the Coaxial Segment of the
+Juan de Fuca Ridge. You have created a route file called Coaxial2009_1v3.rte using
+\fBmbgrdviz\fP. In order to create an MBARI AUV mission script for mission beginning
+with a spiral descent to an altitude of 50 m, followed by a survey run at a 75 m altitude,
+the following will suffice:
+ 	mbm_route2mission -I Coaxial2009_1v3.rte \
+ 		-A75/30/75 -B1 \
+ 		-G0 -MSL -N50 -R220/83/0.3 \
+ 		-O Coaxial2009_1v3.cfg \
+ 		-S1.5 -L30 -W100 -V
+.br
+The resulting mission script has the following header:
+
+     # This MBARI Mapping AUV mission file has been generated
+     # by the MB-System program mbm_route2mission run by
+     # user <caress> on cpu <shepard> at <Thu Jul 30 11:36:47 PDT 2009>
+     # 
+     # Mission Summary:
+     #     Route File:               Coaxial2009_1v3.rte
+     #     Mission File:             Coaxial2009_1v3.cfg
+     #     Distance:                 79501.503455 (m)
+     #     Estimated Time:           57203 (s)  15.890 (hr)
+     #     Abort Time:               60067 (s)
+     #     Max battery life:         64800 (s)
+     #     Safety margin:            1800 (s)
+     #     Ascend time:              2932 (s)
+     #     Way Points:               44
+     #     Route Points:             550
+     #     Survey behavior:          WaypointDepth
+     #     Descent style:            Spiral descent
+     #     Mapping sonar control enabled:          
+     #                               Multibeam enabled
+     #                                 Multibeam receive gain:           83
+     #                                 Multibeam transmit gain:          220
+     #                                 Multibeam minimum range fraction: 0.3
+     #                               Subbottom enabled
+     #                               Low sidescan enabled
+     #                               High sidescan disabled
+     # 
+     # Mission Parameters:
+     #     Vehicle Speed:            1.500000 (m/s) 2.915769 (knots)
+     #     Desired Vehicle Altitude: 75 (m)
+     #     Minimum Vehicle Altitude: 75 (m)
+     #     Abort Vehicle Altitude:   30 (m)
+     #     Maximum Vehicle Depth:    2525.307922 (m)
+     #     Abort Vehicle Depth:      2562.807922 (m)
+     #     Descent Vehicle Depth:    3 (m)
+     #     Spiral descent depth:     2324.917643 m
+     #     Spiral descent altitude:  50 m
+     #     Forward Looking Distance:  (m)
+     #     Waypoint Spacing:         100 (m)
+     #     GPS Duration:             600 (s)
+     #     Descend Rate:             0.417 (m/s)
+     #     Ascend Rate:              1 (m/s)
+     #     Initial descend Duration: 300 (s)
+     #     Setpoint Duration:        30 (s)
+     # 
+     # The primary waypoints from the route file are:
+     #   <number> <longitude (deg)> <latitude (deg)> <topography (m)> <distance (m)> <type>
+     #   0 -129.588618 46.504590 -2384.917643 0.000000 3
+     #   1 -129.583151 46.507559 -2412.977865 533.709482 3
+     #   2 -129.569223 46.503420 -2548.389974 1697.143568 1
+     #   3 -129.566359 46.501080 -2494.963053 2037.557099 3
+     #   4 -129.548611 46.529852 -2539.510864 5512.537193 4
+     #   5 -129.551250 46.530628 -2562.807922 5732.537193 3
+     #   6 -129.568962 46.501924 -2531.034424 9199.497998 4
+     #   7 -129.571600 46.502699 -2519.138489 9419.497998 3
+     #   8 -129.553889 46.531404 -2547.114624 12886.458803 4
+     #   9 -129.556529 46.532180 -2514.533569 13106.458803 3
+     #   10 -129.574238 46.503475 -2470.815735 16573.419607 4
+     #   11 -129.576876 46.504250 -2444.596313 16793.419607 3
+     #   12 -129.559168 46.532956 -2521.781921 20260.380412 4
+     #   13 -129.561807 46.533732 -2537.382141 20480.380412 3
+     #   14 -129.579514 46.505026 -2429.459961 23947.341216 4
+     #   15 -129.582152 46.505801 -2412.764343 24167.341217 3
+     #   16 -129.564447 46.534508 -2545.397705 27634.302021 4
+     #   17 -129.567086 46.535284 -2534.068665 27854.302021 3
+     #   18 -129.584791 46.506576 -2398.283020 31321.262826 4
+     #   19 -129.587429 46.507352 -2390.671509 31541.262826 3
+     #   20 -129.569726 46.536059 -2489.889282 35008.223630 4
+     #   21 -129.572365 46.536835 -2465.280823 35228.223630 3
+     #   22 -129.590068 46.508127 -2389.067017 38695.184435 4
+     #   23 -129.592706 46.508902 -2409.290771 38915.184435 3
+     #   24 -129.575005 46.537610 -2466.533142 42382.145240 4
+     #   25 -129.577645 46.538386 -2491.371094 42602.145240 3
+     #   26 -129.595345 46.509677 -2397.609253 46069.106044 4
+     #   27 -129.597984 46.510452 -2413.315918 46289.106044 3
+     #   28 -129.580285 46.539161 -2499.048889 49756.066849 4
+     #   29 -129.582925 46.539937 -2523.030640 49976.066849 3
+     #   30 -129.600622 46.511227 -2443.481018 53443.027653 4
+     #   31 -129.603261 46.512002 -2419.008240 53663.027653 3
+     #   32 -129.585565 46.540712 -2518.522400 57129.988458 4
+     #   33 -129.588205 46.541487 -2498.521301 57349.988458 3
+     #   34 -129.605900 46.512777 -2450.386536 60816.949263 4
+     #   35 -129.608539 46.513552 -2473.623230 61036.949263 3
+     #   36 -129.590845 46.542262 -2487.422180 64503.910067 4
+     #   37 -129.593485 46.543038 -2491.040466 64723.910067 3
+     #   38 -129.611178 46.514327 -2472.610657 68190.870872 3
+     #   39 -129.606711 46.517999 -2485.114583 68723.704236 3
+     #   40 -129.557338 46.509809 -2488.398743 72619.152031 3
+     #   41 -129.550415 46.521262 -2545.285828 73998.189601 3
+     #   42 -129.600724 46.536447 -2470.920736 78209.372536 3
+     #   43 -129.606972 46.525648 -2443.988281 79501.503455 4
+     # 
+     # A total of 550 mission points have been defined.
+     # 
+     # Define Mission parameters:
+     #define MISSION_SPEED      1.500000
+     #define MISSION_DISTANCE   79501.503455
+     #define MISSION_TIME       57203
+     #define MISSION_TIMEOUT    60067
+     #define DEPTH_MAX          2525.307922
+     #define DEPTH_ABORT        2562.807922
+     #define ALTITUDE_DESIRED   75.000000
+     #define ALTITUDE_MIN       75.000000
+     #define ALTITUDE_ABORT     30.000000
+     #define GPS_DURATION       600
+     #define DESCENT_DEPTH      3.000000
+     #define SPIRAL_DESCENT_DEPTH      2324.917643
+     #define SPIRAL_DESCENT_ALTITUDE   50.000000
+     #define DESCEND_DURATION   300
+     #define SETPOINT_DURATION  30
+     #define GPSMINHITS         10
+     #define ASCENDRUDDER       3.000000
+     #define ASCENDPITCH        45.000000
+     #define ASCENDENDDEPTH     2.000000
+     #define DESCENDRUDDER      3.000000
+     #define DESCENDPITCH       -30.000000
+     #define MAXCROSSTRACKERROR 30
+     #define RESON_DURATION     6
+     #q 
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbgrdviz\fP(l)

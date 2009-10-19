@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100bi.c	12/23/2004
- *	$Id: mbr_sb2100bi.c,v 5.5 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbr_sb2100bi.c,v 5.5 2008/03/01 09:14:03 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -34,7 +34,10 @@
  *              (New file:
  *                 mbr_sb2100bi.c)
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_sb2100bi.c,v $
+ * Revision 5.5  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.4  2006/04/19 18:27:55  caress
  * Fixed error.
  *
@@ -509,7 +512,7 @@ char	buffer[4*MBSYS_SB2100_PIXELS];
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008-03-01 09:14:03 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_register_sb2100b1";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -644,7 +647,7 @@ int mbr_info_sb2100b1(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008-03-01 09:14:03 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_info_sb2100b1";
 	int	status = MB_SUCCESS;
 
@@ -714,7 +717,7 @@ int mbr_info_sb2100b1(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100b2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008-03-01 09:14:03 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_register_sb2100b2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -850,7 +853,7 @@ int mbr_info_sb2100b2(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008-03-01 09:14:03 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_info_sb2100b2";
 	int	status = MB_SUCCESS;
 
@@ -921,7 +924,7 @@ int mbr_info_sb2100b2(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100bi(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008-03-01 09:14:03 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100bi";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

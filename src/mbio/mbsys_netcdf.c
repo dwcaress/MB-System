@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.c	4/11/2002
- *	$Id: mbsys_netcdf.c,v 5.12 2008-12-05 17:32:52 caress Exp $
+ *	$Id: mbsys_netcdf.c,v 5.12 2008/12/05 17:32:52 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	April 11, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_netcdf.c,v $
+ * Revision 5.12  2008/12/05 17:32:52  caress
+ * Check-in mods 5 December 2008 including contributions from Gordon Keith.
+ *
  * Revision 5.11  2008/09/13 06:08:09  caress
  * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
  *
@@ -68,7 +71,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_netcdf.h"
 
-static char res_id[]="$Id: mbsys_netcdf.c,v 5.12 2008-12-05 17:32:52 caress Exp $";
+static char res_id[]="$Id: mbsys_netcdf.c,v 5.12 2008/12/05 17:32:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,

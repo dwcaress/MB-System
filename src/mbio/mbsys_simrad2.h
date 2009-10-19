@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.h		10/9/98
- *	$Id: mbsys_simrad2.h,v 5.22 2009-03-02 18:51:52 caress Exp $
+ *	$Id: mbsys_simrad2.h,v 5.22 2009/03/02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -34,7 +34,10 @@
  * Author:	D. W. Caress
  * Date:	October 9, 1998
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_simrad2.h,v $
+ * Revision 5.22  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.21  2008/03/01 09:14:03  caress
  * Some housekeeping changes.
  *
@@ -1023,8 +1026,9 @@ struct mbsys_simrad2_struct
 	/* pointer to tilt data structure */
 	struct mbsys_simrad2_tilt_struct *tilt;
 
-	/* pointer to survey data structure */
+	/* pointer to survey data structures */
 	struct mbsys_simrad2_ping_struct *ping;
+	struct mbsys_simrad2_ping_struct *ping2;
 
 	/* pointer to water column data structure */
 	struct mbsys_simrad2_watercolumn_struct *wc;

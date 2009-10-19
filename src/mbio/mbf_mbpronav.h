@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbpronav.h	5/20/99
- *	$Id: mbf_mbpronav.h,v 5.3 2006-10-05 18:58:28 caress Exp $
+ *	$Id: mbf_mbpronav.h,v 5.3 2006/10/05 18:58:28 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	May 20, 1999
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_mbpronav.h,v $
+ * Revision 5.3  2006/10/05 18:58:28  caress
+ * Changes for 5.1.0beta4
+ *
  * Revision 5.2  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

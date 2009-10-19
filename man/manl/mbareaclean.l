@@ -227,7 +227,7 @@ of the sonar altitude, and the minimum number of sounding required for
 filtering is 10. The results look like:
 
  Program MBAREACLEAN
- Version $Id: mbareaclean.l,v 5.6 2008-12-05 17:32:51 caress Exp $
+ Version $Id: mbareaclean.l,v 5.6 2008/12/05 17:32:51 caress Exp $
  MB-system Version 5.0.beta29
  Area of interest:
       Minimum Longitude: -122.425560 Maximum Longitude: -122.419740

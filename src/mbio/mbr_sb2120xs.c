@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2120xs.c	3/27/2000
- *	$Id: mbr_sb2120xs.c,v 5.3 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbr_sb2120xs.c,v 5.3 2005/11/05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -26,7 +26,10 @@
  * Author:	D. W. Caress
  * Date:	December 8,  2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_sb2120xs.c,v $
+ * Revision 5.3  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.2  2001/03/22 20:50:02  caress
  * Trying to make version 5.0.beta0
  *
@@ -105,7 +108,7 @@ int mbr_wt_sb2120xs(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2120xs(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.3 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.3 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_register_sb2120xs";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -236,7 +239,7 @@ int mbr_info_sb2120xs(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.3 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.3 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_info_sb2120xs";
 	int	status = MB_SUCCESS;
 
@@ -305,7 +308,7 @@ int mbr_info_sb2120xs(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2120xs(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.3 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2120xs.c,v 5.3 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_alm_sb2120xs";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

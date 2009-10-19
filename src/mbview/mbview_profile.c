@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_profile.c	3/8/2006
- *    $Id: mbview_profile.c,v 5.1 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbview_profile.c,v 5.1 2008/05/16 22:59:42 caress Exp $
  *
  *    Copyright (c) 2006-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -17,7 +17,10 @@
  * Author:	D. W. Caress
  * Date:	March 8, 2006
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbview_profile.c,v $
+ * Revision 5.1  2008/05/16 22:59:42  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.0  2007/06/17 23:16:58  caress
  * Added profiling to mbview.
  *
@@ -81,7 +84,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_profile.c,v 5.1 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_profile.c,v 5.1 2008/05/16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getprofilecount(int verbose, int instance,

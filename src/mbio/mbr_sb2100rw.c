@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 5.13 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbr_sb2100rw.c,v 5.13 2008/03/01 09:14:03 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	March 3, 1994
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_sb2100rw.c,v $
+ * Revision 5.13  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.12  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -224,7 +227,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.13 2008-03-01 09:14:03 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.13 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_register_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -360,7 +363,7 @@ int mbr_info_sb2100rw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.13 2008-03-01 09:14:03 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.13 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_info_sb2100rw";
 	int	status = MB_SUCCESS;
 
@@ -430,7 +433,7 @@ int mbr_info_sb2100rw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.13 2008-03-01 09:14:03 caress Exp $";
+	static char res_id[]="$Id: mbr_sb2100rw.c,v 5.13 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_alm_sb2100rw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1979,7 +1982,7 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp,
                         data->amplitude_ss[i] = 
 				(int) mb_swap_short(read_ss[2*i]);
                         data->alongtrack_ss[i] = 
-				(int) mb_swap_short(read_ss_ptr[2*i+1]);
+				(int) ((short) mb_swap_short(read_ss_ptr[2*i+1]));
 #else
 			data->amplitude_ss[i] = (int) read_ss[2*i];
 			data->alongtrack_ss[i] = (int) read_ss_ptr[2*i+1];

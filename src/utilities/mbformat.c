@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 5.9 2008-10-17 07:52:44 caress Exp $
+ *    $Id: mbformat.c,v 5.9 2008/10/17 07:52:44 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	January 22, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbformat.c,v $
+ * Revision 5.9  2008/10/17 07:52:44  caress
+ * Check in on October 17, 2008.
+ *
  * Revision 5.8  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -119,7 +122,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 5.9 2008-10-17 07:52:44 caress Exp $";
+	static char rcs_id[] = "$Id: mbformat.c,v 5.9 2008/10/17 07:52:44 caress Exp $";
 	static char program_name[] = "MBFORMAT";
 	static char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
 	static char usage_message[] = "mbformat [-Fformat -Ifile -L -W -V -H]";
