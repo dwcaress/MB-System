@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_segysegy.c	10/27/2006
- *	$Id: mbr_segysegy.c,v 5.0 2007/01/04 23:52:24 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2006-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -72,7 +72,7 @@ int mbr_dem_segysegy(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_segysegy.c,v 5.0 2007/01/04 23:52:24 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_segysegy(int verbose, void *mbio_ptr, int *error)

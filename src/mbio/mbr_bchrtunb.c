@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_bchrtunb.c	8/8/94
- *	$Id: mbr_bchrtunb.c,v 5.8 2005/11/05 00:48:04 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -180,7 +180,7 @@ int mbr_bchrtunb_wr_bath40(int verbose, FILE *mbfp,
 int mbr_bchrtunb_wr_bath32(int verbose, FILE *mbfp, 
 		struct mbf_bchrtunb_struct *data, int *error);
 
-static char rcs_id[]="$Id: mbr_bchrtunb.c,v 5.8 2005/11/05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_bchrtunb(int verbose, void *mbio_ptr, int *error)

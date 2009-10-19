@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
- *	$Id: mbf_sb2100rw.h,v 5.2 2003/04/17 21:05:23 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)

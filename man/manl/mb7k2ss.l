@@ -229,7 +229,7 @@ output filenames will be sequentially numbered. The \fB-T\fP option specifies a
 topography grid that is used by \fBmb7k2ss\fP to lay out the sidescan on
 the seafloor. The output appears as follows:
         Program mb7k2ss
- 	Version $Id: mb7k2ss.l,v 5.1 2008/05/16 23:06:21 caress Exp $
+ 	Version $Id$
  	MB-system Version 5.1.1beta5
 
  	Data records to extract:

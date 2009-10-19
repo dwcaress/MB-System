@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.9 2008/11/16 21:51:18 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -83,7 +83,7 @@
 #include "mbeditviz.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.9 2008/11/16 21:51:18 caress Exp $";
+static char rcs_id[] = "$Id$";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";

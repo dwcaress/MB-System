@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_omghdcsj.h	3/10/99
- *	$Id: mbf_omghdcsj.h,v 5.3 2008/03/14 18:33:21 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)

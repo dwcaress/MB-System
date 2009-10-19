@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
- *    $Id: mbrolltimelag.c,v 5.7 2008/09/13 06:08:09 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2005-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -68,7 +68,7 @@
 
 #define	MBRTL_ALLOC_CHUNK	1000
 
-static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.7 2008/09/13 06:08:09 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

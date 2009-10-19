@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.c	3/2/93
- *	$Id: mbsys_hsds.c,v 5.10 2008/10/17 07:30:22 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -147,7 +147,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_hsds.h"
 
-static char rcs_id[]="$Id: mbsys_hsds.c,v 5.10 2008/10/17 07:30:22 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

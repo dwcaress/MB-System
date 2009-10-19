@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.16 2008/11/16 21:51:18 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -135,7 +135,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.16 2008/11/16 21:51:18 caress Exp $";
+static char rcs_id[] = "$Id$";
 char program_name[] = "MBsegygrid";
 char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\

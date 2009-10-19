@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_all.c	2/4/93
- *    $Id: mb_put_all.c,v 5.4 2006/03/06 21:47:48 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -128,7 +128,7 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_put_all.c,v 5.4 2006/03/06 21:47:48 caress Exp $";
+  static char rcs_id[]="$Id$";
 	char	*function_name = "mb_put_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

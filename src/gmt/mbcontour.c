@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcontour.c	6/4/93
- *    $Id: mbcontour.c,v 5.15 2009/03/02 18:59:05 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -216,7 +216,7 @@
 
 int ping_copy(int verbose, int one, int two, struct swath *swath, int *error);
 
-static char rcs_id[] = "$Id: mbcontour.c,v 5.15 2009/03/02 18:59:05 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

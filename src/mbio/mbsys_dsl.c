@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.c	3.00	8/5/96
- *	$Id: mbsys_dsl.c,v 5.8 2005/11/05 00:48:05 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1996-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -97,7 +97,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_dsl.h"
 
-static char rcs_id[]="$Id: mbsys_dsl.c,v 5.8 2005/11/05 00:48:05 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_dsl_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

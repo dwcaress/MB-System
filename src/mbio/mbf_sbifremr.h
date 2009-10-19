@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sbifremr.h	3/29/96
- *	$Id: mbf_sbifremr.h,v 5.2 2003/04/17 21:05:23 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1996-2009 by
  *    David W. Caress (caress@mbari.org)

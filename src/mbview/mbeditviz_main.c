@@ -2,7 +2,7 @@
 /* Begin user code block <abstract> */
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_main.c		4/27/2007
- *    $Id: mbeditviz_main.c,v 5.5 2008/05/16 22:59:42 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)

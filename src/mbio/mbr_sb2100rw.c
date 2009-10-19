@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c,v 5.13 2008/03/01 09:14:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -241,7 +241,7 @@ int mbr_sb2100rw_wr_tr(int verbose, FILE *mbfp, void *data_ptr, int *error);
 int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error);
 int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_sb2100rw.c,v 5.13 2008/03/01 09:14:03 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)

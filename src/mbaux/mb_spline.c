@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_spline.c	10/11/00
- *    $Id: mb_spline.c,v 5.3 2008/07/10 06:43:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -56,7 +56,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_spline.c,v 5.3 2008/07/10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------------*/
 int mb_spline_init(int verbose, double *x, double *y, 

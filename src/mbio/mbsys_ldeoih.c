@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.c	2/26/93
- *	$Id: mbsys_ldeoih.c,v 5.17 2009/03/02 18:51:52 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -153,7 +153,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_ldeoih.h"
 
-static char rcs_id[]="$Id: mbsys_ldeoih.c,v 5.17 2009/03/02 18:51:52 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

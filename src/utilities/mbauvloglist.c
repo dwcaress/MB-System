@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvloglist.c	8/14/2006
- *    $Id: mbauvloglist.c,v 5.1 2006/11/26 09:42:01 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2006-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -52,7 +52,7 @@
 #define	TYPE_INTEGER	2
 #define	TYPE_DOUBLE	3
 
-static char rcs_id[] = "$Id: mbauvloglist.c,v 5.1 2006/11/26 09:42:01 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

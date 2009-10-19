@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsatlraw.h	1/20/93
- *	$Id: mbf_hsatlraw.h,v 5.2 2003/04/17 21:05:23 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)

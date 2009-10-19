@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sbsioswb.h	9/18/94
- *	$Id: mbf_sbsioswb.h,v 5.3 2009/03/08 09:21:00 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)

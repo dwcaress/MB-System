@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_format.c	2/18/94
- *    $Id: mb_format.c,v 5.54 2009/03/09 16:58:31 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -287,7 +287,7 @@ static int format_alias_table[] =
 	71,	/* MBF_MBLDEOIH */
 	};
 
-static char rcs_id[]="$Id: mb_format.c,v 5.54 2009/03/09 16:58:31 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_format_register(int verbose, 
@@ -1666,7 +1666,7 @@ int mb_format(int verbose, int *format, int *error)
 /*--------------------------------------------------------------------*/
 int mb_format_system(int verbose, int *format, int *system, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009/03/09 16:58:31 caress Exp $";
+  static char rcs_id[]="$Id$";
 	char	*function_name = "mb_format_system";
 	int	status;
 
@@ -1736,7 +1736,7 @@ int mb_format_dimensions(int verbose, int *format,
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009/03/09 16:58:31 caress Exp $";
+  static char rcs_id[]="$Id$";
 	char	*function_name = "mb_format_dimensions";
 	int	status;
 
@@ -1805,7 +1805,7 @@ int mb_format_dimensions(int verbose, int *format,
 /*--------------------------------------------------------------------*/
 int mb_format_description(int verbose, int *format, char *description, int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009/03/09 16:58:31 caress Exp $";
+  static char rcs_id[]="$Id$";
 	char	*function_name = "mb_format_description";
 	int	status;
 
@@ -1871,7 +1871,7 @@ int mb_format_flags(int verbose, int *format,
 		int *variable_beams, int *traveltime, int *beam_flagging, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009/03/09 16:58:31 caress Exp $";
+  static char rcs_id[]="$Id$";
 	char	*function_name = "mb_format_flags";
 	int	status;
 
@@ -1944,7 +1944,7 @@ int mb_format_source(int verbose, int *format,
 		int *vru_source, int *svp_source, 
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009/03/09 16:58:31 caress Exp $";
+  static char rcs_id[]="$Id$";
 	char	*function_name = "mb_format_source";
 	int	status;
 
@@ -2015,7 +2015,7 @@ int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error)
 {
-  static char rcs_id[]="$Id: mb_format.c,v 5.54 2009/03/09 16:58:31 caress Exp $";
+  static char rcs_id[]="$Id$";
 	char	*function_name = "mb_format_beamwidth";
 	int	status;
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sb2120xs.h	3/20/2000
- *	$Id: mbf_sb2120xs.h,v 5.0 2000/12/10 20:24:25 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2000-2009 by 
  *    D. W. Caress (caress@mbari.org)

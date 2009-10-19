@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbneptune2esf.c	2004/11/11
- *    $Id: mbneptune2esf.c,v 5.5 2008/09/11 20:20:14 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2004-2009 by
  *    Gordon Keith
@@ -145,7 +145,7 @@ int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array
 int print_pings(FILE *output, struct neptune_ping_tree *node);
 int free_pings(int verbose, struct neptune_ping_tree **node, int *error);
 
-static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.5 2008/09/11 20:20:14 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_info.h			8/21/2006
- *    $Id: mb_info.h,v 5.1 2007/10/08 15:59:34 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2006-2009 by
  *    David W. Caress (caress@mbari.org)

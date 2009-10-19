@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_aea.c 1504 2009-01-06 02:11:57Z warmerdam $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the aea (Albers Equal Area) projection.
@@ -43,7 +43,7 @@
 #define PJ_LIB__
 #include <projects.h>
 
-PJ_CVSID("$Id: PJ_aea.c 1504 2009-01-06 02:11:57Z warmerdam $");
+PJ_CVSID("$Id$");
 
 # define EPS10	1.e-10
 # define TOL7	1.e-7

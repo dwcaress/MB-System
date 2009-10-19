@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbbackangle.c	1/6/95
- *    $Id: mbbackangle.c,v 5.22 2008/07/10 18:16:33 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -221,7 +221,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		char *projection, int argc, char **argv, 
 		int *error);
 						
-static char rcs_id[] = "$Id: mbbackangle.c,v 5.22 2008/07/10 18:16:33 caress Exp $";
+static char rcs_id[] = "$Id$";
 char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 5.8 2009/01/07 17:48:25 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -125,7 +125,7 @@ int get_hand_old(struct swath *data, int *hand,
 		int k, int i, int j, int d);
 int get_azimuth_old(struct swath *data, int iping, double *angle);
 
-static char rcs_id[]="$Id: mb_truecont.c,v 5.8 2009/01/07 17:48:25 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour_init initializes the memory required to

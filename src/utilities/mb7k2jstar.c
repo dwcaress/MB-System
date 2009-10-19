@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2jstar.c	5/19/2005
- *    $Id: mb7k2jstar.c,v 5.9 2008/09/13 06:08:09 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2005-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -90,7 +90,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.9 2008/09/13 06:08:09 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

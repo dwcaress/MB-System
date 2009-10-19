@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c,v 5.9 2009/02/06 19:12:43 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -231,7 +231,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_takeoff_to_rollpitch(int verbose,

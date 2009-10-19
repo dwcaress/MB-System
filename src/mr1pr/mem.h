@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mem.h			3/7/2003
- *	$Id: mem.h,v 5.1 2003/04/17 21:12:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)

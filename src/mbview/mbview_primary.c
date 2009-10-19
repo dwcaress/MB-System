@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_primary.c	9/25/2003
- *    $Id: mbview_primary.c,v 5.8 2008/05/16 22:59:42 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -94,7 +94,7 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static char rcs_id[]="$Id: mbview_primary.c,v 5.8 2008/05/16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setprimarygrid(int verbose, int instance,

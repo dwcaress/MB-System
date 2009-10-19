@@ -4,7 +4,7 @@
 ** Copyright (c) 2003, 2006   Gerald I. Evenden
 */
 static const char
-LIBPROJ_ID[] = "$Id: proj_mdist.c 1504 2009-01-06 02:11:57Z warmerdam $";
+LIBPROJ_ID[] = "$Id$";
 /*
 ** Permission is hereby granted, free of charge, to any person obtaining
 ** a copy of this software and associated documentation files (the

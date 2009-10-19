@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 5.7 2008/07/10 06:43:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -125,7 +125,7 @@ int	*green;
 int	*blue;
 int	rgb[3];
 
-static char rcs_id[]="$Id: mb_pslibface.c,v 5.7 2008/07/10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------------*/
 /* 	function plot_init initializes the GMT plotting. */

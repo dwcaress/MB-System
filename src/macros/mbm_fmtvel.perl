@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_fmtvel.perl	6/18/93
-#    $Id: mbm_fmtvel.perl,v 5.1 2003/04/17 20:42:48 caress Exp $
+#    $Id$
 #
 #    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@mbari.org)
@@ -38,7 +38,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 19, 1993
 #
 # Version:
-#   $Id: mbm_fmtvel.perl,v 5.1 2003/04/17 20:42:48 caress Exp $
+#   $Id$
 #
 # Revisions:
 #   $Log: mbm_fmtvel.perl,v $
@@ -103,7 +103,7 @@ $format =  ($opt_F || $opt_f);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: $\n";
+	print "\nVersion: $Id$\n";
 	print "\nPerl shellscript to generate a list of the C-mean (mean water velocity) \nand C-keel (surface water velocity) used by Hydrosweepin its internal \nprocessing.  This macro executes the programhsdump and then scans the \noutput for the desired values.The only allowed formats are 5 (raw \nHydrosweep data) and 8(L-DEO in-house binary Hydrosweep data).\n";
 	print "\nUsage: $program_name -Fformat -Ifile\n";
 	exit 0;

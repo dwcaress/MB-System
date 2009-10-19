@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_image83p.c	5/5/2008
- *	$Id: mbsys_image83p.c,v 5.4 2008/07/19 07:41:14 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -51,7 +51,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_image83p.h"
 
- static char rcs_id[]="$Id: mbsys_image83p.c,v 5.4 2008/07/19 07:41:14 caress Exp $";
+ static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c,v 5.20 2008/09/11 20:17:33 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -134,7 +134,7 @@
 /* local variables */
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c,v 5.20 2008/09/11 20:17:33 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, int instance,

@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_nav.c	10/28/2003
- *    $Id: mbview_nav.c,v 5.18 2008/05/16 22:59:42 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -124,7 +124,7 @@
 /* local variables */
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_nav.c,v 5.18 2008/05/16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getnavcount(int verbose, int instance,

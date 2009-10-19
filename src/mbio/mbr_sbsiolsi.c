@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbsiolsi.c	2/2/93
- *	$Id: mbr_sbsiolsi.c,v 5.9 2005/11/05 00:48:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -154,7 +154,7 @@ int mbr_dem_sbsiolsi(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sbsiolsi(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_sbsiolsi.c,v 5.9 2005/11/05 00:48:03 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsiolsi(int verbose, void *mbio_ptr, int *error)

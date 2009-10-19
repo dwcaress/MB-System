@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	6/18/93
-#    $Id: mbm_plot.perl,v 5.28 2009/03/02 18:59:05 caress Exp $
+#    $Id$
 #
 #    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@mbari.org)
@@ -74,7 +74,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 17, 1993
 #
 # Version:
-#   $Id: mbm_plot.perl,v 5.28 2009/03/02 18:59:05 caress Exp $
+#   $Id$
 #
 # Revisions:
 #   $Log: mbm_plot.perl,v $
@@ -494,7 +494,7 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: $\n";
+	print "\nVersion: $Id$\n";
 	print "\nMacro to generate a shellscript of MB-System and GMT commands \n";
 	print "which, when executed, will generate a Postscript plot of the \n";
 	print "specified swath sonar data. The plot may include bathymetry color \n";

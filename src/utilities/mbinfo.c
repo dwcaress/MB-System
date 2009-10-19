@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbinfo.c	2/1/93
- *    $Id: mbinfo.c,v 5.30 2009/03/02 18:54:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -243,7 +243,7 @@ struct ping
 	double	*sslat;
 	};
 
-static char rcs_id[] = "$Id: mbinfo.c,v 5.30 2009/03/02 18:54:40 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

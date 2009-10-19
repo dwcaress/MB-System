@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbformat.c	1/22/93
- *    $Id: mbformat.c,v 5.9 2008/10/17 07:52:44 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -118,7 +118,7 @@
 #define MBFORMAT_LIST_SIMPLE	1
 #define MBFORMAT_LIST_ROOT	2
 
-static char rcs_id[] = "$Id: mbformat.c,v 5.9 2008/10/17 07:52:44 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

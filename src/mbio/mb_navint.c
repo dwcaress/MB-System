@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	10/30/2000
- *    $Id: mb_navint.c,v 5.14 2008/09/27 03:27:10 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -85,7 +85,7 @@
     #define MB_DEPINT_DEBUG 1 
     #define MB_ALTINT_DEBUG 1 */
 
-static char rcs_id[]="$Id: mb_navint.c,v 5.14 2008/09/27 03:27:10 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_navint_add adds a nav fix to the internal

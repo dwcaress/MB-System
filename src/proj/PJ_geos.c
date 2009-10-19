@@ -4,7 +4,7 @@
 ** Copyright (c) 2004   Gerald I. Evenden
 */
 static const char
-LIBPROJ_ID[] = "$Id: PJ_geos.c 1504 2009-01-06 02:11:57Z warmerdam $";
+LIBPROJ_ID[] = "$Id$";
 /*
 ** See also (section 4.4.3.2):
 **   http://www.eumetsat.int/en/area4/msg/news/us_doc/cgms_03_26.pdf

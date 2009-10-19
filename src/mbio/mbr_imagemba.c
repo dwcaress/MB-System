@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_imagemba.c	7/18/2008
- *	$Id: mbr_imagemba.c,v 5.1 2008/09/20 00:57:41 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -96,7 +96,7 @@ int mbr_dem_imagemba(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_imagemba.c,v 5.1 2008/09/20 00:57:41 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error)

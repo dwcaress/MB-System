@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
- *	$Id: mbr_hsatlraw.c,v 5.11 2006/09/11 18:55:52 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -232,7 +232,7 @@ int mbr_hsatlraw_wr_ergnctds(int verbose, FILE *mbfp, void *data_ptr, int *error
 int mbr_hsatlraw_wr_ergnampl(int verbose, FILE *mbfp, void *data_ptr, int *error);
 int mbr_hsatlraw_wr_ldeocmnt(int verbose, FILE *mbfp, void *data_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_hsatlraw.c,v 5.11 2006/09/11 18:55:52 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error)

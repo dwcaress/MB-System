@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbnetcdf.c	1/25/02
- *	$Id: mbr_mbnetcdf.c,v 5.9 2008/12/05 17:32:52 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2002-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -140,7 +140,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 #define MBNETCDF_DEBUG 1
 
-static char rcs_id[]="$Id: mbr_mbnetcdf.c,v 5.9 2008/12/05 17:32:52 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)

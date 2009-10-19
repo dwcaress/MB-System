@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbps.c	11/4/93
- *    $Id: mbps.c,v 5.9 2008/09/13 06:08:09 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -169,7 +169,7 @@ struct ping
 int rgb_black[] = {0, 0, 0};
 int rgb_white[] = {255, 255, 255};
 
-static char rcs_id[] = "$Id: mbps.c,v 5.9 2008/09/13 06:08:09 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

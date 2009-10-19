@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.21 2008/09/27 03:27:10 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -114,7 +114,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char rcs_id[]="$Id: mbsys_reson7k.c,v 5.21 2008/09/27 03:27:10 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 

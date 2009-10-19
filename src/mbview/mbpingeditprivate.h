@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	11/19/2007
- *    $Id: mbpingeditprivate.h,v 5.1 2008/11/16 21:51:18 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)

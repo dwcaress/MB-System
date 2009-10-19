@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 5.8 2008/09/13 06:08:09 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -111,7 +111,7 @@
 #define	MBHISTOGRAM_AMP		1
 #define	MBHISTOGRAM_SS		2
 
-static char rcs_id[] = "$Id: mbhistogram.c,v 5.8 2008/09/13 06:08:09 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

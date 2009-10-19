@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: jniproj.c 1558 2009-04-02 18:25:58Z warmerdam $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  Java/JNI wrappers for PROJ.4 API.
@@ -49,7 +49,7 @@
 
 #define arraysize 300
 
-PJ_CVSID("$Id: jniproj.c 1558 2009-04-02 18:25:58Z warmerdam $");
+PJ_CVSID("$Id$");
 
 /*!
  * \brief

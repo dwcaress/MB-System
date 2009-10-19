@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c,v 5.8 2005/11/05 00:48:04 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -209,7 +209,7 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp,
 int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, 
 		struct mbf_hsldeoih_struct *data, int *error);
 
-static char rcs_id[]="$Id: mbr_hsldeoih.c,v 5.8 2005/11/05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error)

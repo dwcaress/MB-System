@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.22 2009/03/02 18:51:52 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -130,7 +130,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_info.h"
 
-static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009/03/02 18:51:52 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblevitus.c	4/15/93
- *    $Id: mblevitus.c,v 5.3 2006/01/18 15:17:00 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -133,7 +133,7 @@
 #define	NDEPTH_MAX	46
 #define	NLEVITUS_MAX	33
 
-static char rcs_id[] = "$Id: mblevitus.c,v 5.3 2006/01/18 15:17:00 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

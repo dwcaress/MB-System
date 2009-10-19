@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_oic.c	3/1/99
- *	$Id: mbsys_oic.c,v 5.10 2008/07/10 18:02:39 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -77,7 +77,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_oic.h"
 
-static char rcs_id[]="$Id: mbsys_oic.c,v 5.10 2008/07/10 18:02:39 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_oic_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

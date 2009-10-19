@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_proj.c	7/16/2002
- *    $Id: mb_proj.c,v 5.7 2009/03/13 07:05:58 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2002-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -73,7 +73,7 @@
 #include "proj_api.h"
 #include "projections.h"
 
-static char rcs_id[]="$Id: $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_proj_init(int verbose,

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em710raw.c	2/26/2008
- *	$Id: mbr_em710raw.c,v 5.3 2009/03/02 18:51:52 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -180,7 +180,7 @@ int mbr_em710raw_wr_ss2(int verbose, FILE *mbfp, int swap,
 int mbr_em710raw_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad3_struct *store, int *error);
 
-static char rcs_id[]="$Id: mbr_em710raw.c,v 5.3 2009/03/02 18:51:52 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)

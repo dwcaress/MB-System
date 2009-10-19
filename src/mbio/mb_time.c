@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_time.c	1/21/93
- *    $Id: mb_time.c,v 5.3 2003/04/17 21:05:23 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -121,7 +121,7 @@
 #define SECINMINUTE     60.0
 #define IMININHOUR 60
 int	yday[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
-static char rcs_id[]="$Id: mb_time.c,v 5.3 2003/04/17 21:05:23 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_get_time returns the number of seconds from

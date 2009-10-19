@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.h	4/13/93
- *	$Id: mbsys_singlebeam.h,v 5.8 2006/11/10 22:36:05 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)

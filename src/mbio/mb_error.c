@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_error.c	2/2/93
- *    $Id: mb_error.c,v 5.6 2006/06/16 19:30:58 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -100,7 +100,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
 
-static char rcs_id[]="$Id: mb_error.c,v 5.6 2006/06/16 19:30:58 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_error(int verbose, int error, char **message)

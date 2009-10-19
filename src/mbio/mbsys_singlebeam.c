@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.c	4/13/99
- *	$Id: mbsys_singlebeam.c,v 5.11 2006/11/10 22:36:05 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -93,7 +93,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_singlebeam.h"
 
-static char rcs_id[]="$Id: mbsys_singlebeam.c,v 5.11 2006/11/10 22:36:05 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

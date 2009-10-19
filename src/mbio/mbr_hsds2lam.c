@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
- *	$Id: mbr_hsds2lam.c,v 5.5 2005/11/05 00:48:04 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -97,7 +97,7 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_hsds2lam.c,v 5.5 2005/11/05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error)

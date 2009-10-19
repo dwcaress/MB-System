@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2unb.c	6/6/97
- *	$Id: mbr_elmk2unb.c,v 5.9 2005/11/05 00:48:05 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1997-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -153,7 +153,7 @@ int mbr_elmk2unb_wr_pos(int verbose, FILE *mbfp, void *data_ptr, int *error);
 int mbr_elmk2unb_wr_svp(int verbose, FILE *mbfp, void *data_ptr, int *error);
 int mbr_elmk2unb_wr_bathgen(int verbose, FILE *mbfp, void *data_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_elmk2unb.c,v 5.9 2005/11/05 00:48:05 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_elmk2unb(int verbose, void *mbio_ptr, int *error)

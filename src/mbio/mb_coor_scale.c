@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_coor_scale.c	1/21/93
- *    $Id: mb_coor_scale.c,v 5.4 2008/09/27 03:27:10 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -112,7 +112,7 @@
 #define C6 1.175
 #define C7 0.0023
 
-static char rcs_id[]="$Id: mb_coor_scale.c,v 5.4 2008/09/27 03:27:10 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_coor_scale(int verbose, double latitude, 

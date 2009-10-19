@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c,v 5.10 2005/11/05 00:48:04 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -132,7 +132,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_get_all.c,v 5.10 2005/11/05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,

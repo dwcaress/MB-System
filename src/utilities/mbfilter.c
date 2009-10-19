@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbfilter.c	1/16/95
- *    $Id: mbfilter.c,v 5.9 2009/03/02 18:54:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -259,7 +259,7 @@ int mbcopy_any_to_mbldeoih(int verbose, int system,
 		char *ombio_ptr, char *ostore_ptr, 
 		int *error);
 
-static char rcs_id[] = "$Id: mbfilter.c,v 5.9 2009/03/02 18:54:40 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

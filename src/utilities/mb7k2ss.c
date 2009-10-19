@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2ss.c		8/15/2007
- *    $Id: mb7k2ss.c,v 5.4 2008/11/16 21:51:18 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -147,7 +147,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 					struct mb7k2ss_grid_struct *grid,
 					double	 *range, int *error);
 
-static char rcs_id[] = "$Id: mb7k2ss.c,v 5.4 2008/11/16 21:51:18 caress Exp $";
+static char rcs_id[] = "$Id$";
 char program_name[] = "mb7k2ss";
 
 /*--------------------------------------------------------------------*/

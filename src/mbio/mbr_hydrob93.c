@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hydrob93.c	9/19/2002
- *	$Id: mbr_hydrob93.c,v 5.5 2008/07/10 06:43:40 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2002-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -94,7 +94,7 @@ int mbr_dem_hydrob93(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hydrob93(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_hydrob93.c,v 5.5 2008/07/10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hydrob93(int verbose, void *mbio_ptr, int *error)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbviewprivate.h	9/24/2003
- *    $Id: mbviewprivate.h,v 5.14 2008/03/14 19:04:32 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)

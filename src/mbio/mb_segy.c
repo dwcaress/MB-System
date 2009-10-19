@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
- *    $Id: mb_segy.c,v 5.7 2008/09/13 06:08:09 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -61,7 +61,7 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_segy.c,v 5.7 2008/09/13 06:08:09 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_segy_read_init opens an existing segy file for 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_cbat8101.h	8/21/94
- *	$Id: mbf_cbat8101.h,v 5.2 2003/04/17 21:05:23 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)

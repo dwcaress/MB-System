@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mstiffss.c	4/7/98
- *	$Id: mbr_mstiffss.c,v 5.8 2005/11/05 00:48:05 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -116,7 +116,7 @@ int mbr_dem_mstiffss(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_mstiffss.c,v 5.8 2005/11/05 00:48:05 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mstiffss(int verbose, void *mbio_ptr, int *error)

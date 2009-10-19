@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.38 2008/09/13 06:08:09 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -318,7 +318,7 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char rcs_id[]="$Id: mbr_em300mba.c,v 5.38 2008/09/13 06:08:09 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)

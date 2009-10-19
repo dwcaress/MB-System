@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.30 2008/08/12 00:05:54 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -375,7 +375,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.30 2008/08/12 00:05:54 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

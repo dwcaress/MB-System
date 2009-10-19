@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_dslnavfix.perl	8/9/96
-#    $Id: mbm_dslnavfix.perl,v 5.2 2003/04/17 20:42:48 caress Exp $
+#    $Id$
 #
 #    Copyright (c) 1996-2009 by 
 #    D. W. Caress (caress@mbari.org)
@@ -36,7 +36,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1996
 #
 # Version:
-#   $Id: mbm_dslnavfix.perl,v 5.2 2003/04/17 20:42:48 caress Exp $
+#   $Id$
 #
 # Revisions:
 #   $Log: mbm_dslnavfix.perl,v $
@@ -93,7 +93,7 @@ $verbose =    		($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: $\n";
+	print "\nVersion: $Id$\n";
 	print "\nMacro to take WHOI DSL AMS-120 processed navigation \n";
 	print "in UTM projected eastings and northings and produce \n";
 	print "navigation in longitude and latitude. The output navigation \n";

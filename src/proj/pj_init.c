@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_init.c 1630 2009-09-24 02:14:06Z warmerdam $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  Initialize projection object from string definition.  Includes
@@ -36,7 +36,7 @@
 #include <errno.h>
 #include <locale.h>
 
-PJ_CVSID("$Id: pj_init.c 1630 2009-09-24 02:14:06Z warmerdam $");
+PJ_CVSID("$Id$");
 
 extern FILE *pj_open_lib(char *, char *);
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbabsorption.c	2/10/2008
- *    $Id: mbabsorption.c,v 5.0 2008/02/12 02:33:49 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -108,7 +108,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[] = "$Id: mbabsorption.c,v 5.0 2008/02/12 02:33:49 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbset.c	1/4/2000
- *    $Id: mbset.c,v 5.32 2009/03/02 18:54:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -153,7 +153,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[] = "$Id: mbset.c,v 5.32 2009/03/02 18:54:40 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

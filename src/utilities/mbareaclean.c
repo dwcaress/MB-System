@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbareaclean.c	2/27/2003
- *    $Id: mbareaclean.c,v 5.13 2008/12/05 17:32:52 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -152,7 +152,7 @@ int getsoundingptr(int verbose, int soundingid,
 int flag_sounding(int verbose, int flag, int output_bad, int output_good,
 		  struct mbareaclean_sndg_struct *sndg, int *error);
 
-static char rcs_id[] = "$Id: mbareaclean.c,v 5.13 2008/12/05 17:32:52 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

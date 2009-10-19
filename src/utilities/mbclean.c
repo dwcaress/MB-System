@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.14 2006/08/09 22:41:27 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -251,7 +251,7 @@ struct bad_struct
 int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, 
 			int action, int *error);
 
-static char rcs_id[] = "$Id: mbclean.c,v 5.14 2006/08/09 22:41:27 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

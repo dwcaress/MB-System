@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
- *	$Id: mbsys_simrad3.h,v 5.2 2009/03/02 18:51:52 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: strtod.c,v 5.1 2002/09/19 00:33:55 caress Exp $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  strtod() substitute.  This is used because the strtod() on

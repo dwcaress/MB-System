@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id: mb_delaun.c,v 5.1 2008/07/10 06:43:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -147,7 +147,7 @@
 /* some defines */
 #define	LARGE	1.0e10
 
-static char rcs_id[] = "$Id: mb_delaun.c,v 5.1 2008/07/10 06:43:40 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_delaun creates a network of triangles connecting an

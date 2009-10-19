@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_oicmbari.h	1/8/99
- *	$Id: mbf_oicmbari.h,v 5.2 2003/04/17 21:05:23 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)

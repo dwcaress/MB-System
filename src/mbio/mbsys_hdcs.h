@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hdcs.h	3/16/99
- *	$Id: mbsys_hdcs.h,v 5.6 2008/03/14 18:33:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
- *    $Id: mbnavadjust_prog.c,v 5.35 2008/12/22 08:32:52 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -187,7 +187,7 @@ struct swathraw
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbnavadjust_prog.c,v 5.35 2008/12/22 08:32:52 caress Exp $";
+static char rcs_id[] = "$Id$";
 static char program_name[] = "mbnavadjust";
 static char help_message[] =  "mbnavadjust is an interactive navigation adjustment package for swath sonar data.\n";
 static char usage_message[] = "mbnavadjust [-Iproject -V -H]";

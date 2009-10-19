@@ -260,7 +260,7 @@ The program will output some information because of the
 \fB-V\fP option:
 .br
  	Program MBCLEAN
- 	Version $Id: mbcleanold.l,v 5.1 2001/03/22 21:15:49 caress Exp $
+ 	Version $Id$
  	MB-system Version 4.3
 .br
  	132 records loaded into buffer

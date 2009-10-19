@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_edgjstar.c	5/2/2005
- *	$Id: mbr_edgjstar.c,v 5.4 2008/07/10 06:43:40 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2005-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -106,7 +106,7 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_edgjstar.c,v 5.4 2008/07/10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)

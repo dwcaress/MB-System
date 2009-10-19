@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 5.8 2008/09/13 06:08:09 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -116,7 +116,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_hsds.h"
 
-static char rcs_id[] = "$Id: hsdump.c,v 5.8 2008/09/13 06:08:09 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

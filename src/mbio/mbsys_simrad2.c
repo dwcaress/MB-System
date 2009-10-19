@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad2.c	3.00	10/9/98
- *	$Id: mbsys_simrad2.c,v 5.33 2009/03/02 18:51:52 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -161,7 +161,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad2.h"
 
-static char rcs_id[]="$Id: mbsys_simrad2.c,v 5.33 2009/03/02 18:51:52 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

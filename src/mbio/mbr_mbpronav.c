@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbpronav.c	5/20/99
- *	$Id: mbr_mbpronav.c,v 5.11 2006/10/05 18:58:29 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -120,7 +120,7 @@ int mbr_wt_mbpronav(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_mbpronav_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_mbpronav_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_mbpronav.c,v 5.11 2006/10/05 18:58:29 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbpronav(int verbose, void *mbio_ptr, int *error)

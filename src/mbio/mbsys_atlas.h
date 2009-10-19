@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_atlas.h	6/22/01
- *	$Id: mbsys_atlas.h,v 5.7 2005/11/05 00:48:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)

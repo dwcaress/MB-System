@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.c	3/27/2000
- *	$Id: mbsys_xse.c,v 5.19 2007/07/03 17:28:08 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2000-2009 by 
  *    D. W. Caress (caress@mbari.org)
@@ -113,7 +113,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_xse.h"
 
-static char rcs_id[]="$Id: mbsys_xse.c,v 5.19 2007/07/03 17:28:08 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

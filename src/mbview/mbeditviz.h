@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz.h		4/27/2007
- *    $Id: mbeditviz.h,v 5.2 2008/11/16 21:51:18 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)

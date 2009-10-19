@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_elmk2unb.h	6/6/97
- *	$Id: mbf_elmk2unb.h,v 5.2 2003/04/17 21:05:23 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1997-2009 by
  *    David W. Caress (caress@mbari.org)

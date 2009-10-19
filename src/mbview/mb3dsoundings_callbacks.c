@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundings_callbacks.c		5/25/2007
- *    $Id: mb3dsoundings_callbacks.c,v 5.6 2008/11/16 21:51:18 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -80,7 +80,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.6 2008/11/16 21:51:18 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/

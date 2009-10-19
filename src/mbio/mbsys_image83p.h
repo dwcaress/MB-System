@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_image83p.h	5/5/2008
- *	$Id: mbsys_image83p.h,v 5.1 2008/07/19 07:41:14 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)

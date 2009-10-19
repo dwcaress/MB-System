@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_transform.c 1504 2009-01-06 02:11:57Z warmerdam $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  Perform overall coordinate system to coordinate system 
@@ -34,7 +34,7 @@
 #include <math.h>
 #include "geocent.h"
 
-PJ_CVSID("$Id: pj_transform.c 1504 2009-01-06 02:11:57Z warmerdam $");
+PJ_CVSID("$Id$");
 
 #ifndef SRS_WGS84_SEMIMAJOR
 #define SRS_WGS84_SEMIMAJOR 6378137.0

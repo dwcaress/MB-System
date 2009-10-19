@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mr1pr_defines.h	3/7/2003
- *	$Id: mr1pr_defines.h,v 5.2 2007/10/08 16:37:00 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)

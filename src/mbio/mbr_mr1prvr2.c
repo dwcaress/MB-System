@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prvr2.c	3/6/2003
- *	$Id: mbr_mr1prvr2.c,v 5.4 2008/07/10 06:43:41 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -88,7 +88,7 @@ int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_mr1prvr2.c,v 5.4 2008/07/10 06:43:41 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1prvr2(int verbose, void *mbio_ptr, int *error)

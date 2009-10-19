@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_transform.c 1504 2009-01-06 02:11:57Z warmerdam $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  Mutex (thread lock) functions.
@@ -32,7 +32,7 @@
 
 #ifndef _WIN32
 #include <projects.h>
-PJ_CVSID("$Id: pj_transform.c 1504 2009-01-06 02:11:57Z warmerdam $");
+PJ_CVSID("$Id$");
 #else
 #include <proj_api.h>
 #endif

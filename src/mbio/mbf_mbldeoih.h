@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbldeoih.h	1/20/93
- *	$Id: mbf_mbldeoih.h,v 5.4 2004/09/16 18:59:42 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h,v 5.12 2007/07/03 17:28:08 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2000-2009 by 
  *    D. W. Caress (caress@mbari.org)

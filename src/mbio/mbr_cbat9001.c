@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_cbat9001.c	8/8/94
- *	$Id: mbr_cbat9001.c,v 5.11 2008/09/13 06:08:09 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -174,7 +174,7 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error);
 int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_cbat9001.c,v 5.11 2008/09/13 06:08:09 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_cbat9001(int verbose, void *mbio_ptr, int *error)

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 5.12 2003/12/04 23:10:21 caress Exp $
+#    $Id$
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,7 +30,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 5.12 2003/12/04 23:10:21 caress Exp $
+#   $Id$
 #
 # Revisions:
 #   $Log: make_mbhtml,v $

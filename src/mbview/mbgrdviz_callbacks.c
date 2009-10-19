@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdviz_callbacks.c		10/9/2002
- *    $Id: mbgrdviz_callbacks.c,v 5.31 2008/10/17 07:52:44 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2002-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -119,7 +119,7 @@ static int	survey_color = MBV_COLOR_BLACK;
 static char	survey_name[MB_PATH_MAXLINE];
 
 /* id variables */
-static char rcs_id[] = "$Id: mbgrdviz_callbacks.c,v 5.31 2008/10/17 07:52:44 caress Exp $";
+static char rcs_id[] = "$Id$";
 static char program_name[] = "MBgrdviz";
 
 /* status variables */

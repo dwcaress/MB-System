@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.h	3/2/93
- *	$Id: mbsys_ldeoih.h,v 5.6 2007/10/08 15:59:34 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
