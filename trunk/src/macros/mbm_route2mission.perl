@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.perl,v 5.21 2008/12/05 17:32:51 caress Exp $
+#    $Id$
 #
 #    Copyright (c) 2004-2009 by 
 #    D. W. Caress (caress@mbari.org)
@@ -37,7 +37,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.perl,v 5.21 2008/12/05 17:32:51 caress Exp $
+# $Id$
 #
 # Revisions:
 #   $Log: mbm_route2mission.perl,v $
@@ -226,7 +226,7 @@ $outputoff =		($opt_Z || $opt_z);
 # print out help message if required
 if ($help) {
     print "\r\n$program_name:\r\n";    
-    print "\nVersion: $Id: $\n";
+    print "\nVersion: $Id$\n";
     print "\r\nPerl shellscript to translate survey route file derived from \r\n";
     print "MBgrdviz into an MBARI AUV mission script. Developed for use\r\n";
     print "in survey planning for the MBARI Mapping AUV.\r\n";

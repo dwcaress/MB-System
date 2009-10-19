@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.28 2009/03/02 18:54:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -258,7 +258,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 		void *ombio_ptr,
 		int *error);
 
-static char rcs_id[] = "$Id: mbcopy.c,v 5.28 2009/03/02 18:54:40 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.11 2007/07/05 19:16:19 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -74,7 +74,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[] = "$Id: mbdatalist.c,v 5.11 2007/07/05 19:16:19 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

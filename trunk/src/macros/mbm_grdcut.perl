@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/23/01
-#    $Id: mbm_grdcut.perl,v 5.6 2006/11/26 09:42:01 caress Exp $
+#    $Id$
 #
 #    Copyright (c) 2001-2009 by
 #    D. W. Caress (caress@mbari.org)
@@ -40,7 +40,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the Kohala coast of Hawaii)
 #
 # Version:
-#   $Id: mbm_grdcut.perl,v 5.6 2006/11/26 09:42:01 caress Exp $
+#   $Id$
 #
 # Revisions:
 #   $Log: mbm_grdcut.perl,v $
@@ -99,7 +99,7 @@ $verbose += 1;
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: $\n";
+	print "\nVersion: $Id$\n";
  	print "Macro to painlessly cut out a region from a GMT grd grid file.\n";
 	print "The GMT program grdcut requires that one specify bounds which\n";
 	print "exactly match grid cell boundaries. Frequently, one just wants\n";

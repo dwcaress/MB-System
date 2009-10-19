@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgetesf.c	6/15/93
- *    $Id: mbgetesf.c,v 5.7 2008/05/16 22:44:37 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -72,7 +72,7 @@
 
 int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
 
-static char rcs_id[] = "$Id: mbgetesf.c,v 5.7 2008/05/16 22:44:37 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

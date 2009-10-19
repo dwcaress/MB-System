@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
- *	$Id: mbr_omghdcsj.c,v 5.13 2008/09/20 00:57:41 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -132,7 +132,7 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_omghdcsj.c,v 5.13 2008/09/20 00:57:41 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)

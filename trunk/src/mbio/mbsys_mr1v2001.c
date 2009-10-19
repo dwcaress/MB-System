@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1v2001.c	3/6/2003
- *	$Id: mbsys_mr1v2001.c,v 5.2 2006/01/24 19:11:17 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -51,7 +51,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_mr1v2001.h"
 
- static char rcs_id[]="$Id: mbsys_mr1v2001.c,v 5.2 2006/01/24 19:11:17 caress Exp $";
+ static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_mr1v2001_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

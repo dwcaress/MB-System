@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 5.6 2009/03/10 05:11:22 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)

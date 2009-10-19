@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	4/21/96
- *    $Id: mb_define.h,v 5.40 2009/03/08 09:21:00 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1996-2009 by
  *    David W. Caress (caress@mbari.org)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_nvnetcdf.c	5/4/02
- *	$Id: mbr_nvnetcdf.c,v 5.6 2008/07/10 06:43:41 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2002-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -94,7 +94,7 @@ int mbr_dem_nvnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_nvnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_nvnetcdf.c,v 5.6 2008/07/10 06:43:41 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_nvnetcdf(int verbose, void *mbio_ptr, int *error)

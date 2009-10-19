@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_cheb.c			3/23/00
- *    $Id: mb_cheb.c,v 5.3 2008/07/10 06:43:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)

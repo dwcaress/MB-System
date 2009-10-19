@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_rt.c	11/14/94
- *    $Id: mb_rt.c,v 5.2 2008/07/10 06:43:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -135,7 +135,7 @@ int mb_rt_plot_circular(int verbose, int *error);
 int mb_rt_line(int verbose, int *error);
 int mb_rt_vertical(int verbose, int *error);
 
-static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008/07/10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------------*/
 int mb_rt_init(int verbose, int number_node, 

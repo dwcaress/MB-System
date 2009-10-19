@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbctdlist.c	9/14/2008
- *    $Id: mbctdlist.c,v 5.0 2008/09/20 00:51:31 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -61,7 +61,7 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbctdlist.c,v 5.0 2008/09/20 00:51:31 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

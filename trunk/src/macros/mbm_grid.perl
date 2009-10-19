@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 5.9 2003/09/25 16:59:52 caress Exp $
+#    $Id$
 #
 #    Copyright (c) 1999-2009 by
 #    D. W. Caress (caress@mbari.org)
@@ -54,7 +54,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 5.9 2003/09/25 16:59:52 caress Exp $
+#   $Id$
 #
 # Revisions:
 #   $Log: mbm_grid.perl,v $
@@ -139,7 +139,7 @@ $bathdef = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: $\n";
+	print "\nVersion: $Id$\n";
         print "Macro to generate a shellscript of MB-System commands \n";
         print "which, when executed, will generate a grid or mosaic of the \n";
         print "specified swath sonar data. The grid or mosaic may be of \n";

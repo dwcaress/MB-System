@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_gsfgenmb.c	2/27/98
- *	$Id: mbr_gsfgenmb.c,v 5.10 2009/03/13 07:05:58 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -122,7 +122,7 @@ int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_gsfgenmb.c,v 5.10 2009/03/13 07:05:58 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error)

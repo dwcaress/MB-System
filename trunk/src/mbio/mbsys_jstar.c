@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.c	10/4/94
- *	$Id: mbsys_jstar.c,v 5.8 2008/07/10 18:02:39 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2005-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -61,7 +61,7 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mbsys_jstar.h"
 
-static char rcs_id[]="$Id: mbsys_jstar.c,v 5.8 2008/07/10 18:02:39 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

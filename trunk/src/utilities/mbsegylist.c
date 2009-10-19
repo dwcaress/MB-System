@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegylist.c	5/29/2004
- *    $Id: mbsegylist.c,v 5.6 2007/10/17 20:34:00 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -86,7 +86,7 @@ int printsimplevalue(int verbose,
 	int ascii, int *invert, int *flipsign, int *error);
 int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 
-static char rcs_id[] = "$Id: mbsegylist.c,v 5.6 2007/10/17 20:34:00 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

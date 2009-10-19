@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:    mbstripNaN.c        8/8/02
- *    $Id: mbstripnan.c,v 5.3 2006/01/18 15:17:00 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2002-2009 by
  *    Mike McCann (mccann@mbari.org)

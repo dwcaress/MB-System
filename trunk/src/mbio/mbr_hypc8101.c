@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hypc8101.c	8/8/94
- *	$Id: mbr_hypc8101.c,v 5.9 2005/11/05 00:48:05 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -116,7 +116,7 @@ int mbr_rt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hypc8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hypc8101_rd_data(int verbose, void *mbio_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_hypc8101.c,v 5.9 2005/11/05 00:48:05 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hypc8101(int verbose, void *mbio_ptr, int *error)

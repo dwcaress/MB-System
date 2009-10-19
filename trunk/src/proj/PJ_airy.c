@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_airy.c 1504 2009-01-06 02:11:57Z warmerdam $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the airy (Airy) projection.
@@ -37,7 +37,7 @@
 #define PJ_LIB__
 #include <projects.h>
 
-PJ_CVSID("$Id: PJ_airy.c 1504 2009-01-06 02:11:57Z warmerdam $");
+PJ_CVSID("$Id$");
 
 PROJ_HEAD(airy, "Airy") "\n\tMisc Sph, no inv.\n\tno_cut lat_b=";
 

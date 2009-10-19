@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbauvnavusbl.c	11/21/2004
  *
- *    $Id: mbauvnavusbl.c,v 5.3 2008/09/11 20:20:14 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -58,7 +58,7 @@
 /* local defines */
 #define	NCHARMAX	256
 
-static char rcs_id[] = "$Id: mbauvnavusbl.c,v 5.3 2008/09/11 20:20:14 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

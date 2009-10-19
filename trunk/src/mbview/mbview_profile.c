@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_profile.c	3/8/2006
- *    $Id: mbview_profile.c,v 5.1 2008/05/16 22:59:42 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2006-2009
 		 by
@@ -84,7 +84,7 @@ static Cardinal 	ac = 0;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_profile.c,v 5.1 2008/05/16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getprofilecount(int verbose, int instance,

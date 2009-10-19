@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_readgrd.c	12/10/2007
- *    $Id: mb_readgrd.c,v 5.1 2008/07/10 06:43:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -66,7 +66,7 @@ extern int isnanf(float x);
 /* default no data value define */
 #define	DEFAULT_NODATA		-9999999.9
 
-static char rcs_id[] = "$Id: mb_readgrd.c,v 5.1 2008/07/10 06:43:40 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /* global variables */
 static char program_name[] = "mb_readgrd";

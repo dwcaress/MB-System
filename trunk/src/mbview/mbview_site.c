@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_site.c	9/25/2003
- *    $Id: mbview_site.c,v 5.10 2008/09/11 20:17:33 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2003-2009(void **)&(shared.shareddata.routes[inew].disttopo), &error);
 		status = mb_reall by
@@ -112,7 +112,7 @@ extern char	*mbsystem_library_name;
 /* local variables */
 static char	value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_site.c,v 5.10 2008/09/11 20:17:33 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getsitecount(int verbose, int instance,

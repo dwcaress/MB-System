@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbotps.c	7/30/2009
- *    $Id: mbotps.c,v 5.10 2008/09/20 00:57:41 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2009-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -76,7 +76,7 @@ char	*getenv();
 
 int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbotps.c,v 5.10 2008/09/20 00:57:41 caress Exp $";
+	static char rcs_id[] = "$Id$";
 	static char program_name[] = "mbotps";
 	static char help_message[] =  "MBotps predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions.";
 	static char usage_message[] = "mbotps -Rlon/lat -Byear/month/day/hour/minute/second\n\t-Eyear/month/day/hour/minute/second -Dinterval -Ooutput\n\t[-Idatalist.mb-1 -Fformat -V]";

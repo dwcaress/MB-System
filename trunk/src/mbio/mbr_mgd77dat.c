@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mgd77dat.c	5/18/99
- *	$Id: mbr_mgd77dat.c,v 5.11 2008/01/14 17:52:34 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -120,7 +120,7 @@ int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_mgd77dat_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_mgd77dat_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_mgd77dat.c,v 5.11 2008/01/14 17:52:34 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error)

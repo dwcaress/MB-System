@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_extrawidgets.h	8/7/95
- *    $Id: mbnavedit_extrawidgets.h,v 5.2 2009/03/10 05:11:22 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)

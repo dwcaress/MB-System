@@ -747,7 +747,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.11 2009/03/02 18:59:05 caress Exp $
+ Version $Id$
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

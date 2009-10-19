@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_em12darw.h	1/20/93
- *	$Id: mbf_em12darw.h,v 5.3 2003/12/04 23:10:22 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)

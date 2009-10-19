@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mr1v2001.h	3/6/2003
- *	$Id: mbsys_mr1v2001.h,v 5.1 2005/11/05 00:48:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)

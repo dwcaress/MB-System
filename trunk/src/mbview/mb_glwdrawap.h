@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_glwdrawap.c	5/22/2007
- *    $Id: mb_glwdrawap.h,v 5.0 2007/06/17 23:16:14 caress Exp $
+ *    $Id$
  *
  *    Altered from original code for MB-System by
  *    David W. Caress (caress@mbari.org)

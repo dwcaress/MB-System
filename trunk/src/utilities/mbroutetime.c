@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbroutetime.c	5/4/2009
- *    $Id:  $
+ *    $Id$
  *
  *    Copyright (c) 2009-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -50,7 +50,7 @@
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
 
-static char rcs_id[] = "$Id: $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

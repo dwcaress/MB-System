@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbtime.c	6/5/2008
- *    $Id: mbtime.c,v 5.0 2008/07/19 07:52:03 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -44,7 +44,7 @@
 #define MBTIME_INPUT_EPOCH	0
 #define MBTIME_INPUT_CALENDAR	1
 
-static char rcs_id[] = "$Id: mbtime.c,v 5.0 2008/07/19 07:52:03 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

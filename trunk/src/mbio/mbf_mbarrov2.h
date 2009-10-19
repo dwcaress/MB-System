@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_mbarrov2.h	10/3/2006
- *	$Id: mbf_mbarrov2.h,v 5.0 2006/10/05 18:56:44 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)

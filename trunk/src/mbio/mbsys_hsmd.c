@@ -114,7 +114,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_hsmd.h"
 
-static char rcs_id[]="$Id: mbsys_hsmd.c,v 5.6 2005/11/05 00:48:03 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

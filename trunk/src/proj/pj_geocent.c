@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_geocent.c 1504 2009-01-06 02:11:57Z warmerdam $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  Stub projection for geocentric.  The transformation isn't
@@ -32,7 +32,7 @@
 #define PJ_LIB__
 #include <projects.h>
 
-PJ_CVSID("$Id: pj_geocent.c 1504 2009-01-06 02:11:57Z warmerdam $");
+PJ_CVSID("$Id$");
 
 PROJ_HEAD(geocent, "Geocentric")  "\n\t";
 

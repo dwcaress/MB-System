@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_atlas.c	3.00	6/25/01
- *	$Id: mbsys_atlas.c,v 5.11 2005/11/05 00:48:05 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -82,7 +82,7 @@
 #define MBSYS_ATLAS_C
 #include "../../include/mbsys_atlas.h"
 
-static char rcs_id[]="$Id: mbsys_atlas.c,v 5.11 2005/11/05 00:48:05 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

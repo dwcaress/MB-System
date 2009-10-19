@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_aux.h	5/16/94
- *    $Id: mb_aux.h,v 5.7 2008/07/10 06:43:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c); 1993-2009 by
  *    David W. Caress (caress@mbari.org);

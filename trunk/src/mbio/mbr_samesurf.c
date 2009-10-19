@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_samesurf.c	6/13/2002
- *	$Id: mbr_samesurf.c,v 5.9 2005/11/05 00:48:05 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2002-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -96,7 +96,7 @@ int mbr_dem_samesurf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_samesurf.c,v 5.9 2005/11/05 00:48:05 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)

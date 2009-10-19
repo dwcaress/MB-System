@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_rollover.perl	6/18/93
-#    $Id: mbm_rollerror.perl,v 5.2 2003/04/17 20:42:48 caress Exp $
+#    $Id$
 #
 #    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@mbari.org)
@@ -35,7 +35,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_rollerror.perl,v 5.2 2003/04/17 20:42:48 caress Exp $
+#   $Id$
 #
 # Revisions:
 #   $Log: mbm_rollerror.perl,v $

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbpingedit_callbacks.c		11/13/2007
- *    $Id: mbpingedit_callbacks.c,v 5.1 2008/05/16 22:59:42 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -75,7 +75,7 @@
 
 /* local variables */
 
-static char rcs_id[]="$Id: mbpingedit_callbacks.c,v 5.1 2008/05/16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/

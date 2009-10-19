@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100bi.c	12/23/2004
- *	$Id: mbr_sb2100bi.c,v 5.5 2008/03/01 09:14:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1997-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -508,7 +508,7 @@ Record End                      03338           2       varies  unsigned short\n
 /* read & write buffer */
 char	buffer[4*MBSYS_SB2100_PIXELS];
 
-static char rcs_id[]="$Id: mbr_sb2100bi.c,v 5.5 2008/03/01 09:14:03 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100b1(int verbose, void *mbio_ptr, int *error)

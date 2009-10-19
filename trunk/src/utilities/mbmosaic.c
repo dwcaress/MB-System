@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.31 2009/03/02 18:54:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1997-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -324,7 +324,7 @@ int mbmosaic_get_footprint(
 		int	*error);
 ;
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.31 2009/03/02 18:54:40 caress Exp $";
+static char rcs_id[] = "$Id$";
 char program_name[] = "mbmosaic";
 char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 char usage_message[] = "mbmosaic -Ifilelist -Oroot \

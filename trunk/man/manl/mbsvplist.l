@@ -121,14 +121,14 @@ obtain a listing to stdout, the following will suffice:
 The output will be as follows:
 
  Program mbsvplist
- Version $Id: mbsvplist.l,v 5.2 2004/10/06 18:51:39 caress Exp $
+ Version $Id$
  MB-system Version 5.0
 
  Searching mbari_1998_526_msn.mb57 for SVP records
  Outputting SVP to file: 
  ## Water Sound Velocity Profile (SVP)
  ## Output by Program mbsvplist
- ## Program Version $Id: mbsvplist.l,v 5.2 2004/10/06 18:51:39 caress Exp $
+ ## Program Version $Id$
  ## MB-System Version 5.0.alpha01
  ## Run by user <caress> on cpu <menard> at <Thu Jan  4 13:36:44 2001>
  ## Swath File: mbari_1998_526_msn.mb57

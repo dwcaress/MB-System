@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_datum_set.c 1504 2009-01-06 02:11:57Z warmerdam $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  Apply datum definition to PJ structure from initialization string.

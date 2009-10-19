@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 5.11 2009/03/13 07:05:58 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -104,7 +104,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_gsf.h"
 
-static char rcs_id[]="$Id: mbsys_gsf.c,v 5.11 2009/03/13 07:05:58 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

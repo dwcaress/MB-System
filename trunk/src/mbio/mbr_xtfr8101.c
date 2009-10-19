@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_xtfr8101.c	8/8/94
- *	$Id: mbr_xtfr8101.c,v 5.11 2008/09/13 06:08:09 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -111,7 +111,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_xtfr8101.c,v 5.11 2008/09/13 06:08:09 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfr8101(int verbose, void *mbio_ptr, int *error)

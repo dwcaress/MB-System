@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: proj_api.h 1631 2009-09-24 02:26:05Z warmerdam $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  Public (application) include file for PROJ.4 API, and constants.

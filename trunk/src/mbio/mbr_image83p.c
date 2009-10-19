@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_image83p.c	5/5/2008
- *	$Id: mbr_image83p.c,v 5.2 2008/09/20 00:57:41 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -98,7 +98,7 @@ int mbr_dem_image83p(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_image83p.c,v 5.2 2008/09/20 00:57:41 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_image83p(int verbose, void *mbio_ptr, int *error)

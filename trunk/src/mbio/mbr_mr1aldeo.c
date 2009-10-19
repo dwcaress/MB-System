@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1aldeo.c	10/24/95
- *	$Id: mbr_mr1aldeo.c,v 5.8 2008/07/10 06:43:40 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -145,7 +145,7 @@ int mbr_mr1aldeo_wr_hdr(int verbose, XDR *xdrs,
 		struct mbf_mr1aldeo_struct *data, char **hdr_comment, int *error);
 int mbr_mr1aldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1aldeo_struct *data, int *error);
 
-static char rcs_id[]="$Id: mbr_mr1aldeo.c,v 5.8 2008/07/10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1aldeo(int verbose, void *mbio_ptr, int *error)

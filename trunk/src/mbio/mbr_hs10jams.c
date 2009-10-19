@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hs10jams.c	12/4/00
- *	$Id: mbr_hs10jams.c,v 5.7 2005/11/05 00:48:05 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -208,7 +208,7 @@ int mbr_dem_hs10jams(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hs10jams(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_hs10jams.c,v 5.7 2005/11/05 00:48:05 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hs10jams(int verbose, void *mbio_ptr, int *error)

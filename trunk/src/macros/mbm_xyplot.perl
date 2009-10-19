@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.15 2008/09/11 20:06:46 caress Exp $
+#    $Id$
 #
 #    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,7 +56,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.15 2008/09/11 20:06:46 caress Exp $
+#   $Id$
 #
 # Revisions:
 #   $Log: mbm_xyplot.perl,v $
@@ -274,7 +274,7 @@ $delete_temp_files = 	($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: $\n";
+	print "\nVersion: $Id$\n";
 	print "\nMacro to generate a shellscript of GMT commands which,  \n";
 	print "when executed, will generate a Postscript plot of xy data. \n";
 	print "Axes may be linear, log,  or any of several geographic  \n";

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	misc.c	3/7/2003
- *	$Id: misc.c,v 5.1 2006/01/11 07:46:15 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elacmk2.c,v 5.9 2005/11/05 00:48:05 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -131,7 +131,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_elacmk2.h"
 
- static char rcs_id[]="$Id: mbsys_elacmk2.c,v 5.9 2005/11/05 00:48:05 caress Exp $";
+ static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarirov.c	5/20/99
- *	$Id: mbr_mbarirov.c,v 5.10 2005/11/05 00:48:04 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -122,7 +122,7 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 
 static char header[] = "Year,Day,Time,Usec,Lat,Lon,East,North,Pres,Head,Alti,Pitch,Roll,PosFlag,PresFlag,HeadFlag,AltiFlag,AttitFlag\n";
 
-static char rcs_id[]="$Id: mbr_mbarirov.c,v 5.10 2005/11/05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbarirov(int verbose, void *mbio_ptr, int *error)

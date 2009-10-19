@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_comment.c	7/15/97
- *    $Id: mb_put_comment.c,v 5.3 2003/04/17 21:05:23 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1997-2009 by
  *    David W. Caress (caress@mbari.org)

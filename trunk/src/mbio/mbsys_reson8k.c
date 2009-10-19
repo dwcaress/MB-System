@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson8k.c	3.00	8/20/94
- *	$Id: mbsys_reson8k.c,v 5.7 2007/10/08 15:59:34 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -64,7 +64,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_reson8k.h"
 
-static char rcs_id[]="$Id: mbsys_reson8k.c,v 5.7 2007/10/08 15:59:34 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson8k_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

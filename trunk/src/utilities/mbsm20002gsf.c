@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsm20002gsf.c	5/15/2009
  *
- *    $Id: mbsm20002gsf.c,v 5.9 2008/09/11 20:20:14 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2009-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -89,7 +89,7 @@ struct sm2000_ping_struct
 	struct sm2000_return_struct returns[SM2000_NUM_RETURNS];
 	};
 
-static char rcs_id[] = "$Id: mbsm20002gsf.c,v 5.9 2008/09/11 20:20:14 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

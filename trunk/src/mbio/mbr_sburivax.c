@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sburivax.c	2/2/93
- *	$Id: mbr_sburivax.c,v 5.8 2005/11/05 00:48:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -142,7 +142,7 @@ int mbr_dem_sburivax(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_sburivax.c,v 5.8 2005/11/05 00:48:03 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sburivax(int verbose, void *mbio_ptr, int *error)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsunknwn.c	10/13/2008
- *	$Id: mbr_hsunknwn.c,v 5.0 2008/10/17 07:28:41 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -107,7 +107,7 @@ int mbr_dem_hsunknwn(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hsunknwn(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_hsunknwn.c,v 5.0 2008/10/17 07:28:41 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsunknwn(int verbose, void *mbio_ptr, int *error)

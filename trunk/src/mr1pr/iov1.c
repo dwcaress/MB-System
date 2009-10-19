@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	iov1.c	3/7/2003
- *	$Id: iov1.c,v 5.1 2006/01/24 19:24:04 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)

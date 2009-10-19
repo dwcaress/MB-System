@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_init.c	1/25/93
- *    $Id: mb_write_init.c,v 5.24 2009/03/13 07:05:58 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -223,7 +223,7 @@
 #include "gsf.h"
 #include "netcdf.h"
 
-static char rcs_id[]="$Id: mb_write_init.c,v 5.24 2009/03/13 07:05:58 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_write_init(int verbose, 

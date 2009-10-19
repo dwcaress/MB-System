@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarrov2.c	10/3/2006
- *	$Id: mbr_mbarrov2.c,v 5.0 2006/10/05 18:56:44 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2006-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -78,7 +78,7 @@ int mbr_mbarrov2_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 
 static char header[] = "RovName,DiveNumber,DateTime24,EpochSecs,Latitude,Longitude,Pressure,Depth,Altitude,Heading,Pitch,Roll,ShipLatitude,ShipLongitude,ShipHeading,QCFlag\n";
 
-static char rcs_id[]="$Id: mbr_mbarrov2.c,v 5.0 2006/10/05 18:56:44 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbarrov2(int verbose, void *mbio_ptr, int *error)

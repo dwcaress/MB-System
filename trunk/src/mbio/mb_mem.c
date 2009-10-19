@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_mem.c	3/1/93
- *    $Id: mb_mem.c,v 5.11 2009/03/08 09:21:00 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -142,7 +142,7 @@ static int	mb_alloc_overflow = MB_NO;
 /* Local debug define */
 /* #define MB_MEM_DEBUG 1 */
 
-static char rcs_id[]="$Id: mb_mem.c,v 5.11 2009/03/08 09:21:00 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_mem_debug_on(int verbose, int *error)
@@ -1039,7 +1039,7 @@ int mb_memory_list(int verbose, int *error)
 int mb_register_array(int verbose, void *mbio_ptr, 
 		int type, size_t size, void **handle, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.11 2009/03/08 09:21:00 caress Exp $";
+	static char rcs_id[]="$Id$";
 	char	*function_name = "mb_update_arrays";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1144,7 +1144,7 @@ mb_io_ptr->regarray_size[mb_io_ptr->n_regarray-1]);*/
 int mb_update_arrays(int verbose, void *mbio_ptr, 
 		int nbath, int namp, int nss, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.11 2009/03/08 09:21:00 caress Exp $";
+	static char rcs_id[]="$Id$";
 	char	*function_name = "mb_update_arrays";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1431,7 +1431,7 @@ nss,mb_io_ptr->pixels_ss_alloc);*/
 int mb_update_arrayptr(int verbose, void *mbio_ptr, 
 		void **handle, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.11 2009/03/08 09:21:00 caress Exp $";
+	static char rcs_id[]="$Id$";
 	char	*function_name = "mb_update_arrayptr";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1484,7 +1484,7 @@ fprintf(stderr,"\n");*/
 /*--------------------------------------------------------------------*/
 int mb_list_arrays(int verbose, void *mbio_ptr, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.11 2009/03/08 09:21:00 caress Exp $";
+	static char rcs_id[]="$Id$";
 	char	*function_name = "mb_list_arrays";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -1529,7 +1529,7 @@ int mb_list_arrays(int verbose, void *mbio_ptr, int *error)
 /*--------------------------------------------------------------------*/
 int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error)
 {
-	static char rcs_id[]="$Id: mb_mem.c,v 5.11 2009/03/08 09:21:00 caress Exp $";
+	static char rcs_id[]="$Id$";
 	char	*function_name = "mb_deall_ioarrays";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

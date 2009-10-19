@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c,v 5.13 2008/07/10 06:43:40 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -173,7 +173,7 @@
 #include "gsf.h"
 #include "netcdf.h"
 
-static	char	rcs_id[]="$Id: mb_close.c,v 5.13 2008/07/10 06:43:40 caress Exp $";
+static	char	rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error)

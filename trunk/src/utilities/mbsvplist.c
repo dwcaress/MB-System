@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsvplist.c	1/3/2001
- *    $Id: mbsvplist.c,v 5.10 2008/09/20 00:57:41 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -87,7 +87,7 @@
 char	*ctime();
 char	*getenv();
 
-static char rcs_id[] = "$Id: mbsvplist.c,v 5.10 2008/09/20 00:57:41 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

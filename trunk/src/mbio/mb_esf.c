@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.13 2008/07/10 06:43:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -88,7 +88,7 @@ void mb_mergesort_setup(u_char *list1, u_char *list2, size_t n, size_t size,
 void mb_mergesort_insertionsort(u_char *a, size_t n, size_t size, 
 	int (*cmp)(void *, void *));
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.13 2008/07/10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */

@@ -106,7 +106,7 @@ Run \fBmbrollbias\fP as follows:
 The output looks like:
 
  Program mbrollbias
- Version $Id: mbrollbias.l,v 5.1 2001/07/13 19:52:33 caress Exp $
+ Version $Id$
  MB-system Version 4.00
 
  mbrollbias Parameters:

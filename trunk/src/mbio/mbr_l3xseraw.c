@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
- *	$Id: mbr_l3xseraw.c,v 5.21 2008/07/10 06:43:40 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2000-2009 by 
  *    D. W. Caress (caress@mbari.org)
@@ -175,7 +175,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error);
 int mbr_l3xseraw_wr_comment(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error);
 
-static char rcs_id[]="$Id: mbr_l3xseraw.c,v 5.21 2008/07/10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)

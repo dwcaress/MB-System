@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c,v 5.16 2008/09/13 06:08:09 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -391,7 +391,7 @@ int              tiff_offset[] =
 			448       /* GeoAsciiParamsTag */
 		      };
 
-static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.16 2008/09/13 06:08:09 caress Exp $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 

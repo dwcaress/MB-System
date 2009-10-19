@@ -169,7 +169,7 @@ int mbr_wt_hsmdaraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsmdaraw_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_hsmdaraw_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_hsmdaraw.c,v 5.8 2005/11/05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsmdaraw(int verbose, void *mbio_ptr, int *error)

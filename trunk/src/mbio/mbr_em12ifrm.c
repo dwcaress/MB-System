@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
- *	$Id: mbr_em12ifrm.c,v 5.15 2008/03/01 09:14:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -130,7 +130,7 @@ int mbr_rt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_em12ifrm_rd_data(int verbose, void *mbio_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_em12ifrm.c,v 5.15 2008/03/01 09:14:03 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)

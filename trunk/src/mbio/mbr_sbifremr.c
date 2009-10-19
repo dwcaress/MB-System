@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbifremr.c	3/29/96
- *	$Id: mbr_sbifremr.c,v 5.8 2005/11/05 00:48:04 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1996-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -137,7 +137,7 @@ int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_sbifremr.c,v 5.8 2005/11/05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbifremr(int verbose, void *mbio_ptr, int *error)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.15 2005/11/05 00:48:04 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -73,7 +73,7 @@ double mbsys_get_depth(	SurfMultiBeamDepth* 			MultiBeamDepth,
 						float	heave,
 						int		n );
 
-static char rcs_id[]="$Id: mbsys_surf.c,v 5.15 2005/11/05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,

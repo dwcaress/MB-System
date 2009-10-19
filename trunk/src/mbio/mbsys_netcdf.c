@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.c	4/11/2002
- *	$Id: mbsys_netcdf.c,v 5.12 2008/12/05 17:32:52 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 2002-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -71,7 +71,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_netcdf.h"
 
-static char rcs_id[]="$Id: mbsys_netcdf.c,v 5.12 2008/12/05 17:32:52 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_netcdf_alloc(int verbose, void *mbio_ptr, void **store_ptr,

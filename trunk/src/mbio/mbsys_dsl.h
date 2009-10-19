@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_dsl.h	8/5/94
- *	$Id: mbsys_dsl.h,v 5.6 2005/11/05 00:48:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1996-2009 by
  *    David W. Caress (caress@mbari.org)

@@ -6,7 +6,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 #--------------------------------------------------------------------
 #    The MB-system: mbm_xbt.perl   6/18/93
-#    $Id: mbm_xbt.perl,v 5.5 2004/09/18 00:36:10 dale Exp $
+#    $Id$
 #
 #    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@mbari.org)
@@ -84,7 +84,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      
 #
 # Version:
-# $Id: mbm_xbt.perl,v 5.5 2004/09/18 00:36:10 dale Exp $
+# $Id$
 #
 # Revisions:
 #   $Log: mbm_xbt.perl,v $
@@ -382,7 +382,7 @@ sub useage {
 
  
     print "\nUsage: $ProgramName -Ifile \n";
-    print "\nVersion: $Id: $\n";
+    print "\nVersion: $Id$\n";
     print "\t[-C -Ssalinity -Fformat -Llatitude -V -H -C]\n\n";
 
     print "\tPerl shellscript to translate various XBT (with -F option) \n";

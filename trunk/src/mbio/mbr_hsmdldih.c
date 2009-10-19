@@ -153,7 +153,7 @@ int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_hsmdldih.c,v 5.10 2005/11/05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)

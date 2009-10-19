@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sburicen.c	2/2/93
- *	$Id: mbr_sburicen.c,v 5.9 2005/11/05 00:48:04 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -152,7 +152,7 @@ int mbr_dem_sburicen(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sburicen(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_sburicen.c,v 5.9 2005/11/05 00:48:04 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sburicen(int verbose, void *mbio_ptr, int *error)

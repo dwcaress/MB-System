@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_dsl120pf.c	8/6/96
- *	$Id: mbr_dsl120pf.c,v 5.9 2005/11/05 00:48:03 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1996-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -135,7 +135,7 @@ int mbr_dsl120pf_wr_bath(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
 int mbr_dsl120pf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
 int mbr_dsl120pf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
 
-static char rcs_id[]="$Id: mbr_dsl120pf.c,v 5.9 2005/11/05 00:48:03 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_dsl120pf(int verbose, void *mbio_ptr, int *error)

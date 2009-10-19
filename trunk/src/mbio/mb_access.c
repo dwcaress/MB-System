@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.17 2008/09/20 00:57:40 caress Exp $
+ *    $Id$
 
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -41,7 +41,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.17 2008/09/20 00:57:40 caress Exp $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
