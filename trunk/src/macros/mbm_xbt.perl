@@ -8,7 +8,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system: mbm_xbt.perl   6/18/93
 #    $Id: mbm_xbt.perl,v 5.5 2004/09/18 00:36:10 dale Exp $
 #
-#    Copyright (c) 1993, 1994, 2000, 2003, 2004 by 
+#    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -382,6 +382,7 @@ sub useage {
 
  
     print "\nUsage: $ProgramName -Ifile \n";
+    print "\nVersion: $Id: $\n";
     print "\t[-C -Ssalinity -Fformat -Llatitude -V -H -C]\n\n";
 
     print "\tPerl shellscript to translate various XBT (with -F option) \n";

@@ -2,7 +2,7 @@
  *    The MB-system:	mbtime.c	6/5/2008
  *    $Id: mbtime.c,v 5.0 2008/07/19 07:52:03 caress Exp $
  *
- *    Copyright (c) 2008 by
+ *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -33,6 +33,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -43,16 +44,16 @@
 #define MBTIME_INPUT_EPOCH	0
 #define MBTIME_INPUT_CALENDAR	1
 
+static char rcs_id[] = "$Id: mbtime.c,v 5.0 2008/07/19 07:52:03 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbtime.c,v 5.0 2008/07/19 07:52:03 caress Exp $";
-	static char program_name[] = "MBTIME";
-	static char help_message[] =  "MBTIME converts time values between epoch seconds (seconds since \n1970/01/01 00:00:00.000000) and calendar time (e.g. 2008/006/05/17/24/32/0). \nThe input time is set using the command line arguments -Mtime_d for \nepoch seconds and -Tyear/month/day/hour/minute/second/microsecond for \ncalendar time. The output time (in the form not specified as input) is \nwritten to stdout.";
-	static char usage_message[] = "mbtime [-Mtime_d -Tyear/month/day/hour/minute/second -V -H]";
+	char program_name[] = "MBTIME";
+	char help_message[] =  "MBTIME converts time values between epoch seconds (seconds since \n1970/01/01 00:00:00.000000) and calendar time (e.g. 2008/006/05/17/24/32/0). \nThe input time is set using the command line arguments -Mtime_d for \nepoch seconds and -Tyear/month/day/hour/minute/second/microsecond for \ncalendar time. The output time (in the form not specified as input) is \nwritten to stdout.";
+	char usage_message[] = "mbtime [-Mtime_d -Tyear/month/day/hour/minute/second -V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;

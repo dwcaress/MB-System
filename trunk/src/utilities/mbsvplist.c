@@ -2,7 +2,7 @@
  *    The MB-system:	mbsvplist.c	1/3/2001
  *    $Id: mbsvplist.c,v 5.10 2008/09/20 00:57:41 caress Exp $
  *
- *    Copyright (c) 2001-2008 by
+ *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -72,6 +72,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -86,16 +87,16 @@
 char	*ctime();
 char	*getenv();
 
+static char rcs_id[] = "$Id: mbsvplist.c,v 5.10 2008/09/20 00:57:41 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbsvplist.c,v 5.10 2008/09/20 00:57:41 caress Exp $";
-	static char program_name[] = "mbsvplist";
-	static char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file.  The -D\noption causes duplicate SVPs to be output.";
-	static char usage_message[] = "mbsvplist [-D -Fformat -H -Ifile -O -P -V -Z]";
+	char program_name[] = "mbsvplist";
+	char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file.  The -D\noption causes duplicate SVPs to be output.";
+	char usage_message[] = "mbsvplist [-D -Fformat -H -Ifile -O -P -V -Z]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -150,7 +151,6 @@ main (int argc, char **argv)
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
-	int	icomment = 0;
 	
 	/* data record source types */
 	int	nav_source;
@@ -160,7 +160,6 @@ main (int argc, char **argv)
 	
 	/* SVP values */
 	int	svp_loaded = MB_NO;
-	int	svp_new = MB_NO;
 	int	svp_duplicate;
 	int	svp_force_zero;
 	int	svp_file_output;
@@ -195,8 +194,7 @@ main (int argc, char **argv)
 	time_t	right_now;
 	char	date[25], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	int	read_data;
-	char	line[MB_PATH_MAXLINE];
-	int	i, j, k;
+	int	i;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -352,8 +350,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -683,8 +681,8 @@ main (int argc, char **argv)
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-				    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+				    file,&format,&file_weight,&error))
 				    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

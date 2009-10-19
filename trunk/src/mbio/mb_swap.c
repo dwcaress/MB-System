@@ -2,7 +2,7 @@
  *    The MB-system:	mb_swap.c	7/6/94
  *    $Id: mb_swap.c,v 5.7 2008/08/12 05:31:54 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -94,6 +94,8 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_swap.h"
 #include "../../include/mb_define.h"
+
+/* static	char	rcs_id[]="$Id: $"; */
 
 /*--------------------------------------------------------------------*/
 /* function mb_swap_check determines if the cpu is byteswapped */

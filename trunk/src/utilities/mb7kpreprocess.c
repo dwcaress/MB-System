@@ -2,7 +2,7 @@
  *    The MB-system:	mb7kpreprocess.c	10/12/2005
  *    $Id: mb7kpreprocess.c,v 5.23 2008/11/16 21:51:18 caress Exp $
  *
- *    Copyright (c) 2005-2008 by
+ *    Copyright (c) 2005-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -100,6 +100,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
@@ -110,6 +111,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_aux.h"
 #include "../../include/mbsys_reson7k.h"
 
 #define MB7KPREPROCESS_ALLOC_CHUNK 1000
@@ -123,13 +125,12 @@ static char rcs_id[] = "$Id: mb7kpreprocess.c,v 5.23 2008/11/16 21:51:18 caress 
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char program_name[] = "mb7kpreprocess";
-	static char help_message[] =  "mb7kpreprocess reads a Reson 7k format file, interpolates the\nasynchronous navigation and attitude onto the multibeam data, \nand writes a new 7k file with that information correctly embedded\nin the multibeam data. This program can also fix various problems\nwith 7k data.";
-	static char usage_message[] = "mb7kpreprocess [-A -B -Doffx/offy -Fformat -Ifile -L  -Ninsfile  -Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ttimelag -H -V]";
+	char program_name[] = "mb7kpreprocess";
+	char help_message[] =  "mb7kpreprocess reads a Reson 7k format file, interpolates the\nasynchronous navigation and attitude onto the multibeam data, \nand writes a new 7k file with that information correctly embedded\nin the multibeam data. This program can also fix various problems\nwith 7k data.";
+	char usage_message[] = "mb7kpreprocess [-A -B -Doffx/offy -Fformat -Ifile -L  -Ninsfile  -Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ttimelag -H -V]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -148,10 +149,7 @@ main (int argc, char **argv)
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format = 0;
-	int	iformat = MBF_RESON7KR;
-	int	oformat = MBF_RESON7KR;
 	int	pings;
-	int	pings_read;
 	int	lonflip;
 	double	bounds[4];
 	int	btime_i[7];
@@ -177,7 +175,6 @@ main (int argc, char **argv)
 	void	*istore_ptr = NULL;
 	struct mbsys_reson7k_struct *istore = NULL;
 	void	*ombio_ptr = NULL;
-	struct mb_io_struct *omb_io_ptr = NULL;
 	int	kind;
 	int	time_i[7];
 	int	time_j[5];
@@ -201,7 +198,6 @@ main (int argc, char **argv)
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
-	int	icomment = 0;
 	
 	/* program mode */
 	int	mode = MB7KPREPROCESS_PROCESS;
@@ -212,7 +208,6 @@ main (int argc, char **argv)
 	s7kr_fileheader		*fileheader;
 	s7kr_position 		*position;
 	s7kr_rollpitchheave 	*rollpitchheave;
-	s7kr_attitude 		*attitude;
 	s7kr_volatilesettings	*volatilesettings;
 	s7kr_beamgeometry	*beamgeometry;
 	s7kr_bathymetry		*bathymetry;
@@ -266,8 +261,6 @@ main (int argc, char **argv)
 	char	rockfile[MB_PATH_MAXLINE];
 	int	rockdata = MB_NO;
 	int	nrock = 0;
-	int	nrock_altitude = 0;
-	int	nrock_speed = 0;
 	double	*rock_time_d = NULL;
 	double	*rock_lon = NULL;
 	double	*rock_lat = NULL;
@@ -275,14 +268,11 @@ main (int argc, char **argv)
 	double	*rock_roll = NULL;
 	double	*rock_pitch = NULL;
 	double	*rock_sonardepth = NULL;
-	int	rock_output_index = -1;
 	
 	/* merge navigation and attitude from separate WHOI DSL data file */
 	char	dslfile[MB_PATH_MAXLINE];
 	int	dsldata = MB_NO;
 	int	ndsl = 0;
-	int	ndsl_altitude = 0;
-	int	ndsl_speed = 0;
 	double	*dsl_time_d = NULL;
 	double	*dsl_lon = NULL;
 	double	*dsl_lat = NULL;
@@ -290,7 +280,6 @@ main (int argc, char **argv)
 	double	*dsl_roll = NULL;
 	double	*dsl_pitch = NULL;
 	double	*dsl_sonardepth = NULL;
-	int	dsl_output_index = -1;
 	
 	/* merge navigation and attitude from separate ins data file */
 	char	insfile[MB_PATH_MAXLINE];
@@ -319,7 +308,6 @@ main (int argc, char **argv)
 	double	*sonardepth_time_d = NULL;
 	double	*sonardepth_sonardepth = NULL;
 	double	*sonardepth_filter = NULL;
-	int	sonardepth_output_index = -1;
 	
 	/* navigation, heading, attitude data */
 	int	nnav = 0;
@@ -398,7 +386,6 @@ main (int argc, char **argv)
 	/* depth sensor lever arm parameter */
 	double	depthsensoroffx = 0.0;
 	double	depthsensoroffz = 0.0;
-	double	sonardepthcorrection;
 	
 	/* depth sensor time lag parameters */
 	int	sonardepthlagfix = MB_NO;
@@ -433,17 +420,13 @@ main (int argc, char **argv)
 	int	read_data;
 	int	testformat;
 	char	fileroot[MB_PATH_MAXLINE];
-	char	command[MB_PATH_MAXLINE];
-	int	found, jfound;
-	int	d1, d2;
-	double	v;
+	int	found;
 	int	sslo_lastread;
 	double	sslo_last_time_d;
 	int	sslo_last_ping;
 	int	foundstart, foundend;
 	int	start, end;
 	int	nscan, startdata;
-	int	ins_quality_index;
 	int	ins_time_d_index;
 	int	ins_lon_index;
 	int	ins_lat_index;
@@ -465,8 +448,7 @@ main (int argc, char **argv)
 	int	year, month, day, hour, minute;
 	double	second, id;
 	char	sensor[24];
-	int	navtype;
-	int	i, j, n;
+	int	i, j;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -698,7 +680,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       depthsensoroffz:        %f\n",depthsensoroffz);
 		for (i=0;i<nrangeoffset;i++)
 			fprintf(stderr,"dbg2       rangeoffset[%d]:         %d %d %f\n",
-				rangeoffsetstart[i], rangeoffsetend[i], rangeoffset[i]);
+				i,rangeoffsetstart[i], rangeoffsetend[i], rangeoffset[i]);
 		}
 
 	/* if help desired then print it and exit */
@@ -1197,8 +1179,8 @@ sonardepth_sonardepth[nsonardepth]);*/
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    ifile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1975,8 +1957,8 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    ifile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -2322,7 +2304,7 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 		fprintf(stdout, "\nTotal auv sonardepth data read: %d\n", nsonardepth);
 		for (i=0;i<nins;i++)
 			{
-			fprintf(stdout, "  SONARDEPTH: %12d %8.3f\n", 
+			fprintf(stdout, "  SONARDEPTH: %12d %8.3f %8.3f\n", 
 				i, sonardepth_time_d[i], sonardepth_sonardepth[i]);
 			}
 		}
@@ -2412,8 +2394,8 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    ifile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -2794,7 +2776,7 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 							}
 							
 						/* flagged by sonar */
-						if (bathymetry->quality[i] & 3 < 3)
+						if ((bathymetry->quality[i] & 3) < 3)
 							{
 							bathymetry->quality[i] += 64;
 							}
@@ -2811,7 +2793,7 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 					}
 
 				/* recalculate optional values in bathymetry record */
-				interp_status == MB_SUCCESS;
+				interp_status = MB_SUCCESS;
 				
 				/* get position */
 				if (nins > 0)
@@ -3337,7 +3319,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 					bluefin->environmental[i].temperature_time);
 				
 				/* get navigation, etc */
-				interp_status == MB_SUCCESS;
+				interp_status = MB_SUCCESS;
 				if (nins > 0)
 					{
 					interp_status = mb_linear_interp_degrees(verbose, 
@@ -3878,8 +3860,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    ifile,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    ifile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

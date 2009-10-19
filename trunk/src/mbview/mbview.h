@@ -2,11 +2,11 @@
  *    The MB-system:	mbview.h	10/9/2002
  *    $Id: mbview.h,v 5.23 2008/11/16 21:51:18 caress Exp $
  *
- *    Copyright (c) 2002, 2003, 2006 by
- *    David W. Caress (caress@mbari.org)
+ *    Copyright (c); 2002-2009 by
+ *    David W. Caress (caress@mbari.org);
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
- *    and Dale N. Chayes (dale@ldeo.columbia.edu)
+ *    and Dale N. Chayes (dale@ldeo.columbia.edu);
  *      Lamont-Doherty Earth Observatory
  *      Palisades, NY 10964
  *
@@ -697,13 +697,13 @@ struct mb3dsoundings_struct {
 
 
 /*--------------------------------------------------------------------*/
-/* mbview API function prototypes */
+
+/* mbview_callbacks.c function prototypes */
 int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error);
-int mbview_quit(int verbose, int *error);
 int mbview_init(int verbose, int *instance, int *error);
+int mbview_quit(int verbose, int *error);
 int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahandle, int *error);
 int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhandle, int *error);
-
 int mbview_setwindowparms(int verbose, int instance,
 			int	(*mbview_dismiss_notify)(int),
 			char	*title,
@@ -747,6 +747,30 @@ int mbview_setviewcontrols(int verbose, int instance,
 			int	display_projection_mode,
 			char	*display_projection_id,
 			int *error);
+int mbview_open(int verbose, int instance, int *error);
+int mbview_update(int verbose, int instance, int *error);
+int mbview_set_widgets(int verbose, int instance, int *error);
+int mbview_addaction(int verbose, int instance,
+			void	(mbview_action_notify)(Widget, XtPointer, XtPointer),
+			char	*label,
+			int	sensitive,
+			int *error);
+int mbview_addpicknotify(int verbose, int instance,
+			int	picktype,
+			void	(mbview_pick_notify)(int),
+			int *error);
+int mbview_setsensitivitynotify(int verbose, int instance,
+			void	(mbview_sensitivity_notify)(),
+			int *error);
+void mbview_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
+int mbview_destroy(int verbose, int instance, int destroywidgets, int *error);
+int mbview_quit(int verbose, int *error);
+int do_mbview_message_on(char *message, int instance);
+int do_mbview_message_off(int instance);
+void set_mbview_label_string(Widget w, String str);
+void set_mbview_label_multiline_string(Widget w, String str);
+
+/* mbview_primary.c function prototypes */
 int mbview_setprimarygrid(int verbose, int instance,
 			int	primary_grid_projection_mode,
 			char	*primary_grid_projection_id,
@@ -773,6 +797,20 @@ int mbview_updateprimarygridcell(int verbose, int instance,
 			int	primary_jy,
 			float	value,
 			int *error);
+int mbview_setprimarycolortable(int verbose, int instance,
+			int	primary_colortable,
+			int	primary_colortable_mode,
+			double	primary_colortable_min,
+			double	primary_colortable_max,
+			int *error);
+int mbview_setslopecolortable(int verbose, int instance,
+			int	slope_colortable,
+			int	slope_colortable_mode,
+			double	slope_colortable_min,
+			double	slope_colortable_max,
+			int *error);
+
+/* mbview_secondary.c function prototypes */
 int mbview_setsecondarygrid(int verbose, int instance,
 			int	secondary_grid_projection_mode,
 			char	*secondary_grid_projection_id,
@@ -799,18 +837,6 @@ int mbview_updatesecondarygridcell(int verbose, int instance,
 			int	primary_jy,
 			float	value,
 			int *error);
-int mbview_setprimarycolortable(int verbose, int instance,
-			int	primary_colortable,
-			int	primary_colortable_mode,
-			double	primary_colortable_min,
-			double	primary_colortable_max,
-			int *error);
-int mbview_setslopecolortable(int verbose, int instance,
-			int	slope_colortable,
-			int	slope_colortable_mode,
-			double	slope_colortable_min,
-			double	slope_colortable_max,
-			int *error);
 int mbview_setsecondarycolortable(int verbose, int instance,
 			int	secondary_colortable,
 			int	secondary_colortable_mode,
@@ -822,44 +848,136 @@ int mbview_setsecondarycolortable(int verbose, int instance,
 			int *error);
 int mbview_setsecondaryname(int verbose, int instance,
 			char *name, int *error);
-int mbview_getsitecount(int verbose, int instance,
-			int	*nsite,
+
+/* mbview_process.c function prototypes */
+int mbview_projectdata(int instance);
+int mbview_projectforward(int instance, int needlonlat,
+				double xgrid, double ygrid, double zdata,
+				double *xlon, double *ylat, 
+				double *xdisplay, double *ydisplay, double *zdisplay);
+int mbview_projectinverse(int instance, int needlonlat,
+				double xdisplay, double ydisplay,double zdisplay,
+				double *xlon, double *ylat,
+				double *xgrid, double *ygrid);
+int mbview_projectfromlonlat(int instance,
+				double xlon, double ylat, double zdata,
+				double *xgrid, double *ygrid,
+				double *xdisplay, double *ydisplay, double *zdisplay);
+int mbview_projectgrid2ll(int instance,
+				double xgrid, double ygrid,
+				double *xlon, double *ylat);
+int mbview_projectll2xygrid(int instance,
+				double xlon, double ylat,
+				double *xgrid, double *ygrid);
+int mbview_projectll2xyzgrid(int instance,
+				double xlon, double ylat,
+				double *xgrid, double *ygrid, double *zdata);
+int mbview_projectll2display(int instance,
+				double xlon, double ylat, double zdata,
+				double *xdisplay, double *ydisplay, double *zdisplay);
+int mbview_projectdisplay2ll(int instance,
+				double xdisplay, double ydisplay, double zdisplay,
+				double *xlon, double *ylat);
+int mbview_projectdistance(int instance,
+				double xlon1, double ylat1, double zdata1,
+				double xlon2, double ylat2, double zdata2,
+				double *distancelateral, 
+				double *distanceoverground,
+				double *slope);
+int mbview_getzdata(int instance, 
+			double xgrid, double ygrid,
+			int *found, double *zdata);
+int mbview_getzdata(int instance, 
+			double xgrid, double ygrid,
+			int *found, double *zdata);
+
+/* mbview_plot.c function prototypes */
+int mbview_reset_glx(int instance);
+int mbview_drawdata(int instance, int rez);
+int mbview_plotlowall(int instance);
+int mbview_plotlowhighall(int instance);
+int mbview_plothighall(int instance);
+int mbview_plotlow(int instance);
+int mbview_plotlowhigh(int instance);
+int mbview_plothigh(int instance);
+int mbview_plotfull(int instance);
+int mbview_plot(int instance, int rez);
+int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg);
+
+/* mbview_pick.c function prototypes */
+
+/* mbview_nav.c function prototypes */
+int mbview_getnavcount(int verbose, int instance,
+			int *nnav,
 			int *error);
-int mbview_allocsitearrays(int verbose, 
-			int	nsite,
-			double	**sitelon,
-			double	**sitelat,
-			double	**sitetopo,
-			int	**sitecolor,
-			int	**sitesize,
-			mb_path	**sitename,
+int mbview_getnavpointcount(int verbose, int instance,
+			int	nav,
+			int	*npoint,
+			int	*nintpoint,
 			int *error);
-int mbview_freesitearrays(int verbose,
-			double	**sitelon,
-			double	**sitelat,
-			double	**sitetopo,
-			int	**sitecolor,
-			int	**sitesize,
-			mb_path	**sitename,
+int mbview_allocnavarrays(int verbose, 
+			int	npointtotal,
+			double	**time_d,
+			double	**navlon,
+			double	**navlat,
+			double	**navz,
+			double	**heading,
+			double	**speed,
+			double	**navportlon,
+			double	**navportlat,
+			double	**navstbdlon,
+			double	**navstbdlat,
+			int	**line,
+			int	**shot,
+			int	**cdp,
+			int 	*error);
+int mbview_freenavarrays(int verbose,
+			double	**time_d,
+			double	**navlon,
+			double	**navlat,
+			double	**navz,
+			double	**heading,
+			double	**speed,
+			double	**navportlon,
+			double	**navportlat,
+			double	**navstbdlon,
+			double	**navstbdlat,
+			int	**line,
+			int	**shot,
+			int	**cdp,
 			int *error);
-int mbview_addsites(int verbose, int instance,
-			int	nsite,
-			double	*sitelon,
-			double	*sitelat,
-			double	*sitetopo,
-			int	*sitecolor,
-			int	*sitesize,
-			mb_path	*sitename,
+int mbview_addnav(int verbose, int instance,
+			int	npoint,
+			double	*time_d,
+			double	*navlon,
+			double	*navlat,
+			double	*navz,
+			double	*heading,
+			double	*speed,
+			double	*navportlon,
+			double	*navportlat,
+			double	*navstbdlon,
+			double	*navstbdlat,
+			int	*line,
+			int	*shot,
+			int	*cdp,
+			int	navcolor,
+			int	navsize,
+			mb_path	navname,
+			int	navpathstatus,
+			mb_path	navpathraw,
+			mb_path	navpathprocessed,
+			int	navformat,
+			int	navswathbounds,
+			int	navline,
+			int	navshot,
+			int	navcdp,
+			int	decimation,
 			int *error);
-int mbview_getsites(int verbose, int instance,
-			int	*nsite,
-			double	*sitelon,
-			double	*sitelat,
-			double	*sitetopo,
-			int	*sitecolor,
-			int	*sitesize,
-			mb_path	*sitename,
+int mbview_enableviewnavs(int verbose, int instance,
 			int *error);
+
+/* mbview_route.c function prototypes */
 int mbview_getroutecount(int verbose, int instance,
 			int	*nroute,
 			int *error);
@@ -931,73 +1049,60 @@ int mbview_getroute(int verbose, int instance,
 			int	*routesize,
 			mb_path	routename,
 			int *error);
-int mbview_getnavpointcount(int verbose, int instance,
-			int	nav,
-			int	*npoint,
-			int	*nintpoint,
+int mbview_enableviewroutes(int verbose, int instance,
 			int *error);
-int mbview_getnavcount(int verbose, int instance,
-			int *nnav,
+int mbview_enableeditroutes(int verbose, int instance,
 			int *error);
-int mbview_allocnavarrays(int verbose, 
-			int	npointtotal,
-			double	**time_d,
-			double	**navlon,
-			double	**navlat,
-			double	**navz,
-			double	**navheading,
-			double	**navspeed,
-			double	**navportlon,
-			double	**navportlat,
-			double	**navstbdlon,
-			double	**navstbdlat,
-			int	**line,
-			int	**shot,
-			int	**cdp,
+int mbview_route_add(int instance, int inew, int jnew, int waypoint,
+				double xgrid, double ygrid,
+				double xlon, double ylat, double zdata,
+				double xdisplay, double ydisplay, double zdisplay);
+
+/* mbview_site.c function prototypes */
+int mbview_getsitecount(int verbose, int instance,
+			int	*nsite,
 			int *error);
-int mbview_freenavarrays(int verbose,
-			double	**time_d,
-			double	**navlon,
-			double	**navlat,
-			double	**navz,
-			double	**navheading,
-			double	**navspeed,
-			double	**navportlon,
-			double	**navportlat,
-			double	**navstbdlon,
-			double	**navstbdlat,
-			int	**line,
-			int	**shot,
-			int	**cdp,
+int mbview_allocsitearrays(int verbose, 
+			int	nsite,
+			double	**sitelon,
+			double	**sitelat,
+			double	**sitetopo,
+			int	**sitecolor,
+			int	**sitesize,
+			mb_path	**sitename,
 			int *error);
-int mbview_addnav(int verbose, int instance,
-			int	npoint,
-			double	*time_d,
-			double	*navlon,
-			double	*navlat,
-			double	*navz,
-			double	*navheading,
-			double	*navspeed,
-			double	*navportlon,
-			double	*navportlat,
-			double	*navstbdlon,
-			double	*navstbdlat,
-			int	*line,
-			int	*shot,
-			int	*cdp,
-			int	navcolor,
-			int	navsize,
-			mb_path	navname,
-			int	navpathstatus,
-			mb_path	navpathraw,
-			mb_path	navpathprocessed,
-			int	navformat,
-			int	navswathbounds,
-			int	navline,
-			int	navshot,
-			int	navcdp,
-			int	decimation,
+int mbview_freesitearrays(int verbose,
+			double	**sitelon,
+			double	**sitelat,
+			double	**sitetopo,
+			int	**sitecolor,
+			int	**sitesize,
+			mb_path	**sitename,
 			int *error);
+int mbview_addsites(int verbose, int instance,
+			int	nsite,
+			double	*sitelon,
+			double	*sitelat,
+			double	*sitetopo,
+			int	*sitecolor,
+			int	*sitesize,
+			mb_path	*sitename,
+			int *error);
+int mbview_getsites(int verbose, int instance,
+			int	*nsite,
+			double	*sitelon,
+			double	*sitelat,
+			double	*sitetopo,
+			int	*sitecolor,
+			int	*sitesize,
+			mb_path	*sitename,
+			int *error);
+int mbview_enableviewsites(int verbose, int instance,
+			int *error);
+int mbview_enableeditsites(int verbose, int instance,
+			int *error);
+
+/* mbview_profile.c function prototypes */
 int mbview_getprofilecount(int verbose, int instance,
 			int *npoints,
 			int *error);
@@ -1044,56 +1149,6 @@ int mbview_getprofile(int verbose, int instance,
 			double	*bearing,
 			double	*slope,
 			int *error);
-
-int mbview_enableviewsites(int verbose, int instance,
-			int *error);
-int mbview_enableeditsites(int verbose, int instance,
-			int *error);
-int mbview_enableviewroutes(int verbose, int instance,
-			int *error);
-int mbview_enableeditroutes(int verbose, int instance,
-			int *error);
-int mbview_enableviewnavs(int verbose, int instance,
-			int *error);
-int mbview_addaction(int verbose, int instance,
-			void	(mbview_action_notify)(Widget, XtPointer, XtPointer),
-			char	*label,
-			int	sensitive,
-			int *error);
-int mbview_addpicknotify(int verbose, int instance,
-			int	picktype,
-			void	(mbview_pick_notify)(int),
-			int *error);
-int mbview_setsensitivitynotify(int verbose, int instance,
-			void	(mbview_sensitivity_notify)(int),
-			int *error);
-
-int mbview_open(int verbose, int instance, int *error);
-int mbview_update(int verbose, int instance, int *error);
-int mbview_destroy(int verbose, int instance, int destroywidgets, int *error);
-
-int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel);
-int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel);
-int mbview_pick_site_delete(int instance, int xpixel, int ypixel);
-int mbview_site_delete(int instance, int isite);
-int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel);
-int mbview_pick_route_add(int instance, int which, int xpixel, int ypixel);
-int mbview_pick_route_delete(int instance, int xpixel, int ypixel);
-int mbview_route_delete(int instance, int iroute, int ipoint);
-int mbview_route_setdistance(int instance, int working_route);
-	
-int mbview_projectforward(int instance, int needlonlat,
-				double xgrid, double ygrid, double zgrid,
-				double *xlon, double *ylat,
-				double *xdisplay, double *ydisplay, double *zdisplay);
-int mbview_projectinverse(int instance, int needlonlat,
-				double xdisplay, double ydisplay, double zdisplay,
-				double *xlon, double *ylat,
-				double *xgrid, double *ygrid);
-int mbview_projectfromlonlat(int instance,
-				double xlon, double ylat, double zdata,
-				double *xgrid, double *ygrid,
-				double *xdisplay, double *ydisplay, double *zdisplay);
 
 /*--------------------------------------------------------------------*/
 

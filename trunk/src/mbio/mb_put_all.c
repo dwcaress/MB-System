@@ -2,7 +2,7 @@
  *    The MB-system:	mb_put_all.c	2/4/93
  *    $Id: mb_put_all.c,v 5.4 2006/03/06 21:47:48 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -133,20 +133,16 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	int	i;
-	int	done;
-	double	mtodeglon, mtodeglat;
-	double	dx, dy;
-	double	delta_time;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		fprintf(stderr,"dbg2       usevalues:  %d\n",usevalues);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
@@ -232,8 +228,8 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

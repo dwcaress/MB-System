@@ -2,7 +2,7 @@
  *    The MB-system:	mb7k2jstar.c	5/19/2005
  *    $Id: mb7k2jstar.c,v 5.9 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 2005, 2007 by
+ *    Copyright (c) 2005-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -58,6 +58,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -93,13 +94,12 @@ static char rcs_id[] = "$Id: mb7k2jstar.c,v 5.9 2008/09/13 06:08:09 caress Exp $
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char program_name[] = "mb7k2jstar";
-	static char help_message[] =  "mb7k2jstar extracts Edgetech subbottom profiler and sidescan data \nfrom Reson 7k format data and outputs in the Edgetech Jstar format.";
-	static char usage_message[] = "mb7k2jstar [-Ifile -Atype -Bmode[/threshold] -C -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile -X -H -V]";
+	char program_name[] = "mb7k2jstar";
+	char help_message[] =  "mb7k2jstar extracts Edgetech subbottom profiler and sidescan data \nfrom Reson 7k format data and outputs in the Edgetech Jstar format.";
+	char usage_message[] = "mb7k2jstar [-Ifile -Atype -Bmode[/threshold] -C -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile -X -H -V]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -122,10 +122,7 @@ main (int argc, char **argv)
 	int	look_processed = MB_DATALIST_LOOK_YES;
 	double	file_weight;
 	int	format = 0;
-	int	iformat = MBF_RESON7KR;
-	int	oformat = MBF_EDGJSTAR;
 	int	pings;
-	int	pings_read;
 	int	lonflip;
 	double	bounds[4];
 	int	btime_i[7];
@@ -189,8 +186,6 @@ main (int argc, char **argv)
 	s7k_fsdwssheader *s7kssheader;		/* Edgetech sidescan header */
 	s7k_fsdwsegyheader *s7ksegyheader;		/* Segy header for subbottom trace */
 	struct mbsys_jstar_channel_struct *channel;
-	int	buffer_alloc = 0;
-	char	*buffer = NULL;
 	int	obeams_bath;
 	int	obeams_amp;
 	int	opixels_ss;
@@ -285,8 +280,7 @@ main (int argc, char **argv)
 	
 	int	read_data;
 	int	found;
-	
-	int	i, j, k, n;
+	int	i, j, n;
 	
 	startline = 1;
 	strcpy(lineroot, "jstar");
@@ -536,7 +530,7 @@ main (int argc, char **argv)
 		if ((fp = fopen(route_file, "r")) == NULL) 
 			{
 			error = MB_ERROR_OPEN_FAIL;
-			status == MB_FAILURE;
+			status = MB_FAILURE;
 			fprintf(stderr,"\nUnable to open route file <%s> for reading\n",route_file);
 			exit(status);
 			}
@@ -645,8 +639,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -2505,8 +2499,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

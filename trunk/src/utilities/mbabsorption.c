@@ -2,7 +2,7 @@
  *    The MB-system:	mbabsorption.c	2/10/2008
  *    $Id: mbabsorption.c,v 5.0 2008/02/12 02:33:49 caress Exp $
  *
- *    Copyright (c) 2008 by
+ *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -101,22 +101,23 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 
+static char rcs_id[] = "$Id: mbabsorption.c,v 5.0 2008/02/12 02:33:49 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbabsorption.c,v 5.0 2008/02/12 02:33:49 caress Exp $";
-	static char program_name[] = "MBabsorption";
-	static char help_message[] = "MBabsorption calculates the absorption of sound in sea water\nin dB/km as a function of frequency, temperature, salinity, \nsound speed, pH, and depth.";
-	static char usage_message[] = "mbabsorption [-Csoundspeed -Ddepth -Ffrequency -Pph -Ssalinity -Ttemperature -V -H]";
+	char program_name[] = "MBabsorption";
+	char help_message[] = "MBabsorption calculates the absorption of sound in sea water\nin dB/km as a function of frequency, temperature, salinity, \nsound speed, pH, and depth.";
+	char usage_message[] = "mbabsorption [-Csoundspeed -Ddepth -Ffrequency -Pph -Ssalinity -Ttemperature -V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	status;

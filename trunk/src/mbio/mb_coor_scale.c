@@ -2,7 +2,7 @@
  *    The MB-system:	mb_coor_scale.c	1/21/93
  *    $Id: mb_coor_scale.c,v 5.4 2008/09/27 03:27:10 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -112,11 +112,12 @@
 #define C6 1.175
 #define C7 0.0023
 
+static char rcs_id[]="$Id: mb_coor_scale.c,v 5.4 2008/09/27 03:27:10 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mb_coor_scale(int verbose, double latitude, 
 			double *mtodeglon, double *mtodeglat)
 {
-  static char rcs_id[]="$Id: mb_coor_scale.c,v 5.4 2008/09/27 03:27:10 caress Exp $";
 	char	*function_name = "mb_coor_scale";
 	int	status;
 	double	radlat;
@@ -124,8 +125,8 @@ int mb_coor_scale(int verbose, double latitude,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
 		fprintf(stderr,"dbg2       latitude: %f\n",latitude);
@@ -151,8 +152,8 @@ int mb_coor_scale(int verbose, double latitude,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return arguments:\n");
 		fprintf(stderr,"dbg2       mtodeglon: %g\n",*mtodeglon);
 		fprintf(stderr,"dbg2       mtodeglat: %g\n",*mtodeglat);
@@ -166,16 +167,14 @@ int mb_coor_scale(int verbose, double latitude,
 /*--------------------------------------------------------------------*/
 int mb_apply_lonflip(int verbose, int lonflip, double *longitude)
 {
-  static char rcs_id[]="$Id: mb_coor_scale.c,v 5.4 2008/09/27 03:27:10 caress Exp $";
 	char	*function_name = "mb_apply_lonflip";
 	int	status;
-	double	radlat;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
 		fprintf(stderr,"dbg2       lonflip:   %d\n",lonflip);
@@ -208,8 +207,8 @@ int mb_apply_lonflip(int verbose, int lonflip, double *longitude)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return arguments:\n");
 		fprintf(stderr,"dbg2       longitude: %f\n",*longitude);
 		fprintf(stderr,"dbg2  Return status:\n");

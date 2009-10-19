@@ -2,7 +2,7 @@
  *    The MB-system:	mblevitus.c	4/15/93
  *    $Id: mblevitus.c,v 5.3 2006/01/18 15:17:00 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -119,6 +119,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -132,16 +133,16 @@
 #define	NDEPTH_MAX	46
 #define	NLEVITUS_MAX	33
 
+static char rcs_id[] = "$Id: mblevitus.c,v 5.3 2006/01/18 15:17:00 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mblevitus.c,v 5.3 2006/01/18 15:17:00 caress Exp $";
-	static char program_name[] = "MBLEVITUS";
-	static char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
-	static char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";
+	char program_name[] = "MBLEVITUS";
+	char help_message[] = "MBLEVITUS generates an average water velocity profile for a \nspecified location from the Levitus temperature and salinity database.";
+	char usage_message[] = "mblevitus [-Rlon/lat -Ooutfile -V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	status;
@@ -190,7 +191,7 @@ main (int argc, char **argv)
 
 	char	*lonptr, *latptr;
 	int	last_good;
-	int	i, j, k;
+	int	i;
 
 	char	*ctime();
 	char	*getenv();

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: nad_init.c,v 5.6 2008/09/29 04:56:21 caress Exp $
+ * $Id: nad_init.c 1504 2009-01-06 02:11:57Z warmerdam $
  *
  * Project:  PROJ.4
  * Purpose:  Load datum shift files into memory.
@@ -25,39 +25,24 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log: nad_init.c,v $
- * Revision 5.6  2008/09/29 04:56:21  caress
- * Proj 4.6.1
- *
- * Revision 1.8  2003/03/17 18:56:01  warmerda
- * implement delayed loading of ctable format files
- *
- * Revision 1.7  2003/03/15 06:02:02  warmerda
- * preliminary NTv2 support, major restructure of datum shifting
- *
- * Revision 1.6  2002/07/08 02:32:05  warmerda
- * ensure clean C++ builds
- *
- * Revision 1.5  2002/04/30 16:26:07  warmerda
- * trip newlines of ctable id field
- *
- * Revision 1.4  2001/08/17 17:28:37  warmerda
- * removed use of emess()
- *
- * Revision 1.3  2001/04/05 19:31:54  warmerda
- * substantially reorganized and added NTv1 support
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 
 #include <projects.h>
 #include <stdio.h>
 #include <errno.h>
-#include <assert.h>
 #include <string.h>
+
+#ifdef _WIN32_WCE
+/* assert.h includes all Windows API headers and causes 'LP' name clash.
+ * Here assert we disable assert() for Windows CE.
+ * TODO - mloskot: re-implement porting friendly assert
+ */
+# define assert(exp)	((void)0)
+#else
+# include <assert.h>
+#endif /* _WIN32_WCE */
 
 /************************************************************************/
 /*                          nad_ctable_load()                           */
@@ -78,6 +63,15 @@ int nad_ctable_load( struct CTABLE *ct, FILE *fid )
     if( ct->cvs == NULL 
         || fread(ct->cvs, sizeof(FLP), a_size, fid) != a_size )
     {
+        pj_dalloc( ct->cvs );
+        ct->cvs = NULL;
+
+        if( getenv("PROJ_DEBUG") != NULL )
+        {
+            fprintf( stderr, 
+            "ctable loading failed on fread() - binary incompatible?\n" );
+        }
+
         pj_errno = -38;
         return 0;
     }

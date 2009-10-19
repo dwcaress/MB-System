@@ -153,7 +153,6 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
 {
     Cardinal ac = 0;
     Arg      args[256];
-    Cardinal cdc = 0;
     Boolean  argok = False;
     
     /**

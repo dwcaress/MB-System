@@ -2,7 +2,7 @@
  *    The MB-system:	mbformat.c	1/22/93
  *    $Id: mbformat.c,v 5.9 2008/10/17 07:52:44 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -104,6 +104,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -117,19 +118,19 @@
 #define MBFORMAT_LIST_SIMPLE	1
 #define MBFORMAT_LIST_ROOT	2
 
+static char rcs_id[] = "$Id: mbformat.c,v 5.9 2008/10/17 07:52:44 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbformat.c,v 5.9 2008/10/17 07:52:44 caress Exp $";
-	static char program_name[] = "MBFORMAT";
-	static char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
-	static char usage_message[] = "mbformat [-Fformat -Ifile -L -W -V -H]";
+	char program_name[] = "MBFORMAT";
+	char help_message[] = "MBFORMAT is an utility which identifies the swath data formats \nassociated with MBIO format id's.  If no format id is specified, \nMBFORMAT lists all of the currently supported formats.";
+	char usage_message[] = "mbformat [-Fformat -Ifile -L -W -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	error = MB_ERROR_NO_ERROR;
@@ -144,7 +145,6 @@ main (int argc, char **argv)
 	int	format_save;
 	int	format_specified;
 	char	format_description[MB_DESCRIPTION_LENGTH];
-	char	*format_name_ptr;
 	char	*format_informal_ptr;
 	char	*format_attributes_ptr;
 	char	format_name[MB_DESCRIPTION_LENGTH];
@@ -365,8 +365,7 @@ main (int argc, char **argv)
 			}
 
 		printf("\n<CENTER><P><BR>\n");
-		printf("Last Updated: %s</P></CENTER>\n", 
-			mb_format_updatedate);
+		printf("Last Updated: %s</P></CENTER>\n", MB_FORMAT_UPDATEDATE);
 		printf("\n<P>\n<HR WIDTH=\"100%%\"></P>\n\n");
 		printf("<P><IMG SRC=\"mbsystem_logo_small.gif\" HEIGHT=55 WIDTH=158><A HREF=\"mbsystem_home.html\">Back\n");
 		printf("to MB-System Home Page...</A></P>\n");

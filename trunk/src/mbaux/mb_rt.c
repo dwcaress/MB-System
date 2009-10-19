@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_rt.c	11/14/94
- *    $Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_rt.c,v 5.2 2008/07/10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1994-2008 by
+ *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	November 14, 1994
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_rt.c,v $
+ * Revision 5.2  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.1  2007/10/08 06:10:15  caress
  * Added function prototypes.
  *
@@ -88,30 +91,40 @@ struct	velocity_model
 	};
 	
 /* global raytrace values */
-struct velocity_model *model;
-int	ray_status;
-int	done;
-int	outofbounds;
-int	layer;
-int	turned;
-int	number_plot_max;
-int	number_plot;
-int	sign_x;
-double	xx;
-double	zz;
-double	xf;
-double	zf;
-double	tt;
-double	dt;
-double	tt_left;
-double	vv_source;
-double	pp;
-double	xc;
-double	zc;
-double	radius;
-double	*xx_plot;
-double	*zz_plot;
+static struct velocity_model *model;
+static int	ray_status;
+static int	done;
+static int	outofbounds;
+static int	layer;
+static int	turned;
+static int	number_plot_max;
+static int	number_plot;
+static int	sign_x;
+static double	xx;
+static double	zz;
+static double	xf;
+static double	zf;
+static double	tt;
+static double	dt;
+static double	tt_left;
+static double	vv_source;
+static double	pp;
+static double	xc;
+static double	zc;
+static double	radius;
+static double	*xx_plot;
+static double	*zz_plot;
 
+int mb_rt_init(int verbose, int number_node, 
+		double *depth, double *velocity, 
+		void **modelptr, int *error);
+int mb_rt_deall(int verbose, void **modelptr, int *error);
+int mb_rt(int verbose, void *modelptr, 
+	double source_depth, double source_angle, double end_time, 
+	int ssv_mode, double surface_vel, double null_angle, 
+	int nplot_max, int *nplot, double *xplot, double *zplot, 
+	double *x, double *z, double *travel_time, int *ray_stat, int *error);
+int mb_rt_circular(int verbose, int *error);
 int mb_rt_quad1(int verbose, int *error);
 int mb_rt_quad2(int verbose, int *error);
 int mb_rt_quad3(int verbose, int *error);
@@ -122,12 +135,13 @@ int mb_rt_plot_circular(int verbose, int *error);
 int mb_rt_line(int verbose, int *error);
 int mb_rt_vertical(int verbose, int *error);
 
+static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008/07/10 06:43:40 caress Exp $";
+
 /*--------------------------------------------------------------------------*/
 int mb_rt_init(int verbose, int number_node, 
 		double *depth, double *velocity, 
-		char **modelptr, int *error)
+		void **modelptr, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_init";
 	int	status = MB_SUCCESS;
 	int	i;
@@ -135,8 +149,8 @@ int mb_rt_init(int verbose, int number_node,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       number_node:      %d\n",number_node);
@@ -145,7 +159,7 @@ int mb_rt_init(int verbose, int number_node,
 			fprintf(stderr,"dbg2       depth: %f  velocity:%f\n",
 				depth[i], velocity[i]);
 			}
-		fprintf(stderr,"dbg2       modelptr:         %d\n",modelptr);
+		fprintf(stderr,"dbg2       modelptr:         %ld\n",(long)modelptr);
 		}
 
 	/* allocate memory for model structure */
@@ -202,10 +216,9 @@ int mb_rt_init(int verbose, int number_node,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       modelptr:   %d\n",*modelptr);
+		fprintf(stderr,"dbg2       modelptr:   %ld\n",(long)*modelptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -214,21 +227,19 @@ int mb_rt_init(int verbose, int number_node,
 	return(status);
 }
 /*--------------------------------------------------------------------------*/
-int mb_rt_deall(int verbose, char **modelptr, int *error)
+int mb_rt_deall(int verbose, void **modelptr, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       modelptr:         %d\n",modelptr);
+		fprintf(stderr,"dbg2       modelptr:         %ld\n",(long)modelptr);
 		}
 
 	/* deallocate memory for velocity model */
@@ -243,8 +254,7 @@ int mb_rt_deall(int verbose, char **modelptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -254,13 +264,12 @@ int mb_rt_deall(int verbose, char **modelptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------------*/
-mb_rt(int verbose, char *modelptr, 
+int mb_rt(int verbose, void *modelptr, 
 	double source_depth, double source_angle, double end_time, 
 	int ssv_mode, double surface_vel, double null_angle, 
 	int nplot_max, int *nplot, double *xplot, double *zplot, 
 	double *x, double *z, double *travel_time, int *ray_stat, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt";
 	int	status = MB_SUCCESS;
 	double	diff_angle;
@@ -273,11 +282,11 @@ mb_rt(int verbose, char *modelptr,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       modelptr:         %d\n",modelptr);
+		fprintf(stderr,"dbg2       modelptr:         %ld\n",(long)modelptr);
 		fprintf(stderr,"dbg2       number_node:      %d\n",model->number_node);
 		fprintf(stderr,"dbg2       layer depth velocity:\n");
 		for (i=0;i<model->number_node;i++)
@@ -474,8 +483,7 @@ mb_rt(int verbose, char *modelptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		if (nplot_max > 0)
 		    fprintf(stderr,"dbg2       nplot:      %d\n",*nplot);
@@ -493,16 +501,14 @@ mb_rt(int verbose, char *modelptr,
 /*--------------------------------------------------------------------------*/
 int mb_rt_circular(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_circular";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		}
@@ -524,8 +530,7 @@ int mb_rt_circular(int verbose, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -537,7 +542,6 @@ int mb_rt_circular(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad1(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_quad1";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -545,13 +549,12 @@ int mb_rt_quad1(int verbose, int *error)
 	double	ipvi;
 	double	beta;
 	double	ivf;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		}
@@ -651,8 +654,7 @@ int mb_rt_quad1(int verbose, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -664,7 +666,6 @@ int mb_rt_quad1(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad2(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_quad2";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -672,13 +673,12 @@ int mb_rt_quad2(int verbose, int *error)
 	double	ipvi;
 	double	beta;
 	double	ivf;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		}
@@ -722,8 +722,7 @@ int mb_rt_quad2(int verbose, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -735,7 +734,6 @@ int mb_rt_quad2(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad3(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_quad3";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -743,13 +741,12 @@ int mb_rt_quad3(int verbose, int *error)
 	double	ipvi;
 	double	beta;
 	double	ivf;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		}
@@ -793,8 +790,7 @@ int mb_rt_quad3(int verbose, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -806,7 +802,6 @@ int mb_rt_quad3(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_quad4(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_quad4";
 	int	status = MB_SUCCESS;
 	double	vi;
@@ -814,13 +809,12 @@ int mb_rt_quad4(int verbose, int *error)
 	double	ipvi;
 	double	beta;
 	double	ivf;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		}
@@ -920,8 +914,7 @@ int mb_rt_quad4(int verbose, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -934,18 +927,16 @@ int mb_rt_quad4(int verbose, int *error)
 int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign, 
 		double *depth, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_get_depth";
 	int	status = MB_SUCCESS;
 	double	alpha;
 	double	velf;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       beta:             %f\n",beta);
@@ -965,8 +956,7 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       depth:      %f\n",*depth);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
@@ -979,7 +969,6 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign,
 /*--------------------------------------------------------------------------*/
 int mb_rt_plot_circular(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_plot_circular";
 	int	status = MB_SUCCESS;
 	double	ai;
@@ -991,8 +980,8 @@ int mb_rt_plot_circular(int verbose, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		}
@@ -1017,8 +1006,7 @@ int mb_rt_plot_circular(int verbose, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1030,19 +1018,17 @@ int mb_rt_plot_circular(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_line(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_line";
 	int	status = MB_SUCCESS;
 	double	theta;
 	double	xvel;
 	double	zvel;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		}
@@ -1097,8 +1083,7 @@ int mb_rt_line(int verbose, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1110,19 +1095,17 @@ int mb_rt_line(int verbose, int *error)
 /*--------------------------------------------------------------------------*/
 int mb_rt_vertical(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_rt.c,v 5.2 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_rt_vertical";
 	int	status = MB_SUCCESS;
 	double	vi;
 	double	vf;
 	double	vfvi;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		}
@@ -1181,8 +1164,7 @@ int mb_rt_vertical(int verbose, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

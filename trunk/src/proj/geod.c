@@ -1,12 +1,9 @@
-#ifndef lint
-static const char SCCSID[]="@(#)geod.c	4.8	95/09/23	GIE	REL";
-#endif
 /* <<<< Geodesic filter program >>>> */
-# include <ctype.h>
-# include <stdio.h>
 # include "projects.h"
 # include "geodesic.h"
 # include "emess.h"
+# include <ctype.h>
+# include <stdio.h>
 # include <string.h>
 
 # define MAXLINE 200

@@ -111,7 +111,7 @@ $(BINDIR)/mbvelocitytool: mbvelocity.o \
 		$(LIBDIR)/libmbio.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmr1pr.a \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbxgr.a
@@ -123,7 +123,7 @@ $(BINDIR)/mbvelocitytool: mbvelocity.o \
 		$(LIBDIR)/libmbio.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
-		$(LIBDIR)/libmr1pr.a  \
+		$(LIBDIR)/libmr1pr.a \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmbaux.a \
 		$(LIBDIR)/libmbxgr.a \
@@ -131,15 +131,15 @@ $(BINDIR)/mbvelocitytool: mbvelocity.o \
 		-o $(BINDIR)/mbvelocitytool
 
 ### compile the source files
-mbvelocity.o: mbvelocity.c  mbvelocity_creation.h 
+mbvelocity.o: mbvelocity.c mbvelocity.h mbvelocity_creation.h 
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity.c
-mbvelocity_callbacks.o: mbvelocity_callbacks.c 
+mbvelocity_callbacks.o: mbvelocity_callbacks.c mbvelocity.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity_callbacks.c
-mbvelocity_creation.o: mbvelocity_creation.c mbvelocity_creation.h
+mbvelocity_creation.o: mbvelocity_creation.c mbvelocity.h mbvelocity_creation.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity_creation.c
 mbvelocity_bxutils.o: mbvelocity_bxutils.c
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbvelocity_bxutils.c
-mbvelocity_prog.o: mbvelocity_prog.c  $(INCDIR)/mb_format.h \
+mbvelocity_prog.o: mbvelocity_prog.c mbvelocity.h $(INCDIR)/mb_format.h \
 		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -c mbvelocity_prog.c
 

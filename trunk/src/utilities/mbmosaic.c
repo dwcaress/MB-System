@@ -171,6 +171,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -180,6 +181,8 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_info.h"
+#include "../../include/mb_process.h"
+#include "../../include/mb_aux.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -254,18 +257,25 @@ struct	footprint
 	double	y[4];
 	};
 
-int mbmosaic_get_footprint(
-		int	verbose, 
-		int	mode,
-		double	beamwidth_xtrack,
-		double	beamwidth_ltrack,
-		double	altitude,
-		double	acrosstrack,
-		double	alongtrack,
-		double	acrosstrack_spacing,
-		struct footprint *footprint,
-		int	*error);
-
+int write_ascii(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, int *error);
+int write_arcascii(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, double nodata, int *error);
+int write_oldgrd(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, int *error);
+int write_cdfgrd(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double zmin, double zmax, double dx, double dy, 
+		char *xlab, char *ylab, char *zlab, char *titl, 
+		char *projection, int argc, char **argv, 
+		int *error);
 int mbmosaic_get_priorities(
 		int	verbose, 
 		int	mode, 
@@ -290,12 +300,34 @@ int mbmosaic_get_priorities(
 		double	*angles, 
 		double	*priorities, 
 		int	*error);
-
+int double_compare(double *a, double *b);
+int set_bathyslope(int verbose,
+		int nbath, char *beamflag, double *bath, double *bathacrosstrack,
+		int *ndepths, double *depths, double *depthacrosstrack, 
+		int *nslopes, double *slopes, double *slopeacrosstrack, 
+		int *error);
+int get_bathyslope(int verbose,
+		int ndepths, double *depths, double *depthacrosstrack, 
+		int nslopes, double *slopes, double *slopeacrosstrack, 
+		double acrosstrack, double *depth,  double *slope, 
+		int *error);
+int mbmosaic_get_footprint(
+		int	verbose, 
+		int	mode,
+		double	beamwidth_xtrack,
+		double	beamwidth_ltrack,
+		double	altitude,
+		double	acrosstrack,
+		double	alongtrack,
+		double	acrosstrack_spacing,
+		struct footprint *footprint,
+		int	*error);
+;
 /* program identifiers */
 static char rcs_id[] = "$Id: mbmosaic.c,v 5.31 2009/03/02 18:54:40 caress Exp $";
-static char program_name[] = "mbmosaic";
-static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
-static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
+char program_name[] = "mbmosaic";
+char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
+char usage_message[] = "mbmosaic -Ifilelist -Oroot \
 -Rwest/east/south/north [-Adatatype \n\
           -Bborder -Cclip -Dxdim/ydim -Edx/dy/units \n\
           -Fpriority_range -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings \n\
@@ -304,10 +336,9 @@ static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -449,7 +480,7 @@ main (int argc, char **argv)
 	int	nbinset, nbinzero, nbinspline;
 
 	/* crosstrack slope values */
-	double	angle, depth, slope;
+	double	depth, slope;
 	int	ndepths;
 	double	*depths;
 	double	*depthacrosstrack;
@@ -462,13 +493,10 @@ main (int argc, char **argv)
 	int	projection_pars_f = MB_NO;
 	double	reference_lon, reference_lat;
 	int	utm_zone = 1;
-	char	projection_type;
 	char	projection_pars[MB_PATH_MAXLINE];
 	char	projection_id[MB_PATH_MAXLINE];
 	int	proj_status;
 	void	*pjptr;
-	double	p_lon_1, p_lon_2;
-	double	p_lat_1, p_lat_2;
 	double	deglontokm, deglattokm;
 	double	mtodeglon, mtodeglat;
 	double	headingx, headingy;
@@ -486,13 +514,11 @@ main (int argc, char **argv)
 	FILE	*outfp;
 
 	/* variables needed to handle Not-a-Number values */
-	float	zero = 0.0;
 	float	NaN;
 
 	/* other variables */
 	FILE	*dfp, *fp;
 	char	buffer[MB_PATH_MAXLINE], *result;
-	int	nscan;
 	double	norm_weight;
 	double	xsmin, xsmax;
 	int	ismin, ismax;
@@ -504,9 +530,8 @@ main (int argc, char **argv)
 	double	r;
 	int	dmask[9];
 	int	kgrid, kout, kint, ib;
-	int	ix, iy;
 	int	ixx[4], iyy[4];
-	int	ix1, ix2, iy1, iy2, dix, diy;
+	int	ix1, ix2, iy1, iy2;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -1525,8 +1550,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
 	/* read in data */
 	ndata = 0;
-	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,look_processed,&error) != MB_SUCCESS)
+	if ((status = mb_datalist_open(verbose,&datalist,
+					filelist,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -1567,7 +1592,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 		    /* check for filtered amplitude or sidescan file */
 		    if (usefiltered == MB_YES && datatype == MBMOSAIC_DATA_AMPLITUDE)
 			{
-			if (status = mb_get_ffa(verbose, file, &format, &error) != MB_SUCCESS)
+			if ((status = mb_get_ffa(verbose, file, &format, &error)) != MB_SUCCESS)
 			    {
 			    mb_error(verbose,error,&message);
 			    fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
@@ -1580,7 +1605,7 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			}
 		    else if (usefiltered == MB_YES && datatype == MBMOSAIC_DATA_SIDESCAN)
 			{
-			if (status = mb_get_ffs(verbose, file, &format, &error) != MB_SUCCESS)
+			if ((status = mb_get_ffs(verbose, file, &format, &error)) != MB_SUCCESS)
 			    {
 			    mb_error(verbose,error,&message);
 			    fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
@@ -2115,8 +2140,8 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 
 	/* read in data */
 	ndata = 0;
-	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,look_processed,&error) != MB_SUCCESS)
+	if ((status = mb_datalist_open(verbose,&datalist,
+					filelist,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -2157,7 +2182,7 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 		    /* check for filtered amplitude or sidescan file */
 		    if (usefiltered == MB_YES && datatype == MBMOSAIC_DATA_AMPLITUDE)
 			{
-			if (status = mb_get_ffa(verbose, file, &format, &error) != MB_SUCCESS)
+			if ((status = mb_get_ffa(verbose, file, &format, &error)) != MB_SUCCESS)
 			    {
 			    mb_error(verbose,error,&message);
 			    fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
@@ -2170,7 +2195,7 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 			}
 		    else if (usefiltered == MB_YES && datatype == MBMOSAIC_DATA_SIDESCAN)
 			{
-			if (status = mb_get_ffs(verbose, file, &format, &error) != MB_SUCCESS)
+			if ((status = mb_get_ffs(verbose, file, &format, &error)) != MB_SUCCESS)
 			    {
 			    mb_error(verbose,error,&message);
 			    fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
@@ -2653,7 +2678,7 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 								&error);
 /* fprintf(stderr,"priorities[%d]:%f maxpriority[%d]:%f range:%f",
 ib,priorities[ib],kgrid,maxpriority[kgrid],priority_range); */
-				    if (inside = MB_YES
+				    if (inside == MB_YES
 				    	&& priorities[ib] > 0.0 
 					&& priorities[ib] >= maxpriority[kgrid] - priority_range)
 					{
@@ -3371,7 +3396,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %d\n",grid);
+		fprintf(stderr,"dbg2       grid:       %ld\n",(long)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -3450,7 +3475,7 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %d\n",grid);
+		fprintf(stderr,"dbg2       grid:       %ld\n",(long)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -3529,7 +3554,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %d\n",grid);
+		fprintf(stderr,"dbg2       grid:       %ld\n",(long)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -3597,6 +3622,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	float	*a;
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	remark[MB_PATH_MAXLINE];
 	int	i, j, kg, ka;
 	char	*ctime();
 	char	*getenv();
@@ -3609,7 +3635,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %d\n",grid);
+		fprintf(stderr,"dbg2       grid:       %ld\n",(long)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -3623,7 +3649,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2       zlab:       %s\n",zlab);
 		fprintf(stderr,"dbg2       titl:       %s\n",titl);
 		fprintf(stderr,"dbg2       argc:       %d\n",argc);
-		fprintf(stderr,"dbg2       *argv:      %d\n",*argv);
+		fprintf(stderr,"dbg2       *argv:      %ld\n",(long)*argv);
 		}
 
 	/* inititialize grd header */
@@ -3663,8 +3689,9 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	else
 		strcpy(user, "unknown");
 	gethostname(host,MB_PATH_MAXLINE);
-	sprintf(grd.remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
+	sprintf(remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
 		projection,program_name,MB_VERSION,user,host,date);
+	strncpy(grd.remark, remark, 159);
 
 	/* set extract wesn,pad */
 	w = 0.0;
@@ -4002,9 +4029,8 @@ int set_bathyslope(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       bath:            %d\n",bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %d\n",
-			bathacrosstrack);
+		fprintf(stderr,"dbg2       bath:            %ld\n",(long)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(long)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d %f %f\n", 
@@ -4195,11 +4221,9 @@ int mbmosaic_get_footprint(
 {
 	char	*function_name = "mbmosaic_get_footprint";
 	int	status = MB_SUCCESS;
-	double	r, x, y;
+	double	r;
 	double	theta, phi, thetap, phip;
 	double	pitch, roll, pitchp, rollp;
-	double	xsonar[4], ysonar[4];
-	
 	int	i;
 
 	/* print input debug statements */

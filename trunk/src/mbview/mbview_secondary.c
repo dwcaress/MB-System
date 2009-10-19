@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_secondary.c	9/25/2003
  *    $Id: mbview_secondary.c,v 5.10 2008/05/16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003-2008 by
+ *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -77,7 +77,9 @@
 #include <Xm/RowColumn.h>
 #include <Xm/CascadeB.h>
 #include <Xm/PushB.h>
+#include <Xm/TextF.h>
 #include <Xm/Separator.h>
+#include <Xm/ToggleB.h>
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
@@ -100,10 +102,7 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static Cardinal 	ac;
-static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
-
 static char rcs_id[]="$Id: mbview_secondary.c,v 5.10 2008/05/16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
@@ -145,7 +144,7 @@ int mbview_setsecondarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
 		fprintf(stderr,"dbg2       secondary_grid_projection_mode:   %d\n", secondary_grid_projection_mode);
 		fprintf(stderr,"dbg2       secondary_grid_projection_id:     %s\n", secondary_grid_projection_id);
-		fprintf(stderr,"dbg2       secondary_nodatavalue:       %d\n", secondary_nodatavalue);
+		fprintf(stderr,"dbg2       secondary_nodatavalue:       %f\n", secondary_nodatavalue);
 		fprintf(stderr,"dbg2       secondary_nx:                %d\n", secondary_nx);
 		fprintf(stderr,"dbg2       secondary_ny:                %d\n", secondary_ny);
 		fprintf(stderr,"dbg2       secondary_min:               %f\n", secondary_min);
@@ -156,7 +155,7 @@ int mbview_setsecondarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2       secondary_ymax:              %f\n", secondary_ymax);
 		fprintf(stderr,"dbg2       secondary_dx:                %f\n", secondary_dx);
 		fprintf(stderr,"dbg2       secondary_dy:                %f\n", secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:              %d\n", secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:              %ld\n", (long)secondary_data);
 		}
 
 	/* get view */
@@ -216,8 +215,8 @@ int mbview_setsecondarygrid(int verbose, int instance,
 					error);
 		if (proj_status == MB_SUCCESS)
 			view->secondary_pj_init = MB_YES;
-fprintf(stderr,"SECONDARY GRID PROJECTION:%d %d %s\n",
-view->secondary_pj_init,view->secondary_pjptr,data->secondary_grid_projection_id);
+fprintf(stderr,"SECONDARY GRID PROJECTION:%d %ld %s\n",
+view->secondary_pj_init,(long)view->secondary_pjptr,data->secondary_grid_projection_id);
 			
 		/* quit if projection fails */
 		if (proj_status != MB_SUCCESS)
@@ -263,7 +262,7 @@ int mbview_updatesecondarygrid(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	first;
-	int	i, j, k;
+	int	k;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -277,7 +276,7 @@ int mbview_updatesecondarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2       instance:                     %d\n", instance);
 		fprintf(stderr,"dbg2       secondary_nx:                 %d\n", secondary_nx);
 		fprintf(stderr,"dbg2       secondary_ny:                 %d\n", secondary_ny);
-		fprintf(stderr,"dbg2       secondary_data:               %f\n", secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:               %ld\n", (long)secondary_data);
 		}
 
 	/* get view */
@@ -506,7 +505,6 @@ int mbview_setsecondaryname(int verbose, int instance,
         XmString    tmp0;
 	Cardinal ac = 0;
 	Arg      args[256];
-	Cardinal cdc = 0;
 	Boolean  argok = False;
 
 	/* print starting debug statements */

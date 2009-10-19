@@ -2,7 +2,7 @@
  *    The MB-system:	mbsegylist.c	5/29/2004
  *    $Id: mbsegylist.c,v 5.6 2007/10/17 20:34:00 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -52,6 +52,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -79,17 +80,22 @@
 /* NaN value */
 double	NaN;
 
+/* function prototypes */
+int printsimplevalue(int verbose, 
+	double value, int width, int precision, 
+	int ascii, int *invert, int *flipsign, int *error);
+int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
+
 static char rcs_id[] = "$Id: mbsegylist.c,v 5.6 2007/10/17 20:34:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char program_name[] = "MBsegylist";
-	static char help_message[] =  "MBsegylist lists table data from a segy data file.";
-	static char usage_message[] = "MBsegylist -Ifile [-A -Ddecimate -Gdelimiter -Llonflip -Olist -H -V]";
+	char program_name[] = "MBsegylist";
+	char help_message[] =  "MBsegylist lists table data from a segy data file.";
+	char usage_message[] = "MBsegylist -Ifile [-A -Ddecimate -Gdelimiter -Llonflip -Olist -H -V]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -109,8 +115,6 @@ main (int argc, char **argv)
 	double	bounds[4];
 	int	btime_i[7];
 	int	etime_i[7];
-	double	btime_d;
-	double	etime_d;
 	double	speedmin;
 	double	timegap;
 
@@ -124,9 +128,7 @@ main (int argc, char **argv)
 	/* output format list controls */
 	char	list[MAX_OPTIONS];
 	int	n_list;
-	double	distance_total;
 	int	nread;
-	int	check_values = MBLIST_CHECK_ON;
 	int	invert_next_value = MB_NO;
 	int	signflip_next_value = MB_NO;
 	int	first = MB_YES;
@@ -154,7 +156,7 @@ main (int argc, char **argv)
 
 	double	b;
 	int	format;
-	int	i, j, k;
+	int	i, j;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -623,7 +625,7 @@ main (int argc, char **argv)
 					case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 						time_u = (int) time_d;
 						if (ascii == MB_YES)
-						    printf("%d",time_u);
+						    printf("%ld",time_u);
 						else
 						    {
 						    b = time_u;
@@ -638,7 +640,7 @@ main (int argc, char **argv)
 							first_u = MB_NO;
 							}
 						if (ascii == MB_YES)
-						    printf("%d",time_u - time_u_ref);
+						    printf("%ld",time_u - time_u_ref);
 						else
 						    {
 						    b = time_u - time_u_ref;

@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavlist.c	2/1/93
  *    $Id: mbnavlist.c,v 5.12 2007/10/17 20:34:00 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -89,6 +89,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -110,16 +111,16 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 /* NaN value */
 double	NaN;
 
+static char rcs_id[] = "$Id: mbnavlist.c,v 5.12 2007/10/17 20:34:00 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 5.12 2007/10/17 20:34:00 caress Exp $";
-	static char program_name[] = "mbnavlist";
-	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
-	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
+	char program_name[] = "mbnavlist";
+	char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
+	char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -200,7 +201,6 @@ main (int argc, char **argv)
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
-	int	icomment = 0;
 	int	atime_i[7 * MB_ASYNCH_SAVE_MAX];
 	double	atime_d[MB_ASYNCH_SAVE_MAX];
 	double	anavlon[MB_ASYNCH_SAVE_MAX];
@@ -215,7 +215,6 @@ main (int argc, char **argv)
 	/* additional time variables */
 	int	first_m = MB_YES;
 	double	time_d_ref;
-	struct tm	time_tm;
 	int	first_u = MB_YES;
 	time_t	time_u;
 	time_t	time_u_ref;
@@ -236,7 +235,7 @@ main (int argc, char **argv)
 	int	read_data;
 	int	inav, n;
 	int	nnav;
-	int	i, j, k;
+	int	i, j;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -443,8 +442,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -846,7 +845,7 @@ time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 						case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 							time_u = (int) time_d;
 							if (ascii == MB_YES)
-							    printf("%d",time_u);
+							    printf("%ld",time_u);
 							else
 							    {
 							    b = time_u;
@@ -861,7 +860,7 @@ time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 								first_u = MB_NO;
 								}
 							if (ascii == MB_YES)
-							    printf("%d",time_u - time_u_ref);
+							    printf("%ld",time_u - time_u_ref);
 							else
 							    {
 							    b = time_u - time_u_ref;
@@ -968,8 +967,8 @@ time_i[3],  time_i[4],  time_i[5],   time_i[6]);*/
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -1009,8 +1008,6 @@ int printsimplevalue(int verbose,
 	char	*function_name = "printsimplevalue";
 	int	status = MB_SUCCESS;
 	char	format[24];
-	int	i;
-	
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1077,8 +1074,6 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error)
 {
 	char	*function_name = "printNaN";
 	int	status = MB_SUCCESS;
-	int	i;
-	
 
 	/* print input debug statements */
 	if (verbose >= 2)

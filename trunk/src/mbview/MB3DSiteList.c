@@ -80,7 +80,6 @@ MB3DSiteListCreate ( MB3DSiteListDataPtr class_in, Widget parent, String name, A
 {
     Cardinal ac = 0;
     Arg      args[256];
-    Cardinal cdc = 0;
     Boolean  argok = False;
     
     /**

@@ -436,6 +436,7 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
+	print "\nVersion: $Id: $\n";
 	print "\nMacro to generate a shellscript of GMT commands which, \n";
 	print "when executed, will generate a Postscript plot of gridded \n";
 	print "data.  Several styles of plots can be generated, including \n";

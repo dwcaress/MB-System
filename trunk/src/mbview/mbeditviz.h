@@ -2,7 +2,7 @@
  *    The MB-system:	mbeditviz.h		4/27/2007
  *    $Id: mbeditviz.h,v 5.2 2008/11/16 21:51:18 caress Exp $
  *
- *    Copyright (c) 2007 by
+ *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -234,11 +234,77 @@ EXTERNAL double	mbev_timelag_3dsdg;
 /* selected sounding parameters */
 EXTERNAL struct mb3dsoundings_struct mbev_selected;
 
+int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon);
+void do_mbeditviz_mode_change( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_openfile( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_quit( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_viewall( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_viewselected( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_regrid( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_updategrid( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_chengecellsize( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_gridparameters( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_viewgrid();
+int do_mbeditviz_mbview_dismiss_notify(int instance);
+void do_mbeditviz_deleteselected( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_changeoutputmode( Widget w, XtPointer client_data, XtPointer call_data);
+int do_mbeditviz_opendata(char *input_file_ptr, int format);
+void do_mbeditviz_update_gui( );
+void do_mbeditviz_pickonepoint_notify(int instance);
+void do_mbeditviz_picktwopoint_notify(int instance);
+void do_mbeditviz_pickarea_notify(int instance);
+void do_mbeditviz_pickregion_notify(int instance);
+void do_mbeditviz_picksite_notify(int instance);
+void do_mbeditviz_pickroute_notify(int instance);
+void do_mbeditviz_picknav_notify(int instance);
+void do_mbeditviz_regrid_notify( Widget w, XtPointer client_data, XtPointer call_data);
+int do_mbeditviz_message_on(char *message);
+int do_mbeditviz_message_off();
+void set_label_string(Widget w, String str);
+void set_label_multiline_string(Widget w, String str);
+void get_text_string(Widget w, String str);
+int do_wait_until_viewed();
+
+int mbeditviz_init(int argc,char **argv);
+int mbeditviz_get_format(char *file, int *form);
+int mbeditviz_open_data(char *path, int format);
+int mbeditviz_import_file(char *path, int format);
+int mbeditviz_load_file(int ifile);
+int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, 
+				double rollbias, double pitchbias, double headingbias, double timelag,  
+				double *heading, double *sonardepth,
+				double *rolldelta, double *pitchdelta);
+int mbeditviz_beam_position(double navlon, double navlat, double headingx, double headingy,
+				double mtodeglon, double mtodeglat,
+				double bath, double acrosstrack, double alongtrack, 
+				double sonardepth, 
+				double rollbias, double pitchbias, 
+				double *bathcorr, double *lon, double *lat);
+int mbeditviz_unload_file(int ifile);
+int mbeditviz_delete_file(int ifile);
+double mbeditviz_erf(double x);
+int mbeditviz_bin_weight(double foot_a, double foot_b, double scale, 
+		    double pcx, double pcy, double dx, double dy, 
+		    double *px, double *py, 
+		    double *weight, int *use);
+int mbeditviz_get_grid_bounds();
+int mbeditviz_setup_grid();
+int mbeditviz_project_soundings();
+int mbeditviz_make_grid();
+int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *ping, int ibeam, int beam_ok, int apply_now);
+int mbeditviz_make_grid_simple();
+int mbeditviz_destroy_grid();
+int mbeditviz_selectregion(int instance);
+int mbeditviz_selectarea(int instance);
+int mbeditviz_selectnav(int instance);
 void mbeditviz_mb3dsoundings_dismiss();
 void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag, int flush);
 void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostring);
 void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag);
 void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag);
+int mb3dsoundings_set_biasapply_notify(int verbose, void (biasapply_notify)(double, double, double, double), int *error);
 
 /* end this include */
 #endif

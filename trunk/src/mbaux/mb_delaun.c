@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_delaun.c	4/19/94
- *    $Id: mb_delaun.c,v 5.1 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_delaun.c,v 5.1 2008/07/10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1994-2008 by
+ *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -95,7 +95,10 @@
  * Author:	D. W. Caress
  * Date:	April, 1994
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_delaun.c,v $
+ * Revision 5.1  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.0  2000/12/01 22:53:59  caress
  * First cut at Version 5.0.
  *
@@ -144,6 +147,8 @@
 /* some defines */
 #define	LARGE	1.0e10
 
+static char rcs_id[] = "$Id: mb_delaun.c,v 5.1 2008/07/10 06:43:40 caress Exp $";
+
 /*--------------------------------------------------------------------------*/
 /* 	function mb_delaun creates a network of triangles connecting an
 	input set of points, where the triangles are as close to equiangular
@@ -172,7 +177,6 @@ int mb_delaun(
 	int	*kv2, 
 	int	*error)
 {
-  	static char rcs_id[]="$Id: mb_delaun.c,v 5.1 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_delaun";
 	int	status = MB_SUCCESS;
 	int	itemp[2][3];
@@ -188,34 +192,34 @@ int mb_delaun(
 	double	denom, s;
 	double	xproduct;
 	int	notfound;
-	int	i, j, k, jj;
+	int	i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       npts:             %d\n",npts);
-		fprintf(stderr,"dbg2       p1:               %d\n",p1);
-		fprintf(stderr,"dbg2       p2:               %d\n",p2);
+		fprintf(stderr,"dbg2       p1:               %ld\n",(long)p1);
+		fprintf(stderr,"dbg2       p2:               %ld\n",(long)p2);
 		fprintf(stderr,"dbg2       ntri:             %d\n",*ntri);
-		fprintf(stderr,"dbg2       iv1:              %d\n",iv1);
-		fprintf(stderr,"dbg2       iv2:              %d\n",iv2);
-		fprintf(stderr,"dbg2       iv3:              %d\n",iv3);
-		fprintf(stderr,"dbg2       ct1:              %d\n",ct1);
-		fprintf(stderr,"dbg2       ct2:              %d\n",ct2);
-		fprintf(stderr,"dbg2       ct3:              %d\n",ct3);
-		fprintf(stderr,"dbg2       cs1:              %d\n",cs1);
-		fprintf(stderr,"dbg2       cs2:              %d\n",cs2);
-		fprintf(stderr,"dbg2       cs3:              %d\n",cs3);
-		fprintf(stderr,"dbg2       v1:               %d\n",v1);
-		fprintf(stderr,"dbg2       v2:               %d\n",v2);
-		fprintf(stderr,"dbg2       v3:               %d\n",v3);
-		fprintf(stderr,"dbg2       istack:           %d\n",istack);
-		fprintf(stderr,"dbg2       kv1:              %d\n",kv1);
-		fprintf(stderr,"dbg2       kv2:              %d\n",kv2);
+		fprintf(stderr,"dbg2       iv1:              %ld\n",(long)iv1);
+		fprintf(stderr,"dbg2       iv2:              %ld\n",(long)iv2);
+		fprintf(stderr,"dbg2       iv3:              %ld\n",(long)iv3);
+		fprintf(stderr,"dbg2       ct1:              %ld\n",(long)ct1);
+		fprintf(stderr,"dbg2       ct2:              %ld\n",(long)ct2);
+		fprintf(stderr,"dbg2       ct3:              %ld\n",(long)ct3);
+		fprintf(stderr,"dbg2       cs1:              %ld\n",(long)cs1);
+		fprintf(stderr,"dbg2       cs2:              %ld\n",(long)cs2);
+		fprintf(stderr,"dbg2       cs3:              %ld\n",(long)cs3);
+		fprintf(stderr,"dbg2       v1:               %ld\n",(long)v1);
+		fprintf(stderr,"dbg2       v2:               %ld\n",(long)v2);
+		fprintf(stderr,"dbg2       v3:               %ld\n",(long)v3);
+		fprintf(stderr,"dbg2       istack:           %ld\n",(long)istack);
+		fprintf(stderr,"dbg2       kv1:              %ld\n",(long)kv1);
+		fprintf(stderr,"dbg2       kv2:              %ld\n",(long)kv2);
 		fprintf(stderr,"dbg2       error:            %d\n",*error);
 		if (verbose >= 5)
 			{
@@ -573,8 +577,7 @@ fprintf(stderr,"jt:%d iv3:%d %f %f\n",jt,iv3[jt],p1[iv3[jt]],p2[iv3[jt]]);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       ntri:             %d\n",*ntri);
 		if (verbose >= 5)

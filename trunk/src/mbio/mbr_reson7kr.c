@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_reson7kr.c	4/4/2004
  *	$Id: mbr_reson7kr.c,v 5.21 2008/09/27 03:27:10 caress Exp $
  *
- *    Copyright (c) 2004-2008 by
+ *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -141,6 +141,8 @@ int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
+int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer, 
+				int *recordid,  int *deviceid, unsigned short *enumerator, int *size);
 int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_reson7kr_chk_label(int verbose, void *mbio_ptr, short type);
 int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, 
@@ -172,12 +174,15 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store_ptr, int *error);
@@ -214,12 +219,15 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
 int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
@@ -229,7 +237,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 
-static char res_id[]="$Id: mbr_reson7kr.c,v 5.21 2008/09/27 03:27:10 caress Exp $";
+static char rcs_id[]="$Id: mbr_reson7kr.c,v 5.21 2008/09/27 03:27:10 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
@@ -241,10 +249,9 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
 
@@ -306,8 +313,7 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
@@ -327,28 +333,28 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %d\n",mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       extract_segytraceheader: %d\n",mb_io_ptr->mb_io_extract_segytraceheader);
-		fprintf(stderr,"dbg2       extract_segy:       %d\n",mb_io_ptr->mb_io_extract_segy);
-		fprintf(stderr,"dbg2       insert_segy:        %d\n",mb_io_ptr->mb_io_insert_segy);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %ld\n",(long)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       extract_segytraceheader: %ld\n",(long)mb_io_ptr->mb_io_extract_segytraceheader);
+		fprintf(stderr,"dbg2       extract_segy:       %ld\n",(long)mb_io_ptr->mb_io_extract_segy);
+		fprintf(stderr,"dbg2       insert_segy:        %ld\n",(long)mb_io_ptr->mb_io_insert_segy);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -386,10 +392,9 @@ int mbr_info_reson7kr(int verbose,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
 
@@ -418,8 +423,7 @@ int mbr_info_reson7kr(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -474,12 +478,11 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -542,8 +545,7 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -568,12 +570,11 @@ int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -597,8 +598,7 @@ int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -639,13 +639,12 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -936,8 +935,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -958,13 +956,12 @@ int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -979,8 +976,7 @@ int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1000,15 +996,11 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	s7k_header *header;
 	s7kr_fsdwss *fsdwsslo;
 	s7kr_fsdwss *fsdwsshi;
-	s7kr_fsdwsb *fsdwsb;
-	s7k_fsdwchannel *fsdwchannel;
-	s7k_fsdwsegyheader *fsdwsegyheader;
 	s7k_fsdwssheader *fsdwssheader;
 	s7kr_bathymetry *bathymetry;
 	s7kr_backscatter	*backscatter;
 	s7kr_beam		*beam;
 	s7kr_image		*image;
-	s7kr_bluefin		*bluefin;
 	double	*edgetech_time_d;
 	double	*edgetech_dt;
 	double	*last_7k_time_d;
@@ -1033,7 +1025,6 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	read_len;
 	int	skip;
 	int	ping_record;
-double klugelon, klugelat;
 	int	time_j[5], time_i[7];
 	double	time_d;
 	int	i;
@@ -1041,13 +1032,12 @@ double klugelon, klugelat;
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1871,8 +1861,7 @@ store->read_beam,store->read_verticaldepth,store->read_image);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1889,9 +1878,6 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	char	*function_name = "mbr_reson7kr_chk_label";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int	*recordidptr;
-	int	*deviceidptr;
-	int	*sizeptr;
 	unsigned short	version;
 	unsigned short	offset;
 	unsigned int	sync;
@@ -1900,12 +1886,11 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:        %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:      %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:      %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -2056,8 +2041,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Output arguments:\n");
 		fprintf(stderr,"dbg2       recordid:      %d\n",*recordid);
 		fprintf(stderr,"dbg2       deviceid:      %d\n",*deviceid);
@@ -2082,13 +2066,12 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:        %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
 		fprintf(stderr,"dbg2       recordid:      %d\n",recordid);
-		fprintf(stderr,"dbg2       buffer:        %d\n",buffer);
+		fprintf(stderr,"dbg2       buffer:        %ld\n",(long)buffer);
 		}
 
 	/* get offset to data section */
@@ -2152,8 +2135,7 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Output arguments:\n");
 		fprintf(stderr,"dbg2       ping_number:   %d\n",*ping_number);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2174,14 +2156,13 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
-		fprintf(stderr,"dbg2       header:     %d\n",header);
+		fprintf(stderr,"dbg2       header:     %ld\n",(long)header);
 		}
 	
 	/* extract the header */
@@ -2232,8 +2213,7 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
@@ -2254,18 +2234,16 @@ int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *e
 	s7kr_reference *reference;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -2322,8 +2300,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2343,18 +2320,16 @@ int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int 
 	s7kr_sensoruncal *sensoruncal;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -2413,8 +2388,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2434,18 +2408,16 @@ int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *e
 	s7kr_sensorcal *sensorcal;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -2504,8 +2476,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2525,18 +2496,16 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
 	s7kr_position *position;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -2598,8 +2567,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2625,13 +2593,12 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -2759,8 +2726,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2780,18 +2746,16 @@ int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error)
 	s7kr_tide *tide;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -2855,8 +2819,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2876,18 +2839,16 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
 	s7kr_altitude *altitude;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -2941,8 +2902,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2968,13 +2928,12 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3088,8 +3047,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3109,18 +3067,16 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
 	s7kr_depth *depth;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3177,8 +3133,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3204,13 +3159,12 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3293,8 +3247,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3320,13 +3273,12 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3424,8 +3376,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3443,7 +3394,6 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_geodesy *geodesy;
-	int	data_size;
 	int	index;
 	int	time_j[5];
 	int	i;
@@ -3451,13 +3401,12 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3553,8 +3502,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3572,21 +3520,18 @@ int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, i
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_rollpitchheave *rollpitchheave;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3642,8 +3587,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3661,21 +3605,18 @@ int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *err
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_heading *heading;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3729,8 +3670,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3756,13 +3696,12 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -3850,8 +3789,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3869,23 +3807,19 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
 	int	status = MB_SUCCESS;
 	int	data_size;
 	short	*shortptr;
-	unsigned short	*ushortptr;
 	int	i;
-short *srptr,*ssptr;
-unsigned short *urptr,*usptr;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       data_format:%d\n",data_format);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwchannel:%d\n",fsdwchannel);
+		fprintf(stderr,"dbg2       fsdwchannel:%ld\n",(long)fsdwchannel);
 		}
 	
 	/* extract the channel header */
@@ -3976,8 +3910,7 @@ fprintf(stderr,"    REAL: raw:%6d %6d   swapped:%6d %6d\n",
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
@@ -3994,22 +3927,18 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index,
 {
 	char	*function_name = "mbr_reson7kr_rd_fsdwssheader";
 	int	status = MB_SUCCESS;
-	int	data_size;
-	short	*shortptr;
-	int	*intptr;
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:         %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:         %d\n",buffer);
+		fprintf(stderr,"dbg2       buffer:         %ld\n",(long)buffer);
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwssheader:   %d\n",fsdwssheader);
+		fprintf(stderr,"dbg2       fsdwssheader:   %ld\n",(long)fsdwssheader);
 		}
 	
 	/* extract the Edgetech sidescan header */
@@ -4053,8 +3982,7 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
@@ -4071,22 +3999,18 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index,
 {
 	char	*function_name = "mbr_reson7kr_rd_fsdwsegyheader";
 	int	status = MB_SUCCESS;
-	int	data_size;
-	short	*shortptr;
-	int	*intptr;
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:         %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:         %d\n",buffer);
+		fprintf(stderr,"dbg2       buffer:         %ld\n",(long)buffer);
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwsegyheader: %d\n",fsdwsegyheader);
+		fprintf(stderr,"dbg2       fsdwsegyheader: %ld\n",(long)fsdwsegyheader);
 		}
 	
 	/* extract the Edgetech segy header */
@@ -4182,8 +4106,7 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
@@ -4206,32 +4129,20 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 	s7k_fsdwssheader *fsdwssheader;
 	s7kr_bathymetry *bathymetry;
 	s7kr_bluefin *bluefin;
-	double	bin[MBSYS_RESON7K_MAX_PIXELS];
-	int	nbin[MBSYS_RESON7K_MAX_PIXELS];
 	int	index;
 	int	time_i[7], time_j[5];
 	double	edgetech_time_d, s7k_time_d, bathy_time_d;
-	int 	bottompick;
-	double	range, sign, sound_speed, half_sound_speed;
-	double	tracemax;
-	double	xtrack;
-	double	pixelsize;
-	double	pickvalue, value;
-	short	*shortptr;
-	unsigned short	*ushortptr;
-	int	jstart, jend;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4317,7 +4228,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 			bad time synching, otherwise use 7K timestamp */
 		/*if (header->s7kTime.Year == 2004)
 			{
-			/* get the time from the original Edgetech header *\/
+			/\* get the time from the original Edgetech header *\/
 			time_j[0] = fsdwssheader->year;
 			time_j[1] = fsdwssheader->day;
 			time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
@@ -4328,7 +4239,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 
 		else
 			{
-			/* get the time from the 6046 datalogger header *\/
+			/\* get the time from the 6046 datalogger header *\/
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
 			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
@@ -4508,8 +4419,7 @@ fprintf(stderr,"\n");
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -4538,13 +4448,12 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4629,7 +4538,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 			bad time synching, otherwise use 7K timestamp */
 		/*if (header->s7kTime.Year == 2004)
 			{
-			/* get the time from the original Edgetech header *\/
+			/\* get the time from the original Edgetech header *\/
 			time_j[0] = fsdwssheader->year;
 			time_j[1] = fsdwssheader->day;
 			time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
@@ -4640,7 +4549,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 
 		else
 			{
-			/* get the time from the 6046 datalogger header *\/
+			/\* get the time from the 6046 datalogger header *\/
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
 			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
@@ -4683,8 +4592,7 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -4708,18 +4616,16 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 	int	index;
 	int	time_i[7], time_j[5];
 	double	edgetech_time_d, s7k_time_d, bathy_time_d;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -4799,7 +4705,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 			bad time synching, otherwise use 7K timestamp */
 		/*if (header->s7kTime.Year == 2004)
 			{
-			/* get the time from the original Edgetech header *\/
+			/\* get the time from the original Edgetech header *\/
 			time_j[0] = fsdwsegyheader->year;
 			time_j[1] = fsdwsegyheader->day;
 			time_j[2] = 60 * fsdwsegyheader->hour + fsdwsegyheader->minute;
@@ -4810,7 +4716,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 
 		else
 			{
-			/* get the time from the 6046 datalogger header *\/
+			/\* get the time from the 6046 datalogger header *\/
 			time_j[0] = header->s7kTime.Year;
 			time_j[1] = header->s7kTime.Day;
 			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
@@ -4853,8 +4759,7 @@ fsdwchannel->sample_interval,fsdwsegyheader->sampleInterval);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -4874,7 +4779,6 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 	s7kr_bluefin *bluefin;
 	int	index;
 	int	time_j[5];
-	int	time_i[7];
 	double	time_d;
 	int	timeproblem;
 	int	i, j;
@@ -4882,13 +4786,12 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -5230,8 +5133,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5249,21 +5151,18 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_volatilesettings *volatilesettings;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -5355,8 +5254,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5383,13 +5281,12 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -5478,8 +5375,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5497,21 +5393,18 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_matchfilter *matchfilter;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -5569,8 +5462,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5588,21 +5480,19 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_beamgeometry *beamgeometry;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -5675,8 +5565,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5694,21 +5583,19 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_calibration *calibration;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -5773,8 +5660,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5792,21 +5678,19 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_bathymetry *bathymetry;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -5938,8 +5822,7 @@ header->RecordNumber,bathymetry->ping_number);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5962,18 +5845,17 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 	int	time_j[5];
 	short	*short_ptr;
 	int	*int_ptr;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6122,8 +6004,7 @@ header->RecordNumber,backscatter->ping_number);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -6142,11 +6023,8 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 	s7k_header *header;
 	s7kr_beam *beam;
 	s7kr_snippet *snippet;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	short	*short_ptr;
-	int	*int_ptr;
 	int	nalloc;
 	int	nsamples;
 	int	sample_type_amp;
@@ -6164,13 +6042,12 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6381,8 +6258,7 @@ header->RecordNumber,beam->ping_number);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -6400,21 +6276,18 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_verticaldepth *verticaldepth;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6476,8 +6349,7 @@ header->RecordNumber,verticaldepth->ping_number);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -6495,33 +6367,23 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_image *image;
-	s7kr_snippet *snippet;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	short	*short_ptr;
-	int	*int_ptr;
 	int	nalloc;
-	int	nsamples;
 	char	*charptr;
 	unsigned short 	*ushortptr;
 	unsigned int	*uintptr;
-	short	*shortptramp;
-	short	*shortptrphase;
-	int	*intptramp;
-	int	*intptrphase;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6624,8 +6486,7 @@ header->RecordNumber,image->ping_number);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -6643,22 +6504,19 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_installation *installation;
-	s7kr_snippet *snippet;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6756,8 +6614,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -6783,13 +6640,12 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6878,8 +6734,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -6905,13 +6760,12 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -6984,8 +6838,7 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -7003,21 +6856,18 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_remotecontrolsettings *remotecontrolsettings;
-	int	data_size;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7107,8 +6957,7 @@ header->RecordNumber);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -7128,18 +6977,16 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
 	s7kr_roll *roll;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7187,8 +7034,7 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -7208,18 +7054,16 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
 	s7kr_pitch *pitch;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7267,8 +7111,7 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -7288,18 +7131,16 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
 	s7kr_soundvelocity *soundvelocity;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7347,8 +7188,7 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -7368,18 +7208,16 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
 	s7kr_absorptionloss *absorptionloss;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7427,8 +7265,7 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -7448,18 +7285,16 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
 	s7kr_spreadingloss *spreadingloss;
 	int	index;
 	int	time_j[5];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -7507,8 +7342,7 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -7531,19 +7365,16 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	*bufferalloc;
 	int	*fileheaders;
 	int	size, write_len;
-	int	nvalue;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -7954,8 +7785,7 @@ if (store->type == R7KRECID_8100SonarData) fprintf(stderr," R7KRECID_8100SonarDa
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -7976,14 +7806,13 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
-		fprintf(stderr,"dbg2       header:     %d\n",header);
+		fprintf(stderr,"dbg2       header:     %ld\n",(long)header);
 		}
 	
 	/* set some important values */
@@ -8031,8 +7860,7 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
@@ -8060,14 +7888,13 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8140,8 +7967,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -8164,20 +7990,18 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8253,8 +8077,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -8277,20 +8100,18 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8366,8 +8187,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -8390,20 +8210,18 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8482,8 +8300,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -8503,24 +8320,21 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_customattitude *customattitude;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8651,8 +8465,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -8675,20 +8488,18 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8769,8 +8580,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -8793,20 +8603,18 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -8877,8 +8685,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -8898,24 +8705,21 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_motion *motion;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9024,8 +8828,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -9048,20 +8851,18 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9135,8 +8936,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -9156,24 +8956,21 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_svp *svp;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9256,8 +9053,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -9277,24 +9073,21 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_ctd *ctd;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9385,8 +9178,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -9406,24 +9198,21 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_geodesy *geodesy;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9536,8 +9325,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -9555,24 +9343,21 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_rollpitchheave *rollpitchheave;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9645,8 +9430,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -9664,24 +9448,21 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_heading *heading;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9752,8 +9533,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -9771,24 +9551,21 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_attitude *attitude;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -9868,8 +9645,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -9885,24 +9661,19 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
 {
 	char	*function_name = "mbr_reson7kr_wr_fsdwchannel";
 	int	status = MB_SUCCESS;
-	int	data_size;
 	short	*shortptr;
-	unsigned short	*ushortptr;
 	int	i;
-short *srptr,*ssptr;
-unsigned short *urptr,*usptr;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       data_format:%d\n",data_format);
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwchannel:%d\n",fsdwchannel);
+		fprintf(stderr,"dbg2       fsdwchannel:%ld\n",(long)fsdwchannel);
 		}
 	
 	/* print out the data to be output */
@@ -9982,8 +9753,7 @@ fprintf(stderr,"    REAL: raw:%6d %6d   swapped:%6d %6d\n",
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
@@ -10000,22 +9770,18 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index,
 {
 	char	*function_name = "mbr_reson7kr_wr_fsdwssheader";
 	int	status = MB_SUCCESS;
-	int	data_size;
-	short	*shortptr;
-	int	*intptr;
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:         %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:         %d\n",buffer);
+		fprintf(stderr,"dbg2       buffer:         %ld\n",(long)buffer);
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwssheader:   %d\n",fsdwssheader);
+		fprintf(stderr,"dbg2       fsdwssheader:   %ld\n",(long)fsdwssheader);
 		}
 	
 	/* print out the data to be output */
@@ -10059,8 +9825,7 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
@@ -10077,22 +9842,18 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index,
 {
 	char	*function_name = "mbr_reson7kr_wr_fsdwsegyheader";
 	int	status = MB_SUCCESS;
-	int	data_size;
-	short	*shortptr;
-	int	*intptr;
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:         %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       buffer:         %d\n",buffer);
+		fprintf(stderr,"dbg2       buffer:         %ld\n",(long)buffer);
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
-		fprintf(stderr,"dbg2       fsdwsegyheader: %d\n",fsdwsegyheader);
+		fprintf(stderr,"dbg2       fsdwsegyheader: %ld\n",(long)fsdwsegyheader);
 		}
 	
 	/* print out the data to be output */
@@ -10188,8 +9949,7 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
@@ -10212,34 +9972,21 @@ int mbr_reson7kr_wr_fsdwsslo(int verbose, int *bufferalloc, char **bufferptr, vo
 	s7k_fsdwssheader *fsdwssheader;
 	s7kr_bathymetry *bathymetry;
 	s7kr_bluefin *bluefin;
-	double	bin[MBSYS_RESON7K_MAX_PIXELS];
-	int	nbin[MBSYS_RESON7K_MAX_PIXELS];
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
-	int 	bottompick;
-	double	range, sign, sound_speed, half_sound_speed;
-	double	tracemax;
-	double	xtrack;
-	double	pixelsize;
-	double	pickvalue, value;
-	short	*shortptr;
-	unsigned short	*ushortptr;
-	int	jstart, jend;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -10352,8 +10099,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -10378,20 +10124,18 @@ int mbr_reson7kr_wr_fsdwsshi(int verbose, int *bufferalloc, char **bufferptr, vo
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -10502,8 +10246,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -10528,20 +10271,18 @@ int mbr_reson7kr_wr_fsdwsb(int verbose, int *bufferalloc, char **bufferptr, void
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -10648,8 +10389,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -10672,20 +10412,18 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -10845,8 +10583,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -10866,24 +10603,21 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_volatilesettings *volatilesettings;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -10992,8 +10726,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -11014,24 +10747,21 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 	s7k_header *header;
 	s7kr_configuration *configuration;
 	s7k_device *device;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11127,8 +10857,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -11148,24 +10877,21 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_matchfilter *matchfilter;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11240,8 +10966,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -11261,24 +10986,21 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_beamgeometry *beamgeometry;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11369,8 +11091,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -11390,24 +11111,21 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_calibration *calibration;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11490,8 +11208,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -11511,24 +11228,21 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_bathymetry *bathymetry;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11657,8 +11371,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -11682,22 +11395,20 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	short	*short_ptr;
 	int	*int_ptr;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -11868,8 +11579,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -11890,13 +11600,9 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 	s7k_header *header;
 	s7kr_beam *beam;
 	s7kr_snippet *snippet;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
-	short	*short_ptr;
-	int	*int_ptr;
 	int	nalloc;
 	int	nsamples;
 	int	sample_type_amp;
@@ -11915,14 +11621,13 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12159,8 +11864,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -12180,24 +11884,21 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_verticaldepth *verticaldepth;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12276,8 +11977,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -12297,36 +11997,25 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_image *image;
-	s7kr_snippet *snippet;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
-	short	*short_ptr;
-	int	*int_ptr;
 	int	nalloc;
-	int	nsamples;
 	char	*charptr;
 	unsigned short 	*ushortptr;
 	unsigned int	*uintptr;
-	short	*shortptramp;
-	short	*shortptrphase;
-	int	*intptramp;
-	int	*intptrphase;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12447,8 +12136,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -12468,25 +12156,21 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_installation *installation;
-	s7kr_snippet *snippet;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12601,8 +12285,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -12626,20 +12309,18 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12780,8 +12461,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -12801,24 +12481,21 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_systemeventmessage *systemeventmessage;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -12899,8 +12576,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -12920,24 +12596,21 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_remotecontrolsettings *remotecontrolsettings;
-	int	data_size;
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13044,8 +12717,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -13068,20 +12740,18 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13153,8 +12823,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -13177,20 +12846,18 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13262,8 +12929,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -13286,20 +12952,18 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13371,8 +13035,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -13395,20 +13058,18 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13480,8 +13141,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);
@@ -13504,20 +13164,18 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	time_j[5];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       res_id:     %s\n",res_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
-		fprintf(stderr,"dbg2       bufferptr:  %d\n",bufferptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(long)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to raw data structure */
@@ -13589,8 +13247,7 @@ fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
 		fprintf(stderr,"dbg2       size:       %d\n",*size);

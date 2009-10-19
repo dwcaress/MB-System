@@ -3,7 +3,7 @@
  *
  *    $Id: mbrolltimelag.c,v 5.7 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 2005 by
+ *    Copyright (c) 2005-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -51,14 +51,12 @@
  * Revision 5.0  2006/01/06 18:20:56  caress
  * Working towards 5.0.8
  *
- *
- *
- *
  */
 
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -70,19 +68,19 @@
 
 #define	MBRTL_ALLOC_CHUNK	1000
 
+static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.7 2008/09/13 06:08:09 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.7 2008/09/13 06:08:09 caress Exp $";
-	static char program_name[] = "MBrolltimelag";
-	static char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
-	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Ooutputname -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
+	char program_name[] = "MBrolltimelag";
+	char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
+	char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Ooutputname -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -92,7 +90,6 @@ main (int argc, char **argv)
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	char	*message;
 
 	/* Files and formats */
 	char	swathdata[MB_PATH_MAXLINE];
@@ -157,7 +154,6 @@ main (int argc, char **argv)
 	
 	int	nrollmean;
 	double	rollmean;
-	int	nslopemean;
 	double	slopemean;
 	
 	double	maxtimelag;
@@ -170,12 +166,9 @@ main (int argc, char **argv)
 	double	time_d_avg;
 	
 	int	nr;
-	double	rollint;
-	
-	char	buffer[MB_PATH_MAXLINE], *result;
+	double	rollint;	
 	int	found;
 	int	nscan;
-	double	value;
 	int	j0, j1;
 	int	i, j, k, l;
 	
@@ -262,7 +255,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       nlag:            %d\n",nlag);
 		fprintf(stderr,"dbg2       lagmin:          %f\n",lagmin);
 		fprintf(stderr,"dbg2       lagmax:          %f\n",lagmax);
-		fprintf(stderr,"dbg2       navchannel:      %f\n",navchannel);
+		fprintf(stderr,"dbg2       navchannel:      %d\n",navchannel);
 		}
 
 	/* if help desired then print it and exit */
@@ -376,8 +369,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    swathfile,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -614,7 +607,7 @@ main (int argc, char **argv)
 		system(cmdfile);
 
 		/* generate plot shellscript for time lag histogram */
-		sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency \%\"", 
+		sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"", 
 				fhistfile, lagstep, swathfile);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		system(cmdfile);
@@ -642,8 +635,8 @@ main (int argc, char **argv)
 		/* figure out whether and what to read next */
         	if (read_datalist == MB_YES)
                 	{
-			if (status = mb_datalist_read(verbose,datalist,
-				    swathfile,&format,&file_weight,&error)
+			if ((status = mb_datalist_read(verbose,datalist,
+				    swathfile,&format,&file_weight,&error))
 				    == MB_SUCCESS)
                         	read_data = MB_YES;
                 	else
@@ -678,7 +671,7 @@ main (int argc, char **argv)
 		}
 		
 	/* generate plot shellscript for time lag histogram */
-	sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency: \%\"", 
+	sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"", 
 			histfile, lagstep, swathdata);
 	fprintf(stderr, "Running: %s...\n", cmdfile);
 	system(cmdfile);

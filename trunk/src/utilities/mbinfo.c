@@ -221,6 +221,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -242,23 +243,23 @@ struct ping
 	double	*sslat;
 	};
 
+static char rcs_id[] = "$Id: mbinfo.c,v 5.30 2009/03/02 18:54:40 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbinfo.c,v 5.30 2009/03/02 18:54:40 caress Exp $";
-	static char program_name[] = "MBINFO";
-	static char help_message[] =  "MBINFO reads a swath sonar data file and outputs\n"
+	char program_name[] = "MBINFO";
+	char help_message[] =  "MBINFO reads a swath sonar data file and outputs\n"
 		"some basic statistics.  If pings are averaged (pings > 2)\n"
 		"MBINFO estimates the variance for each of the swath\n"
 		"beams by reading a set number of pings (>2) and then finding\n"
 		"the variance of the detrended values for each beam.\n"
 		"The results are dumped to stdout.";
-	static char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C "
+	char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C "
 		"-Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnx/ny "
 		"-N -O -Ppings -Rw/e/s/n -Sspeed -W -V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -742,8 +743,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1838,8 +1839,8 @@ main (int argc, char **argv)
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

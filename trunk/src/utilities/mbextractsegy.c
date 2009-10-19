@@ -2,7 +2,7 @@
  *    The MB-system:	mbextractsegy.c	4/18/2004
  *    $Id: mbextractsegy.c,v 5.20 2009/03/13 07:05:58 caress Exp $
  *
- *    Copyright (c) 2004-2008 by
+ *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -85,13 +85,12 @@
  * Revision 5.0  2004/05/21 23:50:44  caress
  * Progress supporting Reson 7k data, including support for extracing subbottom profiler data.
  *
- *
- *
  */
 
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -115,13 +114,12 @@ static char rcs_id[] = "$Id: mbextractsegy.c,v 5.20 2009/03/13 07:05:58 caress E
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char program_name[] = "MBextractsegy";
-	static char help_message[] =  "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
-	static char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat -Ifile -Jxscale/yscale -Lstartline/lineroot -Osegyfile -Qtimelistfile -Rroutefile -Ssampleformat -H -V]";
+	char program_name[] = "MBextractsegy";
+	char help_message[] =  "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
+	char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat -Ifile -Jxscale/yscale -Lstartline/lineroot -Osegyfile -Qtimelistfile -Rroutefile -Ssampleformat -H -V]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -143,7 +141,6 @@ main (int argc, char **argv)
 	double	file_weight;
 	int	format;
 	int	pings;
-	int	pings_read;
 	int	lonflip;
 	double	bounds[4];
 	int	btime_i[7];
@@ -172,10 +169,6 @@ main (int argc, char **argv)
 	double	distance;
 	double	altitude;
 	double	sonardepth;
-	double	draft;
-	double	roll;
-	double	pitch;
-	double	heave;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -267,15 +260,12 @@ main (int argc, char **argv)
 	int	nget;
 	int	point_ok;
 	int	read_data;
-	double	distmin;
-	int	found;
 	int	nread;
 	int	nwrite;
 	int	first;
 	int	index;
 	double	tracemin, tracemax;
-	int	closefile;
-	int	i, j, k, n;
+	int	i, j;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -499,7 +489,7 @@ main (int argc, char **argv)
 		if ((fp = fopen(timelist_file, "r")) == NULL) 
 			{
 			error = MB_ERROR_OPEN_FAIL;
-			status == MB_FAILURE;
+			status = MB_FAILURE;
 			fprintf(stderr,"\nUnable to open time list file <%s> for reading\n",timelist_file);
 			exit(status);
 			}
@@ -578,7 +568,7 @@ main (int argc, char **argv)
 		if ((fp = fopen(route_file, "r")) == NULL) 
 			{
 			error = MB_ERROR_OPEN_FAIL;
-			status == MB_FAILURE;
+			status = MB_FAILURE;
 			fprintf(stderr,"\nUnable to open route file <%s> for reading\n",route_file);
 			exit(status);
 			}
@@ -701,8 +691,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -731,7 +721,7 @@ main (int argc, char **argv)
 	if ((sfp = fopen(scriptfile, "w")) == NULL) 
 		{
 		error = MB_ERROR_OPEN_FAIL;
-		status == MB_FAILURE;
+		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to open plotting script file <%s> \n",scriptfile);
 		exit(status);
 		}
@@ -1076,6 +1066,8 @@ routeheading[activewaypoint-1],segytraceheader.heading,headingdiff,oktowrite);*/
 			}
 		    else if (activewaypoint > 0)
 		    	oktowrite = MBES_ONLINE_COUNT;
+		    else if (nroutepoint == 0)
+		    	oktowrite = MBES_ONLINE_COUNT;
 /*if (status == MB_SUCCESS)
 fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
 activewaypoint,linenumber,range, navlon, 
@@ -1334,8 +1326,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

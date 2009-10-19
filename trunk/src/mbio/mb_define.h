@@ -315,6 +315,8 @@ int mb_format_source(int verbose, int *format,
 int mb_format_beamwidth(int verbose, int *format, 
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error);
+int mb_get_format(int verbose, char *filename, char *fileroot, 
+		    int *format, int *error);
 int mb_datalist_open(int verbose,
 		void **datalist,
 		char *path, 
@@ -323,6 +325,10 @@ int mb_datalist_open(int verbose,
 int mb_datalist_read(int verbose,
 		void *datalist,
 		char *path, int *format, double *weight,
+		int *error);
+int mb_datalist_read2(int verbose,
+		void *datalist,
+		int *pstatus, char *path, char *ppath, int *format, double *weight,
 		int *error);
 int mb_datalist_close(int verbose,
 		void **datalist, int *error);
@@ -370,13 +376,6 @@ int mb_write_init(int verbose,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error);
 int mb_close(int verbose, void **mbio_ptr, int *error);
-int mb_register_array(int verbose, void *mbio_ptr, 
-		int type, int size, void **handle, int *error);
-int mb_update_arrays(int verbose, void *mbio_ptr, 
-		int nbath, int namp, int nss, int *error);
-int mb_update_arrayptr(int verbose, void *mbio_ptr, 
-		void **handle, int *error);
-int mb_list_arrays(int verbose, void *mbio_ptr, int *error);
 int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int *error);
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
@@ -428,6 +427,8 @@ int mb_alloc(int verbose, void *mbio_ptr,
 		void **store_ptr, int *error);
 int mb_deall(int verbose, void *mbio_ptr,
 		void **store_ptr, int *error);
+int mb_get_store(int verbose, void *mbio_ptr,
+		    void **store_ptr, int *error);
 int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
 		int *kind, int *nbath, int *namp, int *nss, int *error);
 int mb_pingnumber(int verbose, void *mbio_ptr, 
@@ -515,9 +516,9 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		double *rawssacrosstrack, 
 		double *rawssalongtrack, 
 		int *error);
-int mb_extract_segyheader(int verbose, void *mbio_ptr, void *store_ptr,
+int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
-		void *segyheader_ptr, 
+		void *segytraceheader_ptr, 
 		int *error);
 int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sampleformat,
@@ -541,21 +542,6 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 		double *sensor7, double *sensor8, int *error);
 int mb_copyrecord(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);
-		
-int mb_read_filter_add(int verbose, void *mbio_ptr,
-		int kind, int mode, int xdim, int ldim, int iteration,
-		double threshold_lo, double threshold_hi,
-		int *error);
-int mb_read_filter(int verbose, void *mbio_ptr,
-		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
-		double *speed, double *heading, 
-		double *distance, double *altitude, double *sonardepth, 
-		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
-		double *bathlon, double *bathlat,
-		double *ss, double *sslon, double *sslat,
-		int *error);
 
 int mb_buffer_init(int verbose, void **buff_ptr, int *error);
 int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, 
@@ -656,6 +642,15 @@ int mb_hedint_nadd(int verbose, void *mbio_ptr,
 int mb_hedint_interp(int verbose, void *mbio_ptr, 
 		double time_d, double *heading, 
 		int *error);
+int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth, int *error);
+int mb_depint_interp(int verbose, void *mbio_ptr, 
+		double time_d, double *sonardepth, 
+		int *error);
+int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, int *error);
+int mb_altint_interp(int verbose, void *mbio_ptr, 
+		double time_d, double *altitude, 
+		int *error);
+		
 int mb_swap_check();
 int mb_get_double(double *, char *, int);
 int mb_get_int(int *, char *, int);
@@ -683,139 +678,35 @@ int mb_xyz_to_takeoff(int verbose,
 		double x, double y, double z,
 		double *theta, double *phi,
 		int *error);
+int mb_lever(int verbose,
+		double sonar_offset_x,
+		double sonar_offset_y,
+		double sonar_offset_z,
+		double nav_offset_x,
+		double nav_offset_y,
+		double nav_offset_z,
+		double vru_offset_x,
+		double vru_offset_y,
+		double vru_offset_z,
+		double vru_pitch,
+		double vru_roll,
+		double *lever_x,
+		double *lever_y,
+		double *lever_z,
+		int *error);
 int mb_double_compare(void *a, void *b);
 int mb_int_compare(void *a, void *b);
 int mb_edit_compare(void *a, void *b);
 void hilbert(int n, double delta[], double kappa[]);
 void hilbert2(int n, double data[]);
 
-int mb_readgrd(int verbose, char *grdfile,
-			int	*grid_projection_mode,
-			char	*grid_projection_id,
-			float	*nodatavalue,
-			int	*nxy,
-			int	*nx,
-			int	*ny,
-			double	*min,
-			double	*max,
-			double	*xmin,
-			double	*xmax,
-			double	*ymin,
-			double	*ymax,
-			double	*dx,
-			double	*dy,
-			float	**data,
-			float	**data_dzdx,
-			float	**data_dzdy,
-			int	*error);
-int mb_rt_init(int verbose, int number_node, 
-		double *depth, double *velocity, 
-		char **modelptr, int *error);
-int mb_rt_deall(int verbose, char **modelptr, int *error);
-int mb_rt(int verbose, char *modelptr, 
-	double source_depth, double source_angle, double end_time, 
-	int ssv_mode, double surface_vel, double null_angle, 
-	int nplot_max, int *nplot, double *xplot, double *zplot, 
-	double *x, double *z, double *travel_time, int *ray_stat, int *error);
-int mb_spline_init(int verbose, double *x, double *y, 
-	int n, double yp1, double ypn, double *y2, int *error);
-int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
-	int n, double x, double *y, int *i, int *error);
-int mb_linear_interp(int verbose, double *xa, double *ya,
-		int n, double x, double *y, int *i, int *error);
-void lsqup(
-    double  *a,
-    int	    *ia,
-    int	    *nia,
-    int	    nnz,
-    int	    nc,
-    int	    nr,
-    double  *x,
-    double  *dx,
-    double  *d,
-    int	    nfix,
-    int	    *ifix,
-    double  *fix,
-    int	    ncycle,
-    double  *sigma);
-void chebyu(
-    double  *sigma,
-    int	    ncycle,
-    double  shi,
-    double  slo,
-    double  *work);
-void splits(
-    double  *x,
-    double  *t,
-    int	    n);
-double errlim(
-	double	*sigma,
-	int	ncycle,
-	double	shi,
-	double	slo);
-double errrat(
-	double	x1,
-	double	x2,
-	double	*sigma,
-	int	ncycle);
-void lspeig(
-	double	*a,
-	int	*ia,
-	int	*nia,
-	int	nnz,
-	int	nc,
-	int	nr,
-	int	ncyc,
-	int	*nsig,
-	double	*x,
-	double	*dx,
-	double	*sigma,
-	double	*w,
-	double	*smax,
-	double	*err,
-	double	*sup);
-int mb_delaun(
-	int	verbose, 
-	int	npts, 
-	double	*p1, 
-	double	*p2, 
-	int	*ed, 
-	int	*ntri, 
-	int	*iv1, 
-	int	*iv2, 
-	int	*iv3, 
-	int	*ct1, 
-	int	*ct2, 
-	int	*ct3, 
-	int	*cs1, 
-	int	*cs2, 
-	int	*cs3, 
-	double	*v1, 
-	double	*v2, 
-	double	*v3, 
-	int	*istack, 
-	int	*kv1, 
-	int	*kv2, 
-	int	*error);
-int plot_init(	int	verbose, 
-		int	argc, 
-		char	**argv, 
-		double	*bounds_use, 
-		double	*scale, 
-		double	*inch2lon, 
-		int	*error);
-int plot_end(int verbose, int *error);
-int plot_exit(int argc, char **argv);
-void set_colors(int ncol, int *rd, int *gn, int *bl);
-void plot(double x, double y, int ipen);
-void setline(int linewidth);
-void newpen(int ipen);
-void justify_string(double height, char *string, double *s);
-void plot_string(double x, double y, double hgt, double angle, char *label);
-int mb_zgrid(float *z, int *nx, int *ny, 
-		float *x1, float *y1, float *dx, float *dy, float *xyz, 
-		int *n, float *zpij, int *knxt, int *imnew, 
-		float *cay, int *nrng);
+int mb_absorption(int verbose,
+		double frequency, double temperature,double salinity, 
+		double depth, double ph, double soundspeed, 
+		double *absorption, int *error);
+		
+int mb_mem_debug_on(int verbose, int *error);
+int mb_mem_debug_off(int verbose, int *error);
 int mb_malloc(int verbose, size_t size, void **ptr, int *error);
 int mb_realloc(int verbose, size_t size, void **ptr, int *error);
 int mb_free(int verbose, void **ptr, int *error);
@@ -827,12 +718,43 @@ int mb_memory_status(int verbose, int *nalloc, int *nallocmax,
 			int *overflow, size_t *allocsize, int *error);
 int mb_memory_list(int verbose, int *error);
 int mb_register_array(int verbose, void *mbio_ptr, 
-		int type, int size, void **handle, int *error);
+		int type, size_t size, void **handle, int *error);
 int mb_update_arrays(int verbose, void *mbio_ptr, 
 		int nbath, int namp, int nss, int *error);
 int mb_update_arrayptr(int verbose, void *mbio_ptr, 
 		void **handle, int *error);
+int mb_list_arrays(int verbose, void *mbio_ptr, int *error);
 int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error);
+
+int mb_get_time(int verbose, int time_i[7], double *time_d);
+int mb_get_date(int verbose, double time_d, int time_i[7]);
+int mb_get_jtime(int verbose, int time_i[7], int time_j[5]);
+int mb_get_itime(int verbose, int time_j[5], int time_i[7]);
+int mb_fix_y2k(int verbose, int year_short, int *year_long);
+int mb_unfix_y2k(int verbose, int year_long, int *year_short);
+
+int mb_proj_init(int verbose,
+		char *projection,
+		void **pjptr,
+		int *error);
+int mb_proj_free(int verbose,
+		void **pjptr,
+		int *error);
+int mb_proj_forward(int verbose,
+		void *pjptr,
+		double lon, double lat,
+		double *easting, double *northing,
+		int *error);
+int mb_proj_inverse(int verbose,
+		void *pjptr,
+		double easting, double northing,
+		double *lon, double *lat,
+		int *error);
+
+int mb_swap_check();
+int mb_swap_float(float *a);
+int mb_swap_double(double *a);
+int mb_swap_long(mb_s_long *a);
 
 /* end conditional include */
 #endif

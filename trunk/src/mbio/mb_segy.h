@@ -2,7 +2,7 @@
  *    The MB-system:	mb_io.h	1/19/93
  *    $Id: mb_segy.h,v 5.7 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -74,36 +74,36 @@ struct mb_segyfileheader_struct
 	int	jobid;
 	int	line;
 	int	reel;
-	short	channels;
-	short	aux_channels;
-	short	sample_interval;
-	short	sample_interval_org;
-	short	number_samples;
-	short	number_samples_org;
-	short	format; /*  	1 IBM 32 bit floating  point
+	unsigned short	channels;
+	unsigned short	aux_channels;
+	unsigned short	sample_interval;
+	unsigned short	sample_interval_org;
+	unsigned short	number_samples;
+	unsigned short	number_samples_org;
+	unsigned short	format; /*  	1 IBM 32 bit floating  point
 				2 32 bit integer
 				3 16 bit integer
 				5 IEEE 32 bit floating point
 				6 IEEE 32 bit floating point
 				8 8 bit integer
 				11 Little-endian IEEE 32 bit floating point */
-	short	cdp_fold;
-	short	trace_sort;
-	short	vertical_sum;
-	short	sweep_start;
-	short	sweep_end;
-	short	sweep_length;
-	short	sweep_type;
-	short	sweep_trace;
-	short	sweep_taper_start;
-	short	sweep_taper_end;
-	short	sweep_taper;
-	short	correlated;
-	short	binary_gain;
-	short	amplitude;
-	short	units;
-	short	impulse_polarity;
-	short	vibrate_polarity;
+	unsigned short	cdp_fold;
+	unsigned short	trace_sort;
+	unsigned short	vertical_sum;
+	unsigned short	sweep_start;
+	unsigned short	sweep_end;
+	unsigned short	sweep_length;
+	unsigned short	sweep_type;
+	unsigned short	sweep_trace;
+	unsigned short	sweep_taper_start;
+	unsigned short	sweep_taper_end;
+	unsigned short	sweep_taper;
+	unsigned short	correlated;
+	unsigned short	binary_gain;
+	unsigned short	amplitude;
+	unsigned short	units;
+	unsigned short	impulse_polarity;
+	unsigned short	vibrate_polarity;
 	short	domain;
 	short	rev;
 	short	fixed_length;
@@ -122,10 +122,10 @@ struct mb_segytraceheader_struct
                                                     the same effective surface location". */
         int            	rp_num; 	/* bytes 20-23,  rp or cdp number  */
         int            	rp_tr;  	/* bytes 24-27,  trace number within the cdp */
-        short		trc_id; 	/* bytes 28-29,  trace id:  1= live, 2=dead  */
-        short   	num_vstk;       /* bytes 30-31,  Number of traces vertically stacked */
-        short   	cdp_fold;       /* bytes 32-33,  cdp fold (coverage)  */
-        short   	use;            /* bytes 34-35,  Data use:  1=production, 2=test  */
+        unsigned short	trc_id; 	/* bytes 28-29,  trace id:  1= live, 2=dead  */
+        unsigned short   num_vstk;       /* bytes 30-31,  Number of traces vertically stacked */
+        unsigned short   cdp_fold;       /* bytes 32-33,  cdp fold (coverage)  */
+        unsigned short   use;            /* bytes 34-35,  Data use:  1=production, 2=test  */
         int            	range;  	/* bytes 36-39,  source to receiver distance (range) */
         int           	grp_elev;       /* bytes 40-43,  Receiver group elevation w.r.t.
                                                           sea level (depth is negative)  */
@@ -159,13 +159,13 @@ struct mb_segytraceheader_struct
         short   	grp_static; 	/* bytes 100-101, Group static correction  */
         short   	tot_static; 	/* bytes 102-103, Total static applied */
         short   	laga;   	/* bytes 104-105, Lag time A in ms. before time 0 */
-/*****  short   	lagb;   	/* bytes 106-107, Lag time B in ms. before time 0 */
+        short   	lagb;   	/* bytes 106-107, Lag time B in ms. before time 0 */
         int            	delay_mils; 	/* bytes 106-109, deep water delay in ms. (or meters)  */
         short   	smute_mils; 	/* bytes 110-111, start mute time in ms. */
         short   	emute_mils; 	/* bytes 112-113, end mutes time in ms.  */
-        short   	nsamps; 	/* bytes 114-115, "Number of data samples in this
+        unsigned short  nsamps; 	/* bytes 114-115, "Number of data samples in this
                                                 	trace" - excludes header */
-        short   	si_micros;      /* bytes 116-117, Sample interval in us for this trace  */
+        unsigned short  si_micros;      /* bytes 116-117, Sample interval in us for this trace  */
         short   	other_1[19]; 	/* bytes 118-155, Other short integer stuff */
         short   	year;   	/* bytes 156-157, year data was recorded. */
         short   	day_of_yr; 	/* bytes 158-159, recording day of year */
@@ -208,3 +208,26 @@ struct mb_segyio_struct
 	int	tracealloc;
 	float	*trace;
 	};
+
+/* function prototypes */
+int mb_segy_read_init(int verbose, char *segyfile, 
+		void **mbsegyio_ptr,
+		struct mb_segyasciiheader_struct *segyasciiheader,
+		struct mb_segyfileheader_struct *segyfileheader,
+		int *error);
+int mb_segy_write_init(int verbose, char *segyfile, 
+		struct mb_segyasciiheader_struct *asciiheader,
+		struct mb_segyfileheader_struct *fileheader,
+		void **mbsegyio_ptr,
+		int *error);
+int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error);
+int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, 
+		struct mb_segytraceheader_struct *traceheaderptr,
+		float **traceptr,
+		int *error);
+int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, 
+		struct mb_segytraceheader_struct *traceheader,
+		float *trace,
+		int *error);
+void hilbert(int n, double delta[], double kappa[]);
+void hilbert2(int n, double data[]);

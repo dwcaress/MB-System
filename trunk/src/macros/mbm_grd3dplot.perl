@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_grd3dplot.perl	8/6/95
 #    $Id: mbm_grd3dplot.perl,v 5.18 2008/09/11 20:06:45 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
+#    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -371,6 +371,7 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
+	print "\nVersion: $Id: $\n";
 	print "\nMacro to generate a shellscript of GMT commands which, when \n";
 	print "executed, will generate a 3D perspective Postscript plot of  \n";
 	print "gridded data.  Several styles of plots can be generated, \n";

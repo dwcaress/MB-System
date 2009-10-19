@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_zgrid.c	    4/25/95
- *    $Id: mb_zgrid.c,v 5.6 2009-03-13 07:05:58 caress Exp $
+ *    $Id: mb_zgrid.c,v 5.6 2009/03/13 07:05:58 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -52,7 +52,10 @@
  * Hacker:	D. W. Caress
  * Date:	April 25, 1995
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_zgrid.c,v $
+ * Revision 5.6  2009/03/13 07:05:58  caress
+ * Release 5.1.2beta02
+ *
  * Revision 5.5  2008/12/22 08:36:18  caress
  * Check in of 22 Dec 2008.
  *
@@ -138,6 +141,7 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 /* MBIO include files */
@@ -154,7 +158,7 @@ int mb_zgrid(float *z, int *nx, int *ny,
 {
     /* System generated locals */
     int z_dim1, z_offset, i__1, i__2, i__3;
-    float r__1, r__2;
+    float r__1;
 
     /* Local variables */
     float delz;
@@ -167,7 +171,8 @@ int mb_zgrid(float *z, int *nx, int *ny,
     int jmnew;
     float dzmax, dzrms;
     int kk, im, jm;
-    float dzrms8, z00, dz, ze, hrange, zn, zs, zw, zrange, dzmaxf, convtest, 
+    float dzrms8, z00, dz, ze, hrange, zn, zs, zw, zrange, 
+            dzmaxf, convtest, convtestlast,
 	    relaxn, rootgs, dzrmsp, big, abz;
     int npg;
     int nmax;
@@ -848,10 +853,11 @@ L3720:
 	}
 L3730:
 	convtest = dzmaxf / ((float)1. - root) - eps;
-	fprintf(stderr,"Zgrid iteration %d convergence test: %f\n",iter,convtest);
-	if (convtest <= (float)0. || (iter > ITERTRANSITION && convtest < 1.0)) {
+	fprintf(stderr,"Zgrid iteration %d convergence test: %f last:%f\n",iter,convtest,convtestlast);
+	if (convtest <= (float)0. || (iter > ITERTRANSITION && convtest > convtestlast)) {
 	    goto L4010;
 	} else {
+	    convtestlast = convtest;
 	    goto L3740;
 	}
 

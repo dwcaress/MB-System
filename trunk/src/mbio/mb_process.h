@@ -2,7 +2,7 @@
  *    The MB-system:	mb_process.h	9/11/00
  *    $Id: mb_process.h,v 5.29 2009/03/02 18:51:52 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -970,6 +970,15 @@ int mb_pr_writepar(int verbose, char *file,
 			int *error);
 int mb_pr_bathmode(int verbose, struct mb_process_struct *process, 
 			int *error);
+int mb_pr_default_output(int verbose, struct mb_process_struct *process, 
+			int *error);
+int mb_pr_get_output(int verbose, int *format, 
+			char *ifile, char *ofile, 
+			int *error);
+int mb_pr_check(int verbose, char *ifile, 
+			int *nparproblem, 	
+			int *ndataproblem, 	
+			int *error);
 int mb_pr_update_ofile(int verbose, char *file, 
 			int	mbp_ofile_specified, 
 			char	*mbp_ofile, 
@@ -1332,8 +1341,9 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 			int *error);
 int mb_esf_save(int verbose, struct mb_esf_struct *esf, 
 			double time_d, int beam, int action, int *error);
+int mb_ess_save(int verbose, struct mb_esf_struct *esf, 
+		double time_d, int beam, int action, int *error);
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
-
 	
 int mb_pr_lockswathfile(int verbose, char *file, int purpose, 
 			char *program, int *error);

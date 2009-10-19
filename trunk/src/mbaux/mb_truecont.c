@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_truecont.c	4/21/94
- *    $Id: mb_truecont.c,v 5.8 2009-01-07 17:48:25 caress Exp $
+ *    $Id: mb_truecont.c,v 5.8 2009/01/07 17:48:25 caress Exp $
  *
- *    Copyright (c) 1994-2008 by
+ *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -29,14 +29,103 @@
 
 /* mbio include files */
 #include "../../include/mb_status.h"
-#include "../../include/mb_contour.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_aux.h"
 
 /* global defines */
 #define IUP 3
 #define IDN 2
 #define IOR -3
 #define EPS 0.0001
+
+/* function prototypes */
+int mb_contour_init(
+		int	verbose, 
+		struct swath **data,
+		int	npings_max,
+		int	beams_bath,
+		int	contour_algorithm,
+		int	plot_contours,
+		int	plot_triangles,
+		int	plot_track,
+		int	plot_name,
+		int	plot_pingnumber,
+		double	contour_int,
+		double	color_int,
+		double	tick_int,
+		double	label_int,
+		double	tick_len,
+		double	label_hgt,
+		double	label_spacing,
+		int	ncolor,
+		int	nlevel,
+		double	*level_list,
+		int	*label_list,
+		int	*tick_list,
+		double	time_tick_int,
+		double	time_annot_int,
+		double	date_annot_int,
+		double	time_tick_len,
+		double	name_hgt,
+		int	pingnumber_tick_int,
+		int	pingnumber_annot_int,
+		double	pingnumber_tick_len,
+		int	*error);
+int mb_contour_deall(
+		int	verbose, 
+		struct swath *data, 
+		int	*error);
+int mb_contour(
+		int	verbose, 
+		struct swath *data, 
+		int	*error);
+int mb_tcontour(
+		int	verbose, 
+		struct swath *data, 
+		int	*error);
+int get_start_tri(
+		struct swath *data, 
+		int	*itri, 
+		int	*iside1, 
+		int	*iside2, 
+		int	*closed);
+int get_next_tri(
+		struct swath *data, 
+		int	*itri, 
+		int	*iside1, 
+		int	*iside2, 
+		int	*closed, 
+		int	*itristart, 
+		int	*isidestart);
+int get_pos_tri(
+		struct swath *data, 
+		double	eps, 
+		int	itri, 
+		int	iside, 
+		double	value, 
+		double	*x, 
+		double	*y);
+int get_azimuth_tri(
+		struct swath *data, 
+		int	itri, 
+		int	iside, 
+		double	*angle);
+int check_label(struct swath *data, 
+		int	nlab);
+int dump_contour(struct swath *data, double value);
+int mb_ocontour(int verbose, struct swath *data, int *error);
+int get_start_old(struct swath *data, 
+		int *k, int *i, int *j, int *d, int *closed);
+int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd,
+		int k, int i, int j, int d, 
+		int kbeg, int ibeg, int jbeg, int dbeg, int *closed);
+int get_pos_old(struct swath *data, double eps, double *x, double *y,
+		int k, int i, int j, double value);
+int get_hand_old(struct swath *data, int *hand, 
+		int k, int i, int j, int d);
+int get_azimuth_old(struct swath *data, int iping, double *angle);
+
+static char rcs_id[]="$Id: mb_truecont.c,v 5.8 2009/01/07 17:48:25 caress Exp $";
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour_init initializes the memory required to
@@ -77,7 +166,6 @@ int mb_contour_init(
 		double	pingnumber_tick_len,
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.8 2009-01-07 17:48:25 caress Exp $";
 	char	*function_name = "mb_contour_init";
 	int	status = MB_SUCCESS;
 	struct swath *dataptr;
@@ -88,11 +176,11 @@ int mb_contour_init(
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
-		fprintf(stderr,"dbg2       data:                 %d\n",data);
+		fprintf(stderr,"dbg2       data:                 %ld\n",(long)data);
 		fprintf(stderr,"dbg2       npings_max:           %d\n",npings_max);
 		fprintf(stderr,"dbg2       beams_bath:           %d\n",beams_bath);
 		fprintf(stderr,"dbg2       contour algorithm:    %d\n",contour_algorithm);
@@ -335,8 +423,7 @@ int mb_contour_init(
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -354,7 +441,6 @@ int mb_contour_deall(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.8 2009-01-07 17:48:25 caress Exp $";
 	char	*function_name = "mb_contour_deall";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -363,11 +449,11 @@ int mb_contour_deall(
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       verbose:                 %d\n",verbose);
+		fprintf(stderr,"dbg2       data:                    %ld\n",(long)data);
 		}
 
 	/* deallocate memory for bathymetry data */
@@ -431,8 +517,7 @@ int mb_contour_deall(
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -448,19 +533,18 @@ int mb_contour(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="";
 	char	*function_name = "mb_contour";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       data:             %d\n",data);
-		fprintf(stderr,"dbg2       data->contour_alg:%d\n",data->contour_algorithm);
+		fprintf(stderr,"dbg2       verbose:                 %d\n",verbose);
+		fprintf(stderr,"dbg2       data:                    %ld\n",(long)data);
+		fprintf(stderr,"dbg2       data->contour_alg:       %d\n",data->contour_algorithm);
 		}
 
 	/* call the appropriate contouring routine */
@@ -472,8 +556,7 @@ int mb_contour(
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -490,7 +573,6 @@ int mb_tcontour(
 		struct swath *data, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.8 2009-01-07 17:48:25 caress Exp $";
 	char	*function_name = "mb_tcontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -516,11 +598,11 @@ int mb_tcontour(
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       verbose:                 %d\n",verbose);
+		fprintf(stderr,"dbg2       data:                    %ld\n",(long)data);
 		fprintf(stderr,"dbg2       data->contour_algorithm: %d\n",data->contour_algorithm);
 		fprintf(stderr,"dbg2       data->plot_contours:     %d\n",data->plot_contours);
 		fprintf(stderr,"dbg2       data->plot_triangles:    %d\n",data->plot_triangles);
@@ -998,8 +1080,7 @@ int mb_tcontour(
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1181,8 +1262,6 @@ int get_azimuth_tri(
 		int	iside, 
 		double	*angle)
 {
-	double	heading;
-
 	*angle = -data->pings[data->pingid[data->iv[iside][itri]]].heading;
 	if (*angle > 180.0)
 		*angle = *angle - 360.0;
@@ -1280,7 +1359,6 @@ int dump_contour(struct swath *data, double value)
 /* 	function mb_ocontour contours multibeam data. */
 int mb_ocontour(int verbose, struct swath *data, int *error)
 {
-  	static char rcs_id[]="$Id: mb_truecont.c,v 5.8 2009-01-07 17:48:25 caress Exp $";
 	char	*function_name = "mb_ocontour";
 	int	status = MB_SUCCESS;
 	struct ping *ping;
@@ -1298,8 +1376,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 	int	ival;
 	double	value;
 	int	tick, label;
-	int	itri, iside1, iside2, closed;
-	int	itristart, isidestart, itriend, isideend;
+	int	closed;
 	double	x, y;
 	double	magdis;
 	double	ratio;
@@ -1310,11 +1387,11 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       verbose:                 %d\n",verbose);
+		fprintf(stderr,"dbg2       data:                    %ld\n",(long)data);
 		fprintf(stderr,"dbg2       data->contour_algorithm: %d\n",data->contour_algorithm);
 		fprintf(stderr,"dbg2       data->plot_contours:     %d\n",data->plot_contours);
 		fprintf(stderr,"dbg2       data->plot_triangles:    %d\n",data->plot_triangles);
@@ -1731,8 +1808,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1747,7 +1823,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 int get_start_old(struct swath *data, 
 		int *k, int *i, int *j, int *d, int *closed)
 {
-	int	nn, ii, jj;
+	int	ii, jj;
 
 	/* search edges */
 	*closed = 0;
@@ -2012,7 +2088,6 @@ int get_hand_old(struct swath *data, int *hand,
 /* 	function get_azimuth_old gets azimuth across shiptrack at ping iping */
 int get_azimuth_old(struct swath *data, int iping, double *angle)
 {
-	double	heading;
 
 	*angle = -data->pings[iping].heading;
 	if (*angle > 180.0)

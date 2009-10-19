@@ -275,6 +275,14 @@ file referencing an input datalist with the $PROCESSED tag set) can be
 executed in conjunction with creating ancilliary files with the -O or
 -N options.
 
+-----> 5.1.2beta12
+
+Updated proj library to 4.7.0 release.
+
+Rooted through the entire codebase fixing obvious failure points for
+64-bit compilation. Most of the issues identified so far relate to
+storing address values in variables declared as "int".
+
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
 

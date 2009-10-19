@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_surface.c	5/2/94
- *    $Id: mb_surface.c,v 5.4 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_surface.c,v 5.4 2008/07/10 06:43:40 caress Exp $
  *
  *    Inclusion in MB-System:
- *    Copyright (c) 1994-2008 by
+ *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -56,7 +56,10 @@
  * Author:	D. W. Caress
  * Date:	May 2, 1994
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_surface.c,v $
+ * Revision 5.4  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.3  2006/08/09 22:41:27  caress
  * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
  *
@@ -86,11 +89,13 @@
 
 /* standard include files */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_aux.h"
 
 #define GMT_CHUNK	2000
 #ifndef FALSE
@@ -114,7 +119,6 @@ struct MB_SURFACE_BRIGGS {
 	double b[6];
 };
  
-static int n_alloc = GMT_CHUNK;
 static int npoints=0;			/* Number of data points */
 static int nx=0;			/* Number of nodes in x-dir. */
 static int ny=0;			/* Number of nodes in y-dir. (Final grid) */
@@ -158,7 +162,6 @@ static double	r_z_scale = 1.0;	/* reciprocal of z_scale  */
 static double	plane_c0, plane_c1, plane_c2;	/* Coefficients of best fitting plane to data  */
 static double small;			/* Let data point coincide with node if distance < small */
 static float *u;			/* Pointer to grid array */
-static float *v2;			/* Pointer to v.2.0 grid array */
 static char *iu;			/* Pointer to grid info array */
 static char mode_type[2] = {'I','D'};	/* D means include data points when iterating
 				 * I means just interpolate from larger grid */
@@ -172,20 +175,49 @@ static int compare_points();
 static struct MB_SURFACE_DATA *data;		/* Data point and index to node it currently constrains  */
 static struct MB_SURFACE_BRIGGS *briggs;		/* Coefficients in Taylor series for Laplacian(z) a la I. C. Briggs (1974)  */
 
+/* function prototypes */
+int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat,
+		double xxmin, double xxmax, double yymin, double yymax, double xxinc, double yyinc,
+		double ttension, float *sgrid);
+void	set_coefficients();
+void	set_offset();
+void fill_in_forecast ();
+int compare_points (struct MB_SURFACE_DATA *point_1, struct MB_SURFACE_DATA *point_2);
+void smart_divide ();
+void set_index ();
+void find_nearest_point();
+void set_grid_parameters();
+void initialize_grid();
+void new_initialize_grid();
+void read_data(int ndat, float *xdat, float *ydat, float *zdat);
+void get_output(float *sgrid);
+int	iterate(int mode);
+void check_errors ();
+int	remove_planar_trend();
+int	replace_planar_trend();
+int	throw_away_unusables();
+int	rescale_z_values();
+void load_constraints (char *low, char *high);
+double	guess_surface_time(int nx, int ny);
+int	get_prime_factors(int n, int f[]);
+int	gcd_euclid(int a,int b);
+
+static char rcs_id[] = "$Id: mb_surface.c,v 5.4 2008/07/10 06:43:40 caress Exp $";
+
 int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat,
 		double xxmin, double xxmax, double yymin, double yymax, double xxinc, double yyinc,
 		double ttension, float *sgrid)
 {
 
-	int	i, j, ij, serror = FALSE, size_query = FALSE;
-	char	modifier, low[100], high[100];
+	int	i, serror = FALSE;
+	char	low[100], high[100];
 	char	*function_name = "mb_surface";
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       xxmin:      %f\n",xxmin);
@@ -323,8 +355,7 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",local_error);
 		for (i=0;i<mx*my;i++)
@@ -337,7 +368,7 @@ int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat,
 	return(status);
 }
 
-int	set_coefficients()
+void	set_coefficients()
 {
 	double	e_4, loose, a0;
 	
@@ -380,7 +411,7 @@ int	set_coefficients()
 
 }
 
-int	set_offset()
+void	set_offset()
 {
 	int	add_w[5], add_e[5], add_s[5], add_n[5], add_w2[5], add_e2[5], add_s2[5], add_n2[5];
 	int	i, j, kase;
@@ -415,7 +446,8 @@ int	set_offset()
 
 
 
-int fill_in_forecast () {
+void fill_in_forecast () 
+{
 
 	/* Fills in bilinear estimates into new node locations
 	   after grid is divided.   
@@ -525,13 +557,15 @@ int compare_points (struct MB_SURFACE_DATA *point_1, struct MB_SURFACE_DATA *poi
 	}
 }
 
-int smart_divide () {
+void smart_divide () 
+{
 		/* Divide grid by its largest prime factor */
 	grid /= factors[n_fact - 1];
 	n_fact--;
 }
 
-int set_index () {
+void set_index () 
+{
 		/* recomputes data[k].index for new value of grid,
 		   sorts data on index and radii, and throws away
 		   data which are now outside the useable limits. */
@@ -554,7 +588,8 @@ int set_index () {
 	
 }
 
-int find_nearest_point() {
+void find_nearest_point() 
+{
 	int i, j, k, last_index, block_i, block_j, iu_index, briggs_index;
 	double x0, y0, dx, dy, xys, xy1, btemp;
 	double b0, b1, b2, b3, b4, b5;
@@ -618,7 +653,7 @@ int find_nearest_point() {
 }
 
 						
-int set_grid_parameters()
+void set_grid_parameters()
 {			
 	block_ny = (ny - 1) / grid + 1;
 	block_nx = (nx - 1) / grid + 1;
@@ -629,7 +664,7 @@ int set_grid_parameters()
 	r_grid_yinc = 1.0 / grid_yinc;
 }
 
-int initialize_grid()
+void initialize_grid()
 {	/*
 	 * For the initial gridsize, compute weighted averages of data inside the search radius
 	 * and assign the values to u[i,j] where i,j are multiples of gridsize.
@@ -685,7 +720,7 @@ int initialize_grid()
 }
 
 
-int new_initialize_grid()
+void new_initialize_grid()
 {	/*
 	 * For the initial gridsize, load constrained nodes with weighted avg of their data;
 	 * and then do something with the unconstrained ones.
@@ -728,7 +763,7 @@ int new_initialize_grid()
 }
 
 /* This function rewritten by D.W. Caress 5/3/94 */
-int read_data(int ndat, float *xdat, float *ydat, float *zdat)
+void read_data(int ndat, float *xdat, float *ydat, float *zdat)
 {
 	int	i, j, k, kmax, kmin, idat;
 	double	zmin = 1.0e38, zmax = -1.0e38;
@@ -799,9 +834,9 @@ int read_data(int ndat, float *xdat, float *ydat, float *zdat)
 }
 
 /* this function rewritten from write_output() by D.W. Caress 5/3/94 */
-int get_output(float *sgrid)
+void get_output(float *sgrid)
 {
-	int	index, i, j, ij;
+	int	index, i, j;
 	
 
 	index = ij_sw_corner;
@@ -1055,7 +1090,7 @@ int	iterate(int mode)
 	return(iteration_count);
 }
 
-int check_errors () {
+void check_errors () {
 
 	int	i, j, k, ij, n_nodes, move_over[12];	/* move_over = offset[kase][12], but grid = 1 so move_over is easy  */
 	
@@ -1313,7 +1348,7 @@ int	throw_away_unusables()
 				npoints * sizeof(struct MB_SURFACE_DATA), 
 				(void **)&data, &local_error);
 	if (local_verbose && (n_outside)) {
-		fprintf(stderr,"surface: %ld unusable points were supplied; these will be ignored.\n", n_outside);
+		fprintf(stderr,"surface: %d unusable points were supplied; these will be ignored.\n", n_outside);
 		fprintf(stderr,"\tYou should have pre-processed the data with blockmean or blockmedian.\n");
 	}
 
@@ -1340,10 +1375,10 @@ int	rescale_z_values()
 	return (0);
 }
 
-int load_constraints (char *low, char *high)
+void load_constraints (char *low, char *high)
 {
-	int i, j, ij, n_trimmed;
-	double xx, yy;
+	int i, j, ij;
+	double yy;
 /*	struct GRD_HEADER hdr;*/
 	
 	/* Load lower/upper limits, verify range, deplane, and rescale */

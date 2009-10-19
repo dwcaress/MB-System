@@ -1,12 +1,5 @@
-static const char RCS_ID[] = "$Id: PJ_lcca.c,v 5.4 2008/09/29 04:56:21 caress Exp $";
-/* PROJ.4 Cartographic Projection System -- Revision Log:
-**$Log: PJ_lcca.c,v $
-**Revision 5.4  2008/09/29 04:56:21  caress
-**Proj 4.6.1
-**
-**Revision 1.1  2003/03/04 02:59:41  warmerda
-**New
-**
+static const char RCS_ID[] = "$Id: PJ_lcca.c 1504 2009-01-06 02:11:57Z warmerdam $";
+/* PROJ.4 Cartographic Projection System 
 */
 #define MAX_ITER 10
 #define DEL_TOL 1e-12

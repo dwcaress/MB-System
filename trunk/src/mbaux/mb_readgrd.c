@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_readgrd.c	12/10/2007
- *    $Id: mb_readgrd.c,v 5.1 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_readgrd.c,v 5.1 2008/07/10 06:43:40 caress Exp $
  *
- *    Copyright (c) 2007-2008 by
+ *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	September 3, 2007
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_readgrd.c,v $
+ * Revision 5.1  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.0  2007/10/08 05:47:27  caress
  * Added grd reading function.
  *
@@ -63,8 +66,9 @@ extern int isnanf(float x);
 /* default no data value define */
 #define	DEFAULT_NODATA		-9999999.9
 
+static char rcs_id[] = "$Id: mb_readgrd.c,v 5.1 2008/07/10 06:43:40 caress Exp $";
+
 /* global variables */
-static char rcs_id[] = "$Id: mb_readgrd.c,v 5.1 2008-07-10 06:43:40 caress Exp $";
 static char program_name[] = "mb_readgrd";
 static int	pargc;
 static char	**pargv;
@@ -90,19 +94,17 @@ int mb_readgrd(int verbose, char *grdfile,
 			float	**data_dzdy,
 			int	*error)
 {
-	char function_name[] = "mbba_readgrd";
+	char function_name[] = "mb_readgrd";
 	int	status = MB_SUCCESS;
 	struct GRD_HEADER header;
 	int	modeltype;
 	int	projectionid;
         mb_path    projectionname;
 	int	off;
-	int	pad[4];
+	GMT_LONG	pad[4];
 	int	nscan;
 	int	utmzone;
-        float   NaN;
 	char	NorS;
-	char	*projection = "-Jx1.0";
 	float	*rawdata;
 	float	*usedata;
 	double	mtodeglon, mtodeglat;
@@ -113,8 +115,8 @@ int mb_readgrd(int verbose, char *grdfile,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr,"dbg2       grdfile:         %s\n", grdfile);
@@ -238,7 +240,11 @@ int mb_readgrd(int verbose, char *grdfile,
 		/* Determine the wesn to be used to read the grdfile */
 		off = (header.node_offset) ? 0 : 1;
 		GMT_map_setup (*xmin, *xmax, *ymin, *ymax);
+#ifdef GMT_MINOR_VERSION
+		GMT_grd_setregion (&header, xmin,  xmax, ymin, ymax, BCR_BILINEAR);
+#else
 		GMT_grd_setregion (&header, xmin,  xmax, ymin, ymax);
+#endif
 
 		/* read the grid */
 		pad[0] = 0;
@@ -369,14 +375,13 @@ int mb_readgrd(int verbose, char *grdfile,
 		fprintf(stderr,"  ymax:                     %f\n", *ymax);
 		fprintf(stderr,"  dx:                       %f\n", *dx);
 		fprintf(stderr,"  dy:                       %f\n", *dy);
-		fprintf(stderr,"  data:                     %d\n", *data);
+		fprintf(stderr,"  data:                     %ld\n", (long)*data);
 		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBBA function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       Dimensions: %d %d\n", header.nx, header.ny);
 		if (modeltype == ModelTypeProjected)
@@ -409,7 +414,7 @@ int mb_readgrd(int verbose, char *grdfile,
 		fprintf(stderr,"dbg2       ymax:                     %f\n", *ymax);
 		fprintf(stderr,"dbg2       dx:                       %f\n", *dx);
 		fprintf(stderr,"dbg2       dy:                       %f\n", *dy);
-		fprintf(stderr,"dbg2       data:                     %d\n", *data);
+		fprintf(stderr,"dbg2       data:                     %ld\n", (long)*data);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);

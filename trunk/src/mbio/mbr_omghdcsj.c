@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
  *	$Id: mbr_omghdcsj.c,v 5.13 2008/09/20 00:57:41 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002, 2003 by
+ *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -132,10 +132,11 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
+static char rcs_id[]="$Id: mbr_omghdcsj.c,v 5.13 2008/09/20 00:57:41 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.13 2008/09/20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_register_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -143,8 +144,8 @@ int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -198,8 +199,7 @@ int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
@@ -219,24 +219,24 @@ int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -268,15 +268,14 @@ int mbr_info_omghdcsj(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_omghdcsj.c,v 5.13 2008/09/20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_info_omghdcsj";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -306,8 +305,7 @@ int mbr_info_omghdcsj(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -338,7 +336,6 @@ int mbr_info_omghdcsj(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_omghdcsj.c,v 5.13 2008/09/20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_alm_omghdcsj";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -360,11 +357,11 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -508,8 +505,7 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -528,16 +524,15 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	struct mbf_omghdcsj_struct *dataplus;
 	struct mbf_omghdcsj_profile_struct *profile;
 	struct mbf_omghdcsj_data_struct *data;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -560,8 +555,7 @@ int mbr_dem_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -596,12 +590,10 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	*buffer;
 	int	read_size;
 	int	buff_size;
-	char	*char_ptr;
 	short	*short_ptr;
 	int	*int_ptr;
 	mb_u_char   scaling_factor;
 	int	ScaleFactor;
-	int	MaxVal;
 	int	offset, offset_start, sample_count;
 	int	nrawpixels, ssrawoffset, firstgoodbeam;
 	double	bathsort[MBF_OMGHDCSJ_MAX_BEAMS];
@@ -611,19 +603,18 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	ss[MBF_OMGHDCSJ_MAX_PIXELS];
 	double	ss_alongtrack[MBF_OMGHDCSJ_MAX_PIXELS];
 	int	ss_cnt[MBF_OMGHDCSJ_MAX_PIXELS];
-	int	ifix;
 	int	first, last, k1, k2;
-	int	i, j, k, jj, kk;
+	int	i, j, k, jj;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+	    fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 	    }
 
 	/* get pointer to mbio descriptor and data structure */
@@ -1671,6 +1662,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    fprintf(stderr,"dbg5       subFileID:              %d\n",summary->subFileID);
 	    fprintf(stderr,"dbg5       fileVersion:            %d\n",summary->fileVersion);
 	    fprintf(stderr,"dbg5       toolType:               %d\n",summary->toolType);
+	    fprintf(stderr,"dbg5       toolType name:          %s\n",mbsys_hdcs_tool_names[summary->toolType]);
 	    fprintf(stderr,"dbg5       numProfiles:            %d\n",summary->numProfiles);
 	    fprintf(stderr,"dbg5       numDepths:              %d\n",summary->numDepths);
 	    fprintf(stderr,"dbg5       timeScale:              %d\n",summary->timeScale);
@@ -1697,8 +1689,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print debug statements */
 	else if (verbose >= 5 && dataplus->kind == MB_DATA_COMMENT)
 	    {
-	    fprintf(stderr,"\ndbg5  New comment read in function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  New header comment in function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       kind:                   %d\n",dataplus->kind);
 	    fprintf(stderr,"dbg5       comment:                %s\n",dataplus->comment);
 	    fprintf(stderr,"dbg5       status:                 %d\n",status);
@@ -2216,25 +2207,23 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	*buffer;
 	int	write_size;
 	int	buff_size;
-	char	*char_ptr;
 	short	*short_ptr;
 	int	*int_ptr;
 	mb_u_char   scaling_factor;
 	int	ScaleFactor;
 	int	MaxVal;
 	int	offset, offset_start;
-	double	xtrack, ss_spacing;
-	int	i, j, jj, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+	    fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 	    }
 
 	/* get pointer to mbio descriptor and data structure */
@@ -2532,6 +2521,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    fprintf(stderr,"dbg5       subFileID:              %d\n",summary->subFileID);
 	    fprintf(stderr,"dbg5       fileVersion:            %d\n",summary->fileVersion);
 	    fprintf(stderr,"dbg5       toolType:               %d\n",summary->toolType);
+	    fprintf(stderr,"dbg5       toolType name:          %s\n",mbsys_hdcs_tool_names[summary->toolType]);
 	    fprintf(stderr,"dbg5       numProfiles:            %d\n",summary->numProfiles);
 	    fprintf(stderr,"dbg5       numDepths:              %d\n",summary->numDepths);
 	    fprintf(stderr,"dbg5       timeScale:              %d\n",summary->timeScale);

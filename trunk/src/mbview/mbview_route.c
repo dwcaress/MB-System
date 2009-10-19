@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_route.c	9/25/2003
  *    $Id: mbview_route.c,v 5.20 2008/09/11 20:17:33 caress Exp $
  *
- *    Copyright (c) 2003-2008 by
+ *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -109,6 +109,7 @@
 #include <Xm/CascadeB.h>
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
+#include <Xm/List.h>
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
@@ -131,9 +132,6 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static Cardinal 	ac;
-static Arg      	args[256];
-static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
 static char rcs_id[]="$Id: mbview_route.c,v 5.20 2008/09/11 20:17:33 caress Exp $";
@@ -256,7 +254,6 @@ int mbview_getrouteselected(int verbose, int instance,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	i;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -316,12 +313,6 @@ int mbview_getrouteinfo(int verbose, int instance,
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	struct mbview_route_struct *route;
-	double	distlateral, distovertopo;
-	double	routelon0, routelon1;
-	double	routelat0, routelat1;
-	double	routetopo0, routetopo1;
-	double	routeslope;
-	int	i, j;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -418,20 +409,20 @@ int mbview_allocroutearrays(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       npointtotal:               %d\n", npointtotal);
-		fprintf(stderr,"dbg2       routelon:                  %d\n", *routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", *routelat);
+		fprintf(stderr,"dbg2       routelon:                  %ld\n", (long)*routelon);
+		fprintf(stderr,"dbg2       routelat:                  %ld\n", (long)*routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %d\n", *waypoint);
+		fprintf(stderr,"dbg2       waypoint:                  %ld\n", (long)*waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
+		fprintf(stderr,"dbg2       routetopo:                 %ld\n", (long)*routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %d\n", *routebearing);
+		fprintf(stderr,"dbg2       routebearing:              %ld\n", (long)*routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
+		fprintf(stderr,"dbg2       distlateral:               %ld\n", (long)*distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %d\n", *distovertopo);
+		fprintf(stderr,"dbg2       distovertopo:              %ld\n", (long)*distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %d\n", *slope);
+		fprintf(stderr,"dbg2       slope:                     %ld\n", (long)*slope);
 		}
 
 	/* allocate the arrays using mb_realloc */
@@ -457,20 +448,20 @@ int mbview_allocroutearrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       routelon:                  %d\n", *routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", *routelat);
+		fprintf(stderr,"dbg2       routelon:                  %ld\n", (long)*routelon);
+		fprintf(stderr,"dbg2       routelat:                  %ld\n", (long)*routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %d\n", *waypoint);
+		fprintf(stderr,"dbg2       waypoint:                  %ld\n", (long)*waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
+		fprintf(stderr,"dbg2       routetopo:                 %ld\n", (long)*routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %d\n", *routebearing);
+		fprintf(stderr,"dbg2       routebearing:              %ld\n", (long)*routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
+		fprintf(stderr,"dbg2       distlateral:               %ld\n", (long)*distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %d\n", *distovertopo);
+		fprintf(stderr,"dbg2       distovertopo:              %ld\n", (long)*distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %d\n", *slope);
+		fprintf(stderr,"dbg2       slope:                     %ld\n", (long)*slope);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -506,20 +497,20 @@ int mbview_freeroutearrays(int verbose,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       routelon:                  %d\n", *routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", *routelat);
+		fprintf(stderr,"dbg2       routelon:                  %ld\n", (long)*routelon);
+		fprintf(stderr,"dbg2       routelat:                  %ld\n", (long)*routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %d\n", *waypoint);
+		fprintf(stderr,"dbg2       waypoint:                  %ld\n", (long)*waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
+		fprintf(stderr,"dbg2       routetopo:                 %ld\n", (long)*routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %d\n", *routebearing);
+		fprintf(stderr,"dbg2       routebearing:              %ld\n", (long)*routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
+		fprintf(stderr,"dbg2       distlateral:               %ld\n", (long)*distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %d\n", *distovertopo);
+		fprintf(stderr,"dbg2       distovertopo:              %ld\n", (long)*distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %d\n", *slope);
+		fprintf(stderr,"dbg2       slope:                     %ld\n", (long)*slope);
 		}
 
 	/* free the arrays using mb_free */
@@ -544,20 +535,20 @@ int mbview_freeroutearrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       routelon:                  %d\n", *routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", *routelat);
+		fprintf(stderr,"dbg2       routelon:                  %ld\n", (long)*routelon);
+		fprintf(stderr,"dbg2       routelat:                  %ld\n", (long)*routelat);
 		if (waypoint != NULL)
-		fprintf(stderr,"dbg2       waypoint:                  %d\n", *waypoint);
+		fprintf(stderr,"dbg2       waypoint:                  %ld\n", (long)*waypoint);
 		if (routetopo != NULL)
-		fprintf(stderr,"dbg2       routetopo:                 %d\n", *routetopo);
+		fprintf(stderr,"dbg2       routetopo:                 %ld\n", (long)*routetopo);
 		if (routebearing != NULL)
-		fprintf(stderr,"dbg2       routebearing:              %d\n", *routebearing);
+		fprintf(stderr,"dbg2       routebearing:              %ld\n", (long)*routebearing);
 		if (distlateral != NULL)
-		fprintf(stderr,"dbg2       distlateral:               %d\n", *distlateral);
+		fprintf(stderr,"dbg2       distlateral:               %ld\n", (long)*distlateral);
 		if (distovertopo != NULL)
-		fprintf(stderr,"dbg2       distovertopo:              %d\n", *distovertopo);
+		fprintf(stderr,"dbg2       distovertopo:              %ld\n", (long)*distovertopo);
 		if (slope != NULL)
-		fprintf(stderr,"dbg2       slope:                     %d\n", *slope);
+		fprintf(stderr,"dbg2       slope:                     %ld\n", (long)*slope);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -587,9 +578,7 @@ int mbview_addroute(int verbose, int instance,
 	struct mbview_struct *data;
 	double	xgrid, ygrid, zdata;
 	double	xdisplay, ydisplay, zdisplay;
-	int	nfound;
-	int	nadded;
-	int	i, ii, jj, iii, jjj, kkk;
+	int	i;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -602,9 +591,9 @@ int mbview_addroute(int verbose, int instance,
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
 		fprintf(stderr,"dbg2       npoint:                    %d\n", npoint);
-		fprintf(stderr,"dbg2       routelon:                  %d\n", routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", routelat);
-		fprintf(stderr,"dbg2       waypoint:                  %d\n", waypoint);
+		fprintf(stderr,"dbg2       routelon:                  %ld\n", (long)routelon);
+		fprintf(stderr,"dbg2       routelat:                  %ld\n", (long)routelat);
+		fprintf(stderr,"dbg2       waypoint:                  %ld\n", (long)waypoint);
 		for (i=0;i<npoint;i++)
 			{
 			fprintf(stderr,"dbg2       point:%d lon:%f lat:%f waypoint:%d\n", 
@@ -768,8 +757,6 @@ int mbview_getroute(int verbose, int instance,
 	struct mbview_struct *data;
 	double	dx, dy, range, bearing;
 	double	xx1, yy1, xx2, yy2;
-	double	dxx, dyy, dzz;
-	double	dll, doo;
 	int	i, j;
 
 	/* print starting debug statements */
@@ -783,18 +770,18 @@ int mbview_getroute(int verbose, int instance,
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
 		fprintf(stderr,"dbg2       route:                     %d\n", route);
-		fprintf(stderr,"dbg2       npointtotal:               %d\n", npointtotal);
-		fprintf(stderr,"dbg2       routelon:                  %d\n", routelon);
-		fprintf(stderr,"dbg2       routelat:                  %d\n", routelat);
-		fprintf(stderr,"dbg2       waypoint:                  %d\n", waypoint);
-		fprintf(stderr,"dbg2       routetopo:                 %d\n", routetopo);
-		fprintf(stderr,"dbg2       routebearing:              %d\n", routebearing);
-		fprintf(stderr,"dbg2       distlateral:               %d\n", distlateral);
-		fprintf(stderr,"dbg2       distovertopo:              %d\n", distovertopo);
-		fprintf(stderr,"dbg2       slope:                     %d\n", slope);
-		fprintf(stderr,"dbg2       routecolor:                %d\n", routecolor);
-		fprintf(stderr,"dbg2       routesize:                 %d\n", routesize);
-		fprintf(stderr,"dbg2       routename:                 %d\n", routename);
+		fprintf(stderr,"dbg2       npointtotal:               %ld\n", (long)npointtotal);
+		fprintf(stderr,"dbg2       routelon:                  %ld\n", (long)routelon);
+		fprintf(stderr,"dbg2       routelat:                  %ld\n", (long)routelat);
+		fprintf(stderr,"dbg2       waypoint:                  %ld\n", (long)waypoint);
+		fprintf(stderr,"dbg2       routetopo:                 %ld\n", (long)routetopo);
+		fprintf(stderr,"dbg2       routebearing:              %ld\n", (long)routebearing);
+		fprintf(stderr,"dbg2       distlateral:               %ld\n", (long)distlateral);
+		fprintf(stderr,"dbg2       distovertopo:              %ld\n", (long)distovertopo);
+		fprintf(stderr,"dbg2       slope:                     %ld\n", (long)slope);
+		fprintf(stderr,"dbg2       routecolor:                %ld\n", (long)routecolor);
+		fprintf(stderr,"dbg2       routesize:                 %ld\n", (long)routesize);
+		fprintf(stderr,"dbg2       routename:                 %ld\n", (long)routename);
 		}
 
 	/* get view */
@@ -1093,7 +1080,6 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
 	/* local variables */
 	char	*function_name = "mbview_pick_route_select";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	found;
@@ -1101,7 +1087,6 @@ int mbview_pick_route_select(int instance, int which, int xpixel, int ypixel)
 	double	xlon, ylat, zdata;
 	double	xdisplay, ydisplay, zdisplay;
 	double	xx, yy, rr, rrmin;
-	double	dx, dy;
 	int	iroute;
 	int	jpoint;
 	int	i, j;
@@ -1271,21 +1256,21 @@ iroute,jpoint,shared.shareddata.routes[iroute].npoints);
 			for (j=0;j<shared.shareddata.routes[i].npoints;j++)
 				{
 				fprintf(stderr,"dbg2       route %d %d waypoint: %d\n",i,j,shared.shareddata.routes[i].waypoint[j]);
-				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].xgrid);
-				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].ygrid);
+				fprintf(stderr,"dbg2       route %d %d xgrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].xgrid[instance]);
+				fprintf(stderr,"dbg2       route %d %d ygrid:    %f\n",i,j,shared.shareddata.routes[i].points[j].ygrid[instance]);
 				fprintf(stderr,"dbg2       route %d %d xlon:     %f\n",i,j,shared.shareddata.routes[i].points[j].xlon);
 				fprintf(stderr,"dbg2       route %d %d ylat:     %f\n",i,j,shared.shareddata.routes[i].points[j].ylat);
 				fprintf(stderr,"dbg2       route %d %d zdata:    %f\n",i,j,shared.shareddata.routes[i].points[j].zdata);
-				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].xdisplay);
-				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].ydisplay);
-				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].zdisplay);
+				fprintf(stderr,"dbg2       route %d %d xdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].xdisplay[instance]);
+				fprintf(stderr,"dbg2       route %d %d ydisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].ydisplay[instance]);
+				fprintf(stderr,"dbg2       route %d %d zdisplay: %f\n",i,j,shared.shareddata.routes[i].points[j].zdisplay[instance]);
 				}
 			for (j=0;j<shared.shareddata.routes[i].npoints-1;j++)
 				{
 				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,shared.shareddata.routes[i].segments[j].nls);
 				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,shared.shareddata.routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %d\n",i,j,shared.shareddata.routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %d\n",i,j,shared.shareddata.routes[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %ld\n",i,j,(long)&shared.shareddata.routes[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %ld\n",i,j,(long)&shared.shareddata.routes[i].segments[j].endpoints[1]);
 				}
 			}
 		}
@@ -1313,7 +1298,7 @@ int mbview_extract_route_profile(int instance)
 	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	iroute, jpoint, jstart;
+	int	iroute, jstart;
 	int	nprpoints;
 	double	dx, dy;
 	int	i, j;
@@ -1480,14 +1465,12 @@ int mbview_pick_route_add(int instance, int which, int xpixel, int ypixel)
 	/* local variables */
 	char	*function_name = "mbview_pick_route_add";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	found;
 	double	xgrid, ygrid;
 	double	xlon, ylat, zdata;
 	double	xdisplay, ydisplay, zdisplay;
-	double	xx, yy, rr, rrmin;
 	int	i, j, inew, jnew;
 
 	/* print starting debug statements */
@@ -1681,8 +1664,8 @@ int mbview_pick_route_add(int instance, int which, int xpixel, int ypixel)
 				{
 				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,shared.shareddata.routes[i].segments[j].nls);
 				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,shared.shareddata.routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %d\n",i,j,shared.shareddata.routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %d\n",i,j,shared.shareddata.routes[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %ld\n",i,j,(long)&shared.shareddata.routes[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %ld\n",i,j,(long)&shared.shareddata.routes[i].segments[j].endpoints[1]);
 				}
 			}
 		}
@@ -1708,7 +1691,6 @@ int mbview_pick_route_delete(int instance, int xpixel, int ypixel)
 	/* local variables */
 	char	*function_name = "mbview_pick_route_delete";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	found;
@@ -2240,8 +2222,8 @@ int mbview_route_delete(int instance, int iroute, int ipoint)
 				{
 				fprintf(stderr,"dbg2       route %d %d nls:          %d\n",i,j,shared.shareddata.routes[i].segments[j].nls);
 				fprintf(stderr,"dbg2       route %d %d nls_alloc:    %d\n",i,j,shared.shareddata.routes[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %d\n",i,j,shared.shareddata.routes[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %d\n",i,j,shared.shareddata.routes[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[0]: %ld\n",i,j,(long)&shared.shareddata.routes[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       route %d %d endpoints[1]: %ld\n",i,j,(long)&shared.shareddata.routes[i].segments[j].endpoints[1]);
 				}
 			}
 		}
@@ -2417,7 +2399,7 @@ int mbview_drawroute(int instance, int rez)
 	struct mbview_struct *data;
 	GLUquadricObj *globj;
 	double	routesizesmall, routesizelarge;
-	double	rr, xx, yy;
+	double	xx, yy;
 	int	iroute, jpoint;
 	int	icolor;
 	int	k, k0, k1;

@@ -494,6 +494,7 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
+	print "\nVersion: $Id: $\n";
 	print "\nMacro to generate a shellscript of MB-System and GMT commands \n";
 	print "which, when executed, will generate a Postscript plot of the \n";
 	print "specified swath sonar data. The plot may include bathymetry color \n";

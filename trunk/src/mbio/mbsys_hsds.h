@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hsds.h	2/16/93
  *	$Id: mbsys_hsds.h,v 5.5 2005/11/05 00:48:03 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -144,14 +144,6 @@
 	- this is supposed to be 1.525 degrees but seems
 	to really be 1.510 degrees */
 #define MBSYS_HSDS_BEAM_SPACING 1.510
-
-/* array matching gain values to appropriate beam */
-static int which_gain[MBSYS_HSDS_BEAMS] = 
-			{ 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-			  4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 
-			  7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
-			 10,10,10,10,11,11,11,11,12,12,12,12,
-			 13,13,13,13,14,14,14,14,15 };
 
 struct mbsys_hsds_struct
 	{

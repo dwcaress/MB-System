@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_utils.c,v 5.6 2008/09/29 04:56:21 caress Exp $
+ * $Id: pj_utils.c 1504 2009-01-06 02:11:57Z warmerdam $
  *
  * Project:  PROJ.4
  * Purpose:  Some utility functions we don't want to bother putting in
@@ -26,26 +26,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log: pj_utils.c,v $
- * Revision 5.6  2008/09/29 04:56:21  caress
- * Proj 4.6.1
- *
- * Revision 1.4  2005/07/06 14:04:09  fwarmerdam
- * Improved precision of es encoding for pj_latlong_from_proj() per:
- *   http://bugzilla.remotesensing.org/show_bug.cgi?id=881
- *
- * Revision 1.3  2002/12/14 20:14:00  warmerda
- * added pj_is_geocent, added +pm support to pj_get_def
- *
- * Revision 1.2  2002/04/30 17:01:51  warmerda
- * Removed printf() statement.
- *
- * Revision 1.1  2001/04/05 04:22:46  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 
@@ -134,10 +115,6 @@ PJ *pj_latlong_from_proj( PJ *pj_in )
 
     if( !got_datum )
     {
-        if( pj_param(pj_in->params, "ttowgs84").i )
-            sprintf( defn+strlen(defn), " +towgs84=%s", 
-                     pj_param(pj_in->params,"stowgs84").s );
-
         if( pj_param(pj_in->params, "ttowgs84").i )
             sprintf( defn+strlen(defn), " +towgs84=%s", 
                      pj_param(pj_in->params,"stowgs84").s );

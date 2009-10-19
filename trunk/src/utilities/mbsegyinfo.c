@@ -2,7 +2,7 @@
  *    The MB-system:	mbsegyinfo.c	6/2/2004
  *    $Id: mbsegyinfo.c,v 5.5 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -45,6 +45,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -76,13 +77,12 @@ static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.5 2008/09/13 06:08:09 caress Exp $
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char program_name[] = "MBsegyinfo";
-	static char help_message[] =  "MBsegyinfo lists table data from a segy data file.";
-	static char usage_message[] = "MBsegyinfo -Ifile [-Llonflip -O -H -V]";
+	char program_name[] = "MBsegyinfo";
+	char help_message[] =  "MBsegyinfo lists table data from a segy data file.";
+	char usage_message[] = "MBsegyinfo -Ifile [-Llonflip -O -H -V]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -101,8 +101,6 @@ main (int argc, char **argv)
 	double	bounds[4];
 	int	btime_i[7];
 	int	etime_i[7];
-	double	btime_d;
-	double	etime_d;
 	double	speedmin;
 	double	timegap;
 
@@ -114,20 +112,8 @@ main (int argc, char **argv)
 	float	*trace;
 
 	/* output format list controls */
-	double	distance_total;
 	int	nread = 0;
 	int	first = MB_YES;
-	
-	/* additional time variables */
-	int	first_m = MB_YES;
-	double	time_d_ref;
-	int	first_u = MB_YES;
-	time_t	time_u;
-	time_t	time_u_ref;
-	double	time_interval;
-	double	minutes;
-	int	degrees;
-	char	hemi;
 
 	/* limit variables */
 	int	shotmin = 0;
@@ -168,10 +154,10 @@ main (int argc, char **argv)
 	int	timend_j[5];
 
 	int	time_i[7], time_j[5];
-	double	time_d, time_d_old;
+	double	time_d;
 	double	navlon, navlat;
 	double	factor, sonardepth, waterdepth;
-	double	tracelength, delay, interval;
+	double	tracelength, delay;
 	double	range;
 	double	receiverelevation;
 	double	sourceelevation;
@@ -186,9 +172,8 @@ main (int argc, char **argv)
 	int	output_usefile = MB_NO;
 	char	output_file[MB_PATH_MAXLINE];
 
-	double	b;
 	int	format;
-	int	i, j, k;
+	int	i;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,

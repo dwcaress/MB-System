@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  9/8/00
-#	$Id: Makefile.template,v 5.7 2009-03-13 07:05:58 caress Exp $
+#	$Id: Makefile.template,v 5.7 2009/03/13 07:05:58 caress Exp $
 #
 #     Copyright (c) 2000-2009 by
 #     David W. Caress (caress@mbari.org)
@@ -15,7 +15,10 @@
 # Author:	D. W. Caress
 # Date:		September 8, 2000
 #
-# $Log: not supported by cvs2svn $
+# $Log: Makefile.template,v $
+# Revision 5.7  2009/03/13 07:05:58  caress
+# Release 5.1.2beta02
+#
 # Revision 5.6  2007/10/08 06:09:51  caress
 # Added mb_readgrd.c
 #
@@ -71,7 +74,8 @@ ARCHIVE = ar rcv
 all:	$(LIBDIR)/libmbaux.a \
 	$(LIBDIR)/libmbps.a \
 	$(LIBDIR)/libmbxgr.a \
-	$(INCDIR)/mb_contour.h
+	$(INCDIR)/mb_aux.h \
+	$(INCDIR)/mb_xgraphics.h
 
 ### make clean removes the object files
 clean:
@@ -105,36 +109,39 @@ $(LIBDIR)/libmbps.a:	\
 		mb_pslibface.o
 	ranlib $(LIBDIR)/libmbps.a
 $(LIBDIR)/libmbxgr.a:	\
-		xgraphics.o
+		mb_xgraphics.o
 	$(ARCHIVE) $(LIBDIR)/libmbxgr.a \
-		xgraphics.o
+		mb_xgraphics.o
 	ranlib $(LIBDIR)/libmbxgr.a
 
 ### compile the source files
-mb_spline.o:	mb_spline.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mb_spline.o:	mb_spline.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) mb_spline.c
-mb_zgrid.o:	mb_zgrid.c $(INCDIR)/mb_define.h
+mb_zgrid.o:	mb_zgrid.c $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) mb_zgrid.c
-mb_surface.o:	mb_surface.c
+mb_surface.o:	mb_surface.c $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) mb_surface.c
-mb_cheb.o:	mb_cheb.c $(INCDIR)/mb_status.h
+mb_cheb.o:	mb_cheb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) mb_cheb.c
-mb_delaun.o:	mb_delaun.c $(INCDIR)/mb_status.h
+mb_delaun.o:	mb_delaun.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) mb_delaun.c
-mb_pslibface.o:	mb_pslibface.c  $(INCDIR)/mb_status.h  $(INCDIR)/mb_define.h
+mb_pslibface.o:	mb_pslibface.c  $(INCDIR)/mb_status.h  $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_pslibface.c
-mb_rt.o:	mb_rt.c $(INCDIR)/mb_status.h
+mb_rt.o:	mb_rt.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) mb_rt.c
-mb_track.o:	mb_track.c $(INCDIR)/mb_status.h $(INCDIR)/mb_contour.h
+mb_track.o:	mb_track.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) mb_track.c
-mb_truecont.o:	mb_truecont.c $(INCDIR)/mb_status.h
+mb_truecont.o:	mb_truecont.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) mb_truecont.c
-mb_readgrd.o:	mb_readgrd.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+mb_readgrd.o:	mb_readgrd.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_readgrd.c
-xgraphics.o:	xgraphics.c $(INCDIR)/mb_status.h
-	$(CC) -c $(CFLAGS) xgraphics.c
+mb_xgraphics.o:	mb_xgraphics.c $(INCDIR)/mb_status.h $(INCDIR)/mb_xgraphics.h
+	$(CC) -c $(CFLAGS) mb_xgraphics.c
 
 ### copy the include files to the include file directory
-$(INCDIR)/mb_contour.h:	mb_contour.h
-	cp mb_contour.h $(INCDIR)/mb_contour.h
-	chmod 664 $(INCDIR)/mb_contour.h
+$(INCDIR)/mb_aux.h:	mb_aux.h
+	cp mb_aux.h $(INCDIR)/mb_aux.h
+	chmod 664 $(INCDIR)/mb_aux.h
+$(INCDIR)/mb_xgraphics.h:	mb_xgraphics.h
+	cp mb_xgraphics.h $(INCDIR)/mb_xgraphics.h
+	chmod 664 $(INCDIR)/mb_xgraphics.h

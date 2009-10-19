@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c,v 5.7 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_pslibface.c,v 5.7 2008/07/10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -22,7 +22,10 @@
  * Author:	D. W. Caress
  * Date:	May 15, 1994
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_pslibface.c,v $
+ * Revision 5.7  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.6  2006/12/15 21:42:49  caress
  * Incremental CVS update.
  *
@@ -106,6 +109,7 @@
 /* MBIO include files */
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_aux.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -121,6 +125,8 @@ int	*green;
 int	*blue;
 int	rgb[3];
 
+static char rcs_id[]="$Id: mb_pslibface.c,v 5.7 2008/07/10 06:43:40 caress Exp $";
+
 /*--------------------------------------------------------------------------*/
 /* 	function plot_init initializes the GMT plotting. */
 int plot_init(	int	verbose, 
@@ -131,24 +137,22 @@ int plot_init(	int	verbose,
 		double	*inch2lon, 
 		int	*error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "plot_init";
 	int	status = MB_SUCCESS;
 	int	errflg = 0;
 	double	bounds[4];
 	double	x1, y1, x2, y2, xx1, yy1, xx2, yy2;
-	double	clipx[4], clipy[4];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       argc:             %d\n",argc);
-		fprintf(stderr,"dbg2       argv:             %d\n",argv);
+		fprintf(stderr,"dbg2       argv:             %ld\n",(long)argv);
 		fprintf(stderr,"dbg2       bounds_use[0]:    %f\n",bounds_use[0]);
 		fprintf(stderr,"dbg2       bounds_use[1]:    %f\n",bounds_use[1]);
 		fprintf(stderr,"dbg2       bounds_use[2]:    %f\n",bounds_use[2]);
@@ -249,8 +253,7 @@ int plot_init(	int	verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       bounds[0]:  %f\n",bounds[0]);
 		fprintf(stderr,"dbg2       bounds[1]:  %f\n",bounds[1]);
@@ -269,16 +272,14 @@ int plot_init(	int	verbose,
 /* 	function plot_end ends the GMT plotting. */
 int plot_end(int verbose, int *error)
 {
-  	static char rcs_id[]="$Id: mb_pslibface.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "plot_end";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		}
@@ -303,8 +304,7 @@ int plot_end(int verbose, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -316,7 +316,6 @@ int plot_end(int verbose, int *error)
 /*--------------------------------------------------------------------*/
 int plot_exit(int argc, char **argv)
 {
-	char	*function_name = "plot_exit";
 	int	status = MB_SUCCESS;
 
 	GMT_end(argc, argv);

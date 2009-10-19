@@ -2,7 +2,7 @@
  *    The MB-system:	mb_read_ping.c	2/3/93
  *    $Id: mb_read_ping.c,v 5.5 2005/11/05 00:48:03 caress Exp $
 
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -165,11 +165,11 @@ int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *e
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -221,8 +221,8 @@ int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, int *kind, int *e
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);

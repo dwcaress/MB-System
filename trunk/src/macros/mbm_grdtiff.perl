@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_grdtiff.perl	11/3/1999
 #    $Id: mbm_grdtiff.perl,v 5.5 2006/07/05 19:50:21 caress Exp $
 #
-#    Copyright (c) 1999, 2000, 2003 by
+#    Copyright (c) 1999-2009 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -180,6 +180,7 @@ $zbounds = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
+	print "\nVersion: $Id: $\n";
         print "\nMacro to generate a shellscript which, when executed, will \n";
         print "generate a geographically located TIFF image of gridded \n";
         print "data. The primary purpose of this macro is to allow the simple, \n";

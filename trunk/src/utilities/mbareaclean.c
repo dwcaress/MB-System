@@ -2,7 +2,7 @@
  *    The MB-system:	mbareaclean.c	2/27/2003
  *    $Id: mbareaclean.c,v 5.13 2008/12/05 17:32:52 caress Exp $
  *
- *    Copyright (c) 2003-2008 by
+ *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -82,6 +82,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -148,17 +149,19 @@ struct mbareaclean_sndg_struct *sndg = NULL;
 int getsoundingptr(int verbose, int soundingid, 
 		struct mbareaclean_sndg_struct **sndgptr, 
 		int *error);
+int flag_sounding(int verbose, int flag, int output_bad, int output_good,
+		  struct mbareaclean_sndg_struct *sndg, int *error);
+
+static char rcs_id[] = "$Id: mbareaclean.c,v 5.13 2008/12/05 17:32:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbareaclean.c,v 5.13 2008/12/05 17:32:52 caress Exp $";
-	static char program_name[] = "MBAREACLEAN";
-	static char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
-	static char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize	\n\t -Mthreshold/nmin -Dthreshold[/nmin[/nmax]] -Ttype -N[-]minbeam/maxbeam]";
+	char program_name[] = "MBAREACLEAN";
+	char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
+	char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize	\n\t -Mthreshold/nmin -Dthreshold[/nmin[/nmax]] -Ttype -N[-]minbeam/maxbeam]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -271,9 +274,6 @@ main (int argc, char **argv)
 	int	beams_good_org_tot = 0;
 	int	beams_flag_org_tot = 0;
 	int	beams_null_org_tot = 0;
-	int	beams_good_new_tot = 0;
-	int	beams_flag_new_tot = 0;
-	int	beams_null_new_tot = 0;
 	int	pings_file = 0;
 	int	beams_file = 0;
 	int	beams_good_org_file = 0;
@@ -284,7 +284,6 @@ main (int argc, char **argv)
 	int	esffile_open = MB_NO;
 	char	esffile[MB_PATH_MAXLINE];
 	struct mb_esf_struct esf;
-	char	notice[MB_PATH_MAXLINE];
 	int	action;
 
 	double	xx, yy;
@@ -295,7 +294,7 @@ main (int argc, char **argv)
 	int	ix, iy, ib, kgrid;
 	double	d1, d2;
 	int	i1, i2, n;
-	int	i, j, k;
+	int	i, j;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -494,12 +493,12 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       median_filter_threshold:   %f\n",median_filter_threshold);
 		fprintf(stderr,"dbg2       median_filter_nmin:        %d\n",median_filter_nmin);
 		fprintf(stderr,"dbg2       density_filter:            %d\n",density_filter);
-		fprintf(stderr,"dbg2       density_filter_nmax:       %f\n",density_filter_nmax);
+		fprintf(stderr,"dbg2       density_filter_nmax:       %d\n",density_filter_nmax);
 		fprintf(stderr,"dbg2       plane_fit:                 %d\n",plane_fit);
 		fprintf(stderr,"dbg2       plane_fit_threshold:       %f\n",plane_fit_threshold);
 		fprintf(stderr,"dbg2       plane_fit_nmin:            %d\n",plane_fit_nmin);
 		fprintf(stderr,"dbg2       std_dev_filter:            %d\n",std_dev_filter);
-		fprintf(stderr,"dbg2       std_dev_threshold:         %d\n",std_dev_threshold);
+		fprintf(stderr,"dbg2       std_dev_threshold:         %f\n",std_dev_threshold);
 		fprintf(stderr,"dbg2       std_dev_nmin:              %d\n",std_dev_nmin);
 		fprintf(stderr,"dbg2       use_detect:                %d\n",use_detect);
 		fprintf(stderr,"dbg2       flag_detect:               %d\n",flag_detect);
@@ -691,8 +690,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    swathfile,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1093,8 +1092,8 @@ files[sndg->sndg_file].ping_time_d[sndg->sndg_ping], sndg->sndg_depth);*/
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    swathfile,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -1396,7 +1395,7 @@ int getsoundingptr(int verbose, int soundingid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       soundingid:      %d\n",soundingid);
-		fprintf(stderr,"dbg2       sndgptr:         %d\n",sndgptr);
+		fprintf(stderr,"dbg2       sndgptr:         %ld\n",(long)sndgptr);
 		}
 
 	/* loop over the files until the sounding is found */
@@ -1417,7 +1416,7 @@ int getsoundingptr(int verbose, int soundingid,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       *sndgptr:        %d\n",*sndgptr);
+		fprintf(stderr,"dbg2       *sndgptr:        %ld\n",(long)sndgptr);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);

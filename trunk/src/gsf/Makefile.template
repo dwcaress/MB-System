@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  1/12/98
-#	$Id: Makefile.template,v 5.1 2006-03-06 21:35:24 caress Exp $
+#	$Id: Makefile.template,v 5.1 2006/03/06 21:35:24 caress Exp $
 #
-#     Copyright (c) 1998, 2000, 2003 by
+#     Copyright (c) 1998-2009 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -15,7 +15,10 @@
 # Author:	D. W. Caress
 # Date:		January 12, 1998
 #
-# $Log: not supported by cvs2svn $
+# $Log: Makefile.template,v $
+# Revision 5.1  2006/03/06 21:35:24  caress
+# Changed libproj and libgsf to libmbproj and libmbgsf.
+#
 # Revision 5.0  2003/07/27 20:52:51  caress
 # Release 5.0.0
 #
@@ -37,6 +40,11 @@
 #
 #
 
+### sets locations of vital objects
+BINDIR = ../../bin
+LIBDIR = ../../lib
+INCDIR = ../../include
+
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 # 
 # Compilers 
@@ -47,9 +55,6 @@ CFLAGS = -g -DIRIX
 ARCHIVE = ar rcv
 #
 # *** LEAVE EVERYTHING ELSE BELOW ALONE ***
-
-LIBDIR = ../../lib
-INCDIR = ../../include
 
 ### make all makes the gsf library, man page, and associated include files
 all:	$(LIBDIR)/libmbgsf.a \

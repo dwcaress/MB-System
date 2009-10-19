@@ -1,6 +1,3 @@
-#ifndef lint
-static const char SCCSID[]="@(#)PJ_laea.c	4.1	94/02/15	GIE	REL";
-#endif
 #define PROJ_PARMS__ \
 	double	sinb1; \
 	double	cosb1; \
@@ -179,8 +176,14 @@ INVERSE(s_inverse); /* spheroid */
 		0. : atan2(xy.x, xy.y);
 	return (lp);
 }
-FREEUP; if (P) pj_dalloc(P); }
-ENTRY0(laea)
+FREEUP;
+    if (P) {
+		if (P->apa)
+			pj_dalloc(P->apa);
+		pj_dalloc(P);
+	}
+}
+ENTRY1(laea,apa)
 	double t;
 
 	if (fabs((t = fabs(P->phi0)) - HALFPI) < EPS10)

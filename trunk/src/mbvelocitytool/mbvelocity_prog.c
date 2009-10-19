@@ -2,7 +2,7 @@
  *    The MB-system:    mbvelocitytool.c        6/6/93
  *    $Id: mbvelocity_prog.c,v 5.19 2009/03/02 18:59:05 caress Exp $ 
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -197,52 +197,23 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <X11/Intrinsic.h>
 
 /* MBIO include files */
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_swap.h"
 #include "../../include/mb_process.h"
-
-/* velocity profile structure definition */
-struct profile
-	{
-	int	n;
-	int	nalloc;
-	char	name[MB_PATH_MAXLINE];
-	double	*depth;
-	double	*velocity;
-	};
-
-/* ping structure definition */
-struct mbvt_ping_struct 
-	{
-	int	allocated;
-	int	time_i[7];
-	double	time_d;
-	double	navlon;
-	double	navlat;
-	double	speed;
-	double	heading;
-	double	sonardepth;
-	double	ssv;
-	int	beams_bath;
-	char	*beamflag;
-	double	*bath;
-	double	*bathacrosstrack;
-	double	*bathalongtrack;
-	double	*ttimes;
-	double	*angles;
-	double	*angles_forward;
-	double	*angles_null;
-	double	*heave;
-	double	*alongtrack_offset;
-	};
+#include "../../include/mb_aux.h"
+#include "../../include/mb_xgraphics.h"
+#include "mbvelocity.h"
 
 /* id variables */
 static char rcs_id[] = "$Id: mbvelocity_prog.c,v 5.19 2009/03/02 18:59:05 caress Exp $";
@@ -256,8 +227,6 @@ int	verbose = 0;
 char	*message = NULL;
 
 /* mbvelocitytool control variables */
-#define	MAX_PROFILES	100
-#define	PICK_DISTANCE	50
 struct profile	profile_display[MAX_PROFILES];
 struct profile	profile_edit;
 int	*edit_x = NULL;
@@ -265,7 +234,7 @@ int	*edit_y = NULL;
 char	editfile[MB_PATH_MAXLINE];
 int	edit = 0;
 int	ndisplay = 0;
-int	mbvt_xgid;
+void	*mbvt_xgid;
 int	borders[4];
 double	maxdepth = 3000.0;
 double	velrange = 500.0;
@@ -287,7 +256,6 @@ double	xpscale, ypscale;
 int	active = -1;
 
 /* default edit profile */
-#define	NUM_EDIT_START	6
 int	depthedit[NUM_EDIT_START] 
 		    = { 0, 300, 1000,  3000, 7000, 12000 };
 int	veledit[NUM_EDIT_START] 
@@ -396,7 +364,6 @@ int mbvt_init(int argc, char **argv)
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -616,7 +583,7 @@ int mbvt_quit()
 /* Function returns:                                                  */
 /*                  int status                                        */
 /*--------------------------------------------------------------------*/
-int mbvt_set_graphics(int xgid, int *brdr, int ncol, int *pixels)
+int mbvt_set_graphics(void *xgid, int *brdr, int ncol, unsigned int *pixels)
 {
 	/* local variables */
 	char	*function_name = "mbvt_set_graphics";
@@ -629,7 +596,7 @@ int mbvt_set_graphics(int xgid, int *brdr, int ncol, int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %d\n",xgid);
+		fprintf(stderr,"dbg2       xgid:         %ld\n",(long)xgid);
 		for (i=0;i<4;i++)
 			fprintf(stderr,"dbg2       borders[%d]:   %d\n",
 				i,brdr[i]);
@@ -1453,7 +1420,7 @@ int mbvt_get_display_names(int *nlist, char *list[MAX_PROFILES])
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input values:\n");
-		fprintf(stderr,"dbg2       list:        %d\n",list);
+		fprintf(stderr,"dbg2       list:        %ld\n",(long)list);
 		}
 
 	/* set values */
@@ -1609,7 +1576,7 @@ int mbvt_plot()
 		fprintf(stderr," borders[1] = %d\n", borders[1]);
 		fprintf(stderr," borders[2] = %d\n", borders[2]);
 		fprintf(stderr," borders[3] = %d\n", borders[3]);
-		fprintf(stderr," mbvt_xgid = %d\n", mbvt_xgid);
+		fprintf(stderr," mbvt_xgid  = %ld\n", (long)mbvt_xgid);
 		}
 
 	/* turn clipp mask back to whole canvas */

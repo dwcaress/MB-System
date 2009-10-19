@@ -1,4 +1,3 @@
-
 /* Begin user code block <abstract> */
 /* End user code block <abstract> */
 
@@ -22,6 +21,7 @@
 /*
  * Motif required Headers
  */
+#include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <Xm/Xm.h>
 #include <Xm/DialogS.h>
@@ -59,6 +59,14 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 extern void BxExitCB(Widget, XtPointer, XtPointer);
 
 /* Begin user code block <globals> */
+
+#include "mb_define.h"
+#include "mb_status.h"
+#include "mb_aux.h"
+#include "mbnavadjust.h"
+
+Widget CreatemainWindow(Widget parent);
+
 /* End user code block <globals> */
 
 /**
@@ -72,7 +80,6 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
-    Boolean      argok=False;
     Widget   topLevelShell;
     Widget   mainWindow;
     

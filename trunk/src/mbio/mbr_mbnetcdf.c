@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_mbnetcdf.c	1/25/02
  *	$Id: mbr_mbnetcdf.c,v 5.9 2008/12/05 17:32:52 caress Exp $
  *
- *    Copyright (c) 2002-2008 by
+ *    Copyright (c) 2002-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -113,6 +113,26 @@ int mbr_info_mbnetcdf(int verbose,
 			double *beamwidth_xtrack,
 			double *beamwidth_ltrack,
 			int *error);
+int mbr_info_mbncdfxt(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
+			int *error);
 int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
@@ -120,7 +140,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 #define MBNETCDF_DEBUG 1
 
-static char res_id[]="$Id: mbr_mbnetcdf.c,v 5.9 2008/12/05 17:32:52 caress Exp $";
+static char rcs_id[]="$Id: mbr_mbnetcdf.c,v 5.9 2008/12/05 17:32:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
@@ -132,8 +152,8 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -187,8 +207,7 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
@@ -208,24 +227,24 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -263,8 +282,8 @@ int mbr_info_mbnetcdf(int verbose,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -294,8 +313,7 @@ int mbr_info_mbnetcdf(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -325,7 +343,7 @@ int mbr_info_mbnetcdf(int verbose,
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_mbnetcdfext(int verbose,
+int mbr_info_mbncdfxt(int verbose,
 			int *system,
 			int *beams_bath_max,
 			int *beams_amp_max,
@@ -352,8 +370,8 @@ int mbr_info_mbnetcdfext(int verbose,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -383,8 +401,7 @@ int mbr_info_mbnetcdfext(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -427,11 +444,11 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -459,8 +476,7 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -480,11 +496,11 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -497,8 +513,7 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -535,12 +550,12 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor and data structure */
@@ -657,20 +672,19 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  NetCDF array dimensions read in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  NetCDF array dimensions read in function <%s>\n",function_name);
 		fprintf(stderr,"dbg2  Array and variable dimensions:\n");
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
 		fprintf(stderr,"dbg2       nc_status:               %d\n", nc_status);
-		fprintf(stderr,"dbg2       CIB_BLOCK_DIM:           %d\n", store->CIB_BLOCK_DIM);
-		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %d\n", store->mbHistoryRecNbr);
-		fprintf(stderr,"dbg2       mbNameLength:            %d\n", store->mbNameLength);
-		fprintf(stderr,"dbg2       mbCommentLength:         %d\n", store->mbCommentLength);
-		fprintf(stderr,"dbg2       mbAntennaNbr:            %d\n", store->mbAntennaNbr);
-		fprintf(stderr,"dbg2       mbBeamNbr:               %d\n", store->mbBeamNbr);
-		fprintf(stderr,"dbg2       mbCycleNbr:              %d\n", store->mbCycleNbr);
-		fprintf(stderr,"dbg2       mbVelocityProfilNbr:     %d\n", store->mbVelocityProfilNbr);
+		fprintf(stderr,"dbg2       CIB_BLOCK_DIM:           %ld\n", store->CIB_BLOCK_DIM);
+		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %ld\n", store->mbHistoryRecNbr);
+		fprintf(stderr,"dbg2       mbNameLength:            %ld\n", store->mbNameLength);
+		fprintf(stderr,"dbg2       mbCommentLength:         %ld\n", store->mbCommentLength);
+		fprintf(stderr,"dbg2       mbAntennaNbr:            %ld\n", store->mbAntennaNbr);
+		fprintf(stderr,"dbg2       mbBeamNbr:               %ld\n", store->mbBeamNbr);
+		fprintf(stderr,"dbg2       mbCycleNbr:              %ld\n", store->mbCycleNbr);
+		fprintf(stderr,"dbg2       mbVelocityProfilNbr:     %ld\n", store->mbVelocityProfilNbr);
 		}
 
 	    /* get global attributes */
@@ -779,8 +793,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* print input debug statements */
 		if (verbose >= 2)
 		    {
-		    fprintf(stderr,"\ndbg2  NetCDF global attributes read in function <%s>\n",
-			    function_name);
+		    fprintf(stderr,"\ndbg2  NetCDF global attributes read in function <%s>\n",function_name);
 		    fprintf(stderr,"dbg2  Global attributes:\n");
 		    fprintf(stderr,"dbg2       status:                  %d\n", status);
 		    fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -965,8 +978,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* print input debug statements */
 		if (verbose >= 2)
 		    {
-		    fprintf(stderr,"\ndbg2  NetCDF variable ids read in function <%s>\n",
-			    function_name);
+		    fprintf(stderr,"\ndbg2  NetCDF variable ids read in function <%s>\n",function_name);
 		    fprintf(stderr,"dbg2  Variable ids:\n");
 		    fprintf(stderr,"dbg2       status:                  %d\n", status);
 		    fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -1255,8 +1267,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    *error = MB_ERROR_MEMORY_FAIL;
 		    if (verbose >= 2)
 			    {
-			    fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",
-				    function_name);
+			    fprintf(stderr,"\ndbg2  MBIO function <%s> terminated with error\n",function_name);
 			    fprintf(stderr,"dbg2  Return values:\n");
 			    fprintf(stderr,"dbg2       error:      %d\n",*error);
 			    fprintf(stderr,"dbg2  Return status:\n");
@@ -1340,7 +1351,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbHistCode_id, "name_code", store->mbHistCode_name_code);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbHistCode_name_code error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbHistCode_id, "units", store->mbHistCode_units);
-fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
+/*fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);*/
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbHistCode_units error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbHistCode_id, "unit_code", store->mbHistCode_unit_code);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbHistCode_unit_code error: %s\n", nc_strerror(nc_status));
@@ -2954,8 +2965,7 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		/* print input debug statements */
 		if (verbose >= 2)
 		    {
-		    fprintf(stderr,"\ndbg2  NetCDF variable attributes read in function <%s>\n",
-			    function_name);
+		    fprintf(stderr,"\ndbg2  NetCDF variable attributes read in function <%s>\n",function_name);
 		    fprintf(stderr,"dbg2  Variable attributes:\n");
 		    fprintf(stderr,"dbg2       status:                  %d\n", status);
 		    fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -3031,8 +3041,8 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    fprintf(stderr,"dbg2       mbOrdinate_unit_code:		%s\n", store->mbOrdinate_unit_code);
 		    fprintf(stderr,"dbg2       mbOrdinate_add_offset:		%f\n", store->mbOrdinate_add_offset);
 		    fprintf(stderr,"dbg2       mbOrdinate_scale_factor:		%f\n", store->mbOrdinate_scale_factor);
-		    fprintf(stderr,"dbg2       mbOrdinate_minimum:		%d\n", store->mbOrdinate_minimum);
-		    fprintf(stderr,"dbg2       mbOrdinate_maximum:		%d\n", store->mbOrdinate_maximum);
+		    fprintf(stderr,"dbg2       mbOrdinate_minimum:		%f\n", store->mbOrdinate_minimum);
+		    fprintf(stderr,"dbg2       mbOrdinate_maximum:		%f\n", store->mbOrdinate_maximum);
 		    fprintf(stderr,"dbg2       mbOrdinate_valid_minimum:		%d\n", store->mbOrdinate_valid_minimum);
 		    fprintf(stderr,"dbg2       mbOrdinate_valid_maximum:		%d\n", store->mbOrdinate_valid_maximum);
 		    fprintf(stderr,"dbg2       mbOrdinate_missing_value:		%d\n", store->mbOrdinate_missing_value);
@@ -3045,8 +3055,8 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    fprintf(stderr,"dbg2       mbAbscissa_unit_code:		%s\n", store->mbAbscissa_unit_code);
 		    fprintf(stderr,"dbg2       mbAbscissa_add_offset:		%f\n", store->mbAbscissa_add_offset);
 		    fprintf(stderr,"dbg2       mbAbscissa_scale_factor:		%f\n", store->mbAbscissa_scale_factor);
-		    fprintf(stderr,"dbg2       mbAbscissa_minimum:		%d\n", store->mbAbscissa_minimum);
-		    fprintf(stderr,"dbg2       mbAbscissa_maximum:		%d\n", store->mbAbscissa_maximum);
+		    fprintf(stderr,"dbg2       mbAbscissa_minimum:		%f\n", store->mbAbscissa_minimum);
+		    fprintf(stderr,"dbg2       mbAbscissa_maximum:		%f\n", store->mbAbscissa_maximum);
 		    fprintf(stderr,"dbg2       mbAbscissa_valid_minimum:		%d\n", store->mbAbscissa_valid_minimum);
 		    fprintf(stderr,"dbg2       mbAbscissa_valid_maximum:		%d\n", store->mbAbscissa_valid_maximum);
 		    fprintf(stderr,"dbg2       mbAbscissa_missing_value:		%d\n", store->mbAbscissa_missing_value);
@@ -3065,72 +3075,72 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    fprintf(stderr,"dbg2       mbFrequency_valid_maximum:		%d\n", store->mbFrequency_valid_maximum);
 		    fprintf(stderr,"dbg2       mbFrequency_missing_value:		%d\n", store->mbFrequency_missing_value);
 		    fprintf(stderr,"dbg2       mbFrequency_format_C:		%s\n", store->mbFrequency_format_C);
-		    fprintf(stderr,"dbg2       mbFrequency_orientation:		%s\n", store->mbFrequency_orientation);
-		    fprintf(stderr,"dbg2       mbSounderMode_type:		%s\n", store->mbSounderMode_type);
-		    fprintf(stderr,"dbg2       mbSounderMode_long_name:		%s\n", store->mbSounderMode_long_name);
-		    fprintf(stderr,"dbg2       mbSounderMode_name_code:		%s\n", store->mbSounderMode_name_code);
-		    fprintf(stderr,"dbg2       mbSounderMode_units:		%s\n", store->mbSounderMode_units);
-		    fprintf(stderr,"dbg2       mbSounderMode_unit_code:		%s\n", store->mbSounderMode_unit_code);
+		    fprintf(stderr,"dbg2       mbFrequency_orientation:			%s\n", store->mbFrequency_orientation);
+		    fprintf(stderr,"dbg2       mbSounderMode_type:			%s\n", store->mbSounderMode_type);
+		    fprintf(stderr,"dbg2       mbSounderMode_long_name:			%s\n", store->mbSounderMode_long_name);
+		    fprintf(stderr,"dbg2       mbSounderMode_name_code:			%s\n", store->mbSounderMode_name_code);
+		    fprintf(stderr,"dbg2       mbSounderMode_units:			%s\n", store->mbSounderMode_units);
+		    fprintf(stderr,"dbg2       mbSounderMode_unit_code:			%s\n", store->mbSounderMode_unit_code);
 		    fprintf(stderr,"dbg2       mbSounderMode_add_offset:		%d\n", store->mbSounderMode_add_offset);
 		    fprintf(stderr,"dbg2       mbSounderMode_scale_factor:		%d\n", store->mbSounderMode_scale_factor);
-		    fprintf(stderr,"dbg2       mbSounderMode_minimum:		%d\n", store->mbSounderMode_minimum);
-		    fprintf(stderr,"dbg2       mbSounderMode_maximum:		%d\n", store->mbSounderMode_maximum);
+		    fprintf(stderr,"dbg2       mbSounderMode_minimum:			%d\n", store->mbSounderMode_minimum);
+		    fprintf(stderr,"dbg2       mbSounderMode_maximum:			%d\n", store->mbSounderMode_maximum);
 		    fprintf(stderr,"dbg2       mbSounderMode_valid_minimum:		%d\n", store->mbSounderMode_valid_minimum);
 		    fprintf(stderr,"dbg2       mbSounderMode_valid_maximum:		%d\n", store->mbSounderMode_valid_maximum);
 		    fprintf(stderr,"dbg2       mbSounderMode_missing_value:		%d\n", store->mbSounderMode_missing_value);
-		    fprintf(stderr,"dbg2       mbSounderMode_format_C:		%s\n", store->mbSounderMode_format_C);
+		    fprintf(stderr,"dbg2       mbSounderMode_format_C:			%s\n", store->mbSounderMode_format_C);
 		    fprintf(stderr,"dbg2       mbSounderMode_orientation:		%s\n", store->mbSounderMode_orientation);
-		    fprintf(stderr,"dbg2       mbReferenceDepth_type:		%s\n", store->mbReferenceDepth_type);
+		    fprintf(stderr,"dbg2       mbReferenceDepth_type:			%s\n", store->mbReferenceDepth_type);
 		    fprintf(stderr,"dbg2       mbReferenceDepth_long_name:		%s\n", store->mbReferenceDepth_long_name);
 		    fprintf(stderr,"dbg2       mbReferenceDepth_name_code:		%s\n", store->mbReferenceDepth_name_code);
-		    fprintf(stderr,"dbg2       mbReferenceDepth_units:		%s\n", store->mbReferenceDepth_units);
+		    fprintf(stderr,"dbg2       mbReferenceDepth_units:			%s\n", store->mbReferenceDepth_units);
 		    fprintf(stderr,"dbg2       mbReferenceDepth_unit_code:		%s\n", store->mbReferenceDepth_unit_code);
 		    fprintf(stderr,"dbg2       mbReferenceDepth_add_offset:		%f\n", store->mbReferenceDepth_add_offset);
 		    fprintf(stderr,"dbg2       mbReferenceDepth_scale_factor:		%f\n", store->mbReferenceDepth_scale_factor);
-		    fprintf(stderr,"dbg2       mbReferenceDepth_minimum:		%d\n", store->mbReferenceDepth_minimum);
-		    fprintf(stderr,"dbg2       mbReferenceDepth_maximum:		%d\n", store->mbReferenceDepth_maximum);
+		    fprintf(stderr,"dbg2       mbReferenceDepth_minimum:		%f\n", store->mbReferenceDepth_minimum);
+		    fprintf(stderr,"dbg2       mbReferenceDepth_maximum:		%f\n", store->mbReferenceDepth_maximum);
 		    fprintf(stderr,"dbg2       mbReferenceDepth_valid_minimum:		%d\n", store->mbReferenceDepth_valid_minimum);
 		    fprintf(stderr,"dbg2       mbReferenceDepth_valid_maximum:		%d\n", store->mbReferenceDepth_valid_maximum);
 		    fprintf(stderr,"dbg2       mbReferenceDepth_missing_value:		%d\n", store->mbReferenceDepth_missing_value);
 		    fprintf(stderr,"dbg2       mbReferenceDepth_format_C:		%s\n", store->mbReferenceDepth_format_C);
 		    fprintf(stderr,"dbg2       mbReferenceDepth_orientation:		%s\n", store->mbReferenceDepth_orientation);
-		    fprintf(stderr,"dbg2       mbDynamicDraught_type:		%s\n", store->mbDynamicDraught_type);
+		    fprintf(stderr,"dbg2       mbDynamicDraught_type:			%s\n", store->mbDynamicDraught_type);
 		    fprintf(stderr,"dbg2       mbDynamicDraught_long_name:		%s\n", store->mbDynamicDraught_long_name);
 		    fprintf(stderr,"dbg2       mbDynamicDraught_name_code:		%s\n", store->mbDynamicDraught_name_code);
-		    fprintf(stderr,"dbg2       mbDynamicDraught_units:		%s\n", store->mbDynamicDraught_units);
+		    fprintf(stderr,"dbg2       mbDynamicDraught_units:			%s\n", store->mbDynamicDraught_units);
 		    fprintf(stderr,"dbg2       mbDynamicDraught_unit_code:		%s\n", store->mbDynamicDraught_unit_code);
 		    fprintf(stderr,"dbg2       mbDynamicDraught_add_offset:		%f\n", store->mbDynamicDraught_add_offset);
 		    fprintf(stderr,"dbg2       mbDynamicDraught_scale_factor:		%f\n", store->mbDynamicDraught_scale_factor);
-		    fprintf(stderr,"dbg2       mbDynamicDraught_minimum:		%d\n", store->mbDynamicDraught_minimum);
-		    fprintf(stderr,"dbg2       mbDynamicDraught_maximum:		%d\n", store->mbDynamicDraught_maximum);
+		    fprintf(stderr,"dbg2       mbDynamicDraught_minimum:		%f\n", store->mbDynamicDraught_minimum);
+		    fprintf(stderr,"dbg2       mbDynamicDraught_maximum:		%f\n", store->mbDynamicDraught_maximum);
 		    fprintf(stderr,"dbg2       mbDynamicDraught_valid_minimum:		%d\n", store->mbDynamicDraught_valid_minimum);
 		    fprintf(stderr,"dbg2       mbDynamicDraught_valid_maximum:		%d\n", store->mbDynamicDraught_valid_maximum);
 		    fprintf(stderr,"dbg2       mbDynamicDraught_missing_value:		%d\n", store->mbDynamicDraught_missing_value);
 		    fprintf(stderr,"dbg2       mbDynamicDraught_format_C:		%s\n", store->mbDynamicDraught_format_C);
 		    fprintf(stderr,"dbg2       mbDynamicDraught_orientation:		%s\n", store->mbDynamicDraught_orientation);
-		    fprintf(stderr,"dbg2       mbTide_type:		%s\n", store->mbTide_type);
-		    fprintf(stderr,"dbg2       mbTide_long_name:		%s\n", store->mbTide_long_name);
-		    fprintf(stderr,"dbg2       mbTide_name_code:		%s\n", store->mbTide_name_code);
-		    fprintf(stderr,"dbg2       mbTide_units:		%s\n", store->mbTide_units);
-		    fprintf(stderr,"dbg2       mbTide_unit_code:		%s\n", store->mbTide_unit_code);
-		    fprintf(stderr,"dbg2       mbTide_add_offset:		%f\n", store->mbTide_add_offset);
-		    fprintf(stderr,"dbg2       mbTide_scale_factor:		%f\n", store->mbTide_scale_factor);
-		    fprintf(stderr,"dbg2       mbTide_minimum:		%d\n", store->mbTide_minimum);
-		    fprintf(stderr,"dbg2       mbTide_maximum:		%d\n", store->mbTide_maximum);
-		    fprintf(stderr,"dbg2       mbTide_valid_minimum:		%d\n", store->mbTide_valid_minimum);
-		    fprintf(stderr,"dbg2       mbTide_valid_maximum:		%d\n", store->mbTide_valid_maximum);
-		    fprintf(stderr,"dbg2       mbTide_missing_value:		%d\n", store->mbTide_missing_value);
-		    fprintf(stderr,"dbg2       mbTide_format_C:		%s\n", store->mbTide_format_C);
-		    fprintf(stderr,"dbg2       mbTide_orientation:		%s\n", store->mbTide_orientation);
-		    fprintf(stderr,"dbg2       mbSoundVelocity_type:		%s\n", store->mbSoundVelocity_type);
+		    fprintf(stderr,"dbg2       mbTide_type:				%s\n", store->mbTide_type);
+		    fprintf(stderr,"dbg2       mbTide_long_name:			%s\n", store->mbTide_long_name);
+		    fprintf(stderr,"dbg2       mbTide_name_code:			%s\n", store->mbTide_name_code);
+		    fprintf(stderr,"dbg2       mbTide_units:				%s\n", store->mbTide_units);
+		    fprintf(stderr,"dbg2       mbTide_unit_code:			%s\n", store->mbTide_unit_code);
+		    fprintf(stderr,"dbg2       mbTide_add_offset:			%f\n", store->mbTide_add_offset);
+		    fprintf(stderr,"dbg2       mbTide_scale_factor:			%f\n", store->mbTide_scale_factor);
+		    fprintf(stderr,"dbg2       mbTide_minimum:				%f\n", store->mbTide_minimum);
+		    fprintf(stderr,"dbg2       mbTide_maximum:				%f\n", store->mbTide_maximum);
+		    fprintf(stderr,"dbg2       mbTide_valid_minimum:			%d\n", store->mbTide_valid_minimum);
+		    fprintf(stderr,"dbg2       mbTide_valid_maximum:			%d\n", store->mbTide_valid_maximum);
+		    fprintf(stderr,"dbg2       mbTide_missing_value:			%d\n", store->mbTide_missing_value);
+		    fprintf(stderr,"dbg2       mbTide_format_C:				%s\n", store->mbTide_format_C);
+		    fprintf(stderr,"dbg2       mbTide_orientation:			%s\n", store->mbTide_orientation);
+		    fprintf(stderr,"dbg2       mbSoundVelocity_type:			%s\n", store->mbSoundVelocity_type);
 		    fprintf(stderr,"dbg2       mbSoundVelocity_long_name:		%s\n", store->mbSoundVelocity_long_name);
 		    fprintf(stderr,"dbg2       mbSoundVelocity_name_code:		%s\n", store->mbSoundVelocity_name_code);
-		    fprintf(stderr,"dbg2       mbSoundVelocity_units:		%s\n", store->mbSoundVelocity_units);
+		    fprintf(stderr,"dbg2       mbSoundVelocity_units:			%s\n", store->mbSoundVelocity_units);
 		    fprintf(stderr,"dbg2       mbSoundVelocity_unit_code:		%s\n", store->mbSoundVelocity_unit_code);
 		    fprintf(stderr,"dbg2       mbSoundVelocity_add_offset:		%f\n", store->mbSoundVelocity_add_offset);
 		    fprintf(stderr,"dbg2       mbSoundVelocity_scale_factor:		%f\n", store->mbSoundVelocity_scale_factor);
-		    fprintf(stderr,"dbg2       mbSoundVelocity_minimum:		%d\n", store->mbSoundVelocity_minimum);
-		    fprintf(stderr,"dbg2       mbSoundVelocity_maximum:		%d\n", store->mbSoundVelocity_maximum);
+		    fprintf(stderr,"dbg2       mbSoundVelocity_minimum:			%f\n", store->mbSoundVelocity_minimum);
+		    fprintf(stderr,"dbg2       mbSoundVelocity_maximum:			%f\n", store->mbSoundVelocity_maximum);
 		    fprintf(stderr,"dbg2       mbSoundVelocity_valid_minimum:		%d\n", store->mbSoundVelocity_valid_minimum);
 		    fprintf(stderr,"dbg2       mbSoundVelocity_valid_maximum:		%d\n", store->mbSoundVelocity_valid_maximum);
 		    fprintf(stderr,"dbg2       mbSoundVelocity_missing_value:		%d\n", store->mbSoundVelocity_missing_value);
@@ -3143,8 +3153,8 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    fprintf(stderr,"dbg2       mbHeading_unit_code:		%s\n", store->mbHeading_unit_code);
 		    fprintf(stderr,"dbg2       mbHeading_add_offset:		%f\n", store->mbHeading_add_offset);
 		    fprintf(stderr,"dbg2       mbHeading_scale_factor:		%f\n", store->mbHeading_scale_factor);
-		    fprintf(stderr,"dbg2       mbHeading_minimum:		%d\n", store->mbHeading_minimum);
-		    fprintf(stderr,"dbg2       mbHeading_maximum:		%d\n", store->mbHeading_maximum);
+		    fprintf(stderr,"dbg2       mbHeading_minimum:		%f\n", store->mbHeading_minimum);
+		    fprintf(stderr,"dbg2       mbHeading_maximum:		%f\n", store->mbHeading_maximum);
 		    fprintf(stderr,"dbg2       mbHeading_valid_minimum:		%d\n", store->mbHeading_valid_minimum);
 		    fprintf(stderr,"dbg2       mbHeading_valid_maximum:		%d\n", store->mbHeading_valid_maximum);
 		    fprintf(stderr,"dbg2       mbHeading_missing_value:		%d\n", store->mbHeading_missing_value);
@@ -3157,8 +3167,8 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    fprintf(stderr,"dbg2       mbRoll_unit_code:		%s\n", store->mbRoll_unit_code);
 		    fprintf(stderr,"dbg2       mbRoll_add_offset:		%f\n", store->mbRoll_add_offset);
 		    fprintf(stderr,"dbg2       mbRoll_scale_factor:		%f\n", store->mbRoll_scale_factor);
-		    fprintf(stderr,"dbg2       mbRoll_minimum:		%d\n", store->mbRoll_minimum);
-		    fprintf(stderr,"dbg2       mbRoll_maximum:		%d\n", store->mbRoll_maximum);
+		    fprintf(stderr,"dbg2       mbRoll_minimum:		%f\n", store->mbRoll_minimum);
+		    fprintf(stderr,"dbg2       mbRoll_maximum:		%f\n", store->mbRoll_maximum);
 		    fprintf(stderr,"dbg2       mbRoll_valid_minimum:		%d\n", store->mbRoll_valid_minimum);
 		    fprintf(stderr,"dbg2       mbRoll_valid_maximum:		%d\n", store->mbRoll_valid_maximum);
 		    fprintf(stderr,"dbg2       mbRoll_missing_value:		%d\n", store->mbRoll_missing_value);
@@ -3171,8 +3181,8 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    fprintf(stderr,"dbg2       mbPitch_unit_code:		%s\n", store->mbPitch_unit_code);
 		    fprintf(stderr,"dbg2       mbPitch_add_offset:		%f\n", store->mbPitch_add_offset);
 		    fprintf(stderr,"dbg2       mbPitch_scale_factor:		%f\n", store->mbPitch_scale_factor);
-		    fprintf(stderr,"dbg2       mbPitch_minimum:		%d\n", store->mbPitch_minimum);
-		    fprintf(stderr,"dbg2       mbPitch_maximum:		%d\n", store->mbPitch_maximum);
+		    fprintf(stderr,"dbg2       mbPitch_minimum:		%f\n", store->mbPitch_minimum);
+		    fprintf(stderr,"dbg2       mbPitch_maximum:		%f\n", store->mbPitch_maximum);
 		    fprintf(stderr,"dbg2       mbPitch_valid_minimum:		%d\n", store->mbPitch_valid_minimum);
 		    fprintf(stderr,"dbg2       mbPitch_valid_maximum:		%d\n", store->mbPitch_valid_maximum);
 		    fprintf(stderr,"dbg2       mbPitch_missing_value:		%d\n", store->mbPitch_missing_value);
@@ -3185,8 +3195,8 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    fprintf(stderr,"dbg2       mbTransmissionHeave_unit_code:		%s\n", store->mbTransmissionHeave_unit_code);
 		    fprintf(stderr,"dbg2       mbTransmissionHeave_add_offset:		%f\n", store->mbTransmissionHeave_add_offset);
 		    fprintf(stderr,"dbg2       mbTransmissionHeave_scale_factor:		%f\n", store->mbTransmissionHeave_scale_factor);
-		    fprintf(stderr,"dbg2       mbTransmissionHeave_minimum:		%d\n", store->mbTransmissionHeave_minimum);
-		    fprintf(stderr,"dbg2       mbTransmissionHeave_maximum:		%d\n", store->mbTransmissionHeave_maximum);
+		    fprintf(stderr,"dbg2       mbTransmissionHeave_minimum:		%f\n", store->mbTransmissionHeave_minimum);
+		    fprintf(stderr,"dbg2       mbTransmissionHeave_maximum:		%f\n", store->mbTransmissionHeave_maximum);
 		    fprintf(stderr,"dbg2       mbTransmissionHeave_valid_minimum:		%d\n", store->mbTransmissionHeave_valid_minimum);
 		    fprintf(stderr,"dbg2       mbTransmissionHeave_valid_maximum:		%d\n", store->mbTransmissionHeave_valid_maximum);
 		    fprintf(stderr,"dbg2       mbTransmissionHeave_missing_value:		%d\n", store->mbTransmissionHeave_missing_value);
@@ -3199,8 +3209,8 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    fprintf(stderr,"dbg2       mbDistanceScale_unit_code:		%s\n", store->mbDistanceScale_unit_code);
 		    fprintf(stderr,"dbg2       mbDistanceScale_add_offset:		%f\n", store->mbDistanceScale_add_offset);
 		    fprintf(stderr,"dbg2       mbDistanceScale_scale_factor:		%f\n", store->mbDistanceScale_scale_factor);
-		    fprintf(stderr,"dbg2       mbDistanceScale_minimum:		%d\n", store->mbDistanceScale_minimum);
-		    fprintf(stderr,"dbg2       mbDistanceScale_maximum:		%d\n", store->mbDistanceScale_maximum);
+		    fprintf(stderr,"dbg2       mbDistanceScale_minimum:		%f\n", store->mbDistanceScale_minimum);
+		    fprintf(stderr,"dbg2       mbDistanceScale_maximum:		%f\n", store->mbDistanceScale_maximum);
 		    fprintf(stderr,"dbg2       mbDistanceScale_valid_minimum:		%d\n", store->mbDistanceScale_valid_minimum);
 		    fprintf(stderr,"dbg2       mbDistanceScale_valid_maximum:		%d\n", store->mbDistanceScale_valid_maximum);
 		    fprintf(stderr,"dbg2       mbDistanceScale_missing_value:		%d\n", store->mbDistanceScale_missing_value);
@@ -3213,8 +3223,8 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    fprintf(stderr,"dbg2       mbDepthScale_unit_code:		%s\n", store->mbDepthScale_unit_code);
 		    fprintf(stderr,"dbg2       mbDepthScale_add_offset:		%f\n", store->mbDepthScale_add_offset);
 		    fprintf(stderr,"dbg2       mbDepthScale_scale_factor:		%f\n", store->mbDepthScale_scale_factor);
-		    fprintf(stderr,"dbg2       mbDepthScale_minimum:		%d\n", store->mbDepthScale_minimum);
-		    fprintf(stderr,"dbg2       mbDepthScale_maximum:		%d\n", store->mbDepthScale_maximum);
+		    fprintf(stderr,"dbg2       mbDepthScale_minimum:		%f\n", store->mbDepthScale_minimum);
+		    fprintf(stderr,"dbg2       mbDepthScale_maximum:		%f\n", store->mbDepthScale_maximum);
 		    fprintf(stderr,"dbg2       mbDepthScale_valid_minimum:		%d\n", store->mbDepthScale_valid_minimum);
 		    fprintf(stderr,"dbg2       mbDepthScale_valid_maximum:		%d\n", store->mbDepthScale_valid_maximum);
 		    fprintf(stderr,"dbg2       mbDepthScale_missing_value:		%d\n", store->mbDepthScale_missing_value);
@@ -3603,8 +3613,7 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		/* print input debug statements */
 		if (verbose >= 2)
 		    {
-		    fprintf(stderr,"\ndbg2  NetCDF Global Variables read in function <%s>\n",
-			    function_name);
+		    fprintf(stderr,"\ndbg2  NetCDF Global Variables read in function <%s>\n",function_name);
 		    fprintf(stderr,"dbg2  Global Variables:\n");
 		    fprintf(stderr,"dbg2       status:                  %d\n", status);
 		    fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -3619,14 +3628,14 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 			fprintf(stderr,"dbg2       mbHistModule[%2d]:        %s\n", i, &(store->mbHistModule[i*store->mbNameLength]));
 			fprintf(stderr,"dbg2       mbHistComment[%2d]:       %s\n", i, &(store->mbHistComment[i*store->mbCommentLength]));
 			}
-		    fprintf(stderr,"dbg2       mbAntennaNbr:              %d\n", store->mbAntennaNbr);
+		    fprintf(stderr,"dbg2       mbAntennaNbr:              %ld\n", store->mbAntennaNbr);
 		    fprintf(stderr,"dbg2       Antenna mbBeam mbAFlag\n");
 		    for (i=0;i<store->mbAntennaNbr;i++)
 			{
 			fprintf(stderr,"dbg2       %d %d %d\n",
 				i, store->mbBeam[i], store->mbAFlag[i]);
 			}
-		    fprintf(stderr,"dbg2       mbBeamNbr:              %d\n", store->mbBeamNbr);
+		    fprintf(stderr,"dbg2       mbBeamNbr:              %ld\n", store->mbBeamNbr);
 		    fprintf(stderr,"dbg2       beam mbAntenna mbBeamBias mbBFlag\n");
 		    for (i=0;i<store->mbBeamNbr;i++)
 			{
@@ -3634,7 +3643,7 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 				i, store->mbAntenna[i], store->mbBeamBias[i],
 				store->mbBFlag[i]);
 			}
-		    fprintf(stderr,"dbg2       mbVelocityProfilNbr:    %d\n", store->mbVelocityProfilNbr);
+		    fprintf(stderr,"dbg2       mbVelocityProfilNbr:    %ld\n", store->mbVelocityProfilNbr);
 		    for (i=0;i<store->mbVelocityProfilNbr;i++)
 			{
 			fprintf(stderr,"dbg2       mbVelProfilRef[%2d]:      %s\n", i, &(store->mbVelProfilRef[i*store->mbCommentLength]));
@@ -3674,8 +3683,7 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Comment read in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  Comment read in function <%s>\n",function_name);
 		fprintf(stderr,"dbg2  Comment:\n");
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -3990,8 +3998,7 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  NetCDF Survey Record read in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  NetCDF Survey Record read in function <%s>\n",function_name);
 		fprintf(stderr,"dbg2  Global Variables:\n");
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -4084,7 +4091,7 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		for (i=0;i<store->mbAntennaNbr;i++)
 			fprintf(stderr, "%d ", store->mbSamplingRate[i]);
 		fprintf(stderr, "\n");
-		fprintf(stderr,"dbg2       mbBeamNbr:               %d\n", store->mbBeamNbr);
+		fprintf(stderr,"dbg2       mbBeamNbr:               %ld\n", store->mbBeamNbr);
 		fprintf(stderr,"dbg2       beam ltrack xtrack depth quality flag\n");
 		for (i=0;i<store->mbBeamNbr;i++)
 		    {
@@ -4114,8 +4121,7 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -4162,12 +4168,12 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor and data storage */
@@ -4277,8 +4283,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Comment saved in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  Comment saved in function <%s>\n",function_name);
 		fprintf(stderr,"dbg2  Comment:\n");
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -4303,7 +4308,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    	{
    	    	nc_status = nc_def_dim((int)mb_io_ptr->mbfp, "CIB_BLOCK_DIM", storelocal->CIB_BLOCK_DIM, &CIB_BLOCK_DIM_id);
 	    	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_dim CIB_BLOCK_DIM error: %s\n", nc_strerror(nc_status));
-fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
+/*fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%ld\n",storelocal->CIB_BLOCK_DIM);*/
 		}
    	    nc_status = nc_def_dim((int)mb_io_ptr->mbfp, "mbHistoryRecNbr", storelocal->mbHistoryRecNbr, &mbHistoryRecNbr_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_dim mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
@@ -4323,20 +4328,19 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  NetCDF array dimensions written in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  NetCDF array dimensions written in function <%s>\n",function_name);
 		fprintf(stderr,"dbg2  Array and variable dimensions:\n");
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
 		fprintf(stderr,"dbg2       nc_status:               %d\n", nc_status);
-		fprintf(stderr,"dbg2       CIB_BLOCK_DIM:           %d\n", storelocal->CIB_BLOCK_DIM);
-		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %d\n", storelocal->mbHistoryRecNbr);
-		fprintf(stderr,"dbg2       mbNameLength:            %d\n", storelocal->mbNameLength);
-		fprintf(stderr,"dbg2       mbCommentLength:         %d\n", storelocal->mbCommentLength);
-		fprintf(stderr,"dbg2       mbAntennaNbr:            %d\n", storelocal->mbAntennaNbr);
-		fprintf(stderr,"dbg2       mbBeamNbr:               %d\n", storelocal->mbBeamNbr);
-		fprintf(stderr,"dbg2       mbCycleNbr:              %d\n", storelocal->mbCycleNbr);
-		fprintf(stderr,"dbg2       mbVelocityProfilNbr:     %d\n", storelocal->mbVelocityProfilNbr);
+		fprintf(stderr,"dbg2       CIB_BLOCK_DIM:           %ld\n", storelocal->CIB_BLOCK_DIM);
+		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %ld\n", storelocal->mbHistoryRecNbr);
+		fprintf(stderr,"dbg2       mbNameLength:            %ld\n", storelocal->mbNameLength);
+		fprintf(stderr,"dbg2       mbCommentLength:         %ld\n", storelocal->mbCommentLength);
+		fprintf(stderr,"dbg2       mbAntennaNbr:            %ld\n", storelocal->mbAntennaNbr);
+		fprintf(stderr,"dbg2       mbBeamNbr:               %ld\n", storelocal->mbBeamNbr);
+		fprintf(stderr,"dbg2       mbCycleNbr:              %ld\n", storelocal->mbCycleNbr);
+		fprintf(stderr,"dbg2       mbVelocityProfilNbr:     %ld\n", storelocal->mbVelocityProfilNbr);
 		}
 
 	    /* define global variables */
@@ -4533,8 +4537,7 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  NetCDF variable ids written in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  NetCDF variable ids written in function <%s>\n",function_name);
 		fprintf(stderr,"dbg2  Variable ids:\n");
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -4682,8 +4685,7 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  NetCDF global attributes written in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  NetCDF global attributes written in function <%s>\n",function_name);
 		fprintf(stderr,"dbg2  Global attributes:\n");
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -6275,8 +6277,7 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  NetCDF variable attributes written in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  NetCDF variable attributes written in function <%s>\n",function_name);
 		fprintf(stderr,"dbg2  Variable attributes:\n");
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -6352,8 +6353,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbOrdinate_unit_code:		%s\n", storelocal->mbOrdinate_unit_code);
 		fprintf(stderr,"dbg2       mbOrdinate_add_offset:		%f\n", storelocal->mbOrdinate_add_offset);
 		fprintf(stderr,"dbg2       mbOrdinate_scale_factor:		%f\n", storelocal->mbOrdinate_scale_factor);
-		fprintf(stderr,"dbg2       mbOrdinate_minimum:		%d\n", storelocal->mbOrdinate_minimum);
-		fprintf(stderr,"dbg2       mbOrdinate_maximum:		%d\n", storelocal->mbOrdinate_maximum);
+		fprintf(stderr,"dbg2       mbOrdinate_minimum:		%f\n", storelocal->mbOrdinate_minimum);
+		fprintf(stderr,"dbg2       mbOrdinate_maximum:		%f\n", storelocal->mbOrdinate_maximum);
 		fprintf(stderr,"dbg2       mbOrdinate_valid_minimum:		%d\n", storelocal->mbOrdinate_valid_minimum);
 		fprintf(stderr,"dbg2       mbOrdinate_valid_maximum:		%d\n", storelocal->mbOrdinate_valid_maximum);
 		fprintf(stderr,"dbg2       mbOrdinate_missing_value:		%d\n", storelocal->mbOrdinate_missing_value);
@@ -6366,8 +6367,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbAbscissa_unit_code:		%s\n", storelocal->mbAbscissa_unit_code);
 		fprintf(stderr,"dbg2       mbAbscissa_add_offset:		%f\n", storelocal->mbAbscissa_add_offset);
 		fprintf(stderr,"dbg2       mbAbscissa_scale_factor:		%f\n", storelocal->mbAbscissa_scale_factor);
-		fprintf(stderr,"dbg2       mbAbscissa_minimum:		%d\n", storelocal->mbAbscissa_minimum);
-		fprintf(stderr,"dbg2       mbAbscissa_maximum:		%d\n", storelocal->mbAbscissa_maximum);
+		fprintf(stderr,"dbg2       mbAbscissa_minimum:		%f\n", storelocal->mbAbscissa_minimum);
+		fprintf(stderr,"dbg2       mbAbscissa_maximum:		%f\n", storelocal->mbAbscissa_maximum);
 		fprintf(stderr,"dbg2       mbAbscissa_valid_minimum:		%d\n", storelocal->mbAbscissa_valid_minimum);
 		fprintf(stderr,"dbg2       mbAbscissa_valid_maximum:		%d\n", storelocal->mbAbscissa_valid_maximum);
 		fprintf(stderr,"dbg2       mbAbscissa_missing_value:		%d\n", storelocal->mbAbscissa_missing_value);
@@ -6408,8 +6409,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbReferenceDepth_unit_code:		%s\n", storelocal->mbReferenceDepth_unit_code);
 		fprintf(stderr,"dbg2       mbReferenceDepth_add_offset:		%f\n", storelocal->mbReferenceDepth_add_offset);
 		fprintf(stderr,"dbg2       mbReferenceDepth_scale_factor:		%f\n", storelocal->mbReferenceDepth_scale_factor);
-		fprintf(stderr,"dbg2       mbReferenceDepth_minimum:		%d\n", storelocal->mbReferenceDepth_minimum);
-		fprintf(stderr,"dbg2       mbReferenceDepth_maximum:		%d\n", storelocal->mbReferenceDepth_maximum);
+		fprintf(stderr,"dbg2       mbReferenceDepth_minimum:		%f\n", storelocal->mbReferenceDepth_minimum);
+		fprintf(stderr,"dbg2       mbReferenceDepth_maximum:		%f\n", storelocal->mbReferenceDepth_maximum);
 		fprintf(stderr,"dbg2       mbReferenceDepth_valid_minimum:		%d\n", storelocal->mbReferenceDepth_valid_minimum);
 		fprintf(stderr,"dbg2       mbReferenceDepth_valid_maximum:		%d\n", storelocal->mbReferenceDepth_valid_maximum);
 		fprintf(stderr,"dbg2       mbReferenceDepth_missing_value:		%d\n", storelocal->mbReferenceDepth_missing_value);
@@ -6422,8 +6423,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbDynamicDraught_unit_code:		%s\n", storelocal->mbDynamicDraught_unit_code);
 		fprintf(stderr,"dbg2       mbDynamicDraught_add_offset:		%f\n", storelocal->mbDynamicDraught_add_offset);
 		fprintf(stderr,"dbg2       mbDynamicDraught_scale_factor:		%f\n", storelocal->mbDynamicDraught_scale_factor);
-		fprintf(stderr,"dbg2       mbDynamicDraught_minimum:		%d\n", storelocal->mbDynamicDraught_minimum);
-		fprintf(stderr,"dbg2       mbDynamicDraught_maximum:		%d\n", storelocal->mbDynamicDraught_maximum);
+		fprintf(stderr,"dbg2       mbDynamicDraught_minimum:		%f\n", storelocal->mbDynamicDraught_minimum);
+		fprintf(stderr,"dbg2       mbDynamicDraught_maximum:		%f\n", storelocal->mbDynamicDraught_maximum);
 		fprintf(stderr,"dbg2       mbDynamicDraught_valid_minimum:		%d\n", storelocal->mbDynamicDraught_valid_minimum);
 		fprintf(stderr,"dbg2       mbDynamicDraught_valid_maximum:		%d\n", storelocal->mbDynamicDraught_valid_maximum);
 		fprintf(stderr,"dbg2       mbDynamicDraught_missing_value:		%d\n", storelocal->mbDynamicDraught_missing_value);
@@ -6436,8 +6437,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbTide_unit_code:		%s\n", storelocal->mbTide_unit_code);
 		fprintf(stderr,"dbg2       mbTide_add_offset:		%f\n", storelocal->mbTide_add_offset);
 		fprintf(stderr,"dbg2       mbTide_scale_factor:		%f\n", storelocal->mbTide_scale_factor);
-		fprintf(stderr,"dbg2       mbTide_minimum:		%d\n", storelocal->mbTide_minimum);
-		fprintf(stderr,"dbg2       mbTide_maximum:		%d\n", storelocal->mbTide_maximum);
+		fprintf(stderr,"dbg2       mbTide_minimum:		%f\n", storelocal->mbTide_minimum);
+		fprintf(stderr,"dbg2       mbTide_maximum:		%f\n", storelocal->mbTide_maximum);
 		fprintf(stderr,"dbg2       mbTide_valid_minimum:		%d\n", storelocal->mbTide_valid_minimum);
 		fprintf(stderr,"dbg2       mbTide_valid_maximum:		%d\n", storelocal->mbTide_valid_maximum);
 		fprintf(stderr,"dbg2       mbTide_missing_value:		%d\n", storelocal->mbTide_missing_value);
@@ -6450,8 +6451,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbSoundVelocity_unit_code:		%s\n", storelocal->mbSoundVelocity_unit_code);
 		fprintf(stderr,"dbg2       mbSoundVelocity_add_offset:		%f\n", storelocal->mbSoundVelocity_add_offset);
 		fprintf(stderr,"dbg2       mbSoundVelocity_scale_factor:		%f\n", storelocal->mbSoundVelocity_scale_factor);
-		fprintf(stderr,"dbg2       mbSoundVelocity_minimum:		%d\n", storelocal->mbSoundVelocity_minimum);
-		fprintf(stderr,"dbg2       mbSoundVelocity_maximum:		%d\n", storelocal->mbSoundVelocity_maximum);
+		fprintf(stderr,"dbg2       mbSoundVelocity_minimum:		%f\n", storelocal->mbSoundVelocity_minimum);
+		fprintf(stderr,"dbg2       mbSoundVelocity_maximum:		%f\n", storelocal->mbSoundVelocity_maximum);
 		fprintf(stderr,"dbg2       mbSoundVelocity_valid_minimum:		%d\n", storelocal->mbSoundVelocity_valid_minimum);
 		fprintf(stderr,"dbg2       mbSoundVelocity_valid_maximum:		%d\n", storelocal->mbSoundVelocity_valid_maximum);
 		fprintf(stderr,"dbg2       mbSoundVelocity_missing_value:		%d\n", storelocal->mbSoundVelocity_missing_value);
@@ -6464,8 +6465,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbHeading_unit_code:		%s\n", storelocal->mbHeading_unit_code);
 		fprintf(stderr,"dbg2       mbHeading_add_offset:		%f\n", storelocal->mbHeading_add_offset);
 		fprintf(stderr,"dbg2       mbHeading_scale_factor:		%f\n", storelocal->mbHeading_scale_factor);
-		fprintf(stderr,"dbg2       mbHeading_minimum:		%d\n", storelocal->mbHeading_minimum);
-		fprintf(stderr,"dbg2       mbHeading_maximum:		%d\n", storelocal->mbHeading_maximum);
+		fprintf(stderr,"dbg2       mbHeading_minimum:		%f\n", storelocal->mbHeading_minimum);
+		fprintf(stderr,"dbg2       mbHeading_maximum:		%f\n", storelocal->mbHeading_maximum);
 		fprintf(stderr,"dbg2       mbHeading_valid_minimum:		%d\n", storelocal->mbHeading_valid_minimum);
 		fprintf(stderr,"dbg2       mbHeading_valid_maximum:		%d\n", storelocal->mbHeading_valid_maximum);
 		fprintf(stderr,"dbg2       mbHeading_missing_value:		%d\n", storelocal->mbHeading_missing_value);
@@ -6478,8 +6479,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbRoll_unit_code:		%s\n", storelocal->mbRoll_unit_code);
 		fprintf(stderr,"dbg2       mbRoll_add_offset:		%f\n", storelocal->mbRoll_add_offset);
 		fprintf(stderr,"dbg2       mbRoll_scale_factor:		%f\n", storelocal->mbRoll_scale_factor);
-		fprintf(stderr,"dbg2       mbRoll_minimum:		%d\n", storelocal->mbRoll_minimum);
-		fprintf(stderr,"dbg2       mbRoll_maximum:		%d\n", storelocal->mbRoll_maximum);
+		fprintf(stderr,"dbg2       mbRoll_minimum:		%f\n", storelocal->mbRoll_minimum);
+		fprintf(stderr,"dbg2       mbRoll_maximum:		%f\n", storelocal->mbRoll_maximum);
 		fprintf(stderr,"dbg2       mbRoll_valid_minimum:		%d\n", storelocal->mbRoll_valid_minimum);
 		fprintf(stderr,"dbg2       mbRoll_valid_maximum:		%d\n", storelocal->mbRoll_valid_maximum);
 		fprintf(stderr,"dbg2       mbRoll_missing_value:		%d\n", storelocal->mbRoll_missing_value);
@@ -6492,8 +6493,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbPitch_unit_code:		%s\n", storelocal->mbPitch_unit_code);
 		fprintf(stderr,"dbg2       mbPitch_add_offset:		%f\n", storelocal->mbPitch_add_offset);
 		fprintf(stderr,"dbg2       mbPitch_scale_factor:		%f\n", storelocal->mbPitch_scale_factor);
-		fprintf(stderr,"dbg2       mbPitch_minimum:		%d\n", storelocal->mbPitch_minimum);
-		fprintf(stderr,"dbg2       mbPitch_maximum:		%d\n", storelocal->mbPitch_maximum);
+		fprintf(stderr,"dbg2       mbPitch_minimum:		%f\n", storelocal->mbPitch_minimum);
+		fprintf(stderr,"dbg2       mbPitch_maximum:		%f\n", storelocal->mbPitch_maximum);
 		fprintf(stderr,"dbg2       mbPitch_valid_minimum:		%d\n", storelocal->mbPitch_valid_minimum);
 		fprintf(stderr,"dbg2       mbPitch_valid_maximum:		%d\n", storelocal->mbPitch_valid_maximum);
 		fprintf(stderr,"dbg2       mbPitch_missing_value:		%d\n", storelocal->mbPitch_missing_value);
@@ -6506,8 +6507,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbTransmissionHeave_unit_code:		%s\n", storelocal->mbTransmissionHeave_unit_code);
 		fprintf(stderr,"dbg2       mbTransmissionHeave_add_offset:		%f\n", storelocal->mbTransmissionHeave_add_offset);
 		fprintf(stderr,"dbg2       mbTransmissionHeave_scale_factor:		%f\n", storelocal->mbTransmissionHeave_scale_factor);
-		fprintf(stderr,"dbg2       mbTransmissionHeave_minimum:		%d\n", storelocal->mbTransmissionHeave_minimum);
-		fprintf(stderr,"dbg2       mbTransmissionHeave_maximum:		%d\n", storelocal->mbTransmissionHeave_maximum);
+		fprintf(stderr,"dbg2       mbTransmissionHeave_minimum:		%f\n", storelocal->mbTransmissionHeave_minimum);
+		fprintf(stderr,"dbg2       mbTransmissionHeave_maximum:		%f\n", storelocal->mbTransmissionHeave_maximum);
 		fprintf(stderr,"dbg2       mbTransmissionHeave_valid_minimum:		%d\n", storelocal->mbTransmissionHeave_valid_minimum);
 		fprintf(stderr,"dbg2       mbTransmissionHeave_valid_maximum:		%d\n", storelocal->mbTransmissionHeave_valid_maximum);
 		fprintf(stderr,"dbg2       mbTransmissionHeave_missing_value:		%d\n", storelocal->mbTransmissionHeave_missing_value);
@@ -6520,8 +6521,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbDistanceScale_unit_code:		%s\n", storelocal->mbDistanceScale_unit_code);
 		fprintf(stderr,"dbg2       mbDistanceScale_add_offset:		%f\n", storelocal->mbDistanceScale_add_offset);
 		fprintf(stderr,"dbg2       mbDistanceScale_scale_factor:		%f\n", storelocal->mbDistanceScale_scale_factor);
-		fprintf(stderr,"dbg2       mbDistanceScale_minimum:		%d\n", storelocal->mbDistanceScale_minimum);
-		fprintf(stderr,"dbg2       mbDistanceScale_maximum:		%d\n", storelocal->mbDistanceScale_maximum);
+		fprintf(stderr,"dbg2       mbDistanceScale_minimum:		%f\n", storelocal->mbDistanceScale_minimum);
+		fprintf(stderr,"dbg2       mbDistanceScale_maximum:		%f\n", storelocal->mbDistanceScale_maximum);
 		fprintf(stderr,"dbg2       mbDistanceScale_valid_minimum:		%d\n", storelocal->mbDistanceScale_valid_minimum);
 		fprintf(stderr,"dbg2       mbDistanceScale_valid_maximum:		%d\n", storelocal->mbDistanceScale_valid_maximum);
 		fprintf(stderr,"dbg2       mbDistanceScale_missing_value:		%d\n", storelocal->mbDistanceScale_missing_value);
@@ -6534,8 +6535,8 @@ fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%d\n",storelocal->CIB_BLOCK_DIM);
 		fprintf(stderr,"dbg2       mbDepthScale_unit_code:		%s\n", storelocal->mbDepthScale_unit_code);
 		fprintf(stderr,"dbg2       mbDepthScale_add_offset:		%f\n", storelocal->mbDepthScale_add_offset);
 		fprintf(stderr,"dbg2       mbDepthScale_scale_factor:		%f\n", storelocal->mbDepthScale_scale_factor);
-		fprintf(stderr,"dbg2       mbDepthScale_minimum:		%d\n", storelocal->mbDepthScale_minimum);
-		fprintf(stderr,"dbg2       mbDepthScale_maximum:		%d\n", storelocal->mbDepthScale_maximum);
+		fprintf(stderr,"dbg2       mbDepthScale_minimum:		%f\n", storelocal->mbDepthScale_minimum);
+		fprintf(stderr,"dbg2       mbDepthScale_maximum:		%f\n", storelocal->mbDepthScale_maximum);
 		fprintf(stderr,"dbg2       mbDepthScale_valid_minimum:		%d\n", storelocal->mbDepthScale_valid_minimum);
 		fprintf(stderr,"dbg2       mbDepthScale_valid_maximum:		%d\n", storelocal->mbDepthScale_valid_maximum);
 		fprintf(stderr,"dbg2       mbDepthScale_missing_value:		%d\n", storelocal->mbDepthScale_missing_value);
@@ -7060,8 +7061,7 @@ storelocal->CIB_BLOCK_DIM,index[0],index[1],index[2],count[0],count[1],count[2])
 	    /* print input debug statements */
 	    if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  NetCDF Survey Record written in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  NetCDF Survey Record written in function <%s>\n",function_name);
 		fprintf(stderr,"dbg2  Global Variables:\n");
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
@@ -7154,7 +7154,7 @@ storelocal->CIB_BLOCK_DIM,index[0],index[1],index[2],count[0],count[1],count[2])
 		for (i=0;i<store->mbAntennaNbr;i++)
 			fprintf(stderr, "%d ", store->mbSamplingRate[i]);
 		fprintf(stderr, "\n");
-		fprintf(stderr,"dbg2       mbBeamNbr:               %d\n", store->mbBeamNbr);
+		fprintf(stderr,"dbg2       mbBeamNbr:               %ld\n", store->mbBeamNbr);
 		fprintf(stderr,"dbg2       beam ltrack xtrack depth quality flag\n");
 		for (i=0;i<store->mbBeamNbr;i++)
 		    {
@@ -7174,8 +7174,7 @@ storelocal->CIB_BLOCK_DIM,index[0],index[1],index[2],count[0],count[1],count[2])
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

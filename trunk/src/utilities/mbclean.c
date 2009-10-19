@@ -2,7 +2,7 @@
  *    The MB-system:	mbclean.c	2/26/93
  *    $Id: mbclean.c,v 5.14 2006/08/09 22:41:27 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2001, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -193,6 +193,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -250,16 +251,16 @@ struct bad_struct
 int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, 
 			int action, int *error);
 
+static char rcs_id[] = "$Id: mbclean.c,v 5.14 2006/08/09 22:41:27 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.14 2006/08/09 22:41:27 caress Exp $";
-	static char program_name[] = "MBCLEAN";
-	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
-	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Sspike_slope/mode/format -Xzap_beams \n\t-V -H]";
+	char program_name[] = "MBCLEAN";
+	char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
+	char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Sspike_slope/mode/format -Xzap_beams \n\t-V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -306,7 +307,6 @@ main (int argc, char **argv)
 
 	/* mbio read and write values */
 	void	*mbio_ptr = NULL;
-	void	*store_ptr = NULL;
 	int	kind;
 	struct mbclean_ping_struct ping[3];
 	int	nrec, irec;
@@ -383,12 +383,6 @@ main (int argc, char **argv)
 	double	mtodeglat;
 	double	headingx;
 	double	headingy;
-	double	*bathx1 = NULL;
-	double	*bathy1 = NULL;
-	double	*bathx2 = NULL;
-	double	*bathy2 = NULL;
-	double	*bathx3 = NULL;
-	double	*bathy3 = NULL;
 	int	nlist;
 	double	*list = NULL;
 	double	median = 0.0;
@@ -405,7 +399,7 @@ main (int argc, char **argv)
 	/* processing variables */
 	int	read_data;
 	int	start, done;
-	int	i, j, k, l, m, p, b;
+	int	i, j, k, p, b;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -601,7 +595,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       maximum slope:  %f\n",slopemax);
 		fprintf(stderr,"dbg2       check_spike:    %d\n",check_spike);
 		fprintf(stderr,"dbg2       maximum spike:  %f\n",spikemax);
-		fprintf(stderr,"dbg2       spike mode:     %f\n",spike_mode);
+		fprintf(stderr,"dbg2       spike mode:     %d\n",spike_mode);
 		fprintf(stderr,"dbg2       minimum dist:   %f\n",distancemin);
 		fprintf(stderr,"dbg2       minimum dist:   %f\n",distancemax);
 		fprintf(stderr,"dbg2       check_range:    %d\n",check_range);
@@ -644,8 +638,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    swathfile,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1833,8 +1827,8 @@ i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    swathfile,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -1904,9 +1898,8 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-	
-		fprintf(stderr,"dbg2       sofp:            %d\n",sofp);
+		fprintf(stderr,"dbg2  Input arguments:\n");	
+		fprintf(stderr,"dbg2       sofp:            %ld\n",(long)sofp);
 		fprintf(stderr,"dbg2       time_d:          %f\n",time_d);
 		fprintf(stderr,"dbg2       beam:            %d\n",beam);
 		fprintf(stderr,"dbg2       action:          %d\n",action);

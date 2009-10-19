@@ -2,7 +2,7 @@
  *    The MB-system:	mb_esf.c	4/10/2003
  *    $Id: mb_esf.c,v 5.13 2008/07/10 06:43:40 caress Exp $
  *
- *    Copyright (c) 2003 by
+ *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -80,6 +80,14 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
+/* prototypes */
+int mb_mergesort(void *base, size_t nmemb,register size_t size, 
+	int (*cmp) (void *, void *));
+void mb_mergesort_setup(u_char *list1, u_char *list2, size_t n, size_t size, 
+	int (*cmp) (void *, void *));
+void mb_mergesort_insertionsort(u_char *a, size_t n, size_t size, 
+	int (*cmp)(void *, void *));
+
 static char rcs_id[]="$Id: mb_esf.c,v 5.13 2008/07/10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
@@ -96,8 +104,8 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
 		fprintf(stderr,"dbg2       swathfile:   %s\n",swathfile);
@@ -124,8 +132,8 @@ int mb_esf_check(int verbose, char *swathfile, char *esffile,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       esfile:      %s\n",esffile);
 		fprintf(stderr,"dbg2       found:       %d\n",*found);
@@ -163,8 +171,8 @@ int mb_esf_load(int verbose, char *swathfile,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
 		fprintf(stderr,"dbg2       swathfile:   %s\n",swathfile);
@@ -193,8 +201,8 @@ int mb_esf_load(int verbose, char *swathfile,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       esfile:      %s\n",esffile);
 		fprintf(stderr,"dbg2       nedit:       %d\n",esf->nedit);
@@ -202,7 +210,7 @@ int mb_esf_load(int verbose, char *swathfile,
 			fprintf(stderr,"dbg2       edit event:  %d %.6f %5d %3d %3d\n",
 				i,esf->edit[i].time_d,esf->edit[i].beam,
 				esf->edit[i].action,esf->edit[i].use);
-		fprintf(stderr,"dbg2       esf->esffp:  %d\n",esf->esffp);
+		fprintf(stderr,"dbg2       esf->esffp:  %ld\n",(long)esf->esffp);
 		fprintf(stderr,"dbg2       error:       %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:      %d\n",status);
@@ -234,24 +242,21 @@ int mb_esf_open(int verbose, char *esffile,
 	FILE	*esffp;
 	struct stat file_status;
 	int	fstat;
-	double	stime_d;
-	int	sbeam;
-	int	saction;
 	char	fmode[16];
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
 		fprintf(stderr,"dbg2       esffile:     %s\n",esffile);
 		fprintf(stderr,"dbg2       load:        %d\n",load);
 		fprintf(stderr,"dbg2       output:      %d\n",output);
-		fprintf(stderr,"dbg2       esf:         %d\n",esf);
-		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2       esf:         %ld\n",(long)esf);
+		fprintf(stderr,"dbg2       error:       %ld\n",(long)error);
 		}
 		
 	/* initialize the esf structure */
@@ -398,8 +403,8 @@ fprintf(stderr,"esstream %s opened with mode %s\n",esf->esstream,fmode);*/
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       nedit:       %d\n",esf->nedit);
 		for (i=0;i<esf->nedit;i++)
@@ -408,8 +413,8 @@ fprintf(stderr,"esstream %s opened with mode %s\n",esf->esstream,fmode);*/
 				esf->edit[i].action,esf->edit[i].use);
 		fprintf(stderr,"dbg2       esf->esffile:  %s\n",esf->esffile);
 		fprintf(stderr,"dbg2       esf->esstream: %s\n",esf->esstream);
-		fprintf(stderr,"dbg2       esf->esffp:    %d\n",esf->esffp);
-		fprintf(stderr,"dbg2       esf->essfp:    %d\n",esf->essfp);
+		fprintf(stderr,"dbg2       esf->esffp:    %ld\n",(long)esf->esffp);
+		fprintf(stderr,"dbg2       esf->essfp:    %ld\n",(long)esf->essfp);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:       %d\n",status);
@@ -432,13 +437,13 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 	int	firstedit, lastedit;
 	int	apply, action;
 	char	beamflagorg;
-	int	i, j, k;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
 		fprintf(stderr,"dbg2       nedit:  %d\n",esf->nedit);
@@ -553,8 +558,8 @@ j, time_d, i, beamflag[i], esf->edit[j].action);*/
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       time_d:      %f\n",time_d);
 		fprintf(stderr,"dbg2       nbath:       %d\n",nbath);
@@ -581,13 +586,13 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %d\n",esf->edit);
-		fprintf(stderr,"dbg2       esf->esffp:       %d\n",esf->esffp);
+		fprintf(stderr,"dbg2       esf->edit:        %ld\n",(long)esf->edit);
+		fprintf(stderr,"dbg2       esf->esffp:       %ld\n",(long)esf->esffp);
 		fprintf(stderr,"dbg2       time_d:           %f\n",time_d);
 		fprintf(stderr,"dbg2       beam:             %d\n",beam);
 		fprintf(stderr,"dbg2       action:           %d\n",action);
@@ -625,12 +630,12 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %d\n",esf->edit);
-		fprintf(stderr,"dbg2       esf->esffp:       %d\n",esf->esffp);
+		fprintf(stderr,"dbg2       esf->edit:        %ld\n",(long)esf->edit);
+		fprintf(stderr,"dbg2       esf->esffp:       %ld\n",(long)esf->esffp);
 		fprintf(stderr,"dbg2       error:            %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:           %d\n",status);
@@ -652,13 +657,13 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %d\n",esf->edit);
-		fprintf(stderr,"dbg2       esf->essfp:       %d\n",esf->essfp);
+		fprintf(stderr,"dbg2       esf->edit:        %ld\n",(long)esf->edit);
+		fprintf(stderr,"dbg2       esf->essfp:       %ld\n",(long)esf->essfp);
 		fprintf(stderr,"dbg2       time_d:           %f\n",time_d);
 		fprintf(stderr,"dbg2       beam:             %d\n",beam);
 		fprintf(stderr,"dbg2       action:           %d\n",action);
@@ -696,12 +701,12 @@ int mb_ess_save(int verbose, struct mb_esf_struct *esf,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %d\n",esf->edit);
-		fprintf(stderr,"dbg2       esf->essfp:       %d\n",esf->essfp);
+		fprintf(stderr,"dbg2       esf->edit:        %ld\n",(long)esf->edit);
+		fprintf(stderr,"dbg2       esf->essfp:       %ld\n",(long)esf->essfp);
 		fprintf(stderr,"dbg2       error:            %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:           %d\n",status);
@@ -721,13 +726,13 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %d\n",esf->edit);
-		fprintf(stderr,"dbg2       esf->esffp:       %d\n",esf->esffp);
+		fprintf(stderr,"dbg2       esf->edit:        %ld\n",(long)esf->edit);
+		fprintf(stderr,"dbg2       esf->esffp:       %ld\n",(long)esf->esffp);
 		}
 
 	/* deallocate the arrays */
@@ -755,13 +760,13 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       esf->nedit:       %d\n",esf->nedit);
-		fprintf(stderr,"dbg2       esf->edit:        %d\n",esf->edit);
-		fprintf(stderr,"dbg2       esf->esffp:       %d\n",esf->esffp);
-		fprintf(stderr,"dbg2       esf->essfp:       %d\n",esf->essfp);
+		fprintf(stderr,"dbg2       esf->edit:        %ld\n",(long)esf->edit);
+		fprintf(stderr,"dbg2       esf->esffp:       %ld\n",(long)esf->esffp);
+		fprintf(stderr,"dbg2       esf->essfp:       %ld\n",(long)esf->essfp);
 		fprintf(stderr,"dbg2       error:            %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:           %d\n",status);
@@ -883,7 +888,7 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
  * Arguments are as for qsort.
  */
 int mb_mergesort(void *base, size_t nmemb,register size_t size, 
-	int (*cmp) (const void *, const void *))
+	int (*cmp) (void *, void *))
 {
 	register int i, sense;
 	int big, iflag;
@@ -931,7 +936,7 @@ int mb_mergesort(void *base, size_t nmemb,register size_t size,
 	    			sense = 0;
 	    		}
 	    		if (!big) {	/* here i = 0 */
-LINEAR:	    			while ((b += size) < t && cmp(q, b) >sense)
+/*LINEAR:*/	    			while ((b += size) < t && cmp(q, b) >sense)
 	    				if (++i == 6) {
 	    					big = 1;
 	    					goto EXPONENTIAL;
@@ -952,7 +957,7 @@ EXPONENTIAL:	    		for (i = size; ; i <<= 1)
 	    					goto FASTCASE;
 	    				} else
 	    					b = p;
-SLOWCASE:	    		while (t > b+size) {
+/*SLOWCASE:*/	    		while (t > b+size) {
 	    				i = (((t - b) / size) >> 1) * size;
 	    				if ((*cmp)(q, p = b + i) <= sense)
 	    					t = p;
@@ -1038,8 +1043,8 @@ COPY:	    			b = t;
  * when THRESHOLD/2 pairs compare with same sense.  (Only used when NATURAL
  * is defined.  Otherwise simple pairwise merging is used.)
  */
-mb_mergesort_setup(u_char *list1, u_char *list2, size_t n, size_t size, 
-	int (*cmp) (const void *, const void *))
+void mb_mergesort_setup(u_char *list1, u_char *list2, size_t n, size_t size, 
+	int (*cmp) (void *, void *))
 {
 	int i, length, size2, tmp, sense;
 	u_char *f1, *f2, *s, *l2, *last, *p2;
@@ -1109,8 +1114,8 @@ mb_mergesort_setup(u_char *list1, u_char *list2, size_t n, size_t size,
  * This is to avoid out-of-bounds addresses in sorting the
  * last 4 elements.
  */
-mb_mergesort_insertionsort(u_char *a, size_t n, size_t size, 
-	int (*cmp)(const void *, const void *))
+void mb_mergesort_insertionsort(u_char *a, size_t n, size_t size, 
+	int (*cmp)(void *, void *))
 {
 	u_char *ai, *s, *t, *u, tmp;
 	int i;

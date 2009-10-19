@@ -2,7 +2,7 @@
  *    The MB-system:    mbstripNaN.c        8/8/02
  *    $Id: mbstripnan.c,v 5.3 2006/01/18 15:17:00 caress Exp $
  *
- *    Copyright (c) 2002, 2003 by
+ *    Copyright (c) 2002-2009 by
  *    Mike McCann (mccann@mbari.org)
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
@@ -39,12 +39,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 /*--------------------------------------------------------------------*/
 /*
  * Read double x,y,z on stdin and send to stdout all but NaNs
  */
-main () {
+int main () {
 	struct node { double lon, lat, height; };
 	struct node n;
 	while ( ( fread(&n, 24, 1, stdin) > 0 ) ) {
@@ -52,6 +53,7 @@ main () {
 			fwrite(&n, 24, 1, stdout);
 		}
 	}
+exit(0);
 }
 /*--------------------------------------------------------------------*/
 

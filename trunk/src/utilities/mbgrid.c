@@ -2,7 +2,7 @@
  *    The MB-system:	mbgrid.c	5/2/94
  *    $Id: mbgrid.c,v 5.51 2009/03/13 07:05:58 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -399,6 +399,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -409,6 +410,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_info.h"
+#include "../../include/mb_aux.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -463,11 +465,35 @@
 	algorithm will be used. 
 	- The default is to use zgrid - to
 	change this uncomment the define below. */
-/* #define USESURFACE *?
+/* #define USESURFACE */
 
 /* approximate complementary error function */
 double erfcc();
 double mbgrid_erf();
+
+int write_ascii(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, int *error);
+int write_arcascii(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, double nodata, int *error);
+int write_oldgrd(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double dx, double dy, int *error);
+int write_cdfgrd(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double zmin, double zmax, double dx, double dy, 
+		char *xlab, char *ylab, char *zlab, char *titl, 
+		char *projection, int argc, char **argv, 
+		int *error);
+int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale, 
+		    double pcx, double pcy, double dx, double dy, 
+		    double *px, double *py, 
+		    double *weight, int *use, int *error);
 
 /* output stream for basic stuff (stdout if verbose <= 1,
 	stderr if verbose > 1) */
@@ -475,19 +501,18 @@ FILE	*outfp;
 
 /* program identifiers */
 static char rcs_id[] = "$Id: mbgrid.c,v 5.51 2009/03/13 07:05:58 caress Exp $";
-static char program_name[] = "mbgrid";
-static char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
-static char usage_message[] = "mbgrid -Ifilelist -Oroot \
+char program_name[] = "mbgrid";
+char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
+char usage_message[] = "mbgrid -Ifilelist -Oroot \
 -Rwest/east/south/north [-Adatatype\n\
           -Bborder  -Cclip -Dxdim/ydim -Edx/dy/units[!] -F\n\
           -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings -Sspeed\n\
           -Ttension -Utime -V -Wscale -Xextend]";
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -648,13 +673,10 @@ main (int argc, char **argv)
 	int	projection_pars_f = MB_NO;
 	double	reference_lon, reference_lat;
 	int	utm_zone = 1;
-	char	projection_type;
 	char	projection_pars[MB_PATH_MAXLINE];
 	char	projection_id[MB_PATH_MAXLINE];
 	int	proj_status;
 	void	*pjptr;
-	double	p_lon_1, p_lon_2;
-	double	p_lat_1, p_lat_2;
 	double	deglontokm, deglattokm;
 	double	mtodeglon, mtodeglat;
 
@@ -667,7 +689,6 @@ main (int argc, char **argv)
 	char	sdlabel[MB_PATH_MAXLINE];
 
 	/* variables needed to handle Not-a-Number values */
-	float	zero = 0.0;
 	float	NaN;
 
 	/* other variables */
@@ -678,8 +699,6 @@ main (int argc, char **argv)
 	int	dmask[9];
 	int	kgrid, kout, kint, ib, ix, iy;
 	int	ix1, ix2, iy1, iy2, isx, isy;
-	int	nscan;
-	int	system_status;
 	int	pid;
 	
 	double	foot_dx, foot_dy, foot_dxn, foot_dyn;
@@ -1695,8 +1714,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 	/* read in data */
 	fprintf(outfp,"\nDoing first pass to generate low resolution slope grid...\n");
 	ndata = 0;
-	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,look_processed,&error) != MB_SUCCESS)
+	if ((status = mb_datalist_open(verbose,&datalist,
+					filelist,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -2105,8 +2124,8 @@ status = write_cdfgrd(verbose,ofile,output,sxdim,sydim,
 	/* read in data */
 	fprintf(outfp,"\nDoing second pass to generate final grid...\n");
 	ndata = 0;
-	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,look_processed,&error) != MB_SUCCESS)
+	if ((status = mb_datalist_open(verbose,&datalist,
+					filelist,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -2624,8 +2643,8 @@ num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 
 	/* read in data */
 	ndata = 0;
-	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,look_processed,&error) != MB_SUCCESS)
+	if ((status = mb_datalist_open(verbose,&datalist,
+					filelist,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -3348,8 +3367,8 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 
 	/* read in data */
 	ndata = 0;
-	if (status = mb_datalist_open(verbose,&datalist,
-					filelist,look_processed,&error) != MB_SUCCESS)
+	if ((status = mb_datalist_open(verbose,&datalist,
+					filelist,look_processed,&error)) != MB_SUCCESS)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(outfp,"\nUnable to open data list file: %s\n",
@@ -5117,7 +5136,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %d\n",grid);
+		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5196,7 +5215,7 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %d\n",grid);
+		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5275,7 +5294,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %d\n",grid);
+		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5343,6 +5362,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	float	*a;
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	remark[MB_PATH_MAXLINE];
 	int	i, j, kg, ka;
 	char	*message;
 	char	*ctime();
@@ -5356,7 +5376,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %d\n",grid);
+		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5370,7 +5390,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2       zlab:       %s\n",zlab);
 		fprintf(outfp,"dbg2       titl:       %s\n",titl);
 		fprintf(outfp,"dbg2       argc:       %d\n",argc);
-		fprintf(outfp,"dbg2       *argv:      %d\n",*argv);
+		fprintf(outfp,"dbg2       *argv:      %ld\n",(long)*argv);
 		}
 
 	/* inititialize grd header */
@@ -5410,8 +5430,9 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	else
 		strcpy(user, "unknown");
 	gethostname(host,MB_PATH_MAXLINE);
-	sprintf(grd.remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
+	sprintf(remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
 		projection,program_name,MB_VERSION,user,host,date);
+	strncpy(grd.remark, remark, 159);
 
 	/* set extract wesn,pad */
 	w = 0.0;
@@ -5422,11 +5443,11 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		pad[i] = 0;
 
 	/* allocate memory for output array */
-	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
+	status = mb_mallocd(5,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
 	if (*error != MB_ERROR_NO_ERROR)
 		{
 		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
-		fprintf(outfp,"\nMBIO Error allocating output arrays.\n",
+		fprintf(outfp,"\nMBIO Error allocating output arrays.\n%s\n",
 			message);
 		fprintf(outfp,"\nProgram <%s> Terminated\n",
 			program_name);

@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavadjust_prog.c	3/23/00
  *    $Id: mbnavadjust_prog.c,v 5.35 2008/12/22 08:32:52 caress Exp $
  *
- *    Copyright (c) 2000-2008 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -140,20 +140,23 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <X11/Intrinsic.h>
 
 /* MBIO include files */
-#include "mb_format.h"
-#include "mb_status.h"
-#include "mb_define.h"
-#include "mb_io.h"
-#include "mb_process.h"
-#include "mb_contour.h"
-#include "mbsys_ldeoih.h"
+#include "../../include/mb_format.h"
+#include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
+#include "../../include/mb_process.h"
+#include "../../include/mb_aux.h"
+#include "../../include/mbsys_ldeoih.h"
+#include "../../include/mb_xgraphics.h"
 
 /* define global control parameters */
 #include "mbnavadjust.h"
@@ -220,10 +223,10 @@ double	timegap;
 #define CORAL	5
 #define	XG_SOLIDLINE	0
 #define	XG_DASHLINE	1
-int	pcont_xgid;
-int	pcorr_xgid;
-int	pzoff_xgid;
-int	pmodp_xgid;
+void	*pcont_xgid;
+void	*pcorr_xgid;
+void	*pzoff_xgid;
+void	*pmodp_xgid;
 int	ncolors;
 int	pixel_values[256];
 
@@ -272,10 +275,6 @@ double	zmisfitmax;
 
 /* minimum initial sigma_crossing (meters) */
 #define	SIGMA_MINIMUM	0.1;
-
-/* system function declarations */
-char	*ctime();
-char	*getenv();
 
 /*--------------------------------------------------------------------*/
 int mbnavadjust_init_globals()
@@ -408,7 +407,6 @@ int mbnavadjust_init(int argc,char **argv)
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -594,12 +592,11 @@ int mbnavadjust_set_borders(int *cn_brdr, int *cr_brdr, int *zc_brdr)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_set_graphics(int cn_xgid, int cr_xgid, int zc_xgid)
+int mbnavadjust_set_graphics(void *cn_xgid, void *cr_xgid, void *zc_xgid)
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_set_graphics";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -607,9 +604,9 @@ int mbnavadjust_set_graphics(int cn_xgid, int cr_xgid, int zc_xgid)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       cn_xgid:      %d\n",cn_xgid);
-		fprintf(stderr,"dbg2       cr_xgid:      %d\n",cr_xgid);
-		fprintf(stderr,"dbg2       zc_xgid:      %d\n",zc_xgid);
+		fprintf(stderr,"dbg2       cn_xgid:      %ld\n",(long)cn_xgid);
+		fprintf(stderr,"dbg2       cr_xgid:      %ld\n",(long)cr_xgid);
+		fprintf(stderr,"dbg2       zc_xgid:      %ld\n",(long)zc_xgid);
 		}
 
 	/* set graphics id */
@@ -1039,7 +1036,6 @@ int mbnavadjust_write_project()
 	struct mbna_section *section;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
-	int	crossingstatus;
 	char	datalist[STRING_MAX];
 	int	i, j, k, l;
 
@@ -1249,7 +1245,6 @@ int mbnavadjust_read_project()
 	char	*result;
 	int	versionmajor, versionminor;
 	int	nscan, idummy;
-	double	lonmin, lonmax, latmin, latmax;
 	int	i, j, k, l;
 
 	/* print input debug statements */
@@ -1945,13 +1940,13 @@ int mbnavadjust_import_data(char *path, int iformat)
 			}
 		else if (iformat == -1)
 			{
-			if (status = mb_datalist_open(mbna_verbose,&datalist,
-							path,MB_DATALIST_LOOK_NO,&error) == MB_SUCCESS)
+			if ((status = mb_datalist_open(mbna_verbose,&datalist,
+							path,MB_DATALIST_LOOK_NO,&error)) == MB_SUCCESS)
 				{
 				while (done == MB_NO)
 					{
-					if (status = mb_datalist_read(mbna_verbose,datalist,
-							filename,&form,&weight,&error)
+					if ((status = mb_datalist_read(mbna_verbose,datalist,
+							filename,&form,&weight,&error))
 							== MB_SUCCESS)
 						{
 						status = mbnavadjust_import_file(filename,form);
@@ -2072,7 +2067,6 @@ int mbnavadjust_import_file(char *path, int iformat)
 	double	mbp_rollbias_port;
 	double	mbp_rollbias_stbd;
 	double	depthmax, distmax, depthscale, distscale;
-	double	lonmin, lonmax, latmin, latmax;
  	int	i, j, k;
 	int	ii1, jj1, kk1, ii2, jj2, kk2;
 	
@@ -3035,7 +3029,6 @@ int mbnavadjust_poornav_file()
 	/* local variables */
 	char	*function_name = "mbnavadjust_poornav_file";
 	int	status = MB_SUCCESS;
-	struct mbna_crossing *crossing;
 	int	block;
  	int	i;
 
@@ -3092,7 +3085,6 @@ int mbnavadjust_goodnav_file()
 	/* local variables */
 	char	*function_name = "mbnavadjust_goodnav_file";
 	int	status = MB_SUCCESS;
-	struct mbna_crossing *crossing;
  	int	block;
 	int	i;
 
@@ -4747,9 +4739,7 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 
 	/* mbio read and write values */
 	void	*imbio_ptr = NULL;
-	void	*ombio_ptr = NULL;
 	void	*istore_ptr = NULL;
-	void	*ostore_ptr = NULL;
 	int	kind;
 	int	time_i[7];
 	double	time_d;
@@ -4791,7 +4781,7 @@ int mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, v
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       file_id:      %d\n",file_id);
 		fprintf(stderr,"dbg2       section_id:   %d\n",section_id);
-		fprintf(stderr,"dbg2       swath_ptr:    %d  %d\n",swath_ptr, *swath_ptr);
+		fprintf(stderr,"dbg2       swath_ptr:    %ld  %ld\n",(long)swath_ptr, (long)*swath_ptr);
 		fprintf(stderr,"dbg2       num_pings:    %d\n",num_pings);
 		}
 		
@@ -5089,8 +5079,8 @@ int mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_p
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       file_id:      %d\n",file_id);
-		fprintf(stderr,"dbg2       swathraw_ptr: %d\n",swathraw_ptr);
-		fprintf(stderr,"dbg2       swath_ptr:    %d\n",swath_ptr);
+		fprintf(stderr,"dbg2       swathraw_ptr: %ld\n",(long)swathraw_ptr);
+		fprintf(stderr,"dbg2       swath_ptr:    %ld\n",(long)swath_ptr);
 		fprintf(stderr,"dbg2       zoffset:      %f\n",zoffset);
 		}
 		
@@ -5213,8 +5203,8 @@ int mbnavadjust_section_contour(int fileid, int sectionid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       fileid:       %d\n",fileid);
 		fprintf(stderr,"dbg2       sectionid:    %d\n",sectionid);
-		fprintf(stderr,"dbg2       swath:        %d\n",swath);
-		fprintf(stderr,"dbg2       contour:      %d\n",contour);
+		fprintf(stderr,"dbg2       swath:        %ld\n",(long)swath);
+		fprintf(stderr,"dbg2       contour:      %ld\n",(long)contour);
 		fprintf(stderr,"dbg2       nvector:      %d\n",contour->nvector);
 		fprintf(stderr,"dbg2       nvector_alloc:%d\n",contour->nvector_alloc);
 		}
@@ -5547,7 +5537,6 @@ int mbnavadjust_crossing_overlap(int crossing_id,
 	struct mbna_section *section2;
 	int	overlap1[MBNA_MASK_DIM * MBNA_MASK_DIM];
 	int	overlap2[MBNA_MASK_DIM * MBNA_MASK_DIM];
-	int	overlap = 0;
 	double	lon1min, lon1max;
 	double	lat1min, lat1max;
 	double	lon2min, lon2max;
@@ -5693,8 +5682,6 @@ int mbnavadjust_get_misfit()
 	double	dinterval;
 	double	zoff;
 	double	minmisfitthreshold, dotproduct;
-	double	x1[3], x2[3], x3[3];
-	double	r1, r2, r3;
 	double	x, y, z, r;
 	double	dotproductsave2;
 	double	rsave2;
@@ -6421,7 +6408,6 @@ mbnavadjust_naverr_plot(int plotmode)
 	struct mbna_file *file1, *file2;
 	struct mbna_section *section1, *section2;
 	struct mbna_tie *tie;
-	double	xscale, yscale;
 	int 	ix, iy, idx, idy;
 	int	boxoff, boxwid;
 	static int 	ixo, iyo;
@@ -6954,7 +6940,6 @@ mbnavadjust_autopick()
 	/* local variables */
 	char	*function_name = "mbnavadjust_autopick";
 	int	status = MB_SUCCESS;
-	struct 	mbna_file *file;
 	struct 	mbna_crossing *crossing;
 	struct 	mbna_tie *tie;
 	double	firstsonardepth1, firsttime_d1, secondsonardepth1, secondtime_d1, dsonardepth1;
@@ -7143,7 +7128,7 @@ mbnavadjust_invertnav()
 	double	offsetx, offsety, offsetz, offsetr;
 	double	offsetsigma;
 	double	weight;
-	double	dtime_d, time_d_old, time_d_older;
+	double	dtime_d;
 	int	done, iter;
 	int	nseq;
 	int	ndx, ndx2;
@@ -7160,32 +7145,6 @@ mbnavadjust_invertnav()
 	double	offset_y;
 	double	offset_z;
 	int	nc;
-	char	npath[STRING_MAX];
-	char	apath[STRING_MAX];
-	char	opath[STRING_MAX];
-	FILE	*nfp, *afp, *ofp;
-	char	*result;
-	char	buffer[BUFFER_MAX];
-	int	nscan;
-	int	time_i[7];
-	double	time_d;
-	double	navlon;
-	double	navlat;
-	double	heading;
-	double	speed;
-	double	draft;
-	double	roll;
-	double	pitch;
-	double	heave;
-	double	factor;
-	double	zoffset;
-	char	ostring[STRING_MAX];
-	int	mbp_heading_mode;
-	double	mbp_headingbias;
-	int	mbp_rollbias_mode;
-	double	mbp_rollbias;
-	double	mbp_rollbias_port;
-	double	mbp_rollbias_stbd;
 	double	time_d1, time_d2, time_d3;
 	double	block_offset_avg_x;
 	double	block_offset_avg_y;
@@ -7912,11 +7871,7 @@ mbnavadjust_applynav()
 	char	*function_name = "mbnavadjust_applynav";
 	int	status = MB_SUCCESS;
 	struct mbna_file *file;
-	struct mbna_file *file1;
-	struct mbna_file *file2;
 	struct mbna_section *section;
-	struct mbna_crossing *crossing;
-	struct mbna_tie *tie;
 	char	npath[STRING_MAX];
 	char	apath[STRING_MAX];
 	char	opath[STRING_MAX];
@@ -7943,7 +7898,6 @@ mbnavadjust_applynav()
 	double	mbp_rollbias;
 	double	mbp_rollbias_port;
 	double	mbp_rollbias_stbd;
-	double	time_d1, time_d2, time_d3;
 	int	done;
 	int	isection, isnav;
 	int	i;
@@ -8219,8 +8173,6 @@ mbnavadjust_interpolatesolution()
 	struct mbna_file *pfile;
 	struct mbna_section *section;
 	struct mbna_section *psection;
-	struct mbna_crossing *crossing;
-	struct mbna_tie *tie;
 	int	previoustie;
 	int	ifilestart;
 	int	isectionstart;
@@ -8503,7 +8455,7 @@ section->snav_z_offset_int[isnav]);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_set_modelplot_graphics(int mp_xgid, int *mp_brdr)
+int mbnavadjust_set_modelplot_graphics(void *mp_xgid, int *mp_brdr)
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_set_modelplot_graphics";
@@ -8516,7 +8468,7 @@ int mbnavadjust_set_modelplot_graphics(int mp_xgid, int *mp_brdr)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       mp_xgid:      %d\n",mp_xgid);
+		fprintf(stderr,"dbg2       mp_xgid:      %ld\n",(long)mp_xgid);
 		fprintf(stderr,"dbg2       mp_brdr:      %d %d %d %d\n",
 			mp_brdr[0], mp_brdr[1], mp_brdr[2], mp_brdr[3]);
 		}
@@ -8607,19 +8559,6 @@ mbnavadjust_modelpot_pick(int x, int y)
 	/* local variables */
 	char	*function_name = "mbnavadjust_modelpot_pick";
 	int	status = MB_SUCCESS;
-	struct mbna_file *file;
-	struct mbna_section *section;
-	struct mbna_crossing *crossing;
-	struct mbna_tie *tie;
-	int	range;
-	int	rangemin;
-	int	pick_crossing;
-	int	pick_tie;
-	int	pick_file;
-	int	pick_section;
-	int	pick_snav;
-	int	ntieselect;
-	int	i, j, ix, iy, iping;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -8897,7 +8836,6 @@ mbnavadjust_modelpot_pick_tielist(int x, int y)
 	int	pick_file;
 	int	pick_section;
 	int	pick_snav;
-	int	ntieselect;
 	int	i, j, ix, iy;
 
  	/* print input debug statements */
@@ -9031,7 +8969,6 @@ mbnavadjust_modelpot_repick(int x, int y)
 	int	pick_file;
 	int	pick_section;
 	int	pick_snav;
-	int	ntieselect;
 	int	i, j, ix, iy, iping;
 
  	/* print input debug statements */
@@ -9880,16 +9817,16 @@ mbnavadjust_modelplot_plot_tielist()
 	double	xymax, yzmax;
 	int	plot_width;
 	int	plot_height;
-	int	first, iping;
+	int	first;
 	char	label[STRING_MAX];
 	int	stringwidth, stringascent, stringdescent;
 	int	pixel;
 	int	ipingstart, ipingend;
-	int	ixo, iyo, ix, iy;
+	int	ix, iy;
 	int	num_blocks;
 	int	plot_index;
 	int	isurvey1, isurvey2;
-	int	i, j, isnav;
+	int	i, j;
 fprintf(stderr,"Called %s\n",function_name);
 
  	/* print input debug statements */

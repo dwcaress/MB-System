@@ -264,6 +264,7 @@
 
 /* GMT include files */
 #include "gmt.h"
+#include "pslib.h"
 
 /* GMT argument handling define */
 #define MBSWATH_GMT_ARG_MAX     128
@@ -352,17 +353,34 @@ double	xo, yo;
 int	nx, ny, nm, nm2;
 unsigned char r, g, b, gray;
 
+int get_footprints(int verbose, int mode, int fp_mode,
+		double factor, double depth_def,
+		struct swath *swath, 
+		double mtodeglon, double mtodeglat, int *error);
+int get_shading(int verbose, int mode, int ampshademode, struct swath *swath,
+		double mtodeglon, double mtodeglat,
+		double magnitude, double azimuth,
+		int nshadelevel, double *shadelevel, 
+		int *shadelevelgray, int *error);
+int plot_data_footprint(int verbose, int mode,
+		struct swath *swath, int first, int nplot, int *error);
+int plot_data_point(int verbose, int mode, 
+		struct swath *swath, int first, int nplot, int *error);
+int plot_box(int verbose, double *x, double *y, int *rgb, int *error);
+int plot_point(int verbose, double x, double y, int *rgb, int *error);
+int ping_copy(int verbose, int one, int two, struct swath *swath, int *error);
+
+static char rcs_id[] = "$Id: mbswath.c,v 5.23 2009/03/02 18:59:05 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.23 2009/03/02 18:59:05 caress Exp $";
-	static char program_name[] = "MBSWATH";
-	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
-	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode[F] -V -H]";
+	char program_name[] = "MBSWATH";
+	char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
+	char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode[F] -V -H]";
 
 	extern char *optarg;
-	extern int optkind;
 	int     argc_gmt = 0;
 	char    *argv_gmt[MBSWATH_GMT_ARG_MAX];
 	int	errflg = 0;
@@ -398,7 +416,6 @@ main (int argc, char **argv)
 	double	speedmin;
 	double	timegap;
 	char	file[MB_PATH_MAXLINE];
-	char	filef[MB_PATH_MAXLINE];
 	int	file_in_bounds;
 	int	beams_bath_max;
 	int	beams_amp_max;
@@ -1015,8 +1032,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1056,7 +1073,7 @@ main (int argc, char **argv)
 		/* check for filtered amplitude or sidescan file */
 		if (filtermode == MBSWATH_FILTER_AMP)
 		    {
-		    if (status = mb_get_ffa(verbose, file, &format, &error) != MB_SUCCESS)
+		    if ((status = mb_get_ffa(verbose, file, &format, &error)) != MB_SUCCESS)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
@@ -1069,7 +1086,7 @@ main (int argc, char **argv)
 		    }
 		else if (filtermode == MBSWATH_FILTER_SIDESCAN)
 		    {
-		    if (status = mb_get_ffs(verbose, file, &format, &error) != MB_SUCCESS)
+		    if ((status = mb_get_ffs(verbose, file, &format, &error)) != MB_SUCCESS)
 			{
 			mb_error(verbose,error,&message);
 			fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
@@ -1453,8 +1470,8 @@ main (int argc, char **argv)
 	    /* figure out whether and what to read next */
 	    if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -1521,6 +1538,7 @@ main (int argc, char **argv)
 
 	/* end it all */
 	GMT_end(argc, argv);
+	exit(status);
 }
 /*--------------------------------------------------------------------*/
 int get_footprints(int verbose, int mode, int fp_mode,
@@ -1552,7 +1570,7 @@ int get_footprints(int verbose, int mode, int fp_mode,
 		fprintf(stderr,"dbg2       fp mode:     %d\n",fp_mode);
 		fprintf(stderr,"dbg2       factor:      %f\n",factor);
 		fprintf(stderr,"dbg2       depth_def:   %f\n",depth_def);
-		fprintf(stderr,"dbg2       swath:       %d\n",swath);
+		fprintf(stderr,"dbg2       swath:       %ld\n",(long)swath);
 		fprintf(stderr,"dbg2       mtodeglon:   %f\n",mtodeglon);
 		fprintf(stderr,"dbg2       mtodeglat:   %f\n",mtodeglat);
 		fprintf(stderr,"dbg2       pings:       %d\n",swath->npings);
@@ -2171,7 +2189,7 @@ int get_shading(int verbose, int mode, int ampshademode, struct swath *swath,
 		double mtodeglon, double mtodeglat,
 		double magnitude, double azimuth,
 		int nshadelevel, double *shadelevel, 
-		double *shadelevelgray, int *error)
+		int *shadelevelgray, int *error)
 {
 	char	*function_name = "get_shading";
 	int	status = MB_SUCCESS;
@@ -2195,7 +2213,7 @@ int get_shading(int verbose, int mode, int ampshademode, struct swath *swath,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mode:       %d\n",mode);
-		fprintf(stderr,"dbg2       swath:      %d\n",swath);
+		fprintf(stderr,"dbg2       swath:      %ld\n",(long)swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
 		fprintf(stderr,"dbg2       mtodeglon:  %f\n",mtodeglon);
 		fprintf(stderr,"dbg2       mtodeglat:  %f\n",mtodeglat);
@@ -2337,9 +2355,9 @@ int get_shading(int verbose, int mode, int ampshademode, struct swath *swath,
 			{
 			/* get shading value from cpt grayscale */
 			if (ping1->amp[j] < shadelevel[0])
-			    graylevel = shadelevelgray[0];
+			    graylevel = (double) shadelevelgray[0];
 			else if (ping1->amp[j] > shadelevel[nshadelevel-1])
-			    graylevel = shadelevelgray[nshadelevel-1];
+			    graylevel = (double) shadelevelgray[nshadelevel-1];
 			else 
 			    {
 			    for (k=0;k<nshadelevel-1;k++)
@@ -2347,9 +2365,9 @@ int get_shading(int verbose, int mode, int ampshademode, struct swath *swath,
 				if (ping1->amp[j] > shadelevel[k]
 				    && ping1->amp[j] <= shadelevel[k+1])
 				    {
-				    graylevel = shadelevelgray[k] 
+				    graylevel = (double) shadelevelgray[k] 
 					+ (ping1->amp[j] - shadelevel[k])
-					*(shadelevelgray[k+1] - shadelevelgray[k])
+					*((double)shadelevelgray[k+1] - (double)shadelevelgray[k])
 					/(shadelevel[k+1] - shadelevel[k]);
 				    }
 				}
@@ -2442,7 +2460,7 @@ int plot_data_footprint(int verbose, int mode,
 	struct footprint	*print;
 	double	*x, *y;
 	double	xx[4], yy[4];
-	int	red, green, blue, rgb[3];
+	int	rgb[3];
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -2453,7 +2471,7 @@ int plot_data_footprint(int verbose, int mode,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mode:       %d\n",mode);
-		fprintf(stderr,"dbg2       swath:      %d\n",swath);
+		fprintf(stderr,"dbg2       swath:      %ld\n",(long)swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
 		fprintf(stderr,"dbg2       first:      %d\n",first);
 		fprintf(stderr,"dbg2       nplot:      %d\n",nplot);
@@ -2550,7 +2568,7 @@ int plot_data_point(int verbose, int mode,
 	int	status = MB_SUCCESS;
 	struct ping	*pingcur;
 	double	xx, yy;
-	int	red, green, blue, rgb[3];
+	int	rgb[3];
 	int	i, j;
 
 	/* print input debug statements */
@@ -2561,7 +2579,7 @@ int plot_data_point(int verbose, int mode,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mode:       %d\n",mode);
-		fprintf(stderr,"dbg2       swath:      %d\n",swath);
+		fprintf(stderr,"dbg2       swath:      %ld\n",(long)swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
 		fprintf(stderr,"dbg2       first:      %d\n",first);
 		fprintf(stderr,"dbg2       nplot:      %d\n",nplot);
@@ -2928,7 +2946,7 @@ int ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       one:        %d\n",one);
 		fprintf(stderr,"dbg2       two:        %d\n",two);
-		fprintf(stderr,"dbg2       swath:      %d\n",swath);
+		fprintf(stderr,"dbg2       swath:      %ld\n",(long)swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
 		}
 

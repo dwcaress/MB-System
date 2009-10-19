@@ -2,7 +2,7 @@
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
  *    $Id: mbvelocity_callbacks.c,v 5.7 2006/01/24 19:20:45 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -97,9 +97,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "mbvelocity_creation.h"
-#include "mb_status.h"
+
+/* X11 includes */
 #include <X11/cursorfont.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Intrinsic.h>
+#include <X11/keysym.h>
+#include <X11/keysymdef.h>
+#include <Xm/FileSB.h>
+#include <Xm/Text.h>
+#include <Xm/TextF.h>
+#include <Xm/ToggleB.h>
+
+/* mbedit widget includes */
+#include "mbvelocity_creation.h"
+#include "../../include/mb_define.h"
+#include "../../include/mb_status.h"
+#include "../../include/mb_xgraphics.h"
+#include "mbvelocity.h"
 
 /*
  * Macros to make code look nicer between ANSI and K&R.
@@ -155,7 +171,7 @@ static char message_str[256];
 static char	input_file[128];
 int selected = 0; /* indicates an input file is selected */
 
-int	can_xgid;		/* XG graphics id */
+void	*can_xgid;		/* XG graphics id */
 Cursor myCursor;
 XColor closest[2];
 XColor exact[2];
@@ -572,7 +588,7 @@ do_mbvelocity_init(int argc, char **argv)
     XDefineCursor(display,can_xid,myCursor);
     
     /* initialize graphics */
-    can_xgid = xg_init(display, can_xid, borders, xgfont );
+    xg_init(display, can_xid, borders, xgfont, &can_xgid);
     
     status = mbvt_set_graphics(can_xgid, borders, 
 		    NCOLORS, mpixel_values);
@@ -697,7 +713,8 @@ void do_set_controls()
 void
 do_velrange( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
+    XmScaleCallbackStruct *acs;
+    acs=(XmScaleCallbackStruct*)call_data;
     
     velrange_gui = (double) acs->value;
 
@@ -715,7 +732,8 @@ do_velrange( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_velcenter( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
+    XmScaleCallbackStruct *acs;
+    acs=(XmScaleCallbackStruct*)call_data;
     
     velcenter_gui = (double) acs->value;
 
@@ -733,7 +751,8 @@ do_velcenter( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_process_mb( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs=(XmAnyCallbackStruct*)call_data;
 
     fprintf(stderr, "\nAbout to process data\n");
 	    
@@ -760,7 +779,8 @@ do_process_mb( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_maxdepth( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
+    XmScaleCallbackStruct *acs;
+    acs=(XmScaleCallbackStruct*)call_data;
 
     maxdepth_gui = (double) acs->value;
     
@@ -778,7 +798,8 @@ do_maxdepth( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_anglemode( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     
     if (XmToggleButtonGetState(toggleButton_mode_ok))
 	anglemode_gui = 0;
@@ -802,7 +823,8 @@ do_anglemode( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_quit( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs=(XmAnyCallbackStruct*)call_data;
 
     mbvt_quit();
 
@@ -817,7 +839,8 @@ do_quit( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs=(XmAnyCallbackStruct*)call_data;
 
     static char selection_text[128];
     int	form;
@@ -847,7 +870,9 @@ do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_open( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmFileSelectionBoxCallbackStruct *acs=(XmFileSelectionBoxCallbackStruct*)call_data;
+    XmFileSelectionBoxCallbackStruct *acs;
+    acs=(XmFileSelectionBoxCallbackStruct*)call_data;
+
     /* local definitions */
     int	selected;
     int	status;
@@ -1036,7 +1061,8 @@ do_open_commandline(char *wfile, char *sfile, char *file, int format)
 void
 do_new_profile( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmListCallbackStruct *acs=(XmListCallbackStruct*)call_data;
+    XmListCallbackStruct *acs;
+    acs=(XmListCallbackStruct*)call_data;
     
     /* get new edit velocity profile */
     mbvt_new_edit_profile();
@@ -1055,7 +1081,8 @@ do_new_profile( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_residual_range( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmScaleCallbackStruct *acs=(XmScaleCallbackStruct*)call_data;
+    XmScaleCallbackStruct *acs;
+    acs=(XmScaleCallbackStruct*)call_data;
 
     resrange_gui = ((double)acs->value / 10.0);
     
@@ -1074,8 +1101,10 @@ do_residual_range( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmDrawingAreaCallbackStruct *acs=(XmDrawingAreaCallbackStruct*)call_data;
-    XEvent  *event = acs->event;
+    XEvent  *event;
+    XmDrawingAreaCallbackStruct *acs;
+    acs=(XmDrawingAreaCallbackStruct*)call_data;
+    event = acs->event;
 
     static Position x_loc, y_loc;
     int root_x_return, root_y_return,win_x,win_y;
@@ -1187,7 +1216,8 @@ do_canvas_event( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_save_swath_svp( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
        if (edit_gui == 1)
 	    {
@@ -1216,7 +1246,8 @@ do_save_swath_svp( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_save_residuals( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
        if (edit_gui == 1 && nload > 0)
 	    {
@@ -1246,7 +1277,8 @@ do_save_residuals( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_io_mode_mb( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs=(XmAnyCallbackStruct*)call_data;
 
     open_type = MBVT_IO_OPEN_MB;
 }
@@ -1256,7 +1288,8 @@ do_io_mode_mb( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_io_mode_open_svp_display( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs=(XmAnyCallbackStruct*)call_data;
 
     open_type = MBVT_IO_OPEN_DISPLAY_SVP;
 }
@@ -1266,7 +1299,8 @@ do_io_mode_open_svp_display( Widget w, XtPointer client_data, XtPointer call_dat
 void
 do_io_mode_save_svp( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs=(XmAnyCallbackStruct*)call_data;
 
     open_type = MBVT_IO_SAVE_EDIT_SVP;
 }
@@ -1276,7 +1310,8 @@ do_io_mode_save_svp( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_io_mode_open_svp_edit( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs=(XmAnyCallbackStruct*)call_data;
 
     open_type = MBVT_IO_OPEN_EDIT_SVP;
 }
@@ -1286,7 +1321,8 @@ do_io_mode_open_svp_edit( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_expose( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs=(XmAnyCallbackStruct*)call_data;
 
     if (expose_plot_ok == True)
 	    mbvt_plot();
@@ -1428,7 +1464,7 @@ void set_label_string(Widget w, String str)
 void set_label_multiline_string(Widget w, String str)
 {
     XmString xstr;
-    int      argok;
+    Boolean      argok;
 
     xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
     if ( xstr != NULL && argok)

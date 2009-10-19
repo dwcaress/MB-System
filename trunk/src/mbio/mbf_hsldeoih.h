@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_hsldeoih.h	3/11/93
  *	$Id: mbf_hsldeoih.h,v 5.2 2003/04/17 21:05:23 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -155,6 +155,14 @@
 #define MBF_HSLDEOIH_OLDKIND_VELOCITY_PROFILE	5
 #define MBF_HSLDEOIH_OLDKIND_STANDBY		6
 #define MBF_HSLDEOIH_OLDKIND_NAV_SOURCE		7
+
+/* array matching gain values to appropriate beam */
+static int which_gain[MBSYS_HSDS_BEAMS] = 
+			{ 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+			  4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 
+			  7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
+			 10,10,10,10,11,11,11,11,12,12,12,12,
+			 13,13,13,13,14,14,14,14,15 };
 
 /* complete data structure containing everything */
 struct mbf_hsldeoih_struct

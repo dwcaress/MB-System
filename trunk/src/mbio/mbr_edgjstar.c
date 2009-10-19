@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_edgjstar.c	5/2/2005
  *	$Id: mbr_edgjstar.c,v 5.4 2008/07/10 06:43:40 caress Exp $
  *
- *    Copyright (c) 2005 by
+ *    Copyright (c) 2005-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -106,10 +106,11 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
+static char rcs_id[]="$Id: mbr_edgjstar.c,v 5.4 2008/07/10 06:43:40 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.4 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_register_edgjstar";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -117,8 +118,8 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -176,8 +177,7 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
@@ -197,27 +197,27 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       extract_segytraceheader: %d\n",mb_io_ptr->mb_io_extract_segytraceheader);
-		fprintf(stderr,"dbg2       extract_segy:       %d\n",mb_io_ptr->mb_io_extract_segy);
-		fprintf(stderr,"dbg2       insert_segy:        %d\n",mb_io_ptr->mb_io_insert_segy);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       extract_segytraceheader: %ld\n",(long)mb_io_ptr->mb_io_extract_segytraceheader);
+		fprintf(stderr,"dbg2       extract_segy:       %ld\n",(long)mb_io_ptr->mb_io_extract_segy);
+		fprintf(stderr,"dbg2       insert_segy:        %ld\n",(long)mb_io_ptr->mb_io_insert_segy);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -249,15 +249,14 @@ int mbr_info_edgjstar(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.4 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_info_edgjstar";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -287,8 +286,7 @@ int mbr_info_edgjstar(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -319,7 +317,6 @@ int mbr_info_edgjstar(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.4 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_register_edgjstr2";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -327,8 +324,8 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -385,8 +382,7 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
@@ -406,27 +402,27 @@ int mbr_register_edgjstr2(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       extract_segytraceheader: %d\n",mb_io_ptr->mb_io_extract_segytraceheader);
-		fprintf(stderr,"dbg2       extract_segy:       %d\n",mb_io_ptr->mb_io_extract_segy);
-		fprintf(stderr,"dbg2       insert_segy:        %d\n",mb_io_ptr->mb_io_insert_segy);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       extract_segytraceheader: %ld\n",(long)mb_io_ptr->mb_io_extract_segytraceheader);
+		fprintf(stderr,"dbg2       extract_segy:       %ld\n",(long)mb_io_ptr->mb_io_extract_segy);
+		fprintf(stderr,"dbg2       insert_segy:        %ld\n",(long)mb_io_ptr->mb_io_insert_segy);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -458,15 +454,14 @@ int mbr_info_edgjstr2(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_edgjstar.c,v 5.4 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_info_edgjstr2";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -496,8 +491,7 @@ int mbr_info_edgjstr2(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -528,20 +522,18 @@ int mbr_info_edgjstr2(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_edgjstar.c,v 5.4 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_alm_edgjstar";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_jstar_struct *store;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -557,8 +549,7 @@ int mbr_alm_edgjstar(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -574,16 +565,15 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error)
 	char	*function_name = "mbr_dem_edgjstar";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_jstar_struct *jstar;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -595,8 +585,7 @@ int mbr_dem_edgjstar(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -623,17 +612,17 @@ int mbr_rt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	read_status;
 	int	shortspersample;
 	int	trace_size;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1056,8 +1045,7 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);*/
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_COMMENT)
 		{
-		fprintf(stderr,"\ndbg5  New comment read by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  New comment read by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == 0)
@@ -1088,8 +1076,7 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);*/
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 		{
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
-		fprintf(stderr,"\ndbg5  New subbottom data record read by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  New subbottom data record read by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d (subbottom)\n", store->subsystem);
 		fprintf(stderr,"\ndbg5  Channel:\n");
@@ -1186,8 +1173,7 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);*/
 		}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"\ndbg5  New sidescan data record read by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  New sidescan data record read by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -1385,8 +1371,7 @@ store->ssport.message.subsystem,store->ssstbd.message.subsystem);*/
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1402,27 +1387,25 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	char	*function_name = "mbr_wt_edgjstar";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	struct mbsys_jstar_message_struct message;
 	struct mbsys_jstar_struct *store;
 	struct mbsys_jstar_channel_struct *sbp;
 	struct mbsys_jstar_channel_struct *ss;
 	struct mbsys_jstar_comment_struct *comment;
 	char	buffer[MBSYS_JSTAR_SBPHEADER_SIZE];
 	int	index;
-	int	done;
 	int	write_len;
 	int	shortspersample;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 3)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1435,8 +1418,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_COMMENT)
 		{
-		fprintf(stderr,"\ndbg5  Comment to be written by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  Comment to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == 0)
@@ -1466,8 +1448,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 		{
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
-		fprintf(stderr,"\ndbg5  Subbottom data record tob be written by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  Subbottom data record tob be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d (subbottom)\n", store->subsystem);
 		fprintf(stderr,"\ndbg5  Channel:\n");
@@ -1564,8 +1545,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	else if (status == MB_SUCCESS && verbose >= 5 && store->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"\ndbg5  Sidescan data record to be written by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  Sidescan data record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Subsystem ID:\n");
 		fprintf(stderr,"dbg5       subsystem:        %d ", store->subsystem);
 		if (store->subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -1785,7 +1765,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_int(MB_YES, comment->message.size, &buffer[index]); index += 4;
 		
 		/* write the message header */
-		if (write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_MESSAGE_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -1793,7 +1773,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		
 		/* write the comment */
-		if (write_len = fwrite(comment->comment,1,comment->message.size,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(comment->comment,1,comment->message.size,mb_io_ptr->mbfp))
 			!= comment->message.size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -1826,7 +1806,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_int(MB_YES, sbp->message.size, &buffer[index]); index += 4;
 
 		/* write the messsage header */
-		if (write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_MESSAGE_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -1922,7 +1902,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_int(MB_YES, sbp->sonaraltitude, &buffer[index]); index += 4;
 		
 		/* write the trace header */
-		if (write_len = fwrite(buffer,1,MBSYS_JSTAR_SBPHEADER_SIZE,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_SBPHEADER_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_SBPHEADER_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -1942,7 +1922,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 #endif
 
 		/* write the trace */
-		if (write_len = fwrite(sbp->trace,1,sbp->message.size,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(sbp->trace,1,sbp->message.size,mb_io_ptr->mbfp))
 			!= sbp->message.size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -1975,7 +1955,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_int(MB_YES, ss->message.size, &buffer[index]); index += 4;
 
 		/* write the messsage header */
-		if (write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_MESSAGE_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2071,7 +2051,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_int(MB_YES, ss->sonaraltitude, &buffer[index]); index += 4;
 
 		/* write the trace header */
-		if (write_len = fwrite(buffer,1,MBSYS_JSTAR_SSHEADER_SIZE,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_SSHEADER_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_SSHEADER_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2091,7 +2071,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 #endif
 
 		/* write the trace */
-		if (write_len = fwrite(ss->trace,1,ss->message.size,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(ss->trace,1,ss->message.size,mb_io_ptr->mbfp))
 			!= ss->message.size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2120,7 +2100,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_int(MB_YES, ss->message.size, &buffer[index]); index += 4;
 
 		/* write the messsage header */
-		if (write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_MESSAGE_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_MESSAGE_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2216,7 +2196,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_int(MB_YES, ss->sonaraltitude, &buffer[index]); index += 4;
 
 		/* write the trace header */
-		if (write_len = fwrite(buffer,1,MBSYS_JSTAR_SSHEADER_SIZE,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(buffer,1,MBSYS_JSTAR_SSHEADER_SIZE,mb_io_ptr->mbfp))
 			!= MBSYS_JSTAR_SSHEADER_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2236,7 +2216,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 #endif
 
 		/* write the trace */
-		if (write_len = fwrite(ss->trace,1,ss->message.size,mb_io_ptr->mbfp) 
+		if ((write_len = fwrite(ss->trace,1,ss->message.size,mb_io_ptr->mbfp))
 			!= ss->message.size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
@@ -2247,8 +2227,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

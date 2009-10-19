@@ -59,7 +59,13 @@ for the water column).
 .B \-B
 \fImaxvalue[/window]\fP
 .br
-This option causes each trace to be normalized so that it's maximum value.
+This option causes the application of automatic gain control (AGC). At each sample, a time interval
+\fIwindow\fP seconds long centered on the sample is considered. The sample value is multiplied
+by a scaling factor calculated as \fImaxvalue\fP divided by the maximum original value in the
+time interval. This approach can emphasize coherent arrivals regardless of amplitude level. If 
+\fIwindow\fP is not specified, then the \fIwindow is taken to be the trace length in time so that
+the entire trace is normalized using the same scale factor, and all traces has the same maximum
+value of \fImaxvalue\fP.
 .TP
 .B \-D
 \fIdecimatex/decimatey\fP

@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavadjust.h	6/24/95
  *    $Id: mbnavadjust.h,v 5.12 2008/12/22 08:32:52 caress Exp $
  *
- *    Copyright (c) 2000-2008 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -415,7 +415,7 @@ int	mbnavadjust_init_globals();
 int	mbnavadjust_init(int argc,char **argv);
 int	mbnavadjust_set_colors(int ncol, int *pixels);
 int	mbnavadjust_set_borders(int *cn_brdr, int *cr_brdr, int *zc_brdr);
-int	mbnavadjust_set_graphics(int cn_xgid, int cr_xgid, int zc_xgid);
+int	mbnavadjust_set_graphics(void *cn_xgid, void *cr_xgid, void *zc_xgid);
 int	mbnavadjust_file_new(char *projectname);
 int	mbnavadjust_file_open(char *projectname);
 int	mbnavadjust_close_project();
@@ -423,10 +423,14 @@ int	mbnavadjust_write_project();
 int	mbnavadjust_read_project();
 int	mbnavadjust_import_data(char *path, int format);
 int	mbnavadjust_import_file(char *path, int format);
+int	mbnavadjust_poornav_file();
+int	mbnavadjust_goodnav_file();
+int	mbnavadjust_naverr_save();
 int	mbnavadjust_naverr_specific(int new_crossing, int new_tie);
 int	mbnavadjust_naverr_next();
 int	mbnavadjust_naverr_previous();
 int	mbnavadjust_naverr_nextunset();
+int	mbnavadjust_naverr_selecttie();
 int	mbnavadjust_naverr_addtie();
 int	mbnavadjust_naverr_deletetie();
 int	mbnavadjust_naverr_settie();
@@ -435,18 +439,85 @@ int	mbnavadjust_naverr_checkoksettie();
 int	mbnavadjust_naverr_skip();
 int	mbnavadjust_crossing_load();
 int	mbnavadjust_crossing_unload();
+int	mbnavadjust_crossing_replot();
 int	mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, void **swath_ptr, int num_pings);
 int	mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_ptr, double zoffset);
+int	mbnavadjust_section_contour(int fileid, int sectionid, 
+				struct swath *swath,
+				struct mbna_contour_vector *contour);
+int	mbnavadjust_naverr_snavpoints(int ix, int iy);
+int	mbnavadjust_sections_intersect(int crossing_id);
+int	mbnavadjust_crossing_overlap(int crossing_id, 
+				double *lonmin, double *lonmax, 
+				double *latmin, double *latmax);
+int	mbnavadjust_get_misfit();
+int	mbnavadjust_get_misfitxy();
 void 	plot(double x,double y,int ipen);
 void 	newpen(int ipen);
 void 	justify_string(double height,char *string, double *s);
 void 	plot_string(double x, double y, double hgt, double angle, char *label);
 void	mbnavadjust_naverr_scale();
 void	mbnavadjust_naverr_plot(int plotmode);
+int	mbnavadjust_autopick();
+int	mbnavadjust_invertnav();
+int	mbnavadjust_applynav();
+int	mbnavadjust_interpolatesolution();
 int	mbnavadjust_modelplot_plot();
-int	mbnavadjust_set_modelplot_graphics(int modp_xgid, int *modp_borders);
+int	mbnavadjust_set_modelplot_graphics(void *modp_xgid, int *modp_borders);
 int	mbnavadjust_modelpot_pick(int x, int y);
+int	mbnavadjust_modelpot_pick_sequential(int x, int y);
 int	mbnavadjust_modelpot_repick(int x, int y);
 int	mbnavadjust_modelplot_setzoom();
+int	mbnavadjust_modelplot_plot_sequential();
+int	mbnavadjust_modelplot_plot_tielist();
+int	mbnavadjust_modelpot_pick_tielist(int x, int y);
+int	mbnavadjust_modelpot_pick_sequential(int x, int y);
+
+void	do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_cont_expose( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_corr_expose( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_zcorr_input( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_previous( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_next( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_nextunset( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_addtie( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_deletetie( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_selecttie( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_settie( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_resettie( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_setnone( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_zerozoffset( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_minxymisfit( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_naverr_misfitcenter( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_file_new( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_file_open( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_file_close( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_file_importdata( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_quit( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_fileselection_mode( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showdata( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showgoodcrossings( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showtruecrossings( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_view_showties( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_action_analyzecrossings( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_fileselection_list(Widget w, XtPointer client, XtPointer call);
+int	do_wait_until_viewed(XtAppContext app);
+void	set_label_string(Widget w, String str);
+void	set_label_multiline_string(Widget w, String str);
+void	get_text_string(Widget w, String str);
+int	do_info_add(char *info, int timetag);
+void	do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
+
+XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
 
 /*--------------------------------------------------------------------*/

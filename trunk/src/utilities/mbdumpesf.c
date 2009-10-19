@@ -2,7 +2,7 @@
  *    The MB-system:	mbdumpesf.c	3/20/2008
  *    $Id: mbdumpesf.c,v 5.0 2008/05/26 03:27:31 caress Exp $
  *
- *    Copyright (c) 2008 by
+ *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -31,6 +31,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
@@ -43,19 +44,19 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
+static char rcs_id[] = "$Id: mbdumpesf.c,v 5.0 2008/05/26 03:27:31 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbdumpesf.c,v 5.0 2008/05/26 03:27:31 caress Exp $";
-	static char program_name[] = "mbdumpesf";
-	static char help_message[] =  "mbdumpesf reads an MB-System edit save file and dumps the \ncontents as an ascii table to stdout.";
-	static char usage_message[] = "mbdumpesf [-Iesffile -V -H]";
+	char program_name[] = "mbdumpesf";
+	char help_message[] =  "mbdumpesf reads an MB-System edit save file and dumps the \ncontents as an ascii table to stdout.";
+	char usage_message[] = "mbdumpesf [-Iesffile -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -65,17 +66,12 @@ main (int argc, char **argv)
 	int	status;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	char	*message = NULL;
 
 	/* MBIO read control parameters */
 	char	esffile[MB_PATH_MAXLINE];
 	FILE	*esffp = NULL;
 	struct stat file_status;
 	int	fstat;
-	double	stime_d;
-	int	sbeam;
-	int	saction;
-	char	fmode[16];
 	int 	byteswapped;
 	int 	nedit;
 	double	time_d;
@@ -87,7 +83,7 @@ main (int argc, char **argv)
 	int	beam_zero = 0;
 	int	beam_filter = 0;
 
-	int	i, j, k, l, m;
+	int	i;
 
 	/* get current default values */
 	byteswapped = mb_swap_check();

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_open_lib.c,v 5.7 2008/09/29 04:56:21 caress Exp $
+ * $Id: pj_open_lib.c 1504 2009-01-06 02:11:57Z warmerdam $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of pj_open_lib(), and pj_set_finder().  These
@@ -28,19 +28,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log: pj_open_lib.c,v $
- * Revision 5.7  2008/09/29 04:56:21  caress
- * Proj 4.6.1
- *
- * Revision 1.6  2004/09/16 15:14:01  fwarmerdam
- * * src/pj_open_lib.c: added pj_set_searchpath() provided by Eric Miller.
- *
- * Revision 1.5  2002/12/14 20:15:30  warmerda
- * updated headers
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 #include <projects.h>
@@ -48,7 +36,7 @@
 #include <string.h>
 #include <errno.h>
 
-PJ_CVSID("$Id: pj_open_lib.c,v 5.7 2008/09/29 04:56:21 caress Exp $");
+PJ_CVSID("$Id: pj_open_lib.c 1504 2009-01-06 02:11:57Z warmerdam $");
 
 static const char *(*pj_finder)(const char *) = NULL;
 static int path_count = 0;
@@ -74,7 +62,8 @@ void pj_set_finder( const char *(*new_finder)(const char *) )
 /*                         pj_set_searchpath()                          */
 /*                                                                      */
 /*      Path control for callers that can't practically provide         */
-/*      pj_set_finder() style callbacks.                                */
+/*      pj_set_finder() style callbacks.  Call with (0,NULL) as args    */
+/*      to clear the searchpath set.                                    */
 /************************************************************************/
 
 void pj_set_searchpath ( int count, const char **path )
@@ -92,13 +81,16 @@ void pj_set_searchpath ( int count, const char **path )
         search_path = NULL;
     }
 
-    search_path = pj_malloc(sizeof *search_path * count);
-    for (i = 0; i < count; i++)
+    if( count > 0 )
     {
-        search_path[i] = pj_malloc(strlen(path[i]) + 1);
-        strcpy(search_path[i], path[i]);
+        search_path = pj_malloc(sizeof *search_path * count);
+        for (i = 0; i < count; i++)
+        {
+            search_path[i] = pj_malloc(strlen(path[i]) + 1);
+            strcpy(search_path[i], path[i]);
+        }
     }
-
+        
     path_count = count;
 }
 
@@ -113,9 +105,16 @@ pj_open_lib(char *name, char *mode) {
     FILE *fid;
     int n = 0;
     int i;
+#ifdef WIN32
+    static const char dir_chars[] = "/\\";
+#else
+    static const char dir_chars[] = "/";
+#endif
+
+#ifndef _WIN32_WCE
 
     /* check if ~/name */
-    if (*name == '~' && name[1] == DIR_CHAR)
+    if (*name == '~' && strchr(dir_chars,name[1]) )
         if (sysname = getenv("HOME")) {
             (void)strcpy(fname, sysname);
             fname[n = strlen(fname)] = DIR_CHAR;
@@ -126,8 +125,10 @@ pj_open_lib(char *name, char *mode) {
             return NULL;
 
     /* or fixed path: /name, ./name or ../name */
-    else if (*name == DIR_CHAR || (*name == '.' && name[1] == DIR_CHAR) ||
-             (!strncmp(name, "..", 2) && name[2] == DIR_CHAR) )
+    else if (strchr(dir_chars,*name)
+             || (*name == '.' && strchr(dir_chars,name[1])) 
+             || (!strncmp(name, "..", 2) && strchr(dir_chars,name[2]))
+             || (name[1] == ':' && strchr(dir_chars,name[2])) )
         sysname = name;
 
     /* or try to use application provided file finder */
@@ -166,4 +167,7 @@ pj_open_lib(char *name, char *mode) {
                  fid == NULL ? "failed" : "succeeded" );
 
     return(fid);
+#else
+    return NULL;
+#endif /* _WIN32_WCE */
 }

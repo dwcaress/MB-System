@@ -1,6 +1,12 @@
 /* Error message processing */
-#ifndef lint
-static const char SCCSID[]="@(#)emess.c	4.6	94/05/24	GIE	REL";
+
+#ifdef _MSC_VER
+#  ifndef _CRT_SECURE_NO_DEPRECATE
+#    define _CRT_SECURE_NO_DEPRECATE
+#  endif
+#  ifndef _CRT_NONSTDC_NO_DEPRECATE
+#    define _CRT_NONSTDC_NO_DEPRECATE
+#  endif
 #endif
 
 #include <stdio.h>

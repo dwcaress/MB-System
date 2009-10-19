@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
  *    $Id: mbnavadjust_callbacks.c,v 5.19 2008/12/22 08:32:52 caress Exp $
  *
- *    Copyright (c) 2000-2008 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -86,16 +86,31 @@
 /* include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <math.h>
+
+/* X11 includes */
+#include <X11/cursorfont.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Intrinsic.h>
+#include <X11/keysym.h>
+#include <X11/keysymdef.h>
+#include <Xm/FileSB.h>
+#include <Xm/Text.h>
+#include <Xm/TextF.h>
+#include <Xm/ToggleB.h>
 #include <Xm/Xm.h>
 #include <Xm/List.h>
-#include <X11/cursorfont.h>
-#include <math.h>
 
 #define MBNAVADJUST_DECLARE_GLOBALS
 #include "mbnavadjust_extrawidgets.h"
+#include "../../include/mb_define.h"
+#include "../../include/mb_status.h"
+#include "../../include/mb_aux.h"
 #include "mbnavadjust.h"
-#include "mb_define.h"
-#include "mb_status.h"
+#include "../../include/mb_xgraphics.h"
 
 #include "mbnavadjust_creation.h"
 
@@ -151,10 +166,10 @@ XGCValues	xgcv;
 XFontStruct	*fontStruct;
 #define	XG_SOLIDLINE	0
 #define	XG_DASHLINE	1
-int	cont_xgid = 0;		/* XG graphics id */
-int	corr_xgid = 0;		/* XG graphics id */
-int	zoff_xgid = 0;		/* XG graphics id */
-int	modp_xgid = 0;		/* XG graphics id */
+void	*cont_xgid = NULL;		/* XG graphics id */
+void	*corr_xgid = NULL;		/* XG graphics id */
+void	*zoff_xgid = NULL;		/* XG graphics id */
+void	*modp_xgid = NULL;		/* XG graphics id */
 Cursor myCursor;
 
 /* Set the colors used for this program here. */
@@ -185,63 +200,14 @@ static int button1down = MB_NO;
 static int button2down = MB_NO;
 static int button3down = MB_NO;
 static int loc_x, loc_y;
-static int mod_loc_x, mod_loc_y;
 
 int	status;
 char	string[STRING_MAX];
 
 Cardinal  ac = 0;
 Arg       args[256];
-int       argok;
+Boolean       argok;
 XmString  tmp0;
-
-/*--------------------------------------------------------------------*/
-
-/* local function prototype definitions */
-void	do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_cont_expose( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_corr_expose( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_zcorr_input( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_previous( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_next( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_nextunset( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_addtie( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_deletetie( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_selecttie( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_settie( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_resettie( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_setnone( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_zerozoffset( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_minxymisfit( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_naverr_misfitcenter( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_file_new( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_file_open( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_file_close( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_file_importdata( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_quit( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_fileselection_mode( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_view_showdata( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_view_showgoodcrossings( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_view_showtruecrossings( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_view_showties( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_action_analyzecrossings( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data);
-void	do_fileselection_list(Widget w, XtPointer client, XtPointer call);
-int	do_wait_until_viewed(XtAppContext app);
-void	set_label_string(Widget w, String str);
-void	set_label_multiline_string(Widget w, String str);
-void	get_text_string(Widget w, String str);
-int	do_info_add(char *info, int timetag);
-void	do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused);
 
 /*--------------------------------------------------------------------*/
 /*      Function Name: 	BxManageCB
@@ -920,7 +886,7 @@ void do_update_status()
 		{
 		set_label_string(label_listdata,">25% Overlap Crossings:");
 		if (mbna_verbose > 0)
-			fprintf(stderr,">25% Overlap Crossings:\n");
+			fprintf(stderr,">25%% Overlap Crossings:\n");
 		if (project.num_files > 0)
 			{
 			xstr = (XmString *) malloc(project.num_crossings * sizeof(XmString));
@@ -1605,9 +1571,9 @@ do_naverr_init()
     XDefineCursor(display,corr_xid,myCursor);
 
     /* initialize graphics */
-    cont_xgid = xg_init(display, cont_xid, cont_borders, xgfont);
-    corr_xgid = xg_init(display, corr_xid, corr_borders, xgfont);
-    zoff_xgid = xg_init(display, zoff_xid, zoff_borders, xgfont);
+    xg_init(display, cont_xid, cont_borders, xgfont, &cont_xgid);
+    xg_init(display, corr_xid, corr_borders, xgfont, &corr_xgid);
+    xg_init(display, zoff_xid, zoff_borders, xgfont, &zoff_xgid);
     status = mbnavadjust_set_graphics(cont_xgid, corr_xgid, zoff_xgid);
 		
     /* set status flag */
@@ -1894,7 +1860,8 @@ do_naverr_test_graphics()
 void
 do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     struct mbna_crossing *crossing;
     int	*position_list = NULL;
     int position_count = 0;
@@ -2057,7 +2024,8 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_cont_expose( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 }
@@ -2067,7 +2035,8 @@ do_naverr_cont_expose( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_corr_expose( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 }
@@ -2077,7 +2046,8 @@ do_naverr_corr_expose( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     XEvent  *event = acs->event;
     double	x1, x2, y1, y2;
     
@@ -2206,7 +2176,8 @@ void
 do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	XEvent *event;
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	event = acs->event;
 
     /* If there is input in the drawing area */
@@ -2282,7 +2253,8 @@ void
 do_naverr_zcorr_input( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XEvent *event;
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     event = acs->event;
 
     /* If there is input in the drawing area */
@@ -2360,7 +2332,8 @@ project.zoffsetwidth, mbna_offset_z);
 void
 do_naverr_previous( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_previous();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2375,7 +2348,8 @@ do_naverr_previous( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_next( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_next();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2390,7 +2364,8 @@ do_naverr_next( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_nextunset( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_nextunset();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2405,7 +2380,8 @@ do_naverr_nextunset( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_addtie( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_addtie();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2420,7 +2396,8 @@ do_naverr_addtie( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_deletetie( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_deletetie();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2435,7 +2412,8 @@ do_naverr_deletetie( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_selecttie( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_selecttie();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2450,7 +2428,8 @@ do_naverr_selecttie( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_setnone( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_skip();
     mbnavadjust_naverr_nextunset();
@@ -2466,7 +2445,8 @@ do_naverr_setnone( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_setoffset( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_save();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2481,7 +2461,8 @@ do_naverr_setoffset( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_resettie( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_naverr_resettie();
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -2496,7 +2477,8 @@ do_naverr_resettie( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 		
     /* unload loaded crossing */
     if (mbna_naverr_load == MB_YES)
@@ -2521,7 +2503,8 @@ do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_fullsize( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     
     /* reset the plot bounds */
     mbna_plot_lon_min = mbna_lon_min;
@@ -2538,7 +2521,8 @@ do_naverr_fullsize( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 		
 	/* move offset */
 	mbna_offset_x = 0.0;
@@ -2558,7 +2542,8 @@ do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_zerozoffset( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 		
 	/* move offset */
 	mbna_offset_z = 0.0;
@@ -2576,7 +2561,8 @@ do_naverr_zerozoffset( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_applyzoffset( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	
 	/* recalculate minimum misfit at current z offset */
 	mbnavadjust_get_misfitxy();
@@ -2593,7 +2579,8 @@ do_naverr_applyzoffset( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
 	/* move offset */
 	mbna_offset_x = mbna_minmisfit_x;
@@ -2617,7 +2604,8 @@ do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_minxymisfit( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
 	/* move offset */
 	mbna_offset_x = mbna_minmisfit_xh;
@@ -2636,7 +2624,8 @@ do_naverr_minxymisfit( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_naverr_misfitcenter( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
 	if (XmToggleButtonGetState(toggleButton_misfitcenter_zero))
 	    mbna_misfit_center = MBNA_MISFIT_ZEROCENTER;
@@ -2654,7 +2643,8 @@ do_naverr_misfitcenter( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_biases_apply( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     	struct mbna_file *file1;
     	struct mbna_file *file2;
 	int	ivalue;
@@ -2704,7 +2694,8 @@ do_biases_apply( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_biases_applyall( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	double	heading_bias;
 	double	roll_bias;
     	struct mbna_file *file;
@@ -2745,7 +2736,8 @@ do_biases_applyall( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_biases_init( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     	struct mbna_file *file1;
     	struct mbna_file *file2;
 	char	value_text[128];
@@ -2817,7 +2809,8 @@ do_biases_init( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_biases_toggle( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	ivalue;
 
 	if (XmToggleButtonGetState(toggleButton_biases_together))
@@ -2868,7 +2861,8 @@ do_biases_toggle( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_biases_heading( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	ivalue;
 
 	if (mbna_bias_mode == MBNA_BIAS_SAME)
@@ -2888,7 +2882,8 @@ do_biases_heading( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_biases_roll( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	ivalue;
 
 	if (mbna_bias_mode == MBNA_BIAS_SAME)
@@ -2908,7 +2903,8 @@ do_biases_roll( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_controls_apply( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	ivalue;
 
     /* get value of decimation slider */
@@ -2976,14 +2972,16 @@ do_controls_apply( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_scale_controls_sectionlength( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
  }
 
 /*--------------------------------------------------------------------*/
 void
 do_scale_controls_sectionsoundings( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	    ivalue;
     int	    imin, imax;
 
@@ -3015,14 +3013,16 @@ do_scale_controls_sectionsoundings( Widget w, XtPointer client_data, XtPointer c
 void
 do_scale_controls_decimation( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 }
 
 /*--------------------------------------------------------------------*/
 void
 do_scale_contourinterval( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	    ivalue;
     int	    imax;
 
@@ -3062,7 +3062,8 @@ do_scale_contourinterval( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_scale_controls_tickinterval( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	    ivalue;
     int	    imax;
 
@@ -3101,7 +3102,8 @@ do_scale_controls_tickinterval( Widget w, XtPointer client_data, XtPointer call_
 void
 do_controls_scale_colorinterval( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	    ivalue;
     int	    imax;
 
@@ -3140,21 +3142,24 @@ do_controls_scale_colorinterval( Widget w, XtPointer client_data, XtPointer call
 void
 do_scale_controls_precision( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 }
 /*--------------------------------------------------------------------*/
 
 void
 do_scale_controls_zoffset( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 }
 
 /*--------------------------------------------------------------------*/
 void
 do_file_new( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 fprintf(stderr,"do_file_new\n");
 }
 
@@ -3162,7 +3167,8 @@ fprintf(stderr,"do_file_new\n");
 void
 do_file_open( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 fprintf(stderr,"do_file_open\n");
 }
 
@@ -3170,7 +3176,8 @@ fprintf(stderr,"do_file_open\n");
 void
 do_file_importdata( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 fprintf(stderr,"do_file_importdata\n");
 }
 
@@ -3178,7 +3185,8 @@ fprintf(stderr,"do_file_importdata\n");
 void
 do_file_close( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_close_project();
     do_update_status();
@@ -3188,7 +3196,8 @@ do_file_close( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_quit( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 		
     /* unload loaded crossing */
     if (mbna_naverr_load == MB_YES)
@@ -3211,7 +3220,8 @@ do_quit( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_fileselection_mode( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     file_mode = (int) client_data;
 
@@ -3250,7 +3260,8 @@ do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data)
 {
     char ifile[STRING_MAX];
     char format_text[40];
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     /* get input filename */
     get_text_string(fileSelectionBox_text, ifile);
@@ -3277,7 +3288,8 @@ do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     file_mode = FILE_MODE_NONE;
 }
@@ -3286,7 +3298,8 @@ do_fileselection_cancel( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_view_showdata( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbna_view_list = MBNA_VIEW_LIST_FILES;
     do_update_status();
@@ -3296,7 +3309,8 @@ do_view_showdata( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbna_view_list = MBNA_VIEW_LIST_CROSSINGS;
     do_update_status();
@@ -3306,7 +3320,8 @@ do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_view_showgoodcrossings( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbna_view_list = MBNA_VIEW_LIST_GOODCROSSINGS;
     do_update_status();
@@ -3316,7 +3331,8 @@ do_view_showgoodcrossings( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_view_showtruecrossings( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbna_view_list = MBNA_VIEW_LIST_TRUECROSSINGS;
     do_update_status();
@@ -3326,7 +3342,8 @@ do_view_showtruecrossings( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_view_showties( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbna_view_list = MBNA_VIEW_LIST_TIES;
     do_update_status();
@@ -3337,7 +3354,8 @@ do_view_showties( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_action_poornav( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_poornav_file();
     do_update_status();
@@ -3348,7 +3366,8 @@ do_action_poornav( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_action_goodnav( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_goodnav_file();
     do_update_status();
@@ -3358,7 +3377,8 @@ do_action_goodnav( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     
     /* make sure that contours are generated for all of the existing crossings */
 		
@@ -3371,14 +3391,16 @@ do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_action_analyzecrossings( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 }
 
 /*--------------------------------------------------------------------*/
 void
 do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     mbna_status = MBNA_STATUS_NAVSOLVE;
     mbnavadjust_invertnav();
@@ -3393,7 +3415,8 @@ do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_apply_nav( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     mbnavadjust_applynav();
     do_update_status();
 }
@@ -3403,7 +3426,8 @@ do_apply_nav( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_modelplot_show( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     Window	modp_xid;
     Dimension	width, height;
     
@@ -3440,7 +3464,7 @@ do_modelplot_show( Widget w, XtPointer client_data, XtPointer call_data)
     XDefineCursor(display,modp_xid,myCursor);
 
     /* initialize graphics */
-    modp_xgid = xg_init(display, modp_xid, modp_borders, xgfont);
+    xg_init(display, modp_xid, modp_borders, xgfont, &modp_xgid);
     status = mbnavadjust_set_modelplot_graphics(modp_xgid, modp_borders);
 
     /* set status flag */
@@ -3461,7 +3485,8 @@ do_modelplot_show( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_modelplot_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     /* deallocate graphics */
     project.modelplot = MB_NO;
@@ -3529,7 +3554,7 @@ do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *un
 		XDefineCursor(display,modp_xid,myCursor);
 
 		/* initialize graphics */
-		modp_xgid = xg_init(display, modp_xid, modp_borders, xgfont);
+		xg_init(display, modp_xid, modp_borders, xgfont, &modp_xgid);
 		status = mbnavadjust_set_modelplot_graphics(modp_xgid, modp_borders);
 
 		/* plot the model */
@@ -3544,7 +3569,8 @@ do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *un
 void
 do_modelplot_fullsize( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
 	/* replot model */
 	mbna_modelplot_zoom_x1 = 0;
@@ -3560,7 +3586,8 @@ do_modelplot_fullsize( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     XEvent  *event = acs->event;
     
     /* If there is input in the drawing area */
@@ -3657,7 +3684,8 @@ do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_modelplot_expose( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
     /* replot the model */
     mbnavadjust_modelplot_plot();
@@ -3668,7 +3696,8 @@ do_modelplot_expose( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_modelplot_block( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 fprintf(stderr,"Called do_modelplot_block\n");
 
 	if (XmToggleButtonGetState(toggleButton_modelplot_block))
@@ -3687,7 +3716,8 @@ fprintf(stderr,"Called do_modelplot_block\n");
 void
 do_modelplot_sequential( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 fprintf(stderr,"Called do_modelplot_sequential\n");
 
 	if (XmToggleButtonGetState(toggleButton_modelplot_sequential))
@@ -3711,7 +3741,8 @@ do_fileselection_list(Widget w, XtPointer client, XtPointer call)
 	int	form;
 	char	value_text[128];
 
-	/*SUPPRESS 594*/XmAnyCallbackStruct *acs=(XmAnyCallbackStruct*)call;
+	XmAnyCallbackStruct *acs;
+	acs=(XmAnyCallbackStruct*)call;
 
 	/* get selected text */
 	get_text_string(fileSelectionBox_text, string);
@@ -3938,7 +3969,7 @@ void set_label_string(Widget w, String str)
 void set_label_multiline_string(Widget w, String str)
 {
     XmString xstr;
-    int      argok;
+    Boolean      argok;
 
     xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
     if ( xstr != NULL && argok)
@@ -3968,5 +3999,6 @@ void get_text_string(Widget w, String str)
 void
 do_make_grid( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 }

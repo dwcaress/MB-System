@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsds2raw.c	6/20/01
  *	$Id: mbr_hsds2lam.c,v 5.5 2005/11/05 00:48:04 caress Exp $
  *
- *    Copyright (c) 2001, 2002, 2003 by
+ *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -54,6 +54,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <rpc/types.h>
+#include <rpc/xdr.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -95,10 +97,11 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
+static char rcs_id[]="$Id: mbr_hsds2lam.c,v 5.5 2005/11/05 00:48:04 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2lam.c,v 5.5 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_register_hsds2lam";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -106,8 +109,8 @@ int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -161,8 +164,7 @@ int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
@@ -182,24 +184,24 @@ int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -231,15 +233,14 @@ int mbr_info_hsds2lam(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2lam.c,v 5.5 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_info_hsds2lam";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -269,8 +270,7 @@ int mbr_info_hsds2lam(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -301,7 +301,6 @@ int mbr_info_hsds2lam(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsds2lam(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsds2lam.c,v 5.5 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_alm_hsds2lam";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -309,11 +308,11 @@ int mbr_alm_hsds2lam(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -332,8 +331,7 @@ int mbr_alm_hsds2lam(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -353,11 +351,11 @@ int mbr_dem_hsds2lam(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -371,8 +369,7 @@ int mbr_dem_hsds2lam(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -393,12 +390,12 @@ int mbr_rt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -417,8 +414,7 @@ int mbr_rt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -439,12 +435,12 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -459,8 +455,7 @@ int mbr_wt_hsds2lam(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -486,12 +481,12 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -508,12 +503,12 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	
 	/* get telegram */
 	nskip = 0;
-	xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
+	xdr_status = xdr_int(mb_io_ptr->xdrs, &telegram_id);
 	while (xdr_status == MB_YES 
 	    && telegram_id != MBSYS_ATLAS_TELEGRAM_HSDS2LAM
 	    && telegram_id != MBSYS_ATLAS_TELEGRAM_COMMENTLAM)
 	    {
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
+	    xdr_status = xdr_int(mb_io_ptr->xdrs, &telegram_id);
 	    nskip++;
 	    }
 
@@ -521,13 +516,13 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (telegram_id == MBSYS_ATLAS_TELEGRAM_HSDS2LAM)
 	    {
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->start_ping_no);
+		xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->start_ping_no);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_transmit_time_d);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->start_opmode, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->start_opmode, strlength);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_heave);
 	    if (xdr_status == MB_YES) 
@@ -545,21 +540,21 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_depth_max);		
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->tt_ping_no);
+		xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->tt_ping_no);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_transmit_time_d);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_beam_table_index);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_beam_table_index);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_beam_cnt);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_beam_cnt);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_long1);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long1);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_long2);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long2);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_long3);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long3);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_xdraught);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_xdraught);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_double1);
 	    if (xdr_status == MB_YES) 
@@ -580,13 +575,13 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    xdr_status = xdr_float(mb_io_ptr->xdrs, &(store->tt_lruntime[i]));
 		}
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->tt_lamplitude, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->tt_lamplitude, strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->tt_lstatus, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->tt_lstatus, strlength);
 	    for (i=0;i<store->tt_beam_cnt;i++)
 		{
 		if (xdr_status == MB_YES) 
@@ -603,11 +598,11 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    xdr_status = xdr_double(mb_io_ptr->xdrs, &(store->pr_bathalongtrack[i]));
 		}
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->pr_beamflag, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->pr_beamflag, strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->ss_ping_no);
+		xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->ss_ping_no);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->ss_transmit_time_d);
 	    if (xdr_status == MB_YES) 
@@ -615,25 +610,25 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->ss_timespacing);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->ss_max_side_bb_cnt);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->ss_max_side_bb_cnt);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->ss_max_side_sb_cnt);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->ss_max_side_sb_cnt);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->ss_sidescan, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->ss_sidescan, strlength);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tr_transmit_time_d);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->tr_ping_no);
+		xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->tr_ping_no);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->tr_window_mode);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_window_mode);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->tr_no_of_win_groups);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_no_of_win_groups);
 	    for (i=0;i<100;i++)
 		{
 		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tr_repeat_count[i]);
+		    xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_repeat_count[i]);
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_float(mb_io_ptr->xdrs, &store->tr_start[i]);
 		if (xdr_status == MB_YES) 
@@ -642,7 +637,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->bs_transmit_time_d);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->bs_ping_no);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->bs_ping_no);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrActualGainSets);
 	    if (xdr_status == MB_YES) 
@@ -663,7 +658,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    for (i=0;i<MBSYS_ATLAS_HSDS2_TX_PAR;i++)
 		{
 		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->bs_txBeamIndex[i]);
+		    xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->bs_txBeamIndex[i]);
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_txLevel[i]);
 		if (xdr_status == MB_YES) 
@@ -679,13 +674,13 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_m_tau[i]);
 		}
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->bs_eff_ampli, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->bs_eff_ampli, strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->bs_nis, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->bs_nis, strlength);
     
 	    /* set kind */
 	    if (store->start_opmode[12] == 0)
@@ -698,9 +693,9 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	else if (telegram_id == MBSYS_ATLAS_TELEGRAM_COMMENTLAM)
 	    {
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->comment, strlength);	    
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->comment, strlength);	    
     
 	    /* set kind */
 	    store->kind = MB_DATA_COMMENT;
@@ -758,8 +753,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (verbose >= 5)
 #endif
 		{
-		fprintf(stderr,"\ndbg5  HSDS2LAM telegram read in MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  HSDS2LAM telegram read in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       xdr_status:              %d\n",xdr_status);
 		fprintf(stderr,"dbg5       kind:                    %d\n",store->kind);
 		if (store->kind == MB_DATA_COMMENT)
@@ -850,8 +844,7 @@ int mbr_hsds2lam_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -876,12 +869,12 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -895,8 +888,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	if (verbose >= 5)
 #endif
 		{
-		fprintf(stderr,"\ndbg5  HSDS2LAM telegram to be written in MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  HSDS2LAM telegram to be written in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       kind:                    %d\n",store->kind);
 		if (store->kind == MB_DATA_COMMENT)
 		    {
@@ -988,16 +980,16 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    || store->kind == MB_DATA_CALIBRATE)
 	    {
 	    telegram_id = MBSYS_ATLAS_TELEGRAM_HSDS2LAM;
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
+	    xdr_status = xdr_int(mb_io_ptr->xdrs, &telegram_id);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->start_ping_no);
+		xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->start_ping_no);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_transmit_time_d);
 	    strlength = 32;
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->start_opmode, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->start_opmode, strlength);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_heave);
 	    if (xdr_status == MB_YES) 
@@ -1015,21 +1007,21 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->start_depth_max);		
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->tt_ping_no);
+		xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->tt_ping_no);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_transmit_time_d);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_beam_table_index);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_beam_table_index);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_beam_cnt);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_beam_cnt);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_long1);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long1);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_long2);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long2);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_long3);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_long3);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tt_xdraught);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tt_xdraught);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tt_double1);
 	    if (xdr_status == MB_YES) 
@@ -1054,17 +1046,17 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    else
 		strlength = 4 * ((store->tt_beam_cnt / 4) + 1);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->tt_lamplitude, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->tt_lamplitude, strlength);
 	    if (store->tt_beam_cnt % 4 == 0)
 		strlength = store->tt_beam_cnt;
 	    else
 		strlength = 4 * ((store->tt_beam_cnt / 4) + 1);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->tt_lstatus, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->tt_lstatus, strlength);
 	    for (i=0;i<store->tt_beam_cnt;i++)
 		{
 		if (xdr_status == MB_YES) 
@@ -1085,11 +1077,11 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    else
 		strlength = 4 * ((store->tt_beam_cnt / 4) + 1);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->pr_beamflag, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->pr_beamflag, strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->ss_ping_no);
+		xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->ss_ping_no);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->ss_transmit_time_d);
 	    if (xdr_status == MB_YES) 
@@ -1097,28 +1089,28 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->ss_timespacing);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->ss_max_side_bb_cnt);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->ss_max_side_bb_cnt);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &store->ss_max_side_sb_cnt);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->ss_max_side_sb_cnt);
 	    if ((store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt) % 4 == 0)
 		strlength = store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt;
 	    else
 		strlength = 4 * (((store->ss_max_side_bb_cnt + store->ss_max_side_sb_cnt) / 4) + 1);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
-	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->ss_sidescan, strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
+	    xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->ss_sidescan, strlength);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->tr_transmit_time_d);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->tr_ping_no);
+		xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->tr_ping_no);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->tr_window_mode);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_window_mode);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->tr_no_of_win_groups);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_no_of_win_groups);
 	    for (i=0;i<100;i++)
 		{
 		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_long(mb_io_ptr->xdrs, &store->tr_repeat_count[i]);
+		    xdr_status = xdr_int(mb_io_ptr->xdrs, &store->tr_repeat_count[i]);
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_float(mb_io_ptr->xdrs, &store->tr_start[i]);
 		if (xdr_status == MB_YES) 
@@ -1127,7 +1119,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_double(mb_io_ptr->xdrs, &store->bs_transmit_time_d);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->bs_ping_no);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &store->bs_ping_no);
 	    if (xdr_status == MB_YES) 
 		xdr_status = xdr_u_short(mb_io_ptr->xdrs, &store->bs_nrActualGainSets);
 	    if (xdr_status == MB_YES) 
@@ -1148,7 +1140,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	    for (i=0;i<MBSYS_ATLAS_HSDS2_TX_PAR;i++)
 		{
 		if (xdr_status == MB_YES) 
-		    xdr_status = xdr_u_long(mb_io_ptr->xdrs, &store->bs_txBeamIndex[i]);
+		    xdr_status = xdr_u_int(mb_io_ptr->xdrs, &store->bs_txBeamIndex[i]);
 		if (xdr_status == MB_YES) 
 		    xdr_status = xdr_float(mb_io_ptr->xdrs, &store->bs_txLevel[i]);
 		if (xdr_status == MB_YES) 
@@ -1165,29 +1157,29 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	    strlength = MBSYS_ATLAS_HSDS2_PFB_NUM;
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->bs_eff_ampli, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->bs_eff_ampli, strlength);
 	    strlength = MBSYS_ATLAS_HSDS2_PFB_NUM;
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->bs_nis, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->bs_nis, strlength);
 	    }
 
 	/* write comment record */
 	else if (store->kind == MB_DATA_COMMENT)
 	    {
 	    telegram_id = MBSYS_ATLAS_TELEGRAM_COMMENTLAM;
-	    xdr_status = xdr_long(mb_io_ptr->xdrs, &telegram_id);
+	    xdr_status = xdr_int(mb_io_ptr->xdrs, &telegram_id);
 	    if ((strlen(store->comment) + 1) % 4 == 0)
 		strlength = strlen(store->comment) + 1;
 	    else
 		strlength = 4 * (((strlen(store->comment) + 1) / 4) + 1);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_long(mb_io_ptr->xdrs, &strlength);
+		xdr_status = xdr_int(mb_io_ptr->xdrs, &strlength);
 	    if (xdr_status == MB_YES) 
-		xdr_status = xdr_opaque(mb_io_ptr->xdrs, store->comment, strlength);
+		xdr_status = xdr_opaque(mb_io_ptr->xdrs, (char *)store->comment, strlength);
 	    }
 
 	/* set error if required */
@@ -1200,8 +1192,7 @@ int mbr_hsds2lam_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

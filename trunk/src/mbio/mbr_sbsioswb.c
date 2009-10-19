@@ -163,7 +163,7 @@ int mbr_dem_sbsioswb(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_sbsioswb.c,v 5.13 2009/03/08 09:21:00 caress Exp $";
+static char rcs_id[]="$Id: mbr_sbsioswb.c,v 5.13 2009/03/08 09:21:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error)
@@ -175,8 +175,8 @@ int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -230,8 +230,7 @@ int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
@@ -251,24 +250,24 @@ int mbr_register_sbsioswb(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -306,8 +305,8 @@ int mbr_info_sbsioswb(int verbose,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -337,8 +336,7 @@ int mbr_info_sbsioswb(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -376,11 +374,11 @@ int mbr_alm_sbsioswb(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -399,8 +397,7 @@ int mbr_alm_sbsioswb(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -420,11 +417,11 @@ int mbr_dem_sbsioswb(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -437,8 +434,7 @@ int mbr_dem_sbsioswb(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -465,19 +461,17 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	lon, lat;
 	int	id;
 	int	skip;
-	int	sensor_size;
-	int	data_size;
 	int	i, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -533,8 +527,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5)
 		{
-		fprintf(stderr,"\ndbg5  New header record read by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  New header record read by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  New header values:\n");
 		fprintf(stderr,"dbg5       year:       %d\n",data->year);
 		fprintf(stderr,"dbg5       day:        %d\n",data->day);
@@ -625,8 +618,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* print debug statements */
 		if (status == MB_SUCCESS && verbose >= 5)
 			{
-			fprintf(stderr,"\ndbg5  Header record after byte shift in MBIO function <%s>\n",
-				function_name);
+			fprintf(stderr,"\ndbg5  Header record after byte shift in MBIO function <%s>\n",function_name);
 			fprintf(stderr,"dbg5  New header values:\n");
 			fprintf(stderr,"dbg5       skip:       %d\n",skip);
 			fprintf(stderr,"dbg5       year:       %d\n",data->year);
@@ -737,8 +729,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* print debug statements */
 		if (status == MB_SUCCESS && verbose >= 5)
 			{
-			fprintf(stderr,"\ndbg5  New sensor record read by MBIO function <%s>\n",
-				function_name);
+			fprintf(stderr,"\ndbg5  New sensor record read by MBIO function <%s>\n",function_name);
 			fprintf(stderr,"dbg5  New sensor values:\n");
 			fprintf(stderr,"dbg5       eclipse_time:    %d\n",
 				data->eclipse_time);
@@ -831,8 +822,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		if (status == MB_SUCCESS && verbose >= 5 
 			&& data->kind == MB_DATA_DATA)
 			{
-			fprintf(stderr,"\ndbg5  New data record read by MBIO function <%s>\n",
-				function_name);
+			fprintf(stderr,"\ndbg5  New data record read by MBIO function <%s>\n",function_name);
 			fprintf(stderr,"dbg5  New data values:\n");
 			fprintf(stderr,"dbg5       beams_bath:   %d\n",
 				data->beams_bath);
@@ -867,8 +857,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* print debug statements */
 		if (status == MB_SUCCESS && verbose >= 5)
 			{
-			fprintf(stderr,"\ndbg5  New comment record read by MBIO function <%s>\n",
-				function_name);
+			fprintf(stderr,"\ndbg5  New comment record read by MBIO function <%s>\n",function_name);
 			fprintf(stderr,"dbg5  New comment:\n");
 			fprintf(stderr,"dbg5       comment:   %s\n",
 				data->comment);
@@ -936,8 +925,7 @@ int mbr_rt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -968,12 +956,12 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -992,8 +980,8 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2 && (store->kind == MB_DATA_DATA || store->kind == MB_DATA_NAV))
 		{
-		fprintf(stderr,"dbg2   Data to be extracted from storage structure: %d %d\n",
-			store_ptr,store);
+		fprintf(stderr,"dbg2   Data to be extracted from storage structure: %ld %ld\n",
+			(long)store_ptr,(long)store);
 		fprintf(stderr,"dbg2       kind:       %d\n",store->kind);
 		fprintf(stderr,"dbg2       lon2u:      %d\n",store->lon2u);
 		fprintf(stderr,"dbg2       lon2b:      %d\n",store->lon2b);
@@ -1132,8 +1120,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print debug statements */
 	if (verbose >= 5)
 		{
-		fprintf(stderr,"\ndbg5  Ready to write data in MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  Ready to write data in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       kind:       %d\n",
 			data->kind);
 		fprintf(stderr,"dbg5       error:      %d\n",*error);
@@ -1143,8 +1130,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print debug statements */
 	if (status == MB_SUCCESS && verbose >= 5)
 		{
-		fprintf(stderr,"\ndbg5  Header record to be written by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  Header record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Header values:\n");
 		fprintf(stderr,"dbg5       year:       %d\n",data->year);
 		fprintf(stderr,"dbg5       day:        %d\n",data->day);
@@ -1171,8 +1157,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if (status == MB_SUCCESS && verbose >= 5 
 		&& data->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"\ndbg5  Sensor record to be written by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  Sensor record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Sensor values:\n");
 		fprintf(stderr,"dbg5       eclipse_time:    %d\n",
 			data->eclipse_time);
@@ -1184,8 +1169,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if (status == MB_SUCCESS && verbose >= 5 
 		&& data->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"\ndbg5  Data record to be written by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  Data record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Data values:\n");
 		fprintf(stderr,"dbg5       beams_bath:   %d\n",
 			data->beams_bath);
@@ -1201,8 +1185,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if (status == MB_SUCCESS && verbose >= 5 
 		&& data->kind == MB_DATA_COMMENT)
 		{
-		fprintf(stderr,"\ndbg5  Comment record to be written by MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  Comment record to be written by MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5  Comment:\n");
 		fprintf(stderr,"dbg5       comment:   %s\n",
 			data->comment);
@@ -1306,8 +1289,7 @@ int mbr_wt_sbsioswb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

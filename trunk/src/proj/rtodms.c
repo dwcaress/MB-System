@@ -1,7 +1,4 @@
 /* Convert radian argument to DMS ascii format */
-#ifndef lint
-static const char SCCSID[]="@(#)rtodms.c	4.3	93/06/12	GIE	REL";
-#endif
 #include <projects.h>
 #include <stdio.h>
 #include <string.h>
@@ -53,7 +50,9 @@ rtodms(char *s, double r, int pos, int neg) {
 	sec = fmod(r / RES, 60.);
 	r = floor(r / RES60);
 	min = fmod(r, 60.);
-	deg = r / 60.;
+        r = floor(r / 60.);
+        deg = r;
+
 	if (dolong)
 		(void)sprintf(ss,format,deg,min,sec,sign);
 	else if (sec) {

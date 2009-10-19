@@ -165,7 +165,7 @@ $(BINDIR)/mbgrdtiff: mbgrdtiff.o \
 		$(LFLAGS) -o $(BINDIR)/mbgrdtiff
 
 ### compile the source files
-mbcontour.o:	mbcontour.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_contour.h
+mbcontour.o:	mbcontour.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbcontour.c
 mbswath.o:	mbswath.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_format.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbswath.c

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	make_mbhtml	8/19/97
-#    $Id: make_mbhtml,v 5.12 2003-12-04 23:10:21 caress Exp $
+#    $Id: make_mbhtml,v 5.12 2003/12/04 23:10:21 caress Exp $
 #
 #    Copyright (c) 1997 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -30,10 +30,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 19,  1997
 #
 # Version:
-#   $Id: make_mbhtml,v 5.12 2003-12-04 23:10:21 caress Exp $
+#   $Id: make_mbhtml,v 5.12 2003/12/04 23:10:21 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: make_mbhtml,v $
+#   Revision 5.12  2003/12/04 23:10:21  caress
+#   Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
+#
 #   Revision 5.11  2003/08/07 21:21:50  caress
 #   Changed to reflect use of CVS instead of raw RCS and the placement of source manual pages in mbystem/man/manl instead of src/* directories.
 #

@@ -1,11 +1,11 @@
 /******************************************************************************
- * $Id: pj_latlong.c,v 5.6 2008/09/29 04:56:21 caress Exp $
+ * $Id: pj_latlong.c 1504 2009-01-06 02:11:57Z warmerdam $
  *
  * Project:  PROJ.4
  * Purpose:  Stub projection implementation for lat/long coordinates. We 
  *           don't actually change the coordinates, but we want proj=latlong
  *           to act sort of like a projection.
- * Author:   Frank Warmerdam, warmerda@home.com
+ * Author:   Frank Warmerdam, warmerdam@pobox.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
@@ -27,25 +27,15 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log: pj_latlong.c,v $
- * Revision 5.6  2008/09/29 04:56:21  caress
- * Proj 4.6.1
- *
- * Revision 1.2  2000/07/07 06:04:23  warmerda
- * added longlat alias
- *
- * Revision 1.1  2000/07/06 23:32:27  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 /* very loosely based upon DMA code by Bradford W. Drew */
 #define PJ_LIB__
 #include	<projects.h>
-PROJ_HEAD(latlong, "Lat/long (Geodetic)")  "\n\t";
-PROJ_HEAD(longlat, "Lat/long (Geodetic)")  "\n\t";
+PROJ_HEAD(lonlat, "Lat/long (Geodetic)")  "\n\t";
+PROJ_HEAD(latlon, "Lat/long (Geodetic alias)")  "\n\t";
+PROJ_HEAD(latlong, "Lat/long (Geodetic alias)")  "\n\t";
+PROJ_HEAD(longlat, "Lat/long (Geodetic alias)")  "\n\t";
 
 FORWARD(forward);
 
@@ -69,6 +59,20 @@ ENTRY0(latlong)
 ENDENTRY(P)
 
 ENTRY0(longlat)
+        P->is_latlong = 1;
+        P->x0 = 0.0;
+        P->y0 = 0.0;
+	P->inv = inverse; P->fwd = forward;
+ENDENTRY(P)
+
+ENTRY0(latlon)
+        P->is_latlong = 1;
+        P->x0 = 0.0;
+        P->y0 = 0.0;
+	P->inv = inverse; P->fwd = forward;
+ENDENTRY(P)
+
+ENTRY0(lonlat)
         P->is_latlong = 1;
         P->x0 = 0.0;
         P->y0 = 0.0;

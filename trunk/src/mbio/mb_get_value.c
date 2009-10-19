@@ -2,7 +2,7 @@
  *    The MB-system:	mb_get_value.c	2/15/93
  *    $Id: mb_get_value.c,v 5.5 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -109,7 +109,7 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 5.5 2008/09/13 06:08:09 caress Exp $";
+/* static char rcs_id[]="$Id: mb_get_value.c,v 5.5 2008/09/13 06:08:09 caress Exp $"; */
 char	tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/
@@ -313,7 +313,6 @@ int mb_put_binary_long(int swapped, mb_s_long value, void *buffer)
  */
 int mb_get_bounds (char *text, double *bounds)
 {
-	char	*function_name = "mb_get_bounds";
 	int	status = MB_SUCCESS;
 	char	*result;
 	int	i;

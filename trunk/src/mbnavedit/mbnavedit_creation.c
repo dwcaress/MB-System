@@ -155,7 +155,6 @@ CreatemainWindow(Widget parent)
 {
     Cardinal ac = 0;
     Arg      args[256];
-    Cardinal cdc = 0;
     Boolean  argok = False;
     Widget   mainWindow;
     Widget   xmDialogShell_offset;

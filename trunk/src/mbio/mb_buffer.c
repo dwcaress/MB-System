@@ -2,7 +2,7 @@
  *    The MB-system:	mb_buffer.c	2/25/93
  *    $Id: mb_buffer.c,v 5.8 2009/03/02 18:51:52 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -185,21 +185,21 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
+static char rcs_id[]="$Id: mb_buffer.c,v 5.8 2009/03/02 18:51:52 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(int verbose, void **buff_ptr, int *error)
 {
-  static char rcs_id[]="$Id: mb_buffer.c,v 5.8 2009/03/02 18:51:52 caress Exp $";
 	char	*function_name = "mb_buffer_init";
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
-	struct mb_io_struct *mb_io_ptr;
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -216,10 +216,10 @@ int mb_buffer_init(int verbose, void **buff_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       buff_ptr:   %d\n",*buff_ptr);
+		fprintf(stderr,"dbg2       buff_ptr:   %ld\n",(long)*buff_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
@@ -239,12 +239,12 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buff_ptr:   %d\n",*buff_ptr);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       buff_ptr:   %ld\n",(long)*buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
 		}
 
 	/* get buffer structure */
@@ -257,7 +257,7 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error)
 			{
 			fprintf(stderr,"\ndbg4  Remaining records in buffer: %d\n",buff->nbuffer);
 			for (i=0;i<buff->nbuffer;i++);
-				fprintf(stderr,"dbg4       Record[%d] pointer: %d\n",i,buff->buffer[i]);
+				fprintf(stderr,"dbg4       Record[%d] pointer: %ld\n",i,(long)(buff->buffer[i]));
 			}
 		for (i=0;i<buff->nbuffer;i++)
 			status = mb_deall(verbose,mbio_ptr,
@@ -270,8 +270,8 @@ int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -292,18 +292,17 @@ int mb_buffer_load(int verbose, void *buff_ptr,void *mbio_ptr,
 	char	*store_ptr;
 	int	nget;
 	int	kind;
-	int	beams_bath, beams_amp, pixels_ss;
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       buff_ptr:   %ld\n",(long)buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
 		fprintf(stderr,"dbg2       nwant:      %d\n",nwant);
 		}
 
@@ -349,10 +348,8 @@ int mb_buffer_load(int verbose, void *buff_ptr,void *mbio_ptr,
 			fprintf(stderr,"\ndbg4  New record read by MBIO function <%s>\n",
 				function_name);
 			fprintf(stderr,"dbg4       kind:          %d\n",kind);
-			fprintf(stderr,"dbg4       store_ptr:     %d\n",
-				store_ptr);
-			fprintf(stderr,"dbg4       nbuffer:       %d\n",
-				buff->nbuffer);
+			fprintf(stderr,"dbg4       store_ptr:     %ld\n",(long)store_ptr);
+			fprintf(stderr,"dbg4       nbuffer:       %d\n",buff->nbuffer);
 			fprintf(stderr,"dbg4       nwant:         %d\n",nwant);
 			fprintf(stderr,"dbg4       nget:          %d\n",nget);
 			fprintf(stderr,"dbg4       nload:         %d\n",*nload);
@@ -390,24 +387,17 @@ int mb_buffer_load(int verbose, void *buff_ptr,void *mbio_ptr,
 		/* print debug statements */
 		if (verbose >= 4)
 			{
-			fprintf(stderr,"\ndbg4  Buffer status in MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4       nbuffer:       %d\n",
-				buff->nbuffer);
-			fprintf(stderr,"dbg4       nload:         %d\n",
-				*nload);
-			fprintf(stderr,"dbg4       nget:          %d\n",
-				nget);
-			fprintf(stderr,"dbg4       nwant:         %d\n",
-				nwant);
-			fprintf(stderr,"dbg4       error:         %d\n",
-				*error);
-			fprintf(stderr,"dbg4       status:        %d\n",
-				status);
+			fprintf(stderr,"\ndbg4  Buffer status in MBIO function <%s>\n",function_name);
+			fprintf(stderr,"dbg4       nbuffer:       %d\n",buff->nbuffer);
+			fprintf(stderr,"dbg4       nload:         %d\n",*nload);
+			fprintf(stderr,"dbg4       nget:          %d\n",nget);
+			fprintf(stderr,"dbg4       nwant:         %d\n",nwant);
+			fprintf(stderr,"dbg4       error:         %d\n",*error);
+			fprintf(stderr,"dbg4       status:        %d\n",status);
 			for (i=0;i<buff->nbuffer;i++)
 				{
-				fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%d\n",
-				i,buff->buffer_kind[i],buff->buffer[i]);
+				fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%ld\n",
+					i,buff->buffer_kind[i],(long)buff->buffer[i]);
 				}
 			}
 		}
@@ -438,8 +428,8 @@ int mb_buffer_load(int verbose, void *buff_ptr,void *mbio_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       nload:      %d\n",*nload);
 		fprintf(stderr,"dbg2       nbuff:      %d\n",*nbuff);
@@ -465,13 +455,13 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       omb_ptr:    %d\n",ombio_ptr);
+		fprintf(stderr,"dbg2       buff_ptr:   %ld\n",(long)buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       omb_ptr:    %ld\n",(long)ombio_ptr);
 		fprintf(stderr,"dbg2       nhold:      %d\n",nhold);
 		}
 
@@ -504,8 +494,8 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 		fprintf(stderr,"dbg4       nbuffer:     %d\n",buff->nbuffer);
 		for (i=0;i<buff->nbuffer;i++)
 			{
-			fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%d\n",
-			i,buff->buffer_kind[i],buff->buffer[i]);
+			fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%ld\n",
+			i,buff->buffer_kind[i],(long)buff->buffer[i]);
 			}
 		}
 
@@ -517,14 +507,10 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 			/* print debug statements */
 			if (verbose >= 4)
 				{
-				fprintf(stderr,"\ndbg4  Dumping record in MBIO function <%s>\n",
-					function_name);
-				fprintf(stderr,"dbg4       record:      %d\n",
-					i);
-				fprintf(stderr,"dbg4       ptr:         %d\n",
-					buff->buffer[i]);
-				fprintf(stderr,"dbg4       kind:        %d\n",
-					buff->buffer_kind[i]);
+				fprintf(stderr,"\ndbg4  Dumping record in MBIO function <%s>\n",function_name);
+				fprintf(stderr,"dbg4       record:      %d\n",i);
+				fprintf(stderr,"dbg4       ptr:         %ld\n",(long)buff->buffer[i]);
+				fprintf(stderr,"dbg4       kind:        %d\n",buff->buffer_kind[i]);
 				}
 
 			/* only write out data if output defined */
@@ -534,14 +520,10 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 			/* print debug statements */
 			if (verbose >= 4)
 				{
-				fprintf(stderr,"\ndbg4  Deallocating record in MBIO function <%s>\n",
-					function_name);
-				fprintf(stderr,"dbg4       record:      %d\n",
-					i);
-				fprintf(stderr,"dbg4       ptr:         %d\n",
-					buff->buffer[i]);
-				fprintf(stderr,"dbg4       kind:        %d\n",
-					buff->buffer_kind[i]);
+				fprintf(stderr,"\ndbg4  Deallocating record in MBIO function <%s>\n",function_name);
+				fprintf(stderr,"dbg4       record:      %d\n",i);
+				fprintf(stderr,"dbg4       ptr:         %ld\n",(long)buff->buffer[i]);
+				fprintf(stderr,"dbg4       kind:        %d\n",buff->buffer_kind[i]);
 				}
 
 			status = mb_deall(verbose,mbio_ptr,
@@ -551,14 +533,10 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 			/* print debug statements */
 			if (verbose >= 4)
 				{
-				fprintf(stderr,"\ndbg4  Done dumping record in MBIO function <%s>\n",
-					function_name);
-				fprintf(stderr,"dbg4       record:      %d\n",
-					i);
-				fprintf(stderr,"dbg4       ptr:         %d\n",
-					buff->buffer[i]);
-				fprintf(stderr,"dbg4       kind:        %d\n",
-					buff->buffer_kind[i]);
+				fprintf(stderr,"\ndbg4  Done dumping record in MBIO function <%s>\n",function_name);
+				fprintf(stderr,"dbg4       record:      %d\n",i);
+				fprintf(stderr,"dbg4       ptr:         %ld\n",(long)buff->buffer[i]);
+				fprintf(stderr,"dbg4       kind:        %d\n",buff->buffer_kind[i]);
 				}
 			}
 		for (i=0;i<nhold;i++)
@@ -566,20 +544,13 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 			/* print debug statements */
 			if (verbose >= 4)
 				{
-				fprintf(stderr,"\ndbg4  Moving buffer record in MBIO function <%s>\n",
-					function_name);
-				fprintf(stderr,"dbg4       old:         %d\n",
-					*ndump + i);
-				fprintf(stderr,"dbg4       new:         %d\n",
-					i);
-				fprintf(stderr,"dbg4       old ptr:     %d\n",
-					buff->buffer[*ndump + i]);
-				fprintf(stderr,"dbg4       new ptr:     %d\n",
-					buff->buffer[i]);
-				fprintf(stderr,"dbg4       old kind:    %d\n",
-					buff->buffer_kind[*ndump + i]);
-				fprintf(stderr,"dbg4       new kind:    %d\n",
-					buff->buffer_kind[i]);
+				fprintf(stderr,"\ndbg4  Moving buffer record in MBIO function <%s>\n",function_name);
+				fprintf(stderr,"dbg4       old:         %d\n",*ndump + i);
+				fprintf(stderr,"dbg4       new:         %d\n",i);
+				fprintf(stderr,"dbg4       old ptr:     %ld\n",(long)buff->buffer[*ndump + i]);
+				fprintf(stderr,"dbg4       new ptr:     %ld\n",(long)buff->buffer[i]);
+				fprintf(stderr,"dbg4       old kind:    %d\n",buff->buffer_kind[*ndump + i]);
+				fprintf(stderr,"dbg4       new kind:    %d\n",buff->buffer_kind[i]);
 				}
 
 			buff->buffer[i] = 
@@ -592,20 +563,13 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 			/* print debug statements */
 			if (verbose >= 4)
 				{
-				fprintf(stderr,"\ndbg4  Done moving buffer record in MBIO function <%s>\n",
-					function_name);
-				fprintf(stderr,"dbg4       old:         %d\n",
-					*ndump + i);
-				fprintf(stderr,"dbg4       new:         %d\n",
-					i);
-				fprintf(stderr,"dbg4       old ptr:     %d\n",
-					buff->buffer[*ndump + i]);
-				fprintf(stderr,"dbg4       new ptr:     %d\n",
-					buff->buffer[i]);
-				fprintf(stderr,"dbg4       old kind:    %d\n",
-					buff->buffer_kind[*ndump + i]);
-				fprintf(stderr,"dbg4       new kind:    %d\n",
-					buff->buffer_kind[i]);
+				fprintf(stderr,"\ndbg4  Done moving buffer record in MBIO function <%s>\n",function_name);
+				fprintf(stderr,"dbg4       old:         %d\n",*ndump + i);
+				fprintf(stderr,"dbg4       new:         %d\n",i);
+				fprintf(stderr,"dbg4       old ptr:     %ld\n",(long)buff->buffer[*ndump + i]);
+				fprintf(stderr,"dbg4       new ptr:     %ld\n",(long)buff->buffer[i]);
+				fprintf(stderr,"dbg4       old kind:    %d\n",buff->buffer_kind[*ndump + i]);
+				fprintf(stderr,"dbg4       new kind:    %d\n",buff->buffer_kind[i]);
 				}
 			}
 		buff->nbuffer = buff->nbuffer - *ndump;
@@ -614,13 +578,12 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 	/* print debug statements */
 	if (verbose >= 4)
 		{
-		fprintf(stderr,"\ndbg4  Buffer list at end of MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg4  Buffer list at end of MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg4       nbuffer:     %d\n",buff->nbuffer);
 		for (i=0;i<buff->nbuffer;i++)
 			{
-			fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%d\n",
-			i,buff->buffer_kind[i],buff->buffer[i]);
+			fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%ld\n",
+			i,buff->buffer_kind[i],(long)buff->buffer[i]);
 			}
 		}
 
@@ -630,8 +593,8 @@ int mb_buffer_dump(int verbose, void *buff_ptr, void *mbio_ptr, void *ombio_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       ndump:      %d\n",*ndump);
 		fprintf(stderr,"dbg2       nbuff:      %d\n",*nbuff);
@@ -657,12 +620,12 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       buff_ptr:   %ld\n",(long)buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
 		fprintf(stderr,"dbg2       nhold:      %d\n",nhold);
 		}
 
@@ -690,13 +653,12 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 	/* print debug statements */
 	if (verbose >= 4)
 		{
-		fprintf(stderr,"\ndbg4  Buffer list in MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg4  Buffer list in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg4       nbuffer:     %d\n",buff->nbuffer);
 		for (i=0;i<buff->nbuffer;i++)
 			{
-			fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%d\n",
-			i,buff->buffer_kind[i],buff->buffer[i]);
+			fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%ld\n",
+			i,buff->buffer_kind[i],(long)buff->buffer[i]);
 			}
 		}
 
@@ -708,14 +670,10 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 			/* print debug statements */
 			if (verbose >= 4)
 				{
-				fprintf(stderr,"\ndbg4  Deallocating record in MBIO function <%s>\n",
-					function_name);
-				fprintf(stderr,"dbg4       record:      %d\n",
-					i);
-				fprintf(stderr,"dbg4       ptr:         %d\n",
-					buff->buffer[i]);
-				fprintf(stderr,"dbg4       kind:        %d\n",
-					buff->buffer_kind[i]);
+				fprintf(stderr,"\ndbg4  Deallocating record in MBIO function <%s>\n",function_name);
+				fprintf(stderr,"dbg4       record:      %d\n",i);
+				fprintf(stderr,"dbg4       ptr:         %ld\n",(long)buff->buffer[i]);
+				fprintf(stderr,"dbg4       kind:        %d\n",buff->buffer_kind[i]);
 				}
 
 			status = mb_deall(verbose,mbio_ptr,
@@ -725,14 +683,10 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 			/* print debug statements */
 			if (verbose >= 4)
 				{
-				fprintf(stderr,"\ndbg4  Done dumping record in MBIO function <%s>\n",
-					function_name);
-				fprintf(stderr,"dbg4       record:      %d\n",
-					i);
-				fprintf(stderr,"dbg4       ptr:         %d\n",
-					buff->buffer[i]);
-				fprintf(stderr,"dbg4       kind:        %d\n",
-					buff->buffer_kind[i]);
+				fprintf(stderr,"\ndbg4  Done dumping record in MBIO function <%s>\n",function_name);
+				fprintf(stderr,"dbg4       record:      %d\n",i);
+				fprintf(stderr,"dbg4       ptr:         %ld\n",(long)buff->buffer[i]);
+				fprintf(stderr,"dbg4       kind:        %d\n",buff->buffer_kind[i]);
 				}
 			}
 		for (i=0;i<nhold;i++)
@@ -740,20 +694,13 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 			/* print debug statements */
 			if (verbose >= 4)
 				{
-				fprintf(stderr,"\ndbg4  Moving buffer record in MBIO function <%s>\n",
-					function_name);
-				fprintf(stderr,"dbg4       old:         %d\n",
-					*ndump + i);
-				fprintf(stderr,"dbg4       new:         %d\n",
-					i);
-				fprintf(stderr,"dbg4       old ptr:     %d\n",
-					buff->buffer[*ndump + i]);
-				fprintf(stderr,"dbg4       new ptr:     %d\n",
-					buff->buffer[i]);
-				fprintf(stderr,"dbg4       old kind:    %d\n",
-					buff->buffer_kind[*ndump + i]);
-				fprintf(stderr,"dbg4       new kind:    %d\n",
-					buff->buffer_kind[i]);
+				fprintf(stderr,"\ndbg4  Moving buffer record in MBIO function <%s>\n",function_name);
+				fprintf(stderr,"dbg4       old:         %d\n",*ndump + i);
+				fprintf(stderr,"dbg4       new:         %d\n",i);
+				fprintf(stderr,"dbg4       old ptr:     %ld\n",(long)buff->buffer[*ndump + i]);
+				fprintf(stderr,"dbg4       new ptr:     %ld\n",(long)buff->buffer[i]);
+				fprintf(stderr,"dbg4       old kind:    %d\n",buff->buffer_kind[*ndump + i]);
+				fprintf(stderr,"dbg4       new kind:    %d\n",buff->buffer_kind[i]);
 				}
 
 			buff->buffer[i] = 
@@ -766,20 +713,13 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 			/* print debug statements */
 			if (verbose >= 4)
 				{
-				fprintf(stderr,"\ndbg4  Done moving buffer record in MBIO function <%s>\n",
-					function_name);
-				fprintf(stderr,"dbg4       old:         %d\n",
-					*ndump + i);
-				fprintf(stderr,"dbg4       new:         %d\n",
-					i);
-				fprintf(stderr,"dbg4       old ptr:     %d\n",
-					buff->buffer[*ndump + i]);
-				fprintf(stderr,"dbg4       new ptr:     %d\n",
-					buff->buffer[i]);
-				fprintf(stderr,"dbg4       old kind:    %d\n",
-					buff->buffer_kind[*ndump + i]);
-				fprintf(stderr,"dbg4       new kind:    %d\n",
-					buff->buffer_kind[i]);
+				fprintf(stderr,"\ndbg4  Done moving buffer record in MBIO function <%s>\n",function_name);
+				fprintf(stderr,"dbg4       old:         %d\n",*ndump + i);
+				fprintf(stderr,"dbg4       new:         %d\n",i);
+				fprintf(stderr,"dbg4       old ptr:     %ld\n",(long)buff->buffer[*ndump + i]);
+				fprintf(stderr,"dbg4       new ptr:     %ld\n",(long)buff->buffer[i]);
+				fprintf(stderr,"dbg4       old kind:    %d\n",buff->buffer_kind[*ndump + i]);
+				fprintf(stderr,"dbg4       new kind:    %d\n",buff->buffer_kind[i]);
 				}
 			}
 		buff->nbuffer = buff->nbuffer - *ndump;
@@ -788,13 +728,12 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 	/* print debug statements */
 	if (verbose >= 4)
 		{
-		fprintf(stderr,"\ndbg4  Buffer list at end of MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg4  Buffer list at end of MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg4       nbuffer:     %d\n",buff->nbuffer);
 		for (i=0;i<buff->nbuffer;i++)
 			{
-			fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%d\n",
-			i,buff->buffer_kind[i],buff->buffer[i]);
+			fprintf(stderr,"dbg4       i:%d  kind:%d  ptr:%ld\n",
+			i,buff->buffer_kind[i],(long)buff->buffer[i]);
 			}
 		}
 
@@ -804,8 +743,8 @@ int mb_buffer_clear(int verbose, void *buff_ptr, void *mbio_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       ndump:      %d\n",*ndump);
 		fprintf(stderr,"dbg2       nbuff:      %d\n",*nbuff);
@@ -833,8 +772,6 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
-	char	*store_ptr;
-	int	system;
 	int	kind;
 	char	comment[200];
 	int	found;
@@ -843,12 +780,12 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       buff_ptr:   %ld\n",(long)buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
 		fprintf(stderr,"dbg2       start:      %d\n",start);
 		}
 
@@ -889,8 +826,8 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       id:         %d\n",*id);
 		}
@@ -956,22 +893,19 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
-	char	*store_ptr;
-	int	system;
 	int	kind;
-	char	comment[200];
 	int	found;
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       buff_ptr:   %ld\n",(long)buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
 		fprintf(stderr,"dbg2       start:      %d\n",start);
 		}
 
@@ -1010,8 +944,8 @@ int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       id:         %d\n",*id);
 		}
@@ -1062,18 +996,17 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr,
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
 	char	*store_ptr;
-	int	system;
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       buff_ptr:   %ld\n",(long)buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
 		fprintf(stderr,"dbg2       id:         %d\n",id);
 		}
 
@@ -1112,8 +1045,8 @@ int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
@@ -1192,18 +1125,16 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
 	char	*store_ptr;
-	int	system;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       buff_ptr:   %d\n",buff_ptr);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       buff_ptr:   %ld\n",(long)buff_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
 		fprintf(stderr,"dbg2       id:         %d\n",id);
 		}
 
@@ -1240,8 +1171,8 @@ int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
@@ -1292,17 +1223,16 @@ int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr,
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
 	char	*store_ptr;
-	int	system;
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		fprintf(stderr,"dbg2       id:         %d\n",id);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
@@ -1397,17 +1327,15 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
 	char	*store_ptr;
-	int	system;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		fprintf(stderr,"dbg2       id:         %d\n",id);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
@@ -1474,16 +1402,15 @@ int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_buffer_struct *buff;
 	struct mb_io_struct *mb_io_ptr;
-	int	system;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		fprintf(stderr,"dbg2       id:         %d\n",id);
 		}
 
@@ -1507,10 +1434,10 @@ int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);

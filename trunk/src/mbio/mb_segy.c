@@ -2,7 +2,7 @@
  *    The MB-system:	mb_segy.c	5/25/2004
  *    $Id: mb_segy.c,v 5.7 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -84,14 +84,14 @@ int mb_segy_read_init(int verbose, char *segyfile,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
 		fprintf(stderr,"dbg2       segyfile:            %s\n",segyfile);
-		fprintf(stderr,"dbg2       mbsegyio_ptr:        %d\n",mbsegyio_ptr);
-		fprintf(stderr,"dbg2       asciiheader:         %d\n",segyasciiheader);
-		fprintf(stderr,"dbg2       fileheader:          %d\n",segyfileheader);
+		fprintf(stderr,"dbg2       mbsegyio_ptr:        %ld\n",(long)mbsegyio_ptr);
+		fprintf(stderr,"dbg2       asciiheader:         %ld\n",(long)segyasciiheader);
+		fprintf(stderr,"dbg2       fileheader:          %ld\n",(long)segyfileheader);
 		}
 
 	/* allocate memory for mbsegyio descriptor */
@@ -213,13 +213,18 @@ int mb_segy_read_init(int verbose, char *segyfile,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       asciiheader:         %d\n",asciiheader);
-		fprintf(stderr,"dbg2       fileheader:          %d\n",fileheader);
+		fprintf(stderr,"dbg2       asciiheader:         %ld\n",(long)asciiheader);
+		fprintf(stderr,"dbg2       fileheader:          %ld\n",(long)fileheader);
 		for (j=0;j<40;j++)
-			fprintf(stderr,"dbg2       asciiheader[%d]:%.80s\n",j,&(asciiheader->line[j]));
+			{
+			fprintf(stderr,"dbg2       asciiheader[%d]:",j);
+			for (i=0;i<80;j++)
+				fprintf(stderr,"%c",asciiheader->line[j][i]);
+			fprintf(stderr,"\n");
+			}
 		fprintf(stderr,"dbg2       jobid:               %d\n",fileheader->jobid);
 		fprintf(stderr,"dbg2       line:                %d\n",fileheader->line);
 		fprintf(stderr,"dbg2       reel:                %d\n",fileheader->reel);
@@ -255,7 +260,7 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		fprintf(stderr,"dbg2       num extended headers: %d\n",fileheader->num_ext_headers);
 		for (i=238;i<238+94;i++)
 			fprintf(stderr,"dbg2       extra[%d]:          %d\n",i,fileheader->extra[i]);
-		fprintf(stderr,"dbg2       fp:            %d\n",mb_segyio_ptr->fp);
+		fprintf(stderr,"dbg2       fp:            %ld\n",(long)mb_segyio_ptr->fp);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:       %d\n",status);
@@ -284,16 +289,21 @@ int mb_segy_write_init(int verbose, char *segyfile,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
 		fprintf(stderr,"dbg2       segyfile:            %s\n",segyfile);
-		fprintf(stderr,"dbg2       asciiheader:         %d\n",asciiheader);
-		fprintf(stderr,"dbg2       fileheader:          %d\n",fileheader);
+		fprintf(stderr,"dbg2       asciiheader:         %ld\n",(long)asciiheader);
+		fprintf(stderr,"dbg2       fileheader:          %ld\n",(long)fileheader);
 		if (asciiheader != NULL)
-			for (j=0;j<40;j++)
-				fprintf(stderr,"dbg2       asciiheader[%2.2d]:     %.80s",j,asciiheader[j]);
+		for (j=0;j<40;j++)
+			{
+			fprintf(stderr,"dbg2       asciiheader[%d]:",j);
+			for (i=0;i<80;j++)
+				fprintf(stderr,"%c",asciiheader->line[j][i]);
+			fprintf(stderr,"\n");
+			}
 		if (fileheader != NULL)
 			{
 			fprintf(stderr,"dbg2       jobid:               %d\n",fileheader->jobid);
@@ -327,7 +337,7 @@ int mb_segy_write_init(int verbose, char *segyfile,
 			for (i=0;i<338;i++)
 				fprintf(stderr,"dbg2       extra[%d]::          %d",i,fileheader->extra[i]);
 			}
-		fprintf(stderr,"dbg2       mbsegyio_ptr:        %d\n",mbsegyio_ptr);
+		fprintf(stderr,"dbg2       mbsegyio_ptr:        %ld\n",(long)mbsegyio_ptr);
 		}
 
 	/* allocate memory for mbsegyio descriptor */
@@ -439,8 +449,8 @@ int mb_segy_write_init(int verbose, char *segyfile,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -463,11 +473,11 @@ int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
-		fprintf(stderr,"dbg2       fp:          %d\n",mb_segyio_ptr->fp);
+		fprintf(stderr,"dbg2       fp:          %ld\n",(long)mb_segyio_ptr->fp);
 		}
 
 	/* get pointer to segyio structure */
@@ -486,10 +496,10 @@ int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       fp:            %d\n",mb_segyio_ptr->fp);
+		fprintf(stderr,"dbg2       fp:            %ld\n",(long)mb_segyio_ptr->fp);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:       %d\n",status);
@@ -520,19 +530,19 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 	int	bytes_per_sample;
 	int	intval;
 	short	shortval;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       mbsegyio_ptr:     %d\n",mbsegyio_ptr);
-		fprintf(stderr,"dbg2       traceheaderptr:   %d\n",traceheaderptr);
-		fprintf(stderr,"dbg2       traceptr:         %d\n",traceptr);
-		fprintf(stderr,"dbg2       *traceptr:        %d\n",*traceptr);
+		fprintf(stderr,"dbg2       mbsegyio_ptr:     %ld\n",(long)mbsegyio_ptr);
+		fprintf(stderr,"dbg2       traceheaderptr:   %ld\n",(long)traceheaderptr);
+		fprintf(stderr,"dbg2       traceptr:         %ld\n",(long)traceptr);
+		fprintf(stderr,"dbg2       *traceptr:        %ld\n",(long)*traceptr);
 		}
 
 	/* get segyio pointer */
@@ -748,8 +758,8 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       seq_num:       %d\n",traceheader->seq_num);
 		fprintf(stderr,"dbg2       seq_reel:      %d\n",traceheader->seq_reel);
@@ -799,21 +809,21 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2       mils:          %d\n",traceheader->mils);
 		fprintf(stderr,"dbg2       tr_weight:     %d\n",traceheader->tr_weight);
 		fprintf(stderr,"dbg2       other_2[5]:    %d\n",traceheader->other_2[5]);
-		fprintf(stderr,"dbg2       delay:         %d\n",traceheader->delay);
-		fprintf(stderr,"dbg2       smute_sec:     %d\n",traceheader->smute_sec);
-		fprintf(stderr,"dbg2       emute_sec:     %d\n",traceheader->emute_sec);
-		fprintf(stderr,"dbg2       si_secs:       %d\n",traceheader->si_secs);
-		fprintf(stderr,"dbg2       wbt_secs:      %d\n",traceheader->wbt_secs);
+		fprintf(stderr,"dbg2       delay:         %f\n",traceheader->delay);
+		fprintf(stderr,"dbg2       smute_sec:     %f\n",traceheader->smute_sec);
+		fprintf(stderr,"dbg2       emute_sec:     %f\n",traceheader->emute_sec);
+		fprintf(stderr,"dbg2       si_secs:       %f\n",traceheader->si_secs);
+		fprintf(stderr,"dbg2       wbt_secs:      %f\n",traceheader->wbt_secs);
 		fprintf(stderr,"dbg2       end_of_rp:     %d\n",traceheader->end_of_rp);
-		fprintf(stderr,"dbg2       dummy1:        %d\n",traceheader->dummy1);
-		fprintf(stderr,"dbg2       dummy2:        %d\n",traceheader->dummy2);
-		fprintf(stderr,"dbg2       dummy3:        %d\n",traceheader->dummy3);
-		fprintf(stderr,"dbg2       dummy4:        %d\n",traceheader->dummy4);
-		fprintf(stderr,"dbg2       dummy5:        %d\n",traceheader->dummy5);
-		fprintf(stderr,"dbg2       dummy6:        %d\n",traceheader->dummy6);
-		fprintf(stderr,"dbg2       dummy7:        %d\n",traceheader->dummy7);
-		fprintf(stderr,"dbg2       dummy8:        %d\n",traceheader->dummy8);
-		fprintf(stderr,"dbg2       heading:       %d\n",traceheader->heading);
+		fprintf(stderr,"dbg2       dummy1:        %f\n",traceheader->dummy1);
+		fprintf(stderr,"dbg2       dummy2:        %f\n",traceheader->dummy2);
+		fprintf(stderr,"dbg2       dummy3:        %f\n",traceheader->dummy3);
+		fprintf(stderr,"dbg2       dummy4:        %f\n",traceheader->dummy4);
+		fprintf(stderr,"dbg2       dummy5:        %f\n",traceheader->dummy5);
+		fprintf(stderr,"dbg2       dummy6:        %f\n",traceheader->dummy6);
+		fprintf(stderr,"dbg2       dummy7:        %f\n",traceheader->dummy7);
+		fprintf(stderr,"dbg2       dummy8:        %f\n",traceheader->dummy8);
+		fprintf(stderr,"dbg2       heading:       %f\n",traceheader->heading);
 		for (i=0;i<traceheader->nsamps;i++)
 			fprintf(stderr,"dbg2       trace[%d]:%f\n",i,trace[i]);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
@@ -843,7 +853,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 	int	bytes_per_sample;
 	int	intval;
 	short	shortval;
-	int	i, j;
+	int	i;
 
 	/* get segyio pointer */
 	mb_segyio_ptr = (struct mb_segyio_struct *) mbsegyio_ptr;
@@ -853,12 +863,12 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       mbsegyio_ptr:  %d\n",mbsegyio_ptr);
-		fprintf(stderr,"dbg2       traceheader:   %d\n",traceheader);
+		fprintf(stderr,"dbg2       mbsegyio_ptr:  %ld\n",(long)mbsegyio_ptr);
+		fprintf(stderr,"dbg2       traceheader:   %ld\n",(long)traceheader);
 		fprintf(stderr,"dbg2       seq_num:       %d\n",traceheader->seq_num);
 		fprintf(stderr,"dbg2       seq_reel:      %d\n",traceheader->seq_reel);
 		fprintf(stderr,"dbg2       shot_num:      %d\n",traceheader->shot_num);
@@ -907,21 +917,21 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2       mils:          %d\n",traceheader->mils);
 		fprintf(stderr,"dbg2       tr_weight:     %d\n",traceheader->tr_weight);
 		fprintf(stderr,"dbg2       other_2[5]:    %d\n",traceheader->other_2[5]);
-		fprintf(stderr,"dbg2       delay:         %d\n",traceheader->delay);
-		fprintf(stderr,"dbg2       smute_sec:     %d\n",traceheader->smute_sec);
-		fprintf(stderr,"dbg2       emute_sec:     %d\n",traceheader->emute_sec);
-		fprintf(stderr,"dbg2       si_secs:       %d\n",traceheader->si_secs);
-		fprintf(stderr,"dbg2       wbt_secs:      %d\n",traceheader->wbt_secs);
+		fprintf(stderr,"dbg2       delay:         %f\n",traceheader->delay);
+		fprintf(stderr,"dbg2       smute_sec:     %f\n",traceheader->smute_sec);
+		fprintf(stderr,"dbg2       emute_sec:     %f\n",traceheader->emute_sec);
+		fprintf(stderr,"dbg2       si_secs:       %f\n",traceheader->si_secs);
+		fprintf(stderr,"dbg2       wbt_secs:      %f\n",traceheader->wbt_secs);
 		fprintf(stderr,"dbg2       end_of_rp:     %d\n",traceheader->end_of_rp);
-		fprintf(stderr,"dbg2       dummy1:        %d\n",traceheader->dummy1);
-		fprintf(stderr,"dbg2       dummy2:        %d\n",traceheader->dummy2);
-		fprintf(stderr,"dbg2       dummy3:        %d\n",traceheader->dummy3);
-		fprintf(stderr,"dbg2       dummy4:        %d\n",traceheader->dummy4);
-		fprintf(stderr,"dbg2       dummy5:        %d\n",traceheader->dummy5);
-		fprintf(stderr,"dbg2       dummy6:        %d\n",traceheader->dummy6);
-		fprintf(stderr,"dbg2       dummy7:        %d\n",traceheader->dummy7);
-		fprintf(stderr,"dbg2       dummy8:        %d\n",traceheader->dummy8);
-		fprintf(stderr,"dbg2       heading:       %d\n",traceheader->heading);
+		fprintf(stderr,"dbg2       dummy1:        %f\n",traceheader->dummy1);
+		fprintf(stderr,"dbg2       dummy2:        %f\n",traceheader->dummy2);
+		fprintf(stderr,"dbg2       dummy3:        %f\n",traceheader->dummy3);
+		fprintf(stderr,"dbg2       dummy4:        %f\n",traceheader->dummy4);
+		fprintf(stderr,"dbg2       dummy5:        %f\n",traceheader->dummy5);
+		fprintf(stderr,"dbg2       dummy6:        %f\n",traceheader->dummy6);
+		fprintf(stderr,"dbg2       dummy7:        %f\n",traceheader->dummy7);
+		fprintf(stderr,"dbg2       dummy8:        %f\n",traceheader->dummy8);
+		fprintf(stderr,"dbg2       heading:       %f\n",traceheader->heading);
 		for (i=0;i<traceheader->nsamps;i++)
 			fprintf(stderr,"dbg2       trace[%d]:%f\n",i,trace[i]);
 		}
@@ -1177,8 +1187,8 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

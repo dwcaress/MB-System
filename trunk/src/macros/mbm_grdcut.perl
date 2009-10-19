@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_arc2grd.perl	4/23/01
 #    $Id: mbm_grdcut.perl,v 5.6 2006/11/26 09:42:01 caress Exp $
 #
-#    Copyright (c) 2001, 2003 by
+#    Copyright (c) 2001-2009 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -98,6 +98,8 @@ $verbose += 1;
 # print out help message if required
 if ($help)
 	{
+	print "\n$program_name:\n";
+	print "\nVersion: $Id: $\n";
  	print "Macro to painlessly cut out a region from a GMT grd grid file.\n";
 	print "The GMT program grdcut requires that one specify bounds which\n";
 	print "exactly match grid cell boundaries. Frequently, one just wants\n";

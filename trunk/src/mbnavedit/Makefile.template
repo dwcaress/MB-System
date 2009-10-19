@@ -132,7 +132,7 @@ mbnavedit_util.o: mbnavedit_util.c mbnavedit_creation.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbnavedit_util.c
 mbnavedit_prog.o: mbnavedit_prog.c mbnavedit.h  $(INCDIR)/mb_format.h \
 		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
-	$(CC) $(CFLAGS) -I$(INCDIR) -c mbnavedit_prog.c
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbnavedit_prog.c
 
 clean: 
 	rm -f core *.o

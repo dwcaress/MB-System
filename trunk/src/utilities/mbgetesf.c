@@ -2,7 +2,7 @@
  *    The MB-system:	mbgetesf.c	6/15/93
  *    $Id: mbgetesf.c,v 5.7 2008/05/16 22:44:37 caress Exp $
  *
- *    Copyright (c) 2001-2008 by
+ *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -54,6 +54,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -69,19 +70,21 @@
 #define MBGETESF_FLAGNULL   2
 #define MBGETESF_ALL	    3
 
+int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
+
+static char rcs_id[] = "$Id: mbgetesf.c,v 5.7 2008/05/16 22:44:37 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbgetesf.c,v 5.7 2008/05/16 22:44:37 caress Exp $";
-	static char program_name[] = "mbgetest";
-	static char help_message[] =  "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other data files\ncontaining the same data (but presumably in a different\nstate of processing).  This allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit and\nmbprocess can be used to apply the edit events to another file.";
-	static char usage_message[] = "mbgetesf [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -Oesffile -V -H]";
+	char program_name[] = "mbgetest";
+	char help_message[] =  "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other data files\ncontaining the same data (but presumably in a different\nstate of processing).  This allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit and\nmbprocess can be used to apply the edit events to another file.";
+	char usage_message[] = "mbgetesf [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -Oesffile -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -150,12 +153,7 @@ main (int argc, char **argv)
 	int	sofile_set = MB_NO;
 	char	sofile[MB_PATH_MAXLINE];
 	FILE	*sofp;
-
-	/* time, user, host variables */
-	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
-
-	int	i, j, k, l, m;
+	int	i;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -563,7 +561,7 @@ int mbgetesf_save_edit(int verbose, FILE *sofp, double time_d, int beam, int act
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 	
-		fprintf(stderr,"dbg2       sofp:            %d\n",sofp);
+		fprintf(stderr,"dbg2       sofp:            %ld\n",(long)sofp);
 		fprintf(stderr,"dbg2       time_d:          %f\n",time_d);
 		fprintf(stderr,"dbg2       beam:            %d\n",beam);
 		fprintf(stderr,"dbg2       action:          %d\n",action);

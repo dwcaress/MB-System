@@ -2,7 +2,7 @@
  *    The MB-system:	mbdefaults.c	1/23/93
  *	$Id: mbdefaults.c,v 5.6 2008/12/31 08:47:38 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -91,6 +91,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -98,16 +99,16 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 
+static char rcs_id[]="$Id: mbdefaults.c,v 5.6 2008/12/31 08:47:38 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-static char rcs_id[]="$Id: mbdefaults.c,v 5.6 2008/12/31 08:47:38 caress Exp $";
-	static char program_name[] = "MBDEFAULTS";
-	static char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
-	static char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Iimagedisplay\n\t-Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";
+	char program_name[] = "MBDEFAULTS";
+	char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
+	char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Iimagedisplay\n\t-Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	status;
@@ -117,7 +118,6 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.6 2008/12/31 08:47:38 caress Exp $";
 	int	flag = 0;
 	FILE	*fp;
 	char	file[MB_PATH_MAXLINE];
-	char	home[MB_PATH_MAXLINE];
 	char	psdisplay[MB_PATH_MAXLINE];
 	char	imgdisplay[MB_PATH_MAXLINE];
 	char	mbproject[MB_PATH_MAXLINE];
@@ -284,8 +284,7 @@ static char rcs_id[]="$Id: mbdefaults.c,v 5.6 2008/12/31 08:47:38 caress Exp $";
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  Program <%s> completed\n",
-			program_name);
+		fprintf(stderr,"\ndbg2  Program <%s> completed\n",program_name);
 		fprintf(stderr,"dbg2  Ending status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}

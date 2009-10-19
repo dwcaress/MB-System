@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_callbacks.c	10/7/2002
  *    $Id: mbview_callbacks.c,v 5.21 2008/09/11 20:17:33 caress Exp $
  *
- *    Copyright (c) 2002-2008 by
+ *    Copyright (c) 2002-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -126,8 +126,13 @@
 #include <Xm/BulletinB.h>
 #include <Xm/RowColumn.h>
 #include <Xm/CascadeB.h>
+#include <Xm/List.h>
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
+#include <Xm/FileSB.h>
+#include <Xm/Text.h>
+#include <Xm/TextF.h>
+#include <Xm/ToggleB.h>
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
@@ -318,8 +323,6 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 	/* local variables */
 	char	*function_name = "mbview_startup";
 	int	status = MB_SUCCESS;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	XmString    tmp0;
 	Boolean  argok = False;
 	int	i;
@@ -336,8 +339,8 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
-		fprintf(stderr,"dbg2       parent:                  %d\n", parent);
-		fprintf(stderr,"dbg2       app:                     %d\n", app);
+		fprintf(stderr,"dbg2       parent:                  %ld\n", (long)parent);
+		fprintf(stderr,"dbg2       app:                     %ld\n", (long)app);
 		}
 		
 	/* set parent widget and app context */
@@ -592,7 +595,6 @@ int mbview_reset(int instance)
 	struct mbview_struct *data;
 	int	dummy_format;
 	int	dummy_pings;
-	int	dummy_lonflip;
 	double	dummy_bounds[4];
 	int	dummy_btime_i[7];
 	int	dummy_etime_i[7];
@@ -971,8 +973,7 @@ int mbview_init(int verbose, int *instance, int *error)
 	char	*function_name = "mbview_init";
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	int	i, j;
+	int	i;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -1056,7 +1057,7 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       datahandle:                %d\n", *datahandle);
+		fprintf(stderr,"dbg2       datahandle:                %ld\n", (long)*datahandle);
 		
 		/* widget controls */
 		fprintf(stderr,"dbg2       title:                     %s\n", data->title);
@@ -1122,7 +1123,7 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 		fprintf(stderr,"dbg2       display_projection_id:          %s\n", data->display_projection_id);
 		
 		/* primary grid data */
-		fprintf(stderr,"dbg2       primary_nodatavalue:       %d\n", data->primary_nodatavalue);
+		fprintf(stderr,"dbg2       primary_nodatavalue:       %f\n", data->primary_nodatavalue);
 		fprintf(stderr,"dbg2       primary_nxy:               %d\n", data->primary_nxy);
 		fprintf(stderr,"dbg2       primary_nx:                %d\n", data->primary_nx);
 		fprintf(stderr,"dbg2       primary_ny:                %d\n", data->primary_ny);
@@ -1134,21 +1135,21 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 		fprintf(stderr,"dbg2       primary_ymax:              %f\n", data->primary_ymax);
 		fprintf(stderr,"dbg2       primary_dx:                %f\n", data->primary_dx);
 		fprintf(stderr,"dbg2       primary_dy:                %f\n", data->primary_dy);
-		fprintf(stderr,"dbg2       primary_data:              %d\n", data->primary_data);
-		fprintf(stderr,"dbg2       primary_x:                 %d\n", data->primary_x);
-		fprintf(stderr,"dbg2       primary_y:                 %d\n", data->primary_y);
-		fprintf(stderr,"dbg2       primary_z:                 %d\n", data->primary_z);
-		fprintf(stderr,"dbg2       primary_dxdz:              %d\n", data->primary_dzdx);
-		fprintf(stderr,"dbg2       primary_dydz:              %d\n", data->primary_dzdy);
-		fprintf(stderr,"dbg2       primary_r:                 %d\n", data->primary_r);
-		fprintf(stderr,"dbg2       primary_g:                 %d\n", data->primary_g);
-		fprintf(stderr,"dbg2       primary_b:                 %d\n", data->primary_b);
-		fprintf(stderr,"dbg2       primary_stat_color:        %d\n", data->primary_stat_color);
-		fprintf(stderr,"dbg2       primary_stat_z:            %d\n", data->primary_stat_z);
+		fprintf(stderr,"dbg2       primary_data:              %ld\n", (long)data->primary_data);
+		fprintf(stderr,"dbg2       primary_x:                 %ld\n", (long)data->primary_x);
+		fprintf(stderr,"dbg2       primary_y:                 %ld\n", (long)data->primary_y);
+		fprintf(stderr,"dbg2       primary_z:                 %ld\n", (long)data->primary_z);
+		fprintf(stderr,"dbg2       primary_dxdz:              %ld\n", (long)data->primary_dzdx);
+		fprintf(stderr,"dbg2       primary_dydz:              %ld\n", (long)data->primary_dzdy);
+		fprintf(stderr,"dbg2       primary_r:                 %ld\n", (long)data->primary_r);
+		fprintf(stderr,"dbg2       primary_g:                 %ld\n", (long)data->primary_g);
+		fprintf(stderr,"dbg2       primary_b:                 %ld\n", (long)data->primary_b);
+		fprintf(stderr,"dbg2       primary_stat_color:        %ld\n", (long)data->primary_stat_color);
+		fprintf(stderr,"dbg2       primary_stat_z:            %ld\n", (long)data->primary_stat_z);
 		
 		/* secondary grid data */
 		fprintf(stderr,"dbg2       secondary_sameas_primary:  %d\n", data->secondary_sameas_primary);
-		fprintf(stderr,"dbg2       secondary_nodatavalue:     %d\n", data->secondary_nodatavalue);
+		fprintf(stderr,"dbg2       secondary_nodatavalue:     %f\n", data->secondary_nodatavalue);
 		fprintf(stderr,"dbg2       secondary_nxy:             %d\n", data->secondary_nxy);
 		fprintf(stderr,"dbg2       secondary_nx:              %d\n", data->secondary_nx);
 		fprintf(stderr,"dbg2       secondary_ny:              %d\n", data->secondary_ny);
@@ -1158,7 +1159,7 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 		fprintf(stderr,"dbg2       secondary_ymax:            %f\n", data->secondary_ymax);
 		fprintf(stderr,"dbg2       secondary_dx:              %f\n", data->secondary_dx);
 		fprintf(stderr,"dbg2       secondary_dy:              %f\n", data->secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:            %d\n", data->secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:            %ld\n", (long)data->secondary_data);
 		
 		/* site data */
 		fprintf(stderr,"dbg2       site_view_mode:       %d\n",data->site_view_mode);
@@ -1216,8 +1217,8 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 		fprintf(stderr,"dbg2       nav_mode:                  %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                      %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:                %d\n",shared.shareddata.nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:              %d\n",shared.shareddata.nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:        %d\n",shared.shareddata.nav_point_selected);
+		fprintf(stderr,"dbg2       nav_selected:              %ld\n",(long)shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:        %ld\n",(long)shared.shareddata.nav_point_selected);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
@@ -1277,15 +1278,15 @@ int mbview_getdataptr(int verbose, int instance, struct mbview_struct **datahand
 		fprintf(stderr,"dbg2       npoints_alloc:             %d\n",data->profile.npoints_alloc);
 		for (i=0;i<data->profile.npoints;i++)
 			{
-			fprintf(stderr,"dbg2       profile %d boundary: %d\n",i,j,data->profile.points[i].boundary);
-			fprintf(stderr,"dbg2       profile %d xgrid:    %f\n",i,j,data->profile.points[i].xgrid);
-			fprintf(stderr,"dbg2       profile %d ygrid:    %f\n",i,j,data->profile.points[i].ygrid);
-			fprintf(stderr,"dbg2       profile %d xlon:     %f\n",i,j,data->profile.points[i].xlon);
-			fprintf(stderr,"dbg2       profile %d ylat:     %f\n",i,j,data->profile.points[i].ylat);
-			fprintf(stderr,"dbg2       profile %d zdata:    %f\n",i,j,data->profile.points[i].zdata);
-			fprintf(stderr,"dbg2       profile %d distance: %f\n",i,j,data->profile.points[i].distance);
-			fprintf(stderr,"dbg2       profile %d xdisplay: %f\n",i,j,data->profile.points[i].xdisplay);
-			fprintf(stderr,"dbg2       profile %d ydisplay: %f\n",i,j,data->profile.points[i].ydisplay);
+			fprintf(stderr,"dbg2       profile %d boundary: %d\n",i,data->profile.points[i].boundary);
+			fprintf(stderr,"dbg2       profile %d xgrid:    %f\n",i,data->profile.points[i].xgrid);
+			fprintf(stderr,"dbg2       profile %d ygrid:    %f\n",i,data->profile.points[i].ygrid);
+			fprintf(stderr,"dbg2       profile %d xlon:     %f\n",i,data->profile.points[i].xlon);
+			fprintf(stderr,"dbg2       profile %d ylat:     %f\n",i,data->profile.points[i].ylat);
+			fprintf(stderr,"dbg2       profile %d zdata:    %f\n",i,data->profile.points[i].zdata);
+			fprintf(stderr,"dbg2       profile %d distance: %f\n",i,data->profile.points[i].distance);
+			fprintf(stderr,"dbg2       profile %d xdisplay: %f\n",i,data->profile.points[i].xdisplay);
+			fprintf(stderr,"dbg2       profile %d ydisplay: %f\n",i,data->profile.points[i].ydisplay);
 			}
 
 		fprintf(stderr,"dbg2       error:                     %d\n",*error);
@@ -1325,7 +1326,7 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       sharedhandle:              %d\n", *sharedhandle);
+		fprintf(stderr,"dbg2       sharedhandle:              %ld\n", (long)*sharedhandle);
 				
 		/* site data */
 		fprintf(stderr,"dbg2       site_mode:            %d\n",shared.shareddata.site_mode);
@@ -1377,8 +1378,8 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr,"dbg2       nav_mode:                  %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                      %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:                %d\n",shared.shareddata.nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:              %d\n",shared.shareddata.nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:        %d\n",shared.shareddata.nav_point_selected);
+		fprintf(stderr,"dbg2       nav_selected:              %ld\n",(long)shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:        %ld\n",(long)shared.shareddata.nav_point_selected);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
@@ -1472,7 +1473,7 @@ int mbview_setwindowparms(int verbose, int instance,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       mbview_dismiss_notify:     %d\n", mbview_dismiss_notify);
+		fprintf(stderr,"dbg2       mbview_dismiss_notify:     %ld\n", (long)mbview_dismiss_notify);
 		fprintf(stderr,"dbg2       title:                     %s\n", title);
 		fprintf(stderr,"dbg2       xo:                        %d\n", xo);
 		fprintf(stderr,"dbg2       yo:                        %d\n", yo);
@@ -1668,7 +1669,6 @@ int mbview_open(int verbose, int instance, int *error)
 	XColor	XColorBlue;
 	XColor	XColorCoral;
 	XColor	exact;
-	XtActionsRec	rec;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	i,  j;
@@ -1687,8 +1687,8 @@ int mbview_open(int verbose, int instance, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       view:                      %d\n", view);
-		fprintf(stderr,"dbg2       data:                      %d\n", data);
+		fprintf(stderr,"dbg2       view:                      %ld\n", (long)view);
+		fprintf(stderr,"dbg2       data:                      %ld\n", (long)data);
 		
 		/* widget controls */
 		fprintf(stderr,"dbg2       title:                     %s\n", data->title);
@@ -1753,7 +1753,7 @@ int mbview_open(int verbose, int instance, int *error)
 		fprintf(stderr,"dbg2       display_projection_id:          %s\n", data->display_projection_id);
 		
 		/* primary grid data */
-		fprintf(stderr,"dbg2       primary_nodatavalue:       %d\n", data->primary_nodatavalue);
+		fprintf(stderr,"dbg2       primary_nodatavalue:       %f\n", data->primary_nodatavalue);
 		fprintf(stderr,"dbg2       primary_nxy:               %d\n", data->primary_nxy);
 		fprintf(stderr,"dbg2       primary_nx:                %d\n", data->primary_nx);
 		fprintf(stderr,"dbg2       primary_ny:                %d\n", data->primary_ny);
@@ -1765,21 +1765,21 @@ int mbview_open(int verbose, int instance, int *error)
 		fprintf(stderr,"dbg2       primary_ymax:              %f\n", data->primary_ymax);
 		fprintf(stderr,"dbg2       primary_dx:                %f\n", data->primary_dx);
 		fprintf(stderr,"dbg2       primary_dy:                %f\n", data->primary_dy);
-		fprintf(stderr,"dbg2       primary_data:              %d\n", data->primary_data);
-		fprintf(stderr,"dbg2       primary_x:                 %d\n", data->primary_x);
-		fprintf(stderr,"dbg2       primary_y:                 %d\n", data->primary_y);
-		fprintf(stderr,"dbg2       primary_z:                 %d\n", data->primary_z);
-		fprintf(stderr,"dbg2       primary_dxdz:              %d\n", data->primary_dzdx);
-		fprintf(stderr,"dbg2       primary_dydz:              %d\n", data->primary_dzdy);
-		fprintf(stderr,"dbg2       primary_r:                 %d\n", data->primary_r);
-		fprintf(stderr,"dbg2       primary_g:                 %d\n", data->primary_g);
-		fprintf(stderr,"dbg2       primary_b:                 %d\n", data->primary_b);
-		fprintf(stderr,"dbg2       primary_stat_color:        %d\n", data->primary_stat_color);
-		fprintf(stderr,"dbg2       primary_stat_z:            %d\n", data->primary_stat_z);
+		fprintf(stderr,"dbg2       primary_data:              %ld\n", (long) data->primary_data);
+		fprintf(stderr,"dbg2       primary_x:                 %ld\n", (long) data->primary_x);
+		fprintf(stderr,"dbg2       primary_y:                 %ld\n", (long) data->primary_y);
+		fprintf(stderr,"dbg2       primary_z:                 %ld\n", (long) data->primary_z);
+		fprintf(stderr,"dbg2       primary_dxdz:              %ld\n", (long) data->primary_dzdx);
+		fprintf(stderr,"dbg2       primary_dydz:              %ld\n", (long) data->primary_dzdy);
+		fprintf(stderr,"dbg2       primary_r:                 %ld\n", (long) data->primary_r);
+		fprintf(stderr,"dbg2       primary_g:                 %ld\n", (long) data->primary_g);
+		fprintf(stderr,"dbg2       primary_b:                 %ld\n", (long) data->primary_b);
+		fprintf(stderr,"dbg2       primary_stat_color:        %ld\n", (long) data->primary_stat_color);
+		fprintf(stderr,"dbg2       primary_stat_z:            %ld\n", (long) data->primary_stat_z);
 		
 		/* secondary grid data */
 		fprintf(stderr,"dbg2       secondary_sameas_primary:  %d\n", data->secondary_sameas_primary);
-		fprintf(stderr,"dbg2       secondary_nodatavalue:     %d\n", data->secondary_nodatavalue);
+		fprintf(stderr,"dbg2       secondary_nodatavalue:     %f\n", data->secondary_nodatavalue);
 		fprintf(stderr,"dbg2       secondary_nxy:             %d\n", data->secondary_nxy);
 		fprintf(stderr,"dbg2       secondary_nx:              %d\n", data->secondary_nx);
 		fprintf(stderr,"dbg2       secondary_ny:              %d\n", data->secondary_ny);
@@ -1789,7 +1789,7 @@ int mbview_open(int verbose, int instance, int *error)
 		fprintf(stderr,"dbg2       secondary_ymax:            %f\n", data->secondary_ymax);
 		fprintf(stderr,"dbg2       secondary_dx:              %f\n", data->secondary_dx);
 		fprintf(stderr,"dbg2       secondary_dy:              %f\n", data->secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:            %d\n", data->secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:            %ld\n", (long) data->secondary_data);
 		
 		/* site data */
 		fprintf(stderr,"dbg2       site_view_mode:       %d\n",data->site_view_mode);
@@ -1799,14 +1799,14 @@ int mbview_open(int verbose, int instance, int *error)
 		fprintf(stderr,"dbg2       site_selected:        %d\n",shared.shareddata.site_selected);
 		for (i=0;i<shared.shareddata.nsite;i++)
 			{
-			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,shared.shareddata.sites[i].point.xgrid);
-			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,shared.shareddata.sites[i].point.ygrid);
+			fprintf(stderr,"dbg2       site %d xgrid:       %f\n",i,shared.shareddata.sites[i].point.xgrid[0]);
+			fprintf(stderr,"dbg2       site %d ygrid:       %f\n",i,shared.shareddata.sites[i].point.ygrid[0]);
 			fprintf(stderr,"dbg2       site %d xlon:        %f\n",i,shared.shareddata.sites[i].point.xlon);
 			fprintf(stderr,"dbg2       site %d ylat:        %f\n",i,shared.shareddata.sites[i].point.ylat);
 			fprintf(stderr,"dbg2       site %d zdata:       %f\n",i,shared.shareddata.sites[i].point.zdata);
-			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,shared.shareddata.sites[i].point.xdisplay);
-			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,shared.shareddata.sites[i].point.ydisplay);
-			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,shared.shareddata.sites[i].point.zdisplay);
+			fprintf(stderr,"dbg2       site %d xdisplay:    %f\n",i,shared.shareddata.sites[i].point.xdisplay[0]);
+			fprintf(stderr,"dbg2       site %d ydisplay:    %f\n",i,shared.shareddata.sites[i].point.ydisplay[0]);
+			fprintf(stderr,"dbg2       site %d zdisplay:    %f\n",i,shared.shareddata.sites[i].point.zdisplay[0]);
 			fprintf(stderr,"dbg2       site %d color:       %d\n",i,shared.shareddata.sites[i].color);
 			fprintf(stderr,"dbg2       site %d size:        %d\n",i,shared.shareddata.sites[i].size);
 			fprintf(stderr,"dbg2       site %d name:        %s\n",i,shared.shareddata.sites[i].name);
@@ -1828,14 +1828,14 @@ int mbview_open(int verbose, int instance, int *error)
 			fprintf(stderr,"dbg2       route %d npoints_alloc: %d\n",i,shared.shareddata.routes[i].npoints_alloc);
 			for (j=0;j<shared.shareddata.routes[i].npoints;j++)
 				{
-				fprintf(stderr,"dbg2       route %d %d xgrid:       %f\n",i,j,shared.shareddata.routes[i].points[j].xgrid);
-				fprintf(stderr,"dbg2       route %d %d ygrid:       %f\n",i,j,shared.shareddata.routes[i].points[j].ygrid);
+				fprintf(stderr,"dbg2       route %d %d xgrid:       %f\n",i,j,shared.shareddata.routes[i].points[j].xgrid[0]);
+				fprintf(stderr,"dbg2       route %d %d ygrid:       %f\n",i,j,shared.shareddata.routes[i].points[j].ygrid[0]);
 				fprintf(stderr,"dbg2       route %d %d xlon:        %f\n",i,j,shared.shareddata.routes[i].points[j].xlon);
 				fprintf(stderr,"dbg2       route %d %d ylat:        %f\n",i,j,shared.shareddata.routes[i].points[j].ylat);
 				fprintf(stderr,"dbg2       route %d %d zdata:       %f\n",i,j,shared.shareddata.routes[i].points[j].zdata);
-				fprintf(stderr,"dbg2       route %d %d xdisplay:    %f\n",i,j,shared.shareddata.routes[i].points[j].xdisplay);
-				fprintf(stderr,"dbg2       route %d %d ydisplay:    %f\n",i,j,shared.shareddata.routes[i].points[j].ydisplay);
-				fprintf(stderr,"dbg2       route %d %d zdisplay:    %f\n",i,j,shared.shareddata.routes[i].points[j].zdisplay);
+				fprintf(stderr,"dbg2       route %d %d xdisplay:    %f\n",i,j,shared.shareddata.routes[i].points[j].xdisplay[0]);
+				fprintf(stderr,"dbg2       route %d %d ydisplay:    %f\n",i,j,shared.shareddata.routes[i].points[j].ydisplay[0]);
+				fprintf(stderr,"dbg2       route %d %d zdisplay:    %f\n",i,j,shared.shareddata.routes[i].points[j].zdisplay[0]);
 				fprintf(stderr,"dbg2       route %d %d distlateral: %f\n",i,j,shared.shareddata.routes[i].distlateral[j]);
 				fprintf(stderr,"dbg2       route %d %d distlateral: %f\n",i,j,shared.shareddata.routes[i].disttopo[j]);
 				}
@@ -1847,8 +1847,8 @@ int mbview_open(int verbose, int instance, int *error)
 		fprintf(stderr,"dbg2       nav_mode:              %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                  %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:            %d\n",shared.shareddata.nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:          %d\n",shared.shareddata.nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:    %d\n",shared.shareddata.nav_point_selected);
+		fprintf(stderr,"dbg2       nav_selected:          %ld\n", (long) shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:    %ld\n", (long) shared.shareddata.nav_point_selected);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
@@ -1869,38 +1869,38 @@ int mbview_open(int verbose, int instance, int *error)
 				fprintf(stderr,"dbg2       nav %d %d speed:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].speed);
 				fprintf(stderr,"dbg2       nav %d %d shot:     %d\n",i,j,shared.shareddata.navs[i].navpts[j].shot);
 				fprintf(stderr,"dbg2       nav %d %d cdp:      %d\n",i,j,shared.shareddata.navs[i].navpts[j].cdp);
-				fprintf(stderr,"dbg2       nav %d %d xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ygrid[0]);
 				fprintf(stderr,"dbg2       nav %d %d xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xlon);
 				fprintf(stderr,"dbg2       nav %d %d ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ylat);
 				fprintf(stderr,"dbg2       nav %d %d zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdata);
-				fprintf(stderr,"dbg2       nav %d %d xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdisplay);
-				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ygrid[0]);
 				fprintf(stderr,"dbg2       nav %d %d port xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xlon);
 				fprintf(stderr,"dbg2       nav %d %d port ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ylat);
 				fprintf(stderr,"dbg2       nav %d %d port zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdata);
-				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ygrid[0]);
 				fprintf(stderr,"dbg2       nav %d %d cntr xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xlon);
 				fprintf(stderr,"dbg2       nav %d %d cntr ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ylat);
 				fprintf(stderr,"dbg2       nav %d %d cntr zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdata);
-				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xgrid[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ygrid[0]);
 				fprintf(stderr,"dbg2       nav %d %d stbd xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xlon);
 				fprintf(stderr,"dbg2       nav %d %d stbd ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ylat);
 				fprintf(stderr,"dbg2       nav %d %d stbd zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdata);
-				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xdisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay[0]);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[0]);
 				}
 			}
 
@@ -1915,15 +1915,15 @@ int mbview_open(int verbose, int instance, int *error)
 		fprintf(stderr,"dbg2       npoints_alloc:             %d\n",data->profile.npoints_alloc);
 		for (i=0;i<data->profile.npoints;i++)
 			{
-			fprintf(stderr,"dbg2       profile %d boundary: %d\n",i,j,data->profile.points[i].boundary);
-			fprintf(stderr,"dbg2       profile %d xgrid:    %f\n",i,j,data->profile.points[i].xgrid);
-			fprintf(stderr,"dbg2       profile %d ygrid:    %f\n",i,j,data->profile.points[i].ygrid);
-			fprintf(stderr,"dbg2       profile %d xlon:     %f\n",i,j,data->profile.points[i].xlon);
-			fprintf(stderr,"dbg2       profile %d ylat:     %f\n",i,j,data->profile.points[i].ylat);
-			fprintf(stderr,"dbg2       profile %d zdata:    %f\n",i,j,data->profile.points[i].zdata);
-			fprintf(stderr,"dbg2       profile %d distance: %f\n",i,j,data->profile.points[i].distance);
-			fprintf(stderr,"dbg2       profile %d xdisplay: %f\n",i,j,data->profile.points[i].xdisplay);
-			fprintf(stderr,"dbg2       profile %d ydisplay: %f\n",i,j,data->profile.points[i].ydisplay);
+			fprintf(stderr,"dbg2       profile %d boundary: %d\n",i,data->profile.points[i].boundary);
+			fprintf(stderr,"dbg2       profile %d xgrid:    %f\n",i,data->profile.points[i].xgrid);
+			fprintf(stderr,"dbg2       profile %d ygrid:    %f\n",i,data->profile.points[i].ygrid);
+			fprintf(stderr,"dbg2       profile %d xlon:     %f\n",i,data->profile.points[i].xlon);
+			fprintf(stderr,"dbg2       profile %d ylat:     %f\n",i,data->profile.points[i].ylat);
+			fprintf(stderr,"dbg2       profile %d zdata:    %f\n",i,data->profile.points[i].zdata);
+			fprintf(stderr,"dbg2       profile %d distance: %f\n",i,data->profile.points[i].distance);
+			fprintf(stderr,"dbg2       profile %d xdisplay: %f\n",i,data->profile.points[i].xdisplay);
+			fprintf(stderr,"dbg2       profile %d ydisplay: %f\n",i,data->profile.points[i].ydisplay);
 			}
 		}
 		
@@ -2342,7 +2342,6 @@ int mbview_update(int verbose, int instance, int *error)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	i;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -2444,7 +2443,6 @@ int mbview_update_sensitivity(int verbose, int instance, int *error)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	i, j;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -2645,6 +2643,17 @@ int mbview_action_sensitivityall()
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	instance;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       mbv_verbose:               %d\n", mbv_verbose);
+		}
 	
 	/* set action sensitivity on all active instances */
 	for (instance=0;instance<MBV_MAX_WINDOWS;instance++)
@@ -2656,6 +2665,15 @@ int mbview_action_sensitivityall()
 		/* if instance active reset action sensitivity */
 		if (data->active == MB_YES)
 			mbview_action_sensitivity(instance);
+		}
+
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",status);
 		}
 
 	/* return */
@@ -2672,6 +2690,18 @@ int mbview_action_sensitivity(int instance)
 	struct mbview_struct *data;
 	int	mbview_allactive;
 	int	i, j;
+
+	/* print starting debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
+		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       mbv_verbose:               %d\n", mbv_verbose);
+		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		}
 	
 	/* check if all available instances are active */
 	mbview_allactive = MB_YES;
@@ -2769,6 +2799,15 @@ int mbview_action_sensitivity(int instance)
 	if (data->mbview_sensitivity_notify != NULL)
 		(data->mbview_sensitivity_notify)();
 
+	/* print output debug statements */
+	if (mbv_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:       %d\n",status);
+		}
+
 	/* return */
 	return(status);
 }
@@ -2781,7 +2820,6 @@ int mbview_set_widgets(int verbose, int instance, int *error)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	Boolean	value;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -2867,7 +2905,7 @@ int mbview_set_widgets(int verbose, int instance, int *error)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:        %d\n",error);
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
@@ -2890,8 +2928,7 @@ int mbview_addaction(int verbose, int instance,
 	struct mbview_struct *data;
         Cardinal ac = 0;
         Arg      args[256];
-        Cardinal cdc = 0;
-        Boolean  argok = False;
+       Boolean  argok = False;
         XmString    tmp0;
 
 	/* print starting debug statements */
@@ -2904,7 +2941,7 @@ int mbview_addaction(int verbose, int instance,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
 		fprintf(stderr,"dbg2       instance:             %d\n",instance);
-		fprintf(stderr,"dbg2       mbview_action_notify: %d\n",mbview_action_notify);
+		fprintf(stderr,"dbg2       mbview_action_notify: %ld\n",(long)mbview_action_notify);
 		fprintf(stderr,"dbg2       label:                %s\n",label);
 		fprintf(stderr,"dbg2       sensitive:            %d\n",sensitive);
 		}
@@ -2941,7 +2978,7 @@ int mbview_addaction(int verbose, int instance,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:        %d\n",error);
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
@@ -2973,7 +3010,7 @@ int mbview_addpicknotify(int verbose, int instance,
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
 		fprintf(stderr,"dbg2       instance:             %d\n",instance);
 		fprintf(stderr,"dbg2       picktype:             %d\n",picktype);
-		fprintf(stderr,"dbg2       mbview_pick_notify:   %d\n",mbview_pick_notify);
+		fprintf(stderr,"dbg2       mbview_pick_notify:   %ld\n",(long)mbview_pick_notify);
 		}
 
 	/* get view */
@@ -3016,7 +3053,7 @@ int mbview_addpicknotify(int verbose, int instance,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:        %d\n",error);
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
@@ -3047,7 +3084,7 @@ int mbview_setsensitivitynotify(int verbose, int instance,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n",verbose);
 		fprintf(stderr,"dbg2       instance:                  %d\n",instance);
-		fprintf(stderr,"dbg2       mbview_sensitivity_notify: %d\n",mbview_sensitivity_notify);
+		fprintf(stderr,"dbg2       mbview_sensitivity_notify: %ld\n",(long)mbview_sensitivity_notify);
 		}
 
 	/* get view */
@@ -3063,7 +3100,7 @@ int mbview_setsensitivitynotify(int verbose, int instance,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       error:        %d\n",error);
+		fprintf(stderr,"dbg2       error:        %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
@@ -3147,7 +3184,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from mbview_resize\n");
 void
 do_mbview_projection_popup( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3227,16 +3265,14 @@ do_mbview_set_projection_label(int instance)
 			&& projectionid == 32661)
 			{
 			sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
-				data->secondary_grid_projection_id,
-				projectionid - 32600);
+				data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
 			}
 		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
 			&& projectionid == 32761)
 			{
 			sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
-				data->secondary_grid_projection_id,
-				projectionid - 32600);
+				data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
 			}
 		else if (sscanf(data->primary_grid_projection_id, "epsg%d", &projectionid) == 1
@@ -3280,16 +3316,14 @@ do_mbview_set_projection_label(int instance)
 				&& projectionid == 32661)
 				{
 				sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
-					data->secondary_grid_projection_id,
-					projectionid - 32600);
+					data->secondary_grid_projection_id);
 				strcat(value_text, tmptext);
 				}
 			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
 				&& projectionid == 32761)
 				{
 				sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
-					data->secondary_grid_projection_id,
-					projectionid - 32600);
+					data->secondary_grid_projection_id);
 				strcat(value_text, tmptext);
 				}
 			else if (sscanf(data->secondary_grid_projection_id, "epsg%d", &projectionid) == 1
@@ -3332,16 +3366,14 @@ do_mbview_set_projection_label(int instance)
 			&& projectionid == 32661)
 			{
 			sprintf(tmptext,":t\"  Projected: %s\":t\"    North Polar Steographic\"",
-				data->secondary_grid_projection_id,
-				projectionid - 32600);
+				data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
 			}
 		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
 			&& projectionid == 32761)
 			{
 			sprintf(tmptext,":t\"  Projected: %s\":t\"    South Polar Steographic\"",
-				data->secondary_grid_projection_id,
-				projectionid - 32600);
+				data->secondary_grid_projection_id);
 			strcat(value_text, tmptext);
 			}
 		else if (sscanf(data->display_projection_id, "epsg%d", &projectionid) == 1
@@ -3379,7 +3411,8 @@ do_mbview_set_projection_label(int instance)
 void
 do_mbview_projection_popdown( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3404,7 +3437,8 @@ fprintf(stderr,"do_mbview_projection_popdown: instance:%d\n", instance);
 void
 do_mbview_display_spheroid( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3448,7 +3482,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_spheroid\n");
 void
 do_mbview_display_geographic( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3493,7 +3528,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_geographic\n")
 void
 do_mbview_display_utm( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -3555,10 +3591,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_utm\n");
 void
 do_mbview_glwda_expose( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
+    mbGLwDrawingAreaCallbackStruct *acs;
+    acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
 	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	
     	ac = 0;
     XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
@@ -3574,10 +3609,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_glwda_expose\n");
 void
 do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
+    mbGLwDrawingAreaCallbackStruct *acs;
+    acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
 	int	instance;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 	
     	ac = 0;
     XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
@@ -3588,19 +3622,18 @@ do_mbview_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_mbview_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    mbGLwDrawingAreaCallbackStruct *acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
+    mbGLwDrawingAreaCallbackStruct *acs;
+    acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
 	int	instance;
 	XEvent  *event;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	KeySym keysym;
-	int key_num;
 	char buffer[1];
 	int actual;
 	int shade_mode;
 	int replotall;
 	int replotprofile;
-	int i;
 
     /* get instance */
     ac = 0;
@@ -4685,12 +4718,12 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		{
 		    
 		/* handle move */
-		if (data->mouse_mode == MBV_MOUSE_MOVE
+		if ((data->mouse_mode == MBV_MOUSE_MOVE
 		    || data->mouse_mode == MBV_MOUSE_ROTATE
 		    || data->mouse_mode == MBV_MOUSE_SHADE
-		    || data->mouse_mode == MBV_MOUSE_VIEWPOINT
-		    && (view->button_down_x != view->button_up_x
-		    	|| view->button_down_y != view->button_up_y))
+		    || data->mouse_mode == MBV_MOUSE_VIEWPOINT)
+		    && ((view->button_down_x != view->button_up_x)
+		    	|| (view->button_down_y != view->button_up_y)))
 		    {		
 		    /* set cursor for pick */
 		    XDefineCursor(view->dpy,view->xid,view->TargetRedCursor);
@@ -4708,9 +4741,9 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 		    }
 
 		/* handle area picking */
-		else if (data->mouse_mode == MBV_MOUSE_AREA
+		else if ((data->mouse_mode == MBV_MOUSE_AREA
 		    && (view->button_down_x != view->button_up_x
-		    	|| view->button_down_y != view->button_up_y))
+		    	|| view->button_down_y != view->button_up_y)))
 		    {				    
 		    /* process area */
 		    mbview_region(instance, MBV_REGION_UP,
@@ -4962,12 +4995,12 @@ event->xbutton.x,event->xbutton.y, data->mouse_mode);*/
 void
 do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	error = MB_ERROR_NO_ERROR;
-	int	i;
 	
 	/* get instance */
     	ac = 0;
@@ -4988,12 +5021,12 @@ do_mbview_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_mbview_goaway( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	error = MB_ERROR_NO_ERROR;
-	int	i;
 	
 	/* get instance */
     	ac = 0;
@@ -5317,9 +5350,9 @@ int mbview_quit(int verbose, int *error)
 void
 do_mbview_display_2D( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
  
@@ -5361,9 +5394,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_2D\n");
 void
 do_mbview_display_3D( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -5405,9 +5438,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_display_3D\n");
 void
 do_mbview_data_primary( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -5448,9 +5481,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_data_primary\n");
 void
 do_mbview_data_primaryslope( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -5491,9 +5524,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_data_primaryslope\n");
 void
 do_mbview_data_secondary( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -5534,7 +5567,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_data_secondary\n");
 void
 do_mbview_histogram( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
     Boolean	value;
     struct mbview_world_struct *view;
@@ -5586,9 +5620,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_histogram\n");
 void
 do_mbview_overlay_none( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -5635,9 +5669,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_overlay_none\n");
 void
 do_mbview_overlay_slope( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
  
@@ -5684,9 +5718,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_overlay_slope\n");
 void
 do_mbview_overlay_illumination( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -5733,9 +5767,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_overlay_illumination\n
 void
 do_mbview_overlay_secondary( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -5782,7 +5816,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_overlay_secondary\n");
 void
 do_mbview_overlay_contour( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
     Boolean	value;
     struct mbview_world_struct *view;
@@ -5818,7 +5853,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_overlay_contour\n");
 void
 do_mbview_site( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
     Boolean	value;
     struct mbview_world_struct *view;
@@ -5870,7 +5906,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_site\n");
 void
 do_mbview_route( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
     Boolean	value;
     struct mbview_world_struct *view;
@@ -5924,7 +5961,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_route\n");
 void
 do_mbview_nav( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
     Boolean	value;
     struct mbview_world_struct *view;
@@ -5970,7 +6008,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_nav\n");
 void
 do_mbview_navdrape( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
     Boolean	value;
     struct mbview_world_struct *view;
@@ -6016,9 +6055,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_navdrape\n");
 void
 do_mbview_colortable_haxby( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -6068,9 +6107,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_haxby\n");
 void
 do_mbview_colortable_bright( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -6120,9 +6159,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_bright\n");
 void
 do_mbview_colortable_muted( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -6172,9 +6211,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_muted\n");
 void
 do_mbview_colortable_gray( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -6224,9 +6263,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_gray\n");
 void
 do_mbview_colortable_flat( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -6277,9 +6316,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_flat\n");
 void
 do_mbview_colortable_sealevel( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -6329,9 +6368,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colortable_sealevel\n"
 void
 do_mbview_mouse_rmode( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct*)call_data;
+    XmToggleButtonCallbackStruct *acs;
+    acs = (XmToggleButtonCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
@@ -6453,9 +6492,9 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_mouse_rmode\n");
 void
 do_mbview_mouse_mode( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmToggleButtonCallbackStruct *acs = (XmToggleButtonCallbackStruct*)call_data;
+    XmToggleButtonCallbackStruct *acs;
+    acs = (XmToggleButtonCallbackStruct*)call_data;
     int	instance;
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
@@ -6571,7 +6610,6 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_mouse_mode\n");
 void
 set_mbview_mouse_mode(int instance, int mode)
 {
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
     MB3DViewData	*mb3dviewptr;
@@ -7091,7 +7129,6 @@ fprintf(stderr,"do_mbview_colortable: instance:%d mode:%d\n", instance, mode);
 void
 set_mbview_colortable_mode(int instance, int mode)
 {
-    Boolean	value;
     struct mbview_world_struct *view;
     struct mbview_struct *data;
 
@@ -7109,7 +7146,8 @@ fprintf(stderr,"do_mbview_colortable_mode: instance:%d mode:%d\n", instance, mod
 void
 do_mbview_aboutpopdown( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7134,7 +7172,8 @@ fprintf(stderr,"do_mbview_aboutpopdown: instance:%d\n", instance);
 void
 do_mbview_aboutpopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7160,7 +7199,8 @@ fprintf(stderr,"do_mbview_aboutpopup: instance:%d\n", instance);
 void
 do_mbview_colorboundspopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7238,7 +7278,8 @@ fprintf(stderr,"do_mbview_colorboundspopup: instance:%d\n", instance);
 void
 do_mbview_colorboundspopdown( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7262,7 +7303,8 @@ fprintf(stderr,"do_mbview_colorboundspopdown: instance:%d\n", instance);
 void
 do_mbview_colorboundsapply( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7398,7 +7440,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_colorboundsapply\n");
 void
 do_mbview_shadeparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7453,7 +7496,8 @@ fprintf(stderr,"do_mbview_shadeparmspopup: instance:%d\n", instance);
 void
 do_mbview_shadeparmspopdown( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7477,7 +7521,8 @@ fprintf(stderr,"do_mbview_shadeparmspopdown: instance:%d\n", instance);
 void
 do_mbview_shadeparmsapply( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7630,13 +7675,15 @@ fprintf(stderr,"do_mbview_3dparmstext: instance:%d\n", instance);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_3dzoom, 
 			value_text);
 
+	return(0);
 }
 /*------------------------------------------------------------------------------*/
 
 void
 do_mbview_3dparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7664,7 +7711,8 @@ fprintf(stderr,"do_mbview_3dparmspopup: instance:%d\n", instance);
 void
 do_mbview_3dparmspopdown( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7688,11 +7736,11 @@ fprintf(stderr,"do_mbview_3dparmspopdown: instance:%d\n", instance);
 void
 do_mbview_3dparmsapply( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	ivalue;
 	double	dvalue;
 	int	change;
 
@@ -7842,6 +7890,8 @@ fprintf(stderr,"do_mbview_2dparmstext: instance:%d\n", instance);
 	sprintf(value_text,"%g", view->size2d);
 	XmTextFieldSetString(view->mb3dview.mbview_textField_view_2dzoom, 
 			value_text);
+	
+	return(0);
 
 }
 /*------------------------------------------------------------------------------*/
@@ -7849,7 +7899,8 @@ fprintf(stderr,"do_mbview_2dparmstext: instance:%d\n", instance);
 void
 do_mbview_2dparmspopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7877,7 +7928,8 @@ fprintf(stderr,"do_mbview_2dparmspopup: instance:%d\n", instance);
 void
 do_mbview_2dparmspopdown( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -7901,11 +7953,11 @@ fprintf(stderr,"do_mbview_2dparmspopdown: instance:%d\n", instance);
 void
 do_mbview_2dparmsapply( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	ivalue;
 	double	dvalue;
 	int	change;
 
@@ -7971,7 +8023,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_2dparmsapply\n");
 void
 do_mbview_resolutionpopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -8010,7 +8063,8 @@ fprintf(stderr,"do_mbview_resolutionpopup: instance:%d\n", instance);
 void
 do_mbview_resolutionpopdown( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -8033,7 +8087,8 @@ fprintf(stderr,"do_mbview_resolutionpopdown: instance:%d\n", instance);
 void
 do_mbview_resolutionchange( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -8098,7 +8153,7 @@ fprintf(stderr,"do_mbview_resolutionchange: instance:%d\n", instance);
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_resolutionchange instance:%d resolutions: %d %d decimations: %d %d\n", 
 instance, data->lorez_dimension, data->hirez_dimension,
-instance, data->lorez_navdecimate, data->hirez_navdecimate);
+data->lorez_navdecimate, data->hirez_navdecimate);
     
     /* draw */
 if (mbv_verbose >= 2)
@@ -8111,7 +8166,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_resolutionchange\n");
 void
 do_mbview_sitelistpopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_sitelistpopup: \n");
@@ -8125,7 +8181,8 @@ fprintf(stderr,"do_mbview_sitelistpopup: \n");
 void
 do_mbview_routelistpopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_routelistpopup:\n");
@@ -8139,7 +8196,8 @@ fprintf(stderr,"do_mbview_routelistpopup:\n");
 void
 do_mbview_navlistpopup( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_navlistpopup:\n");
@@ -8153,7 +8211,8 @@ fprintf(stderr,"do_mbview_navlistpopup:\n");
 void
 do_mbview_sitelistselect( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	*position_list = NULL;
     int position_count = 0;
     int	instance;
@@ -8226,7 +8285,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect instanc
 void
 do_mbview_routelistselect( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	*position_list = NULL;
     int position_count = 0;
     int	iroute, iposition;
@@ -8338,10 +8398,11 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_routelistselect\n");
 void
 do_mbview_navlistselect( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	*position_list = NULL;
     int position_count = 0;
-    int	snav, inav, jpt;
+    int	inav, jpt;
     int	instance;
     int	i, j;
 
@@ -8451,7 +8512,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelistselect: instan
 void
 do_mbview_sitelist_delete( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	*position_list = NULL;
     int position_count = 0;
     int	isite;
@@ -8494,7 +8556,7 @@ fprintf(stderr,"do_mbview_sitelist_delete:\n");
 				{
 				/* set pick annotation */
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_SITE)
-					mbviews[i].data.pickinfo_mode == MBV_PICK_NONE;
+					mbviews[i].data.pickinfo_mode = MBV_PICK_NONE;
 				mbview_pick_text(i);
 
 				/* draw */
@@ -8517,7 +8579,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_sitelist_delete\n");
 void
 do_mbview_routelist_delete( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	*position_list = NULL;
     int position_count = 0;
     int	iposition;
@@ -8603,7 +8666,7 @@ fprintf(stderr,"do_mbview_routelist_delete:\n");
 				{
 				/* set pick annotation */
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_ROUTE)
-					mbviews[i].data.pickinfo_mode == MBV_PICK_NONE;
+					mbviews[i].data.pickinfo_mode = MBV_PICK_NONE;
 				mbview_pick_text(i);
 
 				/* draw */
@@ -8625,7 +8688,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_routelist_delete\n");
 void
 do_mbview_navlist_delete( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     int	*position_list = NULL;
     int position_count = 0;
     int	inav;
@@ -8670,7 +8734,7 @@ fprintf(stderr,"do_mbview_navlist_delete:\n");
 				{
 				/* set pick annotation */
 				if (mbviews[i].data.pickinfo_mode == MBV_PICK_NAV)
-					mbviews[i].data.pickinfo_mode == MBV_PICK_NONE;
+					mbviews[i].data.pickinfo_mode = MBV_PICK_NONE;
 				mbview_pick_text(i);
 
 				/* draw */
@@ -8701,7 +8765,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_navlist_delete\n");
 void
 do_mbview_sitelist_popdown( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_sitelist_popdown:\n");
@@ -8715,7 +8780,8 @@ fprintf(stderr,"do_mbview_sitelist_popdown:\n");
 void
 do_mbview_routelist_popdown( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_routelist_popdown:\n");
@@ -8729,7 +8795,8 @@ fprintf(stderr,"do_mbview_routelist_popdown:\n");
 void
 do_mbview_navlist_popdown( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 
 if (mbv_verbose >= 2)
 fprintf(stderr,"do_mbview_navlist_popdown:\n");
@@ -8742,9 +8809,9 @@ fprintf(stderr,"do_mbview_navlist_popdown:\n");
 void
 do_mbview_full_render( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
-	XEvent  *event;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -8772,9 +8839,9 @@ fprintf(stderr,"Calling mbview_plotfull from do_mbview_full_render:\n");
 void
 do_mbview_reset_view( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
-	XEvent  *event;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -8836,12 +8903,12 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_reset_view\n");
 void
 do_mbview_clearpicks( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
     	int	error;
 	int	instance;
 	int	replotinstance;
 	int	replotall;
-	XEvent  *event;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	inav, jpoint;
@@ -8952,8 +9019,8 @@ fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_clearpicks\n");
 void
 do_mbview_profile_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-    	int	error;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -8998,8 +9065,8 @@ fprintf(stderr,"do_mbview_profile_dismiss: instance:%d\n", instance);
 void
 do_mbview_view_profile( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-    	int	error;
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -9108,7 +9175,8 @@ fprintf(stderr,"view->mbview_scrolledWindow_profile: width:%d height:%d\n",width
 void
 do_mbview_profile_exager( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+    XmScaleCallbackStruct *acs;
+    acs = (XmScaleCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -9142,7 +9210,8 @@ fprintf(stderr,"do_mbview_profile_exager: instance:%d\n", instance);
 void
 do_mbview_profile_width( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+    XmScaleCallbackStruct *acs;
+    acs = (XmScaleCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -9176,7 +9245,8 @@ fprintf(stderr,"do_mbview_profile_width: instance:%d\n", instance);
 void
 do_mbview_profile_slope( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
+    XmScaleCallbackStruct *acs;
+    acs = (XmScaleCallbackStruct*)call_data;
 	int	instance;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -9215,10 +9285,6 @@ do_mbview_status(char *message, int instance)
 {
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-  	Widget  diashell, topshell;
-    	Window  diawindow, topwindow;
-    	XWindowAttributes	xwa;
-    	XEvent  event;
 	    
 	/* get view */
 	view = &(mbviews[instance]);
@@ -9327,7 +9393,7 @@ void set_mbview_label_string(Widget w, String str)
 void set_mbview_label_multiline_string(Widget w, String str)
 {
     XmString xstr;
-    int      argok;
+    Boolean      argok;
 
     xstr = (XtPointer)BX_CONVERT(w, str, XmRXmString, 0, &argok);
     if ( xstr != NULL && argok)
@@ -9437,7 +9503,6 @@ int do_mbview_workfunction(XtPointer client_data)
 {
 	int	status = MB_SUCCESS;
 	int	instance;
-	int	id;
     	struct mbview_world_struct *view;
     	struct mbview_struct *data;
 	int	plotting;
@@ -9446,7 +9511,6 @@ int do_mbview_workfunction(XtPointer client_data)
 	int	use_histogram;
 	float	*histogram;
 	int	ncalc;
-	int	kstart, kend;
 	int	i, j, k;
  
     	/* set starting values */	

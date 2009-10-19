@@ -182,18 +182,22 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <X11/Intrinsic.h>
 
 /* MBIO include files */
-#include "mb_format.h"
-#include "mb_status.h"
-#include "mb_define.h"
-#include "mb_io.h"
-#include "mb_process.h"
+#include "../../include/mb_format.h"
+#include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
+#include "../../include/mb_process.h"
+#include "../../include/mb_aux.h"
+#include "../../include/mb_xgraphics.h"
 
 /* define global control parameters */
 #include "mbnavedit.h"
@@ -302,12 +306,6 @@ static void	*imbio_ptr = NULL;
 /* mbio read and write values */
 static void	*store_ptr = NULL;
 static int	kind;
-static int	time_i[7];
-static double	time_d;
-static double	navlon;
-static double	navlat;
-static double	speed;
-static double	heading;
 static double	distance;
 static double	altitude;
 static double	sonardepth;
@@ -322,10 +320,6 @@ static double	*amp = NULL;
 static double	*ss = NULL;
 static double	*ssacrosstrack = NULL;
 static double	*ssalongtrack = NULL;
-static int	idata = 0;
-static int	icomment = 0;
-static int	odata = 0;
-static int	ocomment = 0;
 static char	comment[MB_COMMENT_MAXLINE];
 
 /* buffer control variables */
@@ -352,7 +346,7 @@ static struct mbnavedit_ping_struct	ping[MBNAVEDIT_BUFFER_SIZE];
 static double	plot_start_time;
 static double	plot_end_time;
 static int	nplot;
-static int	mbnavedit_xgid;
+static void	*mbnavedit_xgid;
 static struct mbnavedit_plot_struct mbnavplot[NUMBER_PLOTS_MAX];
 static int	data_save;
 static double	file_start_time_d;
@@ -463,7 +457,6 @@ int mbnavedit_init(int argc, char **argv)
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -654,7 +647,7 @@ int mbnavedit_init(int argc, char **argv)
 }
 
 /*--------------------------------------------------------------------*/
-int mbnavedit_set_graphics(int xgid, int ncol, int *pixels)
+int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_set_graphics";
@@ -667,7 +660,7 @@ int mbnavedit_set_graphics(int xgid, int ncol, int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %d\n",xgid);
+		fprintf(stderr,"dbg2       xgid:         %ld\n",(long)xgid);
 		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
 		for (i=0;i<ncol;i++)
 			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
@@ -781,11 +774,6 @@ int mbnavedit_open_file(int useprevious)
 	int	format_error;
 	struct stat file_status;
 	int	fstat;
-	int	i;
-
-	/* time, user, host variables */
-	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -988,7 +976,6 @@ int mbnavedit_close_file()
 	char	*function_name = "mbnavedit_close_file";
 	int	status = MB_SUCCESS;
 	char	command[MB_PATH_MAXLINE];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1673,8 +1660,6 @@ int mbnavedit_action_done(int *quit)
 	/* local variables */
 	char	*function_name = "mbnavedit_action_done";
 	int	status = MB_SUCCESS;
-	int	save_nloaded = 0;
-	int	save_ndumped = 0;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1723,8 +1708,6 @@ int mbnavedit_action_quit()
 	/* local variables */
 	char	*function_name = "mbnavedit_action_quit";
 	int	status = MB_SUCCESS;
-	int	save_nloaded = 0;
-	int	save_ndumped = 0;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2463,8 +2446,6 @@ int mbnavedit_action_mouse_deselectall(int xx, int yy)
 	/* local variables */
 	char	*function_name = "mbnavedit_action_mouse_deselectall";
 	int	status = MB_SUCCESS;
-	int	iplot;
-	int	active_plot;
 	int	i;
 
 	/* print input debug statements */
@@ -2620,7 +2601,7 @@ int mbnavedit_action_set_interval(int xx, int yy, int which)
 	int	itmp;
 	double	dtmp;
 	int	set;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3030,7 +3011,6 @@ int mbnavedit_action_interpolate()
 	/* local variables */
 	char	*function_name = "mbnavedit_action_interpolate";
 	int	status = MB_SUCCESS;
-	int	iplot;
 	int	iping;
 	int	ibefore, iafter;
 	int	timelonlat_change;
@@ -3362,7 +3342,6 @@ int mbnavedit_action_interpolaterepeats()
 	/* local variables */
 	char	*function_name = "mbnavedit_action_interpolaterepeats";
 	int	status = MB_SUCCESS;
-	int	iplot;
 	int	iping;
 	int	ibefore, iafter;
 	int	timelonlat_change;
@@ -3605,7 +3584,6 @@ int mbnavedit_action_revert()
 	char	*function_name = "mbnavedit_action_revert";
 	int	status = MB_SUCCESS;
 	int	iplot;
-	int	active_plot;
 	int	timelonlat_change;
 	int	speedheading_change;
 	int	i;
@@ -3730,7 +3708,6 @@ int mbnavedit_action_flag()
 	char	*function_name = "mbnavedit_action_flag";
 	int	status = MB_SUCCESS;
 	int	iplot;
-	int	active_plot;
 	int	i;
 
 	/* print input debug statements */
@@ -3798,7 +3775,6 @@ int mbnavedit_action_unflag()
 	char	*function_name = "mbnavedit_action_unflag";
 	int	status = MB_SUCCESS;
 	int	iplot;
-	int	active_plot;
 	int	i;
 
 	/* print input debug statements */
@@ -4180,10 +4156,8 @@ int mbnavedit_get_gaussianmean()
 	/* local variables */
 	char	*function_name = "mbnavedit_get_gaussianmean";
 	int	status = MB_SUCCESS;
-	double	mtodeglon, mtodeglat;
 	double	timewindow;
 	double	sumlon, sumlat, w, weight;
-	double	meanlon, meanlat;
 	double	dt, a;
 	int	jstart, nsum, npos, nneg;
 	int	jbefore, jafter;
@@ -4379,7 +4353,7 @@ int mbnavedit_get_inversion()
 	double	*sigma;
 	double	*work;
 	int	ncyc, nsig;
-	double	smax, sup, err, supt, slo, errlsq, s;
+	double	smax, sup, err, supt, slo, errlsq;
 	int	ncycle;
 	double	bandwidth;
 	int	nr, nc;
@@ -4831,7 +4805,7 @@ int mbnavedit_plot_all()
 	int	ix;
 	int	swidth, sascent, sdescent;
 	char	yformat[10];
-	int	i, j, k, ii;
+	int	i;
 	char	string[MB_PATH_MAXLINE];
 	int	fpx, fpdx, fpy, fpdy;
 
@@ -5587,8 +5561,8 @@ int mbnavedit_plot_all()
 			pixel_values[BLACK],XG_SOLIDLINE);
 
 		/* plot zero values */
-		if (mbnavplot[iplot].ymax > 0.0 && mbnavplot[iplot].ymin < 0.0
-			|| mbnavplot[iplot].ymax < 0.0 && mbnavplot[iplot].ymin > 0.0)
+		if ((mbnavplot[iplot].ymax > 0.0 && mbnavplot[iplot].ymin < 0.0)
+			|| (mbnavplot[iplot].ymax < 0.0 && mbnavplot[iplot].ymin > 0.0))
 			{
 			if (mbnavplot[iplot].type == PLOT_LONGITUDE ||
 				mbnavplot[iplot].type == PLOT_LATITUDE)
@@ -5678,7 +5652,7 @@ int mbnavedit_plot_tint(int iplot)
 	double	xmin, xmax, ymin, ymax;
 	double	xscale, yscale;
 	int	tint_x1, tint_y1, tint_x2, tint_y2;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5764,7 +5738,7 @@ int mbnavedit_plot_lon(int iplot)
 	double	xmin, xmax, ymin, ymax;
 	double	xscale, yscale;
 	int	lon_x1, lon_y1, lon_x2, lon_y2;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5884,7 +5858,7 @@ int mbnavedit_plot_lat(int iplot)
 	double	xmin, xmax, ymin, ymax;
 	double	xscale, yscale;
 	int	lat_x1, lat_y1, lat_x2, lat_y2;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -6004,7 +5978,7 @@ int mbnavedit_plot_speed(int iplot)
 	double	xmin, xmax, ymin, ymax;
 	double	xscale, yscale;
 	int	speed_x1, speed_y1, speed_x2, speed_y2;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -6107,7 +6081,7 @@ int mbnavedit_plot_heading(int iplot)
 	double	xmin, xmax, ymin, ymax;
 	double	xscale, yscale;
 	int	heading_x1, heading_y1, heading_x2, heading_y2;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -6210,7 +6184,7 @@ int mbnavedit_plot_draft(int iplot)
 	double	xmin, xmax, ymin, ymax;
 	double	xscale, yscale;
 	int	draft_x1, draft_y1, draft_x2, draft_y2;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -6296,7 +6270,7 @@ int mbnavedit_plot_roll(int iplot)
 	double	xmin, xmax, ymin, ymax;
 	double	xscale, yscale;
 	int	roll_x1, roll_y1, roll_x2, roll_y2;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -6360,7 +6334,7 @@ int mbnavedit_plot_pitch(int iplot)
 	double	xmin, xmax, ymin, ymax;
 	double	xscale, yscale;
 	int	pitch_x1, pitch_y1, pitch_x2, pitch_y2;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -6424,7 +6398,7 @@ int mbnavedit_plot_heave(int iplot)
 	double	xmin, xmax, ymin, ymax;
 	double	xscale, yscale;
 	int	heave_x1, heave_y1, heave_x2, heave_y2;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
