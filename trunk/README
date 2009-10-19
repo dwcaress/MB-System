@@ -283,6 +283,10 @@ Rooted through the entire codebase fixing obvious failure points for
 64-bit compilation. Most of the issues identified so far relate to
 storing address values in variables declared as "int".
 
+Completed moving the code base into subversion hosted at Lamont by
+first updating the subversion archive to 5.1.2beta11 and then committing
+the copious mods related to the 64-bit cleanup.
+
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
 
