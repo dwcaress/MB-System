@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbldeoih.c	2/2/93
- *	$Id: mbr_mbldeoih.c,v 5.14 2008-07-10 06:43:40 caress Exp $
+ *	$Id: mbr_mbldeoih.c,v 5.14 2008/07/10 06:43:40 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 2, 1993
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_mbldeoih.c,v $
+ * Revision 5.14  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.13  2007/10/08 15:59:34  caress
  * MBIO changes as of 8 October 2007.
  *
@@ -219,7 +222,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 #define	MBF_MBLDEOIH_OLDHEADERSIZE	38
 #define	MBF_MBLDEOIH_NEWHEADERSIZE	44
 
-static char res_id[]="$Id: mbr_mbldeoih.c,v 5.14 2008-07-10 06:43:40 caress Exp $";
+static char res_id[]="$Id: mbr_mbldeoih.c,v 5.14 2008/07/10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)

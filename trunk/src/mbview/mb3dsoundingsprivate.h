@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	9/24/2003
- *    $Id: mb3dsoundingsprivate.h,v 5.4 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mb3dsoundingsprivate.h,v 5.4 2008/11/16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -17,7 +17,10 @@
  * Author:	D. W. Caress
  * Date:	May 25,  2007
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb3dsoundingsprivate.h,v $
+ * Revision 5.4  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.3  2007/11/16 17:26:56  caress
  * Progress on MBeditviz
  *

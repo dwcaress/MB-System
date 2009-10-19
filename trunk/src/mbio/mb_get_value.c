@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_value.c	2/15/93
- *    $Id: mb_get_value.c,v 5.5 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mb_get_value.c,v 5.5 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Author:	D. W. Caress
  * Date:	February 15, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_get_value.c,v $
+ * Revision 5.5  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.4  2004/11/06 03:55:16  caress
  * Working to support the Reson 7k format.
  *
@@ -106,7 +109,7 @@
 /* maximum line length in characters */
 #define MB_GET_VALUE_MAXLINE 200
 
-static char rcs_id[]="$Id: mb_get_value.c,v 5.5 2008-09-13 06:08:09 caress Exp $";
+static char rcs_id[]="$Id: mb_get_value.c,v 5.5 2008/09/13 06:08:09 caress Exp $";
 char	tmp[MB_GET_VALUE_MAXLINE];
 
 /*--------------------------------------------------------------------*/

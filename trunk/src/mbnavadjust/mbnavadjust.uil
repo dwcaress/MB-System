@@ -71,8 +71,8 @@ identifier BXG_pushButton_applynav;
 identifier BXG_pushButton_invertnav;
 identifier BXG_pushButton_analyzecrossings;
 identifier BXG_pushButton_autopick;
-identifier BXG_pushButton_unfix;
-identifier BXG_pushButton_fix;
+identifier BXG_pushButton_goodnav;
+identifier BXG_pushButton_poornav;
 identifier BXG_pushButton_showmodelplot;
 identifier BXG_pushButton_makegrid;
 identifier BXG_pushButton_showties;
@@ -147,9 +147,9 @@ procedure BxSetValuesCB(string);
 procedure BxUnmanageCB(string);
 procedure do_action_analyzecrossings();
 procedure do_action_autopick();
-procedure do_action_fix();
+procedure do_action_poornav();
 procedure do_action_invertnav();
-procedure do_action_unfix();
+procedure do_action_goodnav();
 procedure do_apply_nav();
 procedure do_biases_apply();
 procedure do_biases_applyall();
@@ -3159,34 +3159,34 @@ object cascadeButton_view : XmCascadeButton widget {
 !(BX)    };
 };
 
-object pushButton_fix : XmPushButton widget {
+object pushButton_poornav : XmPushButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Fix File");
+        XmNlabelString = compound_string("Set Poor Navigation");
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_fix);
-        XmNactivateCallback = procedure do_action_fix();
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_poornav);
+        XmNactivateCallback = procedure do_action_poornav();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
 };
 
-object pushButton_unfix : XmPushButton widget {
+object pushButton_goodnav : XmPushButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Unfix File");
+        XmNlabelString = compound_string("Set Good Navigation");
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_unfix);
-        XmNactivateCallback = procedure do_action_unfix();
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_goodnav);
+        XmNactivateCallback = procedure do_action_goodnav();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -3301,8 +3301,8 @@ object pulldownMenu_action : XmPulldownMenu widget {
         XmNheight = 142;
     };
     controls {
-         managed XmPushButton pushButton_fix;
-         managed XmPushButton pushButton_unfix;
+         managed XmPushButton pushButton_poornav;
+         managed XmPushButton pushButton_goodnav;
          managed XmSeparator separator7;
          managed XmPushButton pushButton_autopick;
          managed XmSeparator separator10;

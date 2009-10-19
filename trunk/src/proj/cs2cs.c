@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: cs2cs.c,v 5.6 2008-09-29 04:56:21 caress Exp $
+ * $Id: cs2cs.c,v 5.6 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Mainline program sort of like ``proj'' for converting between
@@ -28,7 +28,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: cs2cs.c,v $
+ * Revision 5.6  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.10  2006/10/10 15:24:05  fwarmerdam
  *  Increase MAX_LINE to 1000 per request from Dan Scheirer.
  *

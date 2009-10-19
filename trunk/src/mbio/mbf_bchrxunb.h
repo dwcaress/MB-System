@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_bchrxunb.h	8/29/97
- *	$Id: mbf_bchrxunb.h,v 5.2 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbf_bchrxunb.h,v 5.2 2003/04/17 21:05:23 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,7 +18,10 @@
  *
  * Author:	D. W. Caress
  * Date:	August 29, 1997
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_bchrxunb.h,v $
+ * Revision 5.2  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *

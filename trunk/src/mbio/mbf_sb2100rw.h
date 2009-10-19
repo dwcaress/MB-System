@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	MBF_SB2100RW.h	3/3/94
- *	$Id: mbf_sb2100rw.h,v 5.2 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbf_sb2100rw.h,v 5.2 2003/04/17 21:05:23 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,7 +18,10 @@
  *
  * Author:	D. W. Caress
  * Date:	March 3, 1994
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_sb2100rw.h,v $
+ * Revision 5.2  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *

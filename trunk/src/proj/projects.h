@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: projects.h,v 5.6 2008-09-29 04:56:21 caress Exp $
+ * $Id: projects.h,v 5.6 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Primary (private) include file for PROJ.4 library.
@@ -27,7 +27,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: projects.h,v $
+ * Revision 5.6  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.24  2006/10/18 04:34:03  fwarmerdam
  * added mlist functions from libproj4
  *

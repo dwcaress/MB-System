@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mgd77dat.c	5/18/99
- *	$Id: mbr_mgd77dat.c,v 5.11 2008-01-14 17:52:34 caress Exp $
+ *	$Id: mbr_mgd77dat.c,v 5.11 2008/01/14 17:52:34 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003, 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  * Author:	D. W. Caress
  * Date:	May 18, 1999
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_mgd77dat.c,v $
+ * Revision 5.11  2008/01/14 17:52:34  caress
+ * Fixed problem with comments that prevented proper processing.
+ *
  * Revision 5.10  2005/11/05 00:48:03  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -114,7 +117,7 @@ int mbr_dem_mgd77dat(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_mgd77dat(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_mgd77dat.c,v 5.11 2008-01-14 17:52:34 caress Exp $";
+static char res_id[]="$Id: mbr_mgd77dat.c,v 5.11 2008/01/14 17:52:34 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mgd77dat(int verbose, void *mbio_ptr, int *error)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c,v 5.17 2008-09-20 00:57:40 caress Exp $
+ *    $Id: mb_access.c,v 5.17 2008/09/20 00:57:40 caress Exp $
 
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	October 1, 2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_access.c,v $
+ * Revision 5.17  2008/09/20 00:57:40  caress
+ * Release 5.1.1beta23
+ *
  * Revision 5.16  2008/03/01 09:12:52  caress
  * Added support for Simrad EM710 multibeam in new formats 58 and 59.
  *
@@ -38,7 +41,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_segy.h"
 
-static char rcs_id[]="$Id: mb_access.c,v 5.17 2008-09-20 00:57:40 caress Exp $";
+static char rcs_id[]="$Id: mb_access.c,v 5.17 2008/09/20 00:57:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -273,6 +276,61 @@ int mb_pingnumber(int verbose, void *mbio_ptr,
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       pingnumber: %d\n",*pingnumber);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_segynumber(int verbose, void *mbio_ptr, 
+		int *line, int *shot, int *cdp, int *error)
+{
+	char	*function_name = "mb_segynumber";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	if (mb_io_ptr->mb_io_segynumber != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_segynumber)
+				(verbose, mbio_ptr, 
+				line, shot, cdp, error);
+		}
+	else
+		{
+		*line = 0;
+		*shot = mb_io_ptr->ping_count;
+		*cdp = 0;
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       line:       %d\n",*line);
+		fprintf(stderr,"dbg2       shot:       %d\n",*shot);
+		fprintf(stderr,"dbg2       cdp:        %d\n",*cdp);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -2126,6 +2184,84 @@ int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 			fprintf(stderr,"dbg2       depth:         %f\n",depth[i]);
 			fprintf(stderr,"dbg2       salinity:      %f\n",salinity[i]);
 			fprintf(stderr,"dbg2       soundspeed:    %f\n",soundspeed[i]);
+			}
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, int *nsensor, double *time_d, 
+	double *sensor1, double *sensor2, double *sensor3, 
+	double *sensor4, double *sensor5, double *sensor6, 
+	double *sensor7, double *sensor8, int *error)
+{
+	char	*function_name = "mb_ctd";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	/* note: the arrays should be allocated to MB_CTD_MAX length */
+	if (mb_io_ptr->mb_io_ancilliarysensor != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_ancilliarysensor)
+				(verbose,mbio_ptr,store_ptr,
+				kind, nsensor, time_d,
+				sensor1, sensor2, sensor3,
+				sensor4, sensor5, sensor6,
+				sensor7, sensor8, error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nsensor:       %d\n",*nsensor);
+		for (i=0;i<*nsensor;i++)
+			{
+			fprintf(stderr,"dbg2       time_d:        %f\n",time_d[i]);
+			fprintf(stderr,"dbg2       sensor1:       %f\n",sensor1[i]);
+			fprintf(stderr,"dbg2       sensor2:       %f\n",sensor2[i]);
+			fprintf(stderr,"dbg2       sensor3:       %f\n",sensor3[i]);
+			fprintf(stderr,"dbg2       sensor4:       %f\n",sensor4[i]);
+			fprintf(stderr,"dbg2       sensor5:       %f\n",sensor5[i]);
+			fprintf(stderr,"dbg2       sensor6:       %f\n",sensor6[i]);
+			fprintf(stderr,"dbg2       sensor7:       %f\n",sensor7[i]);
+			fprintf(stderr,"dbg2       sensor8:       %f\n",sensor8[i]);
+			fprintf(stderr,"dbg2       sensor1:       %f\n",sensor1[i]);
 			}
 		}
 	if (verbose >= 2)

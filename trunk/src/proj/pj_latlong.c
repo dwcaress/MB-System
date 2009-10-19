@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_latlong.c,v 5.6 2008-09-29 04:56:21 caress Exp $
+ * $Id: pj_latlong.c,v 5.6 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Stub projection implementation for lat/long coordinates. We 
@@ -29,7 +29,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: pj_latlong.c,v $
+ * Revision 5.6  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.2  2000/07/07 06:04:23  warmerda
  * added longlat alias
  *

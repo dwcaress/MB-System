@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcopy.c	2/4/93
- *    $Id: mbcopy.c,v 5.28 2009-03-02 18:54:40 caress Exp $
+ *    $Id: mbcopy.c,v 5.28 2009/03/02 18:54:40 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbcopy.c,v $
+ * Revision 5.28  2009/03/02 18:54:40  caress
+ * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
+ *
  * Revision 5.27  2008/12/05 17:32:52  caress
  * Check-in mods 5 December 2008 including contributions from Gordon Keith.
  *
@@ -256,7 +259,7 @@ int mbcopy_any_to_mbldeoih(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.28 2009-03-02 18:54:40 caress Exp $";
+	static char rcs_id[] = "$Id: mbcopy.c,v 5.28 2009/03/02 18:54:40 caress Exp $";
 	static char program_name[] = "MBcopy";
 	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
 	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  -Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";

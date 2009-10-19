@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_proj.c	7/16/2002
- *    $Id: mb_proj.c,v 5.7 2009-03-13 07:05:58 caress Exp $
+ *    $Id: mb_proj.c,v 5.7 2009/03/13 07:05:58 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -32,7 +32,10 @@
  * Author:	D. W. Caress
  * Date:	July 16, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_proj.c,v $
+ * Revision 5.7  2009/03/13 07:05:58  caress
+ * Release 5.1.2beta02
+ *
  * Revision 5.6  2007/05/14 06:20:09  caress
  * Added more useful error message for inability to open the projection database.
  *

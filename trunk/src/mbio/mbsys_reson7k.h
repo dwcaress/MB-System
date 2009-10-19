@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
- *	$Id: mbsys_reson7k.h,v 5.16 2008-09-27 03:27:10 caress Exp $
+ *	$Id: mbsys_reson7k.h,v 5.16 2008/09/27 03:27:10 caress Exp $
  *
  *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Author:	D. W. Caress
  * Date:	March 3, 2004
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_reson7k.h,v $
+ * Revision 5.16  2008/09/27 03:27:10  caress
+ * Working towards release 5.1.1beta24
+ *
  * Revision 5.15  2008/09/20 00:57:41  caress
  * Release 5.1.1beta23
  *
@@ -819,7 +822,9 @@ short heave;				/*  60 -  61 : Heave (centimeters) */
 short yaw;				/*  62 -  63 : Yaw (minutes) */
 unsigned int depth;			/*  64 -  67 : Vehicle depth (centimeters) */
 short temperature;			/*  68 -  69 : Temperature (degrees Celsius X 10) */
-char reserved2[10];			/*  70 -  79 : Reserved for future use */
+char reserved2[2];			/*  70 -  71 : Reserved for future use */
+int longitude;				/*  72 -  75 : 0.01 Longitude (arc sec) - Reserved for future use by Edgetech */
+int latitude;				/*  76 -  79 : 0.01 Latitude (arc sec) - Reserved for future use by Edgetech */
 }
 s7k_fsdwssheader;
 
@@ -851,8 +856,8 @@ char RS232[32];				/* 40-71 : Reserved for RS232 data - TBD */
 /* the number of seconds east of Greenwich Meridian or north of the     */
 /* equator.                                                             */
 /* -------------------------------------------------------------------- */
-int sourceCoordX;			/* 72-75 : Meters or Seconds of Arc */
-int sourceCoordY;			/* 76-79 : Meters or Seconds of Arc */
+int sourceCoordX;			/* 72-75 : 0.01 arc seconds - original Meters or Seconds of Arc */
+int sourceCoordY;			/* 76-79 : 0.01 arc seconds - original Meters or Seconds of Arc */
 int groupCoordX;			/* 80-83 : mm or 10000 * (Minutes of Arc) */
 int groupCoordY;			/* 84-87 : mm or 10000 * (Minutes of Arc) */
 short coordUnits;			/* 88-89 : Units of coordinates - 1->length (x /y), 2->seconds of arc */
@@ -1016,7 +1021,25 @@ typedef struct s7k_bluefin_environmental_struct
 	float		conductivity_frequency;	/* Hz */
 	int		pressure_counts;	/* strain gauge pressure sensor A/D counts */
 	float		pressure_comp_voltage;	/* Volts */
-	char		reserved2[32];
+						/* 5/10/2009 R/V Thompson TN134 Lau Basin 
+							- added support for five channels
+							  of data from analog sensors integrated
+							  with the MBARI Mapping AUV
+							- Each channel is stored as unsigned 16 bit
+							  integers representing -5V to +5V
+							- initial use is for PMEL eH and optical
+							  backscatter sensors */
+	int		sensor_time_sec;	/* Ancilliary sensor time (unix seconds) */
+	int		sensor_time_nsec;	/* Ancilliary sensor time (nanno seconds) */
+	unsigned short	sensor1;		/* voltage: 0 = -5.00V, 65535 = +5.00V */
+	unsigned short	sensor2;		/* voltage: 0 = -5.00V, 65535 = +5.00V */
+	unsigned short	sensor3;		/* voltage: 0 = -5.00V, 65535 = +5.00V */
+	unsigned short	sensor4;		/* voltage: 0 = -5.00V, 65535 = +5.00V */
+	unsigned short	sensor5;		/* voltage: 0 = -5.00V, 65535 = +5.00V */
+	unsigned short	sensor6;		/* voltage: 0 = -5.00V, 65535 = +5.00V */
+	unsigned short	sensor7;		/* voltage: 0 = -5.00V, 65535 = +5.00V */
+	unsigned short	sensor8;		/* voltage: 0 = -5.00V, 65535 = +5.00V */
+	char		reserved2[8];
 }
 s7k_bluefin_environmental;
 	
@@ -1875,6 +1898,11 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nctd, double *time_d, 
 			double *conductivity, double *temperature, 
 			double *depth, double *salinity, double *soundspeed, int *error);
+int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nsamples, double *time_d,
+			double *sensor1, double *sensor2, double *sensor3, 
+			double *sensor4, double *sensor5, double *sensor6, 
+			double *sensor7, double *sensor8, int *error);
 int mbsys_reson7k_copy(int verbose, void *mbio_ptr, 
 			void *store_ptr, void *copy_ptr,
 			int *error);

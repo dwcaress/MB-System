@@ -1,6 +1,6 @@
 /* --------------------------------------------------------------------
  *    The MB-system:	mbsys_hsmd.h	8/12/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.h,v 5.5 2005-11-05 00:48:04 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.h,v 5.5 2005/11/05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -26,7 +26,10 @@
  * 		David W. Caress
  * Date:	August 10, 1995
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_hsmd.h,v $
+ * Revision 5.5  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.4  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

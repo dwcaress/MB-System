@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbprocess.c	3/31/93
- *    $Id: mbprocess.c,v 5.61 2009-03-08 09:21:00 caress Exp $
+ *    $Id: mbprocess.c,v 5.61 2009/03/08 09:21:00 caress Exp $
  *
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -35,7 +35,10 @@
  * Author:	D. W. Caress
  * Date:	January 4, 2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbprocess.c,v $
+ * Revision 5.61  2009/03/08 09:21:00  caress
+ * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
+ *
  * Revision 5.60  2009/03/02 18:54:40  caress
  * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
  *
@@ -301,7 +304,7 @@ int get_anglecorr(int verbose,
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.61 2009-03-08 09:21:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbprocess.c,v 5.61 2009/03/08 09:21:00 caress Exp $";
 	static char program_name[] = "mbprocess";
 	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
@@ -487,6 +490,16 @@ and mbedit edit save files.\n";
 	double	*velocity_sum = NULL;
 	char	*rt_svp;
 	double	ssv;
+	
+	/* swath file locking variables */
+	int	lock_status;
+	int	lock_error;
+	int	locked;
+	int	lock_purpose;
+	mb_path	lock_program;
+	mb_path lock_cpu;
+	mb_path lock_user;
+	char	lock_date[24];
 
 	/* edit save file control variables */
 	int	esffile_open = MB_NO;
@@ -797,7 +810,6 @@ and mbedit edit save files.\n";
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 	{
-
 	/* load parameters */
 	status = mb_pr_readpar(verbose, mbp_ifile, MB_NO, 
 			&process, &error);
@@ -953,8 +965,31 @@ and mbedit edit save files.\n";
 			}
 		    else
 			{
-			fprintf(stderr,"Data processed - out of date: \n\tInput:  %s\n\tOutput: %s\n",
-				process.mbp_ifile, process.mbp_ofile);
+			/* now try to set a lock of the file to be processed */
+			lock_status = mb_pr_lockswathfile(verbose, process.mbp_ifile, 
+						MBP_LOCK_PROCESS, program_name, &lock_error);
+			if (lock_status == MB_SUCCESS)
+				{
+				fprintf(stderr,"Data processed - out of date and unlocked: \n\tInput:  %s\n\tOutput: %s\n",
+					process.mbp_ifile, process.mbp_ofile);
+				}
+			else if (lock_error == MB_ERROR_FILE_LOCKED)
+				{
+				proceedprocess = MB_NO;
+				fprintf(stderr,"Data not processed - out of date but locked: \n\tInput:  %s\n\tOutput: %s\n",
+					process.mbp_ifile, process.mbp_ofile);
+					
+				/* get lock information */
+				lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked,
+								&lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &lock_error);
+				fprintf(stderr,"\tLocked by program <%s> run by <%s> on <%s> at <>\n", lock_program, lock_user, lock_cpu, lock_date);
+				}
+			else if (lock_error == MB_ERROR_OPEN_FAIL)
+				{
+				proceedprocess = MB_NO;
+				fprintf(stderr,"Data not processed - out of date but unable to set lock: \n\tInput:  %s\n\tOutput: %s\n",
+					process.mbp_ifile, process.mbp_ofile);
+				}
 			}
 		    }
 		}
@@ -6386,6 +6421,10 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 	/* close the files */
 	status = mb_close(verbose,&imbio_ptr,&error);
 	status = mb_close(verbose,&ombio_ptr,&error);
+	
+	/* unlock the raw swath file */
+	lock_status = mb_pr_unlockswathfile(verbose, process.mbp_ifile, 
+						MBP_LOCK_PROCESS, program_name, &lock_error);
 	    
 	/* deallocate arrays for amplitude correction tables */
 	if (nampcorrtable > 0)

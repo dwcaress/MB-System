@@ -1,4 +1,4 @@
-.TH mbmosaic l "27 February 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic l "16 March 2009" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbmosaic\fP - Mosaic amplitude or sidescan data 
 from swath mapping sonar data files.
@@ -592,42 +592,83 @@ grazing angle (this angle is arctan(x/z) where x is acrosstrack distance
 and z is sonar altitude, so
 that the center of the swath has an apparent grazing angle of
 zero, the port swath edge has a large negative angle, and the
-starboard swath edge has a large positive angle). If \fIpriority_source\fP
-is 1 or 2, then default tables of priority as a function of
-apparent grazing angle are used. Specifying \fIpriority_source\fP = 1
-gives a default table intended for use with multibeam sonar data:
+starboard swath edge has a large positive angle). A number of predefined
+priority tables are available and can be accessed by setting \fIpriority_source\fP
+to a number from 1 to 8. These priority tables include:
+ 
+ 
+\fIpriority_source\fP = 1:
 .br
       Angle (deg)  Priority
       ---------------------
- 	-85          0.0
- 	-65          0.2
- 	-45          1.0
- 	-15          0.8
- 	-14.9        0.1
- 	  0          0.1
- 	 14.9        0.1
- 	 15          0.8
- 	 45          1.0
- 	 65          0.2
- 	 85          0.0
-.br
-Specifying \fIpriority_source\fP = 2
-gives a default table intended for use with sidescan sonar data:
+ 	  -60          1.0
+ 	    0          0.0
+ 	   60          1.0
+ 
+ 
+\fIpriority_source\fP = 2:
 .br
       Angle (deg)  Priority
       ---------------------
- 	-85          0.0
- 	-79          1.0
- 	-60          0.7
- 	-30          0.4
- 	-29          0.1
- 	  0          0.1
- 	 29          0.1
- 	 30          0.4
- 	 60          0.7
- 	 79          1.0
- 	 85          0.0
+ 	  -67          1.0
+ 	    0          0.0
+ 	   67          1.0
+ 
+ 
+\fIpriority_source\fP = 3:
 .br
+      Angle (deg)  Priority
+      ---------------------
+ 	  -75          1.0
+ 	    0          0.0
+ 	   75          1.0
+ 
+ 
+\fIpriority_source\fP = 4:
+.br
+      Angle (deg)  Priority
+      ---------------------
+ 	  -85          1.0
+ 	    0          0.0
+ 	   85          1.0
+ 
+ 
+\fIpriority_source\fP = 5:
+.br
+      Angle (deg)  Priority
+      ---------------------
+ 	  -60          0.0
+ 	    0          1.0
+ 	   60          0.0
+ 
+ 
+\fIpriority_source\fP = 6:
+.br
+      Angle (deg)  Priority
+      ---------------------
+ 	  -67          0.0
+ 	    0          1.0
+ 	   67          0.0
+ 
+ 
+\fIpriority_source\fP = 7:
+.br
+      Angle (deg)  Priority
+      ---------------------
+ 	  -75          0.0
+ 	    0          1.0
+ 	   75          0.0
+ 
+ 
+\fIpriority_source\fP = 8:
+.br
+      Angle (deg)  Priority
+      ---------------------
+ 	  -85          0.0
+ 	    0          1.0
+ 	   85          0.0
+ 
+ 
 Alternatively, if \fIpriority_source\fP specifies a file name, then the data
 priority table will be read from this file.
 The priority file should contain two columns: apparent grazing angles
@@ -706,7 +747,7 @@ the mosaic to be filled in through spine interpolation .
 The output looks like:
  
  Program mbmosaic
- Version $Id: mbmosaic.l,v 5.11 2009-03-02 18:59:05 caress Exp $
+ Version $Id: mbmosaic.l,v 5.11 2009/03/02 18:59:05 caress Exp $
  MB-system Version 4.5
 
  MBMOSAIC Parameters:

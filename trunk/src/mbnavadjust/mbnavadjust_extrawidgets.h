@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit_extrawidgets.h	8/7/95
- *    $Id: mbnavadjust_extrawidgets.h,v 5.1 2008-05-16 22:42:32 caress Exp $
+ *    $Id: mbnavadjust_extrawidgets.h,v 5.1 2008/05/16 22:42:32 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Author:	D. W. Caress
  * Date:	March 22, 2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbnavadjust_extrawidgets.h,v $
+ * Revision 5.1  2008/05/16 22:42:32  caress
+ * Release 5.1.1beta18 - working towards use of 3D uncertainty.
+ *
  * Revision 5.0  2000/12/01 22:55:48  caress
  * First cut at Version 5.0.
  *

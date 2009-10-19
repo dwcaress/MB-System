@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhistogram.c	12/28/94
- *    $Id: mbhistogram.c,v 5.8 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mbhistogram.c,v 5.8 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Author:	D. W. Caress
  * Date:	December 28, 1994
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbhistogram.c,v $
+ * Revision 5.8  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.7  2007/10/08 16:48:07  caress
  * State of the code on 8 October 2007.
  *
@@ -111,7 +114,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbhistogram.c,v 5.8 2008-09-13 06:08:09 caress Exp $";
+	static char rcs_id[] = "$Id: mbhistogram.c,v 5.8 2008/09/13 06:08:09 caress Exp $";
 	static char program_name[] = "MBHISTOGRAM";
 	static char help_message[] =  "MBHISTOGRAM reads a swath sonar data file and generates a histogram\n\tof the bathymetry,  amplitude,  or sidescan values. Alternatively, \n\tmbhistogram can output a list of values which break up the\n\tdistribution into equal sized regions.\n\tThe results are dumped to stdout.";
 	static char usage_message[] = "mbhistogram [-Akind -Byr/mo/da/hr/mn/sc -Dmin/max -Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnintervals -Nnbins -Ppings -Rw/e/s/n -Sspeed -V -H]";

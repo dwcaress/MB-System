@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_atlas.h	6/22/01
- *	$Id: mbsys_atlas.h,v 5.7 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbsys_atlas.h,v 5.7 2005/11/05 00:48:03 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -29,7 +29,10 @@
  * Author:	D. N. Chayes
  * Date:	June 22, 2001
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_atlas.h,v $
+ * Revision 5.7  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.6  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

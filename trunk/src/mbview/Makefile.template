@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  7/27/2003
-#	$Id: Makefile.template,v 5.13 2009-03-13 07:05:58 caress Exp $
+#	$Id: Makefile.template,v 5.13 2009/03/13 07:05:58 caress Exp $
 #
 #     Copyright (c) 2003-2009 by
 #     David W. Caress (caress@mbari.org)
@@ -15,7 +15,10 @@
 # Author:	D. W. Caress
 # Date:		August 31, 2002
 #
-# $Log: not supported by cvs2svn $
+# $Log: Makefile.template,v $
+# Revision 5.13  2009/03/13 07:05:58  caress
+# Release 5.1.2beta02
+#
 # Revision 5.12  2008/11/16 21:51:18  caress
 # Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
 #

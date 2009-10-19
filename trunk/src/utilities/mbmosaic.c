@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbmosaic.c	2/10/97
- *    $Id: mbmosaic.c,v 5.31 2009-03-02 18:54:40 caress Exp $
+ *    $Id: mbmosaic.c,v 5.31 2009/03/02 18:54:40 caress Exp $
  *
  *    Copyright (c) 1997-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  * Author:	D. W. Caress
  * Date:	February 10, 1997
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbmosaic.c,v $
+ * Revision 5.31  2009/03/02 18:54:40  caress
+ * Fixed pixel size problems with mbmosaic, resurrected program mbfilter, and also updated copyright dates in several source files.
+ *
  * Revision 5.30  2008/12/22 08:36:18  caress
  * Check in of 22 Dec 2008.
  *
@@ -289,7 +292,7 @@ int mbmosaic_get_priorities(
 		int	*error);
 
 /* program identifiers */
-static char rcs_id[] = "$Id: mbmosaic.c,v 5.31 2009-03-02 18:54:40 caress Exp $";
+static char rcs_id[] = "$Id: mbmosaic.c,v 5.31 2009/03/02 18:54:40 caress Exp $";
 static char program_name[] = "mbmosaic";
 static char help_message[] =  "mbmosaic is an utility used to mosaic amplitude or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered by multibeam swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 static char usage_message[] = "mbmosaic -Ifilelist -Oroot \
@@ -3590,8 +3593,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	status = MB_SUCCESS;
 	struct GRD_HEADER grd;
 	double	w, e, s, n;
-	int	pad[4];
-	int	complex;
+	GMT_LONG	pad[4];
 	float	*a;
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
@@ -3664,14 +3666,13 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	sprintf(grd.remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
 		projection,program_name,MB_VERSION,user,host,date);
 
-	/* set extract wesn,pad and complex */
+	/* set extract wesn,pad */
 	w = 0.0;
 	e = 0.0;
 	s = 0.0;
 	n = 0.0;
 	for (i=0;i<4;i++)
 		pad[i] = 0;
-	complex = 0;
 
 	/* allocate memory for output array */
 	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
@@ -3689,7 +3690,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 				}
 
 		/* write the GMT netCDF grd file */
-		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, complex);
+		GMT_write_grd(outfile, &grd, a, w, e, s, n, pad, FALSE);
 
 		/* free memory for output array */
 		mb_freed(verbose,__FILE__,__LINE__,(void **) &a, error);

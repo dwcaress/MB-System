@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mblist.c	2/1/93
- *    $Id: mblist.c,v 5.30 2008-08-12 00:05:54 caress Exp $
+ *    $Id: mblist.c,v 5.30 2008/08/12 00:05:54 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -27,7 +27,10 @@
  *		derived from the program mbdump created by D. Caress
  *		in 1990.
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mblist.c,v $
+ * Revision 5.30  2008/08/12 00:05:54  caress
+ * Gordon Keith's fixes to some of his options.
+ *
  * Revision 5.29  2008/07/10 18:16:33  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -371,7 +374,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mblist.c,v 5.30 2008-08-12 00:05:54 caress Exp $";
+static char rcs_id[] = "$Id: mblist.c,v 5.30 2008/08/12 00:05:54 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

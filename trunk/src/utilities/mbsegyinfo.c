@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegyinfo.c	6/2/2004
- *    $Id: mbsegyinfo.c,v 5.5 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mbsegyinfo.c,v 5.5 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -18,7 +18,10 @@
  * Author:	D. W. Caress
  * Date:	June 2, 2004
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsegyinfo.c,v $
+ * Revision 5.5  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.4  2008/05/24 19:40:42  caress
  * Applied a Gordon Keith fix.
  *
@@ -69,7 +72,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.5 2008-09-13 06:08:09 caress Exp $";
+static char rcs_id[] = "$Id: mbsegyinfo.c,v 5.5 2008/09/13 06:08:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

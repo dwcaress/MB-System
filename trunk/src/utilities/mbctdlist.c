@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbctdlist.c	9/14/2008
- *    $Id: mbctdlist.c,v 5.0 2008-09-20 00:51:31 caress Exp $
+ *    $Id: mbctdlist.c,v 5.0 2008/09/20 00:51:31 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -27,7 +27,10 @@
  * Author:	D. W. Caress
  * Date:	September 14,  2008
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbctdlist.c,v $
+ * Revision 5.0  2008/09/20 00:51:31  caress
+ * Initial version of mbctdlist - list ctd data.
+ *
  *
  */
 
@@ -60,7 +63,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbctdlist.c,v 5.0 2008-09-20 00:51:31 caress Exp $";
+	static char rcs_id[] = "$Id: mbctdlist.c,v 5.0 2008/09/20 00:51:31 caress Exp $";
 	static char program_name[] = "mbctdlist";
 	static char help_message[] =  "mbctdlist lists all CTD records within swath data files\nThe -O option specifies how the values are output\nin an mblist-likefashion.\n";
 	static char usage_message[] = "mbctdlist [-A -Ddecimate -Fformat -Gdelimeter -H -Ifile -Llonflip -Ooutput_format -V -Zsegment]";
@@ -163,6 +166,16 @@ main (int argc, char **argv)
 	double	ctd_depth[MB_CTD_MAX];
 	double	ctd_salinity[MB_CTD_MAX];
 	double	ctd_soundspeed[MB_CTD_MAX];
+	int	nsensor;
+	double	sensor_time_d[MB_CTD_MAX];
+	double	sensor1[MB_CTD_MAX];
+	double	sensor2[MB_CTD_MAX];
+	double	sensor3[MB_CTD_MAX];
+	double	sensor4[MB_CTD_MAX];
+	double	sensor5[MB_CTD_MAX];
+	double	sensor6[MB_CTD_MAX];
+	double	sensor7[MB_CTD_MAX];
+	double	sensor8[MB_CTD_MAX];
 	double	conductivity;
 	double	temperature;
 	double	depth;
@@ -688,7 +701,14 @@ main (int argc, char **argv)
 			status = mb_ctd(verbose, mbio_ptr, store_ptr,
 						&kind, &nctd, ctd_time_d,
 						ctd_conductivity, ctd_temperature,
-						ctd_depth, ctd_salinity, ctd_soundspeed,
+						ctd_depth, ctd_salinity, ctd_soundspeed, &error);
+
+			/* extract ancilliary sensor data */
+			status = mb_ancilliarysensor(verbose, mbio_ptr, store_ptr,
+						&kind, &nsensor, sensor_time_d,
+						sensor1, sensor2, sensor3,
+						sensor4, sensor5, sensor6,
+						sensor7, sensor8,
 						&error);
 
 			/* loop over the nctd ctd points, outputting each one */
@@ -798,6 +818,46 @@ main (int argc, char **argv)
 									break;
 								case '^': /* use mblist definitions of CcSsTt */
 									mblist_next_value = MB_YES;
+									break;
+								case '1': /* Sensor 1 - volts */
+									printsimplevalue(verbose, sensor1[ictd], 0, 3, ascii, 
+											    &invert_next_value, 
+											    &signflip_next_value, &error);
+									break;
+								case '2': /* Sensor 2 - volts */
+									printsimplevalue(verbose, sensor2[ictd], 0, 3, ascii, 
+											    &invert_next_value, 
+											    &signflip_next_value, &error);
+									break;
+								case '3': /* Sensor 3 - volts */
+									printsimplevalue(verbose, sensor3[ictd], 0, 3, ascii, 
+											    &invert_next_value, 
+											    &signflip_next_value, &error);
+									break;
+								case '4': /* Sensor 4 - volts */
+									printsimplevalue(verbose, sensor4[ictd], 0, 3, ascii, 
+											    &invert_next_value, 
+											    &signflip_next_value, &error);
+									break;
+								case '5': /* Sensor 5 - volts */
+									printsimplevalue(verbose, sensor5[ictd], 0, 3, ascii, 
+											    &invert_next_value, 
+											    &signflip_next_value, &error);
+									break;
+								case '6': /* Sensor 6 - volts */
+									printsimplevalue(verbose, sensor6[ictd], 0, 3, ascii, 
+											    &invert_next_value, 
+											    &signflip_next_value, &error);
+									break;
+								case '7': /* Sensor 7 - volts */
+									printsimplevalue(verbose, sensor7[ictd], 0, 3, ascii, 
+											    &invert_next_value, 
+											    &signflip_next_value, &error);
+									break;
+								case '8': /* Sensor 8 - volts */
+									printsimplevalue(verbose, sensor8[ictd], 0, 3, ascii, 
+											    &invert_next_value, 
+											    &signflip_next_value, &error);
 									break;
 								case 'C': /* Conductivity or Sonar altitude (m) */
 									if (mblist_next_value == MB_NO)

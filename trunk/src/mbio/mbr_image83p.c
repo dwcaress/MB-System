@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_image83p.c	5/5/2008
- *	$Id: mbr_image83p.c,v 5.2 2008-09-20 00:57:41 caress Exp $
+ *	$Id: mbr_image83p.c,v 5.2 2008/09/20 00:57:41 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -25,7 +25,10 @@
  *       	D.W. Caress
  * Date:	May 5, 2008
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_image83p.c,v $
+ * Revision 5.2  2008/09/20 00:57:41  caress
+ * Release 5.1.1beta23
+ *
  * Revision 5.1  2008/07/19 07:41:14  caress
  * Added formats 191 and 192 to support Imagenex Delta T multibeam data.
  *
@@ -98,7 +101,7 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_image83p(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_image83p.c,v 5.2 2008-09-20 00:57:41 caress Exp $";
+	static char res_id[]="$Id: mbr_image83p.c,v 5.2 2008/09/20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_register_image83p";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -231,7 +234,7 @@ int mbr_info_image83p(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_image83p.c,v 5.2 2008-09-20 00:57:41 caress Exp $";
+	static char res_id[]="$Id: mbr_image83p.c,v 5.2 2008/09/20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_info_image83p";
 	int	status = MB_SUCCESS;
 
@@ -301,7 +304,7 @@ int mbr_info_image83p(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_image83p(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_image83p.c,v 5.2 2008-09-20 00:57:41 caress Exp $";
+ static char res_id[]="$Id: mbr_image83p.c,v 5.2 2008/09/20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_alm_image83p";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

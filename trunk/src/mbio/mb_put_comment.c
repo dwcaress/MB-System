@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_comment.c	7/15/97
- *    $Id: mb_put_comment.c,v 5.3 2003-04-17 21:05:23 caress Exp $
+ *    $Id: mb_put_comment.c,v 5.3 2003/04/17 21:05:23 caress Exp $
  *
  *    Copyright (c) 1997, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	July 15, 1997
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_put_comment.c,v $
+ * Revision 5.3  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_put_all.c	2/4/93
- *    $Id: mb_put_all.c,v 5.4 2006-03-06 21:47:48 caress Exp $
+ *    $Id: mb_put_all.c,v 5.4 2006/03/06 21:47:48 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  * Author:	D. W. Caress
  * Date:	February 4, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_put_all.c,v $
+ * Revision 5.4  2006/03/06 21:47:48  caress
+ * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
+ *
  * Revision 5.3  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *
@@ -125,7 +128,7 @@ int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
 {
-  static char rcs_id[]="$Id: mb_put_all.c,v 5.4 2006-03-06 21:47:48 caress Exp $";
+  static char rcs_id[]="$Id: mb_put_all.c,v 5.4 2006/03/06 21:47:48 caress Exp $";
 	char	*function_name = "mb_put_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

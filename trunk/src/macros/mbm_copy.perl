@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_plot.perl	1/17/2003
-#    $Id: mbm_copy.perl,v 5.2 2006-09-11 18:55:52 caress Exp $
+#    $Id: mbm_copy.perl,v 5.2 2006/09/11 18:55:52 caress Exp $
 #
 #    Copyright (c) 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -34,10 +34,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   January 17, 2003
 #
 # Version:
-#   $Id: mbm_copy.perl,v 5.2 2006-09-11 18:55:52 caress Exp $
+#   $Id: mbm_copy.perl,v 5.2 2006/09/11 18:55:52 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_copy.perl,v $
+#   Revision 5.2  2006/09/11 18:55:52  caress
+#   Changes during Western Flyer and Thomas Thompson cruises, August-September
+#   2006.
+#
 #   Revision 5.1  2005/11/05 01:34:20  caress
 #   Much work over the past two months.
 #

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.h	9/11/00
- *    $Id: mb_process.h,v 5.29 2009-03-02 18:51:52 caress Exp $
+ *    $Id: mb_process.h,v 5.29 2009/03/02 18:51:52 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -534,12 +534,29 @@
  *	fileroot.mbxxx.esf	    : bathymetry edit save file 
  *					from mbedit
  *
+ * MBprocess and its associated programs utilize a simple file locking
+ * mechanism to prevent multiple users or processes from working on
+ * the same swath file simultaneously. This mechanism is instituted
+ * using two functions: mbp_lockswathfile() and mbp_unlockswathfile().
+ * The mbp_lockfile() function creates a *.lck file parallel to a
+ * raw swathfile listing the program, purpose, and user locking the 
+ * file. While this file exists, other MB-System processing programs
+ * (e.g. mbprocess, mbedit, mbeditviz, mbnavedit) will not open the
+ * file (except in browse mode). The mbp_unlockfile() removes the 
+ * *.lck file, provided the program, purpose, and user match that 
+ * contained in the file. MBdatalist includes a capability to remove 
+ * locks from single files or entire datalist structures, allowing 
+ * the resetting of files left locked by crashed programs.
  * 
  *
  * Author:	D. W. Caress
  * Date:	September 11, 2000
+ * Updated:	August 4, 2009 (R/V Zephyr, Cleft Segment, Juan de Fuca Ridge)
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_process.h,v $
+ * Revision 5.29  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.28  2008/09/11 20:11:52  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -643,7 +660,6 @@
 #ifndef MB_IO_DEF
 #include "mb_io.h"
 #endif
-
 /* mbprocess value defines */
 #define MBP_FILENAMESIZE	MB_PATH_MAXLINE
 #define MBP_METANOVALUE		9999999.
@@ -741,6 +757,25 @@
 #define MBP_CORRECTION_UNKNOWN	-1
 #define MBP_CORRECTION_NO	0
 #define MBP_CORRECTION_YES	1
+
+/* mbprocess file locking defines */
+#define MBP_LOCK_NONE		0
+#define MBP_LOCK_PROCESS	1
+#define MBP_LOCK_EDITBATHY	2
+#define MBP_LOCK_EDITNAV	3
+#define MBP_UNLOCK_OVERRIDE	0
+#define MBP_UNLOCK_PROCESS	1
+#define MBP_UNLOCK_EDITBATHY	2
+#define MBP_UNLOCK_EDITNAV	3
+
+/* mbprocess file checking */
+#define MB_PR_FILE_UP_TO_DATE		0
+#define MB_PR_FILE_NEEDS_PROCESSING	1
+#define MB_PR_FILE_NOT_EXIST		2
+#define MB_PR_NO_PARAMETER_FILE		3
+
+
+
 
 struct mb_process_struct 
 	{
@@ -924,7 +959,9 @@ struct mb_esf_struct
 	FILE	*esffp;
 	FILE	*essfp;
 	};
-
+	
+int mb_pr_checkstatus(int verbose, char *file, 
+			int *prstatus, int *error);
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
 			struct mb_process_struct *process, 
 			int *error);
@@ -1297,6 +1334,14 @@ int mb_esf_save(int verbose, struct mb_esf_struct *esf,
 			double time_d, int beam, int action, int *error);
 int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error);
 
+	
+int mb_pr_lockswathfile(int verbose, char *file, int purpose, 
+			char *program, int *error);
+int mb_pr_unlockswathfile(int verbose, char *file, int purpose, 
+			char *program, int *error);
+int mb_pr_lockinfo(int verbose, char *file, int *locked,
+			int *purpose, char *program, char *user, char *cpu, 
+			char *date, int *error);
 
 /* end this include */
 #endif

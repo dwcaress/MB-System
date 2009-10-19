@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbvelocity_callbacks.c	4/7/97
- *    $Id: mbvelocity_callbacks.c,v 5.7 2006-01-24 19:20:45 caress Exp $
+ *    $Id: mbvelocity_callbacks.c,v 5.7 2006/01/24 19:20:45 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -25,7 +25,10 @@
  * Date:	April 8, 1993
  * Date:	April 7, 1997  GUI recast
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbvelocity_callbacks.c,v $
+ * Revision 5.7  2006/01/24 19:20:45  caress
+ * Version 5.0.8 beta.
+ *
  * Revision 5.6  2003/04/17 21:11:18  caress
  * Release 5.0.beta30
  *

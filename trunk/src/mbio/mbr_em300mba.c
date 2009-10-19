@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em300mba.c	10/16/98
- *	$Id: mbr_em300mba.c,v 5.38 2008-09-13 06:08:09 caress Exp $
+ *	$Id: mbr_em300mba.c,v 5.38 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 1998, 2000, 2002, 2003 by
+ *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	October 16,  1998
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_em300mba.c,v $
+ * Revision 5.38  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.37  2008/07/10 06:43:40  caress
  * Preparing for 5.1.1beta20
  *
@@ -74,7 +77,7 @@
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
  * Revision 5.21  2005/03/25 04:18:14  caress
- * Fixed problems with the debug mode being on in mbr_em300raw.c and problems with the debug output in both mbr_em300raw.c and mbr_em300mba.c.
+ * Fixed problems with the debug mode being on in mbr_em300mba.c and problems with the debug output in both mbr_em300mba.c and mbr_em300mba.c.
  *
  * Revision 5.20  2004/07/15 19:25:04  caress
  * Progress in supporting Reson 7k data.
@@ -301,19 +304,19 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap,
 int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad2_struct *store, int *error);
+		struct mbsys_simrad2_struct *store, int head, int *error);
 int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad2_struct *store, int *error);
+		struct mbsys_simrad2_struct *store, int head, int *error);
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad2_struct *store, int *error);
+		struct mbsys_simrad2_struct *store, int head, int *error);
 int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad2_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em300mba.c,v 5.38 2008-09-13 06:08:09 caress Exp $";
+static char res_id[]="$Id: mbr_em300mba.c,v 5.38 2008/09/13 06:08:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
@@ -633,6 +636,10 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	ptime_d, ntime_d, atime_d;
 	double	bath_time_d, ss_time_d;
 	double	roll, pitch, heave;
+	double	att_time_d[MBSYS_SIMRAD2_MAXATTITUDE];
+	double	att_roll[MBSYS_SIMRAD2_MAXATTITUDE];
+	double	att_pitch[MBSYS_SIMRAD2_MAXATTITUDE];
+	double	att_heave[MBSYS_SIMRAD2_MAXATTITUDE];
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -675,15 +682,16 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_get_time(verbose, time_i, &atime_d);
 		
 		/* add latest attitude samples */
-		for (i=0;i<attitude->att_ndata;i++)
+		for (i=0;i<MIN(attitude->att_ndata,MBSYS_SIMRAD2_MAXATTITUDE);i++)
 			{
-			mb_attint_add(verbose, mbio_ptr,
-				(double)(atime_d + 0.001 * attitude->att_time[i]),
-				(double)(0.01 * attitude->att_heave[i]),
-				(double)(0.01 * attitude->att_roll[i]),
-				(double)(0.01 * attitude->att_pitch[i]),
-				error);
+			att_time_d[i] = (double)(atime_d + 0.001 * attitude->att_time[i]);
+			att_heave[i] = (double)(0.01 * attitude->att_heave[i]);
+			att_roll[i] = (double)(0.01 * attitude->att_roll[i]);
+			att_pitch[i] = (double)(0.01 * attitude->att_pitch[i]);
 			}
+		mb_attint_nadd(verbose, mbio_ptr,
+				attitude->att_ndata,att_time_d,att_heave,att_roll,att_pitch,
+				error);
 		}
 	
 	/* if no sidescan read then zero sidescan data */
@@ -1454,6 +1462,50 @@ Have a nice day...\n");
 					*expect_save_flag = MB_NO;
 				}
 			}
+		else if (type == EM2_BATH_MBA
+			&& sonar == MBSYS_SIMRAD2_EM3002)
+			{
+			if (expect == EM2_SS_MBA
+				&& store->ping->png_count == store->ping2->png_count
+				&& store->ping->png_serial != store->ping2->png_serial)
+				{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,type);
+#endif
+				done = MB_YES;
+				expect = EM2_NONE;
+				type = first_type;
+				*label_save_flag = MB_YES;
+				store->kind = MB_DATA_DATA;
+				}
+			else
+				{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_rd_bath type %x\n",type);
+#endif
+				status = mbr_em300mba_rd_bath(
+					verbose,mbfp,swap,store,&match,sonar,*version,error);
+				if (status == MB_SUCCESS)
+					{
+					if (first_type == EM2_NONE
+						|| match == MB_NO
+						|| store->ping->png_count != store->ping2->png_count
+						|| store->ping->png_serial != store->ping2->png_serial)
+						{
+						done = MB_NO;
+						first_type = EM2_BATH_MBA;
+						expect = EM2_SS_MBA;
+						}
+					else
+						{
+						done = MB_YES;
+						expect = EM2_NONE;
+						}
+					}
+				}
+
+
+			}
 		else if (type == EM2_BATH_MBA 
 			&& expect == EM2_SS_MBA)
 			{
@@ -1521,6 +1573,17 @@ Have a nice day...\n");
 				expect = EM2_NONE;
 				}
 			}
+		else if (type == EM2_RAWBEAM3
+			&& sonar == MBSYS_SIMRAD2_EM3002)
+			{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_rd_rawbeam3 type %x\n",type);
+#endif
+			status = mbr_em300mba_rd_rawbeam3(
+				verbose,mbfp,swap,store,sonar,error);
+			if (status == MB_SUCCESS)
+				ping->png_raw3_read = MB_YES;
+			}
 		else if (type == EM2_RAWBEAM3)
 			{
 #ifdef MBR_EM300MBA_DEBUG
@@ -1536,6 +1599,27 @@ Have a nice day...\n");
 				done = MB_YES;
 				expect = EM2_NONE;
 				}
+			}
+		else if (type == EM2_SS_MBA
+			&& sonar == MBSYS_SIMRAD2_EM3002)
+			{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_rd_ss type %x\n",type);
+#endif
+			status = mbr_em300mba_rd_ss(
+				verbose,mbfp,swap,store,sonar,*length,&match,error);
+			if (status == MB_SUCCESS)
+			    ping->png_ss_read = MB_YES;
+			if (status == MB_SUCCESS
+				&& ping->png_count == store->ping2->png_count
+				&& ping->png_count == ping->png_raw3_count
+				&& ping->png_count == ping->png_ss_count
+				&& store->ping2->png_count == store->ping2->png_raw3_count
+				&& store->ping2->png_count == store->ping2->png_ss_count)
+			    {
+			    done = MB_YES;
+			    expect = EM2_NONE;
+			    }
 			}
 		else if (type == EM2_SS_MBA 
 			&& expect != EM2_NONE 
@@ -3829,6 +3913,9 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap,
 	char	line[EM2_BATH_MBA_HEADER_SIZE];
 	short	short_val;
 	int	int_val;
+	int	png_count;
+	int	png_serial;
+	int	head;
 	int	read_len, len;
 	int	done;
 	int	i;
@@ -3850,6 +3937,7 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap,
 		
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+	head = 0;
 		
 	/* set kind and type values */
 	store->kind = MB_DATA_DATA;
@@ -3864,6 +3952,21 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap,
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
+		}
+		
+	/* in case of EM3002 check if the data are from the second head and switch ping structure if so */
+	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002)
+		{
+		mb_get_binary_short(swap, &line[8], &short_val); 
+		    png_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[10], &short_val); 
+		    png_serial = (int) ((unsigned short) short_val);
+		    
+		if (png_count == ping->png_count && png_serial != ping->png_serial)
+			{
+			ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
+			head = 1;
+			}
 		}
 
 	/* get binary header data */
@@ -4526,6 +4629,9 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap,
 	char	line[EM2_RAWBEAM3_HEADER_SIZE];
 	short	short_val;
 	int	int_val;
+	int	png_raw3_count;
+	int	png_raw3_serial;
+	int	head;
 	int	read_len;
 	int	spare;
 	int	i;
@@ -4546,6 +4652,7 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap,
 		
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+	head = 0;
 		
 	/* read binary header values into char array */
 	read_len = fread(line,1,EM2_RAWBEAM3_HEADER_SIZE,mbfp);
@@ -4555,6 +4662,21 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap,
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
+		}
+		
+	/* in case of EM3002 check if the data are from the second head and if so switch ping structure */
+	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002)
+		{
+		mb_get_binary_short(swap, &line[8], &short_val); 
+		    png_raw3_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[10], &short_val); 
+		    png_raw3_serial = (int) ((unsigned short) short_val);
+		    
+		if (png_raw3_count == ping->png_raw3_count && png_raw3_serial != ping->png_raw3_serial)
+			{
+			ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
+			head = 1;
+			}
 		}
 
 	/* get binary header data */
@@ -4771,6 +4893,9 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap,
 	char	line[2 * MBSYS_SIMRAD2_BUFFER_SIZE];
 	short	short_val;
 	int	int_val;
+	int	png_ss_count;
+	int	png_ss_serial;
+	int	head;
 	int	read_len, len;
 	int	done;
 	int	junk_bytes;
@@ -4795,6 +4920,7 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap,
 		
 	/* get  storage structure */
 	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+	head = 0;
 		
 	/* set kind and type values */
 	store->kind = MB_DATA_DATA;
@@ -4809,6 +4935,22 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap,
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
+		}
+		
+	/* in case of EM3002 check if the data are from the second head and if so switch ping structure */
+	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002)
+		{
+		mb_get_binary_short(swap, &line[8], &short_val); 
+		    png_ss_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[10], &short_val); 
+		    png_ss_serial = (int) ((unsigned short) short_val);
+		    
+		if ((png_ss_count == ping->png_ss_count && png_ss_serial != ping->png_ss_serial)
+			|| (png_ss_count == store->ping2->png_count && png_ss_serial == store->ping2->png_serial))
+			{
+			ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
+			head = 1;
+			}
 		}
 
 	/* get binary header data */
@@ -5516,10 +5658,11 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		}
 	else if (store->kind == MB_DATA_DATA)
 		{
+		/* write out data from first head for all sonars */
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr,"call mbr_em300mba_wr_bath kind:%d type %x\n",store->kind,EM2_BATH_MBA);
 #endif
-		status = mbr_em300mba_wr_bath(verbose,mbfp,swap,store,error);
+		status = mbr_em300mba_wr_bath(verbose,mbfp,swap,store,0,error);
 		if (ping->png_raw1_read == MB_YES)
 		    {
 #ifdef MBR_EM300MBA_DEBUG
@@ -5539,7 +5682,7 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr,"call mbr_em300mba_wr_rawbeam3 kind:%d type %x\n",store->kind,store->type);
 #endif
-		    status = mbr_em300mba_wr_rawbeam3(verbose,mbfp,swap,store,error);
+		    status = mbr_em300mba_wr_rawbeam3(verbose,mbfp,swap,store,0,error);
 		    }
 #ifdef MBR_EM300MBA_DEBUG
 	if (ping->png_raw1_read == MB_NO && ping->png_raw2_read == MB_NO && ping->png_raw3_read == MB_NO) 
@@ -5550,11 +5693,43 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr,"call mbr_em300mba_wr_ss kind:%d type %x\n",store->kind,EM2_SS_MBA);
 #endif
-		    status = mbr_em300mba_wr_ss(verbose,mbfp,swap,store,error);
+		    status = mbr_em300mba_wr_ss(verbose,mbfp,swap,store,0,error);
 		    }
 #ifdef MBR_EM300MBA_DEBUG
 	else fprintf(stderr,"NOT call mbr_em300mba_wr_ss kind:%d type %x\n",store->kind,EM2_SS_MBA);
 #endif
+
+		/* write out data from second head for EM3002 */
+		if (store->sonar == MBSYS_SIMRAD2_EM3002 
+			&& store->ping2 != NULL 
+			&& store->ping2->png_count ==store->ping->png_count)
+			{
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_bath kind:%d type %x\n",store->kind,store->type);
+#endif
+			status = mbr_em300mba_wr_bath(verbose,mbfp,swap,store,1,error);
+			if (ping->png_raw3_read == MB_YES)
+			    {
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_rawbeam3 kind:%d type %x\n",store->kind,store->type);
+#endif
+			    status = mbr_em300mba_wr_rawbeam3(verbose,mbfp,swap,store,1,error);
+			    }
+#ifdef MBR_EM300MBA_DEBUG
+	if (ping->png_raw3_read == MB_NO) 
+	fprintf(stderr,"NOT call mbr_em300mba_wr_rawbeam kind:%d type %x\n",store->kind,store->type);
+#endif
+			if (ping->png_ss_read == MB_YES)
+			    {
+#ifdef MBR_EM300MBA_DEBUG
+	fprintf(stderr,"call mbr_em300mba_wr_ss kind:%d type %x\n",store->kind,store->type);
+#endif
+			    status = mbr_em300mba_wr_ss(verbose,mbfp,swap,store,1,error);
+			    }
+#ifdef MBR_EM300MBA_DEBUG
+	else fprintf(stderr,"NOT call mbr_em300mba_wr_ss kind:%d type %x\n",store->kind,store->type);
+#endif
+			}
 		}
 	else if (store->kind == MB_DATA_WATER_COLUMN)
 		{
@@ -7769,7 +7944,7 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap,
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad2_struct *store, int *error)
+		struct mbsys_simrad2_struct *store, int head, int *error)
 {
 	char	*function_name = "mbr_em300mba_wr_bath";
 	int	status = MB_SUCCESS;
@@ -7794,10 +7969,14 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
+		fprintf(stderr,"dbg2       head:       %d\n",head);
 		}
 		
 	/* get storage structure */
-	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+	if (store->sonar == MBSYS_SIMRAD2_EM3002 && head == 1)
+		ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
+	else
+		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -8508,7 +8687,7 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap,
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad2_struct *store, int *error)
+		struct mbsys_simrad2_struct *store, int head, int *error)
 {
 	char	*function_name = "mbr_em300mba_wr_rawbeam3";
 	int	status = MB_SUCCESS;
@@ -8532,10 +8711,14 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
+		fprintf(stderr,"dbg2       head:       %d\n",head);
 		}
 		
 	/* get storage structure */
-	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+	if (store->sonar == MBSYS_SIMRAD2_EM3002 && head == 1)
+		ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
+	else
+		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -8776,7 +8959,7 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap,
 }
 /*--------------------------------------------------------------------*/
 int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad2_struct *store, int *error)
+		struct mbsys_simrad2_struct *store, int head, int *error)
 {
 	char	*function_name = "mbr_em300mba_wr_ss";
 	int	status = MB_SUCCESS;
@@ -8801,10 +8984,14 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       mbfp:       %d\n",mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %d\n",store);
+		fprintf(stderr,"dbg2       head:       %d\n",head);
 		}
 		
 	/* get storage structure */
-	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+	if (store->sonar == MBSYS_SIMRAD2_EM3002 && head == 1)
+		ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
+	else
+		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
 
 	/* print debug statements */
 	if (verbose >= 5)

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad.c	3.00	8/5/94
- *	$Id: mbsys_simrad.c,v 5.21 2009-03-02 18:51:52 caress Exp $
+ *	$Id: mbsys_simrad.c,v 5.21 2009/03/02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -30,7 +30,10 @@
  * Author:	D. W. Caress
  * Date:	August 5, 1994
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_simrad.c,v $
+ * Revision 5.21  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.20  2008/07/10 18:02:39  caress
  * Proceeding towards 5.1.1beta20.
  *
@@ -179,7 +182,7 @@
 #define MBSYS_SIMRAD_C
 #include "../../include/mbsys_simrad.h"
 
-static char res_id[]="$Id: mbsys_simrad.c,v 5.21 2009-03-02 18:51:52 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad.c,v 5.21 2009/03/02 18:51:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

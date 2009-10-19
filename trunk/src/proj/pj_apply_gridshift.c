@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_apply_gridshift.c,v 5.6 2008-09-29 04:56:21 caress Exp $
+ * $Id: pj_apply_gridshift.c,v 5.6 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Apply datum shifts based on grid shift files (normally NAD27 to
@@ -30,7 +30,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: pj_apply_gridshift.c,v $
+ * Revision 5.6  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.8  2003/03/20 21:29:41  warmerda
  * Fixed bug in checking against grid bounds.
  *

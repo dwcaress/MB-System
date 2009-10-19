@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_imagemba.c	7/18/2008
- *	$Id: mbr_imagemba.c,v 5.1 2008-09-20 00:57:41 caress Exp $
+ *	$Id: mbr_imagemba.c,v 5.1 2008/09/20 00:57:41 caress Exp $
  *
  *    Copyright (c) 2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  * Author:	D.W. Caress
  * Date:	July 18, 2008
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_imagemba.c,v $
+ * Revision 5.1  2008/09/20 00:57:41  caress
+ * Release 5.1.1beta23
+ *
  * Revision 5.0  2008/07/19 07:43:00  caress
  * Added format 192 to support Imagenex Delta T multibeam data.
  *
@@ -96,7 +99,7 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_imagemba.c,v 5.1 2008-09-20 00:57:41 caress Exp $";
+	static char res_id[]="$Id: mbr_imagemba.c,v 5.1 2008/09/20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_register_imagemba";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -229,7 +232,7 @@ int mbr_info_imagemba(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_imagemba.c,v 5.1 2008-09-20 00:57:41 caress Exp $";
+	static char res_id[]="$Id: mbr_imagemba.c,v 5.1 2008/09/20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_info_imagemba";
 	int	status = MB_SUCCESS;
 
@@ -299,7 +302,7 @@ int mbr_info_imagemba(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_imagemba(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_imagemba.c,v 5.1 2008-09-20 00:57:41 caress Exp $";
+ static char res_id[]="$Id: mbr_imagemba.c,v 5.1 2008/09/20 00:57:41 caress Exp $";
 	char	*function_name = "mbr_alm_imagemba";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

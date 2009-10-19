@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_omghdcsj.h	3/10/99
- *	$Id: mbf_omghdcsj.h,v 5.3 2008-03-14 18:33:21 caress Exp $
+ *	$Id: mbf_omghdcsj.h,v 5.3 2008/03/14 18:33:21 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	March 10, 1999
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_omghdcsj.h,v $
+ * Revision 5.3  2008/03/14 18:33:21  caress
+ * Updated support for JHC format 151.
+ *
  * Revision 5.2  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

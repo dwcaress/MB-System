@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
- *	$Id: mbsys_simrad3.h,v 5.2 2009-03-02 18:51:52 caress Exp $
+ *	$Id: mbsys_simrad3.h,v 5.2 2009/03/02 18:51:52 caress Exp $
  *
  *    Copyright (c) 2008-2009ß by
  *    David W. Caress (caress@mbari.org)
@@ -34,7 +34,10 @@
  * Author:	D. W. Caress (L-DEO)
  * Date:	February 22, 2008
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_simrad3.h,v $
+ * Revision 5.2  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.1  2008/07/10 06:40:34  caress
  * Fixed support for EM122
  *
@@ -166,7 +169,6 @@
 /* sonar models */
 #define	MBSYS_SIMRAD3_UNKNOWN	0
 
-#define	MBSYS_SIMRAD3_EM3002	3020
 #define	MBSYS_SIMRAD3_EM710	 710
 #define	MBSYS_SIMRAD3_EM302	 302
 #define	MBSYS_SIMRAD3_EM122	 122
@@ -184,6 +186,7 @@
 #define	MBSYS_SIMRAD3_EM3000D_6	3006
 #define	MBSYS_SIMRAD3_EM3000D_7	3007
 #define	MBSYS_SIMRAD3_EM3000D_8	3008
+#define	MBSYS_SIMRAD3_EM3002	3020
 
 #define	MBSYS_SIMRAD3_EM12S	9901
 #define	MBSYS_SIMRAD3_EM12D	9902

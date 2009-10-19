@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c,v 5.22 2009-03-02 18:51:52 caress Exp $
+ *    $Id: mb_check_info.c,v 5.22 2009/03/02 18:51:52 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  * Author:	D. W. Caress
  * Date:	September 3, 1996
  * 
- * $Log: not supported by cvs2svn $
+ * $Log: mb_check_info.c,v $
+ * Revision 5.22  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.21  2008/07/10 06:43:40  caress
  * Preparing for 5.1.1beta20
  *
@@ -130,7 +133,7 @@
 /*--------------------------------------------------------------------*/
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009-03-02 18:51:52 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009/03/02 18:51:52 caress Exp $";
 	char	*function_name = "mb_check_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -367,7 +370,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lonflip,
 		    int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009-03-02 18:51:52 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009/03/02 18:51:52 caress Exp $";
 	char	*function_name = "mb_get_info";
 	int	status;
 	char	file_inf[MB_PATH_MAXLINE];
@@ -1289,7 +1292,7 @@ int mb_swathbounds(int verbose, int checkgood,
 /*--------------------------------------------------------------------*/
 int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009-03-02 18:51:52 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009/03/02 18:51:52 caress Exp $";
 	char	*function_name = "mb_info_init";
 	int	status = MB_SUCCESS;
 
@@ -1397,7 +1400,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 int mb_get_info_datalist(int verbose, char *read_file, int *format, 
 			struct mb_info_struct *mb_info, int lonflip, int *error)
 {
-	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009-03-02 18:51:52 caress Exp $";
+	static char rcs_id[]="$Id: mb_check_info.c,v 5.22 2009/03/02 18:51:52 caress Exp $";
 	char	*function_name = "mb_get_info_datalist";
 	int	status = MB_SUCCESS;
 	char	file_inf[MB_PATH_MAXLINE];

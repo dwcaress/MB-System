@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundings_callbacks.c		5/25/2007
- *    $Id: mb3dsoundings_callbacks.c,v 5.6 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mb3dsoundings_callbacks.c,v 5.6 2008/11/16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -74,7 +74,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.6 2008-11-16 21:51:18 caress Exp $";
+static char rcs_id[]="$Id: mb3dsoundings_callbacks.c,v 5.6 2008/11/16 21:51:18 caress Exp $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/
@@ -1151,6 +1151,8 @@ do_mb3dsdg_glwda_input( Widget w, XtPointer client_data, XtPointer call_data)
 	char buffer[1];
 	int actual;
 fprintf(stderr,"Called do_mb3dsdg_glwda_input\n");
+
+    acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
 	
     /* get event */
     event = acs->event;
@@ -2217,7 +2219,9 @@ do_mb3dsdg_rollbias( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
     	int	irollbiasmin, irollbiasmax;
-    
+
+	acs = (XmScaleCallbackStruct*)call_data;
+	
 fprintf(stderr,"Called do_mb3dsdg_rollbias: %d\n", acs->value);
 
 	mb3dsoundings.irollbias = acs->value;
@@ -2260,7 +2264,9 @@ do_mb3dsdg_pitchbias( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
     	int	ipitchbiasmin, ipitchbiasmax;
-    
+
+   	acs = (XmScaleCallbackStruct*)call_data;
+	
 fprintf(stderr,"Called do_mb3dsdg_pitchbias: %d\n", acs->value);
 
 	mb3dsoundings.ipitchbias = acs->value;
@@ -2303,7 +2309,9 @@ do_mb3dsdg_headingbias( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
     	int	iheadingbiasmin, iheadingbiasmax;
-    
+
+  	acs = (XmScaleCallbackStruct*)call_data;
+	
 fprintf(stderr,"Called do_mb3dsdg_headingbias: %d\n", acs->value);
 
 	mb3dsoundings.iheadingbias = acs->value;
@@ -2348,6 +2356,8 @@ do_mb3dsdg_timelag( Widget w, XtPointer client_data, XtPointer call_data)
     XmScaleCallbackStruct *acs = (XmScaleCallbackStruct*)call_data;
     	int	itimelagmin, itimelagmax;
     
+	acs = (XmScaleCallbackStruct*)call_data;
+	
 fprintf(stderr,"Called do_mb3dsdg_timelag: %d\n", acs->value);
 
 	mb3dsoundings.itimelag = acs->value;

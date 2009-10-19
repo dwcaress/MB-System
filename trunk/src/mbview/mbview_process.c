@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_process.c	9/25/2003
- *    $Id: mbview_process.c,v 5.16 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbview_process.c,v 5.16 2008/05/16 22:59:42 caress Exp $
  *
  *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbview_process.c,v $
+ * Revision 5.16  2008/05/16 22:59:42  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.15  2008/03/14 19:04:32  caress
  * Fixed memory problems with route editing.
  *
@@ -122,7 +125,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_process.c,v 5.16 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_process.c,v 5.16 2008/05/16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_projectdata(int instance)
@@ -3123,168 +3126,6 @@ fprintf(stderr,"ILLUMLGT: %f %f %f %f\n",view->illum_x, view->illum_y, view->ill
 	/* return */
 	return(status);
 }
-/*------------------------------------------------------------------------------*/
-int mbview_colordata(int instance, int rez)
-{
-	/* local variables */
-	char	*function_name = "mbview_colordata";
-	int	status = MB_SUCCESS;
-	int	stride;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
-	double	value, svalue, factor, dd;
-	double	xlon, ylat;
-	int	use_histogram;
-	int	make_histogram;
-	float	*histogram;
-	int	which_data;
-	int	i, j, k, ii;
-
-	/* print starting debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
-		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       rez:              %d\n",rez);
-		}
-		
-if (mbv_verbose >= 0)
-fprintf(stderr,"mbview_colordata: %d %d\n", instance, rez);
-		
-	/* get view */
-	view = &(mbviews[instance]);
-	data = &(view->data);
-	
-	/* calculate histogram equalization if needed */
-	make_histogram = MB_NO;
-	use_histogram = MB_NO;
-	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY
-		&& data->primary_histogram == MB_YES)
-		{
-		use_histogram = MB_YES;
-		if (view->primary_histogram_set == MB_NO)
-			{
-			make_histogram = MB_YES;
-			which_data = MBV_DATA_PRIMARY;
-			}
-		histogram = view->primary_histogram;
-		}
-	else if (data->grid_mode == MBV_GRID_VIEW_PRIMARYSLOPE
-		&& data->primaryslope_histogram == MB_YES)
-		{
-		use_histogram = MB_YES;
-		if (view->primaryslope_histogram_set == MB_NO)
-			{
-			make_histogram = MB_YES;
-			which_data = MBV_DATA_PRIMARYSLOPE;
-			}
-		histogram = view->primaryslope_histogram;
-		}
-	else if (data->grid_mode == MBV_GRID_VIEW_SECONDARY
-		&& data->secondary_histogram == MB_YES)
-		{
-		use_histogram = MB_YES;
-		if (view->secondary_histogram_set == MB_NO)
-			{
-			make_histogram = MB_YES;
-			which_data = MBV_DATA_SECONDARY;
-			}
-		histogram = view->secondary_histogram;
-		}
-	if (make_histogram == MB_YES)
-		mbview_make_histogram(view, data, which_data);
-	if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY
-		&& data->secondary_histogram == MB_YES
-		&& view->secondary_histogram_set == MB_NO)
-		mbview_make_histogram(view, data, MBV_DATA_SECONDARY);
-	
-	/* set stride for looping over data */
-	if (rez == MBV_REZ_FULL)
-	    stride = 1;
-	else if (rez == MBV_REZ_HIGH)
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->hirez_dimension)));
-	else
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->lorez_dimension)));
-		
-	/* color the data using simple stretch */
-	if (use_histogram == MB_NO)
-		{
-		for (i=0;i<data->primary_nx;i+=stride)
-			{
-			for (j=0;j<data->primary_ny;j+=stride)
-				{
-				k = i * data->primary_ny + j;
-
-				if (data->primary_data[k] != data->primary_nodatavalue
-					&& !(data->primary_stat_color[k/8] & statmask[k%8]))
-					{
-					mbview_colorpoint(view, data, i, j, k);
-					}
-				}
-
-			/* check for pending event */
-			if (view->plot_done == MB_NO 
-				&& view->plot_interrupt_allowed == MB_YES 
-				&& i % MBV_EVENTCHECKCOARSENESS == 0)
-				do_mbview_xevents();
-
-			/* dump out of loop if plotting already done at a higher recursion */
-			if (view->plot_done == MB_YES)
-				i = data->primary_nx;
-			}
-		}
-		
-	/* else color the data using histogram equalization */
-	else
-		{
-		for (i=0;i<data->primary_nx;i+=stride)
-			{
-			for (j=0;j<data->primary_ny;j+=stride)
-				{
-				k = i * data->primary_ny + j;
-
-				if (data->primary_data[k] != data->primary_nodatavalue
-					&& !(data->primary_stat_color[k/8] & statmask[k%8]))
-					{
-					mbview_colorpoint_histogram(view, data, histogram, i, j, k);
-					}
-				}
-
-			/* check for pending event */
-			if (view->plot_done == MB_NO 
-				&& view->plot_interrupt_allowed == MB_YES 
-				&& i % MBV_EVENTCHECKCOARSENESS == 0)
-				do_mbview_xevents();
-
-			/* dump out of loop if plotting already done at a higher recursion */
-			if (view->plot_done == MB_YES)
-				i = data->primary_nx;
-			}
-		}
-
-	/* print output debug statements */
-	if (mbv_verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:  %d\n",status);
-		}
-
-	/* return */
-	return(status);
-}
-		
 /*------------------------------------------------------------------------------*/
 int mbview_make_histogram(
 	struct mbview_world_struct *view,

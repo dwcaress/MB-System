@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_netcdf.h	4/8/2002
- *	$Id: mbsys_netcdf.h,v 5.6 2008-12-05 17:32:52 caress Exp $
+ *	$Id: mbsys_netcdf.h,v 5.6 2008/12/05 17:32:52 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Author:	D. W. Caress
  * Date:	April 8, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_netcdf.h,v $
+ * Revision 5.6  2008/12/05 17:32:52  caress
+ * Check-in mods 5 December 2008 including contributions from Gordon Keith.
+ *
  * Revision 5.5  2008/05/16 22:56:24  caress
  * Release 5.1.1beta18.
  *

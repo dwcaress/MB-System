@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: jniproj.c,v 5.3 2008-09-29 04:56:21 caress Exp $
+ * $Id: jniproj.c,v 5.3 2008/09/29 04:56:21 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  Java/JNI wrappers for PROJ.4 API.
@@ -27,7 +27,10 @@
  * DEALINGS IN THE SOFTWARE.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: jniproj.c,v $
+ * Revision 5.3  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.3  2005/07/05 16:31:48  fwarmerdam
  * Added standard headers.
  *
@@ -54,7 +57,7 @@
 
 #define arraysize 300
 
-PJ_CVSID("$Id: jniproj.c,v 5.3 2008-09-29 04:56:21 caress Exp $");
+PJ_CVSID("$Id: jniproj.c,v 5.3 2008/09/29 04:56:21 caress Exp $");
 
 /*!
  * \brief

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sbsioswb.h	9/18/94
- *	$Id: mbf_sbsioswb.h,v 5.3 2009-03-08 09:21:00 caress Exp $
+ *	$Id: mbf_sbsioswb.h,v 5.3 2009/03/08 09:21:00 caress Exp $
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -18,7 +18,10 @@
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_sbsioswb.h,v $
+ * Revision 5.3  2009/03/08 09:21:00  caress
+ * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
+ *
  * Revision 5.2  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

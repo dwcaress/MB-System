@@ -64,7 +64,10 @@
  *    ----              -----------
  *    25-02-97          Original Code
  *
- * $Log: not supported by cvs2svn $
+ * $Log: geocent.c,v $
+ * Revision 5.6  2008/09/29 04:56:21  caress
+ * Proj 4.6.1
+ *
  * Revision 1.6  2006/01/12 22:29:01  fwarmerdam
  * make geocent.c globals static to avoid conflicts
  *

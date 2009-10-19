@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_sb.h	2/17/93
- *	$Id: mbsys_sb.h,v 5.6 2009-03-08 09:21:00 caress Exp $
+ *	$Id: mbsys_sb.h,v 5.6 2009/03/08 09:21:00 caress Exp $
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  *
  * Author:	D. W. Caress
  * Date:	February 17, 1993
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_sb.h,v $
+ * Revision 5.6  2009/03/08 09:21:00  caress
+ * Fixed problem reading and writing format 16 (MBF_SBSIOSWB) data on little endian systems.
+ *
  * Revision 5.5  2005/11/05 00:48:05  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *

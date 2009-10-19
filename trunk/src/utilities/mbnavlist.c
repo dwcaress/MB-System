@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavlist.c	2/1/93
- *    $Id: mbnavlist.c,v 5.12 2007-10-17 20:34:00 caress Exp $
+ *    $Id: mbnavlist.c,v 5.12 2007/10/17 20:34:00 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,11 @@
  * Date:	November 11, 1999
  *
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbnavlist.c,v $
+ * Revision 5.12  2007/10/17 20:34:00  caress
+ * Release 5.1.1beta11
+ * Added decimation option.
+ *
  * Revision 5.11  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -110,7 +114,7 @@ double	NaN;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbnavlist.c,v 5.12 2007-10-17 20:34:00 caress Exp $";
+	static char rcs_id[] = "$Id: mbnavlist.c,v 5.12 2007/10/17 20:34:00 caress Exp $";
 	static char program_name[] = "mbnavlist";
 	static char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
 	static char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";

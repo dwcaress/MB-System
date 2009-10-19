@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sb2120xs.h	3/20/2000
- *	$Id: mbf_sb2120xs.h,v 5.0 2000-12-10 20:24:25 caress Exp $
+ *	$Id: mbf_sb2120xs.h,v 5.0 2000/12/10 20:24:25 caress Exp $
  *
  *    Copyright (c) 2000 by 
  *    D. W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	December 8,  2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_sb2120xs.h,v $
+ * Revision 5.0  2000/12/10 20:24:25  caress
+ * Initial revision.
+ *
  *
  *
  */

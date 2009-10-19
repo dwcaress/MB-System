@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:     mbm_grd2geovrml.perl              11/7/2001
-$ver = '$Id: mbm_grd2geovrml.perl,v 5.1 2003-03-19 22:29:29 caress Exp $';
+$ver = '$Id: mbm_grd2geovrml.perl,v 5.1 2003/03/19 22:29:29 caress Exp $';
 #
 #    Copyright (c) 2003 by
 #    Mike McCann (mccann@mbari.org)
@@ -57,11 +57,14 @@ $ver = '$Id: mbm_grd2geovrml.perl,v 5.1 2003-03-19 22:29:29 caress Exp $';
 #   November 7, 2001
 #
 # Version:
-#   $Id: mbm_grd2geovrml.perl,v 5.1 2003-03-19 22:29:29 caress Exp $
+#   $Id: mbm_grd2geovrml.perl,v 5.1 2003/03/19 22:29:29 caress Exp $
 #
 # Revisions:
 #
-# $Log: not supported by cvs2svn $
+# $Log: mbm_grd2geovrml.perl,v $
+# Revision 5.1  2003/03/19 22:29:29  caress
+# New version from Mike McCann.
+#
 # Revision 1.12  2003/03/18 20:31:57  mccann
 # Added -newimage <type> and -basename options.  Can now drape other images
 # over the bathymetry.

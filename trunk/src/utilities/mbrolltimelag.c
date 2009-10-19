@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbrolltimelag.c	11/10/2005
  *
- *    $Id: mbrolltimelag.c,v 5.7 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mbrolltimelag.c,v 5.7 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2005 by
  *    David W. Caress (caress@mbari.org)
@@ -26,7 +26,10 @@
  * Author:	D. W. Caress
  * Date:	November 11, 2005
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbrolltimelag.c,v $
+ * Revision 5.7  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.6  2008/02/12 02:48:39  caress
  * Added ability to set output filename root.
  *
@@ -72,7 +75,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.7 2008-09-13 06:08:09 caress Exp $";
+	static char rcs_id[] = "$Id: mbrolltimelag.c,v 5.7 2008/09/13 06:08:09 caress Exp $";
 	static char program_name[] = "MBrolltimelag";
 	static char help_message[] = "MBrolltimelag extracts the roll time series and the apparent \nbottom slope time series from swath data, and then calculates \nthe cross correlation between the roll and the slope minus roll \nfor a specified set of time lags.";
 	static char usage_message[] = "mbrolltimelag -Iswathdata [-Fformat -Nnping -Ooutputname -Snavchannel -Tnlag/lagmin/lagmax -V -H ]";

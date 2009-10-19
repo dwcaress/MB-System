@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbdatalist.c	10/10/2001
- *    $Id: mbdatalist.c,v 5.11 2007-07-05 19:16:19 caress Exp $
+ *    $Id: mbdatalist.c,v 5.11 2007/07/05 19:16:19 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003, 2007 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Author:	D. W. Caress
  * Date:	October 10, 2001
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbdatalist.c,v $
+ * Revision 5.11  2007/07/05 19:16:19  caress
+ * Added file copy function.
+ *
  * Revision 5.10  2006/01/06 18:19:58  caress
  * Working towards 5.0.8
  *
@@ -73,7 +76,7 @@
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.11 2007-07-05 19:16:19 caress Exp $";
+	static char rcs_id[] = "$Id: mbdatalist.c,v 5.11 2007/07/05 19:16:19 caress Exp $";
 	static char program_name[] = "mbdatalist";
 	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
 	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -U -Z -V -H]";
@@ -113,6 +116,7 @@ main (int argc, char **argv)
 	int	nfile = 0;
 	int	make_inf = MB_NO;
 	int	force_update = MB_NO;
+	int	status_report = MB_NO;
 	int	problem_report = MB_NO;
 	int	problem = MB_NO;
 	int	nparproblem;
@@ -135,7 +139,7 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhCcF:f:I:i:NnOoPpQqR:r:UuZz")) != -1)
+	while ((c = getopt(argc, argv, "VvHhCcF:f:I:i:NnOoPpQqR:r:SsUuZz")) != -1)
 	  switch (c) 
 		{
 		case 'C':
@@ -182,6 +186,11 @@ main (int argc, char **argv)
 		case 'r':
 			mb_get_bounds(optarg, bounds);
 			look_bounds = MB_YES;
+			flag++;
+			break;
+		case 'S':
+		case 's':
+			status_report = MB_YES;
 			flag++;
 			break;
 		case 'U':
@@ -240,6 +249,7 @@ main (int argc, char **argv)
 		fprintf(output,"dbg2       copyfiles:      %d\n",copyfiles);
 		fprintf(output,"dbg2       make_inf:       %d\n",make_inf);
 		fprintf(output,"dbg2       force_update:   %d\n",force_update);
+		fprintf(output,"dbg2       status_report:  %d\n",status_report);
 		fprintf(output,"dbg2       problem_report: %d\n",problem_report);
 		fprintf(output,"dbg2       make_datalistp: %d\n",make_datalistp);
 		fprintf(output,"dbg2       pings:          %d\n",pings);
@@ -274,7 +284,7 @@ main (int argc, char **argv)
 		exit(error);
 		}
 
-	/* if make_datalistp desired then make it and exit */
+	/* if make_datalistp desired then make it */
 	if (make_datalistp)
 		{
    		/* figure out data format and fileroot if possible */
@@ -293,7 +303,10 @@ main (int argc, char **argv)
 		fclose(fp);
 		if (verbose > 0)
 		    fprintf(output, "Convenience datalist file %s created...\n", file);
-		exit(error);
+		
+		/* exit unless building ancilliary files has also been requested */
+		if (make_inf == MB_NO)
+			exit(error);
 		}
 
 	/* get format if required */
@@ -332,6 +345,11 @@ main (int argc, char **argv)
 			    status = MB_SUCCESS;
 			    error = MB_ERROR_NO_ERROR;
 			    }
+			}
+			
+		    /* check status if desired */
+		    if (status_report == MB_YES)
+		    	{
 			}
 			
 		    /* ouput file if no bounds checking or in bounds */
@@ -418,6 +436,11 @@ main (int argc, char **argv)
 				    status = MB_SUCCESS;
 				    error = MB_ERROR_NO_ERROR;
 				    }
+				}
+			
+			    /* check status if desired */
+			    if (status_report == MB_YES)
+		    		{
 				}
 				
 			    /* ouput file if no bounds checking or in bounds */

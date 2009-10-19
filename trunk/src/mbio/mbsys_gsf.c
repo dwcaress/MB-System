@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.c	3.00	8/20/94
- *	$Id: mbsys_gsf.c,v 5.11 2009-03-13 07:05:58 caress Exp $
+ *	$Id: mbsys_gsf.c,v 5.11 2009/03/13 07:05:58 caress Exp $
  *
  *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  * Author:	D. W. Caress
  * Date:	March 5, 1998
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_gsf.c,v $
+ * Revision 5.11  2009/03/13 07:05:58  caress
+ * Release 5.1.2beta02
+ *
  * Revision 5.10  2007/05/14 06:17:29  caress
  * Fixed bug in handling of Simrad and Reson multibeam sidescan.
  *
@@ -105,7 +108,7 @@
 int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error)
 {
- static char res_id[]="$Id: mbsys_gsf.c,v 5.11 2009-03-13 07:05:58 caress Exp $";
+ static char res_id[]="$Id: mbsys_gsf.c,v 5.11 2009/03/13 07:05:58 caress Exp $";
 	char	*function_name = "mbsys_gsf_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

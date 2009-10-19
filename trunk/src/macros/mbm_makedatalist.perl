@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_makedatalist.perl	27/1/2006
-#    $Id: mbm_makedatalist.perl,v 5.1 2006-04-11 19:12:06 caress Exp $
+#    $Id: mbm_makedatalist.perl,v 5.1 2006/04/11 19:12:06 caress Exp $
 #
 #    Copyright (c) 2006 by
 #    D. W. Caress (caress@mbari.org)
@@ -35,10 +35,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   January 27, 2006
 #
 # Version:
-#   $Id: mbm_makedatalist.perl,v 5.1 2006-04-11 19:12:06 caress Exp $
+#   $Id: mbm_makedatalist.perl,v 5.1 2006/04/11 19:12:06 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_makedatalist.perl,v $
+#   Revision 5.1  2006/04/11 19:12:06  caress
+#   Macro now handles data in remote directories.
+#
 #   Revision 5.0  2006/02/03 21:06:18  caress
 #   Initial version of macro to generate a datalist of all recognizable swath files in a directory.
 #

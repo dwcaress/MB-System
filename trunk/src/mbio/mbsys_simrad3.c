@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_simrad3.c	3.00	2/22/2008
- *	$Id: mbsys_simrad3.c,v 5.4 2009-03-02 18:51:52 caress Exp $
+ *	$Id: mbsys_simrad3.c,v 5.4 2009/03/02 18:51:52 caress Exp $
  *
  *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -33,7 +33,10 @@
  * Author:	D. W. Caress
  * Date:	February 22, 2008
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_simrad3.c,v $
+ * Revision 5.4  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.3  2009/02/06 19:12:43  caress
  * Fixed description in mb_angle.c and angle extraction in mb_simrad3.c
  *
@@ -61,7 +64,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad3.h"
 
-static char res_id[]="$Id: mbsys_simrad3.c,v 5.4 2009-03-02 18:51:52 caress Exp $";
+static char res_id[]="$Id: mbsys_simrad3.c,v 5.4 2009/03/02 18:51:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

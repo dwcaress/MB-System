@@ -1,10 +1,19 @@
-.TH mbsystem l "3 February 2006" "MB-System 5.0" "MB-System 5.0"
+.TH mbsystem l "24 March 2009" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsystem\fP - A set of utilities for manipulating and 
 processing swath sonar bathymetry, amplitude, and sidescan data.
 
 .SH VERSION
-Version 5.0
+Version 5.1
+
+.SH AUTHORSHIP
+David W. Caress (caress@mbari.org)
+.br
+  Monterey Bay Aquarium Research Institute
+.br
+Dale N. Chayes (dale@ldeo.columbia.edu)
+.br
+  Lamont-Doherty Earth Observatory
 
 .SH INTRODUCTION
 \fBMB-System\fP is a software package consisting of programs which manipulate, process, list, or
@@ -24,10 +33,11 @@ from all depth ranges.
 
 The National Science Foundation (NSF) has been the primary supporter of \fBMB-System\fP
 development. NSF initially provided grants to the authors at the Lamont-Doherty Earth
-Observatory in 1993 (two years), and 1995 (five years). SeaBeam Instruments also contributed
-significant effort from 1994 to 1999. This support has been renewed through a new five year
-grant (2001-2005) to Caress at the Monterey Bay Aquarium Research Institute (MBARI) and to
-Chayes at Lamont. MBARI is matching the NSF support as part of its seafloor mapping program.
+Observatory (L-DEO) of Columbia University in 1993 (two years), and 1995 (five years). 
+SeaBeam Instruments also contributed significant effort from 1994 to 1999. Since Caress 
+moved to the Monterey Bay Aquarium Research  Institute (MBARI) in 1998, NSF has continued 
+support through two five year grants (1999-2005 & 2006-2011) to both Caress at MBARI and Chayes 
+at L-DEO. The Packard Foundation matches the NSF support to Caress at MBARI.
 
 The original NSF mandate was to create a set of generic tools which would work with all of the
 sonar data used in NSF-supported projects. Not surprisingly, the core of the \fBMB-System\fP user
@@ -39,15 +49,6 @@ international marine geological community.
 The \fBMB-System\fP source code is distributed under the GNU General Public License as formulated
 by the GNU Project. MB-System installation depends on some other software packages (e.g.
 GMT and netCDF), all of which are freely available as source code.
-
-.SH AUTHORSHIP
-David W. Caress (caress@mbari.org)
-.br
-  Monterey Bay Aquarium Research Institute
-.br
-Dale N. Chayes (dale@ldeo.columbia.edu)
-.br
-  Lamont-Doherty Earth Observatory
 
 .SH COPYRIGHT AND LICENSING
 \fBMB-System\fP Copyright (C) 1993-2004 by
@@ -120,8 +121,9 @@ September, 1998. Version 4.6 was released on April 16, 1999. The final update to
 included support for the new generation of Simrad multibeam sonars and tools for
 generating data products that could be imported directly into GIS software packages.
 
-The National Science Foundation has now funded a second five year grant to MBARI and
-L-DEO which support the \fBMB-System\fP project from 2001-2005. The version 5.0 release,
+The National Science Foundation has continued to support \fBMB-System\fP development through
+additional five year grants (2001-2006 & 2006-2011) to MBARI and
+L-DEO. The Packard Foundation matches the NSF support to Caress at MBARI. The version 5.0 release,
 of which this documentation is a part, incorporates yet another substantial rewrite of the
 underlying code as well as providing significant new capabilities.
 

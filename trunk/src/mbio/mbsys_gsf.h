@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_gsf.h	6/10/97
- *	$Id: mbsys_gsf.h,v 5.7 2009-03-13 07:05:58 caress Exp $
+ *	$Id: mbsys_gsf.h,v 5.7 2009/03/13 07:05:58 caress Exp $
  *
  *    Copyright (c) 1998-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Author:	D. W. Caress
  * Date:	March 5, 1998
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_gsf.h,v $
+ * Revision 5.7  2009/03/13 07:05:58  caress
+ * Release 5.1.2beta02
+ *
  * Revision 5.6  2006/03/06 21:47:48  caress
  * Implemented changes suggested by Bob Courtney of the Geological Survey of Canada to support translating Reson data to GSF.
  *

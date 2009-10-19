@@ -109,6 +109,10 @@
  * jsb 11-06-07   Updates to utilize the subrecord size in termining the field size for the array subrecords
  *                that support more than one field size.  Also replaced use of strstr with strcmp in gsfGetMBParams
  *                to resolve potential problem where one keyword name may be fully contained in another.
+ * DHG 2008/12/18 Add "PLATFORM_TYPE" to Processing Parameters for AUV vs Surface Ship discrimination.
+ * mab 02-01-09   Updates to support Reson 7125. Added new subrecord IDs and subrecord definitions for Kongsberg
+ *                sonar systems where TWTT and angle are populated from raw range and beam angle datagram. Added
+ *                new subrecord definition for EM2000.  Bug fixes in gsfOpen and gsfPercent. 
  *
  * Classification : Unclassified
  *
@@ -220,279 +224,287 @@ static int      gsfNumberParams(char *param);
 int
 gsfOpen(const char *filename, const int mode, int *handle)
 {
-    char           *access_mode;
-    int             fileTableIndex;
-    int             length;
-    int             headerSize;
-    int             ret;
-    gsfDataID       id;
-    struct stat     stat_buf;
-    FILE           *fp;
+  char           *access_mode;
+  int             fileTableIndex;
+  int             length;
+  int             headerSize;
+  int             ret;
+  gsfDataID       id;
+  struct stat     stat_buf;
+  FILE           *fp;
 
-    /* Clear the gsfError value each time a new file is opened */
-    gsfError = 0;
+  /* Clear the gsfError value each time a new file is opened */
+  gsfError = 0;
 
-    /* get the desired file access mode */
-    switch (mode)
-    {
-        case GSF_CREATE:
-            access_mode = "w+b";
-            break;
+  /* get the desired file access mode */
+  switch (mode)
+  {
+    case GSF_CREATE:
+      access_mode = "w+b";
+      break;
 
-        case GSF_READONLY:
-            access_mode = "rb";
-            break;
+    case GSF_READONLY:
+      access_mode = "rb";
+      break;
 
-        case GSF_UPDATE:
-            access_mode = "r+b";
-            break;
+    case GSF_UPDATE:
+      access_mode = "r+b";
+      break;
 
-        case GSF_READONLY_INDEX:
-            access_mode = "rb";
-            break;
+    case GSF_READONLY_INDEX:
+      access_mode = "rb";
+      break;
 
-        case GSF_UPDATE_INDEX:
-            access_mode = "r+b";
-            break;
+    case GSF_UPDATE_INDEX:
+      access_mode = "r+b";
+      break;
 
-        case GSF_APPEND:
-            access_mode = "a+b";
-            break;
+    case GSF_APPEND:
+      access_mode = "a+b";
+      break;
 
-        default:
-            gsfError = GSF_BAD_ACCESS_MODE;
-            return (-1);
-    }
+    default:
+      gsfError = GSF_BAD_ACCESS_MODE;
+      return(-1);
+  }
 
-    /* check the number of files currently openned */
-    if (numOpenFiles >= GSF_MAX_OPEN_FILES)
-    {
-        gsfError = GSF_TOO_MANY_OPEN_FILES;
-        return (-1);
-    }
+  /* check the number of files currently openned */
+  if (numOpenFiles >= GSF_MAX_OPEN_FILES)
+  {
+    gsfError = GSF_TOO_MANY_OPEN_FILES;
+    return(-1);
+  }
 
-    /* Try to open this file */
-    if ((fp = fopen(filename, access_mode)) == (FILE *) NULL)
-    {
-        gsfError = GSF_FOPEN_ERROR;
-        return (-1);
-    }
+  /* Try to open this file */
+  if ((fp = fopen(filename, access_mode)) == (FILE *) NULL)
+  {
+    gsfError = GSF_FOPEN_ERROR;
+    return(-1);
+  }
 
     /* The file was successfully opened, load the gsf file table structure by
-     * searching the gsf file table for the caller's filename.  This is done
-     * so that the same file table slot may be re-used.  Applications which
-     * want their file closed frequently, such as real-time data collection
-     * programs may do this to assure data integrity, and it makes sense
-     * to resuse the file table slot they occupied from a previous call to
-     * gsfOpen, so that the ping scale factors don't have to be reset except
-     * when a new file is created.
-     */
-    numOpenFiles++;
-    length = strlen (filename);
-    if (length >= sizeof(gsfFileTable[0].file_name))
+  * searching the gsf file table for the caller's filename.  This is done
+  * so that the same file table slot may be re-used.  Applications which
+  * want their file closed frequently, such as real-time data collection
+  * programs may do this to assure data integrity, and it makes sense
+  * to resuse the file table slot they occupied from a previous call to
+  * gsfOpen, so that the ping scale factors don't have to be reset except
+  * when a new file is created.
+    */
+  numOpenFiles++;
+  length = strlen (filename);
+  if (length >= sizeof(gsfFileTable[0].file_name))
+  {
+    length = sizeof(gsfFileTable[0].file_name) - 1;
+  }
+  for (fileTableIndex=0; fileTableIndex<GSF_MAX_OPEN_FILES; fileTableIndex++)
+  {
+    if ((memcmp(gsfFileTable[fileTableIndex].file_name, filename, length) == 0) &&
+         (gsfFileTable[fileTableIndex].occupied == 0))
     {
-        length = sizeof(gsfFileTable[0].file_name) - 1;
+      break;
     }
+  }
+
+  /* If no filename match was found then use the first available slot */
+  if (fileTableIndex == GSF_MAX_OPEN_FILES)
+  {
     for (fileTableIndex=0; fileTableIndex<GSF_MAX_OPEN_FILES; fileTableIndex++)
     {
-        if ((memcmp(gsfFileTable[fileTableIndex].file_name, filename, length) == 0) &&
-            (gsfFileTable[fileTableIndex].occupied == 0))
-        {
-            break;
-        }
-    }
-
-    /* If no filename match was found then use the first available slot */
-    if (fileTableIndex == GSF_MAX_OPEN_FILES)
-    {
-        for (fileTableIndex=0; fileTableIndex<GSF_MAX_OPEN_FILES; fileTableIndex++)
-        {
-            if (gsfFileTable[fileTableIndex].occupied == 0)
-            {
-                strncpy (gsfFileTable[fileTableIndex].file_name, filename, sizeof(gsfFileTable[fileTableIndex].file_name));
+      if (gsfFileTable[fileTableIndex].occupied == 0)
+      {
+        strncpy (gsfFileTable[fileTableIndex].file_name, filename, sizeof(gsfFileTable[fileTableIndex].file_name));
                 /* This is the first open for this file, so clear the
-                 * pointers to dynamic memory.
-                 */
-                gsfFree (&gsfFileTable[fileTableIndex].rec);
-                break;
-            }
-        }
+        * pointers to dynamic memory.
+                */
+        gsfFree (&gsfFileTable[fileTableIndex].rec);
+        break;
+      }
     }
+  }
 
-    gsfFileTable[fileTableIndex].fp = fp;
-    gsfFileTable[fileTableIndex].buf_size = GSF_STREAM_BUF_SIZE;
-    gsfFileTable[fileTableIndex].occupied = 1;
-    *handle = fileTableIndex + 1;
+  gsfFileTable[fileTableIndex].fp = fp;
+  gsfFileTable[fileTableIndex].buf_size = GSF_STREAM_BUF_SIZE;
+  gsfFileTable[fileTableIndex].occupied = 1;
+  *handle = fileTableIndex + 1;
 
-    /* Set the desired buffer size */
-    if (setvbuf(fp, NULL, _IOFBF, GSF_STREAM_BUF_SIZE))
-    {
-        gsfClose ((int) *handle);
-        gsfError = GSF_SETVBUF_ERROR;
-        return (-1);
-    }
+  /* Set the desired buffer size */
+  if (setvbuf(fp, NULL, _IOFBF, GSF_STREAM_BUF_SIZE))
+  {
+    gsfError = GSF_SETVBUF_ERROR;
+    gsfClose ((int) *handle);
+    return(-1);
+  }
 
-    /* Use stat to get the size of this file. File size is used by gsfPercent */
-    if (stat (filename, &stat_buf))
-    {
-        gsfError = GSF_READ_ERROR;
-        return(-1);
-    }
-    gsfFileTable[fileTableIndex].file_size = (int) stat_buf.st_size;
+  /* Use stat to get the size of this file. File size is used by gsfPercent */
+  if (stat (filename, &stat_buf))
+  {
+    gsfError = GSF_READ_ERROR;
+    gsfClose ((int) *handle);
+    return(-1);
+  }
+  gsfFileTable[fileTableIndex].file_size = (int) stat_buf.st_size;
 
     /* If this file was just created, (ie it has a size of 0 bytes) then
-     * write the gsf file header record. Also, set a flag to indicate
-     * that the ping scale factors need to be written with the next swath
-     * bathymetry ping record.
-     */
-    if (stat_buf.st_size == 0)
-    {
-        gsfFileTable[fileTableIndex].scales_read = 1;
+  * write the gsf file header record. Also, set a flag to indicate
+  * that the ping scale factors need to be written with the next swath
+  * bathymetry ping record.
+    */
+  if (stat_buf.st_size == 0)
+  {
+    gsfFileTable[fileTableIndex].scales_read = 1;
 
-        /* write the gsf file header to the file */
-        id.checksumFlag = 0;
-        id.reserved = 0;
-        id.recordID = GSF_RECORD_HEADER;
-        strcpy(gsfFileTable[fileTableIndex].rec.header.version, GSF_VERSION);
-        gsfFileTable[fileTableIndex].bufferedBytes += gsfWrite(*handle, &id, &gsfFileTable[fileTableIndex].rec);
+    /* write the gsf file header to the file */
+    id.checksumFlag = 0;
+    id.reserved = 0;
+    id.recordID = GSF_RECORD_HEADER;
+    strcpy(gsfFileTable[fileTableIndex].rec.header.version, GSF_VERSION);
+    gsfFileTable[fileTableIndex].bufferedBytes += gsfWrite(*handle, &id, &gsfFileTable[fileTableIndex].rec);
 
         /* Flush this record to disk so that the file size will be non-zero
-         * on the next call to gsfOpen.
-         */
-        if (fflush (gsfFileTable[fileTableIndex].fp))
-        {
-            gsfError = GSF_FLUSH_ERROR;
-            return(-1);
-        }
-    }
-    else
+    * on the next call to gsfOpen.
+        */
+    if (fflush (gsfFileTable[fileTableIndex].fp))
     {
+      gsfError = GSF_FLUSH_ERROR;
+      gsfClose ((int) *handle);
+      return(-1);
+    }
+  }
+  else
+  {
         /* Read the GSF header, if the access mode is append, we need to
-         * seek back to the top of the file.
-         */
-        if (mode == GSF_APPEND)
-        {
-            if (fseek(gsfFileTable[fileTableIndex].fp, 0, SEEK_SET))
-            {
-                gsfError = GSF_FILE_SEEK_ERROR;
-                return (-1);
-            }
-        }
-        /* Read the GSF header */
-        headerSize = gsfRead(*handle, GSF_NEXT_RECORD, &id, &gsfFileTable[fileTableIndex].rec, NULL, 0);
-        /* JSB 04/05/00 Updated to return correct error code */
-        if (headerSize < 0)
-        {
-            fclose(fp);
-            numOpenFiles--;
-            *handle = 0;
-            gsfFileTable[fileTableIndex].occupied = 0;
-            memset(&gsfFileTable[fileTableIndex].rec.header, 0, sizeof(gsfFileTable[fileTableIndex].rec.header));
-            return (-1);
-        }
-        /* JSB end of updates from 04/055/00 */
-        if (!strstr(gsfFileTable[fileTableIndex].rec.header.version, "GSF-"))
-        {
-            fclose(fp);
-            numOpenFiles--;
-            *handle = 0;
-            gsfFileTable[fileTableIndex].occupied = 0;
-            memset(&gsfFileTable[fileTableIndex].rec.header, 0, sizeof(gsfFileTable[fileTableIndex].rec.header));
-            gsfError = GSF_UNRECOGNIZED_FILE;
-            return (-1);
-        }
-        /* If the mode is append seek back to the end of the file */
-        if (mode == GSF_APPEND)
-        {
-            if (fseek(gsfFileTable[fileTableIndex].fp, 0, SEEK_END))
-            {
-                gsfError = GSF_FILE_SEEK_ERROR;
-                return (-1);
-            }
-        }
-    }
-
-    /* jsb 04/16/97 Save the GSF version ID into the file table */
-    ret = sscanf (gsfFileTable[fileTableIndex].rec.header.version, "GSF-v%d.%d",
-        &gsfFileTable[fileTableIndex].major_version_number,
-        &gsfFileTable[fileTableIndex].minor_version_number);
-    if (ret != 2)
+    * seek back to the top of the file.
+        */
+    if (mode == GSF_APPEND)
     {
-        gsfError = GSF_UNRECOGNIZED_FILE;
-        return (-1);
+      if (fseek(gsfFileTable[fileTableIndex].fp, 0, SEEK_SET))
+      {
+        gsfError = GSF_FILE_SEEK_ERROR;
+        gsfClose ((int) *handle);
+        return(-1);
+      }
     }
+    /* Read the GSF header */
+    headerSize = gsfRead(*handle, GSF_NEXT_RECORD, &id, &gsfFileTable[fileTableIndex].rec, NULL, 0);
+    /* JSB 04/05/00 Updated to return correct error code */
+    if (headerSize < 0)
+    {
+      fclose(fp);
+      numOpenFiles--;
+      *handle = 0;
+      gsfFileTable[fileTableIndex].occupied = 0;
+      memset(&gsfFileTable[fileTableIndex].rec.header, 0, sizeof(gsfFileTable[fileTableIndex].rec.header));
+      return(-1);
+    }
+    /* JSB end of updates from 04/055/00 */
+    if (!strstr(gsfFileTable[fileTableIndex].rec.header.version, "GSF-"))
+    {
+      fclose(fp);
+      numOpenFiles--;
+      *handle = 0;
+      gsfFileTable[fileTableIndex].occupied = 0;
+      memset(&gsfFileTable[fileTableIndex].rec.header, 0, sizeof(gsfFileTable[fileTableIndex].rec.header));
+      gsfError = GSF_UNRECOGNIZED_FILE;
+      return(-1);
+    }
+    /* If the mode is append seek back to the end of the file */
+    if (mode == GSF_APPEND)
+    {
+      if (fseek(gsfFileTable[fileTableIndex].fp, 0, SEEK_END))
+      {
+        gsfError = GSF_FILE_SEEK_ERROR;
+        gsfClose ((int) *handle);
+        return(-1);
+      }
+    }
+  }
+
+  /* jsb 04/16/97 Save the GSF version ID into the file table */
+  ret = sscanf (gsfFileTable[fileTableIndex].rec.header.version, "GSF-v%d.%d",
+                &gsfFileTable[fileTableIndex].major_version_number,
+                &gsfFileTable[fileTableIndex].minor_version_number);
+  if (ret != 2)
+  {
+    gsfError = GSF_UNRECOGNIZED_FILE;
+    gsfClose ((int) *handle);
+    return(-1);
+  }
 
     /*  Set the update flag if needed. This is used to force a call to fflush
-     *  between read an write operations, on files opened for update.
-     */
-    if ((mode == GSF_UPDATE) ||
-        (mode == GSF_UPDATE_INDEX) ||
-        (mode == GSF_CREATE))
-    {
-        gsfFileTable[fileTableIndex].update_flag = 1;
-    }
-    else
-    {
-        gsfFileTable[fileTableIndex].update_flag = 0;
-    }
+  *  between read an write operations, on files opened for update.
+    */
+  if ((mode == GSF_UPDATE) ||
+       (mode == GSF_UPDATE_INDEX) ||
+       (mode == GSF_CREATE))
+  {
+    gsfFileTable[fileTableIndex].update_flag = 1;
+  }
+  else
+  {
+    gsfFileTable[fileTableIndex].update_flag = 0;
+  }
 
-    /* Set the index flag and open the index file if needed. */
-    if ((mode == GSF_READONLY_INDEX) || (mode == GSF_UPDATE_INDEX))
+  /* Set the index flag and open the index file if needed. */
+  if ((mode == GSF_READONLY_INDEX) || (mode == GSF_UPDATE_INDEX))
+  {
+    gsfFileTable[fileTableIndex].direct_access = 1;
+    if (gsfOpenIndex (filename, *handle, &gsfFileTable[fileTableIndex]) == -1)
     {
-        gsfFileTable[fileTableIndex].direct_access = 1;
-        if (gsfOpenIndex (filename, *handle, &gsfFileTable[fileTableIndex]) == -1)
-        {
-            gsfFileTable[fileTableIndex].direct_access = 0;
-            return (-1);
-        }
+      gsfFileTable[fileTableIndex].direct_access = 0;
+      gsfClose ((int) *handle);
+      return(-1);
+    }
 
         /* Move the file pointer back to the first record past the gsf file header. This
-         * is required since we will have read the entire to create the index.
-         */
-        if (fseek(gsfFileTable[fileTableIndex].fp, headerSize, SEEK_SET))
-        {
-            gsfError = GSF_FILE_SEEK_ERROR;
-            return (-1);
-        }
-    }
-    else
+    * is required since we will have read the entire to create the index.
+        */
+    if (fseek(gsfFileTable[fileTableIndex].fp, headerSize, SEEK_SET))
     {
-        gsfFileTable[fileTableIndex].direct_access = 0;
+      gsfError = GSF_FILE_SEEK_ERROR;
+      gsfClose ((int) *handle);
+      return(-1);
     }
+  }
+  else
+  {
+    gsfFileTable[fileTableIndex].direct_access = 0;
+  }
 
-    /* Save the file acess mode */
-    switch (mode)
-    {
-        case GSF_CREATE:
-            gsfFileTable[fileTableIndex].access_mode = GSF_CREATE;
-            break;
+  /* Save the file acess mode */
+  switch (mode)
+  {
+    case GSF_CREATE:
+      gsfFileTable[fileTableIndex].access_mode = GSF_CREATE;
+      break;
 
-        case GSF_READONLY:
-            gsfFileTable[fileTableIndex].access_mode = GSF_READONLY;
-            break;
+    case GSF_READONLY:
+      gsfFileTable[fileTableIndex].access_mode = GSF_READONLY;
+      break;
 
-        case GSF_UPDATE:
-            gsfFileTable[fileTableIndex].access_mode = GSF_UPDATE;
-            break;
+    case GSF_UPDATE:
+      gsfFileTable[fileTableIndex].access_mode = GSF_UPDATE;
+      break;
 
-        case GSF_READONLY_INDEX:
-            gsfFileTable[fileTableIndex].access_mode = GSF_READONLY_INDEX;
-            break;
+    case GSF_READONLY_INDEX:
+      gsfFileTable[fileTableIndex].access_mode = GSF_READONLY_INDEX;
+      break;
 
-        case GSF_UPDATE_INDEX:
-            gsfFileTable[fileTableIndex].access_mode = GSF_UPDATE_INDEX;
-            break;
+    case GSF_UPDATE_INDEX:
+      gsfFileTable[fileTableIndex].access_mode = GSF_UPDATE_INDEX;
+      break;
 
-        case GSF_APPEND:
-            gsfFileTable[fileTableIndex].access_mode = GSF_APPEND;
-            break;
+    case GSF_APPEND:
+      gsfFileTable[fileTableIndex].access_mode = GSF_APPEND;
+      break;
 
-        default:
-            gsfError = GSF_BAD_ACCESS_MODE;
-            return (-1);
-    }
+    default:
+      gsfError = GSF_BAD_ACCESS_MODE;
+      gsfClose ((int) *handle);
+      return(-1);
+  }
 
-    return (0);
+  return (0);
 }
 
 /********************************************************************
@@ -2026,7 +2038,7 @@ gsfLoadScaleFactor(gsfScaleFactors *sf, int subrecordID, char c_flag, double pre
             gsfError = GSF_CANNOT_REPRESENT_PRECISION;
             return (-1);
         }
- 
+
         /* New scale factor has passed QC tests, it is now safe to bump the counter */
         sf->numArraySubrecords++;
     }
@@ -2042,7 +2054,7 @@ gsfLoadScaleFactor(gsfScaleFactors *sf, int subrecordID, char c_flag, double pre
          */
         itemp = (int) (mult + 0.001);
 
-        /* QC test on the integer value as this is the number that will get encoded on the GSF byte stream */  
+        /* QC test on the integer value as this is the number that will get encoded on the GSF byte stream */
         if ((itemp < MIN_GSF_SF_MULT_VALUE) || (itemp > MAX_GSF_SF_MULT_VALUE))
         {
             gsfError = GSF_CANNOT_REPRESENT_PRECISION;
@@ -2848,6 +2860,13 @@ gsfPercent (int handle)
         return (-1);
     }
 
+    /* the file is no longer open */
+    if (!gsfFileTable[handle - 1].occupied)
+    {
+        gsfError = GSF_BAD_FILE_HANDLE;
+        return (-1);
+    }
+
     /* Retreive the current file position */
     addr = ftell (gsfFileTable[handle - 1].fp);
     if (addr == -1)
@@ -3604,24 +3623,27 @@ gsfCopyRecords (gsfRecords *target, gsfRecords *source)
     /* Copy the swath bathymetry ping record over to the target by moving
      * the data over one item at a time so we don't overwrite the arrays.
      */
-    target->mb_ping.ping_time       = source->mb_ping.ping_time;
-    target->mb_ping.latitude        = source->mb_ping.latitude;
-    target->mb_ping.longitude       = source->mb_ping.longitude;
-    target->mb_ping.number_beams    = source->mb_ping.number_beams;
-    target->mb_ping.center_beam     = source->mb_ping.center_beam;
-    target->mb_ping.ping_flags      = source->mb_ping.ping_flags;
-    target->mb_ping.reserved        = source->mb_ping.reserved;
-    target->mb_ping.tide_corrector  = source->mb_ping.tide_corrector;
-    target->mb_ping.depth_corrector = source->mb_ping.depth_corrector;
-    target->mb_ping.heading         = source->mb_ping.heading;
-    target->mb_ping.pitch           = source->mb_ping.pitch;
-    target->mb_ping.roll            = source->mb_ping.roll;
-    target->mb_ping.heave           = source->mb_ping.heave;
-    target->mb_ping.course          = source->mb_ping.course;
-    target->mb_ping.speed           = source->mb_ping.speed;
-    target->mb_ping.scaleFactors    = source->mb_ping.scaleFactors;
-    target->mb_ping.sensor_id       = source->mb_ping.sensor_id;
-    target->mb_ping.sensor_data     = source->mb_ping.sensor_data;
+    target->mb_ping.ping_time           = source->mb_ping.ping_time;
+    target->mb_ping.latitude            = source->mb_ping.latitude;
+    target->mb_ping.longitude           = source->mb_ping.longitude;
+    target->mb_ping.number_beams        = source->mb_ping.number_beams;
+    target->mb_ping.center_beam         = source->mb_ping.center_beam;
+    target->mb_ping.ping_flags          = source->mb_ping.ping_flags;
+    target->mb_ping.reserved            = source->mb_ping.reserved;
+    target->mb_ping.tide_corrector      = source->mb_ping.tide_corrector;
+    target->mb_ping.gps_tide_corrector  = source->mb_ping.gps_tide_corrector;
+    target->mb_ping.depth_corrector     = source->mb_ping.depth_corrector;
+    target->mb_ping.heading             = source->mb_ping.heading;
+    target->mb_ping.pitch               = source->mb_ping.pitch;
+    target->mb_ping.roll                = source->mb_ping.roll;
+    target->mb_ping.heave               = source->mb_ping.heave;
+    target->mb_ping.course              = source->mb_ping.course;
+    target->mb_ping.speed               = source->mb_ping.speed;
+    target->mb_ping.height              = source->mb_ping.height;
+    target->mb_ping.sep                 = source->mb_ping.sep;    
+    target->mb_ping.scaleFactors        = source->mb_ping.scaleFactors;
+    target->mb_ping.sensor_id           = source->mb_ping.sensor_id;
+    target->mb_ping.sensor_data         = source->mb_ping.sensor_data;
 
     /* Now hande the sound velocity profile dynamic memory */
     if (target->svp.depth == (double *) NULL)
@@ -4026,6 +4048,40 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     if (ret)
     {
         return(-1);
+    }
+
+    /* DHG 2008/12/18 Add "PLATFORM_TYPE" Processing Parameter */
+
+    if (p->vessel_type == GSF_PLATFORM_TYPE_AUV)
+    {
+        sprintf (temp, "PLATFORM_TYPE=AUV");
+    }
+    else if (p->vessel_type == GSF_PLATFORM_TYPE_SURFACE_SHIP)
+    {
+        sprintf (temp, "PLATFORM_TYPE=SURFACE_SHIP");
+    }
+    else if (p->vessel_type == GSF_PLATFORM_TYPE_ROTV)
+    {
+        sprintf (temp, "PLATFORM_TYPE=ROTV");
+    }
+    ret = gsfSetParam (handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return (-1);
+    }
+
+    if (p->full_raw_data == GSF_TRUE)
+    {
+        sprintf (temp, "FULL_RAW_DATA=TRUE ");
+    }
+    else
+    {
+        sprintf (temp, "FULL_RAW_DATA=FALSE");
+    }
+    ret = gsfSetParam (handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return (-1);
     }
 
     /* This parameter indicates whether the depth data has been roll compensated */
@@ -5114,6 +5170,10 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         case (GSF_V_DATUM_MLWN):
              sprintf(temp, "TIDAL_DATUM=MLWN  ");
              break;
+            
+        case (GSF_V_DATUM_MSL):
+             sprintf(temp, "TIDAL_DATUM=MSL   ");
+             break;
 
         default:
             sprintf(temp, "TIDAL_DATUM=UNKNOWN");
@@ -5173,6 +5233,37 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
             memset(p->start_of_epoch, 0, sizeof(p->start_of_epoch));
             strncpy(p->start_of_epoch, rec->process_parameters.param[i], sizeof(p->start_of_epoch));
         }
+
+        /* DHG 2008/12/18 Add "PLATFORM_TYPE" */
+                                
+        else if (strncmp (rec->process_parameters.param[i], "PLATFORM_TYPE", strlen ("PLATFORM_TYPE")) == 0)
+        {
+            if (strstr(rec->process_parameters.param[i], "AUV"))
+            {
+                p->vessel_type = GSF_PLATFORM_TYPE_AUV;
+            }
+            if (strstr(rec->process_parameters.param[i], "SURFACE_SHIP"))
+            {
+                p->vessel_type = GSF_PLATFORM_TYPE_SURFACE_SHIP;
+            }
+            if (strstr(rec->process_parameters.param[i], "ROTV"))
+            {
+                p->vessel_type = GSF_PLATFORM_TYPE_ROTV;
+            }
+        }
+
+        else if (strncmp (rec->process_parameters.param[i], "FULL_RAW_DATA", strlen ("FULL_RAW_DATA")) == 0)
+        {
+            if (strstr(rec->process_parameters.param[i], "TRUE"))
+            {
+                p->full_raw_data = GSF_TRUE;
+            }
+            else
+            {
+                p->full_raw_data = GSF_FALSE;
+            }
+        }
+
         else if (strncmp(rec->process_parameters.param[i], "ROLL_COMPENSATED", strlen("ROLL_COMPENSATED")) == 0)
         {
             if (strstr(rec->process_parameters.param[i], "YES"))
@@ -5607,6 +5698,10 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
             {
                 p->vertical_datum = GSF_V_DATUM_MLWN;
             }
+            else if (strcmp(str, "MSL") == 0)
+            {
+                p->vertical_datum = GSF_V_DATUM_MSL;
+            }
             else
             {
                 p->vertical_datum = GSF_V_DATUM_UNKNOWN;
@@ -5787,6 +5882,7 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
             *fore_aft = data->mb_ping.sensor_data.gsfSeaBat8101Specific.fore_aft_bw;
             *athwartship = data->mb_ping.sensor_data.gsfSeaBat8101Specific.athwart_bw;
             break;
+            
 
         case (GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC):
             *fore_aft = 2.0;
@@ -5805,6 +5901,7 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
 
         case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2000_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
@@ -5822,6 +5919,28 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
                 *athwartship = data->mb_ping.sensor_data.gsfEM3Specific.run_time[0].receive_beam_width;
             }
             break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM300_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM1002_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2000_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM120_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_RAW_SPECIFIC):
+            *fore_aft = 1.5;
+            *athwartship = 1.5;
+            if (data->mb_ping.sensor_data.gsfEM3RawSpecific.run_time.tx_beam_width != 0.0)
+            {
+                *fore_aft = data->mb_ping.sensor_data.gsfEM3RawSpecific.run_time.tx_beam_width;
+            }
+            if (data->mb_ping.sensor_data.gsfEM3RawSpecific.run_time.rx_beam_width != 0.0)
+            {
+                *athwartship = data->mb_ping.sensor_data.gsfEM3RawSpecific.run_time.rx_beam_width;
+            }
+            break;
+
 
         case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
@@ -5846,6 +5965,11 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
         case (GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC):
             *fore_aft = data->mb_ping.sensor_data.gsfReson8100Specific.fore_aft_bw;
             *athwartship = data->mb_ping.sensor_data.gsfReson8100Specific.athwart_bw;
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_7125_SPECIFIC):
+            *fore_aft = data->mb_ping.sensor_data.gsfReson7100Specific.projector_beam_wdth_vert;
+            *athwartship = data->mb_ping.sensor_data.gsfReson7100Specific.receive_beam_width;
             break;
 
         case GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC:
@@ -5876,7 +6000,7 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
         case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
             *fore_aft = GSF_BEAM_WIDTH_UNKNOWN;
             *athwartship = GSF_BEAM_WIDTH_UNKNOWN;
-            break;            
+            break;
 
         default:
             *fore_aft = GSF_BEAM_WIDTH_UNKNOWN;
@@ -5922,7 +6046,7 @@ gsfIsStarboardPing(gsfRecords *data)
             return data->mb_ping.sensor_data.gsfGeoSwathPlusSpecific.side;
             break;
         case GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC:
-            return data->mb_ping.sensor_data.gsfKlein5410BssSpecific.side;            
+            return data->mb_ping.sensor_data.gsfKlein5410BssSpecific.side;
             break;
         case GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC:
 /* zzz_ */
@@ -5944,6 +6068,8 @@ gsfIsStarboardPing(gsfRecords *data)
 
         case GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC:
         case GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC:
+        case GSF_SWATH_BATHY_SUBRECORD_EM3000D_RAW_SPECIFIC:
+        case GSF_SWATH_BATHY_SUBRECORD_EM3002D_RAW_SPECIFIC:
             /* it is assumed that the center_beam is set to the vertical beam. */
             if (data->mb_ping.center_beam < data->mb_ping.number_beams / 2)
             {
@@ -6436,3 +6562,188 @@ gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, double *mi
     return (ret_code);
 }
 
+/********************************************************************
+ *
+ * Function Name : gsfGetSonarTextName
+ *
+ * Description : This function provides a textual name for the sonar
+ *  given a populated ping structure.
+ *
+ * Inputs :
+ *  ping = A pointer to a populated gsfSwathBathyPing structure.
+ *
+ * Returns :
+ *  This function returns a pointer to a character string containing
+ *   the name of the sonar.
+ *
+ * Error Conditions :
+ *    GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID
+ *
+ ********************************************************************/
+char *gsfGetSonarTextName(gsfSwathBathyPing *ping)
+{
+    char             *ptr;
+
+    switch (ping->sensor_id)
+    {
+        case (GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC):
+            ptr = "SeaBeam";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM12_SPECIFIC):
+            ptr = "Simrad EM12";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM100_SPECIFIC):
+            ptr = "Simrad EM100";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM950_SPECIFIC):
+            ptr = "Simrad EM950";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC):
+            ptr = "Simrad EM1000";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SPECIFIC):
+            ptr = "Simrad EM121A";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SASS_SPECIFIC):
+            ptr = "SASS";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC):
+            ptr = "SeaMap";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC):
+            ptr = "Sea Beam (w/amp)";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC):
+            if (ping->sensor_data.gsfSeaBatIISpecific.mode & GSF_SEABAT_9002)
+            {
+                ptr = " Reson SeaBat 9002";
+            }
+            else if (ping->sensor_data.gsfSeaBatIISpecific.mode & GSF_SEABAT_9003)
+            {
+                ptr = "Reson SeaBat 9003";
+            }
+            else
+            {
+                ptr = "Reson SeaBat 9001";
+            }
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC):
+            ptr = "Reson SeaBat 8101";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC):
+            ptr = "Sea Beam 2112/36";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC):
+            ptr = "ELAC MKII";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM120_RAW_SPECIFIC):
+            ptr = "Kongsberg EM120";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM300_RAW_SPECIFIC):
+            ptr = "Kongsberg EM300";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM1002_RAW_SPECIFIC):
+            ptr = "Kongsberg EM1002";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2000_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2000_RAW_SPECIFIC):
+            ptr = "Kongsberg EM2000";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC):
+            case (GSF_SWATH_BATHY_SUBRECORD_EM3000_RAW_SPECIFIC):
+            ptr = "Kongsberg EM3000";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
+            case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_RAW_SPECIFIC):
+            ptr = "Kongsberg EM3000D";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
+             case (GSF_SWATH_BATHY_SUBRECORD_EM3002_RAW_SPECIFIC):
+            ptr = "Kongsberg EM3002";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
+             case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_RAW_SPECIFIC):
+            ptr = "Kongsberg EM3002D";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC):
+             case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_RAW_SPECIFIC):
+            ptr = "Kongsberg EM121A (SIS)";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_7125_SPECIFIC):
+            ptr = "Reson SeaBat 7125";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC):
+            ptr = "Reson SeaBat 8101";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC):
+            ptr = "Reson SeaBat 8111";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC):
+            ptr = "Reson SeaBat 8124";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC):
+            ptr = "Reson SeaBat 8125";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC):
+            ptr = "Reson SeaBat 8150";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC):
+            ptr = "Reson SeaBat 8160";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
+            ptr = "Kongsberg EM122";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
+            ptr = "Kongsberg EM302";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
+            ptr = "Kongsberg EM710";
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
+            ptr = "Klein 5410";
+            break;
+        case (GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC):
+            ptr = "GeoAcoustics GeoSwath+";
+            break;
+        default:
+            ptr = "Unknown";
+            break;
+    }
+
+    return (ptr);
+}

@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdtiff.perl	11/3/1999
-#    $Id: mbm_grdtiff.perl,v 5.5 2006-07-05 19:50:21 caress Exp $
+#    $Id: mbm_grdtiff.perl,v 5.5 2006/07/05 19:50:21 caress Exp $
 #
 #    Copyright (c) 1999, 2000, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -49,10 +49,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdtiff.perl,v 5.5 2006-07-05 19:50:21 caress Exp $
+#   $Id: mbm_grdtiff.perl,v 5.5 2006/07/05 19:50:21 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_grdtiff.perl,v $
+#   Revision 5.5  2006/07/05 19:50:21  caress
+#   Working towards 5.1.0beta
+#
 #   Revision 5.4  2006/02/10 01:27:40  caress
 #   Fixed parsing of grdinfo output to handle changes to GMT4.1.
 #

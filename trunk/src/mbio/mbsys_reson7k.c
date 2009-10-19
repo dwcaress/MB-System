@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson7k.c	3.00	3/23/2004
- *	$Id: mbsys_reson7k.c,v 5.21 2008-09-27 03:27:10 caress Exp $
+ *	$Id: mbsys_reson7k.c,v 5.21 2008/09/27 03:27:10 caress Exp $
  *
  *    Copyright (c) 2004-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -25,7 +25,10 @@
  * Author:	D. W. Caress
  * Date:	March 23, 2004
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_reson7k.c,v $
+ * Revision 5.21  2008/09/27 03:27:10  caress
+ * Working towards release 5.1.1beta24
+ *
  * Revision 5.20  2008/09/20 00:57:41  caress
  * Release 5.1.1beta23
  *
@@ -110,7 +113,7 @@
 /* turn on debug statements here */
 /* #define MSYS_RESON7KR_DEBUG 1 */
 
-static char res_id[]="$Id: mbsys_reson7k.c,v 5.21 2008-09-27 03:27:10 caress Exp $";
+static char res_id[]="$Id: mbsys_reson7k.c,v 5.21 2008/09/27 03:27:10 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header, 
@@ -611,7 +614,15 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		bluefin->environmental[i].conductivity_frequency = 0.0;
 		bluefin->environmental[i].pressure_counts = 0;
 		bluefin->environmental[i].pressure_comp_voltage = 0.0;
-		for (j=0;j<32;j++)
+		bluefin->environmental[i].sensor1 = 0;
+		bluefin->environmental[i].sensor2 = 0;
+		bluefin->environmental[i].sensor3 = 0;
+		bluefin->environmental[i].sensor4 = 0;
+		bluefin->environmental[i].sensor5 = 0;
+		bluefin->environmental[i].sensor6 = 0;
+		bluefin->environmental[i].sensor7 = 0;
+		bluefin->environmental[i].sensor8 = 0;
+		for (j=0;j<8;j++)
 			bluefin->environmental[i].reserved2[j] = 0;
 		}
 
@@ -1414,8 +1425,6 @@ int mbsys_reson7k_print_sensorcal(int verbose,
 	else
 		{
 		first = nodebug_str;
-		fprintf(stderr,"\n%sMBIO function <%s> called\n",
-			first,function_name);
 		}
 	fprintf(stderr,"%sStructure Contents:\n", first);
 	fprintf(stderr,"%s     offset_x:                %f\n",first,sensorcal->offset_x);
@@ -2679,7 +2688,17 @@ int mbsys_reson7k_print_bluefin(int verbose,
 			fprintf(stderr,"%s     env[%d].conductivity_frequency: %f\n",first,i,bluefin->environmental[i].conductivity_frequency);
 			fprintf(stderr,"%s     env[%d].pressure_counts:        %d\n",first,i,bluefin->environmental[i].pressure_counts);
 			fprintf(stderr,"%s     env[%d].pressure_comp_voltage:  %f\n",first,i,bluefin->environmental[i].pressure_comp_voltage);
-			for (j=0;j<32;j++)
+			fprintf(stderr,"%s     env[%d].sensor_time_sec:        %d\n",first,i,bluefin->environmental[i].sensor_time_sec);
+			fprintf(stderr,"%s     env[%d].sensor_time_nsec:       %d\n",first,i,bluefin->environmental[i].sensor_time_nsec);
+			fprintf(stderr,"%s     env[%d].sensor1:                %d\n",first,i,bluefin->environmental[i].sensor1);
+			fprintf(stderr,"%s     env[%d].sensor2:                %d\n",first,i,bluefin->environmental[i].sensor2);
+			fprintf(stderr,"%s     env[%d].sensor3:                %d\n",first,i,bluefin->environmental[i].sensor3);
+			fprintf(stderr,"%s     env[%d].sensor4:                %d\n",first,i,bluefin->environmental[i].sensor4);
+			fprintf(stderr,"%s     env[%d].sensor5:                %d\n",first,i,bluefin->environmental[i].sensor5);
+			fprintf(stderr,"%s     env[%d].sensor6:                %d\n",first,i,bluefin->environmental[i].sensor6);
+			fprintf(stderr,"%s     env[%d].sensor7:                %d\n",first,i,bluefin->environmental[i].sensor7);
+			fprintf(stderr,"%s     env[%d].sensor8:                %d\n",first,i,bluefin->environmental[i].sensor8);
+			for (j=0;j<8;j++)
 				fprintf(stderr,"%s     env[%d].reserved2[%2d]:          %d\n",first,i,j,bluefin->environmental[i].reserved2[j]);
 			}
 		}
@@ -4263,6 +4282,12 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	s7kr_beam *beam;
 	s7kr_position *position;
 	s7kr_systemeventmessage *systemeventmessage;
+	s7kr_fsdwsb *fsdwsb;
+	s7kr_fsdwss *fsdwsslo;
+	s7kr_fsdwss *fsdwsshi;
+	s7k_fsdwchannel *fsdwchannel;
+	s7k_fsdwsegyheader *fsdwsegyheader;
+	s7k_fsdwssheader *fsdwssheader;
 	double	samplerange;
 	double	*pixel_size;
 	double	*swath_width;
@@ -4292,6 +4317,9 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	beam = (s7kr_beam *) &store->beam;
 	position = (s7kr_position *) &store->position;
 	systemeventmessage = (s7kr_systemeventmessage *) &store->systemeventmessage;
+	fsdwsb = &(store->fsdwsb);
+	fsdwsslo = &(store->fsdwsslo);
+	fsdwsshi = &(store->fsdwsshi);
 	
 	/* get saved values */
 	pixel_size = (double *) &mb_io_ptr->saved1;
@@ -4606,6 +4634,162 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 
 		}
 
+	/* extract data from structure */
+	else if (*kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+		{
+		/* get edgetech segy header */
+		fsdwsegyheader = &(fsdwsb->segyheader);
+		
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
+		
+		/* get heading */
+		if (fsdwsegyheader->heading != 0)
+			*heading = 0.01 * fsdwsegyheader->heading;
+		else
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+					    heading, error);
+		
+		/* get speed and position */
+		*speed = 0.0;
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+				    navlon, navlat, speed, error);
+		
+		/* get position */
+		if (fsdwsegyheader->sourceCoordX != 0
+			|| fsdwsegyheader->sourceCoordY != 0)
+			{
+			*navlon = ((double)fsdwsegyheader->sourceCoordX) / 360000.0;
+			*navlat = ((double)fsdwsegyheader->sourceCoordY) / 360000.0;
+			}
+
+		/* set beam and pixel numbers */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       longitude:  %f\n",
+				*navlon);
+			fprintf(stderr,"dbg4       latitude:   %f\n",
+				*navlat);
+			fprintf(stderr,"dbg4       speed:      %f\n",
+				*speed);
+			fprintf(stderr,"dbg4       heading:    %f\n",
+				*heading);
+			}
+
+		/* done translating values */
+
+		}
+
+	/* extract data from sidescan structure */
+	else if (*kind == MB_DATA_SIDESCAN2
+		|| *kind == MB_DATA_SIDESCAN3)
+		{
+		/* get edgetech sidescan header */
+		if (*kind == MB_DATA_SIDESCAN2)
+			fsdwssheader = &(fsdwsslo->ssheader[0]);
+		else if (*kind == MB_DATA_SIDESCAN3)
+			fsdwssheader = &(fsdwsshi->ssheader[0]);
+		
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
+		
+		/* get heading */
+		if (fsdwssheader->heading != 0)
+			*heading = 0.01 * fsdwssheader->heading;
+		else
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+					    heading, error);
+		
+		/* get speed and position */
+		*speed = 0.0;
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+				    navlon, navlat, speed, error);
+		
+		/* get position */
+		if (fsdwssheader->longitude != 0
+			|| fsdwssheader->latitude != 0)
+			{
+			*navlon = ((double)fsdwssheader->longitude)/ 360000.0;
+			*navlat = ((double)fsdwssheader->latitude)/ 360000.0;
+			}
+
+		/* set beam and pixel numbers */
+		*nbath = 0;
+		*namp = 0;
+		*nss = 0;
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       longitude:  %f\n",
+				*navlon);
+			fprintf(stderr,"dbg4       latitude:   %f\n",
+				*navlat);
+			fprintf(stderr,"dbg4       speed:      %f\n",
+				*speed);
+			fprintf(stderr,"dbg4       heading:    %f\n",
+				*heading);
+			}
+
+		/* done translating values */
+
+		}
+
 	/* extract comment from structure */
 	else if (*kind == MB_DATA_COMMENT)
 		{
@@ -4765,10 +4949,19 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
-	s7kr_bathymetry		*bathymetry;
-	s7kr_backscatter	*backscatter;
-	s7kr_position		*position;
+	s7kr_bluefin *bluefin;
+	s7kr_volatilesettings *volatilesettings;
+	s7kr_bathymetry *bathymetry;
+	s7kr_backscatter *backscatter;
+	s7kr_beam *beam;
+	s7kr_position *position;
 	s7kr_systemeventmessage *systemeventmessage;
+	s7kr_fsdwsb *fsdwsb;
+	s7kr_fsdwss *fsdwsslo;
+	s7kr_fsdwss *fsdwsshi;
+	s7k_fsdwchannel *fsdwchannel;
+	s7k_fsdwsegyheader *fsdwsegyheader;
+	s7k_fsdwssheader *fsdwssheader;
 	int	msglen;
 	int	i, j;
 
@@ -4829,10 +5022,16 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson7k_struct *) store_ptr;
+	bluefin = (s7kr_bluefin *) &store->bluefin;
+	volatilesettings = (s7kr_volatilesettings *) &store->volatilesettings;
 	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
 	backscatter = (s7kr_backscatter *) &store->backscatter;
+	beam = (s7kr_beam *) &store->beam;
 	position = (s7kr_position *) &store->position;
 	systemeventmessage = (s7kr_systemeventmessage *) &store->systemeventmessage;
+	fsdwsb = &(store->fsdwsb);
+	fsdwsslo = &(store->fsdwsslo);
+	fsdwsshi = &(store->fsdwsshi);
 
 	/* set data kind */
 	store->kind = kind;
@@ -4901,6 +5100,70 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 
 		/* get heading */
 
+		/* get speed  */
+		}
+
+	/* insert data in nav structure */
+	else if (store->kind == MB_DATA_NAV2)
+		{
+		/* get time */
+		for (i=0;i<7;i++)
+			store->time_i[i] = time_i[i];
+		store->time_d = time_d;
+
+		/* get navigation */
+		bluefin->nav[0].longitude = DTR * navlon;
+		bluefin->nav[0].latitude = DTR * navlat;
+
+		/* get heading */
+		bluefin->nav[0].yaw = DTR * heading;
+		
+		/* get speed  */
+		}
+
+	/* insert data in subbottom structure */
+	else if (store->kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+		{
+		/* get edgetech segy header */
+		fsdwsegyheader = &(fsdwsb->segyheader);
+		
+		/* get time */
+		for (i=0;i<7;i++)
+			store->time_i[i] = time_i[i];
+		store->time_d = time_d;
+
+		/* get navigation */
+		fsdwsegyheader->sourceCoordX = (int)(navlon * 360000.0);
+		fsdwsegyheader->sourceCoordY = (int)(navlat * 360000.0);
+
+		/* get heading */
+		fsdwsegyheader->heading = (int)(100 * heading);
+		
+		/* get speed  */
+		}
+
+	/* insert data in sidescan structure */
+	else if (store->kind == MB_DATA_SIDESCAN2
+		|| store->kind == MB_DATA_SIDESCAN3)
+		{
+		/* get edgetech sidescan header */
+		if (store->kind == MB_DATA_SIDESCAN2)
+			fsdwssheader = &(fsdwsslo->ssheader[0]);
+		else if (store->kind == MB_DATA_SIDESCAN3)
+			fsdwssheader = &(fsdwsshi->ssheader[0]);
+		
+		/* get time */
+		for (i=0;i<7;i++)
+			store->time_i[i] = time_i[i];
+		store->time_d = time_d;
+
+		/* get navigation */
+		fsdwssheader->longitude = (int)(navlon * 360000.0);
+		fsdwssheader->latitude = (int)(navlat * 360000.0);
+
+		/* get heading */
+		fsdwssheader->heading = (int)(100 * heading);
+		
 		/* get speed  */
 		}
 
@@ -5511,6 +5774,12 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	s7kr_depth *depth;
 	s7kr_attitude *attitude;
 	s7kr_reference *reference;
+	s7kr_fsdwsb *fsdwsb;
+	s7kr_fsdwss *fsdwsslo;
+	s7kr_fsdwss *fsdwsshi;
+	s7k_fsdwchannel *fsdwchannel;
+	s7k_fsdwsegyheader *fsdwsegyheader;
+	s7k_fsdwssheader *fsdwssheader;
 	int	i;
 
 	/* print input debug statements */
@@ -5674,6 +5943,128 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* done translating values */
 
 		}
+
+	/* extract data from structure */
+	else if (*kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
+		{
+		/* get edgetech segy header */
+		fsdwsegyheader = &(fsdwsb->segyheader);
+		
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
+		
+		/* get heading */
+		if (fsdwsegyheader->heading != 0)
+			*heading = 0.01 * fsdwsegyheader->heading;
+		else
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+					    heading, error);
+		
+		/* get speed and position */
+		*speed = 0.0;
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+				    navlon, navlat, speed, error);
+		
+		/* get position */
+		if (fsdwsegyheader->sourceCoordX != 0
+			|| fsdwsegyheader->sourceCoordY != 0)
+			{
+			*navlon = ((double)fsdwsegyheader->sourceCoordX) / 360000.0;
+			*navlat = ((double)fsdwsegyheader->sourceCoordY) / 360000.0;
+			}
+
+		/* get roll pitch and heave */
+		*roll = 0.01 * fsdwsegyheader->roll;
+		*pitch = 0.01 * fsdwsegyheader->pitch;
+		*heave = 0.0;
+
+			mb_attint_interp(verbose, mbio_ptr, store->time_d,  
+				    heave, roll, pitch, error);
+
+		/* get draft  */
+		*draft = reference->water_z;
+
+		/* done translating values */
+
+		}
+
+	/* extract data from sidescan structure */
+	else if (*kind == MB_DATA_SIDESCAN2
+		|| *kind == MB_DATA_SIDESCAN3)
+		{
+		/* get edgetech sidescan header */
+		if (*kind == MB_DATA_SIDESCAN2)
+			fsdwssheader = &(fsdwsslo->ssheader[0]);
+		else if (*kind == MB_DATA_SIDESCAN3)
+			fsdwssheader = &(fsdwsshi->ssheader[0]);
+		
+		/* get time */
+		for (i=0;i<7;i++)
+			time_i[i] = store->time_i[i];
+		*time_d = store->time_d;
+		
+		/* get heading */
+		if (fsdwssheader->heading != 0)
+			*heading = 0.01 * fsdwssheader->heading;
+		else
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+					    heading, error);
+		
+		/* get speed and position */
+		*speed = 0.0;
+		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+				    navlon, navlat, speed, error);
+		
+		/* get position */
+		if (fsdwssheader->longitude != 0
+			|| fsdwssheader->latitude != 0)
+			{
+			*navlon = ((double)fsdwssheader->longitude)/ 360000.0;
+			*navlat = ((double)fsdwssheader->latitude)/ 360000.0;
+			}
+
+		/* print debug statements */
+		if (verbose >= 5)
+			{
+			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
+				function_name);
+			fprintf(stderr,"dbg4  Extracted values:\n");
+			fprintf(stderr,"dbg4       kind:       %d\n",
+				*kind);
+			fprintf(stderr,"dbg4       error:      %d\n",
+				*error);
+			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
+				time_i[0]);
+			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
+				time_i[1]);
+			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
+				time_i[2]);
+			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
+				time_i[3]);
+			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
+				time_i[4]);
+			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
+				time_i[5]);
+			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
+				time_i[6]);
+			fprintf(stderr,"dbg4       time_d:     %f\n",
+				*time_d);
+			fprintf(stderr,"dbg4       longitude:  %f\n",
+				*navlon);
+			fprintf(stderr,"dbg4       latitude:   %f\n",
+				*navlat);
+			fprintf(stderr,"dbg4       speed:      %f\n",
+				*speed);
+			fprintf(stderr,"dbg4       heading:    %f\n",
+				*heading);
+			}
+
+		/* done translating values */
+
+		}
+
 
 	/* deal with comment */
 	else if (*kind == MB_DATA_COMMENT)
@@ -7165,6 +7556,109 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 			fprintf(stderr,"dbg2       depth:         %f\n",depth[i]);
 			fprintf(stderr,"dbg2       salinity:      %f\n",salinity[i]);
 			fprintf(stderr,"dbg2       soundspeed:    %f\n",soundspeed[i]);
+			}
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, int *nsamples, double *time_d, 
+	double *sensor1, double *sensor2, double *sensor3, 
+	double *sensor4, double *sensor5, double *sensor6, 
+	double *sensor7, double *sensor8, int *error)
+{
+	char	*function_name = "mbsys_reson7k_ancilliarysensor";
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_bluefin *bluefin;
+	s7k_bluefin_environmental *environmental;
+	s7kr_ctd *ctd;
+	int	status;
+	int	time_j[5];
+	int	time_i[7];
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract ctd data from bluefin environmental SSV record */
+	if (*kind == MB_DATA_SSV)
+		{
+		bluefin = &(store->bluefin);
+		header = &(bluefin->header);
+				
+		*nsamples = 0;
+		for (i=0;i<bluefin->number_frames;i++)
+			{
+			environmental = &(bluefin->environmental[i]);
+			time_d[*nsamples] = environmental->sensor_time_sec + 0.000000001 * environmental->sensor_time_nsec;
+			sensor1[*nsamples] = -5.0 + ((double)environmental->sensor1) / 6553.6;
+			sensor2[*nsamples] = -5.0 + ((double)environmental->sensor2) / 6553.6;
+			sensor3[*nsamples] = -5.0 + ((double)environmental->sensor3) / 6553.6;
+			sensor4[*nsamples] = -5.0 + ((double)environmental->sensor4) / 6553.6;
+			sensor5[*nsamples] = -5.0 + ((double)environmental->sensor5) / 6553.6;
+			sensor6[*nsamples] = -5.0 + ((double)environmental->sensor6) / 6553.6;
+			sensor7[*nsamples] = -5.0 + ((double)environmental->sensor7) / 6553.6;
+			sensor8[*nsamples] = -5.0 + ((double)environmental->sensor8) / 6553.6;
+			(*nsamples)++;
+			}
+		}
+		
+	/* else failure */
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nsamples:   %d\n",*nsamples);
+		for (i=0;i<*nsamples;i++)
+			{
+			fprintf(stderr,"dbg2       time_d:        %f\n",time_d[i]);
+			fprintf(stderr,"dbg2       sensor1:       %f\n",sensor1[i]);
+			fprintf(stderr,"dbg2       sensor2:       %f\n",sensor2[i]);
+			fprintf(stderr,"dbg2       sensor3:       %f\n",sensor3[i]);
+			fprintf(stderr,"dbg2       sensor4:       %f\n",sensor4[i]);
+			fprintf(stderr,"dbg2       sensor5:       %f\n",sensor5[i]);
+			fprintf(stderr,"dbg2       sensor6:       %f\n",sensor6[i]);
+			fprintf(stderr,"dbg2       sensor7:       %f\n",sensor7[i]);
+			fprintf(stderr,"dbg2       sensor8:       %f\n",sensor8[i]);
 			}
 		}
 	if (verbose >= 2)

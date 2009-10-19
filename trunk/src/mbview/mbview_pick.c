@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_pick.c	9/29/2003
- *    $Id: mbview_pick.c,v 5.17 2008-09-11 20:17:33 caress Exp $
+ *    $Id: mbview_pick.c,v 5.17 2008/09/11 20:17:33 caress Exp $
  *
  *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbview_pick.c,v $
+ * Revision 5.17  2008/09/11 20:17:33  caress
+ * Checking in updates made during cruise AT15-36.
+ *
  * Revision 5.16  2008/05/16 22:59:42  caress
  * Release 5.1.1beta18.
  *
@@ -124,7 +127,7 @@ static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_pick.c,v 5.17 2008-09-11 20:17:33 caress Exp $";
+static char rcs_id[]="$Id: mbview_pick.c,v 5.17 2008/09/11 20:17:33 caress Exp $";
 	
 
 /*------------------------------------------------------------------------------*/
@@ -594,6 +597,7 @@ int mbview_pick_text(int instance)
 	char	lonstr0[24], lonstr1[24];
 	char	latstr0[24], latstr1[24];
 	char	date0[24], date1[24];
+	char	shot0[48], shot1[48];
 	double	lonmin, lonmax, latmin, latmax;
 	int	i;
 
@@ -791,18 +795,24 @@ int mbview_pick_text(int instance)
 					shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon, 
 					shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ylat, 
 					lonstr0, latstr0);
-		sprintf(value_text,":::t\"Navigation Pick Info:\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" Vehicle Depth: %.3f m\":t\" Heading: %.1f deg\":t\" Speed: %.1f km/hr\"", 
+		sprintf(shot0, "#:%d:%d/%d",
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].line,
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].shot,
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].cdp);
+		sprintf(value_text,":::t\"Navigation Pick Info:\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" Vertical: %.3f m\":t\" Heading: %.1f deg\":t\" Speed: %.1f km/hr\":t\" %s\"", 
 			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, 
 			date0, lonstr0, latstr0,
 			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdata,
 			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].heading,
-			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].speed);
-		sprintf(value_list,"Navigation Pick Info: %s %s Lon: %s Lat: %s Vehicle Depth: %.3f m Heading: %.1f deg Speed: %.1f km/hr", 
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].speed, 
+			shot0);
+		sprintf(value_list,"Navigation Pick Info: %s %s Lon: %s Lat: %s Vehicle Depth: %.3f m Heading: %.1f deg Speed: %.1f km/hr %s", 
 			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, 
 			date0, lonstr0, latstr0,
 			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.zdata,
 			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].heading,
-			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].speed);
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].speed, 
+			shot0);
 		}
 	else if (data->pickinfo_mode == MBV_PICK_NAV
 		&& shared.shareddata.navpick_type == MBV_PICK_TWOPOINT
@@ -820,6 +830,10 @@ int mbview_pick_text(int instance)
 					shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.xlon, 
 					shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].point.ylat, 
 					lonstr0, latstr0);
+		sprintf(shot0, "#:%d:%d/%d",
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].line,
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].shot,
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].navpts[shared.shareddata.nav_point_selected[0]].cdp);
 		mb_get_date(mbv_verbose,
 				shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].time_d,
 				time_i);
@@ -831,12 +845,16 @@ int mbview_pick_text(int instance)
 					shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.xlon, 
 					shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].point.ylat, 
 					lonstr1, latstr1);
-		sprintf(value_text,":::t\"Navigation Picks Info:\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\"", 
-			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, date0, lonstr0, latstr0,
-			shared.shareddata.navs[shared.shareddata.nav_selected[1]].name, date1, lonstr1, latstr1);
-		sprintf(value_list,"Navigation Picks Info: %s %s Lon: %s Lat: %s %s %s Lon: %s Lat: %s", 
-			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, date0, lonstr0, latstr0,
-			shared.shareddata.navs[shared.shareddata.nav_selected[1]].name, date1, lonstr1, latstr1);
+		sprintf(shot1, "#:%d:%d/%d",
+			shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].line,
+			shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].shot,
+			shared.shareddata.navs[shared.shareddata.nav_selected[1]].navpts[shared.shareddata.nav_point_selected[1]].cdp);
+		sprintf(value_text,":::t\"Navigation Picks Info:\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" %s\":t\" %s\":t\" %s\":t\" Lon: %s\":t\" Lat: %s\":t\" %s\"", 
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, date0, lonstr0, latstr0, shot0,
+			shared.shareddata.navs[shared.shareddata.nav_selected[1]].name, date1, lonstr1, latstr1, shot1);
+		sprintf(value_list,"Navigation Picks Info: %s %s Lon: %s Lat: %s %s %s %s Lon: %s Lat: %s %s", 
+			shared.shareddata.navs[shared.shareddata.nav_selected[0]].name, date0, lonstr0, latstr0, shot0,
+			shared.shareddata.navs[shared.shareddata.nav_selected[1]].name, date1, lonstr1, latstr1, shot1);
 		}
 /*	else
 		{

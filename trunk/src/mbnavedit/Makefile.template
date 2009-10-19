@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  6/23/95
-#	$Id: Makefile.template,v 5.6 2009-03-13 07:05:58 caress Exp $
+#	$Id: Makefile.template,v 5.6 2009/03/13 07:05:58 caress Exp $
 #
 #     Copyright (c) 1995-2009 by
 #     David W. Caress (caress@mbari.org)
@@ -15,7 +15,10 @@
 # Author:	D. W. Caress
 # Date:		June 23, 1995
 #
-# $Log: not supported by cvs2svn $
+# $Log: Makefile.template,v $
+# Revision 5.6  2009/03/13 07:05:58  caress
+# Release 5.1.2beta02
+#
 # Revision 5.5  2006/03/06 21:38:48  caress
 # Changed libproj and libgsf to libmbproj and libmbgsf.
 #

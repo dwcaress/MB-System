@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_sbsiomrg.h	1/20/93
- *	$Id: mbf_sbsiomrg.h,v 5.3 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mbf_sbsiomrg.h,v 5.3 2003/04/17 21:05:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,7 +18,10 @@
  *
  * Author:	D. W. Caress
  * Date:	January 20, 1993
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_sbsiomrg.h,v $
+ * Revision 5.3  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2002/10/15 18:34:58  caress
  * Release 5.0.beta25
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb7k2ss.c		8/15/2007
- *    $Id: mb7k2ss.c,v 5.4 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mb7k2ss.c,v 5.4 2008/11/16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Date:	August 15, 2007
  *              R/V Atlantis, Axial Seamount
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb7k2ss.c,v $
+ * Revision 5.4  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.3  2008/09/27 03:27:11  caress
  * Working towards release 5.1.1beta24
  *
@@ -142,7 +145,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 					struct mb7k2ss_grid_struct *grid,
 					double	 *range, int *error);
 
-static char rcs_id[] = "$Id: mb7k2ss.c,v 5.4 2008-11-16 21:51:18 caress Exp $";
+static char rcs_id[] = "$Id: mb7k2ss.c,v 5.4 2008/11/16 21:51:18 caress Exp $";
 static char program_name[] = "mb7k2ss";
 static int	pargc;
 static char	**pargv;
@@ -278,6 +281,9 @@ main (int argc, char **argv)
 	double	gainfactor = 1.0;
 	int	ssflip = MB_NO;
 	
+	/* sidescan interpolation scale */
+	int	interpbins = 0;
+	
 	/* route and auto-line data */
 	mb_path	route_file;
 	int	route_file_set = MB_NO;
@@ -370,9 +376,11 @@ main (int argc, char **argv)
 	char	*result;
 	int	nget;
 	int	point_ok;
+	int	previous, jj, interpable;
+	double	dss, dssl, fraction;
 	
 	int	read_data;
-	int	found;
+	int	found, done;
 	int	i, j, k, n;
 	
 	startline = 1;
@@ -388,7 +396,7 @@ main (int argc, char **argv)
 	/* process argument list */
 	pargc = 1;
 	pargv = argv;
-	while ((c = getopt(argc, argv, "A:a:B:b:CcF:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:U:u:XxVvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:F:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:U:u:XxVvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -441,6 +449,10 @@ main (int argc, char **argv)
 		case 'C':
 		case 'c':
 			print_comments = MB_YES;
+			break;
+		case 'D':
+		case 'd':
+			sscanf (optarg,"%d", &interpbins);
 			break;
 		case 'F':
 		case 'f':
@@ -557,6 +569,7 @@ main (int argc, char **argv)
 		fprintf(stderr,"dbg2       bottompickmode:      %d\n",bottompickmode);
 		fprintf(stderr,"dbg2       bottompickthreshold: %f\n",bottompickthreshold);
 		fprintf(stderr,"dbg2       smooth:              %d\n",smooth);
+		fprintf(stderr,"dbg2       interpbins:          %d\n",interpbins);
 		fprintf(stderr,"dbg2       gainmode:            %d\n",gainmode);
 		fprintf(stderr,"dbg2       gainfactor:          %f\n",gainfactor);
 		fprintf(stderr,"dbg2       sslayoutmode:        %d\n",sslayoutmode);
@@ -1372,6 +1385,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						kstart = kangle;
 						}
 					}
+/*fprintf(stderr,"port minimum range:%f kstart:%d\n",rr,kstart);*/
 
 				/* bin port trace */
 				datashort = (unsigned short *) sschannelport->data;
@@ -1389,15 +1403,16 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					/* get sample range */
 					rr = 0.0000000005 * ssv_use *(i * ssheaderport->sampleInterval);
 
-					/* look up position for this range */
-					found = MB_NO;
-					for (kangle=kstart;kangle>0 && found == MB_NO;kangle--)
+					/* look up position(s) for this range */
+					done = MB_NO;
+					for (kangle=kstart;kangle>0 && done == MB_NO;kangle--)
 						{
-						if (rr <= table_range[kangle])
+						found = MB_NO;
+						if (rr <= table_range[kstart])
 							{
-							xtrack = table_xtrack[kangle];
-							ltrack = table_ltrack[kangle];
-							kstart = kangle;
+							xtrack = table_xtrack[kstart];
+							ltrack = table_ltrack[kstart];
+							done = MB_YES;
 							found = MB_YES;
 							}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle-1])
@@ -1408,18 +1423,32 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 								+ factor * (table_xtrack[kangle-1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] 
 								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
-							kstart = kangle;
 							found = MB_YES;
 							}
-						}
-
-					/* bin the value and position */
-					j = opixels_ss / 2 + (int)(xtrack / pixel_width);
-					if (j >= 0 && j < opixels_ss)
-						{
-						oss[j] += value / weight;
-						ossbincount[j]++;
-						ossalongtrack[j] += ltrack;
+						else if (rr < table_range[kangle] && rr >= table_range[kangle-1])
+							{
+							factor = (rr - table_range[kangle]) 
+								/ (table_range[kangle-1] - table_range[kangle]);
+							xtrack = table_xtrack[kangle] 
+								+ factor * (table_xtrack[kangle-1] - table_xtrack[kangle]);
+							ltrack = table_ltrack[kangle] 
+								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
+							found = MB_YES;
+							}
+							
+						/* bin the value and position */
+						if (found == MB_YES)
+							{
+							j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+							if (j >= 0 && j < opixels_ss)
+								{
+								oss[j] += value / weight;
+								ossbincount[j]++;
+								ossalongtrack[j] += ltrack;
+								}
+/*fprintf(stderr,"port:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
+i,rr,xtrack,ltrack,kangle);*/
+							}
 						}
 					}
 									
@@ -1434,6 +1463,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 						kstart = kangle;
 						}
 					}
+/*fprintf(stderr,"stbd minimum range:%f kstart:%d\n",rr,kstart);*/
 /*fprintf(stderr,"kstart:%d angle:%f range:%f xtrack:%f ltrack:%f\n",
 kstart,
 angle_min + kstart * (angle_max - angle_min) / (nangle - 1),
@@ -1456,14 +1486,15 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 					rr = 0.0000000005 * ssv_use *(i * ssheaderstbd->sampleInterval);
 
 					/* look up position for this range */
-					found = MB_NO;
-					for (kangle=kstart;kangle<nangle-1 && found == MB_NO;kangle++)
+					done = MB_NO;
+					for (kangle=kstart;kangle<nangle-1 && done == MB_NO;kangle++)
 						{
-						if (rr <= table_range[kangle])
+						found = MB_NO;
+						if (rr <= table_range[kstart])
 							{
-							xtrack = table_xtrack[kangle];
-							ltrack = table_ltrack[kangle];
-							kstart = kangle;
+							xtrack = table_xtrack[kstart];
+							ltrack = table_ltrack[kstart];
+							done = MB_YES;
 							found = MB_YES;
 							}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle+1])
@@ -1474,18 +1505,32 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 								+ factor * (table_xtrack[kangle+1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] 
 								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
-							kstart = kangle;
 							found = MB_YES;
 							}
-						}
+						else if (rr < table_range[kangle] && rr >= table_range[kangle+1])
+							{
+							factor = (rr - table_range[kangle]) 
+								/ (table_range[kangle+1] - table_range[kangle]);
+							xtrack = table_xtrack[kangle] 
+								+ factor * (table_xtrack[kangle+1] - table_xtrack[kangle]);
+							ltrack = table_ltrack[kangle] 
+								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
+							found = MB_YES;
+							}
 
-					/* bin the value and position */
-					j = opixels_ss / 2 + (int)(xtrack / pixel_width);
-					if (j >= 0 && j < opixels_ss)
-						{
-						oss[j] += value / weight;
-						ossbincount[j]++;
-						ossalongtrack[j] += ltrack;
+						/* bin the value and position */
+						if (found == MB_YES)
+							{
+							j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+							if (j >= 0 && j < opixels_ss)
+								{
+								oss[j] += value / weight;
+								ossbincount[j]++;
+								ossalongtrack[j] += ltrack;
+								}
+/*fprintf(stderr,"stbd:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
+i,rr,xtrack,ltrack,kangle);*/
+							}
 						}
 					}
 
@@ -1500,6 +1545,37 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 					else
 						oss[j] = MB_SIDESCAN_NULL;
 					}
+/*for (j=0;j<opixels_ss;j++)
+{
+fprintf(stderr,"AAA j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalongtrack[j],oss[j]);
+}*/
+
+				/* interpolate gaps in the output sidescan */
+				previous = opixels_ss;
+				for (j=0;j<opixels_ss;j++)
+					{
+					if (ossbincount[j] > 0)
+						{
+						interpable = j - previous - 1;
+						if (interpable > 0 && interpable <= interpbins)
+							{
+							dss = oss[j] - oss[previous];
+							dssl = ossalongtrack[j] - ossalongtrack[previous];
+							for (jj=previous+1;jj<j;jj++)
+								{
+								fraction = ((double)(jj - previous))
+										/ ((double)(j - previous));
+								oss[jj] = oss[previous] + fraction * dss;
+								ossalongtrack[jj] = ossalongtrack[previous] + fraction * dssl;
+								}
+							}
+						previous = j;
+						}
+					}
+/*for (j=0;j<opixels_ss;j++)
+{
+fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalongtrack[j],oss[j]);
+}*/
 
 				/* insert data */
 				mb_insert_nav(verbose, ombio_ptr, (void *)ostore, 
@@ -1684,15 +1760,16 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 					/* get sample range */
 					rr = 0.0000000005 * ssv_use *(i * ssheaderport->sampleInterval);
 
-					/* look up position for this range */
-					found = MB_NO;
-					for (kangle=kstart;kangle>0 && found == MB_NO;kangle--)
+					/* look up position(s) for this range */
+					done = MB_NO;
+					for (kangle=kstart;kangle>0 && done == MB_NO;kangle--)
 						{
-						if (rr <= table_range[kangle])
+						found = MB_NO;
+						if (rr <= table_range[kstart])
 							{
-							xtrack = table_xtrack[kangle];
-							ltrack = table_ltrack[kangle];
-							kstart = kangle;
+							xtrack = table_xtrack[kstart];
+							ltrack = table_ltrack[kstart];
+							done = MB_YES;
 							found = MB_YES;
 							}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle-1])
@@ -1703,19 +1780,22 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 								+ factor * (table_xtrack[kangle-1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] 
 								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
-							kstart = kangle;
 							found = MB_YES;
+							}
+							
+						/* bin the value and position */
+						if (found == MB_YES)
+							{
+							j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+							if (j >= 0 && j < opixels_ss)
+								{
+								oss[j] += value / weight;
+								ossbincount[j]++;
+								ossalongtrack[j] += ltrack;
+								}
 							}
 						}
 
-					/* bin the value and position */
-					j = opixels_ss / 2 + (int)(xtrack / pixel_width);
-					if (j >= 0 && j < opixels_ss)
-						{
-						oss[j] += value / weight;
-						ossbincount[j]++;
-						ossalongtrack[j] += ltrack;
-						}
 					}
 									
 				/* find minimum range */
@@ -1747,14 +1827,15 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 					rr = 0.0000000005 * ssv_use *(i * ssheaderstbd->sampleInterval);
 
 					/* look up position for this range */
-					found = MB_NO;
-					for (kangle=kstart;kangle<nangle-1 && found == MB_NO;kangle++)
+					done = MB_NO;
+					for (kangle=kstart;kangle<nangle-1 && done == MB_NO;kangle++)
 						{
-						if (rr <= table_range[kangle])
+						found = MB_NO;
+						if (rr <= table_range[kstart])
 							{
-							xtrack = table_xtrack[kangle];
-							ltrack = table_ltrack[kangle];
-							kstart = kangle;
+							xtrack = table_xtrack[kstart];
+							ltrack = table_ltrack[kstart];
+							done = MB_YES;
 							found = MB_YES;
 							}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle+1])
@@ -1765,18 +1846,20 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 								+ factor * (table_xtrack[kangle+1] - table_xtrack[kangle]);
 							ltrack = table_ltrack[kangle] 
 								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
-							kstart = kangle;
 							found = MB_YES;
 							}
-						}
 
-					/* bin the value and position */
-					j = opixels_ss / 2 + (int)(xtrack / pixel_width);
-					if (j >= 0 && j < opixels_ss)
-						{
-						oss[j] += value / weight;
-						ossbincount[j]++;
-						ossalongtrack[j] += ltrack;
+						/* bin the value and position */
+						if (found == MB_YES)
+							{
+							j = opixels_ss / 2 + (int)(xtrack / pixel_width);
+							if (j >= 0 && j < opixels_ss)
+								{
+								oss[j] += value / weight;
+								ossbincount[j]++;
+								ossalongtrack[j] += ltrack;
+								}
+							}
 						}
 					}
 
@@ -1790,6 +1873,29 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 						}
 					else
 						oss[j] = MB_SIDESCAN_NULL;
+					}
+
+				/* interpolate gaps in the output sidescan */
+				previous = opixels_ss;
+				for (j=0;j<opixels_ss;j++)
+					{
+					if (ossbincount[j] > 0)
+						{
+						interpable = j - previous - 1;
+						if (interpable > 0 && interpable <= interpbins)
+							{
+							dss = oss[j] - oss[previous];
+							dssl = ossalongtrack[j] - ossalongtrack[previous];
+							for (jj=previous+1;jj<j;jj++)
+								{
+								fraction = ((double)(jj - previous))
+										/ ((double)(j - previous));
+								oss[jj] = oss[previous] + fraction * dss;
+								ossalongtrack[jj] = ossalongtrack[previous] + fraction * dssl;
+								}
+							}
+						previous = j;
+						}
 					}
 
 				/* insert data */

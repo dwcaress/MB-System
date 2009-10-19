@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grdplot.perl	8/6/95
-#    $Id: mbm_grdplot.perl,v 5.33 2008-09-11 20:06:45 caress Exp $
+#    $Id: mbm_grdplot.perl,v 5.33 2008/09/11 20:06:45 caress Exp $
 #
-#    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
+#    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -69,10 +69,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 19, 1994
 #
 # Version:
-#   $Id: mbm_grdplot.perl,v 5.33 2008-09-11 20:06:45 caress Exp $
+#   $Id: mbm_grdplot.perl,v 5.33 2008/09/11 20:06:45 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_grdplot.perl,v $
+#   Revision 5.33  2008/09/11 20:06:45  caress
+#   Checking in updates made during cruise AT15-36.
+#
 #   Revision 5.32  2008/07/10 06:43:40  caress
 #   Preparing for 5.1.1beta20
 #
@@ -1114,6 +1117,16 @@ if ($file_intensity)
 			}
 		}
 	}
+	
+# check for zmode == 1 in zbounds
+if ($zbounds =~ /(\S+)\/(\S+)\/(\S+)/)
+	{
+	($zmin,$zmax,$zmode) = $zbounds =~ /(\S+)\/(\S+)\/(\S+)/;
+	}
+else
+	{
+	$zmode = 0;
+	}
 
 # get limits of files using grdinfo
 if (!$bounds || !$zbounds || $zmode == 1)
@@ -1345,11 +1358,19 @@ if ($data_scale)
 	{
 	$zmin = $data_scale * $zmin;
 	$zmax = $data_scale * $zmax;
+	$zmin_t = $data_scale * $zmin_t;
+	$zmax_t = $data_scale * $zmax_t;
 	if ($zmin > $zmax)
 		{
 		$tmp = $zmin;
 		$zmin = $zmax;
 		$zmax = $tmp;
+		}
+	if ($zmin_t > $zmax_t)
+		{
+		$tmp = $zmin_t;
+		$zmin_t = $zmax_t;
+		$zmax_t = $tmp;
 		}
 	}
 
@@ -1767,7 +1788,13 @@ elsif ($color_mode)
 	{
 	$ncolors_use = $ncolors + 1;
 	}
-if ($color_mode && !$no_nice_color_int && $dzz > 0)
+if ($color_mode && $zbounds)
+	{
+	$color_int = ($zmax - $zmin)/($ncolors_use - 1);
+	$color_start = $zmin;
+	$color_end = $color_start + $color_int * ($ncolors_use - 1);
+	}
+elsif ($color_mode && !$no_nice_color_int && $dzz > 0)
 	{
 	$start_int = $contour_int / 2;
 	$multiplier = int($dzz / ($ncolors_use - 1) / $start_int) + 1;
@@ -2208,20 +2235,6 @@ if ($color_mode && !$file_cpt)
 		{
 		$d1 = $color_start;
 		}
-	if ($zmode == 1)
-		{
-		if ($color_mode == 4)
-			{
-			if ($d1 > 0.0)
-				{
-				$d1 = 0.0;
-				}
-			}
-		else
-			{
-			$d1 = $zmin_t;
-			}
-		}
 	if ($color_style == 1 && $color_flip)
 		{
 		foreach $i (0 .. $ncolors - 2)
@@ -2234,9 +2247,23 @@ if ($color_mode && !$file_cpt)
 				{
 				$d2 = $d1 + $color_int;
 				}
-			if ($i == $ncolors - 2)
+			if ($zmode == 1)
 				{
-				$d2 = $zmax_t;
+				if ($i == 0)
+					{
+					if ($color_mode == 4 && $d1 > 0.0)
+						{
+						$d1 = 0.0;
+						}
+					elsif ($color_mode != 4 && $zmin_t < $d1)
+						{
+						$d1 = $zmin_t;
+						}
+					}
+				if ($i == $ncolors - 2 && $zmax_t > $d2)
+					{
+					$d2 = $zmax_t;
+					}
 				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
@@ -2265,9 +2292,23 @@ if ($color_mode && !$file_cpt)
 				{
 				$d2 = $d1 + $color_int;
 				}
-			if ($zmode == 1 && $i == 0)
+			if ($zmode == 1)
 				{
-				$d2 = $zmax_t;
+				if ($i == $ncolors - 2)
+					{
+					if ($color_mode == 4 && $d1 > 0.0)
+						{
+						$d1 = 0.0;
+						}
+					elsif ($color_mode != 4 && $zmin_t < $d1)
+						{
+						$d1 = $zmin_t;
+						}
+					}
+				if ($i == 0 && $zmax_t > $d2)
+					{
+					$d2 = $zmax_t;
+					}
 				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i+1],@cptg[$i+1],@cptb[$i+1],
@@ -2296,9 +2337,23 @@ if ($color_mode && !$file_cpt)
 				{
 				$d2 = $d1 + $color_int;
 				}
-			if ($zmode == 1 && $i == $ncolors - 1)
+			if ($zmode == 1)
 				{
-				$d2 = $zmax_t;
+				if ($i == 0)
+					{
+					if ($color_mode == 4 && $d1 > 0.0)
+						{
+						$d1 = 0.0;
+						}
+					elsif ($color_mode != 4 && $zmin_t < $d1)
+						{
+						$d1 = $zmin_t;
+						}
+					}
+				if ($i == $ncolors - 1 && $zmax_t > $d2)
+					{
+					$d2 = $zmax_t;
+					}
 				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
@@ -2327,14 +2382,28 @@ if ($color_mode && !$file_cpt)
 				{
 				$d2 = $d1 + $color_int;
 				}
-			if ($zmode == 1 && $i == 0)
+			if ($zmode == 1)
 				{
-				$d2 = $zmax_t;
+				if ($i == $ncolors - 1)
+					{
+					if ($color_mode == 4 && $d1 > 0.0)
+						{
+						$d1 = 0.0;
+						}
+					elsif ($color_mode != 4 && $zmin_t < $d1)
+						{
+						$d1 = $zmin_t;
+						}
+					}
+				if ($i == 0 && $zmax_t > $d2)
+					{
+					$d2 = $zmax_t;
+					}
 				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
-			if ($i == ($ncolors - 2))
+			if ($i == ($ncolors - 1))
 				{
 				print FCMD " >";
 				}

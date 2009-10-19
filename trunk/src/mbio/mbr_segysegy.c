@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_segysegy.c	10/27/2006
- *	$Id: mbr_segysegy.c,v 5.0 2007-01-04 23:52:24 caress Exp $
+ *	$Id: mbr_segysegy.c,v 5.0 2007/01/04 23:52:24 caress Exp $
  *
  *    Copyright (c) 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  * Author:	D. W. Caress
  * Date:	October 27, 2006
  
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_segysegy.c,v $
+ * Revision 5.0  2007/01/04 23:52:24  caress
+ * Support for segy data as format 160
+ *
  *
  */
 
@@ -119,6 +122,7 @@ int mbr_register_segysegy(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_write_ping = &mbr_wt_segysegy; 
 	mb_io_ptr->mb_io_dimensions = &mbsys_singlebeam_dimensions; 
 	mb_io_ptr->mb_io_pingnumber = &mbsys_singlebeam_pingnumber; 
+	mb_io_ptr->mb_io_segynumber = &mbsys_singlebeam_segynumber; 
 	mb_io_ptr->mb_io_extract = &mbsys_singlebeam_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_singlebeam_insert; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_singlebeam_extract_nav; 
@@ -442,6 +446,7 @@ int mbr_rt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->free_air = 0.0;
 		store->seismic_line = mb_segyio_ptr->fileheader.line;
 		store->seismic_shot = traceheader.shot_num;
+		store->seismic_cdp = traceheader.rp_num;
 		for (i=0;i<MBSYS_SINGLEBEAM_MAXLINE;i++)
 		    store->comment[i] = '\0';
 		}
@@ -509,6 +514,8 @@ int mbr_wt_segysegy(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		traceheader.src_depth = 100.0 * store->sonar_depth;
 		traceheader.wbt_secs = store->tt;
 		traceheader.src_wbd = 100.0 * store->bath;
+		traceheader.shot_num = store->seismic_shot;
+		traceheader.rp_num = store->seismic_cdp;
 		}
 
 	/* write next data to file */

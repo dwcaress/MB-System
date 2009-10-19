@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_asciixyz.c	5/8/2002
- *	$Id: mbr_asciixyz.c,v 5.7 2008-07-10 06:43:40 caress Exp $
+ *	$Id: mbr_asciixyz.c,v 5.7 2008/07/10 06:43:40 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -28,7 +28,10 @@
  * Author:	D. W. Caress
  * Date:	May 8, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_asciixyz.c,v $
+ * Revision 5.7  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.6  2006/04/11 19:14:46  caress
  * Various fixes.
  *
@@ -94,7 +97,7 @@ int mbr_dem_asciixyz(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_asciixyz(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char res_id[]="$Id: mbr_asciixyz.c,v 5.7 2008-07-10 06:43:40 caress Exp $";
+static char res_id[]="$Id: mbr_asciixyz.c,v 5.7 2008/07/10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_asciixyz(int verbose, void *mbio_ptr, int *error)

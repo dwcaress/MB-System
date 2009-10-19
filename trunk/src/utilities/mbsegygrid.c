@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegygrid.c	6/12/2004
- *    $Id: mbsegygrid.c,v 5.16 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mbsegygrid.c,v 5.16 2008/11/16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2004, 2005, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Author:	D. W. Caress
  * Date:	June 12, 2004
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsegygrid.c,v $
+ * Revision 5.16  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.15  2008/09/11 20:20:14  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -121,7 +124,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegygrid.c,v 5.16 2008-11-16 21:51:18 caress Exp $";
+static char rcs_id[] = "$Id: mbsegygrid.c,v 5.16 2008/11/16 21:51:18 caress Exp $";
 static char program_name[] = "MBsegygrid";
 static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
@@ -174,6 +177,7 @@ main (int argc, char **argv)
 	int	gainmode = MBSEGYGRID_GAIN_OFF;
 	double	gain = 0.0;
 	double	gainwindow = 0.0;
+	int	agcmode = MB_NO;
 	int	nsamples;
 	int	ntraces;
 	int	ngridx = 0;
@@ -226,7 +230,7 @@ main (int argc, char **argv)
 	GMT_make_fnan(NaN);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:D:d:G:g:I:i:O:o:S:s:T:t:VvW:w:Hh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:BbD:d:G:g:I:i:O:o:S:s:T:t:VvW:w:Hh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -242,6 +246,11 @@ main (int argc, char **argv)
 			n = sscanf (optarg,"%lf/%lf", &shotscale, &timescale);
 			if (n == 2)
 				scale2distance = MB_YES;
+			flag++;
+			break;
+		case 'B':
+		case 'b':
+			agcmode = MB_YES;
 			flag++;
 			break;
 		case 'D':
@@ -351,6 +360,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       windowmode:     %d\n",windowmode);
 		fprintf(outfp,"dbg2       windowstart:    %f\n",windowstart);
 		fprintf(outfp,"dbg2       windowend:      %f\n",windowend);
+		fprintf(outfp,"dbg2       agcmode:        %d\n",agcmode);
 		fprintf(outfp,"dbg2       gainmode:       %d\n",gainmode);
 		fprintf(outfp,"dbg2       gain:           %f\n",gain);
 		fprintf(outfp,"dbg2       gainwindow:     %f\n",gainwindow);
@@ -478,6 +488,7 @@ main (int argc, char **argv)
 		fprintf(outfp,"     window mode:        %d\n",windowmode);
 		fprintf(outfp,"     window start:       %f seconds\n",windowstart);
 		fprintf(outfp,"     window end:         %f seconds\n",windowend);
+		fprintf(outfp,"     agcmode:            %d\n",agcmode);
 		fprintf(outfp,"     gain mode:          %d\n",gainmode);
 		fprintf(outfp,"     gain:               %f\n",gain);
 		fprintf(outfp,"     gainwindow:         %f\n",gainwindow);
@@ -704,6 +715,24 @@ i,iy,factor,i,trace[i]);*/
 							}
 /*fprintf(stderr,"igainstart:%d igainend:%d tmax:%f factor:%f\n",
 igainstart,igainend,tmax,factor);*/
+						}
+						
+					/* apply global agc if desired */
+					if (agcmode == MB_YES)
+						{
+						tmax = 0.0;
+						for (i=0;i<=traceheader.nsamps;i++)
+							{
+							tmax = MAX(tmax, fabs(trace[i]));
+							}
+						if (tmax > 0.0)
+							{
+							factor = 1000.0 / tmax;
+							for (i=0;i<=traceheader.nsamps;i++)
+								{
+								trace[i] *= factor;
+								}
+							}
 						}
 						
 
@@ -991,8 +1020,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	status = MB_SUCCESS;
 	struct GRD_HEADER grd;
 	double	w, e, s, n;
-	int	pad[4];
-	int	complex;
+	GMT_LONG	pad[4];
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	char	*message;
@@ -1067,14 +1095,13 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	sprintf(grd.remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
 		projection,program_name,MB_VERSION,user,host,date);
 
-	/* set extract wesn,pad and complex */
+	/* set extract wesn,pad */
 	w = 0.0;
 	e = 0.0;
 	s = 0.0;
 	n = 0.0;
 	for (i=0;i<4;i++)
 		pad[i] = 0;
-	complex = 0;
 
 	/* write grid to GMT netCDF grd file */
 /*for (i=0;i<nx;i++)
@@ -1083,7 +1110,7 @@ for (j=0;j<ny;j++)
 k = j * nx + i;
 fprintf(outfp,"%d %d %d %f\n",i,j,k,grid[k]);
 }*/
-	GMT_write_grd(outfile, &grd, grid, w, e, s, n, pad, complex);
+	GMT_write_grd(outfile, &grd, grid, w, e, s, n, pad, FALSE);
 	    
 	/* free GMT memory */
 	GMT_free ((void *)GMT_io.skip_if_NaN);

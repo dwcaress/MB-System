@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: strtod.c,v 5.1 2002-09-19 00:33:55 caress Exp $
+ * $Id: strtod.c,v 5.1 2002/09/19 00:33:55 caress Exp $
  *
  * Project:  PROJ.4
  * Purpose:  strtod() substitute.  This is used because the strtod() on
@@ -31,7 +31,10 @@
  * Cambridge, MA 02139, USA.
  ******************************************************************************
  *
- * $Log: not supported by cvs2svn $
+ * $Log: strtod.c,v $
+ * Revision 5.1  2002/09/19 00:33:55  caress
+ * More recent version of PROJ4
+ *
  * Revision 1.2  2000/11/30 03:37:22  warmerda
  * use proj_strtod() in dmstor()
  *

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_samesurf.c	6/13/2002
- *	$Id: mbr_samesurf.c,v 5.9 2005-11-05 00:48:05 caress Exp $
+ *	$Id: mbr_samesurf.c,v 5.9 2005/11/05 00:48:05 caress Exp $
  *
  *    Copyright (c) 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	June 13, 2002
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_samesurf.c,v $
+ * Revision 5.9  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.8  2003/11/24 21:04:29  caress
  * Implement Reinhard Holtkamp's suggested mods for better SURF format support.
  *
@@ -96,7 +99,7 @@ int mbr_wt_samesurf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.9 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.9 2005/11/05 00:48:05 caress Exp $";
 	char	*function_name = "mbr_register_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -230,7 +233,7 @@ int mbr_info_samesurf(int verbose,
 			double *beamwidth_ltrack,
 			int *error)
 {
-	static char res_id[]="$Id: mbr_samesurf.c,v 5.9 2005-11-05 00:48:05 caress Exp $";
+	static char res_id[]="$Id: mbr_samesurf.c,v 5.9 2005/11/05 00:48:05 caress Exp $";
 	char	*function_name = "mbr_info_samesurf";
 	int	status = MB_SUCCESS;
 
@@ -301,7 +304,7 @@ int mbr_info_samesurf(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_samesurf(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_samesurf.c,v 5.9 2005-11-05 00:48:05 caress Exp $";
+ static char res_id[]="$Id: mbr_samesurf.c,v 5.9 2005/11/05 00:48:05 caress Exp $";
 	char	*function_name = "mbr_alm_samesurf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

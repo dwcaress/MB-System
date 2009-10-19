@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
- *    $Id: mbeditviz_prog.c,v 5.9 2008-11-16 21:51:18 caress Exp $
+ *    $Id: mbeditviz_prog.c,v 5.9 2008/11/16 21:51:18 caress Exp $
  *
  *    Copyright (c) 2007-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  * Author:	D. W. Caress
  * Date:	May 1, 2007
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbeditviz_prog.c,v $
+ * Revision 5.9  2008/11/16 21:51:18  caress
+ * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
+ *
  * Revision 5.8  2008/05/16 22:59:42  caress
  * Release 5.1.1beta18.
  *
@@ -78,7 +81,7 @@
 #include "mbview.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.9 2008-11-16 21:51:18 caress Exp $";
+static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.9 2008/11/16 21:51:18 caress Exp $";
 static char program_name[] = "MBeditviz";
 static char help_message[] = "MBeditviz is a bathymetry editor and patch test tool.";
 static char usage_message[] = "mbeditviz [-H -T -V]";
@@ -1064,6 +1067,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 					load_esf = MB_YES;
 					}
 				}
+if (mbev_verbose > 0)
 fprintf(stderr,"file->processed_info_loaded:%d file->process.mbp_edit_mode:%d load_esf:%d\n",
 file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
 			
@@ -1611,7 +1615,6 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 					file->async_attitude_time_d-1, file->async_attitude_pitch-1,
 					file->n_async_attitude, time_d, &pitchasync, &iattitude, 
 					&mbev_error);
-fprintf(stderr,"Rollasync:%f Rollsync:%f Rollbias:%f Rolldelta:%f\n",rollasync,rollsync,rollbias,*rolldelta);
 			*rolldelta = rollasync - rollsync + rollbias;
 			*pitchdelta = pitchasync - pitchsync + pitchbias;
 			}
@@ -2115,7 +2118,6 @@ int mbeditviz_get_grid_bounds()
 		}
 		
 	/* find lon lat bounds of loaded files */
-fprintf(stderr,"mbev_num_files_loaded:%d\n",mbev_num_files_loaded);
 	if (mbev_num_files_loaded > 0)
 		{
 		first = MB_YES;
@@ -2139,10 +2141,10 @@ fprintf(stderr,"mbev_num_files_loaded:%d\n",mbev_num_files_loaded);
 					altitude_min = info->altitude_min;
 					altitude_max = info->altitude_max;
 					first = MB_NO;
-fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
+/*fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
 file->processed_info_loaded,file->name,
 mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
-info->lon_min,info->lon_max,info->lat_min,info->lat_max);
+info->lon_min,info->lon_max,info->lat_min,info->lat_max);*/
 					}
 				else
 					{
@@ -2154,10 +2156,10 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 					depth_max = MIN(depth_max,info->depth_max);
 					altitude_min = MIN(altitude_min,info->altitude_min);
 					altitude_max = MIN(altitude_max,info->altitude_max);
-fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
+/*fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
 file->processed_info_loaded,file->name,
 mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
-info->lon_min,info->lon_max,info->lat_min,info->lat_max);
+info->lon_min,info->lon_max,info->lat_min,info->lat_max);*/
 					}
 				}
 			}
@@ -2237,7 +2239,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 		mbev_grid_boundsutm[3] = MAX(mbev_grid_boundsutm[3], yy);
 		
 		/* get grid spacing */
-fprintf(stderr,"altitude: %f %f\n", altitude_min, altitude_max);
+/*fprintf(stderr,"altitude: %f %f\n", altitude_min, altitude_max);*/
 		if (altitude_max > 0.0)
 			mbev_grid_cellsize = 0.02 * altitude_max;
 		else if (depth_max > 0.0)
@@ -2250,11 +2252,11 @@ fprintf(stderr,"altitude: %f %f\n", altitude_min, altitude_max);
 		mbev_grid_ny = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
 		mbev_grid_boundsutm[1] = mbev_grid_boundsutm[0] + (mbev_grid_nx - 1) * mbev_grid_cellsize;
 		mbev_grid_boundsutm[3] = mbev_grid_boundsutm[2] + (mbev_grid_ny - 1) * mbev_grid_cellsize;
-fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
+/*fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
 mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
 mbev_grid_boundsutm[0],mbev_grid_boundsutm[1],mbev_grid_boundsutm[2],mbev_grid_boundsutm[3]);
 fprintf(stderr,"cell size:%f dimensions: %d %d\n",
-mbev_grid_cellsize,mbev_grid_nx,mbev_grid_ny);
+mbev_grid_cellsize,mbev_grid_nx,mbev_grid_ny);*/
 		
 		/* release projection */
 		mb_proj_free(mbev_verbose, &(pjptr), &mbev_error);
@@ -2293,7 +2295,7 @@ int mbeditviz_setup_grid()
 	int	i, j, k;	
 
 	/* print input debug statements */
-	if (mbev_verbose >= 0)
+	if (mbev_verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
@@ -2301,7 +2303,6 @@ int mbeditviz_setup_grid()
 		}
 		
 	/* find lon lat bounds of loaded files */
-fprintf(stderr,"mbev_num_files_loaded:%d\n",mbev_num_files_loaded);
 	if (mbev_num_files_loaded > 0)
 		{	
 		/* get grid bounds */
@@ -2393,11 +2394,11 @@ fprintf(stderr,"mbev_num_files_loaded:%d\n",mbev_num_files_loaded);
 		mbev_grid.ny = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
 		mbev_grid.boundsutm[1] = mbev_grid.boundsutm[0] + (mbev_grid.nx - 1) * mbev_grid.dx;
 		mbev_grid.boundsutm[3] = mbev_grid.boundsutm[2] + (mbev_grid.ny - 1) * mbev_grid.dy;
-fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
+/*fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
 mbev_grid.bounds[0],mbev_grid.bounds[1],mbev_grid.bounds[2],mbev_grid.bounds[3],
 mbev_grid.boundsutm[0],mbev_grid.boundsutm[1],mbev_grid.boundsutm[2],mbev_grid.boundsutm[3]);
 fprintf(stderr,"cell size:%f %f dimensions: %d %d\n",
-mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);
+mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);*/
 		}
 				
 	/* allocate memory for grid */
@@ -2423,7 +2424,7 @@ mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);
 		}
 
 	/* print output debug statements */
-	if (mbev_verbose >= 0)
+	if (mbev_verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
@@ -2822,7 +2823,6 @@ int mbeditviz_make_grid_simple()
 		}
 		
 	/* find lon lat bounds of loaded files */
-fprintf(stderr,"mbev_num_files_loaded:%d\n",mbev_num_files_loaded);
 	if (mbev_num_files_loaded > 0)
 		{
 		first = MB_YES;
@@ -2846,6 +2846,7 @@ fprintf(stderr,"mbev_num_files_loaded:%d\n",mbev_num_files_loaded);
 					altitude_min = info->altitude_min;
 					altitude_max = info->altitude_max;
 					first = MB_NO;
+if (mbev_verbose > 0)
 fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
 file->processed_info_loaded,file->name,
 mbev_grid.bounds[0],mbev_grid.bounds[1],mbev_grid.bounds[2],mbev_grid.bounds[3],
@@ -2861,6 +2862,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 					depth_max = MIN(depth_max,info->depth_max);
 					altitude_min = MIN(altitude_min,info->altitude_min);
 					altitude_max = MIN(altitude_max,info->altitude_max);
+if (mbev_verbose > 0)
 fprintf(stderr,"Processed:%d Name:%s Bounds: %f %f %f %F   File Bounds: %f %f %f %f\n",
 file->processed_info_loaded,file->name,
 mbev_grid.bounds[0],mbev_grid.bounds[1],mbev_grid.bounds[2],mbev_grid.bounds[3],
@@ -2967,9 +2969,11 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 		mbev_grid.ny = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
 		mbev_grid.boundsutm[1] = mbev_grid.boundsutm[0] + (mbev_grid.nx - 1) * mbev_grid.dx;
 		mbev_grid.boundsutm[3] = mbev_grid.boundsutm[2] + (mbev_grid.ny - 1) * mbev_grid.dy;
+if (mbev_verbose > 0)
 fprintf(stderr,"Grid bounds: %f %f %f %f    %f %f %f %f\n",
 mbev_grid.bounds[0],mbev_grid.bounds[1],mbev_grid.bounds[2],mbev_grid.bounds[3],
 mbev_grid.boundsutm[0],mbev_grid.boundsutm[1],mbev_grid.boundsutm[2],mbev_grid.boundsutm[3]);
+if (mbev_verbose > 0)
 fprintf(stderr,"cell size:%f %f dimensions: %d %d\n",
 mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);
 		}
@@ -3105,12 +3109,14 @@ int mbeditviz_destroy_grid()
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		}
 
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_destroy_grid status:%d\n", mbev_status);
 		
 	/* loop over all files and output edits as necessary */
 	for (ifile=0;ifile<mbev_num_files;ifile++)
 		{
 		file = &mbev_files[ifile];
+if (mbev_verbose > 0)
 fprintf(stderr,"ifile:%d load_status:%d esf_open:%d\n",
 ifile,file->load_status,file->esf_open);
 		if (file->load_status == MB_YES && file->esf_open == MB_YES)
@@ -3132,6 +3138,7 @@ ifile,file->load_status,file->esf_open);
 							action = MBP_EDIT_FLAG;
 						else
 							action = MBP_EDIT_ZERO;
+if (mbev_verbose > 0)
 fprintf(stderr,"mb_esf_save: ifile:%d iping:%d ibeam:%d action:%d\n",
 ifile,iping,ibeam,action);
 						mb_esf_save(mbev_verbose, &(file->esf),
@@ -3244,8 +3251,10 @@ int mbeditviz_selectregion(int instance)
 		region = (struct mbview_region_struct *) &mbviewdata->region;
 
 		/* get region bounds */
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_selectregion: rollbias:%f pitchbias:%f headingbias:%f timelag:%f\n",
 mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg);
+if (mbev_verbose > 0)
 fprintf(stderr,"REGION: %f %f   %f %f   %f %f   %f %f\n",
 region->cornerpoints[0].xgrid,region->cornerpoints[0].ygrid,
 region->cornerpoints[1].xgrid,region->cornerpoints[2].ygrid,
@@ -3383,6 +3392,7 @@ mbev_selected.soundings[mbev_selected.num_soundings].z);*/
 		mbev_selected.zmax = 0.5 * dz;
 		for (i=0;i<mbev_selected.num_soundings;i++)
 			mbev_selected.soundings[i].z = mbev_selected.soundings[i].z - mbev_selected.zorigin;
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_selectregion: num_soundings:%d\n",
 mbev_selected.num_soundings);
 		}
@@ -3436,8 +3446,10 @@ int mbeditviz_selectarea(int instance)
 		{
 		/* get area */
 		area = (struct mbview_area_struct *) &mbviewdata->area;
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_selectarea: rollbias:%f pitchbias:%f headingbias:%f timelag:%f\n",
 mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg);
+if (mbev_verbose > 0)
 fprintf(stderr,"AREA: %f %f   %f %f   %f %f   %f %f\n",
 area->cornerpoints[0].xgrid,area->cornerpoints[0].ygrid,
 area->cornerpoints[1].xgrid,area->cornerpoints[2].ygrid,
@@ -3561,6 +3573,7 @@ mbev_selected.soundings[mbev_selected.num_soundings].z);*/
 		mbev_selected.zmax = 0.5 * dz;
 		for (i=0;i<mbev_selected.num_soundings;i++)
 			mbev_selected.soundings[i].z = mbev_selected.soundings[i].z - mbev_selected.zorigin;
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_selectarea: num_soundings:%d\n",
 mbev_selected.num_soundings);
 		}
@@ -3607,6 +3620,7 @@ int mbeditviz_selectnav(int instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:     %d\n",instance);
 		}
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_selectnav: \n");
 		
     	/* check shared data source for selected nav */
@@ -3739,6 +3753,7 @@ mbev_selected.soundings[mbev_selected.num_soundings].z);*/
 			mbev_selected.soundings[i].y = mbev_selected.soundings[i].y - mbev_selected.yorigin;
 			mbev_selected.soundings[i].z = mbev_selected.soundings[i].z - mbev_selected.zorigin;
 			}
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_selectarea: num_soundings:%d\n",
 mbev_selected.num_soundings);
 		}
@@ -3761,6 +3776,7 @@ mbev_selected.num_soundings);
 void mbeditviz_mb3dsoundings_dismiss()
 {
 	char	*function_name = "mbeditviz_mb3dsoundings_dismiss";
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_mb3dsoundings_dismiss\n");
 
 	/* print input debug statements */
@@ -3914,6 +3930,7 @@ void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostr
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	struct mb_info_struct *info;
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_mb3dsoundings_info:%d %d %d\n", 
 ifile, iping, ibeam);
 
@@ -3967,6 +3984,7 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 	int	ifilelast, ipinglast;
 	int	i;
 
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_mb3dsoundings_bias:%f %f %f %f\n", 
 rollbias, pitchbias, headingbias, timelag);
 
@@ -4079,6 +4097,7 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 	double	mtodeglon, mtodeglat;
 	int	i;
 
+if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_mb3dsoundings_biasapply:%f %f %f %f\n", 
 rollbias, pitchbias, headingbias, timelag);
 

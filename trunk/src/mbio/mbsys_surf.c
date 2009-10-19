@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c,v 5.15 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_surf.c,v 5.15 2005/11/05 00:48:04 caress Exp $
  *
  *    Copyright (c) 2001, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -26,7 +26,10 @@
  * Author:	D. N. Chayes
  * Date:	June 20, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_surf.c,v $
+ * Revision 5.15  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.14  2003/12/04 23:10:24  caress
  * Fixed problems with format 54 EM12DARW due to old code assuming how internal structure was packed. Also changed handling of beamflags for formats that don't support beamflags. Now flagged beams will always be nulled in such cases.
  *
@@ -70,7 +73,7 @@ double mbsys_get_depth(	SurfMultiBeamDepth* 			MultiBeamDepth,
 						float	heave,
 						int		n );
 
-static char res_id[]="$Id: mbsys_surf.c,v 5.15 2005-11-05 00:48:04 caress Exp $";
+static char res_id[]="$Id: mbsys_surf.c,v 5.15 2005/11/05 00:48:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,

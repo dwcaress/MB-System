@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get.c	1/26/93
- *    $Id: mb_get.c,v 5.7 2005-11-05 00:48:05 caress Exp $
+ *    $Id: mb_get.c,v 5.7 2005/11/05 00:48:05 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Author:	D. W. Caress
  * Date:	January 26, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_get.c,v $
+ * Revision 5.7  2005/11/05 00:48:05  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.6  2004/04/27 01:46:13  caress
  * Various updates of April 26, 2004.
  *
@@ -125,7 +128,7 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 
-static char rcs_id[]="$Id: mb_get.c,v 5.7 2005-11-05 00:48:05 caress Exp $";
+static char rcs_id[]="$Id: mb_get.c,v 5.7 2005/11/05 00:48:05 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, 

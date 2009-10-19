@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_xyplot.perl	8/6/95
-#    $Id: mbm_xyplot.perl,v 5.15 2008-09-11 20:06:46 caress Exp $
+#    $Id: mbm_xyplot.perl,v 5.15 2008/09/11 20:06:46 caress Exp $
 #
 #    Copyright (c) 1993, 1994, 1995, 2000, 2003 by 
 #    D. W. Caress (caress@mbari.org)
@@ -56,10 +56,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1995
 #
 # Version:
-#   $Id: mbm_xyplot.perl,v 5.15 2008-09-11 20:06:46 caress Exp $
+#   $Id: mbm_xyplot.perl,v 5.15 2008/09/11 20:06:46 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_xyplot.perl,v $
+#   Revision 5.15  2008/09/11 20:06:46  caress
+#   Checking in updates made during cruise AT15-36.
+#
 #   Revision 5.14  2007/10/08 04:29:06  caress
 #   Added some large page definitions.
 #

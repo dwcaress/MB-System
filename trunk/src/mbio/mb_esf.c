@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c,v 5.13 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_esf.c,v 5.13 2008/07/10 06:43:40 caress Exp $
  *
  *    Copyright (c) 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	April 10, 2003
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_esf.c,v $
+ * Revision 5.13  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.12  2007/07/03 17:33:07  caress
  * A couple of debug statements added.
  *
@@ -77,7 +80,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_esf.c,v 5.13 2008-07-10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id: mb_esf.c,v 5.13 2008/07/10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */

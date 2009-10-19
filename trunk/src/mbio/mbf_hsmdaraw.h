@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_hsmdaraw.h	8/11/95
- *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdaraw.h,v 5.2 2003-04-17 21:05:23 caress Exp $
+ *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbf_hsmdaraw.h,v 5.2 2003/04/17 21:05:23 caress Exp $
  *
  *    Copyright (c) 1995, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  *      	David W. Caress
  * Date:	August 11, 1995
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbf_hsmdaraw.h,v $
+ * Revision 5.2  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.1  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *

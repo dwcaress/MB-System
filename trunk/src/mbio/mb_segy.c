@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
- *    $Id: mb_segy.c,v 5.7 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mb_segy.c,v 5.7 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	May 25, 2004
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_segy.c,v $
+ * Revision 5.7  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.6  2008/07/10 06:43:40  caress
  * Preparing for 5.1.1beta20
  *
@@ -58,7 +61,7 @@
 #include "../../include/mb_segy.h"
 #include "../../include/mb_swap.h"
 
-static char rcs_id[]="$Id: mb_segy.c,v 5.7 2008-09-13 06:08:09 caress Exp $";
+static char rcs_id[]="$Id: mb_segy.c,v 5.7 2008/09/13 06:08:09 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_segy_read_init opens an existing segy file for 

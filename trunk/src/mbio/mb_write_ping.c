@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_ping.c	2/3/93
- *	$Id: mb_write_ping.c,v 5.3 2003-04-17 21:05:23 caress Exp $
+ *	$Id: mb_write_ping.c,v 5.3 2003/04/17 21:05:23 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  *
  * Author:	D. W. Caress
  * Date:	Febrary 3, 1993
- * $Log: not supported by cvs2svn $
+ * $Log: mb_write_ping.c,v $
+ * Revision 5.3  2003/04/17 21:05:23  caress
+ * Release 5.0.beta30
+ *
  * Revision 5.2  2002/09/18 23:32:59  caress
  * Release 5.0.beta23
  *
@@ -136,7 +139,7 @@
 /*--------------------------------------------------------------------*/
 int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 {
- static char res_id[]="$Id: mb_write_ping.c,v 5.3 2003-04-17 21:05:23 caress Exp $";
+ static char res_id[]="$Id: mb_write_ping.c,v 5.3 2003/04/17 21:05:23 caress Exp $";
 	char	*function_name = "mb_write_ping";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;

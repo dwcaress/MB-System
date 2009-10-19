@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_segy.h,v 5.7 2008-09-13 06:08:09 caress Exp $
+ *    $Id: mb_segy.h,v 5.7 2008/09/13 06:08:09 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -25,7 +25,10 @@
  * Author:	D. W. Caress
  * Date:	April 13, 2004
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_segy.h,v $
+ * Revision 5.7  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.6  2006/11/10 22:36:04  caress
  * Working towards release 5.1.0
  *

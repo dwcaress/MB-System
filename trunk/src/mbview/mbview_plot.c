@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c,v 5.14 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbview_plot.c,v 5.14 2008/05/16 22:59:42 caress Exp $
  *
  *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbview_plot.c,v $
+ * Revision 5.14  2008/05/16 22:59:42  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.13  2008/03/14 19:04:32  caress
  * Fixed memory problems with route editing.
  *
@@ -113,7 +116,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_plot.c,v 5.14 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_plot.c,v 5.14 2008/05/16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(int instance)
@@ -153,6 +156,7 @@ int mbview_reset_glx(int instance)
 	XtGetValues(view->glwmda, args, ac);
 	view->glx_context = glXCreateContext(view->dpy, view->vi,
                 	     NULL, GL_FALSE);
+/*fprintf(stderr,"%s(instance:%d): glXMakeCurrent\n",function_name,instance);*/
 	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 	view->glx_init = MB_YES;
         glViewport(0, 0, data->width, data->height);
@@ -222,9 +226,6 @@ int mbview_drawdata(int instance, int rez)
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-		
-	/* set lastdrawrez flag */
-	view->lastdrawrez = rez;
 	
 	/* get size of grid in view */
 	nxrange = data->viewbounds[1] - data->viewbounds[0] + 1;
@@ -243,8 +244,6 @@ int mbview_drawdata(int instance, int rez)
 				/ ((double)data->lorez_dimension)), 
 			(int)ceil(((double)nyrange) 
 				/ ((double)data->lorez_dimension)));
-	if (stride == 1)
-		view->lastdrawrez = MBV_REZ_FULL;
 	
 	/* enable depth test for 3D plots */
 	if (data->display_mode == MBV_DISPLAY_3D
@@ -295,6 +294,10 @@ mbview_glerrorcheck(instance, 1, function_name);
 		}
 	if (make_histogram == MB_YES)
 		mbview_make_histogram(view, data, which_data);
+	if (view->shade_mode == MBV_SHADE_VIEW_OVERLAY
+		&& data->secondary_histogram == MB_YES
+		&& view->secondary_histogram_set == MB_NO)
+		mbview_make_histogram(view, data, MBV_DATA_SECONDARY);
 	
 /*fprintf(stderr,"mbview_drawdata: %d %d stride:%d\n", instance,rez,stride);*/
 
@@ -587,6 +590,9 @@ mbview_glerrorcheck(instance, 3, function_name);
 
 	/* make sure depth test is off */
 	glDisable(GL_DEPTH_TEST);
+		
+	/* set lastdrawrez flag */
+	view->lastdrawrez = rez;
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -1013,6 +1019,7 @@ int mbview_plot(int instance, int rez)
 	data = &(view->data);
 	
 	/* make correct window current for OpenGL */
+/*fprintf(stderr,"%s(instance:%d): glXMakeCurrent\n",function_name,instance);*/
 	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 /*fprintf(stderr,"\nmbview_plot: instance:%d rez:%d recursion:%d\n",instance,rez,view->plot_recursion);
 fprintf(stderr,"     view->plot_done:        %d\n",view->plot_done);
@@ -1150,6 +1157,15 @@ fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
 		/* flush opengl buffers */
 		glFlush();
 
+/*fprintf(stderr,"%s(instance:%d) (flush): glXMakeCurrent\n",function_name,instance);*/
+
+		/* make correct window current for OpenGL (may have changed due to recursion) */
+		glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
+
+/*fprintf(stderr,"mbview_plot(instance:%d, rez:%d): calling glXSwapBuffers(display:%d, window:%d)\n",
+instance, rez, XtDisplay(view->glwmda), XtWindow(view->glwmda));
+mbview_glerrorcheck(instance, 1, function_name);*/
+
 		/* swap opengl buffers */
 		glXSwapBuffers (XtDisplay(view->glwmda), 
 				XtWindow(view->glwmda));
@@ -1222,6 +1238,8 @@ int mbview_findpoint(int instance, int xpixel, int ypixel,
 			xgrid, ygrid,
 			xlon, ylat, zdata,
 			xdisplay, ydisplay, zdisplay);
+/*fprintf(stderr,"First findpointrez: rez:%d pixels:%d %d found:%d xlon:%f ylat:%f zdata:%f\n",
+rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
 	if (*found == MB_YES)
 		{
 		/* save last good results */
@@ -1288,20 +1306,6 @@ int mbview_findpoint(int instance, int xpixel, int ypixel,
 			xlon, ylat, zdata,
 			xdisplay, ydisplay, zdisplay);
 		}
-
-	/* use the best pick location found */
-	if (*found == MB_NO && foundsave == MB_YES)
-		{
-		*found = foundsave;
-		*xgrid = xgridsave;
-		*ygrid = ygridsave;
-		*xlon = xlonsave;
-		*ylat = ylatsave;
-		*zdata = zdatasave;
-		*xdisplay = xdisplaysave;
-		*ydisplay = ydisplaysave;
-		*zdisplay = zdisplaysave;
-		}
 				
 	/* if not found and 2D get position directly from pixels */
 	if (*found == MB_NO && data->display_mode == MBV_DISPLAY_2D)
@@ -1320,6 +1324,20 @@ int mbview_findpoint(int instance, int xpixel, int ypixel,
 			*xlon, *ylat,
 			xgrid, ygrid, zdata);
 		*found = MB_YES;
+		}
+
+	/* if not found and 3D use the best pick location found */
+	if (*found == MB_NO && foundsave == MB_YES)
+		{
+		*found = foundsave;
+		*xgrid = xgridsave;
+		*ygrid = ygridsave;
+		*xlon = xlonsave;
+		*ylat = ylatsave;
+		*zdata = zdatasave;
+		*xdisplay = xdisplaysave;
+		*ydisplay = ydisplaysave;
+		*zdisplay = zdisplaysave;
 		}
 	
 	/* print output debug statements */
@@ -1386,6 +1404,7 @@ int mbview_findpointrez(int instance, int rez, int xpixel, int ypixel,
 	data = &(view->data);
 	
 	/* make correct window current for OpenGL */
+/*fprintf(stderr,"%s(instance:%d): glXMakeCurrent\n",function_name,instance);*/
 	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 /*fprintf(stderr,"\nmbview_findpointrez: instance:%d point:%d %d  bounds:%d %d %d %d\n", 
 instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
@@ -1569,7 +1588,8 @@ i,j, rgb[0], rgb[1], rgb[2]);*/
 
 	/* calculate pick location */
 	if (rgba[0] != 1.0 
-		&& rgba[1] != 1.0)
+		&& rgba[1] != 1.0 
+		&& (rgba[2] > 0.2 && rgba[2] < 0.8))
 		{
 		*found = MB_YES;
 		
@@ -1698,6 +1718,7 @@ int mbview_viewbounds(int instance)
 	data = &(view->data);
 	
 	/* make correct window current for OpenGL */
+/*fprintf(stderr,"%s(instance:%d): glXMakeCurrent\n",function_name,instance);*/
 	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 	
 	/* apply projection if needed */

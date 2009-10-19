@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust_callbacks.c	2/22/2000
- *    $Id: mbnavadjust_callbacks.c,v 5.19 2008-12-22 08:32:52 caress Exp $
+ *    $Id: mbnavadjust_callbacks.c,v 5.19 2008/12/22 08:32:52 caress Exp $
  *
  *    Copyright (c) 2000-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	March 22, 2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbnavadjust_callbacks.c,v $
+ * Revision 5.19  2008/12/22 08:32:52  caress
+ * Added additional model view - survey vs survey rather than sequential.
+ *
  * Revision 5.18  2008/10/17 07:52:44  caress
  * Check in on October 17, 2008.
  *
@@ -838,14 +841,14 @@ void do_update_status()
 			for (i=0;i<project.num_files;i++)
 				{
 				file = &(project.files[i]);
-				if (file->status == MBNA_FILE_FIXED)
-				    sprintf(string,"%4d %4d fixed %4.1f %4.1f %s",
-					    file->id,file->num_sections,
+				if (file->status == MBNA_FILE_POORNAV)
+				    sprintf(string,"%4.4d:%2.2d poor %4d %4.1f %4.1f %s",
+					    file->id,file->block,file->num_sections,
 					    file->heading_bias,file->roll_bias,
 					    file->file);
 				else
-				    sprintf(string,"%4d %4d  free %4.1f %4.1f %s",
-					    file->id,file->num_sections,
+				    sprintf(string,"%4.4d:%2.2d good %4d %4.1f %4.1f %s",
+					    file->id,file->block,file->num_sections,
 					    file->heading_bias,file->roll_bias,
 					    file->file);
     				xstr[i] = XmStringCreateLocalized(string);
@@ -1152,33 +1155,33 @@ void do_update_status()
 	if (mbna_view_list == MBNA_VIEW_LIST_FILES
 		&& project.num_files > 0
 		&& mbna_file_select != MBNA_SELECT_NONE
-		&& project.files[mbna_file_select].status != MBNA_FILE_FIXED)
+		&& project.files[mbna_file_select].status != MBNA_FILE_POORNAV)
 		{
-		XtVaSetValues(pushButton_fix,
+		XtVaSetValues(pushButton_poornav,
 			XmNsensitive, True,
 			NULL);
-		XtVaSetValues(pushButton_unfix,
+		XtVaSetValues(pushButton_goodnav,
 			XmNsensitive, False,
 			NULL);
 		}
 	else if (mbna_view_list == MBNA_VIEW_LIST_FILES
 		&& project.num_files > 0
 		&& mbna_file_select != MBNA_SELECT_NONE
-		&& project.files[mbna_file_select].status == MBNA_FILE_FIXED)
+		&& project.files[mbna_file_select].status == MBNA_FILE_POORNAV)
 		{
-		XtVaSetValues(pushButton_fix,
+		XtVaSetValues(pushButton_poornav,
 			XmNsensitive, False,
 			NULL);
-		XtVaSetValues(pushButton_unfix,
+		XtVaSetValues(pushButton_goodnav,
 			XmNsensitive, True,
 			NULL);
 		}
 	else
 		{
-		XtVaSetValues(pushButton_fix,
+		XtVaSetValues(pushButton_poornav,
 			XmNsensitive, False,
 			NULL);
-		XtVaSetValues(pushButton_unfix,
+		XtVaSetValues(pushButton_goodnav,
 			XmNsensitive, False,
 			NULL);
 		}
@@ -3332,41 +3335,23 @@ do_view_showties( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
-do_action_fix( Widget w, XtPointer client_data, XtPointer call_data)
+do_action_poornav( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
-    mbnavadjust_fix_file();
-    do_update_status();
-}
-
- /*--------------------------------------------------------------------*/
-
-void
-do_action_unfixfix( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
-
-    mbnavadjust_unfix_file();
+    mbnavadjust_poornav_file();
     do_update_status();
 }
 
 /*--------------------------------------------------------------------*/
 
 void
-do_action_unfix( Widget w, XtPointer client_data, XtPointer call_data)
+do_action_goodnav( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
 
-    if (mbna_file_select >= 0
-    	&& mbna_file_select < project.num_files)
-    	{
-    	project.files[mbna_file_select].status = MBNA_FILE_OK;
-    	}
+    mbnavadjust_goodnav_file();
     do_update_status();
-    sprintf(string, "Set file %d unfixed: %s\n",
-		mbna_file_select,project.files[mbna_file_select].file);
-    do_info_add(string, MB_YES);
 }
 /*--------------------------------------------------------------------*/
 
@@ -3864,7 +3849,8 @@ do_info_add(char *info, int timetag)
     XmTextSetInsertionPosition(text_messages, pos);
     
     /* add text */
-    XmTextInsert(text_messages, pos, info);
+    if (timetag == MB_YES)
+        XmTextInsert(text_messages, pos, info);
     if (project.logfp != NULL)
 	fputs(info, project.logfp);
     if (mbna_verbose > 0)
@@ -3895,9 +3881,12 @@ do_info_add(char *info, int timetag)
 	}
     
     /* reposition to end of text */
-    pos = XmTextGetLastPosition(text_messages);
-    XmTextShowPosition(text_messages, pos);
-    XmTextSetInsertionPosition(text_messages, pos);
+    if (timetag == MB_YES)
+        {
+	pos = XmTextGetLastPosition(text_messages);
+        XmTextShowPosition(text_messages, pos);
+        XmTextSetInsertionPosition(text_messages, pos);
+	}
 		
     return(MB_SUCCESS);
 }

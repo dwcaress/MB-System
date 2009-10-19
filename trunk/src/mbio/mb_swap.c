@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c,v 5.7 2008-08-12 05:31:54 caress Exp $
+ *    $Id: mb_swap.c,v 5.7 2008/08/12 05:31:54 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -27,7 +27,10 @@
  * Author:	D. W. Caress
  * Date:	July 6, 1994
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_swap.c,v $
+ * Revision 5.7  2008/08/12 05:31:54  caress
+ * Fixed swapping of 8 byte values. Fix suggested by Jeremy Robst of NERC.
+ *
  * Revision 5.6  2008/05/16 22:56:24  caress
  * Release 5.1.1beta18.
  *

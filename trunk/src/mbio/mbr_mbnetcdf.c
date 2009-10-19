@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbnetcdf.c	1/25/02
- *	$Id: mbr_mbnetcdf.c,v 5.9 2008-12-05 17:32:52 caress Exp $
+ *	$Id: mbr_mbnetcdf.c,v 5.9 2008/12/05 17:32:52 caress Exp $
  *
  *    Copyright (c) 2002-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -24,7 +24,10 @@
  * Author:	D. W. Caress
  * Date:	January 25, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_mbnetcdf.c,v $
+ * Revision 5.9  2008/12/05 17:32:52  caress
+ * Check-in mods 5 December 2008 including contributions from Gordon Keith.
+ *
  * Revision 5.8  2008/07/10 06:43:40  caress
  * Preparing for 5.1.1beta20
  *
@@ -117,7 +120,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 #define MBNETCDF_DEBUG 1
 
-static char res_id[]="$Id: mbr_mbnetcdf.c,v 5.9 2008-12-05 17:32:52 caress Exp $";
+static char res_id[]="$Id: mbr_mbnetcdf.c,v 5.9 2008/12/05 17:32:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
@@ -1496,9 +1499,9 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbOrdinate_add_offset error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbOrdinate_id, "scale_factor", &store->mbOrdinate_scale_factor);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbOrdinate_scale_factor error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbOrdinate_id, "minimum", &store->mbOrdinate_minimum);
+		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbOrdinate_id, "minimum", &store->mbOrdinate_minimum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbOrdinate_minimum error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbOrdinate_id, "maximum", &store->mbOrdinate_maximum);
+		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbOrdinate_id, "maximum", &store->mbOrdinate_maximum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbOrdinate_maximum error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbOrdinate_id, "valid_minimum", &store->mbOrdinate_valid_minimum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbOrdinate_valid_minimum error: %s\n", nc_strerror(nc_status));
@@ -1527,9 +1530,9 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbAbscissa_add_offset error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAbscissa_id, "scale_factor", &store->mbAbscissa_scale_factor);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbAbscissa_scale_factor error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAbscissa_id, "minimum", &store->mbAbscissa_minimum);
+		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAbscissa_id, "minimum", &store->mbAbscissa_minimum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbAbscissa_minimum error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAbscissa_id, "maximum", &store->mbAbscissa_maximum);
+		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAbscissa_id, "maximum", &store->mbAbscissa_maximum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbAbscissa_maximum error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAbscissa_id, "valid_minimum", &store->mbAbscissa_valid_minimum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbAbscissa_valid_minimum error: %s\n", nc_strerror(nc_status));
@@ -2546,13 +2549,13 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_units error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbReceptionHeave_id, "unit_code", store->mbSFlag_unit_code);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_unit_code error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbReceptionHeave_id, "add_offset", &store->mbSFlag_add_offset);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbReceptionHeave_id, "add_offset", &store->mbSFlag_add_offset);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_add_offset error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbReceptionHeave_id, "scale_factor", &store->mbSFlag_scale_factor);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbReceptionHeave_id, "scale_factor", &store->mbSFlag_scale_factor);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_scale_factor error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbReceptionHeave_id, "minimum", &store->mbSFlag_minimum);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbReceptionHeave_id, "minimum", &store->mbSFlag_minimum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_minimum error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbReceptionHeave_id, "maximum", &store->mbSFlag_maximum);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbReceptionHeave_id, "maximum", &store->mbSFlag_maximum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_maximum error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbReceptionHeave_id, "valid_minimum", &store->mbSFlag_valid_minimum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
@@ -2577,13 +2580,13 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_units error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbAlongSlope_id, "unit_code", store->mbSFlag_unit_code);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_unit_code error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAlongSlope_id, "add_offset", &store->mbSFlag_add_offset);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAlongSlope_id, "add_offset", &store->mbSFlag_add_offset);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_add_offset error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAlongSlope_id, "scale_factor", &store->mbSFlag_scale_factor);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAlongSlope_id, "scale_factor", &store->mbSFlag_scale_factor);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_scale_factor error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAlongSlope_id, "minimum", &store->mbSFlag_minimum);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAlongSlope_id, "minimum", &store->mbSFlag_minimum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_minimum error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAlongSlope_id, "maximum", &store->mbSFlag_maximum);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAlongSlope_id, "maximum", &store->mbSFlag_maximum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_maximum error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAlongSlope_id, "valid_minimum", &store->mbSFlag_valid_minimum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_valid_minimum error: %s\n", nc_strerror(nc_status));
@@ -2608,13 +2611,13 @@ fprintf(stderr,"store->mbHistCode_units:%d\n",store->mbHistCode_units);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_units error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_text((int)mb_io_ptr->mbfp, store->mbAcrossSlope_id, "unit_code", store->mbSFlag_unit_code);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_unit_code error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAcrossSlope_id, "add_offset", &store->mbSFlag_add_offset);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAcrossSlope_id, "add_offset", &store->mbSFlag_add_offset);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_add_offset error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAcrossSlope_id, "scale_factor", &store->mbSFlag_scale_factor);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAcrossSlope_id, "scale_factor", &store->mbSFlag_scale_factor);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_scale_factor error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAcrossSlope_id, "minimum", &store->mbSFlag_minimum);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAcrossSlope_id, "minimum", &store->mbSFlag_minimum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_minimum error: %s\n", nc_strerror(nc_status));
-		    nc_status = nc_get_att_double((int)mb_io_ptr->mbfp, store->mbAcrossSlope_id, "maximum", &store->mbSFlag_maximum);
+		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAcrossSlope_id, "maximum", &store->mbSFlag_maximum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_maximum error: %s\n", nc_strerror(nc_status));
 		    nc_status = nc_get_att_int((int)mb_io_ptr->mbfp, store->mbAcrossSlope_id, "valid_minimum", &store->mbSFlag_valid_minimum);
 		    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_get_att mbSFlag_valid_minimum error: %s\n", nc_strerror(nc_status));

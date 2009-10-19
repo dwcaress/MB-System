@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em12ifrm.c	12/4/00
- *	$Id: mbr_em12ifrm.c,v 5.15 2008-03-01 09:14:03 caress Exp $
+ *	$Id: mbr_em12ifrm.c,v 5.15 2008/03/01 09:14:03 caress Exp $
  *
  *    Copyright (c) 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	December 4, 2000
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_em12ifrm.c,v $
+ * Revision 5.15  2008/03/01 09:14:03  caress
+ * Some housekeeping changes.
+ *
  * Revision 5.14  2005/11/05 00:48:04  caress
  * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
  *
@@ -128,7 +131,7 @@ int mbr_wt_em12ifrm(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.15 2008-03-01 09:14:03 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.15 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_register_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -263,7 +266,7 @@ int mbr_info_em12ifrm(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.15 2008-03-01 09:14:03 caress Exp $";
+	static char res_id[]="$Id: mbr_em12ifrm.c,v 5.15 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_info_em12ifrm";
 	int	status = MB_SUCCESS;
 
@@ -333,7 +336,7 @@ int mbr_info_em12ifrm(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_em12ifrm(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_em12ifrm.c,v 5.15 2008-03-01 09:14:03 caress Exp $";
+ static char res_id[]="$Id: mbr_em12ifrm.c,v 5.15 2008/03/01 09:14:03 caress Exp $";
 	char	*function_name = "mbr_alm_em12ifrm";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

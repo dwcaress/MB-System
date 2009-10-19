@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.h	6/21/94
- *    $Id: mb_swap.h,v 5.3 2004-11-06 03:55:15 caress Exp $
+ *    $Id: mb_swap.h,v 5.3 2004/11/06 03:55:15 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Author:	D. W. Caress
  * Date:	June 21, 1994
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_swap.h,v $
+ * Revision 5.3  2004/11/06 03:55:15  caress
+ * Working to support the Reson 7k format.
+ *
  * Revision 5.2  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

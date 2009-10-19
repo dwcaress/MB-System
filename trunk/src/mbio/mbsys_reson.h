@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_reson.h	8/20/94
- *	$Id: mbsys_reson.h,v 5.5 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbsys_reson.h,v 5.5 2005/11/05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1994, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  * Author:	D. W. Caress (L-DEO)
  * Date:	August 20, 1994
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_reson.h,v $
+ * Revision 5.5  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.4  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

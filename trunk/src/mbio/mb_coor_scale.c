@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_coor_scale.c	1/21/93
- *    $Id: mb_coor_scale.c,v 5.4 2008-09-27 03:27:10 caress Exp $
+ *    $Id: mb_coor_scale.c,v 5.4 2008/09/27 03:27:10 caress Exp $
  *
  *    Copyright (c) 1993-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	January 21, 1993
  * 
- * $Log: not supported by cvs2svn $
+ * $Log: mb_coor_scale.c,v $
+ * Revision 5.4  2008/09/27 03:27:10  caress
+ * Working towards release 5.1.1beta24
+ *
  * Revision 5.3  2006/09/11 18:55:52  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -113,7 +116,7 @@
 int mb_coor_scale(int verbose, double latitude, 
 			double *mtodeglon, double *mtodeglat)
 {
-  static char rcs_id[]="$Id: mb_coor_scale.c,v 5.4 2008-09-27 03:27:10 caress Exp $";
+  static char rcs_id[]="$Id: mb_coor_scale.c,v 5.4 2008/09/27 03:27:10 caress Exp $";
 	char	*function_name = "mb_coor_scale";
 	int	status;
 	double	radlat;
@@ -163,7 +166,7 @@ int mb_coor_scale(int verbose, double latitude,
 /*--------------------------------------------------------------------*/
 int mb_apply_lonflip(int verbose, int lonflip, double *longitude)
 {
-  static char rcs_id[]="$Id: mb_coor_scale.c,v 5.4 2008-09-27 03:27:10 caress Exp $";
+  static char rcs_id[]="$Id: mb_coor_scale.c,v 5.4 2008/09/27 03:27:10 caress Exp $";
 	char	*function_name = "mb_apply_lonflip";
 	int	status;
 	double	radlat;

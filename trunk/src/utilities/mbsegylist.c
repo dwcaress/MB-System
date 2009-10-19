@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegylist.c	5/29/2004
- *    $Id: mbsegylist.c,v 5.6 2007-10-17 20:34:00 caress Exp $
+ *    $Id: mbsegylist.c,v 5.6 2007/10/17 20:34:00 caress Exp $
  *
  *    Copyright (c) 2004 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,11 @@
  * Author:	D. W. Caress
  * Date:	May 29, 2004
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsegylist.c,v $
+ * Revision 5.6  2007/10/17 20:34:00  caress
+ * Release 5.1.1beta11
+ * Added decimation option.
+ *
  * Revision 5.5  2006/11/10 22:36:05  caress
  * Working towards release 5.1.0
  *
@@ -75,7 +79,7 @@
 /* NaN value */
 double	NaN;
 
-static char rcs_id[] = "$Id: mbsegylist.c,v 5.6 2007-10-17 20:34:00 caress Exp $";
+static char rcs_id[] = "$Id: mbsegylist.c,v 5.6 2007/10/17 20:34:00 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 

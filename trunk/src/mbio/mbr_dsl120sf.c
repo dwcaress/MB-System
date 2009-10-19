@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_dsl120sf.c	8/6/96
- *	$Id: mbr_dsl120sf.c,v 5.8 2005-11-05 00:48:04 caress Exp $
+ *	$Id: mbr_dsl120sf.c,v 5.8 2005/11/05 00:48:04 caress Exp $
  *
  *    Copyright (c) 1996, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -23,7 +23,10 @@
  *
  * Author:	D. W. Caress
  * Date:	August 6, 1996
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_dsl120sf.c,v $
+ * Revision 5.8  2005/11/05 00:48:04  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.7  2003/05/20 18:05:32  caress
  * Added svp_source to data source parameters.
  *
@@ -120,7 +123,7 @@ int mbr_wt_dsl120sf(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_dsl120sf(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_dsl120sf.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120sf.c,v 5.8 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_register_dsl120sf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -253,7 +256,7 @@ int mbr_info_dsl120sf(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_dsl120sf.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120sf.c,v 5.8 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_info_dsl120sf";
 	int	status = MB_SUCCESS;
 
@@ -323,7 +326,7 @@ int mbr_info_dsl120sf(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_dsl120sf(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_dsl120sf.c,v 5.8 2005-11-05 00:48:04 caress Exp $";
+	static char res_id[]="$Id: mbr_dsl120sf.c,v 5.8 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_alm_dsl120sf";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

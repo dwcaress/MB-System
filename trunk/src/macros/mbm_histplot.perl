@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_histplot.perl	3/20/2006
-#    $Id: mbm_histplot.perl,v 5.1 2007-10-08 05:43:09 caress Exp $
+#    $Id: mbm_histplot.perl,v 5.1 2007/10/08 05:43:09 caress Exp $
 #
 #    Copyright (c) 2006 by 
 #    D. W. Caress (caress@mbari.org)
@@ -48,10 +48,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   March 20, 2006
 #
 # Version:
-#   $Id: mbm_histplot.perl,v 5.1 2007-10-08 05:43:09 caress Exp $
+#   $Id: mbm_histplot.perl,v 5.1 2007/10/08 05:43:09 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_histplot.perl,v $
+#   Revision 5.1  2007/10/08 05:43:09  caress
+#   Added some large page definitions.
+#
 #   Revision 5.0  2006/11/10 22:01:56  caress
 #   New macro for simple histogram plots.
 #

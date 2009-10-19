@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_info.h			8/21/2006
- *    $Id: mb_info.h,v 5.1 2007-10-08 15:59:34 caress Exp $
+ *    $Id: mb_info.h,v 5.1 2007/10/08 15:59:34 caress Exp $
  *
  *    Copyright (c) 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -19,7 +19,10 @@
  * Author:	D. W. Caress
  * Date:	August 21, 2006
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_info.h,v $
+ * Revision 5.1  2007/10/08 15:59:34  caress
+ * MBIO changes as of 8 October 2007.
+ *
  * Revision 5.0  2006/10/05 18:56:44  caress
  * New files for 5.1.0
  *

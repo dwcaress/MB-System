@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_mstiff.h	4/10/98
- *	$Id: mbsys_mstiff.h,v 5.6 2005-11-05 00:48:03 caress Exp $
+ *	$Id: mbsys_mstiff.h,v 5.6 2005/11/05 00:48:03 caress Exp $
  *
  *    Copyright (c) 1998, 2000, 2002, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -18,7 +18,10 @@
  *
  * Author:	D. W. Caress
  * Date:	April 10, 1988
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_mstiff.h,v $
+ * Revision 5.6  2005/11/05 00:48:03  caress
+ * Programs changed to register arrays through mb_register_array() rather than allocating the memory directly with mb_realloc() or mb_malloc().
+ *
  * Revision 5.5  2003/04/17 21:05:23  caress
  * Release 5.0.beta30
  *

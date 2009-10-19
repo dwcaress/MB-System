@@ -26,79 +26,82 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-Version 5.1.2beta02    March 13, 2009
-Version 5.1.2beta01    March 9, 2009
-Version 5.1.1          December 31, 2008
-Version 5.1.1beta26    November 18, 2008
-Version 5.1.1beta25    September 28, 2008
-Version 5.1.1beta23    September 19, 2008
-Version 5.1.1beta21    July 20, 2008
-Version 5.1.1beta20    July 10, 2008
-Version 5.1.1beta19    June 6, 2008
-Version 5.1.1beta18    May 16, 2008
-Version 5.1.1beta17    March 21, 2008
-Version 5.1.1beta16    March 14, 2008
-Version 5.1.1beta15    February 8, 2008
-Version 5.1.1beta14    January 15, 2008
-Version 5.1.1beta13    November 16, 2007
-Version 5.1.1beta12    November 2, 2007
-Version 5.1.1beta11    October 17, 2007
-Version 5.1.1beta10    October 8, 2007
-Version 5.1.1beta5     July 5, 2007
-Version 5.1.0          November 26, 2006
-Version 5.1.0beta4     October 5, 2006
-Version 5.1.0beta3     September 11, 2006
-Version 5.1.0beta2     August 9, 2006
-Version 5.1.0beta      July 5, 2006
-Version 5.0.9          February 20, 2006
-Version 5.0.8          February 8, 2006
-Version 5.0.8beta5     February 3, 2006
-Version 5.0.8beta4     February 1, 2006
-Version 5.0.8beta3     February 1, 2006
-Version 5.0.8beta2     January 27, 2006
-Version 5.0.8beta      January 24, 2006
-Version 5.0.7          April 7, 2005
-Version 5.0.6          February 19, 2005
-Version 5.0.5          October 6, 2004
-Version 5.0.4          May 22, 2004
-Version 5.0.3          February 27, 2004
-Version 5.0.2          December 24, 2003
-Version 5.0.1          December 12, 2003
-Version 5.0.0          December 5, 2003
-
-MB-SYSTEM VERSION 5 BETA RELEASE DATES:
------------------------------------------
-Version 5.0.beta31     April 29, 2003
-Version 5.0.beta30     April 25, 2003
-Version 5.0.beta29     March 10, 2003
-Version 5.0.beta28     January 14, 2003
-Version 5.0.beta27     November 13, 2002
-Version 5.0.beta26     November 3, 2002
-Version 5.0.beta25     October 15, 2002
-Version 5.0.beta24     October 4, 2002
-Version 5.0.beta23     September 20, 2002
-Version 5.0.beta22     August 30, 2002
-Version 5.0.beta21     July 25, 2002
-Version 5.0.beta20     July 20, 2002
-Version 5.0.beta18     May 31, 2002
-Version 5.0.beta17     May 1, 2002
-Version 5.0.beta16     April 5, 2002
-Version 5.0.beta15     March 26, 2002
-Version 5.0.beta14     February 25, 2002
-Version 5.0.beta13     February 22, 2002
-Version 5.0.beta12     January 2, 2002
-Version 5.0.beta11     December 20, 2001
-Version 5.0.beta10     November 20, 2001
-Version 5.0.beta09     November 6, 2001
-Version 5.0.beta08     October 19, 2001
-Version 5.0.beta07     August 10, 2001
-Version 5.0.beta06     July 30, 2001
-Version 5.0.beta05     July 23, 2001
-Version 5.0.beta04     July 20, 2001
-Version 5.0.beta03     July 19, 2001
-Version 5.0.beta02     June 30, 2001
-Version 5.0.beta01     June 8, 2001
-Version 5.0.beta00     April 6, 2001
+  Version 5.1.2beta11    Ausust 26, 2009
+  Version 5.1.2beta10    Ausust 12, 2009
+  Version 5.1.2beta09    Ausust 7, 2009
+  Version 5.1.2beta08    Ausust 5, 2009
+  Version 5.1.2beta06    July 2, 2009
+  Version 5.1.2beta05    June 14, 2009
+  Version 5.1.2beta02    March 13, 2009
+  Version 5.1.2beta01    March 9, 2009
+* Version 5.1.1          December 31, 2008
+  Version 5.1.1beta26    November 18, 2008
+  Version 5.1.1beta25    September 28, 2008
+  Version 5.1.1beta23    September 19, 2008
+  Version 5.1.1beta21    July 20, 2008
+  Version 5.1.1beta20    July 10, 2008
+  Version 5.1.1beta19    June 6, 2008
+  Version 5.1.1beta18    May 16, 2008
+  Version 5.1.1beta17    March 21, 2008
+  Version 5.1.1beta16    March 14, 2008
+  Version 5.1.1beta15    February 8, 2008
+  Version 5.1.1beta14    January 15, 2008
+  Version 5.1.1beta13    November 16, 2007
+  Version 5.1.1beta12    November 2, 2007
+  Version 5.1.1beta11    October 17, 2007
+  Version 5.1.1beta10    October 8, 2007
+  Version 5.1.1beta5     July 5, 2007
+* Version 5.1.0          November 26, 2006
+  Version 5.1.0beta4     October 5, 2006
+  Version 5.1.0beta3     September 11, 2006
+  Version 5.1.0beta2     August 9, 2006
+  Version 5.1.0beta      July 5, 2006
+* Version 5.0.9          February 20, 2006
+* Version 5.0.8          February 8, 2006
+  Version 5.0.8beta5     February 3, 2006
+  Version 5.0.8beta4     February 1, 2006
+  Version 5.0.8beta3     February 1, 2006
+  Version 5.0.8beta2     January 27, 2006
+  Version 5.0.8beta      January 24, 2006
+* Version 5.0.7          April 7, 2005
+* Version 5.0.6          February 19, 2005
+* Version 5.0.5          October 6, 2004
+* Version 5.0.4          May 22, 2004
+* Version 5.0.3          February 27, 2004
+* Version 5.0.2          December 24, 2003
+* Version 5.0.1          December 12, 2003
+* Version 5.0.0          December 5, 2003
+  Version 5.0.beta31     April 29, 2003
+  Version 5.0.beta30     April 25, 2003
+  Version 5.0.beta29     March 10, 2003
+  Version 5.0.beta28     January 14, 2003
+  Version 5.0.beta27     November 13, 2002
+  Version 5.0.beta26     November 3, 2002
+  Version 5.0.beta25     October 15, 2002
+  Version 5.0.beta24     October 4, 2002
+  Version 5.0.beta23     September 20, 2002
+  Version 5.0.beta22     August 30, 2002
+  Version 5.0.beta21     July 25, 2002
+  Version 5.0.beta20     July 20, 2002
+  Version 5.0.beta18     May 31, 2002
+  Version 5.0.beta17     May 1, 2002
+  Version 5.0.beta16     April 5, 2002
+  Version 5.0.beta15     March 26, 2002
+  Version 5.0.beta14     February 25, 2002
+  Version 5.0.beta13     February 22, 2002
+  Version 5.0.beta12     January 2, 2002
+  Version 5.0.beta11     December 20, 2001
+  Version 5.0.beta10     November 20, 2001
+  Version 5.0.beta09     November 6, 2001
+  Version 5.0.beta08     October 19, 2001
+  Version 5.0.beta07     August 10, 2001
+  Version 5.0.beta06     July 30, 2001
+  Version 5.0.beta05     July 23, 2001
+  Version 5.0.beta04     July 20, 2001
+  Version 5.0.beta03     July 19, 2001
+  Version 5.0.beta02     June 30, 2001
+  Version 5.0.beta01     June 8, 2001
+  Version 5.0.beta00     April 6, 2001
 
 MB-SYSTEM AUTHORS:
 -----------------
@@ -204,6 +207,73 @@ these libraries distributed with MB-System will be built and used.
 
 Fixed bug in mbedit in which the view mode switched spontaneously after 
 loading a new file and advancing the view buffer.
+
+Improved efficiency of attitude interpolation when reading Simrad multibeam
+data. This greatly improves the speed at which Simrad multibeam data files
+are read and processed.
+
+Fixed bug in mbm_grdplot which sometimes produces broken color tables.
+
+Updated GSF library code to GSF release 3.01.
+
+Fixed bug in EM710 support (format 59) involving netattitude datagrams.
+
+Changed licensing from GPL version 2 to GPL version 3.
+
+-----> 5.1.2beta07
+
+Fixed MB-System compatibility with GMT 4.5.0
+
+Fixed mbps memory handling.
+
+MBgrdviz now displays ping/shot numbers when navigation is picked.
+MBextractsegy now embeds line numbers into the output segy files.
+
+-----> 5.1.2beta08
+
+Fixed mbauvloglist to work with all MBARI AUV logs.
+
+Fixed mbm_route2mission so that the AUV mission segment duration always
+corresponds to the actual mission segment length.
+
+Added file locking to the mbprocess system. Now, when mbprocess starts
+working on a swath file, it creates a *.lck file parallel to the swath file
+and deletes the *.lck file when processing is complete. Other instances of
+mbprocess will skip a locked file. This allows users to run multiple instances
+of mbprocess on multiple machines on the same datalist structure. This 
+crude sort of parallel processing can greatly speed up reprocessing of 
+large datasets. This locking functionality will be extended to the processing
+tools mbedit, mbeditviz, and mbnavedit in the future.
+
+-----> 5.1.2beta09
+
+Fixed bug in SeaBeam 2112 support that misplaced some sidescan data
+on little-endian machines.
+
+Fixed the mbview library so that MBgrdviz will enable display of routes,
+sites, and navigation on all open windows when such data is loaded into
+one of the windows.
+
+Fixed cause of frequent MBgrdviz crashes when displaying multiple windows.
+
+Implemented timed background plotting in MBgrdviz so that full resolution
+displays automatically appear within a few seconds of the end of mouse 
+interactions. Previously one had to click the "Full" button to get a full
+resolution view. At this point, the redisplay fails to happen occasionally.
+
+Greatly increased speed of reading third generation Simrad data (formats 58 & 59,
+EM710, EM302, EM122).
+
+-----> 5.1.2beta11
+
+Fixed mb7k2ss to avoid creating shadow zones in the extracted sidescan.
+
+Fixed support for dual-head Simrad EM3002 data (formats 56 and 57).
+
+Changed mbdatalist so that the -Z option (create datalistp.mb-1 datalist
+file referencing an input datalist with the $PROCESSED tag set) can be 
+executed in conjunction with creating ancilliary files with the -O or
+-N options.
 
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
@@ -1616,10 +1686,13 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id: README,v 5.130 2009-03-13 07:05:58 caress Exp $
+RCS ID: $Id: README,v 5.130 2009/03/13 07:05:58 caress Exp $
 
 Revision History:
-$Log: not supported by cvs2svn $
+$Log: README,v $
+Revision 5.130  2009/03/13 07:05:58  caress
+Release 5.1.2beta02
+
 Revision 5.129  2009/03/10 05:11:21  caress
 Added Gaussian mean smoothing to MBnavedit.
 

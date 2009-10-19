@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbswath.c	5/30/93
- *    $Id: mbswath.c,v 5.23 2009-03-02 18:59:05 caress Exp $
+ *    $Id: mbswath.c,v 5.23 2009/03/02 18:59:05 caress Exp $
  *
  *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -28,7 +28,10 @@
  * Author:	D. W. Caress
  * Date:	May 30, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbswath.c,v $
+ * Revision 5.23  2009/03/02 18:59:05  caress
+ * Moving towards 5.1.2beta1.
+ *
  * Revision 5.22  2008/09/27 03:27:10  caress
  * Working towards release 5.1.1beta24
  *
@@ -353,7 +356,7 @@ unsigned char r, g, b, gray;
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbswath.c,v 5.23 2009-03-02 18:59:05 caress Exp $";
+	static char rcs_id[] = "$Id: mbswath.c,v 5.23 2009/03/02 18:59:05 caress Exp $";
 	static char program_name[] = "MBSWATH";
 	static char help_message[] =  "MBSWATH is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBSWATH in conjunction with the usual GMT programs.";
 	static char usage_message[] = "mbswath -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode[F] -V -H]";

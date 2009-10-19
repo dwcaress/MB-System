@@ -1,5 +1,5 @@
 #     The MB-system:	Makefile.template  6/23/95
-#	$Id: Makefile.template,v 5.8 2009-03-13 07:05:58 caress Exp $
+#	$Id: Makefile.template,v 5.8 2009/03/13 07:05:58 caress Exp $
 #
 #     Copyright (c) 2000-2009 by 
 #     David W. Caress (caress@mbari.org)
@@ -15,7 +15,10 @@
 # Author:	D. W. Caress
 # Date:		September 7, 2000
 #
-# $Log: not supported by cvs2svn $
+# $Log: Makefile.template,v $
+# Revision 5.8  2009/03/13 07:05:58  caress
+# Release 5.1.2beta02
+#
 # Revision 5.7  2006/11/10 22:36:05  caress
 # Working towards release 5.1.0
 #

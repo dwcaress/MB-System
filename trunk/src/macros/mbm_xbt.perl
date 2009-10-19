@@ -6,7 +6,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 #--------------------------------------------------------------------
 #    The MB-system: mbm_xbt.perl   6/18/93
-#    $Id: mbm_xbt.perl,v 5.5 2004-09-18 00:36:10 dale Exp $
+#    $Id: mbm_xbt.perl,v 5.5 2004/09/18 00:36:10 dale Exp $
 #
 #    Copyright (c) 1993, 1994, 2000, 2003, 2004 by 
 #    D. W. Caress (caress@mbari.org)
@@ -84,10 +84,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      
 #
 # Version:
-# $Id: mbm_xbt.perl,v 5.5 2004-09-18 00:36:10 dale Exp $
+# $Id: mbm_xbt.perl,v 5.5 2004/09/18 00:36:10 dale Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_xbt.perl,v $
+#   Revision 5.5  2004/09/18 00:36:10  dale
+#   Update copyright date, add CU to LDEO and change one more instance of velocity.
+#
 #   Revision 5.3  2004/09/17 19:47:44  dale
 #   This is a major revision to mbm_xbt. It adds new functionality for Sippican MK21 file format, addresses sub-zero temperatures better and is significantly cleaned up. See the comments.
 #

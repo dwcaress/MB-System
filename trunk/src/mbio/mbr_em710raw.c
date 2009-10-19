@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_em710raw.c	2/26/2008
- *	$Id: mbr_em710raw.c,v 5.3 2009-03-02 18:51:52 caress Exp $
+ *	$Id: mbr_em710raw.c,v 5.3 2009/03/02 18:51:52 caress Exp $
  *
- *    Copyright (c) 2008 by
+ *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,7 +24,10 @@
  * Author:	D. W. Caress
  * Date:	February 26, 2008
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbr_em710raw.c,v $
+ * Revision 5.3  2009/03/02 18:51:52  caress
+ * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
+ *
  * Revision 5.2  2008/11/16 21:51:18  caress
  * Updating all recent changes, including time lag analysis using mbeditviz and improvements to the mbgrid footprint gridding algorithm.
  *
@@ -177,7 +180,7 @@ int mbr_em710raw_wr_ss2(int verbose, FILE *mbfp, int swap,
 int mbr_em710raw_wr_wc(int verbose, FILE *mbfp, int swap, 
 		struct mbsys_simrad3_struct *store, int *error);
 
-static char res_id[]="$Id: mbr_em710raw.c,v 5.3 2009-03-02 18:51:52 caress Exp $";
+static char res_id[]="$Id: mbr_em710raw.c,v 5.3 2009/03/02 18:51:52 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)
@@ -508,6 +511,10 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	xx, yy, rr, zz;
 	double	*pixel_size, *swath_width;
 	mb_u_char detection_mask;
+	double	att_time_d[MBSYS_SIMRAD3_MAXATTITUDE];
+	double	att_roll[MBSYS_SIMRAD3_MAXATTITUDE];
+	double	att_pitch[MBSYS_SIMRAD3_MAXATTITUDE];
+	double	att_heave[MBSYS_SIMRAD3_MAXATTITUDE];
 	int	i;
 
 	/* print input debug statements */
@@ -578,15 +585,17 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_get_time(verbose, time_i, &atime_d);
 		
 		/* add latest attitude samples */
+		attitude->att_ndata = MIN(attitude->att_ndata,MBSYS_SIMRAD3_MAXATTITUDE);
 		for (i=0;i<attitude->att_ndata;i++)
 			{
-			mb_attint_add(verbose, mbio_ptr,
-				(double)(atime_d + 0.001 * attitude->att_time[i]),
-				(double)(0.01 * attitude->att_heave[i]),
-				(double)(0.01 * attitude->att_roll[i]),
-				(double)(0.01 * attitude->att_pitch[i]),
-				error);
+			att_time_d[i] = (double)(atime_d + 0.001 * attitude->att_time[i]);
+			att_heave[i] = (double)(0.01 * attitude->att_heave[i]);
+			att_roll[i] = (double)(0.01 * attitude->att_roll[i]);
+			att_pitch[i] = (double)(0.01 * attitude->att_pitch[i]);
 			}
+		mb_attint_nadd(verbose, mbio_ptr,
+				attitude->att_ndata,att_time_d,att_heave,att_roll,att_pitch,
+				error);
 		}
 
 	/* save attitude if network attitude data */
@@ -605,15 +614,17 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_get_time(verbose, time_i, &atime_d);
 		
 		/* add latest attitude samples */
+		netattitude->nat_ndata = MIN(netattitude->nat_ndata,MBSYS_SIMRAD3_MAXATTITUDE);
 		for (i=0;i<netattitude->nat_ndata;i++)
 			{
-			mb_attint_add(verbose, mbio_ptr,
-				(double)(atime_d + 0.001 * netattitude->nat_time[i]),
-				(double)(0.01 * netattitude->nat_heave[i]),
-				(double)(0.01 * netattitude->nat_roll[i]),
-				(double)(0.01 * netattitude->nat_pitch[i]),
-				error);
+			att_time_d[i] = (double)(atime_d + 0.001 * netattitude->nat_time[i]);
+			att_heave[i] = (double)(0.01 * netattitude->nat_heave[i]);
+			att_roll[i] = (double)(0.01 * netattitude->nat_roll[i]);
+			att_pitch[i] = (double)(0.01 * netattitude->nat_pitch[i]);
 			}
+		mb_attint_nadd(verbose, mbio_ptr,
+				netattitude->nat_ndata,att_time_d,att_heave,att_roll,att_pitch,
+				error);
 		}
 
 	/* interpolate attitude data into navigation records */

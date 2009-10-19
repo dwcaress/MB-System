@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.perl,v 5.9 2003-09-25 16:59:52 caress Exp $
+#    $Id: mbm_grid.perl,v 5.9 2003/09/25 16:59:52 caress Exp $
 #
 #    Copyright (c) 1999, 2002, 2003 by
 #    D. W. Caress (caress@mbari.org)
@@ -54,10 +54,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.perl,v 5.9 2003-09-25 16:59:52 caress Exp $
+#   $Id: mbm_grid.perl,v 5.9 2003/09/25 16:59:52 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: mbm_grid.perl,v $
+#   Revision 5.9  2003/09/25 16:59:52  caress
+#   Fixed bug with -X option found by Val Schmidt.
+#
 #   Revision 5.8  2003/04/17 20:42:48  caress
 #   Release 5.0.beta30
 #

@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c,v 5.40 2009-03-09 16:58:31 caress Exp $
+ *    $Id: mb_process.c,v 5.40 2009/03/09 16:58:31 caress Exp $
  *
  *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -21,7 +21,10 @@
  * Author:	D. W. Caress
  * Date:	September 11, 2000
  * 
- * $Log: not supported by cvs2svn $
+ * $Log: mb_process.c,v $
+ * Revision 5.40  2009/03/09 16:58:31  caress
+ * Release 5.1.2beta01
+ *
  * Revision 5.39  2009/03/02 18:51:52  caress
  * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
  *
@@ -170,8 +173,160 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
 
-static char rcs_id[]="$Id: mb_process.c,v 5.40 2009-03-09 16:58:31 caress Exp $";
+static char rcs_id[]="$Id: mb_process.c,v 5.40 2009/03/09 16:58:31 caress Exp $";
 
+/*--------------------------------------------------------------------*/
+int mb_pr_checkstatus(int verbose, char *file, 
+			int *prstatus, int *error) 
+{
+	char	*function_name = "mb_pr_checkstatus";
+	int	status = MB_SUCCESS;
+	int	ifilemodtime = 0;
+	int	ofilemodtime = 0;
+	int	pfilemodtime = 0;
+	int	navfilemodtime = 0;
+	int	navadjfilemodtime = 0;
+	int	attitudefilemodtime = 0;
+	int	sonardepthfilemodtime = 0;
+	int	esfmodtime = 0;
+	int	svpmodtime = 0;
+	struct stat file_status;
+	int	fstat;
+	struct mb_process_struct process;
+	mb_path	mbp_pfile;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
+		fprintf(stderr,"dbg2       file:      %f\n",file);
+		}
+		
+	/* get started */
+	*prstatus = MB_PR_FILE_NEEDS_PROCESSING;
+	*error = MB_ERROR_NO_ERROR;
+
+	/* get existence and get mod time for the input file */
+	fstat = stat(file, &file_status);
+	if ((fstat = stat(file, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		{
+ 		ifilemodtime = file_status.st_mtime;
+		}
+	else
+		{
+		*prstatus = MB_PR_FILE_NOT_EXIST;
+		}
+	
+	/* check for existing parameter file */
+	if (*prstatus == MB_PR_FILE_NEEDS_PROCESSING)
+		{
+		sprintf(mbp_pfile, "%s.par", file);
+	        if ((fstat = stat(mbp_pfile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			{
+			pfilemodtime = file_status.st_mtime;
+			}
+		else
+			{
+	    		*prstatus = MB_PR_NO_PARAMETER_FILE;
+			}
+		}
+
+	/* if input and parameter files found check output and dependencies */
+	if (*prstatus == MB_PR_FILE_NEEDS_PROCESSING)
+		{
+		/* read the parameter file */
+		mb_pr_readpar(verbose, file, MB_NO, &process, error);
+		
+		/* get mod time for the output file */
+		if ((fstat = stat(process.mbp_ofile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			ofilemodtime = file_status.st_mtime;
+		else
+			ofilemodtime = 0;
+
+		/* get mod time for the navigation file if needed */
+		if (process.mbp_nav_mode != MBP_NAV_OFF
+			&& (fstat = stat(process.mbp_navfile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			navfilemodtime = file_status.st_mtime;
+		else
+			navfilemodtime = 0;
+
+		/* get mod time for the navigation adjustment file if needed */
+		if (process.mbp_navadj_mode != MBP_NAVADJ_OFF
+			&& (fstat = stat(process.mbp_navadjfile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			navadjfilemodtime = file_status.st_mtime;
+		else
+			navadjfilemodtime = 0;
+
+		/* get mod time for the attitude file if needed */
+		if (process.mbp_attitude_mode != MBP_ATTITUDE_OFF
+			&& (fstat = stat(process.mbp_attitudefile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			attitudefilemodtime = file_status.st_mtime;
+		else
+			attitudefilemodtime = 0;
+
+		/* get mod time for the sonardepth file if needed */
+		if (process.mbp_sonardepth_mode != MBP_SONARDEPTH_OFF
+			&& (fstat = stat(process.mbp_sonardepthfile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			sonardepthfilemodtime = file_status.st_mtime;
+		else
+			sonardepthfilemodtime = 0;
+
+		/* get mod time for the edit save file if needed */
+		if (process.mbp_edit_mode != MBP_EDIT_OFF
+			&& (fstat = stat(process.mbp_editfile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			esfmodtime = file_status.st_mtime;
+		else
+			esfmodtime = 0;
+
+		/* get mod time for the svp file if needed */
+		if (process.mbp_svp_mode != MBP_SVP_OFF
+			&& (fstat = stat(process.mbp_svpfile, &file_status)) == 0
+			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+			svpmodtime = file_status.st_mtime;
+		else
+			svpmodtime = 0;
+
+		/* now check if processed file is out of date */
+		if (ofilemodtime > 0
+			&& ofilemodtime >= ifilemodtime
+			&& ofilemodtime >= pfilemodtime
+			&& ofilemodtime >= navfilemodtime
+			&& ofilemodtime >= navadjfilemodtime
+			&& ofilemodtime >= attitudefilemodtime
+			&& ofilemodtime >= sonardepthfilemodtime
+			&& ofilemodtime >= esfmodtime
+			&& ofilemodtime >= svpmodtime)
+		    {
+		    *prstatus = MB_PR_FILE_UP_TO_DATE;
+		    }
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       prstatus:   %d\n",*prstatus);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
 /*--------------------------------------------------------------------*/
 int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
 			struct mb_process_struct *process, 
@@ -5757,6 +5912,286 @@ int mb_pr_point_in_quad(int verbose,
 
 	/* return status */
 	return(inside);
+}
+/*--------------------------------------------------------------------*/
+	
+int mb_pr_lockswathfile(int verbose, char *file, int purpose, 
+			char *program, int *error)
+{
+	char	*function_name = "mb_pr_lockswathfile";
+	int	status = MB_SUCCESS;
+	mb_path	lockfile;
+	FILE	*fp;
+	
+	/* file status variables */
+	struct stat file_status;
+	int	fstat;
+
+	/* time, user, host variables */
+	time_t	right_now;
+	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       program:    %s\n",program);
+		fprintf(stderr,"dbg2       purpose:    %d\n",purpose);
+		}
+
+	/* proceed only if lock file does not exist */
+	sprintf(lockfile, "%s.lck", file);
+	if ((fstat = stat(lockfile, &file_status)) == -1)
+		{
+		/* proceed only if we create the lockfile */
+	    	if ((fp = fopen(lockfile, "w")) != NULL)
+			{
+			right_now = time((time_t *)0);
+			strncpy(date,ctime(&right_now),24);
+			if ((user_ptr = getenv("USER")) == NULL)
+				user_ptr = getenv("LOGNAME");
+			if (user_ptr != NULL)
+				strcpy(user,user_ptr);
+			else
+				strcpy(user, "unknown");
+			gethostname(host,MBP_FILENAMESIZE);
+			fprintf(fp, "# File %s \n# Locked by user <%s> on cpu <%s> at <%s>\n",
+				file,user,host,date);
+			fprintf(fp, "Locking Program: %s\n", program);
+			fprintf(fp, "Locking User: %s\n", user);
+			fprintf(fp, "Locking CPU: %s\n", host);
+			fprintf(fp, "Locking Time: %s\n", date);
+			fprintf(fp, "Locking Purpose ID: %d\n", purpose);
+			if (purpose == MBP_LOCK_NONE)
+				fprintf(fp, "Locking Purpose Description: None (unknown)\n");
+			else if (purpose == MBP_LOCK_PROCESS)
+				fprintf(fp, "Locking Purpose Description: Process\n");
+			else if (purpose == MBP_LOCK_EDITBATHY)
+				fprintf(fp, "Locking Purpose Description: Edit Bathymetry\n");
+			else if (purpose == MBP_LOCK_EDITNAV)
+				fprintf(fp, "Locking Purpose Description: Edit Navigation\n");
+			fclose(fp);
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			*error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			}
+		}
+	else
+		{
+		*error = MB_ERROR_FILE_LOCKED;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+	
+int mb_pr_lockinfo(int verbose, char *file, int *locked,
+			int *purpose, char *program, char *user, char *cpu, 
+			char *date, int *error)
+{
+	char	*function_name = "mb_pr_lockinfo";
+	int	status = MB_SUCCESS;
+	mb_path	lockfile;
+	FILE	*fp;
+	mb_path	line;
+	
+	/* file status variables */
+	struct stat file_status;
+	int	fstat;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		}
+
+	/* check if lock file exists */
+	sprintf(lockfile, "%s.lck", file);
+	if ((fstat = stat(lockfile, &file_status)) == 0)
+		{
+		/* read the lockfile */
+		*locked = MB_YES;
+	    	if ((fp = fopen(lockfile, "r")) != NULL)
+			{
+			program[0] = '\0';
+			user[0] = '\0';
+			cpu[0] = '\0';
+			date[0] = '\0';
+			*purpose = 0;
+			while(fgets(line, MBP_FILENAMESIZE, fp) != NULL)
+				{
+				line[strlen(line)-1] = '\0';
+				if (strncmp(line, "Locking Program: ", 17) == 0)
+					{
+					strcpy(program, &(line[17]));
+					}
+				else if (strncmp(line, "Locking User: ", 14) == 0)
+					{
+					strcpy(user, &(line[14]));
+					}
+				else if (strncmp(line, "Locking CPU: ", 13) == 0)
+					{
+					strcpy(cpu, &(line[13]));
+					}
+				else if (strncmp(line, "Locking Time: ", 14) == 0)
+					{
+					strcpy(date, &(line[14]));
+					}
+				else if (strncmp(line, "Locking Purpose ID: ", 20) == 0)
+					{
+					sscanf(&(line[20]), "%d", purpose);
+					}
+				}
+			fclose(fp);
+			*error = MB_ERROR_NO_ERROR;
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			*error = MB_ERROR_OPEN_FAIL;
+			status = MB_FAILURE;
+			}
+		}
+	else
+		{
+		*locked = MB_NO;
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       locked:     %d\n",*locked);
+		fprintf(stderr,"dbg2       purpose:    %d\n",*purpose);
+		fprintf(stderr,"dbg2       program:    %s\n",program);
+		fprintf(stderr,"dbg2       user:       %s\n",user);
+		fprintf(stderr,"dbg2       cpu:        %s\n",cpu);
+		fprintf(stderr,"dbg2       date:       %s\n",date);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_unlockswathfile(int verbose, char *file, int purpose, 
+			char *program, int *error)
+{
+	char	*function_name = "mb_pr_unlockswathfile";
+	int	status = MB_SUCCESS;
+	mb_path	lockfile;
+	FILE	*fp;
+	int	locked;
+	mb_path	lock_program;
+	mb_path	lock_user;
+	mb_path	lock_cpu;
+	mb_path	lock_date;
+	int	lock_purpose;
+	mb_path	command;
+
+	/* user, host variables */
+	char	user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
+	
+	/* file status variables */
+	struct stat file_status;
+	int	fstat;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       file:       %s\n",file);
+		fprintf(stderr,"dbg2       purpose:    %d\n",purpose);
+		fprintf(stderr,"dbg2       program:    %s\n",program);
+		}
+
+	/* check if lock file exists */
+	sprintf(lockfile, "%s.lck", file);
+	if ((fstat = stat(lockfile, &file_status)) == 0)
+		{
+		/* get lock info */
+		status = mb_pr_lockinfo(verbose, file, &locked, &lock_purpose, lock_program,
+					lock_user, lock_cpu, lock_date, error);
+
+		/* get user and date */
+		if ((user_ptr = getenv("USER")) == NULL)
+			user_ptr = getenv("LOGNAME");
+		if (user_ptr != NULL)
+			strcpy(user,user_ptr);
+		else
+			strcpy(user, "unknown");
+					
+		/* if locked and everything matches remove lock file */
+		if (locked == MB_YES
+			&& strncmp(program, lock_program,strlen(program)) == 0
+			&& strncmp(user, lock_user,strlen(user)) == 0
+			&& purpose == lock_purpose)
+			{
+			sprintf(command, "/bin/rm -f %s", lockfile);
+			system(command);
+			status = MB_SUCCESS;
+			*error = MB_ERROR_NO_ERROR;
+			}
+		else
+			{
+			status = MB_SUCCESS;
+			*error = MB_ERROR_FILE_LOCKED;
+			}
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_FILE_NOT_FOUND;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return value:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
 }
 /*--------------------------------------------------------------------*/
 

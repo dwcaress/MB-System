@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_singlebeam.h	4/13/93
- *	$Id: mbsys_singlebeam.h,v 5.8 2006-11-10 22:36:05 caress Exp $
+ *	$Id: mbsys_singlebeam.h,v 5.8 2006/11/10 22:36:05 caress Exp $
  *
  *    Copyright (c) 1999, 2000, 2002, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -28,7 +28,10 @@
  * Author:	D. W. Caress
  * Date:	April 13,  1999
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbsys_singlebeam.h,v $
+ * Revision 5.8  2006/11/10 22:36:05  caress
+ * Working towards release 5.1.0
+ *
  * Revision 5.7  2006/10/05 18:58:29  caress
  * Changes for 5.1.0beta4
  *
@@ -206,6 +209,8 @@ struct mbsys_singlebeam_struct
                              seismic data. */
 	int	seismic_shot;
 			    /* SEISMIC SHOT-POINT NUMBER */
+	int	seismic_cdp;
+			    /* SEISMIC CDP-POINT NUMBER */
 
 	/* ship navigation */
 	double	ship_longitude;	/* degrees */
@@ -240,6 +245,8 @@ int mbsys_singlebeam_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_singlebeam_pingnumber(int verbose, void *mbio_ptr, 
 			int *pingnumber, int *error);
+int mbsys_singlebeam_segynumber(int verbose, void *mbio_ptr, 
+			int *line, int *shot, int *cdp, int *error);
 int mbsys_singlebeam_extract(int verbose, void *mbio_ptr, void *store_ptr, 
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,

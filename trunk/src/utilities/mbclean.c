@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbclean.c	2/26/93
- *    $Id: mbclean.c,v 5.14 2006-08-09 22:41:27 caress Exp $
+ *    $Id: mbclean.c,v 5.14 2006/08/09 22:41:27 caress Exp $
  *
  *    Copyright (c) 1993, 1994, 2001, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -53,7 +53,10 @@
  * which was in turn based on the original program mbclean (v. 1.0)
  * by David Caress.
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbclean.c,v $
+ * Revision 5.14  2006/08/09 22:41:27  caress
+ * Fixed programs that read or write grids so that they do not use the GMT_begin() function; these programs will now work when GMT is built in the default fashion, when GMT is built in the default fashion, with "advisory file locking" enabled.
+ *
  * Revision 5.13  2006/01/18 15:17:00  caress
  * Added stdlib.h include.
  *
@@ -251,7 +254,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam,
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbclean.c,v 5.14 2006-08-09 22:41:27 caress Exp $";
+	static char rcs_id[] = "$Id: mbclean.c,v 5.14 2006/08/09 22:41:27 caress Exp $";
 	static char program_name[] = "MBCLEAN";
 	static char help_message[] =  "MBCLEAN identifies and flags artifacts in swath sonar bathymetry data\nBad beams  are  indentified  based  on  one simple criterion only: \nexcessive bathymetric slopes.   The default input and output streams \nare stdin and stdout.";
 	static char usage_message[] = "mbclean [-Amax -Blow/high -Cslope -Dmin/max \n\t-Fformat -Gfraction_low/fraction_high \n\t-Iinfile -Llonflip -Mmode -Nbuffersize -Ooutfile -Q -Sspike_slope/mode/format -Xzap_beams \n\t-V -H]";

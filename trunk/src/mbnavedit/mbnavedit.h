@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavedit.h	6/24/95
- *    $Id: mbnavedit.h,v 5.6 2009-03-10 05:11:22 caress Exp $
+ *    $Id: mbnavedit.h,v 5.6 2009/03/10 05:11:22 caress Exp $
  *
  *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
@@ -22,7 +22,10 @@
  * Date:	June 24,  1995
  * Date:	August 28, 2000 (New version - no buffered i/o)
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbnavedit.h,v $
+ * Revision 5.6  2009/03/10 05:11:22  caress
+ * Added Gaussian mean smoothing to MBnavedit.
+ *
  * Revision 5.5  2005/06/04 04:45:50  caress
  * Added feature to apply longitude and latitude offsets to the navigation.
  *

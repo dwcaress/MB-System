@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	install_makefiles	5/20/94
-#    $Id: install_makefiles,v 5.35 2009-03-13 07:05:58 caress Exp $
+#    $Id: install_makefiles,v 5.35 2009/03/13 07:05:58 caress Exp $
 #
 #    Copyright (c) 1993-2009 by 
 #    D. W. Caress (caress@lamont.ldgo.columbia.edu)
@@ -96,7 +96,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #--------------------------------------------------------------------
 #
 # Required parameters:
-$MBSYSTEM_HOME = "/Users/caress/sandbox/mbsystem";
+$MBSYSTEM_HOME = "/usr/local/mbsystem";
 $OS = "DARWIN";
 $CFLAGS = "-g -I/usr/X11R6/include";
 $LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
@@ -141,10 +141,13 @@ $LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 #--------------------------------------------------------------------
 #
 # Version:
-#   $Id: install_makefiles,v 5.35 2009-03-13 07:05:58 caress Exp $
+#   $Id: install_makefiles,v 5.35 2009/03/13 07:05:58 caress Exp $
 #
 # Revisions:
-#   $Log: not supported by cvs2svn $
+#   $Log: install_makefiles,v $
+#   Revision 5.35  2009/03/13 07:05:58  caress
+#   Release 5.1.2beta02
+#
 #   Revision 5.34  2009/03/02 18:59:05  caress
 #   Moving towards 5.1.2beta1.
 #

@@ -4,7 +4,7 @@
 ** Copyright (c) 2004   Gerald I. Evenden
 */
 static const char
-LIBPROJ_ID[] = "$Id: PJ_geos.c,v 5.3 2008-09-29 04:56:21 caress Exp $";
+LIBPROJ_ID[] = "$Id: PJ_geos.c,v 5.3 2008/09/29 04:56:21 caress Exp $";
 /*
 ** See also (section 4.4.3.2):
 **   http://www.eumetsat.int/en/area4/msg/news/us_doc/cgms_03_26.pdf
@@ -141,7 +141,10 @@ ENTRY0(geos)
 	}
 ENDENTRY(P)
 /*
-** $Log: not supported by cvs2svn $
+** $Log: PJ_geos.c,v $
+** Revision 5.3  2008/09/29 04:56:21  caress
+** Proj 4.6.1
+**
 ** Revision 1.2  2005/02/04 19:27:58  fwarmerdam
 ** Added link to reference info.
 **

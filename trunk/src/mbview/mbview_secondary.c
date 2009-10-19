@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_secondary.c	9/25/2003
- *    $Id: mbview_secondary.c,v 5.10 2008-05-16 22:59:42 caress Exp $
+ *    $Id: mbview_secondary.c,v 5.10 2008/05/16 22:59:42 caress Exp $
  *
  *    Copyright (c) 2003-2008 by
  *    David W. Caress (caress@mbari.org)
@@ -20,7 +20,10 @@
  * Note:	This code was broken out of mbview_callbacks.c, which was
  *		begun on October 7, 2002
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mbview_secondary.c,v $
+ * Revision 5.10  2008/05/16 22:59:42  caress
+ * Release 5.1.1beta18.
+ *
  * Revision 5.9  2007/10/08 16:32:08  caress
  * Code status as of 8 October 2007.
  *
@@ -101,7 +104,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_secondary.c,v 5.10 2008-05-16 22:59:42 caress Exp $";
+static char rcs_id[]="$Id: mbview_secondary.c,v 5.10 2008/05/16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setsecondarygrid(int verbose, int instance,
