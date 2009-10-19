@@ -1,4 +1,4 @@
-.TH mbm_route2mission l "30 July 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_route2mission l "17 October 2009" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_route2mission\fP - Macro to convert an \fBmbgrdviz\fP route file into an
 MBARI AUV mission script. 
@@ -92,7 +92,16 @@ waypoint, or the time required to reach the first waypoint.
 
 The MBARI Mapping AUV is equipped with a 200 kHz multibeam sonar, a 2-16 kHz chirp subbottom
 profiler, a 110 kHz chirp sidescan, and a 410 kHz chirp sidescan. The \fB-M\fP option is
-used to enable these mapping sonars in the AUV mission script.
+used to enable these mapping sonars in the AUV mission script. If the route file contains
+waypoints identified as line start and line end points, the subbottom profiler (if enabled) will be
+turned on and off at these points. The waypoint type value can be set interactively within 
+\fBmbgrdviz\fP.
+
+The MBARI Benthic Imaging AUV is equipped with dual strobes and a downward pointed camera. 
+The \fB-MC\fP option is used to enable control of the camera in the AUV mission script. If the route file contains
+waypoints identified as line start and line end points, the camera (if enabled) will be
+turned on and off at these points. The waypoint type value can be set interactively within 
+\fBmbgrdviz\fP.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)

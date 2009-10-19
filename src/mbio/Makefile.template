@@ -251,7 +251,7 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 clean:
 	rm -f *.o
 
-### put together the library
+### put together the static library
 $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
@@ -378,7 +378,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_edgjstar.o mbr_segysegy.o \
 		mbr_image83p.o mbr_imagemba.o
 	ranlib $(LIBDIR)/libmbio.a
-
+	
 ### compile the source files
 mb_format.o:	mb_format.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_io.h
 	$(CC) -c $(CFLAGS) mb_format.c
@@ -395,7 +395,7 @@ mb_read_init.o:	mb_read_init.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INC
 mb_write_init.o:	mb_write_init.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GSFINCDIR) -I$(NETCDFINCDIR) mb_write_init.c
 mb_close.o:	mb_close.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
-	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mb_close.c
+	$(CC) -c $(CFLAGS) -I$(GSFINCDIR) -I$(NETCDFINCDIR) mb_close.c
 mb_mem.o:	mb_mem.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_mem.c
 mb_coor_scale.o:	mb_coor_scale.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h

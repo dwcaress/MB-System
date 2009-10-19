@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_nzmg.c,v 5.5 2008/09/29 04:56:21 caress Exp $
+ * $Id: PJ_nzmg.c 1504 2009-01-06 02:11:57Z warmerdam $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the nzmg (New Zealand Map Grid) projection.
@@ -26,22 +26,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log: PJ_nzmg.c,v $
- * Revision 5.5  2008/09/29 04:56:21  caress
- * Proj 4.6.1
- *
- * Revision 1.3  2002/12/14 19:37:29  warmerda
- * updated headers
- *
- */
+ *****************************************************************************/
 
-/*  */
 #define PJ_LIB__
 #include	<projects.h>
 
-PJ_CVSID("$Id: PJ_nzmg.c,v 5.5 2008/09/29 04:56:21 caress Exp $");
+PJ_CVSID("$Id: PJ_nzmg.c 1504 2009-01-06 02:11:57Z warmerdam $");
 
 PROJ_HEAD(nzmg, "New Zealand Map Grid") "\n\tfixed Earth";
 

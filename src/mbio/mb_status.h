@@ -412,8 +412,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.2beta11"
-#define	MB_BUILD_DATE	"26 August 2009"
+#define	MB_VERSION	"5.1.2beta12"
+#define	MB_BUILD_DATE	"18 October 2009"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
@@ -534,7 +534,11 @@
 #define MB_PROCESSED_EXIST	1
 #define MB_PROCESSED_USE	2
 
+/* MBIO maximum notice value */
+#define	MB_NOTICE_MAX	(MB_DATA_KINDS - MB_ERROR_MIN + MB_PROBLEM_MAX + 1)
+
 /* MBIO function error messages */
+#ifdef DEFINE_MB_MESSAGES
 static char *fatal_error_msg[] = 
 	{
 	"No error",
@@ -585,9 +589,6 @@ static char *unknown_error_msg[] =
 	{
 	"Unknown error identifier"
 	};
-
-/* MBIO maximum notice value */
-#define	MB_NOTICE_MAX	(MB_DATA_KINDS - MB_ERROR_MIN + MB_PROBLEM_MAX + 1)
 
 /* MBIO function notice messages */
 static char *notice_msg[] = 
@@ -678,6 +679,7 @@ static char *unknown_notice_msg[] =
 	{
 	"Unknown notice identifier detritus"
 	};
+#endif
 	
 /* MBIO sidescan types 
 	- sidescan values can be logarithmic (dB) or linear (usually voltage) */
@@ -791,11 +793,6 @@ static char *unknown_notice_msg[] =
 #define MB_DETECT_UNKNOWN	0
 #define MB_DETECT_AMPLITUDE	1
 #define MB_DETECT_PHASE		2
-static char *detect_name[] = 
-	{	"Unknown",
-		"Amplitude",
-		"Phase"
-	};
 
 /* end conditional include */
 #endif

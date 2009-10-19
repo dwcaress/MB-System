@@ -2,7 +2,7 @@
  *    The MB-system:	mbrollbias.c	5/16/93
  *    $Id: mbrollbias.c,v 5.6 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -110,6 +110,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -136,16 +137,15 @@ struct bathptr
 
 /* program identifiers */
 static char rcs_id[] = "$Id: mbrollbias.c,v 5.6 2008/09/13 06:08:09 caress Exp $";
-static char program_name[] = "MBROLLBIAS";
-static char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of swath \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the swath system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
-static char usage_message[] = "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";
+char program_name[] = "MBROLLBIAS";
+char help_message[] =  "MBROLLBIAS is an utility used to assess roll bias of swath \nsonar systems using bathymetry data from two swaths covering the \nsame seafloor in opposite directions. The program takes two input  \nfiles and calculates best fitting planes for each dataset.   \nThe roll bias is calculated by solving for a common roll bias\nfactor which explains the difference between the seafloor\nslopes observed on the two swaths.  This approach assumes that \npitch bias is not a factor; this assumption is most correct when\nthe heading of the two shiptracks are exactly opposite. The area is\ndivided into a number of rectangular regions and calculations are done  \nin each region containing a sufficient number of data from both \nswaths.  A positive roll bias value means that the the vertical \nreference used by the swath system is biased to starboard, \ngiving rise to shallow bathymetry to port and deep bathymetry \nto starboard.";
+char usage_message[] = "mbrollbias -Dxdim/ydim -Fformat1/format2 -Ifile1 -Jfile2 -Llonflip -Rw/e/s/n -V -H]";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -171,7 +171,6 @@ main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	file[MB_PATH_MAXLINE];
 	void	*mbio_ptr = NULL;
 
 	/* mbrollbias control variables */
@@ -179,7 +178,6 @@ main (int argc, char **argv)
 	int	jformat;
 	char	ifile[MB_PATH_MAXLINE];
 	char	jfile[MB_PATH_MAXLINE];
-	char	cfile[MB_PATH_MAXLINE];
 	int	xdim, ydim;
 
 	/* mbio read values */
@@ -194,9 +192,6 @@ main (int argc, char **argv)
 	double	distance;
 	double	altitude;
 	double	sonardepth;
-	int	nbath;
-	int	namp;
-	int	nss;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathlon = NULL;
@@ -217,12 +212,9 @@ main (int argc, char **argv)
 	struct bathptr	*jdata = NULL;
 	struct bath	*zone = NULL;
 	int	ndata, ndatafile;
-	double	iheading;
-	double	jheading;
 	double	iaa, ibb, icc, ihh;
 	double	jaa, jbb, jcc, jhh;
 	double	hx, hy, dd;
-	double	sumx2, sumy2;
 	double	isine, icosine, jsine, jcosine;
 	double	roll_bias;
 
@@ -237,8 +229,7 @@ main (int argc, char **argv)
 	FILE	*outfp;
 
 	/* other variables */
-	FILE	*fp;
-	int	i, j, k, m;
+	int	i, j, k;
 	int	ii, jj, kk;
 	int	ib, ix, iy, indx;
 	void	gauss();

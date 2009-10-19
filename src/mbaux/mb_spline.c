@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_spline.c	10/11/00
- *    $Id: mb_spline.c,v 5.3 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_spline.c,v 5.3 2008/07/10 06:43:40 caress Exp $
  *
- *    Copyright (c) 2000-2008 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -26,7 +26,10 @@
  * Author:	D. W. Caress
  * Date:	October 11, 2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_spline.c,v $
+ * Revision 5.3  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.2  2006/09/11 18:55:52  caress
  * Changes during Western Flyer and Thomas Thompson cruises, August-September
  * 2006.
@@ -53,11 +56,12 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 
+static char rcs_id[]="$Id: mb_spline.c,v 5.3 2008/07/10 06:43:40 caress Exp $";
+
 /*--------------------------------------------------------------------------*/
 int mb_spline_init(int verbose, double *x, double *y, 
 	int n, double yp1, double ypn, double *y2, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.3 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_spline_init";
 	int	status = MB_SUCCESS;
 	int	i, k;
@@ -66,16 +70,16 @@ int mb_spline_init(int verbose, double *x, double *y,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       x:                %d\n",x);
-		fprintf(stderr,"dbg2       y:                %d\n",y);
+		fprintf(stderr,"dbg2       x:                %ld\n",(long)x);
+		fprintf(stderr,"dbg2       y:                %ld\n",(long)y);
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       yp1:              %f\n",yp1);
 		fprintf(stderr,"dbg2       ypn:              %f\n",ypn);
-		fprintf(stderr,"dbg2       y2:               %d\n",y2);
+		fprintf(stderr,"dbg2       y2:               %ld\n",(long)y2);
 		}
 		
 	/* check for n > 2 */
@@ -125,8 +129,7 @@ int mb_spline_init(int verbose, double *x, double *y,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -139,7 +142,6 @@ int mb_spline_init(int verbose, double *x, double *y,
 int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 	int n, double x, double *y, int *i, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.3 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_spline_interp";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;
@@ -148,13 +150,13 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       xa:               %d\n",xa);
-		fprintf(stderr,"dbg2       ya:               %d\n",ya);
-		fprintf(stderr,"dbg2       y2a:              %d\n",y2a);
+		fprintf(stderr,"dbg2       xa:               %ld\n",(long)xa);
+		fprintf(stderr,"dbg2       ya:               %ld\n",(long)ya);
+		fprintf(stderr,"dbg2       y2a:              %ld\n",(long)y2a);
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       x:                %f\n",x);
 		}
@@ -190,8 +192,7 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       y:          %f\n",*y);
 		fprintf(stderr,"dbg2       i:          %d\n",*i);
@@ -206,7 +207,6 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 int mb_linear_interp(int verbose, double *xa, double *ya,
 		int n, double x, double *y, int *i, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.3 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_linear_interp";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;
@@ -215,12 +215,12 @@ int mb_linear_interp(int verbose, double *xa, double *ya,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       xa:               %d\n",xa);
-		fprintf(stderr,"dbg2       ya:               %d\n",ya);
+		fprintf(stderr,"dbg2       xa:               %ld\n",(long)xa);
+		fprintf(stderr,"dbg2       ya:               %ld\n",(long)ya);
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       x:                %f\n",x);
 		}
@@ -254,8 +254,7 @@ int mb_linear_interp(int verbose, double *xa, double *ya,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       y:          %f\n",*y);
 		fprintf(stderr,"dbg2       i:          %d\n",*i);
@@ -270,7 +269,6 @@ int mb_linear_interp(int verbose, double *xa, double *ya,
 int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
 		int n, double x, double *y, int *i, int *error)
 {
-  	static char rcs_id[]="$Id: mb_spline.c,v 5.3 2008-07-10 06:43:40 caress Exp $";
 	char	*function_name = "mb_linear_interp_degrees";
 	int	status = MB_SUCCESS;
 	int	klo, khi, k;
@@ -280,12 +278,12 @@ int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       xa:               %d\n",xa);
-		fprintf(stderr,"dbg2       ya:               %d\n",ya);
+		fprintf(stderr,"dbg2       xa:               %ld\n",(long)xa);
+		fprintf(stderr,"dbg2       ya:               %ld\n",(long)ya);
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       x:                %f\n",x);
 		}
@@ -325,8 +323,7 @@ int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       y:          %f\n",*y);
 		fprintf(stderr,"dbg2       i:          %d\n",*i);

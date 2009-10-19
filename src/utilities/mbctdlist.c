@@ -2,7 +2,7 @@
  *    The MB-system:	mbctdlist.c	9/14/2008
  *    $Id: mbctdlist.c,v 5.0 2008/09/20 00:51:31 caress Exp $
  *
- *    Copyright (c) 2008 by
+ *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -37,6 +37,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -46,6 +47,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_process.h"
+#include "../../include/mb_aux.h"
 
 /* local options */
 #define	MAX_OPTIONS	25
@@ -59,16 +61,16 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error);
 /* NaN value */
 double	NaN;
 
+static char rcs_id[] = "$Id: mbctdlist.c,v 5.0 2008/09/20 00:51:31 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbctdlist.c,v 5.0 2008/09/20 00:51:31 caress Exp $";
-	static char program_name[] = "mbctdlist";
-	static char help_message[] =  "mbctdlist lists all CTD records within swath data files\nThe -O option specifies how the values are output\nin an mblist-likefashion.\n";
-	static char usage_message[] = "mbctdlist [-A -Ddecimate -Fformat -Gdelimeter -H -Ifile -Llonflip -Ooutput_format -V -Zsegment]";
+	char program_name[] = "mbctdlist";
+	char help_message[] =  "mbctdlist lists all CTD records within swath data files\nThe -O option specifies how the values are output\nin an mblist-likefashion.\n";
+	char usage_message[] = "mbctdlist [-A -Ddecimate -Fformat -Gdelimeter -H -Ifile -Llonflip -Ooutput_format -V -Zsegment]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -107,7 +109,6 @@ main (int argc, char **argv)
 	char	list[MAX_OPTIONS];
 	int	n_list;
 	double	distance_total;
-	int	nread;
 	int	time_j[5];
 	int	mblist_next_value = MB_NO;
 	int	invert_next_value = MB_NO;
@@ -140,7 +141,6 @@ main (int argc, char **argv)
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
-	int	icomment = 0;
 	
 	/* navigation, heading, attitude data */
 	int	survey_count = 0;
@@ -158,7 +158,6 @@ main (int argc, char **argv)
 	/* CTD values */
 	int	ctd_count = 0;
 	int	ctd_count_tot = 0;
-	int	ctd_time_i[7];
 	int	nctd;
 	double	ctd_time_d[MB_CTD_MAX];
 	double	ctd_conductivity[MB_CTD_MAX];
@@ -185,7 +184,6 @@ main (int argc, char **argv)
 	/* additional time variables */
 	int	first_m = MB_YES;
 	double	time_d_ref;
-	struct tm	time_tm;
 	int	first_u = MB_YES;
 	time_t	time_u;
 	time_t	time_u_ref;
@@ -204,9 +202,8 @@ main (int argc, char **argv)
 	double	b;
 
 	int	read_data;
-	char	line[MB_PATH_MAXLINE];
 	int	ictd;
-	int	i, j, k;
+	int	i, j;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -392,8 +389,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -553,8 +550,8 @@ main (int argc, char **argv)
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-				    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+				    file,&format,&file_weight,&error))
 				    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -593,8 +590,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1043,7 +1040,7 @@ main (int argc, char **argv)
 								case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 									time_u = (int) time_d;
 									if (ascii == MB_YES)
-									    printf("%d",time_u);
+									    printf("%ld",time_u);
 									else
 									    {
 									    b = time_u;
@@ -1058,7 +1055,7 @@ main (int argc, char **argv)
 										first_u = MB_NO;
 										}
 									if (ascii == MB_YES)
-									    printf("%d",time_u - time_u_ref);
+									    printf("%ld",time_u - time_u_ref);
 									else
 									    {
 									    b = time_u - time_u_ref;
@@ -1179,8 +1176,8 @@ main (int argc, char **argv)
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-				    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+				    file,&format,&file_weight,&error))
 				    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -1238,8 +1235,6 @@ int printsimplevalue(int verbose,
 	char	*function_name = "printsimplevalue";
 	int	status = MB_SUCCESS;
 	char	format[24];
-	int	i;
-	
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1306,8 +1301,6 @@ int printNaN(int verbose, int ascii, int *invert, int *flipsign, int *error)
 {
 	char	*function_name = "printNaN";
 	int	status = MB_SUCCESS;
-	int	i;
-	
 
 	/* print input debug statements */
 	if (verbose >= 2)

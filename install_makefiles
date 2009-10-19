@@ -98,8 +98,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Required parameters:
 $MBSYSTEM_HOME = "/usr/local/mbsystem";
 $OS = "DARWIN";
-$CFLAGS = "-g -I/usr/X11R6/include";
-$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
+$CFLAGS = "-Wall -g -I/usr/X11R6/include";
+$LFLAGS = "-Wall -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
 $NETCDFLIBDIR = "/sw/lib";
 $NETCDFINCDIR = "/sw/include";
 $GMTLIBDIR = "/usr/local/gmt/lib";
@@ -364,9 +364,31 @@ elsif ($preset eq "macosxfink")
 	$LFLAGS = "-Wl -lm -bind_at_load";
 	}
 # 
+# Preset configuration for MacOs X 10.6 (Snow Leopard) when building in /usr/local
+#       assumes that GMT, netCDF, and OpenMotif are installed using fink in 32 bit mode
+elsif ($preset eq "macosxusrlocal")
+	{
+	print "\nUsing preset configuration for MacOs X in /usr/local/...\n";
+	$FINKPREFIX = "/sw";
+	$MBSYSTEM_HOME = "/usr/local/mbsystem";
+	$OS = "DARWIN";
+	$CC = "cc";
+	$MOTIFINCDIR = "$FINKPREFIX/include";
+	$MOTIFLIBS = "-L$FINKPREFIX/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
+	$OPENGLLIBS = "-lGLU -lGL";
+	$GMTLIBDIR = "$FINKPREFIX/lib";
+	$GMTINCDIR = "$FINKPREFIX/include";
+	$NETCDFLIBDIR = "$FINKPREFIX/lib";
+	$NETCDFINCDIR = "$FINKPREFIX/include";
+	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
+	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+	$CFLAGS = "-m32 -g -I/usr/X11R6/include";
+	$LFLAGS = "-m32 -Wl -lm";
+	}
+# 
 # Preset configuration for MacOs X 10.5 (Leopard) when building in /usr/local
 #       assumes that GMT, netCDF, and OpenMotif are installed using fink
-elsif ($preset eq "macosxusrlocal")
+elsif ($preset eq "macosx10.5usrlocal")
 	{
 	print "\nUsing preset configuration for MacOs X in /usr/local/...\n";
 	$FINKPREFIX = "/sw";

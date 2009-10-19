@@ -2,7 +2,7 @@
  *    The MB-system:	mbbackangle.c	1/6/95
  *    $Id: mbbackangle.c,v 5.22 2008/07/10 18:16:33 caress Exp $
  *
- *    Copyright (c) 1995, 2000, 2002, 2003, 2004m 2007 by
+ *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -141,6 +141,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -151,6 +152,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_process.h"
+#include "../../include/mb_aux.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -211,17 +213,22 @@ int output_model(int verbose, FILE *tfp,
 	int nangles, double angle_max, double dangle, int symmetry,
 	int *nmean, double *mean, double *sigma, 
 	int *error);
+int write_cdfgrd(int verbose, char *outfile, float *grid,
+		int nx, int ny, 
+		double xmin, double xmax, double ymin, double ymax,
+		double zmin, double zmax, double dx, double dy, 
+		char *xlab, char *ylab, char *zlab, char *titl, 
+		char *projection, int argc, char **argv, 
+		int *error);
 						
 static char rcs_id[] = "$Id: mbbackangle.c,v 5.22 2008/07/10 18:16:33 caress Exp $";
-static char program_name[] = "mbbackangle";
-static int	pargc;
-static char	**pargv;
+char program_name[] = "mbbackangle";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char help_message[] =  
+	char help_message[] =  
 "MBbackangle reads a swath sonar data file and generates a set \n\t\
 of tables containing the average amplitude an/or sidescan values\n\t\
 as a function of the angle of interaction (grazing angle) \n\t\
@@ -229,11 +236,10 @@ with the seafloor. Each table represents the symmetrical \n\t\
 average function for a user defined number of pings. The tables \n\t\
 are output to a \".aga\" and \".sga\" files that can be applied \n\t\
 by MBprocess.";
-	static char usage_message[] = "mbbackangle -Ifile \
+	char usage_message[] = "mbbackangle -Ifile \
 [-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/max/nx/ny \
 -Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -264,8 +270,6 @@ by MBprocess.";
 	char	swathfile[MB_PATH_MAXLINE];
 	char	amptablefile[MB_PATH_MAXLINE];
 	char	sstablefile[MB_PATH_MAXLINE];
-	char	ampalltablefile[MB_PATH_MAXLINE];
-	char	ssalltablefile[MB_PATH_MAXLINE];
 	FILE	*atfp;
 	FILE	*stfp;
 	int	beams_bath;
@@ -381,7 +385,7 @@ by MBprocess.";
 	double	headingx, headingy;
 	double	r[3], rr;
 	double	v1[3], v2[3], v[3], vv;
-	double	slopefraction, slope;
+	double	slope;
 	double	bathy;
 	double	altitude_use;
 	double	angle;
@@ -422,8 +426,6 @@ by MBprocess.";
 	memset(&grid, 0, sizeof (struct mbba_grid_struct));
 
 	/* process argument list */
-	pargc = 1;
-	pargv = argv;
 	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
 	  switch (c) 
 		{
@@ -519,7 +521,7 @@ by MBprocess.";
 			break;
 		case 'T':
 		case 't':
-			sscanf (optarg,"%s", &grid.file);
+			sscanf (optarg,"%s", grid.file);
 			corr_topogrid = MB_YES;
 			flag++;
 			break;
@@ -637,15 +639,15 @@ by MBprocess.";
 		fprintf(stderr,"dbg2       gridampmax:   %f\n",gridampmax);
 		fprintf(stderr,"dbg2       gridampnx:    %d\n",gridampnx);
 		fprintf(stderr,"dbg2       gridampny:    %d\n",gridampny);
-		fprintf(stderr,"dbg2       gridampdx:    %d\n",gridampdx);
-		fprintf(stderr,"dbg2       gridampdy:    %d\n",gridampdy);
+		fprintf(stderr,"dbg2       gridampdx:    %f\n",gridampdx);
+		fprintf(stderr,"dbg2       gridampdy:    %f\n",gridampdy);
 		fprintf(stderr,"dbg2       gridss:       %d\n",gridss);
 		fprintf(stderr,"dbg2       gridssangle:  %f\n",gridssangle);
 		fprintf(stderr,"dbg2       gridssmax:    %f\n",gridssmax);
 		fprintf(stderr,"dbg2       gridssnx:     %d\n",gridssnx);
 		fprintf(stderr,"dbg2       gridssny:     %d\n",gridssny);
-		fprintf(stderr,"dbg2       gridssdx:     %d\n",gridssdx);
-		fprintf(stderr,"dbg2       gridssdy:     %d\n",gridssdy);
+		fprintf(stderr,"dbg2       gridssdx:     %f\n",gridssdx);
+		fprintf(stderr,"dbg2       gridssdy:     %f\n",gridssdy);
 		}
 
 	/* if help desired then print it and exit */
@@ -895,8 +897,8 @@ by MBprocess.";
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    swathfile,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1756,8 +1758,8 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    swathfile,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -1949,7 +1951,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	double	angle, amean, asigma, sum, sumsq, sumn;
 	int	time_i[7];
 	int	ii, jj, i0, i1;
-	int	i, j;
+	int	i;
 	
 
 	/* print input debug statements */
@@ -1959,7 +1961,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr,"dbg2       tfp:             %d\n", tfp);
+		fprintf(stderr,"dbg2       tfp:             %ld\n", (long)tfp);
 		fprintf(stderr,"dbg2       ntable:          %d\n", ntable);
 		fprintf(stderr,"dbg2       nping:           %d\n", nping);
 		fprintf(stderr,"dbg2       time_d:          %f\n", time_d);
@@ -1974,7 +1976,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 		}
 
 	/* process sums and print out results */
-	mb_get_date(verbose, time_d, time_i, error);
+	mb_get_date(verbose, time_d, time_i);
 	fprintf(tfp,"# table: %d\n", ntable);
 	fprintf(tfp,"# nping: %d\n", nping);
 	fprintf(tfp,"# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n",
@@ -2051,7 +2053,7 @@ int output_model(int verbose, FILE *tfp,
 	double	angle, amean, asigma, sum, sumsq, sumn;
 	int	time_i[7];
 	int	ii, jj, i0, i1, iref;
-	int	i, j;
+	int	i;
 	
 
 	/* print input debug statements */
@@ -2061,7 +2063,7 @@ int output_model(int verbose, FILE *tfp,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr,"dbg2       tfp:             %d\n", tfp);
+		fprintf(stderr,"dbg2       tfp:             %ld\n", (long)tfp);
 		fprintf(stderr,"dbg2       beamwidth:       %f\n", beamwidth);
 		fprintf(stderr,"dbg2       depression:      %f\n", depression);
 		fprintf(stderr,"dbg2       ref_angle:       %f\n", ref_angle);
@@ -2113,7 +2115,7 @@ int output_model(int verbose, FILE *tfp,
 	factor = ref_amp * range * range / exp(-aa * del * del);
 
 	/* process sums and print out results */
-	mb_get_date(verbose, time_d, time_i, error);
+	mb_get_date(verbose, time_d, time_i);
 	fprintf(tfp,"# table: %d\n", ntable);
 	fprintf(tfp,"# nping: %d\n", nping);
 	fprintf(tfp,"# time:  %4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d    %16.6f\n",
@@ -2167,6 +2169,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	float	*a;
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
+	char	remark[MB_PATH_MAXLINE];
 	int	i, j, kg, ka;
 	char	*message;
 	char	*ctime();
@@ -2180,7 +2183,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %d\n",grid);
+		fprintf(stderr,"dbg2       grid:       %ld\n",(long)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -2196,7 +2199,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2       zlab:       %s\n",zlab);
 		fprintf(stderr,"dbg2       titl:       %s\n",titl);
 		fprintf(stderr,"dbg2       argc:       %d\n",argc);
-		fprintf(stderr,"dbg2       *argv:      %d\n",*argv);
+		fprintf(stderr,"dbg2       *argv:      %ld\n",(long)*argv);
 		}
 
 	/* inititialize grd header */
@@ -2236,8 +2239,9 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	else
 		strcpy(user, "unknown");
 	gethostname(host,MB_PATH_MAXLINE);
-	sprintf(grd.remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
+	sprintf(remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
 		projection,program_name,MB_VERSION,user,host,date);
+	strncpy(grd.remark, remark, 159);
 
 	/* set extract wesn,pad and complex */
 	w = 0.0;
@@ -2252,7 +2256,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	if (*error != MB_ERROR_NO_ERROR)
 		{
 		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);
-		fprintf(stderr,"\nMBIO Error allocating output arrays.\n",
+		fprintf(stderr,"\nMBIO Error allocating output arrays.\n%s\n",
 			message);
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);

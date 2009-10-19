@@ -2,7 +2,7 @@
  *    The MB-system:	mbdatalist.c	10/10/2001
  *    $Id: mbdatalist.c,v 5.11 2007/07/05 19:16:19 caress Exp $
  *
- *    Copyright (c) 2001, 2002, 2003, 2007 by
+ *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -63,6 +63,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -71,17 +72,18 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
+#include "../../include/mb_process.h"
+
+static char rcs_id[] = "$Id: mbdatalist.c,v 5.11 2007/07/05 19:16:19 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbdatalist.c,v 5.11 2007/07/05 19:16:19 caress Exp $";
-	static char program_name[] = "mbdatalist";
-	static char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
-	static char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -U -Z -V -H]";
+	char program_name[] = "mbdatalist";
+	char help_message[] =  "mbdatalist parses recursive datalist files and outputs the\ncomplete list of data files and formats. \nThe results are dumped to stdout.";
+	char usage_message[] = "mbdatalist [-Fformat -Ifile -N -O -P -Q -Rw/e/s/n -U -Z -V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -118,7 +120,6 @@ main (int argc, char **argv)
 	int	force_update = MB_NO;
 	int	status_report = MB_NO;
 	int	problem_report = MB_NO;
-	int	problem = MB_NO;
 	int	nparproblem;
 	int	ndataproblem;
 	int	nparproblemtot = 0;
@@ -371,8 +372,8 @@ main (int argc, char **argv)
 			    program_name);
 		    exit(error);
 		    }
-		while (status = mb_datalist_read(verbose,datalist,
-					    file,&format,&file_weight,&error)
+		while ((status = mb_datalist_read(verbose,datalist,
+					    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 			{
 			nfile++;

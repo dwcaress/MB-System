@@ -2,7 +2,7 @@
  *    The MB-system:	mb_write_init.c	1/25/93
  *    $Id: mb_write_init.c,v 5.24 2009/03/13 07:05:58 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -218,9 +218,12 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_segy.h"
 #include "../../include/sapi.h"
 #include "gsf.h"
 #include "netcdf.h"
+
+static char rcs_id[]="$Id: mb_write_init.c,v 5.24 2009/03/13 07:05:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_write_init(int verbose, 
@@ -228,7 +231,6 @@ int mb_write_init(int verbose,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_write_init.c,v 5.24 2009/03/13 07:05:58 caress Exp $";
 	char	*function_name = "mb_write_init";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -243,8 +245,8 @@ int mb_write_init(int verbose,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       file:       %s\n",file);
@@ -666,7 +668,7 @@ int mb_write_init(int verbose,
 	else if (mb_io_ptr->filetype == MB_FILETYPE_SEGY)
 	    {
 	    status = mb_segy_write_init(verbose, mb_io_ptr->file, 
-		NULL, NULL, &(mb_io_ptr->mbfp), error);
+		NULL, NULL, (void **)&(mb_io_ptr->mbfp), error);
 	    if (status != MB_SUCCESS)
 		{
 		status = MB_FAILURE;
@@ -817,10 +819,10 @@ int mb_write_init(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",*mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)*mbio_ptr);
 		fprintf(stderr,"dbg2       beams_bath: %d\n",*beams_bath);
 		fprintf(stderr,"dbg2       beams_amp:  %d\n",*beams_amp);
 		fprintf(stderr,"dbg2       pixels_ss:  %d\n",*pixels_ss);

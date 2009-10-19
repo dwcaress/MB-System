@@ -2,13 +2,12 @@
  *    The MB-system:	mbneptune2esf.c	2004/11/11
  *    $Id: mbneptune2esf.c,v 5.5 2008/09/11 20:20:14 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004-2009 by
  *    Gordon Keith
  *      CSIRO Marine Research
  *      Castray Esplanade
  *      Battery Point TAS 7000
  *      Australia
- *    Parts Copyright (c) 1993, 1994, 2001, 2003 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -70,6 +69,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -116,7 +116,6 @@ struct neptune_line_tree
   struct neptune_ping_tree *pings;
 };
 
-
 /* ping structure definition */
 struct mbclean_ping_struct 
 	{
@@ -136,29 +135,26 @@ struct mbclean_ping_struct
 	double	*bathy;
 	};
 
-/* find a line in the tree */
+/* function prototypes */
+int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int action, int *error);
 int find_line(int verbose, char* line_name, struct neptune_line_tree **node, int create, 
 	      struct neptune_line_tree **result, int *nlines, int *error);
-
 int find_ping(int verbose, int ping, struct neptune_ping_tree **node, int create, 
 	      struct neptune_ping_tree **result, int *error);
-
+int line_array(struct neptune_line_tree *line, struct neptune_line_tree ***array, int *n);
 int print_pings(FILE *output, struct neptune_ping_tree *node);
+int free_pings(int verbose, struct neptune_ping_tree **node, int *error);
 
-/* edit output function */
-int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, 
-			int action, int *error);
+static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.5 2008/09/11 20:20:14 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbneptune2esf.c,v 5.5 2008/09/11 20:20:14 caress Exp $";
-	static char program_name[] = "mbneptune2esf";
-	static char help_message[] =  "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand applies the flags in the rules file to the esf file of the coresponding line";
-	static char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
+	char program_name[] = "mbneptune2esf";
+	char help_message[] =  "mbneptune2esf reads a Simrad Neptune BinStat rules files and a list of MB-Systems data files\nand applies the flags in the rules file to the esf file of the coresponding line";
+	char usage_message[] = "mbneptune2esf [-Rrules -Fformat -Iinfile -Ooutfile -V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -203,7 +199,6 @@ main (int argc, char **argv)
 
 	/* mbio read and write values */
 	void	*mbio_ptr = NULL;
-	void	*store_ptr = NULL;
 	struct mb_io_struct	*mb_io_ptr;
 	struct mbsys_simrad2_struct	*store;
 	struct mbsys_simrad2_ping_struct *sim_ping;
@@ -268,7 +263,7 @@ main (int argc, char **argv)
 	/* processing variables */
 	int	read_data;
 	int	start, done;
-	int	i, j, k, l, m, p, b;
+	int	i, j, k;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -597,8 +592,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    swathfile,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -964,8 +959,8 @@ main (int argc, char **argv)
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    swathfile,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    swathfile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -1039,7 +1034,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 	
-		fprintf(stderr,"dbg2       sofp:            %d\n",sofp);
+		fprintf(stderr,"dbg2       sofp:            %ld\n",(long)sofp);
 		fprintf(stderr,"dbg2       time_d:          %f\n",time_d);
 		fprintf(stderr,"dbg2       beam:            %d\n",beam);
 		fprintf(stderr,"dbg2       action:          %d\n",action);
@@ -1129,14 +1124,10 @@ int find_line(int verbose, char* line_name, struct neptune_line_tree **node, int
 
 }
 /*--------------------------------------------------------------------*/
-
-
-/*--------------------------------------------------------------------*/
 int find_ping(int verbose, int ping, struct neptune_ping_tree **node, int create, 
 	      struct neptune_ping_tree **result, int *error)
 {
 	int	status = MB_SUCCESS;
-	int	comp;
 
 	if (NULL == *node) {
 	  if (MB_NO == create)
@@ -1235,6 +1226,8 @@ int free_pings(int verbose, struct neptune_ping_tree **node, int *error)
 #else
   free(*node);
 #endif
+
+  return MB_SUCCESS;
 }
 
 

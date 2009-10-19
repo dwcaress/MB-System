@@ -43,6 +43,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "mr1pr_defines.h"
 #include "mem.h"
@@ -338,7 +339,7 @@ mr1_mrkget(void *mrkbuf, int side, int index)
 
 	c= (char *) mrkbuf;
 	c+= index/2;
-	return ((*c >> ((index%2)*4)+(side*2)) & 0x3);
+	return ((*c >> (((index%2)*4)+(side*2))) & 0x3);
 }
 
 void
@@ -353,8 +354,8 @@ mr1_mrkset(void *mrkbuf, int side, int index, int value)
 
 	c= (char *) mrkbuf;
 	c+= index/2;
-	*c&= ~(0x3 << ((index%2)*4)+(side*2));
-	uv= (unsigned char) ((value & 0x3) << ((index%2)*4)+(side*2));
+	*c&= ~(0x3 << (((index%2)*4)+(side*2)));
+	uv= (unsigned char) ((value & 0x3) << (((index%2)*4)+(side*2)));
 	*c|= uv;
 	return;
 }

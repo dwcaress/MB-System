@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hsmd.h	8/12/95
  *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.h,v 5.5 2005/11/05 00:48:04 caress Exp $
  *
- *    Copyright (c) 1995, 2000, 2002, 2003 by
+ *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

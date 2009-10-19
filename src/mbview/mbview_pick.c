@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_pick.c	9/29/2003
  *    $Id: mbview_pick.c,v 5.17 2008/09/11 20:17:33 caress Exp $
  *
- *    Copyright (c) 2003-2008 by
+ *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -122,8 +122,6 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static Cardinal 	ac;
-static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 static char		value_list[MB_PATH_MAXLINE];
 
@@ -137,7 +135,6 @@ int mbview_pick(int instance, int which, int xpixel, int ypixel)
 	/* local variables */
 	char	*function_name = "mbview_pick";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	found;
@@ -145,8 +142,6 @@ int mbview_pick(int instance, int which, int xpixel, int ypixel)
 	double	xlon, ylat, zdata;
 	double	xdisplay, ydisplay, zdisplay;
 	double	dx, dy;
-	int	npoints;
-	int	i;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -964,12 +959,12 @@ int mbview_region(int instance, int which, int xpixel, int ypixel)
 	double	xgrid, ygrid;
 	double	xlon, ylat, zdata;
 	double	xdisplay, ydisplay, zdisplay;
-	double	dx, dy, dxuse, dyuse;
+	double	dx, dy;
 	double	dd;
 	int	ok;
 	double	bearing;
 	int	match, match0, match1, match2, match3;
-	int	i, j, k;
+	int	i, k;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -1244,7 +1239,7 @@ xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 			{
 			/* set the second endpoint */
 			data->region_type = MBV_REGION_QUAD;
-			data->region_pickcorner == MBV_REGION_PICKCORNER0;
+			data->region_pickcorner = MBV_REGION_PICKCORNER0;
 			data->region.cornerpoints[0].xgrid = xgrid;
 			data->region.cornerpoints[0].ygrid = ygrid;
 			data->region.cornerpoints[0].xlon = xlon;
@@ -1291,7 +1286,7 @@ xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 			{
 			/* set the second endpoint */
 			data->region_type = MBV_REGION_QUAD;
-			data->region_pickcorner == MBV_REGION_PICKCORNER1;
+			data->region_pickcorner = MBV_REGION_PICKCORNER1;
 			data->region.cornerpoints[1].xgrid = xgrid;
 			data->region.cornerpoints[1].ygrid = ygrid;
 			data->region.cornerpoints[1].xlon = xlon;
@@ -1338,7 +1333,7 @@ xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 			{
 			/* set the second endpoint */
 			data->region_type = MBV_REGION_QUAD;
-			data->region_pickcorner == MBV_REGION_PICKCORNER2;
+			data->region_pickcorner = MBV_REGION_PICKCORNER2;
 			data->region.cornerpoints[2].xgrid = xgrid;
 			data->region.cornerpoints[2].ygrid = ygrid;
 			data->region.cornerpoints[2].xlon = xlon;
@@ -1385,7 +1380,7 @@ xgrid,ygrid,xlon,ylat,zdata,xdisplay,ydisplay,zdisplay);*/
 			{
 			/* set corner point 3 */
 			data->region_type = MBV_REGION_QUAD;
-			data->region_pickcorner == MBV_REGION_PICKCORNER3;
+			data->region_pickcorner = MBV_REGION_PICKCORNER3;
 			data->region.cornerpoints[3].xgrid = xgrid;
 			data->region.cornerpoints[3].ygrid = ygrid;
 			data->region.cornerpoints[3].xlon = xlon;
@@ -2149,7 +2144,7 @@ int mbview_drawpick(int instance)
 	/* local variables */
 	char	*function_name = "mbview_drawpick";
 	int	status = MB_SUCCESS;
-	int	i, j;
+	int	i;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	xlength;

@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_plot.perl	1/17/2003
 #    $Id: mbm_copy.perl,v 5.2 2006/09/11 18:55:52 caress Exp $
 #
-#    Copyright (c) 2003 by 
+#    Copyright (c) 2003-2009 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -66,6 +66,7 @@ $verbose = 		($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
+	print "\nVersion: $Id: $\n";
 	print "\nMacro to apply mbcopy to all files referenced through\n";
 	print "a datalist, using the MB-System file suffix convention\n";
 	print "to name the output files.\n";

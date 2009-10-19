@@ -2,7 +2,7 @@
  *    The MB-system:	mbotps.c	7/30/2009
  *    $Id: mbotps.c,v 5.10 2008/09/20 00:57:41 caress Exp $
  *
- *    Copyright (c) 2009 by
+ *    Copyright (c) 2009-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -74,14 +74,13 @@ char	*getenv();
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	static char rcs_id[] = "$Id: mbotps.c,v 5.10 2008/09/20 00:57:41 caress Exp $";
 	static char program_name[] = "mbotps";
 	static char help_message[] =  "MBotps predicts tides using methods and data derived from the OSU Tidal Prediction Software (OTPS) distributions.";
 	static char usage_message[] = "mbotps -Rlon/lat -Byear/month/day/hour/minute/second\n\t-Eyear/month/day/hour/minute/second -Dinterval -Ooutput\n\t[-Idatalist.mb-1 -Fformat -V]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -103,7 +102,6 @@ main (int argc, char **argv)
 	mb_path	file;
 	int	format;
 	int	pings;
-	int	pings_read;
 	int	lonflip;
 	double	bounds[4];
 	double	speedmin;
@@ -117,7 +115,6 @@ main (int argc, char **argv)
 	void	*store_ptr = NULL;
 	int	kind;
 	int	time_i[7];
-	int	time_j[5];
 	double	time_d;
 	double	navlon;
 	double	navlat;
@@ -126,10 +123,6 @@ main (int argc, char **argv)
 	double	distance;
 	double	altitude;
 	double	sonardepth;
-	double	draft;
-	double	roll;
-	double	pitch;
-	double	heave;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -139,7 +132,6 @@ main (int argc, char **argv)
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
-	int	icomment = 0;
 	
 	/* mbotps control parameters */
 	int	mbotps_mode = MBOTPS_MODE_POSITION;
@@ -178,7 +170,7 @@ main (int argc, char **argv)
 	double	tide;
 	double	depth;
 	char	*result;
-	int	i, j, k;
+	int	i;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -466,8 +458,8 @@ main (int argc, char **argv)
 				program_name);
 			exit(error);
 			}
-		    if (status = mb_datalist_read(verbose,datalist,
-				    file,&format,&file_weight,&error)
+		    if ((status = mb_datalist_read(verbose,datalist,
+				    file,&format,&file_weight,&error))
 				    == MB_SUCCESS)
 			read_data = MB_YES;
 		    else
@@ -715,8 +707,8 @@ main (int argc, char **argv)
 			/* figure out whether and what to read next */
         		if (read_datalist == MB_YES)
                 		{
-				if (status = mb_datalist_read(verbose,datalist,
-					    file,&format,&file_weight,&error)
+				if ((status = mb_datalist_read(verbose,datalist,
+					    file,&format,&file_weight,&error))
 					    == MB_SUCCESS)
                         		read_data = MB_YES;
                 		else

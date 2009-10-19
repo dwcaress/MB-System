@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsmdldih.c	9/26/95
  *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.10 2005/11/05 00:48:04 caress Exp $
  *
- *    Copyright (c) 1995, 2000, 2002, 2003 by
+ *    Copyright (c) 1995-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -111,6 +111,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <rpc/types.h>
+#include <rpc/xdr.h>
 
 /* mbio include files */
 #include "../../include/mb_status.h"
@@ -145,13 +147,17 @@ int mbr_info_hsmdldih(int verbose,
 			int *error);
 int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_hsmdldih(int verbose, void *mbio_ptr, int *error);
+int mbr_zero_hsmdldih(int verbose, char *data_ptr, int *error);
 int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error);
+int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error);
+
+static char rcs_id[]="$Id: mbr_hsmdldih.c,v 5.10 2005/11/05 00:48:04 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.10 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_register_hsmdldih";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -159,8 +165,8 @@ int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -214,8 +220,7 @@ int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
@@ -235,24 +240,24 @@ int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -284,15 +289,14 @@ int mbr_info_hsmdldih(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_hsmdldih.c,v 5.10 2005/11/05 00:48:04 caress Exp $";
 	char	*function_name = "mbr_info_hsmdldih";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -322,8 +326,7 @@ int mbr_info_hsmdldih(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -354,10 +357,8 @@ int mbr_info_hsmdldih(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.10 2005/11/05 00:48:04 caress Exp $";
 	char	 *function_name = "mbr_alm_hsmdldih";
 	int	 status = MB_SUCCESS;
-	int	 i;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_hsmdldih_struct *data;
 	char	 *data_ptr;
@@ -373,11 +374,11 @@ int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
   
 	/* get pointer to mbio descriptor */
@@ -423,8 +424,7 @@ int mbr_alm_hsmdldih(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -444,11 +444,11 @@ int mbr_dem_hsmdldih(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -461,8 +461,7 @@ int mbr_dem_hsmdldih(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -483,11 +482,11 @@ int mbr_zero_hsmdldih(int verbose, char *data_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       data_ptr:   %ld\n",(long)data_ptr);
 		}
 
 
@@ -576,8 +575,7 @@ int mbr_zero_hsmdldih(int verbose, char *data_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -598,17 +596,17 @@ int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	time_i[7];
 	double	time_d;
 	double	lon, lat, heading, speed;
-	int	 i, j, k;
+	int	 i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -626,7 +624,7 @@ int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5:\t Returned from  mbr_hsmdldih_rd_data()\n");
 		fprintf(stderr,"dbg5:\t Status:\t%d\n", status);
 		fprintf(stderr,"dbg5:\t data->kind:\t%d\n", data->kind);
-		fprintf(stderr,"dbg5:\t store_ptr: \t%d\n",store_ptr);
+		fprintf(stderr,"dbg5:\t store_ptr: \t%ld\n",(long)store_ptr);
 		}
 
 	/* set error and kind in mb_io_ptr */
@@ -767,8 +765,7 @@ int mbr_rt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -787,18 +784,17 @@ int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbf_hsmdldih_struct *data;
 	char	*data_ptr;
 	struct mbsys_hsmd_struct *store;
-	int	first;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -905,8 +901,7 @@ int mbr_wt_hsmdldih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -925,7 +920,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 	struct  mbf_hsmdldih_struct *data;
 	char    *data_ptr;
 	FILE    *mbfp;
-	char	*xdrs;		/* xdr i/o pointer */
+	XDR	*xdrs;		/* xdr i/o pointer */
 	int     i;
 	int     time_i[7];
 	double	scale;
@@ -946,11 +941,11 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1015,15 +1010,15 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 		for (i=0;i<4;i++)
 			status = xdr_char(xdrs, &data->scsart[i]);
 	if (status == MB_SUCCESS)
-		status = xdr_long(xdrs, &data->scslng);
+		status = xdr_int(xdrs, &data->scslng);
 	if (status == MB_SUCCESS)
-		status = xdr_long(xdrs, &data->scsext);
+		status = xdr_int(xdrs, &data->scsext);
 	if (status == MB_SUCCESS)
-		status = xdr_long(xdrs, &data->scsblcnt);
+		status = xdr_int(xdrs, &data->scsblcnt);
 	if (status == MB_SUCCESS)
 		status = xdr_double(xdrs, &data->scsres1);
 	if (status == MB_SUCCESS)
-		status = xdr_long(xdrs, &data->transid);
+		status = xdr_int(xdrs, &data->transid);
 
 	/* get first time and initialize the time base */
 	if (status == MB_SUCCESS)
@@ -1054,15 +1049,15 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg5: data  From Header:\n");
 		fprintf(stderr,"dbg5: \t->scsid : \t%s\n",data->scsid);
 		fprintf(stderr,"dbg5: \t->scsart: \t%s\n",data->scsart);
-		fprintf(stderr,"dbg5: \t->scslng: \t%ld\t0x%0X\n",
+		fprintf(stderr,"dbg5: \t->scslng: \t%d\t0x%0X\n",
 		  		data->scslng,data->scslng);
-		fprintf(stderr,"dbg5: \t->scsext:  \t%ld\n",
+		fprintf(stderr,"dbg5: \t->scsext:  \t%d\n",
 				data->scsext);
-		fprintf(stderr,"dbg5: \t->scsblcnt:\t%ld\n",
+		fprintf(stderr,"dbg5: \t->scsblcnt:\t%d\n",
 				data->scsblcnt);
 		fprintf(stderr,"dbg5: \t->scsres1: \t%lf\n",
 				data->scsres1);
-		fprintf(stderr,"dgb5: \t->transid: \t%ld\n",
+		fprintf(stderr,"dgb5: \t->transid: \t%d\n",
 				data->transid);
 		fprintf(stderr,"dgb5: \t->reftime: \t%lf\n",
 				data->reftime);
@@ -1088,14 +1083,14 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 	      			if (status == MB_SUCCESS)
 					status = xdr_double(xdrs, &data->cmean);
 	      			if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->Port);
+					status = xdr_int(xdrs, &data->Port);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->noho);
+					status = xdr_int(xdrs, &data->noho);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->skals);
+					status = xdr_int(xdrs, &data->skals);
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i++)
-						status = xdr_long(xdrs, &data->spfb[i]);
+						status = xdr_int(xdrs, &data->spfb[i]);
 
 				/* Check for bad beams - broken records produce
 				    bogus data - it happens with HSMD systems!!! */
@@ -1145,7 +1140,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 					status = xdr_double(xdrs, &data->ss_range);
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_PIXELS_PING;i++)
-						status = xdr_char(xdrs, &data->ss[i]);
+						status = xdr_char(xdrs, (char *)&data->ss[i]);
 
 				/* get attitude data */
 				if (status == MB_SUCCESS)
@@ -1209,9 +1204,9 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 					fprintf(stderr,"\ndgb2: Raw\n");
 					fprintf(stderr,"dbg2: \tckeel\t%8.2lf\n", data->ckeel);
 					fprintf(stderr,"dbg2: \tcmean\t%8.2lf\n", data->cmean);
-					fprintf(stderr,"dgb2: \tPort\t%ld\n", data->Port);
-					fprintf(stderr,"\tnoho\t%ld\n", data->noho);
-					fprintf(stderr,"\tskals\t%ld\n", data->skals);
+					fprintf(stderr,"dgb2: \tPort\t%d\n", data->Port);
+					fprintf(stderr,"\tnoho\t%d\n", data->noho);
+					fprintf(stderr,"\tskals\t%d\n", data->skals);
 					fprintf(stderr,"\tspfbs\n");
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i=i+4)
 		    				{
@@ -1291,14 +1286,14 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 	      			if (status == MB_SUCCESS)
 					status = xdr_double(xdrs, &data->cmean);
 	      			if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->Port);
+					status = xdr_int(xdrs, &data->Port);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->noho);
+					status = xdr_int(xdrs, &data->noho);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->skals);
+					status = xdr_int(xdrs, &data->skals);
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i++)
-						status = xdr_long(xdrs, &data->spfb[i]);
+						status = xdr_int(xdrs, &data->spfb[i]);
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i++)
 						status = xdr_double(xdrs, &data->depth[i]);
@@ -1311,7 +1306,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 					status = xdr_double(xdrs, &data->ss_range);
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_PIXELS_PING;i++)
-						status = xdr_char(xdrs, &data->ss[i]);
+						status = xdr_char(xdrs, (char *)&data->ss[i]);
 
 				/* get attitude data */
 				if (status == MB_SUCCESS)
@@ -1372,9 +1367,9 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 					fprintf(stderr,"\ndgb2: Raw\n");
 					fprintf(stderr,"dbg2: \tckeel\t%8.2lf\n", data->ckeel);
 					fprintf(stderr,"dbg2: \tcmean\t%8.2lf\n", data->cmean);
-					fprintf(stderr,"dgb2: \tPort\t%ld\n", data->Port);
-					fprintf(stderr,"\tnoho\t%ld\n", data->noho);
-					fprintf(stderr,"\tskals\t%ld\n", data->skals);
+					fprintf(stderr,"dgb2: \tPort\t%d\n", data->Port);
+					fprintf(stderr,"\tnoho\t%d\n", data->noho);
+					fprintf(stderr,"\tskals\t%d\n", data->skals);
 					fprintf(stderr,"\tspfbs\n");
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i=i+4)
 		    				{
@@ -1440,19 +1435,19 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 
 				/* get nav data */
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->navid);
+					status = xdr_int(xdrs, &data->navid);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->year);
+					status = xdr_int(xdrs,&data->year);
 				if (status == MB_SUCCESS)
 					mb_fix_y2k(verbose, data->year, &data->year);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->month);
+					status = xdr_int(xdrs,&data->month);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->day);
+					status = xdr_int(xdrs,&data->day);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->hour);
+					status = xdr_int(xdrs,&data->hour);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->minute);
+					status = xdr_int(xdrs,&data->minute);
 				if (status == MB_SUCCESS)
 					status = xdr_double(xdrs,&data->secf);
 				if (status == MB_SUCCESS)
@@ -1504,7 +1499,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 				if (verbose >= 2 && status == MB_SUCCESS)
 					{
 					fprintf(stderr,"dbg2: \nNav\n");
-					fprintf(stderr,"dbg2: \t->navid:  \t%ld\n",data->navid);
+					fprintf(stderr,"dbg2: \t->navid:  \t%d\n",data->navid);
 					fprintf(stderr,"dbg2: \t->year:   \t%4d\n",data->year);
 					fprintf(stderr,"dbg2: \t->month:  \t%2d\n",data->month);
 					fprintf(stderr,"dbg2: \t->day:    \t%2d\n",data->day);
@@ -1519,7 +1514,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 					}
 				if ( verbose >= 2 && status == MB_SUCCESS)
 					{
-					fprintf(stderr,"dbg2: %4ld %2ld %3ld %2ld %2ld %2ld %d %10.5lf %10.5lf %2ld %2s \n",
+					fprintf(stderr,"dbg2: %4d %2d %3d %2d %2d %2d %d %10.5lf %10.5lf %2d %2s \n",
 					data->year,
 					data->month,
 					data->day,
@@ -1547,7 +1542,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 				data->kind = MB_DATA_EVENT; 
 	      
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->evid);
+					status = xdr_int(xdrs, &data->evid);
 	      
 				if (status == MB_SUCCESS)
 					for (i=0;i<84;i++)
@@ -1584,7 +1579,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 	      			if (verbose >= 2 && status == MB_SUCCESS)
 					{
 					fprintf(stderr,"MDE Event->\n");
-					fprintf(stderr,"\t->evid:\t%ld\n", data->evid);
+					fprintf(stderr,"\t->evid:\t%d\n", data->evid);
 					fprintf(stderr,"\t->evtxt:\t%s\n", data->evtext);
 					}
 
@@ -1602,7 +1597,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 				data->kind = MB_DATA_ANGLE;
 	      
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->noho);
+					status = xdr_int(xdrs, &data->noho);
 	      
 				if (status == MB_SUCCESS && status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i++)
@@ -1642,7 +1637,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 				if ( verbose >= 5 && status == MB_SUCCESS)
 					{
 					fprintf(stderr,"\ndgb5: Ang");
-					fprintf(stderr,"dbg5:\tnoho:\t%ld\n", data->noho);
+					fprintf(stderr,"dbg5:\tnoho:\t%d\n", data->noho);
 		  			for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i=i+4)
 		   				{
 		      				fprintf(stderr,"\t%02d: %8.3lf\t%02d: %8.3lf\t%02d: %8.3lf\t%02d: %8.3lf\n",
@@ -1817,8 +1812,7 @@ int mbr_hsmdldih_rd_data(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1836,18 +1830,18 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	struct  mb_io_struct *mb_io_ptr;
 	struct  mbf_hsmdldih_struct *data;
 	FILE	  *mbfp;
-	char	*xdrs;		/* xdr i/o pointer */
+	XDR	*xdrs;		/* xdr i/o pointer */
 	int     i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       data_ptr:   %d\n",data_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       data_ptr:   %ld\n",(long)data_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1869,15 +1863,15 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 		for (i=0;i<4;i++)
 			status = xdr_char(xdrs, &data->scsart[i]);
 	if (status == MB_SUCCESS)
-		status = xdr_long(xdrs, &data->scslng);
+		status = xdr_int(xdrs, &data->scslng);
 	if (status == MB_SUCCESS)
-		status = xdr_long(xdrs, &data->scsext);
+		status = xdr_int(xdrs, &data->scsext);
 	if (status == MB_SUCCESS)
-		status = xdr_long(xdrs, &data->scsblcnt);
+		status = xdr_int(xdrs, &data->scsblcnt);
 	if (status == MB_SUCCESS)
 		status = xdr_double(xdrs, &data->scsres1);
 	if (status == MB_SUCCESS)
-		status = xdr_long(xdrs, &data->transid);
+		status = xdr_int(xdrs, &data->transid);
 	if (status == MB_SUCCESS)
 		status = xdr_double(xdrs, &data->reftime);
 
@@ -1924,9 +1918,9 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 					fprintf(stderr,"\ndgb2: Raw\n");
 					fprintf(stderr,"dbg2: \tckeel\t%8.2lf\n", data->ckeel);
 					fprintf(stderr,"dbg2: \tcmean\t%8.2lf\n", data->cmean);
-					fprintf(stderr,"dgb2: \tPort\t%ld\n", data->Port);
-					fprintf(stderr,"\tnoho\t%ld\n", data->noho);
-					fprintf(stderr,"\tskals\t%ld\n", data->skals);
+					fprintf(stderr,"dgb2: \tPort\t%d\n", data->Port);
+					fprintf(stderr,"\tnoho\t%d\n", data->noho);
+					fprintf(stderr,"\tskals\t%d\n", data->skals);
 					fprintf(stderr,"\tspfbs\n");
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i=i+4)
 		    				{
@@ -1989,14 +1983,14 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	      			if (status == MB_SUCCESS)
 					status = xdr_double(xdrs, &data->cmean);
 	      			if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->Port);
+					status = xdr_int(xdrs, &data->Port);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->noho);
+					status = xdr_int(xdrs, &data->noho);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->skals);
+					status = xdr_int(xdrs, &data->skals);
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i++)
-						status = xdr_long(xdrs, &data->spfb[i]);
+						status = xdr_int(xdrs, &data->spfb[i]);
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i++)
 						status = xdr_double(xdrs, &data->depth[i]);
@@ -2009,7 +2003,7 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 					status = xdr_double(xdrs, &data->ss_range);
 				if (status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_PIXELS_PING;i++)
-						status = xdr_char(xdrs, &data->ss[i]);
+						status = xdr_char(xdrs, (char *)&data->ss[i]);
 
 				/* set attitude data */
 				if (status == MB_SUCCESS)
@@ -2040,19 +2034,19 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	    			{
 				/* set nav data */
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->navid);
+					status = xdr_int(xdrs, &data->navid);
 				if (status == MB_SUCCESS)
 					mb_unfix_y2k(verbose, data->year, &data->year);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->year);
+					status = xdr_int(xdrs,&data->year);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->month);
+					status = xdr_int(xdrs,&data->month);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->day);
+					status = xdr_int(xdrs,&data->day);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->hour);
+					status = xdr_int(xdrs,&data->hour);
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs,&data->minute);
+					status = xdr_int(xdrs,&data->minute);
 				if (status == MB_SUCCESS)
 					status = xdr_double(xdrs,&data->secf);
 
@@ -2077,7 +2071,7 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			case (MBF_HSMDLDIH_MDE):		/* 3, MD Event */
 	    			{
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->evid);
+					status = xdr_int(xdrs, &data->evid);
 				if (status == MB_SUCCESS)
 					for (i=0;i<84;i++)
 						status = xdr_char(xdrs, &data->evtext[i]);
@@ -2093,7 +2087,7 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 			case (MBF_HSMDLDIH_ANG): /* Transid == 4, Beam Angles */
 	    			{
 				if (status == MB_SUCCESS)
-					status = xdr_long(xdrs, &data->noho);
+					status = xdr_int(xdrs, &data->noho);
 				if (status == MB_SUCCESS && status == MB_SUCCESS)
 					for (i=0;i<MBF_HSMDLDIH_BEAMS_PING;i++)
 						status = xdr_double(xdrs, &data->angle[i]);
@@ -2170,8 +2164,7 @@ int mbr_hsmdldih_wr_data(int verbose, void *mbio_ptr, char *data_ptr, int *error
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

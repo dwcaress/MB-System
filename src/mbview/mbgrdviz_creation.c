@@ -119,7 +119,6 @@ CreatemainWindow_mbgrdviz(Widget parent)
 {
     Cardinal ac = 0;
     Arg      args[256];
-    Cardinal cdc = 0;
     Boolean  argok = False;
     Widget   mainWindow_mbgrdviz;
     Widget   dialogShell_realtimesetup;

@@ -2,7 +2,7 @@
  *    The MB-system:	mbset.c	1/4/2000
  *    $Id: mbset.c,v 5.32 2009/03/02 18:54:40 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003, 2004, 2007 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -139,6 +139,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -152,14 +153,15 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
+static char rcs_id[] = "$Id: mbset.c,v 5.32 2009/03/02 18:54:40 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbset.c,v 5.32 2009/03/02 18:54:40 caress Exp $";
-	static char program_name[] = "mbset";
-	static char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
+	char program_name[] = "mbset";
+	char help_message[] = "MBset is a tool for setting values in an mbprocess parameter file.\n\
 MBprocess is a tool for processing swath sonar bathymetry data  \n\
 which performs a number of functions, including:\n\
   - merging navigation\n\
@@ -170,7 +172,7 @@ which performs a number of functions, including:\n\
 The parameters controlling mbprocess are included in an ascii\n\
 parameter file. The parameter file syntax is documented by\n\
 the manual pages for mbprocess and mbset. \n\n";
-	static char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -V -H]";
+	char usage_message[] = "mbset -Iinfile -PPARAMETER:value [-E -L -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -291,12 +293,11 @@ the manual pages for mbprocess and mbset. \n\n";
 
 	/* if help desired then print it and exit */
 	if (help)
-	    {
-	    fprintf(stderr,"MB-System Version %s\n",MB_VERSION);
-	    fprintf(stderr,"\n%s\n",help_message);
-	    fprintf(stderr,"\nusage: %s\n", usage_message);
-	    exit(error);
-	    }
+		{
+		fprintf(stderr,"\n%s\n",help_message);
+		fprintf(stderr,"\nusage: %s\n", usage_message);
+		exit(error);
+		}
 
 	/* get format if required */
 	if (format == 0)
@@ -319,8 +320,8 @@ the manual pages for mbprocess and mbset. \n\n";
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    mbp_ifile,&mbp_format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    mbp_ifile,&mbp_format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1488,8 +1489,8 @@ the manual pages for mbprocess and mbset. \n\n";
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    mbp_ifile,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    mbp_ifile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else

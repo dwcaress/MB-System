@@ -115,12 +115,12 @@ mbnavadjust.o: mbnavadjust.c mbnavadjust_creation.h mbnavadjust.h \
 mbnavadjust_creation.o: mbnavadjust_creation.c mbnavadjust_creation.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbnavadjust_creation.c
 mbnavadjust_callbacks.o: mbnavadjust_callbacks.c mbnavadjust.h mbnavadjust_creation.h \
-	mbnavadjust_extrawidgets.h
+	mbnavadjust_extrawidgets.h $(INCDIR)/mb_xgraphics.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbnavadjust_callbacks.c
 mbnavadjust_util.o: mbnavadjust_util.c mbnavadjust_creation.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbnavadjust_util.c
 mbnavadjust_prog.o: mbnavadjust_prog.c mbnavadjust.h  $(INCDIR)/mb_format.h \
-		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_contour.h
+		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h $(INCDIR)/mb_xgraphics.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -c mbnavadjust_prog.c
 
 clean: 

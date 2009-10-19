@@ -2,7 +2,7 @@
  *    The MB-system:	mbsegygrid.c	6/12/2004
  *    $Id: mbsegygrid.c,v 5.16 2008/11/16 21:51:18 caress Exp $
  *
- *    Copyright (c) 2004, 2005, 2006 by
+ *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -80,6 +80,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -117,6 +118,16 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		char *xlab, char *ylab, char *zlab, char *titl, 
 		char *projection, int argc, char **argv, 
 		int *error);
+int get_segy_limits(int verbose, 
+		char	*segyfile,  
+		int	*tracemode,
+		int	*tracestart,
+		int	*traceend,
+		int	*chanstart,
+		int	*chanend,
+		double	*timesweep,
+		double	*timedelay,
+		int *error);
 char	*ctime();
 char	*getenv();
 
@@ -125,19 +136,18 @@ char	*getenv();
 FILE	*outfp;
 
 static char rcs_id[] = "$Id: mbsegygrid.c,v 5.16 2008/11/16 21:51:18 caress Exp $";
-static char program_name[] = "MBsegygrid";
-static char help_message[] =  "MBsegygrid grids trace data from segy data files.";
-static char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
+char program_name[] = "MBsegygrid";
+char help_message[] =  "MBsegygrid grids trace data from segy data files.";
+char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
           -Ddecimatex/decimatey -Gmode/gain[/window] -R \n\
           -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
           -Wmode/start/end -H -V]";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -156,6 +166,7 @@ main (int argc, char **argv)
 	struct mb_segyfileheader_struct fileheader;
 	struct mb_segytraceheader_struct traceheader;
 	float	*trace = NULL;
+	float	*worktrace = NULL;
 	float	*ptrace = NULL;
 	float	*wtrace = NULL;
 
@@ -178,7 +189,8 @@ main (int argc, char **argv)
 	double	gain = 0.0;
 	double	gainwindow = 0.0;
 	int	agcmode = MB_NO;
-	int	nsamples;
+	double	agcwindow = 0.0;
+	double	agcmaxvalue = 0.0;
 	int	ntraces;
 	int	ngridx = 0;
 	int	ngridy = 0;
@@ -221,6 +233,8 @@ main (int argc, char **argv)
 	double	stimesave = 0.0;
 	double	dtimesave = 0.0;
 	int	plot_status;
+	int	worktrace_alloc;
+	int	iagchalfwindow;
 	int	i, j, k, n;
 
 	/* set file to null */
@@ -230,7 +244,7 @@ main (int argc, char **argv)
 	GMT_make_fnan(NaN);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:BbD:d:G:g:I:i:O:o:S:s:T:t:VvW:w:Hh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:D:d:G:g:I:i:O:o:S:s:T:t:VvW:w:Hh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -250,6 +264,9 @@ main (int argc, char **argv)
 			break;
 		case 'B':
 		case 'b':
+			n = sscanf (optarg,"%lf/%lf", &agcmaxvalue, &agcwindow);
+			if (n < 2)
+				agcwindow = 0.0;
 			agcmode = MB_YES;
 			flag++;
 			break;
@@ -361,6 +378,8 @@ main (int argc, char **argv)
 		fprintf(outfp,"dbg2       windowstart:    %f\n",windowstart);
 		fprintf(outfp,"dbg2       windowend:      %f\n",windowend);
 		fprintf(outfp,"dbg2       agcmode:        %d\n",agcmode);
+		fprintf(outfp,"dbg2       agcmaxvalue:    %f\n",agcmaxvalue);
+		fprintf(outfp,"dbg2       agcwindow:      %f\n",agcwindow);
 		fprintf(outfp,"dbg2       gainmode:       %d\n",gainmode);
 		fprintf(outfp,"dbg2       gain:           %f\n",gain);
 		fprintf(outfp,"dbg2       gainwindow:     %f\n",gainwindow);
@@ -717,8 +736,39 @@ i,iy,factor,i,trace[i]);*/
 igainstart,igainend,tmax,factor);*/
 						}
 						
-					/* apply global agc if desired */
-					if (agcmode == MB_YES)
+					/* apply agc if desired */
+					if (agcmode == MB_YES && agcwindow > 0.0)
+						{
+						if (worktrace == NULL || traceheader.nsamps > worktrace_alloc)
+							{
+							status = mb_reallocd(verbose,__FILE__,__LINE__, 
+										traceheader.nsamps * sizeof(float), 
+										(void **)&worktrace, &error);
+							worktrace_alloc = traceheader.nsamps;
+							}
+						iagchalfwindow = 0.5 * agcwindow / sampleinterval;
+						for (i=0;i<=traceheader.nsamps;i++)
+							{
+							igainstart = i - iagchalfwindow;
+							igainstart = MAX(0, igainstart);
+							igainend = i + iagchalfwindow;
+							igainend = MIN(traceheader.nsamps - 1, igainend);
+							tmax = 0.0;
+							for (j=igainstart;j<=igainend;j++)
+								{
+								tmax = MAX(tmax, fabs(trace[j]));
+								}
+							if (tmax > 0.0)
+								worktrace[i] = trace[i] * agcmaxvalue / tmax;
+							else
+								worktrace[i] = trace[i];
+							}
+						for (i=0;i<=traceheader.nsamps;i++)
+							{
+							trace[i] = worktrace[i];
+							}
+						}	
+					else if (agcmode == MB_YES)
 						{
 						tmax = 0.0;
 						for (i=0;i<=traceheader.nsamps;i++)
@@ -726,15 +776,14 @@ igainstart,igainend,tmax,factor);*/
 							tmax = MAX(tmax, fabs(trace[i]));
 							}
 						if (tmax > 0.0)
+							factor = agcmaxvalue / tmax;
+						else
+							factor = 1.0;
+						for (i=0;i<=traceheader.nsamps;i++)
 							{
-							factor = 1000.0 / tmax;
-							for (i=0;i<=traceheader.nsamps;i++)
-								{
-								trace[i] *= factor;
-								}
+							trace[i] *= factor;
 							}
 						}
-						
 
 					/* insert data into the grid */
 					for (iy=0;iy<ngridy;iy++)
@@ -816,6 +865,8 @@ ix,iy,k,ptrace[iy],wtrace[iy],grid[k]);*/
 	status = mb_segy_close(verbose,&mbsegyioptr,&error);
 
 	/* deallocate memory for grid array */
+	if (worktrace != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&worktrace, &error);	
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&grid, &error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&ptrace, &error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)&wtrace, &error);
@@ -883,7 +934,6 @@ int get_segy_limits(int verbose,
 	int	rp0, rp1, rpdel;
 	int	rptrace0, rptrace1, rptracedel;
 	int	nscan;
-	int	i,j,k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1023,10 +1073,10 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	GMT_LONG	pad[4];
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
-	char	*message;
+	char	remark[MB_PATH_MAXLINE];
 	char	*ctime();
 	char	*getenv();
-	int	i,j,k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1036,7 +1086,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %d\n",grid);
+		fprintf(outfp,"dbg2       grid:       %d\n",(int)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -1051,8 +1101,8 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2       ylab:       %s\n",ylab);
 		fprintf(outfp,"dbg2       zlab:       %s\n",zlab);
 		fprintf(outfp,"dbg2       titl:       %s\n",titl);
-		fprintf(outfp,"dbg2       argc:       %d\n",argc);
-		fprintf(outfp,"dbg2       *argv:      %d\n",*argv);
+		fprintf(outfp,"dbg2       argc:       %d\n",(int)argc);
+		fprintf(outfp,"dbg2       *argv:      %ld\n",(long)*argv);
 		}
 
 	/* inititialize grd header */
@@ -1092,8 +1142,9 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	else
 		strcpy(user, "unknown");
 	gethostname(host,MB_PATH_MAXLINE);
-	sprintf(grd.remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
+	sprintf(remark,"\n\tProjection: %s\n\tGrid created by %s\n\tMB-system Version %s\n\tRun by <%s> on <%s> at <%s>",
 		projection,program_name,MB_VERSION,user,host,date);
+	strncpy(grd.remark, remark, 159);
 
 	/* set extract wesn,pad */
 	w = 0.0;

@@ -4,7 +4,7 @@
  *    The MB-system:	mbgrdviz_main.c		10/9/2002
  *    $Id: mbgrdviz_main.c,v 5.8 2008/05/16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2002-2008 by
+ *    Copyright (c) 2002-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -78,6 +78,7 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 /* MBIO include files */
 #include "../../include/mb_status.h"
@@ -89,11 +90,98 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 /* global mbview variables */
 Widget mainWindow;
 
+/* function prototypes */
+Widget CreatemainWindow_mbgrdviz(Widget parent);
+int do_mbgrdviz_init(int argc, char **argv, int verbosity);
+void do_mbgrdviz_sensitivity();
+int do_mbgrdviz_dismiss_notify(int instance);
+void do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data);
+int do_mbgrdviz_openprimary(char *input_file_ptr);
+int do_mbgrdviz_openoverlay(int instance, char *input_file_ptr);
+int do_mbgrdviz_opensite(int instance, char *input_file_ptr);
+int do_mbgrdviz_savesite(int instance, char *output_file_ptr);
+int do_mbgrdviz_openroute(int instance, char *input_file_ptr);
+int do_mbgrdviz_saveroute(int instance, char *output_file_ptr);
+int do_mbgrdviz_savewinfrogpts(int instance, char *output_file_ptr);
+int do_mbgrdviz_savewinfrogwpt(int instance, char *output_file_ptr);
+int do_mbgrdviz_saveprofile(int instance, char *output_file_ptr);
+int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr);
+int do_mbgrdviz_readnav(int instance, char *swathfile, 
+				int pathstatus, char *pathraw, char *pathprocessed,
+				int format, int formatorg, double weight, int *error);
+int do_mbgrdviz_readgrd(int instance, char *grdfile,
+			int	*grid_projection_mode,
+			char	*grid_projection_id,
+			float	*nodatavalue,
+			int	*nxy,
+			int	*nx,
+			int	*ny,
+			double	*min,
+			double	*max,
+			double	*xmin,
+			double	*xmax,
+			double	*ymin,
+			double	*ymax,
+			double	*dx,
+			double	*dy,
+			float	**data);
+int do_mbgrdviz_opentest(int instance, 
+			double	factor1, 
+			double	factor2, 
+			double	factor3, 
+			int	*grid_projection_mode,
+			char	*grid_projection_id,
+			float	*nodatavalue,
+			int	*nxy,
+			int	*nx,
+			int	*ny,
+			double	*min,
+			double	*max,
+			double	*xmin,
+			double	*xmax,
+			double	*ymin,
+			double	*ymax,
+			double	*dx,
+			double	*dy,
+			float	**data);
+void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_open_mbeditviz( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_parameterchange( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_recalc(int instance);
+void do_mbgrdviz_arearoute_info(int instance);
+void do_mbgrdviz_arearoute_linespacing_increment( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_altitude_increment( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_arearoute_depth_increment( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_start( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_reset( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_pause( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_stop( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtime_resume( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_apply( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_icon( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_browse( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_updaterate( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_path_test( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_realtimesetup_pathmode( Widget w, XtPointer client_data, XtPointer call_data);
+
 static char rcs_id[] = "$Id: mbgrdviz_main.c,v 5.8 2008/05/16 22:59:42 caress Exp $";
 static char program_name[] = "MBgrdviz";
 static char help_message[] =  "MBgrdviz provides simple interactive 2D/3Dvizualization of GMT grids.";
 static char usage_message[] = "mbgrdviz [-Igrdfile -T -V -H]";
 char	ifile[MB_PATH_MAXLINE];
+char	jfile[MB_PATH_MAXLINE];
 
 /* parsing variables */
 extern char *optarg;
@@ -153,19 +241,18 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
-    Boolean      argok=False;
-    Widget   topLevelShell;
+     Widget   topLevelShell;
     Widget   mainWindow_mbgrdviz;
     
     /* Begin user code block <declarations> */
-    	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
 	int	verbose = 0;
-	int	fileflag = 0;
+	int	ifileflag = 0;
+	int	jfileflag = 0;
 	int	testflag = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhI:i:Tt")) != -1)
+	while ((c = getopt(argc, argv, "VvHhI:i:J:j:Tt")) != -1)
 	  {
 	  switch (c) 
 		{
@@ -181,7 +268,13 @@ int main( int argc, char **argv)
 		case 'i':
 			sscanf (optarg,"%s", ifile);
 			flag++;
-			fileflag++;
+			ifileflag++;
+			break;
+		case 'J':
+		case 'j':
+			sscanf (optarg,"%s", jfile);
+			flag++;
+			jfileflag++;
 			break;
 		case 'T':
 		case 't':
@@ -289,9 +382,13 @@ int main( int argc, char **argv)
     
     /* open the file specified on the command line */
     do_mbgrdviz_init(argc,argv, verbose);
-    if (fileflag > 0)
+    if (ifileflag > 0)
     	{
     	do_mbgrdviz_openprimary(ifile);
+	if (jfileflag > 0)
+		{
+		do_mbgrdviz_openoverlay(0,jfile);
+		}
 	}
     else if (testflag > 0)
     	{

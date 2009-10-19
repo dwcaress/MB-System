@@ -4,7 +4,7 @@
  *    The MB-system:	mbeditviz_main.c		4/27/2007
  *    $Id: mbeditviz_main.c,v 5.5 2008/05/16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2007-2008 by
+ *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -88,6 +88,9 @@ extern void BxExitCB(Widget, XtPointer, XtPointer);
 /* global mbeditviz variables */
 #include "mbeditviz.h"
 
+/* function prototypes */
+Widget CreatemainWindow_mbeditviz(Widget parent);
+
 /* use these parameters only when debugging X events */
 #ifdef MBEDITVIZ_DEBUG    
 char	eventname[64];
@@ -138,7 +141,6 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
-    Boolean      argok=False;
     Widget   topLevelShell;
     Widget   mainWindow_mbeditviz;
     

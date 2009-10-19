@@ -3,7 +3,7 @@
  *
  *    $Id: mbsm20002gsf.c,v 5.9 2008/09/11 20:20:14 caress Exp $
  *
- *    Copyright (c) 2009 by
+ *    Copyright (c) 2009-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -29,6 +29,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -37,6 +38,7 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_aux.h"
 
 /* local defines */
 #define	SM2000_NUM_RETURNS	4
@@ -87,19 +89,19 @@ struct sm2000_ping_struct
 	struct sm2000_return_struct returns[SM2000_NUM_RETURNS];
 	};
 
+static char rcs_id[] = "$Id: mbsm20002gsf.c,v 5.9 2008/09/11 20:20:14 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbsm20002gsf.c,v 5.9 2008/09/11 20:20:14 caress Exp $";
-	static char program_name[] = "mbsm20002gsf";
-	static char help_message[] =  "mbsm20002gsf translates native SM2000 mpb format data to GSF (format 121) while merging navigation from a separate file.";
-	static char usage_message[] = "mbsm20002gsf -Impbfile -Mnavformat -Nnavfile -Ogsffile [-V]";
+	char program_name[] = "mbsm20002gsf";
+	char help_message[] =  "mbsm20002gsf translates native SM2000 mpb format data to GSF (format 121) while merging navigation from a separate file.";
+	char usage_message[] = "mbsm20002gsf -Impbfile -Mnavformat -Nnavfile -Ogsffile [-V]";
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -118,8 +120,6 @@ main (int argc, char **argv)
 	double	bounds[4];
 	int	btime_i[7];
 	int	etime_i[7];
-	double	btime_d;
-	double	etime_d;
 	double	speedmin;
 	double	timegap;
 	int	beams_bath;
@@ -127,7 +127,6 @@ main (int argc, char **argv)
 	int	pixels_ss;
 	void	*ombio_ptr = NULL;
 
-	int	mpbfile_specified = MB_NO;
 	int	navfile_specified = MB_NO;
 	int	gsffile_specified = MB_NO;
 	char	mpbfile[MB_PATH_MAXLINE];
@@ -149,16 +148,10 @@ main (int argc, char **argv)
 	double	navlat;
 	double	speed;
 	double	heading;
-	double	distance;
-	double	altitude;
 	double	sonardepth;
 	double	roll;
 	double	pitch;
-	int	nbath = 0;
-	int	namp = 0;
-	int	nss = 0;
 	int	idata = 0;
-	int	icomment = 0;
 	int	odata = 0;
 	int	onav = 0;
 	int	ocomment = 0;
@@ -182,12 +175,6 @@ main (int argc, char **argv)
 	int	nav_ok;
 	int	time_j[5], hr;
 	double	sec;
-	char	NorS[2], EorW[2];
-	double	mlon, llon, mlat, llat;
-	int	degree, minute;
-	double	dminute;
-	double	second;
-	double	splineflag;
 	int	stime_i[7], ftime_i[7];
 	int	itime;
 	double	mtodeglon, mtodeglat;
@@ -200,9 +187,9 @@ main (int argc, char **argv)
 	double	rr, xx, zz;
 
 	int	nchar;
-	char	buffer[BUFFERSIZE], tmp[BUFFERSIZE], *result, *bufftmp;
+	char	buffer[BUFFERSIZE], *result;
 	int	nget, read_len, index;
-	int	i, j, k, l, m;
+	int	i, j;
 
 	char	*ctime();
 	char	*getenv();
@@ -385,7 +372,7 @@ main (int argc, char **argv)
 			/* deal with nav in form: yr jday hour min sec lon lat */
 			else if (navformat == 3)
 				{
-				nget = sscanf(buffer,"%d %d %d %d %lf %lf %lf",
+				nget = sscanf(buffer,"%d %d %d %d %lf %lf %lf %lf %lf %lf %lf",
 					&time_j[0],&time_j[1],&hr,
 					&time_j[2],&sec,
 					&nlon[nnav],&nlat[nnav],
@@ -454,8 +441,8 @@ main (int argc, char **argv)
 				fprintf(stderr,"\ndbg5  New navigation point read in program <%s>\n",program_name);
 				fprintf(stderr,"dbg5       nav[%d]: %f %f %f %f %f %f %f\n",
 					nnav,ntime[nnav],nlon[nnav],nlat[nnav],
-						&nheading[nnav],&nsonardepth[nnav],
-						&nroll[nnav],&npitch[nnav]);
+						nheading[nnav],nsonardepth[nnav],
+						nroll[nnav],npitch[nnav]);
 				}
 			else if (verbose >= 5)
 				{

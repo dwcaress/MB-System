@@ -122,18 +122,18 @@ $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		$(MOTIFLIBS) $(LFLAGS) -o $(BINDIR)/mbedit
 
 ### compile the source files
-mbedit.o: mbedit.c
+mbedit.o: mbedit.c mbedit.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbedit.c
 mbedit_creation.o: mbedit_creation.c
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbedit_creation.c
 mbedit_bxutils.o: mbedit_bxutils.c
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbedit_bxutils.c
-mbedit_prog.o: mbedit_prog.c  $(INCDIR)/mb_format.h \
+mbedit_prog.o: mbedit_prog.c mbedit.h  $(INCDIR)/mb_format.h \
 		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbedit_prog.c
-mbedit_callbacks.o: mbedit_callbacks.c  $(INCDIR)/mb_format.h \
+mbedit_callbacks.o: mbedit_callbacks.c mbedit.h  $(INCDIR)/mb_format.h \
 		$(INCDIR)/mb_io.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
-	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbedit_callbacks.c
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(MOTIFINCDIR) -c mbedit_callbacks.c
 
 clean: 
 	rm -f core *.o

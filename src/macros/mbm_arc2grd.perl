@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
 #    $Id: mbm_arc2grd.perl,v 5.7 2009/01/15 17:37:28 caress Exp $
 #
-#    Copyright (c) 2001, 2003 by
+#    Copyright (c) 2001-2009 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -84,6 +84,7 @@ $verbose =  ($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
+	print "\nVersion: $Id: $\n";
 	print "\nMacro to convert a ArcView ASCII grid to an GMT grid file in the \n";
 	print "GMT NetCDF grid format. This allows users to import the grid\n";
 	print "into GMT. The grid will have the same grid interval in both \n";

@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_oicgeoda.c	2/16/99
  *	$Id: mbr_oicgeoda.c,v 5.10 2008/07/10 18:02:39 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002, 2003 by
+ *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -120,10 +120,11 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
+static char rcs_id[]="$Id: mbr_oicgeoda.c,v 5.10 2008/07/10 18:02:39 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_oicgeoda.c,v 5.10 2008/07/10 18:02:39 caress Exp $";
 	char	*function_name = "mbr_register_oicgeoda";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -131,8 +132,8 @@ int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -186,8 +187,7 @@ int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
@@ -207,24 +207,24 @@ int mbr_register_oicgeoda(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -256,15 +256,14 @@ int mbr_info_oicgeoda(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_oicgeoda.c,v 5.10 2008/07/10 18:02:39 caress Exp $";
 	char	*function_name = "mbr_info_oicgeoda";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -294,8 +293,7 @@ int mbr_info_oicgeoda(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -326,7 +324,6 @@ int mbr_info_oicgeoda(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error)
 {
- static char res_id[]="$Id: mbr_oicgeoda.c,v 5.10 2008/07/10 18:02:39 caress Exp $";
 	char	*function_name = "mbr_alm_oicgeoda";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -338,11 +335,11 @@ int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -391,8 +388,7 @@ int mbr_alm_oicgeoda(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -416,11 +412,11 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -460,8 +456,7 @@ int mbr_dem_oicgeoda(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -499,14 +494,14 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* print input debug statements */
 	if (verbose >= 2)
-	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
-	    fprintf(stderr,"dbg2  Input arguments:\n");
-	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
-	    }
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		}
 
 	/* get pointer to mbio descriptor and data structure */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -522,8 +517,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next four bytes to look for start of header */
-	if (read_size = fread(buffer,1,4,mb_io_ptr->mbfp)
-	    != 4)
+	if ((read_size = fread(buffer,1,4,mb_io_ptr->mbfp)) != 4)
 	    {
 	    status = MB_FAILURE;
 	    *error = MB_ERROR_EOF;		    
@@ -537,8 +531,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    {
 	    for (i=0;i<3;i++)
 		buffer[i] = buffer[i+1];
-	    if (read_size = fread(&buffer[3],1,1,mb_io_ptr->mbfp)
-		!= 1)
+	    if ((read_size = fread(&buffer[3],1,1,mb_io_ptr->mbfp)) != 1)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;		    
@@ -548,9 +541,9 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* now read the rest of the header */
 	if (status == MB_SUCCESS)
 	    {
-	    if (read_size = fread(&buffer[4],
+	    if ((read_size = fread(&buffer[4],
 				1,MBF_OICGEODA_HEADER_SIZE-4,
-				mb_io_ptr->mbfp)
+				mb_io_ptr->mbfp))
 		!= MBF_OICGEODA_HEADER_SIZE-4)
 		{
 		status = MB_FAILURE;
@@ -652,8 +645,8 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* read client specific data */
 	if (status == MB_SUCCESS && header->client_size > 0)
 	    {
-	    if (read_size = fread(dataplus->client,1,
-				(int)(header->client_size),mb_io_ptr->mbfp)
+	    if ((read_size = fread(dataplus->client,1,
+				(int)(header->client_size),mb_io_ptr->mbfp))
 		== (int)(header->client_size))
 		{
 		if (header->client_size < MBF_OICGEODA_MAX_CLIENT)
@@ -719,7 +712,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* read the data */
 		if (status == MB_SUCCESS)
 		    {
-		    if (read_size = fread(data->raw[i],1,data_size,mb_io_ptr->mbfp)
+		    if ((read_size = fread(data->raw[i],1,data_size,mb_io_ptr->mbfp))
 			!= data_size)
 			{
 			status = MB_FAILURE;
@@ -826,11 +819,17 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			for (i=0;i<header->channel[ichan].num_samples;i++)
 			    {
 			    if (header->channel[ichan].size == OIC_SIZE_SHORT)
+				{
 				if (short_ptr[i] > 0) beams_bath_port++;
+				}
 			    else if (header->channel[ichan].size == OIC_SIZE_INT)
+				{
 				if (int_ptr[i] > 0) beams_bath_port++;
+				}
 			    else if (header->channel[ichan].size == OIC_SIZE_FLOAT)
+				{
 				if (float_ptr[i] > 0.0) beams_bath_port++;
+				}
 			    }
 			header->beams_bath = 2 * MAX(beams_bath_port, beams_bath_stbd) + 1;
 			}
@@ -848,11 +847,17 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			for (i=0;i<header->channel[ichan].num_samples;i++)
 			    {
 			    if (header->channel[ichan].size == OIC_SIZE_SHORT)
+				{
 				if (short_ptr[i] > 0) beams_bath_stbd++;
+				}
 			    else if (header->channel[ichan].size == OIC_SIZE_INT)
+				{
 				if (int_ptr[i] > 0) beams_bath_stbd++;
+				}
 			    else if (header->channel[ichan].size == OIC_SIZE_FLOAT)
+				{
 				if (float_ptr[i] > 0.0) beams_bath_stbd++;
+				}
 			    }
 			header->beams_bath = 2 * MAX(beams_bath_port, beams_bath_stbd) + 1;
 			}
@@ -880,8 +885,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  New header read in function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  New header read in function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       type:             %d\n",header->type);
 	    fprintf(stderr,"dbg5       proc_status:      %d\n",header->proc_status);
 	    fprintf(stderr,"dbg5       data_size:        %d\n",header->data_size);
@@ -941,8 +945,7 @@ int mbr_rt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	    for (i=0;i<header->num_chan;i++)
 		{
-		fprintf(stderr,"\ndbg5  New data read in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  New data read in function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       channel:   %d\n", i);
 		if (header->channel[i].type == OIC_TYPE_SIDESCAN)
 		    fprintf(stderr, "dbg5       data type: sidescan\n");
@@ -1600,14 +1603,14 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* print input debug statements */
 	if (verbose >= 2)
-	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
-	    fprintf(stderr,"dbg2  Input arguments:\n");
-	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
-	    }
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		}
 
 	/* get pointer to mbio descriptor and data storage */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -1792,8 +1795,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  New header set in function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  New header set in function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       type:             %d\n",header->type);
 	    fprintf(stderr,"dbg5       proc_status:      %d\n",header->proc_status);
 	    fprintf(stderr,"dbg5       data_size:        %d\n",header->data_size);
@@ -1860,8 +1862,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    {
 	    for (i=0;i<header->num_chan;i++)
 		{
-		fprintf(stderr,"\ndbg5  New data set in function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  New data set in function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       channel:   %d\n", i);
 		if (header->channel[i].type == OIC_TYPE_SIDESCAN)
 		    fprintf(stderr, "dbg5       data type: sidescan\n");
@@ -2036,8 +2037,8 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* write client specific data */
 	if (status == MB_SUCCESS && header->client_size > 0)
 	    {
-	    if (write_size = fwrite(dataplus->client,1,
-				(int)(header->client_size),mb_io_ptr->mbfp)
+	    if ((write_size = fwrite(dataplus->client,1,
+				(int)(header->client_size),mb_io_ptr->mbfp))
 		!= (int)(header->client_size))
 		{
 		status = MB_FAILURE;
@@ -2104,7 +2105,7 @@ int mbr_wt_oicgeoda(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		/* write the data */
 		if (status == MB_SUCCESS)
 		    {
-		    if (write_size = fwrite(data->raw[i],1,data_size,mb_io_ptr->mbfp)
+		    if ((write_size = fwrite(data->raw[i],1,data_size,mb_io_ptr->mbfp))
 			!= data_size)
 			{
 			status = MB_FAILURE;

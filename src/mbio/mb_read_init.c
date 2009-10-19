@@ -2,7 +2,7 @@
  *    The MB-system:	mb_read_init.c	1/25/93
  *    $Id: mb_read_init.c,v 5.27 2009/03/13 07:05:58 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -244,8 +244,11 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 #include "../../include/sapi.h"
+#include "../../include/mb_segy.h"
 #include "gsf.h"
 #include "netcdf.h"
+
+static char rcs_id[]="$Id: mb_read_init.c,v 5.27 2009/03/13 07:05:58 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mb_read_init(int verbose, char *file, 
@@ -256,7 +259,6 @@ int mb_read_init(int verbose, char *file,
 		int *beams_bath, int *beams_amp, int *pixels_ss, 
 		int *error)
 {
-	static char rcs_id[]="$Id: mb_read_init.c,v 5.27 2009/03/13 07:05:58 caress Exp $";
 	char	*function_name = "mb_read_init";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
@@ -270,15 +272,15 @@ int mb_read_init(int verbose, char *file,
 	int	proj_status;
 	FILE	*pfp;
 	struct stat file_status;
-	int	fstat, file_ok;
+	int	fstat;
 	int	i;
 	char	*stdin_string = "stdin";
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       file:       %s\n",file);
@@ -737,7 +739,7 @@ int mb_read_init(int verbose, char *file,
 	else if (mb_io_ptr->filetype == MB_FILETYPE_SEGY)
 	    {
 	    status = mb_segy_read_init(verbose, mb_io_ptr->file, 
-		&(mb_io_ptr->mbfp), NULL, NULL, error);
+		(void **)&(mb_io_ptr->mbfp), NULL, NULL, error);
 	    if (status != MB_SUCCESS)
 		{
 		status = MB_FAILURE;
@@ -906,21 +908,21 @@ int mb_read_init(int verbose, char *file,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",*mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)*mbio_ptr);
 		fprintf(stderr,"dbg2       ->numfile:  %d\n",mb_io_ptr->numfile);
 		fprintf(stderr,"dbg2       ->file:     %s\n",mb_io_ptr->file);
 		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2) 
 		    fprintf(stderr,"dbg2       ->file2:    %s\n",mb_io_ptr->file2);
 		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3) 
 		    fprintf(stderr,"dbg2       ->file3:    %s\n",mb_io_ptr->file3);
-		fprintf(stderr,"dbg2       ->mbfp:     %d\n",mb_io_ptr->mbfp);
+		fprintf(stderr,"dbg2       ->mbfp:     %ld\n",(long)mb_io_ptr->mbfp);
 		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2) 
-		    fprintf(stderr,"dbg2       ->mbfp2:    %d\n",mb_io_ptr->mbfp2);
+		    fprintf(stderr,"dbg2       ->mbfp2:    %ld\n",(long)mb_io_ptr->mbfp2);
 		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3) 
-		    fprintf(stderr,"dbg2       ->mbfp3:    %d\n",mb_io_ptr->mbfp3);
+		    fprintf(stderr,"dbg2       ->mbfp3:    %ld\n",(long)mb_io_ptr->mbfp3);
 		fprintf(stderr,"dbg2       btime_d:    %f\n",*btime_d);
 		fprintf(stderr,"dbg2       etime_d:    %f\n",*etime_d);
 		fprintf(stderr,"dbg2       beams_bath: %d\n",*beams_bath);

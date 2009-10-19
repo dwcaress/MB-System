@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_nav.c	10/28/2003
  *    $Id: mbview_nav.c,v 5.18 2008/05/16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003-2008 by
+ *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -99,6 +99,7 @@
 #include <Xm/CascadeB.h>
 #include <Xm/PushB.h>
 #include <Xm/Separator.h>
+#include <Xm/List.h>
 #include "MB3DView.h"
 #include "MB3DSiteList.h"
 #include "MB3DRouteList.h"
@@ -121,9 +122,6 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static Cardinal 	ac;
-static Arg      	args[256];
-static char		value_text[MB_PATH_MAXLINE];
 static char		value_string[MB_PATH_MAXLINE];
 
 static char rcs_id[]="$Id: mbview_nav.c,v 5.18 2008/05/16 22:59:42 caress Exp $";
@@ -269,26 +267,26 @@ fprintf(stderr,"mbview_allocnavarrays: %d points\n",npointtotal);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       npointtotal:               %d\n", npointtotal);
-		fprintf(stderr,"dbg2       time_d:                    %d\n", *time_d);
-		fprintf(stderr,"dbg2       navlon:                    %d\n", *navlon);
-		fprintf(stderr,"dbg2       navlat:                    %d\n", *navlat);
-		fprintf(stderr,"dbg2       navz:                      %d\n", *navz);
-		fprintf(stderr,"dbg2       heading:                   %f\n", *heading);
-		fprintf(stderr,"dbg2       speed:                     %f\n", *speed);
+		fprintf(stderr,"dbg2       time_d:                    %ld\n", (long)*time_d);
+		fprintf(stderr,"dbg2       navlon:                    %ld\n", (long)*navlon);
+		fprintf(stderr,"dbg2       navlat:                    %ld\n", (long)*navlat);
+		fprintf(stderr,"dbg2       navz:                      %ld\n", (long)*navz);
+		fprintf(stderr,"dbg2       heading:                   %ld\n", (long)*heading);
+		fprintf(stderr,"dbg2       speed:                     %ld\n", (long)*speed);
 		if (navportlon != NULL)
-		fprintf(stderr,"dbg2       navportlon:                %d\n", *navportlon);
+		fprintf(stderr,"dbg2       navportlon:                %ld\n", (long)*navportlon);
 		if (navportlat != NULL)
-		fprintf(stderr,"dbg2       navportlat:                %d\n", *navportlat);
+		fprintf(stderr,"dbg2       navportlat:                %ld\n", (long)*navportlat);
 		if (navstbdlon != NULL)
-		fprintf(stderr,"dbg2       navstbdlon:                %d\n", *navstbdlon);
+		fprintf(stderr,"dbg2       navstbdlon:                %ld\n", (long)*navstbdlon);
 		if (navstbdlat != NULL)
-		fprintf(stderr,"dbg2       navstbdlat:                %d\n", *navstbdlat);
+		fprintf(stderr,"dbg2       navstbdlat:                %ld\n", (long)*navstbdlat);
 		if (line != NULL)
-		fprintf(stderr,"dbg2       line:                      %d\n", *line);
+		fprintf(stderr,"dbg2       line:                      %ld\n", (long)*line);
 		if (shot != NULL)
-		fprintf(stderr,"dbg2       shot:                      %d\n", *shot);
+		fprintf(stderr,"dbg2       shot:                      %ld\n", (long)*shot);
 		if (cdp != NULL)
-		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
+		fprintf(stderr,"dbg2       cdp:                       %ld\n", (long)*cdp);
 		}
 
 	/* allocate the arrays using mb_realloc */
@@ -324,26 +322,26 @@ fprintf(stderr,"mbview_allocnavarrays: %d points\n",npointtotal);
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       time_d:                    %d\n", *time_d);
-		fprintf(stderr,"dbg2       navlon:                    %d\n", *navlon);
-		fprintf(stderr,"dbg2       navlat:                    %d\n", *navlat);
-		fprintf(stderr,"dbg2       navz:                      %d\n", *navz);
-		fprintf(stderr,"dbg2       heading:                   %d\n", *heading);
-		fprintf(stderr,"dbg2       speed:                     %d\n", *speed);
+		fprintf(stderr,"dbg2       time_d:                    %ld\n", (long)*time_d);
+		fprintf(stderr,"dbg2       navlon:                    %ld\n", (long)*navlon);
+		fprintf(stderr,"dbg2       navlat:                    %ld\n", (long)*navlat);
+		fprintf(stderr,"dbg2       navz:                      %ld\n", (long)*navz);
+		fprintf(stderr,"dbg2       heading:                   %ld\n", (long)*heading);
+		fprintf(stderr,"dbg2       speed:                     %ld\n", (long)*speed);
 		if (navportlon != NULL)
-		fprintf(stderr,"dbg2       navportlon:                %d\n", *navportlon);
+		fprintf(stderr,"dbg2       navportlon:                %ld\n", (long)*navportlon);
 		if (navportlat != NULL)
-		fprintf(stderr,"dbg2       navportlat:                %d\n", *navportlat);
+		fprintf(stderr,"dbg2       navportlat:                %ld\n", (long)*navportlat);
 		if (navstbdlon != NULL)
-		fprintf(stderr,"dbg2       navstbdlon:                %d\n", *navstbdlon);
+		fprintf(stderr,"dbg2       navstbdlon:                %ld\n", (long)*navstbdlon);
 		if (navstbdlat != NULL)
-		fprintf(stderr,"dbg2       navstbdlat:                %d\n", *navstbdlat);
+		fprintf(stderr,"dbg2       navstbdlat:                %ld\n", (long)*navstbdlat);
 		if (line != NULL)
-		fprintf(stderr,"dbg2       line:                      %d\n", *line);
+		fprintf(stderr,"dbg2       line:                      %ld\n", (long)*line);
 		if (shot != NULL)
-		fprintf(stderr,"dbg2       shot:                      %d\n", *shot);
+		fprintf(stderr,"dbg2       shot:                      %ld\n", (long)*shot);
 		if (cdp != NULL)
-		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
+		fprintf(stderr,"dbg2       cdp:                       %ld\n", (long)*cdp);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -384,26 +382,26 @@ int mbview_freenavarrays(int verbose,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       time_d:                    %d\n", *time_d);
-		fprintf(stderr,"dbg2       navlon:                    %d\n", *navlon);
-		fprintf(stderr,"dbg2       navlat:                    %d\n", *navlat);
-		fprintf(stderr,"dbg2       navz:                      %d\n", *navz);
-		fprintf(stderr,"dbg2       heading:                   %d\n", *heading);
-		fprintf(stderr,"dbg2       speed:                     %d\n", *speed);
+		fprintf(stderr,"dbg2       time_d:                    %ld\n", (long)*time_d);
+		fprintf(stderr,"dbg2       navlon:                    %ld\n", (long)*navlon);
+		fprintf(stderr,"dbg2       navlat:                    %ld\n", (long)*navlat);
+		fprintf(stderr,"dbg2       navz:                      %ld\n", (long)*navz);
+		fprintf(stderr,"dbg2       heading:                   %ld\n", (long)*heading);
+		fprintf(stderr,"dbg2       speed:                     %ld\n", (long)*speed);
 		if (navportlon != NULL)
-		fprintf(stderr,"dbg2       navportlon:                %d\n", *navportlon);
+		fprintf(stderr,"dbg2       navportlon:                %ld\n", (long)*navportlon);
 		if (navportlat != NULL)
-		fprintf(stderr,"dbg2       navportlat:                %d\n", *navportlat);
+		fprintf(stderr,"dbg2       navportlat:                %ld\n", (long)*navportlat);
 		if (navstbdlon != NULL)
-		fprintf(stderr,"dbg2       navstbdlon:                %d\n", *navstbdlon);
+		fprintf(stderr,"dbg2       navstbdlon:                %ld\n", (long)*navstbdlon);
 		if (navstbdlat != NULL)
-		fprintf(stderr,"dbg2       navstbdlat:                %d\n", *navstbdlat);
+		fprintf(stderr,"dbg2       navstbdlat:                %ld\n", (long)*navstbdlat);
 		if (line != NULL)
-		fprintf(stderr,"dbg2       line:                      %d\n", *line);
+		fprintf(stderr,"dbg2       line:                      %ld\n", (long)*line);
 		if (shot != NULL)
-		fprintf(stderr,"dbg2       shot:                      %d\n", *shot);
+		fprintf(stderr,"dbg2       shot:                      %ld\n", (long)*shot);
 		if (cdp != NULL)
-		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
+		fprintf(stderr,"dbg2       cdp:                       %ld\n", (long)*cdp);
 		}
 
 	/* free the arrays using mb_free */
@@ -434,26 +432,26 @@ int mbview_freenavarrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       time_d:                    %d\n", *time_d);
-		fprintf(stderr,"dbg2       navlon:                    %d\n", *navlon);
-		fprintf(stderr,"dbg2       navlat:                    %d\n", *navlat);
-		fprintf(stderr,"dbg2       navz:                      %d\n", *navz);
-		fprintf(stderr,"dbg2       heading:                   %d\n", *heading);
-		fprintf(stderr,"dbg2       speed:                     %d\n", *speed);
+		fprintf(stderr,"dbg2       time_d:                    %ld\n", (long)*time_d);
+		fprintf(stderr,"dbg2       navlon:                    %ld\n", (long)*navlon);
+		fprintf(stderr,"dbg2       navlat:                    %ld\n", (long)*navlat);
+		fprintf(stderr,"dbg2       navz:                      %ld\n", (long)*navz);
+		fprintf(stderr,"dbg2       heading:                   %ld\n", (long)*heading);
+		fprintf(stderr,"dbg2       speed:                     %ld\n", (long)*speed);
 		if (navportlon != NULL)
-		fprintf(stderr,"dbg2       navportlon:                %d\n", *navportlon);
+		fprintf(stderr,"dbg2       navportlon:                %ld\n", (long)*navportlon);
 		if (navportlat != NULL)
-		fprintf(stderr,"dbg2       navportlat:                %d\n", *navportlat);
+		fprintf(stderr,"dbg2       navportlat:                %ld\n", (long)*navportlat);
 		if (navstbdlon != NULL)
-		fprintf(stderr,"dbg2       navstbdlon:                %d\n", *navstbdlon);
+		fprintf(stderr,"dbg2       navstbdlon:                %ld\n", (long)*navstbdlon);
 		if (navstbdlat != NULL)
-		fprintf(stderr,"dbg2       navstbdlat:                %d\n", *navstbdlat);
+		fprintf(stderr,"dbg2       navstbdlat:                %ld\n", (long)*navstbdlat);
 		if (line != NULL)
-		fprintf(stderr,"dbg2       line:                      %d\n", *line);
+		fprintf(stderr,"dbg2       line:                      %ld\n", (long)*line);
 		if (shot != NULL)
-		fprintf(stderr,"dbg2       shot:                      %d\n", *shot);
+		fprintf(stderr,"dbg2       shot:                      %ld\n", (long)*shot);
 		if (cdp != NULL)
-		fprintf(stderr,"dbg2       cdp:                       %d\n", *cdp);
+		fprintf(stderr,"dbg2       cdp:                       %ld\n", (long)*cdp);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -498,10 +496,8 @@ int mbview_addnav(int verbose, int instance,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	nadded;
 	int	inav;
 	int	i, j;
-	int	ii,jj;
 
 	/* print starting debug statements */
 	if (verbose >= 2)
@@ -791,7 +787,7 @@ shared.shareddata.navs[inav].navpts[i].point.zdisplay[instance]);*/
 		fprintf(stderr,"dbg2       nnav_alloc:         %d\n",shared.shareddata.nnav_alloc);
 		fprintf(stderr,"dbg2       nav_selected[0]:    %d\n",shared.shareddata.nav_selected[0]);
 		fprintf(stderr,"dbg2       nav_selected[1]:    %d\n",shared.shareddata.nav_selected[1]);
-		fprintf(stderr,"dbg2       nav_point_selected: %d\n",shared.shareddata.nav_point_selected);
+		fprintf(stderr,"dbg2       nav_point_selected: %ld\n",(long)shared.shareddata.nav_point_selected);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
@@ -859,8 +855,8 @@ shared.shareddata.navs[inav].navpts[i].point.zdisplay[instance]);*/
 				{
 				fprintf(stderr,"dbg2       nav %d %d nls:          %d\n",i,j,shared.shareddata.navs[i].segments[j].nls);
 				fprintf(stderr,"dbg2       nav %d %d nls_alloc:    %d\n",i,j,shared.shareddata.navs[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       nav %d %d endpoints[0]: %d\n",i,j,shared.shareddata.navs[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       nav %d %d endpoints[1]: %d\n",i,j,shared.shareddata.navs[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       nav %d %d endpoints[0]: %ld\n",i,j,(long)&shared.shareddata.navs[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       nav %d %d endpoints[1]: %ld\n",i,j,(long)&shared.shareddata.navs[i].segments[j].endpoints[1]);
 				}
 			}
 		}
@@ -952,7 +948,6 @@ int mbview_pick_nav_select(int instance, int select, int which, int xpixel, int 
 	int	jj0, jj1;
 	int	inav, jpt;
 	int	i, j;
-	int	ii,jj;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -1296,39 +1291,39 @@ shared.shareddata.nav_selected[0],shared.shareddata.nav_selected[1],select);*/
 				fprintf(stderr,"dbg2       nav %d %d ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.ydisplay[instance]);
 				fprintf(stderr,"dbg2       nav %d %d zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].point.zdisplay[instance]);
 
-				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d stbd xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xgrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d stbd ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ygrid[instance]);
 				fprintf(stderr,"dbg2       nav %d %d stbd xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xlon);
 				fprintf(stderr,"dbg2       nav %d %d stbd ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ylat);
 				fprintf(stderr,"dbg2       nav %d %d stbd zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdata);
-				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.xdisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.ydisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointport.zdisplay[instance]);
 
-				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d cntr xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xgrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d cntr ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ygrid[instance]);
 				fprintf(stderr,"dbg2       nav %d %d cntr xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xlon);
 				fprintf(stderr,"dbg2       nav %d %d cntr ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ylat);
 				fprintf(stderr,"dbg2       nav %d %d cntr zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdata);
-				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d cntr xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.xdisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d cntr ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.ydisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d cntr zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointcntr.zdisplay[instance]);
 
-				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xgrid);
-				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ygrid);
+				fprintf(stderr,"dbg2       nav %d %d port xgrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xgrid[instance]);
+				fprintf(stderr,"dbg2       nav %d %d port ygrid:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ygrid[instance]);
 				fprintf(stderr,"dbg2       nav %d %d port xlon:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xlon);
 				fprintf(stderr,"dbg2       nav %d %d port ylat:     %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ylat);
 				fprintf(stderr,"dbg2       nav %d %d port zdata:    %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdata);
-				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xdisplay);
-				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay);
-				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay);
+				fprintf(stderr,"dbg2       nav %d %d port xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xdisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d port ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay[instance]);
+				fprintf(stderr,"dbg2       nav %d %d port zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[instance]);
 				}
 			for (j=0;j<shared.shareddata.navs[i].npoints-1;j++)
 				{
 				fprintf(stderr,"dbg2       nav %d %d nls:          %d\n",i,j,shared.shareddata.navs[i].segments[j].nls);
 				fprintf(stderr,"dbg2       nav %d %d nls_alloc:    %d\n",i,j,shared.shareddata.navs[i].segments[j].nls_alloc);
-				fprintf(stderr,"dbg2       nav %d %d endpoints[0]: %d\n",i,j,shared.shareddata.navs[i].segments[j].endpoints[0]);
-				fprintf(stderr,"dbg2       nav %d %d endpoints[1]: %d\n",i,j,shared.shareddata.navs[i].segments[j].endpoints[1]);
+				fprintf(stderr,"dbg2       nav %d %d endpoints[0]: %ld\n",i,j,(long)&shared.shareddata.navs[i].segments[j].endpoints[0]);
+				fprintf(stderr,"dbg2       nav %d %d endpoints[1]: %ld\n",i,j,(long)&shared.shareddata.navs[i].segments[j].endpoints[1]);
 				}
 			}
 		}
@@ -1355,7 +1350,6 @@ int mbview_extract_nav_profile(int instance)
 	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	inav, jpoint, jstart;
 	int	nprpoints;
 	double	dx, dy;
 	int	lasti, lastj, firstj;
@@ -1626,7 +1620,7 @@ int mbview_nav_delete(int instance, int inav)
 		shared.shareddata.nnav--;
 
 		/* no selection */
-		shared.shareddata.navpick_type != MBV_PICK_NONE;
+		shared.shareddata.navpick_type = MBV_PICK_NONE;
 		shared.shareddata.nav_selected[0] = MBV_SELECT_NONE;
 		shared.shareddata.nav_selected[1] = MBV_SELECT_NONE;
 		}
@@ -1662,7 +1656,6 @@ int mbview_navpicksize(int instance)
 	double	headingx, headingy;
 	int	found;
 	int	i, j;
-	int	ii,jj;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -1807,7 +1800,7 @@ int mbview_drawnavpick(int instance)
 	/* local variables */
 	char	*function_name = "mbview_drawnavpick";
 	int	status = MB_SUCCESS;
-	int	i, j;
+	int	i;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	xlength;
@@ -2009,18 +2002,13 @@ int mbview_drawnav(int instance, int rez)
 	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	on, flip;
 	int	stride;
-	int	ixmin, ixmax, jymin, jymax;
-	int	ix, jy;
-	int	ixsize, jysize;
-	int	isite;
 	int	icolor;
 	int	inav, jpoint;
 	int	swathbounds_on;
 	double	timegapuse;
 	struct mbview_linesegmentw_struct segment;
-	int	i, j, k, l, m, n, kk, ll;
+	int	i, k;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2356,11 +2344,8 @@ int mbview_updatenavlist()
 	int	status = MB_SUCCESS;
    	XmString *xstr;
 	int	inav;
-	int	jpoint;
 	int	nitems;
 	int	iitem;
-	char	lonstr0[24];
-	char	latstr0[24];
 	int	inavselect;
 
 	/* print starting debug statements */

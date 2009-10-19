@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
  *	$Id: mbsys_simrad3.h,v 5.2 2009/03/02 18:51:52 caress Exp $
  *
- *    Copyright (c) 2008-2009ß by
+ *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1060,6 +1060,9 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 int mbsys_simrad3_survey_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
+int mbsys_simrad3_wc_alloc(int verbose, 
+			void *mbio_ptr, void *store_ptr, 
+			int *error);
 int mbsys_simrad3_attitude_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
@@ -1072,7 +1075,7 @@ int mbsys_simrad3_heading_alloc(int verbose,
 int mbsys_simrad3_ssv_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
-int mbsys_simrad3_tlt_alloc(int verbose, 
+int mbsys_simrad3_tilt_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
 int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, 

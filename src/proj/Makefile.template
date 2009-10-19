@@ -113,6 +113,7 @@ $(LIBDIR)/libmbproj.a: \
 		PJ_gn_sinu.o \
 		PJ_gnom.o \
 		PJ_goode.o \
+		PJ_gstmerc.o \
 		PJ_hammer.o \
 		PJ_hatano.o \
 		PJ_imw_p.o \
@@ -151,7 +152,6 @@ $(LIBDIR)/libmbproj.a: \
 		PJ_putp6.o \
 		PJ_robin.o \
 		PJ_rpoly.o \
-		PJ_mpoly.o \
 		PJ_sconics.o \
 		PJ_somerc.o \
 		PJ_stere.o \
@@ -203,12 +203,14 @@ $(LIBDIR)/libmbproj.a: \
 		pj_gridinfo.o \
 		pj_gridlist.o \
 		pj_init.o \
+		pj_initcache.o \
 		pj_inv.o \
 		pj_latlong.o \
 		pj_list.o \
 		pj_malloc.o \
 		pj_mlfn.o \
 		pj_msfn.o \
+		pj_mutex.o \
 		pj_open_lib.o \
 		pj_param.o \
 		pj_phi2.o \
@@ -257,6 +259,7 @@ $(LIBDIR)/libmbproj.a: \
 		PJ_gn_sinu.o \
 		PJ_gnom.o \
 		PJ_goode.o \
+		PJ_gstmerc.o \
 		PJ_hammer.o \
 		PJ_hatano.o \
 		PJ_imw_p.o \
@@ -295,7 +298,6 @@ $(LIBDIR)/libmbproj.a: \
 		PJ_putp6.o \
 		PJ_robin.o \
 		PJ_rpoly.o \
-		PJ_mpoly.o \
 		PJ_sconics.o \
 		PJ_somerc.o \
 		PJ_stere.o \
@@ -347,12 +349,14 @@ $(LIBDIR)/libmbproj.a: \
 		pj_gridinfo.o \
 		pj_gridlist.o \
 		pj_init.o \
+		pj_initcache.o \
 		pj_inv.o \
 		pj_latlong.o \
 		pj_list.o \
 		pj_malloc.o \
 		pj_mlfn.o \
 		pj_msfn.o \
+		pj_mutex.o \
 		pj_open_lib.o \
 		pj_param.o \
 		pj_phi2.o \
@@ -496,6 +500,10 @@ PJ_goode.o:	PJ_goode.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. PJ_goode.c
+PJ_gstmerc.o:	PJ_gstmerc.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. PJ_gstmerc.c
 PJ_hammer.o:	PJ_hammer.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
@@ -648,10 +656,6 @@ PJ_rpoly.o:	PJ_rpoly.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. PJ_rpoly.c
-PJ_mpoly.o:	PJ_mpoly.c \
-		emess.h  geocent.h  geodesic.h \
-		nad_list.h  pj_list.h  proj_api.h  projects.h
-	$(CC) -c $(CFLAGS) -I. PJ_mpoly.c
 PJ_sconics.o:	PJ_sconics.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
@@ -872,6 +876,10 @@ pj_init.o:	pj_init.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. pj_init.c
+pj_initcache.o:	pj_initcache.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. pj_initcache.c
 pj_inv.o:	pj_inv.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
@@ -896,6 +904,10 @@ pj_msfn.o:	pj_msfn.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. pj_msfn.c
+pj_mutex.o:	pj_mutex.c \
+		emess.h  geocent.h  geodesic.h \
+		nad_list.h  pj_list.h  proj_api.h  projects.h
+	$(CC) -c $(CFLAGS) -I. pj_mutex.c
 pj_open_lib.o:	pj_open_lib.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h

@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_process.c	9/25/2003
  *    $Id: mbview_process.c,v 5.16 2008/05/16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003-2008 by
+ *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -121,10 +121,6 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static Cardinal 	ac;
-static Arg      	args[256];
-static char		value_text[MB_PATH_MAXLINE];
-
 static char rcs_id[]="$Id: mbview_process.c,v 5.16 2008/05/16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
@@ -135,12 +131,9 @@ int mbview_projectdata(int instance)
 	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
 	int	proj_status = MB_SUCCESS;
-	double	mtodeglon, mtodeglat;
 	double	xgrid, ygrid, xlon, ylat, xdisplay, ydisplay, zdisplay;
 	double	xlonmin, xlonmax, ylatmin, ylatmax;
-	int	derivative_ok;
-	double	dx, dy;
-	int	i, j, k, k1, k2;
+	int	i, j, k;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	char	*message;
@@ -548,7 +541,6 @@ int mbview_derivative(int instance, int i, int j)
 	/* local variables */
 	char	*function_name = "mbview_derivative";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	int	derivative_ok;
 	double	dx, dy;
 	int	k, k1, k2;
@@ -712,7 +704,6 @@ int mbview_projectglobaldata(int instance)
 	/* local variables */
 	char	*function_name = "mbview_projectglobaldata";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	struct mbview_pointw_struct *pointw;
@@ -947,13 +938,12 @@ int mbview_zscalegridpoint(int instance, int k)
 	/* local variables */
 	char	*function_name = "mbview_zscalegridpoint";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	xgrid, ygrid;
 	double	xlon, ylat;
 	double	xdisplay, ydisplay, zdisplay;
-	int	i, j, l;
+	int	i, j;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -963,8 +953,8 @@ int mbview_zscalegridpoint(int instance, int k)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %d\n",view);
-		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       view:             %ld\n",(long)view);
+		fprintf(stderr,"dbg2       data:             %ld\n",(long)data);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
 		}
 if (mbv_verbose >= 2)
@@ -1028,8 +1018,6 @@ int mbview_zscalepoint(int instance, int globalview, double offset_factor,
 	/* local variables */
 	char	*function_name = "mbview_zscale";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	i, j, k, l;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -1099,8 +1087,6 @@ int mbview_zscalepointw(int instance, int globalview, double offset_factor,
 	/* local variables */
 	char	*function_name = "mbview_zscale";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	i, j, k, l;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -1170,7 +1156,6 @@ int mbview_updatepointw(int instance, struct mbview_pointw_struct *pointw)
 	/* local variables */
 	char	*function_name = "mbview_updatepointw";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	int	i;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -1231,10 +1216,7 @@ int mbview_updatesegmentw(int instance, struct mbview_linesegmentw_struct *segme
 	/* local variables */
 	char	*function_name = "mbview_updatesegmentw";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	int	i;
-	struct mbview_world_struct *view;
-	struct mbview_struct *data;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -1275,8 +1257,7 @@ int mbview_zscale(int instance)
 	/* local variables */
 	char	*function_name = "mbview_zscale";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	i, j, k, l;
+	int	i, j, k;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	globalview;
@@ -1510,8 +1491,6 @@ int mbview_projectforward(int instance, int needlonlat,
 	/* local variables */
 	char	*function_name = "mbview_projectforward";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
 	double	xx, yy, zz;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
@@ -1589,9 +1568,7 @@ int mbview_projectinverse(int instance, int needlonlat,
 	/* local variables */
 	char	*function_name = "mbview_projectinverse";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
-	double	xx, yy, zz;
+	double	xx, yy;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 
@@ -1665,7 +1642,6 @@ int mbview_projectfromlonlat(int instance,
 	/* local variables */
 	char	*function_name = "mbview_projectfromlonlat";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -1720,10 +1696,8 @@ int mbview_projectgrid2ll(int instance,
 	char	*function_name = "mbview_projectgrid2ll";
 	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	double	xx, yy;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -1780,10 +1754,8 @@ int mbview_projectll2xygrid(int instance,
 	char	*function_name = "mbview_projectll2xygrid";
 	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	double	xx, yy;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -1847,10 +1819,8 @@ int mbview_projectll2xyzgrid(int instance,
 	char	*function_name = "mbview_projectll2xyzgrid";
 	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	double	xx, yy;
 	int	nfound;
 	int	i, j, k, ii, jj;
 
@@ -1865,7 +1835,7 @@ int mbview_projectll2xyzgrid(int instance,
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
-		fprintf(stderr,"dbg2       zdata:            %f\n",zdata);
+		fprintf(stderr,"dbg2       zdata:            %ld\n",(long)zdata);
 		}
 		
 	/* get view */
@@ -1948,7 +1918,6 @@ int mbview_projectll2display(int instance,
 	char	*function_name = "mbview_projectll2display";
 	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	xx, yy, zz;
@@ -2038,7 +2007,6 @@ int mbview_projectdisplay2ll(int instance,
 	char	*function_name = "mbview_projectdisplay2ll";
 	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	xx, yy, zz;
@@ -2113,7 +2081,6 @@ int mbview_projectdistance(int instance,
 	char	*function_name = "mbview_projectdistance";
 	int	status = MB_SUCCESS;
 	int	error = MB_ERROR_NO_ERROR;
-	int	proj_status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	xx1, yy1, zz1;
@@ -2252,12 +2219,10 @@ int mbview_sphere_setup(int instance, int earthcentered, double xlon, double yla
 	/* local variables */
 	char	*function_name = "mbview_sphere_setup";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	phi, theta, psi;
-	double	xx, yy, zz;
-	int	i,j;
+	int	j;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2390,12 +2355,10 @@ int mbview_sphere_forward(int instance, double xlon, double ylat,
 	/* local variables */
 	char	*function_name = "mbview_sphere_forward";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	sinlon, coslon, sinlat, coslat;
 	double	posu[3], posr[3];
-	int	i,j;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2462,11 +2425,9 @@ int mbview_sphere_inverse(int instance, double xx, double yy, double zz,
 	/* local variables */
 	char	*function_name = "mbview_sphere_inverse";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	posu[3], posr[3];
-	int	i,j;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2526,8 +2487,6 @@ int mbview_sphere_matrix(double phi, double theta, double psi,double *eulermatri
 	/* local variables */
 	char	*function_name = "mbview_sphere_rotate";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
-	int	i,j;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2625,7 +2584,6 @@ int mbview_sphere_rotate(double *eulermatrix,
 	/* local variables */
 	char	*function_name = "mbview_sphere_rotate";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	int	i,j;
 
 	/* print starting debug statements */
@@ -2677,7 +2635,6 @@ int mbview_greatcircle_distbearing(int instance,
 	/* local variables */
 	char	*function_name = "mbview_greatcircle_distbearing";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	rlon1, rlat1, rlon2, rlat2, rbearing;
@@ -2777,7 +2734,6 @@ int mbview_greatcircle_dist(int instance,
 	/* local variables */
 	char	*function_name = "mbview_greatcircle_dist";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	double	rlon1, rlat1, rlon2, rlat2;
@@ -2839,10 +2795,9 @@ int mbview_greatcircle_endposition(int instance,
 	/* local variables */
 	char	*function_name = "mbview_greatcircle_endposition";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	double	rd, rbearing, rlon1, rlat1, rlon2, rlat2;
+	double	rd, rbearing, rlon1, rlat1, rlat2;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -3152,8 +3107,8 @@ int mbview_make_histogram(
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %d\n",view);
-		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       view:             %ld\n",(long)view);
+		fprintf(stderr,"dbg2       data:             %ld\n",(long)data);
 		fprintf(stderr,"dbg2       which_data:       %d\n",which_data);
 		}
 
@@ -3341,8 +3296,7 @@ int mbview_colorpoint(
 	/* local variables */
 	char	*function_name = "mbview_colorpoint";
 	int	status = MB_SUCCESS;
-	double	value, svalue, factor, dd;
-	double	xlon, ylat;
+	double	value, svalue, dd;
 	double	intensity;
 
 	/* print starting debug statements */
@@ -3353,8 +3307,8 @@ int mbview_colorpoint(
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %d\n",view);
-		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       view:             %ld\n",(long)view);
+		fprintf(stderr,"dbg2       data:             %ld\n",(long)data);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
@@ -3568,8 +3522,7 @@ int mbview_colorpoint_histogram(
 	/* local variables */
 	char	*function_name = "mbview_colorpoint_histogram";
 	int	status = MB_SUCCESS;
-	double	value, svalue, factor, dd;
-	double	xlon, ylat;
+	double	value, svalue, dd;
 	double	intensity;
 
 	/* print starting debug statements */
@@ -3580,9 +3533,9 @@ int mbview_colorpoint_histogram(
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %d\n",view);
-		fprintf(stderr,"dbg2       data:             %d\n",data);
-		fprintf(stderr,"dbg2       histogram:        %d\n",histogram);
+		fprintf(stderr,"dbg2       view:             %ld\n",(long)view);
+		fprintf(stderr,"dbg2       data:             %ld\n",(long)data);
+		fprintf(stderr,"dbg2       histogram:        %ld\n",(long)histogram);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
@@ -3810,7 +3763,7 @@ int mbview_getcolor(double value, double min, double max,
 	/* local variables */
 	char	*function_name = "mbview_getcolor";
 	int	status = MB_SUCCESS;
-	int	ii;
+	int	i;
 	double	ff, factor;
 
 	/* print starting debug statements */
@@ -3831,9 +3784,12 @@ int mbview_getcolor(double value, double min, double max,
 		fprintf(stderr,"dbg2       above_red:        %f\n",above_red);
 		fprintf(stderr,"dbg2       above_green:      %f\n",above_green);
 		fprintf(stderr,"dbg2       above_blue:       %f\n",above_blue);
-		fprintf(stderr,"dbg2       colortable_red:   %d\n",colortable_red);
-		fprintf(stderr,"dbg2       colortable_green: %d\n",colortable_green);
-		fprintf(stderr,"dbg2       colortable_blue:  %d\n",colortable_blue);
+		for (i=0;i<MBV_NUM_COLORS;i++)
+			fprintf(stderr,"dbg2       colortable_red[%d]:   %f\n",i,colortable_red[i]);
+		for (i=0;i<MBV_NUM_COLORS;i++)
+			fprintf(stderr,"dbg2       colortable_green[%d]: %f\n",i,colortable_green[i]);
+		for (i=0;i<MBV_NUM_COLORS;i++)
+			fprintf(stderr,"dbg2       colortable_blue[%d]:  %f\n",i,colortable_blue[i]);
 		}
 		
 	/* get color */
@@ -3857,14 +3813,14 @@ int mbview_getcolor(double value, double min, double max,
 		}
 	else
 		{
-		ii = (int) (factor * (MBV_NUM_COLORS - 1));
-		ff = factor * (MBV_NUM_COLORS - 1) - ii;
-		*red = colortable_red[ii]
-			+ ff * (colortable_red[ii+1] - colortable_red[ii]);
-		*green = colortable_green[ii]
-			+ ff * (colortable_green[ii+1] - colortable_green[ii]);
-		*blue = colortable_blue[ii]
-			+ ff * (colortable_blue[ii+1] - colortable_blue[ii]);
+		i = (int) (factor * (MBV_NUM_COLORS - 1));
+		ff = factor * (MBV_NUM_COLORS - 1) - i;
+		*red = colortable_red[i]
+			+ ff * (colortable_red[i+1] - colortable_red[i]);
+		*green = colortable_green[i]
+			+ ff * (colortable_green[i+1] - colortable_green[i]);
+		*blue = colortable_blue[i]
+			+ ff * (colortable_blue[i+1] - colortable_blue[i]);
 		}
 
 	/* print output debug statements */
@@ -3926,7 +3882,7 @@ int mbview_getcolor_histogram(double value, double min, double max,
 		fprintf(stderr,"dbg2       above_blue:       %f\n",above_blue);
 		for (i=0;i<MBV_NUM_COLORS;i++)
 			{
-			fprintf(stderr,"dbg2       colortable:       r:%d g:%d b:%d histogram: %f\n",
+			fprintf(stderr,"dbg2       colortable:       r:%f g:%f b:%f histogram: %f\n",
 				colortable_red[i], colortable_green[i], colortable_blue[i], histogram[i]);
 			}
 		}
@@ -4134,9 +4090,9 @@ int mbview_applyshade(double intensity, float *r, float *g, float *b)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       red:     %d\n",*r);
-		fprintf(stderr,"dbg2       green:   %d\n",*g);
-		fprintf(stderr,"dbg2       blue:    %d\n",*b);
+		fprintf(stderr,"dbg2       red:     %f\n",*r);
+		fprintf(stderr,"dbg2       green:   %f\n",*g);
+		fprintf(stderr,"dbg2       blue:    %f\n",*b);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
 		}
@@ -4168,8 +4124,8 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %d\n",view);
-		fprintf(stderr,"dbg2       data:             %d\n",data);
+		fprintf(stderr,"dbg2       view:             %ld\n",(long)view);
+		fprintf(stderr,"dbg2       data:             %ld\n",(long)data);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		}
@@ -4240,7 +4196,6 @@ int mbview_contour(int instance, int rez)
 	/* local variables */
 	char	*function_name = "mbview_contour";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
 	int	i, j, k, l, kk;

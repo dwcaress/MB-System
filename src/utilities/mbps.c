@@ -2,7 +2,7 @@
  *    The MB-system:	mbps.c	11/4/93
  *    $Id: mbps.c,v 5.9 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -129,6 +129,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -168,24 +169,23 @@ struct ping
 int rgb_black[] = {0, 0, 0};
 int rgb_white[] = {255, 255, 255};
 
+static char rcs_id[] = "$Id: mbps.c,v 5.9 2008/09/13 06:08:09 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-
-	static char rcs_id[] = "$Id: mbps.c,v 5.9 2008/09/13 06:08:09 caress Exp $";
-	static char program_name[] = "MBPS";
-	static char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
-	static char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
+	char program_name[] = "MBPS";
+	char help_message[] =  "MBPS reads a swath bathymetry data file and creates a postscript 3-d mesh plot";
+	char usage_message[] = "mbps [-Iinfile -Fformat -Nnpings -Ppings\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc  \n\t-Aalpha -Keta -Dviewdir -Xvertexag \n\t-T\"title\" -Wmetersperinch \n\t-Sspeedmin -Ggap -Ydisplay_stats \n\t-Zdisplay_scales -V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
 	int	flag = 0;
 
 	/*ALBERTO definitions */
-	int	ib, jb, g, gap=1;
+	int	gap=1;
 	double	*xp, *yp;
 	double	xl[4], yl[4];
 	double	alpha =		ALPHA_DEF;
@@ -198,18 +198,17 @@ main (int argc, char **argv)
 	double	sin_alpha, cos_alpha;
 	double	track_length, xscale, zscale, zscale_inch;
 	double	mean_xp=0.0, mean_yp=0.0, min_xp, max_xp, min_yp, max_yp;
-	double	scaling, scaling_xp, scaling_yp,  x_off, y_off;
+	double	scaling, x_off, y_off;
 	double	min_z, max_z, range_z, meters_per_inch=(-1.0);
 	double	mean_lat=0.0;
 	double	mean_lon=0.0;
 	double	mean_latmin;
 	double	mean_lonmin;
 	double	mean_hdg=0.0;
-	int	n_pings, done, mean_knt=0;
+	int	done, mean_knt=0;
 	int	orient;
 	char	label[100];
-	int	a, b, num_pts, rotate;
-	int	cnt;	
+	int	a, b, rotate;
 	double	x, y, z;
 
 	/* MBIO status variables */
@@ -266,7 +265,7 @@ main (int argc, char **argv)
 	int	forward;
 	double	xx, yy, zz;
 	double	heading_start, dheading, dheadingx, dheadingy;
-	int	i, j, jj, k, l, m;
+	int	i, j, jj, k;
 	
 	void Polygon_Fill();
 	void Good_Polygon();

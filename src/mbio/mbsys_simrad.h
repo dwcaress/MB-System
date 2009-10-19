@@ -1409,6 +1409,9 @@ struct mbsys_simrad_struct
 /* system specific function prototypes */
 int mbsys_simrad_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
+int mbsys_simrad_survey_alloc(int verbose, 
+			void *mbio_ptr, void *store_ptr, 
+			int *error);
 int mbsys_simrad_deall(int verbose, void *mbio_ptr, void **store_ptr, 
 			int *error);
 int mbsys_simrad_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
@@ -1470,4 +1473,9 @@ int mbsys_simrad_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_simrad_copy(int verbose, void *mbio_ptr, 
 			void *store_ptr, void *copy_ptr,
 			int *error);
+int mbsys_simrad_makess(int verbose, void *mbio_ptr, void *store_ptr,
+		int pixel_size_set, double *pixel_size, 
+		int swath_width_set, double *swath_width, 
+		int pixel_int, 
+		int *error);
 

@@ -324,14 +324,17 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <X11/Intrinsic.h>
 
 /* MBIO include files */
-#include "mb_format.h"
-#include "mb_status.h"
-#include "mb_define.h"
-#include "mb_io.h"
-#include "mb_swap.h"
-#include "mb_process.h"
+#include "../../include/mb_format.h"
+#include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
+#include "../../include/mb_io.h"
+#include "../../include/mb_swap.h"
+#include "../../include/mb_process.h"
+#include "../../include/mb_xgraphics.h"
+#include "mbedit.h"
 
 /* output mode defines */
 #define	MBEDIT_OUTPUT_EDIT   1
@@ -366,6 +369,13 @@
 #define MBEDIT_GRAB_START		0
 #define MBEDIT_GRAB_MOVE		1
 #define MBEDIT_GRAB_END			2
+
+/* Bottom detect type names */
+char *detect_name[] = 
+	{	"Unknown",
+		"Amplitude",
+		"Phase"
+	};
 
 /* ping structure definition */
 struct mbedit_ping_struct 
@@ -417,160 +427,136 @@ depth values negative, so that no information is lost.";
 static char usage_message[] = "mbedit [-Byr/mo/da/hr/mn/sc -D  -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ooutfile -S -X -V -H]";
 
 /* status variables */
-int	error = MB_ERROR_NO_ERROR;
-int	verbose = 0;
-char	*message = NULL;
+static int	error = MB_ERROR_NO_ERROR;
+static int	verbose = 0;
+static char	*message = NULL;
 
 /* MBIO control parameters */
-int	format;
-int	pings;
-int	lonflip;
-double	bounds[4];
-int	btime_i[7];
-int	etime_i[7];
-double	btime_d;
-double	etime_d;
-double	speedmin;
-double	timegap;
-int	beams_bath;
-int	beams_amp;
-int	pixels_ss;
-char	ifile[MB_PATH_MAXLINE];
-void	*imbio_ptr = NULL;
-void	*ombio_ptr = NULL;
-int	output_mode = MBEDIT_OUTPUT_EDIT;
-int	run_mbprocess = MB_NO;
-int	gui_mode = MB_NO;
-int	startup_save_mode = MB_NO;
+static int	format;
+static int	pings;
+static int	lonflip;
+static double	bounds[4];
+static int	btime_i[7];
+static int	etime_i[7];
+static double	btime_d;
+static double	etime_d;
+static double	speedmin;
+static double	timegap;
+static int	beams_bath;
+static int	beams_amp;
+static int	pixels_ss;
+static char	ifile[MB_PATH_MAXLINE];
+static void	*imbio_ptr = NULL;
+static int	output_mode = MBEDIT_OUTPUT_EDIT;
+static int	run_mbprocess = MB_NO;
+static int	gui_mode = MB_NO;
+static int	startup_save_mode = MB_NO;
 
 /* mbio read and write values */
-void	*store_ptr = NULL;
-int	kind;
-int	id;
-int	time_i[7];
-double	time_d;
-double	time_interval;
-double	navlon;
-double	navlat;
-double	speed;
-double	heading;
-double	distance;
-double	altitude;
-double	draft;
-double	sonardepth;
-double	roll;
-double	pitch;
-double	heave;
-int	nbath;
-int	namp;
-int	nss;
-char	*beamflag = NULL;
-double	*bath = NULL;
-double	*bathacrosstrack = NULL;
-double	*bathalongtrack = NULL;
-double	*amp = NULL;
-double	*ss = NULL;
-double	*ssacrosstrack = NULL;
-double	*ssalongtrack = NULL;
-int	*detect = NULL;
-int	*editcount = NULL;
-int	idata = 0;
-int	icomment = 0;
-int	odata = 0;
-int	ocomment = 0;
-char	comment[MB_COMMENT_MAXLINE];
+static void	*store_ptr = NULL;
+static int	kind;
+static double	distance;
+static double	draft;
+static char	*beamflag = NULL;
+static double	*bath = NULL;
+static double	*bathacrosstrack = NULL;
+static double	*bathalongtrack = NULL;
+static double	*amp = NULL;
+static double	*ss = NULL;
+static double	*ssacrosstrack = NULL;
+static double	*ssalongtrack = NULL;
+static int	*detect = NULL;
+static int	*editcount = NULL;
+static char	comment[MB_COMMENT_MAXLINE];
 
 /* buffer control variables */
 #define	MBEDIT_BUFFER_SIZE	25000
-int	file_open = MB_NO;
-int	buff_size = MBEDIT_BUFFER_SIZE;
-int	buff_size_max = MBEDIT_BUFFER_SIZE;
-int	holdd_size = MBEDIT_BUFFER_SIZE / 1000;
-int	nload = 0;
-int	ndump = 0;
-int	nbuff = 0;
-int	current_id = 0;
-int	nload_total = 0;
-int	ndump_total = 0;
-char	last_ping[MB_PATH_MAXLINE];
+static int	file_open = MB_NO;
+static int	buff_size = MBEDIT_BUFFER_SIZE;
+static int	buff_size_max = MBEDIT_BUFFER_SIZE;
+static int	holdd_size = MBEDIT_BUFFER_SIZE / 1000;
+static int	nload = 0;
+static int	ndump = 0;
+static int	nbuff = 0;
+static int	current_id = 0;
+static int	nload_total = 0;
+static int	ndump_total = 0;
+static char	last_ping[MB_PATH_MAXLINE];
 
 /* info parameters */
-int	info_set = MB_NO;
-int	info_ping;
-int	info_beam;
-int	info_time_i[7];
-double	info_time_d;
-double	info_navlon;
-double	info_navlat;
-double	info_speed;
-double	info_heading;
-double	info_altitude;
-int	info_beams_bath;
-char	info_beamflag;
-double	info_bath;
-double	info_bathacrosstrack;
-double	info_bathalongtrack;
-int	info_detect;
+static int	info_set = MB_NO;
+static int	info_ping;
+static int	info_beam;
+static int	info_time_i[7];
+static double	info_time_d;
+static double	info_navlon;
+static double	info_navlat;
+static double	info_speed;
+static double	info_heading;
+static double	info_altitude;
+static int	info_beams_bath;
+static char	info_beamflag;
+static double	info_bath;
+static double	info_bathacrosstrack;
+static double	info_bathalongtrack;
+static int	info_detect;
 
 /* grab parameters */
-int	grab_set = MB_NO;
-int	grab_start_x;
-int	grab_start_y;
-int	grab_end_x;
-int	grab_end_y;
+static int	grab_set = MB_NO;
+static int	grab_start_x;
+static int	grab_start_y;
+static int	grab_end_x;
+static int	grab_end_y;
 
 /* save file control variables */
-int	esffile_open = MB_NO;
+static int	esffile_open = MB_NO;
 struct mb_esf_struct esf;
-char	esffile[MB_PATH_MAXLINE];
-char	notice[MB_PATH_MAXLINE];
+static char	esffile[MB_PATH_MAXLINE];
+static char	notice[MB_PATH_MAXLINE];
 
 /* filter variables */
-int	filter_medianspike = MB_NO;
-int	filter_medianspike_threshold = 10;
-int	filter_medianspike_xtrack = 5;
-int	filter_medianspike_ltrack = 1;
-int	filter_wrongside = MB_NO;
-int	filter_wrongside_threshold = 15;
-int	filter_cutbeam = MB_NO;
-int	filter_cutbeam_begin = 0;
-int	filter_cutbeam_end = 0;
-int	filter_cutbeam_max = 200;
-int	filter_cutdistance = MB_NO;
-double	filter_cutdistance_begin = 0.0;
-double	filter_cutdistance_end = 0.0;
-double	filter_cutdistance_max = 10000.0;
-int	filter_cutangle = MB_NO;
-double	filter_cutangle_begin = 0.0;
-double	filter_cutangle_end = 0.0;
-double	filter_cutangle_max = 90.0;
+static int	filter_medianspike = MB_NO;
+static int	filter_medianspike_threshold = 10;
+static int	filter_medianspike_xtrack = 5;
+static int	filter_medianspike_ltrack = 1;
+static int	filter_wrongside = MB_NO;
+static int	filter_wrongside_threshold = 15;
+static int	filter_cutbeam = MB_NO;
+static int	filter_cutbeam_begin = 0;
+static int	filter_cutbeam_end = 0;
+static int	filter_cutdistance = MB_NO;
+static double	filter_cutdistance_begin = 0.0;
+static double	filter_cutdistance_end = 0.0;
+static int	filter_cutangle = MB_NO;
+static double	filter_cutangle_begin = 0.0;
+static double	filter_cutangle_end = 0.0;
 
 /* ping drawing control variables */
 #define	MBEDIT_MAX_PINGS	250
 #define	MBEDIT_PICK_DISTANCE	50
 #define	MBEDIT_ERASE_DISTANCE	15
 struct mbedit_ping_struct	ping[MBEDIT_BUFFER_SIZE];
-int	view_mode = MBEDIT_VIEW_WATERFALL;
-int	plot_size = 10;
-int	nplot = 0;
-int	mbedit_xgid;
-int	borders[4];
-int	margin;
-int	xmin, xmax;
-int	ymin, ymax;
-int	exager = 100;
-int	plot_width = 5000;
-double	xscale;
-double	yscale;
-int	x_interval = 1000;
-int	y_interval = 250;
-int	show_detects = MB_NO;
-int	show_flagged = MB_NO;
-int	show_time = MBEDIT_PLOT_TIME;
-int	beam_save = MB_NO;
-int	iping_save = 0;
-int	jbeam_save = 0;
-double	*bathlist;
+static int	view_mode = MBEDIT_VIEW_WATERFALL;
+static int	plot_size = 10;
+static int	nplot = 0;
+static void	*mbedit_xgid;
+static int	borders[4];
+static int	margin;
+static int	xmin, xmax;
+static int	ymin, ymax;
+static int	exager = 100;
+static int	plot_width = 5000;
+static double	xscale;
+static double	yscale;
+static int	x_interval = 1000;
+static int	y_interval = 250;
+static int	show_detects = MB_NO;
+static int	show_flagged = MB_NO;
+static int	show_time = MBEDIT_PLOT_TIME;
+static int	beam_save = MB_NO;
+static int	iping_save = 0;
+static int	jbeam_save = 0;
+static double	*bathlist;
 
 /* color control values */
 #define	WHITE	0	
@@ -582,8 +568,8 @@ double	*bathlist;
 #define LIGHTGREY	6
 #define	XG_SOLIDLINE	0
 #define	XG_DASHLINE	1
-int	ncolors;
-int	pixel_values[256];
+static int	ncolors;
+static unsigned int	pixel_values[256];
 
 /*--------------------------------------------------------------------*/
 int mbedit_init(int argc, char ** argv, int *startup_file)
@@ -596,7 +582,6 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -770,7 +755,7 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 }
 
 /*--------------------------------------------------------------------*/
-int mbedit_set_graphics(int xgid, int ncol, int *pixels)
+int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels)
 {
 	/* local variables */
 	char	*function_name = "mbedit_set_graphics";
@@ -783,7 +768,7 @@ int mbedit_set_graphics(int xgid, int ncol, int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %d\n",xgid);
+		fprintf(stderr,"dbg2       xgid:         %ld\n",(long)xgid);
 		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
 		for (i=0;i<ncol;i++)
 			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
@@ -955,23 +940,23 @@ int mbedit_get_filters( int *b_m, double *d_m,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2       b_m:     %d\n",b_m);
-		fprintf(stderr,"dbg2       d_m:     %d\n",d_m);
- 		fprintf(stderr,"dbg2       f_m:     %d\n",f_m);
-		fprintf(stderr,"dbg2       f_m_t:   %d\n",f_m_t);
-		fprintf(stderr,"dbg2       f_m_x:   %d\n",f_m_x);
-		fprintf(stderr,"dbg2       f_m_l:   %d\n",f_m_l);
- 		fprintf(stderr,"dbg2       f_w:     %d\n",f_w);
-		fprintf(stderr,"dbg2       f_w_t:   %d\n",f_w_t);
- 		fprintf(stderr,"dbg2       f_b:     %d\n",f_b);
-		fprintf(stderr,"dbg2       f_b_b:   %d\n",f_b_b);
-		fprintf(stderr,"dbg2       f_b_e:   %d\n",f_b_e);
- 		fprintf(stderr,"dbg2       f_d:     %d\n",f_d);
-		fprintf(stderr,"dbg2       f_d_b:   %d\n",f_d_b);
-		fprintf(stderr,"dbg2       f_d_e:   %d\n",f_d_e);
- 		fprintf(stderr,"dbg2       f_a:     %d\n",f_a);
-		fprintf(stderr,"dbg2       f_a_b:   %d\n",f_a_b);
-		fprintf(stderr,"dbg2       f_a_e:   %d\n",f_a_e);
+		fprintf(stderr,"dbg2       b_m:     %ld\n",(long)b_m);
+		fprintf(stderr,"dbg2       d_m:     %ld\n",(long)d_m);
+ 		fprintf(stderr,"dbg2       f_m:     %ld\n",(long)f_m);
+		fprintf(stderr,"dbg2       f_m_t:   %ld\n",(long)f_m_t);
+		fprintf(stderr,"dbg2       f_m_x:   %ld\n",(long)f_m_x);
+		fprintf(stderr,"dbg2       f_m_l:   %ld\n",(long)f_m_l);
+ 		fprintf(stderr,"dbg2       f_w:     %ld\n",(long)f_w);
+		fprintf(stderr,"dbg2       f_w_t:   %ld\n",(long)f_w_t);
+ 		fprintf(stderr,"dbg2       f_b:     %ld\n",(long)f_b);
+		fprintf(stderr,"dbg2       f_b_b:   %ld\n",(long)f_b_b);
+		fprintf(stderr,"dbg2       f_b_e:   %ld\n",(long)f_b_e);
+ 		fprintf(stderr,"dbg2       f_d:     %ld\n",(long)f_d);
+		fprintf(stderr,"dbg2       f_d_b:   %ld\n",(long)f_d_b);
+		fprintf(stderr,"dbg2       f_d_e:   %ld\n",(long)f_d_e);
+ 		fprintf(stderr,"dbg2       f_a:     %ld\n",(long)f_a);
+		fprintf(stderr,"dbg2       f_a_b:   %ld\n",(long)f_a_b);
+		fprintf(stderr,"dbg2       f_a_e:   %ld\n",(long)f_a_e);
 		}
 
 	/* set max beam number and acrosstrack distance */
@@ -2741,8 +2726,6 @@ int mbedit_action_mouse_grab(
 	char	*function_name = "mbedit_action_mouse_grab";
 	int	status = MB_SUCCESS;
 	int	zap_box, zap_ping;
-	int	ix, iy, range, range_min;
-	int	iping, jbeam;
 	int	xgmin, xgmax, ygmin, ygmax;
 	int	found;
 	int	replot_label;
@@ -4858,14 +4841,8 @@ int mbedit_open_file(char *file, int form, int savemode)
 	/* local variables */
 	char	*function_name = "mbedit_open_file";
 	int	status = MB_SUCCESS;
-	struct stat file_status;
-	int	fstat;
-	char	command[MB_PATH_MAXLINE];
-	double	stime_d;
-	int	sbeam;
-	int	saction;
 	int	outputmode;
-	int	i, j, insert;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5262,7 +5239,7 @@ int mbedit_load_data(int buffer_size,
 	char	string[MB_PATH_MAXLINE];
 	int	detect_status, detect_error, nbeams;
 	double	speed_nav;
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5612,7 +5589,7 @@ int mbedit_plot_all(
 		fprintf(stderr,"dbg2       show_detects:%d\n",sh_dtcts);
 		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
-		fprintf(stderr,"dbg2       nplt:        %d\n",nplt);
+		fprintf(stderr,"dbg2       nplt:        %ld\n",(long)nplt);
 		fprintf(stderr,"dbg2       autoscale:   %d\n",autoscale);
 		}
 

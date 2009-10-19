@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_datum_set.c,v 5.6 2008/09/29 04:56:21 caress Exp $
+ * $Id: pj_datum_set.c 1504 2009-01-06 02:11:57Z warmerdam $
  *
  * Project:  PROJ.4
  * Purpose:  Apply datum definition to PJ structure from initialization string.
@@ -25,19 +25,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log: pj_datum_set.c,v $
- * Revision 5.6  2008/09/29 04:56:21  caress
- * Proj 4.6.1
- *
- * Revision 1.2  2001/04/04 21:13:21  warmerda
- * do arcsecond/radian and ppm datum parm transformation in pj_set_datum()
- *
- * Revision 1.1  2000/07/06 23:32:27  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 #include <projects.h>
 #include <string.h>
@@ -116,7 +104,7 @@ int pj_datum_set(paralist *pl, PJ *projdef)
 
         /* parse out the parameters */
         s = towgs84;
-        for( s = towgs84; *s != '\0'; ) 
+        for( s = towgs84; *s != '\0' && parm_count < 7; ) 
         {
             projdef->datum_params[parm_count++] = atof(s);
             while( *s != '\0' && *s != ',' )

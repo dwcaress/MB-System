@@ -994,7 +994,7 @@ static int getCStrCount
     if (!str) return(0);
     if (!*str) return(0);
 
-    while (newStr = getNextCStrDelim(str))
+    while ((newStr = getNextCStrDelim(str)))
     {
 	x++;
 	str = ++newStr;
@@ -1404,17 +1404,17 @@ XtPointer BX_CONVERT
 	switch(toVal.size)
 	{
 	case 1:
-	    val = (XTPOINTER)(*(char*)toVal.addr);
+	    val = (XTPOINTER)(long)(*(char*)toVal.addr);
 	    break;
 	case 2:
-	    val = (XTPOINTER)(*(short*)toVal.addr);
+	    val = (XTPOINTER)(long)(*(short*)toVal.addr);
 	    break;
 	case 4:
-	    val = (XTPOINTER)(*(int*)toVal.addr);
+	    val = (XTPOINTER)(long)(*(int*)toVal.addr);
 	    break;
 	case 8:
 	default:
-	    val = (XTPOINTER)(*(long*)toVal.addr);
+	    val = (XTPOINTER)(long)(*(long*)toVal.addr);
 	    break;
 	}
     }
@@ -1523,12 +1523,6 @@ void BX_SET_BACKGROUND_COLOR
         ARG(Cardinal *, argcnt)
         GRA(Pixel, bg_color)
 {
-    int		i;
-    int		topShadowLoc;
-    int		bottomShadowLoc;
-    int		selectLoc;
-    int		fgLoc;
-
 #if ((XmVERSION == 1) && (XmREVISION > 0))
 
     /*
@@ -1642,7 +1636,7 @@ Widget BxFindTopShell
 {
     Widget	p;
     
-    while(p = XtParent(start))
+    while((p = XtParent(start)))
     {
 	start = p;
     }
@@ -2412,7 +2406,7 @@ GRA(BxXpmAttributes *, attributes)
 	 */
 	curkey = 0;
 	lastwaskey = 0;
-	while (l = xpmNextWord(data, buf)) {
+	while ((l = xpmNextWord(data, buf))) {
 	    if (!lastwaskey) {
 		for (key = 1; key < BXNKEYS + 1; key++)
 		    if ((strlen(BxXpmColorKeys[key - 1]) == l)
@@ -3867,8 +3861,8 @@ GRA(Boolean, override_inst)
 	       strlen(defs->wName) : strlen(inst_name);
        }
        if (defs->value == NULL ||
-	   override_inst && strncmp(inst_name, defs->wName, name_length) ||
-	   ! override_inst && defs->cInstName != NULL)
+	   (override_inst && strncmp(inst_name, defs->wName, name_length)) ||
+	   (! override_inst && defs->cInstName != NULL))
        {
 	   defs++;
 	   continue;

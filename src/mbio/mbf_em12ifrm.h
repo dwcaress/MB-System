@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_em12ifrm.h	12/5/00
  *	$Id: mbf_em12ifrm.h,v 5.4 2004/10/18 04:15:46 caress Exp $
  *
- *    Copyright (c) 2000, 2002, 2003, 2004 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

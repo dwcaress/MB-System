@@ -31,6 +31,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -53,13 +54,12 @@ static char rcs_id[] = "$Id: $";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char program_name[] = "MBroutetime";
-	static char help_message[] =  "MBroutetime outputs a list of the times when a survey hit the waypoints\nof a planned survey route. This (lon lat time_d) list can then be used by mbextractsegy\nor mb7k2ss to extract subbottom (or sidescan) data into files corresponding\nto the lines between waypoints.";
-	static char usage_message[] = "mbroutetime  -Rroutefile [-Fformat -Ifile -Owaypointtimefile -Urangethreshold -H -V]";
+	char program_name[] = "MBroutetime";
+	char help_message[] =  "MBroutetime outputs a list of the times when a survey hit the waypoints\nof a planned survey route. This (lon lat time_d) list can then be used by mbextractsegy\nor mb7k2ss to extract subbottom (or sidescan) data into files corresponding\nto the lines between waypoints.";
+	char usage_message[] = "mbroutetime  -Rroutefile [-Fformat -Ifile -Owaypointtimefile -Urangethreshold -H -V]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -81,7 +81,6 @@ main (int argc, char **argv)
 	double	file_weight;
 	int	format;
 	int	pings;
-	int	pings_read;
 	int	lonflip;
 	double	bounds[4];
 	int	btime_i[7];
@@ -94,14 +93,12 @@ main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	double	timeshift = 0.0;
 
 	/* MBIO read values */
 	void	*mbio_ptr = NULL;
 	void	*store_ptr = NULL;
 	int	kind;
 	int	time_i[7];
-	int	time_j[5];
 	double	time_d;
 	double	navlon;
 	double	navlat;
@@ -110,10 +107,6 @@ main (int argc, char **argv)
 	double	distance;
 	double	altitude;
 	double	sonardepth;
-	double	draft;
-	double	roll;
-	double	pitch;
-	double	heave;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
@@ -123,12 +116,10 @@ main (int argc, char **argv)
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
-	int	icomment = 0;
 	
 	/* route and auto-line data */
 	char	route_file[MB_PATH_MAXLINE];
 	int	rawroutefile = MB_NO;
-	char	lineroot[MB_PATH_MAXLINE];
 	int	nroutepoint = 0;
 	int	nroutepointfound = 0;
 	int	nroutepointalloc = 0;
@@ -158,7 +149,7 @@ main (int argc, char **argv)
 	int	point_ok;
 	int	read_data;
 	int	nread;
-	int	i, j, k, n;
+	int	i;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -278,7 +269,7 @@ main (int argc, char **argv)
 	if ((fp = fopen(route_file, "r")) == NULL) 
 		{
 		error = MB_ERROR_OPEN_FAIL;
-		status == MB_FAILURE;
+		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to open route file <%s> for reading\n",route_file);
 		exit(status);
 		}
@@ -387,8 +378,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -541,8 +532,8 @@ main (int argc, char **argv)
 		/* figure out whether and what to read next */
         	if (read_datalist == MB_YES)
                 	{
-			if (status = mb_datalist_read(verbose,datalist,
-				    file,&format,&file_weight,&error)
+			if ((status = mb_datalist_read(verbose,datalist,
+				    file,&format,&file_weight,&error))
 				    == MB_SUCCESS)
                         	read_data = MB_YES;
                 	else
@@ -579,7 +570,7 @@ main (int argc, char **argv)
 	if ((fp = fopen(output_file, "w")) == NULL) 
 		{
 		error = MB_ERROR_OPEN_FAIL;
-		status == MB_FAILURE;
+		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to open output waypoint time list file <%s> for writing\n",output_file);
 		exit(status);
 		}

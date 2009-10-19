@@ -59,6 +59,11 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 extern void BxExitCB(Widget, XtPointer, XtPointer);
 
 /* Begin user code block <globals> */
+
+Widget CreatemainWindow(Widget parent);
+void do_mbnavedit_init(int argc, char **argv);
+int do_wait_until_viewed(XtAppContext app);
+
 /* End user code block <globals> */
 
 /**
@@ -72,7 +77,6 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
-    Boolean      argok=False;
     Widget   topLevelShell;
     Widget   mainWindow;
     

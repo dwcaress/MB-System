@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_aea.c,v 5.5 2008/09/29 04:56:21 caress Exp $
+ * $Id: PJ_aea.c 1504 2009-01-06 02:11:57Z warmerdam $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the aea (Albers Equal Area) projection.
@@ -25,19 +25,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log: PJ_aea.c,v $
- * Revision 5.5  2008/09/29 04:56:21  caress
- * Proj 4.6.1
- *
- * Revision 1.4  2003/08/18 15:21:23  warmerda
- * fixed initialization of en variable
- *
- * Revision 1.3  2002/12/14 19:27:06  warmerda
- * updated header
- *
- */
+ *****************************************************************************/
 
 #define PROJ_PARMS__ \
 	double	ec; \
@@ -55,7 +43,7 @@
 #define PJ_LIB__
 #include <projects.h>
 
-PJ_CVSID("$Id: PJ_aea.c,v 5.5 2008/09/29 04:56:21 caress Exp $");
+PJ_CVSID("$Id: PJ_aea.c 1504 2009-01-06 02:11:57Z warmerdam $");
 
 # define EPS10	1.e-10
 # define TOL7	1.e-7

@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_makedatalist.perl	27/1/2006
 #    $Id: mbm_makedatalist.perl,v 5.1 2006/04/11 19:12:06 caress Exp $
 #
-#    Copyright (c) 2006 by
+#    Copyright (c) 2006-2009 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -62,6 +62,7 @@ $verbose = 		($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
+	print "\nVersion: $Id: $\n";
         print "Macro to generate an MB-System datalist file referencing all\n";
         print "identifiable swath files in the specified directory. If no directory\n";
         print "is specified with the -I option, then the current directory is used.\n";

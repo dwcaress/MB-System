@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_plot.c	9/26/2003
  *    $Id: mbview_plot.c,v 5.14 2008/05/16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003-2008 by
+ *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -114,7 +114,6 @@
 /* local variables */
 static Cardinal 	ac;
 static Arg      	args[256];
-static char		value_text[MB_PATH_MAXLINE];
 
 static char rcs_id[]="$Id: mbview_plot.c,v 5.14 2008/05/16 22:59:42 caress Exp $";
 
@@ -177,11 +176,11 @@ mbview_glerrorcheck(instance, 1, function_name);
 			function_name);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);
-		fprintf(stderr,"dbg2       view->dpy:             %d\n", view->dpy);
-		fprintf(stderr,"dbg2       view->vi:              %d\n", view->vi);
-		fprintf(stderr,"dbg2       view->glwmda:          %d\n", view->glwmda);
-		fprintf(stderr,"dbg2       view->glx_context:     %d\n", view->glx_context);
-		fprintf(stderr,"dbg2       view->glx_init:        %d\n", view->glx_init);
+		fprintf(stderr,"dbg2       view->dpy:             %ld\n", (long)view->dpy);
+		fprintf(stderr,"dbg2       view->vi:              %ld\n", (long)view->vi);
+		fprintf(stderr,"dbg2       view->glwmda:          %ld\n", (long)view->glwmda);
+		fprintf(stderr,"dbg2       view->glx_context:     %ld\n", (long)view->glx_context);
+		fprintf(stderr,"dbg2       view->glx_init:        %ld\n", (long)view->glx_init);
 		fprintf(stderr,"dbg2       view->lastdrawrez:     %d\n", view->lastdrawrez);
 		fprintf(stderr,"dbg2       view->contourlorez:    %d\n", view->contourlorez);
 		fprintf(stderr,"dbg2       view->contourhirez:    %d\n", view->contourhirez);
@@ -204,12 +203,11 @@ int mbview_drawdata(int instance, int rez)
 	int	on, flip;
 	int	nxrange, nyrange;
 	int	stride;
-	float	xlength, xxlength;
 	int	use_histogram;
 	int	make_histogram;
 	float	*histogram;
 	int	which_data;
-	int	i, j, k, l, m, n, ikk, ill, kk, ll;
+	int	i, j, k, l, ikk, ill, kk, ll;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -404,15 +402,17 @@ mbview_glerrorcheck(instance, 1, function_name);
 				data->primary_y[m],
 				data->primary_z[m]);
 			}
-		}
+		} */
 		
 	/* check for pending event */
+	
 	/*if (view->plot_done == MB_NO 
 		&& view->plot_interrupt_allowed == MB_YES 
 		&& i % MBV_EVENTCHECKCOARSENESS == 0)
 		do_mbview_xevents();*/
 		
 	/* dump out of loop if plotting already done at a higher recursion */
+	
 	/*if (view->plot_done == MB_YES)
 		i = data->primary_nx;
 	}
@@ -651,7 +651,6 @@ int mbview_plotlowhighall(int instance)
 	/* local variables */
 	char	*function_name = "mbview_plotlowhighall";
 	int	status = MB_SUCCESS;
-	int	i;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -730,7 +729,6 @@ int mbview_plotlow(int instance)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	float	viewdistance;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -797,7 +795,6 @@ int mbview_plotlowhigh(int instance)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	float	viewdistance;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -866,7 +863,6 @@ int mbview_plothigh(int instance)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	float	viewdistance;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -933,7 +929,6 @@ int mbview_plotfull(int instance)
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	float	viewdistance;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -1372,10 +1367,9 @@ int mbview_findpointrez(int instance, int rez, int xpixel, int ypixel,
 	int	status = MB_SUCCESS;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	good_pick = MB_NO;
 	float	viewdistance;
 	int	stride, ipickstride, jpickstride;
-	int	i, j, k, l, m, n, kk, ll;
+	int	i, j, k, l, m, n;
 	float	rgba[4];
 	int	ni, imin, imax, nj, jmin, jmax;
 	int	npickx, npicky;
@@ -2093,19 +2087,9 @@ int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg)
 	/* local variables */
 	char	*function_name = "mbview_drapesegment";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	istart, iend, iadd, jstart, jend, jadd;
-	int	ni, nj;
-	double	mm, bb;
-	int	found, done, insert;
-	double	xgrid, ygrid, zdata;
-	int	global;
-	double	offset_factor;
-	int	i, j, k, l, ii, icnt, jcnt;
-	int	iii;
-	
+	int	i;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2116,7 +2100,7 @@ int mbview_drapesegment(int instance, struct mbview_linesegment_struct *seg)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       seg:              %d\n",seg);
+		fprintf(stderr,"dbg2       seg:              %ld\n", (long)seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
@@ -2194,7 +2178,7 @@ int mbview_drapesegment_gc(int instance, struct mbview_linesegment_struct *seg)
 	double	xlon1, ylat1, xlon2, ylat2;
 	double	segbearing, dsegbearing, segdist, dsegdist;
 	int	done;
-	int	i, j, k, l, icnt;
+	int	i, j, icnt;
 	
 
 	/* print starting debug statements */
@@ -2206,7 +2190,7 @@ int mbview_drapesegment_gc(int instance, struct mbview_linesegment_struct *seg)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       seg:              %d\n",seg);
+		fprintf(stderr,"dbg2       seg:              %ld\n", (long)seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
@@ -2415,8 +2399,6 @@ int mbview_drapesegment_grid(int instance, struct mbview_linesegment_struct *seg
 	int	global;
 	double	offset_factor;
 	int	i, j, k, l, ii, icnt, jcnt;
-	int	iii;
-	
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2427,7 +2409,7 @@ int mbview_drapesegment_grid(int instance, struct mbview_linesegment_struct *seg
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       seg:              %d\n",seg);
+		fprintf(stderr,"dbg2       seg:              %ld\n", (long)seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid);
@@ -2741,19 +2723,9 @@ int mbview_drapesegmentw(int instance, struct mbview_linesegmentw_struct *seg)
 	/* local variables */
 	char	*function_name = "mbview_drapesegmentw";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	struct mbview_world_struct *view;
 	struct mbview_struct *data;
-	int	istart, iend, iadd, jstart, jend, jadd;
-	int	ni, nj;
-	double	mm, bb;
-	int	found, done, insert;
-	double	xgrid, ygrid, zdata;
-	int	global;
-	double	offset_factor;
-	int	i, j, k, l, ii, icnt, jcnt;
-	int	iii;
-	
+	int	i;
 
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
@@ -2764,7 +2736,7 @@ int mbview_drapesegmentw(int instance, struct mbview_linesegmentw_struct *seg)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       seg:              %d\n",seg);
+		fprintf(stderr,"dbg2       seg:              %ld\n", (long)seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
@@ -2846,7 +2818,7 @@ int mbview_drapesegmentw_gc(int instance, struct mbview_linesegmentw_struct *seg
 	double	xlon1, ylat1, xlon2, ylat2;
 	double	segbearing, dsegbearing, segdist, dsegdist;
 	int	done;
-	int	i, j, k, l, icnt;
+	int	i, j, icnt;
 	
 
 	/* print starting debug statements */
@@ -2858,7 +2830,7 @@ int mbview_drapesegmentw_gc(int instance, struct mbview_linesegmentw_struct *seg
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       seg:              %d\n",seg);
+		fprintf(stderr,"dbg2       seg:              %ld\n", (long)seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
@@ -3072,9 +3044,7 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 	int	global;
 	double	offset_factor;
 	int	i, j, k, l, ii, icnt, jcnt;
-	int	iii;
 	
-
 	/* print starting debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -3084,7 +3054,7 @@ int mbview_drapesegmentw_grid(int instance, struct mbview_linesegmentw_struct *s
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %d\n",instance);
-		fprintf(stderr,"dbg2       seg:              %d\n",seg);
+		fprintf(stderr,"dbg2       seg:              %ld\n", (long)seg);
 		fprintf(stderr,"dbg2       seg->endpoints:\n");
 		fprintf(stderr,"dbg2            xgrid[0]:    %f\n",seg->endpoints[0].xgrid[instance]);
 		fprintf(stderr,"dbg2            ygrid[0]:    %f\n",seg->endpoints[0].ygrid[instance]);
@@ -3432,7 +3402,6 @@ int mbview_glerrorcheck(int instance, int id, char *sourcefunction)
 	/* local variables */
 	char	*function_name = "mbview_glerrorcheck";
 	int	status = MB_SUCCESS;
-	int	error = MB_ERROR_NO_ERROR;
 	GLenum	gl_error;
 	GLubyte *gl_error_msg;
 

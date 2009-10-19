@@ -2,7 +2,7 @@
  *    The MB-system:	mbcopy.c	2/4/93
  *    $Id: mbcopy.c,v 5.28 2009/03/02 18:54:40 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -253,20 +253,24 @@ int mbcopy_any_to_mbldeoih(int verbose,
 		char *comment, 
 		char *ombio_ptr, char *ostore_ptr, 
 		int *error);
+int mbcopy_reson8k_to_gsf(int verbose, 
+		void *imbio_ptr, 
+		void *ombio_ptr,
+		int *error);
+
+static char rcs_id[] = "$Id: mbcopy.c,v 5.28 2009/03/02 18:54:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcopy.c,v 5.28 2009/03/02 18:54:40 caress Exp $";
-	static char program_name[] = "MBcopy";
-	static char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
-	static char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  -Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
+	char program_name[] = "MBcopy";
+	char help_message[] =  "MBcopy copies an input swath sonar data file to an output \nswath sonar data file with the specified conversions.  Options include \nwindowing in time and space and ping averaging.  The input and \noutput data formats may differ, though not all possible combinations \nmake sense.  The default input and output streams are stdin and stdout.";
+	char usage_message[] = "mbcopy [-Byr/mo/da/hr/mn/sc -Ccommentfile -D -Eyr/mo/da/hr/mn/sc \n\t-Fiformat/oformat/mformat -H  -Iinfile -Llonflip -Mmergefile -N -Ooutfile \n\t-Ppings -Qsleep_factor -Rw/e/s/n -Sspeed -V]";
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -318,7 +322,6 @@ main (int argc, char **argv)
 	struct mb_io_struct *mmb_io_ptr;
 	void	*istore_ptr;
 	void	*ostore_ptr;
-	void	*mstore_ptr;
 	int	kind;
 	int	time_i[7];
 	double	time_d;
@@ -362,11 +365,6 @@ main (int argc, char **argv)
 	double	mdistance;
 	double	maltitude;
 	double	msonardepth;
-	double	mdraft;
-	double	mroll;
-	double	mpitch;
-	double	mheave;
-	int	mdata = 0;
 
 	char	mcomment[MB_COMMENT_MAXLINE];
 	int	mnbath, mnamp, mnss;
@@ -1555,8 +1553,8 @@ int mbcopy_elacmk2_to_xse(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       istore:     %d\n",istore);
-		fprintf(stderr,"dbg2       ostore:     %d\n",ostore);
+		fprintf(stderr,"dbg2       istore:     %ld\n",(long)istore);
+		fprintf(stderr,"dbg2       ostore:     %ld\n",(long)ostore);
 		}
 
 	/* copy the data  */
@@ -1856,8 +1854,8 @@ int mbcopy_xse_to_elacmk2(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       istore:     %d\n",istore);
-		fprintf(stderr,"dbg2       ostore:     %d\n",ostore);
+		fprintf(stderr,"dbg2       istore:     %ld\n",(long)istore);
+		fprintf(stderr,"dbg2       ostore:     %ld\n",(long)ostore);
 		fprintf(stderr,"dbg2       kind:       %d\n",istore->kind);
 		}
 
@@ -2056,8 +2054,8 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       istore:     %d\n",istore);
-		fprintf(stderr,"dbg2       ostore:     %d\n",ostore);
+		fprintf(stderr,"dbg2       istore:     %ld\n",(long)istore);
+		fprintf(stderr,"dbg2       ostore:     %ld\n",(long)ostore);
 		fprintf(stderr,"dbg2       kind:       %d\n",istore->kind);
 		}
 
@@ -2963,8 +2961,8 @@ int mbcopy_any_to_mbldeoih(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       ombio_ptr:  %d\n",ombio_ptr);
-		fprintf(stderr,"dbg2       ostore_ptr: %d\n",ostore_ptr);
+		fprintf(stderr,"dbg2       ombio_ptr:  %ld\n",(long)ombio_ptr);
+		fprintf(stderr,"dbg2       ostore_ptr: %ld\n",(long)ostore_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
@@ -3078,12 +3076,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 	gsfRecords	    *records;
 	gsfSwathBathyPing   *mb_ping;
 	gsfMBParams params;
-	double	bathmax;
-	double	bathacrosstrackmax;
-	double	bathalongtrackmax;
-	double  multiplier, offset, lxy;
-	double	time_d;
-	int	time_i[7];
+	double  multiplier, offset;
 	double gain_correction;
 	double	angscale;
 	double	alpha;
@@ -3091,7 +3084,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 	double	theta;
 	double	phi;
 	int	icenter;
-	int	i, j, ret;
+	int	i, ret;
 		
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -3100,9 +3093,9 @@ int mbcopy_reson8k_to_gsf(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       istore:     %d\n",istore_ptr);
-		fprintf(stderr,"dbg2       ostore:     %d\n",ostore_ptr);
-		fprintf(stderr,"dbg2       kind:       %d\n",istore_ptr->kind);
+		fprintf(stderr,"dbg2       istore:     %ld\n",(long)istore_ptr);
+		fprintf(stderr,"dbg2       ostore:     %ld\n",(long)ostore_ptr);
+		fprintf(stderr,"dbg2       kind:       %ld\n",(long)istore_ptr->kind);
 		}
 
 	mb_io_ptr  = (struct mb_io_struct *) imbio_ptr;
@@ -3451,7 +3444,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 				records->comment.comment_length = 0;
 				}
 			    }
-			if (status = MB_SUCCESS && records->comment.comment != NULL)
+			if ((status = MB_SUCCESS) && (records->comment.comment != NULL))
 			    {
 			    strcpy(records->comment.comment, store->comment);
 			    records->comment.comment_length = strlen(store->comment)+1;

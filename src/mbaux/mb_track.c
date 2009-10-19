@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_track.c	8/15/93
- *    $Id: mb_track.c,v 5.5 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_track.c,v 5.5 2008/07/10 06:43:40 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -18,7 +18,10 @@
  * Author:	D. W. Caress
  * Date:	August, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_track.c,v $
+ * Revision 5.5  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.4  2008/05/26 04:43:15  caress
  * Getting ready for release 5.1.1beta19.
  *
@@ -84,15 +87,15 @@
 
 /* mbio include files */
 #include "../../include/mb_status.h"
-#include "../../include/mb_contour.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_aux.h"
 
 /* global array dimensions etc */
 #define IUP 3
 #define IDN 2
 #define IOR -3
 
-static char rcs_id[]="$Id: mb_track.c,v 5.5 2008-07-10 06:43:40 caress Exp $";
+static char rcs_id[]="$Id: mb_track.c,v 5.5 2008/07/10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_track plots the shiptrack of multibeam data. */
@@ -107,16 +110,16 @@ void mb_track(int verbose, struct swath *data, int *error)
 	double	dx, dy;
 	double	angle;
 	char	label[25];
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
-		fprintf(stderr,"dbg2       swath:                %d\n",data);
+		fprintf(stderr,"dbg2       swath:                %ld\n",(long)data);
 		fprintf(stderr,"dbg2       time tick interval:   %f\n",data->time_tick_int);
 		fprintf(stderr,"dbg2       time interval:        %f\n",data->time_annot_int);
 		fprintf(stderr,"dbg2       date interval:        %f\n",data->date_annot_int);
@@ -256,8 +259,7 @@ void mb_track(int verbose, struct swath *data, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -275,23 +277,21 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error)
 	char	*function_name = "mb_trackpingnumber";
 	int	status = MB_SUCCESS;
 	int	pingnumber_tick, pingnumber_annot;
-	double	hour0, hour1;
-	int	time_j[5];
-	double	x, y, x1, y1, x2, y2, x3, y3, x4, y4;
+	double	x, y, x1, y1, x2, y2;
 	double	dx, dy;
 	double	angle;
 	char	label[25];
 	double	justify[4];
-	int	i, j, k;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
-		fprintf(stderr,"dbg2       swath:                %d\n",data);
+		fprintf(stderr,"dbg2       swath:                %ld\n",(long)data);
 		fprintf(stderr,"dbg2       pingnumber tick int:  %d\n",data->pingnumber_tick_int);
 		fprintf(stderr,"dbg2       pingnumber annot int: %d\n",data->pingnumber_annot_int);
 		fprintf(stderr,"dbg2       pingnumber tick len:  %f\n",data->pingnumber_tick_len);
@@ -332,7 +332,7 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error)
 		/* do pingnumber annotation if needed */
 		if (pingnumber_annot == MB_YES)
 			{
-			sprintf(label,"%d ", data->pings[i].pingnumber, data->pings[i].pingnumber);
+			sprintf(label,"%d ", data->pings[i].pingnumber);
 			justify_string(data->pingnumber_tick_len, label, justify);
 			x1 = x - 0.375*data->pingnumber_tick_len*dx;
 			y1 = y - 0.375*data->pingnumber_tick_len*dy;
@@ -361,8 +361,7 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -379,21 +378,18 @@ void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file
 {
 	char	*function_name = "mb_trackname";
 	int	status = MB_SUCCESS;
-	double	x, y, x1, y1, x2, y2, x3, y3, x4, y4;
-	double	dx, dy;
 	double	angle;
 	char	label[MB_PATH_MAXLINE];
-	int	i, j, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBBA function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
 		fprintf(stderr,"dbg2       perpendicular:      %d\n",perpendicular);
-		fprintf(stderr,"dbg2       swath:              %d\n",data);
+		fprintf(stderr,"dbg2       swath:              %ld\n",(long)data);
 		fprintf(stderr,"dbg2       file:               %s\n",file);
 		}
 
@@ -415,8 +411,7 @@ void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");

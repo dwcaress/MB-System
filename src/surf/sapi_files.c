@@ -170,7 +170,7 @@ long SAPI_openFile(char* surfDir,char* surfFile,long errorprint)
  {
   freeControlData();
   if(errorprint != 0)
-    fprintf(stderr,"SAPI-Error: nr of soundings = %d!\n",sapiToSurfData->nrOfSoundings);
+    fprintf(stderr,"SAPI-Error: nr of soundings = %d!\n",(int)(sapiToSurfData->nrOfSoundings));
   return((long)-1);
  }
 

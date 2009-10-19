@@ -22,6 +22,7 @@
 /*
  * Motif required Headers
  */
+#include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <Xm/Xm.h>
 #include <Xm/DialogS.h>
@@ -59,6 +60,12 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 extern void do_quit(Widget, XtPointer, XtPointer);
 
 /* Begin user code block <globals> */
+
+#include "../../include/mb_define.h"
+#include "mbvelocity.h"
+
+Widget Createwindow_mbvelocity(Widget parent);
+
 /* End user code block <globals> */
 
 /**
@@ -72,7 +79,6 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
-    Boolean      argok=False;
     Widget   topLevelShell;
     Widget   window_mbvelocity;
     

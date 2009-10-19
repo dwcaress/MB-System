@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	hsdump.c	6/16/93
- *    $Id: hsdump.c,v 5.8 2008-09-13 06:08:09 caress Exp $
+ *    $Id: hsdump.c,v 5.8 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2003, 2006 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,7 +20,10 @@
  * Author:	D. W. Caress
  * Date:	June 16, 1993
  *
- * $Log: not supported by cvs2svn $
+ * $Log: hsdump.c,v $
+ * Revision 5.8  2008/09/13 06:08:09  caress
+ * Updates to apply suggested patches to segy handling. Also fixes to remove compiler warnings.
+ *
  * Revision 5.7  2008/09/11 20:20:14  caress
  * Checking in updates made during cruise AT15-36.
  *
@@ -103,6 +106,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -112,19 +116,19 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_hsds.h"
 
+static char rcs_id[] = "$Id: hsdump.c,v 5.8 2008/09/13 06:08:09 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: hsdump.c,v 5.8 2008-09-13 06:08:09 caress Exp $";
-	static char program_name[] = "HSDUMP";
-	static char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
-	static char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
+	char program_name[] = "HSDUMP";
+	char help_message[] =  "HSDUMP lists the information contained in data records on\n\tHydrosweep DS data files, including survey, calibrate, water \n\tvelocity and comment records. The default input stream is stdin.";
+	char usage_message[] = "hsdump [-Fformat -V -H -Iinfile -Okind]";
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -200,7 +204,7 @@ main (int argc, char **argv)
 		stderr if verbose > 1) */
 	FILE	*output;
 
-	int	i, j, k, l, m;
+	int	i;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,

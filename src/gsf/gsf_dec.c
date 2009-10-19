@@ -1087,7 +1087,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                         break;
 
                     case GSF_FIELD_SIZE_FOUR:
-                        ret = DecodeFourByteArray(&ft->rec.mb_ping.travel_time, (char *)p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY, handle);
+                        ret = DecodeFourByteArray(&ft->rec.mb_ping.travel_time, (unsigned char *)p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY, handle);
                         break;
                 }
                 if (ret < 0)
@@ -1140,7 +1140,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                         break;
 
                     case GSF_FIELD_SIZE_TWO:
-                        ret = DecodeTwoByteArray(&ft->rec.mb_ping.mr_amplitude, (char *)p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY, handle);
+                        ret = DecodeTwoByteArray(&ft->rec.mb_ping.mr_amplitude, (unsigned char *)p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY, handle);
                         break;
                 }
                 if (ret < 0)
@@ -1317,7 +1317,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                  break;
 
            case (GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY):
-               ret = DecodeSignedByteArray(&ft->rec.mb_ping.incident_beam_adj, p, ping->number_beams,
+               ret = DecodeSignedByteArray(&ft->rec.mb_ping.incident_beam_adj, (char *) p, ping->number_beams,
                    &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY, handle);
                if (ret < 0)
                {
@@ -1339,7 +1339,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                break;
 
            case (GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY):
-               ret = DecodeSignedByteArray(&ft->rec.mb_ping.doppler_corr, p, ping->number_beams,
+               ret = DecodeSignedByteArray(&ft->rec.mb_ping.doppler_corr,(char *) p, ping->number_beams,
                    &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY, handle);
                if (ret < 0)
                {

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_cheb.c			3/23/00
- *    $Id: mb_cheb.c,v 5.3 2008-07-10 06:43:40 caress Exp $
+ *    $Id: mb_cheb.c,v 5.3 2008/07/10 06:43:40 caress Exp $
  *
- *    Copyright (c) 2000-2008 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -30,7 +30,10 @@
  * Author:	D. W. Caress
  * Date:	March 23, 2000
  *
- * $Log: not supported by cvs2svn $
+ * $Log: mb_cheb.c,v $
+ * Revision 5.3  2008/07/10 06:43:40  caress
+ * Preparing for 5.1.1beta20
+ *
  * Revision 5.2  2007/10/08 05:56:18  caress
  * Changed convergence criteria.
  *
@@ -57,6 +60,57 @@
 /* mbio include files */
 #include "../../include/mb_define.h"
 
+void lsqup(
+    double  *a,
+    int	    *ia,
+    int	    *nia,
+    int	    nnz,
+    int	    nc,
+    int	    nr,
+    double  *x,
+    double  *dx,
+    double  *d,
+    int	    nfix,
+    int	    *ifix,
+    double  *fix,
+    int	    ncycle,
+    double  *sigma);
+void chebyu(
+    double  *sigma,
+    int	    ncycle,
+    double  shi,
+    double  slo,
+    double  *work);
+void splits(
+    double  *x,
+    double  *t,
+    int	    n);
+double errlim(
+	double	*sigma,
+	int	ncycle,
+	double	shi,
+	double	slo);
+double errrat(
+	double	x1,
+	double	x2,
+	double	*sigma,
+	int	ncycle);
+void lspeig(
+	double	*a,
+	int	*ia,
+	int	*nia,
+	int	nnz,
+	int	nc,
+	int	nr,
+	int	ncyc,
+	int	*nsig,
+	double	*x,
+	double	*dx,
+	double	*sigma,
+	double	*w,
+	double	*smax,
+	double	*err,
+	double	*sup);
 
 /*----------------------------------------------------------------------
  *
@@ -431,7 +485,7 @@ void lspeig(
 /*----------------------------------------------------------------------*/
 {
     int	    i, j, k, icyc;
-    int	    nsigsave, nsig1;
+    int	    nsig1;
     double  eps = 1.0e-6;
     double  res = 0.0;
     double  slo, smp, errsmp;

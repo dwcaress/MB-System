@@ -131,6 +131,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -224,6 +225,16 @@ struct mbfilter_filter_struct
 	};
 
 /* function prototypes */
+int hipass_mean(int verbose, int n, double *val, double *wgt, 
+		double *hipass, int *error);
+int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, 
+		double *hipass, int *error);
+int hipass_median(int verbose, int n, double *val, double *wgt, 
+		double *hipass, int *error);
+int smooth_mean(int verbose, int n, double *val, double *wgt, 
+		double *smooth, int *error);
+int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, 
+		double *smooth, int *error);
 int smooth_median(int verbose, double original, 
 		int apply_threshold, double threshold_lo, double threshold_hi, 
 		int n, double *val, double *wgt, 
@@ -248,13 +259,14 @@ int mbcopy_any_to_mbldeoih(int verbose, int system,
 		char *ombio_ptr, char *ostore_ptr, 
 		int *error);
 
+static char rcs_id[] = "$Id: mbfilter.c,v 5.9 2009/03/02 18:54:40 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbfilter.c,v 5.9 2009/03/02 18:54:40 caress Exp $";
-	static char program_name[] = "MBFILTER";
-	static char help_message[] =  
+	char program_name[] = "MBFILTER";
+	char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
 data (sidescan, beam amplitude, and/or bathymetry). The filters\n\t\
 include:\n\t\
@@ -274,7 +286,7 @@ data, and the hi-pass filters can be used to emphasize\n\t\
 fine scale structure in the data.\n\t\
 The default input and output streams are stdin and stdout.\n";
 
-	static char usage_message[] = "mbfilter [\
+	char usage_message[] = "mbfilter [\
 -Akind -Byr/mo/da/hr/mn/sc\n\t\
 -Cmode/xdim/ldim/iteration\n\t\
 -Dmode/xdim/ldim/iteration/offset\n\t\
@@ -282,7 +294,6 @@ The default input and output streams are stdin and stdout.\n";
 -Rwest/east/south/north -Smode/xdim/ldim/iteration\n\t\
 -Tthreshold -V -H]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -329,12 +340,10 @@ The default input and output streams are stdin and stdout.\n";
 	struct mb_io_struct *omb_io_ptr;
 	void	*store_ptr;
 	int	kind;
-	int	nrecord = 0;
 	int	ndata = 0;
 	char	comment[MB_COMMENT_MAXLINE];
 
 	/* buffer handling parameters */
-	void	*buff_ptr;
 	int	n_buffer_max = MBFILTER_BUFFER_DEFAULT;
 	int	nhold = 0;
 	int	nhold_ping = 0;
@@ -346,12 +355,8 @@ The default input and output streams are stdin and stdout.\n";
 	int	nwritetot = 0;
 	int	nexpect;
 	struct mbfilter_ping_struct ping[MBFILTER_BUFFER_DEFAULT];
-	int	nping = 0;
-	int	nping_start;
-	int	nping_end;
 	int	first = MB_YES;
-	int	start, done;
-	int	first_distance;
+	int	done;
 
 	/* time, user, host variables */
 	time_t	right_now;
@@ -392,7 +397,7 @@ The default input and output streams are stdin and stdout.\n";
 	int	ifilter, ndx, ndl;
 	int	ia,  ib;
 	int	ja,  jb,  jbeg,  jend;
-	int	i, j, k, ii, jj, kk, n;
+	int	i, j, ii, jj, n;
 
 	char	*ctime();
 	char	*getenv();
@@ -640,9 +645,9 @@ The default input and output streams are stdin and stdout.\n";
 			fprintf(stderr,"dbg2       filters[%d].ldim:          %d\n",i,filters[i].ldim);
 			fprintf(stderr,"dbg2       filters[%d].iteration:     %d\n",i,filters[i].iteration);
 			fprintf(stderr,"dbg2       filters[%d].threshold:     %d\n",i,filters[i].threshold);
-			fprintf(stderr,"dbg2       filters[%d].threshold_lo:  %d\n",i,filters[i].threshold_lo);
-			fprintf(stderr,"dbg2       filters[%d].threshold_hi:  %d\n",i,filters[i].threshold_hi);
-			fprintf(stderr,"dbg2       filters[%d].hipass_offset: %d\n",i,filters[i].hipass_offset);
+			fprintf(stderr,"dbg2       filters[%d].threshold_lo:  %f\n",i,filters[i].threshold_lo);
+			fprintf(stderr,"dbg2       filters[%d].threshold_hi:  %f\n",i,filters[i].threshold_hi);
+			fprintf(stderr,"dbg2       filters[%d].hipass_offset: %f\n",i,filters[i].hipass_offset);
 			}
 		}
 
@@ -730,8 +735,8 @@ The default input and output streams are stdin and stdout.\n";
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -1105,7 +1110,7 @@ The default input and output streams are stdin and stdout.\n";
 						ping[ndata].ssacrosstrack,
 						ping[ndata].ssalongtrack,
 						comment,&error);
-			if (status == MB_SUCCESS & kind == MB_DATA_DATA)
+			if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 				{
 				if (datakind == MBFILTER_SS)
 					{
@@ -1514,8 +1519,8 @@ nunload,nwrite,verbose,error,ombio_ptr,omb_io_ptr->store_data);*/
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -1562,8 +1567,8 @@ int hipass_mean(int verbose, int n, double *val, double *wgt,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %d\n",val);
-		fprintf(stderr,"dbg2       wgt:             %d\n",wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -1600,7 +1605,7 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 	char	*function_name = "hipass_gaussian";
 	int	status = MB_SUCCESS;
 	double	wgtsum;
-	int	i, nn;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1610,9 +1615,9 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %d\n",val);
-		fprintf(stderr,"dbg2       wgt:             %d\n",wgt);
-		fprintf(stderr,"dbg2       dis:             %d\n",dis);
+		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
+		fprintf(stderr,"dbg2       dis:             %ld\n",(long)dis);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f  dis[%d]: %f\n", 
 				i, val[i], i, dis[i]);
@@ -1668,8 +1673,8 @@ int hipass_median(int verbose, int n, double *val, double *wgt,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %d\n",val);
-		fprintf(stderr,"dbg2       wgt:             %d\n",wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -1715,8 +1720,8 @@ int smooth_mean(int verbose, int n, double *val, double *wgt,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %d\n",val);
-		fprintf(stderr,"dbg2       wgt:             %d\n",wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -1753,7 +1758,7 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 	char	*function_name = "smooth_gaussian";
 	int	status = MB_SUCCESS;
 	double	wgtsum;
-	int	i, nn;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1763,9 +1768,9 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %d\n",val);
-		fprintf(stderr,"dbg2       wgt:             %d\n",wgt);
-		fprintf(stderr,"dbg2       dis:             %d\n",dis);
+		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
+		fprintf(stderr,"dbg2       dis:             %ld\n",(long)dis);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f  dis[%d]: %f\n", 
 				i, val[i], i, dis[i]);
@@ -1826,8 +1831,8 @@ int smooth_median(int verbose, double original,
 		fprintf(stderr,"dbg2       original:        %f\n",original);
 		fprintf(stderr,"dbg2       apply_threshold: %d\n",apply_threshold);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %d\n",val);
-		fprintf(stderr,"dbg2       wgt:             %d\n",wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -1884,8 +1889,8 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %d\n",val);
-		fprintf(stderr,"dbg2       wgt:             %d\n",wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -1936,7 +1941,7 @@ int contrast_edge(int verbose, int n, double *val, double *grad,
 	double	edge;
 	double	gradsum;
 	double	contrast;
-	int	i, ii, nn;
+	int	i, ii;
 	
 
 	/* print input debug statements */
@@ -1947,8 +1952,8 @@ int contrast_edge(int verbose, int n, double *val, double *grad,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %d\n",val);
-		fprintf(stderr,"dbg2       grad:            %d\n",grad);
+		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
+		fprintf(stderr,"dbg2       grad:            %ld\n",(long)grad);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -2010,8 +2015,8 @@ int contrast_gradient(int verbose, int n, double *val, double *wgt,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %d\n",val);
-		fprintf(stderr,"dbg2       wgt:             %d\n",wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -2072,8 +2077,8 @@ int mbcopy_any_to_mbldeoih(int verbose, int system,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       ombio_ptr:  %d\n",ombio_ptr);
-		fprintf(stderr,"dbg2       ostore_ptr: %d\n",ostore_ptr);
+		fprintf(stderr,"dbg2       ombio_ptr:  %ld\n",(long)ombio_ptr);
+		fprintf(stderr,"dbg2       ostore_ptr: %ld\n",(long)ostore_ptr);
 		fprintf(stderr,"dbg2       system:     %d\n",system);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}

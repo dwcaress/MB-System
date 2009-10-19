@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: projects.h,v 5.6 2008/09/29 04:56:21 caress Exp $
+ * $Id: projects.h 1625 2009-09-23 18:58:15Z warmerdam $
  *
  * Project:  PROJ.4
  * Purpose:  Primary (private) include file for PROJ.4 library.
@@ -25,75 +25,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log: projects.h,v $
- * Revision 5.6  2008/09/29 04:56:21  caress
- * Proj 4.6.1
- *
- * Revision 1.24  2006/10/18 04:34:03  fwarmerdam
- * added mlist functions from libproj4
- *
- * Revision 1.23  2006/10/12 21:04:39  fwarmerdam
- * Added experimental +lon_wrap argument to set a "center point" for
- * longitude wrapping of longitude values coming out of pj_transform().
- *
- * Revision 1.22  2006/03/30 14:35:09  fwarmerdam
- * bug 1145: avoid warnings on VC8.
- *
- * Revision 1.21  2004/10/28 16:08:13  fwarmerdam
- * added pj_get_*_ref() accessors
- *
- * Revision 1.20  2004/10/20 17:04:29  fwarmerdam
- * added geos, sterea and supporting gauss code from libproj4
- *
- * Revision 1.19  2004/08/31 22:57:11  warmerda
- * Don't re-declare hypot() on win32 as it will conflict with math.h as per
- * http://bugzilla.remotesensing.org/show_bug.cgi?id=495
- *
- * Revision 1.18  2004/04/15 13:56:45  warmerda
- * changed PJD_ERR_GEOCENTRIC to -45
- *
- * Revision 1.17  2003/03/17 18:56:34  warmerda
- * implement heirarchical NTv2 gridinfos
- *
- * Revision 1.16  2003/03/15 06:02:02  warmerda
- * preliminary NTv2 support, major restructure of datum shifting
- *
- * Revision 1.15  2002/12/14 20:35:15  warmerda
- * fix C_NAMESPACE warning issue with C_NAMESPACE_VAR for variables
- *
- * Revision 1.14  2002/12/14 20:16:21  warmerda
- * added geocentric support, and PJ_CVSID
- *
- * Revision 1.13  2002/12/09 16:01:02  warmerda
- * added prime meridian support
- *
- * Revision 1.12  2002/07/08 02:32:05  warmerda
- * ensure clean C++ builds
- *
- * Revision 1.11  2002/06/20 16:09:31  warmerda
- * removed strtod, reimplement non-GPL strtod cover within dmstor.c
- *
- * Revision 1.10  2002/06/13 14:06:49  warmerda
- * Removed incorrect labelling of 3PARAM and 7PARAM as Molodensky.
- *
- * Revision 1.9  2001/04/06 01:24:13  warmerda
- * Introduced proj_api.h as a public interface for PROJ.4
- *
- * Revision 1.8  2001/04/05 04:24:10  warmerda
- * added prototypes for new functions, and PJ_VERSION
- *
- * Revision 1.7  2001/02/07 17:55:05  warmerda
- * Cleaned up various warnings when compiled with -Wall.
- *
- * Revision 1.6  2000/11/30 03:37:22  warmerda
- * use proj_strtod() in dmstor()
- *
- * Revision 1.5  2000/07/06 23:36:47  warmerda
- * added lots of datum related stuff
- *
- */
+ *****************************************************************************/
 
 /* General projections header file */
 #ifndef PROJECTS_H
@@ -152,6 +84,15 @@ extern "C" {
 extern double hypot(double, double);
 #endif
 
+#ifdef _WIN32_WCE
+#  include <wce_stdlib.h>
+#  include <wce_stdio.h>
+#  define rewind wceex_rewind
+#  define getenv wceex_getenv
+#  define strdup _strdup
+#  define hypot _hypot
+#endif
+
 	/* some useful constants */
 #define HALFPI		1.5707963267948966
 #define FORTPI		0.78539816339744833
@@ -167,8 +108,17 @@ extern double hypot(double, double);
 #define ID_TAG_MAX 50
 #endif
 
+/* Use WIN32 as a standard windows 32 bit declaration */
+#if defined(_WIN32) && !defined(WIN32) && !defined(_WIN32_WCE)
+#  define WIN32
+#endif
+
+#if defined(_WINDOWS) && !defined(WIN32) && !defined(_WIN32_WCE)
+#  define WIN32
+#endif
+
 /* directory delimiter for DOS support */
-#ifdef DOS
+#ifdef WIN32
 #define DIR_CHAR '\\'
 #else
 #define DIR_CHAR '/'
@@ -268,8 +218,10 @@ typedef struct PJconsts {
         int is_geocent; /* proj=geocent ... not really a projection at all */
 	double
 		a,  /* major axis or radius if es==0 */
-		e,  /* eccentricity */
+                a_orig, /* major axis before any +proj related adjustment */
 		es, /* e ^ 2 */
+                es_orig, /* es before any +proj related adjustment */
+		e,  /* eccentricity */
 		ra, /* 1/A */
 		one_es, /* 1 - e^2 */
 		rone_es, /* 1/one_es */
@@ -277,7 +229,7 @@ typedef struct PJconsts {
 		x0, y0, /* easting and northing */
 		k0,	/* general scaling factor */
 		to_meter, fr_meter; /* cartesian scaling */
-
+    
         int     datum_type; /* PJD_UNKNOWN/3PARAM/7PARAM/GRIDSHIFT/WGS84 */
         double  datum_params[7];
         double  from_greenwich; /* prime meridian offset (in radians) */
@@ -390,6 +342,12 @@ int pj_ell_set(paralist *, double *, double *);
 int pj_datum_set(paralist *, PJ *);
 int pj_prime_meridian_set(paralist *, PJ *);
 int pj_angular_units_set(paralist *, PJ *);
+
+paralist *pj_clone_paralist( const paralist* );
+void pj_clear_initcache(void);
+paralist*pj_search_initcache( const char *filekey );
+void pj_insert_initcache( const char *filekey, const paralist *list);
+
 double *pj_enfn(double);
 double pj_mlfn(double, double, double, double *);
 double pj_inv_mlfn(double, double, double *);

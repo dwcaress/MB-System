@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: pj_gridlist.c,v 5.4 2008/09/29 04:56:21 caress Exp $
+ * $Id: pj_gridlist.c 1634 2009-09-24 02:40:46Z warmerdam $
  *
  * Project:  PROJ.4
  * Purpose:  Code to manage the list of currently loaded (cached) PJ_GRIDINFOs
@@ -26,32 +26,23 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log: pj_gridlist.c,v $
- * Revision 5.4  2008/09/29 04:56:21  caress
- * Proj 4.6.1
- *
- * Revision 1.4  2005/11/01 05:56:13  fwarmerdam
- * improved error handling if gridcount is zero
- *
- * Revision 1.3  2003/03/18 16:26:58  warmerda
- * clear error if missing file is not required
- *
- * Revision 1.2  2003/03/17 19:45:47  warmerda
- * support '@' marker for optional grids
- *
- * Revision 1.1  2003/03/15 06:01:18  warmerda
- * New
- *
- */
+ *****************************************************************************/
 
 #define PJ_LIB__
 
 #include <projects.h>
 #include <string.h>
 #include <math.h>
-#include <assert.h>
+
+#ifdef _WIN32_WCE
+/* assert.h includes all Windows API headers and causes 'LP' name clash.
+ * Here assert we disable assert() for Windows CE.
+ * TODO - mloskot: re-implement porting friendly assert
+ */
+# define assert(exp)	((void)0)
+#else
+# include <assert.h>
+#endif /* _WIN32_WCE */
 
 static PJ_GRIDINFO *grid_list = NULL;
 
@@ -191,14 +182,17 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
     pj_errno = 0;
     *grid_count = 0;
 
+    pj_acquire_lock();
     if( last_nadgrids != NULL 
         && strcmp(nadgrids,last_nadgrids) == 0 )
     {
+        PJ_GRIDINFO **ret = last_nadgrids_list;
         *grid_count = last_nadgrids_count;
         if( *grid_count == 0 )
             pj_errno = -38;
 
-        return last_nadgrids_list;
+        pj_release_lock();
+        return ret;
     }
 
 /* -------------------------------------------------------------------- */
@@ -236,6 +230,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
         if( end_char > sizeof(name) )
         {
             pj_errno = -38;
+            pj_release_lock();
             return NULL;
         }
         
@@ -249,6 +244,7 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
         if( !pj_gridlist_merge_gridfile( name ) && required )
         {
             pj_errno = -38;
+            pj_release_lock();
             return NULL;
         }
         else
@@ -257,9 +253,14 @@ PJ_GRIDINFO **pj_gridlist_from_nadgrids( const char *nadgrids, int *grid_count)
 
     if( last_nadgrids_count > 0 )
     {
+        PJ_GRIDINFO **ret = last_nadgrids_list;
         *grid_count = last_nadgrids_count;
-        return last_nadgrids_list;
+        pj_release_lock();
+        return ret;
     }
     else
+    {
+        pj_release_lock();
         return NULL;
+    }
 }

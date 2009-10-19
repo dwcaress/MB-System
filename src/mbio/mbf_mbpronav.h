@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_mbpronav.h	5/20/99
  *	$Id: mbf_mbpronav.h,v 5.3 2006/10/05 18:58:28 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002, 2003 by
+ *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

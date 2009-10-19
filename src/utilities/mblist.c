@@ -2,7 +2,7 @@
  *    The MB-system:	mblist.c	2/1/93
  *    $Id: mblist.c,v 5.30 2008/08/12 00:05:54 caress Exp $
  *
- *    Copyright (c) 1993-2008 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -258,6 +258,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -378,13 +379,12 @@ static char rcs_id[] = "$Id: mblist.c,v 5.30 2008/08/12 00:05:54 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char program_name[] = "MBLIST";
-	static char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
-	static char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Kdecimate -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
+	char program_name[] = "MBLIST";
+	char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
+	char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Kdecimate -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -564,8 +564,6 @@ main (int argc, char **argv)
 	double	receive_gain;
 
 	int	read_data;
-	double	distmin;
-	int	found;
 	int	i, j, k, m;
 
 	/* output files */
@@ -878,8 +876,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -951,7 +949,7 @@ main (int argc, char **argv)
 	    fprintf(outfile, "timefields_J = 6,  timefields_j = 5, timefields_t = 7, latm = 13, \n\t");
 
 	    /* find dimensions in format list */
-	    raw_next_value == MB_NO;
+	    raw_next_value = MB_NO;
 	    for (i=0; i<n_list; i++) 
 	    	if (list[i] == '/' || list[i] == '-' 
 			|| list[i] == '=' || list[i] == '+') {
@@ -3141,7 +3139,7 @@ main (int argc, char **argv)
 				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 					time_u = (int) time_d;
 					if (ascii == MB_YES)
-					    fprintf(output[i],"%d",time_u);
+					    fprintf(output[i],"%ld",time_u);
 					else
 					    {
 					    b = time_u;
@@ -3156,7 +3154,7 @@ main (int argc, char **argv)
 						first_u = MB_NO;
 						}
 					if (ascii == MB_YES)
-					    fprintf(output[i],"%d",time_u - time_u_ref);
+					    fprintf(output[i],"%ld",time_u - time_u_ref);
 					else
 					    {
 					    b = time_u - time_u_ref;
@@ -3960,7 +3958,7 @@ main (int argc, char **argv)
 				case 'U': /* unix time in seconds since 1/1/70 00:00:00 */
 					time_u = (int) time_d;
 					if (ascii == MB_YES)
-					    fprintf(output[i],"%d",time_u);
+					    fprintf(output[i],"%ld",time_u);
 					else
 					    {
 					    b = time_u;
@@ -3975,7 +3973,7 @@ main (int argc, char **argv)
 						first_u = MB_NO;
 						}
 					if (ascii == MB_YES)
-					    fprintf(output[i],"%d",time_u - time_u_ref);
+					    fprintf(output[i],"%ld",time_u - time_u_ref);
 					else
 					    {
 					    b = time_u - time_u_ref;
@@ -4425,8 +4423,8 @@ main (int argc, char **argv)
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -4733,9 +4731,8 @@ int set_bathyslope(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       bath:            %d\n",bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %d\n",
-			bathacrosstrack);
+		fprintf(stderr,"dbg2       bath:            %ld\n",(long)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(long)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d %f %f\n", 
@@ -5029,35 +5026,46 @@ int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, i
 Method to get fields from raw data, similar to mb_get_all.
 */
 int mb_get_raw(int verbose, void *mbio_ptr,
-		   int	*mode,
-		   int	*ipulse_length,
-	       int	*png_count,
-	       int	*sample_rate,
-	       double	*absorption,
-	       int 	*max_range,
-	       int 	*r_zero,
-	       int 	*r_zero_corr,
-	       int 	*tvg_start,
-	       int 	*tvg_stop,
-	       double 	*bsn,
-	       double 	*bso,
-	       int 	*tx,
-	       int 	*tvg_crossover,
-	       int 	*nbeams_ss,
-	       int 	*npixels,
-	       int 	*beam_samples,
-	       int	*start_sample,
-	       int 	*range,
-	       double	*depression,
-	       double 	*bs,
-	       double	*ss_pixels,
-	       int 	*error)
+		int	*mode,
+		int	*ipulse_length,
+		int	*png_count,
+		int	*sample_rate,
+		double	*absorption,
+		int 	*max_range,
+		int 	*r_zero,
+		int 	*r_zero_corr,
+		int 	*tvg_start,
+		int 	*tvg_stop,
+		double 	*bsn,
+		double 	*bso,
+		int 	*tx,
+		int 	*tvg_crossover,
+		int 	*nbeams_ss,
+		int 	*npixels,
+		int 	*beam_samples,
+		int	*start_sample,
+		int 	*range,
+		double	*depression,
+		double 	*bs,
+		double	*ss_pixels,
+		int 	*error)
 {
 	char	*function_name = "mb_get_raw";
 	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
 	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:        %ld\n",(long)mbio_ptr);
+		}
 	
-	struct mb_io_struct     *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	
 	*mode = -1;
 	*ipulse_length = 0;
@@ -5090,32 +5098,74 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	  case MBF_EM300MBA:
 	  case MBF_EM300RAW:
 	    mb_get_raw_simrad2(verbose, mbio_ptr, 
-			   	   mode,
-			   	   ipulse_length,
-			       png_count,
-			       sample_rate,
-			       absorption,
-			       max_range,
-			       r_zero,
-			       r_zero_corr,
-			       tvg_start,
-			       tvg_stop,
-			       bsn,
-			       bso,
-			       tx,
-			       tvg_crossover,
-			       nbeams_ss,
-			       npixels,
-			       beam_samples,
-			       start_sample,
-			       range,
-			       depression,
-			       bs,
-			       ss_pixels,
-			       error);
+				mode,
+				ipulse_length,
+				png_count,
+				sample_rate,
+				absorption,
+				max_range,
+				r_zero,
+				r_zero_corr,
+				tvg_start,
+				tvg_stop,
+				bsn,
+				bso,
+				tx,
+				tvg_crossover,
+				nbeams_ss,
+				npixels,
+				beam_samples,
+				start_sample,
+				range,
+				depression,
+				bs,
+				ss_pixels,
+				error);
 
 	    break;
 	  }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       mode:            %d\n",*mode);
+		fprintf(stderr,"dbg2       ipulse_length:   %d\n",*ipulse_length);
+		fprintf(stderr,"dbg2       png_count:       %d\n",*png_count);
+		fprintf(stderr,"dbg2       sample_rate:     %d\n",*sample_rate);
+		fprintf(stderr,"dbg2       absorption:      %f\n",*absorption);
+		fprintf(stderr,"dbg2       max_range:       %d\n",*max_range);
+		fprintf(stderr,"dbg2       r_zero:          %d\n",*r_zero);
+		fprintf(stderr,"dbg2       r_zero_corr:     %d\n",*r_zero_corr);
+		fprintf(stderr,"dbg2       tvg_start:       %d\n",*tvg_start);
+		fprintf(stderr,"dbg2       tvg_stop:        %d\n",*tvg_stop);
+		fprintf(stderr,"dbg2       bsn:             %f\n",*bsn);
+		fprintf(stderr,"dbg2       bso:             %f\n",*bso);
+		fprintf(stderr,"dbg2       tx:              %d\n",*tx);
+		fprintf(stderr,"dbg2       tvg_crossover:   %d\n",*tvg_crossover);
+		fprintf(stderr,"dbg2       nbeams_ss:       %d\n",*nbeams_ss);
+		fprintf(stderr,"dbg2       npixels:         %d\n",*npixels);
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
+			{
+			fprintf(stderr,"dbg2       beam:%d range:%d depression:%f bs:%f\n",
+				i,range[i],depression[i],bs[i]);
+			}
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
+			{
+			fprintf(stderr,"dbg2       beam:%d samples:%d start:%d\n",
+				i,beam_samples[i],start_sample[i]);
+			}
+		for (i = 0; i < *npixels; i++)
+			{
+			fprintf(stderr,"dbg2       pixel:%d ss:%f\n",
+				i,ss_pixels[i]);
+			}
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
 
 	return status;
 }
@@ -5126,37 +5176,50 @@ Method to get fields from simrad2 raw data.
 */
 
 int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
-			   int	*mode,
-			   int	*ipulse_length,
-		       int	*png_count,
-		       int	*sample_rate,
-		       double	*absorption,
-		       int 	*max_range,
-		       int 	*r_zero,
-		       int 	*r_zero_corr,
-		       int 	*tvg_start,
-		       int 	*tvg_stop,
-		       double 	*bsn,
-		       double 	*bso,
-		       int 	*tx,
-		       int 	*tvg_crossover,
-		       int 	*nbeams_ss,
-		       int 	*npixels,
-		       int 	*beam_samples,
-		       int	*start_sample,
-		       int 	*range,
-		       double	*depression,
-		       double 	*bs,
-		       double	*ss_pixels,
-		       int 	*error)
+			int	*mode,
+			int	*ipulse_length,
+			int	*png_count,
+			int	*sample_rate,
+			double	*absorption,
+			int 	*max_range,
+			int 	*r_zero,
+			int 	*r_zero_corr,
+			int 	*tvg_start,
+			int 	*tvg_stop,
+			double 	*bsn,
+			double 	*bso,
+			int 	*tx,
+			int 	*tvg_crossover,
+			int 	*nbeams_ss,
+			int 	*npixels,
+			int 	*beam_samples,
+			int	*start_sample,
+			int 	*range,
+			double	*depression,
+			double 	*bs,
+			double	*ss_pixels,
+			int 	*error)
 {
 	char	*function_name = "mb_get_raw_simrad2";
 	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store_ptr;
+	struct mbsys_simrad2_ping_struct *ping_ptr;
   	int	i;
 
-	struct mb_io_struct     	*mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	struct mbsys_simrad2_struct	*store_ptr = (struct mbsys_simrad2_struct *) mb_io_ptr->store_data;
-	struct mbsys_simrad2_ping_struct *ping_ptr = store_ptr->ping;
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:        %ld\n",(long)mbio_ptr);
+		}
+
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	store_ptr = (struct mbsys_simrad2_struct *) mb_io_ptr->store_data;
+	ping_ptr = store_ptr->ping;
 
 	if (store_ptr->kind == MB_DATA_DATA)
 	  {
@@ -5192,6 +5255,48 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 	    for (i = 0; i < ping_ptr->png_npixels; i++)
 	      ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
 	  }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       mode:            %d\n",*mode);
+		fprintf(stderr,"dbg2       ipulse_length:   %d\n",*ipulse_length);
+		fprintf(stderr,"dbg2       png_count:       %d\n",*png_count);
+		fprintf(stderr,"dbg2       sample_rate:     %d\n",*sample_rate);
+		fprintf(stderr,"dbg2       absorption:      %f\n",*absorption);
+		fprintf(stderr,"dbg2       max_range:       %d\n",*max_range);
+		fprintf(stderr,"dbg2       r_zero:          %d\n",*r_zero);
+		fprintf(stderr,"dbg2       r_zero_corr:     %d\n",*r_zero_corr);
+		fprintf(stderr,"dbg2       tvg_start:       %d\n",*tvg_start);
+		fprintf(stderr,"dbg2       tvg_stop:        %d\n",*tvg_stop);
+		fprintf(stderr,"dbg2       bsn:             %f\n",*bsn);
+		fprintf(stderr,"dbg2       bso:             %f\n",*bso);
+		fprintf(stderr,"dbg2       tx:              %d\n",*tx);
+		fprintf(stderr,"dbg2       tvg_crossover:   %d\n",*tvg_crossover);
+		fprintf(stderr,"dbg2       nbeams_ss:       %d\n",*nbeams_ss);
+		fprintf(stderr,"dbg2       npixels:         %d\n",*npixels);
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
+			{
+			fprintf(stderr,"dbg2       beam:%d range:%d depression:%f bs:%f\n",
+				i,range[i],depression[i],bs[i]);
+			}
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
+			{
+			fprintf(stderr,"dbg2       beam:%d samples:%d start:%d\n",
+				i,beam_samples[i],start_sample[i]);
+			}
+		for (i = 0; i < *npixels; i++)
+			{
+			fprintf(stderr,"dbg2       pixel:%d ss:%f\n",
+				i,ss_pixels[i]);
+			}
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
 
 	return status;
 }

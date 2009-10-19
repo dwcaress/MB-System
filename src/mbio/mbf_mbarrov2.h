@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_mbarrov2.h	10/3/2006
  *	$Id: mbf_mbarrov2.h,v 5.0 2006/10/05 18:56:44 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002, 2003 by
+ *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

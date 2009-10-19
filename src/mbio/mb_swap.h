@@ -2,7 +2,7 @@
  *    The MB-system:	mb_swap.h	6/21/94
  *    $Id: mb_swap.h,v 5.3 2004/11/06 03:55:15 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_singlebeam.h	4/13/93
  *	$Id: mbsys_singlebeam.h,v 5.8 2006/11/10 22:36:05 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2002, 2003, 2006 by
+ *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -286,7 +286,15 @@ int mbsys_singlebeam_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			double speed, double heading, double draft, 
 			double roll, double pitch, double heave,
 			int *error);
+int mbsys_singlebeam_swathbounds(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, double *portlon, double *portlat,
+			double *stbdlon, double *stbdlat,
+			int *error);
 int mbsys_singlebeam_copy(int verbose, void *mbio_ptr, 
 			void *store_ptr, void *copy_ptr,
+			int *error);
+int mbsys_singlebeam_pressuredepth(int verbose, 
+			double pressure, double latitude,
+			double *depth,
 			int *error);
 

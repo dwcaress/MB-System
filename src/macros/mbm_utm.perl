@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_utm.perl	5/13/2002
 #    $Id: mbm_utm.perl,v 5.4 2007/10/08 04:27:20 caress Exp $
 #
-#    Copyright (c) 2002, 2003 by
+#    Copyright (c) 2002-2009 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -76,6 +76,7 @@ $verbose = 		($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
+	print "\nVersion: $Id: $\n";
 	print "\nMB-System macro to perform forward and inverse UTM projections";
 	print "of ASCII data triples using the GMT program mapproject. ";
 	print "Forward projections translate from geographic data ";

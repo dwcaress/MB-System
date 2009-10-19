@@ -2,7 +2,7 @@
  *    The MB-system:	mb_absorption.c		2/10/2008
  *    $Id: mb_absorption.c,v 5.0 2008/03/01 09:19:29 caress Exp $
  *
- *    Copyright (c) 2008 by
+ *    Copyright (c) 2008-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

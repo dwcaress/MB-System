@@ -3,7 +3,7 @@
  *
  *    $Id: mbauvnavusbl.c,v 5.3 2008/09/11 20:20:14 caress Exp $
  *
- *    Copyright (c) 2004 by
+ *    Copyright (c) 2004-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -44,6 +44,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -52,23 +53,24 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_aux.h"
 
 /* local defines */
 #define	NCHARMAX	256
 
+static char rcs_id[] = "$Id: mbauvnavusbl.c,v 5.3 2008/09/11 20:20:14 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbauvnavusbl.c,v 5.3 2008/09/11 20:20:14 caress Exp $";
-	static char program_name[] = "MBauvnavusbl";
-	static char help_message[] = "MBauvnavusbl reads a primary navigation file (usually from a submerged platform\n swath survey) and also reads secondary navigation (e.g. USBL fixes).\n The program calculates position offsets between the raw survey navigation\n and the secondary navigation every 3600 seconds (10 minutes), and then\n linearly interpolates and applies this adjustment vector for each\n primary navigation position. The adjusted navigation is output.";
-	static char usage_message[] = "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";
+	char program_name[] = "MBauvnavusbl";
+	char help_message[] = "MBauvnavusbl reads a primary navigation file (usually from a submerged platform\n swath survey) and also reads secondary navigation (e.g. USBL fixes).\n The program calculates position offsets between the raw survey navigation\n and the secondary navigation every 3600 seconds (10 minutes), and then\n linearly interpolates and applies this adjustment vector for each\n primary navigation position. The adjusted navigation is output.";
+	char usage_message[] = "mbauvnavusbl -Inavfile -Ooutfile -Uusblfile [-Fnavformat -Llonflip -Musblformat -V -H ]";
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -95,23 +97,15 @@ main (int argc, char **argv)
 	double	bounds[4];
 	int	btime_i[7];
 	int	etime_i[7];
-	double	btime_d;
-	double	etime_d;
 	double	speedmin;
 	double	timegap;
 
 	/* read and write values */
 	int	time_i[7];
-	double	time_d;
 	double	navlon;
 	double	navlat;
 	double	heading;
-	double	speed;
 	double	sonardepth;
-
-	/* time, user, host variables */
-	time_t	right_now;
-	char	date[25], user[128], *user_ptr, host[128];
 	
 	/* navigation handling variables */
 	int	useaverage = MB_NO;

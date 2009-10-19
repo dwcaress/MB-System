@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_dsl120pf.h	8/5/96
  *	$Id: mbf_dsl120pf.h,v 5.3 2006/09/11 18:55:52 caress Exp $
  *
- *    Copyright (c) 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1994-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

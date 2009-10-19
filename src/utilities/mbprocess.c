@@ -240,6 +240,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -250,8 +251,11 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
+#include "../../include/mb_aux.h"
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
+#include "../../include/mbsys_atlas.h"
+#include "../../include/mbsys_simrad2.h"
 
 /* define sidescan correction table structure */
 struct mbprocess_sscorr_struct
@@ -299,14 +303,15 @@ int get_anglecorr(int verbose,
 	int nangle, double *angles, double *corrs,
 	double angle, double *corr, int *error);
 
+static char rcs_id[] = "$Id: mbprocess.c,v 5.61 2009/03/08 09:21:00 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbprocess.c,v 5.61 2009/03/08 09:21:00 caress Exp $";
-	static char program_name[] = "mbprocess";
-	static char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
+	char program_name[] = "mbprocess";
+	char help_message[] =  "mbprocess is a tool for processing swath sonar bathymetry data.\n\
 This program performs a number of functions, including:\n\
   - merging navigation\n\
   - recalculating bathymetry from travel time and angle data\n\
@@ -325,11 +330,10 @@ The program will look for and use a parameter file with the \n\
 name \"infile.par\". If no parameter file exists, the program \n\
 will infer a reasonable processing path by looking for navigation\n\
 and mbedit edit save files.\n";
-	static char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -T -V -H]";
+	char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -T -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -467,15 +471,14 @@ and mbedit edit save files.\n";
 	double	*nlonspl, *nlatspl;
 	double	*nalonspl, *nalatspl, *nazspl;
 	double	*attitudetime, *attituderoll, *attitudepitch, *attitudeheave;
-	double	rollval, pitchval, heaveval;
-	double	*fsonardepthtime, *fsonardepth, fsonardepthval;
+	double	*fsonardepthtime, *fsonardepth;
 	double	*tidetime, *tide, tideval;
 	int	*staticbeam;
 	double	*staticoffset;
 	int	itime, iatime;
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
-	double	del_time, dx, dy, dz, dist;
+	double	del_time, dx, dy, dist;
 	double	lever_x = 0.0;
 	double	lever_y = 0.0;
 	double	lever_heave = 0.0;
@@ -502,10 +505,7 @@ and mbedit edit save files.\n";
 	char	lock_date[24];
 
 	/* edit save file control variables */
-	int	esffile_open = MB_NO;
 	struct mb_esf_struct esf;
-	char	esffile[MB_PATH_MAXLINE];
-	char	notice[MB_PATH_MAXLINE];
 	int	neditnull;
 	int	neditduplicate;
 	int	neditnotused;
@@ -553,7 +553,7 @@ and mbedit edit save files.\n";
 	double	*slopeacrosstrack;
 	double	r[3];
 	double	v1[3], v2[3], v[3], vv;
-	double	slopefraction, slope;
+	double	slope;
 	double	bathy;
 	double	altitude_use;
 	double	angle;
@@ -568,7 +568,7 @@ and mbedit edit save files.\n";
 	int	istart, iend, icut;
 	int	intstat;
 	int	ioff;
-	int	i, j, k, ii, mm, n;
+	int	i, j, k, mm;
 	int	ix, jy, kgrid;
 	int	kgrid00, kgrid10,kgrid01,kgrid11;
 	
@@ -734,8 +734,8 @@ and mbedit edit save files.\n";
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    mbp_ifile,&mbp_format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    mbp_ifile,&mbp_format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -982,7 +982,7 @@ and mbedit edit save files.\n";
 				/* get lock information */
 				lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked,
 								&lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &lock_error);
-				fprintf(stderr,"\tLocked by program <%s> run by <%s> on <%s> at <>\n", lock_program, lock_user, lock_cpu, lock_date);
+				fprintf(stderr,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user, lock_cpu, lock_date);
 				}
 			else if (lock_error == MB_ERROR_OPEN_FAIL)
 				{
@@ -2370,12 +2370,12 @@ and mbedit edit save files.\n";
 				&& verbose >= 5)
 				{
 				fprintf(stderr,"\ndbg5  Attitude time error in program <%s>\n",program_name);
-				fprintf(stderr,"dbg5       attitude[%d]: %f %f\n",
+				fprintf(stderr,"dbg5       attitude[%d]: %f %f %f %f\n",
 					nattitude-1,attitudetime[nattitude-1],
 					attituderoll[nattitude-1],
 					attitudepitch[nattitude-1],
 					attitudeheave[nattitude-1]);
-				fprintf(stderr,"dbg5       attitude[%d]: %f %f\n",
+				fprintf(stderr,"dbg5       attitude[%d]: %f %f %f %f\n",
 					nattitude,attitudetime[nattitude],
 					attituderoll[nattitude-1],
 					attitudepitch[nattitude-1],
@@ -2545,7 +2545,7 @@ and mbedit edit save files.\n";
 		if (verbose >= 5 && sonardepth_ok == MB_YES)
 			{
 			fprintf(stderr,"\ndbg5  New sonardepth point read in program <%s>\n",program_name);
-			fprintf(stderr,"dbg5       sonardepth[%d]: %f %f %f %f\n",
+			fprintf(stderr,"dbg5       sonardepth[%d]: %f %f\n",
 				nsonardepth,fsonardepthtime[nsonardepth],fsonardepth[nsonardepth]);
 			}
 		else if (verbose >= 5)
@@ -5058,18 +5058,18 @@ alpha, beta, lever_heave);*/
 			    dx = (nalon[iatime] - nalon[iatime-1])/mtodeglon;
 			    dy = (nalat[iatime] - nalat[iatime-1])/mtodeglat;
 			    }
-			else if (kind == MB_DATA_DATA && idata > 1
-					|| kind == MB_DATA_NAV && inav > 1)
+			else if ((kind == MB_DATA_DATA && idata > 1)
+					|| (kind == MB_DATA_NAV && inav > 1))
 			    {
 			    mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
 			    del_time = time_d - time_d_old;
 			    dx = (navlon - navlon_old)/mtodeglon;
 			    dy = (navlat - navlat_old)/mtodeglat;
 			    }
-			if (process.mbp_nav_mode == MBP_NAV_ON
-				|| process.mbp_navadj_mode >= MBP_NAVADJ_LL
-				|| (kind == MB_DATA_DATA && idata > 1
-					|| kind == MB_DATA_NAV && inav > 1))
+			if ((process.mbp_nav_mode == MBP_NAV_ON)
+				|| (process.mbp_navadj_mode >= MBP_NAVADJ_LL)
+				|| ((kind == MB_DATA_DATA && idata > 1)
+					|| (kind == MB_DATA_NAV && inav > 1)))
 			    {
 			    dist = sqrt(dx*dx + dy*dy);
 			    if (del_time > 0.0)
@@ -5492,7 +5492,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 				    k = -1;
 				    for (j=0;j<nsvp-1;j++)
 					{
-					if (depth[j] < zz & depth[j+1] >= zz)
+					if ((depth[j] < zz) && (depth[j+1] >= zz))
 					    k = j;
 					}
 				    if (k > 0)
@@ -6547,8 +6547,8 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    mbp_ifile,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    mbp_ifile,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -6593,9 +6593,8 @@ int check_ss_for_bath(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       bath:            %d\n",bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %d\n",
-			bathacrosstrack);
+		fprintf(stderr,"dbg2       bath:            %ld\n",(long)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(long)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d %f %f\n", 
@@ -6678,8 +6677,8 @@ int get_corrtable(int verbose,
 	char	*function_name = "get_corrtable";
 	int	status = MB_SUCCESS;
 	double	factor;
-	int	ifirst, ilast, irecent, inext, nfactor;
-	int	i, ii, j, itable;
+	int	ifirst, ilast, irecent, inext;
+	int	i, ii, itable;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -6691,7 +6690,7 @@ int get_corrtable(int verbose,
 		fprintf(stderr,"dbg2       time_d:      %f\n",time_d);
 		fprintf(stderr,"dbg2       ncorrtable:  %d\n",ncorrtable);
 		fprintf(stderr,"dbg2       ncorrangle:  %d\n",ncorrangle);
-		fprintf(stderr,"dbg2       corrtable:   %d\n",corrtable);
+		fprintf(stderr,"dbg2       corrtable:   %ld\n",(long)corrtable);
 		}
 
 	/* find the correction table */
@@ -6859,8 +6858,8 @@ int get_anglecorr(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       nangle:      %d\n",nangle);
-		fprintf(stderr,"dbg2       angles:      %d\n",angles);
-		fprintf(stderr,"dbg2       corrs:       %d\n",corrs);
+		fprintf(stderr,"dbg2       angles:      %ld\n",(long)angles);
+		fprintf(stderr,"dbg2       corrs:       %ld\n",(long)corrs);
 		for (i=0;i<nangle;i++)
 			fprintf(stderr,"dbg2           angle[%d]:%f corrs[%d]:%f\n",i,angles[i],i,corrs[i]);
 		fprintf(stderr,"dbg2       angle:       %f\n",angle);

@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_grdinfo.perl	4/26/01
 #    $Id: mbm_grdinfo.perl,v 1.6 2006/11/26 09:42:01 caress Exp $
 #
-#    Copyright (c) 2001, 2003 by 
+#    Copyright (c) 2001-2009 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -96,6 +96,7 @@ $verbose = 		($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
+	print "\nVersion: $Id: $\n";
 	print "\nMacro to get information regarding a GMT grd file when the\n";
 	print "region of interest is a subset of the area covered in the\n";
 	print "input file. If no bounds are specified, the program grdinfo \n";

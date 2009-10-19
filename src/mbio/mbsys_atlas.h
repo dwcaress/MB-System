@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_atlas.h	6/22/01
  *	$Id: mbsys_atlas.h,v 5.7 2005/11/05 00:48:03 caress Exp $
  *
- *    Copyright (c) 2001, 2002, 2003 by
+ *    Copyright (c) 2001-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1400,5 +1400,8 @@ int mbsys_atlas_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *error);
 int mbsys_atlas_copy(int verbose, void *mbio_ptr, 
 			void *store_ptr, void *copy_ptr,
+			int *error);
+int mbsys_atlas_ttcorr(int verbose, void *mbio_ptr, 
+			void *store_ptr,
 			int *error);
 

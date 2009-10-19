@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
  *	$Id: mbr_l3xseraw.c,v 5.21 2008/07/10 06:43:40 caress Exp $
  *
- *    Copyright (c) 2000, 2001, 2002, 2003 by 
+ *    Copyright (c) 2000-2009 by 
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -150,11 +150,36 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error);
+int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_tide(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_singlebeam(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_message(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_geodetic(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_native(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_product(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_bathymetry(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_control(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error);
+int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error);
+int mbr_l3xseraw_wr_comment(int verbose,int *buffer_size,char *buffer,void *store_ptr,int *error);
+
+static char rcs_id[]="$Id: mbr_l3xseraw.c,v 5.21 2008/07/10 06:43:40 caress Exp $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.21 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_register_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -162,8 +187,8 @@ int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -217,8 +242,7 @@ int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
@@ -238,24 +262,24 @@ int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %d\n",mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %d\n",mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %d\n",mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %d\n",mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %d\n",mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %d\n",mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %d\n",mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %d\n",mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %d\n",mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %d\n",mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %d\n",mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %d\n",mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %d\n",mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %d\n",mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %d\n",mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %d\n",mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %d\n",mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %d\n",mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -287,15 +311,14 @@ int mbr_info_l3xseraw(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.21 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_info_l3xseraw";
 	int	status = MB_SUCCESS;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		}
@@ -325,8 +348,7 @@ int mbr_info_l3xseraw(int verbose,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");	
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
@@ -357,7 +379,6 @@ int mbr_info_l3xseraw(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_l3xseraw.c,v 5.21 2008/07/10 06:43:40 caress Exp $";
 	char	*function_name = "mbr_alm_l3xseraw";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -365,11 +386,11 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -387,8 +408,7 @@ int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -408,11 +428,11 @@ int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -425,8 +445,7 @@ int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -447,17 +466,16 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	lon, lat;
 	double	heading;
 	double	speed;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -541,8 +559,7 @@ store->mul_frame, store->sid_frame);*/
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -559,19 +576,16 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_xse_struct *store;
-	double	maxoffset;
-	int	imaxoffset;
-	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -586,8 +600,7 @@ int mbr_wt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -627,16 +640,16 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 	int	index;
 	int	read_len;
 	int	skip;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %u\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1063,8 +1076,7 @@ fprintf(stderr, "READ NOTHING - SAVE HEADER\n");
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1084,20 +1096,19 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 	int	group_id;
 	int	done;
 	int	index;
-	int	nchar;
 	int	skip;
 	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -1356,8 +1367,7 @@ fprintf(stderr, "READ NAV_GROUP_OTHER\n");
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       nav_source:          %d\n",store->nav_source);
 	    fprintf(stderr,"dbg5       nav_sec:             %u\n",store->nav_sec);
 	    fprintf(stderr,"dbg5       nav_usec:            %u\n",store->nav_usec);
@@ -1404,13 +1414,13 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -1615,8 +1625,7 @@ fprintf(stderr, "READ SVP_GROUP_OTHER\n");
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       svp_source:          %d\n",store->svp_source);
 	    fprintf(stderr,"dbg5       svp_sec:             %u\n",store->svp_sec);
 	    fprintf(stderr,"dbg5       svp_usec:            %u\n",store->svp_usec);
@@ -1652,23 +1661,17 @@ int mbr_l3xseraw_rd_tide(int verbose,int buffer_size,char *buffer,void *store_pt
 	char    *function_name = "mbr_l3xseraw_rd_tide";
 	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
-	int byte_count;
-	int group_id;
-	int done;
-	int index;
-	int	skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -1707,13 +1710,13 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_pt
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -1930,8 +1933,7 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       par_source:          %d\n",store->par_source);
 	    fprintf(stderr,"dbg5       par_sec:             %u\n",store->par_sec);
 	    fprintf(stderr,"dbg5       par_usec:            %u\n",store->par_usec);
@@ -2029,13 +2031,13 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *stor
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -2363,8 +2365,7 @@ fprintf(stderr, "READ SSN_GROUP_OTHER\n");
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       sid_frame:            %d\n",store->sid_frame);
 	    fprintf(stderr,"dbg5       sid_group_avt:        %d\n",store->sid_group_avt);
 	    fprintf(stderr,"dbg5       sid_group_pvt:        %d\n",store->sid_group_pvt);
@@ -2465,13 +2466,13 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *sto
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -3089,8 +3090,7 @@ fprintf(stderr, "READ MBM_GROUP_OTHER  group_id:%d\n", group_id);
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       mul_source:          %d\n",store->mul_source);
 	    fprintf(stderr,"dbg5       mul_sec:             %u\n",store->mul_sec);
 	    fprintf(stderr,"dbg5       mul_usec:            %u\n",store->mul_usec);
@@ -3150,23 +3150,17 @@ int mbr_l3xseraw_rd_singlebeam(int verbose,int buffer_size,char *buffer,void *st
 	char    *function_name = "mbr_l3xseraw_rd_singlebeam";
 	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
-	int byte_count;
-	int group_id;
-	int done;
-	int index;
-	int	skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -3194,23 +3188,17 @@ int mbr_l3xseraw_rd_message(int verbose,int buffer_size,char *buffer,void *store
 	char    *function_name = "mbr_l3xseraw_rd_message";
 	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
-	int byte_count;
-	int group_id;
-	int done;
-	int index;
-	int	skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -3248,13 +3236,13 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 
@@ -3399,8 +3387,7 @@ if (store->sbm_message_len > buffer_size)
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       sbm_source:          %d\n",store->sbm_source);
 	    fprintf(stderr,"dbg5       sbm_sec:             %u\n",store->sbm_sec);
 	    fprintf(stderr,"dbg5       sbm_usec:            %u\n",store->sbm_usec);
@@ -3461,23 +3448,17 @@ int mbr_l3xseraw_rd_geodetic(int verbose,int buffer_size,char *buffer,void *stor
 	char    *function_name = "mbr_l3xseraw_rd_geodetic";
 	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
-	int byte_count;
-	int group_id;
-	int done;
-	int index;
-	int	skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -3505,23 +3486,17 @@ int mbr_l3xseraw_rd_native(int verbose,int buffer_size,char *buffer,void *store_
 	char    *function_name = "mbr_l3xseraw_rd_native";
 	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
-	int byte_count;
-	int group_id;
-	int done;
-	int index;
-	int	skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -3549,23 +3524,17 @@ int mbr_l3xseraw_rd_product(int verbose,int buffer_size,char *buffer,void *store
 	char    *function_name = "mbr_l3xseraw_rd_product";
 	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
-	int byte_count;
-	int group_id;
-	int done;
-	int index;
-	int	skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -3593,23 +3562,17 @@ int mbr_l3xseraw_rd_bathymetry(int verbose,int buffer_size,char *buffer,void *st
 	char    *function_name = "mbr_l3xseraw_rd_bathymetry";
 	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
-	int byte_count;
-	int group_id;
-	int done;
-	int index;
-	int	skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -3637,23 +3600,17 @@ int mbr_l3xseraw_rd_control(int verbose,int buffer_size,char *buffer,void *store
 	char    *function_name = "mbr_l3xseraw_rd_control";
 	int status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
-	int byte_count;
-	int group_id;
-	int done;
-	int index;
-	int	skip;
-	int i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -3691,13 +3648,13 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,void *store
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",buffer_size);
-		fprintf(stderr,"dbg2       buffer:     %u\n",buffer);
-		fprintf(stderr,"dbg2       store_ptr:  %u\n",store_ptr);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to store data structure */
@@ -3783,8 +3740,7 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       comment:             %s\n",store->comment);
 	    }
 
@@ -3818,12 +3774,12 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %d\n",mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -3951,16 +3907,14 @@ fprintf(stderr, "WRITE FAILURE BAD KIND\n");
 	/* print output debug statements */
 	if (verbose >= 5)
 		{
-		fprintf(stderr,"\ndbg5  Data record kind in MBIO function <%s>\n",
-			function_name);
+		fprintf(stderr,"\ndbg5  Data record kind in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       kind:       %d\n",store->kind);
 		}
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3977,7 +3931,6 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	int	status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int	index;
-	int	size;
 	unsigned long frame_count;
 	unsigned long group_count;
 	int frame_cnt_index;
@@ -3989,12 +3942,12 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	/* print input debug statements */
 	if (verbose >= 2)
 	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+	    fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+	    fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 	    }
 
 	/* get pointer to store data structure */
@@ -4003,8 +3956,7 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       nav_source:          %d\n",store->nav_source);
 	    fprintf(stderr,"dbg5       nav_sec:             %u\n",store->nav_sec);
 	    fprintf(stderr,"dbg5       nav_usec:            %u\n",store->nav_usec);
@@ -4606,8 +4558,7 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",*buffer_size);
@@ -4625,7 +4576,6 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	int	status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int	index;
-	int	size;
 	unsigned long frame_count;
 	unsigned long group_count;
 	int frame_cnt_index;
@@ -4641,12 +4591,12 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	/* print input debug statements */
 	if (verbose >= 2)
 	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+	    fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+	    fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 	    }
 
 	/* get pointer to store data structure */
@@ -4655,8 +4605,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       svp_source:          %d\n",store->svp_source);
 	    fprintf(stderr,"dbg5       svp_sec:             %u\n",store->svp_sec);
 	    fprintf(stderr,"dbg5       svp_usec:            %u\n",store->svp_usec);
@@ -5017,8 +4966,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",*buffer_size);
@@ -5036,7 +4984,6 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	int	status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int	index;
-	int	size;
 	unsigned long frame_count;
 	unsigned long group_count;
 	int frame_cnt_index;
@@ -5049,12 +4996,12 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	/* print input debug statements */
 	if (verbose >= 2)
 	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+	    fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+	    fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 	    }
 
 	/* get pointer to store data structure */
@@ -5063,8 +5010,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       par_source:          %d\n",store->par_source);
 	    fprintf(stderr,"dbg5       par_sec:             %u\n",store->par_sec);
 	    fprintf(stderr,"dbg5       par_usec:            %u\n",store->par_usec);
@@ -5480,8 +5426,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",*buffer_size);
@@ -5499,7 +5444,6 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	int	status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int	index;
-	int	size;
 	unsigned long frame_count;
 	unsigned long group_count;
 	int frame_cnt_index;
@@ -5511,12 +5455,12 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	/* print input debug statements */
 	if (verbose >= 2)
 	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+	    fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+	    fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 	    }
 
 	/* get pointer to store data structure */
@@ -5525,8 +5469,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       mul_source:          %d\n",store->mul_source);
 	    fprintf(stderr,"dbg5       mul_sec:             %u\n",store->mul_sec);
 	    fprintf(stderr,"dbg5       mul_usec:            %u\n",store->mul_usec);
@@ -6445,8 +6388,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",*buffer_size);
@@ -6464,7 +6406,6 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	int	status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int	index;
-	int	size;
 	unsigned long frame_count;
 	unsigned long group_count;
 	int frame_cnt_index;
@@ -6476,12 +6417,12 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	/* print input debug statements */
 	if (verbose >= 2)
 	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+	    fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+	    fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 	    }
 
 	/* get pointer to store data structure */
@@ -6490,8 +6431,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       sid_frame:            %d\n",store->sid_frame);
 	    fprintf(stderr,"dbg5       sid_group_avt:        %d\n",store->sid_group_avt);
 	    fprintf(stderr,"dbg5       sid_group_pvt:        %d\n",store->sid_group_pvt);
@@ -7016,8 +6956,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",*buffer_size);
@@ -7035,7 +6974,6 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	int	status = MB_SUCCESS;
 	struct mbsys_xse_struct *store;
 	int	index;
-	int	size;
 	unsigned long frame_count;
 	unsigned long group_count;
 	int frame_cnt_index;
@@ -7047,12 +6985,12 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	/* print input debug statements */
 	if (verbose >= 2)
 	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+	    fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+	    fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 	    }
 
 	/* get pointer to store data structure */
@@ -7061,8 +6999,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       sbm_source:          %d\n",store->sbm_source);
 	    fprintf(stderr,"dbg5       sbm_sec:             %u\n",store->sbm_sec);
 	    fprintf(stderr,"dbg5       sbm_usec:            %u\n",store->sbm_usec);
@@ -7320,8 +7257,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",*buffer_size);
@@ -7341,23 +7277,18 @@ int mbr_l3xseraw_wr_comment(int verbose,int *buffer_size,char *buffer,void *stor
 	int	index;
 	int	size;
 	int	len;
-	unsigned long frame_count;
-	unsigned long group_count;
-	int frame_cnt_index;
-	int group_cnt_index;
 	int frame_id;
 	int group_id;
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
 	    {
-	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 	    fprintf(stderr,"dbg2  Input arguments:\n");
 	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-	    fprintf(stderr,"dbg2       buffer:     %d\n",buffer);
-	    fprintf(stderr,"dbg2       store_ptr:  %d\n",store_ptr);
+	    fprintf(stderr,"dbg2       buffer:     %ld\n",(long)buffer);
+	    fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
 	    }
 
 	/* get pointer to store data structure */
@@ -7366,8 +7297,7 @@ int mbr_l3xseraw_wr_comment(int verbose,int *buffer_size,char *buffer,void *stor
 	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",
-		    function_name);
+	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       comment:             %s\n",store->comment);
 	    }
 
@@ -7429,8 +7359,7 @@ int mbr_l3xseraw_wr_comment(int verbose,int *buffer_size,char *buffer,void *stor
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2       buffer_size:%d\n",*buffer_size);

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_get_all.c	1/26/93
  *    $Id: mb_get_all.c,v 5.10 2005/11/05 00:48:04 caress Exp $
  *
- *    Copyright (c) 1993, 1994, 2000, 2002, 2003 by
+ *    Copyright (c) 1993-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -149,7 +149,6 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 	char	*function_name = "mb_get_all";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
-	int	beams_bath, beams_amp, pixels_ss;
 	int	i;
 	double	mtodeglon, mtodeglat;
 	double	dx, dy;
@@ -159,11 +158,11 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %d\n",mbio_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
 		}
 
 	/* get mbio and data structure descriptors */
@@ -595,10 +594,9 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %d\n",*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)*store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 

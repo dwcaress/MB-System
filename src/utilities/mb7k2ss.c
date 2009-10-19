@@ -2,7 +2,7 @@
  *    The MB-system:	mb7k2ss.c		8/15/2007
  *    $Id: mb7k2ss.c,v 5.4 2008/11/16 21:51:18 caress Exp $
  *
- *    Copyright (c) 2007-2008 by
+ *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -47,6 +47,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 
@@ -55,6 +56,7 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
+#include "../../include/mb_aux.h"
 #include "../../include/mbsys_reson7k.h"
 #include "../../include/mbsys_ldeoih.h"
 
@@ -146,18 +148,15 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 					double	 *range, int *error);
 
 static char rcs_id[] = "$Id: mb7k2ss.c,v 5.4 2008/11/16 21:51:18 caress Exp $";
-static char program_name[] = "mb7k2ss";
-static int	pargc;
-static char	**pargv;
+char program_name[] = "mb7k2ss";
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char help_message[] =  "mb7k2ss extracts sidescan sonar data from Reson 7k format data, \nbins and lays the sidescan onto the seafloor, and outputs files \nin the MBF_MBLDEOIH formst (MBIO format id 71).\n";
-	static char usage_message[] = "mb7k2ss [-Ifile -Atype -Bmode[/threshold] -C -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile -Ttopogridfile -X -H -V]";
+	char help_message[] =  "mb7k2ss extracts sidescan sonar data from Reson 7k format data, \nbins and lays the sidescan onto the seafloor, and outputs files \nin the MBF_MBLDEOIH formst (MBIO format id 71).\n";
+	char usage_message[] = "mb7k2ss [-Ifile -Atype -Bmode[/threshold] -C -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile -Ttopogridfile -X -H -V]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -180,10 +179,7 @@ main (int argc, char **argv)
 	int	look_processed = MB_DATALIST_LOOK_YES;
 	double	file_weight;
 	int	format = 0;
-	int	iformat = MBF_RESON7KR;
-	int	oformat = MBF_MBLDEOIH;
 	int	pings;
-	int	pings_read;
 	int	lonflip;
 	double	bounds[4];
 	int	btime_i[7];
@@ -251,8 +247,6 @@ main (int argc, char **argv)
 	s7k_fsdwssheader *ssheaderstbd;		/* Starboard Edgetech sidescan header */
 	
 	/* output sidescan data */
-	int	buffer_alloc = 0;
-	char	*buffer = NULL;
 	int	obeams_bath;
 	int	obeams_amp;
 	int	opixels_ss;
@@ -345,9 +339,6 @@ main (int argc, char **argv)
 	int	mode;
 	int	format_status, format_guess;
 	int	format_output = MBF_MBLDEOIH;
-	int	shortspersample;
-	int	trace_size;
-	char	*data;
 	unsigned short	*datashort;
 	double	value, threshold;
 	double	channelmax;
@@ -371,7 +362,7 @@ main (int argc, char **argv)
 	int	oktowrite;
 	double	dx, dy;
 	int	kangle, kstart;
-	double	xtrack, ltrack, rr, xx, zz;
+	double	xtrack, ltrack, rr;
 	FILE	*fp = NULL;
 	char	*result;
 	int	nget;
@@ -381,7 +372,7 @@ main (int argc, char **argv)
 	
 	int	read_data;
 	int	found, done;
-	int	i, j, k, n;
+	int	i, j, n;
 	
 	startline = 1;
 	strcpy(lineroot, "jstar");
@@ -394,8 +385,6 @@ main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	pargc = 1;
-	pargv = argv;
 	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:F:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:U:u:XxVvHh")) != -1)
 	  switch (c) 
 		{
@@ -498,7 +487,7 @@ main (int argc, char **argv)
 			break;
 		case 'T':
 		case 't':
-			sscanf (optarg,"%s", &grid.file);
+			sscanf (optarg,"%s", grid.file);
 			sslayoutmode = MB7K2SS_SS_3D_BOTTOM;
 			flag++;
 			break;
@@ -622,7 +611,7 @@ main (int argc, char **argv)
 		if ((fp = fopen(route_file, "r")) == NULL) 
 			{
 			error = MB_ERROR_OPEN_FAIL;
-			status == MB_FAILURE;
+			status = MB_FAILURE;
 			fprintf(stderr,"\nUnable to open route file <%s> for reading\n",route_file);
 			exit(status);
 			}
@@ -793,8 +782,8 @@ main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	    if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+	    if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
 		read_data = MB_YES;
 	    else
@@ -823,7 +812,7 @@ main (int argc, char **argv)
 	if ((sfp = fopen(scriptfile, "w")) == NULL) 
 		{
 		error = MB_ERROR_OPEN_FAIL;
-		status == MB_FAILURE;
+		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to open plotting script file <%s> \n",scriptfile);
 		exit(status);
 		}
@@ -1978,8 +1967,8 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
-		if (status = mb_datalist_read(verbose,datalist,
-			    file,&format,&file_weight,&error)
+		if ((status = mb_datalist_read(verbose,datalist,
+			    file,&format,&file_weight,&error))
 			    == MB_SUCCESS)
                         read_data = MB_YES;
                 else
@@ -2074,9 +2063,9 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 	char	*function_name = "mb7k2ss_get_flatbottom_table";
 	int	status = MB_SUCCESS;
 	double	dangle, angle;
-	double	rr, xx, yy, zz;
+	double	rr, xx, zz;
 	double	alpha, beta, theta, phi;
-	int	i, j;
+	int	i;
 	
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2150,10 +2139,10 @@ int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double
 	int	status = MB_SUCCESS;
 	double	mtodeglon, mtodeglat;
 	double	dangle, angle;
-	double	rr, xx, yy, zz;
+	double	rr, xx, zz;
 	double	alpha, beta, theta, phi;
 	double	vx, vy, vz;
-	int	i, j;
+	int	i;
 	
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2171,11 +2160,11 @@ int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double
 		fprintf(stderr,"dbg2       altitude:              %f\n", altitude);
 		fprintf(stderr,"dbg2       sonardepth:            %f\n", sonardepth);
 		fprintf(stderr,"dbg2       pitch:                 %f\n", pitch);
-		fprintf(stderr,"dbg2       grid:                  %d\n", grid);
+		fprintf(stderr,"dbg2       grid:                  %ld\n", (long)grid);
 		fprintf(stderr,"dbg2       grid->projectionname:  %s\n", grid->projectionname);
 		fprintf(stderr,"dbg2       grid->projection_mode: %d\n", grid->projection_mode);
 		fprintf(stderr,"dbg2       grid->projection_id:   %s\n", grid->projection_id);
-		fprintf(stderr,"dbg2       grid->nodatavalue:     %d\n", grid->nodatavalue);
+		fprintf(stderr,"dbg2       grid->nodatavalue:     %f\n", grid->nodatavalue);
 		fprintf(stderr,"dbg2       grid->nxy:             %d\n", grid->nxy);
 		fprintf(stderr,"dbg2       grid->nx:              %d\n", grid->nx);
 		fprintf(stderr,"dbg2       grid->ny:              %d\n", grid->ny);
@@ -2187,7 +2176,7 @@ int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double
 		fprintf(stderr,"dbg2       grid->ymax:            %f\n", grid->ymax);
 		fprintf(stderr,"dbg2       grid->dx:              %f\n", grid->dx);
 		fprintf(stderr,"dbg2       grid->dy               %f\n", grid->dy);
-		fprintf(stderr,"dbg2       grid->data:            %d\n", grid->data);
+		fprintf(stderr,"dbg2       grid->data:            %ld\n", (long)grid->data);
 		}
 		
 	/* loop over all of the angles */
@@ -2281,11 +2270,11 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 		fprintf(stderr,"dbg2       vx:                    %f\n", vx);
 		fprintf(stderr,"dbg2       vy:                    %f\n", vy);
 		fprintf(stderr,"dbg2       vz:                    %f\n", vz);
-		fprintf(stderr,"dbg2       grid:                  %d\n", grid);
+		fprintf(stderr,"dbg2       grid:                  %ld\n", (long)grid);
 		fprintf(stderr,"dbg2       grid->projectionname:  %s\n", grid->projectionname);
 		fprintf(stderr,"dbg2       grid->projection_mode: %d\n", grid->projection_mode);
 		fprintf(stderr,"dbg2       grid->projection_id:   %s\n", grid->projection_id);
-		fprintf(stderr,"dbg2       grid->nodatavalue:     %d\n", grid->nodatavalue);
+		fprintf(stderr,"dbg2       grid->nodatavalue:     %f\n", grid->nodatavalue);
 		fprintf(stderr,"dbg2       grid->nxy:             %d\n", grid->nxy);
 		fprintf(stderr,"dbg2       grid->nx:              %d\n", grid->nx);
 		fprintf(stderr,"dbg2       grid->ny:              %d\n", grid->ny);
@@ -2297,7 +2286,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 		fprintf(stderr,"dbg2       grid->ymax:            %f\n", grid->ymax);
 		fprintf(stderr,"dbg2       grid->dx:              %f\n", grid->dx);
 		fprintf(stderr,"dbg2       grid->dy               %f\n", grid->dy);
-		fprintf(stderr,"dbg2       grid->data:            %d\n", grid->data);
+		fprintf(stderr,"dbg2       grid->data:            %ld\n", (long)grid->data);
 		}
 	
 	/* test different ranges along the vector until the grid is intersected */

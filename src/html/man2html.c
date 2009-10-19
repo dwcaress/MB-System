@@ -1,5 +1,5 @@
 /*
- * $Id: man2html.c,v 5.2 2004-09-24 21:51:10 caress Exp $
+ * $Id: man2html.c,v 5.2 2004/09/24 21:51:10 caress Exp $
  *
 ** This program was written by Richard Verhoeven (NL:5482ZX35)
 ** at the Eindhoven University of Technology. Email: rcb5@win.tue.nl

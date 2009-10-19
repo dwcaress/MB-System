@@ -1041,6 +1041,9 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 int mbsys_simrad2_survey_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
+int mbsys_simrad2_wc_alloc(int verbose, 
+			void *mbio_ptr, void *store_ptr, 
+			int *error);
 int mbsys_simrad2_attitude_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
@@ -1050,7 +1053,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 int mbsys_simrad2_ssv_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
-int mbsys_simrad2_tlt_alloc(int verbose, 
+int mbsys_simrad2_tilt_alloc(int verbose, 
 			void *mbio_ptr, void *store_ptr, 
 			int *error);
 int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr, 

@@ -2,7 +2,7 @@
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
  *    $Id: mbeditviz_prog.c,v 5.9 2008/11/16 21:51:18 caress Exp $
  *
- *    Copyright (c) 2007-2008 by
+ *    Copyright (c) 2007-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -70,7 +70,8 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_format.h"
-#include "mbeditviz.h"
+#include "../../include/mb_aux.h"
+#include "../../include/mbsys_singlebeam.h"
 
 /* GMT include files */
 #include "gmt.h"
@@ -79,6 +80,7 @@
 #include <X11/StringDefs.h>
 #include <Xm/Xm.h>
 #include "mbview.h"
+#include "mbeditviz.h"
 
 /* id variables */
 static char rcs_id[] = "$Id: mbeditviz_prog.c,v 5.9 2008/11/16 21:51:18 caress Exp $";
@@ -109,17 +111,6 @@ double	mbdef_etime_d;
 double	mbdef_speedmin;
 double	mbdef_timegap;
 
-int mbeditviz_beam_position(double navlon, double navlat, double headingx, double headingy,
-				double mtodeglon, double mtodeglat,
-				double bath, double acrosstrack, double alongtrack, 
-				double sonardepth, 
-				double rollbias, double pitchbias,
-				double *bathcorr, double *lon, double *lat);
-int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, 
-				double rollbias, double pitchbias, double headingbias, double timelag,  
-				double *heading, double *sonardepth,
-				double *rolldelta, double *pitchdelta);
-
 /*--------------------------------------------------------------------*/
 int mbeditviz_init(int argc,char **argv)
 {
@@ -131,7 +122,6 @@ int mbeditviz_init(int argc,char **argv)
 
 	/* parsing variables */
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -155,7 +145,7 @@ int mbeditviz_init(int argc,char **argv)
 		}
 	mbev_files = NULL;
 	mbev_grid.status = MBEV_GRID_NONE;
-	mbev_grid.projection_id[MB_PATH_MAXLINE];
+	mbev_grid.projection_id[0] = 0;
 	for (i=0;i<4;i++)
 		{
 		mbev_grid.bounds[i] = 0.0;
@@ -401,13 +391,13 @@ int mbeditviz_open_data(char *path, int format)
 			}
 		else if (format == -1)
 			{
-			if (mbev_status = mb_datalist_open(mbev_verbose,&datalist,
-							path,MB_DATALIST_LOOK_NO,&mbev_error) == MB_SUCCESS)
+			if ((mbev_status = mb_datalist_open(mbev_verbose,&datalist,
+							path,MB_DATALIST_LOOK_NO,&mbev_error)) == MB_SUCCESS)
 				{
 				while (done == MB_NO)
 					{
-					if (mbev_status = mb_datalist_read2(mbev_verbose,datalist,
-							&filestatus,fileraw,fileprocessed,&format,&weight,&mbev_error)
+					if ((mbev_status = mb_datalist_read2(mbev_verbose,datalist,
+							&filestatus,fileraw,fileprocessed,&format,&weight,&mbev_error))
 							== MB_SUCCESS)
 						{
 						mbev_status = mbeditviz_import_file(fileraw,format);
@@ -447,8 +437,6 @@ int mbeditviz_import_file(char *path, int format)
 	struct mbev_file_struct *file;
 	struct stat file_status;
 	int	fstatus;
-	int	done;
-	int	i, j;	
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -456,7 +444,7 @@ int mbeditviz_import_file(char *path, int format)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:        %s\n",file);
+		fprintf(stderr,"dbg2       path:        %s\n",path);
 		fprintf(stderr,"dbg2       format:      %d\n",format);
 		}
 		
@@ -593,15 +581,10 @@ int mbeditviz_load_file(int ifile)
 	double	heading, sonardepth;
 	double	headingx, headingy;
 	double	rolldelta, pitchdelta;
-	int	intstat;
-	int	inav = 0;
-	int	iheading = 0;
-	int	iattitude = 0;
 	int	swathbounds;
 	int	icenter, iport, istbd;
 	double	centerdistance, portdistance, stbddistance;
 	int	iping, ibeam;
- 	int	i, j, k;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -1545,7 +1528,6 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 	char	*function_name = "mbeditviz_apply_timelag";
 	double	time_d;
 	int	intstat;
-	int	inav = 0;
 	int	iheading = 0;
 	int	isonardepth = 0;
 	int	iattitude = 0;
@@ -1558,8 +1540,11 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:        %d\n",file);
-		fprintf(stderr,"dbg2       ping:        %d\n",ping);
+		fprintf(stderr,"dbg2       file:        %ld\n",(long)file);
+		fprintf(stderr,"dbg2       ping:        %ld\n",(long)ping);
+		fprintf(stderr,"dbg2       rollbias:    %f\n",rollbias);
+		fprintf(stderr,"dbg2       pitchbias:   %f\n",pitchbias);
+		fprintf(stderr,"dbg2       headingbias: %f\n",headingbias);
 		fprintf(stderr,"dbg2       timelag:     %f\n",timelag);
 		}
 
@@ -1928,8 +1913,7 @@ int mbeditviz_delete_file(int ifile)
 {
 	/* local variables */
 	char	*function_name = "mbeditviz_delete_file";
-	struct mbev_file_struct *file;
-	int	i, j;	
+	int	i;	
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -2094,7 +2078,6 @@ int mbeditviz_get_grid_bounds()
 	/* local variables */
 	char	*function_name = "mbeditviz_get_grid_bounds";
 	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
 	struct mb_info_struct *info;
 	double	depth_min, depth_max;
 	double	altitude_min, altitude_max;
@@ -2105,9 +2088,7 @@ int mbeditviz_get_grid_bounds()
 	int	proj_status;
 	char	projection_id[MB_PATH_MAXLINE];
 	void	*pjptr;
-	int	ifile, iping, ibeam;
-	int	filecount;
-	int	i, j, k;	
+	int	ifile;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -2282,17 +2263,10 @@ int mbeditviz_setup_grid()
 {
 	/* local variables */
 	char	*function_name = "mbeditviz_setup_grid";
-	struct mbev_file_struct *file;
-	struct mbev_ping_struct *ping;
-	struct mb_info_struct *info;
-	int	first;
 	double	xx, yy;
 	double	reference_lon, reference_lat;
 	int	utm_zone;
 	int	proj_status;
-	int	ifile, iping, ibeam;
-	int	filecount;
-	int	i, j, k;	
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -2447,7 +2421,6 @@ int mbeditviz_project_soundings()
 	struct mbev_ping_struct *ping;
 	int	ifile, iping, ibeam;
 	int	filecount;
-	int	i, j, k;	
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -2515,12 +2488,7 @@ int mbeditviz_make_grid()
 	char	*function_name = "mbeditviz_make_grid";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
-	struct mb_info_struct *info;
 	int	first;
-	double	xx, yy;
-	double	reference_lon, reference_lat;
-	int	utm_zone;
-	int	proj_status;
 	int	ifile, iping, ibeam;
 	int	filecount;
 	int	i, j, k;	
@@ -2630,7 +2598,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 	int	use_weight;
 	int	ix1, ix2, iy1, iy2;
 	int	ii, jj, kk;
-	int	i, j, k;	
+	int	i, j;	
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -2638,8 +2606,8 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:       %d\n",file);
-		fprintf(stderr,"dbg2       ping:       %d\n",ping);
+		fprintf(stderr,"dbg2       file:       %ld\n",(long)file);
+		fprintf(stderr,"dbg2       ping:       %ld\n",(long)ping);
 		fprintf(stderr,"dbg2       ibeam:      %d\n",ibeam);
 		fprintf(stderr,"dbg2       beam_ok:    %d\n",beam_ok);
 		fprintf(stderr,"dbg2       apply_now:  %d\n",apply_now);
@@ -3218,13 +3186,11 @@ int mbeditviz_selectregion(int instance)
 	char	*function_name = "mbeditviz_selectregion";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
-	struct mb_info_struct *info;
 	struct mbview_struct *mbviewdata;
 	struct mbview_region_struct *region;
-	double	time_duse, navlonuse, navlatuse, headinguse;
 	double	xmin, xmax, ymin, ymax, zmin, zmax;
 	double	dx, dy, dz;
-	double	x, y, z;
+	double	x, y;
 	double	xx, yy;
 	double	heading, sonardepth;
 	double	rolldelta, pitchdelta;
@@ -3417,7 +3383,6 @@ int mbeditviz_selectarea(int instance)
 	char	*function_name = "mbeditviz_selectarea";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
-	struct mb_info_struct *info;
 	struct mbview_struct *mbviewdata;
 	struct mbview_area_struct *area;
 	int	ifile, iping, ibeam;
@@ -3598,12 +3563,10 @@ int mbeditviz_selectnav(int instance)
 	char	*function_name = "mbeditviz_selectnav";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
-	struct mb_info_struct *info;
 	struct mbview_shareddata_struct *mbviewshared;
 	struct mbview_navpointw_struct *navpts;
-
 	int	inavcount;
-	int	ifile, iping, ibeam, isounding;
+	int	ifile, iping, ibeam;
 	double	dx, dy, dz;
 	double	xmin, xmax, ymin, ymax, zmin, zmax;
 	double	heading, sonardepth;
@@ -3929,7 +3892,6 @@ void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostr
 	char	*function_name = "mbeditviz_mb3dsoundings_info";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
-	struct mb_info_struct *info;
 if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_mb3dsoundings_info:%d %d %d\n", 
 ifile, iping, ibeam);
@@ -3977,10 +3939,6 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 	double	rolldelta, pitchdelta;
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
-	int	inav = 0;
-	int	iheading = 0;
-	int	iattitude = 0;
-	int	intstat;
 	int	ifilelast, ipinglast;
 	int	i;
 
@@ -4089,13 +4047,10 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	int	ifile, iping, ibeam;
-	double	x, y, xx, yy;
-	double	zmin, zmax, dz;
 	double	heading, sonardepth;
 	double	rolldelta, pitchdelta;
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
-	int	i;
 
 if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_mb3dsoundings_biasapply:%f %f %f %f\n", 

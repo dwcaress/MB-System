@@ -2,7 +2,7 @@
  *    The MB-system:	mbauvloglist.c	8/14/2006
  *    $Id: mbauvloglist.c,v 5.1 2006/11/26 09:42:01 caress Exp $
  *
- *    Copyright (c) 2006 by
+ *    Copyright (c) 2006-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -35,6 +35,7 @@
 /* standard include files */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <string.h>
 #include <time.h>
@@ -55,13 +56,12 @@ static char rcs_id[] = "$Id: mbauvloglist.c,v 5.1 2006/11/26 09:42:01 caress Exp
 
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char program_name[] = "MBauvloglist";
-	static char help_message[] =  "MBauvloglist lists table data from an MBARI AUV mission log file.";
-	static char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -H -V]";
+	char program_name[] = "MBauvloglist";
+	char help_message[] =  "MBauvloglist lists table data from an MBARI AUV mission log file.";
+	char usage_message[] = "MBauvloglist -Ifile [-Fprintformat -Llonflip -Olist -H -V]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -71,7 +71,6 @@ main (int argc, char **argv)
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	char	*message;
 
 	/* MBIO read control parameters */
 	int	pings;
@@ -80,8 +79,6 @@ main (int argc, char **argv)
 	double	bounds[4];
 	int	btime_i[7];
 	int	etime_i[7];
-	double	btime_d;
-	double	etime_d;
 	double	speedmin;
 	double	timegap;
 
@@ -254,7 +251,7 @@ main (int argc, char **argv)
 	if ((fp = fopen(file, "r")) == NULL) 
 		{
 		error = MB_ERROR_OPEN_FAIL;
-		status == MB_FAILURE;
+		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to open log file <%s> for reading\n",file);
 		exit(status);
 		}
@@ -266,8 +263,8 @@ main (int argc, char **argv)
 		{
 		nscan = sscanf(buffer, "# %s %s %s", 
 				type,  
-				&(fields[nfields].name),  
-				&(fields[nfields].format)); 
+				fields[nfields].name,  
+				fields[nfields].format); 
 		if (nscan == 2)
 			{
 			if (printheader == MB_YES)

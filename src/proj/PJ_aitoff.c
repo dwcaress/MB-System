@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_aitoff.c,v 5.5 2008/09/29 04:56:21 caress Exp $
+ * $Id: PJ_aitoff.c 1504 2009-01-06 02:11:57Z warmerdam $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the aitoff (Aitoff) and wintri (Winkel Tripel)
@@ -26,16 +26,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
- ******************************************************************************
- *
- * $Log: PJ_aitoff.c,v $
- * Revision 5.5  2008/09/29 04:56:21  caress
- * Proj 4.6.1
- *
- * Revision 1.3  2002/12/14 19:32:27  warmerda
- * updated header
- *
- */
+ *****************************************************************************/
 
 #define PROJ_PARMS__ \
 	double	cosphi1; \
@@ -43,7 +34,7 @@
 #define PJ_LIB__
 #include <projects.h>
 
-PJ_CVSID("$Id: PJ_aitoff.c,v 5.5 2008/09/29 04:56:21 caress Exp $");
+PJ_CVSID("$Id: PJ_aitoff.c 1504 2009-01-06 02:11:57Z warmerdam $");
 
 PROJ_HEAD(aitoff, "Aitoff") "\n\tMisc Sph";
 PROJ_HEAD(wintri, "Winkel Tripel") "\n\tMisc Sph\n\tlat_1";

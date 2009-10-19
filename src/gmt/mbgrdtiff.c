@@ -2,7 +2,7 @@
  *    The MB-system:	mbgrdtiff.c	5/30/93
  *    $Id: mbgrdtiff.c,v 5.16 2008/09/13 06:08:09 caress Exp $
  *
- *    Copyright (c) 1999, 2000, 2003 by
+ *    Copyright (c) 1999-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -391,16 +391,16 @@ int              tiff_offset[] =
 			448       /* GeoAsciiParamsTag */
 		      };
 
+static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.16 2008/09/13 06:08:09 caress Exp $";
+
 /*--------------------------------------------------------------------*/
 
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbgrdtiff.c,v 5.16 2008/09/13 06:08:09 caress Exp $";
-	static char program_name[] = "mbgrdtiff";
-	static char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
-	static char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
+	char program_name[] = "mbgrdtiff";
+	char help_message[] = "mbgrdtiff generates a tiff image from a GMT grid. The \nimage generation is similar to that of the GMT program \ngrdimage. In particular, the color map is applied from \na GMT CPT file, and shading overlay grids may be applied. \nThe output TIFF file contains information allowing\nthe ArcView and ArcInfo GIS packages to import the image\nas a geographically located coverage.";
+	char usage_message[] = "mbgrdtiff -Ccptfile -Igrdfile -Otiff_file [-H -Kintensfile -V]";
 	extern char *optarg;
-	extern int optkind;
 	int	errflg = 0;
 	int	c;
 	int	help = 0;
@@ -439,7 +439,6 @@ main (int argc, char **argv)
 	
 	/* other variables */
 	FILE    *tfp;
-	mb_u_char r, g, b;
 	int     rgb[3];
 	int	i, j, k, kk;
         int     index, keyindex;
@@ -448,7 +447,6 @@ main (int argc, char **argv)
 	int	off;
         short   value_short;
         int     value_int;
-        float   value_float;
 	double  value_double;
 	char	*projection = "-Jx1.0";
 

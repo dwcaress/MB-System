@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavedit_extrawidgets.h	8/7/95
  *    $Id: mbnavadjust_extrawidgets.h,v 5.1 2008/05/16 22:42:32 caress Exp $
  *
- *    Copyright (c) 2000-2008 by
+ *    Copyright (c) 2000-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

@@ -80,7 +80,6 @@ MB3DNavListCreate ( MB3DNavListDataPtr class_in, Widget parent, String name, Arg
 {
     Cardinal ac = 0;
     Arg      args[256];
-    Cardinal cdc = 0;
     Boolean  argok = False;
     
     /**

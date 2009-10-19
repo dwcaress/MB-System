@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_primary.c	9/25/2003
  *    $Id: mbview_primary.c,v 5.8 2008/05/16 22:59:42 caress Exp $
  *
- *    Copyright (c) 2003-2008 by
+ *    Copyright (c) 2003-2009 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -94,10 +94,6 @@
 /*------------------------------------------------------------------------------*/
 
 /* local variables */
-static Cardinal 	ac;
-static Arg      	args[256];
-static char		value_text[MB_PATH_MAXLINE];
-
 static char rcs_id[]="$Id: mbview_primary.c,v 5.8 2008/05/16 22:59:42 caress Exp $";
 
 /*------------------------------------------------------------------------------*/
@@ -148,7 +144,7 @@ int mbview_setprimarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2       primary_ymax:                 %f\n", primary_ymax);
 		fprintf(stderr,"dbg2       primary_dx:                   %f\n", primary_dx);
 		fprintf(stderr,"dbg2       primary_dy:                   %f\n", primary_dy);
-		fprintf(stderr,"dbg2       primary_data:                 %d\n", primary_data);
+		fprintf(stderr,"dbg2       primary_data:                 %ld\n", (long)primary_data);
 		}
 
 	/* get view */
@@ -274,7 +270,7 @@ int mbview_updateprimarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2       instance:                     %d\n", instance);
 		fprintf(stderr,"dbg2       primary_nx:                   %d\n", primary_nx);
 		fprintf(stderr,"dbg2       primary_ny:                   %d\n", primary_ny);
-		fprintf(stderr,"dbg2       primary_data:                 %f\n", primary_data);
+		fprintf(stderr,"dbg2       primary_data:                 %ld\n", (long)primary_data);
 		}
 
 	/* get view */
