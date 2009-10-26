@@ -1,1 +1,1 @@
-	char *projectionfile = "/Users/caress/sandbox/mb-system/trunk/share/Projections.dat";
+	char *projectionfile = "/usr/local/mbsystem/share/Projections.dat";

@@ -70,13 +70,21 @@ ARCHIVE = ar rcv
 all:	$(LIBDIR)/libmbproj.a \
 	$(INCDIR)/proj_api.h \
 	$(BINDIR)/proj \
-	$(MANDIR)/manl/proj.1
+	$(BINDIR)/geod \
+	$(MANDIR)/man1/proj.1 \
+	$(MANDIR)/man1/geod.1 \
+	$(MANDIR)/man3/pj_init.3
 	
 ### make clean removes the object files
 clean:
 	rm -f *.o
 
 ### link or copy the executables
+$(BINDIR)/geod: geod.o \
+		$(LIBDIR)/libmbproj.a
+	$(CC) $(CFLAGS) geod.o \
+		$(LIBDIR)/libmbproj.a \
+		$(LFLAGS) -o $(BINDIR)/geod
 $(BINDIR)/proj: proj.o \
 		$(LIBDIR)/libmbproj.a
 	$(CC) $(CFLAGS) proj.o \
@@ -855,8 +863,7 @@ pj_factors.o:	pj_factors.c \
 		emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. pj_factors.c
-pj_fwd.o:	pj_fwd.c \
-		emess.h  geocent.h  geodesic.h \
+pj_fwd.o:	pj_fwd.c emess.h  geocent.h  geodesic.h \
 		nad_list.h  pj_list.h  proj_api.h  projects.h
 	$(CC) -c $(CFLAGS) -I. pj_fwd.c
 pj_gauss.o:	pj_gauss.c \
@@ -984,3 +991,14 @@ vector1.o:	vector1.c \
 $(INCDIR)/proj_api.h:	proj_api.h
 	cp proj_api.h $(INCDIR)/proj_api.h
 	chmod 664 $(INCDIR)/proj_api.h
+
+### copy the man pages to the man directory	
+$(MANDIR)/man1/geod.1:	geod.1
+	cp geod.1 $(MANDIR)/man1/geod.1
+	chmod 664 $(MANDIR)/man1/geod.1
+$(MANDIR)/man1/proj.1:	proj.1
+	cp proj.1 $(MANDIR)/man1/proj.1
+	chmod 664 $(MANDIR)/man1/proj.1
+$(MANDIR)/man3/pj_init.3:	pj_init.3
+	cp pj_init.3 $(MANDIR)/man3/pj_init.3
+	chmod 664 $(MANDIR)/man1/pj_init.3
