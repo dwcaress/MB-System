@@ -92,6 +92,13 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Set program name
 $program_name = "make_mbhtml";
 
+# Make html and ps directories if necessary
+print "make sure ../../html and ../../ps exist and are empty\n";
+`mkdir ../../html`;
+`mkdir ../../ps`;
+`/bin/rm -f ../../html/*`;
+`/bin/rm -f ../../ps/*`;
+
 # generate mbsystem_formats.html using special option for mbformat
 print "mbformat -W > mbsystem_formats.html\n";
 `mbformat -W > mbsystem_formats.html`;
