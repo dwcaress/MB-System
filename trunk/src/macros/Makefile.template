@@ -121,57 +121,57 @@ all:	$(BINDIR)/mbm_xbt \
 clean:
 
 ### link or copy the executables
-$(BINDIR)/mbm_xbt:	mbm_xbt.perl
-	cp mbm_xbt.perl $(BINDIR)/mbm_xbt
+$(BINDIR)/mbm_xbt:	mbm_xbt.pl
+	cp mbm_xbt.pl $(BINDIR)/mbm_xbt
 	chmod 775 $(BINDIR)/mbm_xbt
-$(BINDIR)/mbm_plot:	mbm_plot.perl
-	cp mbm_plot.perl $(BINDIR)/mbm_plot
+$(BINDIR)/mbm_plot:	mbm_plot.pl
+	cp mbm_plot.pl $(BINDIR)/mbm_plot
 	chmod 775 $(BINDIR)/mbm_plot
-$(BINDIR)/mbm_grdplot:	mbm_grdplot.perl
-	cp mbm_grdplot.perl $(BINDIR)/mbm_grdplot
+$(BINDIR)/mbm_grdplot:	mbm_grdplot.pl
+	cp mbm_grdplot.pl $(BINDIR)/mbm_grdplot
 	chmod 775 $(BINDIR)/mbm_grdplot
-$(BINDIR)/mbm_grd3dplot:	mbm_grd3dplot.perl
-	cp mbm_grd3dplot.perl $(BINDIR)/mbm_grd3dplot
+$(BINDIR)/mbm_grd3dplot:	mbm_grd3dplot.pl
+	cp mbm_grd3dplot.pl $(BINDIR)/mbm_grd3dplot
 	chmod 775 $(BINDIR)/mbm_grd3dplot
-$(BINDIR)/mbm_xyplot:	mbm_xyplot.perl
-	cp mbm_xyplot.perl $(BINDIR)/mbm_xyplot
+$(BINDIR)/mbm_xyplot:	mbm_xyplot.pl
+	cp mbm_xyplot.pl $(BINDIR)/mbm_xyplot
 	chmod 775 $(BINDIR)/mbm_xyplot
-$(BINDIR)/mbm_stat:	mbm_stat.perl
-	cp mbm_stat.perl $(BINDIR)/mbm_stat
+$(BINDIR)/mbm_stat:	mbm_stat.pl
+	cp mbm_stat.pl $(BINDIR)/mbm_stat
 	chmod 775 $(BINDIR)/mbm_stat
-$(BINDIR)/mbm_grid:	mbm_grid.perl
-	cp mbm_grid.perl $(BINDIR)/mbm_grid
+$(BINDIR)/mbm_grid:	mbm_grid.pl
+	cp mbm_grid.pl $(BINDIR)/mbm_grid
 	chmod 775 $(BINDIR)/mbm_grid
-$(BINDIR)/mbm_grd2arc:	mbm_grd2arc.perl
-	cp mbm_grd2arc.perl $(BINDIR)/mbm_grd2arc
+$(BINDIR)/mbm_grd2arc:	mbm_grd2arc.pl
+	cp mbm_grd2arc.pl $(BINDIR)/mbm_grd2arc
 	chmod 775 $(BINDIR)/mbm_grd2arc
-$(BINDIR)/mbm_arc2grd:	mbm_arc2grd.perl
-	cp mbm_arc2grd.perl $(BINDIR)/mbm_arc2grd
+$(BINDIR)/mbm_arc2grd:	mbm_arc2grd.pl
+	cp mbm_arc2grd.pl $(BINDIR)/mbm_arc2grd
 	chmod 775 $(BINDIR)/mbm_arc2grd
-$(BINDIR)/mbm_grdcut:	mbm_grdcut.perl
-	cp mbm_grdcut.perl $(BINDIR)/mbm_grdcut
+$(BINDIR)/mbm_grdcut:	mbm_grdcut.pl
+	cp mbm_grdcut.pl $(BINDIR)/mbm_grdcut
 	chmod 775 $(BINDIR)/mbm_grdcut
-$(BINDIR)/mbm_grdinfo:	mbm_grdinfo.perl
-	cp mbm_grdinfo.perl $(BINDIR)/mbm_grdinfo
+$(BINDIR)/mbm_grdinfo:	mbm_grdinfo.pl
+	cp mbm_grdinfo.pl $(BINDIR)/mbm_grdinfo
 	chmod 775 $(BINDIR)/mbm_grdinfo
-$(BINDIR)/mbm_grdtiff:	mbm_grdtiff.perl
-	cp mbm_grdtiff.perl $(BINDIR)/mbm_grdtiff
+$(BINDIR)/mbm_grdtiff:	mbm_grdtiff.pl
+	cp mbm_grdtiff.pl $(BINDIR)/mbm_grdtiff
 	chmod 775 $(BINDIR)/mbm_grdtiff
-$(BINDIR)/mbm_utm:	mbm_utm.perl
-	cp mbm_utm.perl $(BINDIR)/mbm_utm
+$(BINDIR)/mbm_utm:	mbm_utm.pl
+	cp mbm_utm.pl $(BINDIR)/mbm_utm
 	chmod 775 $(BINDIR)/mbm_utm
-$(BINDIR)/mbm_grd2geovrml:	mbm_grd2geovrml.perl
-	cp mbm_grd2geovrml.perl $(BINDIR)/mbm_grd2geovrml
+$(BINDIR)/mbm_grd2geovrml:	mbm_grd2geovrml.pl
+	cp mbm_grd2geovrml.pl $(BINDIR)/mbm_grd2geovrml
 	chmod 775 $(BINDIR)/mbm_grd2geovrml
-$(BINDIR)/mbm_copy:	mbm_copy.perl
-	cp mbm_copy.perl $(BINDIR)/mbm_copy
+$(BINDIR)/mbm_copy:	mbm_copy.pl
+	cp mbm_copy.pl $(BINDIR)/mbm_copy
 	chmod 775 $(BINDIR)/mbm_copy
-$(BINDIR)/mbm_route2mission:	mbm_route2mission.perl
-	cp mbm_route2mission.perl $(BINDIR)/mbm_route2mission
+$(BINDIR)/mbm_route2mission:	mbm_route2mission.pl
+	cp mbm_route2mission.pl $(BINDIR)/mbm_route2mission
 	chmod 775 $(BINDIR)/mbm_route2mission
-$(BINDIR)/mbm_makedatalist:	mbm_makedatalist.perl
-	cp mbm_makedatalist.perl $(BINDIR)/mbm_makedatalist
+$(BINDIR)/mbm_makedatalist:	mbm_makedatalist.pl
+	cp mbm_makedatalist.pl $(BINDIR)/mbm_makedatalist
 	chmod 775 $(BINDIR)/mbm_makedatalist
-$(BINDIR)/mbm_histplot:	mbm_histplot.perl
-	cp mbm_histplot.perl $(BINDIR)/mbm_histplot
+$(BINDIR)/mbm_histplot:	mbm_histplot.pl
+	cp mbm_histplot.pl $(BINDIR)/mbm_histplot
 	chmod 775 $(BINDIR)/mbm_histplot
