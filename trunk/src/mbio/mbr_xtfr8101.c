@@ -900,6 +900,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
+fprintf(stderr,"1 pointer error:%ld\n",(long)error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -923,6 +924,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	
+fprintf(stderr,"1 pointer error:%ld\n",(long)error);
 	/* read file header if required */
 	if (*fileheaderread == MB_NO)
 	    {
@@ -1121,6 +1123,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 	done = MB_NO;
 	while (status == MB_SUCCESS && done == MB_NO)
 	    {
+fprintf(stderr,"2 Read record header\n");
 	    /* find the next packet beginning */
 	    found = MB_NO;
 	    skip = 0;
@@ -1147,6 +1150,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			found = MB_YES;
 		}
 
+fprintf(stderr,"3 pointer error:%ld found:%d skip:%d\n",(long)error,found,skip);
 	    /* read the next packet header */
 	    read_len = fread(&(line[2]),1,12,mb_io_ptr->mbfp);
 	    if (read_len == 12)
@@ -1249,6 +1253,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		    mb_hedint_add(verbose, mbio_ptr, 
 				    timetag, heading, error);
 	
+fprintf(stderr,"4 pointer error:%ld\n",(long)error);
 		    /* print debug statements */
 		    if (verbose >= 5)
 			{
@@ -1285,6 +1290,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 	    else if (status == MB_SUCCESS
 		&& packetheader.HeaderType == XTF_DATA_SIDESCAN)
 		{
+fprintf(stderr,"5 pointer error:%ld\n",(long)error);
 		/* read and parse the the sidescan header */
 		sidescanheader->packetheader = packetheader;
 		read_len = fread(line,1,242,mb_io_ptr->mbfp);
@@ -1516,6 +1522,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
 
+fprintf(stderr,"6 pointer error:%ld\n",(long)error);
 		/* read port sidescan data */
 		if (status == MB_SUCCESS)
 		    {
@@ -1523,6 +1530,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 				    * fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample;
 		    read_len = fread(line,1,read_bytes,mb_io_ptr->mbfp);
 		    }
+fprintf(stderr,"7 pointer error:%ld   read_bytes:%d  read_len:%d\n",(long)error,read_bytes,read_len);
 		if (status == MB_SUCCESS && read_len == read_bytes)
 		    {
 		    if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 1)
@@ -1542,9 +1550,11 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 			    index += 2;
 			    }
 			}
+fprintf(stderr,"8 pointer error:%ld\n",(long)error);
 		    }
 		else
 		    {
+fprintf(stderr,"9 pointer error:%ld\n",(long)error);
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
 		    done = MB_YES;
@@ -1804,6 +1814,7 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 	    else if (status == MB_SUCCESS
 		&& packetheader.HeaderType == XTF_DATA_BATHYMETRY)
 		{
+fprintf(stderr,"15 pointer error:%ld\n",(long)error);
 		data->kind = MB_DATA_DATA;
 		bathheader->packetheader = packetheader;
 		read_len = fread(line,1,242,mb_io_ptr->mbfp);

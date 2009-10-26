@@ -83,14 +83,8 @@ struct mbf_xtfr8101_xtfchaninfo
 
 struct mbf_xtfr8101_xtffileheader
 	{
-	char		FileFormat;		/* File format ID
-						   Format spec says
-							50 = QMIPS
-							51 = Isis
-						   but sample XTF data has 123 */
-	char		SystemType;		/* Acquisition system ID
-						   Format spec says 202 = Isis
-						   but sample Isis XTF data has 1 */
+	char		FileFormat;		/* Set to 123 (0x7B */
+	char		SystemType;		/* Set to 1 */
 	char		RecordingProgramName[8];
 	char		RecordingProgramVersion[8];
 	char		SonarName[16];
@@ -108,7 +102,22 @@ struct mbf_xtfr8101_xtffileheader
 							11 = Sonatech_DDS
 							12 = Echoscan
 							13 = Elac Bottomchart 1180
-							?? = Reson SeaBat 8101	*/
+							14 = Klein 5000	
+							15 = Reson SeaBat 8101	
+							16 = Imagenex model 858	
+							17 = USN SILOS with 3-channel analog	
+							18 = Sonatech super high res sidescan sonar	
+							19 = Delph AU32 Analog input (2 channel)	
+							20 = Generic sonar using the memory-mapped
+								file interface	
+							21 = Simrad SM2000	
+							22 = Standard multibedia audio	
+							23 = Edgetech ACI card for 260 sonar throug PC31 card
+							24 = Edgetech black box	
+							25 = Fugro deeptow	
+							26 = C&C Edgetech chirp conversion program	
+							27 = DTI SAS synthetic aperture processor (mmap file)	
+							*/
 	char		NoteString[64];
 	char		ThisFileName[64];
 	unsigned short	NavUnits;		/* 0 = meters, 3 = degrees */

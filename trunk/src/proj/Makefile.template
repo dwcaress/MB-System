@@ -52,6 +52,7 @@
 BINDIR = ../../bin
 LIBDIR = ../../lib
 INCDIR = ../../include
+MANDIR = ../../man
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
 # 
@@ -67,18 +68,20 @@ ARCHIVE = ar rcv
 ### make all makes the proj library, executables, man pages, 
 ### and associated include files
 all:	$(LIBDIR)/libmbproj.a \
-	$(INCDIR)/proj_api.h
+	$(INCDIR)/proj_api.h \
+	$(BINDIR)/proj \
+	$(MANDIR)/manl/proj.1
 	
 ### make clean removes the object files
 clean:
 	rm -f *.o
 
 ### link or copy the executables
-#$(BINDIR)/proj: proj.o \
-#		$(LIBDIR)/libmbproj.a
-#	$(CC) $(CFLAGS) proj.o \
-#		$(LIBDIR)/libmbproj.a \
-#		$(LFLAGS) -o $(BINDIR)/proj
+$(BINDIR)/proj: proj.o \
+		$(LIBDIR)/libmbproj.a
+	$(CC) $(CFLAGS) proj.o \
+		$(LIBDIR)/libmbproj.a \
+		$(LFLAGS) -o $(BINDIR)/proj
 
 ### put together the library
 $(LIBDIR)/libmbproj.a: \

@@ -4215,7 +4215,8 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			*heading = RTD * bathymetry->heading;
 
 		/* get navigation */
-		if (bathymetry->optionaldata == MB_YES)
+		if (bathymetry->optionaldata == MB_YES
+			&& bathymetry->longitude != 0.0 && bathymetry->latitude != 0.0)
 			{
 			*navlon = RTD * bathymetry->longitude;
 			*navlat = RTD * bathymetry->latitude;
