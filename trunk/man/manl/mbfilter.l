@@ -108,7 +108,16 @@ The filtered amplitude or sidescan data are written to ancilliary
 files located parallel to the input swath data files. Filtered
 amplitude data will be in files named by adding ".ffa" to the input
 file name, and sidescan data will be in files with an ".ffs" suffix.
-The filtered amplitude or sidescan files can
+Filtered amplitude or sidescan data can be plotted with \fBmbm_plot\fP by
+appending "F" to that macro's mode argument (e.g. \fB-G\fP\fI4F\fP for filtered
+amplitude data, and  \fB-G\fP\fI5F\fP for filtered sidescan data).
+If accessing \fBmbswath\fP directly rather than through \fBmbm_plot\fP, 
+plot the filtered data by appending "F" to the program's mode argument 
+(e.g. \fB-Z\fP\fI4F\fP for filtered
+amplitude data, and  \fB-Z\fP\fI5F\fP for filtered sidescan data).
+When using \fBmbmosaic\fP to generate mosaics of amplitude or sidescan data,
+the filtered data can be accessed by appending "F" to the data kind argument
+(e.g. \fB-A\fP\fI3F\fP for amplitude and  \fB-A\fP\fI4F\fP for sidescan data.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -334,7 +343,7 @@ filter:
  		-S3/7/7/1 -C1/5/5/1
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbbackangle\fP(l), \fBmbanglecorrect\fP(l)
+\fBmbsystem\fP(l), \fBmbmosaic\fP(l), \fBmbm_plot\fP(l), \fBmbbackangle\fP(l), \fBmbanglecorrect\fP(l)
 
 .SH REFERENCES
 Sauter, D., and L. Parson, Spatial filtering for speckle reduction,
