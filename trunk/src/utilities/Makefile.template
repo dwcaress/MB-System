@@ -197,7 +197,7 @@ GMTLIBDIR = /usr/local/mbsystem/lib
 GMTINCDIR = /usr/local/gmt/src
 NETCDFINCDIR = /usr/local/netcdf/include
 #
-# Locations of GMT libraries, binaries, and include files:
+# Locations of FFTW libraries, binaries, and include files:
 FFTWLIBDIR = /usr/local/fftw/lib
 FFTWINCDIR = /usr/local/fftw/include
 #
@@ -244,6 +244,7 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbsegylist \
 	$(BINDIR)/mbsegyinfo \
 	$(BINDIR)/mbsegygrid \
+	$(BINDIR)/mbsegypsd \
 	$(BINDIR)/mbauvnavusbl \
 	$(BINDIR)/mbgetesf \
 	$(BINDIR)/mbneptune2esf \
@@ -261,8 +262,7 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbctdlist \
 	$(BINDIR)/mbfilter \
 	$(BINDIR)/mbroutetime \
-	$(BINDIR)/mbsm20002gsf \
-	$(BINDIR)/mbsegypsd
+	$(BINDIR)/mbsm20002gsf
 
 ### make clean removes the object files
 clean:
