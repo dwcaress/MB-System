@@ -55,13 +55,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #                               $MBSYSTEM_HOME/share/annual.
 #	PROJECTIONS	Path of PROJ4 projections database. This is usually 
 #                               $MBSYSTEM_HOME/share/Projections.dat.
+#   REQUIRED for spectrogram tool mbsegypsd..
 #	FFTWLIBDIR	Location of FFTW library libfftw.a
-#	FFTWINCDIR	Location of FFTW include file fftw.h
-#   REQUIRED for graphical tools mbedit, mbnavedit, mbvelocitytool, mbnavadjust, 
-#                               mbgrdviz, and mbeditviz. If these paramters are not 
-#                               both set, no graphicals tools will be built.
-#       MOTIFINCDIR	Location of Motif include files.
-#       MOTIFLIBS	X and Motif libraries required for graphical tools.
+#	FFTWINCDIR	Location of FFTW include file fftw.h 
+#			If these parameters are not both set, mbsegypsd will 
+#			not be built.
 #   REQUIRED for openGL tools mbgrdviz and mbeditviz:
 #       OPENGLLIBS	OpenGL libraries required for new graphical tools,
 #.                              including mbgrdviz and mbeditviz. If this  
@@ -108,33 +106,36 @@ $GMTLIBDIR = "/usr/local/gmt/lib";
 $GMTINCDIR = "/usr/local/gmt/include";
 $LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 $PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#
+# Required parameters for spectrogram program mbsegypsd
+#   - mbsegypsd will not be built if these are commented out
 $FFTWLIBDIR = "/usr/local/fftw/lib";
 $FFTWINCDIR = "/usr/local/fftw/include";
 #
-# Required paramters for graphical tools
+# Required parameters for graphical tools
 #   - graphical tools will not be built if these
 #     are commented out
 $MOTIFINCDIR = "/sw/include";
 $MOTIFLIBS = "-L/sw/lib -L/usr/X11R6/lib -lXm -lXt -lX11";
 #
-# Required paramter for visualization tools
+# Required parameter for visualization tools
 #   - visualization tools will not be built if this
 #     is commented out
 $OPENGLLIBS = "-lGLU -lGL";
 #
-# Required paramter for mblevitus program
+# Required parameter for mblevitus program
 $LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 #
-# Optional paramter for use of non-default C compiler
+# Optional parameter for use of non-default C compiler
 #$CC = "cc";
 #
-# Optional paramters for use of independent GSF library installation
+# Optional parameters for use of independent GSF library installation
 #   - GSF library included with MB-System will be used 
 #     if these are commented out
 #$GSFLIB = "/usr/local/gsf/lib/libgsf.a";
 #$GSFINCDIR = "/usr/local/gsf/include/";
 #
-# Optional paramters for use of independent PROJ4 library installation
+# Optional parameters for use of independent PROJ4 library installation
 #   - PROJ4 library included with MB-System will be used 
 #     if these are commented out
 #$PROJLIB = "/usr/local/proj/lib/libproj.a";
@@ -344,7 +345,7 @@ if (!$preset)
 	print "\nUsing manually defined configuration...\n";
 	}
 #--------------------------------------------------------------------
-# ELSE RESET PARAMTERS USING SPECIFIED PRESET CONFIGURATION
+# ELSE RESET PARAMETERS USING SPECIFIED PRESET CONFIGURATION
 #--------------------------------------------------------------------
 # 
 # Preset configuration for MacOs X when building through fink
@@ -794,6 +795,22 @@ print "GMT Library Location:      $GMTLIBDIR\n";
 print "GMT Include Location:      $GMTINCDIR\n";
 print "NetCDF Library Location:   $NETCDFLIBDIR\n";
 print "NetCDF Include Location:   $NETCDFINCDIR\n";
+if ($FFTWLIBDIR)
+	{
+	print "FFTW Library Location:     $FFTWLIBDIR\n";
+	}
+else
+	{
+	print "FFTW Library Location:     Undefined - mbsegypsd will not be built!\n";
+	}
+if ($FFTWINCDIR)
+	{
+	print "FFTW Include Location:     $FFTWINCDIR\n";
+	}
+else
+	{
+	print "FFTW Include Location:     Undefined - mbsegypsd will not be built!\n";
+	}
 print "Levitus Data Location:     $LEVITUS\n";
 print "Projections Data Location: $PROJECTIONS\n";
 
@@ -899,6 +916,20 @@ while (@files)
 			{
 			print MAK "NETCDFINCDIR = $NETCDFINCDIR\n";
 			}
+		elsif (index($_,"FFTWLIBDIR",0) == 0)
+			{
+			if ($FFTWLIBDIR)
+				{
+				print MAK "FFTWLIBDIR = $FFTWLIBDIR\n";
+				}
+			}
+		elsif (index($_,"FFTWINCDIR",0) == 0)
+			{
+			if ($FFTWINCDIR)
+				{
+				print MAK "FFTWINCDIR = $FFTWINCDIR\n";
+				}
+			}
 		elsif ($GSFINCDIR && index($_,"GSFINCDIR",0) == 0)
 			{
 			print MAK "GSFINCDIR = $GSFINCDIR\n";
@@ -930,6 +961,12 @@ while (@files)
 		elsif (index($_,"BIGFLAG",0) == 0)
 			{
 			print MAK "BIGFLAG = $BIGFLAG\n";
+			}
+		elsif (index($_,"mbsegypsd",0) >= 0 && (!$FFTWLIBDIR || !$FFTWINCDIR))
+			{
+			}
+		elsif (index($_,"fftw",0) >= 0 && (!$FFTWLIBDIR || !$FFTWINCDIR))
+			{
 			}
 		elsif (index($_,"ranlib",0) >= 0 && $OS ne "SUN" && $OS ne "DARWIN")
 			{
