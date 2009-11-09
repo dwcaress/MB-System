@@ -468,6 +468,13 @@
 #define	MB_DATA_INSTALLATION		44	/* Reson 7k */
 #define	MB_DATA_WATER_COLUMN		45	/* Simrad */
 #define	MB_DATA_STATUS			46	/* Simrad */
+#define	MB_DATA_DVL			47	/* JSTAR */
+#define	MB_DATA_NMEA_RMC		48	/* NMEA */
+#define	MB_DATA_NMEA_DBT		49	/* NMEA */
+#define	MB_DATA_NMEA_DPT		50	/* NMEA */
+#define	MB_DATA_NMEA_ZDA		51	/* NMEA */
+#define	MB_DATA_NMEA_GLL		52	/* NMEA */
+#define	MB_DATA_NMEA_GGA		53	/* NMEA */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1

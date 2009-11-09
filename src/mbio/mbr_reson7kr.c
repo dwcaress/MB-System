@@ -619,8 +619,11 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_reson7k_struct *store;
 	s7kr_position 		*position;
 	s7kr_attitude 		*attitude;
+	s7kr_heading 		*dheading;
 	s7kr_rollpitchheave	*rollpitchheave;
 	s7kr_customattitude	*customattitude;
+	s7kr_altitude		*altitude;
+	s7kr_depth		*depth;
 	s7kr_volatilesettings	*volatilesettings;
 	s7kr_beamgeometry	*beamgeometry;
 	s7kr_bathymetry		*bathymetry;
@@ -795,6 +798,51 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 				(double)(RTD * customattitude->heading[i]),
 				error);
 			}
+		}
+
+	/* save heading if heading record */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_HEADING
+		&& store->type == R7KRECID_Heading)
+		{
+		/* get attitude structure */
+		dheading = &(store->heading);
+		
+		/* add latest heading sample */
+		mb_hedint_add(verbose, mbio_ptr,
+				(double)(store->time_d),
+				(double)(RTD * dheading->heading),
+				error);
+		}
+
+	/* save altitude if altitude record */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_HEIGHT
+		&& store->type == R7KRECID_Altitude)
+		{
+		/* get attitude structure */
+		altitude = &(store->altitude);
+		
+		/* add latest heading sample */
+		mb_altint_add(verbose, mbio_ptr,
+				(double)(store->time_d),
+				(double)(altitude->altitude),
+				error);
+		}
+
+	/* save sonardepth if depth record */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_HEIGHT
+		&& store->type == R7KRECID_Depth)
+		{
+		/* get attitude structure */
+		depth = &(store->depth);
+		
+		/* add latest heading sample */
+		mb_depint_add(verbose, mbio_ptr,
+				(double)(store->time_d),
+				(double)(depth->depth),
+				error);
 		}
 #ifdef MBR_RESON7KR_DEBUG
 if (verbose > 0)

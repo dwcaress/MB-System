@@ -55,6 +55,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #                               $MBSYSTEM_HOME/share/annual.
 #	PROJECTIONS	Path of PROJ4 projections database. This is usually 
 #                               $MBSYSTEM_HOME/share/Projections.dat.
+#	FFTWLIBDIR	Location of FFTW library libfftw.a
+#	FFTWINCDIR	Location of FFTW include file fftw.h
 #   REQUIRED for graphical tools mbedit, mbnavedit, mbvelocitytool, mbnavadjust, 
 #                               mbgrdviz, and mbeditviz. If these paramters are not 
 #                               both set, no graphicals tools will be built.
@@ -106,6 +108,8 @@ $GMTLIBDIR = "/usr/local/gmt/lib";
 $GMTINCDIR = "/usr/local/gmt/include";
 $LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 $PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+$FFTWLIBDIR = "/usr/local/fftw/lib";
+$FFTWINCDIR = "/usr/local/fftw/include";
 #
 # Required paramters for graphical tools
 #   - graphical tools will not be built if these
@@ -360,6 +364,8 @@ elsif ($preset eq "macosxfink")
 	$NETCDFINCDIR = "$FINKPREFIX/include";
 	$LEVITUS = "$MBSYSTEM_HOME/share/mbsystem/LevitusAnnual82.dat";
 	$PROJECTIONS = "$MBSYSTEM_HOME/share/mbsystem/Projections.dat";
+	$FFTWLIBDIR = "$FINKPREFIX/lib";
+	$FFTWINCDIR = "$FINKPREFIX/include";
 	$CFLAGS = "-O3 -funroll-loops -fexpensive-optimizations -I/usr/X11R6/include -Wall -Wimplicit -pedantic -W -Wstrict-prototypes -Wredundant-decls  -Wimplicit-int -Wimplicit-function-declaration -Wnested-externs";
 	$LFLAGS = "-Wl -lm -bind_at_load";
 	}
@@ -382,6 +388,8 @@ elsif ($preset eq "macosxusrlocal")
 	$NETCDFINCDIR = "$FINKPREFIX/include";
 	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+	$FFTWLIBDIR = "$FINKPREFIX/lib";
+	$FFTWINCDIR = "$FINKPREFIX/include";
 	$CFLAGS = "-m32 -g -I/usr/X11R6/include";
 	$LFLAGS = "-m32 -Wl -lm";
 	}
@@ -404,6 +412,8 @@ elsif ($preset eq "macosx10.5usrlocal")
 	$NETCDFINCDIR = "$FINKPREFIX/include";
 	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+	$FFTWLIBDIR = "$FINKPREFIX/lib";
+	$FFTWINCDIR = "$FINKPREFIX/include";
 	$CFLAGS = "-g -I/usr/X11R6/include";
 	$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
 	}
@@ -425,6 +435,8 @@ elsif ($preset eq "CYGWIN")
 	$NETCDFINCDIR = "/usr/local/netcdf/include";
 	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+	$FFTWLIBDIR = "/usr/local/fftw/lib";
+	$FFTWINCDIR = "/usr/local/fftw/include";
 	$CFLAGS = "-g -fdata-sections -I/usr/X11R6/include";
 	$LFLAGS = "-lrpc -lrpclib -lm -Wl,--enable-runtime-pseudo-reloc";
 	}
@@ -446,6 +458,8 @@ elsif ($preset eq "irixusrlocal")
 	$NETCDFINCDIR = "/usr/local/netcdf/include";
 	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+	$FFTWLIBDIR = "/usr/local/fftw/lib";
+	$FFTWINCDIR = "/usr/local/fftw/include";
 	$CFLAGS = "-O2";
 	$LFLAGS = "-lm -lsun";
 	}
@@ -481,6 +495,8 @@ else
 #	$NETCDFINCDIR = "/sw/include";
 #	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 #	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #	$CFLAGS = "-g -I/usr/X11R6/include";
 #	$LFLAGS = "-Wl -lm -bind_at_load";
 #
@@ -501,6 +517,8 @@ else
 #	$NETCDFINCDIR = "/sw/include";
 #	$LEVITUS = "$MBSYSTEM_HOME/share/LevitusAnnual82.dat";
 #	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #	$CFLAGS = "-g -I/usr/X11R6/include";
 #	$LFLAGS = "-Wl -lm -bind_at_load -Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/LibGL.dylib";
 #
@@ -516,6 +534,9 @@ else
 #	$NETCDFLIBDIR = "/ocean/mgg/netcdf/sun4/lib";
 #	$NETCDFINCDIR = "/ocean/mgg/netcdf/include";
 #	$LEVITUS = "/ocean/mgg/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #	$CFLAGS = "-O2";
 #	$LFLAGS = "-lm";
 #
@@ -531,6 +552,9 @@ else
 #	$NETCDFLIBDIR = "/net/heezen/packages/netcdf/lib";
 #	$NETCDFINCDIR = "/net/heezen/packages/netcdf/include";
 #	$LEVITUS = "/net/heezen/packages/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #
 # Example for installing on Sun workstations running Solaris 2.4:
 #
@@ -545,6 +569,9 @@ else
 #	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
 #	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #
 # Example for installing on Sun workstations running Solaris 2.6
 #   with GMT built to utilize sincos() - add -lsunmath to $LFLAGS:
@@ -560,6 +587,8 @@ else
 #	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
 #	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #	$CFLAGS = "-O -I/usr/openwin/include -I/usr/ucbinclude";
 #	$LFLAGS = "-lnsl -lm -lsunmath";
 #
@@ -577,6 +606,8 @@ else
 #	$NETCDFINCDIR = "/usr/local/netcdf-3.4/include";
 #	$LEVITUS = "/usr/local/mbsystem/annual";
 #	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #	$CFLAGS = "-O -I/usr/openwin/share/include";
 #	$LFLAGS = "-lnsl -lm";
 #
@@ -592,6 +623,9 @@ else
 #	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
 #	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #
 # Example for installing on SeaBeam Instruments SGI IRIX 6.4 workstations:
 #	$MBSYSTEM_HOME = "/usr/local/mbsystem";
@@ -605,6 +639,9 @@ else
 #	$NETCDFLIBDIR = "/usr/local/netcdf/lib";
 #	$NETCDFINCDIR = "/usr/local/netcdf/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #
 # Example for installing on PC running LINUX:
 #       $MBSYSTEM_HOME = "/usr/local/mbsystem";
@@ -620,6 +657,9 @@ else
 #       $NETCDFLIBDIR = "/usr/local/netcdf-3.5.0/lib";
 #       $NETCDFINCDIR = "/usr/local/netcdf-3.5.0/include";
 #       $LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #
 # Example for installing on Hewlett Packard workstations
 # running HPUX version 9.0X or later:
@@ -634,6 +674,9 @@ else
 #	$NETCDFLIBDIR = "/usr/local/gmt/lib";
 #	$NETCDFINCDIR = "/usr/local/gmt/include";
 #	$LEVITUS = "/usr/local/levitus/annual";
+#	$PROJECTIONS = "$MBSYSTEM_HOME/share/Projections.dat";
+#	$FFTWLIBDIR = "/usr/local/fftw/lib";
+#	$FFTWINCDIR = "/usr/local/fftw/include";
 #
 #--------------------------------------------------------------------
 #

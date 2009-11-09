@@ -271,6 +271,7 @@
 #include "../../include/mbsys_simrad.h"
 #include "../../include/mbsys_simrad2.h"
 #include "../../include/mbsys_simrad3.h"
+#include "../../include/mbsys_jstar.h"
 
 /* Alias table for old (pre-version 4.0) format id's */
 static int format_alias_table[] = 
@@ -2091,9 +2092,11 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	char	*suffix;
 	int	suffix_len;
 	FILE	*checkfp;
-	char	buffer[8];
+	char	buffer[MB_COMMENT_MAXLINE];
 	short	*shortptr;
 	short	type1, sonar1, type2, sonar2, type1swap, sonar1swap, type2swap, sonar2swap;
+	int	nsonar, nlow, nhigh, subsystem, size;
+	int	done;
 	int	i;
 
 	/* print input debug statements */
@@ -3110,6 +3113,61 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    }
 		*format = MBF_EDGJSTAR;
 		found = MB_YES;
+
+		/* examine the file to determine if sidescan data is 
+			high frequency (*format = MBF_EDGJSTR2 = 133) rather than 
+			low frequency (*format = MBF_EDGJSTAR = 132) 
+			- if both low and high frequency are present treat format
+				as low frequency */
+		if ((checkfp = fopen(filename,"r")) != NULL)
+		    {
+		    /* loop over reading data until four full sidescan sonar records are read */
+		    done = MB_NO;
+		    nsonar = 0;
+		    nlow = 0;
+		    nhigh = 0;
+		    while (done == MB_NO)
+			{
+			/* read message header */
+			if (fread(buffer, MBSYS_JSTAR_MESSAGE_SIZE, 1, checkfp) == 1)
+			    {
+			    /* extract and check the subsystem value from the message header */
+			    subsystem = (int)((mb_u_char) buffer[7]);
+			    if (subsystem > 0)
+			    	{
+				nsonar++;
+				}
+			    if (subsystem == 20)
+			    	nlow++;
+			    if (subsystem == 21)
+			    	nhigh++;
+			    if (nsonar >= 4)
+			    	done = MB_YES;
+				
+			    /* read and discard the rest of the record */
+			    if (done == MB_NO)
+			    	{
+				mb_get_binary_int(MB_YES, &buffer[12], &size);
+				for (i=0;i<size;i++)
+			    	    {
+				    if (fread(buffer, 1, 1, checkfp) != 1)
+					    done = MB_YES;
+				    }
+				}
+			    }
+
+			/* end of file */
+			else
+			    {
+			    done = MB_YES;	    
+			    }
+			}
+		    fclose(checkfp);
+		    if (nlow == 0 && nhigh > 0)
+			*format = MBF_EDGJSTR2;
+		    else
+			*format = MBF_EDGJSTAR;
+		    }
 		}
 	    }
 

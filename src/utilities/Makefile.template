@@ -197,6 +197,10 @@ GMTLIBDIR = /usr/local/mbsystem/lib
 GMTINCDIR = /usr/local/gmt/src
 NETCDFINCDIR = /usr/local/netcdf/include
 #
+# Locations of GMT libraries, binaries, and include files:
+FFTWLIBDIR = /usr/local/fftw/lib
+FFTWINCDIR = /usr/local/fftw/include
+#
 # Location of Levitus annual database file
 LEVITUS = /usr/local/mbsystem/share/Levitus82.dat
 # 
@@ -257,7 +261,8 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbctdlist \
 	$(BINDIR)/mbfilter \
 	$(BINDIR)/mbroutetime \
-	$(BINDIR)/mbsm20002gsf
+	$(BINDIR)/mbsm20002gsf \
+	$(BINDIR)/mbsegypsd
 
 ### make clean removes the object files
 clean:
@@ -387,6 +392,10 @@ $(BINDIR)/mbroutetime:	mbroutetime.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(
 $(BINDIR)/mbsm20002gsf:	mbsm20002gsf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbsm20002gsf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbsm20002gsf
+$(BINDIR)/mbsegypsd:	mbsegypsd.o $(LIBDIR)/libmbio.a $(PROJLIB) $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbsegypsd.o $(LIBDIR)/libmbio.a $(PROJLIB) $(LIBDIR)/libmbaux.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(FFTWLIBDIR)/libfftw3.a \
+		$(LFLAGS) -o $(BINDIR)/mbsegypsd
 
 ### compile the source files
 mbformat.o:	mbformat.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -468,3 +477,5 @@ mbroutetime.o:	mbroutetime.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDI
 	$(CC) -c $(CFLAGS) mbroutetime.c
 mbsm20002gsf.o:	mbsm20002gsf.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbsm20002gsf.c
+mbsegypsd.o:	mbsegypsd.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) -I$(FFTWINCDIR) mbsegypsd.c
