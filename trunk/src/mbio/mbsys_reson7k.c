@@ -4932,7 +4932,15 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			else if (mb_beam_check_flag(beamflag[i]))
 				bathymetry->quality[i] = (bathymetry->quality[i] & 63) + 64;
 			else
+				{
 				bathymetry->quality[i] = (bathymetry->quality[i] & 63);
+				if (bathymetry->quality[i] & 4)
+					bathymetry->quality[i] += 16;
+				if (bathymetry->quality[i] & 8)
+					bathymetry->quality[i] += 32;
+				if (!(bathymetry->quality[i] & 12))
+					bathymetry->quality[i] += 16;
+				}
 			bathymetry->acrosstrack[i] = bathacrosstrack[i];
 			bathymetry->alongtrack[i] = bathalongtrack[i];
 			bathymetry->intensity[i] = amp[i];

@@ -612,7 +612,7 @@ int mb_read(int verbose, void *mbio_ptr,
 			    }
 			  for (i=0;i<mb_io_ptr->new_pixels_ss;i++)
 			    {
-			    if (mb_io_ptr->new_ss[i] != 0.0)
+			    if (mb_io_ptr->new_ss[i] != MB_SIDESCAN_NULL)
 			      {
 			      mb_io_ptr->ss[i] = mb_io_ptr->ss[i] 
 			                         + mb_io_ptr->new_ss[i];
@@ -993,7 +993,7 @@ int mb_read(int verbose, void *mbio_ptr,
 				}
 			else
 				{
-				ss[i] = 0.0;
+				ss[i] = MB_SIDESCAN_NULL;
 				sslon[i] = 0.0;
 				sslat[i] = 0.0;
 				}

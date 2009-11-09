@@ -5323,6 +5323,7 @@ int mbedit_load_data(int buffer_size,
 			status = MB_FAILURE;
 			error = MB_ERROR_OTHER;
 			}
+
 		if (status == MB_SUCCESS
 			&& ping[nbuff].allocated > 0
 			&& ping[nbuff].allocated < ping[nbuff].beams_bath)

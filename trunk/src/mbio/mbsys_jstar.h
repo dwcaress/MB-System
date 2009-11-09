@@ -50,8 +50,19 @@
 #define	MBSYS_JSTAR_SBPHEADER_SIZE	240
 #define	MBSYS_JSTAR_SSHEADER_SIZE	240
 #define	MBSYS_JSTAR_PIXELS_MAX		2000
-#define	MBSYS_JSTAR_SONARDATA		80
-#define	MBSYS_JSTAR_COMMENT		17229
+
+#define	MBSYS_JSTAR_DATA_SONAR		80
+#define	MBSYS_JSTAR_DATA_SONAR2		82
+#define	MBSYS_JSTAR_DATA_4400SAS	86
+#define	MBSYS_JSTAR_DATA_PITCHROLL	2020
+#define	MBSYS_JSTAR_DATA_NMEA		2002
+#define	MBSYS_JSTAR_DATA_MISCANALOG	2040
+#define	MBSYS_JSTAR_DATA_PRESSURE	2060
+#define	MBSYS_JSTAR_DATA_DVL		2080
+#define	MBSYS_JSTAR_DATA_MESSAGE	2090
+#define	MBSYS_JSTAR_DATA_SYSINFO	182
+#define	MBSYS_JSTAR_DATA_COMMENT	17229
+
 #define	MBSYS_JSTAR_SUBSYSTEM_SBP	0
 #define	MBSYS_JSTAR_SUBSYSTEM_SSLOW	20
 #define	MBSYS_JSTAR_SUBSYSTEM_SSHIGH	21
@@ -92,7 +103,126 @@ struct mbsys_jstar_comment_struct
 	char	comment[MB_COMMENT_MAXLINE];
 	};
 	
+struct mbsys_jstar_nmea_struct 
+	{
+	/* Message Header */
+	struct mbsys_jstar_message_struct message;
 	
+	/* Time and source */
+	int	seconds;		/* seconds since start of time */
+	int	msec;			/* milliseconds since start of time */
+	char	source;			/* 1=sonar, 2=discover, 3=ETSI */
+	char	reserve[3];
+
+	/* NMEA string */
+	char	nmea[MB_COMMENT_MAXLINE];
+	};
+	
+struct mbsys_jstar_pressure_struct 
+	{
+	/* Message Header */
+	struct mbsys_jstar_message_struct message;
+	
+	/* Time and source */
+	int	seconds;	/* seconds since start of time */
+	int	msec;		/* milliseconds since start of time */
+	char	reserve1[4];
+	int	pressure;	/* 0.001 PSI */
+	int	salinity;	/* ppm */
+	int	datavalidflags;	/* data valid flags:
+					0 - pressure
+					1 - temp
+					2 - salt PPM
+					3 - conductivity
+					4 - sound velocity */
+	int	conductivity;	/* uSiemens/cm */
+	int	soundspeed;	/* 0.001 m/sec */
+	int	reserve2[10];
+	};
+	
+struct mbsys_jstar_pitchroll_struct 
+	{
+	/* Message Header */
+	struct mbsys_jstar_message_struct message;
+	
+	/* Time and source */
+	int	seconds;	/* seconds since start of time */
+	int	msec;		/* milliseconds since start of time */
+	char	reserve1[4];
+	short	accelerationx;	/* x acceleration: multiply by (20 * 1.5) / (32768) to get G's */
+	short	accelerationy;	/* y acceleration: multiply by (20 * 1.5) / (32768) to get G's */
+	short	accelerationz;	/* z acceleration: multiply by (20 * 1.5) / (32768) to get G's */
+	short	gyroratex;	/* x gyro rate: multiply by (500 * 1.5) / (32768) to get deg/sec */
+	short	gyroratey;	/* y gyro rate: multiply by (500 * 1.5) / (32768) to get deg/sec */
+	short	gyroratez;	/* z gyro rate: multiply by (500 * 1.5) / (32768) to get deg/sec */
+	short	pitch;		/* pitch: multiply by (180.0 / 32768) to get degrees */
+	short	roll;		/* roll: multiply by (180.0 / 32768) to get degrees */
+	short	temperature;	/* temperature: 0.1 degree C */
+	unsigned short	deviceinfo;	/* device specific info */
+	short	heave;		/* heave: 0.001 m */
+	unsigned short	heading;/* 0.01 degrees */
+	int	datavalidflags;	/* data valid flags:
+					0 - ax
+					1 - ay
+					2 - az
+					3 - rx
+					4 - ry
+					5 - rz
+					6 - pitch
+					7 - roll
+					8 - heave
+					9 - heading
+					10 - temperature
+					11 - device info */
+	int	reserve2;
+	};
+
+struct mbsys_jstar_dvl_struct 
+	{
+	/* Message Header */
+	struct mbsys_jstar_message_struct message;
+	
+	/* Time and source */
+	int	seconds;	/* seconds since start of time */
+	int	msec;		/* milliseconds since start of time */
+	char	reserve1[4];
+	unsigned int	datavalidflags;	/* Bit values indicate which values are present:
+					0: X,Y velocity present
+					1: 1 = velocity in ship coordinates
+					   0 = velocity in earth coordinates
+					2: Z (vertical) velocity present
+					3: X, Y water velocity present
+					4: Z (vertical) water velocity present
+					5: Distance to bottom present
+					6: Heading present
+					7: Pitch present
+					8: Roll present
+					9: Temperature present
+					10: Depth present
+					11: Salinity present
+					12: Sound velocity present
+					---
+					31: Error detected */
+	int	beam1range;	/* 0.01 m (0 = invalid) */
+	int	beam2range;	/* 0.01 m (0 = invalid) */
+	int	beam3range;	/* 0.01 m (0 = invalid) */
+	int	beam4range;	/* 0.01 m (0 = invalid) */
+	short	velocitybottomx;	/* x velocity wrt bottom (0.001 m/s, positive to starboard or east) */
+	short	velocitybottomy;	/* y velocity wrt bottom (0.001 m/s, positive to forward or north) */
+	short	velocitybottomz;	/* z velocity wrt bottom (0.001 m/s, positive upward) */
+	short	velocitywaterx;	/* x velocity wrt water (0.001 m/s, positive to starboard or east) */
+	short	velocitywatery;	/* y velocity wrt water (0.001 m/s, positive to forward or north) */
+	short	velocitywaterz;	/* z velocity wrt water (0.001 m/s, positive upward) */
+	unsigned short	depth;	/* depth (0.1 m) */
+	short	pitch;		/* pitch (0.01 degree, positive bow up) */
+	short	roll;		/* roll (0.01 degree, positive port up) */
+	short	heading;	/* heading (0.01 degree) */
+	short	salinity;	/* salinity (ppt (part per thousand)) */
+	short	temperature;	/* temperature (0.01 degree celcius) */
+	short	soundspeed;	/* sound speed (m/sec) */
+	short	reserve2[7];
+	};
+		
 struct mbsys_jstar_channel_struct 
 	{
 	/* Message Header */
@@ -251,7 +381,7 @@ struct mbsys_jstar_ss_struct
 	unsigned short	*trace;
 	};
   
-struct mbsys_jstar_struct 
+struct mbsys_jstar_struct
 	{
 	int	kind;			/* MBIO data kind */
 	
@@ -267,6 +397,18 @@ struct mbsys_jstar_struct
 	/* Sidescan data */
 	struct mbsys_jstar_channel_struct ssport;
 	struct mbsys_jstar_channel_struct ssstbd;
+	
+	/* Pitch Roll data */
+	struct mbsys_jstar_pitchroll_struct pitchroll;
+	
+	/* NMEA */
+	struct mbsys_jstar_nmea_struct nmea;
+	
+	/* DVL data */
+	struct mbsys_jstar_dvl_struct dvl;
+	
+	/* Pressure data */
+	struct mbsys_jstar_pressure_struct pressure;
 	
 	/* Comment */
 	struct mbsys_jstar_comment_struct comment;

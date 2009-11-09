@@ -277,7 +277,9 @@ executed in conjunction with creating ancilliary files with the -O or
 
 -----> 5.1.2beta12
 
-Updated proj library to 4.7.0 release.
+Updated proj library to 4.7.0 release. If the installing user chooses to
+use the proj distributed with MB-System, then the programs proj and geod
+will now be built and installed in the bin directory.
 
 Rooted through the entire codebase fixing obvious failure points for
 64-bit compilation. Most of the issues identified so far relate to
@@ -286,6 +288,21 @@ storing address values in variables declared as "int".
 Completed moving the code base into subversion hosted at Lamont by
 first updating the subversion archive to 5.1.2beta11 and then committing
 the copious mods related to the 64-bit cleanup.
+
+Changed the suffix of the Perl source files in src/macros from 
+".perl" to ".pl".
+
+Changed the section name for the MB-System man pages from "l" to "1"
+for programs and "3" for libraries and functions. This is in line with
+common practice and follows a similar change by GMT.
+
+Modified support for Edgetech JSTAR sidescan/subbottom files (formats 132 & 133)
+to work with a new data sample from GEOMAR. MB-System can now automatically
+distinguish between low frequency (132) and high frequency (133) sidescan
+data.
+
+Modified support for Reson 7k multibeams (format 88) to work with a
+new data sample from GEOMAR.
 
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------

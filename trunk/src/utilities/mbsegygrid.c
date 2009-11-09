@@ -130,6 +130,8 @@ int get_segy_limits(int verbose,
 		int *error);
 char	*ctime();
 char	*getenv();
+int fft(float *x, int *n, int *isign);
+int four1(float *data, int *n, int *isign);
 
 /* output stream for basic stuff (stdout if verbose <= 1,
 	stderr if verbose > 1) */
@@ -785,14 +787,12 @@ igainstart,igainend,tmax,factor);*/
 							}
 						}
 
-					/* insert data into the grid */
+					/* process trace */
 					for (iy=0;iy<ngridy;iy++)
 						{
 						ptrace[iy] = 0.0;
 						wtrace[iy] = 0.0;
 						}
-
-					/* process trace */
 					for (i=0;i<traceheader.nsamps;i++)
 						{
 						iy = iys + i / decimatey;

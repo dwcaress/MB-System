@@ -1309,12 +1309,12 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->groupCoordX = (int) (360000.0 * navlon);
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
-				channel->heading = (short) (60.0 * heading);
+				channel->heading = (short) (100.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->sonardepth = 1000 * sonardepth;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (60.0 * roll); 
-				channel->pitch = (short) (60.0 * pitch); 
+				channel->roll = (short) (32768 * roll / 180.0); 
+				channel->pitch = (short) (32768 * pitch / 180.0); 
 				channel->heaveCompensation = heave /
 						channel->sampleInterval / 0.00000075; 
 
@@ -1610,12 +1610,12 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->groupCoordX = (int) (360000.0 * navlon);
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
-				channel->heading = (short) (60.0 * heading);
+				channel->heading = (short) (100.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
 				channel->sonardepth = 1000 * sonardepth;
-				channel->roll = (short) (60.0 * roll); 
-				channel->pitch = (short) (60.0 * pitch); 
+				channel->roll = (short) (32768 * roll / 180.0); 
+				channel->pitch = (short) (32768 * pitch / 180.0); 
 				channel->heaveCompensation = heave /
 						channel->sampleInterval / 0.00000075; 
 
@@ -1888,12 +1888,12 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->groupCoordX = (int) (360000.0 * navlon);
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
-				channel->heading = (short) (60.0 * heading);
+				channel->heading = (short) (100.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->sonardepth = 1000 * sonardepth;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (60.0 * roll); 
-				channel->pitch = (short) (60.0 * pitch); 
+				channel->roll = (short) (32768 * roll / 180.0); 
+				channel->pitch = (short) (32768 * pitch / 180.0); 
 				channel->heaveCompensation = heave /
 						channel->sampleInterval / 0.00000075; 
 
@@ -2167,12 +2167,12 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->groupCoordX = (int) (360000.0 * navlon);
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
-				channel->heading = (short) (60.0 * heading);
+				channel->heading = (short) (100.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->sonardepth = 1000 * sonardepth;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (60.0 * roll); 
-				channel->pitch = (short) (60.0 * pitch); 
+				channel->roll = (short) (32768 * roll / 180.0); 
+				channel->pitch = (short) (32768 * pitch / 180.0); 
 				channel->heaveCompensation = heave /
 						channel->sampleInterval / 0.00000075; 
 
@@ -2427,12 +2427,12 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				channel->groupCoordX = (int) (360000.0 * navlon);
 				channel->groupCoordY = (int) (360000.0 * navlat);
 				channel->coordUnits = 2;
-				channel->heading = (short) (60.0 * heading);
+				channel->heading = (short) (100.0 * heading);
 				channel->startDepth = sonardepth / channel->sampleInterval / 0.00000075; 
 				channel->sonardepth = 1000 * sonardepth;
 				channel->depth = channel->sonardepth + channel->sonaraltitude;
-				channel->roll = (short) (60.0 * roll);
-				channel->pitch = (short) (60.0 * pitch); 
+				channel->roll = (short) (32768 * roll / 180.0); 
+				channel->pitch = (short) (32768 * pitch / 180.0); 
 				channel->heaveCompensation = heave /
 						channel->sampleInterval / 0.00000075; 
 

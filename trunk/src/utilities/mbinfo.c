@@ -1517,7 +1517,7 @@ int main (int argc, char **argv)
 				/* reset time of last ping */
 				time_d_last = time_d;
 				}
-				
+
 			/* update coverage mask */
 			if (pass == 1 && coverage_mask == MB_YES
 				&& (error == MB_ERROR_NO_ERROR 

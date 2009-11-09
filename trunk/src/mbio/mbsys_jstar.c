@@ -375,11 +375,11 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		*navlon = sbp->sourceCoordX / 360000.0;
-		*navlat = sbp->sourceCoordY / 360000.0;
+		*navlon = sbp->groupCoordX / 600000.0;
+		*navlat = sbp->groupCoordY / 600000.0;
 
 		/* get heading */
-		*heading = sbp->heading / 60.0;
+		*heading = sbp->heading / 100.0;
 
 		/* get speed */
 		*speed = 0.0;
@@ -480,11 +480,11 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		*navlon = ssport->sourceCoordX / 360000.0;
-		*navlat = ssport->sourceCoordY / 360000.0;
+		*navlon = ssport->groupCoordX / 600000.0;
+		*navlat = ssport->groupCoordY / 600000.0;
 
 		/* get heading */
-		*heading = ssport->heading / 60.0;
+		*heading = ssport->heading / 100.0;
 
 		/* get speed */
 		*speed = 0.0;
@@ -574,11 +574,19 @@ istart,altitude,rawpixelsize,ssport->startDepth);*/
 		/* average the data in the bins */
 		for (i=0;i<*nss;i++)
 			{
-			if (ssalongtrack[i] > 0.0)
+			if (ss[i] > 0.0 && ssalongtrack[i] > 0.0)
 				{
 				ss[i] /= ssalongtrack[i];
 				ssalongtrack[i] = 0.0;
 				}
+			else
+				{
+				ss[i] = MB_SIDESCAN_NULL;
+				}
+			}
+		for (i=*nss;i<MBSYS_JSTAR_PIXELS_MAX;i++)
+			{
+			ss[i] = MB_SIDESCAN_NULL;
 			}
 
 		/* print debug statements */
@@ -810,11 +818,13 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		if (navlon < 180.0) navlon = navlon + 360.0;
 		if (navlon > 180.0) navlon = navlon - 360.0;
-		sbp->sourceCoordX = (int) (360000.0 * navlon);
-		sbp->sourceCoordY = (int) (360000.0 * navlat);
+		sbp->sourceCoordX = (int) (600000.0 * navlon);
+		sbp->sourceCoordY = (int) (600000.0 * navlat);
+		sbp->groupCoordX = (int) (600000.0 * navlon);
+		sbp->groupCoordY = (int) (600000.0 * navlat);
 
 		/* get heading */
-		sbp->heading = (short) (60.0 * heading);
+		sbp->heading = (short) (100.0 * heading);
 
 		/* read distance and depth values into storage arrays */
 		
@@ -898,14 +908,18 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		if (navlon < 180.0) navlon = navlon + 360.0;
 		if (navlon > 180.0) navlon = navlon - 360.0;
-		ssport->sourceCoordX = 360000.0 * navlon;
-		ssport->sourceCoordY = 360000.0 * navlat;
-		ssstbd->sourceCoordX = 360000.0 * navlon;
-		ssstbd->sourceCoordY = 360000.0 * navlat;
+		ssport->sourceCoordX = 600000.0 * navlon;
+		ssport->sourceCoordY = 600000.0 * navlat;
+		ssstbd->sourceCoordX = 600000.0 * navlon;
+		ssstbd->sourceCoordY = 600000.0 * navlat;
+		ssport->groupCoordX = 600000.0 * navlon;
+		ssport->groupCoordY = 600000.0 * navlat;
+		ssstbd->groupCoordX = 600000.0 * navlon;
+		ssstbd->groupCoordY = 600000.0 * navlat;
 
 		/* get heading and speed */
-		ssport->heading = (short) (60.0 * heading);
-		ssstbd->heading = (short) (60.0 * heading);
+		ssport->heading = (short) (100.0 * heading);
+		ssstbd->heading = (short) (100.0 * heading);
 
 		/* put distance and depth values 
 			into data structure */
@@ -1288,11 +1302,11 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		*navlon = sbp->sourceCoordX / 360000.0;
-		*navlat = sbp->sourceCoordY / 360000.0;
+		*navlon = sbp->groupCoordX / 600000.0;
+		*navlat = sbp->groupCoordY / 600000.0;
 
 		/* get heading */
-		*heading = sbp->heading / 60.0;
+		*heading = sbp->heading / 100.0;
 
 		/* get speed */
 		*speed = 0.0;
@@ -1305,8 +1319,8 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 				* sbp->sampleInterval * 0.00000075; 
 		
 		/* get attitude */
-		*roll = sbp->roll / 60.0; 
-		*pitch = sbp->pitch / 60.0; 
+		*roll = 180.0 / 32768.0 * (double)sbp->roll; 
+		*pitch = 180.0 / 32768.0 * (double)sbp->pitch; 
 		*heave = sbp->heaveCompensation 
 				* sbp->sampleInterval * 0.00000075; 
 
@@ -1377,11 +1391,11 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_time(verbose,time_i,time_d);
 
 		/* get navigation */
-		*navlon = ssport->sourceCoordX / 360000.0;
-		*navlat = ssport->sourceCoordY / 360000.0;
+		*navlon = ssport->groupCoordX / 600000.0;
+		*navlat = ssport->groupCoordY / 600000.0;
 
 		/* get heading */
-		*heading = ssport->heading / 60.0;
+		*heading = ssport->heading / 100.0;
 
 		/* get speed */
 		*speed = 0.0;
@@ -1394,8 +1408,8 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 				* ssport->sampleInterval * 0.00000075; 
 		
 		/* get attitude */
-		*roll = ssport->roll / 60.0; 
-		*pitch = ssport->pitch / 60.0; 
+		*roll = 180.0 / 32768.0 * (double)ssport->roll; 
+		*pitch = 180.0 / 32768.0 * (double)ssport->pitch; 
 		*heave = ssport->heaveCompensation 
 				* ssport->sampleInterval * 0.00000075; 
 
@@ -1576,11 +1590,13 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		if (navlon < 180.0) navlon = navlon + 360.0;
 		if (navlon > 180.0) navlon = navlon - 360.0;
-		sbp->sourceCoordX = (int) (360000.0 * navlon);
-		sbp->sourceCoordY = (int) (360000.0 * navlat);
+		sbp->sourceCoordX = (int) (600000.0 * navlon);
+		sbp->sourceCoordY = (int) (600000.0 * navlat);
+		sbp->groupCoordX = (int) (600000.0 * navlon);
+		sbp->groupCoordY = (int) (600000.0 * navlat);
 
 		/* get heading */
-		sbp->heading = (short) (60.0 * heading);
+		sbp->heading = (short) (100.0 * heading);
 	
 		/* get draft */
 		sbp->startDepth = draft /
@@ -1588,8 +1604,8 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp->sonardepth = 1000 * draft;
 
 		/* get attitude */
-		sbp->roll = roll / 60.0; 
-		sbp->pitch = pitch / 60.0; 
+		sbp->roll = 32768 * roll / 180.0; 
+		sbp->pitch = 32768 * pitch / 180.0; 
 		sbp->heaveCompensation = heave /
 				sbp->sampleInterval / 0.00000075; 
 		
@@ -1651,14 +1667,18 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get navigation */
 		if (navlon < 180.0) navlon = navlon + 360.0;
 		if (navlon > 180.0) navlon = navlon - 360.0;
-		ssport->sourceCoordX = 360000.0 * navlon;
-		ssport->sourceCoordY = 360000.0 * navlat;
-		ssstbd->sourceCoordX = 360000.0 * navlon;
-		ssstbd->sourceCoordY = 360000.0 * navlat;
+		ssport->sourceCoordX = 600000.0 * navlon;
+		ssport->sourceCoordY = 600000.0 * navlat;
+		ssstbd->sourceCoordX = 600000.0 * navlon;
+		ssstbd->sourceCoordY = 600000.0 * navlat;
+		ssport->groupCoordX = 600000.0 * navlon;
+		ssport->groupCoordY = 600000.0 * navlat;
+		ssstbd->groupCoordX = 600000.0 * navlon;
+		ssstbd->groupCoordY = 600000.0 * navlat;
 
 		/* get heading and speed */
-		ssport->heading = (short) (60.0 * heading);
-		ssstbd->heading = (short) (60.0 * heading);
+		ssport->heading = (short) (100.0 * heading);
+		ssstbd->heading = (short) (100.0 * heading);
 	
 		/* get draft */
 		ssport->startDepth = draft /
@@ -1669,12 +1689,12 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		ssstbd->sonardepth = 1000 * draft;
 		
 		/* get attitude */
-		ssport->roll = roll / 60.0; 
-		ssport->pitch = pitch / 60.0; 
+		ssport->roll = 32768 * roll / 180.0; 
+		ssport->pitch = 32768 * pitch / 180.0; 
 		ssport->heaveCompensation = heave /
 				ssport->sampleInterval / 0.00000075; 
-		ssstbd->roll = roll / 60.0; 
-		ssstbd->pitch = pitch / 60.0; 
+		ssstbd->roll = 32768 * roll / 180.0; 
+		ssstbd->pitch = 32768 * pitch / 180.0; 
 		ssstbd->heaveCompensation = heave /
 				ssstbd->sampleInterval / 0.00000075; 
 		}
@@ -1767,8 +1787,8 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		fwatertime = 2.0 * dwaterdepth / ((double) watersoundspeed);
 
 		/* get navigation */
-		longitude = sbp->sourceCoordX / 360000.0;
-		latitude = sbp->sourceCoordY / 360000.0;
+		longitude = sbp->groupCoordX / 600000.0;
+		latitude = sbp->groupCoordY / 600000.0;
 			
 		/* extract the data */
 		mb_segytraceheader_ptr->seq_num 	= sbp->pingNum;
@@ -1793,10 +1813,10 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		mb_segytraceheader_ptr->elev_scalar	= -100; 	/* 0.01 m precision for depths */
 		mb_segytraceheader_ptr->coord_scalar	= -100;		/* 0.01 arc second precision for position
 									= 0.3 m precision at equator */
-		mb_segytraceheader_ptr->src_long	= (int)(longitude * 360000.0);
-		mb_segytraceheader_ptr->src_lat		= (int)(latitude * 360000.0);
-		mb_segytraceheader_ptr->grp_long	= (int)(longitude * 360000.0);
-		mb_segytraceheader_ptr->grp_lat		= (int)(latitude * 360000.0);
+		mb_segytraceheader_ptr->src_long	= (int)(longitude * 600000.0);
+		mb_segytraceheader_ptr->src_lat		= (int)(latitude * 600000.0);
+		mb_segytraceheader_ptr->grp_long	= (int)(longitude * 600000.0);
+		mb_segytraceheader_ptr->grp_lat		= (int)(latitude * 600000.0);
 		mb_segytraceheader_ptr->coord_units	= 2;
 		mb_segytraceheader_ptr->wvel		= watersoundspeed;
 		mb_segytraceheader_ptr->sbvel		= 0;
