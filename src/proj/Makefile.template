@@ -60,6 +60,7 @@ MANDIR = ../../man
 CC = cc
 #
 # Compile and load flags:
+LFLAGS = -lm
 CFLAGS = -g -DIRIX
 ARCHIVE = ar rcv
 #
