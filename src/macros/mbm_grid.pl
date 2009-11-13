@@ -422,15 +422,15 @@ else
 	$ymax = $ymax_data + $dely;
 	$dx = $xmax - $xmin;
 	$dy = $ymax - $ymin;
-	if ($dy/$dx > 2.0)
+	if ($dy/$dx > 10.0)
 		{
-		$delx = 0.5 * (0.5 * $dy - $dx);
+		$delx = 0.5 * (0.1 * $dy - $dx);
 		$xmin = $xmin - $delx;
 		$xmax = $xmax + $delx;
 		}
-	elsif ($dx/$dy > 2.0)
+	elsif ($dx/$dy > 10.0)
 		{
-		$dely = 0.5 * (0.5 * $dx - $dy);
+		$dely = 0.5 * (0.1 * $dx - $dy);
 		$ymin = $ymin - $dely;
 		$ymax = $ymax + $dely;
 		}
