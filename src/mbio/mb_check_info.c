@@ -822,7 +822,6 @@ int mb_make_info(int verbose, int force,
 	    && format != MBF_SB2000SB
 	    && format != MBF_MSTIFFSS
 	    && format != MBF_MBLDEOIH
-	    && format != MBF_MBNETCDF
 	    && format != MBF_ASCIIXYZ
 	    && format != MBF_ASCIIYXZ
 	    && format != MBF_ASCIIXYT
