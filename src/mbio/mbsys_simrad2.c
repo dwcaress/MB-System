@@ -781,6 +781,11 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			/* sidescan */
 			ping->png_ss_read = MB_NO;	
 					/* flag indicating actual reading of sidescan record */
+			ping->png_ss_date = 0;
+					/* date = year*10000 + month*100 + day */
+			ping->png_ss_msec = 0;
+					/* time since midnight in msec */
+
 			ping->png_ss_count = 0;	
 					/* sequential counter or input identifier */
 			ping->png_ss_serial = 0;	

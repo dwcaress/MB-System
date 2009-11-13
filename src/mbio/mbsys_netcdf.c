@@ -1395,6 +1395,9 @@ int mbsys_netcdf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			    amp[i] = store->mbReflectivity[i] * store->mbReflectivity_scale_factor;
 			    }
 			}
+		for (i=*nbath;i<store->mbBeamNbr; i++)
+			beamflag[i] = MB_FLAG_NULL;
+
 
 		/* print debug statements */
 		if (verbose >= 5)
