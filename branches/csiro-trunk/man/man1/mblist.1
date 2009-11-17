@@ -393,6 +393,8 @@ not be supported by all formats.
 .IP
 \fB .b\fP  Oblique backscatter in dB (formats 56 & 67 - Simrad multibeam only)
 .IP
+\fB .C\fP  Sound speed at transducer (formats 56 & 67 - Simrad multibeam only)
+.IP
 \fB .c\fP  Mean backscatter, one value per ping (formats 56 & 67 - Simrad multibeam only)
 .IP
 \fB .d\fP  Beam depression angle (formats 56 & 67 - Simrad multibeam only)
@@ -411,7 +413,15 @@ not be supported by all formats.
 .IP
 \fB .M\fP  Sounder mode (formats 56 & 67 - Simrad multibeam only)
 .IP
+\fB .m\fP  Transmit pulse length (usec)(Seabed telegram formats 56 & 67 - Simrad multibeam only)
+.IP
 \fB .N\fP  Ping number according to sounder (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .n\fP  Range to normal incidence in samples (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .o\fP  Sidescan sorting direction (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .P\fP  Sidescan center sample number (formats 56 & 67 - Simrad multibeam only)
 .IP
 \fB .p\fP  Raw sidescan pixels in dB (formats 56 & 67 - Simrad multibeam only).
 May be preceded by a number to give the first n pixels (NaN padded) of the beam,
@@ -428,6 +438,10 @@ for example\fB .30p\fP will give the first 30 sidescan pixels of each beam.
 \fB .T\fP  Transmit gain (dB)
 .IP
 \fB .t\fP  Receive gain (dB)
+.IP
+\fB .X\fP  TVG crossover angle (degrees) (formats 56 & 67 - Simrad multibeam only)
+.IP
+\fB .x\fP  Transmit beamwidth (degrees) (formats 56 & 67 - Simrad multibeam only)
 
 .br
 Default \fIoutput_format\fP = \fBYXLZ\fP (latitude, longitude, cumulative
