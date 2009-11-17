@@ -274,7 +274,7 @@
 #include "gmt_nan.h"
 
 /* local options */
-#define	MAX_OPTIONS	25
+#define	MAX_OPTIONS	100
 #define	DUMP_MODE_LIST	1
 #define	DUMP_MODE_BATH	2
 #define	DUMP_MODE_TOPO	3
@@ -327,7 +327,11 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		int *mode,
 		int *ipulse_length,
 		int *png_count,
+		double *ssv,
 		int *sample_rate,
+		double *depression,
+		int *range,
+		double *bs,
 		double *absorption,
 		int *max_range,
 		int *r_zero,
@@ -336,22 +340,25 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		int *tvg_stop,
 		double *bsn,
 		double *bso,
-		int *tx,
-		int *tvg_crossover,
+		double *tx,
+		double *tvg_crossover,
 		int *nbeams_ss,
 		int *npixels,
+		int *sort,
 		int *beam_samples,
 		int *start_sample,
-		int *range,
-	        double *depression,
-		double *bs,
+		int *center_sample,
 		double *ss_pixels,
 		int *error);
 int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
 		int *mode,
 		int *ipulse_length,
 		int *png_count,
+		double *ssv,
 		int *sample_rate,
+		double *depression,
+		int *range,
+		double *bs,
 		double *absorption,
 		int *max_range,
 		int *r_zero,
@@ -360,15 +367,14 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 		int *tvg_stop,
 		double *bsn,
 		double *bso,
-		int *tx,
-		int *tvg_crossover,
+		double *tx,
+		double *tvg_crossover,
 		int *nbeams_ss,
 		int *npixels,
+		int *sort,
 		int *beam_samples,
 		int *start_sample,
-		int *range,
-		double *depression,
-		double *bs,
+		int *center_sample,
 		double *ss_pixels,
 		int *error);
 
@@ -538,6 +544,7 @@ int main (int argc, char **argv)
 	int	mode;
 	int	ipulse_length;
 	int	png_count;
+	double ssv;
 	int	sample_rate;
 	double	absorption;
 	int	max_range;
@@ -549,8 +556,8 @@ int main (int argc, char **argv)
 	double 	bso;
 	double	mback;
 	int	nback;
-	int 	tx;
-	int 	tvg_crossover;
+	double 	tx;
+	double 	tvg_crossover;
 	int 	nbeams_ss;
 	int 	npixels;
 	int 	*beam_samples = NULL;
@@ -559,6 +566,8 @@ int main (int argc, char **argv)
 	double	*depression = NULL;
 	double	*bs = NULL;
 	double	*ss_pixels = NULL;
+	int	*center_sample = NULL;
+	int	*sort = NULL;
 	double	transmit_gain;
 	double	pulse_length;
 	double	receive_gain;
@@ -1882,6 +1891,29 @@ int main (int argc, char **argv)
 			raw_next_value = MB_NO;
 			break;
 
+		  case 'C': /* Sound speed at transducer */
+		      strcpy(variable, "ssv");
+		      if (signflip_next_value == MB_YES)
+			  strcat(variable, "-");
+		      if (invert_next_value == MB_YES)
+			  strcat(variable, "_");
+
+		      fprintf(output[i], "\t%s = ", variable);
+
+		      fprintf(outfile, "\tfloat %s(data);\n", variable);
+		      fprintf(outfile, "\t\t%s:long_name = \"Sound speed at transducer\";\n", variable);
+		      fprintf(outfile, "\t\t%s:units = \"", variable);
+		      if (signflip_next_value == MB_YES)
+			  fprintf(outfile, "-");
+		      if (invert_next_value == MB_YES)
+			  fprintf(outfile, "1/");
+		      fprintf(outfile, "m/s\";\n");
+
+		      signflip_next_value = MB_NO;
+		      invert_next_value = MB_NO;
+		      raw_next_value = MB_NO;
+		      break;
+
 		  case 'c': /* mean backscatter */
 			strcpy(variable, "mback");
 			if (signflip_next_value == MB_YES)
@@ -2017,7 +2049,7 @@ int main (int argc, char **argv)
 			fprintf(outfile, "\tlong %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Pulse Length\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
-			fprintf(outfile, "us");
+			fprintf(outfile, "us\";\n");
 			
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
@@ -2025,7 +2057,7 @@ int main (int argc, char **argv)
 			break;
 
 		  case 'l': /* Transmit pulse length */
-			strcpy(variable, "pulse_length");
+			strcpy(variable, "tx_pulse_length");
 			if (signflip_next_value == MB_YES)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
@@ -2062,11 +2094,26 @@ int main (int argc, char **argv)
 			raw_next_value = MB_NO;
 			break;
 
+		  case 'm' : /* Receive Pulse length */
+		        strcpy(variable, "rx_pulse_length");
+
+		        fprintf(output[i], "\t%s = ", variable);
+
+		        fprintf(outfile, "\tlong %s(data);\n", variable);
+		        fprintf(outfile, "\t\t%s:long_name = \"Receive Pulse Length\";\n", variable);
+		        fprintf(outfile, "\t\t%s:units = \"", variable);
+		        fprintf(outfile, "us\";\n");
+
+		        signflip_next_value = MB_NO;
+		        invert_next_value = MB_NO;
+		        raw_next_value = MB_NO;
+		        break;
+
 		  case 'N' : /* Ping number */
 		    	strcpy(variable, "ping_no");
 
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tlong %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Sounder ping counter\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2076,6 +2123,51 @@ int main (int argc, char **argv)
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
 			break;
+
+                  case 'n' : /* Range to normal incidence */
+                        strcpy(variable, "range_normal");
+
+                        fprintf(output[i], "\t%s = ", variable);
+
+                        fprintf(outfile, "\tlong %s(data);\n", variable);
+                        fprintf(outfile, "\t\t%s:long_name = \"Range to normal incidence\";\n", variable);
+                        fprintf(outfile, "\t\t%s:units = \"", variable);
+                        fprintf(outfile, "samples\";\n");
+
+                        signflip_next_value = MB_NO;
+                        invert_next_value = MB_NO;
+                        raw_next_value = MB_NO;
+                        break;
+
+                  case 'o' : /* Sidescan sort order */
+                        strcpy(variable, "sort");
+
+                        fprintf(output[i], "\t%s = ", variable);
+
+                        fprintf(outfile, "\tlong %s(data);\n", variable);
+                        fprintf(outfile, "\t\t%s:long_name = \"Sidescan sort order\";\n", variable);
+                        fprintf(outfile, "\t\t%s:units = \"", variable);
+                        fprintf(outfile, "sign\";\n");
+
+                        signflip_next_value = MB_NO;
+                        invert_next_value = MB_NO;
+                        raw_next_value = MB_NO;
+                        break;
+
+                  case 'P' : /* Center sample number */
+                        strcpy(variable, "center_sample");
+
+                        fprintf(output[i], "\t%s = ", variable);
+
+                        fprintf(outfile, "\tlong %s(data);\n", variable);
+                        fprintf(outfile, "\t\t%s:long_name = \"Center (detection point) sample number\";\n", variable);
+                        fprintf(outfile, "\t\t%s:units = \"", variable);
+                        fprintf(outfile, "sample\";\n");
+
+                        signflip_next_value = MB_NO;
+                        invert_next_value = MB_NO;
+                        raw_next_value = MB_NO;
+                        break;
 
 		  case 'p': /* sidescan pixel */
 			strcpy(variable, "sidescan");
@@ -2242,6 +2334,51 @@ int main (int argc, char **argv)
 			raw_next_value = MB_NO;
 			break;
 
+                  case 'X': /* TVG crossover angle */
+                        strcpy(variable, "tvg_crossover");
+                        if (signflip_next_value == MB_YES)
+                          strcat(variable, "-");
+                        if (invert_next_value == MB_YES)
+                          strcat(variable, "_");
+
+                        fprintf(output[i], "\t%s = ", variable);
+
+                        fprintf(outfile, "\tfloat %s(data);\n", variable);
+                        fprintf(outfile, "\t\t%s:long_name = \"TVG crossover angle\";\n", variable);
+                        fprintf(outfile, "\t\t%s:units = \"", variable);
+                        if (signflip_next_value == MB_YES)
+                          fprintf(outfile, "-");
+                        if (invert_next_value == MB_YES)
+                          fprintf(outfile, "1/");
+                        fprintf(outfile, "degrees\";\n");
+
+                        signflip_next_value = MB_NO;
+                        invert_next_value = MB_NO;
+                        raw_next_value = MB_NO;
+                        break;
+
+                  case 'x': /* Tx beamwidth */
+                        strcpy(variable, "tx_beam");
+                        if (signflip_next_value == MB_YES)
+                          strcat(variable, "-");
+                        if (invert_next_value == MB_YES)
+                          strcat(variable, "_");
+
+                        fprintf(output[i], "\t%s = ", variable);
+
+                        fprintf(outfile, "\tfloat %s(data);\n", variable);
+                        fprintf(outfile, "\t\t%s:long_name = \"Tx beamwidth\";\n", variable);
+                        fprintf(outfile, "\t\t%s:units = \"", variable);
+                        if (signflip_next_value == MB_YES)
+                          fprintf(outfile, "-");
+                        if (invert_next_value == MB_YES)
+                          fprintf(outfile, "1/");
+                        fprintf(outfile, "degrees\";\n");
+
+                        signflip_next_value = MB_NO;
+                        invert_next_value = MB_NO;
+                        raw_next_value = MB_NO;
+                        break;
 
 
 		  default:
@@ -2391,6 +2528,12 @@ int main (int argc, char **argv)
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							sizeof(double), (void **)&bs, &error);
+                if (error == MB_ERROR_NO_ERROR)
+                        status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+                                                        sizeof(int), (void **)&center_sample, &error);
+                if (error == MB_ERROR_NO_ERROR)
+                        status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+                                                        sizeof(int), (void **)&sort, &error);
 		status = mb_mallocd(verbose, __FILE__, __LINE__, 
 					(MBSYS_SIMRAD2_MAXRAWPIXELS)*sizeof(double),
 					(void **)&ss_pixels,&error);
@@ -2680,7 +2823,11 @@ int main (int argc, char **argv)
 					&mode,
 					&ipulse_length,
 					&png_count,
+					&ssv,
 					&sample_rate,
+					depression,
+					range,
+					bs,
 					&absorption,
 					&max_range,
 					&r_zero,
@@ -2693,11 +2840,10 @@ int main (int argc, char **argv)
 					&tvg_crossover,
 					&nbeams_ss,
 					&npixels,
+					sort,
 					beam_samples,
 					start_sample,
-					range,
-					depression,
-					bs,
+					center_sample,
 					ss_pixels,
 					&error);
 			}  
@@ -3396,6 +3542,12 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
+                                case 'C': /* Sound speed */
+                                        printsimplevalue(verbose, output[i], ssv, 5, 1, ascii,
+                                                            &invert_next_value,
+                                                            &signflip_next_value, &error);
+                                        raw_next_value = MB_NO;
+                                        break;
 				case 'c': /* Mean backscatter */
 				  	mback = 0;
 					nback = 0;
@@ -3504,6 +3656,16 @@ int main (int argc, char **argv)
 					    }
 					raw_next_value = MB_NO;
 					break;
+                                case 'm': /* Pulse length */
+                                        if (ascii == MB_YES)
+                                            fprintf(output[i],"%6d",r_zero);
+                                        else
+                                            {
+                                            b = r_zero;
+                                            fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+                                        raw_next_value = MB_NO;
+                                        break;
 				case 'N': /* ping counter */
 					if (ascii == MB_YES)
 					    fprintf(output[i],"%6d",png_count);
@@ -3514,6 +3676,36 @@ int main (int argc, char **argv)
 					    }
 					raw_next_value = MB_NO;
 					break;
+                                case 'n': /* Range normal */
+                                        if (ascii == MB_YES)
+                                            fprintf(output[i],"%6d",r_zero_corr);
+                                        else
+                                            {
+                                            b = r_zero_corr;
+                                            fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+                                        raw_next_value = MB_NO;
+                                        break;
+                                case 'o': /* sidescan sort */
+                                        if (ascii == MB_YES)
+                                            fprintf(output[i],"%4d",sort[k]);
+                                        else
+                                            {
+                                            b = sort[k];
+                                            fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+                                        raw_next_value = MB_NO;
+                                        break;
+                                case 'P': /* center sample */
+                                        if (ascii == MB_YES)
+                                            fprintf(output[i],"%6d",center_sample[k]);
+                                        else
+                                            {
+                                            b = center_sample[k];
+                                            fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+                                        raw_next_value = MB_NO;
+                                        break;
 				case 'p': /* sidescan */
 					invert = invert_next_value;
 					flip = signflip_next_value;
@@ -3600,6 +3792,18 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
+                                case 'X': /* TVG crossover */
+                                        printsimplevalue(verbose, output[i], tvg_crossover, 5, 1, ascii,
+                                                            &invert_next_value,
+                                                            &signflip_next_value, &error);
+                                        raw_next_value = MB_NO;
+                                        break;
+                                case 'x': /* Tx beamwidth */
+                                        printsimplevalue(verbose, output[i], tx, 5, 1, ascii,
+                                                            &invert_next_value,
+                                                            &signflip_next_value, &error);
+                                        raw_next_value = MB_NO;
+                                        break;
 
 				default:
 					if (ascii == MB_YES)
@@ -4197,6 +4401,12 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
+                                case 'C': /* Sound speed */
+                                        printsimplevalue(verbose, output[i], ssv, 5, 1, ascii,
+                                                            &invert_next_value,
+                                                            &signflip_next_value, &error);
+                                        raw_next_value = MB_NO;
+                                        break;
 				case 'c': /* Mean backscatter */
 				  	mback = 0;
 					nback = 0;
@@ -4286,6 +4496,16 @@ int main (int argc, char **argv)
 					    }
 					raw_next_value = MB_NO;
 					break;
+                                case 'm': /* Pulse length */
+                                        if (ascii == MB_YES)
+                                            fprintf(output[i],"%6d",r_zero);
+                                        else
+                                            {
+                                            b = r_zero;
+                                            fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+                                        raw_next_value = MB_NO;
+                                        break;
 				case 'N': /* ping counter */
 					if (ascii == MB_YES)
 					    fprintf(output[i],"%6d",png_count);
@@ -4296,11 +4516,41 @@ int main (int argc, char **argv)
 					    }
 					raw_next_value = MB_NO;
 					break;
+                                case 'n': /* Range normal */
+                                        if (ascii == MB_YES)
+                                            fprintf(output[i],"%6d",r_zero_corr);
+                                        else
+                                            {
+                                            b = r_zero_corr;
+                                            fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+                                        raw_next_value = MB_NO;
+                                        break;
+                                case 'o': /* sidescan sort order */
+                                        if (ascii == MB_YES)
+                                            fprintf(output[i],"%6d",sort[beam_vertical]);
+                                        else
+                                            {
+                                            b = sort[beam_vertical];
+                                            fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+                                        raw_next_value = MB_NO;
+                                        break;
+                                case 'P': /* center sample */
+                                        if (ascii == MB_YES)
+                                            fprintf(output[i],"%6d",center_sample[beam_vertical]);
+                                        else
+                                            {
+                                            b = center_sample[beam_vertical];
+                                            fwrite(&b, sizeof(double), 1, outfile);
+                                            }
+                                        raw_next_value = MB_NO;
+                                        break;
 				case 'p': /* sidescan */
 					invert = invert_next_value;
 					flip = signflip_next_value;
-				  	printsimplevalue(verbose, output[i], ss_pixels[start_sample[beam_vertical]], 5, 1, ascii, 
-							 &invert_next_value, 
+				  	printsimplevalue(verbose, output[i], ss_pixels[start_sample[beam_vertical]], 5, 1, ascii,
+							 &invert_next_value,
 							 &signflip_next_value, &error);
 					if (count > 0)
 					  {
@@ -4385,6 +4635,18 @@ int main (int argc, char **argv)
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
+                                case 'X': /* TVG crossover */
+                                        printsimplevalue(verbose, output[i], tvg_crossover, 5, 1, ascii,
+                                                            &invert_next_value,
+                                                            &signflip_next_value, &error);
+                                        raw_next_value = MB_NO;
+                                        break;
+                                case 'x': /* Tx beamwidth */
+                                        printsimplevalue(verbose, output[i], tx, 5, 1, ascii,
+                                                            &invert_next_value,
+                                                            &signflip_next_value, &error);
+                                        raw_next_value = MB_NO;
+                                        break;
 
 				default:
 					if (ascii == MB_YES)
@@ -5029,7 +5291,11 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		int	*mode,
 		int	*ipulse_length,
 		int	*png_count,
+		double	*ssv,
 		int	*sample_rate,
+		double	*depression,
+		int	*range,
+		double	*bs,
 		double	*absorption,
 		int 	*max_range,
 		int 	*r_zero,
@@ -5038,15 +5304,14 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		int 	*tvg_stop,
 		double 	*bsn,
 		double 	*bso,
-		int 	*tx,
-		int 	*tvg_crossover,
+		double 	*tx,
+		double 	*tvg_crossover,
 		int 	*nbeams_ss,
 		int 	*npixels,
+		int	*sort,
 		int 	*beam_samples,
 		int	*start_sample,
-		int 	*range,
-		double	*depression,
-		double 	*bs,
+		int 	*center_sample,
 		double	*ss_pixels,
 		int 	*error)
 {
@@ -5070,6 +5335,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	*mode = -1;
 	*ipulse_length = 0;
 	*png_count = 0;
+	*ssv = 0;
 	*sample_rate = 0;
 	*absorption = 0;
 	*max_range = 0;
@@ -5085,45 +5351,50 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	*npixels = 0;
 
 	for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
-	  {
+	    {
+	    depression[i] = 0.0;
+	    range[i] = 0;
+	    bs[i] = 0.0;
 	    beam_samples[i] = 0;
 	    start_sample[i] = 0;
-	    range[i] = 0;
-	    depression[i] = 0.0;
-	    bs[i] = 0.0;
-	  }
+	    sort[i] = 0;
+	    center_sample[i] = 0;
+	    }
 
 	switch (mb_io_ptr->format) 
-	  {
-	  case MBF_EM300MBA:
-	  case MBF_EM300RAW:
+	    {
+	case MBF_EM300MBA:
+	case MBF_EM300RAW:
 	    mb_get_raw_simrad2(verbose, mbio_ptr, 
-				mode,
-				ipulse_length,
-				png_count,
-				sample_rate,
-				absorption,
-				max_range,
-				r_zero,
-				r_zero_corr,
-				tvg_start,
-				tvg_stop,
-				bsn,
-				bso,
-				tx,
-				tvg_crossover,
-				nbeams_ss,
-				npixels,
-				beam_samples,
-				start_sample,
-				range,
-				depression,
-				bs,
-				ss_pixels,
-				error);
+		    mode,
+		    ipulse_length,
+		    png_count,
+		    ssv,
+		    sample_rate,
+		    depression,
+		    range,
+		    bs,
+		    absorption,
+		    max_range,
+		    r_zero,
+		    r_zero_corr,
+		    tvg_start,
+		    tvg_stop,
+		    bsn,
+		    bso,
+		    tx,
+		    tvg_crossover,
+		    nbeams_ss,
+		    npixels,
+		    sort,
+		    beam_samples,
+		    start_sample,
+		    center_sample,
+		    ss_pixels,
+		    error);
 
 	    break;
-	  }
+	    }
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -5179,7 +5450,11 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 			int	*mode,
 			int	*ipulse_length,
 			int	*png_count,
+			double	*ssv,
 			int	*sample_rate,
+			double	*depression,
+			int 	*range,
+			double 	*bs,
 			double	*absorption,
 			int 	*max_range,
 			int 	*r_zero,
@@ -5188,15 +5463,14 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 			int 	*tvg_stop,
 			double 	*bsn,
 			double 	*bso,
-			int 	*tx,
-			int 	*tvg_crossover,
+			double 	*tx,
+			double 	*tvg_crossover,
 			int 	*nbeams_ss,
 			int 	*npixels,
+			int	*sort,
 			int 	*beam_samples,
 			int	*start_sample,
-			int 	*range,
-			double	*depression,
-			double 	*bs,
+			int	*center_sample,
 			double	*ss_pixels,
 			int 	*error)
 {
@@ -5222,10 +5496,11 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 	ping_ptr = store_ptr->ping;
 
 	if (store_ptr->kind == MB_DATA_DATA)
-	  {
+	    {
 	    *mode = store_ptr->run_mode;
 	    *ipulse_length = store_ptr->run_tran_pulse;
 	    *png_count = ping_ptr->png_count;
+	    *ssv = ping_ptr->png_ssv *0.1;
 	    *sample_rate =  ping_ptr->png_sample_rate;
 	    *absorption = ping_ptr->png_max_range * 0.01;
 	    *max_range = ping_ptr->png_max_range;
@@ -5235,26 +5510,28 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 	    *tvg_stop = ping_ptr->png_tvg_stop;
 	    *bsn = ping_ptr->png_bsn * 0.5;
 	    *bso = ping_ptr->png_bso * 0.5;
-	    *tx = ping_ptr->png_tx;
-	    *tvg_crossover = ping_ptr->png_tvg_crossover;
+	    *tx = ping_ptr->png_tx * 0.1;
+	    *tvg_crossover = ping_ptr->png_tvg_crossover * 0.1;
 	    *nbeams_ss = ping_ptr->png_nbeams_ss;
 	    *npixels = ping_ptr->png_npixels;
-	    
-	    
+
+
 	    for (i = 0; i < ping_ptr->png_nbeams; i++)
-	      {
-		range[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_range[i];
+		{
 		depression[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_depression[i] * .01;
+		range[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_range[i];
 		bs[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_amp[i] * 0.5;
-	      }
+		}
 	    for (i = 0; i < ping_ptr->png_nbeams_ss; i++) 
-	      {
+		{
+		sort[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_sort_direction[i];
 		beam_samples[ping_ptr->png_beam_index[i]] = ping_ptr->png_beam_samples[i];
 		start_sample[ping_ptr->png_beam_index[i]] = ping_ptr->png_start_sample[i];
-	      }
+		center_sample[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_center_sample[i];
+		}
 	    for (i = 0; i < ping_ptr->png_npixels; i++)
-	      ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
-	  }
+		ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
+	    }
 
 	/* print output debug statements */
 	if (verbose >= 2)
