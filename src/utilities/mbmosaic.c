@@ -204,6 +204,7 @@
 #define MBMOSAIC_DATA_FLAT_GRAZING	5
 #define MBMOSAIC_DATA_GRAZING		6
 #define MBMOSAIC_DATA_SLOPE		7
+#define MBMOSAIC_DATA_OTHER		8
 
 /* prioritization mode */
 #define	MBMOSAIC_PRIORITY_NONE		0
@@ -310,6 +311,12 @@ int mbmosaic_get_footprint(
 		double	alongtrack,
 		double	acrosstrack_spacing,
 		struct footprint *footprint,
+		int	*error);
+int get_other_data(
+		void	*mbio_ptr,
+		int	beam,
+		int	datatype,
+		double	*data,
 		int	*error);
 ;
 /* program identifiers */
@@ -1350,6 +1357,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			fprintf(outfp,"Grazing angle\n");
 		else if (datatype == MBMOSAIC_DATA_SLOPE)
 			fprintf(outfp,"Bottom slope\n");
+		else if (datatype >= MBMOSAIC_DATA_OTHER)
+			fprintf(outfp,"Programmed value %d\n", datatype);
 		else
 			fprintf(outfp,"Unknown?\n");
 		fprintf(outfp,"Grid projection: %s\n", projection_id);
@@ -1902,36 +1911,43 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    if (inside == MB_YES
 				    	&& priorities[ib] > maxpriority[kgrid])
 					{
-					if (use_slope)
-						status = mb_pr_get_bathyslope(verbose,
-						    ndepths,depths,depthacrosstrack,
-						    nslopes,slopes,slopeacrosstrack,
-						    depthacrosstrack[ib],
-						    &depth,&slope,&error);
-					slope = RTD * atan(slope);
-
 					if (datatype == MBMOSAIC_DATA_AMPLITUDE)
 					    grid[kgrid] = amp[ib];
-					else if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
-					  {
-					    if (angles[ib] > 0)
-					      grid[kgrid] = angles[ib];
-					    else
-					      grid[kgrid] = - angles[ib];
-					  }
-					else if (datatype == MBMOSAIC_DATA_GRAZING)
-					  {
-					    slope +=  angles[ib];
-					    if (slope < 0)
-					      slope = - slope;
-					    grid[kgrid] = slope;
-					  }
-					else if (datatype == MBMOSAIC_DATA_SLOPE)
-					  {
-					    if (slope < 0)
-					      slope = - slope;
-					    grid[kgrid] = slope;
-					  }
+					else if (datatype >= MBMOSAIC_DATA_OTHER)
+					    {
+					    get_other_data(mbio_ptr, ib, datatype, &grid[kgrid], &error);
+					    }
+					else if (ib < ndepths)
+					    {
+					    if (use_slope)
+						status = mb_pr_get_bathyslope(verbose,
+							ndepths,depths,depthacrosstrack,
+							nslopes,slopes,slopeacrosstrack,
+							depthacrosstrack[ib],
+							&depth,&slope,&error);
+					    slope = RTD * atan(slope);
+
+					    if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
+						{
+						if (angles[ib] > 0)
+						    grid[kgrid] = angles[ib];
+						else
+						    grid[kgrid] = - angles[ib];
+						}
+					    else if (datatype == MBMOSAIC_DATA_GRAZING)
+						{
+						slope +=  angles[ib];
+						if (slope < 0)
+						    slope = - slope;
+						grid[kgrid] = slope;
+						}
+					    else if (datatype == MBMOSAIC_DATA_SLOPE)
+						{
+						if (slope < 0)
+						    slope = - slope;
+						grid[kgrid] = slope;
+						}
+					    }
 
 					cnt[kgrid] = 1;
 					maxpriority[kgrid] = priorities[ib];
@@ -2536,29 +2552,47 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 					    grid[kgrid] += norm_weight * amp[ib];
 					    sigma[kgrid] += norm_weight * amp[ib] * amp[ib];
 					  }
-					else if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
-					  {
-					    if (angles[ib] > 0)
-					      grid[kgrid] += norm_weight * angles[ib];
-					    else
-					      grid[kgrid] -= norm_weight * angles[ib];
-					    sigma[kgrid] += norm_weight * angles[ib] * angles[ib];
-					  }
-					else if (datatype == MBMOSAIC_DATA_GRAZING)
-					  {
-					    slope += angles[ib];
-					    if (slope < 0)
-					      slope = - slope;
+					else if (datatype >= MBMOSAIC_DATA_OTHER)
+					    {
+					    get_other_data(mbio_ptr, ib, datatype, &slope, &error);
 					    grid[kgrid] += norm_weight * slope;
 					    sigma[kgrid] += norm_weight * slope * slope;
-					  }
-					else if (datatype == MBMOSAIC_DATA_SLOPE)
-					  {
-					    if (slope < 0)
-					      slope = - slope;
-					    grid[kgrid] += norm_weight * slope;
-					    sigma[kgrid] += norm_weight * slope * slope;
-					  }
+					    }
+					else if (ib < ndepths)
+					    {
+					    if (use_slope)
+						status = mb_pr_get_bathyslope(verbose,
+							ndepths,depths,depthacrosstrack,
+							nslopes,slopes,slopeacrosstrack,
+							depthacrosstrack[ib],
+							&depth,&slope,&error);
+					    slope = RTD * atan(slope);
+
+					    if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
+						{
+						if (angles[ib] > 0)
+						    grid[kgrid] += norm_weight * angles[ib];
+						else
+						    grid[kgrid] -= norm_weight * angles[ib];
+						sigma[kgrid] += norm_weight * angles[ib] * angles[ib];
+						}
+					    else if (datatype == MBMOSAIC_DATA_GRAZING)
+						{
+						slope += angles[ib];
+						if (slope < 0)
+						    slope = - slope;
+						grid[kgrid] += norm_weight * slope;
+						sigma[kgrid] += norm_weight * slope * slope;
+						}
+					    else if (datatype == MBMOSAIC_DATA_SLOPE)
+						{
+						if (slope < 0)
+						    slope = - slope;
+						grid[kgrid] += norm_weight * slope;
+						sigma[kgrid] += norm_weight * slope * slope;
+						}
+					    }
+
 					cnt[kgrid]++;
 					}
 				    }
@@ -3096,6 +3130,13 @@ kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 		strcpy(nlabel,"Number of Slope Data Points");
 		strcpy(sdlabel,"Slope Standard Deviation (m)");
 		strcpy(title,"Slope Grid");
+		}
+	else if (datatype >= MBMOSAIC_DATA_OTHER)
+		{
+		strcpy(zlabel,"Degrees");
+		strcpy(nlabel,"Number of Data Points");
+		strcpy(sdlabel,"Standard Deviation (m)");
+		strcpy(title,"Grid");
 		}
 
 	/* write first output file */
@@ -4134,3 +4175,44 @@ int mbmosaic_get_footprint(
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/*
+ * Get Other Data
+ * This method is meant to be hacked to allow the gridding of any data value
+ */
+#include "../../include/mbsys_simrad2.h"
+
+
+int get_other_data(void* mbio_ptr, int beam, int datatype, double* data, int* error) {
+        char    *function_name = "get_other_data";
+        int     status = MB_SUCCESS;
+        int     i;
+
+        *data = 0;
+
+        struct mb_io_struct             *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+        if (mb_io_ptr->format == MBF_EM300RAW || mb_io_ptr->format == MBF_EM300MBA)
+            {
+            struct mbsys_simrad2_struct *store_ptr = (struct mbsys_simrad2_struct *) mb_io_ptr->store_data;
+            struct mbsys_simrad2_ping_struct *ping_ptr = store_ptr->ping;
+
+            switch (datatype)
+                {
+                case 10:  // Surface sound speed
+                    *data = ping_ptr->png_ssv * 0.1;
+                    break;
+
+                case 11: // Sound absorption
+                    *data = ping_ptr->png_max_range * 0.01;
+                    break;
+
+                case 12: // Mode
+                    *data = store_ptr->run_mode;
+                    break;
+
+                case 13: // Pulse length;
+                    *data = ping_ptr->png_r_zero;
+                    break;
+                }
+            }
+        return status;
+}

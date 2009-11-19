@@ -225,6 +225,10 @@ If the desired filtered data files do not exist, data input will fail and
 data are stored in ancilliary files ending with ".ffa", and filtered
 sidescan files end in ".ffs". Appending "F" to \fImode\fP values of 5-7 will have no effect.
 Default: \fIdatatype\fP = 4 (sidescan).
+.br\fIdatatype\fP of 8 or greater is used mbmosaic will grid the data value returned
+by the \fIget_other_data\fP method found at the end of \fImbmosaic.c\fP.
+This method is designed to be easily hacked to allow an arbitrary data value to be mosaiced.
+If a 
 .TP
 .B \-B
 \fIborder\fP
