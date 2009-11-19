@@ -300,17 +300,6 @@ int mbmosaic_get_priorities(
 		double	*angles, 
 		double	*priorities, 
 		int	*error);
-int double_compare(double *a, double *b);
-int set_bathyslope(int verbose,
-		int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-		int *ndepths, double *depths, double *depthacrosstrack, 
-		int *nslopes, double *slopes, double *slopeacrosstrack, 
-		int *error);
-int get_bathyslope(int verbose,
-		int ndepths, double *depths, double *depthacrosstrack, 
-		int nslopes, double *slopes, double *slopeacrosstrack, 
-		double acrosstrack, double *depth,  double *slope, 
-		int *error);
 int mbmosaic_get_footprint(
 		int	verbose, 
 		int	mode,
@@ -412,7 +401,6 @@ int main (int argc, char **argv)
 	int	pstatus;
 	char	path[MB_PATH_MAXLINE];
 	char	ppath[MB_PATH_MAXLINE];
-	char	ifile[MB_PATH_MAXLINE];
 	char	ofile[MB_PATH_MAXLINE];
 	char	dfile[MB_PATH_MAXLINE];
 	char	plot_cmd[MB_COMMENT_MAXLINE];
@@ -482,7 +470,9 @@ int main (int argc, char **argv)
 	/* crosstrack slope values */
 	double	depth, slope;
 	int	ndepths;
+	int	nsmooth = 5;
 	double	*depths = NULL;
+	double	*depthsmooth = NULL;
 	double	*depthacrosstrack = NULL;
 	int	nslopes;
 	double	*slopes = NULL;
@@ -554,7 +544,7 @@ int main (int argc, char **argv)
 	gydim = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:R:r:S:s:T:t:U:u:VvW:w:X:x:Y:y:Z:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -638,6 +628,11 @@ int main (int argc, char **argv)
 		case 'j':
 			sscanf (optarg,"%s", projection_pars);
 			projection_pars_f = MB_YES;
+			flag++;
+			break;
+		case 'K':
+		case 'k':
+			sscanf (optarg,"%d", &nsmooth);
 			flag++;
 			break;
 		case 'L':
@@ -825,7 +820,6 @@ int main (int argc, char **argv)
 		fprintf(outfp,"dbg2       etime_i[6]:           %d\n",etime_i[6]);
 		fprintf(outfp,"dbg2       speedmin:             %f\n",speedmin);
 		fprintf(outfp,"dbg2       timegap:              %f\n",timegap);
-		fprintf(outfp,"dbg2       file list:            %s\n",ifile);
 		fprintf(outfp,"dbg2       output file root:     %s\n",fileroot);
 		fprintf(outfp,"dbg2       grid x dimension:     %d\n",xdim);
 		fprintf(outfp,"dbg2       grid y dimension:     %d\n",ydim);
@@ -1708,12 +1702,13 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    sizeof(double), (void **)&depths, &error);
 			if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+				    sizeof(double), (void **)&depthsmooth, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 				    sizeof(double), (void **)&depthacrosstrack, &error);
-
 			if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 				    sizeof(double), (void **)&slopes, &error);
-
 			if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 				    sizeof(double), (void **)&slopeacrosstrack, &error);
@@ -1853,10 +1848,12 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 
 			  /* get bathymetry slopes if needed */
 			  if (use_slope == MB_YES)
-			    	set_bathyslope(verbose, 
+			      mb_pr_set_bathyslope(verbose,
+				        nsmooth,
 					beams_bath,beamflag,bath,bathacrosstrack,
 					&ndepths,depths,depthacrosstrack,
 					&nslopes,slopes,slopeacrosstrack,
+					depthsmooth,
 					&error);
 
 			  /* deal with data */
@@ -1906,11 +1903,12 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    	&& priorities[ib] > maxpriority[kgrid])
 					{
 					if (use_slope)
-						status = get_bathyslope(verbose,
+						status = mb_pr_get_bathyslope(verbose,
 						    ndepths,depths,depthacrosstrack,
 						    nslopes,slopes,slopeacrosstrack,
 						    depthacrosstrack[ib],
 						    &depth,&slope,&error);
+					slope = RTD * atan(slope);
 
 					if (datatype == MBMOSAIC_DATA_AMPLITUDE)
 					    grid[kgrid] = amp[ib];
@@ -2316,6 +2314,9 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 				    sizeof(double), (void **)&depths, &error);
 			if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+				    sizeof(double), (void **)&depthsmooth, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 				    sizeof(double), (void **)&depthacrosstrack, &error);
 			if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -2459,10 +2460,12 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 
 			  /* get bathymetry slopes if needed */
 			  if (use_slope == MB_YES)
-			    	set_bathyslope(verbose, 
+			      mb_pr_set_bathyslope(verbose,
+				        nsmooth,
 					beams_bath,beamflag,bath,bathacrosstrack,
 					&ndepths,depths,depthacrosstrack,
 					&nslopes,slopes,slopeacrosstrack,
+					depthsmooth,
 					&error);
 
 			  /* deal with data */
@@ -2513,11 +2516,12 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 					&& priorities[ib] >= maxpriority[kgrid] - priority_range)
 					{
 					if (use_slope)
-					    status = get_bathyslope(verbose,
+					    status = mb_pr_get_bathyslope(verbose,
 						ndepths,depths,depthacrosstrack,
 						nslopes,slopes,slopeacrosstrack,
 						depthacrosstrack[ib],
 						&depth,&slope,&error);
+					slope = RTD * atan(slope);
 
 					xx = wbnd[0] + ii*dx - bathlon[ib];
 					yy = wbnd[2] + jj*dy - bathlat[ib];
@@ -4030,211 +4034,6 @@ ndepthgood, depth[0], altitude_default, altitude_use, i, data[i], angles[i]);*/
 				i, angles[i], priorities[i]);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int double_compare(double *a, double *b)
-{
-	if (*a > *b)
-		return(1);
-	else
-		return(-1);
-}
-/*--------------------------------------------------------------------*/
-int set_bathyslope(int verbose,
-	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int *ndepths, double *depths, double *depthacrosstrack, 
-	int *nslopes, double *slopes, double *slopeacrosstrack, 
-	int *error)
-{
-	char	*function_name = "set_bathyslope";
-	int	status = MB_SUCCESS;
-	int	i;
-	
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       bath:            %ld\n",(long)bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(long)bathacrosstrack);
-		fprintf(stderr,"dbg2       bath:\n");
-		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, bath[i], bathacrosstrack[i]);
-		}
-
-	/* first find all depths */
-	*ndepths = 0;
-	for (i=0;i<nbath;i++)
-		{
-		if (mb_beam_ok(beamflag[i]))
-			{
-			depths[*ndepths] = bath[i];
-			depthacrosstrack[*ndepths] = bathacrosstrack[i];
-			(*ndepths)++;
-			}
-		}
-
-	/* now calculate slopes */
-	*nslopes = *ndepths + 1;
-	for (i=0;i<*ndepths-1;i++)
-		{
-		slopes[i+1] = (depths[i+1] - depths[i])
-			/(depthacrosstrack[i+1] - depthacrosstrack[i]);
-		slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1] 
-			+ depthacrosstrack[i]);
-		}
-	if (*ndepths > 1)
-		{
-		slopes[0] = 0.0;
-		slopeacrosstrack[0] = depthacrosstrack[0];
-		slopes[*ndepths] = 0.0;
-		slopeacrosstrack[*ndepths] = 
-			depthacrosstrack[*ndepths-1];
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       ndepths:         %d\n",
-			*ndepths);
-		fprintf(stderr,"dbg2       depths:\n");
-		for (i=0;i<*ndepths;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, depths[i], depthacrosstrack[i]);
-		fprintf(stderr,"dbg2       nslopes:         %d\n",
-			*nslopes);
-		fprintf(stderr,"dbg2       slopes:\n");
-		for (i=0;i<*nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, slopes[i], slopeacrosstrack[i]);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int get_bathyslope(int verbose,
-	int ndepths, double *depths, double *depthacrosstrack, 
-	int nslopes, double *slopes, double *slopeacrosstrack, 
-	double acrosstrack, double *depth,  double *slope, 
-	int *error)
-{
-	char	*function_name = "get_bathyslope";
-	int	status = MB_SUCCESS;
-	int	found_depth, found_slope;
-	int	idepth, islope;
-	int	i;
-	
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       ndepths:         %d\n",
-			ndepths);
-		fprintf(stderr,"dbg2       depths:\n");
-		for (i=0;i<ndepths;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, depths[i], depthacrosstrack[i]);
-		fprintf(stderr,"dbg2       nslopes:         %d\n",
-			nslopes);
-		fprintf(stderr,"dbg2       slopes:\n");
-		for (i=0;i<nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
-				i, slopes[i], slopeacrosstrack[i]);
-		fprintf(stderr,"dbg2       acrosstrack:     %f\n",acrosstrack);
-		}
-
-	/* check if acrosstrack is in defined interval */
-	found_depth = MB_NO;
-	found_slope = MB_NO;
-	if (ndepths > 1)
-	if (acrosstrack >= depthacrosstrack[0]
-		&& acrosstrack <= depthacrosstrack[ndepths-1])
-	    {
-
-	    /* look for depth */
-	    idepth = -1;
-	    while (found_depth == MB_NO && idepth < ndepths - 2)
-		{
-		idepth++;
-		if (acrosstrack >= depthacrosstrack[idepth]
-		    && acrosstrack <= depthacrosstrack[idepth+1])
-		    {
-		    *depth = depths[idepth] 
-			    + (acrosstrack - depthacrosstrack[idepth])
-			    /(depthacrosstrack[idepth+1] 
-			    - depthacrosstrack[idepth])
-			    *(depths[idepth+1] - depths[idepth]);
-		    found_depth = MB_YES;
-		    *error = MB_ERROR_NO_ERROR;
-		    }
-		}
-
-	    /* look for slope */
-	    islope = -1;
-	    while (found_slope == MB_NO && islope < nslopes - 2)
-		{
-		islope++;
-		if (acrosstrack >= slopeacrosstrack[islope]
-		    && acrosstrack <= slopeacrosstrack[islope+1])
-		    {
-		    *slope = slopes[islope] 
-			    + (acrosstrack - slopeacrosstrack[islope])
-			    /(slopeacrosstrack[islope+1] 
-			    - slopeacrosstrack[islope])
-			    *(slopes[islope+1] - slopes[islope]);
-		    found_slope = MB_YES;
-		    *error = MB_ERROR_NO_ERROR;
-		    }
-		}
-	    }
-
-	/* translate slope to degrees */
-	if (found_slope == MB_YES)
-	    *slope = RTD * atan(*slope);
-
-	if (isnan(*slope))
-	    *slope = 90;
-
-	/* check for failure */
-	if (found_depth != MB_YES || found_slope != MB_YES)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_OTHER;
-		*depth = 0.0;
-		*slope = 0.0;
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       depth:           %f\n",*depth);
-		fprintf(stderr,"dbg2       slope:           %f\n",*slope);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
 		}
 
 	/* return status */
