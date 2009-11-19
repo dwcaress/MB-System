@@ -482,11 +482,11 @@ int main (int argc, char **argv)
 	/* crosstrack slope values */
 	double	depth, slope;
 	int	ndepths;
-	double	*depths;
-	double	*depthacrosstrack;
+	double	*depths = NULL;
+	double	*depthacrosstrack = NULL;
 	int	nslopes;
-	double	*slopes;
-	double	*slopeacrosstrack;
+	double	*slopes = NULL;
+	double	*slopeacrosstrack = NULL;
 
 	/* projected grid parameters */
 	int	use_projection = MB_NO;
@@ -1701,6 +1701,24 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							    sizeof(double), (void **)&work2, &error);
 
+		    if (use_slope == MB_YES)
+			{
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+				    sizeof(double), (void **)&depths, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+				    sizeof(double), (void **)&depthacrosstrack, &error);
+
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+				    sizeof(double), (void **)&slopes, &error);
+
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+				    sizeof(double), (void **)&slopeacrosstrack, &error);
+			}
+
 		    /* if error initializing memory then quit */
 		    if (error != MB_ERROR_NO_ERROR)
 			{
@@ -2290,6 +2308,22 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 		    if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							    sizeof(double), (void **)&work2, &error);
+
+		    if (use_slope == MB_YES)
+			{
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+				    sizeof(double), (void **)&depths, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+				    sizeof(double), (void **)&depthacrosstrack, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+				    sizeof(double), (void **)&slopes, &error);
+			if (error == MB_ERROR_NO_ERROR)
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+				    sizeof(double), (void **)&slopeacrosstrack, &error);
+			}
 
 		    /* if error initializing memory then quit */
 		    if (error != MB_ERROR_NO_ERROR)
