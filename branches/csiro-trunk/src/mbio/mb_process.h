@@ -662,6 +662,9 @@
 #endif
 /* mbprocess value defines */
 #define MBP_FILENAMESIZE	MB_PATH_MAXLINE
+#define MBP_MAX_UNKNOWN_STR    5
+#define MBP_MAX_UNKNOWN_NUM    10
+#define MBP_PARAM_SIZE         30
 #define MBP_METANOVALUE		9999999.
 #define MBP_NAV_OFF		0
 #define MBP_NAV_ON		1
@@ -938,6 +941,17 @@ struct mb_process_struct
 	int	mbp_kluge008;
 	int	mbp_kluge009;
 	int	mbp_kluge010;
+
+	/* Second parameter file */
+	int     mbp_file2_modified;
+
+	 /* Parameters not recognised by this version, but preserved for forward compatibility */
+	int     mbp_n_unknown_num;
+	char    mbp_unknown_num_param[MBP_MAX_UNKNOWN_NUM][MBP_PARAM_SIZE];
+	double  mbp_unknown_num_value[MBP_MAX_UNKNOWN_NUM];
+	int     mbp_n_unknown_str;
+	char    mbp_unknown_str_param[MBP_MAX_UNKNOWN_STR][MBP_PARAM_SIZE];
+	char    mbp_unknown_str_value[MBP_MAX_UNKNOWN_STR][MBP_FILENAMESIZE];
 	};
 	
 /* edit save file definitions */
