@@ -11,9 +11,9 @@ Version 5.0
 \fBmbbackangle\fP [\fB-A\fIkind\fP 
 \fB-C\fP \fB-D\fP \fB-F\fIformat\fP  
 \fB-G\fIkind/angle/max/nx/ny\fP
-\fB-I\fIfile\fP  
+\fB-I\fIfile\fP \fB-K\fIsmooth\fP  
 \fB-N\fInangle/anglemax\fP \fB-P\fIpings\fP \fB-Q\fP
-\fBR\fIrefangle\fP \fB-Z\fIaltitude\fP \fB-V -H\fP]
+\fBR\fIrefangle\fP \fB-X\fIacross/along\fP \fB-Z\fIaltitude\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 The program \fBmbbackangle\fP reads a swath sonar data file 
@@ -153,6 +153,15 @@ format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .TP
+.B \-K
+\fIsmooth\fP
+Amount of smoothing to apply to bathymetry before determining acrosstrack slope.
+Only used if the \fB-Q\fP flag is given. 
+The value is the number of beams each side of the current beam to average over to determine
+the smoothed bathymetry for each beam.
+.br
+Default: \fIsmooth\fP = 5.
+.TP
 .B \-N
 \fInangle/angle\fP
 .br
@@ -202,6 +211,16 @@ Normally, \fBmbbackangle\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbmask\fP works in a "verbose" mode and
 outputs the program version being used and all error status messages.
+.TP
+.B \-X
+\fIacross/along\fP
+.br
+Acrosstrack and alongtrack distance of the transducer head,
+used to correct incident angle calculation
+(alongtrack is only used when a topology grid \fB-T\fP is provided).
+For SIMRAD sounders the value to use is at S1Y and S1X in the installation telegram.
+The default value of 0 is suitable for all systems which reference location
+relative to the transducer head.
 .TP
 .B \-Z
 \fIdepth\fP
