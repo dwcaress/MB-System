@@ -238,7 +238,7 @@ are output to a \".aga\" and \".sga\" files that can be applied \n\t\
 by MBprocess.";
 	char usage_message[] = "mbbackangle -Ifile \
 [-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/max/nx/ny \
--Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Zaltitude -V -H]";
+-Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Xacross/along -Zaltitude -V -H]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -388,6 +388,8 @@ by MBprocess.";
 	double	slope;
 	double	bathy;
 	double	altitude_use;
+	double	sonar_acrosstrack = 0.0;
+	double	sonar_alongtrack = 0.0;
 	double	angle;
 	double	ampmax;
 	double	norm;
@@ -426,7 +428,7 @@ by MBprocess.";
 	memset(&grid, 0, sizeof (struct mbba_grid_struct));
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:X:x:VvZ:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -528,6 +530,11 @@ by MBprocess.";
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'X':
+		case 'x':
+			sscanf (optarg,"%lf/%lf", &sonar_acrosstrack, &sonar_alongtrack);
+			flag++;
 			break;
 		case 'Z':
 		case 'z':
@@ -634,6 +641,8 @@ by MBprocess.";
 		fprintf(stderr,"dbg2       pings_avg:    %d\n",pings_avg);
 		fprintf(stderr,"dbg2       angle_max:    %f\n",angle_max);
 		fprintf(stderr,"dbg2       altitude:     %f\n",altitude_default);
+		fprintf(stderr,"dbg2       sonar_acrosstrack: %f\n",sonar_acrosstrack);
+		fprintf(stderr,"dbg2       sonar_alongtrack: %f\n",sonar_alongtrack);
 		fprintf(stderr,"dbg2       gridamp:      %d\n",gridamp);
 		fprintf(stderr,"dbg2       gridampangle: %f\n",gridampangle);
 		fprintf(stderr,"dbg2       gridampmax:   %f\n",gridampmax);
@@ -725,6 +734,8 @@ by MBprocess.";
 		fprintf(stderr, "Number of angle bins: %d\n", nangles);
 		fprintf(stderr, "Maximum angle:         %f\n", angle_max);
 		fprintf(stderr, "Default altitude:      %f\n", altitude_default);
+		fprintf(stderr, "Transducer XT offset:  %f\n", sonar_acrosstrack);
+		fprintf(stderr, "Transducer LT offset:  %f\n", sonar_alongtrack);
 		if (amplitude_on == MB_YES)
 			fprintf(stderr, "Working on beam amplitude data...\n");
 		if (sidescan_on == MB_YES)
@@ -1133,6 +1144,8 @@ by MBprocess.";
 	    	fprintf(atfp, "## Number of angle bins:  %d\n", nangles);
 	    	fprintf(atfp, "## Maximum angle:         %f\n", angle_max);
 	   	fprintf(atfp, "## Default altitude:      %f\n", altitude_default);
+	   	fprintf(atfp, "## Transducer XT offset:  %f\n", sonar_acrosstrack);
+	   	fprintf(atfp, "## Transducer LT offset:  %f\n", sonar_alongtrack);
 		fprintf(atfp, "## Slope correction:      %d\n", amp_corr_slope);
 	   	fprintf(atfp, "## Data type:             beam amplitude\n");
 		}
@@ -1161,6 +1174,8 @@ by MBprocess.";
 	    	fprintf(stfp, "## Number of angle bins:  %d\n", nangles);
 	    	fprintf(stfp, "## Maximum angle:         %f\n", angle_max);
 	   	fprintf(stfp, "## Default altitude:      %f\n", altitude_default);
+	   	fprintf(stfp, "## Transducer XT offset:  %f\n", sonar_acrosstrack);
+	   	fprintf(stfp, "## Transducer LT offset:  %f\n", sonar_alongtrack);
 		fprintf(stfp, "## Slope Correction:      %d\n", ss_corr_slope);
 	   	fprintf(stfp, "## Data type:             sidescan\n");
 		}
@@ -1322,6 +1337,10 @@ by MBprocess.";
 					{
 					/* get look vector for data */
 					bathy = -grid.data[kgrid];
+					r[0] =  headingy * (bathacrosstrack[i] - sonar_acrosstrack)
+						+ headingx * (bathalongtrack[i] - sonar_alongtrack);
+					r[1] =  -headingx * (bathacrosstrack[i] - sonar_acrosstrack)
+						+ headingy * (bathalongtrack[i] - sonar_alongtrack);
 					r[2] = grid.data[kgrid] + sonardepth;
 					rr = -sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
 					r[0] /= rr;
@@ -1355,11 +1374,11 @@ by MBprocess.";
 					/* angle between look vector and surface normal
 						is the acos(r dot v) */
 					angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] *v[2]);
-					if (bathacrosstrack[i] < 0.0)
+					if (bathacrosstrack[i] - sonar_acrosstrack < 0.0)
 						angle = -angle;
 					
 /* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
-i,bathacrosstrack[i],bathalongtrack[i],bath[i],sonardepth,RTD * atan(bathacrosstrack[i] / (sonardepth + grid.data[kgrid])));
+i,bathacrosstrack[i],bathalongtrack[i],bath[i],sonardepth,RTD * atan((bathacrosstrack[i] - sonar_acrosstrack) / (sonardepth + grid.data[kgrid])));
 fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
 ix,grid.nx,jy,grid.ny,grid.data[kgrid]);
 fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
@@ -1374,7 +1393,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 					    bathy = altitude + sonardepth;
 					else
 					    bathy = altitude_default + sonardepth;
-					angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
+					angle = RTD * atan((bathacrosstrack[i] - sonar_acrosstrack) / (bathy - sonardepth));
 					slope = 0.0;
 					}
 				}
@@ -1396,7 +1415,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 				    error = MB_ERROR_NO_ERROR;
 				    }
 				altitude_use = bathy - sonardepth;
-				angle = RTD * atan(bathacrosstrack[i] / altitude_use);
+				angle = RTD * atan((bathacrosstrack[i] - sonar_acrosstrack) / altitude_use);
 				if (corr_slope == MB_YES)
 					angle += RTD * atan(slope);
 				}
@@ -1408,7 +1427,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 				    bathy = altitude_default + sonardepth;
 				slope = 0.0;
 				altitude_use = bathy - sonardepth;
-				angle = RTD * atan(bathacrosstrack[i] / altitude_use);
+				angle = RTD * atan((bathacrosstrack[i] - sonar_acrosstrack) / altitude_use);
 				}
 			    if (bathy > 0.0)
 				{
@@ -1440,8 +1459,8 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 			    /* print debug statements */
 			    if (verbose >= 5)
 				{
-				fprintf(stderr,"dbg5       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n",
-				    nrec, i, slope, altitude_use, bathacrosstrack[i], angle, j);
+				fprintf(stderr,"dbg5       %d %d: slope:%f altitude:%f xtrack:%f sonar:%f ang:%f j:%d\n",
+				    nrec, i, slope, altitude_use, bathacrosstrack[i],  sonar_acrosstrack, angle, j);
 				}
 			    }
 			}
@@ -1476,6 +1495,10 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 					{
 					/* get look vector for data */
 					bathy = -grid.data[kgrid];
+					r[0] =  headingy * (ssacrosstrack[i] - sonar_acrosstrack)
+						+ headingx * (ssalongtrack[i] - sonar_alongtrack);
+					r[1] =  -headingx * (ssacrosstrack[i] - sonar_acrosstrack)
+						+ headingy * (ssalongtrack[i] - sonar_alongtrack);
 					r[2] = grid.data[kgrid] + sonardepth;
 					rr = -sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
 					r[0] /= rr;
@@ -1509,11 +1532,11 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 					/* angle between look vector and surface normal
 						is the acos(r dot v) */
 					angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] *v[2]);
-					if (ssacrosstrack[i] < 0.0)
+					if ((ssacrosstrack[i] - sonar_acrosstrack) < 0.0)
 						angle = -angle;
 					
 /* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
-i,ssacrosstrack[i],ssalongtrack[i],ss[i],sonardepth,RTD * atan(ssacrosstrack[i] / (sonardepth + grid.data[kgrid])));
+i,ssacrosstrack[i],ssalongtrack[i],ss[i],sonardepth,RTD * atan((ssacrosstrack[i] - sonar_acrosstrack) / (sonardepth + grid.data[kgrid])));
 fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
 ix,grid.nx,jy,grid.ny,grid.data[kgrid]);
 fprintf(stderr,"R:%f %f %f  V1:%f %f %f  V2:%f %f %f  V:%f %f %f  angle:%f\n\n",
@@ -1528,7 +1551,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 					    bathy = altitude + sonardepth;
 					else
 					    bathy = altitude_default + sonardepth;
-					angle = RTD * atan(ssacrosstrack[i] / (bathy - sonardepth));
+					angle = RTD * atan((ssacrosstrack[i] - sonar_acrosstrack) / (bathy - sonardepth));
 					slope = 0.0;
 					}
 				}
@@ -1551,7 +1574,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 				    error = MB_ERROR_NO_ERROR;
 				    }
 				altitude_use = bathy - sonardepth;
-				angle = RTD * atan(ssacrosstrack[i] / altitude_use);
+				angle = RTD * atan((ssacrosstrack[i] - sonar_acrosstrack) / altitude_use);
 				if (corr_slope == MB_YES)
 					angle += RTD * atan(slope);
 				}
@@ -1563,7 +1586,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 				    	bathy = altitude_default;
 				slope = 0.0;
 				altitude_use = bathy - sonardepth;
-				angle = RTD * atan(ssacrosstrack[i] / altitude_use);
+				angle = RTD * atan((ssacrosstrack[i] - sonar_acrosstrack) / altitude_use);
 				}
 			    if (bathy > 0.0)
 				{
@@ -1595,8 +1618,8 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 			    /* print debug statements */
 			    if (verbose >= 5)
 				{
-				fprintf(stderr,"dbg5kkk       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n",
-				    nrec, i, slope, altitude_use, ssacrosstrack[i], angle, j);
+				fprintf(stderr,"dbg5kkk       %d %d: slope:%f altitude:%f xtrack:%f sonar:%f ang:%f j:%d\n",
+				    nrec, i, slope, altitude_use, ssacrosstrack[i], sonar_acrosstrack, angle, j);
 				}
 			    }
 			}
@@ -1811,6 +1834,8 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	    fprintf(atfp, "## Number of angle bins:  %d\n", nangles);
 	    fprintf(atfp, "## Maximum angle:         %f\n", angle_max);
 	    fprintf(atfp, "## Default altitude:      %f\n", altitude_default);
+	    fprintf(atfp, "## Transducer XT offset:  %f\n", sonar_acrosstrack);
+	    fprintf(atfp, "## Transducer LT offset:  %f\n", sonar_alongtrack);
 	    fprintf(atfp, "## Slope correction:      %d\n", amp_corr_slope);
 	    fprintf(atfp, "## Data type:             beam amplitude\n");
 	    if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
@@ -1857,6 +1882,8 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	    fprintf(stfp, "## Number of angle bins:  %d\n", nangles);
 	    fprintf(stfp, "## Maximum angle:         %f\n", angle_max);
 	    fprintf(stfp, "## Default altitude:      %f\n", altitude_default);
+	    fprintf(atfp, "## Transducer XT offset:  %f\n", sonar_acrosstrack);
+	    fprintf(atfp, "## Transducer LT offset:  %f\n", sonar_alongtrack);
 	    fprintf(stfp, "## Slope Correction:      %d\n", ss_corr_slope);
 	    fprintf(stfp, "## Data type:             sidescan\n");
 	    if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
