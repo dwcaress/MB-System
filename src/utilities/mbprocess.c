@@ -2939,6 +2939,7 @@ and mbedit edit save files.\n";
 	    nampcorrangle = 0;
 	    sonar_acrosstrack = 0.0;
 	    sonar_alongtrack = 0.0;
+	    nsmooth = 5;
 	    if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL) 
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
@@ -2959,7 +2960,8 @@ and mbedit edit save files.\n";
 		    sscanf(buffer,"## Transducer XT offset:%lf",&sonar_acrosstrack);
 		else if (strncmp(buffer,"## Transducer LT offset:",24) == 0)
 		    sscanf(buffer,"## Transducer LT offset:%lf",&sonar_alongtrack);
-		}
+		else if (strncmp(buffer,"## Number to smooth:",20) == 0)
+		    sscanf(buffer,"## Number to smooth:%d",&nsmooth);		}
 	    fclose(tfp);
 	    
 	    /* allocate arrays for amplitude correction tables */

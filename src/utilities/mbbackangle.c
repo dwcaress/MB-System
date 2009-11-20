@@ -237,7 +237,7 @@ average function for a user defined number of pings. The tables \n\t\
 are output to a \".aga\" and \".sga\" files that can be applied \n\t\
 by MBprocess.";
 	char usage_message[] = "mbbackangle -Ifile \
-[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/max/nx/ny \
+[-Akind -Bmode[/beamwidth/depression] -Fformat -Ggridmode/angle/max/nx/ny -Ksmooth \
 -Nnangles/angle_max -Ppings -Q -Rrefangle -Ttopogridfile -Xacross/along -Zaltitude -V -H]";
 	extern char *optarg;
 	int	errflg = 0;
@@ -428,7 +428,7 @@ by MBprocess.";
 	memset(&grid, 0, sizeof (struct mbba_grid_struct));
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:X:x:VvZ:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:K:k:N:n:P:p:QqR:r:T:t:X:x:VvZ:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -499,6 +499,11 @@ by MBprocess.";
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", read_file);
+			flag++;
+			break;
+		case 'K':
+		case 'k':
+			sscanf (optarg,"%d", &nsmooth);
 			flag++;
 			break;
 		case 'N':
@@ -1147,6 +1152,7 @@ by MBprocess.";
 	   	fprintf(atfp, "## Transducer XT offset:  %f\n", sonar_acrosstrack);
 	   	fprintf(atfp, "## Transducer LT offset:  %f\n", sonar_alongtrack);
 		fprintf(atfp, "## Slope correction:      %d\n", amp_corr_slope);
+		fprintf(atfp, "## Number to smooth:      %d\n", nsmooth);
 	   	fprintf(atfp, "## Data type:             beam amplitude\n");
 		}
 
@@ -1177,6 +1183,7 @@ by MBprocess.";
 	   	fprintf(stfp, "## Transducer XT offset:  %f\n", sonar_acrosstrack);
 	   	fprintf(stfp, "## Transducer LT offset:  %f\n", sonar_alongtrack);
 		fprintf(stfp, "## Slope Correction:      %d\n", ss_corr_slope);
+		fprintf(atfp, "## Number to smooth:      %d\n", nsmooth);
 	   	fprintf(stfp, "## Data type:             sidescan\n");
 		}
 	    }
@@ -1837,6 +1844,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	    fprintf(atfp, "## Transducer XT offset:  %f\n", sonar_acrosstrack);
 	    fprintf(atfp, "## Transducer LT offset:  %f\n", sonar_alongtrack);
 	    fprintf(atfp, "## Slope correction:      %d\n", amp_corr_slope);
+	    fprintf(atfp, "## Number to smooth:      %d\n", nsmooth);
 	    fprintf(atfp, "## Data type:             beam amplitude\n");
 	    if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
 		    output_table(verbose, atfp, 0, ntotavg, time_d_totavg, 
@@ -1885,6 +1893,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	    fprintf(atfp, "## Transducer XT offset:  %f\n", sonar_acrosstrack);
 	    fprintf(atfp, "## Transducer LT offset:  %f\n", sonar_alongtrack);
 	    fprintf(stfp, "## Slope Correction:      %d\n", ss_corr_slope);
+	    fprintf(stfp, "## Number to smooth:      %d\n", nsmooth);
 	    fprintf(stfp, "## Data type:             sidescan\n");
 	    if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
 		    output_table(verbose, stfp, 0, ntotavg, time_d_totavg, 
