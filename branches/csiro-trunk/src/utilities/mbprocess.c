@@ -531,6 +531,8 @@ and mbedit edit save files.\n";
 	
 	/* sidescan correction */
 	double	altitude_default = 1000.0;
+	double	sonar_acrosstrack = 0.0;
+	double	sonar_alongtrack = 0.0;
 	int	nsmooth = 5;
 	double	reference_amp;
 	double	reference_amp_port;
@@ -2935,6 +2937,8 @@ and mbedit edit save files.\n";
 	    /* count the data points in the amplitude correction file */
 	    nampcorrtable = 0;
 	    nampcorrangle = 0;
+	    sonar_acrosstrack = 0.0;
+	    sonar_alongtrack = 0.0;
 	    if ((tfp = fopen(process.mbp_ampcorrfile, "r")) == NULL) 
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
@@ -2949,6 +2953,12 @@ and mbedit edit save files.\n";
 		    nampcorrtable++;
 		else if (strncmp(buffer,"# nangles:",10) == 0)
 		    sscanf(buffer,"# nangles:%d",&nampcorrangle);
+		else if (strncmp(buffer,"## Default altitude:",20) == 0)
+		    sscanf(buffer,"## Default altitude:%lf",&altitude_default);
+		else if (strncmp(buffer,"## Transducer XT offset:",24) == 0)
+		    sscanf(buffer,"## Transducer XT offset:%lf",&sonar_acrosstrack);
+		else if (strncmp(buffer,"## Transducer LT offset:",24) == 0)
+		    sscanf(buffer,"## Transducer LT offset:%lf",&sonar_alongtrack);
 		}
 	    fclose(tfp);
 	    
@@ -5898,7 +5908,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			    			if (bathy > 0.0)
 							{
 							altitude_use = bathy - sonardepth;
-							angle = RTD * atan(bathacrosstrack[i] / altitude_use);
+							angle = RTD * atan((bathacrosstrack[i] - sonar_acrosstrack) / altitude_use);
 							if (process.mbp_ampcorr_slope != MBP_AMPCORR_IGNORESLOPE)
 							   angle += RTD * atan(slope);
 							status = get_anglecorr(verbose, 
@@ -5994,7 +6004,7 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 			    			if (bathy > 0.0)
 							{
 							altitude_use = bathy - sonardepth;
-							angle = RTD * atan(ssacrosstrack[i] / altitude_use);
+							angle = RTD * atan((ssacrosstrack[i] - sonar_acrosstrack) / altitude_use);
 	/*fprintf(stderr,"time_d:%f i:%d xtrack:%f altitude:%f sonardepth:%f bathy:%f altitude_use:%f angle:%f\n",
 	time_d, i, ssacrosstrack[i], altitude, sonardepth, bathy, altitude_use, angle);*/
 							if (process.mbp_sscorr_slope != MBP_SSCORR_IGNORESLOPE)
@@ -6098,6 +6108,10 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 							{
 							/* get look vector for data */
 							bathy = -grid.data[kgrid];
+							r[0] =  headingy * (bathacrosstrack[i] - sonar_acrosstrack)
+								+ headingx * (bathalongtrack[i] - sonar_alongtrack);
+							r[1] =  -headingx * (bathacrosstrack[i] - sonar_acrosstrack)
+								+ headingy * (bathalongtrack[i] - sonar_alongtrack);
 							r[2] = grid.data[kgrid] + sonardepth;
 							rr = -sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
 							r[0] /= rr;
@@ -6131,7 +6145,7 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 							/* angle between look vector and surface normal
 								is the acos(r dot v) */
 							angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] *v[2]);
-							if (bathacrosstrack[i] < 0.0)
+							if ((bathacrosstrack[i] - sonar_acrosstrack) < 0.0)
 								angle = -angle;
 
 /* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
@@ -6148,7 +6162,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 							    bathy = -grid.data[kgrid];
 							else
 							    bathy = bath[i];
-							angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
+							angle = RTD * atan((bathacrosstrack[i] - sonar_acrosstrack) / (bathy - sonardepth));
 							slope = 0.0;
 							}
 							
@@ -6234,6 +6248,10 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 							{
 							/* get look vector for data */
 							bathy = -grid.data[kgrid];
+							r[0] =  headingy * (ssacrosstrack[i] - sonar_acrosstrack)
+								+ headingx * (ssalongtrack[i] - sonar_alongtrack);
+							r[1] =  -headingx * (ssacrosstrack[i] - sonar_acrosstrack)
+								+ headingy * (ssalongtrack[i] - sonar_alongtrack);
 							r[2] = grid.data[kgrid] + sonardepth;
 							rr = -sqrt(r[0] * r[0] + r[1] * r[1] + r[2] * r[2]);
 							r[0] /= rr;
@@ -6267,7 +6285,7 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 							/* angle between look vector and surface normal
 								is the acos(r dot v) */
 							angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] *v[2]);
-							if (ssacrosstrack[i] < 0.0)
+							if ((ssacrosstrack[i] - sonar_acrosstrack) < 0.0)
 								angle = -angle;
 
 		/* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
@@ -6286,7 +6304,7 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 							    bathy = altitude + sonardepth;
 							else
 							    bathy = altitude_default + sonardepth;
-							angle = RTD * atan(bathacrosstrack[i] / (bathy - sonardepth));
+							angle = RTD * atan((bathacrosstrack[i] - sonar_acrosstrack) / (bathy - sonardepth));
 							slope = 0.0;
 							}
 							
