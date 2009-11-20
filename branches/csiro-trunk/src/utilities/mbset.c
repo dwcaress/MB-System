@@ -995,6 +995,38 @@ the manual pages for mbprocess and mbset. \n\n";
 		    sscanf(pargv[i], "SSINTERPOLATE:%d", &process.mbp_ssrecalc_interpolate);
 		    }
    
+                /* absorption correction */
+                else if (strncmp(pargv[i], "SAPMODE", 7) == 0)
+                    {
+                    sscanf(pargv[i], "SAPMODE:%d", &process.mbp_sap_mode);
+                    process.mbp_file2_modified = MB_YES;
+                    }
+                else if (strncmp(pargv[i], "SAPSRC", 6) == 0)
+                    {
+                    sscanf(pargv[i], "SAPSRC:%d", &process.mbp_sap_src);
+                    process.mbp_file2_modified = MB_YES;
+                    }
+                else if (strncmp(pargv[i], "SAPUSE", 6) == 0)
+                    {
+                    sscanf(pargv[i], "SAPUSE:%d", &process.mbp_sap_use);
+                    process.mbp_file2_modified = MB_YES;
+                    }
+                else if (strncmp(pargv[i], "SAPPROFILE", 10) == 0)
+                    {
+                    sscanf(pargv[i], "SAPPROFILE:%s", &process.mbp_sap_profile);
+                    process.mbp_file2_modified = MB_YES;
+                    }
+                else if (strncmp(pargv[i], "ABSLOGGED", 9) == 0)
+                    {
+                    sscanf(pargv[i], "ABSLOGGED:%f", &process.mbp_sa_old);
+                    process.mbp_file2_modified = MB_YES;
+                    }
+                else if (strncmp(pargv[i], "ABSAPPLY", 8) == 0)
+                    {
+                    sscanf(pargv[i], "ABSAPPLY:%f", &process.mbp_sa_new);
+                    process.mbp_file2_modified = MB_YES;
+                    }
+
 		/* metadata insertion */
 		else if (strncmp(pargv[i], "METAVESSEL:", 11) == 0)
 			{

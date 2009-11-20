@@ -531,8 +531,16 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_kluge009 = MB_NO;
 	process->mbp_kluge010 = MB_NO;
 
-	/* Second parameter file */
+	/* second parameter file */
 	process->mbp_file2_modified = MB_NO;
+
+	/* sound absorption profile */
+	process->mbp_sap_mode = MBP_SAP_OFF;
+	process->mbp_sap_src = MBP_SAP_NONE;
+	process->mbp_sap_use = MBP_SAP_NONE;
+	process->mbp_sap_profile[0] = '\0';
+	process->mbp_sa_old = 0.0;
+	process->mbp_sa_new = 0.0;
 
 	/* unknown parameters */
 	process->mbp_n_unknown_str = 0;
@@ -1244,6 +1252,52 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			process->mbp_kluge010 = MB_YES;
 			}			
+
+		    /* sound absorption processing */
+                    else if (strncmp(buffer, "SAPMODE", 7) == 0)
+                        {
+                        sscanf(buffer, "%s %d", dummy, &process->mbp_sap_mode);
+                        }
+                    else if (strncmp(buffer, "SAPSRC", 6) == 0)
+                        {
+                        sscanf(buffer, "%s %d", dummy, &process->mbp_sap_src);
+                        }
+                    else if (strncmp(buffer, "SAPUSE", 6) == 0)
+                        {
+                        sscanf(buffer, "%s %d", dummy, &process->mbp_sap_use);
+                        }
+                    else if (strncmp(buffer, "SAPPROFILE", 10) == 0)
+                        {
+                        sscanf(buffer, "%s %s", dummy, process->mbp_sap_profile);
+                        if (explicit == MB_NO && process->mbp_sap_mode == MBP_SAP_OFF)
+                            {
+                            process->mbp_sap_mode = MBP_SAP_ON;
+                            process->mbp_sap_src = MBP_SAP_SRC_SEABED;
+                            process->mbp_sap_use = MBP_SAP_USE_PROFILE;
+                            }
+                        }
+                    else if (strncmp(buffer, "ABSLOGGED", 9) == 0)
+                        {
+                        sscanf(buffer, "%s %lf", dummy, &process->mbp_sa_old);
+                        if (explicit == MB_NO && process->mbp_sap_mode == MBP_SAP_OFF)
+                            {
+                            process->mbp_sap_mode = MBP_SAP_ON;
+                            process->mbp_sap_src = MBP_SAP_SRC_CONST;
+                            process->mbp_sap_use = MBP_SAP_NONE;
+                            }
+                        }
+                    else if (strncmp(buffer, "ABSAPPLY", 8) == 0)
+                        {
+                        sscanf(buffer, "%s %lf", dummy, &process->mbp_sa_new);
+                        if (explicit == MB_NO && process->mbp_sap_mode == MBP_SAP_OFF)
+                            {
+                            process->mbp_sap_mode = MBP_SAP_ON;
+                            process->mbp_sap_src = MBP_SAP_SRC_SEABED;
+                            process->mbp_sap_use = MBP_SAP_USE_CONST;
+                            }
+                        }
+
+		    /* unrecognised parameters */
 		    else
 			{
 			if (sscanf(buffer, "%s %lf %s", unknown, &x, dummy) == 2)
@@ -1483,8 +1537,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		strcpy(dummy, &(lastslash[1]));
 		strcpy(process->mbp_ampsscorr_topofile, dummy);
 		}
-	    }
 	    
+	    /* reset absorption profile file */
+	    if ((lastslash = strrchr(process->mbp_sap_profile, '/')) != NULL
+		    && strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_sap_profile, dummy);
+		}
+ 	    }
+
+
 	/* Now make filenames global if local */
 	lastslash = strrchr(process->mbp_ifile, '/');
 	len = lastslash - process->mbp_ifile + 1;
@@ -1610,7 +1673,18 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    strcat(process->mbp_ampsscorr_topofile, dummy);
 	    }
 	    
-	/* make sure all global paths are as short as possible */
+        /* reset sound absorption file */
+        if (len > 1
+            && strlen(process->mbp_sap_profile) > 1
+            && process->mbp_sap_profile[0] != '/')
+            {
+            strcpy(dummy, process->mbp_sap_profile);
+            strncpy(process->mbp_sap_profile, process->mbp_ifile, len);
+            process->mbp_sap_profile[len] = '\0';
+            strcat(process->mbp_sap_profile, dummy);
+            }
+
+        /* make sure all global paths are as short as possible */
 	mb_get_shortest_path(verbose, process->mbp_navadjfile, error);
 	mb_get_shortest_path(verbose, process->mbp_navfile, error);
 	mb_get_shortest_path(verbose, process->mbp_attitudefile, error);
@@ -1622,6 +1696,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	mb_get_shortest_path(verbose, process->mbp_ampcorrfile, error);
 	mb_get_shortest_path(verbose, process->mbp_sscorrfile, error);
 	mb_get_shortest_path(verbose, process->mbp_ampsscorr_topofile, error);
+        mb_get_shortest_path(verbose, process->mbp_sap_profile, error);
 	    
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, process, error);
@@ -2237,7 +2312,18 @@ int mb_pr_writepar(int verbose, char *file,
 		    fprintf(fp,"## Generated by user <%s> on cpu <%s> at <%s>\n##\n",
 			    user,host,date);
 
-		    /* Parameters unrecognised in this version (forward compatibility) */
+                    /* Sound absorption */
+                    fprintf(fp, "##\n## Sound absorption parameters:\n");
+                    fprintf(fp, "SAPMODE %d\n", process->mbp_sap_mode);
+                    fprintf(fp, "SAPSRC %d\n", process->mbp_sap_src);
+                    fprintf(fp, "SAPUSE %d\n", process->mbp_sap_use);
+                    strcpy(relative_path, process->mbp_sap_profile);
+                    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+                    fprintf(fp, "SAPPROFILE %s\n", relative_path);
+                    fprintf(fp, "ABSLOGGED %f\n", process->mbp_sa_old);
+                    fprintf(fp, "ABSAPPLY %f\n", process->mbp_sa_new);
+
+                    /* Parameters unrecognised in this version (forward compatibility) */
 		    fprintf(fp, "##\n## Unrecognised parameters:\n");
 		    for (i = 0; i < process->mbp_n_unknown_num; i++)
 			{
@@ -4183,6 +4269,66 @@ int mb_pr_update_kluges(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_pr_update_abscorr(int verbose, char *file,
+                        int     mbp_sap_mode,
+                        int     mbp_sap_src,
+                        int     mbp_sap_use,
+                        char    *mbp_sap_profile,
+                        double  mbp_sa_old,
+                        double  mbp_sa_new,
+                        int *error)
+{
+        char    *function_name = "mb_pr_update_abscorr";
+        struct mb_process_struct process;
+        int     status = MB_SUCCESS;
+
+        /* print input debug statements */
+        if (verbose >= 2)
+                {
+                fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+                        function_name);
+                fprintf(stderr,"dbg2  Input arguments:\n");
+                fprintf(stderr,"dbg2       verbose:                  %d\n",verbose);
+                fprintf(stderr,"dbg2       file:                     %s\n",file);
+                fprintf(stderr,"dbg2       mbp_sap_mode:             %d\n",mbp_sap_mode);
+                fprintf(stderr,"dbg2       mbp_sap_src:              %d\n",mbp_sap_src);
+                fprintf(stderr,"dbg2       mbp_sap_use:              %d\n",mbp_sap_use);
+                fprintf(stderr,"dbg2       mbp_sap_profile:          %s\n",mbp_sap_profile);
+                fprintf(stderr,"dbg2       mbp_sa_old:               %lf\n",mbp_sa_old);
+                fprintf(stderr,"dbg2       mbp_sa_new:               %lf\n",mbp_sa_new);
+                }
+
+        /* get known process parameters */
+        status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+        /* set sap values */
+        process.mbp_sap_mode = mbp_sap_mode;
+        process.mbp_sap_src = mbp_sap_src;
+        process.mbp_sap_use = mbp_sap_use;
+        if (mbp_sap_profile != NULL)
+            strcpy(process.mbp_sap_profile, mbp_sap_profile);
+        process.mbp_sa_old = mbp_sa_old;
+        process.mbp_sa_new = mbp_sa_new;
+        process.mbp_file2_modified = MB_YES;
+
+        /* write new process parameter file */
+        status = mb_pr_writepar(verbose, file, &process, error);
+
+        /* print output debug statements */
+        if (verbose >= 2)
+                {
+                fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+                        function_name);
+                fprintf(stderr,"dbg2  Return value:\n");
+                fprintf(stderr,"dbg2       error:                    %d\n",*error);
+                fprintf(stderr,"dbg2  Return status:\n");
+                fprintf(stderr,"dbg2       status:                   %d\n",status);
+                }
+
+        /* return status */
+        return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_pr_get_ofile(int verbose, char *file, 
 			int	*mbp_ofile_specified, 
 			char	*mbp_ofile, 
@@ -5502,6 +5648,65 @@ int mb_pr_get_kluges(int verbose, char *file,
 
 	/* return status */
 	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pr_get_abscorr(int verbose, char *file,
+                        int     *mbp_sap_mode,
+                        int     *mbp_sap_src,
+                        int     *mbp_sap_use,
+                        char    *mbp_sap_profile,
+                        double  *mbp_sa_old,
+                        double  *mbp_sa_new,
+                        int *error)
+{
+        char    *function_name = "mb_pr_get_abscorr";
+        struct mb_process_struct process;
+        int     status = MB_SUCCESS;
+
+        /* print input debug statements */
+        if (verbose >= 2)
+                {
+                fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+                        function_name);
+                fprintf(stderr,"dbg2  Input arguments:\n");
+                fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+                fprintf(stderr,"dbg2       file:              %s\n",file);
+                }
+
+        /* get known process parameters */
+        status = mb_pr_readpar(verbose, file, MB_YES, &process, error);
+
+        /* set sap values */
+        *mbp_sap_mode = process.mbp_sap_mode;
+        *mbp_sap_src = process.mbp_sap_src;
+        *mbp_sap_use = process.mbp_sap_use;
+        if (mbp_sap_profile != NULL)
+            strcpy(mbp_sap_profile, process.mbp_sap_profile);
+        *mbp_sa_old = process.mbp_sa_old;
+        *mbp_sa_new = process.mbp_sa_new;
+
+        if (*mbp_sap_src == MBP_SAP_NONE || *mbp_sap_use == MBP_SAP_NONE)
+            *mbp_sap_mode = MBP_SAP_OFF;
+
+        /* print output debug statements */
+        if (verbose >= 2)
+                {
+                fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+                        function_name);
+                fprintf(stderr,"dbg2  Return value:\n");
+                fprintf(stderr,"dbg2       mbp_sap_mode:          %d\n",*mbp_sap_mode);
+                fprintf(stderr,"dbg2       mbp_sap_src:           %d\n",*mbp_sap_src);
+                fprintf(stderr,"dbg2       mbp_sap_use:           %d\n",*mbp_sap_use);
+                fprintf(stderr,"dbg2       mbp_sap_profile:       %s\n",mbp_sap_profile);
+                fprintf(stderr,"dbg2       mbp_sa_old:            %f\n",*mbp_sa_old);
+                fprintf(stderr,"dbg2       mbp_sa_new:            %f\n",*mbp_sa_new);
+                fprintf(stderr,"dbg2       error:                    %d\n",*error);
+                fprintf(stderr,"dbg2  Return status:\n");
+                fprintf(stderr,"dbg2       status:                   %d\n",status);
+                }
+
+        /* return status */
+        return(status);
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_set_bathyslopenew(int verbose,
