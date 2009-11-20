@@ -574,6 +574,10 @@ and mbedit edit save files.\n";
 	double	altitude_use;
 	double	angle;
 	double	correction;
+	double	sigma = 1;
+	double	reference_sigma;
+	double	reference_sigma_port;
+	double	reference_sigma_stbd;
 
 	/* topography parameters */
 	struct mbprocess_grid_struct grid;
@@ -6070,6 +6074,40 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 							&error);
 				reference_amp = 0.5 * (reference_amp_port
 								+ reference_amp_stbd);
+				if (process.mbp_ampcorr_stddev == MBP_AMPCORR_NORMALISESTD)
+				    {
+				    status = get_anglecorr(verbose,
+					    ampcorrtableuse.nangle,
+					    ampcorrtableuse.angle,
+					    ampcorrtableuse.sigma,
+					    (-process.mbp_ampcorr_angle),
+					    &reference_sigma_port,
+					    &error);
+				    status = get_anglecorr(verbose,
+					    ampcorrtableuse.nangle,
+					    ampcorrtableuse.angle,
+					    ampcorrtableuse.sigma,
+					    process.mbp_ampcorr_angle,
+					    &reference_sigma_stbd,
+					    &error);
+				    if (reference_sigma_port == 0)
+					{
+					if (reference_sigma_stbd == 0)
+					    reference_sigma = 1;
+					else
+					    reference_sigma = reference_sigma_stbd;
+					}
+				    else
+					{
+					if (reference_sigma_stbd == 0)
+					    reference_sigma = reference_sigma_port;
+					else
+					    reference_sigma = 0.5 * (reference_sigma_port
+						    + reference_sigma_stbd);
+					}
+				    }
+				else
+				    reference_sigma = 1;
 	/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
 	itable, ampcorrtableuse.time_d, 
 	ampcorrtableuse.nangle);
@@ -6122,10 +6160,22 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 									ampcorrtableuse.angle, 
 									ampcorrtableuse.amplitude, 
 									angle, &correction, &error);
+                                                        if (process.mbp_ampcorr_stddev == MBP_AMPCORR_IGNORESTD)
+                                                            sigma = 1;
+                                                        else
+                                                            {
+							    status = get_anglecorr(verbose,
+								    ampcorrtableuse.nangle,
+								    ampcorrtableuse.angle,
+								    ampcorrtableuse.sigma,
+								    angle, &sigma, &error);
+							    if (sigma == 0)
+								sigma = 1;
+                                                            }
 /*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f", 
 j, i, slope, angle, correction, reference_amp, amp[i]);*/
 							if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
-				    				amp[i] = amp[i] - correction + reference_amp;
+				    				amp[i] = (amp[i] - correction) * reference_sigma / sigma + reference_amp;
 							else
 				    				amp[i] = amp[i] / correction * reference_amp;
 /*fprintf(stderr, " amp: %f\n", amp[i]);*/
