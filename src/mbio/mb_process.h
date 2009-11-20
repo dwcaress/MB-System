@@ -520,6 +520,26 @@
  *				    #     be defined as "kluges" that can be turned
  *				    #     on through the parameter files.
  *
+ * SOUND ABSORPTION CORRECTIONS:
+ *   SAPMODE mode		    # sets sound absorption correction mode
+ *   				    #   0: sound absorption correction off
+ *   				    #   1: sound absorption correction on
+ *   SAPSRC mode		    # specifies the source for the sound absorption
+ *   				    # that has been applied to the source data
+ *   				    #   0: None
+ *   				    #   1: Constant - use the value supplied in ABSLOGGED
+ *   				    #   2: Use the value in the Seabed Image telegram
+ *   				    #   3: Use the value in the Runtime telegram
+ *   SAPUSE mode		    # specify the source for the correct sound absorption to use
+ *   				    #   0 : None
+ *   				    #   1 : Constant - use the value supplied in ABSAPPLY
+ *   				    #   2 : Profile - read a sound absorption profile from the
+ *   				    #       file specified by SAPPROFILE
+ *   SAPPROFILE filename	    # set sound absorption profile path
+ *   ABSLOGGED constant		    # sound absorption valued used when data was logged
+ *   ABSAPPLY constant		    # correct sound aborption value to apply
+ *
+ *
  * MBprocess and its associated functions and programs use
  * the following file naming convention. The unprocessed swath
  * data file should have a name like "fileroot.mbxxx", where
@@ -760,6 +780,14 @@
 #define MBP_CORRECTION_UNKNOWN	-1
 #define MBP_CORRECTION_NO	0
 #define MBP_CORRECTION_YES	1
+#define MBP_SAP_OFF		0
+#define MBP_SAP_ON		1
+#define MBP_SAP_NONE		0
+#define MBP_SAP_SRC_CONST	1
+#define MBP_SAP_SRC_SEABED	2
+#define MBP_SAP_SRC_RUNTIME	3
+#define MBP_SAP_USE_CONST	1
+#define MBP_SAP_USE_PROFILE	2
 
 /* mbprocess file locking defines */
 #define MBP_LOCK_NONE		0
@@ -944,6 +972,14 @@ struct mb_process_struct
 
 	/* Second parameter file */
 	int     mbp_file2_modified;
+
+        /* Sound absorption correction */
+        int	mbp_sap_mode;
+        int	mbp_sap_src;
+        int	mbp_sap_use;
+        char	mbp_sap_profile[MBP_FILENAMESIZE];
+        double	mbp_sa_old;
+        double	mbp_sa_new;
 
 	 /* Parameters not recognised by this version, but preserved for forward compatibility */
 	int     mbp_n_unknown_num;

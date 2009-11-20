@@ -254,7 +254,9 @@
 #include "../../include/mb_aux.h"
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
-#include "../../include/mbsys_atlas.h"
+
+/* mbio include files for format specific stuff which probably shouldnt be here, eg get_absorption */
+#include "../../include/mb_io.h"
 #include "../../include/mbsys_simrad2.h"
 
 /* define sidescan correction table structure */
@@ -302,6 +304,12 @@ int get_corrtable(int verbose,
 int get_anglecorr(int verbose,
 	int nangle, double *angles, double *corrs,
 	double angle, double *corr, int *error);
+int get_absorption(int verbose, int mbp_sap_src, double mbp_sap_old,
+	void *mbio_ptr, double *absorption, int* error);
+int get_absorption_simrad2(int verbose, int mbp_sap_src,
+	void *mbio_ptr, double *absorption, int* error);
+int set_absorption(int verbose, void *mbio_ptr, double absorption, int* error);
+int set_absorption_simrad2(int verbose, void *mbio_ptr, double absorption, int* error);
 
 static char rcs_id[] = "$Id$";
 
@@ -493,6 +501,12 @@ and mbedit edit save files.\n";
 	double	*velocity_sum = NULL;
 	char	*rt_svp;
 	double	ssv;
+	int	nsap = 0;
+	double	*abs_depth = NULL;
+	double	*absorption = NULL;
+	double	*absorption_sum = NULL;
+	double	abs_at_bathy;
+	double	sa_delta;
 	
 	/* swath file locking variables */
 	int	lock_status;
@@ -573,6 +587,7 @@ and mbedit edit save files.\n";
 	int	i, j, k, mm;
 	int	ix, jy, kgrid;
 	int	kgrid00, kgrid10,kgrid01,kgrid11;
+	double	abs;
 	
 	char	*ctime();
 	char	*getenv();
@@ -1564,6 +1579,130 @@ and mbedit edit save files.\n";
 		    }
 	    }
 
+        /*--------------------------------------------
+          get sound absorption profile
+        --------------------------------------------*/
+
+        /* if absorption correction to be done get sap */
+        nsap = 0;
+        if (process.mbp_sap_use == MBP_SAP_USE_PROFILE)
+            {
+	    /* count the data points in the sap file */
+	    nsap = 0;
+	    if ((tfp = fopen(process.mbp_sap_profile, "r")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to Open Absorption Profile File <%s> for reading\n",process.mbp_sap_profile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    while ((result = fgets(buffer,MBP_FILENAMESIZE,tfp)) == buffer)
+		if (buffer[0] != '#' && buffer[0] != '(')
+		    nsap++;
+	    fclose(tfp);
+
+	    /* allocate arrays for sap */
+	    if (nsap > 1)
+		{
+		size = (nsap+2) * sizeof(double);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&abs_depth,&error);
+		if (error == MB_ERROR_NO_ERROR)
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&absorption,&error);
+		if (error == MB_ERROR_NO_ERROR)
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,size,(void **)&absorption_sum,&error);
+
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+		}
+
+	    /* if no sap data then quit */
+	    else
+		{
+		error = MB_ERROR_BAD_DATA;
+		fprintf(stderr,"\nUnable to read data from SVP file <%s>\n",process.mbp_sap_profile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+
+	    /* read the data points in the sap file */
+	    nsap = 0;
+	    if ((tfp = fopen(process.mbp_sap_profile, "r")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to Open Absorption Profile File <%s> for reading\n",process.mbp_sap_profile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    while ((result = fgets(buffer,MBP_FILENAMESIZE,tfp)) == buffer)
+		{
+		if (buffer[0] != '#' && buffer[0] != '(')
+		    {
+		    /* read the depth & sound speed pair */
+		    mm = sscanf(buffer,"%lf %lf",&abs_depth[nsap],&absorption[nsap]);
+
+		    /* output some debug values */
+		    if (verbose >= 5 && mm == 2)
+			{
+			fprintf(stderr,"\ndbg5  New absorption value read in program <%s>\n",program_name);
+			fprintf(stderr,"dbg5       abs_depth[%d]: %f  absorption[%d]: %f\n",
+				nsap,abs_depth[nsap],nsap,absorption[nsap]);
+			}
+
+		    /* update counter */
+		    if (mm == 2)
+			nsap++;
+
+		    /* check for nonzero initial depth & fix it if found */
+		    if (mm == 2 && nsap == 1 && abs_depth[0] != 0.0)
+			{
+			abs_depth[1] = abs_depth[0];
+			absorption[1] = absorption[0];
+			abs_depth[0] = 0.0;
+			nsap++;
+
+			/* output some debug values */
+			if (verbose >= 5)
+			    {
+			    fprintf(stderr,"\ndbg5  Nonzero initial SVP depth fixed in program <%s>\n",program_name);
+			    fprintf(stderr,"dbg5       abs_depth[%d]: %f  absorption[%d]: %f\n",
+				    0,abs_depth[0],0,absorption[0]);
+			    fprintf(stderr,"dbg5       abs_depth[%d]: %f  absorption[%d]: %f\n",
+				    1,abs_depth[1],1,absorption[1]);
+			    }
+			}
+		    }
+		}
+	    fclose(tfp);
+
+	    /* if absorption profile doesn't extend to 12000 m depth
+                   extend it to that depth */
+	    if (abs_depth[nsap-1] < 12000.0)
+		{
+		abs_depth[nsap] = 12000.0;
+		absorption[nsap] = absorption[nsap-1];
+		nsap++;
+		}
+
+	    /* get absorption sums in dB, absorption_sum[i] is the total absorption to depth abs_depth[i]  */
+	    absorption_sum[0] = 0.0;
+	    for (i=1;i<nsap;i++)
+		{
+		absorption_sum[i] = absorption_sum[i-1]
+		                  + 0.0005*(absorption[i-1] + absorption[i])
+	                              *(abs_depth[i] - abs_depth[i-1]);
+		}
+            }
+
 	/*--------------------------------------------
 	  get nav
 	  --------------------------------------------*/
@@ -1579,7 +1718,7 @@ and mbedit edit save files.\n";
 
 	    /* count the data points in the nav file */
 	    nnav = 0;
-	    if ((tfp = fopen(process.mbp_navfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_navfile, "r")) == NULL)
 		    {
 		    error = MB_ERROR_OPEN_FAIL;
 		    fprintf(stderr,"\nUnable to Open Navigation File <%s> for reading\n",process.mbp_navfile);
@@ -1590,7 +1729,7 @@ and mbedit edit save files.\n";
 	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
 		    nnav++;
 	    fclose(tfp);
-	    
+
 	    /* allocate arrays for nav */
 	    if (nnav > 1)
 		{
@@ -1606,7 +1745,7 @@ and mbedit edit save files.\n";
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nheave,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlonspl,&error);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nnav*sizeof(double),(void **)&nlatspl,&error);
-	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -1615,9 +1754,9 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 		}
-	
+
 	    /* if no nav data then quit */
 	    else
 		{
@@ -1626,11 +1765,11 @@ and mbedit edit save files.\n";
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
 		exit(error);
-		}		    
-		
+		}
+
 	    /* read the data points in the nav file */
 	    nnav = 0;
-	    if ((tfp = fopen(process.mbp_navfile, "r")) == NULL) 
+	    if ((tfp = fopen(process.mbp_navfile, "r")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		fprintf(stderr,"\nUnable to Open navigation File <%s> for reading\n",process.mbp_navfile);
@@ -2961,7 +3100,8 @@ and mbedit edit save files.\n";
 		else if (strncmp(buffer,"## Transducer LT offset:",24) == 0)
 		    sscanf(buffer,"## Transducer LT offset:%lf",&sonar_alongtrack);
 		else if (strncmp(buffer,"## Number to smooth:",20) == 0)
-		    sscanf(buffer,"## Number to smooth:%d",&nsmooth);		}
+		    sscanf(buffer,"## Number to smooth:%d",&nsmooth);
+	    	}
 	    fclose(tfp);
 	    
 	    /* allocate arrays for amplitude correction tables */
@@ -5795,6 +5935,70 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 			}
 		    }
 
+	        /*--------------------------------------------
+	          apply absorption correction
+	          --------------------------------------------*/
+
+		if (process.mbp_sap_mode == MBP_SAP_ON
+			&& error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA)
+		    {
+		    get_absorption(verbose, process.mbp_sap_src, process.mbp_sa_old, imbio_ptr, &abs, &error);
+
+		    sa_delta = abs;
+
+		    if (process.mbp_sap_use == MBP_SAP_USE_PROFILE)
+			{
+			/* use absorption for mean depth of ping */
+			bathy = 0.0;
+			j = 0;
+			for (i=0;i<beams_amp;i++)
+			    {
+			    if (mb_beam_ok(beamflag[i]))
+				{
+				bathy += bath[i];
+				j++;
+				}
+			    }
+			bathy /= j;
+			for (i=1;i<nsap && abs_depth[i]<bathy; i++) ;
+			if (i >= nsap)
+			    i = nsap - 1;
+
+			/* total absorption in dB to bathy */
+			abs_at_bathy = absorption[i-1] + (absorption[i] - absorption[i-1]) *
+				(bathy - abs_depth[i-1]) / (abs_depth[i] - abs_depth[i-1]);
+
+			abs = absorption_sum[i-1] +
+				0.0005*(absorption[i-1] + abs_at_bathy) *
+				(bathy - abs_depth[i-1]);
+
+			/* average absorption in db/km */
+			abs *= 1000 / bathy;
+			/*
+			printf("abs %f absum %f absi-1 %f absbathy %f absi %f absdepth %f bathy %f \n",
+				abs, absorption_sum[i-1], absorption[i-1], abs_at_bathy, absorption[i], abs_depth[i-1], bathy);
+			*/
+			}
+		    else if (process.mbp_sap_use == MBP_SAP_USE_CONST)
+			{
+			abs = process.mbp_sa_new;
+			}
+		    if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
+			sa_delta -= abs;
+		    else
+			sa_delta /= abs;
+
+		    for (i=0;i<beams_amp;i++)
+			{
+			if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
+			    amp [i] -= sa_delta * 0.002 * sqrt((bath[i] - sonardepth) * (bath[i] - sonardepth) + bathacrosstrack[i] * bathacrosstrack[i] + bathalongtrack[i] * bathalongtrack[i]);
+			else
+			    amp [i] /= sa_delta * 0.002 * sqrt((bath[i] - sonardepth) * (bath[i] - sonardepth) + bathacrosstrack[i] * bathacrosstrack[i] + bathalongtrack[i] * bathalongtrack[i]);
+			}
+		    set_absorption(verbose, imbio_ptr, abs, &error);
+		    }
+
 	/*--------------------------------------------
 	  apply grazing angle corrections to amplitude and sidescan
 	  --------------------------------------------*/
@@ -6536,7 +6740,12 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&velocity,&error);
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&velocity_sum,&error);
 
-	/* check memory */
+        /* deallocate memory for sap arrays */
+        mb_freed(verbose,__FILE__,__LINE__,(void **)&abs_depth,&error);
+        mb_freed(verbose,__FILE__,__LINE__,(void **)&absorption,&error);
+        mb_freed(verbose,__FILE__,__LINE__,(void **)&absorption_sum,&error);
+
+        /* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose,&error);
 
@@ -6957,3 +7166,99 @@ int get_anglecorr(int verbose,
 }
 /*--------------------------------------------------------------------*/
 
+int get_absorption(int verbose, int mbp_sap_src, double mbp_sap_old, void *mbio_ptr, double *absorption, int* error)
+{
+        char    *function_name = "get_absorption";
+        int     status = MB_FAILURE;
+        struct mb_io_struct     *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+        if (*absorption == 0)
+            *absorption = mbp_sap_old;
+
+        if (mbp_sap_src == MBP_SAP_SRC_CONST)
+        {
+            *absorption = mbp_sap_old;
+            status = MB_SUCCESS;
+        }
+        else
+        {
+            switch (mb_io_ptr->format)
+            {
+            case MBF_EM300MBA:
+            case MBF_EM300RAW:
+                status = get_absorption_simrad2(verbose, mbp_sap_src, mbio_ptr, absorption, error);
+                break;
+            }
+        }
+
+        return status;
+}
+
+/*--------------------------------------------------------------------*/
+
+int get_absorption_simrad2(int verbose, int mbp_sap_src, void *mbio_ptr, double *absorption, int* error)
+{
+        char    *function_name = "get_absorption_simrad2";
+        int     status = MB_SUCCESS;
+        double	abs;
+
+        struct mb_io_struct             *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+        struct mbsys_simrad2_struct     *store_ptr = (struct mbsys_simrad2_struct *) mb_io_ptr->store_data;
+        struct mbsys_simrad2_ping_struct *ping_ptr = store_ptr->ping;
+
+        if (mbp_sap_src == MBP_SAP_SRC_SEABED)
+            abs = ping_ptr->png_max_range * 0.01;
+        else
+            abs = store_ptr->run_absorption * 0.01;
+
+        if (abs > 0)
+            *absorption = abs;
+        return status;
+}
+/*--------------------------------------------------------------------*/
+int set_absorption(int verbose, void *mbio_ptr, double absorption, int* error)
+{
+        char    *function_name = "get_absorption";
+        int     status = MB_SUCCESS;
+
+        struct mb_io_struct     *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+        switch (mb_io_ptr->format)
+            {
+        case MBF_EM300MBA:
+        case MBF_EM300RAW:
+            status = set_absorption_simrad2(verbose, mbio_ptr, absorption, error);
+            break;
+            }
+
+        return status;
+}
+/*--------------------------------------------------------------------*/
+int set_absorption_simrad2(int verbose, void *mbio_ptr, double absorption, int* error)
+{
+	char    *function_name = "get_absorption_simrad2";
+	int     status = MB_SUCCESS;
+
+	struct mb_io_struct             *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	struct mbsys_simrad2_struct     *store_ptr = (struct mbsys_simrad2_struct *) mb_io_ptr->store_data;
+	struct mbsys_simrad2_ping_struct *ping_ptr = store_ptr->ping;
+
+	if (store_ptr->sonar == MBSYS_SIMRAD2_EM12S
+		|| store_ptr->sonar == MBSYS_SIMRAD2_EM12D
+		|| store_ptr->sonar == MBSYS_SIMRAD2_EM121
+		|| store_ptr->sonar == MBSYS_SIMRAD2_EM1000)
+	    {
+	/* this format does not store absorption */
+	    }
+	else if (store_ptr->sonar == MBSYS_SIMRAD2_EM300)
+	    {
+	    ping_ptr->png_max_range = (rint)(absorption * 100);
+	    }
+	else
+	    {
+	    /* for the moment assume an unrecognised sounder uses max range for absorption */
+	    ping_ptr->png_max_range = (rint)(absorption * 100);
+	    }
+
+	return status;
+}
+/*--------------------------------------------------------------------*/

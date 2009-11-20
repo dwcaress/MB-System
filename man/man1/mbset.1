@@ -563,6 +563,29 @@ The \fBmbprocess\fP parameter file commands modified by \fBmbset\fP are:
         sets sidescan interpolation distance 
         (number of pixels)
 
+ SOUND ABSORPTION CORRECTION:
+   SAPMODE mode
+ 	    set sound absorption correction mode [0]
+ 	      0: sound absorption correction off
+ 	      1: sound absorption correction on
+   SAPSRC mode
+        sets source for sound absorption in source data
+          0: None 
+          1: constant defined by ABSLOGGED
+          2: primary source in data file (seabed image telegram)
+          3: secondary source in data file (runtime telegram)
+   SAPUSE mode
+        sets the source for the correct sound absorption to use
+          0: None
+          1: constant defined by ABSAPPLY
+          2: value derived from sound absorption profile specified by SAPPROFILE
+   SAPPROFILE filename
+        sets sound absorption profile file path [no default]
+   ABSLOGGED constant
+        the sound absorption value used when the data was logged
+   ABSAPPLY constant
+        the correct sound absorption value to apply
+        
  METADATA INSERTION:
    METAVESSEL string              
         sets mbinfo metadata string for vessel
