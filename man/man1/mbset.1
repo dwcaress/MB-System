@@ -517,6 +517,13 @@ The \fBmbprocess\fP parameter file commands modified by \fBmbset\fP are:
  	  	but slope ignored
           3: local slope from topography grid used in 
  		  calculating correction
+   AMPCORRSTD mode	
+        sets amplitude correction standard deviation ajustment mode [0]
+          0: ignore standard deviation
+          1: divide correction by the standard deviation for the angle
+          2: divide correction by the standard deviation 
+             for this angle and multiply by standard deviation of the
+             reference angle.
 
  SIDESCAN CORRECTION:
    SSCORRMODE  boolean
@@ -544,6 +551,14 @@ The \fBmbprocess\fP parameter file commands modified by \fBmbset\fP are:
  	  	but slope ignored
           3: local slope from topography grid used in 
  		  calculating correction
+   SSCORRSTD mode	
+        sets sidescan correction standard deviation ajustment mode [0]
+        Not currently implemented.
+          0: ignore standard deviation
+          1: divide correction by the standard deviation for the angle
+          2: divide correction by the standard deviation 
+             for this angle and multiply by standard deviation of the
+             reference angle.
 
  SIDESCAN RECALCULATION:
    SSRECALCMODE  boolean

@@ -938,6 +938,11 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "AMPCORRSLOPE:%d", &process.mbp_ampcorr_slope);
 		    }
+		else if (strncmp(pargv[i], "AMPCORRSTD", 10) == 0)
+		    {
+		    sscanf(pargv[i], "AMPCORRSTD:%d", &process.mbp_ampcorr_stddev);
+		    process.mbp_file2_modified = MB_YES;
+		    }
 		else if (strncmp(pargv[i], "AMPSSCORRTOPOFILE", 17) == 0)
 		    {
 		    sscanf(pargv[i], "AMPSSCORRTOPOFILE:%s", process.mbp_ampsscorr_topofile);
@@ -971,6 +976,11 @@ the manual pages for mbprocess and mbset. \n\n";
 		else if (strncmp(pargv[i], "SSCORRSLOPE", 11) == 0)
 		    {
 		    sscanf(pargv[i], "SSCORRSLOPE:%d", &process.mbp_sscorr_slope);
+		    }
+		else if (strncmp(pargv[i], "SSCORRSTD", 9) == 0)
+		    {
+		    sscanf(pargv[i], "SSCORRSTD:%d", &process.mbp_sscorr_stddev);
+		    process.mbp_file2_modified = MB_YES;
 		    }
 		else if (strncmp(pargv[i], "AMPSSCORRTOPOFILE", 17) == 0)
 		    {

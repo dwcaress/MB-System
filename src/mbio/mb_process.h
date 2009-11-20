@@ -385,6 +385,10 @@
  *                                  #      but slope ignored
  *                                  #   3: local slope from topography grid used in 
  *                                  #      calculating correction
+ *   AMPCORRSTD mode		    # sets amplitude correction standard deviation mode [0]
+ *   	                            #   0: don't apply standard deviation correction
+ *                                  #   1: divide correction by angle standard deviation
+ *                                  #   2: divide correction by angle std dev / reference std dev
  *
  * SIDESCAN CORRECTION:
  *   SSCORRMODE  boolean            # sets correction of sidescan by amplitude vs grazing 
@@ -406,6 +410,10 @@
  *                                  #      but slope ignored
  *                                  #   3: local slope from topography grid used in 
  *                                  #      calculating correction
+ *   SSCORRSTD mode		    # sets sidescan correction standard deviation mode [0]
+ *   	                            #   0: don't apply standard deviation correction
+ *                                  #   1: divide correction by angle standard deviation
+ *                                  #   2: divide correction by angle std dev / reference std dev
  *
  * AMPLITUDE/SIDESCAN TOPOGRAPHY CORRECTION:
  *    AMPSSCORRTOPOFILE filename    # sets amplitude/sidescan correction topography grid file path
@@ -764,6 +772,9 @@
 #define MBP_AMPCORR_USESLOPE	1
 #define MBP_AMPCORR_USETOPO	2
 #define MBP_AMPCORR_USETOPOSLOPE	3
+#define MBP_AMPCORR_IGNORESTD	0
+#define MBP_AMPCORR_USESTD	1
+#define MBP_AMPCORR_NORMALISESTD	2
 #define MBP_SSCORR_OFF		0
 #define MBP_SSCORR_ON		1
 #define MBP_SSCORR_UNKNOWN	-1
@@ -775,6 +786,9 @@
 #define MBP_SSCORR_USESLOPE	1
 #define MBP_SSCORR_USETOPO	2
 #define MBP_SSCORR_USETOPOSLOPE	3
+#define MBP_SSCORR_IGNORESTD	0
+#define MBP_SSCORR_USESTD	1
+#define MBP_SSCORR_NORMALISESTD	2
 #define MBP_SSRECALC_OFF	0
 #define MBP_SSRECALC_ON		1
 #define MBP_CORRECTION_UNKNOWN	-1
@@ -920,6 +934,7 @@ struct mb_process_struct
 	int	mbp_ampcorr_symmetry;
 	double	mbp_ampcorr_angle;
 	int	mbp_ampcorr_slope;
+	int	mbp_ampcorr_stddev;
 	
 	/* sidescan correction */
 	int	mbp_sscorr_mode;
@@ -928,6 +943,7 @@ struct mb_process_struct
 	int	mbp_sscorr_symmetry;
 	double	mbp_sscorr_angle;
 	int	mbp_sscorr_slope;
+	int	mbp_sscorr_stddev;
 	
 	/* amplitude and sidescan correction */
 	char	mbp_ampsscorr_topofile[MBP_FILENAMESIZE];
