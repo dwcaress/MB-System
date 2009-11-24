@@ -470,6 +470,8 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	*pixel_size, *swath_width;
 	double	lever_x, lever_y, lever_z;
 	int	badtime;
+	double	gain_correction;
+	double	lon, lat;
 	int	i;
 
 	/* print input debug statements */
@@ -496,7 +498,7 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = data->kind;
-			    
+
 	/* handle navigation fix delay */
 	if (status == MB_SUCCESS && data->kind == MB_DATA_DATA)
 		{
@@ -532,13 +534,27 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		if (data->bathheader.FixTimeHour - data->bathheader.Hour > 1)
 		    dtime -= 3600.0 * 24;
 		ntime_d = time_d + dtime;
+		
+		/* check for use of projected coordinates
+			XTF allows projected coordinates like UTM but the format spec
+			lists the projection specification values as unused!
+			Assume UTM zone 1N as we have to assume something */
+		if (mb_io_ptr->projection_initialized == MB_YES)
+			{
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr,
+							data->bathheader.SensorXcoordinate, 
+							data->bathheader.SensorYcoordinate,
+							&lon, &lat,
+							error);
+			}
+		else
+			{
+			lon = data->bathheader.SensorXcoordinate;
+			lat = data->bathheader.SensorYcoordinate;
+			}
 		    
 		/* add latest fix to list */
-		mb_navint_add(verbose, mbio_ptr, 
-				ntime_d, 
-				data->bathheader.SensorXcoordinate, 
-				data->bathheader.SensorYcoordinate, 
-				error);
+		mb_navint_add(verbose, mbio_ptr, ntime_d, lon, lat, error);
 		}
 
 	/* translate values to reson data storage structure */
@@ -596,8 +612,8 @@ int mbr_rt_xtfr8101(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		time_i[6] = 10000 * data->bathheader.HSeconds;
 		mb_get_time(verbose, time_i,  &(store->png_time_d));
 		store->png_time_d -= store->png_latency;
-		store->png_latitude = data->bathheader.SensorYcoordinate;
 		store->png_longitude = data->bathheader.SensorXcoordinate;
+		store->png_latitude = data->bathheader.SensorYcoordinate;
 		store->png_speed = 0.0;
 		
 		/* interpolate attitude if possible */
@@ -643,8 +659,23 @@ timetag, store->png_roll);
 		    }
 		
 		/* interpolate nav if possible */
-		mb_navint_interp(verbose, mbio_ptr, store->png_time_d, store->png_heading, 0.0, 
-		    &(store->png_longitude), &(store->png_latitude), &(store->png_speed), error);
+		if (mb_io_ptr->nfix > 0)
+			{
+			mb_navint_interp(verbose, mbio_ptr, store->png_time_d, store->png_heading, 0.0, 
+			    &(store->png_longitude), &(store->png_latitude), &(store->png_speed), error);
+		    
+			/* now deal with odd case where original nav is in eastings and northings
+				- since the projection is initialized, it will be applied when data
+				are extracted using mb_extract(), mb_extract_nav(), etc., so we have
+				to reproject the lon lat values to eastings northings for now */
+			if (mb_io_ptr->projection_initialized == MB_YES)
+				{
+				mb_proj_forward(verbose, mb_io_ptr->pjptr,
+							store->png_longitude, store->png_latitude,
+							&(store->png_longitude), &(store->png_latitude),
+							error);
+				}
+			}
 
 		/* get lever arm correction for heave */
 		mb_lever(verbose, 
@@ -663,7 +694,7 @@ timetag, store->png_roll);
 			    &lever_y,
 			    &lever_z,
 			    error);
-		store->png_heave += lever_z;
+		store->png_heave -= lever_z;
 #ifdef MBR_XTFR8101_DEBUG
 fprintf(stderr,"offsets: %f %f %f   roll:%f pitch:%f    dz:%f\n", 
 store->MBOffsetX - store->MRUOffsetX,
@@ -680,27 +711,27 @@ lever_z);
 											/* indicates which sonar head to associate with packet */
 											/* 	head 1 - bit 7 set to 0 */
 											/* 	head 2 -	bit 7 set to 1 		 */
-		store->latency = data->reson8100rit.latency;          		/* time from ping to output (milliseconds) */
-		store->Seconds = data->reson8100rit.Seconds;			/* seconds since 00:00:00, 1 January 1970 */
+		store->latency = data->reson8100rit.latency;          			/* time from ping to output (milliseconds) */
+		store->Seconds = data->reson8100rit.Seconds;				/* seconds since 00:00:00, 1 January 1970 */
 		store->Millisecs = data->reson8100rit.Millisecs;			/* milliseconds, LSB = 1 ms */
 		store->ping_number = data->reson8100rit.ping_number;			/* sequential ping number from sonar startup/reset */
-		store->sonar_id = data->reson8100rit.sonar_id;			/* least significant four bytes of Ethernet address */
+		store->sonar_id = data->reson8100rit.sonar_id;				/* least significant four bytes of Ethernet address */
 		store->sonar_model = data->reson8100rit.sonar_model;			/* coded model number of sonar */
 		store->frequency = data->reson8100rit.frequency;			/* sonar frequency in KHz */
-		store->velocity = data->reson8100rit.velocity;         		/* programmed sound velocity (LSB = 1 m/sec) */
+		store->velocity = data->reson8100rit.velocity;         			/* programmed sound velocity (LSB = 1 m/sec) */
 		store->sample_rate = data->reson8100rit.sample_rate;      		/* A/D sample rate (samples per second) */
 		store->ping_rate = data->reson8100rit.ping_rate;        		/* Ping rate (pings per second * 1000) */
 		store->range_set = data->reson8100rit.range_set;        		/* range setting for SeaBat (meters ) */
-		store->power = data->reson8100rit.power;            		/* power setting for SeaBat  	 */
+		store->power = data->reson8100rit.power;            			/* power setting for SeaBat  	 */
 											/* bits	0-4 -	power (0 - 8) */
-		store->gain = data->reson8100rit.gain;             		/* gain setting for SeaBat */
+		store->gain = data->reson8100rit.gain;             			/* gain setting for SeaBat */
 											/* bits	0-6 -	gain (1 - 45) */
 											/* bit 	14	(0 = fixed, 1 = tvg) */
 											/* bit	15	(0 = manual, 1 = auto) */
 		store->pulse_width = data->reson8100rit.pulse_width;      		/* transmit pulse width (microseconds) */
-		store->tvg_spread = data->reson8100rit.tvg_spread;		/* spreading coefficient for tvg * 4  */
-							/* valid values = 0 to 240 (0.0 to 60.0 in 0.25 steps) */
-		store->tvg_absorp = data->reson8100rit.tvg_absorp;		/* absorption coefficient for tvg */
+		store->tvg_spread = data->reson8100rit.tvg_spread;			/* spreading coefficient for tvg * 4  */
+											/* valid values = 0 to 240 (0.0 to 60.0 in 0.25 steps) */
+		store->tvg_absorp = data->reson8100rit.tvg_absorp;			/* absorption coefficient for tvg */
 		store->projector_type = data->reson8100rit.projector_type;      	/* bits 0-4 = projector type */
 							/* 0 = stick projector */
 							/* 1 = array face */
@@ -787,9 +818,16 @@ lever_z);
 					= xx * cos(DTR * phi);
 				store->bath_alongtrack[i] 
 					= xx * sin(DTR * phi);
-				store->bath[i] = zz + store->png_heave
+				store->bath[i] = zz - store->png_heave
 						+ store->MBOffsetZ;
+/*if (i==store->beams_bath/2 && timetag > 1.0)
+fprintf(stderr,"%f %f %f %f %f\n",timetag,zz,store->png_heave,lever_z,store->bath[i]);*/
 				}
+			}
+		gain_correction = 2.2 * (store->gain & 63) + 6 * store->power;
+		for (i=0;i<store->beams_amp;i++)
+			{
+			store->amp[i] = (double)(40.0 * log10(store->intensity[i])- gain_correction);
 			}
 		store->ssrawtimedelay = data->pingchanportheader.TimeDelay;
 		store->ssrawtimeduration = data->pingchanportheader.TimeDuration;
@@ -889,6 +927,8 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 	int	quality;
 	mb_u_char *mb_u_char_ptr;
 	double	timetag, heave, roll, pitch, heading;
+	int	utm_zone;
+	char	projection[MB_NAME_LENGTH];
 	int	i;
 
 	/* print input debug statements */
@@ -900,7 +940,6 @@ int mbr_xtfr8101_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
 		}
-fprintf(stderr,"1 pointer error:%ld\n",(long)error);
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
@@ -924,7 +963,6 @@ fprintf(stderr,"1 pointer error:%ld\n",(long)error);
 	status = MB_SUCCESS;
 	*error = MB_ERROR_NO_ERROR;
 	
-fprintf(stderr,"1 pointer error:%ld\n",(long)error);
 	/* read file header if required */
 	if (*fileheaderread == MB_NO)
 	    {
@@ -1050,6 +1088,18 @@ fprintf(stderr,"1 pointer error:%ld\n",(long)error);
 			index += 56;
 			}
 
+		/* if NavUnits indicates use of projected coordinates (the format spec
+			indicates the projection parameters are unused!) assume UTM zone 1N 
+			and set up the projection */
+		if (fileheader->NavUnits == 0 && mb_io_ptr->projection_initialized == MB_NO)
+			{
+			/* initialize UTM projection */
+			utm_zone = (int)(((RTD * 0.0 + 183.0)
+					/ 6.0) + 0.5);
+			sprintf(projection,"UTM%2.2dN", utm_zone);
+			mb_proj_init(verbose, projection, &(mb_io_ptr->pjptr), error);
+			mb_io_ptr->projection_initialized = MB_YES;
+			}
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1123,7 +1173,6 @@ fprintf(stderr,"1 pointer error:%ld\n",(long)error);
 	done = MB_NO;
 	while (status == MB_SUCCESS && done == MB_NO)
 	    {
-fprintf(stderr,"2 Read record header\n");
 	    /* find the next packet beginning */
 	    found = MB_NO;
 	    skip = 0;
@@ -1150,7 +1199,6 @@ fprintf(stderr,"2 Read record header\n");
 			found = MB_YES;
 		}
 
-fprintf(stderr,"3 pointer error:%ld found:%d skip:%d\n",(long)error,found,skip);
 	    /* read the next packet header */
 	    read_len = fread(&(line[2]),1,12,mb_io_ptr->mbfp);
 	    if (read_len == 12)
@@ -1210,6 +1258,10 @@ fprintf(stderr,"3 pointer error:%ld found:%d skip:%d\n",(long)error,found,skip);
 		&& packetheader.HeaderType == XTF_DATA_ATTITUDE
 		&& packetheader.NumBytesThisRecord == 64)
 		{
+#ifdef MBR_XTFR8101_DEBUG
+fprintf(stderr,"Reading attitude packet type:%d bytes:%d\n",
+packetheader.HeaderType,packetheader.NumBytesThisRecord);
+#endif
 		attitudeheader->packetheader = packetheader;
 		read_len = fread(line,1,50,mb_io_ptr->mbfp);
 		if (read_len == 50)
@@ -1253,7 +1305,6 @@ fprintf(stderr,"3 pointer error:%ld found:%d skip:%d\n",(long)error,found,skip);
 		    mb_hedint_add(verbose, mbio_ptr, 
 				    timetag, heading, error);
 	
-fprintf(stderr,"4 pointer error:%ld\n",(long)error);
 		    /* print debug statements */
 		    if (verbose >= 5)
 			{
@@ -1290,7 +1341,10 @@ fprintf(stderr,"4 pointer error:%ld\n",(long)error);
 	    else if (status == MB_SUCCESS
 		&& packetheader.HeaderType == XTF_DATA_SIDESCAN)
 		{
-fprintf(stderr,"5 pointer error:%ld\n",(long)error);
+#ifdef MBR_XTFR8101_DEBUG
+fprintf(stderr,"Reading sidescan packet type:%d bytes:%d\n",
+packetheader.HeaderType,packetheader.NumBytesThisRecord);
+#endif
 		/* read and parse the the sidescan header */
 		sidescanheader->packetheader = packetheader;
 		read_len = fread(line,1,242,mb_io_ptr->mbfp);
@@ -1522,7 +1576,6 @@ fprintf(stderr,"5 pointer error:%ld\n",(long)error);
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
 
-fprintf(stderr,"6 pointer error:%ld\n",(long)error);
 		/* read port sidescan data */
 		if (status == MB_SUCCESS)
 		    {
@@ -1530,7 +1583,6 @@ fprintf(stderr,"6 pointer error:%ld\n",(long)error);
 				    * fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample;
 		    read_len = fread(line,1,read_bytes,mb_io_ptr->mbfp);
 		    }
-fprintf(stderr,"7 pointer error:%ld   read_bytes:%d  read_len:%d\n",(long)error,read_bytes,read_len);
 		if (status == MB_SUCCESS && read_len == read_bytes)
 		    {
 		    if (fileheader->chaninfo[pingchanportheader->ChannelNumber].BytesPerSample == 1)
@@ -1550,11 +1602,9 @@ fprintf(stderr,"7 pointer error:%ld   read_bytes:%d  read_len:%d\n",(long)error,
 			    index += 2;
 			    }
 			}
-fprintf(stderr,"8 pointer error:%ld\n",(long)error);
 		    }
 		else
 		    {
-fprintf(stderr,"9 pointer error:%ld\n",(long)error);
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
 		    done = MB_YES;
@@ -1814,7 +1864,10 @@ fprintf(stderr,"9 pointer error:%ld\n",(long)error);
 	    else if (status == MB_SUCCESS
 		&& packetheader.HeaderType == XTF_DATA_BATHYMETRY)
 		{
-fprintf(stderr,"15 pointer error:%ld\n",(long)error);
+#ifdef MBR_XTFR8101_DEBUG
+fprintf(stderr,"Reading bathymetry packet type:%d bytes:%d\n",
+packetheader.HeaderType,packetheader.NumBytesThisRecord);
+#endif
 		data->kind = MB_DATA_DATA;
 		bathheader->packetheader = packetheader;
 		read_len = fread(line,1,242,mb_io_ptr->mbfp);
@@ -1956,8 +2009,8 @@ fprintf(stderr,"15 pointer error:%ld\n",(long)error);
 			}
 
 		    /* read rest of record */
-		    read_len = fread(line,1,bathheader->packetheader.NumBytesThisRecord-242,mb_io_ptr->mbfp);
-		    if (read_len == bathheader->packetheader.NumBytesThisRecord-242)
+		    read_len = fread(line,1,bathheader->packetheader.NumBytesThisRecord-242-14,mb_io_ptr->mbfp);
+		    if (read_len == bathheader->packetheader.NumBytesThisRecord-242-14)
 			{
 			/* check synch value */
 			mb_get_binary_int(MB_YES, &line[0], (int *)&(synch));
@@ -2032,7 +2085,7 @@ fprintf(stderr,"15 pointer error:%ld\n",(long)error);
 				reson8100rit->intensity[i] = 0;
 				index += 2;
 				}
-			    for (i=0;i<reson8100rit->beam_count/2;i++)
+			    for (i=0;i<reson8100rit->beam_count/2+reson8100rit->beam_count%2;i++)
 				{
 				reson8100rit->quality[i] = (mb_u_char) line[index]; 
 				index++;
@@ -2150,7 +2203,7 @@ fprintf(stderr,"15 pointer error:%ld\n",(long)error);
 				mb_get_binary_short(MB_NO, &line[index], (short int *)&(reson8100rit->range[i])); 
 				index += 2;
 				}
-			    for (i=0;i<reson8100rit->beam_count/2;i++)
+			    for (i=0;i<reson8100rit->beam_count/2+reson8100rit->beam_count%2;i++)
 				{
 				reson8100rit->quality[i] = (mb_u_char) line[index]; 
 				index++;
@@ -2317,19 +2370,23 @@ fprintf(stderr,"15 pointer error:%ld\n",(long)error);
 	    /* else read rest of unknown packet */
 	    else if (status == MB_SUCCESS)
 		{
-		for (i=0;i<((int)packetheader.NumBytesThisRecord)-14;i++)
+		if (((int)packetheader.NumBytesThisRecord) > 14)
 			{
-			read_len = fread(line,1,1,mb_io_ptr->mbfp);
-#ifdef MBR_XTFR8101_DEBUG
-fprintf(stderr,"Reading unknown packet i:%d read_len:%d\n",i,read_len);
-#endif
+			for (i=0;i<((int)packetheader.NumBytesThisRecord)-14;i++)
+				{
+				read_len = fread(line,1,1,mb_io_ptr->mbfp);
+				}
+			if (read_len != 1)
+		    		{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				done = MB_YES;
+				}
 			}
-		if (read_len != 1)
-		    {
-		    status = MB_FAILURE;
-		    *error = MB_ERROR_EOF;
-		    done = MB_YES;
-		    }
+#ifdef MBR_XTFR8101_DEBUG
+fprintf(stderr,"Reading unknown packet type:%d bytes:%d\n",
+packetheader.HeaderType,packetheader.NumBytesThisRecord);
+#endif
 		}
 	    }
 		

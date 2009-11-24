@@ -4207,7 +4207,8 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get interpolated nav heading and speed  */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 
 		/* get heading */
@@ -4382,12 +4383,14 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 		*time_d = store->time_d;
 		
 		/* get heading */
-		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+		if (mb_io_ptr->nheading > 0)
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 				    heading, error);
 		
 		/* get speed */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 
 		/* get navigation */
@@ -4452,7 +4455,8 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 		
 		/* get speed */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 
 		/* get navigation */
@@ -4518,13 +4522,14 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 		/* get heading */
 		if (fsdwsegyheader->heading != 0)
 			*heading = 0.01 * fsdwsegyheader->heading;
-		else
+		else if (mb_io_ptr->nheading > 0)
 			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 					    heading, error);
 		
 		/* get speed and position */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 		
 		/* get position */
@@ -4598,7 +4603,7 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 		/* get heading */
 		if (fsdwssheader->heading != 0)
 			*heading = 0.01 * fsdwssheader->heading;
-		else
+		else if (mb_io_ptr->nheading > 0)
 			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 					    heading, error);
 		
@@ -4934,12 +4939,12 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			else
 				{
 				bathymetry->quality[i] = (bathymetry->quality[i] & 63);
-				if (bathymetry->quality[i] & 4)
-					bathymetry->quality[i] += 16;
-				if (bathymetry->quality[i] & 8)
-					bathymetry->quality[i] += 32;
 				if (!(bathymetry->quality[i] & 12))
-					bathymetry->quality[i] += 16;
+					bathymetry->quality[i] = bathymetry->quality[i] | 16;
+				else if (bathymetry->quality[i] & 4)
+					bathymetry->quality[i] = bathymetry->quality[i] | 16;
+				else if (bathymetry->quality[i] & 8)
+					bathymetry->quality[i] = bathymetry->quality[i] | 32;
 				}
 			bathymetry->acrosstrack[i] = bathacrosstrack[i];
 			bathymetry->alongtrack[i] = bathalongtrack[i];
@@ -5179,7 +5184,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			heave_use = bathymetry->heave; 
 			}
-		else
+		else if (mb_io_ptr->nattitude > 0)
 			{
 			mb_attint_interp(verbose, mbio_ptr, store->time_d,  
 				   	&heave_use, &roll, &pitch, error);
@@ -5683,9 +5688,11 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get interpolated nav heading and speed  */
 		*speed = 0.0;
-		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+		if (mb_io_ptr->nheading > 0)
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 				    heading, error);
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 
 		/* get heading */
@@ -5706,7 +5713,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		else if (mb_io_ptr->nsonardepth > 0)
 			{
-			mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+			if (mb_io_ptr->nsonardepth > 0)
+				mb_depint_interp(verbose, mbio_ptr, store->time_d,  
 				    draft, error);
 			}
 		else
@@ -5723,7 +5731,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		else
 			{
-			mb_attint_interp(verbose, mbio_ptr, store->time_d,  
+			if (mb_io_ptr->nattitude > 0)
+				mb_attint_interp(verbose, mbio_ptr, store->time_d,  
 				   	heave, roll, pitch, error);
 			}
 
@@ -5744,15 +5753,18 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get navigation and heading */
 		*speed = 0.0;
-		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+		if (mb_io_ptr->nheading > 0)
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 				    heading, error);
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 		*navlon = RTD * position->longitude;
 		*navlat = RTD * position->latitude;
 
 		/* get roll pitch and heave */
-		mb_attint_interp(verbose, mbio_ptr, *time_d,  
+		if (mb_io_ptr->nattitude > 0)
+			mb_attint_interp(verbose, mbio_ptr, *time_d,  
 				    heave, roll, pitch, error);
 
 		/* get draft  */
@@ -5763,7 +5775,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		else if (mb_io_ptr->nsonardepth > 0)
 			{
-			mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+			if (mb_io_ptr->nsonardepth > 0)
+				mb_depint_interp(verbose, mbio_ptr, store->time_d,  
 				    draft, error);
 			*heave = 0.0;
 			}
@@ -5789,7 +5802,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		
 		/* get speed */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 
 		/* get navigation */
@@ -5828,7 +5842,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		
 		/* get speed and position */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 		
 		/* get position */
@@ -5844,6 +5859,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*pitch = 0.01 * fsdwsegyheader->pitch;
 		*heave = 0.0;
 
+		if (mb_io_ptr->nattitude > 0)
 			mb_attint_interp(verbose, mbio_ptr, store->time_d,  
 				    heave, roll, pitch, error);
 
@@ -5873,12 +5889,14 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		if (fsdwssheader->heading != 0)
 			*heading = 0.01 * fsdwssheader->heading;
 		else
-			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+			if (mb_io_ptr->nheading > 0)
+				mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 					    heading, error);
 		
 		/* get speed and position */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 		
 		/* get position */

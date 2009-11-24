@@ -5018,7 +5018,6 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		proj_status = mb_proj_free(verbose, &(pjptr), &error);
 
 	/* run mbm_grdplot */
-fprintf(stderr,"should run mbm_grdplot gridkind:%d\n",gridkind);
 	if (gridkind == MBGRID_GMTGRD)
 		{
 		/* execute mbm_grdplot */
@@ -5443,7 +5442,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		pad[i] = 0;
 
 	/* allocate memory for output array */
-	status = mb_mallocd(5,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
 	if (*error != MB_ERROR_NO_ERROR)
 		{
 		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);

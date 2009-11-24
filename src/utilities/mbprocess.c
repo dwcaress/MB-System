@@ -396,7 +396,7 @@ and mbedit edit save files.\n";
 	int	onav = 0;
 	int	ocomment = 0;
 	int	oother = 0;
-	char	comment[MBP_FILENAMESIZE];
+	char	comment[MB_COMMENT_MAXLINE];
 	
 	/* sidescan recalculation */
 	int	pixel_size_set;

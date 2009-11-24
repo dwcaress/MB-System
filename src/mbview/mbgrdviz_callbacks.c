@@ -5051,7 +5051,6 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 		first = MB_YES;
 
 		/* do uniform line spacing */
-fprintf(stderr,"survey_mode:%d survey_platform:%d\n",survey_mode,survey_platform);
 		if (survey_mode == MBGRDVIZ_SURVEY_MODE_UNIFORM)
 			{
 			/* get number of lines */
@@ -5086,7 +5085,6 @@ fprintf(stderr,"survey_mode:%d survey_platform:%d\n",survey_mode,survey_platform
 			{
 			/* get number of lines */
 			line_spacing = (double) survey_altitude * 2.0 * tan(DTR * 0.5 * (double) survey_swathwidth);
-fprintf(stderr,"altitude:%d width:%d line_spacing:%f\n",survey_altitude,survey_swathwidth,line_spacing);
 			line_spacing_use = line_spacing * r / data->area.width;
 			nlines = (data->area.width / line_spacing) + 1;
 			
@@ -5162,8 +5160,6 @@ fprintf(stderr,"altitude:%d width:%d line_spacing:%f\n",survey_altitude,survey_s
 				/* get offset from last xx */
 				dxuse = dx * xx[nlines-1];
 				dyuse = dy * xx[nlines-1];
-fprintf(stderr,"nlines:%d xx[%d]:%f\n",
-nlines,nlines-1,xx[nlines-1]);
 				
 				/* get first point */
 				segment.endpoints[0].xdisplay = data->area.endpoints[0].xdisplay + dxuse;
