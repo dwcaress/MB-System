@@ -1,0 +1,432 @@
+#!/bin/sh
+#
+#  grid_swath
+#
+#  Interactive front end to mbgrid
+#
+#  This script is part of a suite of scripts that allow fully automated grid generation
+#  from data logged by the em300.
+#
+#  usage:  grid_swath
+#          Then respond to the questions
+#          A grid type and boundaries are required
+#          all other responses can be left blank
+#
+#          The grid type and boundaries may be provided by setting 
+#          the environment variables GRIDTYPE and
+#          REGION to the appropriate values before running the script.
+#
+#  Author : Gordon Keith, CSIRO, 5 April 2005
+#
+#  Revision history:
+#    20050405 GJK - Initial version based on map_swath
+#    20050615 GJK - Added mosaicing options
+#    20050627 GJK - Added support for reading answers from input file
+#    20070808 GJK - log answers to a command file
+#    20091124 GJK - clean exit if no data
+
+if [ $# -gt 0 ] ; then
+    cat $@ | awk ' { if (substr($1, 0, 1) != "#") print $0 }' | sed 's/[^:]*://' | $0
+
+    exit
+fi
+
+CMDFILE=grid_swath$$.cmd
+
+processed='$PROCESSED'
+getext=""
+
+gotgridtype=0
+
+while [ $gotgridtype = 0 ]; do
+
+	if [ -z "$GRIDTYPE" ] ; then 
+
+		echo 	
+		echo Please enter type of grid:
+		echo   "1: bathymetry"
+		echo   "2: topography"
+		echo   "3: amplitude (backscatter)"
+		echo   "4: sidescan "
+		echo
+		echo   "5: backscatter mosaic"
+		echo   "6: sidescan mosaic"
+		echo   "7: flat bottom grazing angle mosaic"
+		echo   "8: acrosstrack grazing angle mosaic"
+		echo   "9: acrosstrack slope mosaic"
+		echo 
+		echo   "add 10 for grids of raw data"
+		echo
+
+		read GRIDTYPE
+	fi
+
+	if [ "$GRIDTYPE" -gt 9 ] ; then
+	    	processed='$RAW'
+		GRIDTYPE=$[ $GRIDTYPE - 10 ]
+	fi
+
+	case  "$GRIDTYPE"	in
+	1)
+		GRID_OPTIONS="$GRID_OPTIONS -A1 -N "
+		gotgridtype=1
+		TYPE_NAME=bathymetry
+		getext=.fbt
+	;;
+	2)
+		GRID_OPTIONS="$GRID_OPTIONS -A2 -N "
+		gotgridtype=1
+		TYPE_NAME=topography
+		getext=.fbt
+	;;
+	3)
+		GRID_OPTIONS="$GRID_OPTIONS -A3 -N"
+		gotgridtype=1
+		TYPE_NAME=backscatter
+	;;
+	4)
+		GRID_OPTIONS="$GRID_OPTIONS -A4 -N"
+		gotgridtype=1
+		TYPE_NAME=sidescan
+	;;
+	5)
+		GRID_OPTIONS="$GRID_OPTIONS -A3 -N"
+		gotgridtype=1
+		TYPE_NAME=backscatterm
+	;;
+	6)
+		GRID_OPTIONS="$GRID_OPTIONS -A4 -N"
+		gotgridtype=1
+		TYPE_NAME=sidescanm
+	;;
+	7)
+		GRID_OPTIONS="$GRID_OPTIONS -A5 -N"
+		gotgridtype=1
+		TYPE_NAME=flatgrazingm
+	;;
+	8)
+		GRID_OPTIONS="$GRID_OPTIONS -A6 -N"
+		gotgridtype=1
+		TYPE_NAME=grazingm
+	;;
+	9)
+		GRID_OPTIONS="$GRID_OPTIONS -A7 -N"
+		gotgridtype=1
+		TYPE_NAME=slopem
+	;;
+	*)
+		echo Grid type not recognised.
+		GRIDTYPE=
+		sleep 2
+	;;
+
+	esac
+done
+
+echo Grid type:		$GRIDTYPE	> $CMDFILE
+
+if [ -z "$REGION" ] ; then
+	gotregion=0
+else
+	gotregion=1
+fi
+
+while [ $gotregion -eq 0 ] ; do 
+
+	echo
+	echo "Please enter northern limit of map in decimal degrees (negative for south) or dd:mm:ss"
+	read north
+
+	case "$north" in
+	*/*)
+		REGION=$north
+		;;
+	*)
+		echo
+		echo Please enter southern limit of map in decimal degrees
+		read south
+
+		echo
+		echo Please enter western limit of map in decimal degrees
+		read west
+
+		echo
+		echo Please enter eastern limit of map in decimal degrees
+		read east
+
+		REGION=$west/$east/$south/$north
+		;;
+	esac
+
+	if [ "OK" = "`echo $REGION | awk -F/ '/:/ {print "OK"} !/:/ { if ( $1 + 0 < $2 + 0  && $3 + 0 < $4 + 0 )  print "OK"  }'`" ] ; then
+		echo $REGION
+		echo REGION:		$REGION		>> $CMDFILE
+		gotregion=1
+	else
+		echo Please reenter boundaries, they don\'t seem correct
+		if [ ! $north -gt $south ] ; then
+			echo North must be greater than South
+		fi
+		if [ ! $east -gt $west ] ; then
+			echo East must be greater than west
+		fi
+	fi
+done
+
+GRIDNAME=`echo $REGION_NAME $DATANAME $TYPE_NAME $REGION | sed "s/  */_/g" | sed s:/:_:g `
+
+echo
+echo "Would you like more options (y/n/a) [n]?"
+read options
+echo Options:		$options		>> $CMDFILE
+
+adprompt=0
+if [ "$options" = "a" -o "$options" = "A" ] ; then
+	adprompt=1
+	options=y
+fi
+
+if [ "$options" = "y" -o "$options" = "Y" ] ; then
+
+	echo
+	echo "Please enter grid size in metres [10]"
+	if [ $adprompt = 1 ] ; then
+		echo "n or n/m or grid options"
+	fi
+	read grid
+	echo Grid size:		$grid		>> $CMDFILE
+
+	[ -z "$grid" ] && grid=10
+
+	case $grid in
+	-*)
+		GRID_OPTIONS="$GRID_OPTIONS $grid"
+		;;
+	*/*)
+		GRID_OPTIONS="$GRID_OPTIONS -E$grid"
+		;;
+	*)
+		GRID_OPTIONS="$GRID_OPTIONS -E$grid/$grid"
+		;;
+	esac
+
+
+	echo
+	echo "Please enter number of cells to interpolate (size of holes to fill) [0]"
+	if [ $adprompt = 1 ] ; then
+                echo "n   n/m  or grid options"
+	fi
+	read interp
+	echo Interpolate:	$interp		>> $CMDFILE
+
+	if [ ! -z "interp" ] ; then
+               case $interp in
+                -*)
+                        GRID_OPTIONS="$GRID_OPTIONS $interp"
+                        ;;
+                */*)
+                        GRID_OPTIONS="$GRID_OPTIONS -C$interp"
+                        ;;
+                *)
+                        GRID_OPTIONS="$GRID_OPTIONS -C$interp/1"
+                        ;;
+                esac
+        fi
+
+	if  [ $GRIDTYPE -gt 4 -a $GRIDTYPE -lt 10 ] ; then
+
+
+		echo
+		echo "Enter mbmosaic priorities [-F1/1 -Ymosaic_weights]" 
+
+		echo "-Y priority_file -U azimuth/factor -F priority_range"
+		read priorities
+		echo Mosaic priorities:	$priorities		>> $CMDFILE
+
+		if [ -z "$priorities" ] ; then
+
+			if [ ! -f mosaic_weights ] ; then
+				echo -80.0 0.1 >> mosaic_weights
+				echo -60.0 0.2 >> mosaic_weights
+				echo -45.0 1.0 >> mosaic_weights
+				echo -15.0 0.8 >> mosaic_weights
+				echo -14.9 0.1 >> mosaic_weights
+				echo 14.9 0.1 >> mosaic_weights
+				echo 15.0 0.8 >> mosaic_weights
+				echo 45.0 1.0 >> mosaic_weights
+				echo 60.0 0.2 >> mosaic_weights
+				echo 80.0 0.1 >> mosaic_weights
+
+			fi
+			priorities="-F1/1 -Ymosaic_weights"
+		fi
+
+		
+
+		GRID_OPTIONS="$GRID_OPTIONS $priorities"
+
+	fi
+
+	priorit=`echo $priorities | sed s/-//g`
+	GRIDNAME=`echo $REGION_NAME $DATANAME $TYPE_NAME x${grid}m$interp $priorit $REGION | sed "s/  */_/g" | sed s:/:_:g `
+	dirname=`basename $PWD`
+
+	echo 
+	echo "Grid file name prefix (no spaces or /) [$GRIDNAME]"
+        if [ $adprompt = 1 ] ; then
+                echo "\$ will be replaced by $MAPNAME, @ will be replaced by $dirname, # will be replaced by $REGION"
+        fi
+
+	read MAPNAME
+	echo Grid file name:	$MAPNAME		>> $CMDFILE
+
+
+	if [ ! -z "$MAPNAME" ] ; then
+		GRIDNAME=`echo $MAPNAME | sed "s/@/$dirname/g" | sed "s/\\\\\$/$GRIDNAME/g" | sed "s!#!$REGION!g" | sed "s/ /_/g" | sed "s:/:_:g"`
+	fi
+
+	if [ $GRIDTYPE -lt 5 ] ; then
+		
+		echo
+		echo "Enter any additional mbgrid options (optional)"
+
+		if [ $adprompt = 1 ] ; then
+			echo Currently: $GRID_OPTIONS
+		fi
+		echo "options:   -Smin_speed -Falgorithm -M (stddev) -Ttension -Utime -Kbackground -Jprojection -JU (UTM)" 
+		read extras
+		echo Extra options:		$extras		>> $CMDFILE
+
+		GRID_OPTIONS="$GRID_OPTIONS $extras"
+
+	elif  [ $GRIDTYPE -lt 10 ] ; then
+		
+		echo
+		echo "Enter any additional mbmosaic options (optional)"
+
+		if [ $adprompt = 1 ] ; then
+			echo Currently: $GRID_OPTIONS
+		fi
+		echo "options:   -Smin_speed -M (stddev) -Ttension " 
+		read extras
+		echo Extra options:		$extras		>> $CMDFILE
+
+		GRID_OPTIONS="$GRID_OPTIONS $extras"
+
+	fi
+
+	echo
+	echo "Save answers in:"
+	read cmdfile
+
+	if [ -z "$cmdfile" ] ; then
+		rm $CMDFILE
+	else
+		mv $CMDFILE "$cmdfile"
+	fi
+
+else
+    	grid=10
+	GRID_OPTIONS="$GRID_OPTIONS -E$grid/$grid"
+
+	if  [ $GRIDTYPE -gt 4 -a $GRIDTYPE -lt 10 ] ; then
+		if [ -z "$priorities" ] ; then
+
+			if [ ! -f mosaic_weights ] ; then
+				echo -80.0 0.1 >> mosaic_weights
+				echo -60.0 0.2 >> mosaic_weights
+				echo -45.0 1.0 >> mosaic_weights
+				echo -15.0 0.8 >> mosaic_weights
+				echo -14.9 0.1 >> mosaic_weights
+				echo 14.9 0.1 >> mosaic_weights
+				echo 15.0 0.8 >> mosaic_weights
+				echo 45.0 1.0 >> mosaic_weights
+				echo 60.0 0.2 >> mosaic_weights
+				echo 80.0 0.1 >> mosaic_weights
+
+			fi
+			priorities="-F1 -Ymosaic_weights"
+		fi
+		GRID_OPTIONS="$GRID_OPTIONS $priorities"
+	fi
+
+    	GRIDNAME=`echo $REGION_NAME $DATANAME $TYPE_NAME x${grid}m $priorities $REGION | sed "s/  */_/g" | sed s:/:_:g`
+
+fi
+
+echo
+echo "Please be patient, this may take a while. [typically 5-50 min]"
+echo
+echo SWATHDIR=$SWATHDIR
+echo REGION=$REGION
+echo
+
+# set datalist from best of SWATHDIR, DST or default
+[ -z "$DST" ] && DST=$SWATHDIR
+[ -z "$DST" ] && DST=/swath4/mbproc/raw
+[ ! -d "$DST" ] && DST=/home/swath/mbproc/em300
+[ ! -f "$DLST" ] && DLST="$DST/datalist.mb-1" 
+
+DATALIST=${GRIDNAME}_dataset.mb-1
+
+# force updating and checking of data on the ship
+if [ "$HOST" = neptune ] ; then
+	FULL_PROCESS=do_it
+fi
+
+# Convert any new swath data to MBSystem format
+if [ ! -z "$FULL_PROCESS" ] ; then
+	swath_update.sh 
+fi
+
+# Create list of lines to process
+
+processDatalist=$DATALIST
+
+echo $DLST -1 1 > $DATALIST
+
+if [ ! -z $REGION ] ; then
+	processDatalist=${GRIDNAME}_datalist.mb-1
+	echo $processed > $processDatalist
+	if [ ! -z "$FULL_PROCESS" ] ; then
+		echo `date` Checking data list...
+		nice mbdatalist -I $DATALIST -O 
+	fi
+
+	echo `date` Compiling data list...
+	nice mbdatalist -I $DATALIST -R$REGION >> $processDatalist 
+fi
+
+if [ `wc -l $processDatalist | awk '{ print $1 }'` = 1 ] ; then
+	echo
+	echo ">> No data found for $REGION in $DST"
+	echo
+	exit 2
+fi
+
+echo `date` Processing data...
+nice mbprocess -I $processDatalist
+
+# get files from data migration facility if available (cherax)
+
+if [ -x /tools/ascutils/bin/dmget ] ; then
+        echo `date` requesting data...
+        mbdatalist -I $processDatalist | while read getfile junk; do
+                touch -a $getfile$getext
+                echo $getfile$getext
+        done | /tools/ascutils/bin/dmget
+fi
+
+echo `date` Creating grid...
+
+if [ $GRIDTYPE -lt 5 ] ; then
+
+	echo mbgrid -I $processDatalist -O $GRIDNAME -R$REGION $GRID_OPTIONS
+	nice mbgrid -I $processDatalist -O $GRIDNAME -R$REGION $GRID_OPTIONS
+
+else
+
+	echo mbmosaic -I $processDatalist -O $GRIDNAME -R$REGION $GRID_OPTIONS
+	nice mbmosaic -I $processDatalist -O $GRIDNAME -R$REGION $GRID_OPTIONS
+fi
+

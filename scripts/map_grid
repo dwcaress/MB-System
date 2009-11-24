@@ -1,0 +1,889 @@
+#!/bin/sh
+#
+#  map_grid
+#
+#  Interactive front end to mbm_grdplot
+#
+#  This script is part of a suite of scripts that allow fully automated map generation
+#  from data logged by the em300.
+#  This script assumes the grid naming conventions used by grid_swath.
+#
+#  usage:  map_grid
+#          Then respond to the questions
+#          A map type and boundaries are required
+#          all other responses can be left blank
+#
+#          The map type and boundaries may be provided by setting 
+#          the environment variables MAPTYPE and
+#          REGION to the appropriate values before running the script.
+#
+#  Author : Gordon Keith, CSIRO, 6 April 2005
+#
+#  Revision history:
+#    20050406 GJK - Initial version based on map_swath
+#    20050616 GJK - Fixed bug in maptype 6
+#    20050627 GJK - Added support for reading answers from input file
+#    20070808 GJK - log answers to a command file
+
+
+if [ $# -gt 0 ] ; then
+    cat $@ | awk ' { if (substr($1, 0, 1) != "#") print $0 }' | sed 's/[^:]*://' | $0
+
+
+    exit
+fi
+
+umask 000
+
+CMDFILE=map_grid$$.cmd
+
+gotmaptype=0
+tiff=n
+
+while [ $gotmaptype = 0 ]; do
+
+	if [ -z "$MAPTYPE" ] ; then 
+
+		echo 	
+		echo Please enter type of map:
+		echo   "1: Color fill of bathymetry data."
+		echo   "2: Color shaded relief bathymetry. (colour sun illumination)"
+		echo   "3: Color fill of slope data."
+		echo   "4: Grayscale fill of amplitude data. (backscatter)"
+		echo   "5: Grayscale fill of sidescan data."
+		echo   "6: Bathymetry shaded using amplitude data."
+		echo   "7: Grayscale relief bathymetry (sun illumination)"
+		echo   "8: Grayscale rendering of SEGY grid"
+		echo 
+
+		read MAPTYPE
+	fi
+
+	case  "$MAPTYPE"	in
+	1)
+		PLOT_OPTIONS="$PLOT_OPTIONS -G1 -MGS-1"
+		TYPE_NAME=bathymetry
+		MAPTYPENAME=bathy
+		gotmaptype=1
+	;;
+	2)
+		PLOT_OPTIONS="$PLOT_OPTIONS -G2 -MGS-1"
+		TYPE_NAME=bathymetry
+		MAPTYPENAME=bathy
+		gotmaptype=1
+	;;
+	3)
+		PLOT_OPTIONS="$PLOT_OPTIONS -G4"
+		TYPE_NAME=bathymetry
+		MAPTYPENAME=slope
+		gotmaptype=1
+	;;
+
+	4)
+		PLOT_OPTIONS="$PLOT_OPTIONS -G1 -W1/4 -D"
+		TYPE_NAME=backscatter
+		MAPTYPENAME=back
+		gotmaptype=1
+	;;
+
+	5)
+		PLOT_OPTIONS="$PLOT_OPTIONS -G1 -W1/4 -D"
+		TYPE_NAME=sidescan
+		MAPTYPENAME=sidescan
+		gotmaptype=1
+	;;
+        6)
+		PLOT_OPTIONS="$PLOT_OPTIONS -G3 -MGS-1"
+		TYPE_NAME=bathymetry
+		MAPTYPENAME=bathy_back
+		gotmaptype=1
+        ;;
+                
+	7)
+                PLOT_OPTIONS="$PLOT_OPTIONS -G2 -MGS-1 -W1/5"
+		MAPTYPE=2
+		TYPE_NAME=bathymetry
+		MAPTYPENAME=sun
+                gotmaptype=1
+        ;;
+
+	8)
+		PLOT_OPTIONS=""
+		TYPE_NAME=seg
+		MAPTYPENAME=segy
+		gotmaptype=1
+		;;
+
+	*)
+		echo Map type not recognised.
+		MAPTYPE=
+		sleep 2
+	;;
+
+	esac
+
+done
+
+echo Map type:		$MAPTYPE	> $CMDFILE
+
+if [ -z "$REGION" ] ; then
+	gotregion=0
+else
+	gotregion=1
+fi
+
+while [ $gotregion -eq 0 ] ; do 
+
+	north=
+	west=
+	south=
+	east=
+
+	echo
+	echo "Please enter northern limit of map in decimal degrees (negative for south) or dd:mm:ss"
+	read north
+
+	case "$north" in
+	*/*)
+		REGION=$north
+		;;
+	"")
+		;;
+	*)
+		echo
+		echo Please enter southern limit of map in decimal degrees
+		read south
+		;;
+	esac
+
+	if [ ! -z "$south" ] ; then
+	
+		echo
+		echo Please enter western limit of map in decimal degrees
+		read west
+	fi
+
+	if [ ! -z "$west" ] ; then
+	
+		echo
+		echo Please enter eastern limit of map in decimal degrees
+		read east
+	fi
+
+	if [ -z "$east" ] ; then
+		echo REGION:				>> $CMDFILE
+		gotregion=1
+	elif [ "OK" = "`echo $north $south $east $west | awk '/:/ {print "OK"} !/:/ { if ( $1 + 0 > $2 + 0  && $3 + 0 > $4 + 0 )  print "OK"  }'`" ] ; then
+		REGION=$west/$east/$south/$north
+		echo $REGION
+		echo REGION:		$REGION		>> $CMDFILE
+		gotregion=1
+	else
+		echo Please reenter boundaries, they don\'t seem correct
+		if [ ! $north -gt $south ] ; then
+			echo North must be greater than South
+		fi
+		if [ ! $east -gt $west ] ; then
+			echo East must be greater than west
+		fi
+	fi
+done
+
+while [ ! -f "$GRIDNAME" ] ; do
+	ls -lrt *.grd
+
+	GRIDNAME=`echo $REGION_NAME $DATANAME $TYPE_NAME"*"$REGION.grd | sed "s/  */_/g" | sed s:/:_:g`
+	GRIDNAME=`ls -t *$GRIDNAME 2> /dev/null | head -1`
+	if [ -z "$GRIDNAME" ] ; then
+		GRIDNAME=`echo $REGION_NAME $DATANAME $TYPE_NAME "*.grd" | sed "s/  */_/g" | sed "s:/:_:g"`
+		GRIDNAME=`ls -t *$GRIDNAME 2> /dev/null | head -1`
+	   
+		if  [ -z "$GRIDNAME" ] ; then
+			GRIDNAME=`echo $TYPE_NAME "*.grd" | sed "s/  */_/g" | sed "s:/:_:g"`
+			GRIDNAME=`ls -t *$GRIDNAME 2> /dev/null | head -1`
+ 	
+			if  [ -z "$GRIDNAME" ] ; then
+				GRIDNAME="*"`echo $REGION | sed "s/  */_/g" | sed "s:/:_:g"`.grd
+				GRIDNAME=`ls -t *$GRIDNAME 2> /dev/null | head -1`
+
+				if  [ -z "$GRIDNAME" ] ; then
+					GRIDNAME=`ls -t *.grd 2> /dev/null | head -1`
+				fi
+			fi
+		fi
+	fi
+
+	echo
+	echo "Enter grid file to plot [$GRIDNAME]"
+	read gridname
+	echo Grid File:		$gridname	>> $CMDFILE
+
+	if [ ! -z "$gridname" ] ; then
+		GRIDNAME=$gridname
+	fi
+
+done
+
+if [ $MAPTYPE = 6 ] ; then
+	while [ ! -f "$BACK_FILE" ] ; do 
+		BACK_FILE=`echo $GRIDNAME | sed s/bathymetry/backscatter/g`
+
+		if [ ! -f $BACK_FILE ] ; then
+			BACK_FILE=`ls -t *backscatter*.grd 2> /dev/null | head -1`
+		fi
+
+		echo
+		echo "Enter name of backscatter file [$BACK_FILE]"
+		read back_file
+		echo Backscatter File:	$back_file		>> $CMDFILE
+
+		if [ ! -z "$back_file" ] ; then
+			BACK_FILE=$back_file
+		fi		
+	done
+fi
+		
+
+echo
+echo "Would you like more options (y/n/a) [n]?"
+read options
+echo Options:		$options		>> $CMDFILE
+
+adprompt=0
+if [ "$options" = "a" -o "$options" = "A" ] ; then
+	adprompt=1
+	options=y
+fi
+
+#if [ "$options" = "y" -o "$options" = "Y" ] ; then
+
+	echo
+	echo "Would you like a GeoTIFF (y/n/o/r) [o]?"
+        if [ $adprompt = 1 ] ; then
+		echo Yes = tiff and postscript, No = postscript only, Only = tiff only, Raw = tiff only no transparency or compresstion
+	fi
+	read tiff
+
+	case "$tiff" in 
+	y*|Y*)
+		tiff=y
+		;;
+	n*|N*)
+		tiff=n
+		;;
+	r*|R*)
+		tiff=o
+		rawtiff=y
+		;;
+	*)
+		tiff=o
+		;;
+	esac
+
+	if [ "$rawtiff" = y ] ; then
+		echo TIFF:		r		>> $CMDFILE
+	else
+		echo TIFF:		$tiff		>> $CMDFILE
+	fi
+
+	if [ $tiff != n  ] ; then
+		TIFF_OPTIONS=$PLOT_OPTIONS
+	fi
+
+if [ "$options" = "y" -o "$options" = "Y" ] ; then
+
+	MAPNAME=`basename $GRIDNAME .grd`_$MAPTYPENAME
+	dirname=`basename $PWD`
+
+	if [ $tiff != o ] ; then
+		
+		if [ -z "$REGION" ] ; then
+			## assumes $GRIDNAME does not contain colons
+			lat0=`grdinfo $GRIDNAME | sed 's/[^:]*://' | awk ' /y_min/ { print ($2 + $4) / 2}'`
+			lon0=`grdinfo $GRIDNAME | sed 's/[^:]*://' | awk ' /x_min/ { print ($2 + $4) / 2}'`
+		else
+			lat0=`echo $REGION | awk -F/ '{ print (($3 + $4) / 2) }'`
+			lon0=`echo $REGION | awk -F/ '{ print (($1 + $2) / 2) }'`
+		fi
+	
+		echo
+		echo "Select map scale [0]"
+		echo "0:  Automatic"
+		echo "1:  1:100,000	"
+		echo "2:  1:25,000	"
+		echo "3:  1:150,000	"
+		echo "5:  1:50,000	"
+		echo "7:  1:75,000	"
+		echo "10, 20, 25, 50, 75, 100, 125, 150, 200, 250, 500, 750, 1000:  1:n,000"
+		echo "any plot option starting with -"
+		read MAPSCALE
+		echo Map scale:		$MAPSCALE		>> $CMDFILE
+
+		case "$MAPSCALE" in
+		1)	mapscale=100000
+		;;
+		2)	mapscale=25000
+		;;
+		3)	mapscale=150000
+		;;
+		5)	mapscale=50000
+		;;
+		7)	mapscale=75000
+		;;
+		-*)	PLOT_OPTIONS="$PLOT_OPTIONS $MAPSCALE"
+			mapscale=""
+		;;
+		0)	mapscale=""
+		;;
+		"")	
+		;;
+		*)	mapscale=${MAPSCALE}000
+		;;
+		esac
+
+		if [ ! -z "$mapscale" ] ; then
+			PLOT_OPTIONS="$PLOT_OPTIONS -Jm$lon0/$lat0/1:$mapscale"
+			MAPNAME=${MAPNAME}_$mapscale
+		fi
+	fi
+
+	echo 
+	echo "Map file name prefix (no spaces or /) [$MAPNAME]"
+	if [ $adprompt = 1 ] ; then
+		echo "surveyarea_grid_level_variable_contours_track_scale_size"
+		echo "\$ will be replaced by $MAPNAME, @ will be replaced by $dirname, # will be replaced by $REGION" 
+	fi
+	read mapname
+	echo Map name:		$mapname		>> $CMDFILE
+
+
+	if [ ! -z "$mapname" ] ; then
+		
+		MAPNAME=`echo $mapname | sed "s/@/$dirname/g" | sed "s/\\\\\$/$MAPNAME/g" | sed "s!#!$REGION!g" | sed "s/ /_/g" | sed "s:/:~:g"`
+	fi
+
+	if [ "$tiff" != o ] ; then
+
+	echo
+	echo "Please enter a map title [$MAPNAME]"
+	read title
+	echo Title:		$title		>> $CMDFILE
+
+	if [ -z "$title" ]; then
+		LABEL=$MAPNAME
+	else
+		LABEL=$title
+	fi
+	export LABEL
+
+	echo 
+	echo "Please enter paper size [A4]"
+	if [ $adprompt = 1 ] ; then
+		echo Paper size may be followed by other plot options
+	fi
+	read paper
+	echo Paper:		$paper		>> $CMDFILE
+	
+	scale=1001
+	if [ -z "$paper" ] ; then
+		paper=A4
+	fi
+	
+	PLOT_OPTIONS="$PLOT_OPTIONS -P$paper"
+
+	echo
+	echo Please enter contour interval - blank for none, 0 for default, c for 10/100, C for 100/1000.
+	if [ $adprompt = 1 ] ; then
+		echo "n [plot_options] eg 10 -MCA100t -MCWc1 -MCQ20 for 10m contours with 100m annotated."
+	fi
+	read contour
+	echo Contour:		$contour		>> $CMDFILE
+
+	if [  ! -z "$contour" ] ; then
+		if [ "$contour" = 0 ] ; then
+			PLOT_OPTIONS="$PLOT_OPTIONS -C"
+		elif [ "$contour" = c ] ; then
+			PLOT_OPTIONS="$PLOT_OPTIONS -C10 -MCA100t -MCQ20  -MCWc1"
+                elif [ "$contour" = C ] ; then
+                        PLOT_OPTIONS="$PLOT_OPTIONS -C100 -MCA1000t -MCQ20  -MCWc1"
+		else
+			PLOT_OPTIONS="$PLOT_OPTIONS -C$contour"
+		fi
+		if [ $TYPE_NAME != bathymetry ] ; then
+			CONT_FILE=`echo $GRIDNAME | sed s/$TYPE_NAME/bathymetry/g`
+
+			if [ ! -f $CONT_FILE ] ; then
+				CONT_FILE=`ls -t *bathymetry*.grd 2> /dev/null | head -1`
+			fi
+
+			echo
+			echo "Enter name of grid file to contour [$CONT_NAME]"
+			read cont_file
+			echo Contour file:		$cont_file		>> $CMDFILE
+			if [ ! -z "$back_file" ] ; then
+				CONT_FILE=$cont_file
+			fi
+			if [ -f "$CONT_FILE" ] ; then
+				PLOT_OPTIONS="$PLOT_OPTIONS -F$CONT_FILE"
+			fi
+		fi
+	fi
+
+	echo 
+	echo "What format would you like latitude and longitude in: decimal degrees, minutes or seconds (d,m,s) [d]"
+	read format
+	echo LL format:		$format		>> $CMDFILE
+
+	case "$format" in 
+	d*|D*)
+		PLOT_OPTIONS="$PLOT_OPTIONS -MGDPLOT_DEGREE_FORMAT/D"
+		;;
+	m*|M*)
+		PLOT_OPTIONS="$PLOT_OPTIONS -MGDPLOT_DEGREE_FORMAT/ddd:mm"
+		;;
+	s*|S*)
+		PLOT_OPTIONS="$PLOT_OPTIONS -MGDPLOT_DEGREE_FORMAT/ddd:mm:ss"
+		;;
+	-*)
+		PLOT_OPTIONS="$PLOT_OPTIONS $format"
+		;;
+	*)
+		PLOT_OPTIONS="$PLOT_OPTIONS -MGDPLOT_DEGREE_FORMAT/D -Ba.1g.1f.01"
+		;;
+	esac
+
+	fi
+	
+	if [ $MAPTYPE = 2 ] ; then
+		echo 
+		echo "Vertical exageration [4]?"
+		read vertical
+		echo Vertical exageration:		$vertical		>> $CMDFILE
+
+		echo 
+		echo "Sun direction [45]?"
+		read azimuth
+		echo Sun direction:		$azimuth		>> $CMDFILE
+
+		if [ ! \( -z "$vertical" -a -z "$azimuth" \) ] ; then
+			if [ -z "$vertical" ] ; then
+				vertical=4
+			fi
+			if [ -z "$azimuth" ] ; then
+				azimuth=45
+			fi
+			PLOT_OPTIONS="$PLOT_OPTIONS -A$vertical/$azimuth"
+			if [ $tiff != n ] ; then
+                                 TIFF_OPTIONS="$TIFF_OPTIONS -A$vertical/$azimuth"
+                        fi
+		fi
+	fi
+
+	if [ $MAPTYPE = 3 ] ; then
+		echo 
+		echo "Use slope classes? (y/n/r) [y]"
+		read slope_class
+		echo Use slope classes:		$slope_class		>> $CMDFILE
+
+		case "$slope_class" in
+		N*|n* )
+
+		
+			echo 
+			echo "Magnitude [1]?"
+			read vertical
+			echo Magnitude:		$vertical		>> $CMDFILE
+
+			echo 
+			echo "Zero value [0]?"
+			read azimuth
+			echo Zero value:		$azimuth		>> $CMDFILE
+
+			if [ ! \( -z "$vertical" -a -z "$azimuth" \) ] ; then
+				if [ -z "$vertical" ] ; then
+					vertical=1
+				fi
+				if [ -z "$azimuth" ] ; then
+					azimuth=0
+				fi
+				PLOT_OPTIONS="$PLOT_OPTIONS -A$vertical/$azimuth"
+				if [ $tiff != n ] ; then
+ 					TIFF_OPTIONS="$TIFF_OPTIONS -A$vertical/$azimuth"
+				fi
+			fi
+			;;
+		R*|r* )
+		    
+                        MAP_CPT=$MAPNAME.cpt
+
+			echo F 255 0 0 				>  $MAP_CPT
+			echo N 255				>> $MAP_CPT
+			echo 0 255 255 255	0.052 0 0 255	>> $MAP_CPT
+			echo 0.052 0 255 255	0.087 0 255 255	>> $MAP_CPT
+			echo 0.087 255 255 0 	0.176 255 255 0	>> $MAP_CPT
+
+
+                        PLOT_OPTIONS="$PLOT_OPTIONS -W $MAP_CPT"
+			if [ $tiff != n ] ; then
+                                TIFF_OPTIONS="$TIFF_OPTIONS -W $MAP_CPT"
+                        fi
+
+			;;
+		* )
+                        MAP_CPT=$MAPNAME.cpt
+
+			echo F 0				>  $MAP_CPT
+			echo N 255				>> $MAP_CPT
+			echo 0 255 255 255	0.035 255 255 0	>> $MAP_CPT
+			echo 0.035 255 255 0	0.087 0 255 0	>> $MAP_CPT
+			echo 0.087 0 255 0 	0.176 0 255 255	>> $MAP_CPT
+			echo 0.176 0 255 255 	0.268 0 0 255	>> $MAP_CPT
+			echo 0.268 0 0 255 	0.577 255 0 255	>> $MAP_CPT
+			echo 0.577 255 0 255 	1.192 255 0 0	>> $MAP_CPT
+
+
+                        PLOT_OPTIONS="$PLOT_OPTIONS -W $MAP_CPT"
+			if [ $tiff != n ] ; then
+                                TIFF_OPTIONS="$TIFF_OPTIONS -W $MAP_CPT"
+                        fi
+
+                        ;;
+		esac		
+	fi
+
+	if [ $MAPTYPE = 4 ] ; then
+		echo
+		echo 'Shading: a) auto,  b)-45 to -15 dB, c) -45 to -15 dB red/green out of range d) 3 colour [b]?'
+		if [ $adprompt = 1 ] ; then
+			echo 'a, b, c, d low/high or soft:hard eg -45/-15'
+		fi
+
+		read backrange
+		echo Shading:		$backrange		>> $CMDFILE
+
+		case "$backrange" in
+		A*|a*)
+			;;
+		50/10|-50/-10)
+			MAP_CPT=$MAPNAME.cpt
+			echo N 255	> $MAP_CPT
+			echo B 0 255 0	>> $MAP_CPT
+			echo F 255 0 0	>> $MAP_CPT
+			echo -50 255 -45 224	>> $MAP_CPT
+			echo -45 224 -40 192	>> $MAP_CPT
+			echo -40 192 -35 160	>> $MAP_CPT
+			echo -35 160 -30 128	>> $MAP_CPT
+			echo -30 128 -25 96	>> $MAP_CPT
+			echo -25  96 -20 64	>> $MAP_CPT
+			echo -20  64 -15 32	>> $MAP_CPT
+			echo -15  32 -10 0	>> $MAP_CPT
+
+			PLOT_OPTIONS="$PLOT_OPTIONS -W $MAP_CPT"
+			if [ $tiff != n ] ; then
+        	                TIFF_OPTIONS="$TIFF_OPTIONS -W $MAP_CPT"
+                	fi
+
+			;;
+
+		45/15|-45/-15)
+			MAP_CPT=$MAPNAME.cpt
+			echo N 255	> $MAP_CPT
+			echo B 0 255 0	>> $MAP_CPT
+			echo F 255 0 0	>> $MAP_CPT
+			echo -45 255 -43 238 	>> $MAP_CPT
+			echo -43 238 -41 221	>> $MAP_CPT
+			echo -41 221 -39 204	>> $MAP_CPT
+			echo -39 204 -37 187	>> $MAP_CPT
+			echo -37 187 -35 170	>> $MAP_CPT
+			echo -35 170 -33 153	>> $MAP_CPT
+			echo -33 153 -31 136	>> $MAP_CPT
+			echo -31 136 -29 119	>> $MAP_CPT
+ 			echo -29 119 -27 102	>> $MAP_CPT
+			echo -27 102 -25  85	>> $MAP_CPT
+			echo -25  85 -23  68	>> $MAP_CPT
+			echo -23  68 -21  51	>> $MAP_CPT
+			echo -21  51 -19  34	>> $MAP_CPT
+			echo -19  34 -17  17	>> $MAP_CPT
+			echo -17  17 -15   0	>> $MAP_CPT
+
+
+			PLOT_OPTIONS="$PLOT_OPTIONS -W $MAP_CPT"
+			if [ $tiff != n ] ; then
+        	                TIFF_OPTIONS="$TIFF_OPTIONS -W $MAP_CPT"
+                	fi
+
+			;;
+                40/20|-40/-20)
+                        MAP_CPT=$MAPNAME.cpt
+                        echo N 255      > $MAP_CPT
+                        echo B 0 255 0 	>> $MAP_CPT
+                        echo F 255 0 0 	>> $MAP_CPT
+                        echo -40 255 -38 229      >> $MAP_CPT
+                        echo -38 229 -36 204      >> $MAP_CPT
+                        echo -36 204 -34 178      >> $MAP_CPT
+                        echo -34 178 -32 153      >> $MAP_CPT
+                        echo -32 153 -30 127      >> $MAP_CPT
+                        echo -30 127 -28 102      >> $MAP_CPT
+                        echo -28 102 -26  75      >> $MAP_CPT
+                        echo -26  75 -24  51      >> $MAP_CPT
+                        echo -24  51 -22  25      >> $MAP_CPT
+                        echo -22  25 -20   0      >> $MAP_CPT
+
+                        PLOT_OPTIONS="$PLOT_OPTIONS -W $MAP_CPT"
+			if [ $tiff != n ] ; then
+                                TIFF_OPTIONS="$TIFF_OPTIONS -W $MAP_CPT"
+                        fi
+
+                        ;;
+		*/*)
+			low=`echo $backrange | awk -F/ '{ print $1 + 64 }'`
+			hig=`echo $backrange | awk -F/ '{ print $2 + 64 }'`
+                        MAP_CPT=$MAPNAME.cpt
+                        echo N 255      > $MAP_CPT
+                        echo B 255	>> $MAP_CPT
+                        echo F 0	>> $MAP_CPT
+			echo $low 255 $hig 0 >> $MAP_CPT
+
+                        PLOT_OPTIONS="$PLOT_OPTIONS -W $MAP_CPT"
+			if [ $tiff != n ] ; then
+                                TIFF_OPTIONS="$TIFF_OPTIONS -W $MAP_CPT"
+                        fi
+
+                        ;;
+		*:*)
+			low=`echo $backrange | awk -F: '{ print $1  }'`
+			hig=`echo $backrange | awk -F: '{ print $2  }'`
+                        MAP_CPT=$MAPNAME.cpt
+                        echo N 255      > $MAP_CPT
+                        echo B   0 255   0	>> $MAP_CPT
+                        echo F 255   0   0	>> $MAP_CPT
+			echo $low 255 255 0 $hig 255 255 0 >> $MAP_CPT
+			echo $low 255 255 0 $hig 255 255 0 
+
+                        PLOT_OPTIONS="$PLOT_OPTIONS -W $MAP_CPT"
+			if [ $tiff != n ] ; then
+                                TIFF_OPTIONS="$TIFF_OPTIONS -W $MAP_CPT"
+                        fi
+
+                        ;;
+                c)
+                        MAP_CPT=$MAPNAME.cpt
+                        echo N 255      > $MAP_CPT
+                        echo B 0 255 0 	>> $MAP_CPT
+                        echo F 255 0 0 	>> $MAP_CPT
+			echo -45 255 -43 238 	>> $MAP_CPT
+			echo -43 238 -41 221	>> $MAP_CPT
+			echo -41 221 -39 204	>> $MAP_CPT
+			echo -39 204 -37 187	>> $MAP_CPT
+			echo -37 187 -35 170	>> $MAP_CPT
+			echo -35 170 -33 153	>> $MAP_CPT
+			echo -33 153 -31 136	>> $MAP_CPT
+			echo -31 136 -29 119	>> $MAP_CPT
+ 			echo -29 119 -27 102	>> $MAP_CPT
+			echo -27 102 -25  85	>> $MAP_CPT
+			echo -25  85 -23  68	>> $MAP_CPT
+			echo -23  68 -21  51	>> $MAP_CPT
+			echo -21  51 -19  34	>> $MAP_CPT
+			echo -19  34 -17  17	>> $MAP_CPT
+			echo -17  17 -15   0	>> $MAP_CPT
+
+                        PLOT_OPTIONS="$PLOT_OPTIONS -W $MAP_CPT"
+			if [ $tiff != n ] ; then
+                                TIFF_OPTIONS="$TIFF_OPTIONS -W $MAP_CPT"
+                        fi
+
+                        ;;
+               d)
+                        MAP_CPT=$MAPNAME.cpt
+                        echo N 255      	> $MAP_CPT
+			echo B 255		>> $MAP_CPT
+			echo F 0 		>> $MAP_CPT
+			echo -45 0   255 0 -33 0   255 0	>> $MAP_CPT
+			echo -33 255 255 0 -31 255 255 0	>> $MAP_CPT
+			echo -31 255   0 0 -15 255   0 0	>> $MAP_CPT
+
+                        PLOT_OPTIONS="$PLOT_OPTIONS -W $MAP_CPT"
+			if [ $tiff != n ] ; then
+                                TIFF_OPTIONS="$TIFF_OPTIONS -W $MAP_CPT"
+                        fi
+
+                        ;;
+
+ 
+		*)
+                        MAP_CPT=$MAPNAME.cpt
+                        echo N 255      > $MAP_CPT
+                        echo B 255   	>> $MAP_CPT
+                        echo F 0  	>> $MAP_CPT
+                        echo -45 255 -43 238      >> $MAP_CPT
+                        echo -43 238 -41 221      >> $MAP_CPT
+                        echo -41 221 -39 204      >> $MAP_CPT
+                        echo -39 204 -37 187      >> $MAP_CPT
+                        echo -37 187 -35 170      >> $MAP_CPT
+                        echo -35 170 -33 153      >> $MAP_CPT
+                        echo -33 153 -31 136      >> $MAP_CPT
+                        echo -31 136 -29 119      >> $MAP_CPT
+                        echo -29 119 -27 102      >> $MAP_CPT
+                        echo -27 102 -25  85      >> $MAP_CPT
+                        echo -25  85 -23  68      >> $MAP_CPT
+                        echo -23  68 -21  51      >> $MAP_CPT
+                        echo -21  51 -19  34      >> $MAP_CPT
+                        echo -19  34 -17  17      >> $MAP_CPT
+                        echo -17  17 -15   0      >> $MAP_CPT
+
+                        PLOT_OPTIONS="$PLOT_OPTIONS -W $MAP_CPT"
+			if [ $tiff != n ] ; then
+                                TIFF_OPTIONS="$TIFF_OPTIONS -W $MAP_CPT"
+                        fi
+
+			;;
+		esac
+			
+	fi
+
+	if [ $MAPTYPE = 6 ] ; then
+		echo "Minimum backscatter? [-40]"
+		read minback
+		echo Minimum backscatter:	$minback		>> $CMDFILE
+
+		[ -z "$minback" ] && minback=-40
+
+		echo "Maximum backscatter? [-20]"
+		read maxback
+		echo Maximum backscatter:	$maxback		>> $CMDFILE
+
+		[ -z "$maxback" ] && maxback=-20
+
+                BACK_INT_FILE=${MAPNAME}_int.grd
+                PLOT_OPTIONS="$PLOT_OPTIONS -K$BACK_INT_FILE "
+
+		if [ $tiff != n ] ; then
+                        TIFF_OPTIONS="$TIFF_OPTIONS -K$BACK_INT_FILE"
+                fi
+
+	fi
+
+	if [ $MAPTYPE = 8 ] ; then
+		echo "Name of colour pallette? [segy.cpt]"
+		read pallette
+
+		if [ -z "$pallette" ] ; then
+			pallette=segy.cpt
+			if [ ! -f $pallette ] ; then
+				echo N 255		>> $pallette
+				echo B 0		>> $pallette
+				echo F 0		>> $pallette
+				echo -3  0 -1 128	>> $pallette
+				echo -1 128 0 254	>> $pallette
+				echo 0 254 1 128	>> $pallette
+				echo 1 128 3   0	>> $pallette
+			fi
+		fi
+		PLOT_OPTIONS="$PLOT_OPTIONS -W$pallette"
+		TIFF_OPTIONS="$TIFF_OPTIONS -W$pallette"
+	fi
+
+	if [ $tiff != o ] ; then
+
+		echo
+		echo "Enter any additional mbm_grdplot flags (optional)"
+		if [ $adprompt = 1 ] ; then
+		    echo currently: $PLOT_OPTIONS
+		fi 
+		echo
+		echo "common examples:"
+		echo "100m contours 1000m annotation:   -C100 -MCA1000t -MCWc1 -MCQ20"
+		echo "15 min numbers 10 min grid 1 min: -Ba15mg10mf1m"
+       		echo "10km scale:                       -MGLf<lon>/<lat>/<scale_lat>/10k"
+		echo "green facies red training sites:  -MXM -MXW3/0/255/0 -MXI/gamma/mbproc/facies.xy -MXW3/255/0/0 -MXI/gamma/mbproc/training_sites.xy "
+		echo "plot coastlines:                  -T -MTDf"
+		echo "restrict colour range:            -Zmin/max"
+		read extras
+		echo mbm_grdplot flags:		$extras		>> $CMDFILE
+
+		if [ ! -z "$extras" ] ; then
+			PLOT_OPTIONS="$PLOT_OPTIONS $extras"
+		fi
+	fi
+
+        if [ $tiff != n ] ; then
+
+                echo
+                echo "Enter any additional mbm_grdtiff flags (optional)"
+                if [ $adprompt = 1 ] ; then
+                    echo currently: $TIFF_OPTIONS
+                fi
+                echo
+                echo "common examples:"
+                echo "restrict colour range:            -Zmin/max"
+		echo "use colour pallette:              -Wpallette.cpt"
+                read extras
+		echo mbm_grdtiff flags:		$extras		>> $CMDFILE
+
+                if [ ! -z "$extras" ] ; then
+                        TIFF_OPTIONS="$TIFF_OPTIONS $extras"
+                fi
+        fi
+
+
+	echo
+	echo "Save answers in:"
+	read cmdfile
+
+	if [ -z "$cmdfile" ] ; then
+		rm $CMDFILE
+	else
+		mv $CMDFILE "$cmdfile"
+	fi
+
+else
+	PLOT_OPTIONS="$PLOT_OPTIONS -PA4 -MGDPLOT_DEGREE_FORMAT/D -Ba.1g.1f.01 -MGU"
+	MAPNAME=$GRIDNAME
+	BACK_INT_FILE=${MAPNAME}_int.grd
+	minback=-40
+	maxback=-20
+fi
+
+echo
+echo "Please be patient, this may take a while. "
+echo
+
+PATH=$PATH:.
+
+if [ -z "$REGION" ] ; then
+    REGIONOPTION=""
+else
+    REGIONOPTION=-R$REGION
+fi
+
+if [ $MAPTYPE = 6 ] ; then
+	grdmath $BACK_FILE $minback SUB $minback $maxback SUB DIV 2 MUL 1 SUB -1 MAX 1 MIN = $BACK_INT_FILE
+fi
+
+if [ $tiff != n ] ; then
+	echo mbm_grdtiff  -I $GRIDNAME -O $MAPNAME $REGIONOPTION $TIFF_OPTIONS 
+        mbm_grdtiff  -I $GRIDNAME -O $MAPNAME $REGIONOPTION $TIFF_OPTIONS 
+	${MAPNAME}_tiff.cmd
+	listgeo -tfw $MAPNAME.tif
+	grdinfo $GRIDNAME | awk ' /x_min/ { print "west " $3 ; print "east " $5 } /y_min/ { print "south " $3 ; print "north " $5 } ' > $MAPNAME.region
+
+	listgeo $MAPNAME.tif > $MAPNAME.geo
+
+	if [ -z "$rawtiff" ] ; then
+		convert -transparent white -depth 8 $MAPNAME.tif trans_$MAPNAME.tif
+		geotifcp -c lzw -g $MAPNAME.geo trans_$MAPNAME.tif $MAPNAME.tif
+		rm trans_$MAPNAME.tif
+	fi
+fi
+
+if [ $tiff != o ] ; then
+if [ -z "$LABEL" ] ; then
+	echo mbm_grdplot -I $GRIDNAME -O $MAPNAME $REGIONOPTION $PLOT_OPTIONS 
+	mbm_grdplot -I $GRIDNAME -O $MAPNAME $REGIONOPTION $PLOT_OPTIONS 
+	${MAPNAME}.cmd
+else
+	echo mbm_grdplot -I $GRIDNAME -O $MAPNAME $REGIONOPTION $PLOT_OPTIONS -L\"$LABEL\" 
+	mbm_grdplot -I $GRIDNAME -O $MAPNAME $REGIONOPTION $PLOT_OPTIONS -L"$LABEL" 
+	${MAPNAME}.cmd
+fi
+fi

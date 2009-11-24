@@ -1,0 +1,26 @@
+#!/bin/bash
+
+in=$1
+[ -z $in ] && in=`pwd`
+out=$2
+[ -z $out ] && out=`basename $in`
+temp=$out$$.data
+
+cat $in/*.fnv | sort | awk '{ if ($8 != 0) print $0 }' > $temp
+
+lines=`wc -l $temp | awk '{print $1 }'`
+
+echo "Version 700" 				>  $out.mif
+echo 'Charset "WindowsLatin1"' 			>> $out.mif
+echo 'Delimiter ","' 				>> $out.mif
+echo 'CoordSys Earth Projection 1, 104' 	>> $out.mif
+echo 'Columns 1' 				>> $out.mif
+echo '  Timestamp Char(26)'			>> $out.mif
+echo 'Data' 					>> $out.mif
+
+awk  '{ print "Point " $8 " " $9 }' $temp 	>> $out.mif
+
+awk  ' BEGIN { q="\""; c=":"; d="-" } 
+	{ print q $1 d $2 d $3 " " $4 c $5 c $6 q }
+	' $temp > $out.mid
+rm $temp 

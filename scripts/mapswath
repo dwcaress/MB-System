@@ -1,0 +1,466 @@
+#!/bin/sh
+#
+#  mapswath
+#
+#  Script to allow interactive selection of data set to map.
+#
+
+NULLDIR=/tmp/empty
+if [ ! -d $NULLDIR ] ; then
+	mkdir $NULLDIR
+fi
+
+SWATHSRC=$NULLDIR
+export SWATHSRC
+
+while [ -z "$SWATHDIR" ]; do
+
+	echo
+	echo Please select swath data set:
+	echo 
+	echo "0.  All swath data"
+	echo "1.  EM1002 raw data"
+        echo "2.  Bluefin EM3000 data"
+	echo "3.  EM300 raw data"
+	echo "4.  SS0404 survey data (EM300 raw)"
+        echo "5.  NORFANZ (EM300 raw Tangaroa)"
+	echo "7.  SS0407 survey data (EM300 raw)"
+	echo "9.  SS0409 survey data (EM300 raw)"
+	echo
+	echo "10.  All xyz (cleaned) data"
+        echo "11.  EM1002 xyz (cleaned) data"
+        echo "13.  EM300 xyz (cleaned) data"
+	echo "14.  SS0404 processed data (Neptune xyz)"
+        echo "17.  SS0407 processed data (Neptune xyz)"
+	echo
+	echo "20.  All GA Data"
+	echo "21.  GA 0.1 degree (public) data"
+#	echo "22.  GA swath XYZ data"
+	echo "23.  GA west Tas XYZ data"
+	echo "24.  GA east Tas XYZ data"
+	echo "25.  GA AUSTREA1"
+	echo "26.  GA cleaned swath data (GSF)"
+	echo "27.  Tas seamounts"
+	echo "28.  Tas seamounts gridded"
+	echo "29.  All xyz data (including restricted GA)"
+	echo
+	echo "30.  EM300 trials (Perth Canyon)"
+	echo
+	echo "99.  All data"
+	echo
+	echo "100. Current directory (./datalist.mb-1)"
+	echo "101. Working data"
+	echo
+
+	read DATASET
+
+	case "$DATASET" in
+	0)
+		SWATHDIR=/home/swath/mbproc/allswath
+		DATANAME=All_restricted
+	;;
+	1)
+		SWATHDIR=/home/swath/mbproc/EM1002/
+		DATANAME=em1002
+	;;
+        2)
+                SWATHDIR=/home/swath/mbproc/bluefin_swath_trials/
+		DATANAME=bluefin
+        ;;
+	3)
+		SWATHDIR=/home/swath/mbproc/em300/
+		DATANAME=em300
+	;;
+	4)
+		SWATHDIR=/home/swath/mbproc/em300/SE_Ecosystem/
+		DATANAME=ss0404
+	;;
+        5)
+                SWATHDIR=/home/swath/mbproc/gx30_NORFANZ/
+		DATANAME=NORFANZ
+        ;;
+	7)
+		SWATHDIR=/home/swath/mbproc/em300/SS200407/
+		DATANAME=ss0407
+	;;
+	9)
+		SWATHDIR=/home/swath/mbproc/em300/SS200409/
+		DATANAME=ss0409
+	;;
+	10)
+		SWATHDIR=/home/swath/mbdata/xyz/
+		DATANAME=xyz
+	;;
+	11)
+		SWATHDIR=/home/swath/mbdata/xyz/em1002/
+		DATANAME=em1002_xyz
+	;;
+	13)
+		SWATHDIR=/home/swath/mbdata/xyz/em300/
+		DATANAME=em300_xyz
+	;;
+	14)
+		SWATHDIR=/home/swath/ss0404/xyz
+		DATANAME=ss0404_xyz
+	;;
+	17)
+		SWATHDIR=/home/swath/ss0407/xyz
+		DATANAME=ss0407_xyz
+	;;
+	20)
+		SWATHDIR=/home/swath/mbdata/xyz/ga_restricted/
+		DATANAME=GA_restricted
+	;;
+	21)
+		SWATHDIR=/home/swath/mbdata/xyz/ga_bathy/
+		DATANAME=GA
+	;;
+	23)
+		SWATHDIR=/home/swath/mbdata/xyz/ga_restricted/west_162/
+		DATANAME=GA_restricted
+	;;
+	24)
+		SWATHDIR=/home/swath/mbdata/xyz/ga_restricted/east_162/
+		DATANAME=GA_restricted
+	;;
+	25)
+		SWATHDIR=/home/swath/mbdata/xyz/ga_restricted/austrea/
+		DATANAME=GA_restricted
+	;;
+	26)
+		SWATHDIR=/home/swath/mbdata/gsf/
+		DATANAME=GA_GSF_restricted
+	;;
+	27)
+		SWATHDIR=/home/swath/mbdata/xyz/tas_seamounts/
+		DATANAME=GA_restricted
+	;;
+        28)
+                SWATHDIR=/home/swath/mbdata/xyz/tas_seamounts_grid/
+                DATANAME=GA_restricted
+        ;;
+
+	29)
+		SWATHDIR=/home/swath/mbdata/
+		DATANAME=xyz_restricted
+	;;
+	30)
+		SWATHDIR=/home/swath/mbproc/em300/EM300trials
+		DATANAME=em300
+	;;
+	99)
+		SWATHDIR=/home/swath/mbproc/alldata
+		DATANAME=All_restricted
+	;;
+	100)
+		SWATHDIR=.
+		DATANAME=.
+	;;
+	101)
+		SWATHDIR=/home/swath/mbproc/working
+		DATANAME=working
+	;;
+	esac
+
+done
+
+export SWATHDIR
+export DATANAME
+
+echo "What area would you like mapped?"
+echo
+echo "0) Let me enter coordinates"
+echo
+echo 	"1) Big Horseshoe	149.15/149.8/-38.3/-38"
+echo 	"2) Broken Reef		149.234/149.305/-37.982/-37.925"
+echo 	"3) Gabo Reef		149.989/150.097/-37.787/-37.693"
+echo 	"4) Disaster Bay 	150.06/150.11/-37.38/-37.3"
+echo	"5) Disaster Bay west	150/150.02/-37.36/-37.29"
+echo	"6) Disaster Bay E-W	149.97/150.14/-37.36/-37.34"
+echo 	"7) Howe Reef 		150.14/150.29/-37.35/-37.25"
+echo	"8) Pt Hicks		149.13/149.171/-37.825/-37.812"
+echo	"9) Bass Canyon		147.5/150.5/-39.5/-37.5"
+echo
+echo 	"11) King Island slope 	142.9/143.4/-40.2/-39.6"
+echo 	"12) Ling hole		144.2/144.54/-41.48/-41.29"
+echo 	"13) Pieman Canyon	144.44/144.65/-41.92/-41.71"
+echo	"14) King Island	142.8/143.88/-40.25/-39.46"
+echo    "15) Bass Strait	143.15/144.78/-40.94/-40.24"
+echo	"16) Linghole		143.6/144.69/-41.58/-40.93"
+echo	"17) Pieman/Strahan	144.21/145.15/-42.41/-41.57"
+echo	"18) High/low Rocky	144.62/145.96/-43.64/-42.4"
+echo	"19) Banks Strait	148.34/149.18/-41.63/-40.34"
+echo
+echo	"21) GAB 55m		130.65/130.78/-31.85/-31.82"
+echo	"22) GAB 80m 		130.54/130.77/-32.71/-32.69"
+echo	"23) GAB 90m 		130.57/130.76/-32.93/-32.91"
+echo 	"24) GAB 150m		130.57/130.76/-33.29/-33.249"
+echo	"25) GAB outside	130.93/130.98/-33.34/-33.27"
+echo
+echo	"31) Lacepede 40m 	139.3/139.38/-36.27/-36.21"
+echo	"32) Lacepede 50m 	139.37/139.47/-36.58/-36.49"
+echo	"33) Lacepede 80m	138.3/138.37/-37.01/-36.96"
+echo 	"34) Lacepede 120m 	138.23/138.31/-37.09/-37.04"
+echo
+echo	"41) Lord Howe Rise 1	162.5/162.75/-34.3/-33.95"
+echo 	"42) Lord Howe Rise 2	158.85/159.15/-29.3/-29.15"
+echo	"43) Lord Howe Rise 3	159.05/159.4/-32/-31.6"
+echo	"44) Lord Howe Rise 4 	160.3/162.7/-32.8/-32"
+echo
+echo    "51) Perth Canyon	114.75/115.25/-32.4/-31.8"
+echo	"52) Bremer Basin	115.05/121.8/-37/-33.5"
+echo 	"53) Ningaloo		113.5/113.9/-22.3/-21/8"
+echo	"54) Albany		118/118.8/-35.5/-35.1"
+echo	"55) Walpole		117/117.7/-35.6/-35.3"
+echo	"56) Two Rocks		114.7/115.1/-31.82/-31.55"
+
+read AREA
+
+if [ "$AREA" = 00 ] ; then
+    echo 	"1) Big Horseshoe	149.15/149.8/-38.3/-38"
+    echo 	"2) Broken Reef		149.234/149.305/-37.982/-37.925"
+    echo 	"3) Gabo Reef		149.989/150.097/-37.787/-37.693"
+    echo 	"4) Disaster Bay 	150.06/150.11/-37.38/-37.3"
+    echo	"5) Disaster Bay west	150/150.02/-37.36/-37.29"
+    echo	"6) Disaster Bay E-W	149.97/150.14/-37.36/-37.34"
+    echo 	"7) Howe Reef 		150.14/150.29/-37.35/-37.25"
+    echo	"8) Pt Hicks		149.13/149.171/-37.825/-37.812"
+    echo	"9) Bass Canyon		147.5/150.5/-39.5/-37.5"
+    echo
+
+    read AREA
+fi
+
+if [ "$AREA" = 10 ] ; then
+    echo 	"11) King Island slope 	142.9/143.4/-40.2/-39.6"
+    echo 	"12) Ling hole		144.2/144.54/-41.48/-41.29"
+    echo 	"13) Pieman Canyon	144.44/144.65/-41.92/-41.71"
+    echo	"14) King Island	142.8/143.88/-40.25/-39.46"
+    echo    	"15) Bass Strait	143.15/144.78/-40.94/-40.24"
+    echo	"16) Linghole		143.6/144.69/-41.58/-40.93"
+    echo	"17) Pieman/Strahan	144.21/145.15/-42.41/-41.57"
+    echo	"18) High/low Rocky	144.62/145.96/-43.64/-42.4"
+    echo	"19) Banks Strait	148.34/149.18/-41.63/-40.34"
+    echo
+
+    read AREA
+fi
+
+if [ "$AREA" = 20 ] ; then
+    echo	"21) GAB 55m		130.65/130.78/-31.85/-31.82"
+    echo	"22) GAB 80m 		130.54/130.77/-32.71/-32.69"
+    echo	"23) GAB 90m 		130.57/130.76/-32.93/-32.91"
+    echo 	"24) GAB 150m		130.57/130.76/-33.29/-33.249"
+    echo	"25) GAB outside	130.93/130.98/-33.34/-33.27"
+    echo
+
+    read AREA
+fi
+
+if [ "$AREA" = 30 ] ; then
+    echo	"31) Lacepede 40m 	139.3/139.38/-36.27/-36.21"
+    echo	"32) Lacepede 50m 	139.37/139.47/-36.58/-36.49"
+    echo	"33) Lacepede 80m	138.3/138.37/-37.01/-36.96"
+    echo 	"34) Lacepede 120m 	138.23/138.31/-37.09/-37.04"
+    echo
+
+    read AREA
+fi
+
+if [ "$AREA" = 40 ] ; then
+    echo	"41) Lord Howe Rise 1	162.5/162.75/-34.3/-33.95"
+    echo 	"42) Lord Howe Rise 2	158.85/159.15/-29.3/-29.15"
+    echo	"43) Lord Howe Rise 3	159.05/159.4/-32/-31.6"
+    echo	"44) Lord Howe Rise 4 	160.3/162.7/-32.8/-32"
+    echo
+
+    read AREA
+fi
+
+if [ "$AREA" = 50 ] ; then
+    echo    	"51) Perth Canyon	114.75/115.25/-32.4/-31.8"
+    echo	"52) Bremer Basin	115.05/121.8/-37/-33.5"
+    echo 	"53) Ningaloo		113.5/113.9/-22.3/-21/8"
+    echo	"54) Albany		118/118.8/-35.5/-35.1"
+    echo	"55) Walpole		117/117.7/-35.6/-35.3"
+    echo	"56) Two Rocks		114.7/115.1/-31.82/-31.55"
+
+    read AREA
+fi
+
+case "$AREA" in
+0)
+	REGION=
+	;;
+1)
+	REGION=149.15/149.8/-38.3/-38
+	REGION_NAME=Big_Horseshoe
+	;;
+2)
+	REGION=149.234/149.305/-37.982/-37.925
+	REGION_NAME=Broken_Reef
+	;;
+3)
+	REGION=149.989/150.097/-37.787/-37.693
+	REGION_NAME=Gabo_Reef
+	;;
+4)
+	REGION=150.06/150.11/-37.38/-37.3
+	REGION_NAME=Disaster_Bay
+	;;
+5)   
+        REGION=150/150.02/-37.36/-37.29
+	REGION_NAME=Disaster_Bay_W
+	;;
+6)   
+        REGION=149.97/150.14/-37.36/-37.34
+	REGION_NAME=Disaster_Bay_EW
+	;;
+7)   
+        REGION=150.14/150.29/-37.35/-37.25
+	REGION_NAME=Howe_Reef
+	;;
+8)   
+        REGION=149.13/149.171/-37.825/-37.812
+	REGION_NAME=Pt_Hicks
+	;;
+9)
+	REGION=147.5/150.5/-39.5/-37.5
+	REGION_NAME=Bass_Canyon
+	;;
+11)
+	REGION=142.9/143.4/-40.2/-39.6
+	REGION_NAME=King_Island
+	;;
+12)
+	REGION=144.2/144.54/-41.48/-41.29
+	REGION_NAME=Linghole
+	;;
+13)
+	REGION=144.44/144.65/-41.92/-41.71
+	REGION_NAME=Pieman_Canyon
+	;;
+14) 
+	REGION_NAME=King_Island
+	REGION=142.8/143.88/-40.25/-39.46
+	;;
+15) 
+	REGION_NAME=Bass_Strait
+ 	REGION=43.15/144.78/-40.94/-40.24
+	;;
+16) 
+	REGION_NAME=Linghole
+	REGION=143.6/144.69/-41.58/-40.93
+	;;
+17) 
+	REGION_NAME=Pieman~Strahan
+	REGION=144.21/145.15/-42.41/-41.57
+	;;
+18) 
+	REGION_NAME=High~low_Rocky
+	REGION=144.62/145.96/-43.64/-42.4
+	;;
+19) 
+	REGION_NAME=Banks_Strait
+   	REGION=148.34/149.18/-41.63/-40.34
+	;;
+21)    
+        REGION=130.65/130.78/-31.85/-31.82
+	REGION_NAME=GAB_55m
+	;;
+22)    
+        REGION=130.54/130.77/-32.71/-32.69
+	REGION_NAME=GAB_80m
+	;;
+23)    
+        REGION=130.57/130.76/-32.93/-32.91
+	REGION_NAME=GAB_90m
+	;;
+24)    
+        REGION=130.57/130.76/-33.29/-33.249
+	REGION_NAME=GAB_150m
+	;;
+25)    
+        REGION=130.93/130.98/-33.34/-33.27
+	REGION_NAME=GAB_outside
+	;;
+
+31)    
+        REGION=139.3/139.38/-36.27/-36.21
+	REGION_NAME=Lacepede_40m
+	;;
+32)    
+        REGION=139.37/139.47/-36.58/-36.49
+	REGION_NAME=Lacepede_50m
+	;;
+33)    
+        REGION=138.3/138.37/-37.01/-36.96
+	REGION_NAME=Lacepede_80m
+	;;
+34)    
+        REGION=138.23/138.31/-37.09/-37.04
+	REGION_NAME=Lacepede_120m
+	;;
+41)    
+        REGION=162.5/162.75/-34.3/-33.95
+	REGION_NAME=Lord_Howe_Rise_1
+	;;
+42)    
+        REGION=158.85/159.15/-29.3/-29.15
+	REGION_NAME=Lord_Howe_Rise_2
+	;;
+43)   
+        REGION=159.05/159.4/-32/-31.6
+	REGION_NAME=Lord_Howe_Rise_3
+	;;
+44)    
+        REGION=160.3/162.7/-32.8/-32
+	REGION_NAME=Lord_Howe_Rise_4
+	;;
+51) 
+	REGION_NAME=Perth_Canyon	
+        REGION=114.75/115.25/-32.4/-31.8
+	;;
+52) 
+	REGION_NAME=Bremer_Basin	
+        REGION=115.05/121.8/-37/-33.5
+	;;
+53) 
+	REGION_NAME=Ningaloo		
+        REGION=113.5/113.9/-22.3/-21/8
+	;;
+54) 
+	REGION_NAME=Albany		
+        REGION=118/118.8/-35.5/-35.1
+	;;
+55) 
+	REGION_NAME=Walpole		
+        REGION=117/117.7/-35.6/-35.3
+	;;
+56) 
+	REGION_NAME=Two_Rocks		
+        REGION=114.7/115.1/-31.82/-31.55
+	;;
+esac
+
+export REGION
+export REGION_NAME
+
+echo $0
+case `basename $0` in 
+mapswath)
+	map_swath $@
+	;;
+gridswath)
+	grid_swath $@
+	;;
+mapgrid)
+	map_grid $@
+	;;
+*)
+	prog=`echo $0 | sed s/swath/_swath/`
+
+	if [ $prog != $0 ] ; then
+		$prog $@
+	fi
+esac
