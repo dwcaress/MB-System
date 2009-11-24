@@ -1994,6 +1994,13 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 							&(data->area.cornerpoints[0].xgrid), 
 							&(data->area.cornerpoints[0].ygrid), 
 							&(data->area.cornerpoints[0].zdata)); 
+			status = mbview_projectll2display(instance,
+							data->area.cornerpoints[0].xlon, 
+							data->area.cornerpoints[0].ylat, 
+							data->area.cornerpoints[0].zdata ,
+							&data->area.cornerpoints[0].xdisplay, 
+							&data->area.cornerpoints[0].ydisplay,
+							&data->area.cornerpoints[0].zdisplay);
 
 			bearing = data->area.bearing + 90.0;
 			if (bearing < 0.0)
@@ -2013,6 +2020,13 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 							&(data->area.cornerpoints[1].xgrid), 
 							&(data->area.cornerpoints[1].ygrid), 
 							&(data->area.cornerpoints[1].zdata)); 
+			status = mbview_projectll2display(instance,
+							data->area.cornerpoints[1].xlon, 
+							data->area.cornerpoints[1].ylat, 
+							data->area.cornerpoints[1].zdata ,
+							&data->area.cornerpoints[1].xdisplay, 
+							&data->area.cornerpoints[1].ydisplay,
+							&data->area.cornerpoints[1].zdisplay);
 
 			bearing = data->area.bearing + 90.0;
 			if (bearing < 0.0)
@@ -2032,6 +2046,13 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 							&(data->area.cornerpoints[2].xgrid), 
 							&(data->area.cornerpoints[2].ygrid), 
 							&(data->area.cornerpoints[2].zdata)); 
+			status = mbview_projectll2display(instance,
+							data->area.cornerpoints[2].xlon, 
+							data->area.cornerpoints[2].ylat, 
+							data->area.cornerpoints[2].zdata ,
+							&data->area.cornerpoints[2].xdisplay, 
+							&data->area.cornerpoints[2].ydisplay,
+							&data->area.cornerpoints[2].zdisplay);
 
 			bearing = data->area.bearing - 90.0;
 			if (bearing < 0.0)
@@ -2051,6 +2072,13 @@ int mbview_area(int instance, int which, int xpixel, int ypixel)
 							&(data->area.cornerpoints[3].xgrid), 
 							&(data->area.cornerpoints[3].ygrid), 
 							&(data->area.cornerpoints[3].zdata)); 
+			status = mbview_projectll2display(instance,
+							data->area.cornerpoints[3].xlon, 
+							data->area.cornerpoints[3].ylat, 
+							data->area.cornerpoints[3].zdata ,
+							&data->area.cornerpoints[3].xdisplay, 
+							&data->area.cornerpoints[3].ydisplay,
+							&data->area.cornerpoints[3].zdisplay);
 
 			/* set pick info */
 			data->pickinfo_mode = MBV_PICK_AREA;

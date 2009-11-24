@@ -1051,8 +1051,8 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 					}
 				}
 if (mbev_verbose > 0)
-fprintf(stderr,"file->processed_info_loaded:%d file->process.mbp_edit_mode:%d load_esf:%d\n",
-file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
+fprintf(stderr,"loaded swathfile:%s file->processed_info_loaded:%d file->process.mbp_edit_mode:%d load_esf:%d\n",
+swathfile,file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
 			
 			/* load bathymetry edits if needed */
 			if (load_esf == MB_YES)

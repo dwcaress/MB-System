@@ -503,7 +503,6 @@ gsfOpen(const char *filename, const int mode, int *handle)
       gsfClose ((int) *handle);
       return(-1);
   }
-
   return (0);
 }
 
@@ -1715,7 +1714,6 @@ gsfWrite(int handle, gsfDataID *id, gsfRecords *rptr)
 
     /* Clear gsfError before each write */
     gsfError = 0;
-
     /* JSB 04/05/00 replaced ">=" with ">" */
     if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {

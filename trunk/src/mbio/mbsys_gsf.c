@@ -1996,7 +1996,7 @@ int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata,
 			int nbits, int signedvalue, 
 			double *multiplier, double *offset, int *error)
 {
-	char	*function_name = "mbsys_gsf_copy";
+	char	*function_name = "mbsys_gsf_getscale";
 	int	status = MB_SUCCESS;
 	double	datamin;
 	double	datamax;

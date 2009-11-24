@@ -1576,7 +1576,9 @@ int mbsys_reson8k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 	store = (struct mbsys_reson8k_struct *) store_ptr;
 
 	/* insert data in structure */
-	if (store->kind == MB_DATA_DATA)
+	if (store->kind == MB_DATA_DATA 
+		&& store->ssrawstbdsamples > 0 
+		&& store->ssrawportsamples > 0)
 		{
 		/* zero the sidescan */
 		for (i=0;i<MBSYS_RESON8K_MAXPIXELS;i++)

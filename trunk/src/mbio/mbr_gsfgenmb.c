@@ -657,9 +657,9 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbf_gsfgenmb_struct *data;
 	struct mbsys_gsf_struct *store;
-	gsfDataID		    *dataID;
-	gsfRecords	    *records;
-	gsfSwathBathyPing   *mb_ping;
+	gsfDataID		*dataID;
+	gsfRecords		*records;
+	gsfSwathBathyPing	*mb_ping;
 	int	ret;
 	int	i;
 
@@ -772,6 +772,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    {
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_WRITE_FAIL;
+fprintf(stderr,"FAILED 1 to write mbfp:%d ret:%d\n",mb_io_ptr->mbfp,ret);
 		    }
 		dataID->recordID = GSF_RECORD_SWATH_BATHYMETRY_PING;
 		mb_io_ptr->save1 = MB_YES;
@@ -782,6 +783,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    /* write the record */
 	    if ((ret = gsfWrite((int)mb_io_ptr->mbfp, dataID, records)) < 0)
 		{
+fprintf(stderr,"FAILED 2 to write mbfp:%d ret:%d\n",mb_io_ptr->mbfp,ret);
 		status = MB_FAILURE;
 		*error = MB_ERROR_WRITE_FAIL;
 		}
