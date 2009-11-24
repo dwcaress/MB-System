@@ -838,6 +838,7 @@ The default input and output streams are stdin and stdout.\n";
 		ping[i].ssalongtrack = NULL;
 		ping[i].dataprocess = NULL;
 		ping[i].datasave = NULL;
+		ping[i].ndatapts = 0;
 		ping[i].data_i_ptr = NULL;
 		ping[i].data_f_ptr = NULL;
 		ping[i].flag_ptr = NULL;
