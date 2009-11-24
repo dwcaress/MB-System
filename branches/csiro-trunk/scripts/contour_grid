@@ -1,0 +1,95 @@
+#!/bin/sh
+
+# Generate Contours in MapInfo MIF format from grid files.
+#
+# Copyright CSIRO Marine and Atmospheric Research 2005
+#
+# Author Gordon Keith
+#
+# Modication History
+#   200508  SS200507 Inital version
+#
+
+if [ $# -gt 0 ] ; then
+    cat $@ | awk ' { if (substr($1, 0, 1) != "#") print $0 }' | sed 's/[^:]*://' | $0
+
+    exit
+fi
+
+ls -lrt *.grd 2> /dev/null
+	GRIDNAME=`echo $REGION_NAME"*" bathymetry "*"$REGION.grd | sed "s/  */_/g" | sed s:/:_:g`
+	GRIDNAME=`ls -t *$GRIDNAME 2> /dev/null | head -1`
+	if [ -z "$GRIDNAME" ] ; then
+		GRIDNAME=`echo $REGION_NAME $DATANAME"*"bathymetry "*.grd" | sed "s/  */_/g" | sed "s:/:_:g"`
+		GRIDNAME=`ls -t *$GRIDNAME 2> /dev/null | head -1`
+	   
+		if  [ -z "$GRIDNAME" ] ; then
+			GRIDNAME=`echo  bathymetry"*.grd" | sed "s/  */_/g" | sed "s:/:_:g"`
+			GRIDNAME=`ls -t *$GRIDNAME 2> /dev/null | head -1`
+ 	
+			if  [ -z "$GRIDNAME" ] ; then
+				GRIDNAME=`ls -t *.grd 2> /dev/null | head -1`
+			fi
+		fi
+	fi
+default=$GRIDNAME
+
+echo 
+echo "Please enter grid file to contour [$default]"
+read grid
+
+if [ -z "$grid" ] ; then
+	grid=$default
+fi
+
+echo
+echo "Please enter contour interval [100]"
+read contour
+
+if [ -z "$contour" ] ; then
+	contour=100
+fi
+
+echo
+echo "Enter any options, eg to restrict to a region -Rwest/east/south/north"
+read options
+
+out=`basename $grid .grd`.contour$contour
+
+gmtset D_FORMAT %.9lg
+grdcontour $grid -C$contour -Q20 -D$out -M -Jm1:1000 $options > /dev/null 
+
+awk '/>/ { print id++ "," $2 ",0,0" }' $out > $out.MID
+
+awk '
+BEGIN 	{
+		count = 0
+		print "Version 700"
+		print "Charset \"WindowsLatin1\""
+		print "Delimiter \",\""
+		print "CoordSys Earth Projection 1, 104"
+		print "Columns 4"
+		print "  Id Decimal(8, 0)"
+		print "  Z  Decimal(8, 0)"
+		print "  Colour Decimal(10, 0)"
+		print "  Thickness Decimal(4, 0)"
+		print "Data"
+		print
+
+	}
+/>/ 	{ if (count > 0) {
+			print "Pline " count
+			for (i = 0; i < count; i++)
+				print line[i];
+			count=0
+		}
+	}
+!/>/	{
+		line[count++] = $1 " " $2
+	}
+END	{
+		print "Pline " count
+                for (i = 0; i < count; i++)
+                	print line[i];
+         } ' $out > $out.MIF
+
