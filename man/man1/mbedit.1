@@ -718,14 +718,21 @@ some of the keyboard actions described below.
 .B Middle Mouse Button
 The middle mouse button causes the set of displayed pings to step \fInstep\fP 
 pings backward in the current buffer.  The control button \fBReverse\fP causes
-the same action.
+the same action. If the 'G' or 'g' key is depressed, the display will jump
+to the beginning of the current buffer.
 .TP
 .B Right Mouse Button
 The right mouse button causes the set of displayed pings to step \fInstep\fP 
 pings forward in the current buffer.  The control button \fBForward\fP causes
-the same action.
+the same action. If the 'G' or 'g' key is depressed, the display will jump
+to the end of the current buffer.
 
 .SH KEYBOARD ACTIONS
+.TP
+.B 'G' or 'g'
+.B Big Jump:
+Scolling forward while pressing one of these keys jumps to the end
+of the current buffer, and scrolling backward jumps to the beginning of the buffer.
 .TP
 .B 'Z', 'z', 'M', or 'm'
 .B Bad Ping:

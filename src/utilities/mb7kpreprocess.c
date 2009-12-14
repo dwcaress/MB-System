@@ -313,6 +313,7 @@ int main (int argc, char **argv)
 	int	nnav = 0;
 	int	nnav_alloc = 0;
 	double	*nav_time_d = NULL;
+	double	*navdepth_time_d = NULL;
 	int	*nav_quality = NULL;
 	double	*nav_lon = NULL;
 	double	*nav_lat = NULL;
@@ -1584,6 +1585,7 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 				{
 				nnav_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
 				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&navdepth_time_d,&error);
 				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(int),(void **)&nav_quality,&error);
 				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_lon,&error);
 				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_lat,&error);
@@ -1624,6 +1626,7 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 				if (nnav == 0 || nav_time_d[nnav-1] < bluefin->nav[i].position_time)
 					{
 					nav_time_d[nnav] = bluefin->nav[i].position_time;
+					navdepth_time_d[nnav] = bluefin->nav[i].depth_time;
 					nav_quality[nnav] = bluefin->nav[i].quality;
 					nav_lon[nnav] = RTD * bluefin->nav[i].longitude;
 					nav_lat[nnav] = RTD * bluefin->nav[i].latitude;
@@ -1637,10 +1640,10 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 					nav_pitch[nnav] = RTD * bluefin->nav[i].pitch;
 					nnav++;
 					}
-				if (nalt == 0 || (alt_time_d[nalt-1] < bluefin->nav[i].altitude_time
+				if (nalt == 0 || (alt_time_d[nalt-1] < bluefin->nav[i].position_time
 							&& alt_altitude[nalt-1] != bluefin->nav[i].altitude))
 					{
-					alt_time_d[nalt] = bluefin->nav[i].altitude_time;
+					alt_time_d[nalt] = bluefin->nav[i].position_time;
 					alt_altitude[nalt] = bluefin->nav[i].altitude;
 					nalt++;
 					}
@@ -2141,7 +2144,7 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 			sonardepth_filterweight = 0.0;
 			for (j=0;j<nnav;j++)
 				{
-				dtol = (nav_time_d[j] - nav_time_d[i]) / sonardepthfilterlength;
+				dtol = (navdepth_time_d[j] - navdepth_time_d[i]) / sonardepthfilterlength;
 				if (fabs(dtol) < 4.0)
 					{
 					weight = exp(-dtol * dtol);
@@ -2154,8 +2157,8 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 			}
 		for (i=0;i<nnav;i++)
 			{
-/*fprintf(stderr,"nav_time_d[%d]:%f raw:%f filter:%f\n", 
-i, nav_time_d[i], nav_sonardepth[i], nav_sonardepthfilter[i]);*/
+/*fprintf(stderr,"navdepth_time_d[%d]:%f raw:%f filter:%f\n", 
+i, navdepth_time_d[i], nav_sonardepth[i], nav_sonardepthfilter[i]);*/
 			if (nav_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 				factor = 1.0;
 			else
@@ -2257,17 +2260,17 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 			if (i == 0)
 				{
 				nav_sonardepthrate[i] = (nav_sonardepth[i+1] - nav_sonardepth[i]) 
-								/ (nav_time_d[i+1] - nav_time_d[i]);
+								/ (navdepth_time_d[i+1] - navdepth_time_d[i]);
 				}
 			else if (i == nnav - 1)
 				{
 				nav_sonardepthrate[i] = (nav_sonardepth[i] - nav_sonardepth[i-1]) 
-								/ (nav_time_d[i] - nav_time_d[i-1]);
+								/ (navdepth_time_d[i] - navdepth_time_d[i-1]);
 				}
 			else
 				{
 				nav_sonardepthrate[i] = (nav_sonardepth[i+1] - nav_sonardepth[i-1]) 
-								/ (nav_time_d[i+1] - nav_time_d[i-1]);
+								/ (navdepth_time_d[i+1] - navdepth_time_d[i-1]);
 				}
 			nav_sonardepthrate[i] = fabs(nav_sonardepthrate[i]);
 			}
@@ -2315,12 +2318,18 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 		fprintf(stdout, "\nTotal 7k navigation/attitude data read: %d\n", nnav);
 		for (i=0;i<nnav;i++)
 			{
-			fprintf(stdout, "  NAV: %5d %12d %17.6f %11.6f %10.6f %8.3f %8.3f %7.3f %6.3f %6.3f %6.3f\n", 
+			fprintf(stdout, "  NAV: %5d %12d %17.6f %11.6f %10.6f %7.3f %6.3f %6.3f %6.3f\n", 
 				i, nav_quality[i], nav_time_d[i], nav_lon[i], nav_lat[i],
-				nav_sonardepth[i], nav_sonardepthrate[i], nav_heading[i], nav_speed[i],
+				nav_heading[i], nav_speed[i],
 				nav_roll[i], nav_pitch[i]);
 			}
-		fprintf(stdout, "\nTotal altitude data read: %d\n", nnav);
+		fprintf(stdout, "\nTotal sonardepth data read: %d\n", nnav);
+		for (i=0;i<nnav;i++)
+			{
+			fprintf(stdout, "  DEP: %5d %17.6f %8.3f %8.3f\n", 
+				i, navdepth_time_d[i], nav_sonardepth[i], nav_sonardepthrate[i]);
+			}
+		fprintf(stdout, "\nTotal altitude data read: %d\n", nalt);
 		for (i=0;i<nalt;i++)
 			{
 			fprintf(stdout, "  ALT: %5d %17.6f %8.3f\n", 
@@ -2755,10 +2764,11 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 					}
 					
 				/* fix upgraded version 5 quality flags */
-				else if (bathymetry->header.Version == 5)
+				else if (bathymetry->header.Version >= 5)
 					{
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
+/*fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]);*/
 						bathymetry->quality[i] = bathymetry->quality[i] & 15;
 						
 						/* phase or amplitude picks */
@@ -2776,10 +2786,11 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 							}
 							
 						/* flagged by sonar */
-						if ((bathymetry->quality[i] & 3) < 3)
+						if ((bathymetry->quality[i] & 3) == 0)
 							{
 							bathymetry->quality[i] += 64;
 							}
+/*fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]);*/
 						}
 					}
 					
@@ -2976,7 +2987,7 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 						&& interp_status == MB_SUCCESS)
 						{
 						interp_status = mb_linear_interp(verbose, 
-								nav_time_d-1, nav_sonardepthrate-1,
+								navdepth_time_d-1, nav_sonardepthrate-1,
 								nnav, time_d, &sonardepthrate, &j, 
 								&error);
 						sonardepthlag = sonardepthrate * sonardepthlagmax / sonardepthratemax;
@@ -2985,7 +2996,7 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 						}
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp(verbose, 
-								nav_time_d-1, nav_sonardepth-1,
+								navdepth_time_d-1, nav_sonardepth-1,
 								nnav, time_d + sonardepthlag, &sonardepth, &j, 
 								&error);
 					}
@@ -3454,7 +3465,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 				mb_get_time(verbose, time_i, &time_d);
 				time_d -= timelag;
 				bluefin->nav[i].position_time -= timelag;
-				bluefin->nav[i].altitude_time -= timelag;
+				bluefin->nav[i].depth_time -= timelag;
 				mb_get_date(verbose, time_d,time_i);
 				mb_get_jtime(verbose, time_i, time_j);
 				bluefin->nav[i].s7kTime.Year = time_i[0];
@@ -3755,7 +3766,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 					bluefin->nav[i].pitch_rate = 0;
 					bluefin->nav[i].yaw_rate = 0;
 					bluefin->nav[i].position_time = ins_time_d[ins_output_index];
-					bluefin->nav[i].altitude_time = ins_time_d[ins_output_index];
+					bluefin->nav[i].depth_time = ins_time_d[ins_output_index];
 					ins_output_index++;
 					}
 
@@ -3901,6 +3912,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	if (nnav > 0)
 		{
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&navdepth_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_quality,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_lon,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_lat,&error);

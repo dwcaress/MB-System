@@ -311,6 +311,7 @@ Cursor myCursor;
 XColor closest[2];
 XColor exact[2];
 
+int key_g_down = 0;
 int key_z_down = 0;
 int key_s_down = 0;
 int key_a_down = 0;
@@ -1540,11 +1541,22 @@ do_forward( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 
-    status = mbedit_action_step(step,mplot_width,mexager,
-    				mx_interval,my_interval,mplot_size,
-				mshow_detects, mshow_flagged,mshow_time,
-				&nbuffer,&ngood,&icurrent,&mnplot);
-    if (status == 0) XBell(theDisplay,100);
+    if (key_g_down == 0)
+	{
+	status = mbedit_action_step(step,mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+	if (status == 0) XBell(theDisplay,100);
+	}
+    else
+	{
+	status = mbedit_action_step(nbuffer-icurrent-1,mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+	if (status == 0) XBell(theDisplay,100);
+	}
 
 }
 
@@ -1556,11 +1568,22 @@ do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 
-    status = mbedit_action_step(-step,mplot_width,mexager,
-	    			mx_interval,my_interval,mplot_size,
-				mshow_detects, mshow_flagged,mshow_time,
-				&nbuffer,&ngood,&icurrent,&mnplot);
-    if (status == 0) XBell(theDisplay,100);
+    if (key_g_down == 0)
+	{
+	status = mbedit_action_step(-step,mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+	if (status == 0) XBell(theDisplay,100);
+	}
+    else
+	{
+	status = mbedit_action_step(-icurrent,mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+	if (status == 0) XBell(theDisplay,100);
+	}
 
 }
 
@@ -1629,6 +1652,10 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
       /* process events */
       switch (buffer[0])
 	    {
+	    case 'G':
+	    case 'g':
+		    key_g_down = 1;
+		    break;
 	    case 'M':
 	    case 'm':
 	    case 'Z':
@@ -1853,6 +1880,8 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    mview_mode = VIEW_WATERFALL;
 			    mbedit_set_viewmode(mview_mode);
 			    XmToggleButtonSetState(toggleButton_view_waterfall, MB_YES, FALSE);
+			    XmToggleButtonSetState(toggleButton_view_alongtrack, MB_NO, FALSE);
+			    XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_NO, FALSE);
 
 			    /* replot the data */
 			    status = mbedit_action_plot(mplot_width, mexager,
@@ -1867,7 +1896,9 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    /* set the view mode */
 			    mview_mode = VIEW_ALONGTRACK;
 			    mbedit_set_viewmode(mview_mode);
+			    XmToggleButtonSetState(toggleButton_view_waterfall, MB_NO, FALSE);
 			    XmToggleButtonSetState(toggleButton_view_alongtrack, MB_YES, FALSE);
+			    XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_NO, FALSE);
 
 			    /* replot the data */
 			    status = mbedit_action_plot(mplot_width, mexager,
@@ -1882,6 +1913,8 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    /* set the view mode */
 			    mview_mode = VIEW_ACROSSTRACK;
 			    mbedit_set_viewmode(mview_mode);
+			    XmToggleButtonSetState(toggleButton_view_waterfall, MB_NO, FALSE);
+			    XmToggleButtonSetState(toggleButton_view_alongtrack, MB_NO, FALSE);
 			    XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_YES, FALSE);
 
 			    /* replot the data */
@@ -1893,8 +1926,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    break;
 	    default:
 		    break;
-	  } /* end of key switch */
-
+	    } /* end of key switch */
        } /* end of key press events */
 
       /* Deal with KeyRelease events */
@@ -1907,6 +1939,10 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
       /* process events */
       switch (buffer[0])
 	    {
+	    case 'G':
+	    case 'g':
+		    key_g_down = 0;
+		    break;
 	    case 'M':
 	    case 'm':
 	    case 'Z':
@@ -1933,8 +1969,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    break;
 	    default:
 		    break;
-	  } /* end of key switch */
-
+	    } /* end of key switch */
        } /* end of key release events */
 
       /* Check for mouse pressed and not pressed and released. */
@@ -2099,22 +2134,44 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    /* If middle mouse button is pushed then scroll in reverse. */
 	    if(event->xbutton.button == 2)
 	    {
+	    if (key_g_down == 0)
+	    	{
 		    status = mbedit_action_step(-step,mplot_width,mexager,
 				    mx_interval,my_interval,
-				    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+				    mplot_size,mshow_detects,mshow_flagged,mshow_time,
 				    &nbuffer,&ngood,&icurrent,&mnplot);
 		    if (status == 0) XBell(theDisplay,100);
+		}
+	    else
+	    	{
+		    status = mbedit_action_step(-icurrent,mplot_width,mexager,
+				    mx_interval,my_interval,
+				    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+				    &nbuffer,&ngood,&icurrent,&mnplot);
+		    if (status == 0) XBell(theDisplay,100);
+		}
 	    } /* end of middle button events */
 
 	    /* If right mouse button is pushed then scroll forward. */
 	  if ((event->xbutton.button == 3 && mode_reverse_mouse == MB_NO)
 		|| (event->xbutton.button == 1 && mode_reverse_mouse == MB_YES))
 	    {
+	    if (key_g_down == 0)
+	    	{
 		    status = mbedit_action_step(step,mplot_width,mexager,
 				    mx_interval,my_interval,
-				    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+				    mplot_size,mshow_detects,mshow_flagged,mshow_time,
 				    &nbuffer,&ngood,&icurrent,&mnplot);
 		    if (status == 0) XBell(theDisplay,100);
+		}
+	    else
+	    	{
+		    status = mbedit_action_step(nbuffer-icurrent-1,mplot_width,mexager,
+				    mx_interval,my_interval,
+				    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+				    &nbuffer,&ngood,&icurrent,&mnplot);
+		    if (status == 0) XBell(theDisplay,100);
+		}
 	    } /* end of right button events */	
       } /* end of button pressed events */
     } /* end of inputs from window */
