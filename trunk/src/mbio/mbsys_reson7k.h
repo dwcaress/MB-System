@@ -989,7 +989,7 @@ typedef struct s7k_bluefin_nav_struct
 	float		pitch_rate;		/* Vehicle pitch rate (radians/sec) */
 	float		yaw_rate;		/* Vehicle yaw rate (radians/sec) */
 	double		position_time;		/* Vehicle position time (unix sec) */
-	double		altitude_time;		/* Vehicle altitude time (unix sec) */
+	double		depth_time;		/* Vehicle depth time (unix sec) */
 }
 s7k_bluefin_nav;
 	

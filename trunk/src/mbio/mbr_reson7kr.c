@@ -719,16 +719,19 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 			if (mb_io_ptr->nsonardepth == 0
 				|| (bluefin->nav[i].depth 
 					!= mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth-1]))
+				{
+				if (bluefin->nav[i].depth_time <= 0.0)
+					bluefin->nav[i].depth_time = bluefin->nav[i].position_time;
 				mb_depint_add(verbose, mbio_ptr,
-						(double)(bluefin->nav[i].position_time), 
+						(double)(bluefin->nav[i].depth_time), 
 						(double)(bluefin->nav[i].depth), 
 						error);
-			if (bluefin->nav[i].altitude > 0.0 && bluefin->nav[i].altitude < 250.0)
+				}
+			if (bluefin->nav[i].altitude > 0.0 && bluefin->nav[i].altitude < 250.0
+				&& (i == 0 || bluefin->nav[i].altitude != bluefin->nav[i-1].altitude))
 				{
-				if (bluefin->nav[i].altitude_time <= 0.0)
-					bluefin->nav[i].altitude_time = bluefin->nav[i].position_time;
 				mb_altint_add(verbose, mbio_ptr,
-						(double)(bluefin->nav[i].altitude_time), 
+						(double)(bluefin->nav[i].position_time), 
 						(double)(bluefin->nav[i].altitude), 
 						error);
 				}
@@ -4919,7 +4922,7 @@ header->RecordNumber);
 			mb_get_binary_float(MB_YES, &buffer[index], &(bluefin->nav[i].pitch_rate)); index += 4;
 			mb_get_binary_float(MB_YES, &buffer[index], &(bluefin->nav[i].yaw_rate)); index += 4;
 			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].position_time)); index += 8;
-			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].altitude_time)); index += 8;
+			mb_get_binary_double(MB_YES, &buffer[index], &(bluefin->nav[i].depth_time)); index += 8;
 /*
 fprintf(stderr,"Bluefin nav[%d].packet_size:        %d\n",i,bluefin->nav[i].packet_size);
 fprintf(stderr,"Bluefin nav[%d].version:            %d\n",i,bluefin->nav[i].version);
@@ -4950,7 +4953,7 @@ fprintf(stderr,"Bluefin nav[%d].roll_rate:          %f\n",i,bluefin->nav[i].roll
 fprintf(stderr,"Bluefin nav[%d].pitch_rate:         %f\n",i,bluefin->nav[i].pitch_rate);
 fprintf(stderr,"Bluefin nav[%d].yaw_rate:           %f\n",i,bluefin->nav[i].yaw_rate);
 fprintf(stderr,"Bluefin nav[%d].position_time:      %f\n",i,bluefin->nav[i].position_time);
-fprintf(stderr,"Bluefin nav[%d].altitude_time:      %f\n",i,bluefin->nav[i].altitude_time);
+fprintf(stderr,"Bluefin nav[%d].depth_time:         %f\n",i,bluefin->nav[i].depth_time);
 */
 
 /* print out the nav point time stamp */
@@ -5000,7 +5003,7 @@ i,bluefin->nav[i].s7kTime.Hours,bluefin->nav[i].s7kTime.Minutes,bluefin->nav[i].
 					mb_get_itime(verbose, time_j, store->time_i);
 					mb_get_time(verbose, store->time_i, &time_d);
 					bluefin->nav[i].position_time = time_d;
-					bluefin->nav[i].altitude_time = time_d;
+					bluefin->nav[i].depth_time = time_d;
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"    %12f\n",
 time_d);
@@ -10560,7 +10563,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 				mb_put_binary_float(MB_YES, bluefin->nav[i].pitch_rate, &buffer[index]); index += 4;
 				mb_put_binary_float(MB_YES, bluefin->nav[i].yaw_rate, &buffer[index]); index += 4;
 				mb_put_binary_double(MB_YES, bluefin->nav[i].position_time, &buffer[index]); index += 8;
-				mb_put_binary_double(MB_YES, bluefin->nav[i].altitude_time, &buffer[index]); index += 8;
+				mb_put_binary_double(MB_YES, bluefin->nav[i].depth_time, &buffer[index]); index += 8;
 				}
 			}
 		else if (bluefin->data_format == R7KRECID_BluefinEnvironmental)

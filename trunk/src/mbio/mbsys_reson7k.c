@@ -585,7 +585,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		bluefin->nav[i].pitch_rate = 0.0;
 		bluefin->nav[i].yaw_rate = 0.0;
 		bluefin->nav[i].position_time = 0.0;
-		bluefin->nav[i].altitude_time = 0.0;
+		bluefin->nav[i].depth_time = 0.0;
 		bluefin->environmental[i].packet_size = 0;
 		bluefin->environmental[i].version = 0;
 		bluefin->environmental[i].offset = 0;
@@ -2581,7 +2581,7 @@ int mbsys_reson7k_print_bluefin(int verbose,
 			fprintf(stderr,"%s     nav[%d].pitch_rate:         %f\n",first,i,bluefin->nav[i].pitch_rate);
 			fprintf(stderr,"%s     nav[%d].yaw_rate:           %f\n",first,i,bluefin->nav[i].yaw_rate);
 			fprintf(stderr,"%s     nav[%d].position_time:      %f\n",first,i,bluefin->nav[i].position_time);
-			fprintf(stderr,"%s     nav[%d].altitude_time:      %f\n",first,i,bluefin->nav[i].altitude_time);
+			fprintf(stderr,"%s     nav[%d].depth_time:         %f\n",first,i,bluefin->nav[i].depth_time);
 			}
 		}
 	else if (bluefin->data_format == R7KRECID_BluefinEnvironmental)
@@ -4277,6 +4277,10 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			else if ((bathymetry->quality[i] & 15) == 0)
 				{
 				beamflag[i] = MB_FLAG_NULL;
+				}
+			else if ((bathymetry->quality[i] & 3) == 0)
+				{
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				}
 			else
 				{

@@ -302,7 +302,8 @@ distinguish between low frequency (132) and high frequency (133) sidescan
 data.
 
 Modified support for Reson 7k multibeams (format 88) to work with a
-new data sample from GEOMAR.
+new data sample from GEOMAR. Altered interpretation of initial beam quality
+flags, improving initial beamflags.
 
 Fixed problems with survey generation in mbgrdviz.
 

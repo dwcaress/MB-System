@@ -268,7 +268,7 @@ int main (int argc, char **argv)
 	char program_name[] = "MBFILTER";
 	char help_message[] =  
 "mbfilter applies one or more simple filters to the specified\n\t\
-data (sidescan, beam amplitude, and/or bathymetry). The filters\n\t\
+data (sidescan and/or beam amplitude). The filters\n\t\
 include:\n\t\
   - boxcar mean for lo-pass filtering (-S1)\n\t\
   - gaussian mean for lo-pass filtering (-S2)\n\t\
@@ -279,7 +279,7 @@ include:\n\t\
   - boxcar median subtraction for hi-pass filtering (-D3)\n\t\
   - edge detection for contrast enhancement (-C1)\n\t\
   - gradient magnitude subtraction for contrast enhancement (-C2)\n\t\
-These filters are mostly intended for use with sidescan\n\t\
+These filters are primarily intended for use with sidescan\n\t\
 data. In particular, the lo-pass or smoothing filters\n\t\
 can be used for first-order speckle reduction in sidescan\n\t\
 data, and the hi-pass filters can be used to emphasize\n\t\
