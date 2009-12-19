@@ -113,6 +113,7 @@ struct mbareaclean_file_struct {
 	int	nunflagged;
 	int	nflagged;
 	double	*ping_time_d;
+	int	*pingmultiplicity;
 	double	*ping_altitude;
 	int	nsndg;
 	int	nsndg_alloc;
@@ -824,6 +825,7 @@ int main (int argc, char **argv)
 	files[nfile].nflagged = 0;
 	files[nfile].nunflagged = 0;
 	files[nfile].ping_time_d = NULL;
+	files[nfile].pingmultiplicity = NULL;
 	files[nfile].ping_altitude = NULL;
 	files[nfile].nsndg = 0;
 	files[nfile].nsndg_alloc = SNDGALLOCNUM;
@@ -833,6 +835,10 @@ int main (int argc, char **argv)
 	status = mb_mallocd(verbose,__FILE__,__LINE__,
 			files[nfile].nping_alloc * sizeof(double),
 			(void **)&(files[nfile].ping_time_d), &error);
+	if (status == MB_SUCCESS)
+	status = mb_mallocd(verbose,__FILE__,__LINE__,
+			files[nfile].nping_alloc * sizeof(int),
+			(void **)&(files[nfile].pingmultiplicity), &error);
 	if (status == MB_SUCCESS)
 	status = mb_mallocd(verbose,__FILE__,__LINE__,
 			files[nfile].nping_alloc * sizeof(double),
@@ -893,7 +899,7 @@ int main (int argc, char **argv)
 		for (i=0;i<beams_bath;i++)
 			beamflagorg[i] = beamflag[i];
 		status = mb_esf_apply(verbose, &esf, 
-		    		time_d, beams_bath, 
+		    		time_d, 1, beams_bath, 
 				beamflagorg, &error);
 		
 		/* get detection */
@@ -951,6 +957,10 @@ int main (int argc, char **argv)
 					(void **)&(files[nfile-1].ping_time_d), &error);
 			if (status == MB_SUCCESS)
 			status = mb_reallocd(verbose, __FILE__, __LINE__,
+					files[nfile-1].nping_alloc * sizeof(int),
+					(void **)&(files[nfile-1].pingmultiplicity), &error);
+			if (status == MB_SUCCESS)
+			status = mb_reallocd(verbose, __FILE__, __LINE__,
 					files[nfile-1].nping_alloc * sizeof(double),
 					(void **)&(files[nfile-1].ping_altitude), &error);
 			if (error != MB_ERROR_NO_ERROR)
@@ -965,6 +975,17 @@ int main (int argc, char **argv)
 			
 		/* store the ping data */
 		files[nfile-1].ping_time_d[files[nfile-1].nping] = time_d;
+		if (files[nfile-1].nping > 0 
+			&& files[nfile-1].ping_time_d[files[nfile-1].nping] 
+				== files[nfile-1].ping_time_d[files[nfile-1].nping - 1])
+			{
+			files[nfile-1].pingmultiplicity[files[nfile-1].nping] 
+				= files[nfile-1].pingmultiplicity[files[nfile-1].nping - 1] + 1;
+			}
+		else
+			{
+			files[nfile-1].pingmultiplicity[files[nfile-1].nping] = 0;
+			}
 		files[nfile-1].ping_altitude[files[nfile-1].nping] = altitude;
 		files[nfile-1].nping++;
 		
@@ -1304,7 +1325,7 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 					}
 				mb_esf_save(verbose, &esf, 
 						files[i].ping_time_d[sndg->sndg_ping], 
-						sndg->sndg_beam, 
+						sndg->sndg_beam + files[i].pingmultiplicity[sndg->sndg_ping] * 10000, 
 						action, &error);
 				}
 			}
@@ -1355,6 +1376,7 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 	for (i=0;i<nfile;i++)
 		{
 		mb_freed(verbose,__FILE__, __LINE__, (void **)&(files[nfile-1].ping_time_d),&error);
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&(files[nfile-1].pingmultiplicity),&error);
 		mb_freed(verbose,__FILE__, __LINE__, (void **)&(files[nfile-1].ping_altitude),&error);
 		}
 

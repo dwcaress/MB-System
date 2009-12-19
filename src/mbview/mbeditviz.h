@@ -89,6 +89,7 @@ struct	mbev_ping_struct
 	{
 	int	time_i[7];
 	double	time_d;
+	int	multiplicity;
 	double	navlon;
 	double	navlat;
 	double	navlonx;

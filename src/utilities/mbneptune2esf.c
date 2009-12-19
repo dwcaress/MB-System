@@ -261,6 +261,8 @@ int main (int argc, char **argv)
 	struct mb_esf_struct esf;
 
 	/* processing variables */
+	int	pingmultiplicity;
+	double	time_d_lastping;
 	int	read_data;
 	int	start, done;
 	int	i, j, k;
@@ -773,6 +775,7 @@ int main (int argc, char **argv)
 	/* read */
 	done = MB_NO;
 	start = 0;
+	time_d_lastping = 0.0;
 	fprintf(stderr, "Processing data...\n");
 	while (done == MB_NO)
 	    {
@@ -811,10 +814,21 @@ int main (int argc, char **argv)
 		    {
 		    cur_ping.beamflagorg[i] = cur_ping.beamflag[i];
 		    }
+			
+		/* detect multiple pings with the same time stamps */
+		if (cur_ping.time_d == time_d_lastping)
+			{
+			pingmultiplicity++;
+			}
+		else
+			{
+			pingmultiplicity = 0;
+			}
+		time_d_lastping = cur_ping.time_d;
 		    
 		/* apply saved edits */
 		status = mb_esf_apply(verbose, &esf, 
-		    		cur_ping.time_d, cur_ping.beams_bath, 
+		    		cur_ping.time_d, pingmultiplicity, cur_ping.beams_bath, 
 				cur_ping.beamflag, &error);
 
 		/* update counters */
@@ -863,13 +877,17 @@ int main (int argc, char **argv)
 				cur_ping.beamflag[beam_no] 
 					    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nflag++;
-				mb_ess_save(verbose, &esf, cur_ping.time_d, beam_no, MBP_EDIT_FILTER, &error);
+				mb_ess_save(verbose, &esf, cur_ping.time_d, 
+						beam_no + pingmultiplicity * 10000, 
+						MBP_EDIT_FILTER, &error);
 				}
 			    else
 				{
 				cur_ping.beamflag[beam_no] = MB_FLAG_NULL;
 				nzero++;
-				mb_ess_save(verbose, &esf, cur_ping.time_d, beam_no, MBP_EDIT_ZERO, &error);
+				mb_ess_save(verbose, &esf, cur_ping.time_d, 
+						beam_no + pingmultiplicity * 10000, 
+						MBP_EDIT_ZERO, &error);
 				}
 			    }
 
@@ -896,7 +914,8 @@ int main (int argc, char **argv)
 			    else
 				    action = MBP_EDIT_ZERO;
 			    mb_esf_save(verbose, &esf,
-					    cur_ping.time_d, i,
+					    cur_ping.time_d, 
+					    i + pingmultiplicity * 10000,
 					    action, &error);
 			    }
 			}

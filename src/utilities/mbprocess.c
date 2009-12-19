@@ -564,6 +564,7 @@ and mbedit edit save files.\n";
 
 	char	buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	double	factor;
+	int	pingmultiplicity;
 	int	nbeams;
 	int	istart, iend, icut;
 	int	intstat;
@@ -4633,10 +4634,20 @@ and mbedit edit save files.\n";
 				error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
 				}
+			}
+			
+		/* detect multiple pings with the same time stamps */
+		if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
+			{
+			if (time_d == time_d_lastping)
+				{
+				pingmultiplicity++;
+				}
 			else
 				{
-				time_d_lastping = time_d;
+				pingmultiplicity = 0;
 				}
+			time_d_lastping = time_d;
 			}
 
 		/* increment counter */
@@ -5586,7 +5597,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 		    {			    
 		    /* apply edits for this ping */
 		    status = mb_esf_apply(verbose, &esf, 
-		    		time_d, nbath, 
+		    		time_d, pingmultiplicity, nbath, 
 				beamflag, &error);
 		    }
 
