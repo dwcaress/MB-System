@@ -2058,12 +2058,12 @@ int mbedit_action_mouse_toggle(
 			    if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 				mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
-				    jbeam + ping[iping].multiplicity * 10000, 
+				    jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				    MBP_EDIT_FLAG, &error);
 			    else if (ping[iping].beamflag[jbeam] != MB_FLAG_NULL)
 				mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
-				    jbeam + ping[iping].multiplicity * 10000, 
+				    jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				    MBP_EDIT_UNFLAG, &error);
 			    }
 			
@@ -2267,7 +2267,7 @@ int mbedit_action_mouse_pick(
 			    {
 			    mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
-				    jbeam + ping[iping].multiplicity * 10000, 
+				    jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				    MBP_EDIT_FLAG, &error);
 			    }
 			
@@ -2439,7 +2439,7 @@ int mbedit_action_mouse_erase(
 			    {
 			    mb_ess_save(verbose, &esf,
 			    	    ping[i].time_d, 
-				    j + ping[i].multiplicity * 10000, 
+				    j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				    MBP_EDIT_FLAG, &error);
 			    }
 			
@@ -2626,7 +2626,7 @@ int mbedit_action_mouse_restore(
 			    {
 			    mb_ess_save(verbose, &esf,
 				    ping[i].time_d, 
-				    j + ping[i].multiplicity * 10000, 
+				    j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				    MBP_EDIT_UNFLAG, &error);
 			    }
 			
@@ -2984,7 +2984,7 @@ int mbedit_action_mouse_grab(
 					    {
 					    mb_ess_save(verbose, &esf,
 			    			    ping[i].time_d, 
-						    j + ping[i].multiplicity * 10000, 
+						    j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 						    MBP_EDIT_FLAG, &error);
 					    }
 
@@ -3279,7 +3279,7 @@ int mbedit_action_zap_outbounds(
 			{
 			mb_ess_save(verbose, &esf,
 				ping[iping].time_d, 
-				j + ping[iping].multiplicity * 10000, 
+				j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				MBP_EDIT_FLAG, &error);
 			}
 		    
@@ -3410,7 +3410,7 @@ int mbedit_action_bad_ping(
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j + ping[iping_save].multiplicity * 10000, 
+				j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				MBP_EDIT_FLAG, &error);
 		    }
 
@@ -3527,7 +3527,7 @@ int mbedit_action_good_ping(
 			    && ping[iping_save].beamflag[j] != MB_FLAG_NULL)
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j + ping[iping_save].multiplicity * 10000, 
+				j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				MBP_EDIT_UNFLAG, &error);
 		    }
 
@@ -3644,7 +3644,7 @@ int mbedit_action_left_ping(
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j + ping[iping_save].multiplicity * 10000, 
+				j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				MBP_EDIT_FLAG, &error);
 		    }
 
@@ -3760,7 +3760,7 @@ int mbedit_action_right_ping(
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j + ping[iping_save].multiplicity * 10000, 
+				j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				MBP_EDIT_FLAG, &error);
 		    }
 
@@ -3877,7 +3877,7 @@ int mbedit_action_zero_ping(
 			if (ping[iping_save].beamflag[j] != MB_FLAG_NULL)
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j + ping[iping_save].multiplicity * 10000, 
+				j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				MBP_EDIT_ZERO, &error);
 			}
 		    }
@@ -3997,7 +3997,7 @@ int mbedit_action_flag_view(
 				    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
 						ping[i].time_d, 
-						j + ping[i].multiplicity * 10000, 
+						j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 						MBP_EDIT_FLAG, &error);
 		    
 				    /* apply edit */
@@ -4124,7 +4124,7 @@ int mbedit_action_unflag_view(
 				    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
 						ping[i].time_d, 
-						j + ping[i].multiplicity * 10000, 
+						j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 						MBP_EDIT_UNFLAG, &error);
 		    
 				    /* apply edit */
@@ -4251,7 +4251,7 @@ int mbedit_action_unflag_all(
 			    if (esffile_open == MB_YES)
 				mb_ess_save(verbose, &esf,
 					ping[i].time_d, 
-					j + ping[i].multiplicity * 10000, 
+					j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 					MBP_EDIT_UNFLAG, &error);
 	    
 			    /* apply edit */
@@ -4479,7 +4479,7 @@ int mbedit_filter_ping(int iping)
 			    	if (esffile_open == MB_YES)
 				    mb_ess_save(verbose, &esf,
 						ping[iping].time_d, 
-						j + ping[iping].multiplicity * 10000,
+						j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_UNFLAG, &error);
 	
 			    	/* apply edit */
@@ -4535,7 +4535,7 @@ int mbedit_filter_ping(int iping)
 			    	    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
 						ping[iping].time_d, 
-						jbeam + ping[iping].multiplicity * 10000,
+						jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
@@ -4566,7 +4566,7 @@ int mbedit_filter_ping(int iping)
 			        if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
 						ping[iping].time_d, 
-						j + ping[iping].multiplicity * 10000,
+						j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_FILTER, &error);
 	
 			        /* apply edit */
@@ -4590,7 +4590,7 @@ int mbedit_filter_ping(int iping)
 			        if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
 						ping[iping].time_d, 
-						j + ping[iping].multiplicity * 10000,
+						j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_FILTER, &error);
 	
 			        /* apply edit */
@@ -4621,7 +4621,7 @@ int mbedit_filter_ping(int iping)
 			    	    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
 						ping[iping].time_d, 
-						j + ping[iping].multiplicity * 10000,
+						j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
@@ -4648,7 +4648,7 @@ int mbedit_filter_ping(int iping)
 			    	    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
 						ping[iping].time_d, 
-						j + ping[iping].multiplicity * 10000,
+						j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
@@ -4681,7 +4681,7 @@ int mbedit_filter_ping(int iping)
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
 							ping[iping].time_d, 
-							j + ping[iping].multiplicity * 10000,
+							j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -4711,7 +4711,7 @@ int mbedit_filter_ping(int iping)
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
 							ping[iping].time_d, 
-							j + ping[iping].multiplicity * 10000,
+							j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -4748,7 +4748,7 @@ int mbedit_filter_ping(int iping)
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
 							ping[iping].time_d, 
-							j + ping[iping].multiplicity * 10000,
+							j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -4781,7 +4781,7 @@ int mbedit_filter_ping(int iping)
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
 							ping[iping].time_d, 
-							j + ping[iping].multiplicity * 10000,
+							j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -5182,7 +5182,7 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 					action = MBP_EDIT_ZERO;
 				mb_esf_save(verbose, &esf,
 						ping[iping].time_d, 
-						jbeam + ping[iping].multiplicity * 10000,
+						jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						action, &error);
 				}
 			    }

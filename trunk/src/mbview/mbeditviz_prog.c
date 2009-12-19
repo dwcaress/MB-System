@@ -3122,9 +3122,9 @@ ifile,file->load_status,file->esf_open);
 							action = MBP_EDIT_ZERO;
 if (mbev_verbose > 0)
 fprintf(stderr,"mb_esf_save: ifile:%d iping:%d ibeam:%d %d action:%d\n",
-ifile,iping,ibeam, ibeam + ping->multiplicity * 10000, action);
+ifile,iping,ibeam, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR, action);
 						mb_esf_save(mbev_verbose, &(file->esf),
-								ping->time_d, ibeam + ping->multiplicity * 10000,
+								ping->time_d, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 								action, &mbev_error);
 						}
 					}
@@ -3874,7 +3874,7 @@ ifile, iping, ibeam, beamflag, flush);*/
 				else
 					action = MBP_EDIT_ZERO;
 				mb_ess_save(mbev_verbose, &(file->esf),
-						ping->time_d, ibeam + ping->multiplicity * 10000,
+						ping->time_d, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						action, &mbev_error);
 				}
 			}

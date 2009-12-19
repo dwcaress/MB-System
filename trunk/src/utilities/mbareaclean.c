@@ -1325,7 +1325,9 @@ fprintf(stderr,"bin: %d %d %d  pos: %f %f  nsoundings:%d / %d mean:%f std_dev:%f
 					}
 				mb_esf_save(verbose, &esf, 
 						files[i].ping_time_d[sndg->sndg_ping], 
-						sndg->sndg_beam + files[i].pingmultiplicity[sndg->sndg_ping] * 10000, 
+						sndg->sndg_beam 
+							+ files[i].pingmultiplicity[sndg->sndg_ping] 
+								* MB_ESF_MULTIPLICITY_FACTOR, 
 						action, &error);
 				}
 			}

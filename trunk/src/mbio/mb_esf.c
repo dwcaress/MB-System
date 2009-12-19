@@ -461,8 +461,9 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 		}
 		
 	/* if ping has the same time stamp as previous pings, pingmultiplicity will be
-		> 0 and the edit beam values will be augmented by 10000 * pingmultiplicity */
-	beamoffset = 10000 * pingmultiplicity;
+		> 0 and the edit beam values will be augmented by 
+		MB_ESF_MULTIPLICITY_FACTOR * pingmultiplicity */
+	beamoffset = MB_ESF_MULTIPLICITY_FACTOR * pingmultiplicity;
 
 	/* find first and last edits for this ping */
 	firstedit = 0;
@@ -485,7 +486,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 		for (j=firstedit;j<=lastedit;j++)
 		    {
 		    if (esf->edit[j].beam < 0 
-		    	|| (esf->edit[j].beam % 10000) >= nbath)
+		    	|| (esf->edit[j].beam % MB_ESF_MULTIPLICITY_FACTOR) >= nbath)
 		    	esf->edit[j].use += 10000;
 		    }
 		    
