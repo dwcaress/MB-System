@@ -386,6 +386,7 @@ struct mbedit_ping_struct
 	int	outbounds;
 	int	time_i[7];
 	double	time_d;
+	int	multiplicity;
 	double	time_interval;
 	double	navlon;
 	double	navlat;
@@ -2057,12 +2058,12 @@ int mbedit_action_mouse_toggle(
 			    if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 				mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
-				    jbeam, 
+				    jbeam + ping[iping].multiplicity * 10000, 
 				    MBP_EDIT_FLAG, &error);
 			    else if (ping[iping].beamflag[jbeam] != MB_FLAG_NULL)
 				mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
-				    jbeam, 
+				    jbeam + ping[iping].multiplicity * 10000, 
 				    MBP_EDIT_UNFLAG, &error);
 			    }
 			
@@ -2266,7 +2267,7 @@ int mbedit_action_mouse_pick(
 			    {
 			    mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
-				    jbeam, 
+				    jbeam + ping[iping].multiplicity * 10000, 
 				    MBP_EDIT_FLAG, &error);
 			    }
 			
@@ -2438,7 +2439,8 @@ int mbedit_action_mouse_erase(
 			    {
 			    mb_ess_save(verbose, &esf,
 			    	    ping[i].time_d, 
-				    j, MBP_EDIT_FLAG, &error);
+				    j + ping[i].multiplicity * 10000, 
+				    MBP_EDIT_FLAG, &error);
 			    }
 			
 	          	/* unplot the affected beam and ping */
@@ -2624,7 +2626,8 @@ int mbedit_action_mouse_restore(
 			    {
 			    mb_ess_save(verbose, &esf,
 				    ping[i].time_d, 
-				    j, MBP_EDIT_UNFLAG, &error);
+				    j + ping[i].multiplicity * 10000, 
+				    MBP_EDIT_UNFLAG, &error);
 			    }
 			
 	          	/* unplot the affected beam and ping */
@@ -2981,7 +2984,8 @@ int mbedit_action_mouse_grab(
 					    {
 					    mb_ess_save(verbose, &esf,
 			    			    ping[i].time_d, 
-						    j, MBP_EDIT_FLAG, &error);
+						    j + ping[i].multiplicity * 10000, 
+						    MBP_EDIT_FLAG, &error);
 					    }
 
 					/* reset the beam value */
@@ -3275,7 +3279,8 @@ int mbedit_action_zap_outbounds(
 			{
 			mb_ess_save(verbose, &esf,
 				ping[iping].time_d, 
-				j, MBP_EDIT_FLAG, &error);
+				j + ping[iping].multiplicity * 10000, 
+				MBP_EDIT_FLAG, &error);
 			}
 		    
 		    /* unplot the affected beam and ping */
@@ -3405,7 +3410,8 @@ int mbedit_action_bad_ping(
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBP_EDIT_FLAG, &error);
+				j + ping[iping_save].multiplicity * 10000, 
+				MBP_EDIT_FLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3521,7 +3527,8 @@ int mbedit_action_good_ping(
 			    && ping[iping_save].beamflag[j] != MB_FLAG_NULL)
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBP_EDIT_UNFLAG, &error);
+				j + ping[iping_save].multiplicity * 10000, 
+				MBP_EDIT_UNFLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3637,7 +3644,8 @@ int mbedit_action_left_ping(
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBP_EDIT_FLAG, &error);
+				j + ping[iping_save].multiplicity * 10000, 
+				MBP_EDIT_FLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3752,7 +3760,8 @@ int mbedit_action_right_ping(
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBP_EDIT_FLAG, &error);
+				j + ping[iping_save].multiplicity * 10000, 
+				MBP_EDIT_FLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3868,7 +3877,8 @@ int mbedit_action_zero_ping(
 			if (ping[iping_save].beamflag[j] != MB_FLAG_NULL)
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBP_EDIT_ZERO, &error);
+				j + ping[iping_save].multiplicity * 10000, 
+				MBP_EDIT_ZERO, &error);
 			}
 		    }
 
@@ -3986,7 +3996,8 @@ int mbedit_action_flag_view(
 				    /* write edit to save file */
 				    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[i].time_d, j, 
+						ping[i].time_d, 
+						j + ping[i].multiplicity * 10000, 
 						MBP_EDIT_FLAG, &error);
 		    
 				    /* apply edit */
@@ -4112,7 +4123,8 @@ int mbedit_action_unflag_view(
 				    /* write edit to save file */
 				    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[i].time_d, j, 
+						ping[i].time_d, 
+						j + ping[i].multiplicity * 10000, 
 						MBP_EDIT_UNFLAG, &error);
 		    
 				    /* apply edit */
@@ -4238,7 +4250,8 @@ int mbedit_action_unflag_all(
 			    /* write edit to save file */
 			    if (esffile_open == MB_YES)
 				mb_ess_save(verbose, &esf,
-					ping[i].time_d, j, 
+					ping[i].time_d, 
+					j + ping[i].multiplicity * 10000, 
 					MBP_EDIT_UNFLAG, &error);
 	    
 			    /* apply edit */
@@ -4465,7 +4478,8 @@ int mbedit_filter_ping(int iping)
 			    	/* write edit to save file */
 			    	if (esffile_open == MB_YES)
 				    mb_ess_save(verbose, &esf,
-						ping[iping].time_d, j,
+						ping[iping].time_d, 
+						j + ping[iping].multiplicity * 10000,
 						MBP_EDIT_UNFLAG, &error);
 	
 			    	/* apply edit */
@@ -4520,7 +4534,8 @@ int mbedit_filter_ping(int iping)
 			    	    /* write edit to save file */
 			    	    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[iping].time_d, jbeam,
+						ping[iping].time_d, 
+						jbeam + ping[iping].multiplicity * 10000,
 						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
@@ -4550,7 +4565,8 @@ int mbedit_filter_ping(int iping)
 			   	/* write edit to save file */
 			        if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[iping].time_d, j,
+						ping[iping].time_d, 
+						j + ping[iping].multiplicity * 10000,
 						MBP_EDIT_FILTER, &error);
 	
 			        /* apply edit */
@@ -4573,7 +4589,8 @@ int mbedit_filter_ping(int iping)
 			   	/* write edit to save file */
 			        if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[iping].time_d, j,
+						ping[iping].time_d, 
+						j + ping[iping].multiplicity * 10000,
 						MBP_EDIT_FILTER, &error);
 	
 			        /* apply edit */
@@ -4603,7 +4620,8 @@ int mbedit_filter_ping(int iping)
 			    	    /* write edit to save file */
 			    	    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[iping].time_d, j,
+						ping[iping].time_d, 
+						j + ping[iping].multiplicity * 10000,
 						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
@@ -4629,7 +4647,8 @@ int mbedit_filter_ping(int iping)
 			    	    /* write edit to save file */
 			    	    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[iping].time_d, j,
+						ping[iping].time_d, 
+						j + ping[iping].multiplicity * 10000,
 						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
@@ -4661,7 +4680,8 @@ int mbedit_filter_ping(int iping)
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
-							ping[iping].time_d, j,
+							ping[iping].time_d, 
+							j + ping[iping].multiplicity * 10000,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -4690,7 +4710,8 @@ int mbedit_filter_ping(int iping)
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
-							ping[iping].time_d, j,
+							ping[iping].time_d, 
+							j + ping[iping].multiplicity * 10000,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -4726,7 +4747,8 @@ int mbedit_filter_ping(int iping)
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
-							ping[iping].time_d, j,
+							ping[iping].time_d, 
+							j + ping[iping].multiplicity * 10000,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -4758,7 +4780,8 @@ int mbedit_filter_ping(int iping)
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
-							ping[iping].time_d, j,
+							ping[iping].time_d, 
+							j + ping[iping].multiplicity * 10000,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -5158,7 +5181,8 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 				else
 					action = MBP_EDIT_ZERO;
 				mb_esf_save(verbose, &esf,
-						ping[iping].time_d, jbeam,
+						ping[iping].time_d, 
+						jbeam + ping[iping].multiplicity * 10000,
 						action, &error);
 				}
 			    }
@@ -5291,6 +5315,14 @@ int mbedit_load_data(int buffer_size,
 						&ping[nbuff].pitch,
 						&ping[nbuff].heave, 
 						&error);
+			if (nbuff > 0 && ping[nbuff].time_d == ping[nbuff-1].time_d)
+				{
+				ping[nbuff].multiplicity = ping[nbuff-1].multiplicity + 1;
+				}
+			else
+				{
+				ping[nbuff].multiplicity = 0;
+				}
 			if (nbuff == 0)
 				ping[nbuff].distance = 0.0;
 			else
@@ -5429,7 +5461,7 @@ int mbedit_load_data(int buffer_size,
 		    {
 		    /* apply edits for this ping */
 		    status = mb_esf_apply(verbose, &esf, 
-		    		ping[i].time_d, ping[i].beams_bath, 
+		    		ping[i].time_d, ping[i].multiplicity, ping[i].beams_bath, 
 				ping[i].beamflag, &error);
 			
 		    /* update message every 250 records */

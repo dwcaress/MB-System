@@ -429,14 +429,16 @@ fprintf(stderr,"esstream %s opened with mode %s\n",esf->esstream,fmode);*/
 	in a ping. If an output esf file is open the applied edits
 	are saved to that file. */
 int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
-		double time_d, int nbath, char *beamflag, 
+		double time_d, int pingmultiplicity, int nbath, char *beamflag, 
 		int *error)
 {
   	char	*function_name = "mb_esf_apply";
 	int	status = MB_SUCCESS;
 	int	firstedit, lastedit;
 	int	apply, action;
+	int	beamoffset;
 	char	beamflagorg;
+	int	ibeam;
 	int	i, j;
 
 	/* print input debug statements */
@@ -445,17 +447,22 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
-		fprintf(stderr,"dbg2       nedit:  %d\n",esf->nedit);
+		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
+		fprintf(stderr,"dbg2       nedit:            %d\n",esf->nedit);
 		for (i=0;i<esf->nedit;i++)
 			fprintf(stderr,"dbg2       edit event: %d %.6f %5d %3d %3d\n",
 				i,esf->edit[i].time_d,esf->edit[i].beam,
 				esf->edit[i].action,esf->edit[i].use);
-		fprintf(stderr,"dbg2       time_d:      %f\n",time_d);
-		fprintf(stderr,"dbg2       nbath:       %d\n",nbath);
+		fprintf(stderr,"dbg2       time_d:           %f\n",time_d);
+		fprintf(stderr,"dbg2       pingmultiplicity: %d\n",pingmultiplicity);
+		fprintf(stderr,"dbg2       nbath:            %d\n",nbath);
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2       beamflag:    %d %d\n",i,beamflag[i]);
 		}
+		
+	/* if ping has the same time stamp as previous pings, pingmultiplicity will be
+		> 0 and the edit beam values will be augmented by 10000 * pingmultiplicity */
+	beamoffset = 10000 * pingmultiplicity;
 
 	/* find first and last edits for this ping */
 	firstedit = 0;
@@ -478,13 +485,16 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 		for (j=firstedit;j<=lastedit;j++)
 		    {
 		    if (esf->edit[j].beam < 0 
-		    	|| esf->edit[j].beam >= nbath)
+		    	|| (esf->edit[j].beam % 10000) >= nbath)
 		    	esf->edit[j].use += 10000;
 		    }
 		    
 		/* loop over all beams */
 		for (i=0;i<nbath;i++)
 		    {
+		    /* apply beam offset for cases of multiple pings */
+		    ibeam = i + beamoffset;
+		    
 		    /* loop over all edits for this ping */
 		    apply = MB_NO;
 		    beamflagorg = beamflag[i];
@@ -497,7 +507,7 @@ int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
 			   esf file - the overridden edit events
 			   may already be indicated by a use value
 			   of 100 or more. */
-			if (esf->edit[j].beam == i
+			if (esf->edit[j].beam == ibeam
 			    && esf->edit[j].use < 100)
 			    {
 			    /* apply edit */
@@ -551,7 +561,7 @@ j, time_d, i, beamflag[i], esf->edit[j].action);*/
 		    if (apply == MB_YES 
 		    	&& esf->essfp != NULL
 			&& beamflag[i] != beamflagorg)
-		    	mb_ess_save(verbose, esf, time_d, i, action, error);
+		    	mb_ess_save(verbose, esf, time_d, ibeam, action, error);
 		    }
 		}
 
@@ -561,10 +571,11 @@ j, time_d, i, beamflag[i], esf->edit[j].action);*/
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return value:\n");
-		fprintf(stderr,"dbg2       time_d:      %f\n",time_d);
-		fprintf(stderr,"dbg2       nbath:       %d\n",nbath);
+		fprintf(stderr,"dbg2       time_d:           %f\n",time_d);
+		fprintf(stderr,"dbg2       pingmultiplicity: %d\n",pingmultiplicity);
+		fprintf(stderr,"dbg2       nbath:            %d\n",nbath);
 		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2       beamflag:    %d %d\n",i,beamflag[i]);
+			fprintf(stderr,"dbg2       beamflag:    %d %d %d\n",i,ibeam,beamflag[i]);
 		fprintf(stderr,"dbg2       error:  %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:  %d\n",status);

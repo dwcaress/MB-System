@@ -730,6 +730,20 @@ int mbeditviz_load_file(int ifile)
 					mbev_error = MB_ERROR_NO_ERROR;
 					}
 					
+				/* check for multiplicity of pings with the same time stamp */
+				if (mbev_error == MB_ERROR_NO_ERROR
+				    && kind == MB_DATA_DATA)
+					{
+					if (file->num_pings > 0 && ping->time_d == file->pings[file->num_pings-1].time_d)
+						{
+						ping->multiplicity = file->pings[file->num_pings-1].multiplicity + 1;
+						}
+					else
+						{
+						ping->multiplicity = 0;
+						}
+					}
+					
 				/* allocate memory for pings */
 				if (mbev_error == MB_ERROR_NO_ERROR
 				    && kind == MB_DATA_DATA)
@@ -1079,7 +1093,7 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
 
 					/* apply edits for this ping */
 					mb_esf_apply(mbev_verbose, &(file->esf), 
-		    				    ping->time_d, ping->beams_bath, 
+		    				    ping->time_d, ping->multiplicity, ping->beams_bath, 
 						    ping->beamflag, &mbev_error);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						ping->beamflagorg[ibeam] = ping->beamflag[ibeam];
@@ -3107,10 +3121,10 @@ ifile,file->load_status,file->esf_open);
 						else
 							action = MBP_EDIT_ZERO;
 if (mbev_verbose > 0)
-fprintf(stderr,"mb_esf_save: ifile:%d iping:%d ibeam:%d action:%d\n",
-ifile,iping,ibeam,action);
+fprintf(stderr,"mb_esf_save: ifile:%d iping:%d ibeam:%d %d action:%d\n",
+ifile,iping,ibeam, ibeam + ping->multiplicity * 10000, action);
 						mb_esf_save(mbev_verbose, &(file->esf),
-								ping->time_d, ibeam,
+								ping->time_d, ibeam + ping->multiplicity * 10000,
 								action, &mbev_error);
 						}
 					}
@@ -3860,7 +3874,7 @@ ifile, iping, ibeam, beamflag, flush);*/
 				else
 					action = MBP_EDIT_ZERO;
 				mb_ess_save(mbev_verbose, &(file->esf),
-						ping->time_d, ibeam,
+						ping->time_d, ibeam + ping->multiplicity * 10000,
 						action, &mbev_error);
 				}
 			}
