@@ -878,7 +878,7 @@ int main (int argc, char **argv)
 					    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nflag++;
 				mb_ess_save(verbose, &esf, cur_ping.time_d, 
-						beam_no + pingmultiplicity * 10000, 
+						beam_no + pingmultiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 						MBP_EDIT_FILTER, &error);
 				}
 			    else
@@ -886,7 +886,7 @@ int main (int argc, char **argv)
 				cur_ping.beamflag[beam_no] = MB_FLAG_NULL;
 				nzero++;
 				mb_ess_save(verbose, &esf, cur_ping.time_d, 
-						beam_no + pingmultiplicity * 10000, 
+						beam_no + pingmultiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 						MBP_EDIT_ZERO, &error);
 				}
 			    }
@@ -915,7 +915,7 @@ int main (int argc, char **argv)
 				    action = MBP_EDIT_ZERO;
 			    mb_esf_save(verbose, &esf,
 					    cur_ping.time_d, 
-					    i + pingmultiplicity * 10000,
+					    i + pingmultiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 					    action, &error);
 			    }
 			}

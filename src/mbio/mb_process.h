@@ -942,6 +942,7 @@ struct mb_process_struct
 	
 /* edit save file definitions */
 #define MB_ESF_MAXTIMEDIFF 0.0011
+#define MB_ESF_MULTIPLICITY_FACTOR	1000000
 struct mb_edit_struct
 	{
 	double	time_d;
