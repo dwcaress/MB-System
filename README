@@ -117,7 +117,7 @@ Palisades, NY 10964
 
 MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
 -----------------------------------------
-MB-System Copyright (C) 1993-2008 by
+MB-System Copyright (C) 1993-2009 by
 David W. Caress (caress@mbari.org)
   Monterey Bay Aquarium Research Institute
   Moss Landing, CA 95039
@@ -306,6 +306,28 @@ new data sample from GEOMAR. Altered interpretation of initial beam quality
 flags, improving initial beamflags.
 
 Fixed problems with survey generation in mbgrdviz.
+
+Improved read-only support for XTF format Reson 8XXX data 
+(format 84 MBF_XTFR8101), but still don't have time stamping of
+attitude data correct.
+
+Augmented edit save file format and beam flag handling in order to deal
+successfully with multiple head multibeams that produce multiple pings
+with identical time stamps. This affects mbprocess, mbedit, mbeditviz,
+mbclean, and mbareaclean.
+
+Added program mbotps to generate open ocean tidal models at specified
+times and locations using the Oregon State Tidal Prediction Software 
+(OTPS) package. This program will build whether OTPS is installed or 
+not, but will only work if the OTPS programs are installed and in the 
+user's path. The OTPS predictions are based on global barotropic inverse
+tidal solutions obtained with OTIS and available for download at:
+     http://www.coas.oregonstate.edu/research/po/research/tide/
+
+Added program mbsegypsd to calculate sonograms from segy time series data.
+Sonograms are 2D displays of power spectral density (PSD) functions (y-axis)
+versus time (x-axis). One PSD is calculated for each trace in the segy file.
+This program requires linking with the FFTW (Fastest FFT in The West) package.
 
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
