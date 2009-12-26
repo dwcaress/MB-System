@@ -290,7 +290,7 @@ The default input and output streams are stdin and stdout.\n";
 -Akind -Byr/mo/da/hr/mn/sc\n\t\
 -Cmode/xdim/ldim/iteration\n\t\
 -Dmode/xdim/ldim/iteration/offset\n\t\
--Eyr/mo/da/hr/mn/sc -Fformat -Iinfile -Nbuffersize -Ooutfile\n\t\
+-Eyr/mo/da/hr/mn/sc -Fformat -Iinfile -Nbuffersize\n\t\
 -Rwest/east/south/north -Smode/xdim/ldim/iteration\n\t\
 -Tthreshold -V -H]";
 	extern char *optarg;

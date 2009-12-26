@@ -1089,7 +1089,7 @@ int main (int argc, char **argv)
 		    if ((status = mb_get_ffs(verbose, file, &format, &error)) != MB_SUCCESS)
 			{
 			mb_error(verbose,error,&message);
-			fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffa>:\n%s\n",message);
+			fprintf(stderr,"\nMBIO Error returned from function <mb_get_ffs>:\n%s\n",message);
 			fprintf(stderr,"Requested filtered sidescan file missing\n");
 			fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",file);
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
