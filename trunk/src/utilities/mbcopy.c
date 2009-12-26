@@ -1292,6 +1292,7 @@ int main (int argc, char **argv)
 			&& error == MB_ERROR_NO_ERROR)
 			{
 			ostore_ptr = omb_io_ptr->store_data;
+fprintf(stderr,"Calling mbcopy_simrad_to_simrad2\n");
 			status = mbcopy_simrad_to_simrad2(verbose, 
 				    istore_ptr, ostore_ptr, &error);
 			}

@@ -1,4 +1,4 @@
-.TH mbfilter 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbfilter 1 "26 December 2009" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbfilter\fP - Apply some simple filter functions to sidescan or beam
 amplitude data from swath sonar data files.
@@ -13,7 +13,7 @@ Version 5.0
 \fB-D\fImode/xdim/ldim/iteration[/offset]\fP 
 \fB-E\fIyr/mo/da/hr/mn/sc 
 \fB-F\fIformat\fP \fB-I\fIinfile\fP \fB-N\fIbuffersize\fP
-\fB-O\fIoutfile\fP \fB-R\fIwest/east/south/north\fP 
+\fB-R\fIwest/east/south/north\fP 
 \fB-S\fImode/xdim/ldim/iteration[/threshold_lo/threshold_hi]\fP 
 \fB-V -H\fP]
 
@@ -246,14 +246,6 @@ The default value of \fIbuffersize\fP = 500 is appropriate
 for most cases, but users can set the buffer size as required.
 The absolute maximum buffer size is 5000. 
 Default: \fIbuffersize\fP = 500.
-.TP
-.B \-O
-\fIoutfile\fP
-.br
-Data file to which the output data will be written. The \fBMBIO\fP
-format id used is the same as for the input data. If
-no output file is specified, the output will be written to
-stdout. Default: \fIoutfile\fP = stdout.
 .TP
 .B \-R
 \fIwest/east/south/north\fP
