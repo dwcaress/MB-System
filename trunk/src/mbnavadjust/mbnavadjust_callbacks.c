@@ -521,7 +521,7 @@ UARG( Widget, w)
 ARG( XtPointer, client)
 GRAU( XtPointer, call)
 {
-    long	exitValue = (long)client;
+    long	exitValue = EXIT_FAILURE;
     exit(exitValue);
 }
 

@@ -1291,7 +1291,7 @@ int ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       one:        %d\n",one);
 		fprintf(stderr,"dbg2       two:        %d\n",two);
-		fprintf(stderr,"dbg2       swath:      %ld\n",(long)swath);
+		fprintf(stderr,"dbg2       swath:      %ld\n",(size_t)swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
 		}
 

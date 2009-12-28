@@ -1567,8 +1567,8 @@ int hipass_mean(int verbose, int n, double *val, double *wgt,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
-		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(size_t)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(size_t)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -1615,9 +1615,9 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
-		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
-		fprintf(stderr,"dbg2       dis:             %ld\n",(long)dis);
+		fprintf(stderr,"dbg2       val:             %ld\n",(size_t)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(size_t)wgt);
+		fprintf(stderr,"dbg2       dis:             %ld\n",(size_t)dis);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f  dis[%d]: %f\n", 
 				i, val[i], i, dis[i]);
@@ -1673,8 +1673,8 @@ int hipass_median(int verbose, int n, double *val, double *wgt,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
-		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(size_t)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(size_t)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -1720,8 +1720,8 @@ int smooth_mean(int verbose, int n, double *val, double *wgt,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
-		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(size_t)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(size_t)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -1768,9 +1768,9 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
-		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
-		fprintf(stderr,"dbg2       dis:             %ld\n",(long)dis);
+		fprintf(stderr,"dbg2       val:             %ld\n",(size_t)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(size_t)wgt);
+		fprintf(stderr,"dbg2       dis:             %ld\n",(size_t)dis);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f  dis[%d]: %f\n", 
 				i, val[i], i, dis[i]);
@@ -1831,8 +1831,8 @@ int smooth_median(int verbose, double original,
 		fprintf(stderr,"dbg2       original:        %f\n",original);
 		fprintf(stderr,"dbg2       apply_threshold: %d\n",apply_threshold);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
-		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(size_t)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(size_t)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -1889,8 +1889,8 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
-		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(size_t)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(size_t)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -1952,8 +1952,8 @@ int contrast_edge(int verbose, int n, double *val, double *grad,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
-		fprintf(stderr,"dbg2       grad:            %ld\n",(long)grad);
+		fprintf(stderr,"dbg2       val:             %ld\n",(size_t)val);
+		fprintf(stderr,"dbg2       grad:            %ld\n",(size_t)grad);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -2015,8 +2015,8 @@ int contrast_gradient(int verbose, int n, double *val, double *wgt,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       n:               %d\n",n);
-		fprintf(stderr,"dbg2       val:             %ld\n",(long)val);
-		fprintf(stderr,"dbg2       wgt:             %ld\n",(long)wgt);
+		fprintf(stderr,"dbg2       val:             %ld\n",(size_t)val);
+		fprintf(stderr,"dbg2       wgt:             %ld\n",(size_t)wgt);
 		for (i=0;i<n;i++)
 			fprintf(stderr,"dbg2       val[%d]: %f\n", i, val[i]);
 		}
@@ -2077,8 +2077,8 @@ int mbcopy_any_to_mbldeoih(int verbose, int system,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       ombio_ptr:  %ld\n",(long)ombio_ptr);
-		fprintf(stderr,"dbg2       ostore_ptr: %ld\n",(long)ostore_ptr);
+		fprintf(stderr,"dbg2       ombio_ptr:  %ld\n",(size_t)ombio_ptr);
+		fprintf(stderr,"dbg2       ostore_ptr: %ld\n",(size_t)ostore_ptr);
 		fprintf(stderr,"dbg2       system:     %d\n",system);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}

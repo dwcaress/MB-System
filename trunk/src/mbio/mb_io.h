@@ -281,6 +281,8 @@ struct mb_io_struct
 	long	file3_pos;	/* file position #3 at start of
 				    last record read */
 	long	file3_bytes;	/* number of bytes read from file */
+	int	ncid;		/* netCDF datastream ID */
+	int	gsfid;		/* GSF datastream ID */
 	void	*xdrs;		/* XDR stream handle */
 	void	*xdrs2;		/* XDR stream handle #2 */
 	void	*xdrs3;		/* XDR stream handle #2 */

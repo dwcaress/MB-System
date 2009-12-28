@@ -180,7 +180,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -479,7 +479,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -508,8 +508,8 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1196,8 +1196,8 @@ int mbsys_simrad2_wc_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1291,8 +1291,8 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1377,8 +1377,8 @@ int mbsys_simrad2_heading_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1455,8 +1455,8 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1531,8 +1531,8 @@ int mbsys_simrad2_tilt_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1603,8 +1603,8 @@ int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)*store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)*store_ptr);
 		}
 
 	/* get data structure pointer */
@@ -1670,7 +1670,7 @@ int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get pointer to data descriptor */
@@ -1779,8 +1779,8 @@ int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1851,7 +1851,7 @@ int mbsys_simrad2_pingnumber(int verbose, void *mbio_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(size_t)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1906,8 +1906,8 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -2380,8 +2380,8 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
@@ -2886,14 +2886,14 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %ld\n",(long)ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%ld\n",(long)angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%ld\n",(long)angles_forward);
-		fprintf(stderr,"dbg2       angles_null:%ld\n",(long)angles_null);
-		fprintf(stderr,"dbg2       heave:      %ld\n",(long)heave);
-		fprintf(stderr,"dbg2       ltrk_off:   %ld\n",(long)alongtrack_offset);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %ld\n",(size_t)ttimes);
+		fprintf(stderr,"dbg2       angles_xtrk:%ld\n",(size_t)angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%ld\n",(size_t)angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%ld\n",(size_t)angles_null);
+		fprintf(stderr,"dbg2       heave:      %ld\n",(size_t)heave);
+		fprintf(stderr,"dbg2       ltrk_off:   %ld\n",(size_t)alongtrack_offset);
 		}
 
 	/* get mbio descriptor */
@@ -3110,9 +3110,9 @@ int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %ld\n",(long)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %ld\n",(size_t)detects);
 		}
 
 	/* get mbio descriptor */
@@ -3241,8 +3241,8 @@ int mbsys_simrad2_gains(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -3339,8 +3339,8 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -3458,8 +3458,8 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -3739,8 +3739,8 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -3906,8 +3906,8 @@ int mbsys_simrad2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -3988,8 +3988,8 @@ int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       nsvp:       %d\n",nsvp);
 		for (i=0;i<nsvp;i++)
 		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
@@ -4062,9 +4062,9 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %ld\n",(long)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %ld\n",(size_t)copy_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -4262,8 +4262,8 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:        %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:       %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:        %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:       %ld\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       pixel_size_set:  %d\n",pixel_size_set);
 		fprintf(stderr,"dbg2       pixel_size:      %f\n",*pixel_size);
 		fprintf(stderr,"dbg2       swath_width_set: %d\n",swath_width_set);

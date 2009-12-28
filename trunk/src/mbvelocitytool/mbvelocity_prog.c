@@ -596,7 +596,7 @@ int mbvt_set_graphics(void *xgid, int *brdr, int ncol, unsigned int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %ld\n",(long)xgid);
+		fprintf(stderr,"dbg2       xgid:         %ld\n",(size_t)xgid);
 		for (i=0;i<4;i++)
 			fprintf(stderr,"dbg2       borders[%d]:   %d\n",
 				i,brdr[i]);
@@ -1420,7 +1420,7 @@ int mbvt_get_display_names(int *nlist, char *list[MAX_PROFILES])
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input values:\n");
-		fprintf(stderr,"dbg2       list:        %ld\n",(long)list);
+		fprintf(stderr,"dbg2       list:        %ld\n",(size_t)list);
 		}
 
 	/* set values */
@@ -1576,7 +1576,7 @@ int mbvt_plot()
 		fprintf(stderr," borders[1] = %d\n", borders[1]);
 		fprintf(stderr," borders[2] = %d\n", borders[2]);
 		fprintf(stderr," borders[3] = %d\n", borders[3]);
-		fprintf(stderr," mbvt_xgid  = %ld\n", (long)mbvt_xgid);
+		fprintf(stderr," mbvt_xgid  = %ld\n", (size_t)mbvt_xgid);
 		}
 
 	/* turn clipp mask back to whole canvas */

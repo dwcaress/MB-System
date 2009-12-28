@@ -660,7 +660,7 @@ int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %ld\n",(long)xgid);
+		fprintf(stderr,"dbg2       xgid:         %ld\n",(size_t)xgid);
 		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
 		for (i=0;i<ncol;i++)
 			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",

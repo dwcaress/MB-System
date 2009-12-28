@@ -6604,8 +6604,8 @@ int check_ss_for_bath(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       bath:            %ld\n",(long)bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(long)bathacrosstrack);
+		fprintf(stderr,"dbg2       bath:            %ld\n",(size_t)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(size_t)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d %f %f\n", 
@@ -6701,7 +6701,7 @@ int get_corrtable(int verbose,
 		fprintf(stderr,"dbg2       time_d:      %f\n",time_d);
 		fprintf(stderr,"dbg2       ncorrtable:  %d\n",ncorrtable);
 		fprintf(stderr,"dbg2       ncorrangle:  %d\n",ncorrangle);
-		fprintf(stderr,"dbg2       corrtable:   %ld\n",(long)corrtable);
+		fprintf(stderr,"dbg2       corrtable:   %ld\n",(size_t)corrtable);
 		}
 
 	/* find the correction table */
@@ -6869,8 +6869,8 @@ int get_anglecorr(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       nangle:      %d\n",nangle);
-		fprintf(stderr,"dbg2       angles:      %ld\n",(long)angles);
-		fprintf(stderr,"dbg2       corrs:       %ld\n",(long)corrs);
+		fprintf(stderr,"dbg2       angles:      %ld\n",(size_t)angles);
+		fprintf(stderr,"dbg2       corrs:       %ld\n",(size_t)corrs);
 		for (i=0;i<nangle;i++)
 			fprintf(stderr,"dbg2           angle[%d]:%f corrs[%d]:%f\n",i,angles[i],i,corrs[i]);
 		fprintf(stderr,"dbg2       angle:       %f\n",angle);

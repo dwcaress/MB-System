@@ -1553,8 +1553,8 @@ int mbcopy_elacmk2_to_xse(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       istore:     %ld\n",(long)istore);
-		fprintf(stderr,"dbg2       ostore:     %ld\n",(long)ostore);
+		fprintf(stderr,"dbg2       istore:     %ld\n",(size_t)istore);
+		fprintf(stderr,"dbg2       ostore:     %ld\n",(size_t)ostore);
 		}
 
 	/* copy the data  */
@@ -1854,8 +1854,8 @@ int mbcopy_xse_to_elacmk2(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       istore:     %ld\n",(long)istore);
-		fprintf(stderr,"dbg2       ostore:     %ld\n",(long)ostore);
+		fprintf(stderr,"dbg2       istore:     %ld\n",(size_t)istore);
+		fprintf(stderr,"dbg2       ostore:     %ld\n",(size_t)ostore);
 		fprintf(stderr,"dbg2       kind:       %d\n",istore->kind);
 		}
 
@@ -2054,8 +2054,8 @@ int mbcopy_simrad_to_simrad2(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       istore:     %ld\n",(long)istore);
-		fprintf(stderr,"dbg2       ostore:     %ld\n",(long)ostore);
+		fprintf(stderr,"dbg2       istore:     %ld\n",(size_t)istore);
+		fprintf(stderr,"dbg2       ostore:     %ld\n",(size_t)ostore);
 		fprintf(stderr,"dbg2       kind:       %d\n",istore->kind);
 		}
 
@@ -2961,8 +2961,8 @@ int mbcopy_any_to_mbldeoih(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       ombio_ptr:  %ld\n",(long)ombio_ptr);
-		fprintf(stderr,"dbg2       ostore_ptr: %ld\n",(long)ostore_ptr);
+		fprintf(stderr,"dbg2       ombio_ptr:  %ld\n",(size_t)ombio_ptr);
+		fprintf(stderr,"dbg2       ostore_ptr: %ld\n",(size_t)ostore_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
@@ -3100,11 +3100,11 @@ int mbcopy_reson8k_to_gsf(int verbose,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       imbio_ptr:  %ld\n",(long)imbio_ptr);
-		fprintf(stderr,"dbg2       ombio_ptr:  %ld\n",(long)ombio_ptr);
-		fprintf(stderr,"dbg2       istore:     %ld\n",(long)istore);
-		fprintf(stderr,"dbg2       ostore:     %ld\n",(long)ostore);
-		fprintf(stderr,"dbg2       kind:       %ld\n",(long)istore->kind);
+		fprintf(stderr,"dbg2       imbio_ptr:  %ld\n",(size_t)imbio_ptr);
+		fprintf(stderr,"dbg2       ombio_ptr:  %ld\n",(size_t)ombio_ptr);
+		fprintf(stderr,"dbg2       istore:     %ld\n",(size_t)istore);
+		fprintf(stderr,"dbg2       ostore:     %ld\n",(size_t)ostore);
+		fprintf(stderr,"dbg2       kind:       %ld\n",(size_t)istore->kind);
 		}
 	
 	/* copy the data  */
@@ -3155,7 +3155,7 @@ int mbcopy_reson8k_to_gsf(int verbose,
 				params.to_apply.center_of_rotation_x_offset = 0;	    
 				params.to_apply.center_of_rotation_y_offset = 0;	    
 				params.to_apply.center_of_rotation_z_offset = 0;
-				ret = gsfPutMBParams(&params, records,(int) omb_io_ptr->mbfp, 1); 
+				ret = gsfPutMBParams(&params, records, omb_io_ptr->gsfid, 1); 
 				}
 
 			/* set data id */
