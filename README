@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.1.2beta13    December 28, 2009
   Version 5.1.2beta12    December 26, 2009
   Version 5.1.2beta11    Ausust 26, 2009
   Version 5.1.2beta10    Ausust 12, 2009
@@ -329,6 +330,19 @@ Added program mbsegypsd to calculate sonograms from segy time series data.
 Sonograms are 2D displays of power spectral density (PSD) functions (y-axis)
 versus time (x-axis). One PSD is calculated for each trace in the segy file.
 This program requires linking with the FFTW (Fastest FFT in The West) package.
+
+-----> 5.1.2beta13
+
+Fixed many more issues relating to clean compiles on 64 bit machines.
+In particular, store GSF and netCDF data stream id's in their own
+int-size variables rather than a pointer-size FILE variable, and 
+declare mbview instance parameters as size_t rather than int so that
+passing these values through Xt event notify function calls as pointer
+values is clean. Also changed casting of pointer values to long for
+debug printing so that the pointer values are now casted to size_t
+values. This should allow for compatibility with Windows 64 bit builds,
+as Windows 64 bit C has a different type model than the rest of the
+universe (e.g. long = 32 bit on Windows but long = 64 bit for gcc).
 
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------

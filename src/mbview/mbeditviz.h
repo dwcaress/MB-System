@@ -245,7 +245,7 @@ void do_mbeditviz_viewall( Widget w, XtPointer client_data, XtPointer call_data)
 void do_mbeditviz_viewselected( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_regrid( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_updategrid( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbeditviz_chengecellsize( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_changecellsize( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_gridparameters( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_viewgrid();
 int do_mbeditviz_mbview_dismiss_notify(size_t instance);

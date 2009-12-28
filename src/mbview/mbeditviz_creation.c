@@ -87,7 +87,7 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  */
 extern void do_mbeditviz_quit(Widget, XtPointer, XtPointer);
 extern void BxExitCB(Widget, XtPointer, XtPointer);
-extern void do_mbeditviz_chengecellsize(Widget, XtPointer, XtPointer);
+extern void do_mbeditviz_changecellsize(Widget, XtPointer, XtPointer);
 extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
 extern void do_mbeditviz_updategrid(Widget, XtPointer, XtPointer);
 extern void do_mbeditviz_openfile(Widget, XtPointer, XtPointer);
@@ -1252,7 +1252,7 @@ CreatemainWindow_mbeditviz(Widget parent)
         XmStringFree((XmString)tmp0);
     }
     
-    XtAddCallback(scale_cellsize, XmNvalueChangedCallback, do_mbeditviz_chengecellsize, (XtPointer)0);
+    XtAddCallback(scale_cellsize, XmNvalueChangedCallback, do_mbeditviz_changecellsize, (XtPointer)0);
     
     ac = 0;
     {

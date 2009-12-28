@@ -1574,7 +1574,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 		}
 
 	/* get next instance number */
-	status = mbview_init(verbose, &instance, &error);
+	status = mbview_init(5, &instance, &error);
 	if (instance == MBV_NO_WINDOW)
 		{
 		fprintf(stderr, "Unable to create mbview - %d mbview windows already created\n", 
