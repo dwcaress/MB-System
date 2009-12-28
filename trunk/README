@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.1.2beta14    December 28, 2009
   Version 5.1.2beta13    December 28, 2009
   Version 5.1.2beta12    December 26, 2009
   Version 5.1.2beta11    Ausust 26, 2009
@@ -343,6 +344,12 @@ debug printing so that the pointer values are now casted to size_t
 values. This should allow for compatibility with Windows 64 bit builds,
 as Windows 64 bit C has a different type model than the rest of the
 universe (e.g. long = 32 bit on Windows but long = 64 bit for gcc).
+
+-----> 5.1.2beta14
+
+Fixed a few more issues relating to clean compiles on 64 bit machines.
+We're iterating towards a working version by getting problem reports
+from people like Hamish Bowman, Bob Arko, and Bob Covill.
 
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
