@@ -94,7 +94,7 @@ Widget mainWindow;
 Widget CreatemainWindow_mbgrdviz(Widget parent);
 int do_mbgrdviz_init(int argc, char **argv, int verbosity);
 void do_mbgrdviz_sensitivity();
-int do_mbgrdviz_dismiss_notify(int instance);
+int do_mbgrdviz_dismiss_notify(size_t instance);
 void do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPointer call_data);
@@ -106,19 +106,19 @@ void do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_dat
 void do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data);
 int do_mbgrdviz_openprimary(char *input_file_ptr);
-int do_mbgrdviz_openoverlay(int instance, char *input_file_ptr);
-int do_mbgrdviz_opensite(int instance, char *input_file_ptr);
-int do_mbgrdviz_savesite(int instance, char *output_file_ptr);
-int do_mbgrdviz_openroute(int instance, char *input_file_ptr);
-int do_mbgrdviz_saveroute(int instance, char *output_file_ptr);
-int do_mbgrdviz_savewinfrogpts(int instance, char *output_file_ptr);
-int do_mbgrdviz_savewinfrogwpt(int instance, char *output_file_ptr);
-int do_mbgrdviz_saveprofile(int instance, char *output_file_ptr);
-int do_mbgrdviz_opennav(int instance, int swathbounds, char *input_file_ptr);
-int do_mbgrdviz_readnav(int instance, char *swathfile, 
+int do_mbgrdviz_openoverlay(size_t instance, char *input_file_ptr);
+int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr);
+int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr);
+int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr);
+int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr);
+int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr);
+int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr);
+int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr);
+int do_mbgrdviz_opennav(size_t instance, int swathbounds, char *input_file_ptr);
+int do_mbgrdviz_readnav(size_t instance, char *swathfile, 
 				int pathstatus, char *pathraw, char *pathprocessed,
 				int format, int formatorg, double weight, int *error);
-int do_mbgrdviz_readgrd(int instance, char *grdfile,
+int do_mbgrdviz_readgrd(size_t instance, char *grdfile,
 			int	*grid_projection_mode,
 			char	*grid_projection_id,
 			float	*nodatavalue,
@@ -134,7 +134,7 @@ int do_mbgrdviz_readgrd(int instance, char *grdfile,
 			double	*dx,
 			double	*dy,
 			float	**data);
-int do_mbgrdviz_opentest(int instance, 
+int do_mbgrdviz_opentest(size_t instance, 
 			double	factor1, 
 			double	factor2, 
 			double	factor3, 
@@ -159,8 +159,8 @@ void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_da
 void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_arearoute_dismiss( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_arearoute_parameterchange( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbgrdviz_arearoute_recalc(int instance);
-void do_mbgrdviz_arearoute_info(int instance);
+void do_mbgrdviz_arearoute_recalc(size_t instance);
+void do_mbgrdviz_arearoute_info(size_t instance);
 void do_mbgrdviz_arearoute_linespacing_increment( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_arearoute_altitude_increment( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_arearoute_depth_increment( Widget w, XtPointer client_data, XtPointer call_data);

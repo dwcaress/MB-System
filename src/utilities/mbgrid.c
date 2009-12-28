@@ -5135,7 +5135,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(outfp,"dbg2       grid:       %ld\n",(size_t)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5214,7 +5214,7 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(outfp,"dbg2       grid:       %ld\n",(size_t)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5293,7 +5293,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(outfp,"dbg2       grid:       %ld\n",(size_t)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5375,7 +5375,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(outfp,"dbg2       grid:       %ld\n",(size_t)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5389,7 +5389,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2       zlab:       %s\n",zlab);
 		fprintf(outfp,"dbg2       titl:       %s\n",titl);
 		fprintf(outfp,"dbg2       argc:       %d\n",argc);
-		fprintf(outfp,"dbg2       *argv:      %ld\n",(long)*argv);
+		fprintf(outfp,"dbg2       *argv:      %ld\n",(size_t)*argv);
 		}
 
 	/* inititialize grd header */

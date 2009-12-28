@@ -353,7 +353,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       file:         %s\n",file);
 		fprintf(stderr,"dbg2       lookforfiles: %d\n",lookforfiles);
-		fprintf(stderr,"dbg2       process:      %ld\n",(long)process);
+		fprintf(stderr,"dbg2       process:      %ld\n",(size_t)process);
 		}
 
 	/* get expected process parameter file name */
@@ -1741,7 +1741,7 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                %d\n",verbose);
 		fprintf(stderr,"dbg2       file:                   %s\n",file);
-		fprintf(stderr,"dbg2       process:                %ld\n",(long)process);
+		fprintf(stderr,"dbg2       process:                %ld\n",(size_t)process);
 		fprintf(stderr,"dbg2       mbp_ifile_specified:    %d\n",process->mbp_ifile_specified);
 		fprintf(stderr,"dbg2       mbp_ifile:              %s\n",process->mbp_ifile);
 		fprintf(stderr,"dbg2       mbp_ofile_specified:    %d\n",process->mbp_ofile_specified);
@@ -2195,7 +2195,7 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
-		fprintf(stderr,"dbg2       process:   %ld\n",(long)process);
+		fprintf(stderr,"dbg2       process:   %ld\n",(size_t)process);
 		}
 
 	/* figure out bathymetry recalculation mode */
@@ -2246,7 +2246,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
-		fprintf(stderr,"dbg2       process:             %ld\n",(long)process);
+		fprintf(stderr,"dbg2       process:             %ld\n",(size_t)process);
 		fprintf(stderr,"dbg2       mbp_ifile_specified: %d\n",process->mbp_ifile_specified);
 		fprintf(stderr,"dbg2       mbp_ifile:           %s\n",process->mbp_ifile);
 		fprintf(stderr,"dbg2       mbp_format_specified:%d\n",process->mbp_format_specified);
@@ -2448,7 +2448,7 @@ int mb_pr_check(int verbose, char *ifile,
 	if (stat(ifile, &statbuf) != 0)
 	    {
 	    missing_ifile = MB_YES;
-	    *nparproblem++;
+	    (*nparproblem)++;
 	    }
 	
 	/* only check parameter file if parameter file exists */
@@ -2471,7 +2471,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& process.mbp_format != format)
 		{
 		unexpected_format = MB_YES;
-		*nparproblem++;
+		(*nparproblem)++;
 		
 		/* get output file with specified format */
 		status = mb_pr_get_output(verbose, &process.mbp_format, process.mbp_ifile, 
@@ -2486,7 +2486,7 @@ int mb_pr_check(int verbose, char *ifile,
 		if (strcmp(process.mbp_ofile, ofile) != 0)
 		    {
 		    unexpected_output = MB_YES;
-		    *nparproblem++;
+		    (*nparproblem)++;
 		    }
 		}
     
@@ -2495,7 +2495,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_ofile, &statbuf) != 0)
 		{
 		missing_ofile = MB_YES;
-		*nparproblem++;
+		(*nparproblem)++;
 		}
     
 	    /* check if nav file specified but does not exist */
@@ -2503,7 +2503,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_navfile, &statbuf) != 0)
 		{
 		missing_navfile = MB_YES;
-		*nparproblem++;
+		(*nparproblem)++;
 		}
     
 	    /* check if navadj file specified but does not exist */
@@ -2511,7 +2511,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_navadjfile, &statbuf) != 0)
 		{
 		missing_navadjfile = MB_YES;
-		*nparproblem++;
+		(*nparproblem)++;
 		}
    
 	    /* check if attitude file specified but does not exist */
@@ -2519,7 +2519,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_attitudefile, &statbuf) != 0)
 		{
 		missing_attitudefile = MB_YES;
-		*nparproblem++;
+		(*nparproblem)++;
 		}
    
 	    /* check if sonardepth file specified but does not exist */
@@ -2527,7 +2527,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_sonardepthfile, &statbuf) != 0)
 		{
 		missing_sonardepthfile = MB_YES;
-		*nparproblem++;
+		(*nparproblem)++;
 		}
     
 	    /* check if svp file specified but does not exist */
@@ -2535,7 +2535,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_svpfile, &statbuf) != 0)
 		{
 		missing_svpfile = MB_YES;
-		*nparproblem++;
+		(*nparproblem)++;
 		}
     
 	    /* check if edit file specified but does not exist */
@@ -2543,7 +2543,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_editfile, &statbuf) != 0)
 		{
 		missing_editfile = MB_YES;
-		*nparproblem++;
+		(*nparproblem)++;
 		}
     
 	    /* check if tide file specified but does not exist */
@@ -2551,7 +2551,7 @@ int mb_pr_check(int verbose, char *ifile,
 		&& stat(process.mbp_tidefile, &statbuf) != 0)
 		{
 		missing_tidefile = MB_YES;
-		*nparproblem++;
+		(*nparproblem)++;
 		}
 	    }
 	
@@ -5424,17 +5424,17 @@ int mb_pr_set_bathyslopenew(int verbose,
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nsmooth:         %d\n",nsmooth);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       beamflag:        %ld\n",(long)beamflag);
-		fprintf(stderr,"dbg2       bath:            %ld\n",(long)bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(long)bathacrosstrack);
+		fprintf(stderr,"dbg2       beamflag:        %ld\n",(size_t)beamflag);
+		fprintf(stderr,"dbg2       bath:            %ld\n",(size_t)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(size_t)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d  %d  %f %f\n", 
 				i, beamflag[i], bath[i], bathacrosstrack[i]);
-		fprintf(stderr,"dbg2       depths:           %ld\n",(long)depths);
-		fprintf(stderr,"dbg2       depthacrosstrack: %ld\n",(long)depthacrosstrack);
-		fprintf(stderr,"dbg2       slopes:           %ld\n",(long)slopes);
-		fprintf(stderr,"dbg2       slopeacrosstrack: %ld\n",(long)slopeacrosstrack);
+		fprintf(stderr,"dbg2       depths:           %ld\n",(size_t)depths);
+		fprintf(stderr,"dbg2       depthacrosstrack: %ld\n",(size_t)depthacrosstrack);
+		fprintf(stderr,"dbg2       slopes:           %ld\n",(size_t)slopes);
+		fprintf(stderr,"dbg2       slopeacrosstrack: %ld\n",(size_t)slopeacrosstrack);
 		}
 
 	/* initialize depths */
@@ -5544,17 +5544,17 @@ int mb_pr_set_bathyslope(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       beamflag:        %ld\n",(long)beamflag);
-		fprintf(stderr,"dbg2       bath:            %ld\n",(long)bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(long)bathacrosstrack);
+		fprintf(stderr,"dbg2       beamflag:        %ld\n",(size_t)beamflag);
+		fprintf(stderr,"dbg2       bath:            %ld\n",(size_t)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(size_t)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d  %d  %f %f\n", 
 				i, beamflag[i], bath[i], bathacrosstrack[i]);
-		fprintf(stderr,"dbg2       depths:           %ld\n",(long)depths);
-		fprintf(stderr,"dbg2       depthacrosstrack: %ld\n",(long)depthacrosstrack);
-		fprintf(stderr,"dbg2       slopes:           %ld\n",(long)slopes);
-		fprintf(stderr,"dbg2       slopeacrosstrack: %ld\n",(long)slopeacrosstrack);
+		fprintf(stderr,"dbg2       depths:           %ld\n",(size_t)depths);
+		fprintf(stderr,"dbg2       depthacrosstrack: %ld\n",(size_t)depthacrosstrack);
+		fprintf(stderr,"dbg2       slopes:           %ld\n",(size_t)slopes);
+		fprintf(stderr,"dbg2       slopeacrosstrack: %ld\n",(size_t)slopeacrosstrack);
 		}
 
 	/* initialize depths */

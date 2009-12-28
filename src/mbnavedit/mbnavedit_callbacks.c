@@ -244,7 +244,7 @@ ARG( XtPointer, client)
 GRAU( XtPointer, call)
 {
     int		status;
-    int		exitValue = (int)client;
+    long	exitValue = EXIT_FAILURE;
 
     /* finish with the current file */
     status = mbnavedit_action_quit();

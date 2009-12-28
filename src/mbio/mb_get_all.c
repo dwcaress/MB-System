@@ -162,7 +162,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(size_t)mbio_ptr);
 		}
 
 	/* get mbio and data structure descriptors */
@@ -596,7 +596,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)*store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
 	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 

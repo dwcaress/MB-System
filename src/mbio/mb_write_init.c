@@ -315,6 +315,8 @@ int mb_write_init(int verbose,
 	strcpy(mb_io_ptr->file3,"\0");
 	mb_io_ptr->file3_pos = 0;
 	mb_io_ptr->file3_bytes = 0;
+	mb_io_ptr->ncid = 0;
+	mb_io_ptr->gsfid = 0;
 	mb_io_ptr->xdrs = NULL;
 	mb_io_ptr->xdrs2 = NULL;
 	mb_io_ptr->xdrs3 = NULL;
@@ -584,7 +586,7 @@ int mb_write_init(int verbose,
 	    {
 	    status = gsfOpen(mb_io_ptr->file, 
 				GSF_CREATE, 
-				(int *) &(mb_io_ptr->mbfp));
+				(int *) &(mb_io_ptr->gsfid));
 	    if (status == 0)
 		{
 		status = MB_SUCCESS;
@@ -602,7 +604,7 @@ int mb_write_init(int verbose,
 	    {
 	    status = nc_create(mb_io_ptr->file, 
 				NC_CLOBBER, 
-				(int *) &(mb_io_ptr->mbfp));
+				(int *) &(mb_io_ptr->ncid));
 	    if (status == 0)
 		{
 		status = MB_SUCCESS;
@@ -822,7 +824,7 @@ int mb_write_init(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)*mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)*mbio_ptr);
 		fprintf(stderr,"dbg2       beams_bath: %d\n",*beams_bath);
 		fprintf(stderr,"dbg2       beams_amp:  %d\n",*beams_amp);
 		fprintf(stderr,"dbg2       pixels_ss:  %d\n",*pixels_ss);

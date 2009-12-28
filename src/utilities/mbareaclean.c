@@ -1419,7 +1419,7 @@ int getsoundingptr(int verbose, int soundingid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       soundingid:      %d\n",soundingid);
-		fprintf(stderr,"dbg2       sndgptr:         %ld\n",(long)sndgptr);
+		fprintf(stderr,"dbg2       sndgptr:         %ld\n",(size_t)sndgptr);
 		}
 
 	/* loop over the files until the sounding is found */
@@ -1440,7 +1440,7 @@ int getsoundingptr(int verbose, int soundingid,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       *sndgptr:        %ld\n",(long)sndgptr);
+		fprintf(stderr,"dbg2       *sndgptr:        %ld\n",(size_t)sndgptr);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);

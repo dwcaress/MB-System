@@ -97,7 +97,7 @@
 static char rcs_id[]="$Id$";
 
 /*------------------------------------------------------------------------------*/
-int mbview_setprimarygrid(int verbose, int instance,
+int mbview_setprimarygrid(int verbose, size_t instance,
 			int	primary_grid_projection_mode,
 			char	*primary_grid_projection_id,
 			float	primary_nodatavalue,
@@ -130,7 +130,7 @@ int mbview_setprimarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                      %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                     %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                     %ld\n", instance);
 		fprintf(stderr,"dbg2       primary_grid_projection_mode: %d\n", primary_grid_projection_mode);
 		fprintf(stderr,"dbg2       primary_grid_projection_id:   %s\n", primary_grid_projection_id);
 		fprintf(stderr,"dbg2       primary_nodatavalue:          %f\n", primary_nodatavalue);
@@ -144,7 +144,7 @@ int mbview_setprimarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2       primary_ymax:                 %f\n", primary_ymax);
 		fprintf(stderr,"dbg2       primary_dx:                   %f\n", primary_dx);
 		fprintf(stderr,"dbg2       primary_dy:                   %f\n", primary_dy);
-		fprintf(stderr,"dbg2       primary_data:                 %ld\n", (long)primary_data);
+		fprintf(stderr,"dbg2       primary_data:                 %ld\n", (size_t)primary_data);
 		}
 
 	/* get view */
@@ -243,7 +243,7 @@ int mbview_setprimarygrid(int verbose, int instance,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_updateprimarygrid(int verbose, int instance,
+int mbview_updateprimarygrid(int verbose, size_t instance,
 			int	primary_nx,
 			int	primary_ny,
 			float	*primary_data,
@@ -267,10 +267,10 @@ int mbview_updateprimarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                      %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                     %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                     %ld\n", instance);
 		fprintf(stderr,"dbg2       primary_nx:                   %d\n", primary_nx);
 		fprintf(stderr,"dbg2       primary_ny:                   %d\n", primary_ny);
-		fprintf(stderr,"dbg2       primary_data:                 %ld\n", (long)primary_data);
+		fprintf(stderr,"dbg2       primary_data:                 %ld\n", (size_t)primary_data);
 		}
 
 	/* get view */
@@ -334,7 +334,7 @@ int mbview_updateprimarygrid(int verbose, int instance,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_updateprimarygridcell(int verbose, int instance,
+int mbview_updateprimarygridcell(int verbose, size_t instance,
 			int	primary_ix,
 			int	primary_jy,
 			float	value,
@@ -357,7 +357,7 @@ int mbview_updateprimarygridcell(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                      %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                     %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                     %ld\n", instance);
 		fprintf(stderr,"dbg2       primary_ix:                   %d\n", primary_ix);
 		fprintf(stderr,"dbg2       primary_jy:                   %d\n", primary_jy);
 		fprintf(stderr,"dbg2       value:                        %f\n", value);
@@ -400,7 +400,7 @@ int mbview_updateprimarygridcell(int verbose, int instance,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_setprimarycolortable(int verbose, int instance,
+int mbview_setprimarycolortable(int verbose, size_t instance,
 			int	primary_colortable,
 			int	primary_colortable_mode,
 			double	primary_colortable_min,
@@ -423,7 +423,7 @@ int mbview_setprimarycolortable(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
 		fprintf(stderr,"dbg2       primary_colortable:        %d\n", primary_colortable);
 		fprintf(stderr,"dbg2       primary_colortable_mode:   %d\n", primary_colortable_mode);
 		fprintf(stderr,"dbg2       primary_colortable_min:    %f\n", primary_colortable_min);
@@ -456,7 +456,7 @@ int mbview_setprimarycolortable(int verbose, int instance,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_setslopecolortable(int verbose, int instance,
+int mbview_setslopecolortable(int verbose, size_t instance,
 			int	slope_colortable,
 			int	slope_colortable_mode,
 			double	slope_colortable_min,
@@ -479,7 +479,7 @@ int mbview_setslopecolortable(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
 		fprintf(stderr,"dbg2       slope_colortable:          %d\n", slope_colortable);
 		fprintf(stderr,"dbg2       slope_colortable_mode:     %d\n", slope_colortable_mode);
 		fprintf(stderr,"dbg2       slope_colortable_min:      %f\n", slope_colortable_min);

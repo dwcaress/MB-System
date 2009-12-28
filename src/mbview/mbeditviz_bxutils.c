@@ -1489,13 +1489,13 @@ XtPointer BX_CONVERT
 	switch(toVal.size)
 	{
 	case 1:
-	    val = (XTPOINTER)(long)(*(char*)toVal.addr);
+	    val = (XTPOINTER)(size_t)(*(char*)toVal.addr);
 	    break;
 	case 2:
-	    val = (XTPOINTER)(long)(*(short*)toVal.addr);
+	    val = (XTPOINTER)(size_t)(*(short*)toVal.addr);
 	    break;
 	case 4:
-	    val = (XTPOINTER)(long)(*(int*)toVal.addr);
+	    val = (XTPOINTER)(size_t)(*(int*)toVal.addr);
 	    break;
 	case 8:
 	default:

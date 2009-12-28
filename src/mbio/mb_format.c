@@ -309,7 +309,7 @@ int mb_format_register(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:    %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:  %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:  %ld\n",(size_t)mbio_ptr);
 		fprintf(stderr,"dbg2       format:    %d\n",*format);
 		}
 		
@@ -663,23 +663,23 @@ int mb_format_register(int verbose,
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %ld\n",(long)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(size_t)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %ld\n",(size_t)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(size_t)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %ld\n",(size_t)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %ld\n",(size_t)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %ld\n",(size_t)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %ld\n",(size_t)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %ld\n",(size_t)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(size_t)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(size_t)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(size_t)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(size_t)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %ld\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %ld\n",(size_t)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(size_t)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:             %d\n",status);
@@ -3372,7 +3372,7 @@ int mb_datalist_open(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       datalist:      %ld\n",(long)*datalist);
+		fprintf(stderr,"dbg2       datalist:      %ld\n",(size_t)*datalist);
 		fprintf(stderr,"dbg2       path:          %s\n",path);
 		fprintf(stderr,"dbg2       look_processed:%d\n",look_processed);
 		}
@@ -3410,14 +3410,14 @@ int mb_datalist_open(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       datalist:      %ld\n",(long)*datalist);
+		fprintf(stderr,"dbg2       datalist:      %ld\n",(size_t)*datalist);
 		if (*datalist != NULL)
 			{
 			fprintf(stderr,"dbg2       datalist->open:       %d\n",datalist_ptr->open);
-			fprintf(stderr,"dbg2       datalist->fp:         %ld\n",(long)datalist_ptr->fp);
+			fprintf(stderr,"dbg2       datalist->fp:         %ld\n",(size_t)datalist_ptr->fp);
 			fprintf(stderr,"dbg2       datalist->recursion:  %d\n",datalist_ptr->recursion);
 			fprintf(stderr,"dbg2       datalist->path:       %s\n",datalist_ptr->path);
-			fprintf(stderr,"dbg2       datalist->datalist:   %ld\n",(long)datalist_ptr->datalist);
+			fprintf(stderr,"dbg2       datalist->datalist:   %ld\n",(size_t)datalist_ptr->datalist);
 			}
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -3444,7 +3444,7 @@ int mb_datalist_close(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       datalist:      %ld\n",(long)*datalist);
+		fprintf(stderr,"dbg2       datalist:      %ld\n",(size_t)*datalist);
 		}
 
 	/* close file */
@@ -3472,7 +3472,7 @@ int mb_datalist_close(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       datalist:      %ld\n",(long)*datalist);
+		fprintf(stderr,"dbg2       datalist:      %ld\n",(size_t)*datalist);
 		fprintf(stderr,"dbg2       error:         %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:        %d\n",status);
@@ -3502,7 +3502,7 @@ int mb_datalist_read(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       datalist:      %ld\n",(long)datalist);
+		fprintf(stderr,"dbg2       datalist:      %ld\n",(size_t)datalist);
 		}
 
 	/* get datalist pointer */
@@ -3512,10 +3512,10 @@ int mb_datalist_read(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"dbg2       datalist_ptr->open:       %d\n",datalist_ptr->open);
-		fprintf(stderr,"dbg2       datalist_ptr->fp:         %ld\n",(long)datalist_ptr->fp);
+		fprintf(stderr,"dbg2       datalist_ptr->fp:         %ld\n",(size_t)datalist_ptr->fp);
 		fprintf(stderr,"dbg2       datalist_ptr->recursion:  %d\n",datalist_ptr->recursion);
 		fprintf(stderr,"dbg2       datalist_ptr->path:       %s\n",datalist_ptr->path);
-		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %ld\n",(long)datalist_ptr->datalist);
+		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %ld\n",(size_t)datalist_ptr->datalist);
 		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
 		}
 		
@@ -3579,7 +3579,7 @@ int mb_datalist_readorg(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       datalist:      %ld\n",(long)datalist);
+		fprintf(stderr,"dbg2       datalist:      %ld\n",(size_t)datalist);
 		}
 
 	/* get datalist pointer */
@@ -3589,10 +3589,10 @@ int mb_datalist_readorg(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"dbg2       datalist_ptr->open:       %d\n",datalist_ptr->open);
-		fprintf(stderr,"dbg2       datalist_ptr->fp:         %ld\n",(long)datalist_ptr->fp);
+		fprintf(stderr,"dbg2       datalist_ptr->fp:         %ld\n",(size_t)datalist_ptr->fp);
 		fprintf(stderr,"dbg2       datalist_ptr->recursion:  %d\n",datalist_ptr->recursion);
 		fprintf(stderr,"dbg2       datalist_ptr->path:       %s\n",datalist_ptr->path);
-		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %ld\n",(long)datalist_ptr->datalist);
+		fprintf(stderr,"dbg2       datalist_ptr->datalist:   %ld\n",(size_t)datalist_ptr->datalist);
 		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
 		}
 		
@@ -3875,7 +3875,7 @@ int mb_datalist_read2(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:        %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       datalist:      %ld\n",(long)datalist);
+		fprintf(stderr,"dbg2       datalist:      %ld\n",(size_t)datalist);
 		}
 
 	/* get datalist pointer */
@@ -3885,10 +3885,10 @@ int mb_datalist_read2(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"dbg2       datalist_ptr->open:             %d\n",datalist_ptr->open);
-		fprintf(stderr,"dbg2       datalist_ptr->fp:               %ld\n",(long)datalist_ptr->fp);
+		fprintf(stderr,"dbg2       datalist_ptr->fp:               %ld\n",(size_t)datalist_ptr->fp);
 		fprintf(stderr,"dbg2       datalist_ptr->recursion:        %d\n",datalist_ptr->recursion);
 		fprintf(stderr,"dbg2       datalist_ptr->path:             %s\n",datalist_ptr->path);
-		fprintf(stderr,"dbg2       datalist_ptr->datalist:         %ld\n",(long)datalist_ptr->datalist);
+		fprintf(stderr,"dbg2       datalist_ptr->datalist:         %ld\n",(size_t)datalist_ptr->datalist);
 		fprintf(stderr,"dbg2       datalist_ptr->look_processed:   %d\n",datalist_ptr->look_processed);
 		}
 		
