@@ -635,7 +635,7 @@ do_mbgrdviz_sensitivity()
    	int	mbview_allactive;
         Cardinal ac = 0;
         Arg	args[256];
-	int	instance;
+	size_t	instance;
 	int	nsite, nroute;
 	int	i;
 
@@ -724,11 +724,11 @@ void
 do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox";
- 	int	actionid;
-	int	mode;
+ 	size_t	actionid;
+	size_t	mode;
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
         XmString	tmp0;
 	Boolean	argok;
 	XmAnyCallbackStruct *acs;
@@ -745,10 +745,9 @@ do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_da
 		}
 
     	/* figure out what kind of file is to be opened */
-	actionid = (int) client_data;
+	actionid = (size_t) client_data;
 	mode = actionid / MBV_MAX_WINDOWS;
-	if (mode > 0)
-		instance = actionid - mode * MBV_MAX_WINDOWS;
+	instance = actionid - mode * MBV_MAX_WINDOWS;
 	
 	/* set title to open primary grid */
 	ac = 0;
@@ -775,7 +774,7 @@ do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPoi
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_openoverlay";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -793,7 +792,7 @@ do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPoi
 		}
 
     	/* get instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* set title to open file dialog  */
 	ac = 0;
@@ -819,7 +818,7 @@ do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPoint
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_openroute";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -837,7 +836,7 @@ do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPoint
 		}
 
     	/* get instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* set title to open file dialog  */
 	ac = 0;
@@ -863,7 +862,7 @@ do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointe
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_opensite";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -881,7 +880,7 @@ do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointe
 		}
 
     	/* get instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* set title to open file dialog  */
 	ac = 0;
@@ -907,7 +906,7 @@ do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_opennav";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -925,7 +924,7 @@ do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer
 		}
 
     	/* get instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* set title to open file dialog  */
 	ac = 0;
@@ -951,7 +950,7 @@ do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPoint
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_openswath";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -969,7 +968,7 @@ do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPoint
 		}
 
     	/* get instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* set title to open file dialog  */
 	ac = 0;
@@ -995,7 +994,7 @@ do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPoint
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_saveroute";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -1013,7 +1012,7 @@ do_mbgrdviz_fileSelectionBox_saveroute( Widget w, XtPointer client_data, XtPoint
 		}
 
     	/* get instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* set title to open file dialog  */
 	ac = 0;
@@ -1039,7 +1038,7 @@ do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, Xt
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_savewinfrogpts";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -1057,7 +1056,7 @@ do_mbgrdviz_fileSelectionBox_savewinfrogpts( Widget w, XtPointer client_data, Xt
 		}
 
     	/* get instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* set title to open file dialog  */
 	ac = 0;
@@ -1083,7 +1082,7 @@ do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, Xt
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_savewinfrogwpt";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -1101,7 +1100,7 @@ do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, Xt
 		}
 
     	/* get instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* set title to open file dialog  */
 	ac = 0;
@@ -1127,7 +1126,7 @@ do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointe
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_savesite";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -1145,7 +1144,7 @@ do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointe
 		}
     
     	/* get instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* set title to open file dialog  */
 	ac = 0;
@@ -1171,7 +1170,7 @@ do_mbgrdviz_fileSelectionBox_saveprofile( Widget w, XtPointer client_data, XtPoi
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_saveprofile";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -1189,7 +1188,7 @@ do_mbgrdviz_fileSelectionBox_saveprofile( Widget w, XtPointer client_data, XtPoi
 		}
     
     	/* get instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* set title to open file dialog  */
 	ac = 0;
@@ -1215,7 +1214,7 @@ do_mbgrdviz_fileSelectionBox_realtime( Widget w, XtPointer client_data, XtPointe
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_realtime";
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	int	actionid;
         XmString	tmp0;
 	Boolean	argok;
@@ -1342,7 +1341,7 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 	int	status = MB_SUCCESS;
 	int	actionid;
 	int	mode;
-	int	instance;
+	size_t	instance;
 	char    *file_ptr;
         Cardinal ac = 0;
         Arg      args[256];
@@ -3862,7 +3861,11 @@ int do_mbgrdviz_readgrd(size_t instance, char *grdfile,
 	int	projectionid;
         char    projectionname[MB_PATH_MAXLINE];
 	int	off;
+#ifdef GMT_MINOR_VERSION
 	GMT_LONG	pad[4];
+#else
+	int	pad[4];
+#endif
 	int	nscan;
 	int	utmzone;
 	char	NorS;
@@ -4697,7 +4700,7 @@ void do_mbgrdviz_open_mbeditviz( Widget w, XtPointer client_data, XtPointer call
 	int	status = MB_SUCCESS;
 	
 	/* mbview instance */
-	int	instance;
+	size_t	instance;
 	struct mbview_struct *data;
 	struct mbview_shareddata_struct *shareddata;
 	struct mbview_nav_struct *nav;
@@ -4707,7 +4710,7 @@ void do_mbgrdviz_open_mbeditviz( Widget w, XtPointer client_data, XtPointer call
 	int	i;
 
     	/* get source mbview instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
     
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4722,7 +4725,7 @@ void do_mbgrdviz_open_mbeditviz( Widget w, XtPointer client_data, XtPointer call
 	/* getting instance from client_data doesn't seem
 		to work so use survey_instance instead */
 	instance = survey_instance;
-fprintf(stderr,"Called do_mbgrdviz_open_mbeditviz instance:%d\n", instance);
+fprintf(stderr,"Called do_mbgrdviz_open_mbeditviz instance:%ld\n", instance);
 	    
     	/* check data source for area to bounding desired survey */
 	status = mbview_getdataptr(verbose, instance, &data, &error);
@@ -4774,11 +4777,11 @@ void do_mbgrdviz_make_survey( Widget w, XtPointer client_data, XtPointer call_da
 	/* mbview instance */
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	struct mbview_struct *data;
 
     	/* get source mbview instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
     
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4908,7 +4911,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 	int	status = MB_SUCCESS;
 	
 	/* mbview instance */
-	int	instance;
+	size_t	instance;
 	struct mbview_struct *data;
 	
 	/* survey construction parameters */
@@ -4941,7 +4944,7 @@ void do_mbgrdviz_generate_survey( Widget w, XtPointer client_data, XtPointer cal
 	int	i, j, k;
 
     	/* get source mbview instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	
 	/* getting instance from client_data doesn't seem
 		to work so use survey_instance instead */
@@ -5732,12 +5735,12 @@ do_mbgrdviz_arearoute_parameterchange( Widget w, XtPointer client_data, XtPointe
 	/* mbview instance */
         Cardinal ac = 0;
         Arg      args[256];
-	int	instance;
+	size_t	instance;
 	struct mbview_struct *data;
 	char	*tmp;
 
     	/* get source mbview instance */
-	instance = (int) client_data;
+	instance = (size_t) client_data;
     
 	/* print input debug statements */
 	if (verbose >= 2)

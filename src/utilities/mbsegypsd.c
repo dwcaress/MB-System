@@ -1011,7 +1011,11 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	status = MB_SUCCESS;
 	struct GRD_HEADER grd;
 	double	w, e, s, n;
+#ifdef GMT_MINOR_VERSION
 	GMT_LONG	pad[4];
+#else
+	int	pad[4];
+#endif
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	char	remark[MB_PATH_MAXLINE];

@@ -101,7 +101,11 @@ int mb_readgrd(int verbose, char *grdfile,
 	int	projectionid;
         mb_path    projectionname;
 	int	off;
+#ifdef GMT_MINOR_VERSION
 	GMT_LONG	pad[4];
+#else
+	int	pad[4];
+#endif
 	int	nscan;
 	int	utmzone;
 	char	NorS;

@@ -8,7 +8,7 @@
 #include <string.h>
 #include "types_win32.h"
 #else
-#include <strings.h>
+#include <string.h>
 #include <unistd.h>
 #endif
 #include <math.h>
