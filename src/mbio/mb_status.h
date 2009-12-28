@@ -412,7 +412,7 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.2beta13"
+#define	MB_VERSION	"5.1.2beta14"
 #define	MB_BUILD_DATE	"28 December 2009"
 
 /* MBIO function boolean convention */
