@@ -140,7 +140,7 @@ void do_mbeditviz_pickroute_notify(size_t instance);
 void do_mbeditviz_picknav_notify(size_t instance);
 void do_mbeditviz_regrid_notify( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_gridparameters( Widget w, XtPointer client_data, XtPointer call_data);
-void do_mbeditviz_chengecellsize( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbeditviz_changecellsize( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_updategrid( Widget w, XtPointer client_data, XtPointer call_data);
 	
 XtPointer BX_CONVERT(Widget, char *, char *, int, Boolean *);
@@ -965,9 +965,9 @@ fprintf(stderr,"return do_mbeditviz_updategrid status:%d\n", mbev_status);
 
 /*--------------------------------------------------------------------*/
 void
-do_mbeditviz_chengecellsize( Widget w, XtPointer client_data, XtPointer call_data)
+do_mbeditviz_changecellsize( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	char function_name[] = "do_mbeditviz_chengecellsize";
+	char function_name[] = "do_mbeditviz_changecellsize";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
 	char	string[MB_PATH_MAXLINE];
@@ -984,7 +984,7 @@ do_mbeditviz_chengecellsize( Widget w, XtPointer client_data, XtPointer call_dat
 		}
 
 if (mbev_verbose > 0)
-fprintf(stderr,"do_mbeditviz_chengecellsize\n");
+fprintf(stderr,"do_mbeditviz_changecellsize\n");
     
     	/* get cell size value */
 	ac = 0;
@@ -1514,10 +1514,14 @@ if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 	
 	/* destroy any mb3dsoundings window */
-	mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_verbose);
-	mbeditviz_mb3dsoundings_dismiss();
 if (mbev_verbose > 0)
 fprintf(stderr,"1 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
+	mbev_status = mb3dsoundings_end(mbev_verbose, &mbev_verbose);
+if (mbev_verbose > 0)
+fprintf(stderr,"2 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
+	mbeditviz_mb3dsoundings_dismiss();
+if (mbev_verbose > 0)
+fprintf(stderr,"3 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 	
 	/* destroy the grid */
 if (mbev_verbose > 0)
@@ -1525,7 +1529,7 @@ fprintf(stderr,"mbev_grid.status:%d\n",mbev_grid.status);
 	if (mbev_grid.status != MBEV_GRID_NONE)
 		mbeditviz_destroy_grid();
 if (mbev_verbose > 0)
-fprintf(stderr,"2 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
+fprintf(stderr,"4 do_mbeditviz_mbview_dismiss_notify status:%d\n", mbev_status);
 	
 	/* reset the gui */
 	do_mbeditviz_update_gui();

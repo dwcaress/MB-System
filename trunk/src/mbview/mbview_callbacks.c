@@ -990,10 +990,10 @@ int mbview_init(int verbose, size_t *instance, int *error)
 	*instance = MBV_NO_WINDOW;
 	for (i=0;i<MBV_MAX_WINDOWS;i++)
 	    {
-	    if (*instance < 0 && mbviews[i].init != MBV_WINDOW_VISIBLE)
+	    if (*instance == MBV_NO_WINDOW && mbviews[i].init != MBV_WINDOW_VISIBLE)
 		*instance = i;
 	    }
-	if (*instance < 0)
+	if (*instance == MBV_NO_WINDOW)
 	    {
 	    fprintf(stderr, "Unable to create mbview - all %d mbview windows already in use.\n", 
 		MBV_MAX_WINDOWS);

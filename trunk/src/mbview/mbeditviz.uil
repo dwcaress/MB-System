@@ -83,7 +83,7 @@ procedure BxExitCB(integer);
 procedure BxManageCB(string);
 procedure BxUnmanageCB(string);
 procedure do_mbeditviz_changeoutputmode();
-procedure do_mbeditviz_chengecellsize();
+procedure do_mbeditviz_changecellsize();
 procedure do_mbeditviz_deleteselected();
 procedure do_mbeditviz_fileSelectionBox_openswath();
 procedure do_mbeditviz_mode_change();
@@ -282,7 +282,7 @@ object scale_cellsize : XmScale widget {
     callbacks {
         callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_cellsize);
-        XmNvalueChangedCallback = procedure do_mbeditviz_chengecellsize();
+        XmNvalueChangedCallback = procedure do_mbeditviz_changecellsize();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
