@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.1.2beta15    December 30, 2009
   Version 5.1.2beta14    December 28, 2009
   Version 5.1.2beta13    December 28, 2009
   Version 5.1.2beta12    December 26, 2009
@@ -350,6 +351,13 @@ universe (e.g. long = 32 bit on Windows but long = 64 bit for gcc).
 Fixed a few more issues relating to clean compiles on 64 bit machines.
 We're iterating towards a working version by getting problem reports
 from people like Hamish Bowman, Bob Arko, and Bob Covill.
+
+-----> 5.1.2beta15
+
+Fixed EM3002 support to reliably detect whether data comes from a single
+or double head sonar (formats 56 & 57).
+
+Fixed problem with EM710 support (formats 58 & 59).
 
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------

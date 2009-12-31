@@ -1432,7 +1432,7 @@ int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error)
 			}
 		ping->png_pixel_size = 0.0;	/* processed sidescan pixel size (m) */
 		ping->png_pixels_ss = 0;	/* number of processed sidescan pixels stored */
-		for (i=0;i<MBSYS_SIMRAD3_MAXRAWPIXELS;i++)
+		for (i=0;i<MBSYS_SIMRAD3_MAXPIXELS;i++)
 			{
 			ping->png_ss[i] = 0; /* the processed sidescan ordered port to starboard */
 			ping->png_ssalongtrack[i] = 0; /* the processed sidescan alongtrack distances (0.01 m) */

@@ -273,7 +273,7 @@ int mbr_info_hsds2raw(int verbose,
 	strncpy(format_name, "HSDS2RAW", MB_NAME_LENGTH);
 	strncpy(system_name, "ATLAS", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_HSDS2RAW\nInformal Description: STN Atlas raw multibeam format\nAttributes:           STN Atlas multibeam sonars, \n                      Hydrosweep DS2, Hydrosweep MD, \n                      Fansweep 10, Fansweep 20, \n                      bathymetry, amplitude, and sidescan,\n                      up to 1440 beams and 4096 pixels,\n                      XDR binary, STN Atlas.\n", MB_DESCRIPTION_LENGTH);
-	*numfile = 3;
+	*numfile = -3;
 	*filetype = MB_FILETYPE_XDR;
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
@@ -1708,7 +1708,8 @@ int mbr_hsds2raw_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mb_io_ptr->mbfp);
-	mb_io_ptr->file2_bytes = ftell(mb_io_ptr->mbfp2);
+	if (mb_io_ptr->mbfp2 != NULL)
+		mb_io_ptr->file2_bytes = ftell(mb_io_ptr->mbfp2);
 
 	/* print output debug statements */
 	if (verbose >= 2)

@@ -197,6 +197,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->kind = MB_DATA_NONE;
 	store->type = EM2_NONE;
 	store->sonar = MBSYS_SIMRAD2_UNKNOWN;
+	store->numberheads = 1;
 
 	/* time stamp */
 	store->date = 0;
