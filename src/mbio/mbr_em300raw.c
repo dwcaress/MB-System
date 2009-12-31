@@ -1557,7 +1557,8 @@ Have a nice day...\n");
 				}
 			}
 		else if (type == EM2_BATH
-			&& sonar == MBSYS_SIMRAD2_EM3002)
+			&& sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 			{
 			if (expect == EM2_SS
 				&& store->ping->png_count == store->ping2->png_count
@@ -1668,7 +1669,8 @@ Have a nice day...\n");
 				}
 			}
 		else if (type == EM2_RAWBEAM3
-			&& sonar == MBSYS_SIMRAD2_EM3002)
+			&& sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 			{
 #ifdef MBR_EM300RAW_DEBUG
 	fprintf(stderr,"call mbr_em300raw_rd_rawbeam3 type %x\n",type);
@@ -1695,10 +1697,11 @@ Have a nice day...\n");
 				}
 			}
 		else if (type == EM2_SS
-			&& sonar == MBSYS_SIMRAD2_EM3002)
+			&& sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 			{
 #ifdef MBR_EM300RAW_DEBUG
-	fprintf(stderr,"call mbr_em300raw_rd_ss type %x\n",type);
+	fprintf(stderr,"call mbr_em300raw_rd_ss a type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_ss(
 				verbose,mbfp,swap,store,sonar,*length,&match,&good_end_bytes,error);
@@ -1731,7 +1734,7 @@ Have a nice day...\n");
 		else if (type == EM2_SS)
 			{
 #ifdef MBR_EM300RAW_DEBUG
-	fprintf(stderr,"call mbr_em300raw_rd_ss type %x\n",type);
+	fprintf(stderr,"call mbr_em300raw_rd_ss b type %x\n",type);
 #endif
 			status = mbr_em300raw_rd_ss(
 				verbose,mbfp,swap,store,sonar,*length,&match,&good_end_bytes,error);
@@ -1829,7 +1832,7 @@ Have a nice day...\n");
 			}
 
 #ifdef MBR_EM300RAW_DEBUG
-	fprintf(stderr,"record_size:%d bytes read:%d file_pos old:%d new:%d\n", 
+	fprintf(stderr,"record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", 
 		record_size, ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
 	fprintf(stderr,"done:%d expect:%x status:%d error:%d\n", 
 		done, expect, status, *error);
@@ -2152,6 +2155,10 @@ int mbr_em300raw_rd_start(int verbose, FILE *mbfp, int swap,
 		mb_get_binary_short(swap, &line[12], &short_val); 
 		    store->par_serial_2 = (int) ((unsigned short) short_val);
 		}
+		
+	/* check for dual head sonars */
+	if (store->par_serial_1 != 0 && store->par_serial_2 != 0)
+		store->numberheads = 2;
 		
 	/* now loop over reading individual characters to 
 	    handle ASCII parameter values */
@@ -4071,8 +4078,9 @@ int mbr_em300raw_rd_bath(int verbose, FILE *mbfp, int swap,
 		*error = MB_ERROR_EOF;
 		}
 		
-	/* in case of EM3002 check if the data are from the second head and switch ping structure if so */
-	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002)
+	/* in case of dual head EM3002 check if the data are from the second head and switch ping structure if so */
+	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 		{
 		mb_get_binary_short(swap, &line[8], &short_val); 
 		    png_count = (int) ((unsigned short) short_val);
@@ -4790,8 +4798,9 @@ int mbr_em300raw_rd_rawbeam3(int verbose, FILE *mbfp, int swap,
 		*error = MB_ERROR_EOF;
 		}
 		
-	/* in case of EM3002 check if the data are from the second head and if so switch ping structure */
-	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002)
+	/* in case of dual head EM3002 check if the data are from the second head and if so switch ping structure */
+	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 		{
 		mb_get_binary_short(swap, &line[8], &short_val); 
 		    png_raw3_count = (int) ((unsigned short) short_val);
@@ -5065,8 +5074,9 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap,
 		*error = MB_ERROR_EOF;
 		}
 		
-	/* in case of EM3002 check if the data are from the second head and if so switch ping structure */
-	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002)
+	/* in case of dual head EM3002 check if the data are from the second head and if so switch ping structure */
+	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 		{
 		mb_get_binary_short(swap, &line[8], &short_val); 
 		    png_ss_count = (int) ((unsigned short) short_val);
@@ -5765,7 +5775,8 @@ int mbr_em300raw_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
 		/* write out data from second head for EM3002 */
-		if (store->sonar == MBSYS_SIMRAD2_EM3002 
+		if (store->sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2 
 			&& store->ping2 != NULL 
 			&& store->ping2->png_count ==store->ping->png_count)
 			{
@@ -8198,7 +8209,8 @@ int mbr_em300raw_wr_bath(int verbose, FILE *mbfp, int swap,
 		}
 		
 	/* get storage structure */
-	if (store->sonar == MBSYS_SIMRAD2_EM3002 && head == 1)
+	if (store->sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2 && head == 1)
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
 	else
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
@@ -8920,7 +8932,8 @@ int mbr_em300raw_wr_rawbeam3(int verbose, FILE *mbfp, int swap,
 		}
 		
 	/* get storage structure */
-	if (store->sonar == MBSYS_SIMRAD2_EM3002 && head == 1)
+	if (store->sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2 && head == 1)
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
 	else
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
@@ -9188,7 +9201,8 @@ int mbr_em300raw_wr_ss(int verbose, FILE *mbfp, int swap,
 		}
 		
 	/* get storage structure */
-	if (store->sonar == MBSYS_SIMRAD2_EM3002 && head == 1)
+	if (store->sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2 && head == 1)
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
 	else
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
