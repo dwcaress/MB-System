@@ -364,6 +364,8 @@ Fixed problem with EM710 support (formats 58 & 59).
 
 Incorporates all changes listed above.
 
+Fixed memory management bug for formats 56 and 57 (Simrad EM3002 etc).
+
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
 
