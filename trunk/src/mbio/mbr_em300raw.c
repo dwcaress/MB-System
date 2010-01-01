@@ -5051,7 +5051,7 @@ int mbr_em300raw_rd_ss(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		fprintf(stderr,"dbg2       length:     %d\n",length);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
 		
