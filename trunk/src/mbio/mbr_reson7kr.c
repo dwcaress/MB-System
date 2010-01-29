@@ -164,6 +164,8 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *error);
+int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *error);
 int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int *index, s7k_fsdwchannel *fsdwchannel, int *error);
 int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdwssheader *fsdwssheader, int *error);
@@ -209,6 +211,8 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
+int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error);
 int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int *index, s7k_fsdwchannel *fsdwchannel, int *error);
 int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index, s7k_fsdwssheader *fsdwssheader, int *error);
@@ -502,10 +506,10 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 	last_ping = (int *) &mb_io_ptr->save1;
 	recordid = (int *) &mb_io_ptr->save3;
 	recordidlast = (int *) &mb_io_ptr->save4;
-	bufferptr = (char **) &mb_io_ptr->save5;
+	bufferptr = (char **) &mb_io_ptr->saveptr1;
 	buffer = (char *) *bufferptr;
 	bufferalloc = (int *) &mb_io_ptr->save6;
-	buffersaveptr = (char **) &mb_io_ptr->save7;
+	buffersaveptr = (char **) &mb_io_ptr->saveptr2;
 	buffersave = (char *) *buffersaveptr;
 	size = (int *) &mb_io_ptr->save8;
 	nbadrec = (int *) &mb_io_ptr->save9;
@@ -586,10 +590,10 @@ int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error)
 			&mb_io_ptr->store_data,error);
 
 	/* deallocate memory for reading/writing buffer */
-	bufferptr = (char **) &mb_io_ptr->save5;
+	bufferptr = (char **) &mb_io_ptr->saveptr1;
 	buffer = (char *) *bufferptr;
 	bufferalloc = (int *) &mb_io_ptr->save6;
-	buffersaveptr = (char **) &mb_io_ptr->save7;
+	buffersaveptr = (char **) &mb_io_ptr->saveptr2;
 	buffersave = (char *) *buffersaveptr;
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)bufferptr,error);
 	status = mb_freed(verbose,__FILE__,__LINE__,(void **)buffersaveptr,error);
@@ -618,6 +622,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
 	s7kr_position 		*position;
+	s7kr_navigation 	*navigation;
 	s7kr_attitude 		*attitude;
 	s7kr_heading 		*dheading;
 	s7kr_rollpitchheave	*rollpitchheave;
@@ -736,6 +741,23 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 						error);
 				}
 			}
+		}
+
+	/* save nav and heading if navigation data */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_NAV3)
+		{
+		/* add latest fix */
+		navigation = &(store->navigation);
+		mb_navint_add(verbose, mbio_ptr, 
+				store->time_d, 
+				(double)(RTD * navigation->longitude), 
+				(double)(RTD * navigation->latitude), 
+				error);
+		mb_hedint_add(verbose, mbio_ptr,
+				store->time_d, 
+				(double)(RTD * navigation->heading), 
+				error);
 		}
 
 	/* save attitude if attitude record */
@@ -1105,10 +1127,10 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	new_ping = (int *) &mb_io_ptr->save2;
 	recordid = (int *) &mb_io_ptr->save3;
 	recordidlast = (int *) &mb_io_ptr->save4;
-	bufferptr = (char **) &mb_io_ptr->save5;
+	bufferptr = (char **) &mb_io_ptr->saveptr1;
 	buffer = (char *) *bufferptr;
 	bufferalloc = (int *) &mb_io_ptr->save6;
-	buffersaveptr = (char **) &mb_io_ptr->save7;
+	buffersaveptr = (char **) &mb_io_ptr->saveptr2;
 	buffersave = (char *) *buffersaveptr;
 	size = (int *) &mb_io_ptr->save8;
 	nbadrec = (int *) &mb_io_ptr->save9;
@@ -1341,7 +1363,7 @@ if (*recordid == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferencePoi
 if (*recordid == R7KRECID_UncalibratedSensorOffset) fprintf(stderr," R7KRECID_UncalibratedSensorOffset\n");
 if (*recordid == R7KRECID_CalibratedSensorOffset) fprintf(stderr," R7KRECID_CalibratedSensorOffset\n");
 if (*recordid == R7KRECID_Position) fprintf(stderr," R7KRECID_Position\n");
-if (*recordid == R7KRECID_Attitude) fprintf(stderr," R7KRECID_Attitude\n");
+if (*recordid == R7KRECID_CustomAttitude) fprintf(stderr," R7KRECID_CustomAttitude\n");
 if (*recordid == R7KRECID_Tide) fprintf(stderr," R7KRECID_Tide\n");
 if (*recordid == R7KRECID_Altitude) fprintf(stderr," R7KRECID_Altitude\n");
 if (*recordid == R7KRECID_MotionOverGround) fprintf(stderr," R7KRECID_MotionOverGround\n");
@@ -1349,6 +1371,13 @@ if (*recordid == R7KRECID_Depth) fprintf(stderr," R7KRECID_Depth\n");
 if (*recordid == R7KRECID_SoundVelocityProfile) fprintf(stderr," R7KRECID_SoundVelocityProfile\n");
 if (*recordid == R7KRECID_CTD) fprintf(stderr," R7KRECID_CTD\n");
 if (*recordid == R7KRECID_Geodesy) fprintf(stderr," R7KRECID_Geodesy\n");
+if (*recordid == R7KRECID_RollPitchHeave) fprintf(stderr," R7KRECID_RollPitchHeave\n");
+if (*recordid == R7KRECID_Heading) fprintf(stderr," R7KRECID_Heading\n");
+if (*recordid == R7KRECID_SurveyLine) fprintf(stderr," R7KRECID_SurveyLine\n");
+if (*recordid == R7KRECID_Navigation) fprintf(stderr," R7KRECID_Navigation\n");
+if (*recordid == R7KRECID_Attitude) fprintf(stderr," R7KRECID_Attitude\n");
+if (*recordid == R7KRECID_GenericSensorCalibration) fprintf(stderr," R7KRECID_GenericSensorCalibration\n");
+if (*recordid == R7KRECID_GenericSidescan) fprintf(stderr," R7KRECID_GenericSidescan\n");
 if (*recordid == R7KRECID_FSDWsidescan) fprintf(stderr," R7KRECID_FSDWsidescan\n");
 if (*recordid == R7KRECID_FSDWsubbottom) fprintf(stderr," R7KRECID_FSDWsubbottom\n");
 if (*recordid == R7KRECID_Bluefin) fprintf(stderr," R7KRECID_Bluefin\n");
@@ -1485,6 +1514,16 @@ mb_navint_add(verbose, mbio_ptr,
 			else if (*recordid == R7KRECID_Heading)
 				{
 				status = mbr_reson7kr_rd_heading(verbose, buffer, store_ptr, error);
+				done = MB_YES;
+				}
+			else if (*recordid == R7KRECID_SurveyLine)
+				{
+				status = mbr_reson7kr_rd_surveyline(verbose, buffer, store_ptr, error);
+				done = MB_YES;
+				}
+			else if (*recordid == R7KRECID_Navigation)
+				{
+				status = mbr_reson7kr_rd_navigation(verbose, buffer, store_ptr, error);
 				done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_Attitude)
@@ -1850,7 +1889,7 @@ header->RecordNumber,image->ping_number);
 				{
 				
 #ifdef MBR_RESON7KR_DEBUG
-				fprintf(stderr,"Record type %d - recognized but not supported.\n");
+				fprintf(stderr,"Record type %d - recognized but not supported.\n",*recordid);
 #endif
 				done = MB_NO;
 				}
@@ -1996,6 +2035,8 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 			&& *recordid != R7KRECID_Geodesy
 			&& *recordid != R7KRECID_RollPitchHeave
 			&& *recordid != R7KRECID_Heading
+			&& *recordid != R7KRECID_SurveyLine
+			&& *recordid != R7KRECID_Navigation
 			&& *recordid != R7KRECID_Attitude
 			&& *recordid != R7KRECID_FSDWsidescan
 			&& *recordid != R7KRECID_FSDWsubbottom
@@ -2053,6 +2094,8 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 			if (*recordid == R7KRECID_Geodesy) fprintf(stderr," R7KRECID_Geodesy\n");
 			if (*recordid == R7KRECID_RollPitchHeave) fprintf(stderr," R7KRECID_RollPitchHeave\n");
 			if (*recordid == R7KRECID_Heading) fprintf(stderr," R7KRECID_Heading\n");
+			if (*recordid == R7KRECID_SurveyLine) fprintf(stderr," R7KRECID_Heading\n");
+			if (*recordid == R7KRECID_Navigation) fprintf(stderr," R7KRECID_Heading\n");
 			if (*recordid == R7KRECID_Attitude) fprintf(stderr," R7KRECID_Attitude\n");
 			if (*recordid == R7KRECID_FSDWsidescan) fprintf(stderr," R7KRECID_FSDWsidescan\n");
 			if (*recordid == R7KRECID_FSDWsubbottom) fprintf(stderr," R7KRECID_FSDWsubbottom\n");
@@ -3732,6 +3775,212 @@ header->RecordNumber);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *error)
+{
+	char	*function_name = "mbr_reson7kr_rd_surveyline";
+	int	status = MB_SUCCESS;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_surveyline *surveyline;
+	int	data_size;
+	int	index;
+	int	time_j[5];
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(size_t)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+	surveyline = &(store->surveyline);
+	header = &(surveyline->header);
+	
+	/* extract the header */
+	index = 0;
+	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
+		
+	/* extract the data */
+	index = header->Offset + 4;
+	mb_get_binary_short(MB_YES, &buffer[index], &(surveyline->n)); index += 2;
+	mb_get_binary_short(MB_YES, &buffer[index], &(surveyline->type)); index += 2;
+	mb_get_binary_float(MB_YES, &buffer[index], &(surveyline->turnradius)); index += 4;
+	for (i=0;i<64;i++)
+		{
+		surveyline->name[i] = (char) buffer[index]; index++;
+		}
+		
+	/* make sure enough memory is allocated for channel data */
+	if (surveyline->nalloc < surveyline->n)
+		{
+		data_size = surveyline->n * sizeof(float);
+		status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(surveyline->latitude), error);
+		if (status == MB_SUCCESS)
+			status = mb_reallocd(verbose, __FILE__, __LINE__, data_size, (void **)&(surveyline->longitude), error);
+		if (status == MB_SUCCESS)
+			{
+			surveyline->nalloc = surveyline->n;
+			}
+		else
+			{
+			surveyline->nalloc = 0;
+			surveyline->n = 0;
+			}
+		}
+
+	for (i=0;i<surveyline->n;i++)
+		{
+		mb_get_binary_double(MB_YES, &buffer[index], &(surveyline->latitude[i])); index += 8;
+		mb_get_binary_double(MB_YES, &buffer[index], &(surveyline->longitude[i])); index += 8;
+		}
+
+	/* set kind */
+	if (status == MB_SUCCESS)
+		{
+		/* set kind */
+		store->kind = MB_DATA_SURVEY_LINE;
+		store->type = R7KRECID_SurveyLine;
+		
+		/* get the time */
+		time_j[0] = header->s7kTime.Year;
+		time_j[1] = header->s7kTime.Day;
+		time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+		time_j[3] = (int) header->s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, store->time_i);
+		mb_get_time(verbose, store->time_i, &(store->time_d));
+		}
+	else
+		{
+		store->kind = MB_DATA_NONE;
+		}
+
+	/* print out the results */
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"R7KRECID_SurveyLine:                   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber);
+#endif
+#ifdef MBR_RESON7KR_DEBUG
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_surveyline(verbose, surveyline, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *error)
+{
+	char	*function_name = "mbr_reson7kr_rd_navigation";
+	int	status = MB_SUCCESS;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_navigation *navigation;
+	int	index;
+	int	time_j[5];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       buffer:     %ld\n",(size_t)buffer);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+	navigation = &(store->navigation);
+	header = &(navigation->header);
+	
+	/* extract the header */
+	index = 0;
+	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
+		
+	/* extract the data */
+	index = header->Offset + 4;
+	navigation->vertical_reference = (mb_u_char) buffer[index]; index++;
+	mb_get_binary_double(MB_YES, &buffer[index], &(navigation->latitude)); index += 8;
+	mb_get_binary_double(MB_YES, &buffer[index], &(navigation->longitude)); index += 8;
+	mb_get_binary_float(MB_YES, &buffer[index], &(navigation->position_accuracy)); index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &(navigation->height)); index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &(navigation->height_accuracy)); index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &(navigation->speed)); index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &(navigation->course)); index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &(navigation->heading)); index += 4;
+
+	/* set kind */
+	if (status == MB_SUCCESS)
+		{
+		/* set kind */
+		store->kind = MB_DATA_NAV3;
+		store->type = R7KRECID_Navigation;
+		
+		/* get the time */
+		time_j[0] = header->s7kTime.Year;
+		time_j[1] = header->s7kTime.Day;
+		time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+		time_j[3] = (int) header->s7kTime.Seconds;
+		time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+		mb_get_itime(verbose, time_j, store->time_i);
+		mb_get_time(verbose, store->time_i, &(store->time_d));
+		}
+	else
+		{
+		store->kind = MB_DATA_NONE;
+		}
+
+	/* print out the results */
+#ifdef MBR_RESON7KR_DEBUG
+fprintf(stderr,"R7KRECID_Navigation:                    7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+store->time_i[0],store->time_i[1],store->time_i[2],
+store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
+header->RecordNumber);
+#endif
+#ifdef MBR_RESON7KR_DEBUG
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_navigation(verbose, navigation, error);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *error)
 {
 	char	*function_name = "mbr_reson7kr_rd_attitude";
@@ -4667,6 +4916,7 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 	int	index;
 	int	time_i[7], time_j[5];
 	double	edgetech_time_d, s7k_time_d, bathy_time_d;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4833,7 +5083,9 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 	double	time_d;
 	int	timeproblem;
 	int	i, j;
-
+#ifdef MBR_RESON7KR_DEBUG
+	int	time_i[7];
+#endif
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -7436,7 +7688,7 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	mbfp = mb_io_ptr->mbfp;
 	
 	/* get saved values */
-	bufferptr = (char **) &mb_io_ptr->save5;
+	bufferptr = (char **) &mb_io_ptr->saveptr1;
 	buffer = (char *) *bufferptr;
 	bufferalloc = (int *) &mb_io_ptr->save6;
 	fileheaders = (int *) &mb_io_ptr->save12;
@@ -7521,13 +7773,13 @@ fprintf(stderr," R7KRECID_7kBeamGeometry\n");
 				}
 			}
 			
-		/* Reson 7k remote control settings (record 7004) */
+		/* Reson 7k remote control settings (record 7503) */
 		if (status == MB_SUCCESS && store->read_remotecontrolsettings == MB_YES)
 			{
-			store->type = R7KRECID_7kBeamGeometry;
+			store->type = R7KRECID_7kRemoteControlSonarSettings;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBeamGeometry, R7KRECID_7kBeamGeometry);
-fprintf(stderr," R7KRECID_7kBeamGeometry\n");
+fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kRemoteControlSonarSettings, R7KRECID_7kRemoteControlSonarSettings);
+fprintf(stderr," R7KRECID_7kRemoteControlSonarSettings\n");
 #endif
 			status = mbr_reson7kr_wr_remotecontrolsettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
@@ -7642,7 +7894,7 @@ if (store->type == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferenceP
 if (store->type == R7KRECID_UncalibratedSensorOffset) fprintf(stderr," R7KRECID_UncalibratedSensorOffset\n");
 if (store->type == R7KRECID_CalibratedSensorOffset) fprintf(stderr," R7KRECID_CalibratedSensorOffset\n");
 if (store->type == R7KRECID_Position) fprintf(stderr," R7KRECID_Position\n");
-if (store->type == R7KRECID_Attitude) fprintf(stderr," R7KRECID_Attitude\n");
+if (store->type == R7KRECID_CustomAttitude) fprintf(stderr," R7KRECID_CustomAttitude\n");
 if (store->type == R7KRECID_Tide) fprintf(stderr," R7KRECID_Tide\n");
 if (store->type == R7KRECID_Altitude) fprintf(stderr," R7KRECID_Altitude\n");
 if (store->type == R7KRECID_MotionOverGround) fprintf(stderr," R7KRECID_MotionOverGround\n");
@@ -7650,6 +7902,13 @@ if (store->type == R7KRECID_Depth) fprintf(stderr," R7KRECID_Depth\n");
 if (store->type == R7KRECID_SoundVelocityProfile) fprintf(stderr," R7KRECID_SoundVelocityProfile\n");
 if (store->type == R7KRECID_CTD) fprintf(stderr," R7KRECID_CTD\n");
 if (store->type == R7KRECID_Geodesy) fprintf(stderr," R7KRECID_Geodesy\n");
+if (store->type == R7KRECID_RollPitchHeave) fprintf(stderr," R7KRECID_RollPitchHeave\n");
+if (store->type == R7KRECID_Heading) fprintf(stderr," R7KRECID_Heading\n");
+if (store->type == R7KRECID_SurveyLine) fprintf(stderr," R7KRECID_SurveyLine\n");
+if (store->type == R7KRECID_Navigation) fprintf(stderr," R7KRECID_Navigation\n");
+if (store->type == R7KRECID_Attitude) fprintf(stderr," R7KRECID_Attitude\n");
+if (store->type == R7KRECID_GenericSensorCalibration) fprintf(stderr," R7KRECID_GenericSensorCalibration\n");
+if (store->type == R7KRECID_GenericSidescan) fprintf(stderr," R7KRECID_GenericSidescan\n");
 if (store->type == R7KRECID_FSDWsidescan)
 	{
 	if (store->sstype == R7KRECID_FSDWsidescanLo) fprintf(stderr," R7KRECID_FSDWsidescan R7KRECID_FSDWsidescanLo\n");
@@ -7741,6 +8000,14 @@ if (store->type == R7KRECID_8100SonarData) fprintf(stderr," R7KRECID_8100SonarDa
 		else if (store->type == R7KRECID_Heading)
 			{
 			status = mbr_reson7kr_wr_heading(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+			}
+		else if (store->type == R7KRECID_SurveyLine)
+			{
+			status = mbr_reson7kr_wr_surveyline(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+			}
+		else if (store->type == R7KRECID_Navigation)
+			{
+			status = mbr_reson7kr_wr_navigation(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			}
 		else if (store->type == R7KRECID_Attitude)
 			{
@@ -9561,6 +9828,232 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 		/* insert the data */
 		index = header->Offset + 4;
 		mb_put_binary_float(MB_YES, heading->heading, &buffer[index]); index += 4;
+
+		/* reset the header size value */
+		mb_put_binary_int(MB_YES, ((unsigned int)(index + 4)), &buffer[8]);
+
+		/* now add the checksum */
+		checksum = 0;
+		for (i=0;i<index;i++)
+			checksum += (unsigned char) buffer[i];
+		mb_put_binary_int(MB_YES, checksum, &buffer[index]); index += 4;
+
+		/* check size */
+		if (*size != index)
+			{
+fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_DATA;
+			*size = 0;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error)
+{
+	char	*function_name = "mbr_reson7kr_wr_surveyline";
+	int	status = MB_SUCCESS;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_surveyline *surveyline;
+	unsigned int checksum;
+	int	index;
+	char	*buffer;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(size_t)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+	surveyline = &(store->surveyline);
+	header = &(surveyline->header);
+
+	/* print out the data to be output */
+#ifdef MBR_RESON7KR_DEBUG
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_surveyline(verbose, surveyline, error);
+	
+	/* figure out size of output record */
+	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
+	*size += R7KHDRSIZE_SurveyLine;
+	*size += surveyline->n * R7KRDTSIZE_SurveyLine;
+	
+	/* allocate memory to read rest of record if necessary */
+	if (*bufferalloc < *size)
+		{
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
+		if (status != MB_SUCCESS)
+			{
+			*bufferalloc = 0;
+			}
+		else
+			{
+			*bufferalloc = *size;
+			}
+		}
+		
+	/* proceed to write if buffer allocated */
+	if (status == MB_SUCCESS)
+		{
+		/* get buffer for writing */
+		buffer = (char *) *bufferptr;
+
+		/* insert the header */
+		index = 0;
+		status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
+
+		/* insert the data */
+		index = header->Offset + 4;
+		mb_put_binary_short(MB_YES, surveyline->n, &buffer[index]); index += 2;
+		mb_put_binary_short(MB_YES, surveyline->type, &buffer[index]); index += 2;
+		mb_put_binary_float(MB_YES, surveyline->turnradius, &buffer[index]); index += 4;
+		for (i=0;i<64;i++)
+			{
+			buffer[index] = (char) surveyline->name[i]; index++;
+			}
+		for (i=0;i<surveyline->n;i++)
+			{
+			mb_put_binary_double(MB_YES, surveyline->latitude[i], &buffer[index]); index += 8;
+			mb_put_binary_double(MB_YES, surveyline->longitude[i], &buffer[index]); index += 8;
+			}
+
+		/* reset the header size value */
+		mb_put_binary_int(MB_YES, ((unsigned int)(index + 4)), &buffer[8]);
+
+		/* now add the checksum */
+		checksum = 0;
+		for (i=0;i<index;i++)
+			checksum += (unsigned char) buffer[i];
+		mb_put_binary_int(MB_YES, checksum, &buffer[index]); index += 4;
+
+		/* check size */
+		if (*size != index)
+			{
+fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+			status = MB_FAILURE;
+			*error = MB_ERROR_BAD_DATA;
+			*size = 0;
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, void *store_ptr, int *size, int *error)
+{
+	char	*function_name = "mbr_reson7kr_wr_navigation";
+	int	status = MB_SUCCESS;
+	struct mbsys_reson7k_struct *store;
+	s7k_header *header;
+	s7kr_navigation *navigation;
+	unsigned int checksum;
+	int	index;
+	char	*buffer;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       bufferalloc:%d\n",*bufferalloc);
+		fprintf(stderr,"dbg2       bufferptr:  %ld\n",(size_t)bufferptr);
+		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		}
+
+	/* get pointer to raw data structure */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+	navigation = &(store->navigation);
+	header = &(navigation->header);
+
+	/* print out the data to be output */
+#ifdef MBR_RESON7KR_DEBUG
+	if (verbose > 0)
+#else
+	if (verbose >= 2)
+#endif
+	mbsys_reson7k_print_navigation(verbose, navigation, error);
+	
+	/* figure out size of output record */
+	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
+	*size += R7KHDRSIZE_Navigation;
+	
+	/* allocate memory to read rest of record if necessary */
+	if (*bufferalloc < *size)
+		{
+		status = mb_reallocd(verbose, __FILE__, __LINE__, *size,
+					(void **)bufferptr, error);
+		if (status != MB_SUCCESS)
+			{
+			*bufferalloc = 0;
+			}
+		else
+			{
+			*bufferalloc = *size;
+			}
+		}
+		
+	/* proceed to write if buffer allocated */
+	if (status == MB_SUCCESS)
+		{
+		/* get buffer for writing */
+		buffer = (char *) *bufferptr;
+
+		/* insert the header */
+		index = 0;
+		status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
+
+		/* insert the data */
+		index = header->Offset + 4;
+		buffer[index] = (mb_u_char) navigation->vertical_reference; index++;
+		mb_put_binary_double(MB_YES, navigation->latitude, &buffer[index]); index += 8;
+		mb_put_binary_double(MB_YES, navigation->longitude, &buffer[index]); index += 8;
+		mb_put_binary_float(MB_YES, navigation->position_accuracy, &buffer[index]); index += 4;
+		mb_put_binary_float(MB_YES, navigation->height, &buffer[index]); index += 4;
+		mb_put_binary_float(MB_YES, navigation->height_accuracy, &buffer[index]); index += 4;
+		mb_put_binary_float(MB_YES, navigation->speed, &buffer[index]); index += 4;
+		mb_put_binary_float(MB_YES, navigation->course, &buffer[index]); index += 4;
+		mb_put_binary_float(MB_YES, navigation->heading, &buffer[index]); index += 4;
 
 		/* reset the header size value */
 		mb_put_binary_int(MB_YES, ((unsigned int)(index + 4)), &buffer[8]);

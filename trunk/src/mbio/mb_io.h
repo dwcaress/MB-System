@@ -451,6 +451,8 @@ struct mb_io_struct
 	double	saved3;
 	double	saved4;
 	double	saved5;
+	void	*saveptr1;
+	void	*saveptr2;
 
 	/* function pointers for allocating and deallocating format
 		specific structures */

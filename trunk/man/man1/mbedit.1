@@ -1,4 +1,4 @@
-.TH mbedit 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbedit 1 "22 January 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -608,6 +608,26 @@ This toggle button, when set, reverses the meaning of
 the right and left mouse buttons. This option is for
 the convenience of left-handed users.
 .TP
+.B Start
+This button causes the set of displayed pings to step backward to the 
+beginning of the current buffer. The middle mouse button causes
+the same action if the 'G' or 'g' key is down.
+.TP
+.B Reverse
+This button causes the set of displayed pings to step \fInstep\fP 
+pings backward in the current buffer.  The middle mouse button causes
+the same action.
+.TP
+.B Forward
+This button causes the set of displayed pings to step \fInstep\fP 
+pings forward in the current buffer.  The right mouse button causes
+the same action.
+.TP
+.B End
+This button causes the set of displayed pings to step forward to the 
+end of the current buffer. The right mouse button causes
+the same action if the 'G' or 'g' key is down.
+.TP
 .B Next Buffer
 This button causes the program to write out the data from the
 current buffer and then read in and display the next buffer.
@@ -617,16 +637,6 @@ has been written out, then the input and output files are closed.
 .B Done
 This button causes the program to write out all of the data from the
 input file and then close the input and output files.
-.TP
-.B Forward
-This button causes the set of displayed pings to step \fInstep\fP 
-pings forward in the current buffer.  The right mouse button causes
-the same action.
-.TP
-.B Reverse
-This button causes the set of displayed pings to step \fInstep\fP 
-pings backward in the current buffer.  The middle mouse button causes
-the same action.
 .TP
 .B Quit
 This button causes the program to exit gracefully.  If a data file

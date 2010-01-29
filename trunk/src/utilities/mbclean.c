@@ -674,7 +674,7 @@ int main (int argc, char **argv)
 		for the specified data format */
 	if (beam_flagging == MB_NO && mode <= 2)
 		{
-		fprintf(stderr,"\nMBIO format %d does not allow flagging of bad data \nas negative numbers (specified by cleaning mode %d).\n",format,mode);
+		fprintf(stderr,"\nMBIO format %d does not allow flagging of bad data (specified by cleaning mode %d).\n",format,mode);
 		fprintf(stderr,"\nCopy the data to another format or set the cleaning mode to zero \nbad data values (-M3 or -M4).\n");
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);

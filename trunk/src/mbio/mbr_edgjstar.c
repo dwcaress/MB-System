@@ -273,7 +273,7 @@ int mbr_info_edgjstar(int verbose,
 	*beams_amp_max = 0;
 	*pixels_ss_max = MBSYS_JSTAR_PIXELS_MAX;
 	strncpy(format_name, "EDGJSTAR", MB_NAME_LENGTH);
-	strncpy(system_name, "EDGJSTAR", MB_NAME_LENGTH);
+	strncpy(system_name, "JSTAR", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_EDGJSTAR\nInformal Description: Edgetech Jstar format\nAttributes:           variable pixels, dual frequency sidescan and subbottom,\n                      binary SEGY variant, single files,\n                      low frequency sidescan returned as\n                      survey data, Edgetech. \n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
@@ -886,12 +886,12 @@ status,message.type,message.subsystem,message.channel,message.size);
 					}
 				if (sbp->sonaraltitude == 0 && mb_io_ptr->naltitude > 0)
 					{
-					mb_altint_interp(5, mbio_ptr, time_d, &altitude, error);
+					mb_altint_interp(verbose, mbio_ptr, time_d, &altitude, error);
 					sbp->sonaraltitude = altitude / 1000.0; 
 					}
 				if (sbp->sonardepth == 0 && mb_io_ptr->nsonardepth > 0)
 					{
-					mb_depint_interp(5, mbio_ptr, time_d, &sonardepth, error);
+					mb_depint_interp(verbose, mbio_ptr, time_d, &sonardepth, error);
 					sbp->sonardepth = sonardepth / 1000.0; 
 					}
 					

@@ -4263,7 +4263,7 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 	int	i, j, k, ksource;
 	
 	/* existing mbview instance */
-	int	instance_source;
+	size_t	instance_source;
 	struct mbview_struct *data_source;
 	char	button_name_source[MB_PATH_MAXLINE];
 	
@@ -4307,7 +4307,7 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 	float	*mbv_secondary_data;
    
     	/* get source mbview instance */
-	instance_source = (int) client_data;
+	instance_source = (size_t) client_data;
 /*fprintf(stderr,"Called do_mbgrdviz_open_region instance:%d\n", instance_source);*/
     
 	/* print input debug statements */

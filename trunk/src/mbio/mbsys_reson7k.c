@@ -199,6 +199,8 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	s7kr_geodesy		*geodesy;
 	s7kr_rollpitchheave	*rollpitchheave;
 	s7kr_heading		*heading;
+	s7kr_surveyline		*surveyline;
+	s7kr_navigation		*navigation;
 	s7kr_attitude		*attitude;
 	s7kr_fsdwss		*fsdwsslo;
 	s7kr_fsdwss		*fsdwsshi;
@@ -443,6 +445,31 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	heading = &store->heading;
 	mbsys_reson7k_zero7kheader(verbose, &heading->header, error);
 	heading->heading = 0.0;
+	
+	/* Survey Line (record 1014) */
+	surveyline = &store->surveyline;
+	mbsys_reson7k_zero7kheader(verbose, &surveyline->header, error);
+	surveyline->n = 0;
+	surveyline->type = 0;
+	surveyline->turnradius = 0.0;
+	for (i=0;i<64;i++)
+		surveyline->name[i] = '\0';
+	surveyline->nalloc = 0;
+	surveyline->latitude = NULL;
+	surveyline->longitude = NULL;
+	
+	/* Navigation (record 1015) */
+	navigation = &store->navigation;
+	mbsys_reson7k_zero7kheader(verbose, &navigation->header, error);
+	navigation->vertical_reference = 0;
+	navigation->latitude = 0.0;
+	navigation->longitude = 0.0;
+	navigation->position_accuracy = 0.0;
+	navigation->height = 0.0;
+	navigation->height_accuracy = 0.0;
+	navigation->speed = 0.0;
+	navigation->course = 0.0;
+	navigation->heading = 0.0;
 
 	/* Attitude (record 1016) */
 	attitude = &store->attitude;
@@ -977,6 +1004,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	s7kr_motion		*motion;
 	s7kr_svp		*svp;
 	s7kr_ctd		*ctd;
+	s7kr_surveyline		*surveyline;
 	s7kr_attitude		*attitude;
 	s7kr_fsdwss		*fsdwsslo;
 	s7kr_fsdwss		*fsdwsshi;
@@ -1061,6 +1089,17 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->pressure_depth),error);
 	if (ctd->sound_velocity != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->sound_velocity),error);
+
+	/* Survey Line (record 1014) */
+	surveyline = &store->surveyline;
+	surveyline->n = 0;
+	surveyline->nalloc = 0;
+	surveyline->latitude = NULL;
+	surveyline->longitude = NULL;
+	if (surveyline->latitude != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(surveyline->latitude),error);
+	if (surveyline->longitude != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(surveyline->longitude),error);
 
 	/* Attitude (record 1016) */
 	attitude = &store->attitude;
@@ -2037,7 +2076,7 @@ int mbsys_reson7k_print_heading(int verbose,
 	/* print Reson 7k data record header information */
 	mbsys_reson7k_print_header(verbose, &heading->header, error);
 
-	/* print Roll pitch heave (record 1012) */
+	/* print Heading (record 1013) */
 	if (verbose >= 2)
 		first = debug_str;
 	else
@@ -2048,6 +2087,122 @@ int mbsys_reson7k_print_heading(int verbose,
 		}
 	fprintf(stderr,"%sStructure Contents:\n", first);
 	fprintf(stderr,"%s     roll:                       %f\n",first,heading->heading);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_surveyline(int verbose, 
+			s7kr_surveyline *surveyline,
+			int *error)
+{
+	char	*function_name = "mbsys_reson7k_print_surveyline";
+	int	status = MB_SUCCESS;
+	char	*debug_str = "dbg2  ";
+	char	*nodebug_str = "  ";
+	char	*first;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
+		fprintf(stderr,"dbg2       surveyline:   %ld\n",(size_t)surveyline);
+		}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &surveyline->header, error);
+
+	/* print Survey Line (record 1014) */
+	if (verbose >= 2)
+		first = debug_str;
+	else
+		{
+		first = nodebug_str;
+		fprintf(stderr,"\n%sMBIO function <%s> called\n",
+			first,function_name);
+		}
+	fprintf(stderr,"%sStructure Contents:\n", first);
+	fprintf(stderr,"%s     n:                          %d\n",first,surveyline->n);
+	fprintf(stderr,"%s     type:                       %d\n",first,surveyline->type);
+	fprintf(stderr,"%s     turnradius:                 %f\n",first,surveyline->turnradius);
+	fprintf(stderr,"%s     name:                       %s\n",first,surveyline->name);
+	fprintf(stderr,"%s     nalloc:                     %d\n",first,surveyline->nalloc);
+	for (i=0;i<surveyline->n;i++)
+		fprintf(stderr,"%s     i:%d latitude:%f longitude:%f\n",
+					first,i,surveyline->latitude[i],surveyline->longitude[i]);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_navigation(int verbose, 
+			s7kr_navigation *navigation,
+			int *error)
+{
+	char	*function_name = "mbsys_reson7k_print_navigation";
+	int	status = MB_SUCCESS;
+	char	*debug_str = "dbg2  ";
+	char	*nodebug_str = "  ";
+	char	*first;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
+		fprintf(stderr,"dbg2       navigation:   %ld\n",(size_t)navigation);
+		}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &navigation->header, error);
+
+	/* print Navigation (record 1015) */
+	if (verbose >= 2)
+		first = debug_str;
+	else
+		{
+		first = nodebug_str;
+		fprintf(stderr,"\n%sMBIO function <%s> called\n",
+			first,function_name);
+		}
+	fprintf(stderr,"%sStructure Contents:\n", first);
+	fprintf(stderr,"%s     vertical_reference:         %d\n",first,navigation->vertical_reference);
+	fprintf(stderr,"%s     latitude:                   %f\n",first,navigation->latitude);
+	fprintf(stderr,"%s     longitude:                  %f\n",first,navigation->longitude);
+	fprintf(stderr,"%s     position_accuracy:          %f\n",first,navigation->position_accuracy);
+	fprintf(stderr,"%s     height:                     %f\n",first,navigation->height);
+	fprintf(stderr,"%s     height_accuracy:            %f\n",first,navigation->height_accuracy);
+	fprintf(stderr,"%s     speed:                      %f\n",first,navigation->speed);
+	fprintf(stderr,"%s     course:                     %f\n",first,navigation->course);
+	fprintf(stderr,"%s     heading:                    %f\n",first,navigation->heading);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2088,7 +2243,7 @@ int mbsys_reson7k_print_attitude(int verbose,
 	/* print Reson 7k data record header information */
 	mbsys_reson7k_print_header(verbose, &attitude->header, error);
 
-	/* print Attitude (record 1004) */
+	/* print Attitude (record 1016) */
 	if (verbose >= 2)
 		first = debug_str;
 	else

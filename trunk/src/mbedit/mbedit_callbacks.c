@@ -1493,6 +1493,12 @@ do_filebutton_on()
 		XtVaSetValues(pushButton_reverse, 
 			XmNsensitive, False, 
 			NULL);
+		XtVaSetValues(pushButton_start, 
+			XmNsensitive, False, 
+			NULL);
+		XtVaSetValues(pushButton_end, 
+			XmNsensitive, False, 
+			NULL);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1510,6 +1516,12 @@ do_filebutton_off()
 			XmNsensitive, True, 
 			NULL);
 		XtVaSetValues(pushButton_reverse, 
+			XmNsensitive, True, 
+			NULL);
+		XtVaSetValues(pushButton_start, 
+			XmNsensitive, True, 
+			NULL);
+		XtVaSetValues(pushButton_end, 
 			XmNsensitive, True, 
 			NULL);
 }
@@ -1531,6 +1543,23 @@ do_nextbutton_off()
 		XtVaSetValues(pushButton_next, 
 			XmNsensitive, False, 
 			NULL);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_end( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"do_end\n");
+
+    status = mbedit_action_step(nbuffer-icurrent-1,mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+    if (status == 0) XBell(theDisplay,100);
+
 }
 
 /*--------------------------------------------------------------------*/
@@ -1584,6 +1613,23 @@ do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
 	}
+
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_start( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+fprintf(stderr,"do_start\n");
+
+    status = mbedit_action_step(-icurrent,mplot_width,mexager,
+			    mx_interval,my_interval,
+			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    &nbuffer,&ngood,&icurrent,&mnplot);
+    if (status == 0) XBell(theDisplay,100);
 
 }
 

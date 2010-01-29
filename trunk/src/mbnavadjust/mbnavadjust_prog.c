@@ -7144,7 +7144,6 @@ mbnavadjust_invertnav()
 	double	offset_x;
 	double	offset_y;
 	double	offset_z;
-	int	nc;
 	double	time_d1, time_d2, time_d3;
 	double	block_offset_avg_x;
 	double	block_offset_avg_y;
@@ -7194,8 +7193,23 @@ mbnavadjust_invertnav()
 		    }
 		misfit_initial = sqrt(misfit_initial) / ntie;
 		
-		/* invert for block offsets only if there is more than one block */
-		if (project.num_blocks > 1)
+		/* if only one block just set average offsets to zero */
+		if (project.num_blocks <= 1)
+		    {
+		    block_offset_avg_x = 0.0;
+		    block_offset_avg_y = 0.0;
+		    block_offset_avg_z = 0.0;
+		    for (i=0;i<project.num_files;i++)
+			{
+			file = &project.files[i];
+			file->block_offset_x = 0.0;
+			file->block_offset_y = 0.0;
+			file->block_offset_z = 0.0;
+			}
+		    }
+		
+		/* else if more than one block first invert for block offsets  */
+		else if (project.num_blocks > 1)
 		    {
 		    /* allocate space for the inverse problem */
 		    ncols = ndf * project.num_blocks;
@@ -7223,7 +7237,6 @@ mbnavadjust_invertnav()
 			    }
 		    
 			/* loop over crossings getting set ties */
-			nc = ndf * project.num_blocks;
 			ntie = 0;
 			for (icrossing=0;icrossing<project.num_crossings;icrossing++)
 			    {
@@ -7306,11 +7319,10 @@ mbnavadjust_invertnav()
 			block_offset_avg_x /= navg;
 			block_offset_avg_y /= navg;
 			block_offset_avg_z /= navg;
-fprintf(stderr,"Average block offsets: x:%f y:%f z:%f  Used %d of %d blocks\n",
+/* fprintf(stderr,"Average block offsets: x:%f y:%f z:%f  Used %d of %d blocks\n",
 block_offset_avg_x,block_offset_avg_y,block_offset_avg_z,
-navg,project.num_blocks);
+navg,project.num_blocks);*/
 			}
-		    
 
 		    /* output solution */
 		    if (mbna_verbose > 1)
@@ -7407,7 +7419,7 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 							+ offsety * tie->sigmax1[1]
 							+ offsetz * tie->sigmax1[2]);
 			misfit_initial += misfit * misfit;
-/*fprintf(stderr,"Initial Misfit: %d %f %f\n", ntie, misfit, misfit_initial);*/
+/* fprintf(stderr,"Initial Misfit: %d %f %f\n", ntie, misfit, misfit_initial);*/
 
 			/* get horizontal axis misfit */
 			misfit = mbna_offsetweight / tie->sigmar2
@@ -7415,7 +7427,7 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 							+ offsety * tie->sigmax2[1]
 							+ offsetz * tie->sigmax2[2]);
 			misfit_initial += misfit * misfit;
-/*fprintf(stderr,"Initial Misfit: %d %f %f\n", ntie, misfit, misfit_initial);*/
+/* fprintf(stderr,"Initial Misfit: %d %f %f\n", ntie, misfit, misfit_initial);*/
 
 			/* get semi-vertical axis misfit */
 			misfit = mbna_offsetweight / tie->sigmar3
@@ -7423,13 +7435,13 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 							+ offsety * tie->sigmax3[1]
 							+ offsetz * tie->sigmax3[2]);
 			misfit_initial += misfit * misfit;
-/*fprintf(stderr,"Initial Misfit: %d %f %f\n\n", ntie, misfit, misfit_initial);*/
+/* fprintf(stderr,"Initial Misfit: %d %f %f\n\n", ntie, misfit, misfit_initial);*/
 
 			ntie++;
 			}
 		    }
 		misfit_initial = sqrt(misfit_initial) / ntie;
-/*fprintf(stderr,"ntie:%d misfit_initial:%f\n",ntie,misfit_initial);*/
+/* fprintf(stderr,"ntie:%d misfit_initial:%f\n",ntie,misfit_initial);*/
 
 		/* loop until convergence */
 		done = MB_NO;
@@ -7497,7 +7509,7 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 			    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax1[0];
 			    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax1[1];
 			    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax1[2];
-/*fprintf(stderr,"long axis:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
+/* fprintf(stderr,"long axis:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xx[3*nc1],xx[3*nc1+1],xx[3*nc1+2],
 nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
 
@@ -7515,7 +7527,7 @@ nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
 			    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax2[0];
 			    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax2[1];
 			    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax2[2];
-/*fprintf(stderr,"horizontal:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
+/* fprintf(stderr,"horizontal:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xx[3*nc1],xx[3*nc1+1],xx[3*nc1+2],
 nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
 
@@ -7533,11 +7545,11 @@ nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
 			    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax3[0];
 			    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax3[1];
 			    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax3[2];
-/*fprintf(stderr,"semi-vertical:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
+/* fprintf(stderr,"semi-vertical:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xx[3*nc1],xx[3*nc1+1],xx[3*nc1+2],
-nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);
+nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
 			    
-fprintf(stderr,"icrossing:%d j:%d tie->offset_x_m:%f x[3*%d]:%f x[3*%d]:%f offsetx:%f xx[3*%d]:%f xx[3*%d]:%f\n",
+/* fprintf(stderr,"icrossing:%d j:%d tie->offset_x_m:%f x[3*%d]:%f x[3*%d]:%f offsetx:%f xx[3*%d]:%f xx[3*%d]:%f\n",
 icrossing,j,tie->offset_x_m,nc2,x[3*nc2],nc1,x[3*nc1],offsetx,nc2,xx[3*nc2],nc1,xx[3*nc1]);
 fprintf(stderr,"icrossing:%d j:%d tie->offset_y_m:%f x[3*%d+1]:%f x[3*%d+1]:%f offsety:%f xx[3*%d+1]:%f xx[3*%d+1]:%f\n",
 icrossing,j,tie->offset_y_m,nc2,x[3*nc2+1],nc1,x[3*nc1+1],offsety,nc2,xx[3*nc2+1],nc1,xx[3*nc1+1]);
@@ -7597,7 +7609,7 @@ icrossing,j,tie->offset_z_m,nc2,x[3*nc2+2],nc1,x[3*nc1+2],offsetz,nc2,xx[3*nc2+2
 					xx[3*nc3+2] += -0.5 * weight * offsetz;
 					    
 					ndx++;
-/*fprintf(stderr,"1st Derivative: nc2:%d offsets:%f %f %f  weight:%f perturbation:%f %f %f\n",
+/* fprintf(stderr,"1st Derivative: nc2:%d offsets:%f %f %f  weight:%f perturbation:%f %f %f\n",
 nc2,offsetx,offsety,offsetz,weight,
 0.5 * weight * offsetx,0.5 * weight * offsety,0.5 * weight * offsetz);*/
 					}
@@ -7628,7 +7640,7 @@ nc2,offsetx,offsety,offsetz,weight,
 					xx[3*nc3]   += -0.25 * weight * offsetx;
 					xx[3*nc3+1] += -0.25 * weight * offsety;
 					xx[3*nc3+2] += -0.25 * weight * offsetz;
-/*fprintf(stderr,"2nd Derivative: nc2:%d offsets:%f %f %f  weight:%f perturbation:%f %f %f\n",
+/* fprintf(stderr,"2nd Derivative: nc2:%d offsets:%f %f %f  weight:%f perturbation:%f %f %f\n",
 nc2,offsetx,offsety,offsetz,weight,0.25 * weight * offsetx,0.25 * weight * offsety,0.25 * weight * offsetz);*/
 					    
 					ndx2++;
@@ -7652,9 +7664,9 @@ nc2,offsetx,offsety,offsetz,weight,0.25 * weight * offsetx,0.25 * weight * offse
 		    /* apply perturbation */
 		    for (i=0;i<ncols;i++)
 			{
-/*fprintf(stderr,"i:%d x:%f ",i,x[i]);*/
+/* fprintf(stderr,"i:%d x:%f ",i,x[i]);*/
 			x[i] += xx[i];
-/*fprintf(stderr,"xx:%f x:%f\n",xx[i],x[i]);*/
+/* fprintf(stderr,"xx:%f x:%f\n",xx[i],x[i]);*/
 			}
 
 		    /* calculate weighted misfit */
@@ -7740,8 +7752,14 @@ iter,ntie,misfit_initial,misfit_ties,perturbationsize);*/
 				    {
 				    k = section->snav_invert_id[isnav];
 				    section->snav_lon_offset[isnav] = (x[3*k] + file->block_offset_x - block_offset_avg_x) * mbna_mtodeglon;
+/* fprintf(stderr,"isnav:%d k:%d x[3*k]:%f file->block_offset_x:%f block_offset_avg_x:%f mbna_mtodeglon:%f section->snav_lon_offset[isnav]:%f\n",
+isnav,k,x[3*k],file->block_offset_x,block_offset_avg_x,mbna_mtodeglon,section->snav_lon_offset[isnav]);*/
 				    section->snav_lat_offset[isnav] = (x[3*k+1] + file->block_offset_y - block_offset_avg_y) * mbna_mtodeglat;
+/* fprintf(stderr,"isnav:%d k:%d x[3*k+1]:%f file->block_offset_y:%f block_offset_avg_y:%f mbna_mtodeglat:%f section->snav_lat_offset[isnav]:%f\n",
+isnav,k,x[3*k+1],file->block_offset_y,block_offset_avg_y,mbna_mtodeglat,section->snav_lat_offset[isnav]);*/
 				    section->snav_z_offset[isnav] = (x[3*k+2] + file->block_offset_z - block_offset_avg_z);
+/* fprintf(stderr,"isnav:%d k:%d x[3*k+2]:%f file->block_offset_z:%f block_offset_avg_z:%f section->snav_lat_offset[isnav]:%f\n\n",
+isnav,k,x[3*k],file->block_offset_z,block_offset_avg_z,section->snav_lat_offset[isnav]);*/
 				    }
 				}
 			    }
@@ -7780,7 +7798,6 @@ iter,ntie,misfit_initial,misfit_ties,perturbationsize);*/
 			|| project.num_truecrossings_analyzed == project.num_truecrossings)
 		&& error == MB_ERROR_NO_ERROR)
     		{
-		
 		/* now output inverse solution */
 		sprintf(message,"Outputting navigation solution...");
 		do_message_on(message);
@@ -7813,6 +7830,9 @@ iter,ntie,misfit_initial,misfit_ties,perturbationsize);*/
    			tie->inversion_offset_x_m = offset_x / mbna_mtodeglon;
     			tie->inversion_offset_y_m = offset_y / mbna_mtodeglat;
     			tie->inversion_offset_z_m = offset_z;
+/* fprintf(stderr,"mbna_mtodeglon:%f mbna_mtodeglat:%f\n",mbna_mtodeglon,mbna_mtodeglat);
+fprintf(stderr,"offsets:%f %f %f   offsets_m:%f %f %f\n",
+offset_x,offset_y,offset_z,tie->inversion_offset_x_m,tie->inversion_offset_y_m,tie->inversion_offset_z_m);*/
 
 			sprintf(message, " >     %4d   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f   %10.3f %10.3f %10.3f\n",
 				icrossing,
@@ -7826,11 +7846,12 @@ iter,ntie,misfit_initial,misfit_ties,perturbationsize);*/
 				(tie->inversion_offset_y_m - tie->offset_y_m),
 				(tie->inversion_offset_z_m - tie->offset_z_m));
 			do_info_add(message, MB_NO);
+/* fprintf(stderr,"%s",message);*/
 			}
 		    }
 
-		if (mbna_verbose > 0)
-		for (i=0;i<nc/3;i++)
+		if (mbna_verbose >= 0)
+		for (i=0;i<ncols/3;i++)
 		    {
 		    fprintf(stderr, "i:%d  offsets: %f %f %f\n",
 		    		i, xx[3*i], xx[3*i+1], xx[3*i+2]);

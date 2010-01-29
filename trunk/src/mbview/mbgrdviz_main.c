@@ -241,7 +241,8 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
-     Widget   topLevelShell;
+    Boolean      argok=False;
+    Widget   topLevelShell;
     Widget   mainWindow_mbgrdviz;
     
     /* Begin user code block <declarations> */
@@ -354,7 +355,7 @@ int main( int argc, char **argv)
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBgrdviz"); ac++;
     XtSetArg(args[ac], XmNx, 108); ac++;
-    XtSetArg(args[ac], XmNy, 153); ac++;
+    XtSetArg(args[ac], XmNy, 219); ac++;
     XtSetArg(args[ac], XmNwidth, 260); ac++;
     XtSetArg(args[ac], XmNheight, 215); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",
@@ -379,7 +380,7 @@ int main( int argc, char **argv)
     
     /* initialize the vizualization widgets code */
     mbview_startup(verbose, parent, app, &error);
-    
+        
     /* open the file specified on the command line */
     do_mbgrdviz_init(argc,argv, verbose);
     if (ifileflag > 0)
@@ -394,7 +395,6 @@ int main( int argc, char **argv)
     	{
         do_mbgrdviz_openprimary(NULL);
 	}
-    
     /* End user code block <main_loop> */
     
     XtAppMainLoop(app);
