@@ -603,7 +603,7 @@ int do_mbgrdviz_init(int argc, char **argv, int verbosity)
 	/* set up realtime control widgets */
 
 	/* set up realtime display icon */
-	str_list = (XmStringTable) XtMalloc(2 * sizeof(XmString *));
+	str_list = (XmStringTable) XtMalloc(3 * sizeof(XmString *));
 	str_list[0] = XmStringCreateLocalized("Ship");
 	str_list[1] = XmStringCreateLocalized("ROV");
 	str_list[2] = XmStringCreateLocalized("AUV");

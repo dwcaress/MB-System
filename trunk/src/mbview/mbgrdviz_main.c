@@ -241,7 +241,6 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
-    Boolean      argok=False;
     Widget   topLevelShell;
     Widget   mainWindow_mbgrdviz;
     
