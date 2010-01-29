@@ -80,6 +80,8 @@ EXTERNAL Widget   setting_output_label;
 EXTERNAL Widget   setting_output;
 EXTERNAL Widget   setting_output_toggle_edit;
 EXTERNAL Widget   setting_output_toggle_browse;
+EXTERNAL Widget   pushButton_end;
+EXTERNAL Widget   pushButton_start;
 EXTERNAL Widget   pushButton_file;
 EXTERNAL Widget   toggleButton_view_waterfall;
 EXTERNAL Widget   toggleButton_view_alongtrack;

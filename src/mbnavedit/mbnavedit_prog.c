@@ -323,7 +323,7 @@ static double	*ssalongtrack = NULL;
 static char	comment[MB_COMMENT_MAXLINE];
 
 /* buffer control variables */
-#define	MBNAVEDIT_BUFFER_SIZE	25000
+#define	MBNAVEDIT_BUFFER_SIZE	1000000
 static int	file_open = MB_NO;
 static int	nfile_open = MB_NO;
 static FILE	*nfp;

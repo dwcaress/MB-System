@@ -1,1 +1,1 @@
-	char *otps_location = "/Users/caress/sandbox/tides/OTPSnc";
+	char *otps_location = "/usr/local/OTPSnc";

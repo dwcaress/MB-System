@@ -147,6 +147,7 @@
 #define R7KRECID_RollPitchHeave				1012
 #define R7KRECID_Heading				1013
 #define R7KRECID_SurveyLine				1014
+#define R7KRECID_Navigation				1015
 #define R7KRECID_Attitude				1016
 #define R7KRECID_GenericSensorCalibration		1050
 #define R7KRECID_GenericSidescan			1200
@@ -228,6 +229,9 @@
 #define R7KHDRSIZE_Geodesy					320
 #define R7KHDRSIZE_RollPitchHeave				12
 #define R7KHDRSIZE_Heading					4
+#define R7KHDRSIZE_SurveyLine					16
+#define R7KRDTSIZE_SurveyLine					16
+#define R7KHDRSIZE_Navigation					41
 #define R7KHDRSIZE_Attitude					1
 #define R7KRDTSIZE_Attitude					18
 
@@ -734,6 +738,43 @@ typedef struct s7kr_heading_struct
 	float		heading;		/* Heading (radians) */
 }
 s7kr_heading;
+
+/* Survey Line (record 1014) */
+typedef struct s7kr_surveyline_struct
+{	
+	s7k_header	header;
+	unsigned short	n;			/* Number of points */
+	unsigned short	type;			/* Position type flag:
+							0: Geographical coordinates
+							1: Grid coordinates */
+	float		turnradius;		/* Turn radius between line segments 
+							(meters, 0 = no curvature in turns) */
+	char		name[64];		/* Line name */
+	int		nalloc;			/* Number of points allocated */
+	double		*latitude;		/* Latitude (radians, -pi/2 to pi/2) */
+	double		*longitude;		/* Longitude (radians -pi to pi) */
+}
+s7kr_surveyline;
+	
+/* Navigation (record 1015) */
+typedef struct s7kr_navigation_struct
+{	
+	s7k_header	header;
+	mb_u_char	vertical_reference;	/* Vertical reference:
+							1 = Ellipsoid
+							2 = Geoid
+							3 = Chart datum */
+	double		latitude;		/* Latitude (radians, -pi/2 to pi/2) */
+	double		longitude;		/* Longitude (radians -pi to pi) */
+	float		position_accuracy;	/* Horizontal position accuracy (meters) */
+	float		height;			/* Height of vessel reference point above
+							vertical reference (meters) */
+	float		height_accuracy;	/* Height accuracy (meters) */
+	float		speed;			/* Speed over ground (meters/sec) */
+	float		course;			/* Course over ground (radians) */
+	float		heading;		/* Heading (radians) */
+}
+s7kr_navigation;
 	
 /* Attitude (record 1016) */
 typedef struct s7kr_attitude_struct
@@ -1448,7 +1489,7 @@ typedef struct s7kr_image_struct
 }
 s7kr_image;
 
-/* Reson 7k sonar installation parameters (record 7051) */
+/* Reson 7k sonar installation parameters (record 7030) */
 typedef struct s7kr_installation_struct
 {
 	s7k_header	header;
@@ -1715,6 +1756,12 @@ struct mbsys_reson7k_struct
 	/* Heading (record 1013) */
 	s7kr_heading	heading;
 	
+	/* Survey line (record 1014) */
+	s7kr_surveyline	surveyline;
+	
+	/* Navigation (record 1015) */
+	s7kr_navigation	navigation;
+	
 	/* Attitude (record 1016) */
 	s7kr_attitude	attitude;
 	
@@ -1760,7 +1807,7 @@ struct mbsys_reson7k_struct
 	/* Reson 7k image data (record 7011) */
 	s7kr_image		image;
 
-	/* Reson 7k sonar installation parameters (record 7051) */
+	/* Reson 7k sonar installation parameters (record 7030) */
 	s7kr_installation	installation;
 
 	/* Reson 7k system event (record 7051) */
@@ -1958,6 +2005,12 @@ int mbsys_reson7k_print_rollpitchheave(int verbose,
 			int *error);
 int mbsys_reson7k_print_heading(int verbose, 
 			s7kr_heading *heading,
+			int *error);
+int mbsys_reson7k_print_surveyline(int verbose, 
+			s7kr_surveyline *surveyline,
+			int *error);
+int mbsys_reson7k_print_navigation(int verbose, 
+			s7kr_navigation *navigation,
 			int *error);
 int mbsys_reson7k_print_attitude(int verbose, 
 			s7kr_attitude *attitude,

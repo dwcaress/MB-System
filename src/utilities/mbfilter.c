@@ -1350,10 +1350,12 @@ done, jbeg, jend, ndata, nhold_ping, nhold);*/
 					ping[j].data_i_ptr[i] = ping[j].data_f_ptr[i];
 
 				/* save results if done with final iteration */
-				if (iteration == filters[ifilter].iteration-1)
+				if (ndata > 0 && iteration == filters[ifilter].iteration-1)
+				  {
 				  for (j=jbeg;j<=jend;j++)
 				    for (i=0;i<ping[j].ndatapts;i++)
 					ping[j].datasave[i] = ping[j].data_i_ptr[i];
+				  }
 
 				iteration++;
 				}

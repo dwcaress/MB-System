@@ -2,7 +2,7 @@
  *    The MB-system:	mbio_status.h	2/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2010 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -412,15 +412,15 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.2"
-#define	MB_BUILD_DATE	"31 December 2009"
+#define	MB_VERSION	"5.1.3beta01"
+#define	MB_BUILD_DATE	"29 January 2010"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
 #define	MB_NO	0
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			45
+#define	MB_DATA_KINDS			55
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -475,6 +475,7 @@
 #define	MB_DATA_NMEA_ZDA		51	/* NMEA */
 #define	MB_DATA_NMEA_GLL		52	/* NMEA */
 #define	MB_DATA_NMEA_GGA		53	/* NMEA */
+#define	MB_DATA_SURVEY_LINE		54	/* Reson 7k */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1
@@ -648,6 +649,15 @@ static char *notice_msg[] =
 	"MB_DATA_SPREADINGLOSS (ID=43): Spreading loss record", 
 	"MB_DATA_INSTALLATION (ID=44): Installation parameter record", 
 	"MB_DATA_WATER_COLUMN (ID=45): Water column record", 
+	"MB_DATA_STATUS (ID=46): Status record", 
+	"MB_DATA_DVL (ID=47): DVL record", 
+	"MB_DATA_NMEA_RMC (ID=48): NMEA RMC record", 
+	"MB_DATA_NMEA_DBT (ID=49): NMEA DBT record", 
+	"MB_DATA_NMEA_DPT (ID=50): NMEA DPT record", 
+	"MB_DATA_NMEA_ZDA (ID=51): NMEA ZDA record", 
+	"MB_DATA_NMEA_GLL (ID=52): NMEA GLL record", 
+	"MB_DATA_NMEA_GGA (ID=53): NMEA GGA record", 
+	"MB_DATA_SURVEY_LINE (ID=54): Survey line record", 
 	
 	/* notices for nonfatal error messages */
 	"MB_ERROR_TIME_GAP (ID=-1): Time gap in data",

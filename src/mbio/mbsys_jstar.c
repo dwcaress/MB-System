@@ -490,8 +490,8 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*speed = 0.0;
 			
 		/* set beamwidths in mb_io structure */
-		mb_io_ptr->beamwidth_ltrack = 20.0;
-		mb_io_ptr->beamwidth_xtrack = 20.0;
+		mb_io_ptr->beamwidth_ltrack = 1.5;
+		mb_io_ptr->beamwidth_xtrack = 0.1;
 
 		/* read distance and depth values into storage arrays */
 		/* average sidescan into a MBSYS_JSTAR_PIXELS_MAX pixel array */
