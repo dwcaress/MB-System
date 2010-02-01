@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-  Version 5.1.3beta01    January 29, 2010
+  Version 5.1.3beta1826  February 2, 2010
 * Version 5.1.2          December 31, 2009
   Version 5.1.2beta15    December 30, 2009
   Version 5.1.2beta14    December 28, 2009
@@ -168,7 +168,12 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
 
------> 5.1.3beta01
+-----> 5.1.3beta1826
+
+From now on beta releases will be named according to the corresponding
+source archive revision in the MB-System Subversion source code archive. 
+This will allow us (and users) to more precisely track code changes relative
+to the beta releases.
 
 Fixed support of Reson 7k data (format 88) to work with MARUM
 AUV data. Includes changes to mb7kpreprocess.
@@ -184,6 +189,13 @@ Fixed sidescan beamwidths used by the Edgetech Jstar format i/o
 modules (formats 132 & 133).
 
 Fixed memory management errors in MBgrdviz and mbfilter.
+
+Fixed more 64 bit  and memory management issues in MBeditviz and MBgrdviz.
+
+Added a plot reset button and an ability to autoscale on unflagged soundings
+only in the MBeditviz 3D sounding cloud display.
+
+Fixed handling of site and route points far from the display view in MBgrdviz.
 
 MB-SYSTEM VERSION 5.1.2 RELEASE NOTES:
 ------------------------------------------

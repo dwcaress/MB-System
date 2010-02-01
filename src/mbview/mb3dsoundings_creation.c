@@ -79,8 +79,8 @@ Createmb3dsdg_mainWindow(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 119); ac++;
-    XtSetArg(args[ac], XmNy, 192); ac++;
+    XtSetArg(args[ac], XmNx, 747); ac++;
+    XtSetArg(args[ac], XmNy, 56); ac++;
     XtSetArg(args[ac], XmNwidth, 197); ac++;
     XtSetArg(args[ac], XmNheight, 104); ac++;
     mb3dsdg_mainWindow = XmCreateMainWindow(parent,
@@ -103,8 +103,8 @@ Createmb3dsdg_mainWindow(Widget parent)
         args,
         ac);
     ac = 0;
-    XtSetArg(args[ac], XmNx, 229); ac++;
-    XtSetArg(args[ac], XmNy, 1326); ac++;
+    XtSetArg(args[ac], XmNx, 775); ac++;
+    XtSetArg(args[ac], XmNy, 932); ac++;
     XtSetArg(args[ac], XmNwidth, 1011); ac++;
     XtSetArg(args[ac], XmNheight, 660); ac++;
     XtSetValues(mb3dsdg.Mb3dsdg, args, ac);

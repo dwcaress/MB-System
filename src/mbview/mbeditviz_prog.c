@@ -3325,14 +3325,14 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 								/* get local position in selected region */
 								x = ping->bathx[ibeam] - mbev_selected.xorigin;
 								y = ping->bathy[ibeam] - mbev_selected.yorigin;
-		xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
-		yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
-		mbev_selected.soundings[mbev_selected.num_soundings].x = xx;
-		mbev_selected.soundings[mbev_selected.num_soundings].y = yy;
-								/*mbev_selected.soundings[mbev_selected.num_soundings].x 
-									= xx * mbev_selected.cosbearing - yy * mbev_selected.sinbearing;
-								mbev_selected.soundings[mbev_selected.num_soundings].y 
-									= xx * mbev_selected.sinbearing + yy * mbev_selected.cosbearing;*/
+								xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
+								yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
+								mbev_selected.soundings[mbev_selected.num_soundings].x = xx;
+								mbev_selected.soundings[mbev_selected.num_soundings].y = yy;
+									/*mbev_selected.soundings[mbev_selected.num_soundings].x 
+										= xx * mbev_selected.cosbearing - yy * mbev_selected.sinbearing;
+									mbev_selected.soundings[mbev_selected.num_soundings].y 
+										= xx * mbev_selected.sinbearing + yy * mbev_selected.cosbearing;*/
 								mbev_selected.soundings[mbev_selected.num_soundings].z 
 									= -ping->bathcorr[ibeam];
 								if (mbev_selected.num_soundings == 0)

@@ -3124,7 +3124,7 @@ mbview_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
 	if (cevent->type == ConfigureNotify)
 	    {
 	    /* get view */
-	    instance = (int)client_data;
+	    instance = (size_t)client_data;
 	    view = &(mbviews[instance]);
 	    data = &(view->data);
 		    
@@ -9146,7 +9146,7 @@ fprintf(stderr,"do_mbview_profile_resize: instance:%ld\n", instance);
 	if (cevent->type == ConfigureNotify)
 		{
 		/* get view */
-		instance = (int)client_data;
+		instance = (size_t)client_data;
 		view = &(mbviews[instance]);
 		data = &(view->data);
 
@@ -9509,7 +9509,7 @@ int do_mbview_workfunction(XtPointer client_data)
 	int	i, j, k;
  
     	/* set starting values */	
-	instance = (int) client_data;
+	instance = (size_t) client_data;
 	plotting = MB_NO;
 	found = MB_NO;
 	mode = MBV_BACKGROUND_NONE;

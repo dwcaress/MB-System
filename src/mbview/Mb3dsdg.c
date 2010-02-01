@@ -16,22 +16,22 @@
  */
 #include <Xm/Xm.h>
 #include <Xm/Form.h>
+#include <Xm/PushB.h>
 #include <Xm/Scale.h>
 #include <Xm/ToggleB.h>
 #include <Xm/Label.h>
 #include <Xm/RowColumn.h>
 #include <Xm/CascadeB.h>
 #include <Xm/Separator.h>
-#include <Xm/PushB.h>
 #include <Xm/DrawingA.h>
 #include <Xm/Form.h>
+#include <Xm/PushB.h>
 #include <Xm/Scale.h>
 #include <Xm/ToggleB.h>
 #include <Xm/Label.h>
 #include <Xm/RowColumn.h>
 #include <Xm/CascadeB.h>
 #include <Xm/Separator.h>
-#include <Xm/PushB.h>
 #include <Xm/DrawingA.h>
 #include "Mb3dsdg.h"
 
@@ -54,6 +54,7 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
 /**
  * Declarations for callbacks and handlers.
  */
+extern void do_mb3dsdg_resetview(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_timelag(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_panzoom(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_rotate(Widget, XtPointer, XtPointer);
@@ -66,6 +67,7 @@ extern void do_mb3dsdg_view_flagged(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_noprofile(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_goodprofile(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_view_allprofile(Widget, XtPointer, XtPointer);
+extern void do_mb3dsdg_view_scalewithflagged(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_action_applybias(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_dismiss(Widget, XtPointer, XtPointer);
 extern void do_mb3dsdg_mouse_toggle(Widget, XtPointer, XtPointer);
@@ -105,6 +107,7 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
 {
     Cardinal ac = 0;
     Arg      args[256];
+    Cardinal cdc = 0;
     Boolean  argok = False;
     
     /**
@@ -112,6 +115,7 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
      */
     RegisterBxConverters(XtWidgetToApplicationContext(parent));
     XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
@@ -119,7 +123,6 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     /**
@@ -143,8 +146,8 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 111); ac++;
-        XtSetArg(args[ac], XmNy, 1247); ac++;
+        XtSetArg(args[ac], XmNx, 671); ac++;
+        XtSetArg(args[ac], XmNy, 275); ac++;
         XtSetArg(args[ac], XmNwidth, 987); ac++;
         XtSetArg(args[ac], XmNheight, 584); ac++;
         class_in->Mb3dsdg = XmCreateForm(parent,
@@ -158,6 +161,34 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
         XmStringFree((XmString)tmp0);
     }
     
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->Mb3dsdg, (char *)"Reset View", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 810); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 170); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->pushButton_reset = XmCreatePushButton(class_in->Mb3dsdg,
+            (char *)"pushButton_reset",
+            args, 
+            ac);
+        XtManageChild(class_in->pushButton_reset);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->pushButton_reset, XmNactivateCallback, do_mb3dsdg_resetview, (XtPointer)0);
     
     ac = 0;
     {
@@ -260,9 +291,9 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
             XmRPixel, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
         XtSetArg(args[ac], XmNx, 810); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 160); ac++;
-        XtSetArg(args[ac], XmNheight, 120); ac++;
+        XtSetArg(args[ac], XmNy, 50); ac++;
+        XtSetArg(args[ac], XmNwidth, 170); ac++;
+        XtSetArg(args[ac], XmNheight, 80); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
@@ -395,7 +426,7 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
             XmRPixel, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 100); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 530); ac++;
+        XtSetArg(args[ac], XmNwidth, 540); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(class_in->Mb3dsdg, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
@@ -453,10 +484,10 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 204); ac++;
-    XtSetArg(args[ac], XmNheight, 128); ac++;
+    XtSetArg(args[ac], XmNx, 757); ac++;
+    XtSetArg(args[ac], XmNy, 290); ac++;
+    XtSetArg(args[ac], XmNwidth, 236); ac++;
+    XtSetArg(args[ac], XmNheight, 154); ac++;
     class_in->pulldownMenu_view = XmCreatePulldownMenu(XtParent(class_in->cascadeButton_view),
         (char *)"pulldownMenu_view",
         args, 
@@ -597,6 +628,37 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     XtAddCallback(class_in->toggleButton_view_connectall, XmNvalueChangedCallback, do_mb3dsdg_view_allprofile, (XtPointer)0);
     
     ac = 0;
+    class_in->separator2 = XmCreateSeparator(class_in->pulldownMenu_view,
+        (char *)"separator2",
+        args, 
+        ac);
+    XtManageChild(class_in->separator2);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(class_in->pulldownMenu_view, (char *)"Scale with Flagged Soundings", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(class_in->pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        class_in->toggleButton_view_scalewithflagged = XmCreateToggleButton(class_in->pulldownMenu_view,
+            (char *)"toggleButton_view_scalewithflagged",
+            args, 
+            ac);
+        XtManageChild(class_in->toggleButton_view_scalewithflagged);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(class_in->toggleButton_view_scalewithflagged, XmNvalueChangedCallback, do_mb3dsdg_view_scalewithflagged, (XtPointer)0);
+    
+    ac = 0;
     XtSetArg(args[ac], XmNsubMenuId, class_in->pulldownMenu_view); ac++;
     XtSetValues(class_in->cascadeButton_view, args, ac);
     
@@ -628,8 +690,8 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 197); ac++;
-    XtSetArg(args[ac], XmNy, 1286); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 152); ac++;
     XtSetArg(args[ac], XmNheight, 52); ac++;
     class_in->pulldownMenu_mouse = XmCreatePulldownMenu(XtParent(class_in->cascadeButton_mouse),
@@ -1008,6 +1070,12 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     XtAddCallback(class_in->toggleButton_mouse_info, XmNvalueChangedCallback, do_mb3dsdg_mouse_info, (XtPointer)0);
     ac = 0;
     XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 810); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetValues(class_in->pushButton_reset, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
     XtSetArg(args[ac], XmNleftOffset, 630); ac++;
     XtSetArg(args[ac], XmNtopOffset, 70); ac++;
     XtSetValues(class_in->scale_timelag, args, ac);
@@ -1031,7 +1099,7 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
     XtSetArg(args[ac], XmNleftOffset, 810); ac++;
     XtSetArg(args[ac], XmNrightOffset, 0); ac++;
-    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 50); ac++;
     XtSetValues(class_in->label_mousemode, args, ac);
     
     ac = 0;

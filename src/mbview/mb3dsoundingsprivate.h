@@ -196,6 +196,7 @@ struct mb3dsoundings_world_struct
     int	view_boundingbox;
     int	view_flagged;
     int	view_profiles;
+    int	view_scalewithflagged;
     };
 
 /* library variables */
@@ -260,6 +261,7 @@ void do_mb3dsdg_input( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_glwda_expose( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_glwda_input( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_glwda_resize( Widget w, XtPointer client_data, XtPointer call_data);
+int mb3dsoundings_setzscale(int verbose, int *error);
 int mb3dsoundings_scale(int verbose, int *error);
 int mb3dsoundings_scalez(int verbose, int *error);
 int mb3dsoundings_pick(int x, int y);
@@ -276,6 +278,7 @@ void do_mb3dsdg_view_goodprofile( Widget w, XtPointer client_data, XtPointer cal
 void do_mb3dsdg_view_allprofile( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_action_applybias( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_boundingbox( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mb3dsdg_view_scalewithflagged( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_view_reset( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_panzoom( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_rotate( Widget w, XtPointer client_data, XtPointer call_data);
