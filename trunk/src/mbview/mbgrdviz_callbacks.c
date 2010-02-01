@@ -1573,7 +1573,7 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 		}
 
 	/* get next instance number */
-	status = mbview_init(5, &instance, &error);
+	status = mbview_init(verbose, &instance, &error);
 	if (instance == MBV_NO_WINDOW)
 		{
 		fprintf(stderr, "Unable to create mbview - %d mbview windows already created\n", 
@@ -2443,7 +2443,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 			/* if data accumulated call mbview_addroute() */
 			if (npoint > 0)
 			    {
-			    status = mbview_addroute(5, instance,
+			    status = mbview_addroute(verbose, instance,
 			    				npoint, routelon, routelat, routewaypoint,
 							routecolor, routesize, routename,
 							&iroute, &error);
@@ -2499,7 +2499,7 @@ int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr)
 		/* add last route if not already handled */
 		if (npoint > 0)
 		    {
-		    status = mbview_addroute(5, instance,
+		    status = mbview_addroute(verbose, instance,
 			    			npoint, routelon, routelat, routewaypoint,
 						routecolor, routesize, routename,
 						&iroute, &error);

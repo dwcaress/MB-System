@@ -632,12 +632,25 @@ int mbview_addroute(int verbose, size_t instance,
 		status = mbview_projectll2display(instance,
 				routelon[i], routelat[i], zdata,
 				&xdisplay, &ydisplay, &zdisplay);
+				
+		/* check for reasonable coordinates */
+		if (fabs(xdisplay) < 1000.0 && fabs(ydisplay) < 1000.0 && fabs(zdisplay) < 1000.0)
+			{
 			
-		/* add the route point */
-		mbview_route_add(instance, *iroute, i, waypoint[i],
-			xgrid, ygrid,
-			routelon[i], routelat[i], zdata,
-			xdisplay, ydisplay, zdisplay);
+			/* add the route point */
+			mbview_route_add(instance, *iroute, i, waypoint[i],
+				xgrid, ygrid,
+				routelon[i], routelat[i], zdata,
+				xdisplay, ydisplay, zdisplay);
+			}
+			
+		/* report failure due to unreasonable coordinates */
+		else
+			{
+fprintf(stderr,"Failed to add route point at position lon:%f lat:%f due to display coordinate projection (%f %f %f) far outside view...\n",
+routelon[i],routelat[i],xdisplay,ydisplay,zdisplay);
+			XBell(view->dpy,100);
+			}
 		}
 
 	/* set color size and name for new route */
@@ -1855,6 +1868,8 @@ int mbview_route_add(size_t instance, int inew, int jnew, int waypoint,
 					shared.shareddata.routes[i].npoints = 0;
 					shared.shareddata.routes[i].npoints_alloc = MBV_ALLOC_NUM;
 					shared.shareddata.routes[i].waypoint = NULL;
+					shared.shareddata.routes[i].distlateral = NULL;
+					shared.shareddata.routes[i].disttopo = NULL;
 					shared.shareddata.routes[i].points = NULL;
 					shared.shareddata.routes[i].segments = NULL;
 					status = mb_reallocd(mbv_verbose,  __FILE__, __LINE__,

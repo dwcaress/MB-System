@@ -388,28 +388,41 @@ shared.shareddata.nsite_alloc, shared.shareddata.nsite, nsite, shared.shareddata
 		status = mbview_projectll2display(instance,
 				sitelon[i], sitelat[i], zdata,
 				&xdisplay, &ydisplay, &zdisplay);
+				
+		/* check for reasonable coordinates */
+		if (fabs(xdisplay) < 1000.0 && fabs(ydisplay) < 1000.0 && fabs(zdisplay) < 1000.0)
+			{
 
-		/* add the new site */
-		shared.shareddata.sites[shared.shareddata.nsite].point.xgrid[instance] = xgrid;
-		shared.shareddata.sites[shared.shareddata.nsite].point.ygrid[instance] = ygrid;
-		shared.shareddata.sites[shared.shareddata.nsite].point.xlon = sitelon[i];
-		shared.shareddata.sites[shared.shareddata.nsite].point.ylat = sitelat[i];
-		shared.shareddata.sites[shared.shareddata.nsite].point.zdata = zdata;
-		shared.shareddata.sites[shared.shareddata.nsite].point.xdisplay[instance] = xdisplay;
-		shared.shareddata.sites[shared.shareddata.nsite].point.ydisplay[instance] = ydisplay;
-		shared.shareddata.sites[shared.shareddata.nsite].point.zdisplay[instance] = zdisplay;
-		shared.shareddata.sites[shared.shareddata.nsite].color = sitecolor[i];
-		shared.shareddata.sites[shared.shareddata.nsite].size = sitesize[i];
-		strcpy(shared.shareddata.sites[shared.shareddata.nsite].name, sitename[i]);
-		
-		/* set grid and display coordinates for all instances */
-		mbview_updatepointw(instance, &(shared.shareddata.sites[shared.shareddata.nsite].point));
+			/* add the new site */
+			shared.shareddata.sites[shared.shareddata.nsite].point.xgrid[instance] = xgrid;
+			shared.shareddata.sites[shared.shareddata.nsite].point.ygrid[instance] = ygrid;
+			shared.shareddata.sites[shared.shareddata.nsite].point.xlon = sitelon[i];
+			shared.shareddata.sites[shared.shareddata.nsite].point.ylat = sitelat[i];
+			shared.shareddata.sites[shared.shareddata.nsite].point.zdata = zdata;
+			shared.shareddata.sites[shared.shareddata.nsite].point.xdisplay[instance] = xdisplay;
+			shared.shareddata.sites[shared.shareddata.nsite].point.ydisplay[instance] = ydisplay;
+			shared.shareddata.sites[shared.shareddata.nsite].point.zdisplay[instance] = zdisplay;
+			shared.shareddata.sites[shared.shareddata.nsite].color = sitecolor[i];
+			shared.shareddata.sites[shared.shareddata.nsite].size = sitesize[i];
+			strcpy(shared.shareddata.sites[shared.shareddata.nsite].name, sitename[i]);
 
-		/* set nsite */
-		shared.shareddata.nsite++;
-		nadded++;
-fprintf(stderr,"Added site %d added so far:%d total;%d\n",
-shared.shareddata.nsite-1, nadded, shared.shareddata.nsite);
+			/* set grid and display coordinates for all instances */
+			mbview_updatepointw(instance, &(shared.shareddata.sites[shared.shareddata.nsite].point));
+
+			/* set nsite */
+			shared.shareddata.nsite++;
+			nadded++;
+/* fprintf(stderr,"Added site %d added so far:%d total:%d\n",
+shared.shareddata.nsite-1, nadded, shared.shareddata.nsite);*/
+			}
+			
+		/* report failure due to unreasonable coordinates */
+		else
+			{
+fprintf(stderr,"Failed to add site at position lon:%f lat:%f due to display coordinate projection (%f %f %f) far outside view...\n",
+sitelon[i],sitelat[i],xdisplay,ydisplay,zdisplay);
+			XBell(view->dpy,100);
+			}
 		}
 
 	/* make sites viewable */
@@ -1337,6 +1350,10 @@ int mbview_drawsite(size_t instance, int rez)
 			glTranslatef(shared.shareddata.sites[isite].point.xdisplay[instance],
 					shared.shareddata.sites[isite].point.ydisplay[instance],
 					shared.shareddata.sites[isite].point.zdisplay[instance]);
+/*fprintf(stderr,"site:%d position: %f %f %f\n",
+isite,shared.shareddata.sites[isite].point.xdisplay[instance],
+shared.shareddata.sites[isite].point.ydisplay[instance],
+shared.shareddata.sites[isite].point.zdisplay[instance]);*/
 			if (isite == shared.shareddata.site_selected)
 	    			glCallList((GLuint)MBV_GLLIST_SITELARGE);
 			else
