@@ -1,0 +1,51 @@
+/******************************************************
+*                                                     *
+* $Id: mbedit_init.uil,v 4.0 1994-10-21 11:55:41 caress Exp $                                                *
+*                                                     *
+* mbedit_init.uil                                     *
+*                                                     *
+* THIS FILE INITIALIZES THE FONTS, COLORS, LABELS ETC *
+* FOR THE GUI.                                        *
+*                                                     *
+*******************************************************
+*                                                     *
+* AUTHOR: ROD MCCABE                                  *
+*         ANTARCTIC SUPPORT ASSOCIATES                *
+*         61 INVERNESS DRIVE EAST                     *
+*         ENGLEWOOD, CO.                              *
+*                                                     *
+* $Log: not supported by cvs2svn $
+# Revision 1.1  1994/07/14  21:21:13  brockda
+# Initial revision
+#                                               *
+*                                                     *
+*******************************************************
+*                                                     *
+* LANGUAGE: "C"                                       *
+*                                                     *
+* OPERATING SYSTEM: UNIX                              *
+* FOR MOTIF                                           *
+*                                                     *
+*******************************************************/
+
+value
+	black		:color('black',foreground);
+	white		:color('white',background);
+
+value
+	k_button_font	:font('-misc-fixed-medium-r-normal--9-90-75-75-c-60-iso8859-1');
+
+	k_menu_bar_font	:font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1');
+
+	k_menu_font	:font('-misc-fixed-bold-r-normal-*-13-*-75-75-c-70-iso8859-1');
+
+
+
+/*******************************************************/
+/* ADD NEW VALUES HERE.                                */
+/*******************************************************/
+
+/*******************************************************/
+/* END OF "mbedit_init.uil" FILE.                      */
+/*******************************************************/
+
