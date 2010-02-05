@@ -824,7 +824,7 @@ int mb_write_init(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)*mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)*mbio_ptr);
 		fprintf(stderr,"dbg2       beams_bath: %d\n",*beams_bath);
 		fprintf(stderr,"dbg2       beams_amp:  %d\n",*beams_amp);
 		fprintf(stderr,"dbg2       pixels_ss:  %d\n",*pixels_ss);

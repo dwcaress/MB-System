@@ -390,7 +390,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       file:       %s\n",file);
-		fprintf(stderr,"dbg2       info:       %ld\n",(size_t)mb_info);
+		fprintf(stderr,"dbg2       info:       %lu\n",(size_t)mb_info);
 		fprintf(stderr,"dbg2       lonflip:    %d\n",lonflip);
 		}
 
@@ -1301,7 +1301,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_info:    %ld\n",(size_t)mb_info);
+		fprintf(stderr,"dbg2       mb_info:    %lu\n",(size_t)mb_info);
 		}
 		
 	/* initialize mb_info_struct */

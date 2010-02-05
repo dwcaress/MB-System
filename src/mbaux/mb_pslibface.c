@@ -152,7 +152,7 @@ int plot_init(	int	verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		fprintf(stderr,"dbg2       argc:             %d\n",argc);
-		fprintf(stderr,"dbg2       argv:             %ld\n",(size_t)argv);
+		fprintf(stderr,"dbg2       argv:             %lu\n",(size_t)argv);
 		fprintf(stderr,"dbg2       bounds_use[0]:    %f\n",bounds_use[0]);
 		fprintf(stderr,"dbg2       bounds_use[1]:    %f\n",bounds_use[1]);
 		fprintf(stderr,"dbg2       bounds_use[2]:    %f\n",bounds_use[2]);

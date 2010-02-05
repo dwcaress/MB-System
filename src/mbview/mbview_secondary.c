@@ -155,7 +155,7 @@ int mbview_setsecondarygrid(int verbose, size_t instance,
 		fprintf(stderr,"dbg2       secondary_ymax:              %f\n", secondary_ymax);
 		fprintf(stderr,"dbg2       secondary_dx:                %f\n", secondary_dx);
 		fprintf(stderr,"dbg2       secondary_dy:                %f\n", secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:              %ld\n", (size_t)secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:              %lu\n", (size_t)secondary_data);
 		}
 
 	/* get view */
@@ -276,7 +276,7 @@ int mbview_updatesecondarygrid(int verbose, size_t instance,
 		fprintf(stderr,"dbg2       instance:                     %ld\n", instance);
 		fprintf(stderr,"dbg2       secondary_nx:                 %d\n", secondary_nx);
 		fprintf(stderr,"dbg2       secondary_ny:                 %d\n", secondary_ny);
-		fprintf(stderr,"dbg2       secondary_data:               %ld\n", (size_t)secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:               %lu\n", (size_t)secondary_data);
 		}
 
 	/* get view */

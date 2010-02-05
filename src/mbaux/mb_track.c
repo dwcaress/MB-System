@@ -119,7 +119,7 @@ void mb_track(int verbose, struct swath *data, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
-		fprintf(stderr,"dbg2       swath:                %ld\n",(size_t)data);
+		fprintf(stderr,"dbg2       swath:                %lu\n",(size_t)data);
 		fprintf(stderr,"dbg2       time tick interval:   %f\n",data->time_tick_int);
 		fprintf(stderr,"dbg2       time interval:        %f\n",data->time_annot_int);
 		fprintf(stderr,"dbg2       date interval:        %f\n",data->date_annot_int);
@@ -291,7 +291,7 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
-		fprintf(stderr,"dbg2       swath:                %ld\n",(size_t)data);
+		fprintf(stderr,"dbg2       swath:                %lu\n",(size_t)data);
 		fprintf(stderr,"dbg2       pingnumber tick int:  %d\n",data->pingnumber_tick_int);
 		fprintf(stderr,"dbg2       pingnumber annot int: %d\n",data->pingnumber_annot_int);
 		fprintf(stderr,"dbg2       pingnumber tick len:  %f\n",data->pingnumber_tick_len);
@@ -389,7 +389,7 @@ void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:            %d\n",verbose);
 		fprintf(stderr,"dbg2       perpendicular:      %d\n",perpendicular);
-		fprintf(stderr,"dbg2       swath:              %ld\n",(size_t)data);
+		fprintf(stderr,"dbg2       swath:              %lu\n",(size_t)data);
 		fprintf(stderr,"dbg2       file:               %s\n",file);
 		}
 

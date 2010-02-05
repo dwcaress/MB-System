@@ -1834,7 +1834,7 @@ int mbview_projectll2xyzgrid(size_t instance,
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		fprintf(stderr,"dbg2       xlon:             %f\n",xlon);
 		fprintf(stderr,"dbg2       ylat:             %f\n",ylat);
-		fprintf(stderr,"dbg2       zdata:            %ld\n",(size_t)zdata);
+		fprintf(stderr,"dbg2       zdata:            %lu\n",(size_t)zdata);
 		}
 		
 	/* get view */
@@ -3106,8 +3106,8 @@ int mbview_make_histogram(
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %ld\n",(size_t)view);
-		fprintf(stderr,"dbg2       data:             %ld\n",(size_t)data);
+		fprintf(stderr,"dbg2       view:             %lu\n",(size_t)view);
+		fprintf(stderr,"dbg2       data:             %lu\n",(size_t)data);
 		fprintf(stderr,"dbg2       which_data:       %d\n",which_data);
 		}
 
@@ -3306,8 +3306,8 @@ int mbview_colorpoint(
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %ld\n",(size_t)view);
-		fprintf(stderr,"dbg2       data:             %ld\n",(size_t)data);
+		fprintf(stderr,"dbg2       view:             %lu\n",(size_t)view);
+		fprintf(stderr,"dbg2       data:             %lu\n",(size_t)data);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
@@ -3532,9 +3532,9 @@ int mbview_colorpoint_histogram(
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %ld\n",(size_t)view);
-		fprintf(stderr,"dbg2       data:             %ld\n",(size_t)data);
-		fprintf(stderr,"dbg2       histogram:        %ld\n",(size_t)histogram);
+		fprintf(stderr,"dbg2       view:             %lu\n",(size_t)view);
+		fprintf(stderr,"dbg2       data:             %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       histogram:        %lu\n",(size_t)histogram);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		fprintf(stderr,"dbg2       k:                %d\n",k);
@@ -4123,8 +4123,8 @@ int mbview_getsecondaryvalue(struct mbview_world_struct *view,
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       view:             %ld\n",(size_t)view);
-		fprintf(stderr,"dbg2       data:             %ld\n",(size_t)data);
+		fprintf(stderr,"dbg2       view:             %lu\n",(size_t)view);
+		fprintf(stderr,"dbg2       data:             %lu\n",(size_t)data);
 		fprintf(stderr,"dbg2       i:                %d\n",i);
 		fprintf(stderr,"dbg2       j:                %d\n",j);
 		}

@@ -117,7 +117,7 @@ int mb_error(int verbose, int error, char **message)
 		fprintf(stderr,"dbg2       rcs_id:  %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
 		fprintf(stderr,"dbg2       error:   %d\n",error);
-		fprintf(stderr,"dbg2       message: %ld\n",(size_t)message);
+		fprintf(stderr,"dbg2       message: %lu\n",(size_t)message);
 		fprintf(stderr,"dbg2       MB_ERROR_MIN: %d\n",MB_ERROR_MIN);
 		fprintf(stderr,"dbg2       MB_ERROR_MAX: %d\n",MB_ERROR_MAX);
 		}
@@ -169,7 +169,7 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		fprintf(stderr,"dbg2       data_id:    %d\n",data_id);
 		}
 
@@ -214,7 +214,7 @@ int mb_notice_log_error(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		fprintf(stderr,"dbg2       error_id:   %d\n",error_id);
 		}
 
@@ -259,7 +259,7 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:     %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		fprintf(stderr,"dbg2       problem_id: %d\n",problem_id);
 		}
 
@@ -305,8 +305,8 @@ int mb_notice_get_list(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       rcs_id:         %s\n",rcs_id);
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:       %ld\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       notice_list:    %ld\n",(size_t)notice_list);
+		fprintf(stderr,"dbg2       mbio_ptr:       %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       notice_list:    %lu\n",(size_t)notice_list);
 		}
 
 	/* get pointer to mbio descriptor */

@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-  Version 5.1.3beta1826  February 2, 2010
+  Version 5.1.3beta1829  February 5, 2010
 * Version 5.1.2          December 31, 2009
   Version 5.1.2beta15    December 30, 2009
   Version 5.1.2beta14    December 28, 2009
@@ -168,7 +168,7 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
 
------> 5.1.3beta1826
+-----> 5.1.3beta1829
 
 From now on beta releases will be named according to the corresponding
 source archive revision in the MB-System Subversion source code archive. 
@@ -196,6 +196,11 @@ Added a plot reset button and an ability to autoscale on unflagged soundings
 only in the MBeditviz 3D sounding cloud display.
 
 Fixed handling of site and route points far from the display view in MBgrdviz.
+
+Put actual (but still incomplete) text into the MBeditviz man page.
+
+Changed print format for unsigned long values from %ld to %lu to avoid copious
+warning messages in Ubuntu.
 
 MB-SYSTEM VERSION 5.1.2 RELEASE NOTES:
 ------------------------------------------
@@ -1841,9 +1846,9 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id$
+Subversion ID: $Id$
 
-Revision History:
+RCS Revision History:
 $Log: README,v $
 Revision 5.130  2009/03/13 07:05:58  caress
 Release 5.1.2beta02

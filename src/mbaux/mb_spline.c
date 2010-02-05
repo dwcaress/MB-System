@@ -74,12 +74,12 @@ int mb_spline_init(int verbose, double *x, double *y,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       x:                %ld\n",(size_t)x);
-		fprintf(stderr,"dbg2       y:                %ld\n",(size_t)y);
+		fprintf(stderr,"dbg2       x:                %lu\n",(size_t)x);
+		fprintf(stderr,"dbg2       y:                %lu\n",(size_t)y);
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       yp1:              %f\n",yp1);
 		fprintf(stderr,"dbg2       ypn:              %f\n",ypn);
-		fprintf(stderr,"dbg2       y2:               %ld\n",(size_t)y2);
+		fprintf(stderr,"dbg2       y2:               %lu\n",(size_t)y2);
 		}
 		
 	/* check for n > 2 */
@@ -154,9 +154,9 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       xa:               %ld\n",(size_t)xa);
-		fprintf(stderr,"dbg2       ya:               %ld\n",(size_t)ya);
-		fprintf(stderr,"dbg2       y2a:              %ld\n",(size_t)y2a);
+		fprintf(stderr,"dbg2       xa:               %lu\n",(size_t)xa);
+		fprintf(stderr,"dbg2       ya:               %lu\n",(size_t)ya);
+		fprintf(stderr,"dbg2       y2a:              %lu\n",(size_t)y2a);
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       x:                %f\n",x);
 		}
@@ -219,8 +219,8 @@ int mb_linear_interp(int verbose, double *xa, double *ya,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       xa:               %ld\n",(size_t)xa);
-		fprintf(stderr,"dbg2       ya:               %ld\n",(size_t)ya);
+		fprintf(stderr,"dbg2       xa:               %lu\n",(size_t)xa);
+		fprintf(stderr,"dbg2       ya:               %lu\n",(size_t)ya);
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       x:                %f\n",x);
 		}
@@ -282,8 +282,8 @@ int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
-		fprintf(stderr,"dbg2       xa:               %ld\n",(size_t)xa);
-		fprintf(stderr,"dbg2       ya:               %ld\n",(size_t)ya);
+		fprintf(stderr,"dbg2       xa:               %lu\n",(size_t)xa);
+		fprintf(stderr,"dbg2       ya:               %lu\n",(size_t)ya);
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       x:                %f\n",x);
 		}

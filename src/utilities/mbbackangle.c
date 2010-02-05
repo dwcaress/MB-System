@@ -1961,7 +1961,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr,"dbg2       tfp:             %ld\n", (size_t)tfp);
+		fprintf(stderr,"dbg2       tfp:             %lu\n", (size_t)tfp);
 		fprintf(stderr,"dbg2       ntable:          %d\n", ntable);
 		fprintf(stderr,"dbg2       nping:           %d\n", nping);
 		fprintf(stderr,"dbg2       time_d:          %f\n", time_d);
@@ -2063,7 +2063,7 @@ int output_model(int verbose, FILE *tfp,
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n", verbose);
-		fprintf(stderr,"dbg2       tfp:             %ld\n", (size_t)tfp);
+		fprintf(stderr,"dbg2       tfp:             %lu\n", (size_t)tfp);
 		fprintf(stderr,"dbg2       beamwidth:       %f\n", beamwidth);
 		fprintf(stderr,"dbg2       depression:      %f\n", depression);
 		fprintf(stderr,"dbg2       ref_angle:       %f\n", ref_angle);
@@ -2187,7 +2187,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %ld\n",(size_t)grid);
+		fprintf(stderr,"dbg2       grid:       %lu\n",(size_t)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -2203,7 +2203,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2       zlab:       %s\n",zlab);
 		fprintf(stderr,"dbg2       titl:       %s\n",titl);
 		fprintf(stderr,"dbg2       argc:       %d\n",argc);
-		fprintf(stderr,"dbg2       *argv:      %ld\n",(size_t)*argv);
+		fprintf(stderr,"dbg2       *argv:      %lu\n",(size_t)*argv);
 		}
 
 	/* inititialize grd header */

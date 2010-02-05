@@ -175,24 +175,24 @@ int mbr_register_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %ld\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %ld\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %ld\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %ld\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %ld\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %ld\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %ld\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -303,7 +303,7 @@ int mbr_alm_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -355,7 +355,7 @@ int mbr_dem_mr1prvr2(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -396,8 +396,8 @@ int mbr_rt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -439,8 +439,8 @@ int mbr_wt_mr1prvr2(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -486,7 +486,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -625,7 +625,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			fprintf(stderr,"dbg5       towfish longitude:%f\n",store->ping.png_tlon);
 			fprintf(stderr,"dbg5       towfish latitude: %f\n",store->ping.png_tlat);
 			fprintf(stderr,"dbg5       towfish course:   %f\n",store->ping.png_tcourse);
-			fprintf(stderr,"dbg5       compass ptr:      %ld\n",(size_t)store->compass);
+			fprintf(stderr,"dbg5       compass ptr:      %lu\n",(size_t)store->compass);
 			fprintf(stderr,"dbg5       towfish compass interval:  %f\n",store->ping.png_compass.sns_int);
 			fprintf(stderr,"dbg5       towfish compass samples:   %d\n",store->ping.png_compass.sns_nsamps);
 			fprintf(stderr,"dbg5       towfish compass value:     %f\n",store->ping.png_compass.sns_repval);
@@ -634,7 +634,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			  {
 			  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->compass[i]);
 			  }
-			fprintf(stderr,"dbg5       depth ptr:        %ld\n",(size_t)store->depth);
+			fprintf(stderr,"dbg5       depth ptr:        %lu\n",(size_t)store->depth);
 			fprintf(stderr,"dbg5       towfish depth interval:    %f\n",store->ping.png_depth.sns_int);
 			fprintf(stderr,"dbg5       towfish depth samples:     %d\n",store->ping.png_depth.sns_nsamps);
 			fprintf(stderr,"dbg5       towfish depth value:       %f\n",store->ping.png_depth.sns_repval);
@@ -643,7 +643,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			  {
 			  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->depth[i]);
 			  }
-			fprintf(stderr,"dbg5       pitch ptr:        %ld\n",(size_t)store->pitch);
+			fprintf(stderr,"dbg5       pitch ptr:        %lu\n",(size_t)store->pitch);
 			fprintf(stderr,"dbg5       towfish pitch interval:    %f\n",store->ping.png_pitch.sns_int);
 			fprintf(stderr,"dbg5       towfish pitch samples:     %d\n",store->ping.png_pitch.sns_nsamps);
 			fprintf(stderr,"dbg5       towfish pitch value:       %f\n",store->ping.png_pitch.sns_repval);			
@@ -652,7 +652,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			  {
 			  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pitch[i]);
 			  }
-			fprintf(stderr,"dbg5       roll ptr:         %ld\n",(size_t)store->roll);
+			fprintf(stderr,"dbg5       roll ptr:         %lu\n",(size_t)store->roll);
 			fprintf(stderr,"dbg5       towfish roll interval:     %f\n",store->ping.png_roll.sns_int);
 			fprintf(stderr,"dbg5       towfish roll samples:      %d\n",store->ping.png_roll.sns_nsamps);
 			fprintf(stderr,"dbg5       towfish roll value:        %f\n",store->ping.png_roll.sns_repval);			
@@ -673,7 +673,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			fprintf(stderr,"dbg5       port ps_bdrange:  %f\n",store->ping.png_sides[ACP_PORT].ps_bdrange);
 			fprintf(stderr,"dbg5       port ps_btycount: %d\n",store->ping.png_sides[ACP_PORT].ps_btycount);
 			fprintf(stderr,"dbg5       port ps_btypad:   %d\n",store->ping.png_sides[ACP_PORT].ps_btypad);
-			fprintf(stderr,"dbg5       port bty ptr:     %ld\n",(size_t)store->pbty);
+			fprintf(stderr,"dbg5       port bty ptr:     %lu\n",(size_t)store->pbty);
 			fprintf(stderr,"dbg5       port xtrack bathymetry:\n");
 			for (i=0;i<store->ping.png_sides[ACP_PORT].ps_btycount;i++)
 			  {
@@ -682,7 +682,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			fprintf(stderr,"dbg5       port ps_ssoffset: %f\n",store->ping.png_sides[ACP_PORT].ps_ssoffset);
 			fprintf(stderr,"dbg5       port ps_sscount:  %d\n",store->ping.png_sides[ACP_PORT].ps_sscount);
 			fprintf(stderr,"dbg5       port ps_sspad:    %d\n",store->ping.png_sides[ACP_PORT].ps_sspad);
-			fprintf(stderr,"dbg5       port ss ptr:      %ld\n",(size_t)store->pss);
+			fprintf(stderr,"dbg5       port ss ptr:      %lu\n",(size_t)store->pss);
 			fprintf(stderr,"dbg5       port sidescan:\n");
 			for (i=0;i<store->ping.png_sides[ACP_PORT].ps_sscount;i++)
 			  {
@@ -695,7 +695,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			fprintf(stderr,"dbg5       stbd ps_bdrange:  %f\n",store->ping.png_sides[ACP_STBD].ps_bdrange);
 			fprintf(stderr,"dbg5       stbd ps_btycount: %d\n",store->ping.png_sides[ACP_STBD].ps_btycount);
 			fprintf(stderr,"dbg5       stbd ps_btypad:   %d\n",store->ping.png_sides[ACP_STBD].ps_btypad);
-			fprintf(stderr,"dbg5       stbd bty ptr:     %ld\n",(size_t)store->sbty);
+			fprintf(stderr,"dbg5       stbd bty ptr:     %lu\n",(size_t)store->sbty);
 			fprintf(stderr,"dbg5       stbd xtrack bathymetry:\n");
 			for (i=0;i<store->ping.png_sides[ACP_STBD].ps_btycount;i++)
 			  {
@@ -704,7 +704,7 @@ int mbr_mr1prvr2_rd_data(int verbose, void *mbio_ptr, int *error)
 			fprintf(stderr,"dbg5       stbd ps_ssoffset: %f\n",store->ping.png_sides[ACP_STBD].ps_ssoffset);
 			fprintf(stderr,"dbg5       stbd ps_sscount:  %d\n",store->ping.png_sides[ACP_STBD].ps_sscount);
 			fprintf(stderr,"dbg5       stbd ps_sspad:    %d\n",store->ping.png_sides[ACP_STBD].ps_sspad);
-			fprintf(stderr,"dbg5       stbd ss ptr:      %ld\n",(size_t)store->sss);
+			fprintf(stderr,"dbg5       stbd ss ptr:      %lu\n",(size_t)store->sss);
 			fprintf(stderr,"dbg5       stbd sidescan:\n");
 			for (i=0;i<store->ping.png_sides[ACP_STBD].ps_sscount;i++)
 			  {
@@ -746,7 +746,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -771,7 +771,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg5       towfish longitude:%f\n",store->ping.png_tlon);
 		fprintf(stderr,"dbg5       towfish latitude: %f\n",store->ping.png_tlat);
 		fprintf(stderr,"dbg5       towfish course:   %f\n",store->ping.png_tcourse);
-		fprintf(stderr,"dbg5       compass ptr:      %ld\n",(size_t)store->compass);
+		fprintf(stderr,"dbg5       compass ptr:      %lu\n",(size_t)store->compass);
 		fprintf(stderr,"dbg5       towfish compass interval:  %f\n",store->ping.png_compass.sns_int);
 		fprintf(stderr,"dbg5       towfish compass samples:   %d\n",store->ping.png_compass.sns_nsamps);
 		fprintf(stderr,"dbg5       towfish compass value:     %f\n",store->ping.png_compass.sns_repval);
@@ -780,7 +780,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		  {
 		  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->compass[i]);
 		  }
-		fprintf(stderr,"dbg5       depth ptr:        %ld\n",(size_t)store->depth);
+		fprintf(stderr,"dbg5       depth ptr:        %lu\n",(size_t)store->depth);
 		fprintf(stderr,"dbg5       towfish depth interval:    %f\n",store->ping.png_depth.sns_int);
 		fprintf(stderr,"dbg5       towfish depth samples:     %d\n",store->ping.png_depth.sns_nsamps);
 		fprintf(stderr,"dbg5       towfish depth value:       %f\n",store->ping.png_depth.sns_repval);
@@ -789,7 +789,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		  {
 		  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->depth[i]);
 		  }
-		fprintf(stderr,"dbg5       pitch ptr:        %ld\n",(size_t)store->pitch);
+		fprintf(stderr,"dbg5       pitch ptr:        %lu\n",(size_t)store->pitch);
 		fprintf(stderr,"dbg5       towfish pitch interval:    %f\n",store->ping.png_pitch.sns_int);
 		fprintf(stderr,"dbg5       towfish pitch samples:     %d\n",store->ping.png_pitch.sns_nsamps);
 		fprintf(stderr,"dbg5       towfish pitch value:       %f\n",store->ping.png_pitch.sns_repval);			
@@ -798,7 +798,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		  {
 		  fprintf(stderr,"dbg5         %3d     %12.4g\n",i,store->pitch[i]);
 		  }
-		fprintf(stderr,"dbg5       roll ptr:         %ld\n",(size_t)store->roll);
+		fprintf(stderr,"dbg5       roll ptr:         %lu\n",(size_t)store->roll);
 		fprintf(stderr,"dbg5       towfish roll interval:     %f\n",store->ping.png_roll.sns_int);
 		fprintf(stderr,"dbg5       towfish roll samples:      %d\n",store->ping.png_roll.sns_nsamps);
 		fprintf(stderr,"dbg5       towfish roll value:        %f\n",store->ping.png_roll.sns_repval);			
@@ -819,7 +819,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg5       port ps_bdrange:  %f\n",store->ping.png_sides[ACP_PORT].ps_bdrange);
 		fprintf(stderr,"dbg5       port ps_btycount: %d\n",store->ping.png_sides[ACP_PORT].ps_btycount);
 		fprintf(stderr,"dbg5       port ps_btypad:   %d\n",store->ping.png_sides[ACP_PORT].ps_btypad);
-		fprintf(stderr,"dbg5       port bty ptr:     %ld\n",(size_t)store->pbty);
+		fprintf(stderr,"dbg5       port bty ptr:     %lu\n",(size_t)store->pbty);
 		fprintf(stderr,"dbg5       port bathymetry xtrack:\n");
 		for (i=0;i<store->ping.png_sides[ACP_PORT].ps_btycount;i++)
 		  {
@@ -828,7 +828,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg5       port ps_ssoffset: %f\n",store->ping.png_sides[ACP_PORT].ps_ssoffset);
 		fprintf(stderr,"dbg5       port ps_sscount:  %d\n",store->ping.png_sides[ACP_PORT].ps_sscount);
 		fprintf(stderr,"dbg5       port ps_sspad:    %d\n",store->ping.png_sides[ACP_PORT].ps_sspad);
-		fprintf(stderr,"dbg5       port ss ptr:      %ld\n",(size_t)store->pss);
+		fprintf(stderr,"dbg5       port ss ptr:      %lu\n",(size_t)store->pss);
 		fprintf(stderr,"dbg5       port sidescan:\n");
 		for (i=0;i<store->ping.png_sides[ACP_PORT].ps_sscount;i++)
 		  {
@@ -841,7 +841,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg5       stbd ps_bdrange:  %f\n",store->ping.png_sides[ACP_STBD].ps_bdrange);
 		fprintf(stderr,"dbg5       stbd ps_btycount: %d\n",store->ping.png_sides[ACP_STBD].ps_btycount);
 		fprintf(stderr,"dbg5       stbd ps_btypad:   %d\n",store->ping.png_sides[ACP_STBD].ps_btypad);
-		fprintf(stderr,"dbg5       stbd bty ptr:     %ld\n",(size_t)store->pbty);
+		fprintf(stderr,"dbg5       stbd bty ptr:     %lu\n",(size_t)store->pbty);
 		fprintf(stderr,"dbg5       stbd bathymetry xtrack:\n");
 		for (i=0;i<store->ping.png_sides[ACP_STBD].ps_btycount;i++)
 		  {
@@ -850,7 +850,7 @@ int mbr_mr1prvr2_wr_data(int verbose, void *mbio_ptr, char *store_ptr, int *erro
 		fprintf(stderr,"dbg5       stbd ps_ssoffset: %f\n",store->ping.png_sides[ACP_STBD].ps_ssoffset);
 		fprintf(stderr,"dbg5       stbd ps_sscount:  %d\n",store->ping.png_sides[ACP_STBD].ps_sscount);
 		fprintf(stderr,"dbg5       stbd ps_sspad:    %d\n",store->ping.png_sides[ACP_STBD].ps_sspad);
-		fprintf(stderr,"dbg5       stbd ss ptr:      %ld\n",(size_t)store->sss);
+		fprintf(stderr,"dbg5       stbd ss ptr:      %lu\n",(size_t)store->sss);
 		fprintf(stderr,"dbg5       stbd sidescan:\n");
 		for (i=0;i<store->ping.png_sides[ACP_STBD].ps_sscount;i++)
 		  {

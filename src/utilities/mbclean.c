@@ -1971,7 +1971,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");	
-		fprintf(stderr,"dbg2       sofp:            %ld\n",(size_t)sofp);
+		fprintf(stderr,"dbg2       sofp:            %lu\n",(size_t)sofp);
 		fprintf(stderr,"dbg2       time_d:          %f\n",time_d);
 		fprintf(stderr,"dbg2       beam:            %d\n",beam);
 		fprintf(stderr,"dbg2       action:          %d\n",action);
