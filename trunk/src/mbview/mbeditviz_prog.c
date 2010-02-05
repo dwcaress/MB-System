@@ -1554,8 +1554,8 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:        %ld\n",(size_t)file);
-		fprintf(stderr,"dbg2       ping:        %ld\n",(size_t)ping);
+		fprintf(stderr,"dbg2       file:        %lu\n",(size_t)file);
+		fprintf(stderr,"dbg2       ping:        %lu\n",(size_t)ping);
 		fprintf(stderr,"dbg2       rollbias:    %f\n",rollbias);
 		fprintf(stderr,"dbg2       pitchbias:   %f\n",pitchbias);
 		fprintf(stderr,"dbg2       headingbias: %f\n",headingbias);
@@ -2620,8 +2620,8 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:       %ld\n",(size_t)file);
-		fprintf(stderr,"dbg2       ping:       %ld\n",(size_t)ping);
+		fprintf(stderr,"dbg2       file:       %lu\n",(size_t)file);
+		fprintf(stderr,"dbg2       ping:       %lu\n",(size_t)ping);
 		fprintf(stderr,"dbg2       ibeam:      %d\n",ibeam);
 		fprintf(stderr,"dbg2       beam_ok:    %d\n",beam_ok);
 		fprintf(stderr,"dbg2       apply_now:  %d\n",apply_now);

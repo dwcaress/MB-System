@@ -227,24 +227,24 @@ int mbr_register_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(size_t)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %ld\n",(size_t)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(size_t)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %ld\n",(size_t)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %ld\n",(size_t)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %ld\n",(size_t)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %ld\n",(size_t)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %ld\n",(size_t)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(size_t)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(size_t)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(size_t)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(size_t)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %ld\n",(size_t)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(size_t)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -448,7 +448,7 @@ int mbr_alm_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -500,7 +500,7 @@ int mbr_dem_mbnetcdf(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -554,8 +554,8 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor and data structure */
@@ -677,14 +677,14 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
 		fprintf(stderr,"dbg2       nc_status:               %d\n", nc_status);
-		fprintf(stderr,"dbg2       CIB_BLOCK_DIM:           %ld\n", store->CIB_BLOCK_DIM);
-		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %ld\n", store->mbHistoryRecNbr);
-		fprintf(stderr,"dbg2       mbNameLength:            %ld\n", store->mbNameLength);
-		fprintf(stderr,"dbg2       mbCommentLength:         %ld\n", store->mbCommentLength);
-		fprintf(stderr,"dbg2       mbAntennaNbr:            %ld\n", store->mbAntennaNbr);
-		fprintf(stderr,"dbg2       mbBeamNbr:               %ld\n", store->mbBeamNbr);
-		fprintf(stderr,"dbg2       mbCycleNbr:              %ld\n", store->mbCycleNbr);
-		fprintf(stderr,"dbg2       mbVelocityProfilNbr:     %ld\n", store->mbVelocityProfilNbr);
+		fprintf(stderr,"dbg2       CIB_BLOCK_DIM:           %lu\n", store->CIB_BLOCK_DIM);
+		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %lu\n", store->mbHistoryRecNbr);
+		fprintf(stderr,"dbg2       mbNameLength:            %lu\n", store->mbNameLength);
+		fprintf(stderr,"dbg2       mbCommentLength:         %lu\n", store->mbCommentLength);
+		fprintf(stderr,"dbg2       mbAntennaNbr:            %lu\n", store->mbAntennaNbr);
+		fprintf(stderr,"dbg2       mbBeamNbr:               %lu\n", store->mbBeamNbr);
+		fprintf(stderr,"dbg2       mbCycleNbr:              %lu\n", store->mbCycleNbr);
+		fprintf(stderr,"dbg2       mbVelocityProfilNbr:     %lu\n", store->mbVelocityProfilNbr);
 		}
 
 	    /* get global attributes */
@@ -3628,14 +3628,14 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"dbg2       mbHistModule[%2d]:        %s\n", i, &(store->mbHistModule[i*store->mbNameLength]));
 			fprintf(stderr,"dbg2       mbHistComment[%2d]:       %s\n", i, &(store->mbHistComment[i*store->mbCommentLength]));
 			}
-		    fprintf(stderr,"dbg2       mbAntennaNbr:              %ld\n", store->mbAntennaNbr);
+		    fprintf(stderr,"dbg2       mbAntennaNbr:              %lu\n", store->mbAntennaNbr);
 		    fprintf(stderr,"dbg2       Antenna mbBeam mbAFlag\n");
 		    for (i=0;i<store->mbAntennaNbr;i++)
 			{
 			fprintf(stderr,"dbg2       %d %d %d\n",
 				i, store->mbBeam[i], store->mbAFlag[i]);
 			}
-		    fprintf(stderr,"dbg2       mbBeamNbr:              %ld\n", store->mbBeamNbr);
+		    fprintf(stderr,"dbg2       mbBeamNbr:              %lu\n", store->mbBeamNbr);
 		    fprintf(stderr,"dbg2       beam mbAntenna mbBeamBias mbBFlag\n");
 		    for (i=0;i<store->mbBeamNbr;i++)
 			{
@@ -3643,7 +3643,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				i, store->mbAntenna[i], store->mbBeamBias[i],
 				store->mbBFlag[i]);
 			}
-		    fprintf(stderr,"dbg2       mbVelocityProfilNbr:    %ld\n", store->mbVelocityProfilNbr);
+		    fprintf(stderr,"dbg2       mbVelocityProfilNbr:    %lu\n", store->mbVelocityProfilNbr);
 		    for (i=0;i<store->mbVelocityProfilNbr;i++)
 			{
 			fprintf(stderr,"dbg2       mbVelProfilRef[%2d]:      %s\n", i, &(store->mbVelProfilRef[i*store->mbCommentLength]));
@@ -4091,7 +4091,7 @@ int mbr_rt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<store->mbAntennaNbr;i++)
 			fprintf(stderr, "%d ", store->mbSamplingRate[i]);
 		fprintf(stderr, "\n");
-		fprintf(stderr,"dbg2       mbBeamNbr:               %ld\n", store->mbBeamNbr);
+		fprintf(stderr,"dbg2       mbBeamNbr:               %lu\n", store->mbBeamNbr);
 		fprintf(stderr,"dbg2       beam ltrack xtrack depth quality flag\n");
 		for (i=0;i<store->mbBeamNbr;i++)
 		    {
@@ -4172,8 +4172,8 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(size_t)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor and data storage */
@@ -4308,7 +4308,7 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    	{
    	    	nc_status = nc_def_dim(mb_io_ptr->ncid, "CIB_BLOCK_DIM", storelocal->CIB_BLOCK_DIM, &CIB_BLOCK_DIM_id);
 	    	    if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_dim CIB_BLOCK_DIM error: %s\n", nc_strerror(nc_status));
-/*fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%ld\n",storelocal->CIB_BLOCK_DIM);*/
+/*fprintf(stderr,"storelocal->CIB_BLOCK_DIM:%lu\n",storelocal->CIB_BLOCK_DIM);*/
 		}
    	    nc_status = nc_def_dim(mb_io_ptr->ncid, "mbHistoryRecNbr", storelocal->mbHistoryRecNbr, &mbHistoryRecNbr_id);
 	    	if ((verbose >= 2 || nc_verbose >= 1) && nc_status != NC_NOERR) fprintf(stderr, "nc_def_dim mbHistoryRecNbr error: %s\n", nc_strerror(nc_status));
@@ -4333,14 +4333,14 @@ int mbr_wt_mbnetcdf(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2       status:                  %d\n", status);
 		fprintf(stderr,"dbg2       error:                   %d\n", *error);
 		fprintf(stderr,"dbg2       nc_status:               %d\n", nc_status);
-		fprintf(stderr,"dbg2       CIB_BLOCK_DIM:           %ld\n", storelocal->CIB_BLOCK_DIM);
-		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %ld\n", storelocal->mbHistoryRecNbr);
-		fprintf(stderr,"dbg2       mbNameLength:            %ld\n", storelocal->mbNameLength);
-		fprintf(stderr,"dbg2       mbCommentLength:         %ld\n", storelocal->mbCommentLength);
-		fprintf(stderr,"dbg2       mbAntennaNbr:            %ld\n", storelocal->mbAntennaNbr);
-		fprintf(stderr,"dbg2       mbBeamNbr:               %ld\n", storelocal->mbBeamNbr);
-		fprintf(stderr,"dbg2       mbCycleNbr:              %ld\n", storelocal->mbCycleNbr);
-		fprintf(stderr,"dbg2       mbVelocityProfilNbr:     %ld\n", storelocal->mbVelocityProfilNbr);
+		fprintf(stderr,"dbg2       CIB_BLOCK_DIM:           %lu\n", storelocal->CIB_BLOCK_DIM);
+		fprintf(stderr,"dbg2       mbHistoryRecNbr:         %lu\n", storelocal->mbHistoryRecNbr);
+		fprintf(stderr,"dbg2       mbNameLength:            %lu\n", storelocal->mbNameLength);
+		fprintf(stderr,"dbg2       mbCommentLength:         %lu\n", storelocal->mbCommentLength);
+		fprintf(stderr,"dbg2       mbAntennaNbr:            %lu\n", storelocal->mbAntennaNbr);
+		fprintf(stderr,"dbg2       mbBeamNbr:               %lu\n", storelocal->mbBeamNbr);
+		fprintf(stderr,"dbg2       mbCycleNbr:              %lu\n", storelocal->mbCycleNbr);
+		fprintf(stderr,"dbg2       mbVelocityProfilNbr:     %lu\n", storelocal->mbVelocityProfilNbr);
 		}
 
 	    /* define global variables */
@@ -7154,7 +7154,7 @@ storelocal->CIB_BLOCK_DIM,index[0],index[1],index[2],count[0],count[1],count[2])
 		for (i=0;i<store->mbAntennaNbr;i++)
 			fprintf(stderr, "%d ", store->mbSamplingRate[i]);
 		fprintf(stderr, "\n");
-		fprintf(stderr,"dbg2       mbBeamNbr:               %ld\n", store->mbBeamNbr);
+		fprintf(stderr,"dbg2       mbBeamNbr:               %lu\n", store->mbBeamNbr);
 		fprintf(stderr,"dbg2       beam ltrack xtrack depth quality flag\n");
 		for (i=0;i<store->mbBeamNbr;i++)
 		    {

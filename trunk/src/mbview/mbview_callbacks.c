@@ -339,8 +339,8 @@ int mbview_startup(int verbose, Widget parent, XtAppContext app, int *error)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
-		fprintf(stderr,"dbg2       parent:                  %ld\n", (size_t)parent);
-		fprintf(stderr,"dbg2       app:                     %ld\n", (size_t)app);
+		fprintf(stderr,"dbg2       parent:                  %lu\n", (size_t)parent);
+		fprintf(stderr,"dbg2       app:                     %lu\n", (size_t)app);
 		}
 		
 	/* set parent widget and app context */
@@ -1057,7 +1057,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       datahandle:                %ld\n", (size_t)*datahandle);
+		fprintf(stderr,"dbg2       datahandle:                %lu\n", (size_t)*datahandle);
 		
 		/* widget controls */
 		fprintf(stderr,"dbg2       title:                     %s\n", data->title);
@@ -1135,17 +1135,17 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr,"dbg2       primary_ymax:              %f\n", data->primary_ymax);
 		fprintf(stderr,"dbg2       primary_dx:                %f\n", data->primary_dx);
 		fprintf(stderr,"dbg2       primary_dy:                %f\n", data->primary_dy);
-		fprintf(stderr,"dbg2       primary_data:              %ld\n", (size_t)data->primary_data);
-		fprintf(stderr,"dbg2       primary_x:                 %ld\n", (size_t)data->primary_x);
-		fprintf(stderr,"dbg2       primary_y:                 %ld\n", (size_t)data->primary_y);
-		fprintf(stderr,"dbg2       primary_z:                 %ld\n", (size_t)data->primary_z);
-		fprintf(stderr,"dbg2       primary_dxdz:              %ld\n", (size_t)data->primary_dzdx);
-		fprintf(stderr,"dbg2       primary_dydz:              %ld\n", (size_t)data->primary_dzdy);
-		fprintf(stderr,"dbg2       primary_r:                 %ld\n", (size_t)data->primary_r);
-		fprintf(stderr,"dbg2       primary_g:                 %ld\n", (size_t)data->primary_g);
-		fprintf(stderr,"dbg2       primary_b:                 %ld\n", (size_t)data->primary_b);
-		fprintf(stderr,"dbg2       primary_stat_color:        %ld\n", (size_t)data->primary_stat_color);
-		fprintf(stderr,"dbg2       primary_stat_z:            %ld\n", (size_t)data->primary_stat_z);
+		fprintf(stderr,"dbg2       primary_data:              %lu\n", (size_t)data->primary_data);
+		fprintf(stderr,"dbg2       primary_x:                 %lu\n", (size_t)data->primary_x);
+		fprintf(stderr,"dbg2       primary_y:                 %lu\n", (size_t)data->primary_y);
+		fprintf(stderr,"dbg2       primary_z:                 %lu\n", (size_t)data->primary_z);
+		fprintf(stderr,"dbg2       primary_dxdz:              %lu\n", (size_t)data->primary_dzdx);
+		fprintf(stderr,"dbg2       primary_dydz:              %lu\n", (size_t)data->primary_dzdy);
+		fprintf(stderr,"dbg2       primary_r:                 %lu\n", (size_t)data->primary_r);
+		fprintf(stderr,"dbg2       primary_g:                 %lu\n", (size_t)data->primary_g);
+		fprintf(stderr,"dbg2       primary_b:                 %lu\n", (size_t)data->primary_b);
+		fprintf(stderr,"dbg2       primary_stat_color:        %lu\n", (size_t)data->primary_stat_color);
+		fprintf(stderr,"dbg2       primary_stat_z:            %lu\n", (size_t)data->primary_stat_z);
 		
 		/* secondary grid data */
 		fprintf(stderr,"dbg2       secondary_sameas_primary:  %d\n", data->secondary_sameas_primary);
@@ -1159,7 +1159,7 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr,"dbg2       secondary_ymax:            %f\n", data->secondary_ymax);
 		fprintf(stderr,"dbg2       secondary_dx:              %f\n", data->secondary_dx);
 		fprintf(stderr,"dbg2       secondary_dy:              %f\n", data->secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:            %ld\n", (size_t)data->secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:            %lu\n", (size_t)data->secondary_data);
 		
 		/* site data */
 		fprintf(stderr,"dbg2       site_view_mode:       %d\n",data->site_view_mode);
@@ -1217,8 +1217,8 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 		fprintf(stderr,"dbg2       nav_mode:                  %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                      %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:                %d\n",shared.shareddata.nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:              %ld\n",(size_t)shared.shareddata.nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:        %ld\n",(size_t)shared.shareddata.nav_point_selected);
+		fprintf(stderr,"dbg2       nav_selected:              %lu\n",(size_t)shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:        %lu\n",(size_t)shared.shareddata.nav_point_selected);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
@@ -1326,7 +1326,7 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       sharedhandle:              %ld\n", (size_t)*sharedhandle);
+		fprintf(stderr,"dbg2       sharedhandle:              %lu\n", (size_t)*sharedhandle);
 				
 		/* site data */
 		fprintf(stderr,"dbg2       site_mode:            %d\n",shared.shareddata.site_mode);
@@ -1378,8 +1378,8 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 		fprintf(stderr,"dbg2       nav_mode:                  %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                      %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:                %d\n",shared.shareddata.nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:              %ld\n",(size_t)shared.shareddata.nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:        %ld\n",(size_t)shared.shareddata.nav_point_selected);
+		fprintf(stderr,"dbg2       nav_selected:              %lu\n",(size_t)shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:        %lu\n",(size_t)shared.shareddata.nav_point_selected);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
@@ -1473,7 +1473,7 @@ int mbview_setwindowparms(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
-		fprintf(stderr,"dbg2       mbview_dismiss_notify:     %ld\n", (size_t)mbview_dismiss_notify);
+		fprintf(stderr,"dbg2       mbview_dismiss_notify:     %lu\n", (size_t)mbview_dismiss_notify);
 		fprintf(stderr,"dbg2       title:                     %s\n", title);
 		fprintf(stderr,"dbg2       xo:                        %d\n", xo);
 		fprintf(stderr,"dbg2       yo:                        %d\n", yo);
@@ -1687,8 +1687,8 @@ int mbview_open(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
-		fprintf(stderr,"dbg2       view:                      %ld\n", (size_t)view);
-		fprintf(stderr,"dbg2       data:                      %ld\n", (size_t)data);
+		fprintf(stderr,"dbg2       view:                      %lu\n", (size_t)view);
+		fprintf(stderr,"dbg2       data:                      %lu\n", (size_t)data);
 		
 		/* widget controls */
 		fprintf(stderr,"dbg2       title:                     %s\n", data->title);
@@ -1765,17 +1765,17 @@ int mbview_open(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2       primary_ymax:              %f\n", data->primary_ymax);
 		fprintf(stderr,"dbg2       primary_dx:                %f\n", data->primary_dx);
 		fprintf(stderr,"dbg2       primary_dy:                %f\n", data->primary_dy);
-		fprintf(stderr,"dbg2       primary_data:              %ld\n", (size_t) data->primary_data);
-		fprintf(stderr,"dbg2       primary_x:                 %ld\n", (size_t) data->primary_x);
-		fprintf(stderr,"dbg2       primary_y:                 %ld\n", (size_t) data->primary_y);
-		fprintf(stderr,"dbg2       primary_z:                 %ld\n", (size_t) data->primary_z);
-		fprintf(stderr,"dbg2       primary_dxdz:              %ld\n", (size_t) data->primary_dzdx);
-		fprintf(stderr,"dbg2       primary_dydz:              %ld\n", (size_t) data->primary_dzdy);
-		fprintf(stderr,"dbg2       primary_r:                 %ld\n", (size_t) data->primary_r);
-		fprintf(stderr,"dbg2       primary_g:                 %ld\n", (size_t) data->primary_g);
-		fprintf(stderr,"dbg2       primary_b:                 %ld\n", (size_t) data->primary_b);
-		fprintf(stderr,"dbg2       primary_stat_color:        %ld\n", (size_t) data->primary_stat_color);
-		fprintf(stderr,"dbg2       primary_stat_z:            %ld\n", (size_t) data->primary_stat_z);
+		fprintf(stderr,"dbg2       primary_data:              %lu\n", (size_t) data->primary_data);
+		fprintf(stderr,"dbg2       primary_x:                 %lu\n", (size_t) data->primary_x);
+		fprintf(stderr,"dbg2       primary_y:                 %lu\n", (size_t) data->primary_y);
+		fprintf(stderr,"dbg2       primary_z:                 %lu\n", (size_t) data->primary_z);
+		fprintf(stderr,"dbg2       primary_dxdz:              %lu\n", (size_t) data->primary_dzdx);
+		fprintf(stderr,"dbg2       primary_dydz:              %lu\n", (size_t) data->primary_dzdy);
+		fprintf(stderr,"dbg2       primary_r:                 %lu\n", (size_t) data->primary_r);
+		fprintf(stderr,"dbg2       primary_g:                 %lu\n", (size_t) data->primary_g);
+		fprintf(stderr,"dbg2       primary_b:                 %lu\n", (size_t) data->primary_b);
+		fprintf(stderr,"dbg2       primary_stat_color:        %lu\n", (size_t) data->primary_stat_color);
+		fprintf(stderr,"dbg2       primary_stat_z:            %lu\n", (size_t) data->primary_stat_z);
 		
 		/* secondary grid data */
 		fprintf(stderr,"dbg2       secondary_sameas_primary:  %d\n", data->secondary_sameas_primary);
@@ -1789,7 +1789,7 @@ int mbview_open(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2       secondary_ymax:            %f\n", data->secondary_ymax);
 		fprintf(stderr,"dbg2       secondary_dx:              %f\n", data->secondary_dx);
 		fprintf(stderr,"dbg2       secondary_dy:              %f\n", data->secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:            %ld\n", (size_t) data->secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:            %lu\n", (size_t) data->secondary_data);
 		
 		/* site data */
 		fprintf(stderr,"dbg2       site_view_mode:       %d\n",data->site_view_mode);
@@ -1847,8 +1847,8 @@ int mbview_open(int verbose, size_t instance, int *error)
 		fprintf(stderr,"dbg2       nav_mode:              %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                  %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:            %d\n",shared.shareddata.nnav_alloc);
-		fprintf(stderr,"dbg2       nav_selected:          %ld\n", (size_t) shared.shareddata.nav_selected);
-		fprintf(stderr,"dbg2       nav_point_selected:    %ld\n", (size_t) shared.shareddata.nav_point_selected);
+		fprintf(stderr,"dbg2       nav_selected:          %lu\n", (size_t) shared.shareddata.nav_selected);
+		fprintf(stderr,"dbg2       nav_point_selected:    %lu\n", (size_t) shared.shareddata.nav_point_selected);
 		for (i=0;i<shared.shareddata.nnav;i++)
 			{
 			fprintf(stderr,"dbg2       nav %d color:         %d\n",i,shared.shareddata.navs[i].color);
@@ -2941,7 +2941,7 @@ int mbview_addaction(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
 		fprintf(stderr,"dbg2       instance:             %ld\n",instance);
-		fprintf(stderr,"dbg2       mbview_action_notify: %ld\n",(size_t)mbview_action_notify);
+		fprintf(stderr,"dbg2       mbview_action_notify: %lu\n",(size_t)mbview_action_notify);
 		fprintf(stderr,"dbg2       label:                %s\n",label);
 		fprintf(stderr,"dbg2       sensitive:            %d\n",sensitive);
 		}
@@ -3010,7 +3010,7 @@ int mbview_addpicknotify(int verbose, size_t instance,
 		fprintf(stderr,"dbg2       verbose:              %d\n",verbose);
 		fprintf(stderr,"dbg2       instance:             %ld\n",instance);
 		fprintf(stderr,"dbg2       picktype:             %d\n",picktype);
-		fprintf(stderr,"dbg2       mbview_pick_notify:   %ld\n",(size_t)mbview_pick_notify);
+		fprintf(stderr,"dbg2       mbview_pick_notify:   %lu\n",(size_t)mbview_pick_notify);
 		}
 
 	/* get view */
@@ -3084,7 +3084,7 @@ int mbview_setsensitivitynotify(int verbose, size_t instance,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n",verbose);
 		fprintf(stderr,"dbg2       instance:                  %ld\n",instance);
-		fprintf(stderr,"dbg2       mbview_sensitivity_notify: %ld\n",(size_t)mbview_sensitivity_notify);
+		fprintf(stderr,"dbg2       mbview_sensitivity_notify: %lu\n",(size_t)mbview_sensitivity_notify);
 		}
 
 	/* get view */

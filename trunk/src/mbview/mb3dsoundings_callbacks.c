@@ -169,8 +169,8 @@ int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *err
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
-		fprintf(stderr,"dbg2       parent:                  %ld\n", (size_t)parent);
-		fprintf(stderr,"dbg2       app:                     %ld\n", (size_t)app);
+		fprintf(stderr,"dbg2       parent:                  %lu\n", (size_t)parent);
+		fprintf(stderr,"dbg2       app:                     %lu\n", (size_t)app);
 		}
 		
 	/* set parent widget and app context */
@@ -783,7 +783,7 @@ fprintf(stderr,"Called mb3dsoundings_open\n");
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       soundingdata:  %ld\n",(size_t)soundingdata);
+		fprintf(stderr,"dbg2       soundingdata:  %lu\n",(size_t)soundingdata);
 		}
 		
 	/* set the data pointer */

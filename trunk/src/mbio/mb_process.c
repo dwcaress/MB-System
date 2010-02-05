@@ -353,7 +353,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       file:         %s\n",file);
 		fprintf(stderr,"dbg2       lookforfiles: %d\n",lookforfiles);
-		fprintf(stderr,"dbg2       process:      %ld\n",(size_t)process);
+		fprintf(stderr,"dbg2       process:      %lu\n",(size_t)process);
 		}
 
 	/* get expected process parameter file name */
@@ -1741,7 +1741,7 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                %d\n",verbose);
 		fprintf(stderr,"dbg2       file:                   %s\n",file);
-		fprintf(stderr,"dbg2       process:                %ld\n",(size_t)process);
+		fprintf(stderr,"dbg2       process:                %lu\n",(size_t)process);
 		fprintf(stderr,"dbg2       mbp_ifile_specified:    %d\n",process->mbp_ifile_specified);
 		fprintf(stderr,"dbg2       mbp_ifile:              %s\n",process->mbp_ifile);
 		fprintf(stderr,"dbg2       mbp_ofile_specified:    %d\n",process->mbp_ofile_specified);
@@ -2195,7 +2195,7 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
-		fprintf(stderr,"dbg2       process:   %ld\n",(size_t)process);
+		fprintf(stderr,"dbg2       process:   %lu\n",(size_t)process);
 		}
 
 	/* figure out bathymetry recalculation mode */
@@ -2246,7 +2246,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
-		fprintf(stderr,"dbg2       process:             %ld\n",(size_t)process);
+		fprintf(stderr,"dbg2       process:             %lu\n",(size_t)process);
 		fprintf(stderr,"dbg2       mbp_ifile_specified: %d\n",process->mbp_ifile_specified);
 		fprintf(stderr,"dbg2       mbp_ifile:           %s\n",process->mbp_ifile);
 		fprintf(stderr,"dbg2       mbp_format_specified:%d\n",process->mbp_format_specified);
@@ -5424,17 +5424,17 @@ int mb_pr_set_bathyslopenew(int verbose,
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nsmooth:         %d\n",nsmooth);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       beamflag:        %ld\n",(size_t)beamflag);
-		fprintf(stderr,"dbg2       bath:            %ld\n",(size_t)bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(size_t)bathacrosstrack);
+		fprintf(stderr,"dbg2       beamflag:        %lu\n",(size_t)beamflag);
+		fprintf(stderr,"dbg2       bath:            %lu\n",(size_t)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %lu\n",(size_t)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d  %d  %f %f\n", 
 				i, beamflag[i], bath[i], bathacrosstrack[i]);
-		fprintf(stderr,"dbg2       depths:           %ld\n",(size_t)depths);
-		fprintf(stderr,"dbg2       depthacrosstrack: %ld\n",(size_t)depthacrosstrack);
-		fprintf(stderr,"dbg2       slopes:           %ld\n",(size_t)slopes);
-		fprintf(stderr,"dbg2       slopeacrosstrack: %ld\n",(size_t)slopeacrosstrack);
+		fprintf(stderr,"dbg2       depths:           %lu\n",(size_t)depths);
+		fprintf(stderr,"dbg2       depthacrosstrack: %lu\n",(size_t)depthacrosstrack);
+		fprintf(stderr,"dbg2       slopes:           %lu\n",(size_t)slopes);
+		fprintf(stderr,"dbg2       slopeacrosstrack: %lu\n",(size_t)slopeacrosstrack);
 		}
 
 	/* initialize depths */
@@ -5544,17 +5544,17 @@ int mb_pr_set_bathyslope(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       beamflag:        %ld\n",(size_t)beamflag);
-		fprintf(stderr,"dbg2       bath:            %ld\n",(size_t)bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(size_t)bathacrosstrack);
+		fprintf(stderr,"dbg2       beamflag:        %lu\n",(size_t)beamflag);
+		fprintf(stderr,"dbg2       bath:            %lu\n",(size_t)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %lu\n",(size_t)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d  %d  %f %f\n", 
 				i, beamflag[i], bath[i], bathacrosstrack[i]);
-		fprintf(stderr,"dbg2       depths:           %ld\n",(size_t)depths);
-		fprintf(stderr,"dbg2       depthacrosstrack: %ld\n",(size_t)depthacrosstrack);
-		fprintf(stderr,"dbg2       slopes:           %ld\n",(size_t)slopes);
-		fprintf(stderr,"dbg2       slopeacrosstrack: %ld\n",(size_t)slopeacrosstrack);
+		fprintf(stderr,"dbg2       depths:           %lu\n",(size_t)depths);
+		fprintf(stderr,"dbg2       depthacrosstrack: %lu\n",(size_t)depthacrosstrack);
+		fprintf(stderr,"dbg2       slopes:           %lu\n",(size_t)slopes);
+		fprintf(stderr,"dbg2       slopeacrosstrack: %lu\n",(size_t)slopeacrosstrack);
 		}
 
 	/* initialize depths */
