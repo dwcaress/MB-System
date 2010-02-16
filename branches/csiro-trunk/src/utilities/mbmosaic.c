@@ -1903,8 +1903,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 				    {
 				    /* set grid if highest weight */
 				    kgrid = ii*gydim + jj;
-				    xx = dx * ixx[ii] + wbnd[0];
-				    yy = dy * iyy[jj] + wbnd[2];
+				    xx = dx * ii + wbnd[0];
+				    yy = dy * jj + wbnd[2];
 				    inside = mb_pr_point_in_quad(verbose, xx, yy,
 				    				footprints[ib].x, footprints[ib].y,
 								&error);
@@ -2104,8 +2104,8 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 				    {
 				    /* set grid if highest weight */
 				    kgrid = ii*gydim + jj;
-				    xx = dx * ixx[ii] + wbnd[0];
-				    yy = dy * iyy[jj] + wbnd[2];
+				    xx = dx * ii + wbnd[0];
+				    yy = dy * jj + wbnd[2];
 				    inside = mb_pr_point_in_quad(verbose, xx, yy,
 				    				footprints[ib].x, footprints[ib].y,
 								&error);
@@ -2522,8 +2522,8 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 				    {
 				    /* add to cell if weight high enough */
 				    kgrid = ii*gydim + jj;
-				    xx = dx * ixx[ii] + wbnd[0];
-				    yy = dy * iyy[jj] + wbnd[2];
+				    xx = dx * ii + wbnd[0];
+				    yy = dy * jj + wbnd[2];
 				    inside = mb_pr_point_in_quad(verbose, xx, yy,
 				    				footprints[ib].x, footprints[ib].y,
 								&error);
@@ -2743,8 +2743,8 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 				    {
 				    /* set grid if highest weight */
 				    kgrid = ii*gydim + jj;
-				    xx = dx * ixx[ii] + wbnd[0];
-				    yy = dy * iyy[jj] + wbnd[2];
+				    xx = dx * ii + wbnd[0];
+				    yy = dy * jj + wbnd[2];
 				    inside = mb_pr_point_in_quad(verbose, xx, yy,
 				    				footprints[ib].x, footprints[ib].y,
 								&error);
