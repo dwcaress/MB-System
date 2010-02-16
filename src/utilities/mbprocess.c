@@ -578,6 +578,7 @@ and mbedit edit save files.\n";
 	double	reference_sigma;
 	double	reference_sigma_port;
 	double	reference_sigma_stbd;
+	int	count;
 
 	/* topography parameters */
 	struct mbprocess_grid_struct grid;
@@ -1379,6 +1380,20 @@ and mbedit edit save files.\n";
  		}
 	    else
 		fprintf(stderr,"  Amplitude correction off.\n");
+	    if (process.mbp_sap_mode == MBP_SAP_ON)
+		{
+		fprintf(stderr, "Sound absorption correction ON");
+		if (process.mbp_sap_src == MBP_SAP_SRC_CONST)
+		    fprintf(stderr,"  Source absorption:  %f dB", process.mbp_sa_old);
+		else if (process.mbp_sap_src == MBP_SAP_SRC_SEABED)
+		    fprintf(stderr,"  Source absorption from seabed image telegram");
+		else if (process.mbp_sap_src == MBP_SAP_SRC_RUNTIME)
+		    fprintf(stderr,"  Source absorption from runtime telegram");
+		if (process.mbp_sap_use == MBP_SAP_USE_CONST)
+		    fprintf(stderr,"  New absorption:  %f dB", process.mbp_sa_new);
+		else if (process.mbp_sap_use == MBP_SAP_USE_PROFILE)
+		    fprintf(stderr,"  New absorption from: %s", process.mbp_sap_profile);
+		}
 
 	    fprintf(stderr,"\nSidescan Corrections:\n");
 	    if (process.mbp_sscorr_mode == MBP_SSCORR_ON)
@@ -4495,6 +4510,43 @@ and mbedit edit save files.\n";
 		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
  		}
 
+	    if (process.mbp_sap_mode == MBP_SAP_ON)
+		{
+		strncpy(comment,"\0",MBP_FILENAMESIZE);
+		sprintf(comment,"Sound absorption correction on");
+		status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		if (process.mbp_sap_src == MBP_SAP_SRC_CONST)
+		    {
+		    strncpy(comment,"\0",MBP_FILENAMESIZE);
+		    sprintf(comment,"  Source absorption:  %f dB", process.mbp_sa_old);
+		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		    }
+		else if (process.mbp_sap_src == MBP_SAP_SRC_SEABED)
+		    {
+		    strncpy(comment,"\0",MBP_FILENAMESIZE);
+		    sprintf(comment,"  Source absorption from seabed image telegram");
+		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		    }
+		else if (process.mbp_sap_src == MBP_SAP_SRC_RUNTIME)
+		    {
+		    strncpy(comment,"\0",MBP_FILENAMESIZE);
+		    sprintf(comment,"  Source absorption from runtime telegram");
+		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		    }
+		if (process.mbp_sap_use == MBP_SAP_USE_CONST)
+		    {
+		    strncpy(comment,"\0",MBP_FILENAMESIZE);
+		    sprintf(comment,"  New absorption:  %f dB", process.mbp_sa_new);
+		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		    }
+		else if (process.mbp_sap_use == MBP_SAP_USE_PROFILE)
+		    {
+		    strncpy(comment,"\0",MBP_FILENAMESIZE);
+		    sprintf(comment,"  New absorption from: %s", process.mbp_sap_profile);
+		    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
+		    }
+		}
+
 	    strncpy(comment,"\0",MBP_FILENAMESIZE);
 	    sprintf(comment,"Sidescan Corrections:");
 	    status = mb_put_comment(verbose,ombio_ptr,comment,&error);
@@ -6106,6 +6158,23 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 						    + reference_sigma_stbd);
 					}
 				    }
+				else if (process.mbp_ampcorr_stddev == MBP_AMPCORR_NORMALSTD)
+				    {
+				    reference_sigma = 0.0;
+				    count = 0;
+				    for (i=0;i<ampcorrtableuse.nangle-1;i++)
+					{
+					if (ampcorrtableuse.sigma[i] != 0.0)
+					    {
+					    reference_sigma += ampcorrtableuse.sigma[i];
+					    count++;
+					    }
+					}
+				    if (count == 0)
+					reference_sigma = 1;
+				    else
+					reference_sigma = reference_sigma/count;
+				    }
 				else
 				    reference_sigma = 1;
 	/*fprintf(stderr, "itable:%d time:%f nangle:%d\n",
@@ -6172,8 +6241,8 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 							    if (sigma == 0)
 								sigma = 1;
                                                             }
-/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f", 
-j, i, slope, angle, correction, reference_amp, amp[i]);*/
+/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f",
+idata, i, slope, angle, correction, reference_amp, amp[i]);*/
 							if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
 				    				amp[i] = (amp[i] - correction) * reference_sigma / sigma + reference_amp;
 							else
