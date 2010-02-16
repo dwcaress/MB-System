@@ -10,7 +10,7 @@ Version 5.0
 \fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
 \fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype[F]\fP 
 \fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
-\fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range[/weight]\fP 
+\fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range[/weight[/space]]\fP 
 \fB-G\fIgridkind\fP  \fB-J\fIprojection\fP
 \fB-H -L\fIlonflip\fP \fB-M -N -P\fIpings\fP
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fIazimuth/factor\fP 
@@ -280,7 +280,7 @@ the program sets the grid cell spacing to be 0.02 times the maximum
 sonar altitude in the input files.
 .TP
 .B \-F
-\fIpriority_range[/weight]\fP
+\fIpriority_range[/weight[/space]]\fP
 .br
 Turns on Gaussian weighted mean mosaicing. The 
 \fIpriority_range\fP value determines which data points are
@@ -291,13 +291,19 @@ Only samples with priorities greater than this threshold
 are used in the Gaussian weighted mean mosaicing.
 The default is to simply set each bin's value equal to the
 value of the highest priority sample in that bin.
+
 The \fIweight\fP value, if present, causes priorities to be 
 also used to weight values. A \fIweight\fP of 0 (the default) indicates 
 priorities are not used as weights. A \fIweight\fP of 1 
 indicates the Gaussian weight of each value is 
 multiplied by its priority to get the value weight. A \fIweight\fP of 2 
 indicates the Gaussian weight of each value is multiplied by the square of 
-its priority to get the value weight.
+its priority to get the value weight. 
+Default: weight = 0.
+
+If \fIspace\fP=1 convert values from log space to linear space (10^(x/10)), 
+averaged as above in linear space, then converted back to log space (10*log10(x)). 
+Default: space = 0 (do not convert).
 .TP
 .B \-G
 \fIgridkind\fP

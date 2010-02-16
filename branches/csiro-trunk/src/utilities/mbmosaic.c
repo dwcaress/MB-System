@@ -414,6 +414,8 @@ int main (int argc, char **argv)
 	int	plot_status;
 	int	use_beams = MB_NO;
 	int 	use_slope = MB_NO;
+	int	linear = MB_NO;
+	double	value;
 
 	/* mbio read values */
 	int	rpings;
@@ -595,7 +597,7 @@ int main (int argc, char **argv)
 			break;
 		case 'F':
 		case 'f':
-			sscanf (optarg,"%lf/%d", &priority_range, &weight_priorities);
+			sscanf (optarg,"%lf/%d/%d", &priority_range, &weight_priorities, &linear);
 			grid_mode = MBMOSAIC_AVERAGE;
 			flag++;
 			break;
@@ -2546,17 +2548,13 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 						norm_weight *= priorities[ib];
 					else if (weight_priorities == 2)
 						norm_weight *= priorities[ib] * priorities[ib];
-					norm[kgrid] += norm_weight;
 					if (datatype == MBMOSAIC_DATA_AMPLITUDE)
-					  {
-					    grid[kgrid] += norm_weight * amp[ib];
-					    sigma[kgrid] += norm_weight * amp[ib] * amp[ib];
-					  }
+					    {
+					    value = amp[ib];
+					    }
 					else if (datatype >= MBMOSAIC_DATA_OTHER)
 					    {
-					    get_other_data(mbio_ptr, ib, datatype, &slope, &error);
-					    grid[kgrid] += norm_weight * slope;
-					    sigma[kgrid] += norm_weight * slope * slope;
+					    get_other_data(mbio_ptr, ib, datatype, &value, &error);
 					    }
 					else if (ib < ndepths)
 					    {
@@ -2571,27 +2569,32 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 					    if (datatype == MBMOSAIC_DATA_FLAT_GRAZING)
 						{
 						if (angles[ib] > 0)
-						    grid[kgrid] += norm_weight * angles[ib];
+						    value = angles[ib];
 						else
-						    grid[kgrid] -= norm_weight * angles[ib];
-						sigma[kgrid] += norm_weight * angles[ib] * angles[ib];
+						    value = - angles[ib];
 						}
 					    else if (datatype == MBMOSAIC_DATA_GRAZING)
 						{
 						slope += angles[ib];
 						if (slope < 0)
-						    slope = - slope;
-						grid[kgrid] += norm_weight * slope;
-						sigma[kgrid] += norm_weight * slope * slope;
+						    value = - slope;
+						else
+						    value = slope;
 						}
 					    else if (datatype == MBMOSAIC_DATA_SLOPE)
 						{
 						if (slope < 0)
-						    slope = - slope;
-						grid[kgrid] += norm_weight * slope;
-						sigma[kgrid] += norm_weight * slope * slope;
+						    value = - slope;
+						else
+						    value = slope;
 						}
 					    }
+
+					if (linear == MB_YES)
+					    value = exp10(value*0.1);
+					norm[kgrid] += norm_weight;
+					grid[kgrid] += norm_weight * value;
+					sigma[kgrid] += norm_weight * value * value;
 
 					cnt[kgrid]++;
 					}
@@ -2762,9 +2765,13 @@ ib,priorities[ib],kgrid,maxpriority[kgrid],priority_range); */
 						norm_weight *= priorities[ib];
 					else if (weight_priorities == 2)
 						norm_weight *= priorities[ib] * priorities[ib];
-					grid[kgrid] += norm_weight * ss[ib];
+					if (linear == MB_NO)
+					    value = ss[ib];
+					else
+					    value = exp(ss[ib]*0.1);
 					norm[kgrid] += norm_weight;
-					sigma[kgrid] += norm_weight * ss[ib] * ss[ib];
+					grid[kgrid] += norm_weight * value;
+					sigma[kgrid] += norm_weight * value * value;
 					cnt[kgrid]++;
 /*fprintf(stderr," kgrid:%d norm_weight:%g grid:%g norm:%g cnt:%d",
 kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
@@ -2845,6 +2852,8 @@ kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 			{
 			nbinset++;
 			grid[kgrid] = grid[kgrid] / norm[kgrid];
+			if (linear == MB_YES)
+			    grid[kgrid] = 10 * log10(grid[kgrid]);
 			sigma[kgrid] = 
 				sqrt(fabs(sigma[kgrid] / norm[kgrid]
 					- grid[kgrid] * grid[kgrid]));
