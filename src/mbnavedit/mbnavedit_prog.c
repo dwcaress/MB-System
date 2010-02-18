@@ -323,7 +323,7 @@ static double	*ssalongtrack = NULL;
 static char	comment[MB_COMMENT_MAXLINE];
 
 /* buffer control variables */
-#define	MBNAVEDIT_BUFFER_SIZE	25000
+#define	MBNAVEDIT_BUFFER_SIZE	1000000
 static int	file_open = MB_NO;
 static int	nfile_open = MB_NO;
 static FILE	*nfp;
@@ -660,7 +660,7 @@ int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %ld\n",(long)xgid);
+		fprintf(stderr,"dbg2       xgid:         %lu\n",(size_t)xgid);
 		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
 		for (i=0;i<ncol;i++)
 			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",

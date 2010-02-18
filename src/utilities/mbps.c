@@ -839,14 +839,21 @@ int main (int argc, char **argv)
 			y_off=(-(max_yp+min_yp)*scaling/2.0)+(11./2)-.2;
 			}
 		}
-		
-	/* initialize the Postscript plotting */
-	ps_plotinit_hires(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
-		gmtdefs.paper_width, gmtdefs.page_rgb, 
-		gmtdefs.encoding.name, 
-		GMT_epsinfo (argv[0]));
-	GMT_echo_command (argc, argv);
-		
+
+       /* initialize the Postscript plotting */
+#ifdef GMT_MINOR_VERSION
+       ps_plotinit_hires(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
+               gmtdefs.paper_width, gmtdefs.page_rgb, 
+               gmtdefs.encoding.name, 
+               GMT_epsinfo (argv[0]));
+#else
+       ps_plotinit(NULL,0,orient,x_off,y_off,1.0,1.0,1,300,1,
+               gmtdefs.paper_width, gmtdefs.page_rgb, 
+               gmtdefs.encoding.name, 
+               GMT_epsinfo (argv[0]));
+#endif
+       GMT_echo_command (argc, argv);
+
 	/* now loop over the data in the appropriate order
 	    laying down white filled boxes with black outlines
 	    wherever the data is good */

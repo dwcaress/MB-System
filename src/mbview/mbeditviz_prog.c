@@ -730,6 +730,20 @@ int mbeditviz_load_file(int ifile)
 					mbev_error = MB_ERROR_NO_ERROR;
 					}
 					
+				/* check for multiplicity of pings with the same time stamp */
+				if (mbev_error == MB_ERROR_NO_ERROR
+				    && kind == MB_DATA_DATA)
+					{
+					if (file->num_pings > 0 && ping->time_d == file->pings[file->num_pings-1].time_d)
+						{
+						ping->multiplicity = file->pings[file->num_pings-1].multiplicity + 1;
+						}
+					else
+						{
+						ping->multiplicity = 0;
+						}
+					}
+					
 				/* allocate memory for pings */
 				if (mbev_error == MB_ERROR_NO_ERROR
 				    && kind == MB_DATA_DATA)
@@ -1051,8 +1065,8 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 					}
 				}
 if (mbev_verbose > 0)
-fprintf(stderr,"file->processed_info_loaded:%d file->process.mbp_edit_mode:%d load_esf:%d\n",
-file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
+fprintf(stderr,"loaded swathfile:%s file->processed_info_loaded:%d file->process.mbp_edit_mode:%d load_esf:%d\n",
+swathfile,file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
 			
 			/* load bathymetry edits if needed */
 			if (load_esf == MB_YES)
@@ -1079,7 +1093,7 @@ file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
 
 					/* apply edits for this ping */
 					mb_esf_apply(mbev_verbose, &(file->esf), 
-		    				    ping->time_d, ping->beams_bath, 
+		    				    ping->time_d, ping->multiplicity, ping->beams_bath, 
 						    ping->beamflag, &mbev_error);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						ping->beamflagorg[ibeam] = ping->beamflag[ibeam];
@@ -1540,8 +1554,8 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:        %ld\n",(long)file);
-		fprintf(stderr,"dbg2       ping:        %ld\n",(long)ping);
+		fprintf(stderr,"dbg2       file:        %lu\n",(size_t)file);
+		fprintf(stderr,"dbg2       ping:        %lu\n",(size_t)ping);
 		fprintf(stderr,"dbg2       rollbias:    %f\n",rollbias);
 		fprintf(stderr,"dbg2       pitchbias:   %f\n",pitchbias);
 		fprintf(stderr,"dbg2       headingbias: %f\n",headingbias);
@@ -2606,8 +2620,8 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       file:       %ld\n",(long)file);
-		fprintf(stderr,"dbg2       ping:       %ld\n",(long)ping);
+		fprintf(stderr,"dbg2       file:       %lu\n",(size_t)file);
+		fprintf(stderr,"dbg2       ping:       %lu\n",(size_t)ping);
 		fprintf(stderr,"dbg2       ibeam:      %d\n",ibeam);
 		fprintf(stderr,"dbg2       beam_ok:    %d\n",beam_ok);
 		fprintf(stderr,"dbg2       apply_now:  %d\n",apply_now);
@@ -3107,10 +3121,10 @@ ifile,file->load_status,file->esf_open);
 						else
 							action = MBP_EDIT_ZERO;
 if (mbev_verbose > 0)
-fprintf(stderr,"mb_esf_save: ifile:%d iping:%d ibeam:%d action:%d\n",
-ifile,iping,ibeam,action);
+fprintf(stderr,"mb_esf_save: ifile:%d iping:%d ibeam:%d %d action:%d\n",
+ifile,iping,ibeam, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR, action);
 						mb_esf_save(mbev_verbose, &(file->esf),
-								ping->time_d, ibeam,
+								ping->time_d, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 								action, &mbev_error);
 						}
 					}
@@ -3181,7 +3195,7 @@ ifile,iping,ibeam,action);
 	return(mbev_status);
 }
 /*--------------------------------------------------------------------*/
-int mbeditviz_selectregion(int instance)
+int mbeditviz_selectregion(size_t instance)
 {
 	char	*function_name = "mbeditviz_selectregion";
 	struct mbev_file_struct *file;
@@ -3204,7 +3218,7 @@ int mbeditviz_selectregion(int instance)
 		fprintf(stderr,"\ndbg2  Function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:     %d\n",instance);
+		fprintf(stderr,"dbg2       instance:     %ld\n",instance);
 		}
 		
     	/* check data source for selected area */
@@ -3311,14 +3325,14 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 								/* get local position in selected region */
 								x = ping->bathx[ibeam] - mbev_selected.xorigin;
 								y = ping->bathy[ibeam] - mbev_selected.yorigin;
-		xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
-		yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
-		mbev_selected.soundings[mbev_selected.num_soundings].x = xx;
-		mbev_selected.soundings[mbev_selected.num_soundings].y = yy;
-								/*mbev_selected.soundings[mbev_selected.num_soundings].x 
-									= xx * mbev_selected.cosbearing - yy * mbev_selected.sinbearing;
-								mbev_selected.soundings[mbev_selected.num_soundings].y 
-									= xx * mbev_selected.sinbearing + yy * mbev_selected.cosbearing;*/
+								xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
+								yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
+								mbev_selected.soundings[mbev_selected.num_soundings].x = xx;
+								mbev_selected.soundings[mbev_selected.num_soundings].y = yy;
+									/*mbev_selected.soundings[mbev_selected.num_soundings].x 
+										= xx * mbev_selected.cosbearing - yy * mbev_selected.sinbearing;
+									mbev_selected.soundings[mbev_selected.num_soundings].y 
+										= xx * mbev_selected.sinbearing + yy * mbev_selected.cosbearing;*/
 								mbev_selected.soundings[mbev_selected.num_soundings].z 
 									= -ping->bathcorr[ibeam];
 								if (mbev_selected.num_soundings == 0)
@@ -3378,7 +3392,7 @@ mbev_selected.num_soundings);
 	return(mbev_status);
 }				   
 /*--------------------------------------------------------------------*/
-int mbeditviz_selectarea(int instance)
+int mbeditviz_selectarea(size_t instance)
 {
 	char	*function_name = "mbeditviz_selectarea";
 	struct mbev_file_struct *file;
@@ -3400,7 +3414,7 @@ int mbeditviz_selectarea(int instance)
 		fprintf(stderr,"\ndbg2  Function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:     %d\n",instance);
+		fprintf(stderr,"dbg2       instance:     %ld\n",instance);
 		}
 		
     	/* check data source for selected area */
@@ -3558,7 +3572,7 @@ mbev_selected.num_soundings);
 	return(mbev_status);
 }				   
 /*--------------------------------------------------------------------*/
-int mbeditviz_selectnav(int instance)
+int mbeditviz_selectnav(size_t instance)
 {
 	char	*function_name = "mbeditviz_selectnav";
 	struct mbev_file_struct *file;
@@ -3581,7 +3595,7 @@ int mbeditviz_selectnav(int instance)
 		fprintf(stderr,"\ndbg2  Function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:     %d\n",instance);
+		fprintf(stderr,"dbg2       instance:     %ld\n",instance);
 		}
 if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_selectnav: \n");
@@ -3860,7 +3874,7 @@ ifile, iping, ibeam, beamflag, flush);*/
 				else
 					action = MBP_EDIT_ZERO;
 				mb_ess_save(mbev_verbose, &(file->esf),
-						ping->time_d, ibeam,
+						ping->time_d, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						action, &mbev_error);
 				}
 			}

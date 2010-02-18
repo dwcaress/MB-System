@@ -408,25 +408,25 @@ int mbr_register_em300mba(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       detects:            %ld\n",(long)mb_io_ptr->mb_io_detects);
-		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -540,7 +540,7 @@ int mbr_alm_em300mba(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -591,7 +591,7 @@ int mbr_dem_em300mba(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -643,8 +643,8 @@ int mbr_rt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor */
@@ -858,8 +858,8 @@ int mbr_wt_em300mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -927,8 +927,8 @@ int mbr_em300mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1451,7 +1451,8 @@ Have a nice day...\n");
 				}
 			}
 		else if (type == EM2_BATH_MBA
-			&& sonar == MBSYS_SIMRAD2_EM3002)
+			&& sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 			{
 			if (expect == EM2_SS_MBA
 				&& store->ping->png_count == store->ping2->png_count
@@ -1562,7 +1563,8 @@ Have a nice day...\n");
 				}
 			}
 		else if (type == EM2_RAWBEAM3
-			&& sonar == MBSYS_SIMRAD2_EM3002)
+			&& sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 			{
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr,"call mbr_em300mba_rd_rawbeam3 type %x\n",type);
@@ -1589,7 +1591,8 @@ Have a nice day...\n");
 				}
 			}
 		else if (type == EM2_SS_MBA
-			&& sonar == MBSYS_SIMRAD2_EM3002)
+			&& sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 			{
 #ifdef MBR_EM300MBA_DEBUG
 	fprintf(stderr,"call mbr_em300mba_rd_ss type %x\n",type);
@@ -1754,7 +1757,7 @@ int mbr_em300mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		fprintf(stderr,"dbg2       label:      %x%x%x%x\n",label[0],label[1],label[2],label[3]);
 		}
 
@@ -1990,9 +1993,9 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       type:       %d\n",type);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
@@ -2028,6 +2031,10 @@ int mbr_em300mba_rd_start(int verbose, FILE *mbfp, int swap,
 		mb_get_binary_short(swap, &line[12], &short_val); 
 		    store->par_serial_2 = (int) ((unsigned short) short_val);
 		}
+		
+	/* check for dual head sonars */
+	if (store->par_serial_1 != 0 && store->par_serial_2 != 0)
+		store->numberheads = 2;
 		
 	/* now loop over reading individual characters to 
 	    handle ASCII parameter values */
@@ -2390,9 +2397,9 @@ int mbr_em300mba_rd_run_parameter(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -2521,9 +2528,9 @@ int mbr_em300mba_rd_clock(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -2612,9 +2619,9 @@ int mbr_em300mba_rd_tide(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -2704,9 +2711,9 @@ int mbr_em300mba_rd_height(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -2795,9 +2802,9 @@ int mbr_em300mba_rd_heading(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -2937,9 +2944,9 @@ int mbr_em300mba_rd_ssv(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -3077,9 +3084,9 @@ int mbr_em300mba_rd_tilt(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -3217,9 +3224,9 @@ int mbr_em300mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -3369,9 +3376,9 @@ int mbr_em300mba_rd_pos(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -3561,9 +3568,9 @@ int mbr_em300mba_rd_svp(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -3703,9 +3710,9 @@ int mbr_em300mba_rd_svp2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -3847,9 +3854,9 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		fprintf(stderr,"dbg2       version:    %d\n",version);
 		}
@@ -3874,7 +3881,8 @@ int mbr_em300mba_rd_bath(int verbose, FILE *mbfp, int swap,
 		}
 		
 	/* in case of EM3002 check if the data are from the second head and switch ping structure if so */
-	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002)
+	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 		{
 		mb_get_binary_short(swap, &line[8], &short_val); 
 		    png_count = (int) ((unsigned short) short_val);
@@ -4102,9 +4110,9 @@ int mbr_em300mba_rd_rawbeam(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -4280,9 +4288,9 @@ int mbr_em300mba_rd_rawbeam2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -4552,9 +4560,9 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -4573,7 +4581,8 @@ int mbr_em300mba_rd_rawbeam3(int verbose, FILE *mbfp, int swap,
 		}
 		
 	/* in case of EM3002 check if the data are from the second head and if so switch ping structure */
-	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002)
+	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 		{
 		mb_get_binary_short(swap, &line[8], &short_val); 
 		    png_raw3_count = (int) ((unsigned short) short_val);
@@ -4815,9 +4824,9 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		fprintf(stderr,"dbg2       length:     %d\n",length);
 		}
@@ -4842,7 +4851,8 @@ int mbr_em300mba_rd_ss(int verbose, FILE *mbfp, int swap,
 		}
 		
 	/* in case of EM3002 check if the data are from the second head and if so switch ping structure */
-	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002)
+	if (status == MB_SUCCESS && sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2)
 		{
 		mb_get_binary_short(swap, &line[8], &short_val); 
 		    png_ss_count = (int) ((unsigned short) short_val);
@@ -5215,9 +5225,9 @@ int mbr_em300mba_rd_wc(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
 		
@@ -5452,8 +5462,8 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -5598,7 +5608,8 @@ int mbr_em300mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 
 		/* write out data from second head for EM3002 */
-		if (store->sonar == MBSYS_SIMRAD2_EM3002 
+		if (store->sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2 
 			&& store->ping2 != NULL 
 			&& store->ping2->png_count ==store->ping->png_count)
 			{
@@ -5691,9 +5702,9 @@ int mbr_em300mba_wr_start(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 
 	/* print debug statements */
@@ -6041,9 +6052,9 @@ int mbr_em300mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 
 	/* print debug statements */
@@ -6216,9 +6227,9 @@ int mbr_em300mba_wr_clock(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 
 	/* print debug statements */
@@ -6357,9 +6368,9 @@ int mbr_em300mba_wr_tide(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 
 	/* print debug statements */
@@ -6499,9 +6510,9 @@ int mbr_em300mba_wr_height(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 
 	/* print debug statements */
@@ -6639,9 +6650,9 @@ int mbr_em300mba_wr_heading(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 		
 	/* get storage structure */
@@ -6836,9 +6847,9 @@ int mbr_em300mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 		
 	/* get storage structure */
@@ -7032,9 +7043,9 @@ int mbr_em300mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 		
 	/* get storage structure */
@@ -7228,9 +7239,9 @@ int mbr_em300mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 		
 	/* get storage structure */
@@ -7430,9 +7441,9 @@ int mbr_em300mba_wr_pos(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 
 	/* print debug statements */
@@ -7627,9 +7638,9 @@ int mbr_em300mba_wr_svp(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 
 	/* print debug statements */
@@ -7826,14 +7837,15 @@ int mbr_em300mba_wr_bath(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       head:       %d\n",head);
 		}
 		
 	/* get storage structure */
-	if (store->sonar == MBSYS_SIMRAD2_EM3002 && head == 1)
+	if (store->sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2 && head == 1)
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
 	else
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
@@ -8070,9 +8082,9 @@ int mbr_em300mba_wr_rawbeam(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 		
 	/* get storage structure */
@@ -8275,9 +8287,9 @@ int mbr_em300mba_wr_rawbeam2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 		
 	/* get storage structure */
@@ -8559,14 +8571,15 @@ int mbr_em300mba_wr_rawbeam3(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       head:       %d\n",head);
 		}
 		
 	/* get storage structure */
-	if (store->sonar == MBSYS_SIMRAD2_EM3002 && head == 1)
+	if (store->sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2 && head == 1)
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
 	else
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
@@ -8828,14 +8841,15 @@ int mbr_em300mba_wr_ss(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       head:       %d\n",head);
 		}
 		
 	/* get storage structure */
-	if (store->sonar == MBSYS_SIMRAD2_EM3002 && head == 1)
+	if (store->sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2 && head == 1)
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
 	else
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
@@ -9146,9 +9160,9 @@ int mbr_em300mba_wr_wc(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbfp:       %ld\n",(long)mbfp);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
-		fprintf(stderr,"dbg2       store:      %ld\n",(long)store);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
 		
 	/* get storage structure */

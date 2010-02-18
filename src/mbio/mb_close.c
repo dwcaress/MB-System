@@ -189,7 +189,7 @@ int mb_close(int verbose, void **mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)*mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)*mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -231,15 +231,15 @@ int mb_close(int verbose, void **mbio_ptr, int *error)
 	/* else if gsf then use gsfClose */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF)
 	    {
-	    gsfClose((int) mb_io_ptr->mbfp);
+	    gsfClose((int) mb_io_ptr->gsfid);
 	    }
 	
 	/* else if netcdf then use nc_close */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF)
 	    {
 	    if (mb_io_ptr->filemode == MB_FILEMODE_WRITE)
-		nc_enddef((int) mb_io_ptr->mbfp);
-	    nc_close((int) mb_io_ptr->mbfp);
+		nc_enddef(mb_io_ptr->ncid);
+	    nc_close(mb_io_ptr->ncid);
 	    }
 
         /* else handle surf files to be opened with libsapi */

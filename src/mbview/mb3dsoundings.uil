@@ -42,7 +42,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/opt/bx-6.1")
 !(BX) bx_info("builder_version", "BuilderXcessory Version 6.1.3")
 !(BX) bx_info("build_lang", "C")
@@ -68,6 +67,7 @@ procedure do_mb3dsdg_mouse_restore();
 procedure do_mb3dsdg_mouse_rotate();
 procedure do_mb3dsdg_mouse_toggle();
 procedure do_mb3dsdg_pitchbias();
+procedure do_mb3dsdg_resetview();
 procedure do_mb3dsdg_rollbias();
 procedure do_mb3dsdg_timelag();
 procedure do_mb3dsdg_view_allprofile();
@@ -75,6 +75,7 @@ procedure do_mb3dsdg_view_boundingbox();
 procedure do_mb3dsdg_view_flagged();
 procedure do_mb3dsdg_view_goodprofile();
 procedure do_mb3dsdg_view_noprofile();
+procedure do_mb3dsdg_view_scalewithflagged();
 
 list BaseStyle : arguments {
 };
@@ -105,15 +106,15 @@ object mb3dsdg : XmFormDialog widget {
 !(BX) BxNclass = "Mb3dsdg";
 !(BX) BxNsubclassDerived = "False";
         arguments Style_use;
-        XmNborderWidth = 0;
         XmNdialogTitle = compound_string("3D Soundings");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 229;
-        XmNy = 1326;
+        XmNx = 775;
+        XmNy = 932;
         XmNwidth = 1011;
         XmNheight = 660;
     };
     controls {
+         managed XmPushButton mb3dsdg_pushButton_reset;
          managed XmScale mb3dsdg_scale_timelag;
          managed XmToggleButton mb3dsdg_toggleButton_mouse_panzoom1;
          managed XmToggleButton mb3dsdg_toggleButton_mouse_rotate1;
@@ -154,8 +155,8 @@ object mb3dsdg : XmFormDialog widget {
 object mb3dsdg_mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 119;
-        XmNy = 192;
+        XmNx = 747;
+        XmNy = 56;
         XmNwidth = 197;
         XmNheight = 104;
     };
@@ -208,8 +209,8 @@ object mb3dsdg_mainWindow : XmMainWindow widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MBgrdviz";
-!(BX)        XmNx = 119;
-!(BX)        XmNy = 192;
+!(BX)        XmNx = 747;
+!(BX)        XmNy = 56;
 !(BX)        XmNwidth = 197;
 !(BX)        XmNheight = 104;
 !(BX)    };
@@ -499,13 +500,43 @@ object mb3dsdg_toggleButton_view_connectall : XmToggleButton widget {
 !(BX)    };
 };
 
+object mb3dsdg_separator2 : XmSeparator widget {
+    arguments {
+        arguments Style_use;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object mb3dsdg_toggleButton_view_scalewithflagged : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Scale with Flagged Soundings");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNvalueChangedCallback = procedure do_mb3dsdg_view_scalewithflagged();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mb3dsdg_pulldownMenu_view : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 204;
-        XmNheight = 128;
+        XmNx = 757;
+        XmNy = 290;
+        XmNwidth = 236;
+        XmNheight = 154;
     };
     controls {
          managed XmToggleButton mb3dsdg_toggleButton_view_boundingbox;
@@ -515,6 +546,8 @@ object mb3dsdg_pulldownMenu_view : XmPulldownMenu widget {
          managed XmToggleButton mb3dsdg_toggleButton_view_noconnect;
          managed XmToggleButton mb3dsdg_toggleButton_view_connectgood;
          managed XmToggleButton mb3dsdg_toggleButton_view_connectall;
+         managed XmSeparator mb3dsdg_separator2;
+         managed XmToggleButton mb3dsdg_toggleButton_view_scalewithflagged;
     };
     callbacks {
         callbacks Style_useReasons;
@@ -579,8 +612,8 @@ object mb3dsdg_toggleButton_mouse_panzoom : XmToggleButton widget {
 object mb3dsdg_pulldownMenu_mouse : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 197;
-        XmNy = 1286;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 152;
         XmNheight = 52;
     };
@@ -766,7 +799,7 @@ object mb3dsdg_label_status : XmLabel widget {
         XmNtopOffset = 10;
         XmNx = 100;
         XmNy = 10;
-        XmNwidth = 530;
+        XmNwidth = 540;
         XmNheight = 30;
     };
     controls {
@@ -917,11 +950,11 @@ object mb3dsdg_label_mousemode : XmLabel widget {
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 810;
         XmNrightOffset = 0;
-        XmNtopOffset = 10;
+        XmNtopOffset = 50;
         XmNx = 810;
-        XmNy = 10;
-        XmNwidth = 160;
-        XmNheight = 120;
+        XmNy = 50;
+        XmNwidth = 170;
+        XmNheight = 80;
     };
     controls {
     };
@@ -1018,6 +1051,29 @@ object mb3dsdg_scale_timelag : XmScale widget {
 !(BX)    };
 };
 
+object mb3dsdg_pushButton_reset : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Reset View");
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 810;
+        XmNtopOffset = 10;
+        XmNx = 810;
+        XmNy = 10;
+        XmNwidth = 170;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_mb3dsdg_resetview();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object mb3dsdg_form : XmForm widget {
     arguments {
 !(BX) BxNclassOnly = "Mb3dsdg";
@@ -1028,7 +1084,7 @@ object mb3dsdg_form : XmForm widget {
 !(BX) BxNderived = "Mb3dsdgDerived";
 !(BX) BxNfilebase = "Mb3dsdgDerived";
 !(BX) BxNclassFilebase = "Mb3dsdg";
-!(BX) BxNclassGeometry = "987x584+111+1247";
+!(BX) BxNclassGeometry = "987x584+671+275";
 !(BX) BxNgenerate = "True";
 !(BX) BxNreference = "True";
 !(BX) BxNpaletteGroup = "Project Classes";
@@ -1037,12 +1093,13 @@ object mb3dsdg_form : XmForm widget {
         arguments Style_use;
         XmNdialogTitle = compound_string("3D Soundings");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 111;
-        XmNy = 1247;
+        XmNx = 671;
+        XmNy = 275;
         XmNwidth = 987;
         XmNheight = 584;
     };
     controls {
+         managed XmPushButton mb3dsdg_pushButton_reset;
          managed XmScale mb3dsdg_scale_timelag;
          managed XmToggleButton mb3dsdg_toggleButton_mouse_panzoom1;
          managed XmToggleButton mb3dsdg_toggleButton_mouse_rotate1;

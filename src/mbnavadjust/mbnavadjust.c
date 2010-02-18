@@ -16,6 +16,8 @@
 
 
 /* Begin user code block <file_comments> */
+#include <stdio.h>
+#include <stdlib.h>
 /* End user code block <file_comments> */
 
 /*

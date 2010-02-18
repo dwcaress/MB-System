@@ -386,6 +386,7 @@ struct mbedit_ping_struct
 	int	outbounds;
 	int	time_i[7];
 	double	time_d;
+	int	multiplicity;
 	double	time_interval;
 	double	navlon;
 	double	navlat;
@@ -768,7 +769,7 @@ int mbedit_set_graphics(void *xgid, int ncol, unsigned int *pixels)
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       xgid:         %ld\n",(long)xgid);
+		fprintf(stderr,"dbg2       xgid:         %lu\n",(size_t)xgid);
 		fprintf(stderr,"dbg2       ncolors:      %d\n",ncol);
 		for (i=0;i<ncol;i++)
 			fprintf(stderr,"dbg2       pixel[%d]:     %d\n",
@@ -940,23 +941,23 @@ int mbedit_get_filters( int *b_m, double *d_m,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2       b_m:     %ld\n",(long)b_m);
-		fprintf(stderr,"dbg2       d_m:     %ld\n",(long)d_m);
- 		fprintf(stderr,"dbg2       f_m:     %ld\n",(long)f_m);
-		fprintf(stderr,"dbg2       f_m_t:   %ld\n",(long)f_m_t);
-		fprintf(stderr,"dbg2       f_m_x:   %ld\n",(long)f_m_x);
-		fprintf(stderr,"dbg2       f_m_l:   %ld\n",(long)f_m_l);
- 		fprintf(stderr,"dbg2       f_w:     %ld\n",(long)f_w);
-		fprintf(stderr,"dbg2       f_w_t:   %ld\n",(long)f_w_t);
- 		fprintf(stderr,"dbg2       f_b:     %ld\n",(long)f_b);
-		fprintf(stderr,"dbg2       f_b_b:   %ld\n",(long)f_b_b);
-		fprintf(stderr,"dbg2       f_b_e:   %ld\n",(long)f_b_e);
- 		fprintf(stderr,"dbg2       f_d:     %ld\n",(long)f_d);
-		fprintf(stderr,"dbg2       f_d_b:   %ld\n",(long)f_d_b);
-		fprintf(stderr,"dbg2       f_d_e:   %ld\n",(long)f_d_e);
- 		fprintf(stderr,"dbg2       f_a:     %ld\n",(long)f_a);
-		fprintf(stderr,"dbg2       f_a_b:   %ld\n",(long)f_a_b);
-		fprintf(stderr,"dbg2       f_a_e:   %ld\n",(long)f_a_e);
+		fprintf(stderr,"dbg2       b_m:     %lu\n",(size_t)b_m);
+		fprintf(stderr,"dbg2       d_m:     %lu\n",(size_t)d_m);
+ 		fprintf(stderr,"dbg2       f_m:     %lu\n",(size_t)f_m);
+		fprintf(stderr,"dbg2       f_m_t:   %lu\n",(size_t)f_m_t);
+		fprintf(stderr,"dbg2       f_m_x:   %lu\n",(size_t)f_m_x);
+		fprintf(stderr,"dbg2       f_m_l:   %lu\n",(size_t)f_m_l);
+ 		fprintf(stderr,"dbg2       f_w:     %lu\n",(size_t)f_w);
+		fprintf(stderr,"dbg2       f_w_t:   %lu\n",(size_t)f_w_t);
+ 		fprintf(stderr,"dbg2       f_b:     %lu\n",(size_t)f_b);
+		fprintf(stderr,"dbg2       f_b_b:   %lu\n",(size_t)f_b_b);
+		fprintf(stderr,"dbg2       f_b_e:   %lu\n",(size_t)f_b_e);
+ 		fprintf(stderr,"dbg2       f_d:     %lu\n",(size_t)f_d);
+		fprintf(stderr,"dbg2       f_d_b:   %lu\n",(size_t)f_d_b);
+		fprintf(stderr,"dbg2       f_d_e:   %lu\n",(size_t)f_d_e);
+ 		fprintf(stderr,"dbg2       f_a:     %lu\n",(size_t)f_a);
+		fprintf(stderr,"dbg2       f_a_b:   %lu\n",(size_t)f_a_b);
+		fprintf(stderr,"dbg2       f_a_e:   %lu\n",(size_t)f_a_e);
 		}
 
 	/* set max beam number and acrosstrack distance */
@@ -2057,12 +2058,12 @@ int mbedit_action_mouse_toggle(
 			    if (mb_beam_ok(ping[iping].beamflag[jbeam]))
 				mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
-				    jbeam, 
+				    jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				    MBP_EDIT_FLAG, &error);
 			    else if (ping[iping].beamflag[jbeam] != MB_FLAG_NULL)
 				mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
-				    jbeam, 
+				    jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				    MBP_EDIT_UNFLAG, &error);
 			    }
 			
@@ -2266,7 +2267,7 @@ int mbedit_action_mouse_pick(
 			    {
 			    mb_ess_save(verbose, &esf,
 				    ping[iping].time_d, 
-				    jbeam, 
+				    jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 				    MBP_EDIT_FLAG, &error);
 			    }
 			
@@ -2438,7 +2439,8 @@ int mbedit_action_mouse_erase(
 			    {
 			    mb_ess_save(verbose, &esf,
 			    	    ping[i].time_d, 
-				    j, MBP_EDIT_FLAG, &error);
+				    j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+				    MBP_EDIT_FLAG, &error);
 			    }
 			
 	          	/* unplot the affected beam and ping */
@@ -2624,7 +2626,8 @@ int mbedit_action_mouse_restore(
 			    {
 			    mb_ess_save(verbose, &esf,
 				    ping[i].time_d, 
-				    j, MBP_EDIT_UNFLAG, &error);
+				    j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+				    MBP_EDIT_UNFLAG, &error);
 			    }
 			
 	          	/* unplot the affected beam and ping */
@@ -2981,7 +2984,8 @@ int mbedit_action_mouse_grab(
 					    {
 					    mb_ess_save(verbose, &esf,
 			    			    ping[i].time_d, 
-						    j, MBP_EDIT_FLAG, &error);
+						    j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						    MBP_EDIT_FLAG, &error);
 					    }
 
 					/* reset the beam value */
@@ -3275,7 +3279,8 @@ int mbedit_action_zap_outbounds(
 			{
 			mb_ess_save(verbose, &esf,
 				ping[iping].time_d, 
-				j, MBP_EDIT_FLAG, &error);
+				j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+				MBP_EDIT_FLAG, &error);
 			}
 		    
 		    /* unplot the affected beam and ping */
@@ -3405,7 +3410,8 @@ int mbedit_action_bad_ping(
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBP_EDIT_FLAG, &error);
+				j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+				MBP_EDIT_FLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3521,7 +3527,8 @@ int mbedit_action_good_ping(
 			    && ping[iping_save].beamflag[j] != MB_FLAG_NULL)
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBP_EDIT_UNFLAG, &error);
+				j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+				MBP_EDIT_UNFLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3637,7 +3644,8 @@ int mbedit_action_left_ping(
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBP_EDIT_FLAG, &error);
+				j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+				MBP_EDIT_FLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3752,7 +3760,8 @@ int mbedit_action_right_ping(
 			if (mb_beam_ok(ping[iping_save].beamflag[j]))
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBP_EDIT_FLAG, &error);
+				j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+				MBP_EDIT_FLAG, &error);
 		    }
 
 		/* unplot the affected beam and ping */
@@ -3868,7 +3877,8 @@ int mbedit_action_zero_ping(
 			if (ping[iping_save].beamflag[j] != MB_FLAG_NULL)
 			    mb_ess_save(verbose, &esf,
 				ping[iping_save].time_d, 
-				j, MBP_EDIT_ZERO, &error);
+				j + ping[iping_save].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+				MBP_EDIT_ZERO, &error);
 			}
 		    }
 
@@ -3986,7 +3996,8 @@ int mbedit_action_flag_view(
 				    /* write edit to save file */
 				    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[i].time_d, j, 
+						ping[i].time_d, 
+						j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 						MBP_EDIT_FLAG, &error);
 		    
 				    /* apply edit */
@@ -4112,7 +4123,8 @@ int mbedit_action_unflag_view(
 				    /* write edit to save file */
 				    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[i].time_d, j, 
+						ping[i].time_d, 
+						j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 						MBP_EDIT_UNFLAG, &error);
 		    
 				    /* apply edit */
@@ -4238,7 +4250,8 @@ int mbedit_action_unflag_all(
 			    /* write edit to save file */
 			    if (esffile_open == MB_YES)
 				mb_ess_save(verbose, &esf,
-					ping[i].time_d, j, 
+					ping[i].time_d, 
+					j + ping[i].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
 					MBP_EDIT_UNFLAG, &error);
 	    
 			    /* apply edit */
@@ -4465,7 +4478,8 @@ int mbedit_filter_ping(int iping)
 			    	/* write edit to save file */
 			    	if (esffile_open == MB_YES)
 				    mb_ess_save(verbose, &esf,
-						ping[iping].time_d, j,
+						ping[iping].time_d, 
+						j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_UNFLAG, &error);
 	
 			    	/* apply edit */
@@ -4520,7 +4534,8 @@ int mbedit_filter_ping(int iping)
 			    	    /* write edit to save file */
 			    	    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[iping].time_d, jbeam,
+						ping[iping].time_d, 
+						jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
@@ -4550,7 +4565,8 @@ int mbedit_filter_ping(int iping)
 			   	/* write edit to save file */
 			        if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[iping].time_d, j,
+						ping[iping].time_d, 
+						j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_FILTER, &error);
 	
 			        /* apply edit */
@@ -4573,7 +4589,8 @@ int mbedit_filter_ping(int iping)
 			   	/* write edit to save file */
 			        if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[iping].time_d, j,
+						ping[iping].time_d, 
+						j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_FILTER, &error);
 	
 			        /* apply edit */
@@ -4603,7 +4620,8 @@ int mbedit_filter_ping(int iping)
 			    	    /* write edit to save file */
 			    	    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[iping].time_d, j,
+						ping[iping].time_d, 
+						j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
@@ -4629,7 +4647,8 @@ int mbedit_filter_ping(int iping)
 			    	    /* write edit to save file */
 			    	    if (esffile_open == MB_YES)
 					mb_ess_save(verbose, &esf,
-						ping[iping].time_d, j,
+						ping[iping].time_d, 
+						j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						MBP_EDIT_FILTER, &error);
 	
 			    	    /* apply edit */
@@ -4661,7 +4680,8 @@ int mbedit_filter_ping(int iping)
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
-							ping[iping].time_d, j,
+							ping[iping].time_d, 
+							j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -4690,7 +4710,8 @@ int mbedit_filter_ping(int iping)
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
-							ping[iping].time_d, j,
+							ping[iping].time_d, 
+							j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -4726,7 +4747,8 @@ int mbedit_filter_ping(int iping)
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
-							ping[iping].time_d, j,
+							ping[iping].time_d, 
+							j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -4758,7 +4780,8 @@ int mbedit_filter_ping(int iping)
 			    	    	/* write edit to save file */
 			    	    	if (esffile_open == MB_YES)
 						mb_ess_save(verbose, &esf,
-							ping[iping].time_d, j,
+							ping[iping].time_d, 
+							j + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 							MBP_EDIT_FILTER, &error);
 	
 			    	    	/* apply edit */
@@ -5158,7 +5181,8 @@ int mbedit_dump_data(int hold_size, int *ndumped, int *nbuffer)
 				else
 					action = MBP_EDIT_ZERO;
 				mb_esf_save(verbose, &esf,
-						ping[iping].time_d, jbeam,
+						ping[iping].time_d, 
+						jbeam + ping[iping].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 						action, &error);
 				}
 			    }
@@ -5291,6 +5315,14 @@ int mbedit_load_data(int buffer_size,
 						&ping[nbuff].pitch,
 						&ping[nbuff].heave, 
 						&error);
+			if (nbuff > 0 && ping[nbuff].time_d == ping[nbuff-1].time_d)
+				{
+				ping[nbuff].multiplicity = ping[nbuff-1].multiplicity + 1;
+				}
+			else
+				{
+				ping[nbuff].multiplicity = 0;
+				}
 			if (nbuff == 0)
 				ping[nbuff].distance = 0.0;
 			else
@@ -5429,7 +5461,7 @@ int mbedit_load_data(int buffer_size,
 		    {
 		    /* apply edits for this ping */
 		    status = mb_esf_apply(verbose, &esf, 
-		    		ping[i].time_d, ping[i].beams_bath, 
+		    		ping[i].time_d, ping[i].multiplicity, ping[i].beams_bath, 
 				ping[i].beamflag, &error);
 			
 		    /* update message every 250 records */
@@ -5590,7 +5622,7 @@ int mbedit_plot_all(
 		fprintf(stderr,"dbg2       show_detects:%d\n",sh_dtcts);
 		fprintf(stderr,"dbg2       show_flagged:%d\n",sh_flggd);
 		fprintf(stderr,"dbg2       show_time:   %d\n",sh_time);
-		fprintf(stderr,"dbg2       nplt:        %ld\n",(long)nplt);
+		fprintf(stderr,"dbg2       nplt:        %lu\n",(size_t)nplt);
 		fprintf(stderr,"dbg2       autoscale:   %d\n",autoscale);
 		}
 

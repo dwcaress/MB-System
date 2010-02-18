@@ -431,7 +431,9 @@ int main (int argc, char **argv)
 		/* remove the temporary files */
 		sprintf(line, "/bin/rm -f %s %s\n", lltfile, otpsfile);
 		system(line);
-		
+			
+		/* some helpful output */
+		fprintf(stderr, "\nResults are really in %s\n", tidefile);
 		} /* end single position mode */
 		
 	/* else get tides along the navigation contained in a set of swath files */

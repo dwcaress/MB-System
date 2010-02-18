@@ -1002,4 +1002,4 @@ $(MANDIR)/man1/proj.1:	proj.1
 	chmod 664 $(MANDIR)/man1/proj.1
 $(MANDIR)/man3/pj_init.3:	pj_init.3
 	cp pj_init.3 $(MANDIR)/man3/pj_init.3
-	chmod 664 $(MANDIR)/man1/pj_init.3
+	chmod 664 $(MANDIR)/man3/pj_init.3
