@@ -3484,7 +3484,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(stderr,"dbg2       grid:       %lu\n",(size_t)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -3563,7 +3563,7 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(stderr,"dbg2       grid:       %lu\n",(size_t)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -3642,7 +3642,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(stderr,"dbg2       grid:       %lu\n",(size_t)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -3706,7 +3706,11 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	status = MB_SUCCESS;
 	struct GRD_HEADER grd;
 	double	w, e, s, n;
+#ifdef GMT_MINOR_VERSION
 	GMT_LONG	pad[4];
+#else
+	int	pad[4];
+#endif
 	float	*a;
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
@@ -3723,7 +3727,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       outfile:    %s\n",outfile);
-		fprintf(stderr,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(stderr,"dbg2       grid:       %lu\n",(size_t)grid);
 		fprintf(stderr,"dbg2       nx:         %d\n",nx);
 		fprintf(stderr,"dbg2       ny:         %d\n",ny);
 		fprintf(stderr,"dbg2       xmin:       %f\n",xmin);
@@ -3737,7 +3741,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(stderr,"dbg2       zlab:       %s\n",zlab);
 		fprintf(stderr,"dbg2       titl:       %s\n",titl);
 		fprintf(stderr,"dbg2       argc:       %d\n",argc);
-		fprintf(stderr,"dbg2       *argv:      %ld\n",(long)*argv);
+		fprintf(stderr,"dbg2       *argv:      %lu\n",(size_t)*argv);
 		}
 
 	/* inititialize grd header */

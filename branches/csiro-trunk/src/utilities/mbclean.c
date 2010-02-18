@@ -224,6 +224,7 @@ struct mbclean_ping_struct
 	{
 	int	time_i[7];
 	double	time_d;
+	int	multiplicity;
 	double	navlon;
 	double	navlat;
 	double	speed;
@@ -673,7 +674,7 @@ int main (int argc, char **argv)
 		for the specified data format */
 	if (beam_flagging == MB_NO && mode <= 2)
 		{
-		fprintf(stderr,"\nMBIO format %d does not allow flagging of bad data \nas negative numbers (specified by cleaning mode %d).\n",format,mode);
+		fprintf(stderr,"\nMBIO format %d does not allow flagging of bad data (specified by cleaning mode %d).\n",format,mode);
 		fprintf(stderr,"\nCopy the data to another format or set the cleaning mode to zero \nbad data values (-M3 or -M4).\n");
 		fprintf(stderr,"\nProgram <%s> Terminated\n",
 			program_name);
@@ -861,6 +862,16 @@ int main (int argc, char **argv)
 		}
 	    if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 		{
+		/* check for multiple pings with the same time stamps */
+		if (nrec > 0 && ping[nrec].time_d == ping[nrec-1].time_d)
+			{
+			ping[nrec].multiplicity = ping[nrec-1].multiplicity + 1;
+			}
+		else
+			{
+			ping[nrec].multiplicity = 0;
+			}
+		
 		/* save original beamflags */
 		for (i=0;i<ping[nrec].beams_bath;i++)
 		    {
@@ -894,7 +905,7 @@ int main (int argc, char **argv)
 		    
 		/* apply saved edits */
 		status = mb_esf_apply(verbose, &esf, 
-		    		ping[nrec].time_d, ping[nrec].beams_bath, 
+		    		ping[nrec].time_d, ping[nrec].multiplicity, ping[nrec].beams_bath, 
 				ping[nrec].beamflag, &error);
 
 		/* update counters */
@@ -952,14 +963,18 @@ int main (int argc, char **argv)
 					    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nouter++;
 				nflag++;
-				mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+						i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_FILTER, &error);
 				}
 			    else
 				{
 				ping[irec].beamflag[i] = MB_FLAG_NULL;
 				nouter++;
 				nzero++;
-				mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+						i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_ZERO, &error);
 				}
 			    }
 			j = ping[irec].beams_bath - i - 1;
@@ -982,14 +997,18 @@ int main (int argc, char **argv)
 				    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nouter++;
 				nflag++;
-				mb_ess_save(verbose, &esf, ping[irec].time_d, j, MBP_EDIT_FILTER, &error);
+				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+						j + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_FILTER, &error);
 				}
 			    else
 				{
 				ping[irec].beamflag[j] = MB_FLAG_NULL;
 				nouter++;
 				nzero++;
-				mb_ess_save(verbose, &esf, ping[irec].time_d, j, MBP_EDIT_ZERO, &error);
+				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+						j + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_ZERO, &error);
 				}
 			    }
 			}
@@ -1021,14 +1040,18 @@ int main (int argc, char **argv)
 					    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nrange++;
 				nflag++;
-				mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+						i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_FILTER, &error);
 				}
 			    else
 				{
 				ping[irec].beamflag[i] = MB_FLAG_NULL;
 				nrange++;
 				nzero++;
-				mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+						i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_ZERO, &error);
 				}
 			    }
 			}
@@ -1093,7 +1116,9 @@ int main (int argc, char **argv)
 				    ping[irec].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				    nrail++;
 				    nflag++;
-				    mb_ess_save(verbose, &esf, ping[irec].time_d, j, MBP_EDIT_FILTER, &error);
+				    mb_ess_save(verbose, &esf, ping[irec].time_d, 
+				    		j + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_FILTER, &error);
 				    }
 				}
 			    else
@@ -1103,7 +1128,9 @@ int main (int argc, char **argv)
 				    ping[irec].beamflag[j] = MB_FLAG_NULL;
 				    nrail++;
 				    nzero++;
-				    mb_ess_save(verbose, &esf, ping[irec].time_d, j, MBP_EDIT_ZERO, &error);
+				    mb_ess_save(verbose, &esf, ping[irec].time_d, 
+				    		j + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_ZERO, &error);
 				    }
 				}
 			    }
@@ -1130,7 +1157,9 @@ int main (int argc, char **argv)
 				    ping[irec].beamflag[k] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				    nrail++;
 				    nflag++;
-				    mb_ess_save(verbose, &esf, ping[irec].time_d, k, MBP_EDIT_FILTER, &error);
+				    mb_ess_save(verbose, &esf, ping[irec].time_d, 
+				    		k + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_FILTER, &error);
 				    }
 				}
 			    else
@@ -1140,7 +1169,9 @@ int main (int argc, char **argv)
 				    ping[irec].beamflag[k] = MB_FLAG_NULL;
 				    nrail++;
 				    nzero++;
-				    mb_ess_save(verbose, &esf, ping[irec].time_d, k, MBP_EDIT_FILTER, &error);
+				    mb_ess_save(verbose, &esf, ping[irec].time_d, 
+				    		k + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_FILTER, &error);
 				    }
 				}
 			    }
@@ -1217,14 +1248,18 @@ int main (int argc, char **argv)
 					ping[irec].beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 					nfraction++;
 					nflag++;
-					mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+					mb_ess_save(verbose, &esf, ping[irec].time_d, 
+							i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+							MBP_EDIT_FILTER, &error);
 					}
 				    else
 					{
 					ping[irec].beamflag[i] = MB_FLAG_NULL;
 					nfraction++;
 					nzero++;
-					mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+					mb_ess_save(verbose, &esf, ping[irec].time_d, 
+							i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+							MBP_EDIT_ZERO, &error);
 					}
 				    }
 				}
@@ -1251,14 +1286,18 @@ int main (int argc, char **argv)
 					ping[irec].beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 					ndeviation++;
 					nflag++;
-					mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+					mb_ess_save(verbose, &esf, ping[irec].time_d, 
+							i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+							MBP_EDIT_FILTER, &error);
 					}
 				    else
 					{
 					ping[irec].beamflag[i] = MB_FLAG_NULL;
 					ndeviation++;
 					nzero++;
-					mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+					mb_ess_save(verbose, &esf, ping[irec].time_d, 
+							i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+							MBP_EDIT_ZERO, &error);
 					}
 				    }
 				}
@@ -1306,13 +1345,17 @@ int main (int argc, char **argv)
 						      {
 							ping[irec].beamflag[i] 
 							  = MB_FLAG_FLAG + MB_FLAG_FILTER;
-							mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+							mb_ess_save(verbose, &esf, ping[irec].time_d, 
+									i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+									MBP_EDIT_FILTER, &error);
 						      }
 						    else if (mode == MBCLEAN_ZERO_ONE
 							|| mode == MBCLEAN_ZERO_BOTH)
 						      {
 							ping[irec].beamflag[i] = MB_FLAG_NULL;
-							mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+							mb_ess_save(verbose, &esf, ping[irec].time_d, 
+									i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+									MBP_EDIT_ZERO, &error);
 						      }
 						    if (verbose >= 1)
 						      {
@@ -1375,13 +1418,17 @@ int main (int argc, char **argv)
 						      {
 							ping[1].beamflag[i] 
 							  = MB_FLAG_FLAG + MB_FLAG_FILTER;
-							mb_ess_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_FILTER, &error);
+							mb_ess_save(verbose, &esf, ping[1].time_d, 
+									i + ping[1].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+									MBP_EDIT_FILTER, &error);
 						      }
 						    else if (mode == MBCLEAN_ZERO_ONE
 							|| mode == MBCLEAN_ZERO_BOTH)
 						      {
 							ping[1].beamflag[i] = MB_FLAG_NULL;
-							mb_ess_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_ZERO, &error);
+							mb_ess_save(verbose, &esf, ping[1].time_d, 
+									i + ping[1].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+									MBP_EDIT_ZERO, &error);
 						      }
 						    if (verbose >= 1)
 						      {
@@ -1449,8 +1496,12 @@ int main (int argc, char **argv)
 							MB_FLAG_FLAG + MB_FLAG_FILTER;
 						nbad++;
 						nflag = nflag + 2;
-						mb_ess_save(verbose, &esf, ping[j].time_d, k, MBP_EDIT_FILTER, &error);
-						mb_ess_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_FILTER, &error);
+						mb_ess_save(verbose, &esf, ping[j].time_d, 
+								k + ping[j].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+								MBP_EDIT_FILTER, &error);
+						mb_ess_save(verbose, &esf, ping[1].time_d, 
+								i + ping[1].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+								MBP_EDIT_FILTER, &error);
 						}
 					    else if (mode == MBCLEAN_FLAG_ONE)
 						{
@@ -1464,7 +1515,9 @@ int main (int argc, char **argv)
 						    bad[1].flag = MB_NO;
 						    ping[j].beamflag[k] 
 							= MB_FLAG_FLAG + MB_FLAG_FILTER;
-						    mb_ess_save(verbose, &esf, ping[j].time_d, k, MBP_EDIT_FILTER, &error);
+						    mb_ess_save(verbose, &esf, ping[j].time_d, 
+						    		k + ping[j].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+								MBP_EDIT_FILTER, &error);
 						    }
 						else
 						    {
@@ -1475,7 +1528,9 @@ int main (int argc, char **argv)
 						    bad[1].flag = MB_NO;
 						    ping[1].beamflag[i] 
 							= MB_FLAG_FLAG + MB_FLAG_FILTER;
-						    mb_ess_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_FILTER, &error);
+						    mb_ess_save(verbose, &esf, ping[1].time_d, 
+						    		i + ping[1].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+								MBP_EDIT_FILTER, &error);
 						    }
 						nbad++;
 						nflag++;
@@ -1494,8 +1549,12 @@ int main (int argc, char **argv)
 						ping[1].beamflag[i] = MB_FLAG_NULL;
 						nbad++;
 						nzero = nzero + 2;
-						mb_ess_save(verbose, &esf, ping[j].time_d, k, MBP_EDIT_ZERO, &error);
-						mb_ess_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_ZERO, &error);
+						mb_ess_save(verbose, &esf, ping[j].time_d, 
+								k + ping[j].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+								MBP_EDIT_ZERO, &error);
+						mb_ess_save(verbose, &esf, ping[1].time_d, 
+								i + ping[1].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+								MBP_EDIT_ZERO, &error);
 						}
 					    else if (mode == MBCLEAN_ZERO_ONE)
 						{
@@ -1508,7 +1567,9 @@ int main (int argc, char **argv)
 						    bad[0].bath = ping[j].bath[k];
 						    bad[1].flag = MB_NO;
 						    ping[j].beamflag[k] = MB_FLAG_NULL;
-						    mb_ess_save(verbose, &esf, ping[j].time_d, k, MBP_EDIT_ZERO, &error);
+						    mb_ess_save(verbose, &esf, ping[j].time_d, 
+						    		k + ping[j].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+								MBP_EDIT_ZERO, &error);
 						    }
 						else
 						    {
@@ -1519,7 +1580,9 @@ int main (int argc, char **argv)
 						    bad[1].flag = MB_NO;
     
 						    ping[1].beamflag[i] = MB_FLAG_NULL;
-						    mb_ess_save(verbose, &esf, ping[1].time_d, i, MBP_EDIT_ZERO, &error);
+						    mb_ess_save(verbose, &esf, ping[1].time_d, 
+						    		i + ping[1].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+								MBP_EDIT_ZERO, &error);
 						    }
 						nbad++;
 						nzero++;
@@ -1602,7 +1665,9 @@ int main (int argc, char **argv)
 				    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nmin++;
 				nflag++;
-				mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+						i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_FILTER, &error);
 				}
 			    else if (mb_beam_ok(ping[irec].beamflag[i]))
 				{
@@ -1620,7 +1685,9 @@ int main (int argc, char **argv)
 				ping[irec].beamflag[i] = MB_FLAG_NULL;
 				nmin++;
 				nzero++;
-				mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+						i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_ZERO, &error);
 				}
 			    }
 			}
@@ -1654,7 +1721,9 @@ int main (int argc, char **argv)
 				    = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				nmin++;
 				nflag++;
-				mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_FILTER, &error);
+				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+						i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_FILTER, &error);
 				}
 			    else if (mb_beam_ok(ping[irec].beamflag[i]))
 				{
@@ -1672,7 +1741,9 @@ int main (int argc, char **argv)
 				ping[irec].beamflag[i] = MB_FLAG_NULL;
 				nmin++;
 				nzero++;
-				mb_ess_save(verbose, &esf, ping[irec].time_d, i, MBP_EDIT_ZERO, &error);
+				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+						i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+						MBP_EDIT_ZERO, &error);
 				}
 			    }
 			}
@@ -1706,7 +1777,8 @@ int main (int argc, char **argv)
 			    else
 				    action = MBP_EDIT_ZERO;
 			    mb_esf_save(verbose, &esf,
-					    ping[irec].time_d, i,
+					    ping[irec].time_d, 
+					    i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
 					    action, &error);
 			    }
 			}
@@ -1899,7 +1971,7 @@ int mbclean_save_edit(int verbose, FILE *sofp, double time_d, int beam, int acti
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");	
-		fprintf(stderr,"dbg2       sofp:            %ld\n",(long)sofp);
+		fprintf(stderr,"dbg2       sofp:            %lu\n",(size_t)sofp);
 		fprintf(stderr,"dbg2       time_d:          %f\n",time_d);
 		fprintf(stderr,"dbg2       beam:            %d\n",beam);
 		fprintf(stderr,"dbg2       action:          %d\n",action);

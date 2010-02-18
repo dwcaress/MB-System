@@ -420,7 +420,11 @@ int main (int argc, char **argv)
         char    tiff_file[MB_PATH_MAXLINE];
 	int	intensity;
         double  bounds[4];
+#ifdef GMT_MINOR_VERSION
 	GMT_LONG	pad[4];
+#else
+	int	pad[4];
+#endif
         int     nx,ny,nxy;
         float   *grid = NULL;
         float   *igrid = NULL;

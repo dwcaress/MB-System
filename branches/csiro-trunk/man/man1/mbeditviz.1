@@ -1,6 +1,6 @@
-.TH mbeditviz 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH MBeditviz 1 "4 February 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBMBeditviz\fP - Interactive 3D visualization based bathymetry editor and patch test tool.
+\fBMBeditviz\fP - 3D visualization-based editing of swath bathymetry soundings.
 
 .SH VERSION
 Version 5.0
@@ -12,8 +12,65 @@ Version 5.0
 
 \fIOverview\fP
 
-\fBMBeditviz\fP is an interactive 3D visualization based bathymetry editor and
-patch test tool.
+\fBMBeditviz\fP is an interactive 2D/3D visualization-based tool for editing swath 
+bathymetry data. The bathymetry data from selected files are read into memory, gridded,
+and displayed in the same 2D/3D visualization environment used by \fBMBgrdviz\fP. In
+this environment, users can select arbitrary areas or regions. All of the soundings in
+the selected areas are displayed in a 3D "cloud" that can be rotated, zoomed, and exaggerated.
+These soundings can also be edited using the same edit mouse modes as in \fBMBedit\fP.
+\fBMBeditviz\fP operates with "edit save files" (*.esf) in the same fashion as \fBMBedit\fP,
+\fBmbclean\fP, and \fBmbareaclean\fP. To apply the edits in processing, simply run \fBmbprocess\fP
+on a datalist referencing the relevant files.
+
+\fIStarting Up\fP
+
+The initial MBeditviz display shows a list of the swath files you have identified by using 
+the "File->Open Swath File" menu item.  You can select some or all of the files in the list. 
+When you click on the "View All Files" or the "View Selected Files", MBeditviz reads the 
+specified files, loading all of the soundings into memory. The program then brings up a 
+"Grid Parameters" dialog which suggests a grid cell size and shows the implied dimensions 
+of a grid enclosing all of the data. The two issues to keep in mind are that you want the 
+grid to be reasonably sized (dimensions <2500 or so on my laptop) and that no interpolation 
+is applied in the gridding, so too small a grid cell size will leave gaps between soundings 
+in the map view. When you click "Apply", MBeditviz grids the soundings, and then displays 
+the grid using the same 2D/3D interface as MBgrdviz, including the navigation associated with
+the selected swath files.
+
+The navigation associated with the selected swath files will be displayed as well, and can
+be selected or queried by setting the mouse mode to 
+
+Data files that have been previously edited with \fBMBeditviz\fP, \fBMBedit\fP, \fBmbclean\fP, 
+or \fBmbareaclean\fP will have two related ancilliary files with suffixes ".esf" and ".par".
+The "*.esf" file is the edit save file containing all of the flag and unflag edit events 
+generated for soundings in a data file. The "*.par" file is the processing parameter file
+that contains all of the processing parameters and instructions to be applied by the program
+\fBmbprocess\fP. \fBMBeditviz\fP will read and apply the pre-existing edit events as files
+are read into memory. The initial gridded view of the bathymetry will reflect all of the
+pre-existing edit events.
+
+\fIDisplaying a "Sounding Cloud"\fP
+
+Once you have an MBeditviz survey display, set the mouse mode to "Pick Area" and either use 
+the left button to drag a square "region", or use the middle button to drag an arbitrarily 
+oriented "area" (also, if an area is defined the right button decreases/increases the width 
+of the area). Each time you define or change a picked region or area, MBeditviz will display 
+the point cloud of soundings located in the region or area. Since \fBMBeditviz\fP also displays
+the swath file navigation, users can also change the mouse mode to "Pick Nav" or "Pick Nav File"
+and select portions of the navigation. In this case the sounding cloud will encompass all of
+the data associated with the selected navigation. The 3Dsoundings view is manipulated
+using the middle and right mouse buttons in either rotation mode or zoom/exagerate mode.
+
+You can edit the soundings in the point cloud context using the left mouse button. The 
+editing mouse modes work just like MBedit. The View menu in the 
+point cloud display lets you show, or not show, the flagged soundings (which are displayed in red).
+
+\fIApplying the Bathyemtry Edits\fP
+
+When you dismiss the gridded view, the esf files of the affected files will be updated just 
+as they are with MBedit. The program also modifies the \fBmbprocess\fP parameter file
+for the input file by specifying the edit save file and setting the \fBmbprocess\fP mode to 
+apply the edits when generating a processed swath output file. If no parameter file exists, 
+\fBmbeditviz\fP creates one.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -31,10 +88,12 @@ This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
 .B \-I
-\fIdatalistfile\fP
+\fIdatalist\fP
 .br
-Sets the datalist file to be recursively read by MBeditviz. 
-A datalist contains a list of input swath data files and/or other datalist files. 
+Sets an \fBMB-System\fP datalist file to be parsed on input for swath data files
+to list as available for editing. 
+This option is usually used when \fBMBeditviz\fP is started
+automatically from some other process, such as \fBMBgrdviz\fP. 
 .TP
 .B \-V
 Normally, \fBMBeditviz\fP outputs limited information to the stderr stream.  
@@ -43,18 +102,14 @@ outputs the program version being used, all error status messages,
 and a large amount of other information including all of the
 beams flagged or zeroed.
 
-.SH INTERACTIVE CONTROLS: to be documented.....
+.SH INTERACTIVE CONTROLS
 
 .SH MOUSE ACTIONS
 
 .SH KEYBOARD ACTIONS
 
-.SH MBeditviz ROUTE FILES
-
-.SH MBeditviz SITE FILES
-
 .SH SEE ALSO
-\fBmbsystem\fP(l) \fBmbgrdviz\fP
+\fBmbsystem\fP(l), \fBmbbedit\fP(l), \fBmbprocess\fP(l)
 
 .SH BUGS
 This program is not done, nor is it adequately documented.

@@ -778,6 +778,7 @@ struct mbsys_simrad2_struct
 
 	/* type of sonar */
 	int	sonar;		/* Type of Simrad sonar */
+	int	numberheads;	/* Number of sonar heads (1 or 2) */
 	
 	/* time stamp */
 	int	date;		/* date = year*10000 + month*100 + day

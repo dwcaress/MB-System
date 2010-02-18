@@ -190,7 +190,7 @@ static int modp_borders[4];
 #define FILE_MODE_NEW 		1
 #define FILE_MODE_OPEN 		2
 #define FILE_MODE_IMPORT 	3
-int	file_mode = FILE_MODE_NONE;
+size_t	file_mode = FILE_MODE_NONE;
 int	format = 0;
 int	expose_plot_ok = True;
 int selected = 0; /* indicates an input file is selected */
@@ -521,7 +521,7 @@ UARG( Widget, w)
 ARG( XtPointer, client)
 GRAU( XtPointer, call)
 {
-    long	exitValue = (long)client;
+    long	exitValue = EXIT_FAILURE;
     exit(exitValue);
 }
 
@@ -791,7 +791,7 @@ void do_update_status()
         		strcat(string,"Inversion Performed:                    Out of Date\n");
         	else
         		strcat(string,"Inversion Performed:                    No\n");
-		fprintf(stderr,string);
+		fprintf(stderr,"%s", string);
 		}
 
 	/* set list_data */
@@ -3223,7 +3223,7 @@ do_fileselection_mode( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 
-    file_mode = (int) client_data;
+    file_mode = (size_t) client_data;
 
     /* desl with selection */
     if (file_mode == FILE_MODE_NEW)

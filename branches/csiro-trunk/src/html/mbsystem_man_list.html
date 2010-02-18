@@ -57,17 +57,20 @@ complete list of data files and formats.</li>
 mbio
 parameters
 for reading and writing swath sonar data</li>
+  <li><a href="mbdumpesf.html">mbdumpesf</a>: mbdumpesf reads an MB-System edit save file and dumps the contents as an ascii table to stdout.</li>
   <li> <a href="mbedit.html">mbedit</a>: Interactive editor used to
 flag
 bad beams
 in swath sonar bathymetry data.</li>
   <li><a href="mbeditviz.html">mbeditviz</a>: Interactive 3D visualization bathymetry editing and attitude bias patch test.</li>
   <li><a href="mbextractsegy.html">mbextractsegy</a>:
-Extract subbottom profiler or center beam reflection data to segy files.</li>
-  <li> <a href="mbformat.html">mbformat</a>: List information about
-swath
-sonar
-data formats supported by the MBIO library.</li>
+    Extract subbottom profiler or center beam reflection data to segy files.</li>
+  <li><a href="mbfilter.html">mbfilter</a>:
+    Apply  one or more simple filters to sidescan and/or beam amplitude data.</li>
+  <li><a href="mbformat.html">mbformat</a>: List information about
+    swath
+    sonar
+  data formats supported by the MBIO library.</li>
   <li> <a href="mbgetesf.html">mbgetesf</a>: Extract bathymetry edits
 in
 edit
@@ -97,16 +100,18 @@ files.</li>
   <li> <a href="mbmosaic.html">mbmosaic</a>: Mosaic sidescan and
 amplitude
 data.</li>
-  <li> <a href="mbnavedit.html">mbnavedit</a>: Interactive editor used
-to
-fix
-problems with navigation in swath sonar data files.</li>
-  <li> <a href="mbnavlist.html">mbnavlist</a>: List navigation data in
-swath sonar
-data files.</li>
+  <li> <a href="mbnavadjust.html">mbnavadjust</a>: Package  that solves for optimal navigation by matching bathymetry of overlapping swathes.</li>
+  <li><a href="mbnavedit.html">mbnavedit</a>: Interactive editor used
+    to
+    fix
+  problems with navigation in swath sonar data files.</li>
+  <li><a href="mbnavlist.html">mbnavlist</a>: List navigation data in
+    swath sonar
+  data files.</li>
   <li> <a href="mbneptune2esf.html">mbneptune2esf</a>: Extract
-bathymetry edits from Simrad Neptune software into edit save file
-format.</li>
+    bathymetry edits from Simrad Neptune software into edit save file
+  format.</li>
+  <li><a href="mbotps.html">mbotps</a>: Generate open ocean tidal model for specified time and location using the Oregon State Tidal Prediction Software (OTPS) package.</li>
   <li> <a href="mbprocess.html">mbprocess</a>: Process swath sonar
 data
 files, including
@@ -119,18 +124,21 @@ in Postscript.</li>
 swath sonar system using two pieces of coincident bathymetry data 
 collected with opposing ship headings.</li>
   <li><a href="mbrolltimelag.html">mbrolltimelag</a> Estimate attitude
-time lag by cross correlation of apparent bottom slope with the roll
-time series: </li>
+    time lag by cross correlation of apparent bottom slope with the roll
+    time series: </li>
+  <li><a href="mbrolltimelag.html">mbroutetime</a> Outputs a list of the times when a survey passes the waypoints of a planned survey route.</li>
   <li><a href="mbsegygrid.html">mbsegygrid</a>:
-Generate time vs. trace number grids of seismic data from segy files.<br>
+    Generate time vs. trace number grids of seismic data from segy files.<br>
   </li>
   <li><a href="mbsegyinfo.html">mbsegyinfo</a>:
 Output some basic statistics of segy seismic data files.</li>
   <li><a href="mbsegylist.html">mbsegylist</a>:
-List selected header values in segy seismic data files.</li>
+    List selected header values in segy seismic data files.</li>
+  <li><a href="mbsegypsd.html">mbsegypsd</a>:
+    Calculates the power spectral density function of each trace in a segy data file, outputting the results as a GMT grid file..</li>
   <li><a href="mbset.html">mbset</a>:
-Create and modify parameter files used
-to control mbprocess.</li>
+    Create and modify parameter files used
+  to control mbprocess.</li>
   <li> <a href="mbstripnan.html">mbstripnan</a>: Filter to remove NaN
 nodes.</li>
   <li> <a href="mbsvplist.html">mbsvplist</a>: Extract water sound
@@ -167,14 +175,23 @@ ASCII grid
 file to a GMT grid file.</li>
   <li> <a href="mbm_copy.html">mbm_copy</a>: Translate groups of swath
 data files between formats</li>
+  <li> <a href="mbm_grd2arc.html">mbm_grd2arc</a>: Convert a GMT grid
+    file
+    to
+    an ArcView ASCII grid file.</li>
   <li> <a href="mbm_grd2geovrml.html">mbm_grd2geovrml</a>: Create and
-execute commands which generate a TerraVision tileset and GeoVRML set
-of files that can be combined with other data and viewed in a web
-browser.</li>
+    execute commands which generate a TerraVision tileset and GeoVRML set
+    of files that can be combined with other data and viewed in a web
+  browser.</li>
+  <li> <a href="mbm_grd3dplot.html">mbm_grd3dplot</a>: Reads a GMT GRD
+    grid file
+    and writes a shellscript which will generate a GMT 3D perspective view
+    of the data.</li>
   <li> <a href="mbm_grdcut.html">mbm_grdcut</a>: Extract a subarea of
-a
-GMT grid
-file.</li>
+    a
+    GMT grid
+  file.</li>
+  <li><a href="mbm_grdinfo.html">mbm_grdinfo</a>: Get information regarding a GMT grd file when the region of interest is a subset of the area covered in the input file. </li>
   <li> <a href="mbm_grdplot.html">mbm_grdplot</a>: Reads a GMT GRD
 grid
 file and
@@ -183,23 +200,15 @@ writes a shellscript which will generate a GMT map of the data.</li>
 grid
 file and
 writes a shellscript which will generate a TIFF image of the data.</li>
-  <li> <a href="mbm_grd3dplot.html">mbm_grd3dplot</a>: Reads a GMT GRD
-grid file
-and writes a shellscript which will generate a GMT 3D perspective view
-of the data.</li>
-  <li> <a href="mbm_grd2arc.html">mbm_grd2arc</a>: Convert a GMT grid
-file
-to
-an ArcView ASCII grid file.</li>
-  <li> <a href="mbm_histplot.html">mbm_histplot</a>: Create an executable
-shellscript which will generate a GMT histogram plot of a dataset.</li>
-  <li> <a href="mbm_grid.html">mbm_grid</a>: Reads a swath sonar data
-file and writes a shellscript which will grid bathymetry data or mosaic
-sidescan (or amplitude) data using reasonable guesses at the appropriate 
-grid bounds and bin size.</li> 
+  <li><a href="mbm_grid.html">mbm_grid</a>: Reads a swath sonar data
+    file and writes a shellscript which will grid bathymetry data or mosaic
+    sidescan (or amplitude) data using reasonable guesses at the appropriate 
+  grid bounds and bin size.</li> 
+  <li><a href="mbm_histplot.html">mbm_histplot</a>: Create an executable
+    shellscript which will generate a GMT histogram plot of a dataset.</li>
   <li><a href="mbm_makedatalist.html">mbm_makedatalist</a>: Generates
-an MB-System datalist file referencing all identifiable swath files in
-the specified target directory.</li>
+    an MB-System datalist file referencing all identifiable swath files in
+  the specified target directory.</li>
   <li> <a href="mbm_plot.html">mbm_plot</a>: Reads a swath sonar data
 file
 and
@@ -227,7 +236,7 @@ data
 files
 and writes a shellscript which will generate GMT plot of the data.</li>
 </ul>
-<center>Last Updated: $Date: 2008/12/31 08:47:38 $ $Revision: 5.23 $
+<center>Last Updated: $Id$
 </center>
 <p>
 </p>

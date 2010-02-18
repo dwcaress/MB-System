@@ -404,7 +404,7 @@ and mbedit edit save files.\n";
 	int	onav = 0;
 	int	ocomment = 0;
 	int	oother = 0;
-	char	comment[MBP_FILENAMESIZE];
+	char	comment[MB_COMMENT_MAXLINE];
 	
 	/* sidescan recalculation */
 	int	pixel_size_set;
@@ -585,6 +585,7 @@ and mbedit edit save files.\n";
 
 	char	buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
 	double	factor;
+	int	pingmultiplicity;
 	int	nbeams;
 	int	istart, iend, icut;
 	int	intstat;
@@ -4841,10 +4842,20 @@ and mbedit edit save files.\n";
 				error = MB_ERROR_UNINTELLIGIBLE;
 				status = MB_FAILURE;
 				}
+			}
+			
+		/* detect multiple pings with the same time stamps */
+		if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
+			{
+			if (time_d == time_d_lastping)
+				{
+				pingmultiplicity++;
+				}
 			else
 				{
-				time_d_lastping = time_d;
+				pingmultiplicity = 0;
 				}
+			time_d_lastping = time_d;
 			}
 
 		/* increment counter */
@@ -5794,7 +5805,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 		    {			    
 		    /* apply edits for this ping */
 		    status = mb_esf_apply(verbose, &esf, 
-		    		time_d, nbath, 
+		    		time_d, pingmultiplicity, nbath, 
 				beamflag, &error);
 		    }
 
@@ -6941,8 +6952,8 @@ int check_ss_for_bath(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       nbath:           %d\n",nbath);
-		fprintf(stderr,"dbg2       bath:            %ld\n",(long)bath);
-		fprintf(stderr,"dbg2       bathacrosstrack: %ld\n",(long)bathacrosstrack);
+		fprintf(stderr,"dbg2       bath:            %lu\n",(size_t)bath);
+		fprintf(stderr,"dbg2       bathacrosstrack: %lu\n",(size_t)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
 			fprintf(stderr,"dbg2         %d %f %f\n", 
@@ -7038,7 +7049,7 @@ int get_corrtable(int verbose,
 		fprintf(stderr,"dbg2       time_d:      %f\n",time_d);
 		fprintf(stderr,"dbg2       ncorrtable:  %d\n",ncorrtable);
 		fprintf(stderr,"dbg2       ncorrangle:  %d\n",ncorrangle);
-		fprintf(stderr,"dbg2       corrtable:   %ld\n",(long)corrtable);
+		fprintf(stderr,"dbg2       corrtable:   %lu\n",(size_t)corrtable);
 		}
 
 	/* find the correction table */
@@ -7206,8 +7217,8 @@ int get_anglecorr(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       nangle:      %d\n",nangle);
-		fprintf(stderr,"dbg2       angles:      %ld\n",(long)angles);
-		fprintf(stderr,"dbg2       corrs:       %ld\n",(long)corrs);
+		fprintf(stderr,"dbg2       angles:      %lu\n",(size_t)angles);
+		fprintf(stderr,"dbg2       corrs:       %lu\n",(size_t)corrs);
 		for (i=0;i<nangle;i++)
 			fprintf(stderr,"dbg2           angle[%d]:%f corrs[%d]:%f\n",i,angles[i],i,corrs[i]);
 		fprintf(stderr,"dbg2       angle:       %f\n",angle);

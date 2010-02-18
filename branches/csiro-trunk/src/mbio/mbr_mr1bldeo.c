@@ -228,24 +228,24 @@ int mbr_register_mr1bldeo(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       svp_source:         %d\n",mb_io_ptr->svp_source);
 		fprintf(stderr,"dbg2       beamwidth_xtrack:   %f\n",mb_io_ptr->beamwidth_xtrack);
 		fprintf(stderr,"dbg2       beamwidth_ltrack:   %f\n",mb_io_ptr->beamwidth_ltrack);
-		fprintf(stderr,"dbg2       format_alloc:       %ld\n",(long)mb_io_ptr->mb_io_format_alloc);
-		fprintf(stderr,"dbg2       format_free:        %ld\n",(long)mb_io_ptr->mb_io_format_free);
-		fprintf(stderr,"dbg2       store_alloc:        %ld\n",(long)mb_io_ptr->mb_io_store_alloc);
-		fprintf(stderr,"dbg2       store_free:         %ld\n",(long)mb_io_ptr->mb_io_store_free);
-		fprintf(stderr,"dbg2       read_ping:          %ld\n",(long)mb_io_ptr->mb_io_read_ping);
-		fprintf(stderr,"dbg2       write_ping:         %ld\n",(long)mb_io_ptr->mb_io_write_ping);
-		fprintf(stderr,"dbg2       extract:            %ld\n",(long)mb_io_ptr->mb_io_extract);
-		fprintf(stderr,"dbg2       insert:             %ld\n",(long)mb_io_ptr->mb_io_insert);
-		fprintf(stderr,"dbg2       extract_nav:        %ld\n",(long)mb_io_ptr->mb_io_extract_nav);
-		fprintf(stderr,"dbg2       insert_nav:         %ld\n",(long)mb_io_ptr->mb_io_insert_nav);
-		fprintf(stderr,"dbg2       extract_altitude:   %ld\n",(long)mb_io_ptr->mb_io_extract_altitude);
-		fprintf(stderr,"dbg2       insert_altitude:    %ld\n",(long)mb_io_ptr->mb_io_insert_altitude);
-		fprintf(stderr,"dbg2       extract_svp:        %ld\n",(long)mb_io_ptr->mb_io_extract_svp);
-		fprintf(stderr,"dbg2       insert_svp:         %ld\n",(long)mb_io_ptr->mb_io_insert_svp);
-		fprintf(stderr,"dbg2       ttimes:             %ld\n",(long)mb_io_ptr->mb_io_ttimes);
-		fprintf(stderr,"dbg2       extract_rawss:      %ld\n",(long)mb_io_ptr->mb_io_extract_rawss);
-		fprintf(stderr,"dbg2       insert_rawss:       %ld\n",(long)mb_io_ptr->mb_io_insert_rawss);
-		fprintf(stderr,"dbg2       copyrecord:         %ld\n",(long)mb_io_ptr->mb_io_copyrecord);
+		fprintf(stderr,"dbg2       format_alloc:       %lu\n",(size_t)mb_io_ptr->mb_io_format_alloc);
+		fprintf(stderr,"dbg2       format_free:        %lu\n",(size_t)mb_io_ptr->mb_io_format_free);
+		fprintf(stderr,"dbg2       store_alloc:        %lu\n",(size_t)mb_io_ptr->mb_io_store_alloc);
+		fprintf(stderr,"dbg2       store_free:         %lu\n",(size_t)mb_io_ptr->mb_io_store_free);
+		fprintf(stderr,"dbg2       read_ping:          %lu\n",(size_t)mb_io_ptr->mb_io_read_ping);
+		fprintf(stderr,"dbg2       write_ping:         %lu\n",(size_t)mb_io_ptr->mb_io_write_ping);
+		fprintf(stderr,"dbg2       extract:            %lu\n",(size_t)mb_io_ptr->mb_io_extract);
+		fprintf(stderr,"dbg2       insert:             %lu\n",(size_t)mb_io_ptr->mb_io_insert);
+		fprintf(stderr,"dbg2       extract_nav:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_nav);
+		fprintf(stderr,"dbg2       insert_nav:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_nav);
+		fprintf(stderr,"dbg2       extract_altitude:   %lu\n",(size_t)mb_io_ptr->mb_io_extract_altitude);
+		fprintf(stderr,"dbg2       insert_altitude:    %lu\n",(size_t)mb_io_ptr->mb_io_insert_altitude);
+		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
+		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
+		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
+		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
+		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
 		fprintf(stderr,"dbg2       error:              %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:         %d\n",status);
@@ -356,7 +356,7 @@ int mbr_alm_mr1bldeo(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -410,7 +410,7 @@ int mbr_dem_mr1bldeo(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -447,7 +447,7 @@ int mbr_zero_mr1bldeo(int verbose, struct mbf_mr1bldeo_struct *data, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       data:       %ld\n",(long)data);
+		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
 		}
 
 	/* initialize everything to zeros */
@@ -557,8 +557,8 @@ int mbr_rt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointers to mbio descriptor and data structures */
@@ -684,8 +684,8 @@ int mbr_wt_mr1bldeo(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -808,7 +808,7 @@ int mbr_mr1bldeo_rd_data(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -902,9 +902,9 @@ int mbr_mr1bldeo_rd_hdr(int verbose, XDR *xdrs,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       xdrs:       %ld\n",(long)xdrs);
-		fprintf(stderr,"dbg2       data:       %ld\n",(long)data);
-		fprintf(stderr,"dbg2       hdr_comment:%ld\n",(long)*hdr_comment);
+		fprintf(stderr,"dbg2       xdrs:       %lu\n",(size_t)xdrs);
+		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       hdr_comment:%lu\n",(size_t)*hdr_comment);
 		}
 
 	/* set status and error */
@@ -970,7 +970,6 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs,
 	int	status = MB_SUCCESS;
 	int	dummy_count;
 	float	dummy;
-	long	sec, usec;
 	int	i;
 
 	/* print input debug statements */
@@ -980,15 +979,13 @@ int mbr_mr1bldeo_rd_ping(int verbose, XDR *xdrs,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       xdrs:       %ld\n",(long)xdrs);
-		fprintf(stderr,"dbg2       data:       %ld\n",(long)data);
+		fprintf(stderr,"dbg2       xdrs:       %lu\n",(size_t)xdrs);
+		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
 		}
 
 	/* read ping header */
-	status = xdr_long(xdrs, &sec);
-	status = xdr_long(xdrs, &usec);
-	data->sec = (int)sec;
-	data->usec = (int)usec;
+	status = xdr_long(xdrs, &data->sec);
+	status = xdr_long(xdrs, &data->usec);
 	status = xdr_double(xdrs, &data->png_lon);
 	status = xdr_double(xdrs, &data->png_lat);
 	status = xdr_float(xdrs, &data->png_course);
@@ -1256,8 +1253,8 @@ int mbr_mr1bldeo_wr_data(int verbose, void *mbio_ptr, struct mbf_mr1bldeo_struct
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       data:       %ld\n",(long)data);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
 		}
 
 	/* get pointer to mbio descriptor */
@@ -1350,9 +1347,9 @@ int mbr_mr1bldeo_wr_hdr(int verbose, XDR *xdrs,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       xdrs:       %ld\n",(long)xdrs);
-		fprintf(stderr,"dbg2       data:       %ld\n",(long)data);
-		fprintf(stderr,"dbg2       hdr_comment:%ld\n",(long)*hdr_comment);
+		fprintf(stderr,"dbg2       xdrs:       %lu\n",(size_t)xdrs);
+		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
+		fprintf(stderr,"dbg2       hdr_comment:%lu\n",(size_t)*hdr_comment);
 		}
 
 	/* print debug statements */
@@ -1415,7 +1412,6 @@ int mbr_mr1bldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *dat
 {
 	char	*function_name = "mbr_mr1bldeo_wr_ping";
 	int	status = MB_SUCCESS;
-	long	sec, usec;
 	int	i;
 
 	/* print input debug statements */
@@ -1425,8 +1421,8 @@ int mbr_mr1bldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *dat
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       xdrs:       %ld\n",(long)xdrs);
-		fprintf(stderr,"dbg2       data:       %ld\n",(long)data);
+		fprintf(stderr,"dbg2       xdrs:       %lu\n",(size_t)xdrs);
+		fprintf(stderr,"dbg2       data:       %lu\n",(size_t)data);
 		}
 
 	/* print debug statements */
@@ -1519,10 +1515,8 @@ int mbr_mr1bldeo_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1bldeo_struct *dat
 		}
 
 	/* write ping header */
-	sec = (long) data->sec;
-	usec = (long) data->usec;
-	status = xdr_long(xdrs, &sec);
-	status = xdr_long(xdrs, &usec);
+	status = xdr_long(xdrs, &data->sec);
+	status = xdr_long(xdrs, &data->usec);
 	status = xdr_double(xdrs, &data->png_lon);
 	status = xdr_double(xdrs, &data->png_lat);
 	status = xdr_float(xdrs, &data->png_course);

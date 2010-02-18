@@ -27,7 +27,7 @@ speed of your internet connection, may take a few minutes to transfer.</p>
  href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/MB-System.tar.gz"> here to ftp</a> the current stable MB-System release as a compressed tar archive.</p>
 <p>Click<a
  href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/MB-SystemBeta.tar.gz"> here to ftp</a> the current unstable (&quot;beta&quot;) MB-System release as a compressed tar archive.</p>
-<p>Click <a href="ftp://ftp.ldeo.columbia.edu/pub/MB-System">here to
+<p>Click <a href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/">here to
 get point-and-click ftp access</a> to all of the MB-System related
 files
 available from Lamont (these may include data examples and beta
@@ -115,7 +115,7 @@ netCDF
 library</a>.</li>
   <li><b>Perl</b> version 5.0 or later: Perl is a fast, well
 documented
-scripting language used widely in the Unix world. MB-System contains a
+scripting language used widely in the Linux/Unix world. MB-System contains a
 number of perl scripts used both for installation and to ease common
 tasks. Most of the current Unix operating systems include perl. If 
 you need to obtain the perl source code, first check with your local 
@@ -140,6 +140,8 @@ to ftp this file. Be sure to uncompress the file and to set the
 "LEVITUS"
 flag in the install_makefiles appropriately, as described below in the
 installation section.</li>
+  <li><strong>FFTW</strong>: The &quot;Fastest Fourier Transform in the West&quot; package is used by the sonagram calculation program MBbsegypsd to calculate, well, Fast Fourier Transforms. <a href="http://www.fftw.org/">FFTW</a> is commonly used and thus available on or for most current Unix operating systems.</li>
+  <li><strong>OTPSnc</strong>: The Oregon State Ocean Tide Prediction Software package is required for the tidal modeling program MBotps (which in fact is just a convenient front end for the old-style-batch interface of OTPS). The OTPSnc package can be obtained from the<a href="http://www.oce.orst.edu/research/po/research/tide/"> tidal modeling group</a> at <a href="http://www.oce.orst.edu/">Oregon State University</a> from <a href="http://www.coas.oregonstate.edu/research/po/research/tide/region.html">this page</a>.</li>
 </ul>
 <p>MB-System produces Postscript based graphics. Most current Unix
 operating
@@ -181,13 +183,13 @@ file and then running tar:</p>
 <ul>
   <pre>% tar xvzf MB-System.tar.gz</pre>
 </ul>
-<p>This will create a directory called (for the 5.1.2 distribution): </p>
+<p>This will create a directory called (for the 5.1.3 distribution): </p>
 <ul>
-  <pre>mbsystem-5.1.2</pre>
+  <pre>mbsystem-5.1.3</pre>
 </ul>
 <p>In order to
 configure your installation, you must edit the perl script
-mbsystem-5.1.2/install_makefiles, and set a number of parameters to reflect the system architecture, the location of the installation, and the locations of certain required libraries.
+mbsystem-5.1.3/install_makefiles, and set a number of parameters to reflect the system architecture, the location of the installation, and the locations of certain required libraries.
 This script will read template makefiles in the MB-System
 source
 directories and create makefiles with the correct dependencies, compile flags, and link flags. The important parameters to be set in install_makefiles are listed below. The install_makefiles script includes comments suggesting parameters to use for many common computer systems.</p>
@@ -216,6 +218,15 @@ directories and create makefiles with the correct dependencies, compile flags, a
   <li>OPENGLLIBS	- OpenGL libraries required for new graphical tools, including mbgrdviz and mbeditviz. If this parameter is not set, mbgrdviz and mbeditviz will not be built<br>
   </li>
 </ul>
+<p>This parameter must be set to build the sonogram calculation program mbsegypsd:</p>
+<ul>
+  <li>FFTWLIBDIR	- location of FFTW library providing fast Fourier transform.</li>
+  <li>FFTWINCDIR - location of FFTW include files</li>
+</ul>
+<p>This parameter must be set for the tidal modeling program mbotps to work:</p>
+<ul>
+  <li>OTPSDIR	- location of OTPSnc tide prediction program predict_tide.</li>
+</ul>
 <p>This optional parameter can be used to specify a  non-default C compiler:</p>
 <ul>
   <li>CC		- C compiler to be used.<br>
@@ -236,7 +247,7 @@ directories and create makefiles with the correct dependencies, compile flags, a
   execute
   install_makefiles, do the following:</p>
 <ul>
-  <pre>% cd mbsystem-5.1.2 </pre>
+  <pre>% cd mbsystem-5.1.3 </pre>
   <pre>% install_makefiles</pre>
 </ul>
 <p>Because install_makefiles is a perl script, the executable perl must
@@ -252,9 +263,9 @@ structure, compiling source files, linking object files, and copying
 executables
 and manual pages to the appropriate directories. The executables will
 be
-placed in mbsystem-5.1.2/bin, the libraries in mbsystem-5.1.2/lib, and
+placed in mbsystem-5.1.3/bin, the libraries in mbsystem-5.1.3/lib, and
 the manual pages
-in mbsystem-5.1.2/man/man1.</p>
+in mbsystem-5.1.3/man/man1.</p>
 <p>Naturally, in order for users to use the MB-System utilities, the
 directory
 containing the executables must be included in their path. Altering the user path variable is generally accomplished by editing the initialization files hidden in the user's home directory. Which files need to be edited depends on which command line shell is being used. If the user works with <em>csh</em>, then the <em>.cshrc</em> and <em>.login </em>files need to be changed. If the shell is <em>bash</em>, then the <em>.bashrc</em> and <em>.profile</em> files must be altered. See the manual pages for the relevant shell program to determine how to set the user environment. The
@@ -272,7 +283,7 @@ Popular open source options for Postscript display include ghostview and gv. The
 Graphics machines running Irix.</p>
 <center>
 <p><br>
-Last Updated: $Date: 2009/03/13 07:05:58 $ $Revision: 5.22 $</p>
+Last Updated: $Id$</p>
 </center>
 <p>
 </p>

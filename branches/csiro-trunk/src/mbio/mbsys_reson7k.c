@@ -131,7 +131,7 @@ int mbsys_reson7k_zero7kheader(int verbose, s7k_header	*header,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       header:     %ld\n",(long)header);
+		fprintf(stderr,"dbg2       header:     %lu\n",(size_t)header);
 		}
 
 	/* Reson 7k data record header information */
@@ -199,6 +199,8 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	s7kr_geodesy		*geodesy;
 	s7kr_rollpitchheave	*rollpitchheave;
 	s7kr_heading		*heading;
+	s7kr_surveyline		*surveyline;
+	s7kr_navigation		*navigation;
 	s7kr_attitude		*attitude;
 	s7kr_fsdwss		*fsdwsslo;
 	s7kr_fsdwss		*fsdwsshi;
@@ -227,7 +229,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -443,6 +445,31 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	heading = &store->heading;
 	mbsys_reson7k_zero7kheader(verbose, &heading->header, error);
 	heading->heading = 0.0;
+	
+	/* Survey Line (record 1014) */
+	surveyline = &store->surveyline;
+	mbsys_reson7k_zero7kheader(verbose, &surveyline->header, error);
+	surveyline->n = 0;
+	surveyline->type = 0;
+	surveyline->turnradius = 0.0;
+	for (i=0;i<64;i++)
+		surveyline->name[i] = '\0';
+	surveyline->nalloc = 0;
+	surveyline->latitude = NULL;
+	surveyline->longitude = NULL;
+	
+	/* Navigation (record 1015) */
+	navigation = &store->navigation;
+	mbsys_reson7k_zero7kheader(verbose, &navigation->header, error);
+	navigation->vertical_reference = 0;
+	navigation->latitude = 0.0;
+	navigation->longitude = 0.0;
+	navigation->position_accuracy = 0.0;
+	navigation->height = 0.0;
+	navigation->height_accuracy = 0.0;
+	navigation->speed = 0.0;
+	navigation->course = 0.0;
+	navigation->heading = 0.0;
 
 	/* Attitude (record 1016) */
 	attitude = &store->attitude;
@@ -585,7 +612,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		bluefin->nav[i].pitch_rate = 0.0;
 		bluefin->nav[i].yaw_rate = 0.0;
 		bluefin->nav[i].position_time = 0.0;
-		bluefin->nav[i].altitude_time = 0.0;
+		bluefin->nav[i].depth_time = 0.0;
 		bluefin->environmental[i].packet_size = 0;
 		bluefin->environmental[i].version = 0;
 		bluefin->environmental[i].offset = 0;
@@ -957,7 +984,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -977,6 +1004,7 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	s7kr_motion		*motion;
 	s7kr_svp		*svp;
 	s7kr_ctd		*ctd;
+	s7kr_surveyline		*surveyline;
 	s7kr_attitude		*attitude;
 	s7kr_fsdwss		*fsdwsslo;
 	s7kr_fsdwss		*fsdwsshi;
@@ -995,8 +1023,8 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)*store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
 		}
 
 	/* get data structure pointer */
@@ -1061,6 +1089,17 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->pressure_depth),error);
 	if (ctd->sound_velocity != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->sound_velocity),error);
+
+	/* Survey Line (record 1014) */
+	surveyline = &store->surveyline;
+	surveyline->n = 0;
+	surveyline->nalloc = 0;
+	surveyline->latitude = NULL;
+	surveyline->longitude = NULL;
+	if (surveyline->latitude != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(surveyline->latitude),error);
+	if (surveyline->longitude != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(surveyline->longitude),error);
 
 	/* Attitude (record 1016) */
 	attitude = &store->attitude;
@@ -1199,7 +1238,7 @@ int mbsys_reson7k_print_header(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       header:     %ld\n",(long)header);
+		fprintf(stderr,"dbg2       header:     %lu\n",(size_t)header);
 		}
 
 
@@ -1274,7 +1313,7 @@ int mbsys_reson7k_print_reference(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       reference:  %ld\n",(long)reference);
+		fprintf(stderr,"dbg2       reference:  %lu\n",(size_t)reference);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1327,7 +1366,7 @@ int mbsys_reson7k_print_sensoruncal(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       sensoruncal:  %ld\n",(long)sensoruncal);
+		fprintf(stderr,"dbg2       sensoruncal:  %lu\n",(size_t)sensoruncal);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1382,7 +1421,7 @@ int mbsys_reson7k_print_sensorcal(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       sensorcal:    %ld\n",(long)sensorcal);
+		fprintf(stderr,"dbg2       sensorcal:    %lu\n",(size_t)sensorcal);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1435,7 +1474,7 @@ int mbsys_reson7k_print_position(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       position:     %ld\n",(long)position);
+		fprintf(stderr,"dbg2       position:     %lu\n",(size_t)position);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1494,7 +1533,7 @@ int mbsys_reson7k_print_customattitude(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       customattitude:%ld\n",(long)customattitude);
+		fprintf(stderr,"dbg2       customattitude:%lu\n",(size_t)customattitude);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1556,7 +1595,7 @@ int mbsys_reson7k_print_tide(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       tide:         %ld\n",(long)tide);
+		fprintf(stderr,"dbg2       tide:         %lu\n",(size_t)tide);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1616,7 +1655,7 @@ int mbsys_reson7k_print_altitude(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       altitude:     %ld\n",(long)altitude);
+		fprintf(stderr,"dbg2       altitude:     %lu\n",(size_t)altitude);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1667,7 +1706,7 @@ int mbsys_reson7k_print_motion(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       motion:       %ld\n",(long)motion);
+		fprintf(stderr,"dbg2       motion:       %lu\n",(size_t)motion);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1724,7 +1763,7 @@ int mbsys_reson7k_print_depth(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       depth:        %ld\n",(long)depth);
+		fprintf(stderr,"dbg2       depth:        %lu\n",(size_t)depth);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1778,7 +1817,7 @@ int mbsys_reson7k_print_svp(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       svp:          %ld\n",(long)svp);
+		fprintf(stderr,"dbg2       svp:          %lu\n",(size_t)svp);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1838,7 +1877,7 @@ int mbsys_reson7k_print_ctd(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       ctd:          %ld\n",(long)ctd);
+		fprintf(stderr,"dbg2       ctd:          %lu\n",(size_t)ctd);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1905,7 +1944,7 @@ int mbsys_reson7k_print_geodesy(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       geodesy:      %ld\n",(long)geodesy);
+		fprintf(stderr,"dbg2       geodesy:      %lu\n",(size_t)geodesy);
 		}
 
 	/* print Reson 7k data record header information */
@@ -1979,7 +2018,7 @@ int mbsys_reson7k_print_rollpitchheave(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       rollpitchheave: %ld\n",(long)rollpitchheave);
+		fprintf(stderr,"dbg2       rollpitchheave: %lu\n",(size_t)rollpitchheave);
 		}
 
 	/* print Reson 7k data record header information */
@@ -2031,13 +2070,13 @@ int mbsys_reson7k_print_heading(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       heading:      %ld\n",(long)heading);
+		fprintf(stderr,"dbg2       heading:      %lu\n",(size_t)heading);
 		}
 
 	/* print Reson 7k data record header information */
 	mbsys_reson7k_print_header(verbose, &heading->header, error);
 
-	/* print Roll pitch heave (record 1012) */
+	/* print Heading (record 1013) */
 	if (verbose >= 2)
 		first = debug_str;
 	else
@@ -2048,6 +2087,122 @@ int mbsys_reson7k_print_heading(int verbose,
 		}
 	fprintf(stderr,"%sStructure Contents:\n", first);
 	fprintf(stderr,"%s     roll:                       %f\n",first,heading->heading);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_surveyline(int verbose, 
+			s7kr_surveyline *surveyline,
+			int *error)
+{
+	char	*function_name = "mbsys_reson7k_print_surveyline";
+	int	status = MB_SUCCESS;
+	char	*debug_str = "dbg2  ";
+	char	*nodebug_str = "  ";
+	char	*first;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
+		fprintf(stderr,"dbg2       surveyline:   %lu\n",(size_t)surveyline);
+		}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &surveyline->header, error);
+
+	/* print Survey Line (record 1014) */
+	if (verbose >= 2)
+		first = debug_str;
+	else
+		{
+		first = nodebug_str;
+		fprintf(stderr,"\n%sMBIO function <%s> called\n",
+			first,function_name);
+		}
+	fprintf(stderr,"%sStructure Contents:\n", first);
+	fprintf(stderr,"%s     n:                          %d\n",first,surveyline->n);
+	fprintf(stderr,"%s     type:                       %d\n",first,surveyline->type);
+	fprintf(stderr,"%s     turnradius:                 %f\n",first,surveyline->turnradius);
+	fprintf(stderr,"%s     name:                       %s\n",first,surveyline->name);
+	fprintf(stderr,"%s     nalloc:                     %d\n",first,surveyline->nalloc);
+	for (i=0;i<surveyline->n;i++)
+		fprintf(stderr,"%s     i:%d latitude:%f longitude:%f\n",
+					first,i,surveyline->latitude[i],surveyline->longitude[i]);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_navigation(int verbose, 
+			s7kr_navigation *navigation,
+			int *error)
+{
+	char	*function_name = "mbsys_reson7k_print_navigation";
+	int	status = MB_SUCCESS;
+	char	*debug_str = "dbg2  ";
+	char	*nodebug_str = "  ";
+	char	*first;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
+		fprintf(stderr,"dbg2       navigation:   %lu\n",(size_t)navigation);
+		}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &navigation->header, error);
+
+	/* print Navigation (record 1015) */
+	if (verbose >= 2)
+		first = debug_str;
+	else
+		{
+		first = nodebug_str;
+		fprintf(stderr,"\n%sMBIO function <%s> called\n",
+			first,function_name);
+		}
+	fprintf(stderr,"%sStructure Contents:\n", first);
+	fprintf(stderr,"%s     vertical_reference:         %d\n",first,navigation->vertical_reference);
+	fprintf(stderr,"%s     latitude:                   %f\n",first,navigation->latitude);
+	fprintf(stderr,"%s     longitude:                  %f\n",first,navigation->longitude);
+	fprintf(stderr,"%s     position_accuracy:          %f\n",first,navigation->position_accuracy);
+	fprintf(stderr,"%s     height:                     %f\n",first,navigation->height);
+	fprintf(stderr,"%s     height_accuracy:            %f\n",first,navigation->height_accuracy);
+	fprintf(stderr,"%s     speed:                      %f\n",first,navigation->speed);
+	fprintf(stderr,"%s     course:                     %f\n",first,navigation->course);
+	fprintf(stderr,"%s     heading:                    %f\n",first,navigation->heading);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2082,13 +2237,13 @@ int mbsys_reson7k_print_attitude(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       attitude:     %ld\n",(long)attitude);
+		fprintf(stderr,"dbg2       attitude:     %lu\n",(size_t)attitude);
 		}
 
 	/* print Reson 7k data record header information */
 	mbsys_reson7k_print_header(verbose, &attitude->header, error);
 
-	/* print Attitude (record 1004) */
+	/* print Attitude (record 1016) */
 	if (verbose >= 2)
 		first = debug_str;
 	else
@@ -2141,7 +2296,7 @@ int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
 		fprintf(stderr,"dbg2       data_format:  %d\n",data_format);
-		fprintf(stderr,"dbg2       fsdwchannel:  %ld\n",(long)fsdwchannel);
+		fprintf(stderr,"dbg2       fsdwchannel:  %lu\n",(size_t)fsdwchannel);
 		}
 
 	/* print Edgetech sidescan or subbottom channel header data */
@@ -2219,7 +2374,7 @@ int mbsys_reson7k_print_fsdwssheader(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       fsdwssheader:  %ld\n",(long)fsdwssheader);
+		fprintf(stderr,"dbg2       fsdwssheader:  %lu\n",(size_t)fsdwssheader);
 		}
 
 	/* print Edgetech sidescan or subbottom channel header data */
@@ -2298,7 +2453,7 @@ int mbsys_reson7k_print_fsdwsegyheader(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       fsdwsegyheader:  %ld\n",(long)fsdwsegyheader);
+		fprintf(stderr,"dbg2       fsdwsegyheader:  %lu\n",(size_t)fsdwsegyheader);
 		}
 
 	/* print Edgetech sidescan or subbottom channel header data */
@@ -2412,7 +2567,7 @@ int mbsys_reson7k_print_fsdwss(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       fsdwss:       %ld\n",(long)fsdwss);
+		fprintf(stderr,"dbg2       fsdwss:       %lu\n",(size_t)fsdwss);
 		}
 
 	/* print Reson 7k data record header information */
@@ -2470,7 +2625,7 @@ int mbsys_reson7k_print_fsdwsb(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       fsdwsb:       %ld\n",(long)fsdwsb);
+		fprintf(stderr,"dbg2       fsdwsb:       %lu\n",(size_t)fsdwsb);
 		}
 
 	/* print Reson 7k data record header information */
@@ -2526,7 +2681,7 @@ int mbsys_reson7k_print_bluefin(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
-		fprintf(stderr,"dbg2       bluefin:      %ld\n",(long)bluefin);
+		fprintf(stderr,"dbg2       bluefin:      %lu\n",(size_t)bluefin);
 		}
 
 	/* print Reson 7k data record header information */
@@ -2581,7 +2736,7 @@ int mbsys_reson7k_print_bluefin(int verbose,
 			fprintf(stderr,"%s     nav[%d].pitch_rate:         %f\n",first,i,bluefin->nav[i].pitch_rate);
 			fprintf(stderr,"%s     nav[%d].yaw_rate:           %f\n",first,i,bluefin->nav[i].yaw_rate);
 			fprintf(stderr,"%s     nav[%d].position_time:      %f\n",first,i,bluefin->nav[i].position_time);
-			fprintf(stderr,"%s     nav[%d].altitude_time:      %f\n",first,i,bluefin->nav[i].altitude_time);
+			fprintf(stderr,"%s     nav[%d].depth_time:         %f\n",first,i,bluefin->nav[i].depth_time);
 			}
 		}
 	else if (bluefin->data_format == R7KRECID_BluefinEnvironmental)
@@ -2659,7 +2814,7 @@ int mbsys_reson7k_print_volatilesettings(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       volatilesettings:  %ld\n",(long)volatilesettings);
+		fprintf(stderr,"dbg2       volatilesettings:  %lu\n",(size_t)volatilesettings);
 		}
 
 	/* print Reson 7k data record header information */
@@ -2746,7 +2901,7 @@ int mbsys_reson7k_print_device(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       device:            %ld\n",(long)device);
+		fprintf(stderr,"dbg2       device:            %lu\n",(size_t)device);
 		}
 
 	/* print Reson 7k device configuration structure */
@@ -2798,7 +2953,7 @@ int mbsys_reson7k_print_configuration(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       configuration:     %ld\n",(long)configuration);
+		fprintf(stderr,"dbg2       configuration:     %lu\n",(size_t)configuration);
 		}
 
 	/* print Reson 7k data record header information */
@@ -2850,7 +3005,7 @@ int mbsys_reson7k_print_matchfilter(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       matchfilter:       %ld\n",(long)matchfilter);
+		fprintf(stderr,"dbg2       matchfilter:       %lu\n",(size_t)matchfilter);
 		}
 
 	/* print Reson 7k data record header information */
@@ -2904,7 +3059,7 @@ int mbsys_reson7k_print_beamgeometry(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       beamgeometry:      %ld\n",(long)beamgeometry);
+		fprintf(stderr,"dbg2       beamgeometry:      %lu\n",(size_t)beamgeometry);
 		}
 
 	/* print Reson 7k data record header information */
@@ -2959,7 +3114,7 @@ int mbsys_reson7k_print_calibration(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       calibration:       %ld\n",(long)calibration);
+		fprintf(stderr,"dbg2       calibration:       %lu\n",(size_t)calibration);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3013,7 +3168,7 @@ int mbsys_reson7k_print_bathymetry(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       bathymetry:        %ld\n",(long)bathymetry);
+		fprintf(stderr,"dbg2       bathymetry:        %lu\n",(size_t)bathymetry);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3090,7 +3245,7 @@ int mbsys_reson7k_print_backscatter(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       backscatter:       %ld\n",(long)backscatter);
+		fprintf(stderr,"dbg2       backscatter:       %lu\n",(size_t)backscatter);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3207,7 +3362,7 @@ int mbsys_reson7k_print_beam(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       beam:              %ld\n",(long)beam);
+		fprintf(stderr,"dbg2       beam:              %lu\n",(size_t)beam);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3322,7 +3477,7 @@ int mbsys_reson7k_print_verticaldepth(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       verticaldepth:     %ld\n",(long)verticaldepth);
+		fprintf(stderr,"dbg2       verticaldepth:     %lu\n",(size_t)verticaldepth);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3383,7 +3538,7 @@ int mbsys_reson7k_print_image(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       image:             %ld\n",(long)image);
+		fprintf(stderr,"dbg2       image:             %lu\n",(size_t)image);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3460,7 +3615,7 @@ int mbsys_reson7k_print_installation(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       installation:      %ld\n",(long)installation);
+		fprintf(stderr,"dbg2       installation:      %lu\n",(size_t)installation);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3547,7 +3702,7 @@ int mbsys_reson7k_print_systemeventmessage(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       systemeventmessage:%ld\n",(long)systemeventmessage);
+		fprintf(stderr,"dbg2       systemeventmessage:%lu\n",(size_t)systemeventmessage);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3601,7 +3756,7 @@ int mbsys_reson7k_print_subsystem(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       subsystem:         %ld\n",(long)subsystem);
+		fprintf(stderr,"dbg2       subsystem:         %lu\n",(size_t)subsystem);
 		}
 
 	/* print Reson 7k subsystem structure */
@@ -3649,7 +3804,7 @@ int mbsys_reson7k_print_fileheader(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       fileheader:        %ld\n",(long)fileheader);
+		fprintf(stderr,"dbg2       fileheader:        %lu\n",(size_t)fileheader);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3712,7 +3867,7 @@ int mbsys_reson7k_print_remotecontrolsettings(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       remotecontrolsettings:  %ld\n",(long)remotecontrolsettings);
+		fprintf(stderr,"dbg2       remotecontrolsettings:  %lu\n",(size_t)remotecontrolsettings);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3797,7 +3952,7 @@ int mbsys_reson7k_print_roll(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       roll:              %ld\n",(long)roll);
+		fprintf(stderr,"dbg2       roll:              %lu\n",(size_t)roll);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3846,7 +4001,7 @@ int mbsys_reson7k_print_pitch(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       pitch:             %ld\n",(long)pitch);
+		fprintf(stderr,"dbg2       pitch:             %lu\n",(size_t)pitch);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3895,7 +4050,7 @@ int mbsys_reson7k_print_soundvelocity(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       soundvelocity:     %ld\n",(long)soundvelocity);
+		fprintf(stderr,"dbg2       soundvelocity:     %lu\n",(size_t)soundvelocity);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3944,7 +4099,7 @@ int mbsys_reson7k_print_absorptionloss(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       absorptionloss:    %ld\n",(long)absorptionloss);
+		fprintf(stderr,"dbg2       absorptionloss:    %lu\n",(size_t)absorptionloss);
 		}
 
 	/* print Reson 7k data record header information */
@@ -3993,7 +4148,7 @@ int mbsys_reson7k_print_spreadingloss(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       spreadingloss:     %ld\n",(long)spreadingloss);
+		fprintf(stderr,"dbg2       spreadingloss:     %lu\n",(size_t)spreadingloss);
 		}
 
 	/* print Reson 7k data record header information */
@@ -4041,8 +4196,8 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -4105,7 +4260,7 @@ int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -4170,8 +4325,8 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -4207,7 +4362,8 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get interpolated nav heading and speed  */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 
 		/* get heading */
@@ -4276,6 +4432,10 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			else if ((bathymetry->quality[i] & 15) == 0)
 				{
 				beamflag[i] = MB_FLAG_NULL;
+				}
+			else if ((bathymetry->quality[i] & 3) == 0)
+				{
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 				}
 			else
 				{
@@ -4382,12 +4542,14 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 		*time_d = store->time_d;
 		
 		/* get heading */
-		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+		if (mb_io_ptr->nheading > 0)
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 				    heading, error);
 		
 		/* get speed */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 
 		/* get navigation */
@@ -4452,7 +4614,8 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 		
 		/* get speed */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 
 		/* get navigation */
@@ -4518,13 +4681,14 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 		/* get heading */
 		if (fsdwsegyheader->heading != 0)
 			*heading = 0.01 * fsdwsegyheader->heading;
-		else
+		else if (mb_io_ptr->nheading > 0)
 			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 					    heading, error);
 		
 		/* get speed and position */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 		
 		/* get position */
@@ -4598,7 +4762,7 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 		/* get heading */
 		if (fsdwssheader->heading != 0)
 			*heading = 0.01 * fsdwssheader->heading;
-		else
+		else if (mb_io_ptr->nheading > 0)
 			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 					    heading, error);
 		
@@ -4840,8 +5004,8 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV1 || kind == MB_DATA_NAV2))
@@ -4934,12 +5098,12 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			else
 				{
 				bathymetry->quality[i] = (bathymetry->quality[i] & 63);
-				if (bathymetry->quality[i] & 4)
-					bathymetry->quality[i] += 16;
-				if (bathymetry->quality[i] & 8)
-					bathymetry->quality[i] += 32;
 				if (!(bathymetry->quality[i] & 12))
-					bathymetry->quality[i] += 16;
+					bathymetry->quality[i] = bathymetry->quality[i] | 16;
+				else if (bathymetry->quality[i] & 4)
+					bathymetry->quality[i] = bathymetry->quality[i] | 16;
+				else if (bathymetry->quality[i] & 8)
+					bathymetry->quality[i] = bathymetry->quality[i] | 32;
 				}
 			bathymetry->acrosstrack[i] = bathacrosstrack[i];
 			bathymetry->alongtrack[i] = bathalongtrack[i];
@@ -5140,14 +5304,14 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %ld\n",(long)ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%ld\n",(long)angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%ld\n",(long)angles_forward);
-		fprintf(stderr,"dbg2       angles_null:%ld\n",(long)angles_null);
-		fprintf(stderr,"dbg2       heave:      %ld\n",(long)heave);
-		fprintf(stderr,"dbg2       ltrk_off:   %ld\n",(long)alongtrack_offset);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %lu\n",(size_t)ttimes);
+		fprintf(stderr,"dbg2       angles_xtrk:%lu\n",(size_t)angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%lu\n",(size_t)angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%lu\n",(size_t)angles_null);
+		fprintf(stderr,"dbg2       heave:      %lu\n",(size_t)heave);
+		fprintf(stderr,"dbg2       ltrk_off:   %lu\n",(size_t)alongtrack_offset);
 		}
 
 	/* get mbio descriptor */
@@ -5179,7 +5343,7 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			heave_use = bathymetry->heave; 
 			}
-		else
+		else if (mb_io_ptr->nattitude > 0)
 			{
 			mb_attint_interp(verbose, mbio_ptr, store->time_d,  
 				   	&heave_use, &roll, &pitch, error);
@@ -5303,9 +5467,9 @@ int mbsys_reson7k_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %ld\n",(long)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
 		}
 
 	/* get mbio descriptor */
@@ -5403,8 +5567,8 @@ int mbsys_reson7k_gains(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -5505,8 +5669,8 @@ int mbsys_reson7k_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -5654,8 +5818,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -5683,9 +5847,11 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get interpolated nav heading and speed  */
 		*speed = 0.0;
-		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+		if (mb_io_ptr->nheading > 0)
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 				    heading, error);
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 
 		/* get heading */
@@ -5706,7 +5872,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		else if (mb_io_ptr->nsonardepth > 0)
 			{
-			mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+			if (mb_io_ptr->nsonardepth > 0)
+				mb_depint_interp(verbose, mbio_ptr, store->time_d,  
 				    draft, error);
 			}
 		else
@@ -5723,7 +5890,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		else
 			{
-			mb_attint_interp(verbose, mbio_ptr, store->time_d,  
+			if (mb_io_ptr->nattitude > 0)
+				mb_attint_interp(verbose, mbio_ptr, store->time_d,  
 				   	heave, roll, pitch, error);
 			}
 
@@ -5744,15 +5912,18 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get navigation and heading */
 		*speed = 0.0;
-		mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+		if (mb_io_ptr->nheading > 0)
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 				    heading, error);
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 		*navlon = RTD * position->longitude;
 		*navlat = RTD * position->latitude;
 
 		/* get roll pitch and heave */
-		mb_attint_interp(verbose, mbio_ptr, *time_d,  
+		if (mb_io_ptr->nattitude > 0)
+			mb_attint_interp(verbose, mbio_ptr, *time_d,  
 				    heave, roll, pitch, error);
 
 		/* get draft  */
@@ -5763,7 +5934,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		else if (mb_io_ptr->nsonardepth > 0)
 			{
-			mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+			if (mb_io_ptr->nsonardepth > 0)
+				mb_depint_interp(verbose, mbio_ptr, store->time_d,  
 				    draft, error);
 			*heave = 0.0;
 			}
@@ -5789,7 +5961,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		
 		/* get speed */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 
 		/* get navigation */
@@ -5828,7 +6001,8 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		
 		/* get speed and position */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 		
 		/* get position */
@@ -5844,6 +6018,7 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*pitch = 0.01 * fsdwsegyheader->pitch;
 		*heave = 0.0;
 
+		if (mb_io_ptr->nattitude > 0)
 			mb_attint_interp(verbose, mbio_ptr, store->time_d,  
 				    heave, roll, pitch, error);
 
@@ -5873,12 +6048,14 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		if (fsdwssheader->heading != 0)
 			*heading = 0.01 * fsdwssheader->heading;
 		else
-			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+			if (mb_io_ptr->nheading > 0)
+				mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
 					    heading, error);
 		
 		/* get speed and position */
 		*speed = 0.0;
-		mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+		if (mb_io_ptr->nfix > 0)
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
 				    navlon, navlat, speed, error);
 		
 		/* get position */
@@ -6018,8 +6195,8 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       nmax:       %d\n",nmax);
 		}
 
@@ -6266,8 +6443,8 @@ int mbsys_reson7k_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -6377,8 +6554,8 @@ int mbsys_reson7k_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -6461,8 +6638,8 @@ int mbsys_reson7k_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       nsvp:       %d\n",nsvp);
 		for (i=0;i<nsvp;i++)
 		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
@@ -6553,10 +6730,10 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:         %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:      %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:         %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:      %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       kind:           %d\n",*kind);
-		fprintf(stderr,"dbg2       segytraceheader_ptr: %ld\n",(long)segytraceheader_ptr);
+		fprintf(stderr,"dbg2       segytraceheader_ptr: %lu\n",(size_t)segytraceheader_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -6801,12 +6978,12 @@ int mbsys_reson7k_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:            %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:         %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:            %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:         %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       sampleformat:      %d\n",*sampleformat);
 		fprintf(stderr,"dbg2       kind:              %d\n",*kind);
-		fprintf(stderr,"dbg2       segyheader_ptr:    %ld\n",(long)segyheader_ptr);
-		fprintf(stderr,"dbg2       segydata:          %ld\n",(long)segydata);
+		fprintf(stderr,"dbg2       segyheader_ptr:    %lu\n",(size_t)segyheader_ptr);
+		fprintf(stderr,"dbg2       segydata:          %lu\n",(size_t)segydata);
 		}
 
 	/* get mbio descriptor */
@@ -7044,10 +7221,10 @@ int mbsys_reson7k_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:        %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:         %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:      %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:         %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:      %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       kind:           %d\n",kind);
-		fprintf(stderr,"dbg2       segyheader_ptr: %ld\n",(long)segyheader_ptr);
+		fprintf(stderr,"dbg2       segyheader_ptr: %lu\n",(size_t)segyheader_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -7300,8 +7477,8 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -7438,8 +7615,8 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -7547,9 +7724,9 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %ld\n",(long)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %lu\n",(size_t)copy_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -8110,8 +8287,8 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:        %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:       %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:        %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:       %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       pixel_size_set:  %d\n",pixel_size_set);
 		fprintf(stderr,"dbg2       pixel_size:      %f\n",*pixel_size);
 		fprintf(stderr,"dbg2       swath_width_set: %d\n",swath_width_set);

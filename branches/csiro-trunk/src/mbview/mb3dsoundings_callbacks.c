@@ -145,7 +145,7 @@ UARG( Widget, w)
 ARG( XtPointer, client)
 GRAU( XtPointer, call)
 {
-    long	exitValue = (long)client;
+    long	exitValue = EXIT_FAILURE;
     exit(exitValue);
 }
 #endif
@@ -169,8 +169,8 @@ int mb3dsoundings_startup(int verbose, Widget parent, XtAppContext app, int *err
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                 %d\n", verbose);
-		fprintf(stderr,"dbg2       parent:                  %ld\n", (long)parent);
-		fprintf(stderr,"dbg2       app:                     %ld\n", (long)app);
+		fprintf(stderr,"dbg2       parent:                  %lu\n", (size_t)parent);
+		fprintf(stderr,"dbg2       app:                     %lu\n", (size_t)app);
 		}
 		
 	/* set parent widget and app context */
@@ -303,6 +303,17 @@ int mb3dsoundings_updategui()
 	else
 		{
     		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_flagged, 
+				False, False);
+		}
+	
+	if (mb3dsoundings.view_scalewithflagged == MB_YES)
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_scalewithflagged, 
+				True, False);
+		}
+	else
+		{
+    		XmToggleButtonSetState(mb3dsoundings.mb3dsdg.toggleButton_view_scalewithflagged, 
 				False, False);
 		}
 	
@@ -733,6 +744,7 @@ int mb3dsoundings_reset()
 	mb3dsoundings.view_boundingbox = MB_YES;
 	mb3dsoundings.view_flagged = MB_YES;
 	mb3dsoundings.view_profiles = MBS_VIEW_PROFILES_NONE;
+	mb3dsoundings.view_scalewithflagged = MB_YES;
 	
 	/* print output debug statements */
 	if (mbs_verbose >= 2)
@@ -771,7 +783,7 @@ fprintf(stderr,"Called mb3dsoundings_open\n");
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:       %d\n",verbose);
-		fprintf(stderr,"dbg2       soundingdata:  %ld\n",(long)soundingdata);
+		fprintf(stderr,"dbg2       soundingdata:  %lu\n",(size_t)soundingdata);
 		}
 		
 	/* set the data pointer */
@@ -901,6 +913,9 @@ fprintf(stderr,"Called mb3dsoundings_open\n");
 	
 	/* reset OpenGL */
 	mb3dsoundings_reset_glx();
+		
+	/* recalculate vertical scaling */
+	mb3dsoundings_setzscale(verbose, error);
 		
 	/* replot the data */
 	mb3dsoundings_plot(verbose, error);
@@ -1892,6 +1907,79 @@ fprintf(stderr,"Infostring:\n%s", infostring);
 /*---------------------------------------------------------------------------------------*/
 
 int
+mb3dsoundings_setzscale(int verbose, int *error)
+{
+    struct mb3dsoundings_struct *soundingdata;
+    struct mb3dsoundings_sounding_struct *sounding;
+    int		nunflagged = 0;
+    double	zmin, zmax, dz;
+    int		i;
+
+	/* get sounding data structure */
+	soundingdata = (struct mb3dsoundings_struct *) mb3dsoundings.soundingdata;
+fprintf(stderr,"Called mb3dsoundings_setzscale: %d soundings\n",soundingdata->num_soundings);
+
+	/* initialize zmin and zmax */
+	zmin = 0.0;
+	zmax = 0.0;
+
+	/* get vertical min maxes for scaling of all soundings */
+	if (mb3dsoundings.view_scalewithflagged == MB_YES && soundingdata->num_soundings > 0)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[0]);
+		zmin = sounding->z;
+		zmax = sounding->z;
+		for (i=1;i<soundingdata->num_soundings;i++)
+			{
+			sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+			zmin = MIN(sounding->z, zmin);
+			zmax = MAX(sounding->z, zmax);
+			}
+		}
+		
+	/* else get vertical min maxes for scaling of only unflagged soundings */
+	else if (soundingdata->num_soundings > 0)
+		{
+		nunflagged = 0;
+		for (i=1;i<soundingdata->num_soundings;i++)
+			{
+			sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+			if (mb_beam_ok(sounding->beamflag))
+				{
+				if (nunflagged == 0)
+					{
+					zmin = sounding->z;
+					zmax = sounding->z;
+					}
+				else
+					{
+					zmin = MIN(sounding->z, zmin);
+					zmax = MAX(sounding->z, zmax);
+					}
+				nunflagged++;
+				}
+			}
+		}
+		
+	dz = zmax - zmin; 
+	soundingdata->zorigin = 0.5 * (zmin + zmax);
+	soundingdata->zmin = -0.5 * dz;
+	soundingdata->zmax = 0.5 * dz;
+	for (i=0;i<soundingdata->num_soundings;i++)
+		{
+		sounding = (struct mb3dsoundings_sounding_struct *) &(soundingdata->soundings[i]);
+		sounding->z = sounding->z - soundingdata->zorigin;
+		sounding->glz = mb3dsoundings.exageration * soundingdata->zscale * sounding->z;
+		}
+	
+	/* return */
+	return(mbs_status);
+
+}
+	
+/*---------------------------------------------------------------------------------------*/
+
+int
 mb3dsoundings_plot(int verbose, int *error)
 {
     struct mb3dsoundings_struct *soundingdata;
@@ -2497,19 +2585,24 @@ fprintf(stderr,"Called do_mb3dsdg_view_allprofile\n");
 /*---------------------------------------------------------------------------------------*/
 
 void
-do_mb3dsdg_action_applybias( Widget w, XtPointer client_data, XtPointer call_data)
+do_mb3dsdg_resetview( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
     
-fprintf(stderr,"Called do_mb3dsdg_action_applybias\n");
-			
-	/* send bias parameters to calling program to be applied */
-	if (mb3dsoundings.mb3dsoundings_biasapply_notify != NULL)
-	(mb3dsoundings.mb3dsoundings_biasapply_notify)(0.01 *((double)mb3dsoundings.irollbias), 
-						0.01 *((double)mb3dsoundings.ipitchbias),
-						0.01 *((double)mb3dsoundings.iheadingbias),
-						0.01 *((double)mb3dsoundings.itimelag));
+fprintf(stderr,"Called do_mb3dsdg_view_reset\n");
+
+	/* reset view orientation */
+	mb3dsoundings.elevation = 0.0;
+	mb3dsoundings.azimuth = 0.0;
+	mb3dsoundings.exageration = 1.0;
+	
+	/* rescale */
+	mb3dsoundings_scalez(mbs_verbose, &mbs_error);
+	mb3dsoundings_updatestatus();
+		
+	/* replot the data */
+	mb3dsoundings_plot(mbs_verbose, &mbs_error);
 }
 
 /*---------------------------------------------------------------------------------------*/
@@ -2531,24 +2624,36 @@ fprintf(stderr,"Called do_mb3dsdg_view_boundingbox\n");
 /*---------------------------------------------------------------------------------------*/
 
 void
-do_mb3dsdg_view_reset( Widget w, XtPointer client_data, XtPointer call_data)
+do_mb3dsdg_view_scalewithflagged( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
     
-fprintf(stderr,"Called do_mb3dsdg_view_reset\n");
+fprintf(stderr,"Called do_mb3dsdg_view_scalewithflagged\n");
 
-	/* reset view orientation */
-	mb3dsoundings.elevation = 0.0;
-	mb3dsoundings.azimuth = 0.0;
-	mb3dsoundings.exageration = 1.0;
-	
-	/* rescale */
-	mb3dsoundings_scalez(mbs_verbose, &mbs_error);
-	mb3dsoundings_updatestatus();
+	mb3dsoundings.view_scalewithflagged = XmToggleButtonGetState(mb3dsoundings.mb3dsdg.toggleButton_view_scalewithflagged);
 		
 	/* replot the data */
+	mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
 	mb3dsoundings_plot(mbs_verbose, &mbs_error);
+}
+
+/*---------------------------------------------------------------------------------------*/
+
+void
+do_mb3dsdg_action_applybias( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    
+fprintf(stderr,"Called do_mb3dsdg_action_applybias\n");
+			
+	/* send bias parameters to calling program to be applied */
+	if (mb3dsoundings.mb3dsoundings_biasapply_notify != NULL)
+	(mb3dsoundings.mb3dsoundings_biasapply_notify)(0.01 *((double)mb3dsoundings.irollbias), 
+						0.01 *((double)mb3dsoundings.ipitchbias),
+						0.01 *((double)mb3dsoundings.iheadingbias),
+						0.01 *((double)mb3dsoundings.itimelag));
 }
 
 /*---------------------------------------------------------------------------------------*/

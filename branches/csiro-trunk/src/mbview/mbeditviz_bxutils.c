@@ -464,7 +464,7 @@ static void copyWcsToMbs
     }
 
     tmp = tbuf[lenToConvert];
-    tbuf[lenToConvert] = (wchar_t) NULL;
+    tbuf[lenToConvert] = (wchar_t) 0;
     numCvt = doWcstombs(mbs, tbuf, lenToConvert);
     tbuf[lenToConvert] = tmp;
     
@@ -1489,13 +1489,13 @@ XtPointer BX_CONVERT
 	switch(toVal.size)
 	{
 	case 1:
-	    val = (XTPOINTER)(long)(*(char*)toVal.addr);
+	    val = (XTPOINTER)(size_t)(*(char*)toVal.addr);
 	    break;
 	case 2:
-	    val = (XTPOINTER)(long)(*(short*)toVal.addr);
+	    val = (XTPOINTER)(size_t)(*(short*)toVal.addr);
 	    break;
 	case 4:
-	    val = (XTPOINTER)(long)(*(int*)toVal.addr);
+	    val = (XTPOINTER)(size_t)(*(int*)toVal.addr);
 	    break;
 	case 8:
 	default:
@@ -3605,8 +3605,12 @@ GRA(char *, buf)
 
     switch (mdata->type) {
     case BXXPMARRAY:
-        while (isspace(c = *mdata->cptr) && c != mdata->Eos)
-            mdata->cptr++;
+    	c = *mdata->cptr;
+        while (isspace(c) && c != mdata->Eos)
+            {
+	    mdata->cptr++;
+    	    c = *mdata->cptr;
+	    }
         do {
             c = *mdata->cptr++;
             buf[n++] = c;
@@ -3616,7 +3620,9 @@ GRA(char *, buf)
         break;
     case BXXPMFILE:
     case BXXPMPIPE:
-        while (isspace(c = xpmGetC(mdata)) && c != mdata->Eos);
+        c = xpmGetC(mdata);
+        while (isspace(c) && c != mdata->Eos)
+	    c = xpmGetC(mdata);
         while (!isspace(c) && c != mdata->Eos && c != EOF) {
             buf[n++] = c;
             c = xpmGetC(mdata);

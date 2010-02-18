@@ -106,7 +106,7 @@ static char		value_text[MB_PATH_MAXLINE];
 static char rcs_id[]="$Id$";
 
 /*------------------------------------------------------------------------------*/
-int mbview_setsecondarygrid(int verbose, int instance,
+int mbview_setsecondarygrid(int verbose, size_t instance,
 			int	secondary_grid_projection_mode,
 			char	*secondary_grid_projection_id,
 			float	secondary_nodatavalue,
@@ -141,7 +141,7 @@ int mbview_setsecondarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
 		fprintf(stderr,"dbg2       secondary_grid_projection_mode:   %d\n", secondary_grid_projection_mode);
 		fprintf(stderr,"dbg2       secondary_grid_projection_id:     %s\n", secondary_grid_projection_id);
 		fprintf(stderr,"dbg2       secondary_nodatavalue:       %f\n", secondary_nodatavalue);
@@ -155,7 +155,7 @@ int mbview_setsecondarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2       secondary_ymax:              %f\n", secondary_ymax);
 		fprintf(stderr,"dbg2       secondary_dx:                %f\n", secondary_dx);
 		fprintf(stderr,"dbg2       secondary_dy:                %f\n", secondary_dy);
-		fprintf(stderr,"dbg2       secondary_data:              %ld\n", (long)secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:              %lu\n", (size_t)secondary_data);
 		}
 
 	/* get view */
@@ -216,7 +216,7 @@ int mbview_setsecondarygrid(int verbose, int instance,
 		if (proj_status == MB_SUCCESS)
 			view->secondary_pj_init = MB_YES;
 fprintf(stderr,"SECONDARY GRID PROJECTION:%d %ld %s\n",
-view->secondary_pj_init,(long)view->secondary_pjptr,data->secondary_grid_projection_id);
+view->secondary_pj_init,(size_t)view->secondary_pjptr,data->secondary_grid_projection_id);
 			
 		/* quit if projection fails */
 		if (proj_status != MB_SUCCESS)
@@ -249,7 +249,7 @@ view->secondary_pj_init,(long)view->secondary_pjptr,data->secondary_grid_project
 	return(status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_updatesecondarygrid(int verbose, int instance,
+int mbview_updatesecondarygrid(int verbose, size_t instance,
 			int	secondary_nx,
 			int	secondary_ny,
 			float	*secondary_data,
@@ -273,10 +273,10 @@ int mbview_updatesecondarygrid(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                      %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                     %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                     %ld\n", instance);
 		fprintf(stderr,"dbg2       secondary_nx:                 %d\n", secondary_nx);
 		fprintf(stderr,"dbg2       secondary_ny:                 %d\n", secondary_ny);
-		fprintf(stderr,"dbg2       secondary_data:               %ld\n", (long)secondary_data);
+		fprintf(stderr,"dbg2       secondary_data:               %lu\n", (size_t)secondary_data);
 		}
 
 	/* get view */
@@ -329,7 +329,7 @@ int mbview_updatesecondarygrid(int verbose, int instance,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_updatesecondarygridcell(int verbose, int instance,
+int mbview_updatesecondarygridcell(int verbose, size_t instance,
 			int	secondary_ix,
 			int	secondary_jy,
 			float	value,
@@ -352,7 +352,7 @@ int mbview_updatesecondarygridcell(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                      %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                     %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                     %ld\n", instance);
 		fprintf(stderr,"dbg2       secondary_ix:                 %d\n", secondary_ix);
 		fprintf(stderr,"dbg2       secondary_jy:                 %d\n", secondary_jy);
 		fprintf(stderr,"dbg2       value:                        %f\n", value);
@@ -387,7 +387,7 @@ int mbview_updatesecondarygridcell(int verbose, int instance,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_setsecondarycolortable(int verbose, int instance,
+int mbview_setsecondarycolortable(int verbose, size_t instance,
 			int	secondary_colortable,
 			int	secondary_colortable_mode,
 			double	secondary_colortable_min,
@@ -413,7 +413,7 @@ int mbview_setsecondarycolortable(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
 		fprintf(stderr,"dbg2       secondary_colortable:      %d\n", secondary_colortable);
 		fprintf(stderr,"dbg2       secondary_colortable_mode: %d\n", secondary_colortable_mode);
 		fprintf(stderr,"dbg2       secondary_colortable_min:  %f\n", secondary_colortable_min);
@@ -493,7 +493,7 @@ int mbview_setsecondarycolortable(int verbose, int instance,
 
 /*------------------------------------------------------------------------------*/
 
-int mbview_setsecondaryname(int verbose, int instance,
+int mbview_setsecondaryname(int verbose, size_t instance,
 				char *name, int *error)
 
 {
@@ -516,7 +516,7 @@ int mbview_setsecondaryname(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
 		fprintf(stderr,"dbg2       name:                      %s\n", name);
 		}
 

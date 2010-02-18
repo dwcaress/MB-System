@@ -5018,7 +5018,6 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		proj_status = mb_proj_free(verbose, &(pjptr), &error);
 
 	/* run mbm_grdplot */
-fprintf(stderr,"should run mbm_grdplot gridkind:%d\n",gridkind);
 	if (gridkind == MBGRID_GMTGRD)
 		{
 		/* execute mbm_grdplot */
@@ -5136,7 +5135,7 @@ int write_ascii(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(outfp,"dbg2       grid:       %lu\n",(size_t)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5215,7 +5214,7 @@ int write_arcascii(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(outfp,"dbg2       grid:       %lu\n",(size_t)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5294,7 +5293,7 @@ int write_oldgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(outfp,"dbg2       grid:       %lu\n",(size_t)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5358,7 +5357,11 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	status = MB_SUCCESS;
 	struct GRD_HEADER grd;
 	double	w, e, s, n;
+#ifdef GMT_MINOR_VERSION
 	GMT_LONG	pad[4];
+#else
+	int	pad[4];
+#endif
 	float	*a;
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
@@ -5376,7 +5379,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %ld\n",(long)grid);
+		fprintf(outfp,"dbg2       grid:       %lu\n",(size_t)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -5390,7 +5393,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2       zlab:       %s\n",zlab);
 		fprintf(outfp,"dbg2       titl:       %s\n",titl);
 		fprintf(outfp,"dbg2       argc:       %d\n",argc);
-		fprintf(outfp,"dbg2       *argv:      %ld\n",(long)*argv);
+		fprintf(outfp,"dbg2       *argv:      %lu\n",(size_t)*argv);
 		}
 
 	/* inititialize grd header */
@@ -5443,7 +5446,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		pad[i] = 0;
 
 	/* allocate memory for output array */
-	status = mb_mallocd(5,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,grd.nx*grd.ny*sizeof(float),(void **)&a,error);
 	if (*error != MB_ERROR_NO_ERROR)
 		{
 		mb_error(verbose,MB_ERROR_MEMORY_FAIL,&message);

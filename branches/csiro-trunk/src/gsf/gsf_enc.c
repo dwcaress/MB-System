@@ -1763,7 +1763,6 @@ EncodeScaleFactors(unsigned char *sptr, gsfScaleFactors *sf)
             sf_counter++;
         }
     }
-
     /* Make sure that we encoded the expected number of array subrecords. If not return an error condition */
     if (sf_counter != sf->numArraySubrecords)
     {

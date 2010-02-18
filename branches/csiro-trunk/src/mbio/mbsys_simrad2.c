@@ -180,7 +180,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -197,6 +197,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->kind = MB_DATA_NONE;
 	store->type = EM2_NONE;
 	store->sonar = MBSYS_SIMRAD2_UNKNOWN;
+	store->numberheads = 1;
 
 	/* time stamp */
 	store->date = 0;
@@ -479,7 +480,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)*store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
 		fprintf(stderr,"dbg2       error:      %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
@@ -508,8 +509,8 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -523,328 +524,317 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_ping_struct),
 			(void **)&(store->ping),error);
-	if (store->ping2 == NULL && store->sonar == MBSYS_SIMRAD2_EM3002)
+	if (status == MB_SUCCESS && store->ping != NULL)
 		{
-		if ((status = mb_mallocd(verbose,__FILE__, __LINE__,
-			sizeof(struct mbsys_simrad2_ping_struct),
-			(void **)&(store->ping2),error)) == MB_SUCCESS)
+		/* get data structure pointer */
+		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+
+		/* initialize everything */
+		ping->png_date = 0;	
+				/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		ping->png_msec = 0;	
+				/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		ping->png_count = 0;	
+				/* sequential counter or input identifier */
+		ping->png_serial = 0;	
+				/* system 1 or system 2 serial number */
+		ping->png_latitude = EM2_INVALID_INT;
+				/* latitude in decimal degrees * 20000000
+				    (negative in southern hemisphere) 
+				    if valid, invalid = 0x7FFFFFFF */
+		ping->png_longitude = EM2_INVALID_INT;
+				/* longitude in decimal degrees * 10000000
+				    (negative in western hemisphere) 
+				    if valid, invalid = 0x7FFFFFFF */
+		ping->png_speed = 0;
+				/* speed over ground (cm/sec) if valid,
+				    invalid = 0xFFFF */
+		ping->png_heading = 0;	
+				/* heading (0.01 deg) */
+		ping->png_heave = 0;	
+				/* heave from interpolation (0.01 m) */
+		ping->png_roll = 0;	
+				/* roll from interpolation (0.01 deg) */
+		ping->png_pitch = 0;	
+				/* pitch from interpolation (0.01 deg) */
+		ping->png_ssv = 0;	
+				/* sound speed at transducer (0.1 m/sec) */
+		ping->png_xducer_depth = 0;   
+				/* transmit transducer depth (0.01 m) 
+				    - The transmit transducer depth plus the
+					depth offset multiplier times 65536 cm
+					should be added to the beam depths to 
+					derive the depths re the water line.
+					The depth offset multiplier will usually
+					be zero, except when the EM3000 sonar
+					head is on an underwater vehicle at a
+					depth greater than about 650 m. Note that
+					the offset multiplier will be negative
+					(-1) if the actual heave is large enough
+					to bring the transmit transducer above 
+					the water line. This may represent a valid
+					situation,  but may also be due to an 
+					erroneously set installation depth of 
+					the either transducer or the water line. */
+		ping->png_offset_multiplier = 0;	
+				/* transmit transducer depth offset multiplier
+				   - see note 7 above */ 
+
+		/* beam data */
+		ping->png_nbeams_max = 0;	
+				/* maximum number of beams possible */
+		ping->png_nbeams = 0;	
+				/* number of valid beams */
+		ping->png_depth_res = 0;	
+				/* depth resolution (0.01 m) */
+		ping->png_distance_res = 0;	
+				/* x and y resolution (0.01 m) */
+		ping->png_sample_rate = 0;	
+				/* sampling rate (Hz) OR depth difference between
+				    sonar heads in EM3000D - see note 9 above */
+		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
+		    {
+		    ping->png_depth[i] = 0;	
+				/* depths in depth resolution units */
+		    ping->png_acrosstrack[i] = 0;
+				/* acrosstrack distances in distance resolution units */
+		    ping->png_alongtrack[i] = 0;
+				/* alongtrack distances in distance resolution units */
+		    ping->png_depression[i] = 0;
+				/* Primary beam angles in one of two formats (see note 10 above)
+				   1: Corrected format - gives beam depression angles
+					in 0.01 degree. These are the takeoff angles used
+					in raytracing calculations.
+				   2: Uncorrected format - gives beam pointing angles
+					in 0.01 degree. These values are relative to
+					the transducer array and have not been corrected
+					for vessel motion. */
+		    ping->png_azimuth[i] = 0;
+				/* Secondary beam angles in one of two formats (see note 10 above)
+				   1: Corrected format - gives beam azimuth angles
+					in 0.01 degree. These values used to rotate sounding
+					position relative to the sonar after raytracing.
+				   2: Uncorrected format - combines a flag indicating that
+					the angles are in the uncorrected format with
+					beam tilt angles. Values greater than
+					35999 indicate the uncorrected format is in use. The
+					beam tilt angles are given as (value - 54000) in
+					0.01 degree; the tilt angles give the tilt of the
+					transmitted ping due to compensation for vessel
+					motion. */
+		    ping->png_range[i] = 0;
+				/* Ranges in one of two formats (see note 10 above):
+				   1: Corrected format - the ranges are one way 
+					travel times in time units defined as half 
+					the inverse sampling rate.
+				   2: Uncorrected format - the ranges are raw two
+					way travel times in time units defined as
+					half the inverse sampling rate. These values
+					have not been corrected for changes in the
+					heave during the ping cycle. */
+		    ping->png_quality[i] = 0;	
+				/* 0-254 */
+		    ping->png_window[i] = 0;		
+				/* samples/4 */
+		    ping->png_amp[i] = 0;		
+				/* 0.5 dB */
+		    ping->png_beam_num[i] = 0;	
+				/* beam 128 is first beam on 
+				    second head of EM3000D */
+		    ping->png_beamflag[i] = MB_FLAG_NULL;	
+				/* uses standard MB-System beamflags */
+		    }
+
+		/* raw beam record */
+		ping->png_raw1_read = MB_NO;	/* flag indicating actual reading of old rawbeam record */
+		ping->png_raw2_read = MB_NO;	/* flag indicating actual reading of new rawbeam record */
+		ping->png_raw_date = 0;	
+				/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		ping->png_raw_msec = 0;	
+				/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		ping->png_raw_count = 0;	
+				/* sequential counter or input identifier */
+		ping->png_raw_serial = 0;	
+				/* system 1 or system 2 serial number */
+		ping->png_raw_heading = 0;	/* heading (0.01 deg) */
+		ping->png_raw_ssv = 0;		/* sound speed at transducer (0.1 m/sec) */
+		ping->png_raw_xducer_depth = 0;	/* transmit transducer depth (0.01 m) */
+		ping->png_raw_nbeams_max = 0;		/* maximum number of beams possible */
+		ping->png_raw_nbeams = 0;		/* number of valid beams */
+		ping->png_raw_depth_res = 0;		/* depth resolution (0.01 m) */
+		ping->png_raw_distance_res = 0;	/* x and y resolution (0.01 m) */
+		ping->png_raw_sample_rate = 0;	/* sampling rate (Hz) */
+		ping->png_raw_status = 0;		/* status from PU/TRU */
+		ping->png_raw_nbeams = 0;		/* number of raw travel times and angles
+							- nonzero only if raw beam record read */
+		ping->png_raw_rangenormal = 0;	/* normal incidence range (meters) */
+		ping->png_raw_normalbackscatter = 0; 	/* normal incidence backscatter (dB) (-60 to +9) */
+		ping->png_raw_obliquebackscatter = 0; /* oblique incidence backscatter (dB) (-60 to +9) */
+		ping->png_raw_fixedgain = 0;		/* fixed gain (dB) (0 to 30) */
+		ping->png_raw_txpower = 0;		/* transmit power (dB) (0, -10, or -20) */
+		ping->png_raw_mode = 0;		/* sonar mode: 
+							0 : very shallow
+							1 : shallow
+							2 : medium
+							3 : deep
+							4 : very deep
+							5 : extra deep */
+		ping->png_raw_coverage = 0;	/* swath width (degrees) (10 to 150 degrees) */
+		ping->png_raw_yawstabheading = 0; /* yaw stabilization heading (0.01 degrees) */
+		ping->png_raw_ntx = 0;		/* number of TX pulses (1 to 9) */
+		for (i=0;i<MBSYS_SIMRAD2_MAXTX;i++)
 			{
+			ping->png_raw_txlastbeam[i] = 0;/* last beam number in this TX pulse */
+			ping->png_raw_txtiltangle[i] = 0;/* tilt angle (0.01 deg) */
+			ping->png_raw_txheading[i] = 0;	/* heading (0.01 deg) */
+			ping->png_raw_txroll[i] = 0;	/* roll (0.01 deg) */
+			ping->png_raw_txpitch[i] = 0;	/* pitch angle (0.01 deg) */
+			ping->png_raw_txheave[i] = 0;	/* heave (0.01 m) */
+			}
+		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
+			{
+			ping->png_raw_rxrange[i] = 0;
+				/* Ranges as raw two way travel times in time 
+					units defined as one-fourth the inverse 
+					sampling rate. These values have not 
+					been corrected for changes in the
+					heave during the ping cycle. */
+			ping->png_raw_rxquality[i] = 0;	/* beam quality flag */
+			ping->png_raw_rxwindow[i] = 0;	/* length of detection window */
+			ping->png_raw_rxamp[i] = 0;		/* 0.5 dB */
+			ping->png_raw_rxbeam_num[i] = 0;	
+				/* beam 128 is first beam on 
+				    second head of EM3000D */
+			ping->png_raw_rxpointangle[i] = 0;
+				/* Raw beam pointing angles in 0.01 degree,
+					positive to port. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+			ping->png_raw_rxtiltangle[i] = 0;
+				/* Raw transmit tilt angles in 0.01 degree,
+					positive forward. 
+					These values are relative to the transducer 
+					array and have not been corrected
+					for vessel motion. */
+			ping->png_raw_rxheading[i] = 0;	/* heading (0.01 deg) */
+			ping->png_raw_rxroll[i] = 0;	/* roll (0.01 deg) */
+			ping->png_raw_rxpitch[i] = 0;	/* pitch angle (0.01 deg) */
+			ping->png_raw_rxheave[i] = 0;	/* heave (0.01 m) */
+			}
 
-			/* get data structure pointer */
-			ping = (struct mbsys_simrad2_ping_struct *) store->ping;
-
-			/* initialize everything */
-			ping->png_date = 0;	
-					/* date = year*10000 + month*100 + day
-					    Feb 26, 1995 = 19950226 */
-			ping->png_msec = 0;	
-					/* time since midnight in msec
-					    08:12:51.234 = 29570234 */
-			ping->png_count = 0;	
-					/* sequential counter or input identifier */
-			ping->png_serial = 0;	
-					/* system 1 or system 2 serial number */
-			ping->png_latitude = EM2_INVALID_INT;
-					/* latitude in decimal degrees * 20000000
-					    (negative in southern hemisphere) 
-					    if valid, invalid = 0x7FFFFFFF */
-			ping->png_longitude = EM2_INVALID_INT;
-					/* longitude in decimal degrees * 10000000
-					    (negative in western hemisphere) 
-					    if valid, invalid = 0x7FFFFFFF */
-			ping->png_speed = 0;
-					/* speed over ground (cm/sec) if valid,
-					    invalid = 0xFFFF */
-			ping->png_heading = 0;	
-					/* heading (0.01 deg) */
-			ping->png_heave = 0;	
-					/* heave from interpolation (0.01 m) */
-			ping->png_roll = 0;	
-					/* roll from interpolation (0.01 deg) */
-			ping->png_pitch = 0;	
-					/* pitch from interpolation (0.01 deg) */
-			ping->png_ssv = 0;	
-					/* sound speed at transducer (0.1 m/sec) */
-			ping->png_xducer_depth = 0;   
-					/* transmit transducer depth (0.01 m) 
-					    - The transmit transducer depth plus the
-						depth offset multiplier times 65536 cm
-						should be added to the beam depths to 
-						derive the depths re the water line.
-						The depth offset multiplier will usually
-						be zero, except when the EM3000 sonar
-						head is on an underwater vehicle at a
-						depth greater than about 650 m. Note that
-						the offset multiplier will be negative
-						(-1) if the actual heave is large enough
-						to bring the transmit transducer above 
-						the water line. This may represent a valid
-						situation,  but may also be due to an 
-						erroneously set installation depth of 
-						the either transducer or the water line. */
-			ping->png_offset_multiplier = 0;	
-					/* transmit transducer depth offset multiplier
-					   - see note 7 above */ 
-
-			/* beam data */
-			ping->png_nbeams_max = 0;	
-					/* maximum number of beams possible */
-			ping->png_nbeams = 0;	
-					/* number of valid beams */
-			ping->png_depth_res = 0;	
-					/* depth resolution (0.01 m) */
-			ping->png_distance_res = 0;	
-					/* x and y resolution (0.01 m) */
-			ping->png_sample_rate = 0;	
-					/* sampling rate (Hz) OR depth difference between
-					    sonar heads in EM3000D - see note 9 above */
-			for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
-			    {
-			    ping->png_depth[i] = 0;	
-					/* depths in depth resolution units */
-			    ping->png_acrosstrack[i] = 0;
-					/* acrosstrack distances in distance resolution units */
-			    ping->png_alongtrack[i] = 0;
-					/* alongtrack distances in distance resolution units */
-			    ping->png_depression[i] = 0;
-					/* Primary beam angles in one of two formats (see note 10 above)
-					   1: Corrected format - gives beam depression angles
-				        	in 0.01 degree. These are the takeoff angles used
-						in raytracing calculations.
-					   2: Uncorrected format - gives beam pointing angles
-				        	in 0.01 degree. These values are relative to
-						the transducer array and have not been corrected
-						for vessel motion. */
-			    ping->png_azimuth[i] = 0;
-					/* Secondary beam angles in one of two formats (see note 10 above)
-					   1: Corrected format - gives beam azimuth angles
-				        	in 0.01 degree. These values used to rotate sounding
-						position relative to the sonar after raytracing.
-					   2: Uncorrected format - combines a flag indicating that
-				        	the angles are in the uncorrected format with
-						beam tilt angles. Values greater than
-						35999 indicate the uncorrected format is in use. The
-						beam tilt angles are given as (value - 54000) in
-						0.01 degree; the tilt angles give the tilt of the
-						transmitted ping due to compensation for vessel
-						motion. */
-			    ping->png_range[i] = 0;
-					/* Ranges in one of two formats (see note 10 above):
-					   1: Corrected format - the ranges are one way 
-				        	travel times in time units defined as half 
-						the inverse sampling rate.
-					   2: Uncorrected format - the ranges are raw two
-				        	way travel times in time units defined as
-						half the inverse sampling rate. These values
-						have not been corrected for changes in the
-						heave during the ping cycle. */
-			    ping->png_quality[i] = 0;	
-					/* 0-254 */
-			    ping->png_window[i] = 0;		
-					/* samples/4 */
-			    ping->png_amp[i] = 0;		
-					/* 0.5 dB */
-			    ping->png_beam_num[i] = 0;	
-					/* beam 128 is first beam on 
-					    second head of EM3000D */
-			    ping->png_beamflag[i] = MB_FLAG_NULL;	
-					/* uses standard MB-System beamflags */
-			    }
-
-			/* raw beam record */
-			ping->png_raw1_read = MB_NO;	/* flag indicating actual reading of old rawbeam record */
-			ping->png_raw2_read = MB_NO;	/* flag indicating actual reading of new rawbeam record */
-			ping->png_raw_date = 0;	
-					/* date = year*10000 + month*100 + day
-					    Feb 26, 1995 = 19950226 */
-			ping->png_raw_msec = 0;	
-					/* time since midnight in msec
-					    08:12:51.234 = 29570234 */
-			ping->png_raw_count = 0;	
-					/* sequential counter or input identifier */
-			ping->png_raw_serial = 0;	
-					/* system 1 or system 2 serial number */
-			ping->png_raw_heading = 0;	/* heading (0.01 deg) */
-			ping->png_raw_ssv = 0;		/* sound speed at transducer (0.1 m/sec) */
-			ping->png_raw_xducer_depth = 0;	/* transmit transducer depth (0.01 m) */
-			ping->png_raw_nbeams_max = 0;		/* maximum number of beams possible */
-			ping->png_raw_nbeams = 0;		/* number of valid beams */
-			ping->png_raw_depth_res = 0;		/* depth resolution (0.01 m) */
-			ping->png_raw_distance_res = 0;	/* x and y resolution (0.01 m) */
-			ping->png_raw_sample_rate = 0;	/* sampling rate (Hz) */
-			ping->png_raw_status = 0;		/* status from PU/TRU */
-			ping->png_raw_nbeams = 0;		/* number of raw travel times and angles
-								- nonzero only if raw beam record read */
-			ping->png_raw_rangenormal = 0;	/* normal incidence range (meters) */
-			ping->png_raw_normalbackscatter = 0; 	/* normal incidence backscatter (dB) (-60 to +9) */
-			ping->png_raw_obliquebackscatter = 0; /* oblique incidence backscatter (dB) (-60 to +9) */
-			ping->png_raw_fixedgain = 0;		/* fixed gain (dB) (0 to 30) */
-			ping->png_raw_txpower = 0;		/* transmit power (dB) (0, -10, or -20) */
-			ping->png_raw_mode = 0;		/* sonar mode: 
-								0 : very shallow
-								1 : shallow
-								2 : medium
-								3 : deep
-								4 : very deep
-								5 : extra deep */
-			ping->png_raw_coverage = 0;	/* swath width (degrees) (10 to 150 degrees) */
-			ping->png_raw_yawstabheading = 0; /* yaw stabilization heading (0.01 degrees) */
-			ping->png_raw_ntx = 0;		/* number of TX pulses (1 to 9) */
-			for (i=0;i<MBSYS_SIMRAD2_MAXTX;i++)
-				{
-				ping->png_raw_txlastbeam[i] = 0;/* last beam number in this TX pulse */
-				ping->png_raw_txtiltangle[i] = 0;/* tilt angle (0.01 deg) */
-				ping->png_raw_txheading[i] = 0;	/* heading (0.01 deg) */
-				ping->png_raw_txroll[i] = 0;	/* roll (0.01 deg) */
-				ping->png_raw_txpitch[i] = 0;	/* pitch angle (0.01 deg) */
-				ping->png_raw_txheave[i] = 0;	/* heave (0.01 m) */
-				}
-			for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
-		    		{
-				ping->png_raw_rxrange[i] = 0;
-					/* Ranges as raw two way travel times in time 
-						units defined as one-fourth the inverse 
-						sampling rate. These values have not 
-						been corrected for changes in the
-						heave during the ping cycle. */
-				ping->png_raw_rxquality[i] = 0;	/* beam quality flag */
-				ping->png_raw_rxwindow[i] = 0;	/* length of detection window */
-				ping->png_raw_rxamp[i] = 0;		/* 0.5 dB */
-				ping->png_raw_rxbeam_num[i] = 0;	
-					/* beam 128 is first beam on 
-					    second head of EM3000D */
-				ping->png_raw_rxpointangle[i] = 0;
+		/* raw travel time and angle data version 3 */
+		ping->png_raw3_read = 0;	/* flag indicating actual reading of newer rawbeam record */
+		ping->png_raw3_date = 0;	/* date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		ping->png_raw3_msec = 0;	/* time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		ping->png_raw3_count = 0;	/* sequential counter or input identifier */
+		ping->png_raw3_serial = 0;	/* system 1 or system 2 serial number */
+		ping->png_raw3_ntx = 0;		/* number of TX pulses (1 to 9) */
+		ping->png_raw3_nbeams = 0;		/* number of raw travel times and angles
+					    - nonzero only if raw beam record read */
+		ping->png_raw3_sample_rate = 0;	/* sampling rate (Hz or 0.01 Hz) */
+		ping->png_raw3_xducer_depth = 0;	/* transmit transducer depth (0.01 m) */
+		ping->png_raw3_ssv = 0;		/* sound speed at transducer (0.1 m/sec) */
+		ping->png_raw3_nbeams_max = 0;	/* maximum number of beams possible */
+		for (i=0;i<MBSYS_SIMRAD2_MAXTX;i++)
+			{
+			ping->png_raw3_txtiltangle[i] = 0;/* tilt angle (0.01 deg) */
+			ping->png_raw3_txfocus[i] = 0;   /* focus range (0.1 m)
+									0 = no focus */
+			ping->png_raw3_txsignallength[i] = 0;	/* signal length (usec) */
+			ping->png_raw3_txoffset[i] = 0;	/* transmit time offset (usec) */
+			ping->png_raw3_txcenter[i] = 0;	/* center frequency (Hz) */
+			ping->png_raw3_txbandwidth[i] = 0;	/* bandwidth (10 Hz) */
+			ping->png_raw3_txwaveform[i] = 0;	/* signal waveform identifier 
+										0 = CW, 1 = FM */
+			ping->png_raw3_txsector[i] = 0;	/* transmit sector number (0-19) */
+			}
+		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
+			{
+			ping->png_raw3_rxpointangle[i] = 0;;
 					/* Raw beam pointing angles in 0.01 degree,
 						positive to port. 
 						These values are relative to the transducer 
 						array and have not been corrected
 						for vessel motion. */
-				ping->png_raw_rxtiltangle[i] = 0;
-					/* Raw transmit tilt angles in 0.01 degree,
-						positive forward. 
-						These values are relative to the transducer 
-						array and have not been corrected
-						for vessel motion. */
-				ping->png_raw_rxheading[i] = 0;	/* heading (0.01 deg) */
-				ping->png_raw_rxroll[i] = 0;	/* roll (0.01 deg) */
-				ping->png_raw_rxpitch[i] = 0;	/* pitch angle (0.01 deg) */
-				ping->png_raw_rxheave[i] = 0;	/* heave (0.01 m) */
-		    		}
-
-			/* raw travel time and angle data version 3 */
-			ping->png_raw3_read = 0;	/* flag indicating actual reading of newer rawbeam record */
-			ping->png_raw3_date = 0;	/* date = year*10000 + month*100 + day
-					    Feb 26, 1995 = 19950226 */
-			ping->png_raw3_msec = 0;	/* time since midnight in msec
-					    08:12:51.234 = 29570234 */
-			ping->png_raw3_count = 0;	/* sequential counter or input identifier */
-			ping->png_raw3_serial = 0;	/* system 1 or system 2 serial number */
-			ping->png_raw3_ntx = 0;		/* number of TX pulses (1 to 9) */
-			ping->png_raw3_nbeams = 0;		/* number of raw travel times and angles
-						    - nonzero only if raw beam record read */
-			ping->png_raw3_sample_rate = 0;	/* sampling rate (Hz or 0.01 Hz) */
-			ping->png_raw3_xducer_depth = 0;	/* transmit transducer depth (0.01 m) */
-			ping->png_raw3_ssv = 0;		/* sound speed at transducer (0.1 m/sec) */
-			ping->png_raw3_nbeams_max = 0;	/* maximum number of beams possible */
-			for (i=0;i<MBSYS_SIMRAD2_MAXTX;i++)
-				{
-				ping->png_raw3_txtiltangle[i] = 0;/* tilt angle (0.01 deg) */
-				ping->png_raw3_txfocus[i] = 0;   /* focus range (0.1 m)
-										0 = no focus */
-				ping->png_raw3_txsignallength[i] = 0;	/* signal length (usec) */
-				ping->png_raw3_txoffset[i] = 0;	/* transmit time offset (usec) */
-				ping->png_raw3_txcenter[i] = 0;	/* center frequency (Hz) */
-				ping->png_raw3_txbandwidth[i] = 0;	/* bandwidth (10 Hz) */
-				ping->png_raw3_txwaveform[i] = 0;	/* signal waveform identifier 
-											0 = CW, 1 = FM */
-				ping->png_raw3_txsector[i] = 0;	/* transmit sector number (0-19) */
-		    		}
-			for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
-		    		{
-				ping->png_raw3_rxpointangle[i] = 0;;
-						/* Raw beam pointing angles in 0.01 degree,
-							positive to port. 
-							These values are relative to the transducer 
-							array and have not been corrected
-							for vessel motion. */
-				ping->png_raw3_rxrange[i] = 0;;	/* Ranges (0.25 samples) */
-				ping->png_raw3_rxsector[i] = 0;;	/* transmit sector identifier */
-				ping->png_raw3_rxamp[i] = 0;;		/* 0.5 dB */
-				ping->png_raw3_rxquality[i] = 0;;	/* beam quality flag */
-				ping->png_raw3_rxwindow[i] = 0;;	/* length of detection window */
-				ping->png_raw3_rxbeam_num[i] = 0;;	
-						/* beam 128 is first beam on 
-						    second head of EM3000D */
-				ping->png_raw3_rxspare[i] = 0;;	/* spare */
-		    		}
-
-			/* sidescan */
-			ping->png_ss_read = MB_NO;	
-					/* flag indicating actual reading of sidescan record */
-			ping->png_ss_date = 0;
-					/* date = year*10000 + month*100 + day */
-			ping->png_ss_msec = 0;
-					/* time since midnight in msec */
-
-			ping->png_ss_count = 0;	
-					/* sequential counter or input identifier */
-			ping->png_ss_serial = 0;	
-					/* system 1 or system 2 serial number */
-			ping->png_max_range = 0;  
-					/* max range of ping in number of samples */
-			ping->png_r_zero = 0;	
-					/* range to normal incidence used in TVG
-					    (R0 predicted) in samples */
-			ping->png_r_zero_corr = 0;
-					/* range to normal incidence used to correct
-					    sample amplitudes in number of samples */
-			ping->png_tvg_start = 0;	
-					/* start sample of TVG ramp if not enough 
-					    dynamic range (0 otherwise) */
-			ping->png_tvg_stop = 0;	\
-					/* stop sample of TVG ramp if not enough 
-					    dynamic range (0 otherwise) */
-			ping->png_bsn = 0;	
-					/* normal incidence backscatter (BSN) in dB */
-			ping->png_bso = 0;	
-					/* oblique incidence backscatter (BSO) in dB */
-			ping->png_tx = 0;	
-					/* Tx beamwidth in 0.1 degree */
-			ping->png_tvg_crossover = 0;	
-					/* TVG law crossover angle in degrees */
-			ping->png_nbeams_ss = 0;	
-					/* number of beams with sidescan */
-			for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
-			    {
-			    ping->png_beam_index[i] = 0;	
-					/* beam index number */
-			    ping->png_sort_direction[i] = 0;	
-					/* sorting direction - first sample in beam has lowest
-					    range if 1, highest if -1. */
-			    ping->png_beam_samples[i] = 0;	
-					/* number of sidescan samples derived from
-						each beam */
-			    ping->png_start_sample[i] = 0;	
-					/* start sample number */
-			    ping->png_center_sample[i] = 0;	
-					/* center sample number */
-			    }
-			for (i=0;i<MBSYS_SIMRAD2_MAXRAWPIXELS;i++)
-			    {
-			    ping->png_ssraw[i] = EM2_INVALID_AMP;
-					/* the raw sidescan ordered port to starboard */
-			    }
-			ping->png_pixel_size = 0;
-			ping->png_pixels_ss = 0;
-			for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
-			    {
-			    ping->png_ss[i] = EM2_INVALID_AMP;
-					/* the processed sidescan ordered port to starboard */
-			    ping->png_ssalongtrack[i] = EM2_INVALID_AMP;
-					/* the processed sidescan alongtrack distances 
-						in distance resolution units */
-			    }
+			ping->png_raw3_rxrange[i] = 0;;	/* Ranges (0.25 samples) */
+			ping->png_raw3_rxsector[i] = 0;;	/* transmit sector identifier */
+			ping->png_raw3_rxamp[i] = 0;;		/* 0.5 dB */
+			ping->png_raw3_rxquality[i] = 0;;	/* beam quality flag */
+			ping->png_raw3_rxwindow[i] = 0;;	/* length of detection window */
+			ping->png_raw3_rxbeam_num[i] = 0;;	
+					/* beam 128 is first beam on 
+					    second head of EM3000D */
+			ping->png_raw3_rxspare[i] = 0;;	/* spare */
 			}
+
+		/* sidescan */
+		ping->png_ss_read = MB_NO;	
+				/* flag indicating actual reading of sidescan record */
+		ping->png_ss_count = 0;	
+				/* sequential counter or input identifier */
+		ping->png_ss_serial = 0;	
+				/* system 1 or system 2 serial number */
+		ping->png_max_range = 0;  
+				/* max range of ping in number of samples */
+		ping->png_r_zero = 0;	
+				/* range to normal incidence used in TVG
+				    (R0 predicted) in samples */
+		ping->png_r_zero_corr = 0;
+				/* range to normal incidence used to correct
+				    sample amplitudes in number of samples */
+		ping->png_tvg_start = 0;	
+				/* start sample of TVG ramp if not enough 
+				    dynamic range (0 otherwise) */
+		ping->png_tvg_stop = 0;	\
+				/* stop sample of TVG ramp if not enough 
+				    dynamic range (0 otherwise) */
+		ping->png_bsn = 0;	
+				/* normal incidence backscatter (BSN) in dB */
+		ping->png_bso = 0;	
+				/* oblique incidence backscatter (BSO) in dB */
+		ping->png_tx = 0;	
+				/* Tx beamwidth in 0.1 degree */
+		ping->png_tvg_crossover = 0;	
+				/* TVG law crossover angle in degrees */
+		ping->png_nbeams_ss = 0;	
+				/* number of beams with sidescan */
+		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
+		    {
+		    ping->png_beam_index[i] = 0;	
+				/* beam index number */
+		    ping->png_sort_direction[i] = 0;	
+				/* sorting direction - first sample in beam has lowest
+				    range if 1, highest if -1. */
+		    ping->png_beam_samples[i] = 0;	
+				/* number of sidescan samples derived from
+					each beam */
+		    ping->png_start_sample[i] = 0;	
+				/* start sample number */
+		    ping->png_center_sample[i] = 0;	
+				/* center sample number */
+		    }
+		for (i=0;i<MBSYS_SIMRAD2_MAXRAWPIXELS;i++)
+		    {
+		    ping->png_ssraw[i] = EM2_INVALID_AMP;
+				/* the raw sidescan ordered port to starboard */
+		    }
+		ping->png_pixel_size = 0;
+		ping->png_pixels_ss = 0;
+		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
+		    {
+		    ping->png_ss[i] = EM2_INVALID_AMP;
+				/* the processed sidescan ordered port to starboard */
+		    ping->png_ssalongtrack[i] = EM2_INVALID_AMP;
+				/* the processed sidescan alongtrack distances 
+					in distance resolution units */
+		    }
 		}
 
 	/* allocate memory for second data structure if needed */
@@ -1201,8 +1191,8 @@ int mbsys_simrad2_wc_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1296,8 +1286,8 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1382,8 +1372,8 @@ int mbsys_simrad2_heading_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1460,8 +1450,8 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1536,8 +1526,8 @@ int mbsys_simrad2_tilt_alloc(int verbose,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1608,8 +1598,8 @@ int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)*store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
 		}
 
 	/* get data structure pointer */
@@ -1675,7 +1665,7 @@ int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error)
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get pointer to data descriptor */
@@ -1784,8 +1774,8 @@ int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1856,7 +1846,7 @@ int mbsys_simrad2_pingnumber(int verbose, void *mbio_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -1911,8 +1901,8 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -2081,6 +2071,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* deal with second head in case of EM3002 */
 		if (store->sonar == MBSYS_SIMRAD2_EM3002
+			&& store->numberheads == 2
 			&& store->ping2 != NULL
 			&& store->ping2->png_count == ping->png_count)
 			{
@@ -2385,8 +2376,8 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",kind);
 		}
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_NAV))
@@ -2891,14 +2882,14 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
-		fprintf(stderr,"dbg2       ttimes:     %ld\n",(long)ttimes);
-		fprintf(stderr,"dbg2       angles_xtrk:%ld\n",(long)angles);
-		fprintf(stderr,"dbg2       angles_ltrk:%ld\n",(long)angles_forward);
-		fprintf(stderr,"dbg2       angles_null:%ld\n",(long)angles_null);
-		fprintf(stderr,"dbg2       heave:      %ld\n",(long)heave);
-		fprintf(stderr,"dbg2       ltrk_off:   %ld\n",(long)alongtrack_offset);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       ttimes:     %lu\n",(size_t)ttimes);
+		fprintf(stderr,"dbg2       angles_xtrk:%lu\n",(size_t)angles);
+		fprintf(stderr,"dbg2       angles_ltrk:%lu\n",(size_t)angles_forward);
+		fprintf(stderr,"dbg2       angles_null:%lu\n",(size_t)angles_null);
+		fprintf(stderr,"dbg2       heave:      %lu\n",(size_t)heave);
+		fprintf(stderr,"dbg2       ltrk_off:   %lu\n",(size_t)alongtrack_offset);
 		}
 
 	/* get mbio descriptor */
@@ -3115,9 +3106,9 @@ int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
-		fprintf(stderr,"dbg2       detects:    %ld\n",(long)detects);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
 		}
 
 	/* get mbio descriptor */
@@ -3246,8 +3237,8 @@ int mbsys_simrad2_gains(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -3344,8 +3335,8 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -3463,8 +3454,8 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -3744,8 +3735,8 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       time_i[0]:  %d\n",time_i[0]);
 		fprintf(stderr,"dbg2       time_i[1]:  %d\n",time_i[1]);
 		fprintf(stderr,"dbg2       time_i[2]:  %d\n",time_i[2]);
@@ -3911,8 +3902,8 @@ int mbsys_simrad2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mb_ptr:     %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -3993,8 +3984,8 @@ int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       nsvp:       %d\n",nsvp);
 		for (i=0;i<nsvp;i++)
 		    fprintf(stderr,"dbg2       depth[%d]: %f   velocity[%d]: %f\n",i, depth[i], i, velocity[i]);
@@ -4067,9 +4058,9 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:  %ld\n",(long)store_ptr);
-		fprintf(stderr,"dbg2       copy_ptr:   %ld\n",(long)copy_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       copy_ptr:   %lu\n",(size_t)copy_ptr);
 		}
 
 	/* get mbio descriptor */
@@ -4267,8 +4258,8 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
-		fprintf(stderr,"dbg2       mbio_ptr:        %ld\n",(long)mbio_ptr);
-		fprintf(stderr,"dbg2       store_ptr:       %ld\n",(long)store_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:        %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:       %lu\n",(size_t)store_ptr);
 		fprintf(stderr,"dbg2       pixel_size_set:  %d\n",pixel_size_set);
 		fprintf(stderr,"dbg2       pixel_size:      %f\n",*pixel_size);
 		fprintf(stderr,"dbg2       swath_width_set: %d\n",swath_width_set);

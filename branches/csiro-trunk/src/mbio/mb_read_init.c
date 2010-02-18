@@ -371,6 +371,8 @@ int mb_read_init(int verbose, char *file,
 	strcpy(mb_io_ptr->file3,"\0");
 	mb_io_ptr->file3_pos = 0;
 	mb_io_ptr->file3_bytes = 0;
+	mb_io_ptr->ncid = 0;
+	mb_io_ptr->gsfid = 0;
 	mb_io_ptr->xdrs = NULL;
 	mb_io_ptr->xdrs2 = NULL;
 	mb_io_ptr->xdrs3 = NULL;
@@ -655,7 +657,7 @@ int mb_read_init(int verbose, char *file,
 	    {
 	    status = gsfOpen(mb_io_ptr->file, 
 				GSF_READONLY, 
-				(int *) &(mb_io_ptr->mbfp));
+				(int *) &(mb_io_ptr->gsfid));
 	    if (status == 0)
 		{
 		status = MB_SUCCESS;
@@ -673,7 +675,7 @@ int mb_read_init(int verbose, char *file,
 	    {
 	    status = nc_open(mb_io_ptr->file, 
 				NC_NOWRITE, 
-				(int *) &(mb_io_ptr->mbfp));
+				(int *) &(mb_io_ptr->ncid));
 	    if (status == 0)
 		{
 		status = MB_SUCCESS;
@@ -911,18 +913,18 @@ int mb_read_init(int verbose, char *file,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
 		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       mbio_ptr:   %ld\n",(long)*mbio_ptr);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)*mbio_ptr);
 		fprintf(stderr,"dbg2       ->numfile:  %d\n",mb_io_ptr->numfile);
 		fprintf(stderr,"dbg2       ->file:     %s\n",mb_io_ptr->file);
 		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2) 
 		    fprintf(stderr,"dbg2       ->file2:    %s\n",mb_io_ptr->file2);
 		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3) 
 		    fprintf(stderr,"dbg2       ->file3:    %s\n",mb_io_ptr->file3);
-		fprintf(stderr,"dbg2       ->mbfp:     %ld\n",(long)mb_io_ptr->mbfp);
+		fprintf(stderr,"dbg2       ->mbfp:     %lu\n",(size_t)mb_io_ptr->mbfp);
 		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2) 
-		    fprintf(stderr,"dbg2       ->mbfp2:    %ld\n",(long)mb_io_ptr->mbfp2);
+		    fprintf(stderr,"dbg2       ->mbfp2:    %lu\n",(size_t)mb_io_ptr->mbfp2);
 		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3) 
-		    fprintf(stderr,"dbg2       ->mbfp3:    %ld\n",(long)mb_io_ptr->mbfp3);
+		    fprintf(stderr,"dbg2       ->mbfp3:    %lu\n",(size_t)mb_io_ptr->mbfp3);
 		fprintf(stderr,"dbg2       btime_d:    %f\n",*btime_d);
 		fprintf(stderr,"dbg2       etime_d:    %f\n",*etime_d);
 		fprintf(stderr,"dbg2       beams_bath: %d\n",*beams_bath);

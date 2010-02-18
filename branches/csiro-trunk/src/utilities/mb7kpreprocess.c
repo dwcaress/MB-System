@@ -205,57 +205,119 @@ int main (int argc, char **argv)
 	int	goodnavattitudeonly = MB_YES;
 	
 	/* data structure pointers */
-	s7kr_fileheader		*fileheader;
+	s7k_header 		*header;
+	s7kr_reference		*reference;
+	s7kr_sensoruncal	*sensoruncal;
+	s7kr_sensorcal		*sensorcal;
 	s7kr_position 		*position;
+	s7kr_customattitude	*customattitude;
+	s7kr_tide		*tide;
+	s7kr_altitude		*altituderec;
+	s7kr_motion		*motion;
+	s7kr_depth		*depth;
+	s7kr_svp		*svp;
+	s7kr_ctd		*ctd;
+	s7kr_geodesy		*geodesy;
 	s7kr_rollpitchheave 	*rollpitchheave;
-	s7kr_volatilesettings	*volatilesettings;
-	s7kr_beamgeometry	*beamgeometry;
-	s7kr_bathymetry		*bathymetry;
-	s7kr_backscatter	*backscatter;
-	s7kr_beam		*beam;
-	s7kr_image		*image;
-	s7kr_bluefin		*bluefin;
+	s7kr_heading		*headingrec;
+	s7kr_surveyline		*surveyline;
+	s7kr_navigation		*navigation;
+	s7kr_attitude		*attitude;
 	s7kr_fsdwss 		*fsdwsslo;
 	s7kr_fsdwss 		*fsdwsshi;
 	s7kr_fsdwsb 		*fsdwsb;
 	s7k_fsdwchannel 	*fsdwchannel;
 	s7k_fsdwssheader 	*fsdwssheader;
 	s7k_fsdwsegyheader 	*fsdwsegyheader;
-	s7k_header 		*header;
+	s7kr_bluefin		*bluefin;
+	s7kr_volatilesettings	*volatilesettings;
+	s7kr_matchfilter	*matchfilter;
+	s7kr_beamgeometry	*beamgeometry;
+	s7kr_bathymetry		*bathymetry;
+	s7kr_backscatter	*backscatter;
+	s7kr_beam		*beam;
+	s7kr_verticaldepth	*verticaldepth;
+	s7kr_image		*image;
+	s7kr_fileheader		*fileheader;
+	s7kr_remotecontrolsettings	*remotecontrolsettings;
 	
 	/* counting variables */
-	int	nreadfileheader = 0;
-	int	nreadmultibeam = 0;
-	int	nreadmbvolatilesettings = 0;
-	int	nreadmbbeamgeometry = 0;
-	int	nreadmbbathymetry = 0;
-	int	nreadmbbackscatter = 0;
-	int	nreadmbbeam = 0;
-	int	nreadmbimage = 0;
-	int	nreadssv = 0;
-	int	nreadnav1 = 0;
-	int	nreadnav2 = 0;
-	int	nreadrph = 0;
-	int	nreadsbp = 0;
-	int	nreadsslo = 0;
-	int	nreadsshi = 0;
-	int	nreadother = 0;
-	int	nreadfileheadertot = 0;
-	int	nreadmultibeamtot = 0;
-	int	nreadmbvolatilesettingstot = 0;
-	int	nreadmbbeamgeometrytot = 0;
-	int	nreadmbbathymetrytot = 0;
-	int	nreadmbbackscattertot = 0;
-	int	nreadmbbeamtot = 0;
-	int	nreadmbimagetot = 0;
-	int	nreadssvtot = 0;
-	int	nreadnav1tot = 0;
-	int	nreadnav2tot = 0;
-	int	nreadrphtot = 0;
-	int	nreadsbptot = 0;
-	int	nreadsslotot = 0;
-	int	nreadsshitot = 0;
-	int	nreadothertot = 0;
+	int	nrec_reference = 0;
+	int	nrec_sensoruncal = 0;
+	int	nrec_sensorcal = 0;
+	int	nrec_position = 0;
+	int	nrec_customattitude = 0;
+	int	nrec_tide = 0;
+	int	nrec_altitude = 0;
+	int	nrec_motion = 0;
+	int	nrec_depth = 0;
+	int	nrec_svp = 0;
+	int	nrec_ctd = 0;
+	int	nrec_geodesy = 0;
+	int	nrec_rollpitchheave = 0;
+	int	nrec_heading = 0;
+	int	nrec_surveyline = 0;
+	int	nrec_navigation = 0;
+	int	nrec_attitude = 0;
+	int	nrec_fsdwsslo = 0;
+	int	nrec_fsdwsshi = 0;
+	int	nrec_fsdwsbp = 0;
+	int	nrec_bluefinnav = 0;
+	int	nrec_bluefinenv = 0;
+	int	nrec_multibeam = 0;
+	int	nrec_volatilesettings = 0;
+	int	nrec_configuration = 0;
+	int	nrec_matchfilter = 0;
+	int	nrec_beamgeometry = 0;
+	int	nrec_calibration = 0;
+	int	nrec_bathymetry = 0;
+	int	nrec_backscatter = 0;
+	int	nrec_beam = 0;
+	int	nrec_verticaldepth = 0;
+	int	nrec_image = 0;
+	int	nrec_installation = 0;
+	int	nrec_systemeventmessage = 0;
+	int	nrec_fileheader = 0;
+	int	nrec_remotecontrolsettings = 0;
+	int	nrec_other = 0;
+	int	nrec_reference_tot = 0;
+	int	nrec_sensoruncal_tot = 0;
+	int	nrec_sensorcal_tot = 0;
+	int	nrec_position_tot = 0;
+	int	nrec_customattitude_tot = 0;
+	int	nrec_tide_tot = 0;
+	int	nrec_altitude_tot = 0;
+	int	nrec_motion_tot = 0;
+	int	nrec_depth_tot = 0;
+	int	nrec_svp_tot = 0;
+	int	nrec_ctd_tot = 0;
+	int	nrec_geodesy_tot = 0;
+	int	nrec_rollpitchheave_tot = 0;
+	int	nrec_heading_tot = 0;
+	int	nrec_surveyline_tot = 0;
+	int	nrec_navigation_tot = 0;
+	int	nrec_attitude_tot = 0;
+	int	nrec_fsdwsslo_tot = 0;
+	int	nrec_fsdwsshi_tot = 0;
+	int	nrec_fsdwsbp_tot = 0;
+	int	nrec_bluefinnav_tot = 0;
+	int	nrec_bluefinenv_tot = 0;
+	int	nrec_multibeam_tot = 0;
+	int	nrec_volatilesettings_tot = 0;
+	int	nrec_configuration_tot = 0;
+	int	nrec_matchfilter_tot = 0;
+	int	nrec_beamgeometry_tot = 0;
+	int	nrec_calibration_tot = 0;
+	int	nrec_bathymetry_tot = 0;
+	int	nrec_backscatter_tot = 0;
+	int	nrec_beam_tot = 0;
+	int	nrec_verticaldepth_tot = 0;
+	int	nrec_image_tot = 0;
+	int	nrec_installation_tot = 0;
+	int	nrec_systemeventmessage_tot = 0;
+	int	nrec_fileheader_tot = 0;
+	int	nrec_remotecontrolsettings_tot = 0;
+	int	nrec_other_tot = 0;
 	
 	/* merge navigation and attitude from separate Steve Rock data file */
 	char	rockfile[MB_PATH_MAXLINE];
@@ -268,6 +330,7 @@ int main (int argc, char **argv)
 	double	*rock_roll = NULL;
 	double	*rock_pitch = NULL;
 	double	*rock_sonardepth = NULL;
+	double	*rock_sonardepthfilter = NULL;
 	
 	/* merge navigation and attitude from separate WHOI DSL data file */
 	char	dslfile[MB_PATH_MAXLINE];
@@ -280,6 +343,7 @@ int main (int argc, char **argv)
 	double	*dsl_roll = NULL;
 	double	*dsl_pitch = NULL;
 	double	*dsl_sonardepth = NULL;
+	double	*dsl_sonardepthfilter = NULL;
 	
 	/* merge navigation and attitude from separate ins data file */
 	char	insfile[MB_PATH_MAXLINE];
@@ -307,42 +371,46 @@ int main (int argc, char **argv)
 	int	nsonardepth = 0;
 	double	*sonardepth_time_d = NULL;
 	double	*sonardepth_sonardepth = NULL;
-	double	*sonardepth_filter = NULL;
+	double	*sonardepth_sonardepthfilter = NULL;
 	
-	/* navigation, heading, attitude data */
-	int	nnav = 0;
-	int	nnav_alloc = 0;
-	double	*nav_time_d = NULL;
-	int	*nav_quality = NULL;
-	double	*nav_lon = NULL;
-	double	*nav_lat = NULL;
-	double	*nav_sonardepth = NULL;
-	double	*nav_sonardepthrate = NULL;
-	double	*nav_sonardepthfilter = NULL;
-	double	*nav_heading = NULL;
-	double	*nav_speed = NULL;
-	double	*nav_roll = NULL;
-	double	*nav_pitch = NULL;
-	int	nalt = 0;
-	int	nalt_alloc = 0;
-	double	*alt_time_d = NULL;
-	double	*alt_altitude = NULL;
+	/* asynchronous navigation, heading, attitude data */
+	int	ndat_nav = 0;
+	int	ndat_nav_alloc = 0;
+	double	*dat_nav_time_d = NULL;
+	double	*dat_nav_lon = NULL;
+	double	*dat_nav_lat = NULL;
+	double	*dat_nav_speed = NULL;
+	
+	int	ndat_sonardepth = 0;
+	int	ndat_sonardepth_alloc = 0;
+	double	*dat_sonardepth_time_d = NULL;
+	double	*dat_sonardepth_sonardepth = NULL;
+	double	*dat_sonardepth_sonardepthrate = NULL;
+	double	*dat_sonardepth_sonardepthfilter = NULL;
+	
+	int	ndat_heading = 0;
+	int	ndat_heading_alloc = 0;
+	double	*dat_heading_time_d = NULL;
+	double	*dat_heading_heading = NULL;
+
+	int	ndat_rph = 0;
+	int	ndat_rph_alloc = 0;
+	double	*dat_rph_time_d = NULL;
+	double	*dat_rph_roll = NULL;
+	double	*dat_rph_pitch = NULL;
+	double	*dat_rph_heave = NULL;
+
+	int	ndat_altitude = 0;
+	int	ndat_altitude_alloc = 0;
+	double	*dat_altitude_time_d = NULL;
+	double	*dat_altitude_altitude = NULL;
+	
+	/* bathymetry time delay data */
 	int	ntimedelay = 0;
 	int	ntimedelaycount = 0;
 	int	ntimedelay_alloc = 0;
 	double	*timedelay_time_d = NULL;
 	double	*timedelay_timedelay = NULL;
-	int	npos = 0;
-	int	npos_alloc = 0;
-	double	*pos_time_d = NULL;
-	double	*pos_lon = NULL;
-	double	*pos_lat = NULL;
-	int	nrph = 0;
-	int	nrph_alloc = 0;
-	double	*rph_time_d = NULL;
-	double	*rph_roll = NULL;
-	double	*rph_pitch = NULL;
-	double	*rph_heave = NULL;
 	
 	/* bathymetry timetag data */
 	int	nbatht = 0;
@@ -412,7 +480,7 @@ int main (int argc, char **argv)
 	double	dx, dy, dist, dt;
 	int	j1, j2;
 	
-	FILE	*tfp;
+	FILE	*tfp = NULL;
 	struct stat file_status;
 	int	fstat;
 	char	buffer[MB_PATH_MAXLINE];
@@ -524,11 +592,12 @@ int main (int argc, char **argv)
 			break;
 		case 'P':
 		case 'p':
-			sscanf (optarg,"%s", sonardepthfile);
-			if ((fstat = stat(sonardepthfile, &file_status)) == 0
+			sscanf (optarg,"%s", buffer);
+			if ((fstat = stat(buffer, &file_status)) == 0
 				&& (file_status.st_mode & S_IFMT) != S_IFDIR)
 					{
 					sonardepthdata  = MB_YES;
+					strcpy(sonardepthfile,buffer);
 					}
 			else if (optarg[0] == 'F' || optarg[0] == 'f')
 				{
@@ -868,6 +937,8 @@ ins_altitude[nins]);*/
 		    if (error == MB_ERROR_NO_ERROR)
 		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepth,&error);
 		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_sonardepthfilter,&error);
+		    if (error == MB_ERROR_NO_ERROR)
 		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_heading,&error);
 		    if (error == MB_ERROR_NO_ERROR)
 		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nrock * sizeof(double), (void **)&rock_roll,&error);
@@ -947,6 +1018,8 @@ rock_heading[nrock]);*/
 		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_lat,&error);
 		    if (error == MB_ERROR_NO_ERROR)
 		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepth,&error);
+		    if (error == MB_ERROR_NO_ERROR)
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_sonardepthfilter,&error);
 		    if (error == MB_ERROR_NO_ERROR)
 		    	status = mb_mallocd(verbose, __FILE__, __LINE__, ndsl * sizeof(double), (void **)&dsl_heading,&error);
 		    if (error == MB_ERROR_NO_ERROR)
@@ -1064,7 +1137,7 @@ dsl_heading[ndsl]);*/
 		    if (error == MB_ERROR_NO_ERROR)
 		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepth,&error);
 		    if (error == MB_ERROR_NO_ERROR)
-		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_filter,&error);
+		    	status = mb_mallocd(verbose, __FILE__, __LINE__, nsonardepth * sizeof(double), (void **)&sonardepth_sonardepthfilter,&error);
 		    if (error != MB_ERROR_NO_ERROR)
 			{
 			mb_error(verbose,error,&message);
@@ -1157,6 +1230,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		    }
 		fclose(tfp);
 		}
+		
+	/* null tfp - allows detection of whether time delay file was opened, which only happens for MBARI AUV
+		data with navigation and attitude in "bluefin" records */
+	tfp = NULL;
 
 	/* get format if required */
 	if (format == 0)
@@ -1192,19 +1269,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	    strcpy(ifile, read_file);
 	    read_data = MB_YES;
 	    }
-	    
-	/* open file for timedelay values */
-	sprintf(timelagfile, "%s_timedelay.txt", read_file);
-	if ((tfp = fopen(timelagfile, "w")) == NULL) 
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open time delay file <%s> for writing\n",timelagfile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-	
-	
+		
 	/* loop over all files to be read */
 	while (read_data == MB_YES && format == MBF_RESON7KR)
 	{
@@ -1276,23 +1341,47 @@ sonardepth_sonardepth[nsonardepth]);*/
 		exit(error);
 		}
 
+	/* reset file record counters */
+	nrec_reference = 0;
+	nrec_sensoruncal = 0;
+	nrec_sensorcal = 0;
+	nrec_position = 0;
+	nrec_customattitude = 0;
+	nrec_tide = 0;
+	nrec_altitude = 0;
+	nrec_motion = 0;
+	nrec_depth = 0;
+	nrec_svp = 0;
+	nrec_ctd = 0;
+	nrec_geodesy = 0;
+	nrec_rollpitchheave = 0;
+	nrec_heading = 0;
+	nrec_surveyline = 0;
+	nrec_navigation = 0;
+	nrec_attitude = 0;
+	nrec_fsdwsslo = 0;
+	nrec_fsdwsshi = 0;
+	nrec_fsdwsbp = 0;
+	nrec_bluefinnav = 0;
+	nrec_bluefinenv = 0;
+	nrec_multibeam = 0;
+	nrec_volatilesettings = 0;
+	nrec_configuration = 0;
+	nrec_matchfilter = 0;
+	nrec_beamgeometry = 0;
+	nrec_calibration = 0;
+	nrec_bathymetry = 0;
+	nrec_backscatter = 0;
+	nrec_beam = 0;
+	nrec_verticaldepth = 0;
+	nrec_image = 0;
+	nrec_installation = 0;
+	nrec_systemeventmessage = 0;
+	nrec_fileheader = 0;
+	nrec_remotecontrolsettings = 0;
+	nrec_other = 0;
+
 	/* read and print data */
-	nreadfileheader = 0;
-	nreadmultibeam = 0;
-	nreadmbvolatilesettings = 0;
-	nreadmbbeamgeometry = 0;
-	nreadmbbathymetry = 0;
-	nreadmbbackscatter = 0;
-	nreadmbbeam = 0;
-	nreadmbimage = 0;
-	nreadssv = 0;
-	nreadnav1 = 0;
-	nreadnav2 = 0;
-	nreadrph = 0;
-	nreadsbp = 0;
-	nreadsslo = 0;
-	nreadsshi = 0;
-	nreadother = 0;
 	sslo_lastread = MB_NO;
 	while (error <= MB_ERROR_NO_ERROR)
 		{
@@ -1319,27 +1408,50 @@ sonardepth_sonardepth[nsonardepth]);*/
 	   	/* handle multibeam data */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA) 
 			{
-			nreadmultibeam++;
+			nrec_multibeam++;
 			
 			bathymetry = &(istore->bathymetry);
 			if (istore->read_volatilesettings == MB_YES)
-				nreadmbvolatilesettings++;
+				nrec_volatilesettings++;
+			if (istore->read_matchfilter == MB_YES)
+				nrec_matchfilter++;
 			if (istore->read_beamgeometry == MB_YES)
-				nreadmbbeamgeometry++;
+				nrec_beamgeometry++;
+			if (istore->read_remotecontrolsettings == MB_YES)
+				nrec_bathymetry++;
 			if (istore->read_bathymetry == MB_YES)
-				nreadmbbathymetry++;
+				nrec_bathymetry++;
 			if (istore->read_backscatter == MB_YES)
-				nreadmbbackscatter++;
+				nrec_backscatter++;
 			if (istore->read_beam == MB_YES)
-				nreadmbbeam++;
+				nrec_beam++;
+			if (istore->read_verticaldepth == MB_YES)
+				nrec_verticaldepth++;
 			if (istore->read_image == MB_YES)
-				nreadmbimage++;
+				nrec_image++;
 				
 			/* print out record headers */
 			if (istore->read_volatilesettings == MB_YES)
 				{
 				volatilesettings = &(istore->volatilesettings);
 				header = &(volatilesettings->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kVolatileSonarSettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber);
+				}
+			if (istore->read_matchfilter == MB_YES)
+				{
+				matchfilter = &(istore->matchfilter);
+				header = &(matchfilter->header);
 				time_j[0] = header->s7kTime.Year;
 				time_j[1] = header->s7kTime.Day;
 				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
@@ -1369,6 +1481,23 @@ sonardepth_sonardepth[nsonardepth]);*/
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber,beamgeometry->number_beams);
+				}
+			if (istore->read_remotecontrolsettings == MB_YES)
+				{
+				remotecontrolsettings = &(istore->remotecontrolsettings);
+				header = &(remotecontrolsettings->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kremotecontrolsettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber);
 				}
 			if (istore->read_bathymetry == MB_YES)
 				{
@@ -1458,10 +1587,27 @@ sonardepth_sonardepth[nsonardepth]);*/
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
 				if (verbose > 0)
-				fprintf(stderr,"R7KHDRSIZE_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d samples:%d\n",
+				fprintf(stderr,"R7KRECID_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d samples:%d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber,beam->ping_number,beam->number_beams,beam->number_samples);
+				}
+			if (istore->read_verticaldepth == MB_YES)
+				{
+				verticaldepth = &(istore->verticaldepth);
+				header = &(verticaldepth->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kVerticalDepth: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,verticaldepth->ping_number);
 				}
 			if (istore->read_image == MB_YES)
 				{
@@ -1483,10 +1629,623 @@ sonardepth_sonardepth[nsonardepth]);*/
 
 			}
 			
-	   	/* handle file header data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_HEADER) 
+	   	/* handle reference point data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_ReferencePoint) 
 			{
-			nreadfileheader++;
+			nrec_reference++;
+			
+			reference = &(istore->reference);
+			header = &(reference->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_ReferencePoint: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+			
+	   	/* handle uncalibrated sensor offset data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_UncalibratedSensorOffset) 
+			{
+			nrec_sensoruncal++;
+			
+			sensoruncal = &(istore->sensoruncal);
+			header = &(sensoruncal->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_UncalibratedSensorOffset: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+			
+	   	/* handle calibrated sensor offset data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_CalibratedSensorOffset) 
+			{
+			nrec_sensorcal++;
+			
+			sensorcal = &(istore->sensorcal);
+			header = &(sensorcal->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_CalibratedSensorOffset: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+			
+	   	/* handle position data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Position) 
+			{
+			nrec_position++;
+			
+			position = &(istore->position);
+			header = &(position->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Position: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+				
+			/* allocate memory for position arrays if needed */
+			if (ndat_nav + 1 >= ndat_nav_alloc)
+				{
+				ndat_nav_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lon,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lat,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_speed,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the position data */
+			if (ndat_nav == 0 || dat_nav_time_d[ndat_nav-1] < time_d)
+				{
+				dat_nav_time_d[ndat_nav] = time_d + position->latency;
+				dat_nav_lon[ndat_nav] = RTD * position->longitude;
+				dat_nav_lat[ndat_nav] = RTD * position->latitude;
+				dat_nav_speed[ndat_nav] = 0.0;
+				ndat_nav++;
+				}
+			
+			}
+
+	   	/* handle customattitude data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_CustomAttitude) 
+			{
+			nrec_customattitude++;
+			
+			customattitude = &(istore->customattitude);
+			header = &(customattitude->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_CustomAttitude: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+				
+			/* allocate memory for customattitude arrays if needed */
+			if (ndat_rph + customattitude->n >= ndat_rph_alloc)
+				{
+				ndat_rph_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, customattitude->n);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_roll,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_pitch,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_heave,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the customattitude data */
+			for (i=0;i<customattitude->n;i++)
+				{
+				if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < time_d)
+					{
+					dat_rph_time_d[ndat_rph] = time_d + i / customattitude->frequency;
+					dat_rph_roll[ndat_rph] = RTD * customattitude->roll[i];
+					dat_rph_pitch[ndat_rph] = RTD * customattitude->pitch[i];
+					dat_rph_heave[ndat_rph] = customattitude->heave[i];
+					ndat_rph++;
+					}
+				}
+			}
+			
+	   	/* handle tide data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Tide) 
+			{
+			nrec_tide++;
+			
+			tide = &(istore->tide);
+			header = &(fileheader->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Tide: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+			
+	   	/* handle altitude data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Altitude) 
+			{
+			nrec_altitude++;
+			
+			altituderec = &(istore->altitude);
+			header = &(fileheader->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Altitude: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+				
+			/* allocate memory for altitude arrays if needed */
+			if (ndat_altitude + 1 >= ndat_altitude_alloc)
+				{
+				ndat_altitude_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_altitude_alloc*sizeof(double),(void **)&dat_altitude_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_altitude_alloc*sizeof(double),(void **)&dat_altitude_altitude,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the altitude data */
+			if (ndat_altitude == 0 || dat_altitude_time_d[ndat_altitude-1] < time_d)
+				{
+				dat_altitude_time_d[ndat_altitude] = time_d;
+				dat_altitude_altitude[ndat_altitude] = altituderec->altitude;
+				ndat_altitude++;
+				}
+			}
+			
+	   	/* handle motion data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_MotionOverGround) 
+			{
+			nrec_motion++;
+			
+			motion = &(istore->motion);
+			header = &(motion->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_MotionOverGround: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber,motion->n);
+			}
+			
+	   	/* handle depth data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Depth) 
+			{
+			nrec_depth++;
+			
+			depth = &(istore->depth);
+			header = &(depth->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Depth: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+				
+			/* allocate memory for sonar depth arrays if needed */
+			if (ndat_sonardepth + 1 >= ndat_sonardepth_alloc)
+				{
+				ndat_sonardepth_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthrate,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthfilter,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the sonar depth data */
+			if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < time_d)
+				{
+				dat_sonardepth_time_d[ndat_sonardepth] = time_d;
+				dat_sonardepth_sonardepth[ndat_sonardepth] = depth->depth;
+				dat_sonardepth_sonardepthrate[ndat_sonardepth] = 0.0;
+				dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
+				ndat_sonardepth++;
+				}
+			}
+			
+	   	/* handle sound velocity data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_SoundVelocityProfile) 
+			{
+			nrec_svp++;
+			
+			svp = &(istore->svp);
+			header = &(svp->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_SoundVelocityProfile: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber,svp->n);
+			}
+
+	   	/* handle ctd data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_CTD) 
+			{
+			nrec_ctd++;
+			
+			ctd = &(istore->ctd);
+			header = &(ctd->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_CTD: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber,ctd->n);
+			}
+
+	   	/* handle geodesy data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Geodesy) 
+			{
+			nrec_geodesy++;
+			
+			geodesy = &(istore->geodesy);
+			header = &(geodesy->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Geodesy: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+			}
+
+	   	/* handle rollpitchheave data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_RollPitchHeave) 
+			{
+			nrec_rollpitchheave++;
+			
+			rollpitchheave = &(istore->rollpitchheave);
+			header = &(rollpitchheave->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_RollPitchHeave:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+				
+			/* allocate memory for rollpitchheave arrays if needed */
+			if (ndat_rph + 1 >= ndat_rph_alloc)
+				{
+				ndat_rph_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_roll,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_pitch,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_heave,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the rollpitchheave data */
+			if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < time_d)
+				{
+				dat_rph_time_d[ndat_rph] = time_d;
+				dat_rph_roll[ndat_rph] = RTD * rollpitchheave->roll;
+				dat_rph_pitch[ndat_rph] = RTD * rollpitchheave->pitch;
+				dat_rph_heave[ndat_rph] = rollpitchheave->heave;
+				ndat_rph++;
+				}
+			
+			}
+			
+	   	/* handle heading data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Heading) 
+			{
+			nrec_heading++;
+			
+			headingrec = &(istore->heading);
+			header = &(headingrec->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Heading: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+				
+			/* allocate memory for sonar heading arrays if needed */
+			if (ndat_heading + 1 >= ndat_heading_alloc)
+				{
+				ndat_heading_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_heading,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the sonar heading data */
+			if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < time_d)
+				{
+				dat_heading_time_d[ndat_heading] = time_d;
+				dat_heading_heading[ndat_heading] = RTD * headingrec->heading;
+				ndat_heading++;
+				}
+			}
+
+	   	/* handle survey line data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_SurveyLine) 
+			{
+			nrec_surveyline++;
+			
+			surveyline = &(istore->surveyline);
+			header = &(surveyline->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_SurveyLine: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+			}
+			
+	   	/* handle navigation data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Navigation) 
+			{
+			nrec_navigation++;
+			
+			navigation = &(istore->navigation);
+			header = &(navigation->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Navigation: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+				
+			/* allocate memory for position arrays if needed */
+			if (ndat_nav + 1 >= ndat_nav_alloc)
+				{
+				ndat_nav_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lon,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lat,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_speed,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the navigation data */
+			if (ndat_nav == 0 || dat_nav_time_d[ndat_nav-1] < time_d)
+				{
+				dat_nav_time_d[ndat_nav] = time_d;
+				dat_nav_lon[ndat_nav] = RTD * navigation->longitude;
+				dat_nav_lat[ndat_nav] = RTD * navigation->latitude;
+				dat_nav_speed[ndat_nav] = navigation->speed;
+				ndat_nav++;
+				}
+				
+			/* allocate memory for sonar heading arrays if needed */
+			if (ndat_heading + 1 >= ndat_heading_alloc)
+				{
+				ndat_heading_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_heading,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the sonar heading data */
+			if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < time_d)
+				{
+				dat_heading_time_d[ndat_heading] = time_d;
+				dat_heading_heading[ndat_heading] = RTD * navigation->heading;
+				ndat_heading++;
+				}			
+			}
+
+	   	/* handle attitude data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Attitude) 
+			{
+			nrec_attitude++;
+			
+			attitude = &(istore->attitude);
+			header = &(attitude->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Attitude: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber,attitude->n);
+				
+			/* allocate memory for attitude arrays if needed */
+			if (ndat_rph + attitude->n >= ndat_rph_alloc)
+				{
+				ndat_rph_alloc += MB7KPREPROCESS_ALLOC_CHUNK;
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_roll,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_pitch,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_heave,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* store the attitude data */
+			for (i=0;i<attitude->n;i++)
+				{
+				if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < time_d)
+					{
+					dat_rph_time_d[ndat_rph] = time_d + i * attitude->delta_time[i];
+					dat_rph_roll[ndat_rph] = RTD * attitude->roll[i];
+					dat_rph_pitch[ndat_rph] = RTD * attitude->pitch[i];
+					dat_rph_heave[ndat_rph] = attitude->heave[i];
+					ndat_rph++;
+					}
+				}
+			}
+			
+	   	/* handle file header data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_7kFileHeader) 
+			{
+			nrec_fileheader++;
 			
 			fileheader = &(istore->fileheader);
 			header = &(fileheader->header);
@@ -1498,16 +2257,16 @@ sonardepth_sonardepth[nsonardepth]);*/
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
 			if (verbose > 0)
-				fprintf(stderr,"R7KRECID_7kFileHeader:             7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				fprintf(stderr,"R7KRECID_7kFileHeader: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 				time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5],time_i[6],
 				header->RecordNumber);
 			}
 			
 	   	/* handle bluefin ctd data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SSV) 
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_SSV) 
 			{
-			nreadssv++;
+			nrec_bluefinenv++;
 			
 			bluefin = &(istore->bluefin);
 			header = &(bluefin->header);
@@ -1520,10 +2279,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 			mb_get_time(verbose, time_i, &time_d);
 
 			if (verbose > 0)
-				fprintf(stderr,"R7KRECID_BluefinEnvironmental:     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				fprintf(stderr,"R7KRECID_BluefinEnvironmental: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
 			time_i[0],time_i[1],time_i[2],
 			time_i[3],time_i[4],time_i[5],time_i[6],
-			header->RecordNumber);
+			header->RecordNumber,bluefin->number_frames);
 			for (i=0;i<bluefin->number_frames;i++)
 				{
 				time_j[0] = bluefin->environmental[i].s7kTime.Year;
@@ -1542,9 +2301,9 @@ sonardepth_sonardepth[nsonardepth]);*/
 			}
 			
 	   	/* handle bluefin nav data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_NAV2) 
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_NAV2) 
 			{
-			nreadnav2++;
+			nrec_bluefinnav++;
 			
 			bluefin = &(istore->bluefin);
 			header = &(bluefin->header);
@@ -1557,10 +2316,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 			mb_get_time(verbose, time_i, &time_d);
 
 			if (verbose > 0)
-				fprintf(stderr,"R7KRECID_BluefinNav:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				fprintf(stderr,"R7KRECID_BluefinNav: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
 			time_i[0],time_i[1],time_i[2],
 			time_i[3],time_i[4],time_i[5],time_i[6],
-			header->RecordNumber);
+			header->RecordNumber,bluefin->number_frames);
 			for (i=0;i<bluefin->number_frames;i++)
 				{
 				time_j[0] = bluefin->nav[i].s7kTime.Year;
@@ -1569,31 +2328,39 @@ sonardepth_sonardepth[nsonardepth]);*/
 				time_j[3] = (int) bluefin->nav[i].s7kTime.Seconds;
 				time_j[4] = (int) (1000000 * (bluefin->nav[i].s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
-fprintf(tfp,"%f %f\n",
-bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 				if (verbose > 0)
 				fprintf(stderr,"                       %2.2d          7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) Pos_time:%f\n",
 					i,time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					bluefin->nav[i].position_time);
+
+				/* output time delay from MBARI AUV */
+				if (tfp == NULL)
+					{	    
+					/* open file for timedelay values */
+					sprintf(timelagfile, "%s_timedelay.txt", read_file);
+					if ((tfp = fopen(timelagfile, "w")) == NULL) 
+						{
+						error = MB_ERROR_OPEN_FAIL;
+						fprintf(stderr,"\nUnable to open time delay file <%s> for writing\n",timelagfile);
+						fprintf(stderr,"\nProgram <%s> Terminated\n",
+							program_name);
+						exit(error);
+						}
+					}
+				fprintf(tfp,"%f %f\n",
+				bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 				}
 				
-			/* allocate memory for navigation/attitude arrays if needed */
+			/* allocate memory for position arrays if needed */
 			if (bluefin->number_frames > 0 
-				&& nnav + bluefin->number_frames >= nnav_alloc)
+				&& ndat_nav + bluefin->number_frames >= ndat_nav_alloc)
 				{
-				nnav_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_time_d,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(int),(void **)&nav_quality,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_lon,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_lat,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_speed,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_sonardepth,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_sonardepthrate,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_sonardepthfilter,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_heading,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_roll,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nnav_alloc*sizeof(double),(void **)&nav_pitch,&error);
+				ndat_nav_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lon,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_lat,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_nav_alloc*sizeof(double),(void **)&dat_nav_speed,&error);
 				if (error != MB_ERROR_NO_ERROR)
 					{
 					mb_error(verbose,error,&message);
@@ -1603,13 +2370,79 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 					exit(error);
 					}		    
 				}
+				
+			/* allocate memory for sonar heading arrays if needed */
 			if (bluefin->number_frames > 0 
-				&& nalt + bluefin->number_frames >= nalt_alloc)
+				&& ndat_heading + bluefin->number_frames >= ndat_heading_alloc)
 				{
-				nalt_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nalt_alloc*sizeof(double),(void **)&alt_time_d,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nalt_alloc*sizeof(double),(void **)&alt_altitude,&error);
+				ndat_heading_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_heading_alloc*sizeof(double),(void **)&dat_heading_heading,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
 				}
+				
+			/* allocate memory for attitude arrays if needed */
+			if (bluefin->number_frames > 0 
+				&& ndat_rph + bluefin->number_frames >= ndat_rph_alloc)
+				{
+				ndat_rph_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_roll,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_pitch,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_rph_alloc*sizeof(double),(void **)&dat_rph_heave,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* allocate memory for altitude arrays if needed */
+			if (bluefin->number_frames > 0 
+				&& ndat_altitude + bluefin->number_frames >= ndat_altitude_alloc)
+				{
+				ndat_altitude_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_altitude_alloc*sizeof(double),(void **)&dat_altitude_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_altitude_alloc*sizeof(double),(void **)&dat_altitude_altitude,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+				
+			/* allocate memory for sonar depth arrays if needed */
+			if (bluefin->number_frames > 0 
+				&& ndat_sonardepth + bluefin->number_frames >= ndat_sonardepth_alloc)
+				{
+				ndat_sonardepth_alloc += MAX(MB7KPREPROCESS_ALLOC_CHUNK, bluefin->number_frames);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_time_d,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepth,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthrate,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,ndat_sonardepth_alloc*sizeof(double),(void **)&dat_sonardepth_sonardepthfilter,&error);
+				if (error != MB_ERROR_NO_ERROR)
+					{
+					mb_error(verbose,error,&message);
+					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+					fprintf(stderr,"\nProgram <%s> Terminated\n",
+					    program_name);
+					exit(error);
+					}		    
+				}
+
 			if (bluefin->number_frames > 0 
 				&& ntimedelay + bluefin->number_frames >= ntimedelay_alloc)
 				{
@@ -1621,29 +2454,48 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 			/* store the navigation and attitude data */
 			for (i=0;i<bluefin->number_frames;i++)
 				{
-				if (nnav == 0 || nav_time_d[nnav-1] < bluefin->nav[i].position_time)
+				/* store regular nav and attitude values */
+				if (ndat_nav == 0 || dat_nav_time_d[ndat_nav-1] < bluefin->nav[i].position_time)
 					{
-					nav_time_d[nnav] = bluefin->nav[i].position_time;
-					nav_quality[nnav] = bluefin->nav[i].quality;
-					nav_lon[nnav] = RTD * bluefin->nav[i].longitude;
-					nav_lat[nnav] = RTD * bluefin->nav[i].latitude;
-					nav_speed[nnav] = bluefin->nav[i].speed;
-					nav_sonardepth[nnav] = bluefin->nav[i].depth 
+					dat_nav_time_d[ndat_nav] = bluefin->nav[i].position_time;
+					dat_nav_lon[ndat_nav] = RTD * bluefin->nav[i].longitude;
+					dat_nav_lat[ndat_nav] = RTD * bluefin->nav[i].latitude;
+					dat_nav_speed[ndat_nav] = bluefin->nav[i].speed;
+					ndat_nav++;
+					}
+				if (ndat_heading == 0 || dat_heading_time_d[ndat_heading-1] < bluefin->nav[i].position_time)
+					{
+					dat_heading_time_d[ndat_heading] = bluefin->nav[i].position_time;
+					dat_heading_heading[ndat_heading] = RTD * bluefin->nav[i].yaw;
+					ndat_heading++;
+					}			
+				if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < bluefin->nav[i].position_time)
+					{
+					dat_rph_time_d[ndat_rph] = bluefin->nav[i].position_time;
+					dat_rph_roll[ndat_rph] = RTD * bluefin->nav[i].roll;
+					dat_rph_pitch[ndat_rph] = RTD * bluefin->nav[i].pitch;
+					dat_rph_heave[ndat_rph] = 0.0;
+					ndat_rph++;
+					}
+				if (ndat_altitude == 0 || dat_altitude_time_d[ndat_altitude-1] < bluefin->nav[i].position_time)
+					{
+					dat_altitude_time_d[ndat_altitude] = bluefin->nav[i].position_time;
+					dat_altitude_altitude[ndat_altitude] = bluefin->nav[i].altitude;
+					ndat_altitude++;
+					}
+				if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < bluefin->nav[i].depth_time)
+					{
+					dat_sonardepth_time_d[ndat_sonardepth] = bluefin->nav[i].depth_time;
+					dat_sonardepth_sonardepth[ndat_sonardepth] = bluefin->nav[i].depth 
 						+ depthsensoroffx * sin(bluefin->nav[i].pitch)
 						+ depthsensoroffz * cos(bluefin->nav[i].pitch)
 						+ sonardepthoffset;
-					nav_heading[nnav] = RTD * bluefin->nav[i].yaw;
-					nav_roll[nnav] = RTD * bluefin->nav[i].roll;
-					nav_pitch[nnav] = RTD * bluefin->nav[i].pitch;
-					nnav++;
+					dat_sonardepth_sonardepthrate[ndat_sonardepth] = 0.0;
+					dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
+					ndat_sonardepth++;
 					}
-				if (nalt == 0 || (alt_time_d[nalt-1] < bluefin->nav[i].altitude_time
-							&& alt_altitude[nalt-1] != bluefin->nav[i].altitude))
-					{
-					alt_time_d[nalt] = bluefin->nav[i].altitude_time;
-					alt_altitude[nalt] = bluefin->nav[i].altitude;
-					nalt++;
-					}
+					
+				/* deal with MBARI AUV time delay values */
 /*fprintf(stderr,"TIMEDELAYS: count:%d delay: %d",ntimedelaycount,bluefin->nav[i].timedelay);*/
 				if (ntimedelaycount == 0)
 					{
@@ -1667,111 +2519,11 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 			
 			}
 			
-	   	/* handle position data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_NAV1) 
-			{
-			nreadnav1++;
-			
-			position = &(istore->position);
-			header = &(position->header);
-			time_j[0] = header->s7kTime.Year;
-			time_j[1] = header->s7kTime.Day;
-			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
-			time_j[3] = (int) header->s7kTime.Seconds;
-			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
-			mb_get_itime(verbose, time_j, time_i);
-			mb_get_time(verbose, time_i, &time_d);
-
-			if (verbose > 0)
-				fprintf(stderr,"R7KRECID_Position:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
-			time_i[0],time_i[1],time_i[2],
-			time_i[3],time_i[4],time_i[5],time_i[6],
-			header->RecordNumber);
-				
-			/* allocate memory for position arrays if needed */
-			if (npos + 1 >= npos_alloc)
-				{
-				npos_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
-				status = mb_reallocd(verbose,__FILE__,__LINE__,npos_alloc*sizeof(double),(void **)&pos_time_d,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,npos_alloc*sizeof(double),(void **)&pos_lon,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,npos_alloc*sizeof(double),(void **)&pos_lat,&error);
-				if (error != MB_ERROR_NO_ERROR)
-					{
-					mb_error(verbose,error,&message);
-					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
-					exit(error);
-					}		    
-				}
-				
-			/* store the position data */
-			if (npos == 0 || pos_time_d[npos-1] < time_d)
-				{
-				pos_time_d[npos] = time_d + position->latency;
-				pos_lon[npos] = RTD * position->longitude;
-				pos_lat[npos] = RTD * position->latitude;
-				npos++;
-				}
-			
-			}
-			
-	   	/* handle rollpitchheave data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_ATTITUDE
-			&& istore->type == R7KRECID_RollPitchHeave) 
-			{
-			nreadrph++;
-			
-			rollpitchheave = &(istore->rollpitchheave);
-			header = &(rollpitchheave->header);
-			time_j[0] = header->s7kTime.Year;
-			time_j[1] = header->s7kTime.Day;
-			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
-			time_j[3] = (int) header->s7kTime.Seconds;
-			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
-			mb_get_itime(verbose, time_j, time_i);
-			mb_get_time(verbose, time_i, &time_d);
-
-			if (verbose > 0)
-				fprintf(stderr,"R7KRECID_RollPitchHeave:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
-			time_i[0],time_i[1],time_i[2],
-			time_i[3],time_i[4],time_i[5],time_i[6],
-			header->RecordNumber);
-				
-			/* allocate memory for rollpitchheave arrays if needed */
-			if (nrph + 1 >= nrph_alloc)
-				{
-				nrph_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nrph_alloc*sizeof(double),(void **)&rph_time_d,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nrph_alloc*sizeof(double),(void **)&rph_roll,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nrph_alloc*sizeof(double),(void **)&rph_pitch,&error);
-				status = mb_reallocd(verbose,__FILE__,__LINE__,nrph_alloc*sizeof(double),(void **)&rph_heave,&error);
-				if (error != MB_ERROR_NO_ERROR)
-					{
-					mb_error(verbose,error,&message);
-					fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-					fprintf(stderr,"\nProgram <%s> Terminated\n",
-					    program_name);
-					exit(error);
-					}		    
-				}
-				
-			/* store the rollpitchheave data */
-			if (nrph == 0 || rph_time_d[nrph-1] < time_d)
-				{
-				rph_time_d[nrph] = time_d;
-				rph_roll[nrph] = RTD * rollpitchheave->roll;
-				rph_pitch[nrph] = RTD * rollpitchheave->pitch;
-				rph_heave[nrph] = rollpitchheave->heave;
-				nrph++;
-				}
-			
-			}
 			
 	   	/* handle subbottom data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) 
 			{
-			nreadsbp++;
+			nrec_fsdwsbp++;
 
 			fsdwsb = &(istore->fsdwsb);
 			header = &(fsdwsb->header);
@@ -1796,7 +2548,7 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 	   	/* handle low frequency sidescan data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2) 
 			{
-			nreadsslo++;
+			nrec_fsdwsslo++;
 
 			fsdwsslo = &(istore->fsdwsslo);
 			header = &(fsdwsslo->header);
@@ -1861,7 +2613,7 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 	   	/* handle high frequency sidescan data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN3) 
 			{
-			nreadsshi++;
+			nrec_fsdwsshi++;
 
 			fsdwsshi = &(istore->fsdwsshi);
 			header = &(fsdwsshi->header);
@@ -1891,7 +2643,7 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 		else  if (status == MB_SUCCESS) 
 			{
 /*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
-			nreadother++;
+			nrec_other++;
 			}
 			
 	   	/* handle read error */
@@ -1922,37 +2674,85 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 	
 	/* output counts */
 	fprintf(stdout, "\nData records read from: %s\n", ifile);
-	fprintf(stdout, "     File Header:       %d\n", nreadfileheader);
-	fprintf(stdout, "     Multibeam:         %d\n", nreadmultibeam);
-	fprintf(stdout, "          Volatile Settings: %d\n", nreadmbvolatilesettings);
-	fprintf(stdout, "          Beam Geometry:     %d\n", nreadmbbeamgeometry);
-	fprintf(stdout, "          Bathymetry:        %d\n", nreadmbbathymetry);
-	fprintf(stdout, "          Backscatter:       %d\n", nreadmbbackscatter);
-	fprintf(stdout, "          Beam:              %d\n", nreadmbbeam);
-	fprintf(stdout, "          Image:             %d\n", nreadmbimage);
-	fprintf(stdout, "     Bluefin CTD:       %d\n", nreadssv);
-	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav2);
-	fprintf(stdout, "     Position:          %d\n", nreadnav1);	
-	fprintf(stdout, "     RollPitchHeave:    %d\n", nreadrph);
-	fprintf(stdout, "     Subbottom:         %d\n", nreadsbp);
-	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslo);
-	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshi);
-	nreadfileheadertot += nreadfileheader;
-	nreadmultibeamtot += nreadmultibeam;
-	nreadmbvolatilesettingstot += nreadmbvolatilesettings;
-	nreadmbbeamgeometrytot += nreadmbbeamgeometry;
-	nreadmbbathymetrytot += nreadmbbathymetry;
-	nreadmbbackscattertot += nreadmbbackscatter;
-	nreadmbbeamtot += nreadmbbeam;
-	nreadmbimagetot += nreadmbimage;
-	nreadssvtot += nreadssv;
-	nreadnav1tot += nreadnav1;
-	nreadnav2tot += nreadnav2;
-	nreadrphtot += nreadrph;
-	nreadsbptot += nreadsbp;
-	nreadsslotot += nreadsslo;
-	nreadsshitot += nreadsshi;
-	nreadothertot += nreadother;
+	fprintf(stdout, "     File Header:                       %d\n", nrec_fileheader);
+	fprintf(stdout, "     Multibeam:                         %d\n", nrec_multibeam);
+	fprintf(stdout, "          Volatile Settings:                 %d\n", nrec_volatilesettings);
+	fprintf(stdout, "          Match Filter:                      %d\n", nrec_matchfilter);
+	fprintf(stdout, "          Beam Geometry:                     %d\n", nrec_beamgeometry);
+	fprintf(stdout, "          Remote Control:                    %d\n", nrec_remotecontrolsettings);
+	fprintf(stdout, "          Bathymetry:                        %d\n", nrec_bathymetry);
+	fprintf(stdout, "          Backscatter:                       %d\n", nrec_backscatter);
+	fprintf(stdout, "          Beam:                              %d\n", nrec_beam);
+	fprintf(stdout, "          Image:                             %d\n", nrec_image);
+	fprintf(stdout, "     Reference:                         %d\n", nrec_reference);
+	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal);
+	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal);
+	fprintf(stdout, "     Position:                          %d\n", nrec_position);
+	fprintf(stdout, "     Custom Attitude:                   %d\n", nrec_customattitude);
+	fprintf(stdout, "     Tide:                              %d\n", nrec_tide);
+	fprintf(stdout, "     Altitude:                          %d\n", nrec_altitude);
+	fprintf(stdout, "     Motion Over Ground:                %d\n", nrec_motion);
+	fprintf(stdout, "     Depth:                             %d\n", nrec_depth);
+	fprintf(stdout, "     Sound Speed Profile:               %d\n", nrec_svp);
+	fprintf(stdout, "     CTD:                               %d\n", nrec_ctd);
+	fprintf(stdout, "     Geodosy:                           %d\n", nrec_geodesy);
+	fprintf(stdout, "     Roll Pitch Heave:                  %d\n", nrec_rollpitchheave);
+	fprintf(stdout, "     Heading:                           %d\n", nrec_heading);
+	fprintf(stdout, "     Survey Line:                       %d\n", nrec_surveyline);
+	fprintf(stdout, "     Navigation:                        %d\n", nrec_navigation);
+	fprintf(stdout, "     Attitude:                          %d\n", nrec_attitude);
+	fprintf(stdout, "     Edgetech Low Frequency Sidescan:   %d\n", nrec_fsdwsslo);
+	fprintf(stdout, "     Edgetech High Frequency Sidescan:  %d\n", nrec_fsdwsshi);
+	fprintf(stdout, "     Edgetech Subbottom:                %d\n", nrec_fsdwsbp);
+	fprintf(stdout, "     MBARI Mapping AUV Environmental:   %d\n", nrec_bluefinnav);
+	fprintf(stdout, "     MBARI Mapping AUV Navigation:      %d\n", nrec_bluefinenv);
+	fprintf(stdout, "     Configuration:                     %d\n", nrec_configuration);
+	fprintf(stdout, "     Calibration:                       %d\n", nrec_calibration);
+	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth);
+	fprintf(stdout, "     Installation:                      %d\n", nrec_installation);
+	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage);
+	fprintf(stdout, "     Remote Control Settings:           %d\n", nrec_remotecontrolsettings);
+	fprintf(stdout, "     Other:                             %d\n", nrec_other);
+	nrec_fileheader_tot += nrec_fileheader;
+	nrec_multibeam_tot += nrec_multibeam;
+	nrec_volatilesettings_tot += nrec_volatilesettings;
+	nrec_matchfilter_tot += nrec_matchfilter;
+	nrec_beamgeometry_tot += nrec_beamgeometry;
+	nrec_remotecontrolsettings_tot += nrec_remotecontrolsettings;
+	nrec_bathymetry_tot += nrec_bathymetry;
+	nrec_backscatter_tot += nrec_backscatter;
+	nrec_beam_tot += nrec_beam;
+	nrec_image_tot += nrec_image;	
+	nrec_reference_tot += nrec_reference;
+	nrec_sensoruncal_tot += nrec_sensoruncal;
+	nrec_sensorcal_tot += nrec_sensorcal;
+	nrec_position_tot += nrec_position;
+	nrec_customattitude_tot += nrec_customattitude;
+	nrec_tide_tot += nrec_tide;
+	nrec_altitude_tot += nrec_altitude;
+	nrec_motion_tot += nrec_motion;
+	nrec_depth_tot += nrec_depth;
+	nrec_svp_tot += nrec_svp;
+	nrec_ctd_tot += nrec_ctd;
+	nrec_geodesy_tot += nrec_geodesy;
+	nrec_rollpitchheave_tot += nrec_rollpitchheave;
+	nrec_heading_tot += nrec_heading;
+	nrec_surveyline_tot += nrec_surveyline;
+	nrec_navigation_tot += nrec_navigation;
+	nrec_attitude_tot += nrec_attitude;
+	nrec_fsdwsbp_tot += nrec_fsdwsbp;
+	nrec_fsdwsslo_tot += nrec_fsdwsslo;
+	nrec_fsdwsshi_tot += nrec_fsdwsshi;
+	nrec_bluefinenv_tot += nrec_bluefinenv;
+	nrec_position_tot += nrec_position;
+	nrec_bluefinnav_tot += nrec_bluefinnav;
+	nrec_configuration_tot += nrec_configuration;
+	nrec_calibration_tot += nrec_calibration;
+	nrec_verticaldepth_tot += nrec_verticaldepth;
+	nrec_installation_tot += nrec_installation;
+	nrec_systemeventmessage_tot += nrec_systemeventmessage;
+	nrec_remotecontrolsettings_tot += nrec_remotecontrolsettings;
+	nrec_other_tot += nrec_other;
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
@@ -1974,13 +2774,125 @@ bluefin->nav[i].position_time,(-0.001*(double)bluefin->nav[i].timedelay));
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 		
-/* close time delay file */
-fclose(tfp);
-		
-	/* apply time lag to navigation/attitude data */
-	if (nins > 0 && timelagmode != MB7KPREPROCESS_TIMELAG_OFF)
+	/* close time delay file */
+	if (tfp != NULL)
+		fclose(tfp);
+	
+	/* apply time lag to all relevant data 
+		timelag value calculated either from model imported from file (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			or by a constant offset (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT) plus any timedelay
+				values embedded in the data (MBARI AUV bluefin nav records only) */
+	if (timelagmode != MB7KPREPROCESS_TIMELAG_OFF)
 		{
-		/* correct time_d of ins navigation data */
+		/* correct time of navigation, heading, attitude, sonardepth, altitude 
+			read from asynchronous records in 7k files */
+		j = 0;
+		for (i=0;i<ndat_nav;i++)
+			{
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, dat_nav_time_d[i], &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, dat_nav_time_d[i], &timelag, &j, 
+							&error);
+				}
+			dat_nav_time_d[i] -= timelag;
+			}
+		j = 0;
+		for (i=0;i<ndat_heading;i++)
+			{
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, dat_heading_time_d[i], &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, dat_heading_time_d[i], &timelag, &j, 
+							&error);
+				}
+			dat_heading_time_d[i] -= timelag;
+			}
+		j = 0;
+		for (i=0;i<ndat_rph;i++)
+			{
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, dat_rph_time_d[i], &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, dat_rph_time_d[i], &timelag, &j, 
+							&error);
+				}
+			dat_rph_time_d[i] -= timelag;
+			}
+		j = 0;
+		for (i=0;i<ndat_sonardepth;i++)
+			{
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, dat_sonardepth_time_d[i], &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, dat_sonardepth_time_d[i], &timelag, &j, 
+							&error);
+				}
+			dat_sonardepth_time_d[i] -= timelag;
+			}
+		j = 0;
+		for (i=0;i<ndat_altitude;i++)
+			{
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, dat_altitude_time_d[i], &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, dat_altitude_time_d[i], &timelag, &j, 
+							&error);
+				}
+			dat_altitude_time_d[i] -= timelag;
+			}
+			
+		/* correct time of INS data read from MBARI AUV log file */
 		for (i=0;i<nins;i++)
 			{
 			/* get timelag value */
@@ -1999,9 +2911,7 @@ fclose(tfp);
 							ntimelag, ins_time_d[i], &timelag, &j, 
 							&error);
 				}
-fprintf(stderr,"INS TIME LAG CORRECTION: %f %f",timelag,ins_time_d[i]);
 			ins_time_d[i] -= timelag;
-fprintf(stderr," %f\n",ins_time_d[i]);
 			}
 		for (i=0;i<nins_altitude;i++)
 			{
@@ -2043,18 +2953,16 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 				}
 			ins_speed_time_d[i] -= timelag;
 			}
-		}
-	else if (timelagmode != MB7KPREPROCESS_TIMELAG_OFF)
-		{
-		/* correct time_d of ins navigation data */
-		for (i=0;i<nnav;i++)
+			
+		/* correct time of navigation and attitude data read from WHOI DSL nav and attitude file */
+		for (i=0;i<ndsl;i++)
 			{
 			/* get timelag value */
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, nav_time_d[i], &timelag, &j, 
+							ntimedelay, dsl_time_d[i], &timelag, &j, 
 							&error);
 				timelag += timelagconstant;
 				}
@@ -2062,19 +2970,35 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 				{
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, nav_time_d[i], &timelag, &j, 
+							ntimelag, dsl_time_d[i], &timelag, &j, 
 							&error);
 				}
-/*fprintf(stderr,"NAV TIME LAG CORRECTION: %f %f",timelag,nav_time_d[i]);*/
-			nav_time_d[i] -= timelag;
-/*fprintf(stderr," %f\n",nav_time_d[i]);*/
+			dsl_time_d[i] -= timelag;
 			}
-		}
-		
-	/* apply time lag to sonardepth data */
-	if (nsonardepth > 0 && timelagmode != MB7KPREPROCESS_TIMELAG_OFF)
-		{
-		/* correct time_d of sonardepth data */
+			
+		/* correct time of navigation and attitude data read from Steve Rock file */
+		for (i=0;i<nrock;i++)
+			{
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, rock_time_d[i], &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, rock_time_d[i], &timelag, &j, 
+							&error);
+				}
+			rock_time_d[i] -= timelag;
+			}
+			
+		/* correct time of sonar depth data read from separate file */
 		for (i=0;i<nsonardepth;i++)
 			{
 			/* get timelag value */
@@ -2094,17 +3018,46 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 							&error);
 				}
 			sonardepth_time_d[i] -= timelag;
-/*fprintf(stderr,"sonardepth_time_d[%d]:%f timelag:%f\n", i, sonardepth_time_d[i], timelag);*/
 			}
 		}
-		
-	/* apply filtering to sonardepth data */
-	if (nsonardepth > 0 && sonardepthfilter == MB_YES)
+				
+	/* if desired apply filtering to sonardepth data */
+	if (sonardepthfilter == MB_YES)
 		{
-		/* filter sonardepth data */
+		/* apply filtering to sonardepth data 
+			read from asynchronous records in 7k files */
+		for (i=0;i<ndat_sonardepth;i++)
+			{
+			dat_sonardepth_sonardepthfilter[i] = 0.0;
+			sonardepth_filterweight = 0.0;
+			for (j=0;j<ndat_sonardepth;j++)
+				{
+				dtol = (dat_sonardepth_time_d[j] - dat_sonardepth_time_d[i]) / sonardepthfilterlength;
+				if (fabs(dtol) < 4.0)
+					{
+					weight = exp(-dtol * dtol);
+					dat_sonardepth_sonardepthfilter[i] += weight * dat_sonardepth_sonardepth[j];
+					sonardepth_filterweight += weight;
+					}
+				}
+			if (sonardepth_filterweight > 0.0)
+				dat_sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
+			}
+		for (i=0;i<ndat_sonardepth;i++)
+			{
+			if (dat_sonardepth_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+				factor = 1.0;
+			else
+				factor = exp(-(dat_sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+						/ (sonardepthfilterdepth));
+			dat_sonardepth_sonardepth[i] = (1.0 - factor) * dat_sonardepth_sonardepth[i]
+						+ factor * dat_sonardepth_sonardepthfilter[i];
+			}
+
+		/* filter sonardepth data from separate file */
 		for (i=0;i<nsonardepth;i++)
 			{
-			sonardepth_filter[i] = 0.0;
+			sonardepth_sonardepthfilter[i] = 0.0;
 			sonardepth_filterweight = 0.0;
 			for (j=0;j<nsonardepth;j++)
 				{
@@ -2112,12 +3065,12 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 				if (fabs(dtol) < 4.0)
 					{
 					weight = exp(-dtol * dtol);
-					sonardepth_filter[i] += weight * sonardepth_sonardepth[j];
+					sonardepth_sonardepthfilter[i] += weight * sonardepth_sonardepth[j];
 					sonardepth_filterweight += weight;
 					}
 				}
 			if (sonardepth_filterweight > 0.0)
-				sonardepth_filter[i] /= sonardepth_filterweight;
+				sonardepth_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
 		for (i=0;i<nsonardepth;i++)
 			{
@@ -2127,54 +3080,15 @@ fprintf(stderr," %f\n",ins_time_d[i]);
 				factor = exp(-(sonardepth_sonardepth[i] - 2.0 * sonardepthfilterdepth)
 						/ (sonardepthfilterdepth));
 			sonardepth_sonardepth[i] = (1.0 - factor) * sonardepth_sonardepth[i]
-						+ factor * sonardepth_filter[i];
+						+ factor * sonardepth_sonardepthfilter[i];
 			}
-		}
-		
-	/* apply filtering to nav sonardepth data */
-	if (nnav > 0 && sonardepthfilter == MB_YES)
-		{
-		/* correct time_d of sonardepth data */
-		for (i=0;i<nnav;i++)
-			{
-			nav_sonardepthfilter[i] = 0.0;
-			sonardepth_filterweight = 0.0;
-			for (j=0;j<nnav;j++)
-				{
-				dtol = (nav_time_d[j] - nav_time_d[i]) / sonardepthfilterlength;
-				if (fabs(dtol) < 4.0)
-					{
-					weight = exp(-dtol * dtol);
-					nav_sonardepthfilter[i] += weight * nav_sonardepth[j];
-					sonardepth_filterweight += weight;
-					}
-				}
-			if (sonardepth_filterweight > 0.0)
-				nav_sonardepthfilter[i] /= sonardepth_filterweight;
-			}
-		for (i=0;i<nnav;i++)
-			{
-/*fprintf(stderr,"nav_time_d[%d]:%f raw:%f filter:%f\n", 
-i, nav_time_d[i], nav_sonardepth[i], nav_sonardepthfilter[i]);*/
-			if (nav_sonardepth[i] < 2.0 * sonardepthfilterdepth)
-				factor = 1.0;
-			else
-				factor = exp(-(nav_sonardepth[i] - 2.0 * sonardepthfilterdepth)
-						/ (sonardepthfilterdepth));
-			nav_sonardepth[i] = (1.0 - factor) * nav_sonardepth[i]
-						+ factor * nav_sonardepthfilter[i];
-			}
-		}
-		
-	/* apply filtering to ins sonardepth data */
-	if (nins > 0 && sonardepthfilter == MB_YES)
-		{
-		/* correct time_d of sonardepth data */
+
+		/* filter sonardepth data from separate INS file */
 		for (i=0;i<nins;i++)
 			{
 			ins_sonardepthfilter[i] = 0.0;
 			sonardepth_filterweight = 0.0;
-			for (j=0;j<nins;j++)
+			for (j=0;j<nsonardepth;j++)
 				{
 				dtol = (ins_time_d[j] - ins_time_d[i]) / sonardepthfilterlength;
 				if (fabs(dtol) < 4.0)
@@ -2187,10 +3101,8 @@ i, nav_time_d[i], nav_sonardepth[i], nav_sonardepthfilter[i]);*/
 			if (sonardepth_filterweight > 0.0)
 				ins_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
-		for (i=0;i<nins;i++)
+		for (i=0;i<nsonardepth;i++)
 			{
-/*fprintf(stderr,"ins_time_d[%d]:%f raw:%f filter:%f\n", 
-i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 			if (ins_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 				factor = 1.0;
 			else
@@ -2198,6 +3110,88 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 						/ (sonardepthfilterdepth));
 			ins_sonardepth[i] = (1.0 - factor) * ins_sonardepth[i]
 						+ factor * ins_sonardepthfilter[i];
+			}
+
+		/* filter sonardepth data from separate WHOI DSL file */
+		for (i=0;i<ndsl;i++)
+			{
+			dsl_sonardepthfilter[i] = 0.0;
+			sonardepth_filterweight = 0.0;
+			for (j=0;j<nsonardepth;j++)
+				{
+				dtol = (dsl_time_d[j] - dsl_time_d[i]) / sonardepthfilterlength;
+				if (fabs(dtol) < 4.0)
+					{
+					weight = exp(-dtol * dtol);
+					dsl_sonardepthfilter[i] += weight * dsl_sonardepth[j];
+					sonardepth_filterweight += weight;
+					}
+				}
+			if (sonardepth_filterweight > 0.0)
+				dsl_sonardepthfilter[i] /= sonardepth_filterweight;
+			}
+		for (i=0;i<nsonardepth;i++)
+			{
+			if (dsl_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+				factor = 1.0;
+			else
+				factor = exp(-(dsl_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+						/ (sonardepthfilterdepth));
+			dsl_sonardepth[i] = (1.0 - factor) * dsl_sonardepth[i]
+						+ factor * dsl_sonardepthfilter[i];
+			}
+
+		/* filter sonardepth data from separate Steve Rock file */
+		for (i=0;i<nrock;i++)
+			{
+			rock_sonardepthfilter[i] = 0.0;
+			sonardepth_filterweight = 0.0;
+			for (j=0;j<nsonardepth;j++)
+				{
+				dtol = (rock_time_d[j] - rock_time_d[i]) / sonardepthfilterlength;
+				if (fabs(dtol) < 4.0)
+					{
+					weight = exp(-dtol * dtol);
+					rock_sonardepthfilter[i] += weight * rock_sonardepth[j];
+					sonardepth_filterweight += weight;
+					}
+				}
+			if (sonardepth_filterweight > 0.0)
+				rock_sonardepthfilter[i] /= sonardepth_filterweight;
+			}
+		for (i=0;i<nsonardepth;i++)
+			{
+			if (rock_sonardepth[i] < 2.0 * sonardepthfilterdepth)
+				factor = 1.0;
+			else
+				factor = exp(-(rock_sonardepth[i] - 2.0 * sonardepthfilterdepth)
+						/ (sonardepthfilterdepth));
+			rock_sonardepth[i] = (1.0 - factor) * rock_sonardepth[i]
+						+ factor * rock_sonardepthfilter[i];
+			}
+		}
+		
+	/* calculate sonardepth change rate for variable lag correction - asynchronous data only */
+	if (sonardepthlagfix == MB_YES && ndat_sonardepth > 1)
+		{
+		for (i=0;i<ndat_sonardepth;i++)
+			{
+			if (i == 0)
+				{
+				dat_sonardepth_sonardepthrate[i] = (dat_sonardepth_sonardepth[i+1] - dat_sonardepth_sonardepth[i]) 
+								/ (dat_sonardepth_time_d[i+1] - dat_sonardepth_time_d[i]);
+				}
+			else if (i == ndat_sonardepth - 1)
+				{
+				dat_sonardepth_sonardepthrate[i] = (dat_sonardepth_sonardepth[i] - dat_sonardepth_sonardepth[i-1]) 
+								/ (dat_sonardepth_time_d[i] - dat_sonardepth_time_d[i-1]);
+				}
+			else
+				{
+				dat_sonardepth_sonardepthrate[i] = (dat_sonardepth_sonardepth[i+1] - dat_sonardepth_sonardepth[i-1]) 
+								/ (dat_sonardepth_time_d[i+1] - dat_sonardepth_time_d[i-1]);
+				}
+			dat_sonardepth_sonardepthrate[i] = fabs(dat_sonardepth_sonardepthrate[i]);
 			}
 		}
 		
@@ -2249,30 +3243,6 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 		batht_time_d_new[i] = batht_time_d[i] + batht_time_offset[i];
 		}
 		
-	/* calculate sonardepth change rate for variable lag correction */
-	if (sonardepthlagfix == MB_YES && nnav > 1)
-		{
-		for (i=0;i<nnav;i++)
-			{
-			if (i == 0)
-				{
-				nav_sonardepthrate[i] = (nav_sonardepth[i+1] - nav_sonardepth[i]) 
-								/ (nav_time_d[i+1] - nav_time_d[i]);
-				}
-			else if (i == nnav - 1)
-				{
-				nav_sonardepthrate[i] = (nav_sonardepth[i] - nav_sonardepth[i-1]) 
-								/ (nav_time_d[i] - nav_time_d[i-1]);
-				}
-			else
-				{
-				nav_sonardepthrate[i] = (nav_sonardepth[i+1] - nav_sonardepth[i-1]) 
-								/ (nav_time_d[i+1] - nav_time_d[i-1]);
-				}
-			nav_sonardepthrate[i] = fabs(nav_sonardepthrate[i]);
-			}
-		}
-		
 	/* output ins navigation and attitude data */
 	if (nins > 0 && (verbose > 0 || mode == MB7KPREPROCESS_TIMESTAMPLIST))
 		{
@@ -2284,13 +3254,13 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 				ins_sonardepth[i], ins_altitude[i], ins_speed[i],
 				RTD * ins_roll[i], RTD * ins_pitch[i]);
 			}
-		fprintf(stdout, "\nTotal INS altitude data read: %d\n", nnav);
+		fprintf(stdout, "\nTotal INS altitude data read: %d\n", nins_altitude);
 		for (i=0;i<nins_altitude;i++)
 			{
 			fprintf(stdout, "  INS ALT: %12d %17.6f %6.3f\n", 
 				i, ins_altitude_time_d[i], ins_altitude[i]);
 			}
-		fprintf(stdout, "\nTotal INS speed data read: %d\n", nnav);
+		fprintf(stdout, "\nTotal INS speed data read: %d\n", nins_speed);
 		for (i=0;i<nins_speed;i++)
 			{
 			fprintf(stdout, "  INS SPD: %12d %17.6f %6.3f\n", 
@@ -2312,27 +3282,43 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 	/* output 7k navigation and attitude data */
 	if (verbose > 0 || mode == MB7KPREPROCESS_TIMESTAMPLIST)
 		{
-		fprintf(stdout, "\nTotal 7k navigation/attitude data read: %d\n", nnav);
-		for (i=0;i<nnav;i++)
+		fprintf(stdout, "\nTotal 7k navigation data read: %d\n", ndat_nav);
+		for (i=0;i<ndat_nav;i++)
 			{
-			fprintf(stdout, "  NAV: %5d %12d %17.6f %11.6f %10.6f %8.3f %8.3f %7.3f %6.3f %6.3f %6.3f\n", 
-				i, nav_quality[i], nav_time_d[i], nav_lon[i], nav_lat[i],
-				nav_sonardepth[i], nav_sonardepthrate[i], nav_heading[i], nav_speed[i],
-				nav_roll[i], nav_pitch[i]);
+			fprintf(stdout, "  NAV: %5d %17.6f %11.6f %10.6f %6.3f\n", 
+				i, dat_nav_time_d[i], dat_nav_lon[i], dat_nav_lat[i], dat_nav_speed[i]);
 			}
-		fprintf(stdout, "\nTotal altitude data read: %d\n", nnav);
-		for (i=0;i<nalt;i++)
+		fprintf(stdout, "\nTotal heading data read: %d\n", ndat_heading);
+		for (i=0;i<ndat_heading;i++)
+			{
+			fprintf(stdout, "  HDG: %5d %17.6f %8.3f\n", 
+				i, dat_heading_time_d[i], dat_heading_heading[i]);
+			}
+		fprintf(stdout, "\nTotal sonardepth data read: %d\n", ndat_sonardepth);
+		for (i=0;i<ndat_sonardepth;i++)
+			{
+			fprintf(stdout, "  DEP: %5d %17.6f %8.3f %8.3f\n", 
+				i, dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i], dat_sonardepth_sonardepthrate[i]);
+			}
+		fprintf(stdout, "\nTotal altitude data read: %d\n", ndat_altitude);
+		for (i=0;i<ndat_altitude;i++)
 			{
 			fprintf(stdout, "  ALT: %5d %17.6f %8.3f\n", 
-				i, alt_time_d[i], alt_altitude[i]);
+				i, dat_altitude_time_d[i], dat_altitude_altitude[i]);
 			}
-		fprintf(stdout, "\nTotal Edgetech time stamp data read: %d\n", nnav);
+		fprintf(stdout, "\nTotal attitude data read: %d\n", ndat_rph);
+		for (i=0;i<ndat_rph;i++)
+			{
+			fprintf(stdout, "  ALT: %5d %17.6f %8.3f %8.3f %8.3f\n", 
+				i, dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i], dat_rph_heave[i]);
+			}
+		fprintf(stdout, "\nTotal Edgetech time stamp data read: %d\n", nedget);
 		for (i=0;i<nedget;i++)
 			{
 			fprintf(stdout, "  EDG: %5d %17.6f %d\n", 
 				i, edget_time_d[i], edget_ping[i]);
 			}
-		fprintf(stdout, "\nTotal multibeam time stamp data read: %d\n", nnav);
+		fprintf(stdout, "\nTotal multibeam time stamp data read: %d\n", nbatht);
 		for (i=0;i<nbatht;i++)
 			{
 			fprintf(stdout, "  BAT: %5d %17.6f %17.6f %5d   offsets: %17.6f %5d  %5d\n", 
@@ -2342,38 +3328,84 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 	
 	/* output counts */
 	fprintf(stdout, "\nTotal data records read from: %s\n", read_file);
-	fprintf(stdout, "     File Header:       %d\n", nreadfileheadertot);
-	fprintf(stdout, "     Multibeam:         %d\n", nreadmultibeamtot);
-	fprintf(stdout, "          Volatile Settings: %d\n", nreadmbvolatilesettingstot);
-	fprintf(stdout, "          Beam Geometry:     %d\n", nreadmbbeamgeometrytot);
-	fprintf(stdout, "          Bathymetry:        %d\n", nreadmbbathymetrytot);
-	fprintf(stdout, "          Backscatter:       %d\n", nreadmbbackscattertot);
-	fprintf(stdout, "          Beam:              %d\n", nreadmbbeamtot);
-	fprintf(stdout, "          Image:             %d\n", nreadmbimagetot);
-	fprintf(stdout, "     Bluefin CTD:       %d\n", nreadssvtot);
-	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav2tot);
-	fprintf(stdout, "     Position:          %d\n", nreadnav1tot);
-	fprintf(stdout, "     RollPitchHeave:    %d\n", nreadrphtot);
-	fprintf(stdout, "     Subbottom:         %d\n", nreadsbptot);
-	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslotot);
-	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshitot);
+	fprintf(stdout, "     File Header:                       %d\n", nrec_fileheader_tot);
+	fprintf(stdout, "     Multibeam:                         %d\n", nrec_multibeam_tot);
+	fprintf(stdout, "          Volatile Settings:                 %d\n", nrec_volatilesettings_tot);
+	fprintf(stdout, "          Match Filter:                      %d\n", nrec_matchfilter_tot);
+	fprintf(stdout, "          Beam Geometry:                     %d\n", nrec_beamgeometry_tot);
+	fprintf(stdout, "          Remote Control:                    %d\n", nrec_remotecontrolsettings_tot);
+	fprintf(stdout, "          Bathymetry:                        %d\n", nrec_bathymetry_tot);
+	fprintf(stdout, "          Backscatter:                       %d\n", nrec_backscatter_tot);
+	fprintf(stdout, "          Beam:                              %d\n", nrec_beam_tot);
+	fprintf(stdout, "          Image:                             %d\n", nrec_image_tot);
+	fprintf(stdout, "     Reference:                         %d\n", nrec_reference_tot);
+	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal_tot);
+	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal_tot);
+	fprintf(stdout, "     Position:                          %d\n", nrec_position_tot);
+	fprintf(stdout, "     Custom Attitude:                   %d\n", nrec_customattitude_tot);
+	fprintf(stdout, "     Tide:                              %d\n", nrec_tide_tot);
+	fprintf(stdout, "     Altitude:                          %d\n", nrec_altitude_tot);
+	fprintf(stdout, "     Motion Over Ground:                %d\n", nrec_motion_tot);
+	fprintf(stdout, "     Depth:                             %d\n", nrec_depth_tot);
+	fprintf(stdout, "     Sound Speed Profile:               %d\n", nrec_svp_tot);
+	fprintf(stdout, "     CTD:                               %d\n", nrec_ctd_tot);
+	fprintf(stdout, "     Geodosy:                           %d\n", nrec_geodesy_tot);
+	fprintf(stdout, "     Roll Pitch Heave:                  %d\n", nrec_rollpitchheave_tot);
+	fprintf(stdout, "     Heading:                           %d\n", nrec_heading_tot);
+	fprintf(stdout, "     Survey Line:                       %d\n", nrec_surveyline_tot);
+	fprintf(stdout, "     Navigation:                        %d\n", nrec_navigation_tot);
+	fprintf(stdout, "     Attitude:                          %d\n", nrec_attitude_tot);
+	fprintf(stdout, "     Edgetech Low Frequency Sidescan:   %d\n", nrec_fsdwsslo_tot);
+	fprintf(stdout, "     Edgetech High Frequency Sidescan:  %d\n", nrec_fsdwsshi_tot);
+	fprintf(stdout, "     Edgetech Subbottom:                %d\n", nrec_fsdwsbp_tot);
+	fprintf(stdout, "     MBARI Mapping AUV Environmental:   %d\n", nrec_bluefinnav_tot);
+	fprintf(stdout, "     MBARI Mapping AUV Navigation:      %d\n", nrec_bluefinenv_tot);
+	fprintf(stdout, "     Configuration:                     %d\n", nrec_configuration_tot);
+	fprintf(stdout, "     Calibration:                       %d\n", nrec_calibration_tot);
+	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth_tot);
+	fprintf(stdout, "     Installation:                      %d\n", nrec_installation_tot);
+	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage_tot);
+	fprintf(stdout, "     Remote Control Settings:           %d\n", nrec_remotecontrolsettings_tot);
+	fprintf(stdout, "     Other:                             %d\n", nrec_other_tot);
 
-	nreadfileheadertot = 0;
-	nreadmultibeamtot = 0;
-	nreadmbvolatilesettingstot = 0;
-	nreadmbbeamgeometrytot = 0;
-	nreadmbbathymetrytot = 0;
-	nreadmbbackscattertot = 0;
-	nreadmbbeamtot = 0;
-	nreadmbimagetot = 0;
-	nreadssvtot = 0;
-	nreadnav1tot = 0;
-	nreadnav2tot = 0;
-	nreadrphtot = 0;
-	nreadsbptot = 0;
-	nreadsslotot = 0;
-	nreadsshitot = 0;
-	nreadothertot = 0;
+	nrec_reference_tot = 0;
+	nrec_sensoruncal_tot = 0;
+	nrec_sensorcal_tot = 0;
+	nrec_position_tot = 0;
+	nrec_customattitude_tot = 0;
+	nrec_tide_tot = 0;
+	nrec_altitude_tot = 0;
+	nrec_motion_tot = 0;
+	nrec_depth_tot = 0;
+	nrec_svp_tot = 0;
+	nrec_ctd_tot = 0;
+	nrec_geodesy_tot = 0;
+	nrec_rollpitchheave_tot = 0;
+	nrec_heading_tot = 0;
+	nrec_surveyline_tot = 0;
+	nrec_navigation_tot = 0;
+	nrec_attitude_tot = 0;
+	nrec_fsdwsslo_tot = 0;
+	nrec_fsdwsshi_tot = 0;
+	nrec_fsdwsbp_tot = 0;
+	nrec_bluefinnav_tot = 0;
+	nrec_bluefinenv_tot = 0;
+	nrec_multibeam_tot = 0;
+	nrec_volatilesettings_tot = 0;
+	nrec_configuration_tot = 0;
+	nrec_matchfilter_tot = 0;
+	nrec_beamgeometry_tot = 0;
+	nrec_calibration_tot = 0;
+	nrec_bathymetry_tot = 0;
+	nrec_backscatter_tot = 0;
+	nrec_beam_tot = 0;
+	nrec_verticaldepth_tot = 0;
+	nrec_image_tot = 0;
+	nrec_installation_tot = 0;
+	nrec_systemeventmessage_tot = 0;
+	nrec_fileheader_tot = 0;
+	nrec_remotecontrolsettings_tot = 0;
+	nrec_other_tot = 0;
 
 	/* now read the data files again, this time interpolating nav and attitude
 		into the multibeam records and fixing other problems found in the
@@ -2555,24 +3587,48 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 			program_name);
 		exit(error);
 		}
+
+	/* reset file record counters */
+	nrec_reference = 0;
+	nrec_sensoruncal = 0;
+	nrec_sensorcal = 0;
+	nrec_position = 0;
+	nrec_customattitude = 0;
+	nrec_tide = 0;
+	nrec_altitude = 0;
+	nrec_motion = 0;
+	nrec_depth = 0;
+	nrec_svp = 0;
+	nrec_ctd = 0;
+	nrec_geodesy = 0;
+	nrec_rollpitchheave = 0;
+	nrec_heading = 0;
+	nrec_surveyline = 0;
+	nrec_navigation = 0;
+	nrec_attitude = 0;
+	nrec_fsdwsslo = 0;
+	nrec_fsdwsshi = 0;
+	nrec_fsdwsbp = 0;
+	nrec_bluefinnav = 0;
+	nrec_bluefinenv = 0;
+	nrec_multibeam = 0;
+	nrec_volatilesettings = 0;
+	nrec_configuration = 0;
+	nrec_matchfilter = 0;
+	nrec_beamgeometry = 0;
+	nrec_calibration = 0;
+	nrec_bathymetry = 0;
+	nrec_backscatter = 0;
+	nrec_beam = 0;
+	nrec_verticaldepth = 0;
+	nrec_image = 0;
+	nrec_installation = 0;
+	nrec_systemeventmessage = 0;
+	nrec_fileheader = 0;
+	nrec_remotecontrolsettings = 0;
+	nrec_other = 0;
 		
 	/* read and print data */
-	nreadfileheader = 0;
-	nreadmultibeam = 0;
-	nreadmbvolatilesettings = 0;
-	nreadmbbeamgeometry = 0;
-	nreadmbbathymetry = 0;
-	nreadmbbackscatter = 0;
-	nreadmbbeam = 0;
-	nreadmbimage = 0;
-	nreadssv = 0;
-	nreadnav1 = 0;
-	nreadnav2 = 0;
-	nreadrph = 0;
-	nreadsbp = 0;
-	nreadsslo = 0;
-	nreadsshi = 0;
-	nreadother = 0;
 	while (error <= MB_ERROR_NO_ERROR)
 		{
 		/* reset error */
@@ -2598,27 +3654,50 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 	   	/* handle multibeam data */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA) 
 			{
-			/* update counters */
-			nreadmultibeam++;
+			nrec_multibeam++;
+			
 			bathymetry = &(istore->bathymetry);
 			if (istore->read_volatilesettings == MB_YES)
-				nreadmbvolatilesettings++;
+				nrec_volatilesettings++;
+			if (istore->read_matchfilter == MB_YES)
+				nrec_matchfilter++;
 			if (istore->read_beamgeometry == MB_YES)
-				nreadmbbeamgeometry++;
+				nrec_beamgeometry++;
+			if (istore->read_remotecontrolsettings == MB_YES)
+				nrec_bathymetry++;
 			if (istore->read_bathymetry == MB_YES)
-				nreadmbbathymetry++;
+				nrec_bathymetry++;
 			if (istore->read_backscatter == MB_YES)
-				nreadmbbackscatter++;
+				nrec_backscatter++;
 			if (istore->read_beam == MB_YES)
-				nreadmbbeam++;
+				nrec_beam++;
+			if (istore->read_verticaldepth == MB_YES)
+				nrec_verticaldepth++;
 			if (istore->read_image == MB_YES)
-				nreadmbimage++;
+				nrec_image++;
 				
 			/* print out record headers */
 			if (istore->read_volatilesettings == MB_YES)
 				{
 				volatilesettings = &(istore->volatilesettings);
 				header = &(volatilesettings->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kVolatileSonarSettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber);
+				}
+			if (istore->read_matchfilter == MB_YES)
+				{
+				matchfilter = &(istore->matchfilter);
+				header = &(matchfilter->header);
 				time_j[0] = header->s7kTime.Year;
 				time_j[1] = header->s7kTime.Day;
 				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
@@ -2648,6 +3727,23 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber,beamgeometry->number_beams);
+				}
+			if (istore->read_remotecontrolsettings == MB_YES)
+				{
+				remotecontrolsettings = &(istore->remotecontrolsettings);
+				header = &(remotecontrolsettings->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kremotecontrolsettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber);
 				}
 			if (istore->read_bathymetry == MB_YES)
 				{
@@ -2755,10 +3851,11 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 					}
 					
 				/* fix upgraded version 5 quality flags */
-				else if (bathymetry->header.Version == 5)
+				else if (bathymetry->header.Version >= 5)
 					{
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
+/*fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]);*/
 						bathymetry->quality[i] = bathymetry->quality[i] & 15;
 						
 						/* phase or amplitude picks */
@@ -2776,10 +3873,11 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 							}
 							
 						/* flagged by sonar */
-						if ((bathymetry->quality[i] & 3) < 3)
+						if ((bathymetry->quality[i] & 3) == 0)
 							{
 							bathymetry->quality[i] += 64;
 							}
+/*fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]);*/
 						}
 					}
 					
@@ -2795,7 +3893,8 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 				/* recalculate optional values in bathymetry record */
 				interp_status = MB_SUCCESS;
 				
-				/* get position */
+				/* get nav */
+				j = 0;
 				if (nins > 0)
 					{
 					interp_status = mb_linear_interp_degrees(verbose, 
@@ -2824,6 +3923,23 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 								rock_time_d-1, rock_lat-1,
 								nrock, time_d, &navlat, &j, 
 								&error);
+					if (j > 1)
+						{
+						j1 = j - 2;
+						j2 = j - 1;
+						}
+					else
+						{
+						j1 = j - 1;
+						j2 = j;
+						}
+					mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+					dx = (rock_lon[j2] - rock_lon[j1])/mtodeglon;
+					dy = (rock_lat[j2] - rock_lat[j1])/mtodeglat;
+					dist = sqrt(dx*dx + dy*dy);
+					dt = (rock_time_d[j2] - rock_time_d[j1]);
+					if (dt > 0.0)
+						speed = 3.6 * dist / dt;
 					}
 				else if (ndsl > 0)
 					{
@@ -2836,32 +3952,40 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 								dsl_time_d-1, dsl_lat-1,
 								ndsl, time_d, &navlat, &j, 
 								&error);
+					if (j > 1)
+						{
+						j1 = j - 2;
+						j2 = j - 1;
+						}
+					else
+						{
+						j1 = j - 1;
+						j2 = j;
+						}
+					mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+					dx = (dsl_lon[j2] - dsl_lon[j1])/mtodeglon;
+					dy = (dsl_lat[j2] - dsl_lat[j1])/mtodeglat;
+					dist = sqrt(dx*dx + dy*dy);
+					dt = (dsl_time_d[j2] - dsl_time_d[j1]);
+					if (dt > 0.0)
+						speed = 3.6 * dist / dt;
 					}
-				else if (nnav > 0)
+				else if (ndat_nav > 0)
 					{
 					interp_status = mb_linear_interp_degrees(verbose, 
-								nav_time_d-1, nav_lon-1,
-								nnav, time_d, &navlon, &j, 
+								dat_nav_time_d-1, dat_nav_lon-1,
+								ndat_nav, time_d, &navlon, &j, 
 								&error);
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp_degrees(verbose, 
-								nav_time_d-1, nav_lat-1,
-								nnav, time_d, &navlat, &j, 
-								&error);
-					speed = 0.0;
-					}
-				else if (npos > 0)
-					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								pos_time_d-1, pos_lon-1,
-								npos, time_d, &navlon, &j, 
+								dat_nav_time_d-1, dat_nav_lat-1,
+								ndat_nav, time_d, &navlat, &j, 
 								&error);
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp_degrees(verbose, 
-								pos_time_d-1, pos_lat-1,
-								npos, time_d, &navlat, &j, 
+								dat_nav_time_d-1, dat_nav_speed-1,
+								ndat_nav, time_d, &speed, &j, 
 								&error);
-					speed = 0.0;
 					}
 				else
 					{
@@ -2871,6 +3995,7 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 					}
 				
 				/* get heading */
+				j = 0;
 				if (interp_status != MB_SUCCESS)
 					{
 					}
@@ -2895,41 +4020,12 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 								ndsl, time_d, &heading, &j, 
 								&error);
 					}
-				else if (nnav > 0)
+				else if (ndat_heading > 0)
 					{
 					interp_status = mb_linear_interp_degrees(verbose, 
-								nav_time_d-1, nav_heading-1,
-								nnav, time_d, &heading, &j, 
+								dat_heading_time_d-1, dat_heading_heading-1,
+								ndat_heading, time_d, &heading, &j, 
 								&error);
-					}
-				else if (npos > 1)
-					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								pos_time_d-1, pos_lat-1,
-								npos, time_d, &navlat, &j, 
-								&error);
-					if (j > 1)
-						{
-						j1 = j - 2;
-						j2 = j - 1;
-						}
-					else
-						{
-						j1 = j - 1;
-						j2 = j;
-						}
-					
-					mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
-					dx = (pos_lon[j2] - pos_lon[j1])/mtodeglon;
-					dy = (pos_lat[j2] - pos_lat[j1])/mtodeglat;
-					dist = sqrt(dx*dx + dy*dy);
-					if (dist > 0.0)
-						heading = RTD*atan2(dx/dist,dy/dist);
-					if (heading < 0.0)
-						heading = heading + 360.0;
-					dt = (pos_time_d[j2] - pos_time_d[j1]);
-					if (dt > 0.0)
-						speed = 3.6 * dist / dt;
 					}
 				else
 					{
@@ -2969,15 +4065,16 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 								ndsl, time_d, &sonardepth, &j, 
 								&error);
 					}
-				else if (nnav > 0)
+				else if (ndat_sonardepth > 0)
 					{
-					if (sonardepthlagfix == MB_YES && nnav > 1 
+					sonardepthlag = 0.0;
+					if (sonardepthlagfix == MB_YES && ndat_sonardepth > 1 
 						&& sonardepthratemax > 0.0
 						&& interp_status == MB_SUCCESS)
 						{
 						interp_status = mb_linear_interp(verbose, 
-								nav_time_d-1, nav_sonardepthrate-1,
-								nnav, time_d, &sonardepthrate, &j, 
+								dat_sonardepth_time_d-1, dat_sonardepth_sonardepthrate-1,
+								ndat_sonardepth, time_d, &sonardepthrate, &j, 
 								&error);
 						sonardepthlag = sonardepthrate * sonardepthlagmax / sonardepthratemax;
 						if (sonardepthrate >= sonardepthratemax)
@@ -2985,15 +4082,15 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 						}
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp(verbose, 
-								nav_time_d-1, nav_sonardepth-1,
-								nnav, time_d + sonardepthlag, &sonardepth, &j, 
+								dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
+								ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &j, 
 								&error);
 					}
-				else if (nrph > 0)
+				else if (ndat_rph > 0)
 					{
 					interp_status = mb_linear_interp(verbose, 
-								rph_time_d-1, rph_heave-1,
-								nrph, time_d, &heave, &j, 
+								dat_rph_time_d-1, dat_rph_heave-1,
+								ndat_rph, time_d, &heave, &j, 
 								&error);
 					sonardepth = heave;
 					}
@@ -3013,11 +4110,11 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 								nins_altitude, time_d, &altitude, &j, 
 								&error);
 					}
-				else if (nnav > 0)
+				else if (ndat_altitude > 0)
 					{
 					interp_status = mb_linear_interp(verbose, 
-								alt_time_d-1, alt_altitude-1,
-								nalt, time_d, &altitude, &j, 
+								dat_altitude_time_d-1, dat_altitude_altitude-1,
+								ndat_altitude, time_d, &altitude, &j, 
 								&error);
 					}
 				else
@@ -3065,28 +4162,16 @@ i, ins_time_d[i], ins_sonardepth[i], ins_sonardepthfilter[i]);*/
 								ndsl, time_d, &pitch, &j, 
 								&error);
 					}
-				else if (nnav > 0)
+				else if (ndat_rph > 0)
 					{
 					interp_status = mb_linear_interp(verbose, 
-								nav_time_d-1, nav_roll-1,
-								nnav, time_d, &roll, &j, 
+								dat_rph_time_d-1, dat_rph_roll-1,
+								ndat_rph, time_d, &roll, &j, 
 								&error);
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp(verbose, 
-								nav_time_d-1, nav_pitch-1,
-								nnav, time_d, &pitch, &j, 
-								&error);
-					}
-				else if (nrph > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								rph_time_d-1, rph_roll-1,
-								nrph, time_d, &roll, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								rph_time_d-1, rph_pitch-1,
-								nrph, time_d, &pitch, &j, 
+								dat_rph_time_d-1, dat_rph_pitch-1,
+								ndat_rph, time_d, &pitch, &j, 
 								&error);
 					}
 				else
@@ -3201,10 +4286,27 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
 				if (verbose > 0)
-				fprintf(stderr,"R7KHDRSIZE_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d samples:%d\n",
+				fprintf(stderr,"R7KRECID_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d samples:%d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber,beam->ping_number,beam->number_beams,beam->number_samples);
+				}
+			if (istore->read_verticaldepth == MB_YES)
+				{
+				verticaldepth = &(istore->verticaldepth);
+				header = &(verticaldepth->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kVerticalDepth: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,verticaldepth->ping_number);
 				}
 			if (istore->read_image == MB_YES)
 				{
@@ -3223,13 +4325,657 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber,image->ping_number,image->width,image->height);
 				}
+			}
+			
+	   	/* handle reference point data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_ReferencePoint) 
+			{
+			nrec_reference++;
+			
+			reference = &(istore->reference);
+			header = &(reference->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_ReferencePoint: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+			
+	   	/* handle uncalibrated sensor offset data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_UncalibratedSensorOffset) 
+			{
+			nrec_sensoruncal++;
+			
+			sensoruncal = &(istore->sensoruncal);
+			header = &(sensoruncal->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_UncalibratedSensorOffset: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+			
+	   	/* handle calibrated sensor offset data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_CalibratedSensorOffset) 
+			{
+			nrec_sensorcal++;
+			
+			sensorcal = &(istore->sensorcal);
+			header = &(sensorcal->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_CalibratedSensorOffset: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+			
+	   	/* handle position data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Position) 
+			{
+			nrec_position++;
+			
+			position = &(istore->position);
+			header = &(position->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
 
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Position: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+			}
+
+	   	/* handle customattitude data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_CustomAttitude) 
+			{
+			nrec_customattitude++;
+			
+			customattitude = &(istore->customattitude);
+			header = &(customattitude->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_CustomAttitude: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+			}
+			
+	   	/* handle tide data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Tide) 
+			{
+			nrec_tide++;
+			
+			tide = &(istore->tide);
+			header = &(fileheader->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Tide: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+			
+	   	/* handle altitude data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Altitude) 
+			{
+			nrec_altitude++;
+			
+			altituderec = &(istore->altitude);
+			header = &(fileheader->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Altitude: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+			
+	   	/* handle motion data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_MotionOverGround) 
+			{
+			nrec_motion++;
+			
+			motion = &(istore->motion);
+			header = &(motion->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_MotionOverGround: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber,motion->n);
+			}
+			
+	   	/* handle depth data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Depth) 
+			{
+			nrec_depth++;
+			
+			depth = &(istore->depth);
+			header = &(depth->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Depth: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+			
+	   	/* handle sound velocity data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_SoundVelocityProfile) 
+			{
+			nrec_svp++;
+			
+			svp = &(istore->svp);
+			header = &(svp->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_SoundVelocityProfile: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber,svp->n);
+			}
+
+	   	/* handle ctd data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_CTD) 
+			{
+			nrec_ctd++;
+			
+			ctd = &(istore->ctd);
+			header = &(ctd->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_CTD: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber,ctd->n);
+			}
+
+	   	/* handle geodesy data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Geodesy) 
+			{
+			nrec_geodesy++;
+			
+			geodesy = &(istore->geodesy);
+			header = &(geodesy->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Geodesy: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+			}
+
+	   	/* handle rollpitchheave data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_RollPitchHeave) 
+			{
+			nrec_rollpitchheave++;
+			
+			rollpitchheave = &(istore->rollpitchheave);
+			header = &(rollpitchheave->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_RollPitchHeave:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+			}
+			
+	   	/* handle heading data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Heading) 
+			{
+			nrec_heading++;
+			
+			headingrec = &(istore->heading);
+			header = &(headingrec->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Heading: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				time_i[0],time_i[1],time_i[2],
+				time_i[3],time_i[4],time_i[5],time_i[6],
+				header->RecordNumber);
+			}
+
+	   	/* handle survey line data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_SurveyLine) 
+			{
+			nrec_surveyline++;
+			
+			surveyline = &(istore->surveyline);
+			header = &(surveyline->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_SurveyLine: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+			}
+			
+	   	/* handle navigation data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Navigation) 
+			{
+			nrec_navigation++;
+			
+			navigation = &(istore->navigation);
+			header = &(navigation->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Navigation: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber);
+			}
+
+	   	/* handle attitude data */
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Attitude) 
+			{
+			nrec_attitude++;
+			
+			attitude = &(istore->attitude);
+			header = &(attitude->header);
+			time_j[0] = header->s7kTime.Year;
+			time_j[1] = header->s7kTime.Day;
+			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time_j[3] = (int) header->s7kTime.Seconds;
+			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+			mb_get_itime(verbose, time_j, time_i);
+			mb_get_time(verbose, time_i, &time_d);
+
+			/* get timelag value */
+			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timedelay_time_d-1, timedelay_timedelay-1,
+							ntimedelay, time_d, &timelag, &j, 
+							&error);
+				timelag += timelagconstant;
+				}
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+				{
+				interp_status = mb_linear_interp(verbose, 
+							timelag_time_d-1, timelag_model-1,
+							ntimelag, time_d, &timelag, &j, 
+							&error);
+				}
+			time_d -= timelag;
+			mb_get_date(verbose, time_d,time_i);
+			mb_get_jtime(verbose, time_i, time_j);
+			header->s7kTime.Year = time_i[0];
+			header->s7kTime.Day = time_j[1];
+			header->s7kTime.Hours = time_i[3];
+			header->s7kTime.Minutes = time_i[4];
+			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+
+			if (verbose > 0)
+				fprintf(stderr,"R7KRECID_Attitude: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d n:%d\n",
+			time_i[0],time_i[1],time_i[2],
+			time_i[3],time_i[4],time_i[5],time_i[6],
+			header->RecordNumber,attitude->n);
 			}
 			
 	   	/* handle file header data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_HEADER) 
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_7kFileHeader) 
 			{
-			nreadfileheader++;
+			nrec_fileheader++;
 			
 			fileheader = &(istore->fileheader);
 			header = &(fileheader->header);
@@ -3241,16 +4987,16 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
 			if (verbose > 0)
-				fprintf(stderr,"R7KRECID_7kFileHeader:             7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				fprintf(stderr,"R7KRECID_7kFileHeader: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 				time_i[0],time_i[1],time_i[2],
 				time_i[3],time_i[4],time_i[5],time_i[6],
 				header->RecordNumber);
 			}
 			
 	   	/* handle bluefin ctd data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SSV) 
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_SSV) 
 			{
-			nreadssv++;
+			nrec_bluefinenv++;
 			
 			bluefin = &(istore->bluefin);
 			header = &(bluefin->header);
@@ -3318,8 +5064,9 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 					bluefin->environmental[i].ctd_time,
 					bluefin->environmental[i].temperature_time);
 				
-				/* get navigation, etc */
+				/* get nav */
 				interp_status = MB_SUCCESS;
+				j = 0;
 				if (nins > 0)
 					{
 					interp_status = mb_linear_interp_degrees(verbose, 
@@ -3331,35 +5078,92 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 								ins_time_d-1, ins_lat-1,
 								nins, time_d, &navlat, &j, 
 								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								ins_time_d-1, ins_sonardepth-1,
-								nins, time_d, &sonardepth, &j, 
+					}
+				else if (nrock > 0)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								rock_time_d-1, rock_lon-1,
+								nrock, time_d, &navlon, &j, 
 								&error);
 					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								ins_altitude_time_d-1, ins_altitude-1,
-								nins_altitude, time_d, &altitude, &j, 
+					interp_status = mb_linear_interp_degrees(verbose, 
+								rock_time_d-1, rock_lat-1,
+								nrock, time_d, &navlat, &j, 
+								&error);
+					}
+				else if (ndsl > 0)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								dsl_time_d-1, dsl_lon-1,
+								ndsl, time_d, &navlon, &j, 
+								&error);
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp_degrees(verbose, 
+								dsl_time_d-1, dsl_lat-1,
+								ndsl, time_d, &navlat, &j, 
+								&error);
+					}
+				else if (ndat_nav > 0)
+					{
+					interp_status = mb_linear_interp_degrees(verbose, 
+								dat_nav_time_d-1, dat_nav_lon-1,
+								ndat_nav, time_d, &navlon, &j, 
+								&error);
+					if (interp_status == MB_SUCCESS)
+					interp_status = mb_linear_interp_degrees(verbose, 
+								dat_nav_time_d-1, dat_nav_lat-1,
+								ndat_nav, time_d, &navlat, &j, 
 								&error);
 					}
 				else
 					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								nav_time_d-1, nav_lon-1,
-								nnav, time_d, &navlon, &j, 
-								&error);
+					navlon = 0.0;
+					navlat = 0.0;
+					}
+				
+				/* get sonar depth */
+				if (interp_status != MB_SUCCESS)
+					{
+					}
+				else if (nsonardepth > 0)
+					{
 					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose, 
-								nav_time_d-1, nav_lat-1,
-								nnav, time_d, &navlat, &j, 
+					interp_status = mb_linear_interp(verbose, 
+								sonardepth_time_d-1, sonardepth_sonardepth-1,
+								nsonardepth, time_d, &sonardepth, &j, 
 								&error);
-					if (sonardepthlagfix == MB_YES && nnav > 1 
+					}
+				else if (nins > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								ins_time_d-1, ins_sonardepth-1,
+								nins, time_d, &sonardepth, &j, 
+								&error);
+					}
+				else if (nrock > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								rock_time_d-1, rock_sonardepth-1,
+								nrock, time_d, &sonardepth, &j, 
+								&error);
+					}
+				else if (ndsl > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								dsl_time_d-1, dsl_sonardepth-1,
+								ndsl, time_d, &sonardepth, &j, 
+								&error);
+					}
+				else if (ndat_sonardepth > 0)
+					{
+					sonardepthlag = 0.0;
+					if (sonardepthlagfix == MB_YES && ndat_sonardepth > 1 
 						&& sonardepthratemax > 0.0
 						&& interp_status == MB_SUCCESS)
 						{
 						interp_status = mb_linear_interp(verbose, 
-								nav_time_d-1, nav_sonardepthrate-1,
-								nnav, time_d, &sonardepthrate, &j, 
+								dat_sonardepth_time_d-1, dat_sonardepth_sonardepthrate-1,
+								ndat_sonardepth, time_d, &sonardepthrate, &j, 
 								&error);
 						sonardepthlag = sonardepthrate * sonardepthlagmax / sonardepthratemax;
 						if (sonardepthrate >= sonardepthratemax)
@@ -3367,29 +5171,46 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 						}
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp(verbose, 
-								nav_time_d-1, nav_sonardepth-1,
-								nnav, time_d + sonardepthlag, &sonardepth, &j, 
+								dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
+								ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &j, 
 								&error);
-					if (interp_status == MB_SUCCESS)
+					}
+				else if (ndat_rph > 0)
+					{
 					interp_status = mb_linear_interp(verbose, 
-								alt_time_d-1, alt_altitude-1,
-								nalt, time_d, &altitude, &j, 
+								dat_rph_time_d-1, dat_rph_heave-1,
+								ndat_rph, time_d, &heave, &j, 
 								&error);
+					sonardepth = heave;
+					}
+				else
+					{
+					sonardepth = 0.0;
 					}
 				
-				/* get sonardepth */
-				if (nsonardepth > 0)
+				/* get altitude */
+				if (interp_status != MB_SUCCESS)
 					{
-/*fprintf(stderr,"time_d:%f sonardepth:%f", time_d, sonardepth);*/
-					if (interp_status == MB_SUCCESS)
+					}
+				else if (nins > 0)
+					{
 					interp_status = mb_linear_interp(verbose, 
-								sonardepth_time_d-1, sonardepth_sonardepth-1,
-								nsonardepth, time_d, &sonardepth, &j, 
+								ins_altitude_time_d-1, ins_altitude-1,
+								nins_altitude, time_d, &altitude, &j, 
 								&error);
-/*fprintf(stderr," sonardepth:%f\n", sonardepth);*/
+					}
+				else if (ndat_altitude > 0)
+					{
+					interp_status = mb_linear_interp(verbose, 
+								dat_altitude_time_d-1, dat_altitude_altitude-1,
+								ndat_altitude, time_d, &altitude, &j, 
+								&error);
+					}
+				else
+					{
+					altitude = 0.0;
 					}
 
-					
 				/* output ctd data to file */
 				fprintf(tfp,"%.3f %11.6f %10.6f %.3f %.3f %.2f %.3f\n",
 					time_d, navlon, navlat, sonardepth, altitude, 
@@ -3399,9 +5220,9 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 			}
 			
 	   	/* handle bluefin nav data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_NAV2) 
+		else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_NAV2) 
 			{
-			nreadnav2++;
+			nrec_bluefinnav++;
 			
 			bluefin = &(istore->bluefin);
 			header = &(bluefin->header);
@@ -3454,7 +5275,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 				mb_get_time(verbose, time_i, &time_d);
 				time_d -= timelag;
 				bluefin->nav[i].position_time -= timelag;
-				bluefin->nav[i].altitude_time -= timelag;
+				bluefin->nav[i].depth_time -= timelag;
 				mb_get_date(verbose, time_d,time_i);
 				mb_get_jtime(verbose, time_i, time_j);
 				bluefin->nav[i].s7kTime.Year = time_i[0];
@@ -3480,57 +5301,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 				}			
 			}
 			
-	   	/* handle position data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_NAV1) 
-			{
-			nreadnav1++;
-			
-			position = &(istore->position);
-			header = &(position->header);
-			time_j[0] = header->s7kTime.Year;
-			time_j[1] = header->s7kTime.Day;
-			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
-			time_j[3] = (int) header->s7kTime.Seconds;
-			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
-			mb_get_itime(verbose, time_j, time_i);
-			mb_get_time(verbose, time_i, &time_d);
-
-			/* get timelag value */
-			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
-				{
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
-				timelag += timelagconstant;
-				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
-				{
-				interp_status = mb_linear_interp(verbose, 
-							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
-							&error);
-				}
-			time_d -= timelag;
-			mb_get_date(verbose, time_d,time_i);
-			mb_get_jtime(verbose, time_i, time_j);
-			header->s7kTime.Year = time_i[0];
-			header->s7kTime.Day = time_j[1];
-			header->s7kTime.Hours = time_i[3];
-			header->s7kTime.Minutes = time_i[4];
-			header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
-
-			if (verbose > 0)
-				fprintf(stderr,"R7KRECID_Position:               7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
-						time_i[0],time_i[1],time_i[2],
-						time_i[3],time_i[4],time_i[5],time_i[6],
-						header->RecordNumber);
-			}
-			
 	   	/* handle subbottom data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) 
 			{
-			nreadsbp++;
+			nrec_fsdwsbp++;
 
 			fsdwsb = &(istore->fsdwsb);
 			header = &(fsdwsb->header);
@@ -3555,7 +5329,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	   	/* handle low frequency sidescan data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2) 
 			{
-			nreadsslo++;
+			nrec_fsdwsslo++;
 
 			fsdwsslo = &(istore->fsdwsslo);
 			header = &(fsdwsslo->header);
@@ -3584,7 +5358,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	   	/* handle high frequency sidescan data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN3) 
 			{
-			nreadsshi++;
+			nrec_fsdwsshi++;
 
 			fsdwsshi = &(istore->fsdwsshi);
 			header = &(fsdwsshi->header);
@@ -3614,7 +5388,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 		else  if (status == MB_SUCCESS) 
 			{
 /*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
-			nreadother++;
+			nrec_other++;
 			}
 			
 	   	/* handle read error */
@@ -3755,7 +5529,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 					bluefin->nav[i].pitch_rate = 0;
 					bluefin->nav[i].yaw_rate = 0;
 					bluefin->nav[i].position_time = ins_time_d[ins_output_index];
-					bluefin->nav[i].altitude_time = ins_time_d[ins_output_index];
+					bluefin->nav[i].depth_time = ins_time_d[ins_output_index];
 					ins_output_index++;
 					}
 
@@ -3819,37 +5593,85 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 	
 	/* output counts */
 	fprintf(stdout, "\nData records written to: %s\n", ofile);
-	fprintf(stdout, "     File Header:       %d\n", nreadfileheader);
-	fprintf(stdout, "     Multibeam:         %d\n", nreadmultibeam);
-	fprintf(stdout, "          Volatile Settings: %d\n", nreadmbvolatilesettings);
-	fprintf(stdout, "          Beam Geometry:     %d\n", nreadmbbeamgeometry);
-	fprintf(stdout, "          Bathymetry:        %d\n", nreadmbbathymetry);
-	fprintf(stdout, "          Backscatter:       %d\n", nreadmbbackscatter);
-	fprintf(stdout, "          Beam:              %d\n", nreadmbbeam);
-	fprintf(stdout, "          Image:             %d\n", nreadmbimage);
-	fprintf(stdout, "     Bluefin CTD:       %d\n", nreadssv);
-	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav2);
-	fprintf(stdout, "     Position:          %d\n", nreadnav1);
-	fprintf(stdout, "     RollPitchHeave:    %d\n", nreadrph);
-	fprintf(stdout, "     Subbottom:         %d\n", nreadsbp);
-	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslo);
-	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshi);
-	nreadfileheadertot += nreadfileheader;
-	nreadmultibeamtot += nreadmultibeam;
-	nreadmbvolatilesettingstot += nreadmbvolatilesettings;
-	nreadmbbeamgeometrytot += nreadmbbeamgeometry;
-	nreadmbbathymetrytot += nreadmbbathymetry;
-	nreadmbbackscattertot += nreadmbbackscatter;
-	nreadmbbeamtot += nreadmbbeam;
-	nreadmbimagetot += nreadmbimage;
-	nreadssvtot += nreadssv;
-	nreadnav1tot += nreadnav1;
-	nreadnav2tot += nreadnav2;
-	nreadrphtot += nreadrph;
-	nreadsbptot += nreadsbp;
-	nreadsslotot += nreadsslo;
-	nreadsshitot += nreadsshi;
-	nreadothertot += nreadother;
+	fprintf(stdout, "     File Header:                       %d\n", nrec_fileheader);
+	fprintf(stdout, "     Multibeam:                         %d\n", nrec_multibeam);
+	fprintf(stdout, "          Volatile Settings:                 %d\n", nrec_volatilesettings);
+	fprintf(stdout, "          Match Filter:                      %d\n", nrec_matchfilter);
+	fprintf(stdout, "          Beam Geometry:                     %d\n", nrec_beamgeometry);
+	fprintf(stdout, "          Remote Control:                    %d\n", nrec_remotecontrolsettings);
+	fprintf(stdout, "          Bathymetry:                        %d\n", nrec_bathymetry);
+	fprintf(stdout, "          Backscatter:                       %d\n", nrec_backscatter);
+	fprintf(stdout, "          Beam:                              %d\n", nrec_beam);
+	fprintf(stdout, "          Image:                             %d\n", nrec_image);
+	fprintf(stdout, "     Reference:                         %d\n", nrec_reference);
+	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal);
+	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal);
+	fprintf(stdout, "     Position:                          %d\n", nrec_position);
+	fprintf(stdout, "     Custom Attitude:                   %d\n", nrec_customattitude);
+	fprintf(stdout, "     Tide:                              %d\n", nrec_tide);
+	fprintf(stdout, "     Altitude:                          %d\n", nrec_altitude);
+	fprintf(stdout, "     Motion Over Ground:                %d\n", nrec_motion);
+	fprintf(stdout, "     Depth:                             %d\n", nrec_depth);
+	fprintf(stdout, "     Sound Speed Profile:               %d\n", nrec_svp);
+	fprintf(stdout, "     CTD:                               %d\n", nrec_ctd);
+	fprintf(stdout, "     Geodosy:                           %d\n", nrec_geodesy);
+	fprintf(stdout, "     Roll Pitch Heave:                  %d\n", nrec_rollpitchheave);
+	fprintf(stdout, "     Heading:                           %d\n", nrec_heading);
+	fprintf(stdout, "     Survey Line:                       %d\n", nrec_surveyline);
+	fprintf(stdout, "     Navigation:                        %d\n", nrec_navigation);
+	fprintf(stdout, "     Attitude:                          %d\n", nrec_attitude);
+	fprintf(stdout, "     Edgetech Low Frequency Sidescan:   %d\n", nrec_fsdwsslo);
+	fprintf(stdout, "     Edgetech High Frequency Sidescan:  %d\n", nrec_fsdwsshi);
+	fprintf(stdout, "     Edgetech Subbottom:                %d\n", nrec_fsdwsbp);
+	fprintf(stdout, "     MBARI Mapping AUV Environmental:   %d\n", nrec_bluefinnav);
+	fprintf(stdout, "     MBARI Mapping AUV Navigation:      %d\n", nrec_bluefinenv);
+	fprintf(stdout, "     Configuration:                     %d\n", nrec_configuration);
+	fprintf(stdout, "     Calibration:                       %d\n", nrec_calibration);
+	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth);
+	fprintf(stdout, "     Installation:                      %d\n", nrec_installation);
+	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage);
+	fprintf(stdout, "     Remote Control Settings:           %d\n", nrec_remotecontrolsettings);
+	fprintf(stdout, "     Other:                             %d\n", nrec_other);
+	nrec_fileheader_tot += nrec_fileheader;
+	nrec_multibeam_tot += nrec_multibeam;
+	nrec_volatilesettings_tot += nrec_volatilesettings;
+	nrec_matchfilter_tot += nrec_matchfilter;
+	nrec_beamgeometry_tot += nrec_beamgeometry;
+	nrec_remotecontrolsettings_tot += nrec_remotecontrolsettings;
+	nrec_bathymetry_tot += nrec_bathymetry;
+	nrec_backscatter_tot += nrec_backscatter;
+	nrec_beam_tot += nrec_beam;
+	nrec_image_tot += nrec_image;	
+	nrec_reference_tot += nrec_reference;
+	nrec_sensoruncal_tot += nrec_sensoruncal;
+	nrec_sensorcal_tot += nrec_sensorcal;
+	nrec_position_tot += nrec_position;
+	nrec_customattitude_tot += nrec_customattitude;
+	nrec_tide_tot += nrec_tide;
+	nrec_altitude_tot += nrec_altitude;
+	nrec_motion_tot += nrec_motion;
+	nrec_depth_tot += nrec_depth;
+	nrec_svp_tot += nrec_svp;
+	nrec_ctd_tot += nrec_ctd;
+	nrec_geodesy_tot += nrec_geodesy;
+	nrec_rollpitchheave_tot += nrec_rollpitchheave;
+	nrec_heading_tot += nrec_heading;
+	nrec_surveyline_tot += nrec_surveyline;
+	nrec_navigation_tot += nrec_navigation;
+	nrec_attitude_tot += nrec_attitude;
+	nrec_fsdwsbp_tot += nrec_fsdwsbp;
+	nrec_fsdwsslo_tot += nrec_fsdwsslo;
+	nrec_fsdwsshi_tot += nrec_fsdwsshi;
+	nrec_bluefinenv_tot += nrec_bluefinenv;
+	nrec_position_tot += nrec_position;
+	nrec_bluefinnav_tot += nrec_bluefinnav;
+	nrec_configuration_tot += nrec_configuration;
+	nrec_calibration_tot += nrec_calibration;
+	nrec_verticaldepth_tot += nrec_verticaldepth;
+	nrec_installation_tot += nrec_installation;
+	nrec_systemeventmessage_tot += nrec_systemeventmessage;
+	nrec_remotecontrolsettings_tot += nrec_remotecontrolsettings;
+	nrec_other_tot += nrec_other;
 		
 	/* generate inf fnv and fbt files */
 	if (status == MB_SUCCESS)
@@ -3879,45 +5701,91 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 			
 	/* output counts */
 	fprintf(stdout, "\nTotal data records written from: %s\n", read_file);
-	fprintf(stdout, "     File Header:       %d\n", nreadfileheadertot);
-	fprintf(stdout, "     Multibeam:         %d\n", nreadmultibeamtot);
-	fprintf(stdout, "          Volatile Settings: %d\n", nreadmbvolatilesettingstot);
-	fprintf(stdout, "          Beam Geometry:     %d\n", nreadmbbeamgeometrytot);
-	fprintf(stdout, "          Bathymetry:        %d\n", nreadmbbathymetrytot);
-	fprintf(stdout, "          Backscatter:       %d\n", nreadmbbackscattertot);
-	fprintf(stdout, "          Beam:              %d\n", nreadmbbeamtot);
-	fprintf(stdout, "          Image:             %d\n", nreadmbimagetot);
-	fprintf(stdout, "     Bluefin CTD:       %d\n", nreadssvtot);
-	fprintf(stdout, "     Bluefin Nav:       %d\n", nreadnav2tot);
-	fprintf(stdout, "     Position:          %d\n", nreadnav1tot);
-	fprintf(stdout, "     RollPitchHeave:    %d\n", nreadrphtot);
-	fprintf(stdout, "     Subbottom:         %d\n", nreadsbptot);
-	fprintf(stdout, "     Low Sidescan:      %d\n", nreadsslotot);
-	fprintf(stdout, "     High Sidescan:     %d\n", nreadsshitot);
+	fprintf(stdout, "     File Header:                       %d\n", nrec_fileheader_tot);
+	fprintf(stdout, "     Multibeam:                         %d\n", nrec_multibeam_tot);
+	fprintf(stdout, "          Volatile Settings:                 %d\n", nrec_volatilesettings_tot);
+	fprintf(stdout, "          Match Filter:                      %d\n", nrec_matchfilter_tot);
+	fprintf(stdout, "          Beam Geometry:                     %d\n", nrec_beamgeometry_tot);
+	fprintf(stdout, "          Remote Control:                    %d\n", nrec_remotecontrolsettings_tot);
+	fprintf(stdout, "          Bathymetry:                        %d\n", nrec_bathymetry_tot);
+	fprintf(stdout, "          Backscatter:                       %d\n", nrec_backscatter_tot);
+	fprintf(stdout, "          Beam:                              %d\n", nrec_beam_tot);
+	fprintf(stdout, "          Image:                             %d\n", nrec_image_tot);
+	fprintf(stdout, "     Reference:                         %d\n", nrec_reference_tot);
+	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal_tot);
+	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal_tot);
+	fprintf(stdout, "     Position:                          %d\n", nrec_position_tot);
+	fprintf(stdout, "     Custom Attitude:                   %d\n", nrec_customattitude_tot);
+	fprintf(stdout, "     Tide:                              %d\n", nrec_tide_tot);
+	fprintf(stdout, "     Altitude:                          %d\n", nrec_altitude_tot);
+	fprintf(stdout, "     Motion Over Ground:                %d\n", nrec_motion_tot);
+	fprintf(stdout, "     Depth:                             %d\n", nrec_depth_tot);
+	fprintf(stdout, "     Sound Speed Profile:               %d\n", nrec_svp_tot);
+	fprintf(stdout, "     CTD:                               %d\n", nrec_ctd_tot);
+	fprintf(stdout, "     Geodosy:                           %d\n", nrec_geodesy_tot);
+	fprintf(stdout, "     Roll Pitch Heave:                  %d\n", nrec_rollpitchheave_tot);
+	fprintf(stdout, "     Heading:                           %d\n", nrec_heading_tot);
+	fprintf(stdout, "     Survey Line:                       %d\n", nrec_surveyline_tot);
+	fprintf(stdout, "     Navigation:                        %d\n", nrec_navigation_tot);
+	fprintf(stdout, "     Attitude:                          %d\n", nrec_attitude_tot);
+	fprintf(stdout, "     Edgetech Low Frequency Sidescan:   %d\n", nrec_fsdwsslo_tot);
+	fprintf(stdout, "     Edgetech High Frequency Sidescan:  %d\n", nrec_fsdwsshi_tot);
+	fprintf(stdout, "     Edgetech Subbottom:                %d\n", nrec_fsdwsbp_tot);
+	fprintf(stdout, "     MBARI Mapping AUV Environmental:   %d\n", nrec_bluefinnav_tot);
+	fprintf(stdout, "     MBARI Mapping AUV Navigation:      %d\n", nrec_bluefinenv_tot);
+	fprintf(stdout, "     Configuration:                     %d\n", nrec_configuration_tot);
+	fprintf(stdout, "     Calibration:                       %d\n", nrec_calibration_tot);
+	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth_tot);
+	fprintf(stdout, "     Installation:                      %d\n", nrec_installation_tot);
+	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage_tot);
+	fprintf(stdout, "     Remote Control Settings:           %d\n", nrec_remotecontrolsettings_tot);
+	fprintf(stdout, "     Other:                             %d\n", nrec_other_tot);
 	}
 		
 	
 	/* deallocate navigation arrays */
-	if (nnav > 0)
+	if (ndat_nav > 0)
 		{
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_time_d,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_quality,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_lon,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_lat,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_speed,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_sonardepth,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_sonardepthrate,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_sonardepthfilter,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_heading,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_roll,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&nav_pitch,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&alt_time_d,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&alt_altitude,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_nav_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_nav_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_nav_lon,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_nav_lat,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_nav_speed,&error);
+		}
+	if (ndat_sonardepth > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_sonardepth_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_sonardepth_sonardepthrate,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_sonardepth_sonardepthfilter,&error);
+		}
+	if (ndat_heading > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_heading_heading,&error);
+		}
+	if (ndat_rph > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_rph_roll,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_rph_pitch,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_rph_heave,&error);
+		}
+	if (ndat_altitude > 0)
+		{
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_altitude_time_d,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dat_altitude_altitude,&error);
+		}
+	if (ntimedelay > 0)
+		{
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&timedelay_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&timedelay_timedelay,&error);
+		}
+	if (nbatht > 0)
+		{
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_ping,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_time_d_new,&error);
+		}
+	if (nedget > 0)
+		{
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&edget_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&edget_ping,&error);
 		}
@@ -3938,6 +5806,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_lon,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_lat,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_sonardepthfilter,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_heading,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_roll,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rock_pitch,&error);
@@ -3948,6 +5817,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_lon,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_lat,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_sonardepth,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_sonardepthfilter,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_heading,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_roll,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&dsl_pitch,&error);
@@ -3966,20 +5836,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 		{
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sonardepth_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sonardepth_sonardepth,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sonardepth_filter,&error);
-		}
-	if (npos > 0)
-		{
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&pos_time_d,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&pos_lon,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&pos_lat,&error);
-		}
-	if (nrph > 0)
-		{
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rph_time_d,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rph_roll,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rph_pitch,&error);
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&rph_heave,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&sonardepth_sonardepthfilter,&error);
 		}
 
 	/* check memory */

@@ -103,7 +103,6 @@
 
 /* library variables */
 extern int	mbv_verbose;
-extern int	mbv_ninstance;
 extern Widget	parent_widget;
 extern XtAppContext	app_context;
 extern struct mbview_world_struct mbviews[MBV_MAX_WINDOWS];
@@ -115,7 +114,7 @@ static char	value_string[MB_PATH_MAXLINE];
 static char rcs_id[]="$Id$";
 
 /*------------------------------------------------------------------------------*/
-int mbview_getsitecount(int verbose, int instance,
+int mbview_getsitecount(int verbose, size_t instance,
 			int *nsite,
 			int *error)
 
@@ -135,7 +134,7 @@ int mbview_getsitecount(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
 		}
 
 	/* get view */
@@ -187,12 +186,12 @@ int mbview_allocsitearrays(int verbose,
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
 		fprintf(stderr,"dbg2       nsite:                     %d\n", nsite);
-		fprintf(stderr,"dbg2       sitelon:                   %ld\n", (long)*sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %ld\n", (long)*sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %ld\n", (long)*sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %ld\n", (long)*sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %ld\n", (long)*sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %ld\n", (long)*sitename);
+		fprintf(stderr,"dbg2       sitelon:                   %lu\n", (size_t)*sitelon);
+		fprintf(stderr,"dbg2       sitelat:                   %lu\n", (size_t)*sitelat);
+		fprintf(stderr,"dbg2       sitetopo:                  %lu\n", (size_t)*sitetopo);
+		fprintf(stderr,"dbg2       sitecolor:                 %lu\n", (size_t)*sitecolor);
+		fprintf(stderr,"dbg2       sitesize:                  %lu\n", (size_t)*sitesize);
+		fprintf(stderr,"dbg2       sitename:                  %lu\n", (size_t)*sitename);
 		}
 
 	/* allocate the arrays using mb_realloc */
@@ -214,12 +213,12 @@ int mbview_allocsitearrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       sitelon:                   %ld\n", (long)*sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %ld\n", (long)*sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %ld\n", (long)*sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %ld\n", (long)*sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %ld\n", (long)*sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %ld\n", (long)*sitename);
+		fprintf(stderr,"dbg2       sitelon:                   %lu\n", (size_t)*sitelon);
+		fprintf(stderr,"dbg2       sitelat:                   %lu\n", (size_t)*sitelat);
+		fprintf(stderr,"dbg2       sitetopo:                  %lu\n", (size_t)*sitetopo);
+		fprintf(stderr,"dbg2       sitecolor:                 %lu\n", (size_t)*sitecolor);
+		fprintf(stderr,"dbg2       sitesize:                  %lu\n", (size_t)*sitesize);
+		fprintf(stderr,"dbg2       sitename:                  %lu\n", (size_t)*sitename);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -254,12 +253,12 @@ int mbview_freesitearrays(int verbose,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       sitelon:                   %ld\n", (long)*sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %ld\n", (long)*sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %ld\n", (long)*sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %ld\n", (long)*sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %ld\n", (long)*sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %ld\n", (long)*sitename);
+		fprintf(stderr,"dbg2       sitelon:                   %lu\n", (size_t)*sitelon);
+		fprintf(stderr,"dbg2       sitelat:                   %lu\n", (size_t)*sitelat);
+		fprintf(stderr,"dbg2       sitetopo:                  %lu\n", (size_t)*sitetopo);
+		fprintf(stderr,"dbg2       sitecolor:                 %lu\n", (size_t)*sitecolor);
+		fprintf(stderr,"dbg2       sitesize:                  %lu\n", (size_t)*sitesize);
+		fprintf(stderr,"dbg2       sitename:                  %lu\n", (size_t)*sitename);
 		}
 
 	/* free the arrays using mb_free */
@@ -276,12 +275,12 @@ int mbview_freesitearrays(int verbose,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       sitelon:                   %ld\n", (long)*sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %ld\n", (long)*sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %ld\n", (long)*sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %ld\n", (long)*sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %ld\n", (long)*sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %ld\n", (long)*sitename);
+		fprintf(stderr,"dbg2       sitelon:                   %lu\n", (size_t)*sitelon);
+		fprintf(stderr,"dbg2       sitelat:                   %lu\n", (size_t)*sitelat);
+		fprintf(stderr,"dbg2       sitetopo:                  %lu\n", (size_t)*sitetopo);
+		fprintf(stderr,"dbg2       sitecolor:                 %lu\n", (size_t)*sitecolor);
+		fprintf(stderr,"dbg2       sitesize:                  %lu\n", (size_t)*sitesize);
+		fprintf(stderr,"dbg2       sitename:                  %lu\n", (size_t)*sitename);
 		fprintf(stderr,"dbg2       error:                     %d\n", *error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:                    %d\n", status);
@@ -293,7 +292,7 @@ int mbview_freesitearrays(int verbose,
 
 
 /*------------------------------------------------------------------------------*/
-int mbview_addsites(int verbose, int instance,
+int mbview_addsites(int verbose, size_t instance,
 			int	nsite,
 			double	*sitelon,
 			double	*sitelat,
@@ -323,14 +322,14 @@ int mbview_addsites(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
 		fprintf(stderr,"dbg2       nsite:                     %d\n", nsite);
-		fprintf(stderr,"dbg2       sitelon:                   %ld\n", (long)sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %ld\n", (long)sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %ld\n", (long)sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %ld\n", (long)sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %ld\n", (long)sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %ld\n", (long)sitename);
+		fprintf(stderr,"dbg2       sitelon:                   %lu\n", (size_t)sitelon);
+		fprintf(stderr,"dbg2       sitelat:                   %lu\n", (size_t)sitelat);
+		fprintf(stderr,"dbg2       sitetopo:                  %lu\n", (size_t)sitetopo);
+		fprintf(stderr,"dbg2       sitecolor:                 %lu\n", (size_t)sitecolor);
+		fprintf(stderr,"dbg2       sitesize:                  %lu\n", (size_t)sitesize);
+		fprintf(stderr,"dbg2       sitename:                  %lu\n", (size_t)sitename);
 		for (i=0;i<nsite;i++)
 			{
 			fprintf(stderr,"dbg2       site:%d lon:%f lat:%f topo:%f color:%d size:%d name:%s\n", 
@@ -389,28 +388,41 @@ shared.shareddata.nsite_alloc, shared.shareddata.nsite, nsite, shared.shareddata
 		status = mbview_projectll2display(instance,
 				sitelon[i], sitelat[i], zdata,
 				&xdisplay, &ydisplay, &zdisplay);
+				
+		/* check for reasonable coordinates */
+		if (fabs(xdisplay) < 1000.0 && fabs(ydisplay) < 1000.0 && fabs(zdisplay) < 1000.0)
+			{
 
-		/* add the new site */
-		shared.shareddata.sites[shared.shareddata.nsite].point.xgrid[instance] = xgrid;
-		shared.shareddata.sites[shared.shareddata.nsite].point.ygrid[instance] = ygrid;
-		shared.shareddata.sites[shared.shareddata.nsite].point.xlon = sitelon[i];
-		shared.shareddata.sites[shared.shareddata.nsite].point.ylat = sitelat[i];
-		shared.shareddata.sites[shared.shareddata.nsite].point.zdata = zdata;
-		shared.shareddata.sites[shared.shareddata.nsite].point.xdisplay[instance] = xdisplay;
-		shared.shareddata.sites[shared.shareddata.nsite].point.ydisplay[instance] = ydisplay;
-		shared.shareddata.sites[shared.shareddata.nsite].point.zdisplay[instance] = zdisplay;
-		shared.shareddata.sites[shared.shareddata.nsite].color = sitecolor[i];
-		shared.shareddata.sites[shared.shareddata.nsite].size = sitesize[i];
-		strcpy(shared.shareddata.sites[shared.shareddata.nsite].name, sitename[i]);
-		
-		/* set grid and display coordinates for all instances */
-		mbview_updatepointw(instance, &(shared.shareddata.sites[shared.shareddata.nsite].point));
+			/* add the new site */
+			shared.shareddata.sites[shared.shareddata.nsite].point.xgrid[instance] = xgrid;
+			shared.shareddata.sites[shared.shareddata.nsite].point.ygrid[instance] = ygrid;
+			shared.shareddata.sites[shared.shareddata.nsite].point.xlon = sitelon[i];
+			shared.shareddata.sites[shared.shareddata.nsite].point.ylat = sitelat[i];
+			shared.shareddata.sites[shared.shareddata.nsite].point.zdata = zdata;
+			shared.shareddata.sites[shared.shareddata.nsite].point.xdisplay[instance] = xdisplay;
+			shared.shareddata.sites[shared.shareddata.nsite].point.ydisplay[instance] = ydisplay;
+			shared.shareddata.sites[shared.shareddata.nsite].point.zdisplay[instance] = zdisplay;
+			shared.shareddata.sites[shared.shareddata.nsite].color = sitecolor[i];
+			shared.shareddata.sites[shared.shareddata.nsite].size = sitesize[i];
+			strcpy(shared.shareddata.sites[shared.shareddata.nsite].name, sitename[i]);
 
-		/* set nsite */
-		shared.shareddata.nsite++;
-		nadded++;
-fprintf(stderr,"Added site %d added so far:%d total;%d\n",
-shared.shareddata.nsite-1, nadded, shared.shareddata.nsite);
+			/* set grid and display coordinates for all instances */
+			mbview_updatepointw(instance, &(shared.shareddata.sites[shared.shareddata.nsite].point));
+
+			/* set nsite */
+			shared.shareddata.nsite++;
+			nadded++;
+/* fprintf(stderr,"Added site %d added so far:%d total:%d\n",
+shared.shareddata.nsite-1, nadded, shared.shareddata.nsite);*/
+			}
+			
+		/* report failure due to unreasonable coordinates */
+		else
+			{
+fprintf(stderr,"Failed to add site at position lon:%f lat:%f due to display coordinate projection (%f %f %f) far outside view...\n",
+sitelon[i],sitelat[i],xdisplay,ydisplay,zdisplay);
+			XBell(view->dpy,100);
+			}
 		}
 
 	/* make sites viewable */
@@ -437,7 +449,7 @@ shared.shareddata.nsite-1, nadded, shared.shareddata.nsite);
 	return(status);
 }
 /*------------------------------------------------------------------------------*/
-int mbview_getsites(int verbose, int instance,
+int mbview_getsites(int verbose, size_t instance,
 			int	*nsite,
 			double	*sitelon,
 			double	*sitelat,
@@ -464,14 +476,14 @@ int mbview_getsites(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
-		fprintf(stderr,"dbg2       nsite:                     %ld\n", (long)nsite);
-		fprintf(stderr,"dbg2       sitelon:                   %ld\n", (long)sitelon);
-		fprintf(stderr,"dbg2       sitelat:                   %ld\n", (long)sitelat);
-		fprintf(stderr,"dbg2       sitetopo:                  %ld\n", (long)sitetopo);
-		fprintf(stderr,"dbg2       sitecolor:                 %ld\n", (long)sitecolor);
-		fprintf(stderr,"dbg2       sitesize:                  %ld\n", (long)sitesize);
-		fprintf(stderr,"dbg2       sitename:                  %ld\n", (long)sitename);
+		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
+		fprintf(stderr,"dbg2       nsite:                     %lu\n", (size_t)nsite);
+		fprintf(stderr,"dbg2       sitelon:                   %lu\n", (size_t)sitelon);
+		fprintf(stderr,"dbg2       sitelat:                   %lu\n", (size_t)sitelat);
+		fprintf(stderr,"dbg2       sitetopo:                  %lu\n", (size_t)sitetopo);
+		fprintf(stderr,"dbg2       sitecolor:                 %lu\n", (size_t)sitecolor);
+		fprintf(stderr,"dbg2       sitesize:                  %lu\n", (size_t)sitesize);
+		fprintf(stderr,"dbg2       sitename:                  %lu\n", (size_t)sitename);
 		}
 
 	/* get view */
@@ -526,7 +538,7 @@ int mbview_getsites(int verbose, int instance,
 }
 
 /*--------------------------------------------------------------------*/
-int mbview_enableviewsites(int verbose, int instance,
+int mbview_enableviewsites(int verbose, size_t instance,
 			int *error)
 
 {
@@ -545,7 +557,7 @@ int mbview_enableviewsites(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
 		}
 
 	/* set values */
@@ -579,7 +591,7 @@ int mbview_enableviewsites(int verbose, int instance,
 }
 
 /*--------------------------------------------------------------------*/
-int mbview_enableeditsites(int verbose, int instance,
+int mbview_enableeditsites(int verbose, size_t instance,
 			int *error)
 
 {
@@ -598,7 +610,7 @@ int mbview_enableeditsites(int verbose, int instance,
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:                   %d\n", verbose);
-		fprintf(stderr,"dbg2       instance:                  %d\n", instance);
+		fprintf(stderr,"dbg2       instance:                  %ld\n", instance);
 		}
 
 	/* get view */
@@ -628,7 +640,7 @@ int mbview_enableeditsites(int verbose, int instance,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel)
+int mbview_pick_site_select(size_t instance, int which, int xpixel, int ypixel)
 {
 
 	/* local variables */
@@ -651,7 +663,7 @@ int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		fprintf(stderr,"dbg2       which:            %d\n",which);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
@@ -812,7 +824,7 @@ int mbview_pick_site_select(int instance, int which, int xpixel, int ypixel)
 
 
 /*------------------------------------------------------------------------------*/
-int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel)
+int mbview_pick_site_add(size_t instance, int which, int xpixel, int ypixel)
 {
 
 	/* local variables */
@@ -835,7 +847,7 @@ int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		fprintf(stderr,"dbg2       which:            %d\n",which);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
@@ -1026,7 +1038,7 @@ int mbview_pick_site_add(int instance, int which, int xpixel, int ypixel)
 
 
 /*------------------------------------------------------------------------------*/
-int mbview_pick_site_delete(int instance, int xpixel, int ypixel)
+int mbview_pick_site_delete(size_t instance, int xpixel, int ypixel)
 {
 
 	/* local variables */
@@ -1049,7 +1061,7 @@ int mbview_pick_site_delete(int instance, int xpixel, int ypixel)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
 		}
@@ -1167,7 +1179,7 @@ int mbview_pick_site_delete(int instance, int xpixel, int ypixel)
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_site_delete(int instance, int isite)
+int mbview_site_delete(size_t instance, int isite)
 {
 
 	/* local variables */
@@ -1186,7 +1198,7 @@ int mbview_site_delete(int instance, int isite)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       isite:            %d\n",isite);
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
 		
 	/* get view */
@@ -1227,7 +1239,7 @@ int mbview_site_delete(int instance, int isite)
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_drawsite(int instance, int rez)
+int mbview_drawsite(size_t instance, int rez)
 {
 	/* local variables */
 	char	*function_name = "mbview_drawsite";
@@ -1250,7 +1262,7 @@ int mbview_drawsite(int instance, int rez)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       instance:         %d\n",instance);
+		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		}
 		
@@ -1338,6 +1350,10 @@ int mbview_drawsite(int instance, int rez)
 			glTranslatef(shared.shareddata.sites[isite].point.xdisplay[instance],
 					shared.shareddata.sites[isite].point.ydisplay[instance],
 					shared.shareddata.sites[isite].point.zdisplay[instance]);
+/*fprintf(stderr,"site:%d position: %f %f %f\n",
+isite,shared.shareddata.sites[isite].point.xdisplay[instance],
+shared.shareddata.sites[isite].point.ydisplay[instance],
+shared.shareddata.sites[isite].point.zdisplay[instance]);*/
 			if (isite == shared.shareddata.site_selected)
 	    			glCallList((GLuint)MBV_GLLIST_SITELARGE);
 			else

@@ -1009,6 +1009,7 @@ struct mb_process_struct
 	
 /* edit save file definitions */
 #define MB_ESF_MAXTIMEDIFF 0.0011
+#define MB_ESF_MULTIPLICITY_FACTOR	1000000
 struct mb_edit_struct
 	{
 	double	time_d;
@@ -1404,7 +1405,7 @@ int mb_esf_open(int verbose, char *esffile,
 			struct mb_esf_struct *esf,
 			int *error);
 int mb_esf_apply(int verbose, struct mb_esf_struct *esf,
-			double time_d, int nbath, char *beamflag, 
+			double time_d, int pingmultiplicity, int nbath, char *beamflag, 
 			int *error);
 int mb_esf_save(int verbose, struct mb_esf_struct *esf, 
 			double time_d, int beam, int action, int *error);

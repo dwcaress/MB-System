@@ -114,8 +114,8 @@ int main( int argc, char **argv)
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBgrdviz"); ac++;
-    XtSetArg(args[ac], XmNx, 119); ac++;
-    XtSetArg(args[ac], XmNy, 192); ac++;
+    XtSetArg(args[ac], XmNx, 747); ac++;
+    XtSetArg(args[ac], XmNy, 56); ac++;
     XtSetArg(args[ac], XmNwidth, 197); ac++;
     XtSetArg(args[ac], XmNheight, 104); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",

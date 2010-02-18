@@ -2160,7 +2160,7 @@ int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double
 		fprintf(stderr,"dbg2       altitude:              %f\n", altitude);
 		fprintf(stderr,"dbg2       sonardepth:            %f\n", sonardepth);
 		fprintf(stderr,"dbg2       pitch:                 %f\n", pitch);
-		fprintf(stderr,"dbg2       grid:                  %ld\n", (long)grid);
+		fprintf(stderr,"dbg2       grid:                  %lu\n", (size_t)grid);
 		fprintf(stderr,"dbg2       grid->projectionname:  %s\n", grid->projectionname);
 		fprintf(stderr,"dbg2       grid->projection_mode: %d\n", grid->projection_mode);
 		fprintf(stderr,"dbg2       grid->projection_id:   %s\n", grid->projection_id);
@@ -2176,7 +2176,7 @@ int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double
 		fprintf(stderr,"dbg2       grid->ymax:            %f\n", grid->ymax);
 		fprintf(stderr,"dbg2       grid->dx:              %f\n", grid->dx);
 		fprintf(stderr,"dbg2       grid->dy               %f\n", grid->dy);
-		fprintf(stderr,"dbg2       grid->data:            %ld\n", (long)grid->data);
+		fprintf(stderr,"dbg2       grid->data:            %lu\n", (size_t)grid->data);
 		}
 		
 	/* loop over all of the angles */
@@ -2270,7 +2270,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 		fprintf(stderr,"dbg2       vx:                    %f\n", vx);
 		fprintf(stderr,"dbg2       vy:                    %f\n", vy);
 		fprintf(stderr,"dbg2       vz:                    %f\n", vz);
-		fprintf(stderr,"dbg2       grid:                  %ld\n", (long)grid);
+		fprintf(stderr,"dbg2       grid:                  %lu\n", (size_t)grid);
 		fprintf(stderr,"dbg2       grid->projectionname:  %s\n", grid->projectionname);
 		fprintf(stderr,"dbg2       grid->projection_mode: %d\n", grid->projection_mode);
 		fprintf(stderr,"dbg2       grid->projection_id:   %s\n", grid->projection_id);
@@ -2286,7 +2286,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 		fprintf(stderr,"dbg2       grid->ymax:            %f\n", grid->ymax);
 		fprintf(stderr,"dbg2       grid->dx:              %f\n", grid->dx);
 		fprintf(stderr,"dbg2       grid->dy               %f\n", grid->dy);
-		fprintf(stderr,"dbg2       grid->data:            %ld\n", (long)grid->data);
+		fprintf(stderr,"dbg2       grid->data:            %lu\n", (size_t)grid->data);
 		}
 	
 	/* test different ranges along the vector until the grid is intersected */

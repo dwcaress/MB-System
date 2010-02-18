@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.1.2 README FILE:
+MB-SYSTEM VERSION 5.1.3 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.1.2 release of the MB-System software package for 
+5.1.3 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,6 +26,12 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.1.3beta1829  February 5, 2010
+* Version 5.1.2          December 31, 2009
+  Version 5.1.2beta15    December 30, 2009
+  Version 5.1.2beta14    December 28, 2009
+  Version 5.1.2beta13    December 28, 2009
+  Version 5.1.2beta12    December 26, 2009
   Version 5.1.2beta11    Ausust 26, 2009
   Version 5.1.2beta10    Ausust 12, 2009
   Version 5.1.2beta09    Ausust 7, 2009
@@ -117,7 +123,7 @@ Palisades, NY 10964
 
 MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
 -----------------------------------------
-MB-System Copyright (C) 1993-2008 by
+MB-System Copyright (C) 1993-2010 by
 David W. Caress (caress@mbari.org)
   Monterey Bay Aquarium Research Institute
   Moss Landing, CA 95039
@@ -158,6 +164,43 @@ Aquarium Research Institute, or any other individuals or
 organizations involved in the design and maintenance of the 
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
+
+MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
+------------------------------------------
+
+-----> 5.1.3beta1829
+
+From now on beta releases will be named according to the corresponding
+source archive revision in the MB-System Subversion source code archive. 
+This will allow us (and users) to more precisely track code changes relative
+to the beta releases.
+
+Fixed support of Reson 7k data (format 88) to work with MARUM
+AUV data. Includes changes to mb7kpreprocess.
+
+Fixed 64 bit issues with Simrad, Reson 7k, and L3 XSE data
+(formats 58, 59, 88, 94).
+
+Fixed 64 bit issues with mbnavedit, mbclean, and mbneptune2esf.
+
+Added buttons to MBedit to immediately go to the start or end of the data.
+
+Fixed sidescan beamwidths used by the Edgetech Jstar format i/o
+modules (formats 132 & 133).
+
+Fixed memory management errors in MBgrdviz and mbfilter.
+
+Fixed more 64 bit  and memory management issues in MBeditviz and MBgrdviz.
+
+Added a plot reset button and an ability to autoscale on unflagged soundings
+only in the MBeditviz 3D sounding cloud display.
+
+Fixed handling of site and route points far from the display view in MBgrdviz.
+
+Put actual (but still incomplete) text into the MBeditviz man page.
+
+Changed print format for unsigned long values from %ld to %lu to avoid copious
+warning messages in Ubuntu.
 
 MB-SYSTEM VERSION 5.1.2 RELEASE NOTES:
 ------------------------------------------
@@ -302,7 +345,64 @@ distinguish between low frequency (132) and high frequency (133) sidescan
 data.
 
 Modified support for Reson 7k multibeams (format 88) to work with a
-new data sample from GEOMAR.
+new data sample from GEOMAR. Altered interpretation of initial beam quality
+flags, improving initial beamflags.
+
+Fixed problems with survey generation in mbgrdviz.
+
+Improved read-only support for XTF format Reson 8XXX data 
+(format 84 MBF_XTFR8101), but still don't have time stamping of
+attitude data correct.
+
+Augmented edit save file format and beam flag handling in order to deal
+successfully with multiple head multibeams that produce multiple pings
+with identical time stamps. This affects mbprocess, mbedit, mbeditviz,
+mbclean, and mbareaclean.
+
+Added program mbotps to generate open ocean tidal models at specified
+times and locations using the Oregon State Tidal Prediction Software 
+(OTPS) package. This program will build whether OTPS is installed or 
+not, but will only work if the OTPS programs are installed and in the 
+user's path. The OTPS predictions are based on global barotropic inverse
+tidal solutions obtained with OTIS and available for download at:
+     http://www.coas.oregonstate.edu/research/po/research/tide/
+
+Added program mbsegypsd to calculate sonograms from segy time series data.
+Sonograms are 2D displays of power spectral density (PSD) functions (y-axis)
+versus time (x-axis). One PSD is calculated for each trace in the segy file.
+This program requires linking with the FFTW (Fastest FFT in The West) package.
+
+-----> 5.1.2beta13
+
+Fixed many more issues relating to clean compiles on 64 bit machines.
+In particular, store GSF and netCDF data stream id's in their own
+int-size variables rather than a pointer-size FILE variable, and 
+declare mbview instance parameters as size_t rather than int so that
+passing these values through Xt event notify function calls as pointer
+values is clean. Also changed casting of pointer values to long for
+debug printing so that the pointer values are now casted to size_t
+values. This should allow for compatibility with Windows 64 bit builds,
+as Windows 64 bit C has a different type model than the rest of the
+universe (e.g. long = 32 bit on Windows but long = 64 bit for gcc).
+
+-----> 5.1.2beta14
+
+Fixed a few more issues relating to clean compiles on 64 bit machines.
+We're iterating towards a working version by getting problem reports
+from people like Hamish Bowman, Bob Arko, and Bob Covill.
+
+-----> 5.1.2beta15
+
+Fixed EM3002 support to reliably detect whether data comes from a single
+or double head sonar (formats 56 & 57).
+
+Fixed problem with EM710 support (formats 58 & 59).
+
+-----> 5.1.2
+
+Incorporates all changes listed above.
+
+Fixed memory management bug for formats 56 and 57 (Simrad EM3002 etc).
 
 MB-SYSTEM VERSION 5.1.1 RELEASE NOTES:
 ------------------------------------------
@@ -1545,9 +1645,9 @@ and databases to be fully functional. These are:
      coastline database. GMT has been developed by Professor Paul Wessel of SOEST (School
      of Ocean and Earth Science and Technology at the Univeristy of Hawaii) and Dr. Walter
      H. F. Smith of NOAA. The GMT source code is available from the GMT web page. 
-- NetCDF version 2.3r2 or later: Both GMT and MB-System require the NCAR netCDF
+- NetCDF version 3.0 or later: Both GMT and MB-System require the NCAR netCDF
      library. 
-- Perl version 4.0r19 or later: Perl is a fast, well documented scripting language used widely
+- Perl version 5.0 or later: Perl is a fast, well documented scripting language used widely
      in the Unix world. MB-System contains a number of perl scripts used both for installation
      and to ease common tasks. Most of the current Unix operating systems include perl. If you
      need to obtain the perl source code, first check with your local system administrator - you
@@ -1560,6 +1660,8 @@ and databases to be fully functional. These are:
      code distribution from http://www.motifzone.net  Another open source Motif-compatible 
      distribution called LessTif (http://www.lesstif.org) has been available for some time, and 
      also works well with MB-System. 
+- FFTW3 - Fastest Fourier Transform in the West. This FFT library is required for the
+     spectrogram program mbsegypsd
 - Levitus Database: The MB-System program mblevitus depends on a 16 MByte data file
      that is not included in the MB-System tarfile. Be sure to
      uncompress the file and to set the "LEVITUS" flag in the install_makefiles appropriately,
@@ -1589,23 +1691,52 @@ libraries and include files are accurate and so that the compile and link flags 
 
 The important parameters to be set in install_makefiles are:
 
-     MBSYSTEM_HOME - Absolute path to the directory containing this file. 
-     OS Operating system - (e.g. SUN, IRIX, HPUX, LINUX, LYNX). 
-     BYTESWAPPED - If set to "YES" will enable byte swapping of input and output binary
-     data. Otherwise byte swapping is disabled. Byte swapping needs to be enabled when
-     installing on "little endian" machines such as PCs or VAXs. 
-     CC - C compiler to be used (usually either cc or gcc) 
-     CFLAGS - Compile flags for C source files. 
-     LFLAGS - Load flags for all object files. 
-     GRAPHICAL - If set to "YES" will enable the installation of the Motif based graphical
-     utilities mbedit, mbnavedit, and mbvelocitytool. If Motif is not available but the
-     nongraphical utilities are desired then disable with "NO" (optional, default is "YES"). 
-     MOTIFINCDIR - Location of Motif include files. 
-     MOTIFLIBS - X and Motif libraries required for graphical tools. 
-     GMTLIBDIR - Location of GMT libraries libgmt.a and libpsl.a 
-     GMTINCDIR - Location of GMT include files gmt.h, grd.h, and pslib.h 
-     NETCDFDIR - Location of NetCDF library libnetcdf.a 
-     LEVITUS - Path for Levitus data file annual. 
+     Required parameters:
+     $MBSYSTEM_HOME - absolute path to the MB-System installation location
+     $OS - Operating system (e.g. DARWIN, LINUX).
+     $CFLAGS - Compile flags for C source files.
+     $LFLAGS - Load flags for all object files.
+     $NETCDFLIBDIR - Location of NetCDF library.
+     $NETCDFINCDIR - Location of NetCDF header files.
+     $GMTLIBDIR - Location of GMT libraries.
+     $GMTINCDIR - Location of GMT header files.
+
+     Required parameters for spectrogram program mbsegypsd
+	- mbsegypsd will not be built if these are commented out
+     $FFTWLIBDIR - Location of the FFTW3 library.
+     $FFTWINCDIR - Location of FFTW3 header files.
+
+     Required parameters for graphical tools
+	- graphical tools will not be built if these
+	  are commented out
+     $MOTIFINCDIR - Location of the Motif header files.
+     $MOTIFLIBS - Location of the Motif libraries.
+
+     Required parameter for visualization tools
+	- visualization tools will not be built if this
+	  is commented out
+     $OPENGLLIBS - Link flags for the OpenGL libraries: "-lGLU -lGL";
+
+     Required parameter for mblevitus program
+     $LEVITUS - Location of the Levitus library (usually "$MBSYSTEM_HOME/share/LevitusAnnual82.dat").
+
+     Required parameter for mbotps program
+     $OTPSDIR - Location of the OTPSnc installation (usually "/usr/local/OTPSnc").
+
+     Optional name of C compiler (if other than "cc").
+     $CC - Usually "cc", but could be "gcc".
+
+     Optional parameters for use of independent GSF library installation
+	- GSF library included with MB-System will be used 
+	  if these are commented out
+     $GSFLIB - Location of GSF library.
+     $GSFINCDIR - Location of GSF header files.
+
+     Optional parameters for use of independent PROJ4 library installation
+	- PROJ4 library included with MB-System will be used 
+	  if these are commented out
+     $PROJLIB - Location of PROJ4 library.
+     $PROJINCDIR - Location of PROJ4 header files.
 
 Examples of appropriate values for several different installations (e.g. Sun, SGI, PC) are included
 in the comments in install_makefiles. To execute install_makefiles, do the following:
@@ -1631,7 +1762,7 @@ the macros to work.
 
 Most users will also wish to specify which program they generally use to view Postscript plots on
 their screen. This parameter can be set either with the mbdefaults program or using the
-PS_VIEWER environment variable - the former is recommended (see the mbdefaults manual
+MB_PS_VIEWER environment variable - the former is recommended (see the mbdefaults manual
 page for details). On Sun workstations pageview is a popular Postscript viewer; on Silicon
 Graphics machines xpsview is commonly used. A popular generic alternative to these platform
 specific programs is ghostview.
@@ -1715,9 +1846,9 @@ Dale Chayes dale@ldeo.columbia.edu
 
 ------------------------------------------------------------------------
 
-RCS ID: $Id$
+Subversion ID: $Id$
 
-Revision History:
+RCS Revision History:
 $Log: README,v $
 Revision 5.130  2009/03/13 07:05:58  caress
 Release 5.1.2beta02

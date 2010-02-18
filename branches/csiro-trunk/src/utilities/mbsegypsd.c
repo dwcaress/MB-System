@@ -14,8 +14,8 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsegypsd calculates the power spectral densisty function of each trace in a 
- * segy files, outputing the PSD as a GMT grid file with trace number along
- * the x axis and frequeny along the y axis.
+ * segy file, outputting the PSD as a GMT grid file with trace number along
+ * the x axis and frequency along the y axis.
  *
  * Author:	D. W. Caress
  * Date:	November 2, 2009
@@ -84,7 +84,7 @@ FILE	*outfp;
 static char rcs_id[] = "$Id: mbsegypsd.c 1770 2009-10-19 17:16:39Z caress $";
 char program_name[] = "mbsegypsd";
 char help_message[] =  "mbsegypsd calculates the power spectral density function of each trace in a segy data file, \noutputting the results as a GMT grid file.";
-char usage_message[] = "mbsegypsd -Ifile -Oroot [-Ashotscale/frequencyscale \n\
+char usage_message[] = "mbsegypsd -Ifile -Oroot [-Ashotscale \n\
           -Ddecimatex -R \n\
           -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
           -Wmode/start/end -H -V]";
@@ -653,7 +653,7 @@ int main (int argc, char **argv)
 								{
 								sint = sin(M_PI * ((double)(k - kstart)) / ((double)(kend - kstart)));
 								taper = sint * sint;
-								fftw_in[i][0] = taper * trace[k];
+								fftw_in[i][0] = taper * trace[k]; 
 								normraw += trace[k] * trace[k];
 								normtaper += fftw_in[i][0] * fftw_in[i][0];
 								}
@@ -666,7 +666,7 @@ fftw_in[i][0] = sin(2.0 * M_PI * 1000.0 * i * sampleinterval)
 							fftw_in[i][1] = 0.0;
 							}
 						soundpressurelevel = 20.0 * log10(normraw / nfft);
-fprintf(stderr,"Sound Pressure Level: %f dB re 1 uPa\n",soundpressurelevel);
+/*fprintf(stderr,"Sound Pressure Level: %f dB re 1 uPa\n",soundpressurelevel);*/
 							
 						/* execute the fft */
 						fftw_execute(plan);
@@ -707,19 +707,19 @@ nfft/2,fftw_out[nfft/2][0],fftw_out[nfft/2][1],fftw_out[nfft/2][0] * fftw_out[nf
 						}
 						
 					/* output psd for this trace to the grid */
-fprintf(stderr,"N:%d Normalization: %f %f %f    ratios: %f %f     %f %f\n",
-nfft,normraw,normtaper,normfft,normraw/normfft,normfft/normraw,normtaper/normfft,normfft/normtaper);
+/*fprintf(stderr,"N:%d Normalization: %f %f %f    ratios: %f %f     %f %f\n",
+nfft,normraw,normtaper,normfft,normraw/normfft,normfft/normraw,normtaper/normfft,normfft/normtaper);*/
 					for (iy=0;iy<ngridy;iy++)
 						{
 						k = (ngridy - 1 - iy) * ngridx + ix;
 						if (wpsd[iy] > 0.0)
 							{
-							spsdtot[iy] += spsd[iy];
-							wpsdtot[iy] += wpsd[iy];
 							if (logscale == MB_NO)
 								grid[k] = spsd[iy] / wpsd[iy];
 							else
 								grid[k] = 20.0 * log10(spsd[iy] / wpsd[iy]);
+							spsdtot[iy] += grid[k];
+							wpsdtot[iy] += 1.0;
 /*fprintf(stderr,"ix:%d iy:%d k:%d spsd:%f wpsd:%f     f:%f p:%f\n",
 ix,iy,k,spsd[iy],wpsd[iy],ymax * iy / ngridy,grid[k]);*/
 							gridmintot = MIN(grid[k], gridmintot);
@@ -758,7 +758,10 @@ ix,iy,k,spsd[iy],wpsd[iy],ymax * iy / ngridy,grid[k]);*/
 		strcpy(ylabel, "Frequency (Hz)");
 		dx = (double) decimatex;
 		}
-	strcpy(zlabel, "dB/Hz");
+	if (logscale == MB_YES)
+		strcpy(zlabel, "dB/Hz");
+	else
+		strcpy(zlabel, "Intensity/Hz");
 	sprintf(title, "Power Spectral Density Grid from %s", segyfile);
 	status = write_cdfgrd(verbose, gridfile, grid,
 		ngridx, ngridy, 
@@ -772,9 +775,9 @@ ix,iy,k,spsd[iy],wpsd[iy],ymax * iy / ngridy,grid[k]);*/
 		{
 		for (iy=0;iy<ngridy;iy++)
 			{
-			if (wpsd[iy] > 0.0)
+			if (wpsdtot[iy] > 0.0)
 				{
-				spsdtot[iy] = spsd[iy] / wpsd[iy];
+				spsdtot[iy] = spsdtot[iy] / wpsdtot[iy];
 				}
 			fprintf(fp, "%f %f\n", dy * iy, spsdtot[iy]);
 			}
@@ -1008,7 +1011,11 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 	int	status = MB_SUCCESS;
 	struct GRD_HEADER grd;
 	double	w, e, s, n;
+#ifdef GMT_MINOR_VERSION
 	GMT_LONG	pad[4];
+#else
+	int	pad[4];
+#endif
 	time_t	right_now;
 	char	date[MB_PATH_MAXLINE], user[MB_PATH_MAXLINE], *user_ptr, host[MB_PATH_MAXLINE];
 	char	remark[MB_PATH_MAXLINE];
@@ -1024,7 +1031,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2  Input arguments:\n");
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       outfile:    %s\n",outfile);
-		fprintf(outfp,"dbg2       grid:       %d\n",(int)grid);
+		fprintf(outfp,"dbg2       grid:       %lu\n",(size_t)grid);
 		fprintf(outfp,"dbg2       nx:         %d\n",nx);
 		fprintf(outfp,"dbg2       ny:         %d\n",ny);
 		fprintf(outfp,"dbg2       xmin:       %f\n",xmin);
@@ -1040,7 +1047,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		fprintf(outfp,"dbg2       zlab:       %s\n",zlab);
 		fprintf(outfp,"dbg2       titl:       %s\n",titl);
 		fprintf(outfp,"dbg2       argc:       %d\n",(int)argc);
-		fprintf(outfp,"dbg2       *argv:      %ld\n",(long)*argv);
+		fprintf(outfp,"dbg2       *argv:      %lu\n",(size_t)*argv);
 		}
 
 	/* inititialize grd header */
