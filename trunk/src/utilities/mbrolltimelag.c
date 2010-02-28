@@ -314,7 +314,7 @@ int main (int argc, char **argv)
 			nroll++;
 			}
 		}
-	fclose(fp);
+	pclose(fp);
 	fprintf(stderr,"%d roll data read from %s\n", nroll, swathdata);
 	
 	/* open total cross correlation file */
@@ -409,7 +409,7 @@ int main (int argc, char **argv)
 				nslope++;
 				}
 			}
-		fclose(fp);
+		pclose(fp);
 		nslopetot += nslope;
 		if (nslope > 0)
 			time_d_avg /= nslope;
