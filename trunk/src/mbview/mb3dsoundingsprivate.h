@@ -126,6 +126,8 @@ struct mb3dsoundings_world_struct
     /* mode parameters */
     int			mouse_mode;
     int			edit_mode;
+    int			keyreverse_mode;
+    int			mousereverse_mode;
         
     /* cursors */
     Cursor TargetBlackCursor;
@@ -197,6 +199,10 @@ struct mb3dsoundings_world_struct
     int	view_flagged;
     int	view_profiles;
     int	view_scalewithflagged;
+    
+    /* last sounding edited */
+    int	last_sounding_defined;
+    int	last_sounding_edited;
     };
 
 /* library variables */
@@ -220,6 +226,11 @@ EXTERNAL XtAppContext	mbs_app_context;
 EXTERNAL int	mbs_work_function_set;
 EXTERNAL int	mbs_timer_count;
 EXTERNAL struct mb3dsoundings_world_struct mb3dsoundings;
+EXTERNAL int key_g_down = 0;
+EXTERNAL int key_z_down = 0;
+EXTERNAL int key_s_down = 0;
+EXTERNAL int key_a_down = 0;
+EXTERNAL int key_d_down = 0;
 
 /* global declarations */
 #ifdef MB3DSOUNDINGSGLOBAL
@@ -282,5 +293,13 @@ void do_mb3dsdg_view_scalewithflagged( Widget w, XtPointer client_data, XtPointe
 void do_mb3dsdg_view_reset( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_panzoom( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mb3dsdg_mouse_rotate( Widget w, XtPointer client_data, XtPointer call_data);
+int mb3dsoundings_updatemodetoggles();
+int mb3dsoundings_bad_ping();
+int mb3dsoundings_good_ping();
+int mb3dsoundings_left_ping();
+int mb3dsoundings_right_ping();
+int mb3dsoundings_flag_view();
+int mb3dsoundings_unflag_view();
+int mb3dsoundings_zero_ping();
 
 /*--------------------------------------------------------------------*/

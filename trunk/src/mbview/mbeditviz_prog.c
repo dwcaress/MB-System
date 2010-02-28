@@ -1571,7 +1571,7 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 		/* if asyncronous heading available, interpolate new value */
 		if (file->n_async_heading > 0)
 			{
-			intstat = mb_linear_interp(mbev_verbose, 
+			intstat = mb_linear_interp_degrees(mbev_verbose, 
 					file->async_heading_time_d-1, file->async_heading_heading-1,
 					file->n_async_heading, time_d, heading, &iheading, 
 					&mbev_error);
