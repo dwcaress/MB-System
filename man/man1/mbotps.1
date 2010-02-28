@@ -1,4 +1,4 @@
-.TH mbotps 1 "24 December 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbotps 1 "18 February 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbotps\fP - Predicts tides using the OSU Tidal Prediction Software (OTPS) distribution.
 
@@ -9,7 +9,7 @@ Version 5.0
 \fBmbotps\fP [\fB-B\fP\fIyear/month/day/hour/minute/second\fP
 \fB-D\fP\fIinterval\fP \fB-E\fP\fIyear/month/day/hour/minute/second 
 \fB-F\fP\fIformat\fP \fB-I\fP\fIdatalist.mb-1\fP 
-\fB-O\fP\fIoutput\fP \fB-R\fP\fIlon/lat\fP \fB-V\fP]
+\fB-M\fP \fB-O\fP\fIoutput\fP \fB-R\fP\fIlon/lat\fP \fB-V\fP]
 
 .SH DESCRIPTION
 \fBMBotps\fP is a utility that predicts tides using the OTPSnc (OSU Tidal Prediction
@@ -31,9 +31,9 @@ the output tidal model, and the \fB-O\fP option sets the output tidal model file
 Alternatively, instead of specifying a place and time range, the user may specify
 one or more swath data files using the \fB-I\fP option. A tidal model is produced for
 each swath file in which tidal values are calculated using the sonar navigation 
-locations at intervals specified with the \fB-D\fP option, and the swath file's 
-processing parameter file is modified so that \fBmbprocess\fP applies the tidal 
-model during processing.
+locations at intervals specified with the \fB-D\fP option, and if the \fB-M\fP option
+is specified, the swath file's processing parameter file is modified so that \fBmbprocess\fP 
+applies the tidal model during processing.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -97,6 +97,12 @@ This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
+.TP
+.B \-M
+If the \fB-I\fP option has been used so that tidal models are created for swath files,
+then this option causes each swath file's parameter file to be modified so that
+\fBmbprocess\fP will read and apply the ancilliary tidal model file created by
+\fBmbotps\fP.
 .TP
 .B \-O
 \fIfilename\fP
