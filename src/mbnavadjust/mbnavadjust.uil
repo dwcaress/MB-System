@@ -42,7 +42,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/opt/bx-6.1")
 !(BX) bx_info("builder_version", "BuilderXcessory Version 6.1.3")
 !(BX) bx_info("build_lang", "C")
@@ -71,15 +70,23 @@ identifier BXG_pushButton_applynav;
 identifier BXG_pushButton_invertnav;
 identifier BXG_pushButton_analyzecrossings;
 identifier BXG_pushButton_autopick;
+identifier BXG_pushButton_fixednav;
 identifier BXG_pushButton_goodnav;
 identifier BXG_pushButton_poornav;
 identifier BXG_pushButton_showmodelplot;
 identifier BXG_pushButton_makegrid;
+identifier BXG_toggleButton_showselectedsection;
+identifier BXG_toggleButton_showselectedfile;
+identifier BXG_toggleButton_showselectedsurvey;
+identifier BXG_toggleButton_showallsurveys;
 identifier BXG_pushButton_showties;
 identifier BXG_pushButton_showtruecrossings;
+identifier BXG_pushButton_showbettercrossings;
 identifier BXG_pushButton_showgoodcrossings;
 identifier BXG_pushButton_showcrossings;
+identifier BXG_pushButton_showsections;
 identifier BXG_pushButton_showdata;
+identifier BXG_pushButton_showsurveys;
 identifier BXG_pushButton_quit;
 identifier BXG_pushButton_importdata;
 identifier BXG_pushButton_close;
@@ -147,9 +154,10 @@ procedure BxSetValuesCB(string);
 procedure BxUnmanageCB(string);
 procedure do_action_analyzecrossings();
 procedure do_action_autopick();
-procedure do_action_poornav();
-procedure do_action_invertnav();
+procedure do_action_fixednav();
 procedure do_action_goodnav();
+procedure do_action_invertnav();
+procedure do_action_poornav();
 procedure do_apply_nav();
 procedure do_biases_apply();
 procedure do_biases_applyall();
@@ -201,15 +209,18 @@ procedure do_scale_controls_sectionlength();
 procedure do_scale_controls_sectionsoundings();
 procedure do_scale_controls_tickinterval();
 procedure do_scale_controls_zoffset();
+procedure do_view_showallsurveys();
+procedure do_view_showbettercrossings();
 procedure do_view_showcrossings();
 procedure do_view_showdata();
 procedure do_view_showgoodcrossings();
+procedure do_view_showsections();
+procedure do_view_showselectedfile();
+procedure do_view_showselectedsection();
+procedure do_view_showselectedsurveys();
+procedure do_view_showsurveys();
 procedure do_view_showties();
 procedure do_view_showtruecrossings();
-!(BX) "Widget" "bulletinBoard_biases"
-identifier bulletinBoard_biases;
-!(BX) "int" "mbna_fileselect_mode"
-identifier mbna_fileselect_mode;
 
 list BaseStyle : arguments {
 };
@@ -265,8 +276,8 @@ object drawingArea_modelplot : XmDrawingArea widget {
         XmNbackground = color('white');
         XmNx = 10;
         XmNy = 50;
-        XmNwidth = 820;
-        XmNheight = 330;
+        XmNwidth = 990;
+        XmNheight = 420;
     };
     controls {
     };
@@ -285,11 +296,12 @@ object label_modelplot_status : XmLabel widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("0 pings 0 nav pts 0 ties Inversi" &
- "on: out of date");
-        XmNx = 340;
+        XmNlabelString = compound_string("Mouse: <left> select closest tie" &
+ "; <middle> select closest untied crossing; <right> drag zoom exten" &
+ "t");
+        XmNx = 400;
         XmNy = 10;
-        XmNwidth = 490;
+        XmNwidth = 600;
         XmNheight = 30;
     };
     controls {
@@ -306,7 +318,7 @@ object pushButton_modelplot_fullsize : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Full Size");
-        XmNx = 260;
+        XmNx = 290;
         XmNy = 10;
         XmNwidth = 80;
         XmNheight = 32;
@@ -387,10 +399,10 @@ object bulletinBoard_modelplot : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 343;
-        XmNy = 286;
-        XmNwidth = 843;
-        XmNheight = 393;
+        XmNx = 115;
+        XmNy = 73;
+        XmNwidth = 1014;
+        XmNheight = 481;
     };
     controls {
          managed XmRadioBox radioBox;
@@ -414,8 +426,8 @@ object bulletinBoard_modelplot : XmBulletinBoardDialog widget {
 !(BX)        XmNtitle = "Navigation Adjustment Model Plot" &
 !(BX) "";
 !(BX)        XmNallowShellResize = true;
-!(BX)        XmNwidth = 843;
-!(BX)        XmNheight = 393;
+!(BX)        XmNwidth = 1014;
+!(BX)        XmNheight = 481;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_modelplot;
@@ -1025,8 +1037,8 @@ object form_controls : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 523;
-        XmNy = 258;
+        XmNx = 147;
+        XmNy = 97;
         XmNwidth = 635;
         XmNheight = 438;
     };
@@ -1378,8 +1390,8 @@ object form_about : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 572;
-        XmNy = 233;
+        XmNx = 147;
+        XmNy = 96;
         XmNwidth = 488;
         XmNheight = 484;
     };
@@ -1723,8 +1735,8 @@ object bulletinBoard_biases : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Heading & Roll Bias");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 250;
+        XmNx = 146;
+        XmNy = 95;
         XmNwidth = 284;
         XmNheight = 446;
     };
@@ -2376,8 +2388,8 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 431;
-        XmNy = 232;
+        XmNx = 79;
+        XmNy = 48;
         XmNwidth = 935;
         XmNheight = 685;
     };
@@ -2507,8 +2519,8 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 563;
-        XmNy = 301;
+        XmNx = 116;
+        XmNy = 71;
         XmNwidth = 611;
         XmNheight = 530;
     };
@@ -2624,8 +2636,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 393;
+        XmNx = 115;
+        XmNy = 253;
         XmNwidth = 311;
         XmNheight = 160;
     };
@@ -2704,8 +2716,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_ANY;
-        XmNx = 0;
-        XmNy = 430;
+        XmNx = 115;
+        XmNy = 146;
         XmNwidth = 542;
         XmNheight = 86;
     };
@@ -2982,6 +2994,23 @@ object cascadeButton_option : XmCascadeButton widget {
 !(BX)    };
 };
 
+object pushButton_showsurveys : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show Surveys");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showsurveys);
+        XmNactivateCallback = procedure do_view_showsurveys();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object pushButton_showdata : XmPushButton widget {
     arguments {
         arguments Style_use;
@@ -2993,6 +3022,23 @@ object pushButton_showdata : XmPushButton widget {
         callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showdata);
         XmNactivateCallback = procedure do_view_showdata();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_showsections : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show Data File Sections");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showsections);
+        XmNactivateCallback = procedure do_view_showsections();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -3027,6 +3073,23 @@ object pushButton_showgoodcrossings : XmPushButton widget {
         callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showgoodcrossings);
         XmNactivateCallback = procedure do_view_showgoodcrossings();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_showbettercrossings : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show >50% Overlap Crossings");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showbettercrossings);
+        XmNactivateCallback = procedure do_view_showbettercrossings();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -3068,6 +3131,83 @@ object pushButton_showties : XmPushButton widget {
 };
 
 object separator13 : XmSeparator widget {
+    arguments {
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object toggleButton_showallsurveys : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show All Surveys");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showallsurveys);
+        XmNvalueChangedCallback = procedure do_view_showallsurveys();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_showselectedsurvey : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show Only Selected Survey");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showselectedsurvey);
+        XmNvalueChangedCallback = procedure do_view_showselectedsurveys();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_showselectedfile : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show Only Selected File");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showselectedfile);
+        XmNvalueChangedCallback = procedure do_view_showselectedfile();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_showselectedsection : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show Only Selected Section");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showselectedsection);
+        XmNvalueChangedCallback = procedure do_view_showselectedsection();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object separator15 : XmSeparator widget {
     arguments {
     };
     controls {
@@ -3118,16 +3258,24 @@ object pulldownMenu_view : XmPulldownMenu widget {
         arguments Style_use;
         XmNx = 0;
         XmNy = 0;
-        XmNwidth = 196;
-        XmNheight = 160;
+        XmNwidth = 209;
+        XmNheight = 316;
     };
     controls {
+         managed XmPushButton pushButton_showsurveys;
          managed XmPushButton pushButton_showdata;
+         managed XmPushButton pushButton_showsections;
          managed XmPushButton pushButton_showcrossings;
          managed XmPushButton pushButton_showgoodcrossings;
+         managed XmPushButton pushButton_showbettercrossings;
          managed XmPushButton pushButton_showtruecrossings;
          managed XmPushButton pushButton_showties;
          managed XmSeparator separator13;
+         managed XmToggleButton toggleButton_showallsurveys;
+         managed XmToggleButton toggleButton_showselectedsurvey;
+         managed XmToggleButton toggleButton_showselectedfile;
+         managed XmToggleButton toggleButton_showselectedsection;
+         managed XmSeparator separator15;
          managed XmPushButton pushButton_makegrid;
          managed XmPushButton pushButton_showmodelplot;
     };
@@ -3162,7 +3310,7 @@ object cascadeButton_view : XmCascadeButton widget {
 object pushButton_poornav : XmPushButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Set Poor Navigation");
+        XmNlabelString = compound_string("Set File Poor Navigation");
     };
     controls {
     };
@@ -3179,7 +3327,7 @@ object pushButton_poornav : XmPushButton widget {
 object pushButton_goodnav : XmPushButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Set Good Navigation");
+        XmNlabelString = compound_string("Set File Good Navigation");
     };
     controls {
     };
@@ -3187,6 +3335,23 @@ object pushButton_goodnav : XmPushButton widget {
         callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_goodnav);
         XmNactivateCallback = procedure do_action_goodnav();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_fixednav : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Set File Fixed Navigation");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_fixednav);
+        XmNactivateCallback = procedure do_action_fixednav();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -3298,11 +3463,12 @@ object pulldownMenu_action : XmPulldownMenu widget {
         XmNx = 0;
         XmNy = 0;
         XmNwidth = 167;
-        XmNheight = 142;
+        XmNheight = 164;
     };
     controls {
          managed XmPushButton pushButton_poornav;
          managed XmPushButton pushButton_goodnav;
+         managed XmPushButton pushButton_fixednav;
          managed XmSeparator separator7;
          managed XmPushButton pushButton_autopick;
          managed XmSeparator separator10;
@@ -3600,8 +3766,8 @@ object form_mbnavadjust : XmForm widget {
 object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 478;
-        XmNy = 224;
+        XmNx = 51;
+        XmNy = 22;
         XmNwidth = 962;
         XmNheight = 400;
     };
@@ -3629,8 +3795,8 @@ object mainWindow : XmMainWindow widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "MBnavadjust";
 !(BX)        XmNiconName = "MBnavadjust";
-!(BX)        XmNx = 478;
-!(BX)        XmNy = 224;
+!(BX)        XmNx = 51;
+!(BX)        XmNy = 22;
 !(BX)        XmNwidth = 962;
 !(BX)        XmNheight = 400;
 !(BX)    };

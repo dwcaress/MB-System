@@ -1,3 +1,4 @@
+
 /* Begin user code block <abstract> */
 /* End user code block <abstract> */
 
@@ -23,7 +24,6 @@
 /*
  * Motif required Headers
  */
-#include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <Xm/Xm.h>
 #include <Xm/DialogS.h>
@@ -82,6 +82,7 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
+    Boolean      argok=False;
     Widget   topLevelShell;
     Widget   mainWindow;
     
@@ -135,8 +136,8 @@ int main( int argc, char **argv)
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBnavadjust"); ac++;
     XtSetArg(args[ac], XmNiconName, "MBnavadjust"); ac++;
-    XtSetArg(args[ac], XmNx, 478); ac++;
-    XtSetArg(args[ac], XmNy, 224); ac++;
+    XtSetArg(args[ac], XmNx, 51); ac++;
+    XtSetArg(args[ac], XmNy, 22); ac++;
     XtSetArg(args[ac], XmNwidth, 962); ac++;
     XtSetArg(args[ac], XmNheight, 400); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",
