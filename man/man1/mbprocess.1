@@ -1,4 +1,4 @@
-.TH mbprocess 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbprocess 1 "15 March 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbprocess\fP - this program performs a 
 variety of swath data processing 
@@ -17,7 +17,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbprocess\fP \fB-I\fP\fIinfile\fP [\fB-F\fP\fIformat\fP  
-\fB-N\fP \fB-O\fP\fIoutfile\fP \fB-P -T -V -H\fP]
+\fB-N\fP \fB-O\fP\fIoutfile\fP \fB-P -S -T -V -H\fP]
 
 .SH DESCRIPTION
 The program \fBmbprocess\fP is a tool for 
@@ -846,6 +846,13 @@ This option puts \fBmbprocess\fP into a test mode. The program
 will report whether or not it would process a file, but it
 will not actually process the data or produce an output
 processed file.
+.TP
+.B \-S
+.br
+This option causes \fBmbprocess\fP to print out the status of
+each file (e.g. up to date, out of date, locked, unlocked) along
+with the file modification times used to determine if the output
+file is out of date.
 .TP
 .B \-V
 Normally, \fBmbprocess\fP works "silently" without outputting
