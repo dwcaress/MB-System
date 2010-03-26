@@ -330,7 +330,7 @@ The program will look for and use a parameter file with the \n\
 name \"infile.par\". If no parameter file exists, the program \n\
 will infer a reasonable processing path by looking for navigation\n\
 and mbedit edit save files.\n";
-	char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -T -V -H]";
+	char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -415,6 +415,7 @@ and mbedit edit save files.\n";
 	/* processing variables */
 	int	checkuptodate = MB_YES;
 	int	testonly = MB_NO;
+	int	printfilestatus = MB_NO;
 	int	read_datalist = MB_NO;
 	int	read_data = MB_NO;
 	char	read_file[MB_PATH_MAXLINE];
@@ -628,7 +629,7 @@ and mbedit edit save files.\n";
 	memset(&grid, 0, sizeof (struct mbprocess_grid_struct));
 	
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpTt")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -666,6 +667,11 @@ and mbedit edit save files.\n";
 		case 'P':
 		case 'p':
 			checkuptodate = MB_NO;
+			flag++;
+			break;
+		case 'S':
+		case 's':
+			printfilestatus = MB_YES;
 			flag++;
 			break;
 		case 'T':
@@ -797,6 +803,7 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"dbg2       timegap:         %f\n",timegap);
 	    fprintf(stderr,"dbg2       strip_comments:  %d\n",strip_comments);
 	    fprintf(stderr,"dbg2       checkuptodate:   %d\n",checkuptodate);
+	    fprintf(stderr,"dbg2       printfilestatus: %d\n",printfilestatus);
 	    fprintf(stderr,"dbg2       testonly:        %d\n",testonly);
 	    fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 	    }
@@ -1046,22 +1053,87 @@ and mbedit edit save files.\n";
 		string1, string2, string3, process.mbp_ifile, process.mbp_ofile);
 	    if (locked == MB_YES)
 		fprintf(stderr,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user, lock_cpu, lock_date);
-	    if (testonly == MB_YES || verbose > 0)
+	    if (testonly == MB_YES || verbose > 0 || printfilestatus == MB_YES)
 		{
 		if (outofdate == MB_YES)
 			fprintf(stderr,"\tFile Status: out of date\n");
 		else
 			fprintf(stderr,"\tFile Status: up to date\n");
-		fprintf(stderr,"\t\tModification times:\n");
-		fprintf(stderr,"\t\t\tInput file:                 %12d %12d <%s>\n", ifilemodtime, ofilemodtime - ifilemodtime, mbp_ifile);
-		fprintf(stderr,"\t\t\tParameter file:             %12d %12d <%s>\n", pfilemodtime, ofilemodtime - pfilemodtime, mbp_pfile);
-		fprintf(stderr,"\t\t\tNavigation file:            %12d %12d <%s>\n", navfilemodtime, ofilemodtime - navfilemodtime, process.mbp_navfile);
-		fprintf(stderr,"\t\t\tNavigation adjustment file: %12d %12d <%s>\n", navadjfilemodtime, ofilemodtime - navadjfilemodtime, process.mbp_navadjfile);
-		fprintf(stderr,"\t\t\tSonar depth file:           %12d %12d <%s>\n", attitudefilemodtime, ofilemodtime - attitudefilemodtime, process.mbp_attitudefile);
-		fprintf(stderr,"\t\t\tAttitude file:              %12d %12d <%s>\n", sonardepthfilemodtime, ofilemodtime - sonardepthfilemodtime, process.mbp_sonardepthfile);
-		fprintf(stderr,"\t\t\tEdit save file:             %12d %12d <%s>\n", esfmodtime, ofilemodtime - esfmodtime, process.mbp_editfile);
-		fprintf(stderr,"\t\t\tSVP file:                   %12d %12d <%s>\n", svpmodtime, ofilemodtime - svpmodtime, process.mbp_svpfile);
-		fprintf(stderr,"\t\t\tOutput file:                %12d %12d <%s>\n", ofilemodtime, ofilemodtime - ofilemodtime, mbp_ofile);
+		fprintf(stderr,"\t\tModification times and ages relative to the output file in seconds:\n");
+		mb_get_date_string(verbose, (double)ifilemodtime, dummy);
+		fprintf(stderr,"\t\t\tInput file:                 %s %12d <%s>\n", dummy, ofilemodtime - ifilemodtime, mbp_ifile);
+		if (pfilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)pfilemodtime, dummy);
+			fprintf(stderr,"\t\t\tParameter file:             %s %12d <%s>\n", dummy, ofilemodtime - pfilemodtime, mbp_pfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tParameter file:             None\n");
+			}
+		if (navfilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)navfilemodtime, dummy);
+			fprintf(stderr,"\t\t\tNavigation file:            %s %12d <%s>\n", dummy, ofilemodtime - navfilemodtime, process.mbp_navfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tNavigation file:            None\n");
+			}
+		if (navadjfilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)navadjfilemodtime, dummy);
+			fprintf(stderr,"\t\t\tNavigation adjustment file: %s %12d <%s>\n", dummy, ofilemodtime - navadjfilemodtime, process.mbp_navadjfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tNavigation adjustment file: None\n");
+			}
+		if (attitudefilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)attitudefilemodtime, dummy);
+			fprintf(stderr,"\t\t\tSonar depth file:           %s %12d <%s>\n", dummy, ofilemodtime - attitudefilemodtime, process.mbp_attitudefile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tSonar depth file:           None\n");
+			}
+		if (sonardepthfilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)sonardepthfilemodtime, dummy);
+			fprintf(stderr,"\t\t\tAttitude file:              %s %12d <%s>\n", dummy, ofilemodtime - sonardepthfilemodtime, process.mbp_sonardepthfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tAttitude file:              None\n");
+			}
+		if (esfmodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)esfmodtime, dummy);
+			fprintf(stderr,"\t\t\tEdit save file:             %s %12d <%s>\n", dummy, ofilemodtime - esfmodtime, process.mbp_editfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tEdit save file:             None\n");
+			}
+		if (svpmodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)svpmodtime, dummy);
+			fprintf(stderr,"\t\t\tSVP file:                   %s %12d <%s>\n", dummy, ofilemodtime - svpmodtime, process.mbp_svpfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tSVP file:                   None\n");
+			}
+		if (ofilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)ofilemodtime, dummy);
+			fprintf(stderr,"\t\t\tOutput file:                %s              <%s>\n", dummy, process.mbp_ofile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tOutput file:                None\n");
+			}
 		}
 
 	    /* reset proceedprocess if only testing */

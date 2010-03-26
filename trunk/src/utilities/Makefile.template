@@ -396,6 +396,10 @@ $(BINDIR)/mbsegypsd:	mbsegypsd.o $(LIBDIR)/libmbio.a $(PROJLIB) $(LIBDIR)/libmba
 	$(CC) $(CFLAGS) mbsegypsd.o $(LIBDIR)/libmbio.a $(PROJLIB) $(LIBDIR)/libmbaux.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(FFTWLIBDIR)/libfftw3.a \
 		$(LFLAGS) -o $(BINDIR)/mbsegypsd
+$(BINDIR)/mbprofilepsd:	mbprofilepsd.o $(LIBDIR)/libmbio.a $(PROJLIB) $(LIBDIR)/libmbaux.a
+	$(CC) $(CFLAGS) mbprofilepsd.o $(LIBDIR)/libmbio.a $(PROJLIB) $(LIBDIR)/libmbaux.a \
+		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a $(FFTWLIBDIR)/libfftw3.a \
+		$(LFLAGS) -o $(BINDIR)/mbprofilepsd
 
 ### compile the source files
 mbformat.o:	mbformat.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -479,3 +483,5 @@ mbsm20002gsf.o:	mbsm20002gsf.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INC
 	$(CC) -c $(CFLAGS) mbsm20002gsf.c
 mbsegypsd.o:	mbsegypsd.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) -I$(FFTWINCDIR) mbsegypsd.c
+mbprofilepsd.o:	mbprofilepsd.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) -I$(FFTWINCDIR) mbprofilepsd.c

@@ -2332,8 +2332,8 @@ do_update_naverr()
     			/ mbna_mtodeglon;
 			
 	/* get time difference */
-    	timediff = (project.files[mbna_file_id_1].sections[mbna_section_1].btime_d 
-		- project.files[mbna_file_id_2].sections[mbna_section_2].btime_d) / 86400.0;
+    	timediff = (project.files[mbna_file_id_2].sections[mbna_section_2].btime_d
+		- project.files[mbna_file_id_1].sections[mbna_section_1].btime_d) / 86400.0;
 
     	/* set main naverr status label */
 	crossing = &project.crossings[mbna_current_crossing];
@@ -3128,11 +3128,11 @@ do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbna_offset_x = mbna_misfit_offset_x 
 				    + (event->xbutton.x
 		    			- (corr_borders[0] + corr_borders[1]) / 2)
-		    			/ mbna_misfit_scale;
+		    			/ mbna_misfit_xscale;
 		    mbna_offset_y = mbna_misfit_offset_y
 				    - (event->xbutton.y
 		    			- (corr_borders[3] + corr_borders[2]) / 2)
-		    			/ mbna_misfit_scale;
+		    			/ mbna_misfit_yscale;
 	    	
 		    /* replot contours */
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_MOVE);
@@ -3160,11 +3160,11 @@ do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data)
 		mbna_offset_x = mbna_misfit_offset_x 
 				+ (event->xmotion.x
 		    			- (corr_borders[0] + corr_borders[1]) / 2)
-		    			/ mbna_misfit_scale;
+		    			/ mbna_misfit_xscale;
 		mbna_offset_y = mbna_misfit_offset_y
 				- (event->xmotion.y
 		    			- (corr_borders[3] + corr_borders[2]) / 2)
-		    			/ mbna_misfit_scale;
+		    			/ mbna_misfit_yscale;
 		
 		/* replot contours */
 		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_MOVE);
@@ -3205,7 +3205,7 @@ do_naverr_zcorr_input( Widget w, XtPointer client_data, XtPointer call_data)
 		mbna_offset_z = ((event->xbutton.x - zoff_borders[0]) 
 		    			/ mbna_zoff_scale_x) 
 					+ mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
-fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z);
+/* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
 	
 		/* recalculate minimum misfit at current z offset */
 		mbnavadjust_get_misfitxy();
@@ -3239,10 +3239,10 @@ fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z);
 		mbna_offset_z = ((event->xbutton.x - zoff_borders[0]) 
 		    			/ mbna_zoff_scale_x) 
 					+ mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
-fprintf(stderr,"buttonx:%d %f  mbna_misfit_offset_z:%f project.zoffsetwidth:%f  mbna_offset_z:%f\n",
+/* fprintf(stderr,"buttonx:%d %f  mbna_misfit_offset_z:%f project.zoffsetwidth:%f  mbna_offset_z:%f\n",
 event->xbutton.x,((event->xbutton.x - zoff_borders[0])/mbna_zoff_scale_x), mbna_misfit_offset_z,
 project.zoffsetwidth, mbna_offset_z);
-fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z);
+fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
 	
 		/* recalculate minimum misfit at current z offset */
 		mbnavadjust_get_misfitxy();
@@ -3462,7 +3462,7 @@ do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data)
 	mbna_offset_x = 0.0;
 	mbna_offset_y = 0.0;
 	mbna_offset_z = 0.0;
-fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z);
+/* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
 
 	/* recalculate minimum misfit at current z offset */
 	mbnavadjust_get_misfitxy();
@@ -3482,7 +3482,7 @@ do_naverr_zerozoffset( Widget w, XtPointer client_data, XtPointer call_data)
 		
 	/* move offset */
 	mbna_offset_z = 0.0;
-fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z);
+/* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
 	
 	/* recalculate minimum misfit at current z offset */
 	mbnavadjust_get_misfitxy();
@@ -3522,7 +3522,7 @@ do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data)
 	mbna_offset_x = mbna_minmisfit_x;
 	mbna_offset_y = mbna_minmisfit_y;
 	mbna_offset_z = mbna_minmisfit_z;
-fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z);
+/* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
 	
 	/* recalculate minimum misfit at current z offset */
 	mbnavadjust_get_misfitxy();
@@ -3548,7 +3548,7 @@ do_naverr_minxymisfit( Widget w, XtPointer client_data, XtPointer call_data)
 	mbna_offset_x = mbna_minmisfit_xh;
 	mbna_offset_y = mbna_minmisfit_yh;
 	mbna_offset_z = mbna_minmisfit_zh;
-fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z);
+/* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
 		
 	/* replot contours */
 	mbnavadjust_crossing_replot();
@@ -4730,7 +4730,7 @@ do_modelplot_block( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-fprintf(stderr,"Called do_modelplot_block\n");
+/* fprintf(stderr,"Called do_modelplot_block\n"); */
 
 	if (XmToggleButtonGetState(toggleButton_modelplot_block))
 	    {
@@ -4750,7 +4750,7 @@ do_modelplot_sequential( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-fprintf(stderr,"Called do_modelplot_sequential\n");
+/* fprintf(stderr,"Called do_modelplot_sequential\n"); */
 
 	if (XmToggleButtonGetState(toggleButton_modelplot_sequential))
 	    {

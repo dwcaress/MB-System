@@ -728,6 +728,7 @@ int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error);
 
 int mb_get_time(int verbose, int time_i[7], double *time_d);
 int mb_get_date(int verbose, double time_d, int time_i[7]);
+int mb_get_date_string(int verbose, double time_d, char *string);
 int mb_get_jtime(int verbose, int time_i[7], int time_j[5]);
 int mb_get_itime(int verbose, int time_j[5], int time_i[7]);
 int mb_fix_y2k(int verbose, int year_short, int *year_long);
