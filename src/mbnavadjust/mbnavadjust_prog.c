@@ -1247,6 +1247,7 @@ int mbnavadjust_read_project()
 	char	obuffer[BUFFER_MAX];
 	char	*result;
 	int	versionmajor, versionminor;
+	double	dummy;
 	int	nscan, idummy, jdummy;
 	int	i, j, k, l;
 
@@ -1706,6 +1707,24 @@ fprintf(stderr, "read failed on tie: %s\n", buffer);
 						}
 					tie->offset_z_m = 0.0;
 					tie->inversion_offset_z_m = 0.0;
+					}
+			    
+				/* reorder crossing to be early file first older file second if
+					file version prior to 3.00 */
+				if (versionmajor < 3)
+					{
+					idummy = tie->snav_1;
+					dummy = tie->snav_1_time_d;
+					tie->snav_1 = tie->snav_2;
+					tie->snav_1_time_d = tie->snav_2_time_d;
+					tie->snav_2 = idummy;
+					tie->snav_2_time_d = dummy;
+					tie->offset_x *= -1.0;
+					tie->offset_y *= -1.0;
+					tie->offset_z_m *= -1.0;
+					tie->inversion_offset_x *= -1.0;
+					tie->inversion_offset_y *= -1.0;
+					tie->inversion_offset_z_m *= -1.0;
 					}
 					
 				/* for version 2.0 or later read covariance */
@@ -3178,6 +3197,7 @@ int mbnavadjust_fixednav_file()
 			if (project.files[i].block == block)
 				{
 				project.files[i].status = MBNA_FILE_FIXEDNAV;
+				fprintf(stderr,"Set file to have fixed nav: %d %s\n",i,project.files[i].file);
 				}
 			}
 		if (project.inversion == MBNA_INVERSION_CURRENT)
@@ -3249,7 +3269,7 @@ int mbnavadjust_naverr_save()
 		    section->snav_num_ties[tie->snav_2]--;
 		    
 		    /* get new tie values */
-/*fprintf(stderr, "tie %d of crossing %d saved...\n", mbna_current_tie, mbna_current_crossing);*/
+/* fprintf(stderr, "tie %d of crossing %d saved...\n", mbna_current_tie, mbna_current_crossing); */
 		    tie->snav_1 = mbna_snav_1;
 		    tie->snav_1_time_d = mbna_snav_1_time_d;
 		    tie->snav_2 = mbna_snav_2;
@@ -3288,6 +3308,16 @@ int mbnavadjust_naverr_save()
 		
 		    /* write updated project */
 		    mbnavadjust_write_project();
+
+		    /* add info text */
+		    sprintf(message,"Save Tie Point %d of Crossing %d\n > Nav points: %d:%d:%d %d:%d:%d\n > Offsets: %f %f %f m\n",
+			    mbna_current_tie, mbna_current_crossing,
+			    crossing->file_id_1, crossing->section_1, tie->snav_1,
+			    crossing->file_id_2, crossing->section_2, tie->snav_2,
+			    tie->offset_x_m, tie->offset_y_m, tie->offset_z_m);
+		    if (mbna_verbose == 0)
+			    fprintf(stderr,"%s",message);
+		    do_info_add(message, MB_YES);
 		    }
 		}
 			
@@ -3983,6 +4013,8 @@ int mbnavadjust_naverr_addtie()
 				crossing->file_id_1, crossing->section_1, tie->snav_1,
 				crossing->file_id_2, crossing->section_2, tie->snav_2,
 				tie->offset_x_m, tie->offset_y_m, tie->offset_z_m);
+			if (mbna_verbose == 0)
+				fprintf(stderr,"%s",message);
 			do_info_add(message, MB_YES);
 
  			/* print output debug statements */
@@ -4083,6 +4115,8 @@ int mbnavadjust_naverr_deletetie()
 				crossing->file_id_1, crossing->section_1, tie->snav_1,
 				crossing->file_id_2, crossing->section_2, tie->snav_2,
 				tie->offset_x_m, tie->offset_y_m, tie->offset_z_m);
+			if (mbna_verbose == 0)
+				fprintf(stderr,"%s",message);
 			do_info_add(message, MB_YES);
 		    
 			/* reset tie counts for snavs */
@@ -4360,6 +4394,8 @@ int mbnavadjust_naverr_skip()
 			/* add info text */
 			sprintf(message,"Set crossing %d to be ignored\n",
 				mbna_current_crossing);
+			if (mbna_verbose == 0)
+				fprintf(stderr,"%s",message);
 			do_info_add(message, MB_YES);
   			}			
    		}
@@ -5777,8 +5813,8 @@ i, j, swath2->pings[i].bathlon[j], swath2->pings[i].bathlat[j], x, y, igx, igy);
 				    k2 = i2 + j2 * grid_nx;
 				    if (gridn1[k1] > 0 && gridn2[k2] > 0)
 					{
-					gridm[lc] += (grid2[k2] - grid1[k1] - zoff - mbna_offset_z)
-							* (grid2[k2] - grid1[k1] - zoff - mbna_offset_z);
+					gridm[lc] += (grid2[k2] - grid1[k1] + zoff - mbna_offset_z)
+							* (grid2[k2] - grid1[k1] + zoff - mbna_offset_z);
 					gridnm[lc]++;
 					}
 				    }
@@ -6916,6 +6952,8 @@ mbnavadjust_autopick()
 		sprintf(message,"Autopicking offsets...");
 		do_message_on(message);
 		sprintf(message,"Autopicking offsets.\n");
+		if (mbna_verbose == 0)
+		    fprintf(stderr,"%s",message);
 		do_info_add(message,MB_YES);
 		
 		/* loop over all crossings */

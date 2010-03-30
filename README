@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.1.3beta1844  March 30, 2010
   Version 5.1.3beta1843  March 29, 2010
   Version 5.1.3beta1829  February 5, 2010
 * Version 5.1.2          December 31, 2009
@@ -168,6 +169,12 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
+
+-----> 5.1.3beta1844
+
+Fixed yet another bug in MBnavadjust - this time getting the
+importation of old project files correct and, more importantly,
+getting the z-offset sign correct in the Naverr display.
 
 -----> 5.1.3beta1843
 
