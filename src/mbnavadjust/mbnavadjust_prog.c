@@ -1040,6 +1040,7 @@ int mbnavadjust_write_project()
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
 	char	datalist[STRING_MAX];
+	double	navlon1, navlon2, navlat1, navlat2;
 	int	i, j, k, l;
 
 	/* print input debug statements */
@@ -1217,6 +1218,46 @@ fprintf(stderr,"Writing project %s\n", project.name);
 			project.name, datalist);
 		do_info_add(message, MB_YES);
 		}
+
+	/* write mbgrdviz route file in which each tie point is a two point route
+		consisting of the connected snav points */
+	sprintf(datalist,"%s%s.rte",project.path,project.name);
+	if ((hfp = fopen(datalist,"w")) == NULL)
+		{
+		fclose(hfp);
+		status = MB_FAILURE;
+		error = MB_ERROR_OPEN_FAIL;
+		sprintf(message, " > Unable to open output tie route file %s\n", datalist);
+		do_info_add(message, MB_NO);
+		if (mbna_verbose == 0)
+			fprintf(stderr,"%s\n",message);
+		}
+	else
+		{
+		for (i=0;i<project.num_crossings;i++)
+		    {
+		    crossing = &project.crossings[i];
+
+		    /* check only set ties */
+		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
+		    for (j=0;j<crossing->num_ties;j++)
+			{
+			tie = (struct mbna_tie *) &crossing->ties[j];
+			navlon1 = project.files[crossing->file_id_1].sections[crossing->section_1].snav_lon[tie->snav_1]
+				+ project.files[crossing->file_id_1].sections[crossing->section_1].snav_lon_offset[tie->snav_1];
+			navlat1 = project.files[crossing->file_id_1].sections[crossing->section_1].snav_lat[tie->snav_1]
+				+ project.files[crossing->file_id_1].sections[crossing->section_1].snav_lat_offset[tie->snav_1];
+			navlon2 = project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon[tie->snav_2]
+				+ project.files[crossing->file_id_2].sections[crossing->section_2].snav_lon_offset[tie->snav_2];
+			navlat2 = project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat[tie->snav_2]
+				+ project.files[crossing->file_id_2].sections[crossing->section_2].snav_lat_offset[tie->snav_2];
+			fprintf(hfp,"%.7f %.7f 0.00 1\n%.7f %.7f 0.00 1\n>\n",
+				navlon1,navlat1,navlon2,navlat2);
+			}
+		    }
+		fclose(hfp);
+		}
+		
 
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -1521,7 +1562,7 @@ fprintf(stderr, "\n");
 						&section->snav_lat[k],
 						&section->snav_lon_offset[k],
 						&section->snav_lat_offset[k],
-						&section->snav_z_offset[k]);	
+						&section->snav_z_offset[k]);
 				    section->snav_num_ties[k] = 0;
 				    section->snav_lon_offset_int[k] = 0.0;
 				    section->snav_lat_offset_int[k] = 0.0;
@@ -1540,6 +1581,14 @@ fprintf(stderr, "\n");
 					{
 					status = MB_FAILURE;
 fprintf(stderr, "read failed on snav: %s\n", buffer);
+					}
+			    
+				    /* reverse offset values if older values */
+				    if (versionmajor < 3)
+					{
+				    	section->snav_lon_offset[k] *= -1.0;
+				    	section->snav_lat_offset[k] *= -1.0;
+				    	section->snav_z_offset[k] *= -1.0;
 					}
 				    }
 				section->global_start_ping = project.num_pings;
@@ -1719,12 +1768,12 @@ fprintf(stderr, "read failed on tie: %s\n", buffer);
 					tie->snav_1_time_d = tie->snav_2_time_d;
 					tie->snav_2 = idummy;
 					tie->snav_2_time_d = dummy;
-					tie->offset_x *= -1.0;
+/*					tie->offset_x *= -1.0;
 					tie->offset_y *= -1.0;
 					tie->offset_z_m *= -1.0;
 					tie->inversion_offset_x *= -1.0;
 					tie->inversion_offset_y *= -1.0;
-					tie->inversion_offset_z_m *= -1.0;
+					tie->inversion_offset_z_m *= -1.0;*/
 					}
 					
 				/* for version 2.0 or later read covariance */
@@ -7075,6 +7124,76 @@ tie->offset_z_m / (dsonardepth2 - dsonardepth1));
 				}
 			}
 			
+		/* write updated project */
+		mbnavadjust_write_project();
+		
+		/* turn off message dialog */
+		do_message_off();
+		}
+
+ 	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+
+int
+mbnavadjust_zerozoffsets()
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_zerozoffsets";
+	int	status = MB_SUCCESS;
+	struct 	mbna_crossing *crossing;
+	struct 	mbna_tie *tie;
+	int	i, j;
+
+ 	/* print input debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* loop over all crossings */
+    	if (project.open == MB_YES
+    		&& project.num_crossings > 0)
+    		{
+		/* set message dialog on */
+		sprintf(message,"Zeroing all z offsets...");
+		do_message_on(message);
+		sprintf(message,"Zeroing all z offsets.\n");
+		if (mbna_verbose == 0)
+		    fprintf(stderr,"%s",message);
+		do_info_add(message,MB_YES);
+		
+		/* loop over all crossings */
+		for (i=0;i<project.num_crossings;i++)
+			{
+			/* get structure */
+			crossing = &(project.crossings[i]);
+
+			/* deal with each tie */
+			for (j=0;j<crossing->num_ties;j++)
+				{
+				tie = &(crossing->ties[j]);
+				
+				/* zero the z offset */
+				tie->offset_z_m = 0.0;
+				
+				/* set inversion out of date */
+				if (project.inversion == MBNA_INVERSION_CURRENT)
+					project.inversion = MBNA_INVERSION_OLD;
+				}
+			}
 		/* write updated project */
 		mbnavadjust_write_project();
 		

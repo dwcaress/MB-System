@@ -4426,7 +4426,18 @@ do_action_analyzecrossings( Widget w, XtPointer client_data, XtPointer call_data
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 }
-
+/*--------------------------------------------------------------------*/
+void
+do_zerozoffsets( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    
+    mbnavadjust_zerozoffsets();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
+    do_update_status();
+}
 /*--------------------------------------------------------------------*/
 void
 do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data)

@@ -221,6 +221,7 @@ procedure do_view_showselectedsurveys();
 procedure do_view_showsurveys();
 procedure do_view_showties();
 procedure do_view_showtruecrossings();
+procedure do_zerozoffsets();
 
 list BaseStyle : arguments {
 };
@@ -399,8 +400,8 @@ object bulletinBoard_modelplot : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 115;
-        XmNy = 73;
+        XmNx = 83;
+        XmNy = 95;
         XmNwidth = 1014;
         XmNheight = 481;
     };
@@ -1037,8 +1038,8 @@ object form_controls : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 147;
-        XmNy = 97;
+        XmNx = 115;
+        XmNy = 71;
         XmNwidth = 635;
         XmNheight = 438;
     };
@@ -1390,8 +1391,8 @@ object form_about : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 147;
-        XmNy = 96;
+        XmNx = 116;
+        XmNy = 69;
         XmNwidth = 488;
         XmNheight = 484;
     };
@@ -1735,8 +1736,8 @@ object bulletinBoard_biases : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Heading & Roll Bias");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 146;
-        XmNy = 95;
+        XmNx = 117;
+        XmNy = 120;
         XmNwidth = 284;
         XmNheight = 446;
     };
@@ -2388,8 +2389,8 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 79;
-        XmNy = 48;
+        XmNx = 117;
+        XmNy = 69;
         XmNwidth = 935;
         XmNheight = 685;
     };
@@ -2520,7 +2521,7 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
         XmNx = 116;
-        XmNy = 71;
+        XmNy = 69;
         XmNwidth = 611;
         XmNheight = 530;
     };
@@ -2636,8 +2637,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 115;
-        XmNy = 253;
+        XmNx = 117;
+        XmNy = 95;
         XmNwidth = 311;
         XmNheight = 160;
     };
@@ -2716,8 +2717,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_ANY;
-        XmNx = 115;
-        XmNy = 146;
+        XmNx = 117;
+        XmNy = 93;
         XmNwidth = 542;
         XmNheight = 86;
     };
@@ -3423,6 +3424,31 @@ object separator11 : XmSeparator widget {
     };
 };
 
+object pushButton_zerozoffsets : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Zero All Z Offsets");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_zerozoffsets();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object separator16 : XmSeparator widget {
+    arguments {
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
 object pushButton_invertnav : XmPushButton widget {
     arguments {
         arguments Style_use;
@@ -3460,10 +3486,10 @@ object pushButton_applynav : XmPushButtonGadget widget {
 object pulldownMenu_action : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
+        XmNx = 192;
+        XmNy = 71;
         XmNwidth = 167;
-        XmNheight = 164;
+        XmNheight = 188;
     };
     controls {
          managed XmPushButton pushButton_poornav;
@@ -3474,6 +3500,8 @@ object pulldownMenu_action : XmPulldownMenu widget {
          managed XmSeparator separator10;
          managed XmPushButton pushButton_analyzecrossings;
          managed XmSeparator separator11;
+         managed XmPushButton pushButton_zerozoffsets;
+         managed XmSeparator separator16;
          managed XmPushButton pushButton_invertnav;
          managed XmPushButtonGadget pushButton_applynav;
     };
@@ -3767,7 +3795,7 @@ object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 51;
-        XmNy = 22;
+        XmNy = 44;
         XmNwidth = 962;
         XmNheight = 400;
     };
@@ -3796,7 +3824,7 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNtitle = "MBnavadjust";
 !(BX)        XmNiconName = "MBnavadjust";
 !(BX)        XmNx = 51;
-!(BX)        XmNy = 22;
+!(BX)        XmNy = 44;
 !(BX)        XmNwidth = 962;
 !(BX)        XmNheight = 400;
 !(BX)    };
