@@ -374,6 +374,8 @@ int mbview_updateprimarygridcell(int verbose, size_t instance,
 		/* update the cell value */
 		k = primary_ix * data->primary_ny + primary_jy;
 		data->primary_data[k] = value;
+		data->primary_stat_z[k/8] = data->primary_stat_z[k/8] & (255 - statmask[k%8]);
+		data->primary_stat_color[k/8] = data->primary_stat_color[k/8] & (255 - statmask[k%8]);
 		
 		/* calculate new derivative */
 		mbview_derivative(instance, primary_ix, primary_jy);
