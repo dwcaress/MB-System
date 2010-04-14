@@ -3855,29 +3855,29 @@ sonardepth_sonardepth[nsonardepth]);*/
 					{
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
-/*fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]);*/
+/* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
 						bathymetry->quality[i] = bathymetry->quality[i] & 15;
 						
 						/* phase or amplitude picks */
 						if (bathymetry->quality[i] & 8)
 							{
-/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
+/* fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]); */
 							bathymetry->quality[i] += 32;
-/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
 							}
 						else if (bathymetry->quality[i] & 4)
 							{
-/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
+/* fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]); */
 							bathymetry->quality[i] += 16;
-/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
 							}
 							
 						/* flagged by sonar */
-						if ((bathymetry->quality[i] & 3) == 0)
+						if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0)
 							{
 							bathymetry->quality[i] += 64;
 							}
-/*fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]);*/
+/* fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]); */
 						}
 					}
 					
@@ -4210,9 +4210,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 						soundspeed = bluefin->environmental[0].sound_speed;
 					else
 						soundspeed = 1500.0;
-/*fprintf(stderr,"roll:%f pitch:%f\n",bathymetry->roll,bathymetry->pitch);*/
+/* fprintf(stderr,"roll:%f pitch:%f\n",bathymetry->roll,bathymetry->pitch); */
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
+/* fprintf(stderr,"i:%d quality:%d range:%f\n",i,bathymetry->quality[i],bathymetry->range[i]); */
 						if ((bathymetry->quality[i] & 15) > 0)
 							{
 							alpha = RTD * (beamgeometry->angle_alongtrack[i] + bathymetry->pitch);
@@ -4230,10 +4231,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 							bathymetry->depth[i] = zz + sonardepth;
 							bathymetry->pointing_angle[i] = DTR * theta;
 							bathymetry->azimuth_angle[i] = DTR * phi;
-/*fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
 i,roll, bathymetry->roll,pitch, bathymetry->pitch,
 alpha,beta,theta,phi,
-bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							}
 						else
 							{
