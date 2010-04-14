@@ -471,6 +471,7 @@ void 	plot_string(double x, double y, double hgt, double angle, char *label);
 void	mbnavadjust_naverr_scale();
 void	mbnavadjust_naverr_plot(int plotmode);
 int	mbnavadjust_autopick();
+int	mbnavadjust_zerozoffsets();
 int	mbnavadjust_invertnav();
 int	mbnavadjust_applynav();
 int	mbnavadjust_interpolatesolution();
