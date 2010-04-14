@@ -215,8 +215,8 @@ int mbview_setsecondarygrid(int verbose, size_t instance,
 					error);
 		if (proj_status == MB_SUCCESS)
 			view->secondary_pj_init = MB_YES;
-fprintf(stderr,"SECONDARY GRID PROJECTION:%d %ld %s\n",
-view->secondary_pj_init,(size_t)view->secondary_pjptr,data->secondary_grid_projection_id);
+/*fprintf(stderr,"SECONDARY GRID PROJECTION:%d %ld %s\n",
+view->secondary_pj_init,(size_t)view->secondary_pjptr,data->secondary_grid_projection_id);*/
 			
 		/* quit if projection fails */
 		if (proj_status != MB_SUCCESS)

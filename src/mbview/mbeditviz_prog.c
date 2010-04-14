@@ -549,7 +549,9 @@ int mbeditviz_load_file(int ifile)
 	int	fstatus;
 	FILE	*afp;
 	mb_path	asyncfile;
+	mb_path	geffile;
 	char	buffer[MBP_FILENAMESIZE], *result;
+	char	command[MBP_FILENAMESIZE];
 	int	nread;
 
 	/* mbio read and write values */
@@ -573,9 +575,8 @@ int mbeditviz_load_file(int ifile)
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
 
-	int	esfmodtime = 0;
-	int	ofilemodtime = 0;
-	int	load_esf;
+	int	rawmodtime = 0;
+	int	gefmodtime = 0;
 	
 	double	mtodeglon, mtodeglat;
 	double	heading, sonardepth;
@@ -626,7 +627,7 @@ int mbeditviz_load_file(int ifile)
 		/* open the file for reading */
 		if (mbev_status == MB_SUCCESS)
 			{
-			/* use processed file if possible */
+			/* read processed file if available, raw otherwise (fbt if possible) */
 			if (file->processed_info_loaded == MB_YES)
 				strcpy(swathfile, file->process.mbp_ofile);
 			else
@@ -1032,51 +1033,36 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 			/* close the file */
 			mbev_status = mb_close(mbev_verbose,&imbio_ptr,&mbev_error);
 			
-			/* load bathymetry edits if needed - if raw file loaded or 
-				processed file is out of date */
-			load_esf = MB_NO;
-
-		    	/* load esf if no processed file exists */
-			if (file->processed_info_loaded == MB_NO)
+			/* if processed file read, then reset the beam edits to the original raw state
+				by reading in a global esf file from the raw file */
+			if (file->processed_info_loaded == MB_YES)
 				{
-				load_esf = MB_YES;
-				}
-				
-			/* load esf if processed file exists but is out of date */
-			else if (file->process.mbp_edit_mode != MBP_EDIT_OFF)
-				{
-		    		/* get mod time for the edit save file if needed */
-				if ((fstatus = stat(file->process.mbp_editfile, &file_status)) == 0
+		    		/* check if global edit file (*.gef) exists and is up to date */
+				if ((fstatus = stat(file->path, &file_status)) == 0
 					&& (file_status.st_mode & S_IFMT) != S_IFDIR)
-					esfmodtime = file_status.st_mtime;
+					rawmodtime = file_status.st_mtime;
 				  else
-					esfmodtime = 0;
-					
-				/* get mod time for the output file */
-				if ((fstatus = stat(file->process.mbp_ofile, &file_status)) == 0
+					rawmodtime = 0;
+				sprintf(geffile, "%s.gef", file->path);
+				if ((fstatus = stat(geffile, &file_status)) == 0
 					&& (file_status.st_mode & S_IFMT) != S_IFDIR)
-					ofilemodtime = file_status.st_mtime;
-				else
-					ofilemodtime = 0;
-
-				if (esfmodtime > ofilemodtime)
+					gefmodtime = file_status.st_mtime;
+				  else
+					gefmodtime = 0;
+				if (rawmodtime >= gefmodtime)
 					{
-					load_esf = MB_YES;
+					sprintf(command, "mbgetesf -I %s -M2 -O %s.gef", file->path, file->path);
+					fprintf(stderr,"Generating global edit file:\n\t%s\n",command);
+					system(command);
 					}
-				}
-if (mbev_verbose > 0)
-fprintf(stderr,"loaded swathfile:%s file->processed_info_loaded:%d file->process.mbp_edit_mode:%d load_esf:%d\n",
-swathfile,file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
-			
-			/* load bathymetry edits if needed */
-			if (load_esf == MB_YES)
-				{
-				/* load the esf */
-				mbev_status = mb_esf_load(mbev_verbose, file->path, MB_YES, MBP_ESF_NOWRITE,
-								file->esffile, &(file->esf), &mbev_error);
+				
+				/* now read and apply the global edits */
+				mbev_status = mb_esf_open(mbev_verbose, geffile, MB_YES, MBP_ESF_NOWRITE,
+							&(file->esf), &mbev_error);
 				if (mbev_status == MB_SUCCESS)
 					{
 					file->esf_open = MB_YES;
+fprintf(stderr,"%d global beam states read from %s...\n",file->esf.nedit,geffile);
 					}
 				else
 					{
@@ -1084,7 +1070,59 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode,load_esf);
 					mbev_status = MB_SUCCESS;
 					mbev_error = MB_ERROR_NO_ERROR;
 					}
-					
+				if (file->esf_open == MB_YES)
+					{
+					/* loop over pings applying edits */
+					do_mbeditviz_message_on("MBeditviz is applying original beam states...");
+fprintf(stderr,"MBeditviz is applying %d original beam states\n",file->esf.nedit);
+					for (iping=0;iping<file->num_pings;iping++)
+						{
+						ping = &(file->pings[iping]);
+
+						/* apply edits for this ping */
+						mb_esf_apply(mbev_verbose, &(file->esf), 
+		    					    ping->time_d, ping->multiplicity, ping->beams_bath, 
+							    ping->beamflag, &mbev_error);
+						for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
+							ping->beamflagorg[ibeam] = ping->beamflag[ibeam];
+
+						/* update message every 250 records */
+						if (iping % 250 == 0)
+							{
+							sprintf(message, "MBeditviz: global edits applied to %d of %d records so far...", 
+								iping, file->num_pings);
+							do_mbeditviz_message_on(message);
+							}
+						}
+
+					/* close the esf */
+					if (file->esf_open == MB_YES)
+						{
+						mb_esf_close(mbev_verbose, &file->esf, &mbev_error);
+						file->esf_open = MB_NO;
+						}
+					}
+				}
+			
+if (mbev_verbose > 0)
+fprintf(stderr,"loaded swathfile:%s file->processed_info_loaded:%d file->process.mbp_edit_mode:%d\n",
+swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
+			
+			/* attempt to load bathymetry edits */
+			mbev_status = mb_esf_load(mbev_verbose, file->path, MB_YES, MBP_ESF_NOWRITE,
+							file->esffile, &(file->esf), &mbev_error);
+			if (mbev_status == MB_SUCCESS)
+				{
+				file->esf_open = MB_YES;
+				}
+			else
+				{
+				file->esf_open = MB_NO;
+				mbev_status = MB_SUCCESS;
+				mbev_error = MB_ERROR_NO_ERROR;
+				}
+			if (file->esf_open == MB_YES)
+				{
 				/* loop over pings applying edits */
 				do_mbeditviz_message_on("MBeditviz is applying saved edits...");
 				for (iping=0;iping<file->num_pings;iping++)
@@ -2754,7 +2792,6 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 							mbev_grid.val[kk] = mbev_grid.nodatavalue;
 							mbev_grid.sgm[kk] = mbev_grid.nodatavalue;
 							}
-							
 						/* update grid in mbview display */
 						mbview_updateprimarygridcell(mbev_verbose, 0, ii, jj, mbev_grid.val[kk], &mbev_error);
 						}
@@ -3810,9 +3847,8 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	int	action;
-/*if (flush !=  MB3DSDG_EDIT_NOFLUSH)
-fprintf(stderr,"mbeditviz_mb3dsoundings_edit:%d %d %d beamflag:%d flush:%d\n", 
-ifile, iping, ibeam, beamflag, flush);*/
+/* fprintf(stderr,"mbeditviz_mb3dsoundings_edit:%d %d %d beamflag:%d flush:%d\n", 
+ifile, iping, ibeam, beamflag, flush); */
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -3924,8 +3960,8 @@ ifile, iping, ibeam);
 	/* generate info string */
 	file = &mbev_files[ifile];
 	ping = &(file->pings[iping]);
-	sprintf(infostring,"File:%s\n\tPing %d of %d\n\tPing Time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f\n",
-		file->name,iping,file->num_pings,ping->time_i[0],ping->time_i[1],ping->time_i[2],
+	sprintf(infostring,"Beam %d of %d   Ping %d of %d   File:%s\nPing Time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f",
+		ibeam,ping->beams_bath,iping,file->num_pings,file->name,ping->time_i[0],ping->time_i[1],ping->time_i[2],
 		ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],ping->time_d);
 		
 	/* print output debug statements */

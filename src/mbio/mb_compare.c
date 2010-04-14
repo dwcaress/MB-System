@@ -48,6 +48,7 @@
  *
  */
 #include <stdio.h>
+#include <math.h>
 
 /* mbio include files */
 #include "../../include/mb_define.h"
@@ -93,7 +94,20 @@ int mb_edit_compare(void *a, void *b)
 	aa = (struct mb_edit_struct *) a;
 	bb = (struct mb_edit_struct *) b;
 	
-	if (aa->time_d > bb->time_d)
+/*if (fabs(aa->time_d - bb->time_d) < MB_ESF_MAXTIMEDIFF && aa->time_d != bb->time_d)
+{
+fprintf(stderr,"aa:%.7f bb:%.7f diff:%g\n",aa->time_d,bb->time_d,aa->time_d - bb->time_d);
+}*/
+	if (fabs(aa->time_d - bb->time_d) < MB_ESF_MAXTIMEDIFF)
+		{
+		if (aa->beam > bb->beam)
+			return(1);
+		else if (aa->beam < bb->beam)
+			return(-1);
+		else
+			return(0);
+		}
+	else if (aa->time_d > bb->time_d)
 		return(1);
 	else
 		return(-1);

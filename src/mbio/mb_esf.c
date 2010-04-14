@@ -348,14 +348,21 @@ esf->edit[i].action,esf->edit[i].use);*/
 			/* reset message */
 			if (verbose > 0)
 				fprintf(stderr, "Sorting %d old edits...\n", esf->nedit);
+				
+			/* first round all timestamps to the nearest 0.1 millisecond to avoid
+				comparison errors during sorting */
+			/* for (i=0;i<esf->nedit;i++)
+			    {
+			    esf->edit[i].time_d = 0.0001 * floor(10000.0 * esf->edit[i].time_d + 0.5);
+			    } */
 			
 			/* now sort the edits */
 			mb_mergesort((char *)esf->edit, esf->nedit, 
 					sizeof(struct mb_edit_struct), mb_edit_compare);
-/*for (i=0;i<esf->nedit;i++)
+/* for (i=0;i<esf->nedit;i++)
 fprintf(stderr,"EDITS SORTED: i:%d edit: %f %d %d  use:%d\n",
 i,esf->edit[i].time_d,esf->edit[i].beam,
-esf->edit[i].action,esf->edit[i].use);*/
+esf->edit[i].action,esf->edit[i].use); */
 			}
 		    }
 	    	}
