@@ -81,7 +81,7 @@ int main (int argc, char **argv)
 	/* id variables */
 	char program_name[] = "mbgetest";
 	char help_message[] =  "mbgetesf reads a multibeam data file and writes out\nan edit save file which can be applied to other data files\ncontaining the same data (but presumably in a different\nstate of processing).  This allows editing of one data file to\nbe transferred to another with ease.  The programs mbedit and\nmbprocess can be used to apply the edit events to another file.";
-	char usage_message[] = "mbgetesf [-Fformat -Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Sspeed -Iinfile -Oesffile -V -H]";
+	char usage_message[] = "mbgetesf [-Fformat -Iinfile -Mmode -Oesffile -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -187,7 +187,7 @@ int main (int argc, char **argv)
 	strcpy (ifile, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:E:F:f:I:i:K:k:M:m:O:o:S:s:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhB:b:E:F:f:I:i:K:k:M:m:O:o:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -238,11 +238,6 @@ int main (int argc, char **argv)
 		case 'o':
 			sscanf (optarg,"%s", sofile);
 			sofile_set = MB_YES;
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf (optarg,"%lf", &speedmin);
 			flag++;
 			break;
 		case '?':
@@ -481,7 +476,7 @@ int main (int argc, char **argv)
 		    else if (mb_beam_check_flag_null(beamflag[i]))
 			{
 			beam_null++;
-			if (mode == MBGETESF_FLAGNULL)
+			if (mode == MBGETESF_FLAGNULL || mode == MBGETESF_ALL)
 			    {
 			    mbgetesf_save_edit(verbose, sofp, time_d, i, 
 						MBP_EDIT_ZERO, &error);
