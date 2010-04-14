@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.1.3beta1851  April 14, 2010
   Version 5.1.3beta1844  March 30, 2010
   Version 5.1.3beta1843  March 29, 2010
   Version 5.1.3beta1829  February 5, 2010
@@ -169,6 +170,31 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
+
+-----> 5.1.3beta1851
+
+Fixed problem where mb7kpreprocess made beams that should have been null 
+valid but flagged.
+
+Fixed bug that caused mbclean to fail to actually flag some beams 
+identified for flagging.
+
+Added button to zero all z offsets on crossings for cases where tidal 
+corrections have been made before data were imported into a mbnavadjust 
+project.
+
+Fixed mbgetesf manual page.
+
+Fixed mode control in mbgetesf so one can extract the complete beam flag 
+state from a swath file. MBgetesf is now used by MBeditviz to get the 
+original beam flag state of raw swath bathymetry when processed files 
+are read.
+
+Fixed sorting of beamflag edit events in edit save file data as used by 
+MBedit, MBeditviz, MBclean, MBareaclean, and MBprocess. This fixes a 
+problem wherein some edits performed by MBeditviz were dropped by 
+MBprocess. Also, MBgetesf is now used by MBeditviz to get the original 
+beam flag state of raw swath bathymetry when processed files are read.
 
 -----> 5.1.3beta1844
 
