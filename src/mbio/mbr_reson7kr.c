@@ -5256,8 +5256,7 @@ i,bluefin->nav[i].s7kTime.Hours,bluefin->nav[i].s7kTime.Minutes,bluefin->nav[i].
 					bluefin->nav[i].position_time = time_d;
 					bluefin->nav[i].depth_time = time_d;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"    %12f\n",
-time_d);
+fprintf(stderr,"    %12f\n",time_d);
 #endif
 					}
 				}

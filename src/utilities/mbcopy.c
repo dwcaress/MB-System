@@ -404,6 +404,7 @@ int main (int argc, char **argv)
 	FILE	*fp;
 	char	*result;
 	int	format;
+	double	seconds;
 	int	i, j;
 
 	char	*ctime();
@@ -427,10 +428,11 @@ int main (int argc, char **argv)
 		{
 		case 'B':
 		case 'b':
-			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+			sscanf (optarg,"%d/%d/%d/%d/%d/%lf",
 				&btime_i[0],&btime_i[1],&btime_i[2],
-				&btime_i[3],&btime_i[4],&btime_i[5]);
-			btime_i[6] = 0;
+				&btime_i[3],&btime_i[4],&seconds);				
+			btime_i[5] = (int)floor(seconds);
+			btime_i[6] = 1000000 * (seconds - btime_i[5]);
 			flag++;
 			break;
 		case 'C':
@@ -446,10 +448,11 @@ int main (int argc, char **argv)
 			break;
 		case 'E':
 		case 'e':
-			sscanf (optarg,"%d/%d/%d/%d/%d/%d",
+			sscanf (optarg,"%d/%d/%d/%d/%d/%lf",
 				&etime_i[0],&etime_i[1],&etime_i[2],
-				&etime_i[3],&etime_i[4],&etime_i[5]);
-			etime_i[6] = 0;
+				&etime_i[3],&etime_i[4],&seconds);
+			etime_i[5] = (int)floor(seconds);
+			etime_i[6] = 1000000 * (seconds - btime_i[5]);
 			flag++;
 			break;
 		case 'F':

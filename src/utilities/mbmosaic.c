@@ -2161,7 +2161,6 @@ ib,ss[ib],ssacrosstrack[ib],ssalongtrack[ib],sslon[ib],sslat[ib]);*/
 	/***** do second pass gridding *****/
 	if (grid_mode == MBMOSAIC_AVERAGE)
 	{
-
 	/* initialize arrays */
 	for (i=0;i<gxdim;i++)
 		for (j=0;j<gydim;j++)
@@ -4110,7 +4109,6 @@ int mbmosaic_get_footprint(
 	int	status = MB_SUCCESS;
 	double	r;
 	double	theta, phi, thetap, phip;
-	double	pitch, roll, pitchp, rollp;
 	int	i;
 
 	/* print input debug statements */
@@ -4132,39 +4130,33 @@ int mbmosaic_get_footprint(
 	/* calculate footprint location in sonar coordinates */
 	r = sqrt(altitude * altitude + acrosstrack * acrosstrack + alongtrack * alongtrack);
 	mb_xyz_to_takeoff(verbose, acrosstrack, alongtrack, altitude, &theta, &phi, error);
-	mb_takeoff_to_rollpitch(verbose, theta, phi, &pitch, &roll, error);
-	/* z = r * cos(DTR * thetap); */
 	
-	pitchp = pitch - 0.5 * beamwidth_ltrack;
-	rollp = roll - 0.5 * beamwidth_xtrack;
-	mb_rollpitch_to_takeoff(verbose, pitchp, rollp, &thetap, &phip, error);
+	phip = phi - 0.5 * beamwidth_ltrack;
+	thetap = theta - 0.5 * beamwidth_xtrack;
 	if (mode == MBMOSAIC_FOOTPRINT_REAL)
 		footprint->x[0] = r * sin(DTR * thetap) * cos(DTR * phip);
 	else
 		footprint->x[0] = acrosstrack - 0.5 * acrosstrack_spacing;
 	footprint->y[0] = r * sin(DTR * thetap) * sin(DTR * phip);
 	
-	pitchp = pitch - 0.5 * beamwidth_ltrack;
-	rollp = roll + 0.5 * beamwidth_xtrack;
-	mb_rollpitch_to_takeoff(verbose, pitchp, rollp, &thetap, &phip, error);
+	phip = phi - 0.5 * beamwidth_ltrack;
+	thetap = theta + 0.5 * beamwidth_xtrack;
 	if (mode == MBMOSAIC_FOOTPRINT_REAL)
 		footprint->x[1] = r * sin(DTR * thetap) * cos(DTR * phip);
 	else
 		footprint->x[1] = acrosstrack + 0.5 * acrosstrack_spacing;
 	footprint->y[1] = r * sin(DTR * thetap) * sin(DTR * phip);
 	
-	pitchp = pitch + 0.5 * beamwidth_ltrack;
-	rollp = roll + 0.5 * beamwidth_xtrack;
-	mb_rollpitch_to_takeoff(verbose, pitchp, rollp, &thetap, &phip, error);
+	phip = phi + 0.5 * beamwidth_ltrack;
+	thetap = theta + 0.5 * beamwidth_xtrack;
 	if (mode == MBMOSAIC_FOOTPRINT_REAL)
 		footprint->x[2] = r * sin(DTR * thetap) * cos(DTR * phip);
 	else
 		footprint->x[2] = acrosstrack + 0.5 * acrosstrack_spacing;
 	footprint->y[2] = r * sin(DTR * thetap) * sin(DTR * phip);
 	
-	pitchp = pitch + 0.5 * beamwidth_ltrack;
-	rollp = roll - 0.5 * beamwidth_xtrack;
-	mb_rollpitch_to_takeoff(verbose, pitchp, rollp, &thetap, &phip, error);
+	phip = phi + 0.5 * beamwidth_ltrack;
+	thetap = theta - 0.5 * beamwidth_xtrack;
 	if (mode == MBMOSAIC_FOOTPRINT_REAL)
 		footprint->x[3] = r * sin(DTR * thetap) * cos(DTR * phip);
 	else
