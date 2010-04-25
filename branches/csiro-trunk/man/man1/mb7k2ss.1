@@ -1,4 +1,4 @@
-.TH mb7k2ss 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mb7k2ss 1 "29 March 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7k2ss\fP - extracts sidescan sonar
 data from Reson 7k format data, bins and lays the sidescan
@@ -10,7 +10,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmb7k2ss\fP [\fB-A\fItype\fP 
-\fB-B\fP\fIbottompickmode/bottompickthreshold\fP \fB-C\fP 
+\fB-B\fP\fIbottompickmode/bottompickthreshold\fP \fB-C\fP \fB-D\fP\fIinterpbins\fP
 \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-L\fP\fIstartline/lineroot\fP 
 \fB-M -O\fP\fIoutfile\fP \fB-R\fP\fIroutefile\fP 
 \fB-T\fP\fItopogridfile\fP \fB-U\fP\fIrangethreshold\fP \fB-X -H -V\fP]
@@ -102,6 +102,13 @@ Default: fIbottompickmode\fP = 1.
 .br
 This option causes  \fBmb7k2ss\fP to print out any comment records
 encountered in the input Reson 7k data.
+.TP
+.B \-D
+\fIinterpbins\fP
+.br
+Causes interpolation over gaps in the output sidescan resulting from draping
+the sidescan on topography. The \fIinterpbins\fP values sets the maximum
+gap size over which interpolation will be applied.
 .TP
 .B \-F
 \fIformat\fP

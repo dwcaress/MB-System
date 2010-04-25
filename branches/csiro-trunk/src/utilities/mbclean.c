@@ -1804,14 +1804,11 @@ int main (int argc, char **argv)
 		    ping[j].beams_bath = ping[j+1].beams_bath;
 		    for (i=0;i<ping[j].beams_bath;i++)
 			{
-			ping[j].beamflag[i] = 
-				ping[j+1].beamflag[i];
-			ping[j].bath[i] = 
-				ping[j+1].bath[i];
-			ping[j].bathacrosstrack[i] = 
-				ping[j+1].bathacrosstrack[i];
-			ping[j].bathalongtrack[i] = 
-				ping[j+1].bathalongtrack[i];
+			ping[j].beamflag[i] = ping[j+1].beamflag[i];
+			ping[j].beamflagorg[i] = ping[j+1].beamflagorg[i];
+			ping[j].bath[i] = ping[j+1].bath[i];
+			ping[j].bathacrosstrack[i] = ping[j+1].bathacrosstrack[i];
+			ping[j].bathalongtrack[i] = ping[j+1].bathalongtrack[i];
 			}
 		    }
 		}

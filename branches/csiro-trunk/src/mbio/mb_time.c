@@ -254,6 +254,50 @@ int mb_get_date(int verbose, double time_d, int time_i[7])
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/* 	function mb_get_date_string returns a string formated as:
+ *          yyyy/mm/dd:hh:mm:ss.ssssss
+ * 	from the number of seconds after 1/1/70 00:00:0 */
+int mb_get_date_string(int verbose, double time_d, char *string)
+{
+
+	char	*function_name = "mb_get_date_string";
+	int	status;
+	int	time_i[7];
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
+		fprintf(stderr,"dbg2       time_d:  %f\n",time_d);
+		}
+
+	/* get the date */
+	mb_get_date(verbose, time_d, time_i);
+	sprintf(string, "%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d",
+		time_i[0], time_i[1], time_i[2], time_i[3], 
+		time_i[4], time_i[5], time_i[6]);
+
+	/* assume success */
+	status = MB_SUCCESS;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\nMBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       string: %s\n",string);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return success */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 /* 	function mb_get_jtime returns the day of year calculated 
  *	from (yy/mm/dd/hr/mi/sc). */
 int mb_get_jtime(int verbose, int time_i[7], int time_j[5])

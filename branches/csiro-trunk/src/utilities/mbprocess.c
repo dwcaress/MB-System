@@ -338,7 +338,7 @@ The program will look for and use a parameter file with the \n\
 name \"infile.par\". If no parameter file exists, the program \n\
 will infer a reasonable processing path by looking for navigation\n\
 and mbedit edit save files.\n";
-	char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -T -V -H]";
+	char usage_message[] = "mbprocess -Iinfile [-C -Fformat -N -Ooutfile -P -S -T -V -H]";
 
 	/* parsing variables */
 	extern char *optarg;
@@ -423,6 +423,7 @@ and mbedit edit save files.\n";
 	/* processing variables */
 	int	checkuptodate = MB_YES;
 	int	testonly = MB_NO;
+	int	printfilestatus = MB_NO;
 	int	read_datalist = MB_NO;
 	int	read_data = MB_NO;
 	char	read_file[MB_PATH_MAXLINE];
@@ -430,6 +431,7 @@ and mbedit edit save files.\n";
 	int	look_processed = MB_DATALIST_LOOK_NO;
 	double	file_weight;
 	int	proceedprocess= MB_NO;
+	int	outofdate = MB_NO;
 	double	time_d_lastping = 0.0;
 	int	ifilemodtime = 0;
 	int	ofilemodtime = 0;
@@ -440,6 +442,16 @@ and mbedit edit save files.\n";
 	int	sonardepthfilemodtime = 0;
 	int	esfmodtime = 0;
 	int	svpmodtime = 0;
+	char	str_process_yes[] = "**: Data processed";
+	char	str_process_no[] = "--: Data not processed";
+	char	str_process_yes_test[] = "Data processed (test-only mode)";
+	char	str_process_no_test[] = "Data not processed (test-only mode)";
+	char	str_outofdate_yes[] = "out of date";
+	char	str_outofdate_overridden[] = "up to date but overridden";
+	char	str_outofdate_no[] = "up to date";
+	char	str_locked_yes[] = "locked";
+	char	str_locked_fail[] = "unlocked but set lock failed";
+	char	str_locked_no[] = "unlocked";
  	int	format = 0;
 	int	variable_beams;
 	int	traveltime;
@@ -584,6 +596,7 @@ and mbedit edit save files.\n";
 	struct mbprocess_grid_struct grid;
 
 	char	buffer[MBP_FILENAMESIZE], dummy[MBP_FILENAMESIZE], *result;
+	char	*string1, *string2, *string3;
 	double	factor;
 	int	pingmultiplicity;
 	int	nbeams;
@@ -638,7 +651,7 @@ and mbedit edit save files.\n";
 	memset(&grid, 0, sizeof (struct mbprocess_grid_struct));
 	
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpTt")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:NnO:o:PpSsTt")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -676,6 +689,11 @@ and mbedit edit save files.\n";
 		case 'P':
 		case 'p':
 			checkuptodate = MB_NO;
+			flag++;
+			break;
+		case 'S':
+		case 's':
+			printfilestatus = MB_YES;
 			flag++;
 			break;
 		case 'T':
@@ -807,6 +825,7 @@ and mbedit edit save files.\n";
 	    fprintf(stderr,"dbg2       timegap:         %f\n",timegap);
 	    fprintf(stderr,"dbg2       strip_comments:  %d\n",strip_comments);
 	    fprintf(stderr,"dbg2       checkuptodate:   %d\n",checkuptodate);
+	    fprintf(stderr,"dbg2       printfilestatus: %d\n",printfilestatus);
 	    fprintf(stderr,"dbg2       testonly:        %d\n",testonly);
 	    fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 	    }
@@ -863,175 +882,286 @@ and mbedit edit save files.\n";
 	    process.mbp_ofile[len] = '\0';
 	    strcat(process.mbp_ofile,mbp_ofile);
 	    }
+
+	/* get mod time for the input file */
+	ifilemodtime = 0;
+	if ((fstat = stat(mbp_ifile, &file_status)) == 0
+	    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+	    {
+ 	    ifilemodtime = file_status.st_mtime;
+	    }
+
+	/* check for existing parameter file */
+	pfilemodtime = 0;
+	sprintf(mbp_pfile, "%s.par", mbp_ifile);
+	if ((fstat = stat(mbp_pfile, &file_status)) == 0
+	    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+	    {
+	    pfilemodtime = file_status.st_mtime;
+	    }
 	    
 	/* skip if processing cannot be inferred */
 	if (status == MB_FAILURE)
 	    {
 	    proceedprocess = MB_NO;
 	    if (verbose > 0 || testonly == MB_YES)
-	    	fprintf(stderr,"Data skipped - processing unknown: %s\n",
-			mbp_ifile);
+	    fprintf(stderr,"Data skipped - processing unknown: %s\n",
+	    	mbp_ifile);
 	    }
 
-	/* check for up to date if required */
-	else if (checkuptodate == MB_YES)
+	    
+	/* skip if input file can't be read */
+	else if (ifilemodtime == 0)
+	    {
+	    proceedprocess = MB_NO;
+	    if (verbose > 0 || testonly == MB_YES)
+	    fprintf(stderr,"Data skipped - input file cannot be read: %s\n",
+	    	mbp_ifile);
+	    }
+	    
+	/* skip if parameter file can't be read */
+	else if (pfilemodtime == 0)
+	    {
+	    proceedprocess = MB_NO;
+	    if (verbose > 0 || testonly == MB_YES)
+	    fprintf(stderr,"Data skipped - parameter file cannot be read: %s\n",
+	    	mbp_pfile);
+	    }
+	/* check for up to date */
+	else
+	    {
+	    /* initialize file modification times as 0, update if they exist */
+	    ofilemodtime = 0;
+	    navfilemodtime = 0;
+	    navadjfilemodtime = 0;
+	    attitudefilemodtime = 0;
+	    sonardepthfilemodtime = 0;
+	    esfmodtime = 0;
+	    svpmodtime = 0;
+
+	    /* get mod time for the output file */
+	    if ((fstat = stat(process.mbp_ofile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		ofilemodtime = file_status.st_mtime;
+
+	    /* get mod time for the navigation file if needed */
+	    if (process.mbp_nav_mode != MBP_NAV_OFF
+		&& (fstat = stat(process.mbp_navfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		navfilemodtime = file_status.st_mtime;
+
+	    /* get mod time for the navigation adjustment file if needed */
+	    if (process.mbp_navadj_mode != MBP_NAVADJ_OFF
+		&& (fstat = stat(process.mbp_navadjfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		navadjfilemodtime = file_status.st_mtime;
+
+	    /* get mod time for the attitude file if needed */
+	    if (process.mbp_attitude_mode != MBP_ATTITUDE_OFF
+		&& (fstat = stat(process.mbp_attitudefile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		attitudefilemodtime = file_status.st_mtime;
+
+	    /* get mod time for the sonardepth file if needed */
+	    if (process.mbp_sonardepth_mode != MBP_SONARDEPTH_OFF
+		&& (fstat = stat(process.mbp_sonardepthfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		sonardepthfilemodtime = file_status.st_mtime;
+
+	    /* get mod time for the edit save file if needed */
+	    if (process.mbp_edit_mode != MBP_EDIT_OFF
+		&& (fstat = stat(process.mbp_editfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		esfmodtime = file_status.st_mtime;
+
+	    /* get mod time for the svp file if needed */
+	    if (process.mbp_svp_mode != MBP_SVP_OFF
+		&& (fstat = stat(process.mbp_svpfile, &file_status)) == 0
+		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		svpmodtime = file_status.st_mtime;
+
+	    /* now check if processed file is out of date */
+	    if (ofilemodtime > 0
+		    && ofilemodtime >= ifilemodtime
+		    && ofilemodtime >= pfilemodtime
+		    && ofilemodtime >= navfilemodtime
+		    && ofilemodtime >= navadjfilemodtime
+		    && ofilemodtime >= attitudefilemodtime
+		    && ofilemodtime >= sonardepthfilemodtime
+		    && ofilemodtime >= esfmodtime
+		    && ofilemodtime >= svpmodtime)
+		outofdate = MB_NO;
+	    else
+	    	outofdate = MB_YES;
+
+	    /* deal with information */
+	    if (outofdate == MB_YES || checkuptodate == MB_NO)
 		{
-		/* check for existing parameter file */
-		sprintf(mbp_pfile, "%s.par", mbp_ifile);
-	        if ((fstat = stat(mbp_pfile, &file_status)) == 0
-			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
+		/* not testing - do it for real */
+		if (testonly == MB_NO)
+		    {
+		    /* want to process, now try to set a lock of the file to be processed */
+		    lock_status = mb_pr_lockswathfile(verbose, process.mbp_ifile, 
+					    MBP_LOCK_PROCESS, program_name, &lock_error);
+		    if (lock_status == MB_SUCCESS)
 			{
 			proceedprocess = MB_YES;
-			pfilemodtime = file_status.st_mtime;
+			locked = MB_NO;
 			}
-		else
+		    else if (lock_error == MB_ERROR_FILE_LOCKED)
 			{
 			proceedprocess = MB_NO;
-	    		if (verbose > 0 || testonly == MB_YES)
-	    			fprintf(stderr,"Data skipped - no parameter file: %s\n",
-					mbp_pfile);
+			lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked,
+							&lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &lock_error);
 			}
-
-		/* get mod time for the input file */
-		if ((fstat = stat(mbp_ifile, &file_status)) == 0
-			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
-			{
- 			ifilemodtime = file_status.st_mtime;
-			}
-		else
+		    else if (lock_error == MB_ERROR_OPEN_FAIL)
 			{
 			proceedprocess = MB_NO;
-	    		if (verbose > 0 || testonly == MB_YES)
-	    			fprintf(stderr,"Data skipped - no input file: %s\n",
-					process.mbp_ifile);
+			locked = MB_NO;
 			}
+		    }
 
-		/* if input and parameter files found check output and dependencies */
-		if (proceedprocess == MB_YES)
+		/* else only testing */
+		else
 		    {
-		    /* get mod time for the output file */
-		    if ((fstat = stat(process.mbp_ofile, &file_status)) == 0
-			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			    ofilemodtime = file_status.st_mtime;
-		    else
-			    ofilemodtime = 0;
-    
-		    /* get mod time for the navigation file if needed */
-		    if (process.mbp_nav_mode != MBP_NAV_OFF
-			    && (fstat = stat(process.mbp_navfile, &file_status)) == 0
-			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			    navfilemodtime = file_status.st_mtime;
-		    else
-			    navfilemodtime = 0;
-    
-		    /* get mod time for the navigation adjustment file if needed */
-		    if (process.mbp_navadj_mode != MBP_NAVADJ_OFF
-			    && (fstat = stat(process.mbp_navadjfile, &file_status)) == 0
-			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			    navadjfilemodtime = file_status.st_mtime;
-		    else
-			    navadjfilemodtime = 0;
-    
-		    /* get mod time for the attitude file if needed */
-		    if (process.mbp_attitude_mode != MBP_ATTITUDE_OFF
-			    && (fstat = stat(process.mbp_attitudefile, &file_status)) == 0
-			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			    attitudefilemodtime = file_status.st_mtime;
-		    else
-			    attitudefilemodtime = 0;
-    
-		    /* get mod time for the sonardepth file if needed */
-		    if (process.mbp_sonardepth_mode != MBP_SONARDEPTH_OFF
-			    && (fstat = stat(process.mbp_sonardepthfile, &file_status)) == 0
-			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			    sonardepthfilemodtime = file_status.st_mtime;
-		    else
-			    sonardepthfilemodtime = 0;
-    
-		    /* get mod time for the edit save file if needed */
-		    if (process.mbp_edit_mode != MBP_EDIT_OFF
-			    && (fstat = stat(process.mbp_editfile, &file_status)) == 0
-			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			    esfmodtime = file_status.st_mtime;
-		    else
-			    esfmodtime = 0;
-    
-		    /* get mod time for the svp file if needed */
-		    if (process.mbp_svp_mode != MBP_SVP_OFF
-			    && (fstat = stat(process.mbp_svpfile, &file_status)) == 0
-			    && (file_status.st_mode & S_IFMT) != S_IFDIR)
-			    svpmodtime = file_status.st_mtime;
-		    else
-			    svpmodtime = 0;
-			    
-		    /* now check if processed file is out of date */
-		    if (ofilemodtime > 0
-			    && ofilemodtime >= ifilemodtime
-			    && ofilemodtime >= pfilemodtime
-			    && ofilemodtime >= navfilemodtime
-			    && ofilemodtime >= navadjfilemodtime
-			    && ofilemodtime >= attitudefilemodtime
-			    && ofilemodtime >= sonardepthfilemodtime
-			    && ofilemodtime >= esfmodtime
-			    && ofilemodtime >= svpmodtime)
+		    /* want to process, check lock status of the file to be processed */
+		    lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked,
+						&lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &lock_error);
+		    if (locked == MB_NO)
 			{
-			proceedprocess = MB_NO;
-	    		if (verbose > 0 || testonly == MB_YES)
-	    			fprintf(stderr,"Data skipped - up to date: %s\n",
-					process.mbp_ifile);
-			}
-		    else if (testonly == MB_YES)
-			{
-			proceedprocess = MB_NO;
-			fprintf(stderr,"Data would be processed (test-only mode) - out of date: %s\n",
-				process.mbp_ifile);
+			proceedprocess = MB_YES;
 			}
 		    else
 			{
-			/* now try to set a lock of the file to be processed */
-			lock_status = mb_pr_lockswathfile(verbose, process.mbp_ifile, 
-						MBP_LOCK_PROCESS, program_name, &lock_error);
-			if (lock_status == MB_SUCCESS)
-				{
-				fprintf(stderr,"Data processed - out of date and unlocked: \n\tInput:  %s\n\tOutput: %s\n",
-					process.mbp_ifile, process.mbp_ofile);
-				}
-			else if (lock_error == MB_ERROR_FILE_LOCKED)
-				{
-				proceedprocess = MB_NO;
-				fprintf(stderr,"Data not processed - out of date but locked: \n\tInput:  %s\n\tOutput: %s\n",
-					process.mbp_ifile, process.mbp_ofile);
-					
-				/* get lock information */
-				lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked,
-								&lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &lock_error);
-				fprintf(stderr,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user, lock_cpu, lock_date);
-				}
-			else if (lock_error == MB_ERROR_OPEN_FAIL)
-				{
-				proceedprocess = MB_NO;
-				fprintf(stderr,"Data not processed - out of date but unable to set lock: \n\tInput:  %s\n\tOutput: %s\n",
-					process.mbp_ifile, process.mbp_ofile);
-				}
+			proceedprocess = MB_NO;
 			}
 		    }
 		}
-
-	/* force mode but test only */
-	else if (testonly == MB_YES)
+	    else
 		{
 		proceedprocess = MB_NO;
-		fprintf(stderr,"Data would be processed (test-only mode): %s\n",
-			process.mbp_ifile);
+		lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked,
+							&lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &lock_error);
 		}
 
-	/* else just do it */
-	else
+	    /* write out information */
+	    if (testonly == MB_NO)
 		{
-		proceedprocess = MB_YES;
-		fprintf(stderr,"Data processed: \n\tInput:  %s\n\tOutput: %s\n",
-			process.mbp_ifile, process.mbp_ofile);
+		if (proceedprocess == MB_YES)
+			string1 = str_process_yes;
+		else if (proceedprocess == MB_NO)
+			string1 = str_process_no;
 		}
+	    else
+		{
+		if (proceedprocess == MB_YES)
+			string1 = str_process_yes_test;
+		else if (proceedprocess == MB_NO)
+			string1 = str_process_no_test;
+		}
+	    if (outofdate == MB_YES)
+		string2 = str_outofdate_yes;
+	    else if (outofdate == MB_NO && checkuptodate == MB_NO)
+		string2 = str_outofdate_overridden;
+	    else
+		string2 = str_outofdate_no;
+	    if (locked == MB_YES)
+		string3 = str_locked_yes;
+	    else if (locked == MB_NO && lock_error == MB_ERROR_OPEN_FAIL)
+		string3 = str_locked_fail;
+	    else
+		string3 = str_locked_no;
+	    fprintf(stderr,"%s - %s - %s: \n\tInput:  %s\n\tOutput: %s\n",
+		string1, string2, string3, process.mbp_ifile, process.mbp_ofile);
+	    if (locked == MB_YES)
+		fprintf(stderr,"\tLocked by program <%s> run by <%s> on <%s> at <%s>\n", lock_program, lock_user, lock_cpu, lock_date);
+	    if (testonly == MB_YES || verbose > 0 || printfilestatus == MB_YES)
+		{
+		if (outofdate == MB_YES)
+			fprintf(stderr,"\tFile Status: out of date\n");
+		else
+			fprintf(stderr,"\tFile Status: up to date\n");
+		fprintf(stderr,"\t\tModification times and ages relative to the output file in seconds:\n");
+		mb_get_date_string(verbose, (double)ifilemodtime, dummy);
+		fprintf(stderr,"\t\t\tInput file:                 %s %12d <%s>\n", dummy, ofilemodtime - ifilemodtime, mbp_ifile);
+		if (pfilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)pfilemodtime, dummy);
+			fprintf(stderr,"\t\t\tParameter file:             %s %12d <%s>\n", dummy, ofilemodtime - pfilemodtime, mbp_pfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tParameter file:             None\n");
+			}
+		if (navfilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)navfilemodtime, dummy);
+			fprintf(stderr,"\t\t\tNavigation file:            %s %12d <%s>\n", dummy, ofilemodtime - navfilemodtime, process.mbp_navfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tNavigation file:            None\n");
+			}
+		if (navadjfilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)navadjfilemodtime, dummy);
+			fprintf(stderr,"\t\t\tNavigation adjustment file: %s %12d <%s>\n", dummy, ofilemodtime - navadjfilemodtime, process.mbp_navadjfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tNavigation adjustment file: None\n");
+			}
+		if (attitudefilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)attitudefilemodtime, dummy);
+			fprintf(stderr,"\t\t\tSonar depth file:           %s %12d <%s>\n", dummy, ofilemodtime - attitudefilemodtime, process.mbp_attitudefile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tSonar depth file:           None\n");
+			}
+		if (sonardepthfilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)sonardepthfilemodtime, dummy);
+			fprintf(stderr,"\t\t\tAttitude file:              %s %12d <%s>\n", dummy, ofilemodtime - sonardepthfilemodtime, process.mbp_sonardepthfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tAttitude file:              None\n");
+			}
+		if (esfmodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)esfmodtime, dummy);
+			fprintf(stderr,"\t\t\tEdit save file:             %s %12d <%s>\n", dummy, ofilemodtime - esfmodtime, process.mbp_editfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tEdit save file:             None\n");
+			}
+		if (svpmodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)svpmodtime, dummy);
+			fprintf(stderr,"\t\t\tSVP file:                   %s %12d <%s>\n", dummy, ofilemodtime - svpmodtime, process.mbp_svpfile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tSVP file:                   None\n");
+			}
+		if (ofilemodtime > 0)
+			{
+			mb_get_date_string(verbose, (double)ofilemodtime, dummy);
+			fprintf(stderr,"\t\t\tOutput file:                %s              <%s>\n", dummy, process.mbp_ofile);
+			}
+		else
+			{
+			fprintf(stderr,"\t\t\tOutput file:                None\n");
+			}
+		}
+
+	    /* reset proceedprocess if only testing */
+	    if (testonly == MB_YES)
+		proceedprocess = MB_NO;
+	    }
 		
 	/* now process the input file */
 	if (proceedprocess == MB_YES)

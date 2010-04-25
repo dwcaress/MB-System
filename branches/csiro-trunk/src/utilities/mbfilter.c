@@ -1856,7 +1856,14 @@ int smooth_median(int verbose, double original,
 		ratio = original/(*smooth);
 		if (ratio < threshold_hi
 			&& ratio > threshold_lo)
+			{
+/*fprintf(stderr,"IGNORE MEDIAN FILTER: ratio:%f threshold:%f %f original:%f smooth:%f\n",
+ratio, threshold_lo, threshold_hi, original, *smooth);*/
 			*smooth = original;
+			}
+/*else
+fprintf(stderr,"** APPLY MEDIAN FILTER: ratio:%f threshold:%f %f original:%f smooth:%f\n",
+ratio, threshold_lo, threshold_hi, original, *smooth);*/
 		}
 
 	/* print output debug statements */

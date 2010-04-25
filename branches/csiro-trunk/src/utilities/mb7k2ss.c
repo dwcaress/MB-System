@@ -155,7 +155,7 @@ char program_name[] = "mb7k2ss";
 int main (int argc, char **argv)
 {
 	char help_message[] =  "mb7k2ss extracts sidescan sonar data from Reson 7k format data, \nbins and lays the sidescan onto the seafloor, and outputs files \nin the MBF_MBLDEOIH formst (MBIO format id 71).\n";
-	char usage_message[] = "mb7k2ss [-Ifile -Atype -Bmode[/threshold] -C -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile -Ttopogridfile -X -H -V]";
+	char usage_message[] = "mb7k2ss [-Ifile -Atype -Bmode[/threshold] -C -D -Fformat -Lstartline/lineroot -Ooutfile -Rroutefile -Ttopogridfile -X -H -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;

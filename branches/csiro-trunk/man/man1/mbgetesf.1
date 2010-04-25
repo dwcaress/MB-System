@@ -1,4 +1,4 @@
-.TH mbgetesf 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbgetesf 1 "13 April 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgetesf\fP - Extract swath bathymetry data flags into an edit save file.
 
@@ -6,7 +6,7 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbgetesf\fP [\fB-F\fPformat \fB-B\fPyr/mo/da/hr/mn/sc \fB-E\fPyr/mo/da/hr/mn/sc \fB-S\fPspeed \fB-I\fPinfile \fB-O\fPesffile \fB-V -H\fP]
+\fBmbgetesf\fP [\fB-F\fPformat \fB-I\fPinfile \fB-M\fPmode \fB-O\fPesffile \fB-V -H\fP]
 
 .SH DESCRIPTION
 Swath bathymetry data is typically edited either with interactive
@@ -32,9 +32,9 @@ properly (an ".esf" suffix added to the input swath file
 name), the edits can automatically be loaded into \fBmbedit\fP or
 \fBmbclean\fP.
 
-The user can extract edit events from only the flagged beams,
-or can additionally extract edit events specifying null beams
-and even good beams. The latter cases are necessary only if
+The user can extract edit events from only the flagged beams (\fB-M\fP\fI1\fP),
+or can extract edit events specifying null and flagged beams (\fB-M\fP\fI2\fP)
+and all (good, flagged, and null) beams (\fB-M\fP\fI3\fP). The latter cases are necessary only if
 previous editing has involved nulling beams that were 
 originally classified as good or unflagging beams that were
 originally flagged.
@@ -52,32 +52,6 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
-.TP
-.B \-B
-\fIyr/mo/da/hr/mn/sc\fP
-.br
-This option sets the starting time for data allowed in the input data.
-The \fB-E\fP option sets the ending time for data. If the 
-starting time is before the ending time, then any data
-with a time stamp before the starting time or after the
-ending time is ignored. If instead the starting time is
-after the ending time, then any data between the ending
-and starting time will be ignored. This scheme allows time
-windowing both inside and outside a specified interval.
-Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
-.TP
-.B \-E
-\fIyr/mo/da/hr/mn/sc\fP
-.br
-This option sets the ending time for data allowed in the input data.
-The \fB-B\fP option sets the starting time for data. If the 
-starting time is before the ending time, then any data
-with a time stamp before the starting time or after the
-ending time is ignored. If instead the starting time is
-after the ending time, then any data between the ending
-and starting time will be ignored. This scheme allows time
-windowing both inside and outside a specified interval.
-Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 .B \-F
 \fIformat\fP
@@ -100,6 +74,16 @@ Data file from which the input data will be read. If
 no input file is specified, the input will be read
 from stdin. Default: \fIinfile\fP = stdin.
 .TP
+.B \-M
+\fImode\fP
+.br
+Specifies which beam flag values are output as edit events.
+If \fImode\fP = 1, then only flagged beams are output. If
+\fImode\fP = 2, then flagged and null beams are output. If
+\fImode\fP = 3, then an edit event will be output for every
+beam, including those that are "good" (neither flagged nor
+null). Default: \fImode\fP = 1.
+.TP
 .B \-O
 \fIesffile\fP
 .br
@@ -107,13 +91,6 @@ Specifies output edit save file to which the
 edit events will be written. If
 no edit save file is specified, the output will be written
 to stdout. Default: \fIesffile\fP = stdout.
-.TP
-.B \-S
-\fIspeed\fP
-.br
-Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
-the input data; pings associated with a smaller ship speed will not be
-copied. Default: \fIspeed\fP = 0.
 .TP
 .B \-V
 Normally, \fBmbgetesf\fP works "silently" without outputting

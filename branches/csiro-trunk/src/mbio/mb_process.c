@@ -6273,6 +6273,7 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 			{
 			right_now = time((time_t *)0);
 			strncpy(date,ctime(&right_now),24);
+			date[24] = 0;
 			if ((user_ptr = getenv("USER")) == NULL)
 				user_ptr = getenv("LOGNAME");
 			if (user_ptr != NULL)

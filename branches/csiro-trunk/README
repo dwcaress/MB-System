@@ -26,6 +26,9 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.1.3beta1851  April 14, 2010
+  Version 5.1.3beta1844  March 30, 2010
+  Version 5.1.3beta1843  March 29, 2010
   Version 5.1.3beta1829  February 5, 2010
 * Version 5.1.2          December 31, 2009
   Version 5.1.2beta15    December 30, 2009
@@ -167,6 +170,71 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
+
+-----> 5.1.3beta1851
+
+Fixed problem where mb7kpreprocess made beams that should have been null 
+valid but flagged.
+
+Fixed bug that caused mbclean to fail to actually flag some beams 
+identified for flagging.
+
+Added button to zero all z offsets on crossings for cases where tidal 
+corrections have been made before data were imported into a mbnavadjust 
+project.
+
+Fixed mbgetesf manual page.
+
+Fixed mode control in mbgetesf so one can extract the complete beam flag 
+state from a swath file. MBgetesf is now used by MBeditviz to get the 
+original beam flag state of raw swath bathymetry when processed files 
+are read.
+
+Fixed sorting of beamflag edit events in edit save file data as used by 
+MBedit, MBeditviz, MBclean, MBareaclean, and MBprocess. This fixes a 
+problem wherein some edits performed by MBeditviz were dropped by 
+MBprocess. Also, MBgetesf is now used by MBeditviz to get the original 
+beam flag state of raw swath bathymetry when processed files are read.
+
+-----> 5.1.3beta1844
+
+Fixed yet another bug in MBnavadjust - this time getting the
+importation of old project files correct and, more importantly,
+getting the z-offset sign correct in the Naverr display.
+
+-----> 5.1.3beta1843
+
+Updated mb7k2ss man page.
+
+Fixed bug in mbrolltimelag regarding popen/pclose use.
+
+Fixed bug in mb_process.c file locking.
+
+Fixed mbotps man page.Fixed bug in MBeditviz and added hot keys for 
+editing (only partially successful because it's hard to reliably get 
+the keyboard focus onto the rendering OpenGL widget.
+
+Fixed mbotps man page.
+
+Augmented MBnavadjust to allow referencing high resolution bathymetry 
+(e.g. AUV surveys) to lower resolution bathymetry (e.g. hull mounted 
+multibeam surveys). The navigation of specified files (typically the 
+data collected from the surface where GPS is available) can be fixed 
+so that everything else floats and is adjusted relative to those data.
+
+mbprocess - improved error reporting to show why files are not being processed.
+
+mbmosaic - fixed aspects of the footprint calculation, particularly 
+fixing a bug that prevented footprints from being fully covered.
+
+Added -S option to mbprocess for debugging file status values used to 
+determine whether processed data files are "out of date".
+
+Greatly improved mbnavadjust by adding a interim solution for a smooth 
+navigation adjustment model fitting ties to fixed (immovable) data and 
+by making all of the internal crossing and tie conventions consistent. 
+MBnavadjust now outputs version 3.0 nvh project files, but will transparently 
+read and translate earlier version nvh project files.
 
 -----> 5.1.3beta1829
 

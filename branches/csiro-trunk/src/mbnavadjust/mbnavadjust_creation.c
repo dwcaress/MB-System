@@ -141,18 +141,27 @@ extern void do_fileselection_ok(Widget, XtPointer, XtPointer);
 extern void BxSetValuesCB(Widget, XtPointer, XtPointer);
 extern void do_file_close(Widget, XtPointer, XtPointer);
 extern void do_quit(Widget, XtPointer, XtPointer);
+extern void do_view_showsurveys(Widget, XtPointer, XtPointer);
 extern void do_view_showdata(Widget, XtPointer, XtPointer);
+extern void do_view_showsections(Widget, XtPointer, XtPointer);
 extern void do_view_showcrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showgoodcrossings(Widget, XtPointer, XtPointer);
+extern void do_view_showbettercrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showtruecrossings(Widget, XtPointer, XtPointer);
 extern void do_view_showties(Widget, XtPointer, XtPointer);
+extern void do_view_showallsurveys(Widget, XtPointer, XtPointer);
+extern void do_view_showselectedsurveys(Widget, XtPointer, XtPointer);
+extern void do_view_showselectedfile(Widget, XtPointer, XtPointer);
+extern void do_view_showselectedsection(Widget, XtPointer, XtPointer);
 extern void do_make_grid(Widget, XtPointer, XtPointer);
 extern void do_modelplot_show(Widget, XtPointer, XtPointer);
 extern void do_action_poornav(Widget, XtPointer, XtPointer);
 extern void do_action_goodnav(Widget, XtPointer, XtPointer);
+extern void do_action_fixednav(Widget, XtPointer, XtPointer);
 extern void do_action_autopick(Widget, XtPointer, XtPointer);
 extern void do_naverr_init(Widget, XtPointer, XtPointer);
 extern void do_action_analyzecrossings(Widget, XtPointer, XtPointer);
+extern void do_zerozoffsets(Widget, XtPointer, XtPointer);
 extern void do_action_invertnav(Widget, XtPointer, XtPointer);
 extern void do_apply_nav(Widget, XtPointer, XtPointer);
 extern void do_list_data_select(Widget, XtPointer, XtPointer);
@@ -165,6 +174,7 @@ CreatemainWindow(Widget parent)
 {
     Cardinal ac = 0;
     Arg      args[256];
+    Cardinal cdc = 0;
     Boolean  argok = False;
     Widget   mainWindow;
     Widget   dialogShell_modelplot;
@@ -232,11 +242,14 @@ CreatemainWindow(Widget parent)
     Widget   cascadeButton_view;
     Widget   pulldownMenu_view;
     Widget   separator13;
+    Widget   separator15;
     Widget   cascadeButton_action;
     Widget   pulldownMenu_action;
     Widget   separator7;
     Widget   separator10;
     Widget   separator11;
+    Widget   pushButton_zerozoffsets;
+    Widget   separator16;
     Widget   cascadeButton_about;
     Widget   pulldownMenu_about;
     Widget   pushButton_about;
@@ -268,8 +281,8 @@ CreatemainWindow(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmListWidgetClass);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 478); ac++;
-    XtSetArg(args[ac], XmNy, 224); ac++;
+    XtSetArg(args[ac], XmNx, 51); ac++;
+    XtSetArg(args[ac], XmNy, 44); ac++;
     XtSetArg(args[ac], XmNwidth, 962); ac++;
     XtSetArg(args[ac], XmNheight, 400); ac++;
     mainWindow = XmCreateMainWindow(parent,
@@ -570,12 +583,36 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 196); ac++;
-    XtSetArg(args[ac], XmNheight, 160); ac++;
+    XtSetArg(args[ac], XmNwidth, 209); ac++;
+    XtSetArg(args[ac], XmNheight, 316); ac++;
     pulldownMenu_view = XmCreatePulldownMenu(XtParent(cascadeButton_view),
         (char *)"pulldownMenu_view",
         args, 
         ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Surveys", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_showsurveys = XmCreatePushButton(pulldownMenu_view,
+            (char *)"pushButton_showsurveys",
+            args, 
+            ac);
+        XtManageChild(pushButton_showsurveys);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_showsurveys, XmNactivateCallback, do_view_showsurveys, (XtPointer)0);
     
     ac = 0;
     {
@@ -600,6 +637,30 @@ CreatemainWindow(Widget parent)
     }
     
     XtAddCallback(pushButton_showdata, XmNactivateCallback, do_view_showdata, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Data File Sections", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_showsections = XmCreatePushButton(pulldownMenu_view,
+            (char *)"pushButton_showsections",
+            args, 
+            ac);
+        XtManageChild(pushButton_showsections);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_showsections, XmNactivateCallback, do_view_showsections, (XtPointer)0);
     
     ac = 0;
     {
@@ -648,6 +709,30 @@ CreatemainWindow(Widget parent)
     }
     
     XtAddCallback(pushButton_showgoodcrossings, XmNactivateCallback, do_view_showgoodcrossings, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show >50% Overlap Crossings", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_showbettercrossings = XmCreatePushButton(pulldownMenu_view,
+            (char *)"pushButton_showbettercrossings",
+            args, 
+            ac);
+        XtManageChild(pushButton_showbettercrossings);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_showbettercrossings, XmNactivateCallback, do_view_showbettercrossings, (XtPointer)0);
     
     ac = 0;
     {
@@ -703,6 +788,109 @@ CreatemainWindow(Widget parent)
         args, 
         ac);
     XtManageChild(separator13);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show All Surveys", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_showallsurveys = XmCreateToggleButton(pulldownMenu_view,
+            (char *)"toggleButton_showallsurveys",
+            args, 
+            ac);
+        XtManageChild(toggleButton_showallsurveys);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_showallsurveys, XmNvalueChangedCallback, do_view_showallsurveys, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected Survey", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_showselectedsurvey = XmCreateToggleButton(pulldownMenu_view,
+            (char *)"toggleButton_showselectedsurvey",
+            args, 
+            ac);
+        XtManageChild(toggleButton_showselectedsurvey);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_showselectedsurvey, XmNvalueChangedCallback, do_view_showselectedsurveys, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected File", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_showselectedfile = XmCreateToggleButton(pulldownMenu_view,
+            (char *)"toggleButton_showselectedfile",
+            args, 
+            ac);
+        XtManageChild(toggleButton_showselectedfile);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_showselectedfile, XmNvalueChangedCallback, do_view_showselectedfile, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected Section", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_showselectedsection = XmCreateToggleButton(pulldownMenu_view,
+            (char *)"toggleButton_showselectedsection",
+            args, 
+            ac);
+        XtManageChild(toggleButton_showselectedsection);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_showselectedsection, XmNvalueChangedCallback, do_view_showselectedsection, (XtPointer)0);
+    
+    ac = 0;
+    separator15 = XmCreateSeparator(pulldownMenu_view,
+        (char *)"separator15",
+        args, 
+        ac);
+    XtManageChild(separator15);
     
     ac = 0;
     {
@@ -785,10 +973,10 @@ CreatemainWindow(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNx, 192); ac++;
+    XtSetArg(args[ac], XmNy, 71); ac++;
     XtSetArg(args[ac], XmNwidth, 167); ac++;
-    XtSetArg(args[ac], XmNheight, 142); ac++;
+    XtSetArg(args[ac], XmNheight, 188); ac++;
     pulldownMenu_action = XmCreatePulldownMenu(XtParent(cascadeButton_action),
         (char *)"pulldownMenu_action",
         args, 
@@ -798,7 +986,7 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set Poor Navigation", 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set File Poor Navigation", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -822,7 +1010,7 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set Good Navigation", 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set File Good Navigation", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -841,6 +1029,30 @@ CreatemainWindow(Widget parent)
     }
     
     XtAddCallback(pushButton_goodnav, XmNactivateCallback, do_action_goodnav, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set File Fixed Navigation", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_fixednav = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_fixednav",
+            args, 
+            ac);
+        XtManageChild(pushButton_fixednav);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_fixednav, XmNactivateCallback, do_action_fixednav, (XtPointer)0);
     
     ac = 0;
     separator7 = XmCreateSeparator(pulldownMenu_action,
@@ -912,6 +1124,37 @@ CreatemainWindow(Widget parent)
         args, 
         ac);
     XtManageChild(separator11);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Zero All Z Offsets", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_zerozoffsets = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_zerozoffsets",
+            args, 
+            ac);
+        XtManageChild(pushButton_zerozoffsets);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_zerozoffsets, XmNactivateCallback, do_zerozoffsets, (XtPointer)0);
+    
+    ac = 0;
+    separator16 = XmCreateSeparator(pulldownMenu_action,
+        (char *)"separator16",
+        args, 
+        ac);
+    XtManageChild(separator16);
     
     ac = 0;
     {
@@ -1185,8 +1428,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_ANY); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 430); ac++;
+    XtSetArg(args[ac], XmNx, 117); ac++;
+    XtSetArg(args[ac], XmNy, 93); ac++;
     XtSetArg(args[ac], XmNwidth, 542); ac++;
     XtSetArg(args[ac], XmNheight, 86); ac++;
     bulletinBoard_message = XtCreateWidget((char *)"bulletinBoard_message",
@@ -1264,8 +1507,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 393); ac++;
+    XtSetArg(args[ac], XmNx, 117); ac++;
+    XtSetArg(args[ac], XmNy, 95); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 160); ac++;
     bulletinBoard_error = XtCreateWidget((char *)"bulletinBoard_error",
@@ -1398,8 +1641,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 563); ac++;
-    XtSetArg(args[ac], XmNy, 301); ac++;
+    XtSetArg(args[ac], XmNx, 116); ac++;
+    XtSetArg(args[ac], XmNy, 69); ac++;
     XtSetArg(args[ac], XmNwidth, 611); ac++;
     XtSetArg(args[ac], XmNheight, 530); ac++;
     bulletinBoard_fileselection = XtCreateWidget((char *)"bulletinBoard_fileselection",
@@ -1513,8 +1756,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNnoResize, True); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-        XtSetArg(args[ac], XmNx, 431); ac++;
-        XtSetArg(args[ac], XmNy, 232); ac++;
+        XtSetArg(args[ac], XmNx, 117); ac++;
+        XtSetArg(args[ac], XmNy, 69); ac++;
         XtSetArg(args[ac], XmNwidth, 935); ac++;
         XtSetArg(args[ac], XmNheight, 685); ac++;
         bulletinBoard_naverr = XtCreateWidget((char *)"bulletinBoard_naverr",
@@ -2259,8 +2502,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 250); ac++;
+        XtSetArg(args[ac], XmNx, 117); ac++;
+        XtSetArg(args[ac], XmNy, 120); ac++;
         XtSetArg(args[ac], XmNwidth, 284); ac++;
         XtSetArg(args[ac], XmNheight, 446); ac++;
         bulletinBoard_biases = XtCreateWidget((char *)"bulletinBoard_biases",
@@ -2635,8 +2878,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 572); ac++;
-    XtSetArg(args[ac], XmNy, 233); ac++;
+    XtSetArg(args[ac], XmNx, 116); ac++;
+    XtSetArg(args[ac], XmNy, 69); ac++;
     XtSetArg(args[ac], XmNwidth, 488); ac++;
     XtSetArg(args[ac], XmNheight, 484); ac++;
     form_about = XtCreateWidget((char *)"form_about",
@@ -3004,8 +3247,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 523); ac++;
-    XtSetArg(args[ac], XmNy, 258); ac++;
+    XtSetArg(args[ac], XmNx, 115); ac++;
+    XtSetArg(args[ac], XmNy, 71); ac++;
     XtSetArg(args[ac], XmNwidth, 635); ac++;
     XtSetArg(args[ac], XmNheight, 438); ac++;
     form_controls = XtCreateWidget((char *)"form_controls",
@@ -3517,8 +3760,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "Navigation Adjustment Model Plot"); ac++;
     XtSetArg(args[ac], XmNallowShellResize, True); ac++;
-    XtSetArg(args[ac], XmNwidth, 843); ac++;
-    XtSetArg(args[ac], XmNheight, 393); ac++;
+    XtSetArg(args[ac], XmNwidth, 1014); ac++;
+    XtSetArg(args[ac], XmNheight, 481); ac++;
     dialogShell_modelplot = XmCreateDialogShell(mainWindow,
         (char *)"dialogShell_modelplot",
         args, 
@@ -3527,10 +3770,10 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 343); ac++;
-    XtSetArg(args[ac], XmNy, 286); ac++;
-    XtSetArg(args[ac], XmNwidth, 843); ac++;
-    XtSetArg(args[ac], XmNheight, 393); ac++;
+    XtSetArg(args[ac], XmNx, 83); ac++;
+    XtSetArg(args[ac], XmNy, 95); ac++;
+    XtSetArg(args[ac], XmNwidth, 1014); ac++;
+    XtSetArg(args[ac], XmNheight, 481); ac++;
     bulletinBoard_modelplot = XtCreateWidget((char *)"bulletinBoard_modelplot",
         xmBulletinBoardWidgetClass,
         dialogShell_modelplot,
@@ -3609,7 +3852,7 @@ CreatemainWindow(Widget parent)
         tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"Full Size", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 260); ac++;
+        XtSetArg(args[ac], XmNx, 290); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
@@ -3634,13 +3877,13 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"0 pings 0 nav pts 0 ties Inversion: out of date", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"Mouse: <left> select closest tie; <middle> select closest untied crossing; <right> drag zoom extent", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 340); ac++;
+        XtSetArg(args[ac], XmNx, 400); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 490); ac++;
+        XtSetArg(args[ac], XmNwidth, 600); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
@@ -3665,8 +3908,8 @@ CreatemainWindow(Widget parent)
         XmRPixel, 0, &argok)); if (argok) ac++;
     XtSetArg(args[ac], XmNx, 10); ac++;
     XtSetArg(args[ac], XmNy, 50); ac++;
-    XtSetArg(args[ac], XmNwidth, 820); ac++;
-    XtSetArg(args[ac], XmNheight, 330); ac++;
+    XtSetArg(args[ac], XmNwidth, 990); ac++;
+    XtSetArg(args[ac], XmNheight, 420); ac++;
     drawingArea_modelplot = XmCreateDrawingArea(bulletinBoard_modelplot,
         (char *)"drawingArea_modelplot",
         args, 
