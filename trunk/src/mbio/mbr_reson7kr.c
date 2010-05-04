@@ -4916,6 +4916,9 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 	int	index;
 	int	time_i[7], time_j[5];
 	double	edgetech_time_d, s7k_time_d, bathy_time_d;
+#ifdef MBR_RESON7KR_DEBUG
+	int i;
+#endif
 
 	/* print input debug statements */
 	if (verbose >= 2)
