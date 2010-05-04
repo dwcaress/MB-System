@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.1.3beta1855  May 4, 2010
   Version 5.1.3beta1851  April 14, 2010
   Version 5.1.3beta1844  March 30, 2010
   Version 5.1.3beta1843  March 29, 2010
@@ -170,6 +171,12 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
+
+-----> 5.1.3beta1855
+
+Fixed error in beam angle calculation for third generation Simrad multibeam
+data (formats 58 and 59, EM710, EM302, EM122) that made bathymetry recalculation
+by raytracing badly wrong.
 
 -----> 5.1.3beta1851
 
