@@ -503,6 +503,9 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	att_roll[MBSYS_SIMRAD3_MAXATTITUDE];
 	double	att_pitch[MBSYS_SIMRAD3_MAXATTITUDE];
 	double	att_heave[MBSYS_SIMRAD3_MAXATTITUDE];
+	double	transmit_time_d, transmit_heave, transmit_roll, transmit_pitch;
+	double	receive_time_d, receive_heave, receive_roll, receive_pitch;
+	/* double	rr, xx, zz; */
 	int	i;
 
 	/* print input debug statements */
@@ -777,17 +780,23 @@ ping->png_bso);*/
 		ping->png_roll = (int) rint(roll / 0.01);
 		ping->png_pitch = (int) rint(pitch / 0.01);
 		ping->png_heave = (int) rint(heave / 0.01);
-		
+
+/*fprintf(stderr,"\navailable attitude:\n");
+for (i=0;i<mb_io_ptr->nattitude;i++)
+fprintf(stderr,"     %d %f %f %f %f\n",
+i,mb_io_ptr->attitude_time_d[i],mb_io_ptr->attitude_heave[i],mb_io_ptr->attitude_roll[i],mb_io_ptr->attitude_pitch[i]);
+fprintf(stderr,"\nbeams:\n");*/
+
 		/* calculate corrected ranges, angles, and bathymetry */
 		for (i=0;i<ping->png_nbeams;i++)
 			{
 			/* get attitude and heave at ping and receive time */
-			/*transmit_time_d = ptime_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
+			transmit_time_d = ptime_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
 			mb_attint_interp(verbose, mbio_ptr, transmit_time_d,  
 				    		&transmit_heave, &transmit_roll, &transmit_pitch, error);
 			receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
 			mb_attint_interp(verbose, mbio_ptr, receive_time_d,  
-				    		&receive_heave, &receive_roll, &receive_pitch, error);*/
+				    		&receive_heave, &receive_roll, &receive_pitch, error);
 
 			/* alongtrack offset distance */
 			transmit_alongtrack = (100.0 * ((double)ping->png_speed)) 
@@ -798,38 +807,36 @@ ping->png_bso);*/
 				ping->png_ssv = 150;
 			soundspeed = 0.1 * ((double)ping->png_ssv);
 			ping->png_range[i] = ping->png_raw_rxrange[i];
-			/*ping->png_range[i] = ping->png_raw_rxrange[i] 
-						- (receive_heave - transmit_heave) / soundspeed;*/
+			ping->png_range[i] = ping->png_raw_rxrange[i] 
+						- (receive_heave - transmit_heave) / soundspeed;
 
-			/* calculate bathymetry */
-			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) + pitch;
-			beta = 90.0 - (0.01 * (double)ping->png_raw_rxpointangle[i]) + roll;
+			/* calculate angles */
+			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) + transmit_pitch;
+			beta = 90.0 - (0.01 * (double)ping->png_raw_rxpointangle[i] + receive_roll);
 			mb_rollpitch_to_takeoff(
 				verbose, 
 				alpha, beta, 
 				&theta, &phi, 
 				error);
-			/*rr = 0.5 * soundspeed * ping->png_range[i];
+			ping->png_depression[i] = theta;
+			ping->png_azimuth[i] = phi;
+			/* rr = 0.5 * soundspeed * ping->png_range[i];
 			xx = rr * sin(DTR * theta);
 			zz = rr * cos(DTR * theta);
 			ping->png_acrosstrack[i] = xx * cos(DTR * phi);
 			ping->png_alongtrack[i] = xx * sin(DTR * phi) + transmit_alongtrack;
 			ping->png_depth[i] = zz + ping->png_xducer_depth;*/
-			ping->png_depression[i] = theta;
-			ping->png_azimuth[i] = phi;
-			
-/*range = sqrt(ping->png_depth[i]*ping->png_depth[i] 
-+ ping->png_acrosstrack[i]*ping->png_acrosstrack[i]
-+ ping->png_alongtrack[i]*ping->png_alongtrack[i]);
-angle = RTD*atan((double)(ping->png_acrosstrack[i]/ping->png_depth[i]));
-
-if (i == ping->png_nbeams/2)
-fprintf(stderr,"%d  %f %f %f  xangle:%f rxpa:%f dang:%f rroll:%f dang-rroll:%f\n",
-i, ptime_d, transmit_time_d - ptime_d, receive_time_d-ptime_d,
-angle, (0.01 * (double)ping->png_raw_rxpointangle[i]),
-angle + (0.01 * (double)ping->png_raw_rxpointangle[i]),
-receive_roll,angle + (0.01 * (double)ping->png_raw_rxpointangle[i]) + receive_roll);*/
-			
+/*if (i == ping->png_nbeams/2)
+{
+mb_xyz_to_takeoff(verbose,ping->png_acrosstrack[i],ping->png_alongtrack[i],ping->png_depth[i],
+&theta,&phi,error);
+mb_takeoff_to_rollpitch(verbose,theta,phi,&pitch,&roll,error);
+fprintf(stderr,"    %d time:%f %f   bath:%f %f %f   theta:%f phi:%f pitch:%f %f roll:%f %f angles:%d %d\n",
+i,transmit_time_d,receive_time_d,ping->png_depth[i],ping->png_acrosstrack[i],ping->png_alongtrack[i],
+theta,phi,pitch,transmit_pitch,roll,receive_roll,
+ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]],
+ping->png_raw_rxpointangle[i]);
+}*/			
 			
 			/* calculate beamflag */
 			detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];

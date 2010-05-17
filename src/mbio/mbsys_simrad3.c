@@ -2225,23 +2225,6 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		soundspeed = 0.1 * ((double)ping->png_ssv);
 		for (i=0;i<ping->png_nbeams;i++)
 			{
-			/* get corrected range */
-			ping->png_range[i] = ping->png_raw_rxrange[i] 
-						- (receive_heave - transmit_heave) / soundspeed;
-
-			/* calculate angles */
-			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) 
-					+ 0.01 * ((double)ping->png_pitch);
-			beta = 90.0 - (0.01 * (double)ping->png_raw_rxpointangle[i]) 
-					+ 0.01 * ((double)ping->png_roll);
-			mb_rollpitch_to_takeoff(
-				verbose, 
-				alpha, beta, 
-				&theta, &phi, 
-				error);
-			ping->png_depression[i] = theta;
-			ping->png_azimuth[i] = phi;
-			
 			ttimes[i] = ping->png_range[i];
 			angles[i] = ping->png_depression[i];
 			angles_forward[i] = 180.0 - ping->png_azimuth[i];
