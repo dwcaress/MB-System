@@ -482,6 +482,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_ampcorr_angle = 30.0;
 	process->mbp_ampcorr_slope = MBP_AMPCORR_IGNORESLOPE;
 	process->mbp_ampcorr_stddev = MBP_AMPCORR_IGNORESTD;
+	process->mbp_ampcorr_reffile[0] = '\0';
 	
 	/* sidescan correction */
 	process->mbp_sscorr_mode = MBP_SSCORR_OFF;
@@ -1088,6 +1089,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_ampcorr_stddev);
 			}
+		    else if (strncmp(buffer, "AMPCORRREFFILE", 14) == 0)
+			{
+			sscanf(buffer, "%s %s", dummy, process->mbp_ampcorr_reffile);
+			}
 
 		    /* sidescan correction */
 		    else if (strncmp(buffer, "SSCORRMODE", 10) == 0)
@@ -1279,32 +1284,14 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
                     else if (strncmp(buffer, "SAPPROFILE", 10) == 0)
                         {
                         sscanf(buffer, "%s %s", dummy, process->mbp_sap_profile);
-                        if (explicit == MB_NO && process->mbp_sap_mode == MBP_SAP_OFF)
-                            {
-                            process->mbp_sap_mode = MBP_SAP_ON;
-                            process->mbp_sap_src = MBP_SAP_SRC_SEABED;
-                            process->mbp_sap_use = MBP_SAP_USE_PROFILE;
-                            }
                         }
                     else if (strncmp(buffer, "ABSLOGGED", 9) == 0)
                         {
                         sscanf(buffer, "%s %lf", dummy, &process->mbp_sa_old);
-                        if (explicit == MB_NO && process->mbp_sap_mode == MBP_SAP_OFF)
-                            {
-                            process->mbp_sap_mode = MBP_SAP_ON;
-                            process->mbp_sap_src = MBP_SAP_SRC_CONST;
-                            process->mbp_sap_use = MBP_SAP_NONE;
-                            }
-                        }
+                         }
                     else if (strncmp(buffer, "ABSAPPLY", 8) == 0)
                         {
                         sscanf(buffer, "%s %lf", dummy, &process->mbp_sa_new);
-                        if (explicit == MB_NO && process->mbp_sap_mode == MBP_SAP_OFF)
-                            {
-                            process->mbp_sap_mode = MBP_SAP_ON;
-                            process->mbp_sap_src = MBP_SAP_SRC_SEABED;
-                            process->mbp_sap_use = MBP_SAP_USE_CONST;
-                            }
                         }
 
 		    /* unrecognised parameters */
@@ -1532,6 +1519,14 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		strcpy(process->mbp_ampcorrfile, dummy);
 		}
 
+	    /* reset ampcorr reference file */
+	    if ((lastslash = strrchr(process->mbp_ampcorr_reffile, '/')) != NULL
+		&& strlen(lastslash) > 1)
+		{
+		strcpy(dummy, &(lastslash[1]));
+		strcpy(process->mbp_ampcorr_reffile, dummy);
+		}
+
 	    /* reset sscorr file */
 	    if ((lastslash = strrchr(process->mbp_sscorrfile, '/')) != NULL
 		&& strlen(lastslash) > 1)
@@ -1661,6 +1656,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    strcat(process->mbp_ampcorrfile, dummy);
 	    }
 
+	/* reset amplitude correction reference file */
+	if (len > 1
+	    && strlen(process->mbp_ampcorr_reffile) > 1
+	    && process->mbp_ampcorr_reffile[0] != '/')
+	    {
+	    strcpy(dummy, process->mbp_ampcorr_reffile);
+	    strncpy(process->mbp_ampcorr_reffile, process->mbp_ifile, len);
+	    process->mbp_ampcorr_reffile[len] = '\0';
+	    strcat(process->mbp_ampcorr_reffile, dummy);
+	    }
+
 	/* reset sidescan correction file */
 	if (len > 1
 	    && strlen(process->mbp_sscorrfile) > 1
@@ -1704,6 +1710,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	mb_get_shortest_path(verbose, process->mbp_staticfile, error);
 	mb_get_shortest_path(verbose, process->mbp_tidefile, error);
 	mb_get_shortest_path(verbose, process->mbp_ampcorrfile, error);
+	mb_get_shortest_path(verbose, process->mbp_ampcorr_reffile, error);
 	mb_get_shortest_path(verbose, process->mbp_sscorrfile, error);
 	mb_get_shortest_path(verbose, process->mbp_ampsscorr_topofile, error);
         mb_get_shortest_path(verbose, process->mbp_sap_profile, error);
@@ -1810,6 +1817,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		fprintf(stderr,"dbg2       mbp_ampcorr_angle:      %f\n",process->mbp_ampcorr_angle);
 		fprintf(stderr,"dbg2       mbp_ampcorr_slope:      %d\n",process->mbp_ampcorr_slope);
 		fprintf(stderr,"dbg2       mbp_ampcorr_stddev:     %d\n",process->mbp_ampcorr_stddev);
+		fprintf(stderr,"dbg2       mbp_ampcorr_reffile:    %s\n",process->mbp_ampcorr_reffile);
 		fprintf(stderr,"dbg2       mbp_sscorr_mode:        %d\n",process->mbp_sscorr_mode);
 		fprintf(stderr,"dbg2       mbp_sscorrfile:         %s\n",process->mbp_sscorrfile);
 		fprintf(stderr,"dbg2       mbp_sscorr_type:        %d\n",process->mbp_sscorr_type);
@@ -1968,6 +1976,7 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_ampcorr_angle:      %f\n",process->mbp_ampcorr_angle);
 		fprintf(stderr,"dbg2       mbp_ampcorr_slope:      %d\n",process->mbp_ampcorr_slope);
 		fprintf(stderr,"dbg2       mbp_ampcorr_stddev:     %d\n",process->mbp_ampcorr_stddev);
+		fprintf(stderr,"dbg2       mbp_ampcorr_reffile:    %s\n",process->mbp_ampcorr_reffile);
 		fprintf(stderr,"dbg2       mbp_sscorr_mode:        %d\n",process->mbp_sscorr_mode);
 		fprintf(stderr,"dbg2       mbp_sscorrfile:         %s\n",process->mbp_sscorrfile);
 		fprintf(stderr,"dbg2       mbp_sscorr_type:        %d\n",process->mbp_sscorr_type);
@@ -2328,6 +2337,9 @@ int mb_pr_writepar(int verbose, char *file,
 
 		    fprintf(fp, "AMPCORRSTD %d\n", process->mbp_ampcorr_stddev);
 		    fprintf(fp, "SSCORRSTD %d\n", process->mbp_sscorr_stddev);
+		    strcpy(relative_path, process->mbp_ampcorr_reffile);
+		    status = mb_get_relative_path(verbose, relative_path, pwd, error);
+		    fprintf(fp, "AMPCORRREFFILE %s\n", relative_path);
 
                     /* Sound absorption */
                     fprintf(fp, "##\n## Sound absorption parameters:\n");

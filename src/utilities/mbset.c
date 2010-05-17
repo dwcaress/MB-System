@@ -943,6 +943,11 @@ the manual pages for mbprocess and mbset. \n\n";
 		    sscanf(pargv[i], "AMPCORRSTD:%d", &process.mbp_ampcorr_stddev);
 		    process.mbp_file2_modified = MB_YES;
 		    }
+		else if (strncmp(pargv[i], "AMPCORR_REFFILE", 14) == 0)
+		    {
+		    sscanf(pargv[i], "AMPCORR_REFFILE:%s", process.mbp_ampcorr_reffile);
+		    process.mbp_file2_modified = MB_YES;
+		    }
 		else if (strncmp(pargv[i], "AMPSSCORRTOPOFILE", 17) == 0)
 		    {
 		    sscanf(pargv[i], "AMPSSCORRTOPOFILE:%s", process.mbp_ampsscorr_topofile);
