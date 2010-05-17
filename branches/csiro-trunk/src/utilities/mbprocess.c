@@ -303,6 +303,7 @@ int get_corrtable(int verbose,
 	int *error);
 int get_anglecorr(int verbose,
 	int nangle, double *angles, double *corrs,
+	int nrefangle, double *refangles, double *refcorrs,
 	double angle, double *corr, int *error);
 int get_absorption(int verbose, int mbp_sap_src, double mbp_sap_old,
 	void *mbio_ptr, double *absorption, int* error);
@@ -568,10 +569,12 @@ and mbedit edit save files.\n";
 	int	nsscorrangle = 0;
 	struct mbprocess_sscorr_struct	*sscorrtable = NULL;
 	struct mbprocess_sscorr_struct	sscorrtableuse;
+	struct mbprocess_sscorr_struct	sscorrreftable;
 	int	nampcorrtable = 0;
 	int	nampcorrangle = 0;
 	struct mbprocess_sscorr_struct	*ampcorrtable = NULL;
 	struct mbprocess_sscorr_struct	ampcorrtableuse;
+	struct mbprocess_sscorr_struct	ampcorrreftable;
 	int	ndepths;
 	double	*depths;
 	double	*depthsmooth;
@@ -3379,6 +3382,73 @@ and mbedit edit save files.\n";
 		    fprintf(stderr,"\n%d amplitude correction tables with %d angles read\n",
 		    		nampcorrtable, nampcorrangle);
 		    }
+
+	    /* read reference file */
+	    nampcorrangle = 0;
+	    ampcorrreftable.nangle=0;
+	    sscorrreftable.nangle=0;
+	    if (process.mbp_ampcorr_reffile[0] != NULL  && (tfp = fopen(process.mbp_ampcorr_reffile, "r")) != NULL)
+		    {
+	    while ((result = fgets(buffer,MBP_FILENAMESIZE,tfp)) == buffer)
+	    	{
+		if (strncmp(buffer,"# nangles:",10) == 0)
+		    sscanf(buffer,"# nangles:%d",&nampcorrangle);
+	    	}
+	    fclose(tfp);
+
+	    /* allocate arrays for amplitude correction reference table */
+		ampcorrreftable.angle = NULL;
+		ampcorrreftable.amplitude = NULL;
+		ampcorrreftable.sigma = NULL;
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrreftable.angle),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrreftable.amplitude),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrreftable.sigma),&error);
+
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+		    {
+		    mb_error(verbose,error,&message);
+		    fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+		    fprintf(stderr,"\nProgram <%s> Terminated\n",
+			    program_name);
+		    exit(error);
+		    }
+
+		ampcorrreftable.nangle=0;
+		for (i=0;i<nampcorrangle; i++)
+		    {
+		    ampcorrreftable.angle[i]=0;
+		    ampcorrreftable.amplitude[i]=0;
+		    ampcorrreftable.sigma[i]=0;
+		    }
+		}
+
+	    /* read the data points in the amplitude correction file */
+	    if ((tfp = fopen(process.mbp_ampcorr_reffile, "r")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to Open Amplitude Correction Reference File <%s> for reading\n",process.mbp_ampcorr_reffile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	    while ((result = fgets(buffer,MBP_FILENAMESIZE,tfp)) == buffer)
+		{
+		if (buffer[0] != '#' && ampcorrreftable.nangle <nampcorrangle)
+			{
+			nget = sscanf(buffer, "%lf %lf %lf",
+				&(ampcorrreftable.angle[ampcorrreftable.nangle]),
+				&(ampcorrreftable.amplitude[ampcorrreftable.nangle]),
+				&(ampcorrreftable.sigma[ampcorrreftable.nangle]));
+			(ampcorrreftable.nangle)++;
+			if (nget != 3)
+				{
+				fprintf(stderr,"\ndbg5  Error parsing line in reference amplitude correction file in program <%s>\n",program_name);
+				fprintf(stderr,"dbg5       line: %s\n",buffer);
+				}
+			}
+		}
+	    fclose(tfp);
 	    }
 
 	/*--------------------------------------------
@@ -6255,6 +6325,9 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 							ampcorrtableuse.nangle, 
 							ampcorrtableuse.angle, 
 							ampcorrtableuse.amplitude, 
+							ampcorrreftable.nangle,
+							ampcorrreftable.angle,
+							ampcorrreftable.amplitude,
 							(-process.mbp_ampcorr_angle), 
 							&reference_amp_port, 
 							&error);
@@ -6262,6 +6335,9 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 							ampcorrtableuse.nangle, 
 							ampcorrtableuse.angle, 
 							ampcorrtableuse.amplitude, 
+							ampcorrreftable.nangle,
+							ampcorrreftable.angle,
+							ampcorrreftable.amplitude,
 							process.mbp_ampcorr_angle, 
 							&reference_amp_stbd, 
 							&error);
@@ -6273,6 +6349,9 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					    ampcorrtableuse.nangle,
 					    ampcorrtableuse.angle,
 					    ampcorrtableuse.sigma,
+					    ampcorrreftable.nangle,
+					    ampcorrreftable.angle,
+					    ampcorrreftable.sigma,
 					    (-process.mbp_ampcorr_angle),
 					    &reference_sigma_port,
 					    &error);
@@ -6280,6 +6359,9 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					    ampcorrtableuse.nangle,
 					    ampcorrtableuse.angle,
 					    ampcorrtableuse.sigma,
+					    ampcorrreftable.nangle,
+					    ampcorrreftable.angle,
+					    ampcorrreftable.sigma,
 					    process.mbp_ampcorr_angle,
 					    &reference_sigma_stbd,
 					    &error);
@@ -6369,6 +6451,9 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 									ampcorrtableuse.nangle, 
 									ampcorrtableuse.angle, 
 									ampcorrtableuse.amplitude, 
+									ampcorrreftable.nangle,
+									ampcorrreftable.angle,
+									ampcorrreftable.amplitude,
 									angle, &correction, &error);
                                                         if (process.mbp_ampcorr_stddev == MBP_AMPCORR_IGNORESTD)
                                                             sigma = 1;
@@ -6378,6 +6463,9 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 								    ampcorrtableuse.nangle,
 								    ampcorrtableuse.angle,
 								    ampcorrtableuse.sigma,
+								    ampcorrreftable.nangle,
+								    ampcorrreftable.angle,
+								    ampcorrreftable.sigma,
 								    angle, &sigma, &error);
 							    if (sigma == 0)
 								sigma = 1;
@@ -6413,6 +6501,9 @@ idata, i, slope, angle, correction, reference_amp, amp[i]);*/
 							sscorrtableuse.nangle, 
 							sscorrtableuse.angle, 
 							sscorrtableuse.amplitude, 
+							sscorrreftable.nangle,
+							sscorrreftable.angle,
+							sscorrreftable.amplitude,
 							(-process.mbp_sscorr_angle), 
 							&reference_amp_port, 
 							&error);
@@ -6420,6 +6511,9 @@ idata, i, slope, angle, correction, reference_amp, amp[i]);*/
 							sscorrtableuse.nangle, 
 							sscorrtableuse.angle, 
 							sscorrtableuse.amplitude, 
+							sscorrreftable.nangle,
+							sscorrreftable.angle,
+							sscorrreftable.sigma,
 							process.mbp_sscorr_angle, 
 							&reference_amp_stbd, 
 							&error);
@@ -6483,6 +6577,9 @@ idata, i, slope, angle, correction, reference_amp, amp[i]);*/
 									sscorrtableuse.nangle, 
 									sscorrtableuse.angle, 
 									sscorrtableuse.amplitude, 
+									sscorrreftable.nangle,
+									sscorrreftable.angle,
+									sscorrreftable.amplitude,
 									angle, &correction, &error);
 /*fprintf(stderr, "ping:%d pixel:%d altitude_use:%f slope:%f angle:%f corr:%f reference:%f ss: %f", 
 	idata, i, altitude_use, slope, angle, correction, reference_amp, ss[i]);*/
@@ -6529,6 +6626,9 @@ idata, i, slope, angle, correction, reference_amp, amp[i]);*/
 							ampcorrtableuse.nangle, 
 							ampcorrtableuse.angle, 
 							ampcorrtableuse.amplitude, 
+							ampcorrreftable.nangle,
+							ampcorrreftable.angle,
+							ampcorrreftable.amplitude,
 							(-process.mbp_ampcorr_angle), 
 							&reference_amp_port, 
 							&error);
@@ -6536,6 +6636,9 @@ idata, i, slope, angle, correction, reference_amp, amp[i]);*/
 							ampcorrtableuse.nangle, 
 							ampcorrtableuse.angle, 
 							ampcorrtableuse.amplitude, 
+							ampcorrreftable.nangle,
+							ampcorrreftable.angle,
+							ampcorrreftable.amplitude,
 							process.mbp_ampcorr_angle, 
 							&reference_amp_stbd, 
 							&error);
@@ -6637,6 +6740,9 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 								ampcorrtableuse.nangle, 
 								ampcorrtableuse.angle, 
 								ampcorrtableuse.amplitude, 
+								ampcorrreftable.nangle,
+								ampcorrreftable.angle,
+								ampcorrreftable.amplitude,
 								angle, &correction, &error);
 /*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f", 
 j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
@@ -6668,6 +6774,9 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 							sscorrtableuse.nangle, 
 							sscorrtableuse.angle, 
 							sscorrtableuse.amplitude, 
+							sscorrreftable.nangle,
+							sscorrreftable.angle,
+							sscorrreftable.amplitude,
 							(-process.mbp_sscorr_angle), 
 							&reference_amp_port, 
 							&error);
@@ -6675,6 +6784,9 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 							sscorrtableuse.nangle, 
 							sscorrtableuse.angle, 
 							sscorrtableuse.amplitude, 
+							sscorrreftable.nangle,
+							sscorrreftable.angle,
+							sscorrreftable.amplitude,
 							process.mbp_sscorr_angle, 
 							&reference_amp_stbd, 
 							&error);
@@ -6779,6 +6891,9 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 								sscorrtableuse.nangle, 
 								sscorrtableuse.angle, 
 								sscorrtableuse.amplitude, 
+								sscorrreftable.nangle,
+								sscorrreftable.angle,
+								sscorrreftable.amplitude,
 								angle, &correction, &error);
 						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
 				    			ss[i] = ss[i] - correction + reference_amp;
@@ -7331,13 +7446,15 @@ int get_corrtable(int verbose,
 /*--------------------------------------------------------------------*/
 int get_anglecorr(int verbose,
 	int nangle, double *angles, double *corrs,
+	int nrefangle, double *refangles, double *refcorrs,
 	double angle, double *corr, int *error)
 {
 	char	*function_name = "get_anglecorr";
 	int	status = MB_SUCCESS;
 	int	iangle, found;
-	int	ifirst, ilast;
+	int	ifirst, ilast, iwide;
 	int	i;
+	double	refcorr = 0.0;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -7400,9 +7517,20 @@ int get_anglecorr(int verbose,
 				}
 			}
 		if (angle < 0.0)
-			*corr = corrs[ifirst];
-		if (angle > 0.0)
-			*corr = corrs[ilast];
+			iwide = ifirst;
+		else
+		        iwide = ilast;
+		if (nrefangle > 0)
+			{
+			for (i = 0; i < nrefangle;i++)
+				{
+				if (angle >= refangles[i] && angle < refangles[i+1])
+					refcorr += refcorrs[i];
+				if (angles[iwide] >= refangles[i] && angles[iwide] < refangles[i+1])
+					refcorr -= refcorrs[i];
+				}
+			}
+		*corr = corrs[iwide] + refcorr;
 		}
 
 	/* assume success */

@@ -389,6 +389,7 @@
  *   	                            #   0: don't apply standard deviation correction
  *                                  #   1: divide correction by angle standard deviation
  *                                  #   2: divide correction by angle std dev / reference std dev
+ *   AMPCORRREFFILE filename        # sets reference grazing table (only used when AMPCORRANGLE is not in AMPCORRFILE)
  *
  * SIDESCAN CORRECTION:
  *   SSCORRMODE  boolean            # sets correction of sidescan by amplitude vs grazing 
@@ -936,6 +937,7 @@ struct mb_process_struct
 	double	mbp_ampcorr_angle;
 	int	mbp_ampcorr_slope;
 	int	mbp_ampcorr_stddev;
+	char	mbp_ampcorr_reffile[MBP_FILENAMESIZE];
 	
 	/* sidescan correction */
 	int	mbp_sscorr_mode;
