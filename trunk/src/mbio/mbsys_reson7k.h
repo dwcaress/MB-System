@@ -1373,7 +1373,8 @@ typedef struct s7kr_snippet_struct
 	unsigned short	beam_number;		/* Beam or element number */
 	unsigned int	begin_sample;		/* First sample number in beam from transmitter and outward. */
 	unsigned int	end_sample;		/* Last sample number in beam from transmitter and outward. */
-	unsigned int	nalloc;			/* Bytes allocated to hold time series */
+	unsigned int	nalloc_amp;		/* Bytes allocated to hold amplitude time series */
+	unsigned int	nalloc_phase;		/* Bytes allocated to hold phase time series */
 	void		*amplitude;		/* Amplitude or I time series as defined by sample_type */
 	void		*phase;			/* Phase or Q time series as defined by sample_type */
 }
@@ -1415,8 +1416,8 @@ typedef struct s7kr_beam_struct
 								3 = Phase (32 bits)
 							8-11: I and Q
 								0 = No I and Q
-								1 = Signed 16 but I and signed 16 bit Q
-								2 = Signed 32 but I and signed 32 bit Q
+								1 = Signed 16 bit I and signed 16 bit Q
+								2 = Signed 32 bit I and signed 32 bit Q
 							12-14: Beam forming flag:
 								0 = Beam formed data
 								1 = Element data */

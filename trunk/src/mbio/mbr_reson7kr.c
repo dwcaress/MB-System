@@ -634,6 +634,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	s7kr_bathymetry		*bathymetry;
 	s7kr_backscatter	*backscatter;
 	s7kr_beam		*beam;
+	s7kr_verticaldepth	*verticaldepth;
 	s7kr_image		*image;
 	s7kr_bluefin		*bluefin;
 	int	*current_ping;
@@ -863,11 +864,28 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		/* get attitude structure */
 		depth = &(store->depth);
 		
-		/* add latest heading sample */
-		mb_depint_add(verbose, mbio_ptr,
-				(double)(store->time_d),
-				(double)(depth->depth),
-				error);
+		/* add latest depth sample if sensor depth, not water depth */
+		if (depth->descriptor == 0 && depth->depth != 0.0)
+			mb_depint_add(verbose, mbio_ptr,
+					(double)(store->time_d),
+					(double)(depth->depth),
+					error);
+		}
+
+	/* save sonardepth if 7kVerticalDepth record has been read */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_DATA
+		&& store->read_verticaldepth == MB_YES)
+		{
+		/* get attitude structure */
+		verticaldepth = &(store->verticaldepth);
+		
+		/* add latest depth sample if sensor depth, not water depth */
+		if (verticaldepth->vertical_depth != 0.0)
+			mb_depint_add(verbose, mbio_ptr,
+					(double)(store->time_d),
+					(double)(verticaldepth->vertical_depth),
+					error);
 		}
 #ifdef MBR_RESON7KR_DEBUG
 if (verbose > 0)
@@ -1273,12 +1291,18 @@ skip, *recordid, *recordid,
 				/* check for ping number */
 				ping_record = MB_YES;
 				mbr_reson7kr_chk_pingnumber(verbose, *recordid, buffer, new_ping);
+/* fprintf(stderr,"called mbr_reson7kr_chk_pingnumber recordid:%d last_ping:%d new_ping:%d\n",
+*recordid,*last_ping,*new_ping);
+fprintf(stderr,"records read: %d %d %d %d %d %d %d %d %d\n",
+store->read_volatilesettings,store->read_matchfilter,store->read_beamgeometry,store->read_bathymetry,
+store->read_remotecontrolsettings,store->read_backscatter,store->read_beam,store->read_verticaldepth,store->read_image);*/
 				
 				/* fix lack of ping number for backscatter and beam geometry records */
 				if (*recordid == R7KRECID_7kBackscatterImageData
 					&& *new_ping <= 0)
 					*new_ping = *last_ping;
-				else if (*recordid == R7KRECID_7kBeamGeometry)
+				else if (*recordid == R7KRECID_7kBeamGeometry
+					&& *new_ping <= 0)
 					*new_ping = *last_ping;
 					
 				/* determine if record is continuation of the last ping
@@ -1311,10 +1335,13 @@ skip, *recordid, *recordid,
 						mb_get_time(verbose, store->time_i, &(store->time_d));
 						}
 					
-					/* not a complete record unless there is bathymetry */
+					/* not a complete record unless there is bathymetry, drop the partial ping */
 					else
 						{
 						done = MB_NO;
+						*last_ping = -1;
+						*last_ping = *new_ping;
+						*save_flag = MB_NO;
 						}
 
 					}
@@ -1342,6 +1369,8 @@ skip, *recordid, *recordid,
 					}
 				}
 			}
+/* fprintf(stderr,"ping_record:%d last_ping:%d new_ping:%d current_ping:%d done:%d status:%d error:%d\n",
+ping_record,*last_ping,*new_ping,*current_ping,done,status,*error); */
 			
 		/* check for ping data already read in read error case */
 		if (status == MB_FAILURE && *last_ping >= 0)
@@ -1795,7 +1824,7 @@ header->RecordNumber,backscatter->ping_number);
 					header->s7kTime.Minutes = store->time_i[4];
 					header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr,"TIME CORRECTION: R7KHDRSIZE_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
+fprintf(stderr,"TIME CORRECTION: R7KRECID_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,beam->ping_number);
@@ -1911,13 +1940,24 @@ header->RecordNumber,image->ping_number);
 				*current_ping = *last_ping;
 				*last_ping = -1;
 				}
+			else if (status == MB_SUCCESS 
+				&& ping_record == MB_YES
+				&& store->read_volatilesettings == MB_YES
+				&& store->read_beamgeometry == MB_YES
+				&& store->read_bathymetry == MB_YES
+				&& store->read_image == MB_YES)
+				{
+				done = MB_YES;
+				*current_ping = *last_ping;
+				*last_ping = -1;
+				}
 			}
 
 		/* bail out if there is a parsing error */
 		if (status == MB_FAILURE)
 			done = MB_YES;
 #ifdef MBR_RESON7KR_DEBUG
-if (verbose > 0)
+if (verbose >= 0)
 {
 fprintf(stderr,"done:%d kind:%d recordid:%x size:%d status:%d error:%d\n", 
 	done, store->kind, *recordid, *size, status, *error);
@@ -1996,7 +2036,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	mb_get_binary_short(MB_YES, &buffer[40], &reserved); 
 	mb_get_binary_short(MB_YES, &buffer[42], enumerator); 
 #ifdef MBR_RESON7KR_DEBUG
-	if (verbose >= 0)
+	if (verbose > 0)
 		{
 		fprintf(stderr, "\nChecking header in mbr_reson7kr_chk_header:\n");
 		fprintf(stderr, "Version:      %4.4hX | %d\n", version, version);
@@ -4399,7 +4439,7 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index,
 		{
 		mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwsegyheader->unuseda[i])); *index += 2;
 		}
-	
+
 	/* print out the results */
 	/*mbsys_reson7k_print_fsdwsegyheader(verbose, fsdwsegyheader, error);*/
 
@@ -6329,7 +6369,8 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 	s7kr_snippet *snippet;
 	int	index;
 	int	time_j[5];
-	int	nalloc;
+	int	nalloc_amp;
+	int	nalloc_phase;
 	int	nsamples;
 	int	sample_type_amp;
 	int	sample_type_phase;
@@ -6376,8 +6417,8 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 	mb_get_binary_short(MB_YES, &buffer[index], &(beam->sample_header_id)); index += 2;
 	mb_get_binary_int(MB_YES, &buffer[index], &(beam->sample_type)); index += 4;
 	sample_type_amp = beam->sample_type & 15;
-	sample_type_phase = (beam->sample_type << 4) & 15;
-	sample_type_iandq = (beam->sample_type << 8) & 15;
+	sample_type_phase = (beam->sample_type >> 4) & 15;
+	sample_type_iandq = (beam->sample_type >> 8) & 15;
 	for (i=0;i<beam->number_beams;i++)
 		{
 		snippet = &beam->snippets[i];
@@ -6390,108 +6431,97 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 		{
 		/* allocate memory for snippet if needed */
 		snippet = &beam->snippets[i];
-		nalloc = 0;
+		nalloc_amp = 0;
+		nalloc_phase = 0;
 		if (sample_type_amp == 1)
-			nalloc += 1;
+			nalloc_amp += 1;
 		else if (sample_type_amp == 2)
-			nalloc += 2;
+			nalloc_amp += 2;
 		else if (sample_type_amp == 3)
-			nalloc += 4;
+			nalloc_amp += 4;
 		if (sample_type_phase == 1)
-			nalloc += 1;
+			nalloc_phase += 1;
 		else if (sample_type_phase == 2)
-			nalloc += 2;
+			nalloc_phase += 2;
 		else if (sample_type_phase == 3)
-			nalloc += 4;
+			nalloc_phase += 4;
 		if (sample_type_iandq == 1)
-			nalloc += 4;
-		else if (sample_type_iandq == 2)
-			nalloc += 8;
-		nalloc *= snippet->end_sample - snippet->begin_sample + 1;
-		if (status == MB_SUCCESS
-			&& snippet->nalloc < nalloc)
 			{
-			snippet->nalloc = nalloc;
+			nalloc_amp += 2;
+			nalloc_phase += 2;
+			}
+		else if (sample_type_iandq == 2)
+			{
+			nalloc_amp += 4;
+			nalloc_phase += 4;
+			}
+		nalloc_amp *= (snippet->end_sample - snippet->begin_sample + 1);
+		nalloc_phase *= (snippet->end_sample - snippet->begin_sample + 1);
+		if (status == MB_SUCCESS
+			&& (snippet->nalloc_amp < nalloc_amp || snippet->nalloc_phase < nalloc_phase))
+			{
+			snippet->nalloc_amp = nalloc_amp;
 			if (status == MB_SUCCESS)
-			status = mb_reallocd(verbose, __FILE__, __LINE__, snippet->nalloc,
+			status = mb_reallocd(verbose, __FILE__, __LINE__, snippet->nalloc_amp,
 						(void **) &(snippet->amplitude), error);
+			snippet->nalloc_phase = nalloc_phase;
 			if (status == MB_SUCCESS)
-			status = mb_reallocd(verbose, __FILE__, __LINE__, snippet->nalloc,
+			status = mb_reallocd(verbose, __FILE__, __LINE__, snippet->nalloc_phase,
 						(void **) &(snippet->phase), error);
 			if (status != MB_SUCCESS)
 				{
-				snippet->nalloc = 0;
+				snippet->nalloc_amp = 0;
+				snippet->nalloc_phase = 0;
 				}
 			}
 
-		/* extract snippet data */
+		/* extract snippet or beam data */
 		if (status == MB_SUCCESS)
 			{
 			nsamples = snippet->end_sample - snippet->begin_sample + 1;
-			if (sample_type_amp == 1)
+			for (j=0;j<nsamples;j++)
 				{
-				charptr = (char *)snippet->amplitude;
-				for (j=0;j<nsamples;j++)
+				if (sample_type_amp == 1)
 					{
+					charptr = (char *)snippet->amplitude;
 					charptr[j] = buffer[index]; index++;
 					}
-				}
-			else if (sample_type_amp == 2)
-				{
-				ushortptr = (unsigned short *)snippet->amplitude;
-				for (j=0;j<nsamples;j++)
+				else if (sample_type_amp == 2)
 					{
+					ushortptr = (unsigned short *)snippet->amplitude;
 					mb_get_binary_short(MB_YES, &buffer[index], &(ushortptr[j])); index += 2;
 					}
-				}
-			else if (sample_type_amp == 3)
-				{
-				uintptr = (unsigned int *)snippet->amplitude;
-				for (j=0;j<nsamples;j++)
+				else if (sample_type_amp == 3)
 					{
+					uintptr = (unsigned int *)snippet->amplitude;
 					mb_get_binary_int(MB_YES, &buffer[index], &(uintptr[j])); index += 4;
 					}
-				}
-			if (sample_type_phase == 1)
-				{
-				charptr = (char *)snippet->phase;
-				for (j=0;j<nsamples;j++)
+				if (sample_type_phase == 1)
 					{
+					charptr = (char *)snippet->phase;
 					charptr[j] = buffer[index]; index++;
 					}
-				}
-			else if (sample_type_phase == 2)
-				{
-				ushortptr = (unsigned short *)snippet->phase;
-				for (j=0;j<nsamples;j++)
+				else if (sample_type_phase == 2)
 					{
+					ushortptr = (unsigned short *)snippet->phase;
 					mb_get_binary_short(MB_YES, &buffer[index], &(ushortptr[j])); index += 2;
 					}
-				}
-			else if (sample_type_phase == 3)
-				{
-				uintptr = (unsigned int *)snippet->phase;
-				for (j=0;j<nsamples;j++)
+				else if (sample_type_phase == 3)
 					{
+					uintptr = (unsigned int *)snippet->phase;
 					mb_get_binary_int(MB_YES, &buffer[index], &(uintptr[j])); index += 4;
 					}
-				}
-			else if (sample_type_iandq == 1)
-				{
-				shortptramp = (short *)snippet->amplitude;
-				shortptrphase = (short *)snippet->phase;
-				for (j=0;j<nsamples;j++)
+				if (sample_type_iandq == 1)
 					{
+					shortptramp = (short *)snippet->amplitude;
+					shortptrphase = (short *)snippet->phase;
 					mb_get_binary_short(MB_YES, &buffer[index], &(shortptramp[j])); index += 2;
 					mb_get_binary_short(MB_YES, &buffer[index], &(shortptrphase[j])); index += 2;
 					}
-				}
-			else if (sample_type_iandq == 2)
-				{
-				intptramp = (int *)snippet->amplitude;
-				intptrphase = (int *)snippet->phase;
-				for (j=0;j<nsamples;j++)
+				else if (sample_type_iandq == 2)
 					{
+					intptramp = (int *)snippet->amplitude;
+					intptrphase = (int *)snippet->phase;
 					mb_get_binary_int(MB_YES, &buffer[index], &(intptramp[j])); index += 4;
 					mb_get_binary_int(MB_YES, &buffer[index], &(intptrphase[j])); index += 4;
 					}
@@ -6529,7 +6559,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 		{
 		/* set kind */
 		store->kind = MB_DATA_DATA;
-		store->type = R7KHDRSIZE_7kBeamData;
+		store->type = R7KRECID_7kBeamData;
 		
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
@@ -8276,7 +8306,7 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -8386,7 +8416,7 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -8496,7 +8526,7 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -8609,7 +8639,7 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -8774,7 +8804,7 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -8889,7 +8919,7 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -8994,7 +9024,7 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -9137,7 +9167,7 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -9245,7 +9275,7 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -9362,7 +9392,7 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -9425,6 +9455,7 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_CTD;
+	*size += ctd->n * R7KRDTSIZE_CTD;
 	
 	/* allocate memory to read rest of record if necessary */
 	if (*bufferalloc < *size)
@@ -9487,7 +9518,7 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -9634,7 +9665,7 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -9739,7 +9770,7 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -9842,7 +9873,7 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -9957,7 +9988,7 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -10068,7 +10099,7 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -10180,7 +10211,7 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -10634,7 +10665,7 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -10781,7 +10812,7 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -10924,7 +10955,7 @@ fsdwchannel->sample_interval,fsdwsegyheader->sampleInterval);
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -11118,7 +11149,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -11261,7 +11292,7 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -11392,7 +11423,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -11501,7 +11532,7 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -11626,7 +11657,7 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -11743,7 +11774,7 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -11906,7 +11937,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -12114,7 +12145,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -12148,7 +12179,6 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	nalloc;
 	int	nsamples;
 	int	sample_type_amp;
 	int	sample_type_phase;
@@ -12192,8 +12222,8 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kBeamData;
 	sample_type_amp = beam->sample_type & 15;
-	sample_type_phase = (beam->sample_type << 4) & 15;
-	sample_type_iandq = (beam->sample_type << 8) & 15;
+	sample_type_phase = (beam->sample_type >> 4) & 15;
+	sample_type_iandq = (beam->sample_type >> 8) & 15;
 	sample_size = 0;
 	if (sample_type_amp == 1)
 		sample_size += 1;
@@ -12268,93 +12298,53 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 
 		for (i=0;i<beam->number_beams;i++)
 			{
-			/* allocate memory for snippet if needed */
-			snippet = &beam->snippets[i];
-			nalloc = sample_size * (snippet->end_sample - snippet->begin_sample + 1);
-			if (status == MB_SUCCESS
-				&& snippet->nalloc < nalloc)
-				{
-				snippet->nalloc = nalloc;
-				if (status == MB_SUCCESS)
-				status = mb_reallocd(verbose, __FILE__, __LINE__, snippet->nalloc,
-							(void **)&(snippet->amplitude), error);
-				if (status == MB_SUCCESS)
-				status = mb_reallocd(verbose, __FILE__, __LINE__, snippet->nalloc,
-							(void **) &(snippet->phase), error);
-				if (status != MB_SUCCESS)
-					{
-					snippet->nalloc = 0;
-					}
-				}
-
-			/* extract snippet data */
+			/* extract snippet or beam data data */
 			if (status == MB_SUCCESS)
 				{
 				nsamples = snippet->end_sample - snippet->begin_sample + 1;
-				if (sample_type_amp == 1)
+				for (j=0;j<nsamples;j++)
 					{
-					charptr = (char *)snippet->amplitude;
-					for (j=0;j<nsamples;j++)
+					if (sample_type_amp == 1)
 						{
+						charptr = (char *)snippet->amplitude;
 						buffer[index] = charptr[j]; index++;
 						}
-					}
-				else if (sample_type_amp == 2)
-					{
-					ushortptr = (unsigned short *)snippet->amplitude;
-					for (j=0;j<nsamples;j++)
+					else if (sample_type_amp == 2)
 						{
+						ushortptr = (unsigned short *)snippet->amplitude;
 						mb_put_binary_short(MB_YES, ushortptr[j], &buffer[index]); index += 2;
 						}
-					}
-				else if (sample_type_amp == 3)
-					{
-					uintptr = (unsigned int *)snippet->amplitude;
-					for (j=0;j<nsamples;j++)
+					else if (sample_type_amp == 3)
 						{
+						uintptr = (unsigned int *)snippet->amplitude;
 						mb_put_binary_int(MB_YES, uintptr[j], &buffer[index]); index += 4;
 						}
-					}
-				if (sample_type_phase == 1)
-					{
-					charptr = (char *)snippet->phase;
-					for (j=0;j<nsamples;j++)
+					if (sample_type_phase == 1)
 						{
+						charptr = (char *)snippet->phase;
 						buffer[index] = charptr[j]; index++;
 						}
-					}
-				else if (sample_type_phase == 2)
-					{
-					ushortptr = (unsigned short *)snippet->phase;
-					for (j=0;j<nsamples;j++)
+					else if (sample_type_phase == 2)
 						{
+						ushortptr = (unsigned short *)snippet->phase;
 						mb_put_binary_short(MB_YES, ushortptr[j], &buffer[index]); index += 2;
 						}
-					}
-				else if (sample_type_phase == 3)
-					{
-					uintptr = (unsigned int *)snippet->phase;
-					for (j=0;j<nsamples;j++)
+					else if (sample_type_phase == 3)
 						{
+						uintptr = (unsigned int *)snippet->phase;
 						mb_put_binary_int(MB_YES, uintptr[j], &buffer[index]); index += 4;
 						}
-					}
-				else if (sample_type_iandq == 1)
-					{
-					shortptramp = (short *)snippet->amplitude;
-					shortptrphase = (short *)snippet->phase;
-					for (j=0;j<nsamples;j++)
+					if (sample_type_iandq == 1)
 						{
+						shortptramp = (short *)snippet->amplitude;
+						shortptrphase = (short *)snippet->phase;
 						mb_put_binary_short(MB_YES, shortptramp[j], &buffer[index]); index += 2;
 						mb_put_binary_short(MB_YES, shortptrphase[j], &buffer[index]); index += 2;
 						}
-					}
-				else if (sample_type_iandq == 2)
-					{
-					intptramp = (int *)snippet->amplitude;
-					intptrphase = (int *)snippet->phase;
-					for (j=0;j<nsamples;j++)
+					else if (sample_type_iandq == 2)
 						{
+						intptramp = (int *)snippet->amplitude;
+						intptrphase = (int *)snippet->phase;
 						mb_put_binary_int(MB_YES, intptramp[j], &buffer[index]); index += 4;
 						mb_put_binary_int(MB_YES, intptrphase[j], &buffer[index]); index += 4;
 						}
@@ -12399,7 +12389,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -12512,7 +12502,7 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -12671,7 +12661,7 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -12820,7 +12810,7 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -12995,8 +12985,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -13111,7 +13100,7 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -13252,7 +13241,7 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -13357,8 +13346,7 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -13463,8 +13451,7 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -13569,8 +13556,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -13675,8 +13661,7 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;
@@ -13781,8 +13766,7 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 		/* check size */
 		if (*size != index)
 			{
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
-fprintf(stderr,"Bad size comparison: size:%d index:%d\n",*size,index);
+fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE__, __LINE__, *size, index);
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_DATA;
 			*size = 0;

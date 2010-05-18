@@ -824,7 +824,8 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		beam->snippets[i].beam_number = 0;
 		beam->snippets[i].begin_sample = 0;
 		beam->snippets[i].end_sample = 0;
-		beam->snippets[i].nalloc = 0;
+		beam->snippets[i].nalloc_amp = 0;
+		beam->snippets[i].nalloc_phase = 0;
 		beam->snippets[i].amplitude = NULL;
 		beam->snippets[i].phase = NULL;
 		}
@@ -1163,7 +1164,8 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		{
 		beam->snippets[i].begin_sample = 0;
 		beam->snippets[i].end_sample = 0;
-		beam->snippets[i].nalloc = 0;
+		beam->snippets[i].nalloc_amp = 0;
+		beam->snippets[i].nalloc_phase = 0;
 		if (beam->snippets[i].amplitude != NULL)
 			status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(beam->snippets[i].amplitude),error);
 		if (beam->snippets[i].phase != NULL)
@@ -3389,9 +3391,9 @@ int mbsys_reson7k_print_beam(int verbose,
 	fprintf(stderr,"%s     sample_header_id:           %d\n",first,beam->sample_header_id);
 	fprintf(stderr,"%s     sample_type:                %d\n",first,beam->sample_type);
 	sample_type_amp = beam->sample_type & 15;
-	sample_type_phase = (beam->sample_type << 4) & 15;
-	sample_type_iandq = (beam->sample_type << 8) & 15;
-	sample_type_beamforming = (beam->sample_type << 12) & 15;
+	sample_type_phase = (beam->sample_type >> 4) & 15;
+	sample_type_iandq = (beam->sample_type >> 8) & 15;
+	sample_type_beamforming = (beam->sample_type >> 12) & 15;
 	fprintf(stderr,"%s     sample_type amplitude:      %d\n",first,sample_type_amp);
 	fprintf(stderr,"%s     sample_type phase:          %d\n",first,sample_type_phase);
 	fprintf(stderr,"%s     sample_type I and Q:        %d\n",first,sample_type_iandq);
@@ -3399,9 +3401,9 @@ int mbsys_reson7k_print_beam(int verbose,
 	for (i=0;i<beam->number_beams;i++)
 		{
 		snippet = &beam->snippets[i];
-		fprintf(stderr,"%s     beam[%d]:%d   begin_sample:%d end_sample:%d nalloc:%d\n",
+		fprintf(stderr,"%s     beam[%d]:%d   begin_sample:%d end_sample:%d nalloc_amp:%d nalloc_phase:%d\n",
 						first,i,snippet->beam_number,snippet->begin_sample,
-						snippet->end_sample,snippet->nalloc);
+						snippet->end_sample,snippet->nalloc_amp,snippet->nalloc_phase);
 		ucharptramp = (mb_u_char *) snippet->amplitude;
 		ucharptrphase = (mb_u_char *) snippet->phase;
 		ushortptramp = (unsigned short *) snippet->amplitude;
@@ -3422,11 +3424,11 @@ int mbsys_reson7k_print_beam(int verbose,
 			else if (sample_type_amp == 3)
 				fprintf(stderr,"   amplitude:%d",uintptramp[j]);
 			if (sample_type_phase == 1)
-				fprintf(stderr,"   amplitude:%d",ucharptramp[j]);
+				fprintf(stderr,"   phase:%d",ucharptrphase[j]);
 			else if (sample_type_phase == 2)
-				fprintf(stderr,"   amplitude:%d",ushortptramp[j]);
+				fprintf(stderr,"   phase:%d",ushortptrphase[j]);
 			else if (sample_type_phase == 3)
-				fprintf(stderr,"   amplitude:%d",uintptramp[j]);
+				fprintf(stderr,"   phase:%d",uintptrphase[j]);
 			if (sample_type_iandq == 1)
 				fprintf(stderr,"   amplitude:%d   phase:%d",shortptramp[j],shortptrphase[j]);
 			else if (sample_type_iandq == 2)
@@ -3565,21 +3567,21 @@ int mbsys_reson7k_print_image(int verbose,
 	if (image->color_depth == 1)
 		{
 		charptr = (mb_s_char *) image->image;
-		for (i=0;i<image->width*image->width;i++)
-			fprintf(stderr,"%s     image[%d]:  %u\n",
+		for (i=0;i<image->width*image->height;i++)
+			fprintf(stderr,"%s     image[%d]:  %hhu\n",
 				first,i,charptr[i]);
 		}
 	else if (image->color_depth == 2)
 		{
 		shortptr = (short *) image->image;
-		for (i=0;i<image->width*image->width;i++)
-			fprintf(stderr,"%s     image[%d]:  %u\n",
+		for (i=0;i<image->width*image->height;i++)
+			fprintf(stderr,"%s     image[%d]:  %hu\n",
 				first,i,shortptr[i]);
 		}
 	else if (image->color_depth == 4)
 		{
 		intptr = (int *) image->image;
-		for (i=0;i<image->width*image->width;i++)
+		for (i=0;i<image->width*image->height;i++)
 			fprintf(stderr,"%s     image[%d]:  %u\n",
 				first,i,intptr[i]);
 		}
@@ -8119,40 +8121,26 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 	copy->beam = store->beam;
 	for (i=0;i<MBSYS_RESON7K_MAX_RECEIVERS;i++)
 		{
-		copy->beam.snippets[i].nalloc = beam->snippets[i].nalloc;
+		copy->beam.snippets[i].nalloc_amp = beam->snippets[i].nalloc_amp;
+		copy->beam.snippets[i].nalloc_phase = beam->snippets[i].nalloc_phase;
 		copy->beam.snippets[i].amplitude = beam->snippets[i].amplitude;
 		copy->beam.snippets[i].phase = beam->snippets[i].phase;
-		nalloc = 0;
-		if ((store->beam.sample_type & 15) == 1)
-			nalloc += 1;
-		else if ((store->beam.sample_type & 15) == 2)
-			nalloc += 2;
-		else if ((store->beam.sample_type & 15) == 3)
-			nalloc += 4;
-		if (((store->beam.sample_type << 4) & 15) == 1)
-			nalloc += 1;
-		else if (((store->beam.sample_type << 4) & 15) == 2)
-			nalloc += 2;
-		else if (((store->beam.sample_type << 4) & 15) == 3)
-			nalloc += 4;
-		if (((store->beam.sample_type << 8) & 15) == 1)
-			nalloc += 4;
-		else if (((store->beam.sample_type << 8) & 15) == 2)
-			nalloc += 8;
-		nalloc *= store->beam.snippets[i].end_sample - store->beam.snippets[i].begin_sample + 1;
 		if (status == MB_SUCCESS
-			&& copy->beam.snippets[i].nalloc < nalloc)
+			&& (copy->beam.snippets[i].nalloc_amp < store->beam.snippets[i].nalloc_amp
+				|| copy->beam.snippets[i].nalloc_phase < store->beam.snippets[i].nalloc_phase))
 			{
-			copy->beam.snippets[i].nalloc = nalloc;
+			copy->beam.snippets[i].nalloc_amp = store->beam.snippets[i].nalloc_amp;
 			if (status == MB_SUCCESS)
-			status = mb_reallocd(verbose, __FILE__, __LINE__, copy->beam.snippets[i].nalloc,
+			status = mb_reallocd(verbose, __FILE__, __LINE__, copy->beam.snippets[i].nalloc_amp,
 						(void **)&(copy->beam.snippets[i].amplitude), error);
+			copy->beam.snippets[i].nalloc_phase = store->beam.snippets[i].nalloc_phase;
 			if (status == MB_SUCCESS)
-			status = mb_reallocd(verbose, __FILE__, __LINE__, copy->beam.snippets[i].nalloc,
+			status = mb_reallocd(verbose, __FILE__, __LINE__, copy->beam.snippets[i].nalloc_phase,
 						(void **)&(copy->beam.snippets[i].phase), error);
 			if (status != MB_SUCCESS)
 				{
-				copy->beam.snippets[i].nalloc = 0;
+				copy->beam.snippets[i].nalloc_amp = 0;
+				copy->beam.snippets[i].nalloc_phase = 0;
 				copy->beam.snippets[i].end_sample = 0;
 				copy->beam.snippets[i].begin_sample = 0;
 				}
@@ -8161,11 +8149,11 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 			{
 			copycharptr = (char *)(copy->beam.snippets[i].amplitude);
 			charptr = (char *)(store->beam.snippets[i].amplitude);
-			for (j=0;j<nalloc;j++)
+			for (j=0;j<copy->beam.snippets[i].nalloc_amp;j++)
 				copycharptr[j] = charptr[j];
 			copycharptr = (char *)(copy->beam.snippets[i].phase);
 			charptr = (char *)(store->beam.snippets[i].phase);
-			for (j=0;j<nalloc;j++)
+			for (j=0;j<copy->beam.snippets[i].nalloc_phase;j++)
 				copycharptr[j] = charptr[j];
 			}
 		

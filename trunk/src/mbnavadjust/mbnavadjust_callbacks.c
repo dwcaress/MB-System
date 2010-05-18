@@ -2090,6 +2090,12 @@ void do_update_status()
 		XtVaSetValues(toggleButton_showselectedsurvey,
 			XmNsensitive, False,
 			NULL);
+		XtVaSetValues(toggleButton_showselectedfile,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(toggleButton_showselectedsection,
+			XmNsensitive, False,
+			NULL);
 		}
 		
 	if (mbna_status == MBNA_STATUS_GUI
@@ -2099,10 +2105,21 @@ void do_update_status()
 		XtVaSetValues(pushButton_autopick,
 			XmNsensitive, True,
 			NULL);
+        	if (project.inversion == MBNA_INVERSION_CURRENT)
+			XtVaSetValues(pushButton_newcrossings,
+				XmNsensitive, True,
+				NULL);
+        	else
+			XtVaSetValues(pushButton_newcrossings,
+				XmNsensitive, False,
+				NULL);
 		XtVaSetValues(pushButton_makegrid,
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_analyzecrossings,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_zerozoffsets,
 			XmNsensitive, True,
 			NULL);
 		if (project.num_truecrossings == project.num_truecrossings_analyzed
@@ -2136,10 +2153,16 @@ void do_update_status()
 		XtVaSetValues(pushButton_autopick,
 			XmNsensitive, False,
 			NULL);
+		XtVaSetValues(pushButton_newcrossings,
+			XmNsensitive, False,
+			NULL);
 		XtVaSetValues(pushButton_makegrid,
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_analyzecrossings,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_zerozoffsets,
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_invertnav,
@@ -3360,6 +3383,23 @@ do_naverr_selecttie( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
+do_naverr_unset( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mbnavadjust_naverr_unset();
+    mbnavadjust_naverr_nextunset();
+    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+    do_update_naverr();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
+    do_update_status();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
 do_naverr_setnone( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
@@ -4419,14 +4459,32 @@ do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data)
     mbna_status = MBNA_STATUS_GUI;
     
 }
+
 /*--------------------------------------------------------------------*/
+
 void
 do_action_analyzecrossings( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 }
+
 /*--------------------------------------------------------------------*/
+
+void
+do_action_checknewcrossings( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mbnavadjust_findcrossings();
+    if (project.modelplot == MB_YES)
+	mbnavadjust_modelplot_plot();
+    do_update_status();
+}
+
+/*--------------------------------------------------------------------*/
+
 void
 do_zerozoffsets( Widget w, XtPointer client_data, XtPointer call_data)
 {
@@ -4438,7 +4496,9 @@ do_zerozoffsets( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavadjust_modelplot_plot();
     do_update_status();
 }
+
 /*--------------------------------------------------------------------*/
+
 void
 do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data)
 {

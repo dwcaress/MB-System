@@ -250,6 +250,7 @@
 #define	EM3_SS_MBA		0x02E2
 #define	EM3_BATH2_MBA		0x02E3
 #define	EM3_SS2_MBA		0x02E4
+#define	EM3_BATH3_MBA		0x02E5
 
 /* datagram types */
 #define	EM3_ID_STOP2		0x30
@@ -288,6 +289,7 @@
 #define	EM3_ID_SS_MBA		0xE2
 #define	EM3_ID_BATH2_MBA	0xE3
 #define	EM3_ID_SS2_MBA		0xE4
+#define	EM3_ID_BATH3_MBA	0xE5
 
 /* datagram sizes where constant */
 #define	EM3_STATUS_SIZE			88
@@ -320,6 +322,8 @@
 #define	EM3_RAWBEAM4_HEADER_SIZE	28
 #define	EM3_RAWBEAM4_TX_SIZE		24
 #define	EM3_RAWBEAM4_BEAM_SIZE		16
+#define	EM3_BATH3_MBA_HEADER_SIZE	48
+#define	EM3_BATH3_MBA_BEAM_SIZE		38
 #define	EM3_SS2_HEADER_SIZE		28
 #define	EM3_SS2_BEAM_SIZE		6
 #define	EM3_SS2_MBA_HEADER_SIZE		36
@@ -446,9 +450,9 @@ struct mbsys_simrad3_ping_struct
 	float	png_azimuth[MBSYS_SIMRAD3_MAXBEAMS];
 				/* beam azimuth angles (deg) */
 	float	png_range[MBSYS_SIMRAD3_MAXBEAMS];
-				/* Two-way travel times (sec). These values
-					have been corrected for changes in the
-					heave during the ping cycle. */
+				/* Two-way travel times (sec). */
+	float	png_bheave[MBSYS_SIMRAD3_MAXBEAMS];
+				/* Average of heave at transmit and receive time for each beam */
 
 	/* raw travel time and angle data version 4 */
 	int	png_raw4_read;	/* flag indicating actual reading of raw beam record */

@@ -68,7 +68,9 @@ identifier BXG_scrolledWindow_datalist;
 identifier BXG_form_mbnavadjust;
 identifier BXG_pushButton_applynav;
 identifier BXG_pushButton_invertnav;
+identifier BXG_pushButton_zerozoffsets;
 identifier BXG_pushButton_analyzecrossings;
+identifier BXG_pushButton_newcrossings;
 identifier BXG_pushButton_autopick;
 identifier BXG_pushButton_fixednav;
 identifier BXG_pushButton_goodnav;
@@ -103,6 +105,7 @@ identifier BXG_label_format;
 identifier BXG_fileSelectionBox;
 identifier BXG_bulletinBoard_fileselection;
 identifier BXG_xmDialogShell_fileselection;
+identifier BXG_pushButton_naverr_unset;
 identifier BXG_pushButton_naverr_minxymisfit;
 identifier BXG_drawingArea_naverr_zcorr;
 identifier BXG_pushButton_naverr_zerozoffset;
@@ -154,6 +157,7 @@ procedure BxSetValuesCB(string);
 procedure BxUnmanageCB(string);
 procedure do_action_analyzecrossings();
 procedure do_action_autopick();
+procedure do_action_checknewcrossings();
 procedure do_action_fixednav();
 procedure do_action_goodnav();
 procedure do_action_invertnav();
@@ -198,6 +202,7 @@ procedure do_naverr_resettie();
 procedure do_naverr_selecttie();
 procedure do_naverr_setnone();
 procedure do_naverr_setoffset();
+procedure do_naverr_unset();
 procedure do_naverr_zcorr_input();
 procedure do_naverr_zerooffset();
 procedure do_naverr_zerozoffset();
@@ -400,8 +405,8 @@ object bulletinBoard_modelplot : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 83;
-        XmNy = 95;
+        XmNx = 774;
+        XmNy = 1021;
         XmNwidth = 1014;
         XmNheight = 481;
     };
@@ -1038,8 +1043,8 @@ object form_controls : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 115;
-        XmNy = 71;
+        XmNx = 963;
+        XmNy = 1043;
         XmNwidth = 635;
         XmNheight = 438;
     };
@@ -1391,8 +1396,8 @@ object form_about : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 116;
-        XmNy = 69;
+        XmNx = 1037;
+        XmNy = 1020;
         XmNwidth = 488;
         XmNheight = 484;
     };
@@ -1736,8 +1741,8 @@ object bulletinBoard_biases : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Heading & Roll Bias");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 117;
-        XmNy = 120;
+        XmNx = 1139;
+        XmNy = 1039;
         XmNwidth = 284;
         XmNheight = 446;
     };
@@ -2035,8 +2040,8 @@ object pushButton_naverr_zerooffset : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Zero Offset");
-        XmNx = 550;
-        XmNy = 10;
+        XmNx = 650;
+        XmNy = 40;
         XmNwidth = 100;
         XmNheight = 30;
     };
@@ -2203,7 +2208,7 @@ object pushButton_naverr_settie : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNlabelString = compound_string("Set Offset");
-        XmNx = 450;
+        XmNx = 550;
         XmNy = 10;
         XmNwidth = 100;
         XmNheight = 30;
@@ -2380,6 +2385,28 @@ object pushButton_naverr_minxymisfit : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_naverr_unset : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Unset Crossing");
+        XmNrecomputeSize = false;
+        XmNx = 450;
+        XmNy = 10;
+        XmNwidth = 100;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_unset);
+        XmNactivateCallback = procedure do_naverr_unset();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object bulletinBoard_naverr : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
@@ -2389,12 +2416,13 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 117;
-        XmNy = 69;
+        XmNx = 461;
+        XmNy = 807;
         XmNwidth = 935;
         XmNheight = 685;
     };
     controls {
+         managed XmPushButton pushButton_naverr_unset;
          managed XmPushButton pushButton_naverr_minxymisfit;
          managed XmDrawingArea drawingArea_naverr_zcorr;
          managed XmPushButton pushButton_naverr_zerozoffset;
@@ -2520,8 +2548,8 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 116;
-        XmNy = 69;
+        XmNx = 975;
+        XmNy = 997;
         XmNwidth = 611;
         XmNheight = 530;
     };
@@ -2637,8 +2665,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 117;
-        XmNy = 95;
+        XmNx = 1125;
+        XmNy = 1182;
         XmNwidth = 311;
         XmNheight = 160;
     };
@@ -2717,8 +2745,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_ANY;
-        XmNx = 117;
-        XmNy = 93;
+        XmNx = 1010;
+        XmNy = 1219;
         XmNwidth = 542;
         XmNheight = 86;
     };
@@ -3394,6 +3422,32 @@ object separator10 : XmSeparator widget {
     };
 };
 
+object pushButton_newcrossings : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Check For New Crossings");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_newcrossings);
+        XmNactivateCallback = procedure do_action_checknewcrossings();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object separator17 : XmSeparator widget {
+    arguments {
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
 object pushButton_analyzecrossings : XmPushButton widget {
     arguments {
         arguments Style_use;
@@ -3433,6 +3487,7 @@ object pushButton_zerozoffsets : XmPushButton widget {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_zerozoffsets);
         XmNactivateCallback = procedure do_zerozoffsets();
     };
 !(BX)    handlers {
@@ -3486,10 +3541,10 @@ object pushButton_applynav : XmPushButtonGadget widget {
 object pulldownMenu_action : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 192;
-        XmNy = 71;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 167;
-        XmNheight = 188;
+        XmNheight = 212;
     };
     controls {
          managed XmPushButton pushButton_poornav;
@@ -3498,6 +3553,8 @@ object pulldownMenu_action : XmPulldownMenu widget {
          managed XmSeparator separator7;
          managed XmPushButton pushButton_autopick;
          managed XmSeparator separator10;
+         managed XmPushButton pushButton_newcrossings;
+         managed XmSeparator separator17;
          managed XmPushButton pushButton_analyzecrossings;
          managed XmSeparator separator11;
          managed XmPushButton pushButton_zerozoffsets;
@@ -3794,8 +3851,8 @@ object form_mbnavadjust : XmForm widget {
 object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 51;
-        XmNy = 44;
+        XmNx = 82;
+        XmNy = 242;
         XmNwidth = 962;
         XmNheight = 400;
     };
@@ -3823,8 +3880,8 @@ object mainWindow : XmMainWindow widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "MBnavadjust";
 !(BX)        XmNiconName = "MBnavadjust";
-!(BX)        XmNx = 51;
-!(BX)        XmNy = 44;
+!(BX)        XmNx = 82;
+!(BX)        XmNy = 242;
 !(BX)        XmNwidth = 962;
 !(BX)        XmNheight = 400;
 !(BX)    };
