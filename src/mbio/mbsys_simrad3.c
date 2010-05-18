@@ -585,9 +585,9 @@ int mbsys_simrad3_survey_alloc(int verbose,
 			ping->png_azimuth[i] = 0.0;
 				/* beam azimuth angles (deg) */
 			ping->png_range[i] = 0.0;
-				/* Two-way travel times (sec). These values
-					have been corrected for changes in the
-					heave during the ping cycle. */
+				/* Two-way travel times (sec). */
+			ping->png_bheave[i] = 0.0;
+				/* Average of heave at transmit and receive time for each beam */
 			}
 
 		/* raw travel time and angle data version 4 */
@@ -2164,15 +2164,11 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
-	double	heave_use;
 	int	time_i[7];
 	double	ptime_d;
 	double	soundspeed;
-	double	receive_heave;
-	double	transmit_heave;
-	double	alpha, beta, theta, phi;
 	int	i;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -2216,7 +2212,6 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_time(verbose, time_i, &ptime_d);
 
 		/* get depth offset (heave + heave offset) */
-		heave_use =  0.0;
 		*ssv = 0.1 * ping->png_ssv;
 		*draft = ping->png_xducer_depth;
 
@@ -2230,8 +2225,8 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			angles_forward[i] = 180.0 - ping->png_azimuth[i];
 			if (angles_forward[i] < 0.0) angles_forward[i] += 360.0;
 			angles_null[i] = 0.0;
-			heave[i] = heave_use;
-			alongtrack_offset[i] = (100.0 * ((double)ping->png_speed)) 
+			heave[i] = 0.5 * (ping->png_bheave[i] - 0.01 * (float)ping->png_heave);
+			alongtrack_offset[i] = (0.01 * ((double)ping->png_speed)) 
 						* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
 			}
 

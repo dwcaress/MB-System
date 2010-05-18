@@ -120,7 +120,7 @@
 #define	MB7KPREPROCESS_TIMELAG_OFF	0
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
-
+#define	MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH	1
 static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -129,7 +129,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mb7kpreprocess";
 	char help_message[] =  "mb7kpreprocess reads a Reson 7k format file, interpolates the\nasynchronous navigation and attitude onto the multibeam data, \nand writes a new 7k file with that information correctly embedded\nin the multibeam data. This program can also fix various problems\nwith 7k data.";
-	char usage_message[] = "mb7kpreprocess [-A -B -Doffx/offy -Fformat -Ifile -L  -Ninsfile  -Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ttimelag -H -V]";
+	char usage_message[] = "mb7kpreprocess [-A -B -Doffx/offy -Fformat -Ifile -Kklugemode -L  -Ninsfile  -Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ttimelag -H -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -472,6 +472,10 @@ int main (int argc, char **argv)
 	FILE	*atafp;
 	FILE	*stafp;
 	
+	/* kluge modes */
+	int	klugemode;
+	int	kluge_useverticaldepth = MB_NO; /* kluge 1 */
+	
 	int	interp_status;
 	double	soundspeed;
 	double	alpha, beta, theta, phi;
@@ -526,7 +530,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaBbD:d:F:f:I:i:LlM:m:N:n:O:o:P:p:R:r:T:t:W:w:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "AaBbD:d:F:f:I:i:K:k:LlM:m:N:n:O:o:P:p:R:r:T:t:W:w:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -565,6 +569,15 @@ int main (int argc, char **argv)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", read_file);
+			flag++;
+			break;
+		case 'K':
+		case 'k':
+			sscanf (optarg,"%d", &klugemode);
+			if (klugemode == MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH)
+				{
+				kluge_useverticaldepth = MB_YES;
+				}
 			flag++;
 			break;
 		case 'L':
@@ -723,6 +736,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       fix_time_stamps:     %d\n",fix_time_stamps);
 		fprintf(stderr,"dbg2       goodnavattitudeonly: %d\n",goodnavattitudeonly);
 		fprintf(stderr,"dbg2       timelagmode:         %d\n",timelagmode);
+		fprintf(stderr,"dbg2       kluge_useverticaldepth: %d\n",kluge_useverticaldepth);
 		if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 			{
 			fprintf(stderr,"dbg2       timelagfile:         %s\n",timelagfile);
@@ -1418,7 +1432,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			if (istore->read_beamgeometry == MB_YES)
 				nrec_beamgeometry++;
 			if (istore->read_remotecontrolsettings == MB_YES)
-				nrec_bathymetry++;
+				nrec_remotecontrolsettings++;
 			if (istore->read_bathymetry == MB_YES)
 				nrec_bathymetry++;
 			if (istore->read_backscatter == MB_YES)
@@ -2711,7 +2725,6 @@ sonardepth_sonardepth[nsonardepth]);*/
 	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth);
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage);
-	fprintf(stdout, "     Remote Control Settings:           %d\n", nrec_remotecontrolsettings);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other);
 	nrec_fileheader_tot += nrec_fileheader;
 	nrec_multibeam_tot += nrec_multibeam;
@@ -2751,7 +2764,6 @@ sonardepth_sonardepth[nsonardepth]);*/
 	nrec_verticaldepth_tot += nrec_verticaldepth;
 	nrec_installation_tot += nrec_installation;
 	nrec_systemeventmessage_tot += nrec_systemeventmessage;
-	nrec_remotecontrolsettings_tot += nrec_remotecontrolsettings;
 	nrec_other_tot += nrec_other;
 
 	/* figure out whether and what to read next */
@@ -2790,8 +2802,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<ndat_nav;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dat_nav_time_d[i], &timelag, &j, 
@@ -2800,6 +2814,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, dat_nav_time_d[i], &timelag, &j, 
@@ -2811,8 +2826,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<ndat_heading;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dat_heading_time_d[i], &timelag, &j, 
@@ -2821,6 +2838,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, dat_heading_time_d[i], &timelag, &j, 
@@ -2832,8 +2850,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<ndat_rph;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dat_rph_time_d[i], &timelag, &j, 
@@ -2842,6 +2862,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, dat_rph_time_d[i], &timelag, &j, 
@@ -2853,8 +2874,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<ndat_sonardepth;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dat_sonardepth_time_d[i], &timelag, &j, 
@@ -2863,6 +2886,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, dat_sonardepth_time_d[i], &timelag, &j, 
@@ -2874,8 +2898,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<ndat_altitude;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dat_altitude_time_d[i], &timelag, &j, 
@@ -2884,6 +2910,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, dat_altitude_time_d[i], &timelag, &j, 
@@ -2896,8 +2923,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<nins;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, ins_time_d[i], &timelag, &j, 
@@ -2906,6 +2935,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, ins_time_d[i], &timelag, &j, 
@@ -2916,8 +2946,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<nins_altitude;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, ins_altitude_time_d[i], &timelag, &j, 
@@ -2926,6 +2958,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, ins_altitude_time_d[i], &timelag, &j, 
@@ -2936,8 +2969,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<nins_speed;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, ins_speed_time_d[i], &timelag, &j, 
@@ -2946,6 +2981,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, ins_speed_time_d[i], &timelag, &j, 
@@ -2958,8 +2994,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<ndsl;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dsl_time_d[i], &timelag, &j, 
@@ -2968,6 +3006,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, dsl_time_d[i], &timelag, &j, 
@@ -2980,8 +3019,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<nrock;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, rock_time_d[i], &timelag, &j, 
@@ -2990,6 +3031,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, rock_time_d[i], &timelag, &j, 
@@ -3002,8 +3044,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 		for (i=0;i<nsonardepth;i++)
 			{
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, sonardepth_time_d[i], &timelag, &j, 
@@ -3012,6 +3056,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, sonardepth_time_d[i], &timelag, &j, 
@@ -3365,7 +3410,6 @@ sonardepth_sonardepth[nsonardepth]);*/
 	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth_tot);
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation_tot);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage_tot);
-	fprintf(stdout, "     Remote Control Settings:           %d\n", nrec_remotecontrolsettings_tot);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other_tot);
 
 	nrec_reference_tot = 0;
@@ -3664,7 +3708,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			if (istore->read_beamgeometry == MB_YES)
 				nrec_beamgeometry++;
 			if (istore->read_remotecontrolsettings == MB_YES)
-				nrec_bathymetry++;
+				nrec_remotecontrolsettings++;
 			if (istore->read_bathymetry == MB_YES)
 				nrec_bathymetry++;
 			if (istore->read_backscatter == MB_YES)
@@ -4033,7 +4077,12 @@ sonardepth_sonardepth[nsonardepth]);*/
 					}
 				
 				/* get sonar depth */
-				if (interp_status != MB_SUCCESS)
+				if (kluge_useverticaldepth == MB_YES)
+					{
+					verticaldepth = (s7kr_verticaldepth *)&(istore->verticaldepth);
+					sonardepth = (double)(verticaldepth->vertical_depth);
+					}
+				else if (interp_status != MB_SUCCESS)
 					{
 					}
 				else if (nsonardepth > 0)
@@ -4407,8 +4456,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4417,6 +4468,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -4454,8 +4506,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4464,6 +4518,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -4522,8 +4577,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4532,6 +4589,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -4569,8 +4627,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4579,6 +4639,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -4616,8 +4677,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4626,6 +4689,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -4663,8 +4727,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4673,6 +4739,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -4710,8 +4777,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4720,6 +4789,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -4779,8 +4849,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4789,6 +4861,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -4826,8 +4899,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4836,6 +4911,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -4895,8 +4971,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4905,6 +4983,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -4942,8 +5021,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -4952,6 +5033,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -5010,8 +5092,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -5020,6 +5104,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -5236,8 +5321,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			mb_get_time(verbose, time_i, &time_d);
 
 			/* get timelag value */
+			timelag = 0.0;
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
+				if (ntimedelay > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
@@ -5246,6 +5333,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
+				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
 							ntimelag, time_d, &timelag, &j, 
@@ -5559,6 +5647,11 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				mb_get_date(verbose, time_d, time_i);
 				}
 			}
+			
+		/* do not output full beam data */
+		if (error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA
+			&& istore->read_beam == MB_YES)
+			istore->read_beam = MB_NO;
 
 		/* write some data */
 		if (error == MB_ERROR_NO_ERROR && (nins < 1 || kind != MB_DATA_NAV2))
@@ -5631,7 +5724,6 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth);
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage);
-	fprintf(stdout, "     Remote Control Settings:           %d\n", nrec_remotecontrolsettings);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other);
 	nrec_fileheader_tot += nrec_fileheader;
 	nrec_multibeam_tot += nrec_multibeam;
@@ -5671,7 +5763,6 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	nrec_verticaldepth_tot += nrec_verticaldepth;
 	nrec_installation_tot += nrec_installation;
 	nrec_systemeventmessage_tot += nrec_systemeventmessage;
-	nrec_remotecontrolsettings_tot += nrec_remotecontrolsettings;
 	nrec_other_tot += nrec_other;
 		
 	/* generate inf fnv and fbt files */
@@ -5739,7 +5830,6 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	fprintf(stdout, "     Vertical Depth:                    %d\n", nrec_verticaldepth_tot);
 	fprintf(stdout, "     Installation:                      %d\n", nrec_installation_tot);
 	fprintf(stdout, "     System Event Message:              %d\n", nrec_systemeventmessage_tot);
-	fprintf(stdout, "     Remote Control Settings:           %d\n", nrec_remotecontrolsettings_tot);
 	fprintf(stdout, "     Other:                             %d\n", nrec_other_tot);
 	}
 		

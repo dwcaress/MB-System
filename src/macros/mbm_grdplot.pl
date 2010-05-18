@@ -1710,7 +1710,7 @@ if (!$gridprojected)
 		{
 		$size = $ysize;
 		}
-	if ($size > 1.0)
+	if ($size > 4.0)
 		{
 		$degree_format = "ddd";
 		}

@@ -412,15 +412,15 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.1.3beta1855"
-#define	MB_BUILD_DATE	"4 May 2010"
+#define	MB_VERSION	"5.1.3beta1858"
+#define	MB_BUILD_DATE	"18 May 2010"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
 #define	MB_NO	0
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			55
+#define	MB_DATA_KINDS			54
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */

@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.1.3beta1858  May 18, 2010
   Version 5.1.3beta1855  May 4, 2010
   Version 5.1.3beta1851  April 14, 2010
   Version 5.1.3beta1844  March 30, 2010
@@ -171,6 +172,32 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
+
+-----> 5.1.3beta1858
+
+Slight modification to mbm_grdplot map annotation scheme (degrees + minutes
+for maps up to 4 degrees across where only degrees shown before for maps
+wider than 1 degree).
+
+Changes to mbm_route2mission to accomodate new capability of MBARI
+Mapping AUV to record full water column data from the Reson 7125 multibeam.
+
+Move mb_mergesort() function prototype from mb_esf.c to mb_define.h.
+
+MBnavadjust augmented with capability to check for new crossings and
+to recalculate overlap coverage of existing crossings after inversions.
+Users can also toggle previously analyzed crossing to "unset" status.
+
+MB7kpreprocess augmented to handle Reson 7111 data sample from NGDC.
+
+Fixed incorrect listing MB_DATA defines in mb_status.h.
+
+Added per-beam heave data to mbsys_simrad3 ping structure to support 
+bathymetry recalculation for EM710, EM302, EM122 data. Defined new
+processed bathymetry record for use in format 59, and set code to
+transparently read the old record and write only the new record.
+Mostly fixed handling of attitude data in bathymetry recalculation.
+There still seems to be a problem with handling heading data.
 
 -----> 5.1.3beta1855
 

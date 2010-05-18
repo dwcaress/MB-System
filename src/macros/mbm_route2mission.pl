@@ -173,6 +173,7 @@ $mb_receivegain = 75.0;
 $mb_minrangefraction = 0.2;
 $mb_pulsewidth = 0.000030;
 $resongainsetcount = 0;
+$mb_snippetmode = 1;
 
 # behavior waypoint and waypoint_depth
 $behaviorWaypointID = 0;
@@ -211,7 +212,7 @@ $routefile =		($opt_I || $opt_i);
 $depthprofilefile =	($opt_J || $opt_j);
 $approachdepth =	($opt_L || $opt_l || $approachdepth);
 $sensor =		($flg_M || $flg_m);
-$sensorarg =	($opt_M || $opt_m);
+$sensorarg =		($opt_M || $opt_m);
 $spiraldescent =	($flg_N || $flg_n);
 $spiraldescentarg =	($opt_N || $opt_n);
 $missionfile =		($opt_O || $opt_o);
@@ -294,6 +295,10 @@ elsif ($startposition)
 	}
 	
 # Set mapping sonar status
+if ($sensorarg =~ /\S*M\S*/)
+	{
+	$mappingsonar = 1;
+	}
 if ($sensorarg =~ /\S*S\S*/)
 	{
 	$mappingsonar = 1;
@@ -312,6 +317,11 @@ if ($sensorarg =~ /\S*H\S*/)
 if ($sensorarg =~ /\S*C\S*/)
 	{
 	$camera = 1;
+	}
+if ($sensorarg =~ /\S*B\S*/)
+	{
+	$mappingsonar = 1;
+	$beamdata = 1;
 	}
 if ($sensor && !$sensorarg)
 	{
@@ -336,6 +346,10 @@ elsif ($multibeamsettings =~ /\S+\/\S+/)
 	{
 	($mb_transmitgain,$mb_receivegain) = $multibeamsettings =~ /(\S+)\/(\S+)/;
 	$mb_minrangefraction = 0.2;
+	}
+if ($mappingsonar && $beamdata)
+	{
+	$mb_snippetmode = 0;
 	}
 	
 # Open the input file
@@ -812,6 +826,10 @@ elsif ($verbose)
 		printf "                                 Multibeam receive gain:           $mb_receivegain\r\n";
 		printf "                                 Multibeam transmit gain:          $mb_transmitgain\r\n";
 		printf "                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
+		if ($beamdata)
+			{
+			printf "                                 Multibeam beam data collection enabled (100 m range)\r\n";
+			}
 		if ($subbottom)
 			{
 			printf "                               Subbottom enabled\r\n";
@@ -957,6 +975,10 @@ if (!$outputoff)
 		printf MFILE "#                                 Multibeam receive gain:           $mb_receivegain\r\n";
 		printf MFILE "#                                 Multibeam transmit gain:          $mb_transmitgain\r\n";
 		printf MFILE "#                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
+		if ($beamdata)
+			{
+			printf MFILE "#                                 Multibeam beam data collection enabled (100 m range)\r\n";
+			}
 		if ($subbottom)
 			{
 			printf MFILE "#                               Subbottom enabled\r\n";
@@ -1196,22 +1218,31 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 			$sonaraltitudeuse = $sonaraltitude;
 			}
 		
-		# sonar range allows for 1.2 * 120 degree swath
+		# sonar range allows for 150 degree swath on flat bottom
+		# sonar range cut off at 100 m for recorded full beamformed data
 		$mb_range = 4.0 * $sonaraltitudeuse;
 		if ($mb_range > 350.0)
 			{
 			$mb_range = 350.0;
+			}
+		if ($beamdata && $mb_range > 100.0)
+			{
+			$mb_range = 100.0;
 			}
 		$mb_minrange = $mb_minrangefraction * $sonaraltitudeuse;
 		$mb_maxrange = $mb_range;
 		$mb_mindepth = 0.0;
 		$mb_maxdepth = $mb_range;
 		$sslo_range = 0.9 * 750.0 / $mb_pingrate;
-		#if ($sslo_range > 200.0)
-		#	{
-		#	$sslo_range = 200.0;
-		#	}
+		if ($sslo_range > 200.0)
+			{
+			$sslo_range = 200.0;
+			}
 		$sbp_duration = 1000.0 * 0.9 / $mb_pingrate;
+		if ($sbp_duration > 400.0)
+			{
+			$sbp_duration = 400.0;
+			}
 
 		# do ascend, gps, descend at line starts and ends if specified
 		if (($iwaypoint != $nwaypoints - 1) 
@@ -1442,8 +1473,8 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 				}
 			if ($sidescanhi)
 				{
-				print MFILE "HiSS_Mode = 0; \r\n";
-				print MFILE "HiSS_Power = 0.0; \r\n";
+				print MFILE "HiSS_Mode = 1; \r\n";
+				print MFILE "HiSS_Power = 100.0; \r\n";
 				print MFILE "HiSS_Range = $sslo_range; \r\n";
 				}
 			print MFILE "MB_Power = $mb_transmitgain; \r\n";
@@ -1458,7 +1489,7 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 			printf MFILE "MB_Bottom_Detect_Filter_Max_Depth = %.2f; \r\n", $mb_maxdepth;
 			print MFILE "MB_Bottom_Detect_Range_Mode = 1; \r\n";
 			print MFILE "MB_Bottom_Detect_Depth_Mode = 0; \r\n";
-			print MFILE "Snippet_Mode = 1; \r\n";
+			print MFILE "Snippet_Mode = $mb_snippetmode; \r\n";
 			print MFILE "Window_Size = 200; \r\n";
 			print MFILE "Log_Mode = 0; \r\n";
 			print MFILE "} \r\n";
@@ -1870,22 +1901,22 @@ print "Behavior: gps\n";
 	if ($mappingsonar)
 		{
 		# get starting sonar parameters assuming $altitudedesired altitude
+		#  $sslo_range & $sbp_duration calculated near start of program
+		# from ping rate
 		$sonaraltitudeuse = $altitudedesired;
 		$mb_range = 4.0 * $sonaraltitudeuse;
 		if ($mb_range > 350.0)
 			{
 			$mb_range = 350.0;
 			}
+		if ($beamdata && $mb_range > 100.0)
+			{
+			$mb_range = 100.0;
+			}
 		$mb_minrange = $mb_minrangefraction * $sonaraltitudeuse;
 		$mb_maxrange = $mb_range;
 		$mb_mindepth = 0.0;
 		$mb_maxdepth = $mb_range;
-		$sslo_range = 0.9 * 750.0 / $mb_pingrate;
-		if ($sslo_range > 200.0)
-			{
-			$sslo_range = 200.0;
-			}
-		$sbp_duration = 1000.0 * 0.9 / $mb_pingrate;
 
 		print MFILE "#######################################################\r\n";
 		print MFILE "# Set sonar parameters, turn pinging on, power zero and logging off \r\n";
@@ -1917,7 +1948,7 @@ print "Behavior: gps\n";
 		printf MFILE "MB_Bottom_Detect_Filter_Max_Depth = %.2f; \r\n", $mb_maxdepth;
 		print MFILE "MB_Bottom_Detect_Range_Mode = 1; \r\n";
 		print MFILE "MB_Bottom_Detect_Depth_Mode = 0; \r\n";
-		print MFILE "Snippet_Mode = 1; \r\n";
+		print MFILE "Snippet_Mode = $mb_snippetmode; \r\n";
 		print MFILE "Window_Size = 200; \r\n";
 		print MFILE "} \r\n";
 		print MFILE "# \r\n";

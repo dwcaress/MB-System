@@ -694,6 +694,7 @@ int mb_lever(int verbose,
 		double *lever_y,
 		double *lever_z,
 		int *error);
+int mb_mergesort(void *base, size_t nmemb,register size_t size, int (*cmp) (void *, void *));
 int mb_double_compare(void *a, void *b);
 int mb_int_compare(void *a, void *b);
 int mb_edit_compare(void *a, void *b);
