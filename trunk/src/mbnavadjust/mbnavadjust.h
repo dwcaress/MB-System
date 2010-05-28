@@ -150,6 +150,7 @@
 
 #define MBNA_INTERATION_MAX		10000
 #define MBNA_CONVERGENCE		0.000001
+#define MBNA_SMALL			0.0001
 
 /* mbnavadjust project and file structures */
 struct mbna_section {

@@ -756,6 +756,7 @@ void do_update_status()
 {
     	XmString *xstr;
     	struct mbna_file *file;
+    	struct mbna_file *file2;
 	struct mbna_section *section;
     	struct mbna_crossing *crossing;
     	struct mbna_tie *tie;
@@ -767,7 +768,7 @@ void do_update_status()
 	int	btime_i[7], etime_i[7];
 	int	num_sections;
 	double	dr1, dr2, dr3;
-    	int	i, j, k;
+    	int	i, ii, j, k;
 
 	/* set status label */
         sprintf(string,":::t\"Project: %s\":t\"Number of Files:                             %4d     Selected Survey:%4d\":t\"Number of Crossings Found:           %4d     Selected File:    %4d\":t\"Number of Crossings Analyzed:       %4d     Selected Section:%4d\":t\"Number of True Crossings:              %4d     Selected Crossing:%4d\":t\"Number of True Crossings Analyzed:%4d     Selected Tie:   %4d\":t\"Number of Ties Set:                         %d\"",
@@ -835,15 +836,23 @@ void do_update_status()
 					{
 					btime_d = file->sections[0].btime_d;
 					}
-				if (file->block == num_surveys || i == project.num_files - 1)
+				if (file->block == num_surveys)
 					{
+					/* find end time for this block */
+					num_files = 0;
+					btime_d = file->sections[0].etime_d;
+					for (ii=i;ii<project.num_files;ii++)
+						{
+						file2 = &(project.files[ii]);
+						if (file2->block == file->block)
+							{
+							etime_d = file2->sections[file2->num_sections-1].etime_d;
+							num_files++;
+							}
+						}
+						
 					/* make survey list item */
 					mb_get_date(mbna_verbose,btime_d,btime_i);
-					if (i == project.num_files - 1)
-						{
-						etime_d = file->sections[file->num_sections-1].etime_d;
-						num_files++;
-						}
 					mb_get_date(mbna_verbose,etime_d,etime_i);
 				    	sprintf(string,"%2.2d %2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d",
 					    num_surveys,num_files,
@@ -853,15 +862,8 @@ void do_update_status()
 					if (mbna_verbose > 0)
 						fprintf(stderr,"%s\n",string);
 					
-					/* start new survey */
-					btime_d = file->sections[0].etime_d;
-					num_files = 1;
+					/* increment counter */
 					num_surveys++;
-					}
-				else
-					{
-					etime_d = file->sections[file->num_sections-1].etime_d;
-					num_files++;
 					}
 				}
  			XmListAddItems(list_data,xstr,num_surveys,0);

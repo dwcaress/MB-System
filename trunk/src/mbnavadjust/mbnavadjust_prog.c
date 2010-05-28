@@ -1289,6 +1289,7 @@ int mbnavadjust_read_project()
 	int	versionmajor, versionminor;
 	double	dummy;
 	int	nscan, idummy, jdummy;
+	int	s1id, s2id;
 	int	i, j, k, l;
 
 	/* print input debug statements */
@@ -1893,7 +1894,40 @@ fprintf(stderr,"Reset tie snav_2 on read:%d\n",tie->snav_2);
 				    tie->inversion_offset_y_m = tie->inversion_offset_y / mbna_mtodeglat;
 				    }
 				
-				}			
+				}
+				
+			/* finally make sure crossing has later section second, switch if needed */
+			s1id = crossing->file_id_1 * 1000 + crossing->section_1;
+			s2id = crossing->file_id_2 * 1000 + crossing->section_2;
+			if (s2id < s1id)
+				{
+				idummy = crossing->file_id_1;
+				jdummy = crossing->section_1;
+				crossing->file_id_1 = crossing->file_id_2;
+				crossing->section_1 = crossing->section_2;
+				crossing->file_id_2 = idummy;
+				crossing->section_2 = jdummy;
+				for (j=0;j<crossing->num_ties;j++)
+					{
+					tie = &crossing->ties[j];
+					idummy = tie->snav_1;
+					dummy = tie->snav_1_time_d;
+					tie->snav_1 = tie->snav_2;
+					tie->snav_1_time_d = tie->snav_2_time_d;
+					tie->snav_2 = idummy;
+					tie->snav_2_time_d = dummy;
+					tie->offset_x *= -1.0;
+					tie->offset_y *= -1.0;
+					tie->offset_x_m *= -1.0;
+					tie->offset_y_m *= -1.0;
+					tie->offset_z_m *= -1.0;
+					tie->inversion_offset_x *= -1.0;
+					tie->inversion_offset_y *= -1.0;
+					tie->inversion_offset_x_m *= -1.0;
+					tie->inversion_offset_y_m *= -1.0;
+					tie->inversion_offset_z_m *= -1.0;
+					}
+				}
 			}
 
 		/* close home file */
@@ -2042,6 +2076,9 @@ int mbnavadjust_import_data(char *path, int iformat)
 				}
 			}
 		}
+
+	/* look for new crossings */
+	status = mbnavadjust_findcrossings();
 			
 	/* count the number of blocks */
 	project.num_blocks = 0;
@@ -2814,13 +2851,13 @@ beams_bath,beams_amp,pixels_ss);*/
 			status = mb_close(mbna_verbose,&ombio_ptr,&error);
 			}
 		
-		/* now look for new crossings */
+		/* get coverage masks for each section */
 		if (file != NULL && first != MB_YES)
 			{
-			/* first get coverage masks for each section */
+			/* loop over all sections */
 			for (k=0;k<file->num_sections;k++)
 				{
-				/* first get coverage mask */
+				/* set section data to be read */
 				section = (struct mbna_section *) &file->sections[k];
 				sprintf(opath,"%s/nvs_%4.4d_%4.4d.mb71",
 					project.datadir,file->id,k);
@@ -2952,12 +2989,8 @@ fprintf(stderr, "\n");
 }*/
 
 				/* deallocate memory used for data arrays */
-				status = mb_close(mbna_verbose,&ombio_ptr,&error);
-				
+				status = mb_close(mbna_verbose,&ombio_ptr,&error);				
 				}
-		
-			/* look for new crossings */
-			status = mbnavadjust_findcrossings();
 			}
 		}
 
@@ -3028,6 +3061,7 @@ int mbnavadjust_findcrossings()
 		/* resort crossings */
 		sprintf(message,"Sorting crossings....");
 		do_message_on(message);
+		if (project.num_crossings > 1)
 		mb_mergesort((void *)project.crossings, (size_t)project.num_crossings, sizeof(struct mbna_crossing), mbnavadjust_crossing_compare);
 			
 		/* recalculate overlap fractions, true crossings, good crossing statistics */
@@ -3084,16 +3118,30 @@ int mbnavadjust_crossing_compare(void *a, void *b)
 {
 	struct mbna_crossing	*aa, *bb;
 	int a1id, a2id, b1id, b2id;
+	int aid, bid;
 	
 	aa = (struct mbna_crossing *) a;
 	bb = (struct mbna_crossing *) b;
 	
 	a1id = aa->file_id_1 * 1000 + aa->section_1;
 	a2id = aa->file_id_2 * 1000 + aa->section_2;
+	if (a1id > a2id)
+		aid = a1id;
+	else
+		aid = a2id;
+		
 	b1id = bb->file_id_1 * 1000 + bb->section_1;
 	b2id = bb->file_id_2 * 1000 + bb->section_2;
+	if (b1id > b2id)
+		bid = b1id;
+	else
+		bid = b2id;
 	
-	if (a1id > b1id)
+	if (aid > bid)
+		return(1);
+	else if (aid < bid)
+		return(-1);
+	else if (a1id > b1id)
 		return(1);
 	else if (a1id < b1id)
 		return(-1);
@@ -3265,19 +3313,27 @@ int mbnavadjust_findcrossingsfile(int ifile)
 							crossing->status = MBNA_CROSSING_STATUS_NONE;
 							crossing->truecrossing = MB_NO;
 							crossing->overlap = 0;
-							crossing->file_id_1 = file2->id;
-							crossing->section_1 = isection;
-							crossing->file_id_2 = file1->id;
-							crossing->section_2 = jsection;
+							crossing->file_id_1 = file1->id;
+							crossing->section_1 = jsection;
+							crossing->file_id_2 = file2->id;
+							crossing->section_2 = isection;
 							crossing->num_ties = 0;
 							project.num_crossings++;
 
-fprintf(stderr,"added crossing:%d  %4d %4d   %4d %4d\n",
+fprintf(stderr,"added crossing: %d  %4d %4d   %4d %4d\n",
 project.num_crossings-1,
 crossing->file_id_1,crossing->section_1,
 crossing->file_id_2,crossing->section_2);
 							}
+/*else
+fprintf(stderr,"no new crossing:    %4d %4d   %4d %4d   duplicate\n",
+file2->id,isection,
+file1->id,jsection);*/
 						}
+/*else
+fprintf(stderr,"disqualified:       %4d %4d   %4d %4d   disqualify:%d overlaptxt list:%d\n",
+file2->id,isection,
+file1->id,jsection, disqualify, overlap);*/
 
 					}
 				}
@@ -4209,6 +4265,28 @@ int mbnavadjust_naverr_addtie()
 				tie->sigmax2[i] = mbna_minmisfit_sx2[i];
 				tie->sigmax3[i] = mbna_minmisfit_sx3[i];
 				}
+			if (tie->sigmar1 < MBNA_SMALL)
+				{
+				tie->sigmar1 = 100.0;
+				tie->sigmax1[0] = 1.0;
+				tie->sigmax1[1] = 0.0;
+				tie->sigmax1[2] = 0.0;
+				}
+			if (tie->sigmar2 < MBNA_SMALL)
+				{
+				tie->sigmar2 = 100.0;
+				tie->sigmax2[0] = 0.0;
+				tie->sigmax2[1] = 1.0;
+				tie->sigmax2[2] = 0.0;
+				}
+			if (tie->sigmar3 < MBNA_SMALL)
+				{
+				tie->sigmar3 = 100.0;
+				tie->sigmax3[0] = 0.0;
+				tie->sigmax3[1] = 0.0;
+				tie->sigmax3[2] = 1.0;
+				}
+				
 			file1 = (struct mbna_file *) &project.files[mbna_file_id_1];
 			file2 = (struct mbna_file *) &project.files[mbna_file_id_2];
 			section1 = (struct mbna_section *) &file1->sections[mbna_section_1];
@@ -6314,7 +6392,7 @@ mbna_minmisfit_sx1[0],mbna_minmisfit_sx1[1],mbna_minmisfit_sx1[2],mbna_minmisfit
 		    /* now get a horizontal unit vector perpendicular to the the longest vector 
 			    and then find the largest r associated with that vector */
 		    mbna_minmisfit_sr2 = sqrt(mbna_minmisfit_sx1[0] * mbna_minmisfit_sx1[0] + mbna_minmisfit_sx1[1] * mbna_minmisfit_sx1[1]);
-		    if (mbna_minmisfit_sr2 == 0.0)
+		    if (mbna_minmisfit_sr2 < MBNA_SMALL)
 			    {
 			    mbna_minmisfit_sx2[0] = 0.0;
 			    mbna_minmisfit_sx2[1] = 1.0;
@@ -6336,7 +6414,7 @@ mbna_minmisfit_sx2[0],mbna_minmisfit_sx2[1],mbna_minmisfit_sx2[2],mbna_minmisfit
 		    /* now get a near-vertical unit vector perpendicular to the the longest vector 
 			    and then find the largest r associated with that vector */
 		    mbna_minmisfit_sr3 = sqrt(mbna_minmisfit_sx1[0] * mbna_minmisfit_sx1[0] + mbna_minmisfit_sx1[1] * mbna_minmisfit_sx1[1]);
-		    if (mbna_minmisfit_sr3 == 0.0)
+		    if (mbna_minmisfit_sr3 < MBNA_SMALL)
 			{
 			mbna_minmisfit_sx3[0] = 0.0;
 			mbna_minmisfit_sx3[1] = 0.0;
@@ -6416,9 +6494,9 @@ ic,jc,kc,lc,gridm[lc],minmisfitthreshold,dotproduct,x,y,z,r); */
 					}
 				    }
 				}
-		    if (mbna_minmisfit_sr2 <= 0.0)
+		    if (mbna_minmisfit_sr2 < MBNA_SMALL)
 		    	mbna_minmisfit_sr2 = rsave2;
-		    if (mbna_minmisfit_sr3 <= 0.0)
+		    if (mbna_minmisfit_sr3 < MBNA_SMALL)
 		    	mbna_minmisfit_sr3 = rsave3;
 		    }
 		else
@@ -8632,7 +8710,7 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);
 		    /* check for convergence */
 		    perturbationchange = perturbationsize - perturbationsizeold;
 		    convergencecriterea = fabs(perturbationchange) / misfit_initial;
-		    if (convergencecriterea < MBNA_CONVERGENCE || iter > MBNA_INTERATION_MAX)
+		    if (convergencecriterea < MBNA_CONVERGENCE || convergencecriterea > 10000.0 || iter > MBNA_INTERATION_MAX)
 		    	done = MB_YES;
 
 /* fprintf(stderr,"MODEL INVERT: iter:%d ntie:%d misfit_initial:%f misfit_ties:%f perturbationsize:%g perturbationchange:%g convergencecriterea:%g done:%d\n",
