@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.1.3beta1860  May 28, 2010
   Version 5.1.3beta1858  May 18, 2010
   Version 5.1.3beta1855  May 4, 2010
   Version 5.1.3beta1851  April 14, 2010
@@ -172,6 +173,13 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
+
+-----> 5.1.3beta1860
+
+Further changes to mbnavadjust:
+- The inversion stops if it is diverging rather than converging on a navigation adjustment model solution.
+- The program will insure that all crossings have the later section second by flipping the order of crossings if necessary while reading an old project.
+- The program also resorts the crossings when it reads a project.
 
 -----> 5.1.3beta1858
 
