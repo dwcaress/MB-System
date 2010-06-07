@@ -265,7 +265,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_put_all.o mb_put_comment.o \
 		mb_buffer.o \
 		mb_read_ping.o mb_write_ping.o \
-		mb_access.o mb_segy.o\
+		mb_access.o mb_segy.o mb_rt.o\
 		mbsys_sb.o mbsys_hsds.o \
 		mbsys_sb2100.o mbsys_simrad.o \
 		mbsys_simrad2.o mbsys_simrad3.o \
@@ -328,7 +328,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_put_all.o mb_put_comment.o \
 		mb_buffer.o \
 		mb_read_ping.o mb_write_ping.o \
-		mb_access.o mb_segy.o \
+		mb_access.o mb_segy.o mb_rt.o \
 		mbsys_sb.o mbsys_hsds.o \
 		mbsys_sb2100.o mbsys_simrad.o \
 		mbsys_simrad2.o mbsys_simrad3.o \
@@ -439,6 +439,8 @@ mb_access.o:	mb_access.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/m
 	$(CC) -c $(CFLAGS) mb_access.c
 mb_segy.o:	mb_segy.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) mb_segy.c
+mb_rt.o:	mb_rt.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mb_rt.c
 mbsys_sb.o:	mbsys_sb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_sb.h
 	$(CC) -c $(CFLAGS) mbsys_sb.c
 mbsys_hsds.o:	mbsys_hsds.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hsds.h

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_access.c	11/1/00
  *    $Id$
 
- *    Copyright (c) 2000-2009 by
+ *    Copyright (c) 2000-2010 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1546,6 +1546,67 @@ int mb_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<*nbeams;i++)
 			fprintf(stderr,"dbg2       beam %d: detects:%d\n",
 				i,detects[i]);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, int *nbeams, int *pulses, int *error)
+{
+	char	*function_name = "mb_pulses";
+	int	status;
+	struct mb_io_struct *mb_io_ptr;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ extraction routine */
+	if (mb_io_ptr->mb_io_pulses != NULL)
+		{
+		status = (*mb_io_ptr->mb_io_pulses)
+				(verbose,mbio_ptr,store_ptr,
+				kind,nbeams,pulses,error);
+		}
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_BAD_SYSTEM;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
+		for (i=0;i<*nbeams;i++)
+			fprintf(stderr,"dbg2       beam %d: pulses:%d\n",
+				i,pulses[i]);
 		}
 	if (verbose >= 2)
 		{

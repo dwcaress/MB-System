@@ -88,7 +88,6 @@ $(LIBDIR)/libmbaux.a:	\
 		mb_surface.o \
 		mb_cheb.o \
 		mb_delaun.o \
-		mb_rt.o \
 		mb_track.o \
 		mb_truecont.o \
 		mb_readgrd.o
@@ -98,7 +97,6 @@ $(LIBDIR)/libmbaux.a:	\
 		mb_surface.o \
 		mb_cheb.o \
 		mb_delaun.o \
-		mb_rt.o \
 		mb_track.o \
 		mb_truecont.o \
 		mb_readgrd.o
@@ -127,8 +125,6 @@ mb_delaun.o:	mb_delaun.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) mb_delaun.c
 mb_pslibface.o:	mb_pslibface.c  $(INCDIR)/mb_status.h  $(INCDIR)/mb_define.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_pslibface.c
-mb_rt.o:	mb_rt.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
-	$(CC) -c $(CFLAGS) mb_rt.c
 mb_track.o:	mb_track.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
 	$(CC) -c $(CFLAGS) mb_track.c
 mb_truecont.o:	mb_truecont.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h

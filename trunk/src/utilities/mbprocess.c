@@ -503,7 +503,7 @@ and mbedit edit save files.\n";
 	double	*depth = NULL;
 	double	*velocity = NULL;
 	double	*velocity_sum = NULL;
-	char	*rt_svp;
+	void	*rt_svp;
 	double	ssv;
 	
 	/* swath file locking variables */
@@ -5288,7 +5288,7 @@ alpha, beta, lever_heave);*/
 					+ bathalongtrack[i] * bathalongtrack[i]);
 				    ttimes[i] = rr / 750.0;
 				    mb_xyz_to_takeoff(verbose, 
-						bathacrosstrack[i], 
+						-bathacrosstrack[i], 
 						bathalongtrack[i], 
 						(bath[i] - sonardepth), 
 						&angles[i],
@@ -6652,10 +6652,15 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 		mb_esf_close(verbose,&esf,&error);
 		}
 
-	/* deallocate memory for svp arrays */
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&depth,&error);
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&velocity,&error);
-	mb_freed(verbose,__FILE__,__LINE__,(void **)&velocity_sum,&error);
+	/* deallocate memory for svp arrays and raytracing */
+	if (process.mbp_svp_mode != MBP_SVP_OFF)
+		{
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&depth,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&velocity,&error);
+		mb_freed(verbose,__FILE__,__LINE__,(void **)&velocity_sum,&error);
+		if (rt_svp != NULL)
+			status = mb_rt_deall(verbose, &rt_svp, &error);
+		}
 
 	/* check memory */
 	if (verbose >= 4)

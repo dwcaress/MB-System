@@ -22,7 +22,6 @@
 /*
  * Motif required Headers
  */
-#include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <Xm/Xm.h>
 #include <Xm/DialogS.h>
@@ -132,10 +131,10 @@ int main( int argc, char **argv)
     XtSetArg(args[ac], XmNiconName, "MBedit"); ac++;
     XtSetArg(args[ac], XmNallowShellResize, False); ac++;
     XtSetArg(args[ac], XmNdeleteResponse, XmDESTROY); ac++;
-    XtSetArg(args[ac], XmNx, 52); ac++;
-    XtSetArg(args[ac], XmNy, 383); ac++;
+    XtSetArg(args[ac], XmNx, 603); ac++;
+    XtSetArg(args[ac], XmNy, 190); ac++;
     XtSetArg(args[ac], XmNwidth, 1014); ac++;
-    XtSetArg(args[ac], XmNheight, 709); ac++;
+    XtSetArg(args[ac], XmNheight, 663); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",
         topLevelShellWidgetClass,
         parent,

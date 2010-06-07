@@ -2,7 +2,7 @@
  *    The MB-system:	mb_io.h	1/19/93
  *    $Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2010 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -539,6 +539,8 @@ struct mb_io_struct
 		double *draft, double *ssv, int *error);
 	int (*mb_io_detects)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbeams, int *detects, int *error);
+	int (*mb_io_pulses)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, int *nbeams, int *pulses, int *error);
 	int (*mb_io_gains)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, double *transmit_gain, double *pulse_length, 
 		double *receive_gain, int *error);

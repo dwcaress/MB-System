@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2009 by
+ *    Copyright (c) 2008-2010 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -452,7 +452,9 @@ struct mbsys_simrad3_ping_struct
 	float	png_range[MBSYS_SIMRAD3_MAXBEAMS];
 				/* Two-way travel times (sec). */
 	float	png_bheave[MBSYS_SIMRAD3_MAXBEAMS];
-				/* Average of heave at transmit and receive time for each beam */
+				/* Heave correction to the sonar depth for each beam - this is half the difference
+				   between the sonar depth at ping time and the sonar depth at receive time,
+				   as measured by heave  */
 
 	/* raw travel time and angle data version 4 */
 	int	png_raw4_read;	/* flag indicating actual reading of raw beam record */
@@ -1115,6 +1117,8 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *draft, double *ssv, int *error);
 int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
+int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *pulses, int *error);
 int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transmit_gain, double *pulse_length, 
 			double *receive_gain, int *error);

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_io.h	4/21/96
  *    $Id$
  *
- *    Copyright (c) 1996-2009 by
+ *    Copyright (c) 1996-2010 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -500,6 +500,8 @@ int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		double *draft, double *ssv, int *error);
 int mb_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbeams, int *detects, int *error);
+int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr,
+		int *kind, int *nbeams, int *pulses, int *error);
 int mb_gains(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, double *transmit_gain, double *pulse_length, 
 		double *receive_gain, int *error);
@@ -757,6 +759,17 @@ int mb_swap_check();
 int mb_swap_float(float *a);
 int mb_swap_double(double *a);
 int mb_swap_long(mb_s_long *a);
+
+/* mb_rt function prototypes */
+int mb_rt_init(int verbose, int number_node, 
+		double *depth, double *velocity, 
+		void **modelptr, int *error);
+int mb_rt_deall(int verbose, void **modelptr, int *error);
+int mb_rt(int verbose, void *modelptr, 
+	double source_depth, double source_angle, double end_time, 
+	int ssv_mode, double surface_vel, double null_angle, 
+	int nplot_max, int *nplot, double *xplot, double *zplot, 
+	double *x, double *z, double *travel_time, int *ray_stat, int *error);
 
 /* end conditional include */
 #endif
