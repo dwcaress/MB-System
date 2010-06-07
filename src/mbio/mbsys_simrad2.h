@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_simrad2.h		10/9/98
  *	$Id$
  *
- *    Copyright (c) 1998-2009 by
+ *    Copyright (c) 1998-2010 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1090,6 +1090,8 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *draft, double *ssv, int *error);
 int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
+int mbsys_simrad2_pulses(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *pulses, int *error);
 int mbsys_simrad2_gains(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transmit_gain, double *pulse_length, 
 			double *receive_gain, int *error);

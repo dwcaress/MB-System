@@ -149,6 +149,7 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		mbgrdviz_creation.o \
 		$(LIBDIR)/libmbview.a \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \
@@ -162,6 +163,7 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		mbgrdviz_creation.o \
 		$(LIBDIR)/libmbview.a \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \

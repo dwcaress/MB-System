@@ -145,12 +145,14 @@ $(BINDIR)/mbcontour: mbcontour.o \
 		$(LFLAGS) -o $(BINDIR)/mbcontour
 $(BINDIR)/mbswath: mbswath.o \
 		$(LIBDIR)/libmbio.a  \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a
 	$(CC) $(CFLAGS) mbswath.o \
 		$(LIBDIR)/libmbio.a  \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \

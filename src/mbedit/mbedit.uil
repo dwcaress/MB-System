@@ -71,7 +71,9 @@ identifier BXG_toggleButton_show_lon;
 identifier BXG_toggleButton_show_interval;
 identifier BXG_toggleButton_show_time;
 identifier BXG_toggleButton_show_wideplot;
+identifier BXG_toggleButton_show_pulsetypes;
 identifier BXG_toggleButton_show_detects;
+identifier BXG_toggleButton_show_flags;
 identifier BXG_toggleButton_show_flagged_on;
 identifier BXG_toggleButton_view_acrosstrack;
 identifier BXG_toggleButton_view_alongtrack;
@@ -188,6 +190,8 @@ procedure do_scale_y();
 procedure do_set_filters();
 procedure do_show_detects();
 procedure do_show_flagged();
+procedure do_show_flags();
+procedure do_show_pulsetypes();
 procedure do_show_time();
 procedure do_start();
 procedure do_unflag_all();
@@ -791,8 +795,8 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 1106;
+        XmNx = 506;
+        XmNy = 306;
         XmNwidth = 430;
         XmNheight = 311;
     };
@@ -1006,8 +1010,8 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogTitle = compound_string("Annotation");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 1172;
+        XmNx = 453;
+        XmNy = 372;
         XmNwidth = 536;
         XmNheight = 179;
     };
@@ -1220,8 +1224,8 @@ object pushButton_buffer_dismiss : XmPushButton widget {
 object bulletinBoard_buffer : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 1169;
+        XmNx = 453;
+        XmNy = 369;
         XmNwidth = 536;
         XmNheight = 186;
     };
@@ -1338,8 +1342,8 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 1159;
+        XmNx = 565;
+        XmNy = 359;
         XmNwidth = 311;
         XmNheight = 205;
     };
@@ -1458,8 +1462,8 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 1173;
+        XmNx = 505;
+        XmNy = 373;
         XmNwidth = 431;
         XmNheight = 177;
     };
@@ -1545,8 +1549,8 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 0;
-        XmNy = 1206;
+        XmNx = 473;
+        XmNy = 406;
         XmNwidth = 496;
         XmNheight = 112;
     };
@@ -1815,8 +1819,8 @@ object label_about_create1 : XmLabel widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 1011;
+        XmNx = 484;
+        XmNy = 211;
         XmNwidth = 473;
         XmNheight = 501;
     };
@@ -2130,8 +2134,8 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 1089;
+        XmNx = 623;
+        XmNy = 289;
         XmNwidth = 196;
         XmNheight = 346;
     };
@@ -2451,8 +2455,8 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 995;
+        XmNx = 450;
+        XmNy = 195;
         XmNwidth = 541;
         XmNheight = 533;
     };
@@ -3227,8 +3231,8 @@ object toggleButton_reverse_mouse : XmToggleButton widget {
 
 object pulldownMenu_controls : XmPulldownMenu widget {
     arguments {
-        XmNx = 546;
-        XmNy = 549;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 240;
         XmNheight = 150;
     };
@@ -3269,7 +3273,7 @@ object menuBar_controls : XmMenuBar widget {
     arguments {
         XmNx = 170;
         XmNy = 0;
-        XmNwidth = 90;
+        XmNwidth = 87;
         XmNheight = 34;
     };
     controls {
@@ -3397,6 +3401,33 @@ object toggleButton_show_flagged_on : XmToggleButton widget {
 !(BX)    };
 };
 
+object separator8 : XmSeparator widget {
+    arguments {
+    };
+    controls {
+    };
+    callbacks {
+    };
+};
+
+object toggleButton_show_flags : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Show Flag States");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_flags);
+        XmNvalueChangedCallback = procedure do_show_flags();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object toggleButton_show_detects : XmToggleButton widget {
     arguments {
         arguments Style_use;
@@ -3409,6 +3440,24 @@ object toggleButton_show_detects : XmToggleButton widget {
         callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_detects);
         XmNvalueChangedCallback = procedure do_show_detects();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_show_pulsetypes : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNalignment = XmALIGNMENT_BEGINNING;
+        XmNlabelString = compound_string("Show Source Pulse Types");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_show_pulsetypes);
+        XmNvalueChangedCallback = procedure do_show_pulsetypes();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -3650,10 +3699,10 @@ object toggleButton_show_heave : XmToggleButton widget {
 
 object pulldownMenu_view : XmPulldownMenu widget {
     arguments {
-        XmNx = 0;
-        XmNy = 0;
+        XmNx = 698;
+        XmNy = 219;
         XmNwidth = 247;
-        XmNheight = 440;
+        XmNheight = 490;
     };
     controls {
          managed XmToggleButton toggleButton_view_waterfall;
@@ -3661,7 +3710,10 @@ object pulldownMenu_view : XmPulldownMenu widget {
          managed XmToggleButton toggleButton_view_acrosstrack;
          managed XmSeparator separator2;
          managed XmToggleButton toggleButton_show_flagged_on;
+         managed XmSeparator separator8;
+         managed XmToggleButton toggleButton_show_flags;
          managed XmToggleButton toggleButton_show_detects;
+         managed XmToggleButton toggleButton_show_pulsetypes;
          managed XmSeparator separator9;
          managed XmToggleButton toggleButton_show_wideplot;
          managed XmToggleButton toggleButton_show_time;
@@ -3706,7 +3758,7 @@ object menuBar_view : XmMenuBar widget {
         XmNpacking = XmPACK_TIGHT;
         XmNx = 90;
         XmNy = 0;
-        XmNwidth = 70;
+        XmNwidth = 58;
         XmNheight = 34;
     };
     controls {
@@ -3873,8 +3925,8 @@ object mbedit_bboard : XmBulletinBoard widget {
 object window_mbedit : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 1090;
-        XmNy = 575;
+        XmNx = 603;
+        XmNy = 190;
         XmNwidth = 1014;
         XmNheight = 663;
     };
@@ -3939,8 +3991,8 @@ object window_mbedit : XmMainWindow widget {
 !(BX)        XmNiconName = "MBedit";
 !(BX)        XmNallowShellResize = false;
 !(BX)        XmNdeleteResponse = XmDESTROY;
-!(BX)        XmNx = 1090;
-!(BX)        XmNy = 575;
+!(BX)        XmNx = 603;
+!(BX)        XmNy = 190;
 !(BX)        XmNwidth = 1014;
 !(BX)        XmNheight = 663;
 !(BX)    };

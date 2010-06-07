@@ -47,9 +47,9 @@
 
 /* mbio include files */
 #include "../../include/mb_status.h"
+#include "../../include/mb_define.h"
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
-#include "../../include/mb_define.h"
 #include "../../include/mbsys_simrad3.h"
 
 /* include for byte swapping */
@@ -242,6 +242,7 @@ int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_insert_svp = &mbsys_simrad3_insert_svp; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_simrad3_ttimes; 
 	mb_io_ptr->mb_io_detects = &mbsys_simrad3_detects; 
+	mb_io_ptr->mb_io_pulses = &mbsys_simrad3_pulses; 
 	mb_io_ptr->mb_io_gains = &mbsys_simrad3_gains; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad3_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
@@ -286,6 +287,7 @@ int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
 		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       pulses:             %lu\n",(size_t)mb_io_ptr->mb_io_pulses);
 		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
@@ -459,6 +461,12 @@ int mbr_dem_em710raw(int verbose, void *mbio_ptr, int *error)
 	/* get pointers to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
+	/* deallocate old raytracing structure if it exists */
+	if (mb_io_ptr->saveptr1 != NULL)
+		{
+		status = mb_rt_deall(verbose, &(mb_io_ptr->saveptr1), error);
+		}
+
 	/* deallocate memory for data descriptor */
 	status = mbsys_simrad3_deall(
 			verbose,mbio_ptr,
@@ -496,7 +504,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	plon, plat, pspeed, roll, pitch, heave;
 	double	soundspeed;
 	double	transmit_alongtrack;
-	double	alpha, beta, theta, phi;
+	double	alpha, beta, theta, phi, theta_bath, phi_bath, theta_table, dtheta, theta_old;
 	double	*pixel_size, *swath_width;
 	mb_u_char detection_mask;
 	double	att_time_d[MBSYS_SIMRAD3_MAXATTITUDE];
@@ -505,7 +513,11 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	att_heave[MBSYS_SIMRAD3_MAXATTITUDE];
 	double	transmit_time_d, transmit_heading, transmit_heave, transmit_roll, transmit_pitch;
 	double	receive_time_d, receive_heading, receive_heave, receive_roll, receive_pitch;
-	/* double	rr, xx, zz; */
+	double	*svpdepth = NULL;
+	double	*svpvel = NULL;
+	double	xx, zz, dx, dz;
+	double	xxx, zzz, ttt, xxx_old;
+	int	ray_stat, iter;
 	int	i;
 
 	/* print input debug statements */
@@ -647,6 +659,32 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		store->pos_roll = (int) rint(roll / 0.01);
 		store->pos_pitch = (int) rint(pitch / 0.01);
 		store->pos_heave = (int) rint(heave / 0.01);
+		}
+	
+	/* if svp read then set up for raytracing */
+	if (status == MB_SUCCESS 
+		&& store->kind == MB_DATA_VELOCITY_PROFILE
+		&& store->svp_num > 1)
+		{
+		/* deallocate old raytracing structure if it exists */
+		if (mb_io_ptr->saveptr1 != NULL)
+			{
+			status = mb_rt_deall(verbose, &(mb_io_ptr->saveptr1), error);
+			}
+
+		/* allocate memory for svp data */
+		status = mb_mallocd(verbose, __FILE__, __LINE__, store->svp_num * sizeof(double),(void **)&svpdepth,error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, store->svp_num * sizeof(double),(void **)&svpvel,error);
+		
+		/* construct svp from raw values */
+		for (i=0;i<store->svp_num;i++)
+			{
+			svpdepth[i] = 0.01 * store->svp_depth_res * store->svp_depth[i];
+			svpvel[i] = 0.1 * store->svp_vel[i];
+			}
+			
+		/* initialize raytracing */
+		status = mb_rt_init(verbose, store->svp_num, svpdepth, svpvel, (void **) &(mb_io_ptr->saveptr1), error);
 		}
 	
 	/* if no sidescan read then zero sidescan data */
@@ -818,36 +856,90 @@ fprintf(stderr,"\nbeams:\n");*/
 				ping->png_ssv = 150;
 			soundspeed = 0.1 * ((double)ping->png_ssv);
 			ping->png_range[i] = ping->png_raw_rxrange[i];
-			ping->png_bheave[i] = receive_heave;
+			ping->png_bheave[i] = 0.5 * (transmit_heave + receive_heave) - heave;
 
 			/* calculate angles */
-			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) + transmit_pitch + store->par_msp;
-fprintf(stderr,"ANGLES: %d tx:%d pitch:%f bias:%f  alpha:%f\n",
+			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) - transmit_pitch + store->par_msp;
+/*fprintf(stderr,"ANGLES: %d tx:%d pitch:%f bias:%f  alpha:%f\n",
 i,ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]],transmit_pitch,store->par_msp,alpha);
-fprintf(stderr,"HEADING: %d transmit:%f receive:%f\n",i,transmit_heading,receive_heading);
-			beta = 90.0 - (0.01 * (double)ping->png_raw_rxpointangle[i] + receive_roll + store->par_msr);
+fprintf(stderr,"HEADING: %d transmit:%f receive:%f\n",i,transmit_heading,receive_heading);*/
+			beta = 90.0 - ((0.01 * (double)ping->png_raw_rxpointangle[i]) + receive_roll - store->par_msr);
 			mb_rollpitch_to_takeoff(
 				verbose, 
 				alpha, beta, 
 				&theta, &phi, 
 				error);
+			
+			/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
+				the ping heading and the heading at sector transmit time */
+			phi -= transmit_heading - pheading;
+			if (phi > 180.0) phi -= 360.0;
+			if (phi < -180.0) phi += 360.0;
+			
+			/* KLUGE ALERT! */
+			/* Unfortunately, the above code is not succeeding in calculating angles that, after
+				raytracing, replicate the sounding positions reported by the sonar. I am
+				probably missing some aspect of the calculation of attitude compensation, or
+				I've just got something wrong.
+				To get bathymetry recalculation close to right, I will estimate the azimuthal
+				angle using the originally reported beam positions.  */
+			/* estimate a better azimuthal angle phi from the originally reported sounding */
+			xx = sqrt(ping->png_acrosstrack[i] * ping->png_acrosstrack[i]
+					+ ping->png_alongtrack[i] * ping->png_alongtrack[i]);
+			zz = ping->png_depth[i];
+			mb_xyz_to_takeoff(verbose,-ping->png_acrosstrack[i],ping->png_alongtrack[i], zz,
+						&theta_bath,&phi_bath,error);
+			phi = phi_bath;
+						
+			/* further, I will iterate test raytraces to find the vertical angle that
+				matches the lateral distance found in the original bathymetry */
+			if (mb_io_ptr->saveptr1 != NULL)
+				{
+				iter = 0;
+				theta_table = theta;
+				dtheta = 0.0;
+				dx = zz;
+				while (fabs(dx) > 0.00001 * zz && iter < 10)
+					{
+					theta_old = theta_table;
+					xxx_old = xxx;
+					theta_table += dtheta;
+					mb_rt(verbose, (void *) mb_io_ptr->saveptr1, 0.0, theta_table,0.5*ping->png_range[i],
+						0, 0.0, 0.0, 0, NULL, NULL, NULL, &xxx, &zzz, &ttt, &ray_stat,error);
+					dx = xx - xxx;
+					dz = zz - zzz;
+ /*fprintf(stderr,"iter:%d theta_table:%f xxx:%f xx:%f dx:%f   zzz:%f zz:%f dz:%f\n",
+iter,theta_table,xxx,xx,dx,zzz,zz,dz);*/
+					if (iter == 0)
+						{
+						dtheta = 0.1;
+						}
+					else
+						{
+						dtheta = (xx - xxx) * (theta_table - theta_old) / (xxx - xxx_old);
+						}
+					iter++;
+					}
+				
+				/* here we embed the depth difference between the original sounding and that 
+					calculated by raytracing to the same lateral offset */
+				ping->png_bheave[i] = dz;
+				theta = theta_table;
+				}
+			
 			ping->png_depression[i] = theta;
 			ping->png_azimuth[i] = phi;
-			/* rr = 0.5 * soundspeed * ping->png_range[i];
-			xx = rr * sin(DTR * theta);
-			zz = rr * cos(DTR * theta);
-			ping->png_acrosstrack[i] = xx * cos(DTR * phi);
-			ping->png_alongtrack[i] = xx * sin(DTR * phi) + transmit_alongtrack;
-			ping->png_depth[i] = zz + ping->png_xducer_depth;*/
+/* fprintf(stderr,"%d phi: raw:%f bath:%f diff:%f    theta: raw:%f bath:%f diff:%f\n",
+i, phi, phi_bath, (phi-phi_bath), theta, theta_bath, (theta-theta_bath)); */
 
-mb_xyz_to_takeoff(verbose,ping->png_acrosstrack[i],ping->png_alongtrack[i],ping->png_depth[i] - ping->png_xducer_depth,
+/* mb_xyz_to_takeoff(verbose,ping->png_acrosstrack[i],ping->png_alongtrack[i],ping->png_depth[i] - ping->png_xducer_depth,
 &theta,&phi,error);
 mb_takeoff_to_rollpitch(verbose,theta,phi,&pitch,&roll,error);
 fprintf(stderr,"    %d time:%f %f   bath:%f %f %f   theta:%f phi:%f pitch:%f %f roll:%f %f angles:%d %d\n",
 i,transmit_time_d,receive_time_d,ping->png_depth[i],ping->png_acrosstrack[i],ping->png_alongtrack[i],
 theta,phi,pitch,transmit_pitch,90.-roll,receive_roll,
 ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]],
-ping->png_raw_rxpointangle[i]);		
+ping->png_raw_rxpointangle[i]);	*/	
 			
 			/* calculate beamflag */
 			detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];

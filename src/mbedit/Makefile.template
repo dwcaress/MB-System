@@ -101,6 +101,7 @@ all: $(BINDIR)/mbedit
 ### link the executable
 $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
@@ -111,6 +112,7 @@ $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		mbedit_creation.o mbedit_bxutils.o
 	$(CC) $(CFLAGS) mbedit.o mbedit_prog.o \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \

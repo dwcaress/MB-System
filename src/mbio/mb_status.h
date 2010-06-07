@@ -811,5 +811,11 @@ static char *unknown_notice_msg[] =
 #define MB_DETECT_AMPLITUDE	1
 #define MB_DETECT_PHASE		2
 
+/* Source pulse type flags */
+#define MB_PULSE_UNKNOWN	0
+#define MB_PULSE_CW		1
+#define MB_PULSE_UPCHIRP	2
+#define MB_PULSE_DOWNCHIRP	3
+
 /* end conditional include */
 #endif
