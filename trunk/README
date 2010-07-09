@@ -174,6 +174,20 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
 
+The function mb_get_info() now properly applies the lonflip value. This
+in turn allows mbgrid to infer correct bounds in situations where the
+lonflip is important (e.g. data across the +/-180 degree boundary when
+lonflip is -1 or 1).
+
+Changed MBnavadjust so that an "Inversion Smoothing" value replaces a 
+no-longer-used "Inversion Precision" value. This value, accessible under
+the Options dialog, sets the importance of smoothing in the adjusted
+navigation model. The default is 4.00, and possible ranges are 0.10 to
+10.0, where the smoothing penalty weight applied to the first and
+second derivatives of the adjusted navigation perturbation is ten
+raised to this power.
+
+
 -----> 5.1.3beta1862
 
 Moved src/mbaux/mb_rt.c to src/mbio/mb_rt.c and made this
