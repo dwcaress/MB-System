@@ -100,7 +100,7 @@ extern void do_modelplot_dismiss(Widget, XtPointer, XtPointer);
 extern void do_modelplot_sequential(Widget, XtPointer, XtPointer);
 extern void do_modelplot_block(Widget, XtPointer, XtPointer);
 extern void do_scale_controls_zoffset(Widget, XtPointer, XtPointer);
-extern void do_scale_controls_precision(Widget, XtPointer, XtPointer);
+extern void do_scale_controls_smoothing(Widget, XtPointer, XtPointer);
 extern void do_scale_controls_sectionlength(Widget, XtPointer, XtPointer);
 extern void do_scale_controls_tickinterval(Widget, XtPointer, XtPointer);
 extern void do_controls_scale_colorinterval(Widget, XtPointer, XtPointer);
@@ -186,7 +186,7 @@ CreatemainWindow(Widget parent)
     Widget   form_controls;
     Widget   separator14;
     Widget   label_controls_zoffset;
-    Widget   label_controls_precision;
+    Widget   label_controls_smoothing;
     Widget   separator12;
     Widget   label_controls_sectionlength;
     Widget   label_controls_contourinterval;
@@ -3383,7 +3383,7 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)":::t\"Inversion\"\"Precision (m):\"", 
+        tmp0 = (XmString) BX_CONVERT(form_controls, (char *)":::t\"Inversion\"\"Smoothing (m):\"", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
@@ -3394,11 +3394,11 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(form_controls, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        label_controls_precision = XmCreateLabel(form_controls,
-            (char *)"label_controls_precision",
+        label_controls_smoothing = XmCreateLabel(form_controls,
+            (char *)"label_controls_smoothing",
             args, 
             ac);
-        XtManageChild(label_controls_precision);
+        XtManageChild(label_controls_smoothing);
         
         /**
          * Free any memory allocated for resources.
@@ -3422,12 +3422,12 @@ CreatemainWindow(Widget parent)
     XtSetArg(args[ac], XmNfontList, 
         BX_CONVERT(form_controls, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
-    scale_controls_precision = XmCreateScale(form_controls,
-        (char *)"scale_controls_precision",
+    scale_controls_smoothing = XmCreateScale(form_controls,
+        (char *)"scale_controls_smoothing",
         args, 
         ac);
-    XtManageChild(scale_controls_precision);
-    XtAddCallback(scale_controls_precision, XmNvalueChangedCallback, do_scale_controls_precision, (XtPointer)0);
+    XtManageChild(scale_controls_smoothing);
+    XtAddCallback(scale_controls_smoothing, XmNvalueChangedCallback, do_scale_controls_smoothing, (XtPointer)0);
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 10); ac++;
@@ -4029,7 +4029,7 @@ CreatemainWindow(Widget parent)
     XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
     XtSetArg(args[ac], XmNleftOffset, 10); ac++;
     XtSetArg(args[ac], XmNtopOffset, 270); ac++;
-    XtSetValues(label_controls_precision, args, ac);
+    XtSetValues(label_controls_smoothing, args, ac);
     
     ac = 0;
     XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
@@ -4037,7 +4037,7 @@ CreatemainWindow(Widget parent)
     XtSetArg(args[ac], XmNleftOffset, 140); ac++;
     XtSetArg(args[ac], XmNrightOffset, 7); ac++;
     XtSetArg(args[ac], XmNtopOffset, 270); ac++;
-    XtSetValues(scale_controls_precision, args, ac);
+    XtSetValues(scale_controls_smoothing, args, ac);
     
     ac = 0;
     XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;

@@ -319,6 +319,7 @@ int mbnavadjust_init_globals()
  	project.section_soundings = 20000;
  	project.decimation = 1;
 	project.precision = SIGMA_MINIMUM;
+	project.smoothing = MBNA_SMOOTHING_DEFAULT;
 	project.zoffsetwidth = 5.0;
 	mbna_file_id_1 = -1;
 	mbna_section_1 = -1;
@@ -346,8 +347,8 @@ int mbnavadjust_init_globals()
 	mbna_contour2.nvector = 0;
 	mbna_contour2.nvector_alloc = 0;
 	mbna_contour2.vector = NULL;
-	mbna_smoothweight = 10.0;
-	mbna_offsetweight = 1.0;
+	mbna_smoothweight = 100.0;
+	mbna_offsetweight = 0.01;
 	mbna_misfit_center = MBNA_MISFIT_AUTOCENTER;
 	mbna_minmisfit_nthreshold = MBNA_MISFIT_NTHRESHOLD;
 	mbna_minmisfit = 0.0;
@@ -722,6 +723,7 @@ int mbnavadjust_file_new(char *projectname)
 				project.num_ties = 0;
 				project.inversion = MBNA_INVERSION_NONE;
 				project.precision = SIGMA_MINIMUM;
+				project.smoothing = MBNA_SMOOTHING_DEFAULT;
 				project.zoffsetwidth = 5.0;
 				
 				/* create data directory */
@@ -1056,7 +1058,7 @@ fprintf(stderr,"Writing project %s\n", project.name);
 		fprintf(hfp,"##MBNAVADJUST PROJECT\n");
 		fprintf(hfp,"MB-SYSTEM_VERSION\t%s\n",MB_VERSION);
 		fprintf(hfp,"PROGRAM_VERSION\t%s\n",rcs_id);
-		fprintf(hfp,"FILE_VERSION\t3.00\n");
+		fprintf(hfp,"FILE_VERSION\t3.01\n");
 		fprintf(hfp,"NAME\t%s\n",project.name);
 		fprintf(hfp,"PATH\t%s\n",project.path);
 		fprintf(hfp,"HOME\t%s\n",project.home);
@@ -1070,7 +1072,7 @@ fprintf(stderr,"Writing project %s\n", project.name);
 		fprintf(hfp,"COLORINTERVAL\t%f\n",project.col_int);
 		fprintf(hfp,"TICKINTERVAL\t%f\n",project.tick_int);
 		fprintf(hfp,"INVERSION\t%d\n",project.inversion);
-		fprintf(hfp,"PRECISION\t%f\n",project.precision);
+		fprintf(hfp,"SMOOTHING\t%f\n",project.smoothing);
 		fprintf(hfp,"ZOFFSETWIDTH\t%f\n",project.zoffsetwidth);
 		for (i=0;i<project.num_files;i++)
 			{
@@ -1392,19 +1394,31 @@ int mbnavadjust_read_project()
 			status = MB_FAILURE;
 		if (status == MB_SUCCESS)
 			{
-			if (versionmajor > 1 || versionminor > 2)
+			if (versionmajor > 3 || (versionmajor == 3 && versionminor > 0))
+				{
+				if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
+					|| (nscan = sscanf(buffer,"%s %lf",label,&project.smoothing)) != 2
+					|| strcmp(label,"SMOOTHING") != 0)
+					status = MB_FAILURE;
+				project.precision = SIGMA_MINIMUM;
+				}
+			else if (versionmajor > 1 || (versionmajor == 1 && versionminor > 2))
 				{
 				if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 					|| (nscan = sscanf(buffer,"%s %lf",label,&project.precision)) != 2
 					|| strcmp(label,"PRECISION") != 0)
-				status = MB_FAILURE;
+					status = MB_FAILURE;
+				project.smoothing = MBNA_SMOOTHING_DEFAULT;
 				}
 			else
+				{
 				project.precision = SIGMA_MINIMUM;
+				project.smoothing = MBNA_SMOOTHING_DEFAULT;
+				}
 			}
 		if (status == MB_SUCCESS)
 			{
-			if ((versionmajor > 1 || versionminor > 4)
+			if ((versionmajor > 1 || (versionmajor == 1 && versionminor > 4))
 				&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 					|| (nscan = sscanf(buffer,"%s %lf",label,&project.zoffsetwidth)) != 2
 					|| strcmp(label,"ZOFFSETWIDTH") != 0))
@@ -8344,6 +8358,7 @@ icrossing,jtie,nc1,file1->status,nc2,file2->status,offsetx,offsety,offsetz);
 		done = MB_NO;
 		iter = 0;
 		perturbationsizeold = misfit_initial;
+		mbna_smoothweight = pow(10.0, project.smoothing) * mbna_offsetweight;
 		while (done == MB_NO)
 		    {
 		    /* set message dialog on */

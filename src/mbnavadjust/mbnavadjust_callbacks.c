@@ -768,6 +768,7 @@ void do_update_status()
 	int	btime_i[7], etime_i[7];
 	int	num_sections;
 	double	dr1, dr2, dr3;
+	double	dx, dy, dz;
     	int	i, ii, j, k;
 
 	/* set status label */
@@ -1511,6 +1512,9 @@ void do_update_status()
 					    if (tie->inversion_status == MBNA_INVERSION_CURRENT
 						    || tie->inversion_status == MBNA_INVERSION_OLD)
 						    {
+						    dx = tie->offset_x_m - tie->inversion_offset_x_m;
+						    dy = tie->offset_y_m - tie->inversion_offset_y_m;
+						    dz = tie->offset_z_m - tie->inversion_offset_z_m;
 						    dr1 = fabs((tie->inversion_offset_x_m - tie->offset_x_m) * tie->sigmax1[0]
 							    + (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax1[1]
 							    + (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax1[2]) / tie->sigmar1;
@@ -1522,7 +1526,7 @@ void do_update_status()
 							    + (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax3[2]) / tie->sigmar3;
 						    }
 					    if (tie->inversion_status == MBNA_INVERSION_CURRENT)
-						sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f",
+						sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f",
 						    i, j,
 						    crossing->file_id_1,
 						    crossing->section_1,
@@ -1535,12 +1539,13 @@ void do_update_status()
 						    tie->offset_x_m,
 						    tie->offset_y_m,
 						    tie->offset_z_m,
+						    dx, dy, dz,
 						    tie->sigmar1,
 						    tie->sigmar2,
 						    tie->sigmar3,
 						    dr1, dr2, dr3);
 					    else if (tie->inversion_status == MBNA_INVERSION_OLD)
-						sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f ***",
+						sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f ***",
 						    i, j,
 						    crossing->file_id_1,
 						    crossing->section_1,
@@ -1553,6 +1558,7 @@ void do_update_status()
 						    tie->offset_x_m,
 						    tie->offset_y_m,
 						    tie->offset_z_m,
+						    dx, dy, dz,
 						    tie->sigmar1,
 						    tie->sigmar2,
 						    tie->sigmar3,
@@ -2243,9 +2249,12 @@ void do_update_status()
 			XmNvalue, ivalue, 
 			NULL);
 
-	/* set values of inversion precsion slider */
-	ivalue = (int) (100 * project.precision);
-	XtVaSetValues(scale_controls_precision, 
+	/* set values of inversion smoothing weight slider */
+	ivalue = (int) (100 * project.smoothing);
+	imax = (int) (100 * 10.0);
+	XtVaSetValues(scale_controls_smoothing, 
+			XmNminimum, 1, 
+			XmNmaximum, imax, 
 			XmNdecimalPoints, 2, 
 			XmNvalue, ivalue, 
 			NULL);
@@ -3922,11 +3931,11 @@ do_controls_apply( Widget w, XtPointer client_data, XtPointer call_data)
 		NULL);
     project.tick_int = ((double) ivalue) / 100.0;
  
-    /* get values of inversion precision slider */
-    XtVaGetValues(scale_controls_precision, 
+    /* get values of inversion smoothing slider */
+    XtVaGetValues(scale_controls_smoothing, 
 		XmNvalue, &ivalue, 
 		NULL);
-    project.precision = ((double) ivalue) / 100.0;
+    project.smoothing = ((double) ivalue) / 100.0;
  
     /* get values of z offset width slider */
     XtVaGetValues(scale_controls_zoffset, 
@@ -4120,7 +4129,7 @@ do_controls_scale_colorinterval( Widget w, XtPointer client_data, XtPointer call
 /*--------------------------------------------------------------------*/
 
 void
-do_scale_controls_precision( Widget w, XtPointer client_data, XtPointer call_data)
+do_scale_controls_smoothing( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;

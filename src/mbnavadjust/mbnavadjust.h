@@ -148,6 +148,8 @@
 #define	MBNA_INTERP_CONSTANT		1
 #define	MBNA_INTERP_INTERP		2
 
+#define MBNA_SMOOTHING_DEFAULT		4
+
 #define MBNA_INTERATION_MAX		10000
 #define MBNA_CONVERGENCE		0.000001
 #define MBNA_SMALL			0.0001
@@ -274,6 +276,7 @@ struct mbna_project {
 	double	label_int;
 	int	decimation;
 	double	precision;
+	double	smoothing;
 	double	zoffsetwidth;
 	int	inversion;
 	int	modelplot;
