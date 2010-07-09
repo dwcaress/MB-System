@@ -40,7 +40,7 @@ EXTERNAL Widget   toggleButton_modelplot_sequential;
 EXTERNAL Widget   toggleButton_modelplot_block;
 EXTERNAL Widget   drawingArea_modelplot;
 EXTERNAL Widget   scale_controls_zoffset;
-EXTERNAL Widget   scale_controls_precision;
+EXTERNAL Widget   scale_controls_smoothing;
 EXTERNAL Widget   scale_controls_sectionlength;
 EXTERNAL Widget   scale_controls_tickinterval;
 EXTERNAL Widget   scale_controls_colorinterval;

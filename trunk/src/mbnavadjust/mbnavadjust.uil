@@ -139,7 +139,7 @@ identifier BXG_toggleButton_biases_separate;
 identifier BXG_toggleButton_biases_together;
 identifier BXG_label_about_version;
 identifier BXG_scale_controls_zoffset;
-identifier BXG_scale_controls_precision;
+identifier BXG_scale_controls_smoothing;
 identifier BXG_scale_controls_sectionlength;
 identifier BXG_scale_controls_tickinterval;
 identifier BXG_scale_controls_colorinterval;
@@ -209,7 +209,7 @@ procedure do_naverr_zerozoffset();
 procedure do_quit();
 procedure do_scale_contourinterval();
 procedure do_scale_controls_decimation();
-procedure do_scale_controls_precision();
+procedure do_scale_controls_smoothing();
 procedure do_scale_controls_sectionlength();
 procedure do_scale_controls_sectionsoundings();
 procedure do_scale_controls_tickinterval();
@@ -914,7 +914,7 @@ object separator12 : XmSeparator widget {
     };
 };
 
-object scale_controls_precision : XmScale widget {
+object scale_controls_smoothing : XmScale widget {
     arguments {
         arguments Style_use;
         XmNminimum = 1;
@@ -938,20 +938,20 @@ object scale_controls_precision : XmScale widget {
     };
     callbacks {
         callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_precision);
-        XmNvalueChangedCallback = procedure do_scale_controls_precision();
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_smoothing);
+        XmNvalueChangedCallback = procedure do_scale_controls_smoothing();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
 !(BX)    };
 };
 
-object label_controls_precision : XmLabel widget {
+object label_controls_smoothing : XmLabel widget {
     arguments {
         arguments Style_use;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Inversion", separate=true) &
- compound_string("Precision (m):");
+ compound_string("Smoothing (m):");
         XmNleftAttachment = XmATTACH_FORM;
         XmNleftOffset = 10;
         XmNtopOffset = 270;
@@ -1052,8 +1052,8 @@ object form_controls : XmFormDialog widget {
          managed XmSeparator separator14;
          managed XmScale scale_controls_zoffset;
          managed XmLabel label_controls_zoffset;
-         managed XmLabel label_controls_precision;
-         managed XmScale scale_controls_precision;
+         managed XmLabel label_controls_smoothing;
+         managed XmScale scale_controls_smoothing;
          managed XmSeparator separator12;
          managed XmLabel label_controls_sectionlength;
          managed XmScale scale_controls_sectionlength;
