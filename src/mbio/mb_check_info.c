@@ -640,6 +640,40 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 		    
 		/* close the file */
 		fclose(fp);
+		
+		/* apply lonflip if needed */
+		if (lonflip == -1 
+		    && mb_info->lon_min > 0.0)
+		    {
+		    mb_info->lon_min -= 360.0;
+		    mb_info->lon_max -= 360.0;
+		    mb_info->lon_start -= 360.0;
+		    mb_info->lon_end -= 360.0;
+		    }
+		else if (lonflip == 0
+		    && mb_info->lon_max < -180.0)
+		    {
+		    mb_info->lon_min += 360.0;
+		    mb_info->lon_max += 360.0;
+		    mb_info->lon_start += 360.0;
+		    mb_info->lon_end += 360.0;
+		    }
+		else if (lonflip == 0
+		    && mb_info->lon_min > 180.0)
+		    {
+		    mb_info->lon_min -= 360.0;
+		    mb_info->lon_max -= 360.0;
+		    mb_info->lon_start -= 360.0;
+		    mb_info->lon_end -= 360.0;
+		    }
+		else if (lonflip == 1
+		    && mb_info->lon_max < 0.0)
+		    {
+		    mb_info->lon_min += 360.0;
+		    mb_info->lon_max += 360.0;
+		    mb_info->lon_start += 360.0;
+		    mb_info->lon_end += 360.0;
+		    }
 		}
 
 	/* set error and status (if you got here you succeeded */

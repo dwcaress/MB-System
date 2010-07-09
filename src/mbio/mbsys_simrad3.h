@@ -71,6 +71,7 @@
  *        *0x0230: Parameter - Stop                       variable size
  *        *0x0231: Parameter - Data out off               variable size
  *        *0x0232: Parameter - Data out on                variable size
+ *        *0x0233: Extra Parameter                        variable size
  *        *0x0241: Attitude Output                        1222 bytes
  *        *0x0243: Clock Output                           28 bytes
  *        *0x0244: Bathymetry                             48-4092 bytes
@@ -169,6 +170,7 @@
 /* sonar models */
 #define	MBSYS_SIMRAD3_UNKNOWN	0
 
+#define	MBSYS_SIMRAD3_EM2040	 2040
 #define	MBSYS_SIMRAD3_EM710	 710
 #define	MBSYS_SIMRAD3_EM302	 302
 #define	MBSYS_SIMRAD3_EM122	 122

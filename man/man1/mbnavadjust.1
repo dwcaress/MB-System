@@ -1,4 +1,4 @@
-.TH mbnavadjust 1 "6 June 2010" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjust 1 "24 June 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjust\fP - Package that solves for optimal navigation by
 matching bathymetry of overlapping swaths.
@@ -529,10 +529,13 @@ This slider widget sets the depth interval in meters at which contours have
 downhill facing tickmarks. The tick interval should be a multiple of the contour
 interval.
 .TP
-.B Precision (m)
-This slider widget sets the target inversion precision in meters as measured
-by the standard deviation misfit of the tie point offsets. See the Details of 
-the Inversion section below to learn how this value affects the inversion.
+.B Inversion Smoothing
+This slider widget sets the importance of smoothing in the adjusted
+navigation model. Larger values yield a smoother model, smaller values a rougher model.
+The default is 4.00, and possible ranges are 0.10 to
+10.0, where the smoothing penalty weight applied to the first and
+second derivatives of the adjusted navigation perturbation is ten
+raised to this power.
 .TP
 .B Apply
 This button applies any changed values in the slider widgets of the \fBControls Window\fP.
