@@ -319,6 +319,14 @@ int main (int argc, char **argv)
 	int	nrec_remotecontrolsettings_tot = 0;
 	int	nrec_other_tot = 0;
 	
+	/* last time_d variables - used to check for repeated data */
+	double	last_7k_time_d = 0.0;
+	double	last_bluefinnav_time_d = 0.0;
+	double	last_bluefinenv_time_d = 0.0;
+	double	last_fsdwsbp_time_d = 0.0;
+	double	last_fsdwsslo_time_d = 0.0;
+	double	last_fsdwsshi_time_d = 0.0;
+	
 	/* merge navigation and attitude from separate Steve Rock data file */
 	char	rockfile[MB_PATH_MAXLINE];
 	int	rockdata = MB_NO;
@@ -3676,6 +3684,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	while (error <= MB_ERROR_NO_ERROR)
 		{
 		/* reset error */
+		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
 		
 		/* read next data record */
@@ -3750,7 +3759,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
 				if (verbose > 0)
-				fprintf(stderr,"R7KRECID_7kVolatileSonarSettings:  7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
+				fprintf(stderr,"R7KRECID_7kMatchFilter:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber);
@@ -3789,7 +3798,12 @@ sonardepth_sonardepth[nsonardepth]);*/
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber);
 				}
-			if (istore->read_bathymetry == MB_YES)
+			if (istore->read_bathymetry != MB_YES)
+				{
+				status = MB_FAILURE;
+				error = MB_ERROR_IGNORE;
+				}
+			else if (istore->read_bathymetry == MB_YES)
 				{
 				bathymetry = &(istore->bathymetry);
 				header = &(bathymetry->header);
@@ -3800,443 +3814,453 @@ sonardepth_sonardepth[nsonardepth]);*/
 				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
+				last_7k_time_d = MAX(last_7k_time_d, time_d);
 				if (verbose > 0)
 				fprintf(stderr,"R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d\n",
 					time_i[0],time_i[1],time_i[2],
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber,bathymetry->ping_number,bathymetry->number_beams);
-					
-				/* fix time stamp */
-				if (fix_time_stamps == MB_YES)
-					{
-					found = MB_NO;
-					for (j=0; j < nbatht && found == MB_NO; j++)
-						{
-						if (bathymetry->ping_number == batht_ping[j])
-							{
-							found = MB_YES;
-							time_d = batht_time_d_new[j];
-							mb_get_date(verbose, time_d, time_i);
-							mb_get_jtime(verbose, time_i, time_j);
-							header->s7kTime.Year = time_j[0];
-							header->s7kTime.Day = time_j[1];
-							header->s7kTime.Hours = time_i[3];
-							header->s7kTime.Minutes = time_i[4];
-							header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
-							}
-						}
-					}
-
-				/* fix version 4 quality flags */
-				if (bathymetry->header.Version < 5)
-					{
-					for (i=0;i<bathymetry->number_beams;i++)
-						{
-						if ((bathymetry->quality[i]) < 16)
-							{
-							if (bathymetry->range[i] > 0.007)
-								{
-								bathymetry->quality[i] = 23;
-								}
-							else if (bathymetry->range[i] > 0.0)
-								{
-								bathymetry->quality[i] = 20;
-								}
-							else
-								{
-								bathymetry->quality[i] = 0;
-								}
-							}
-						}
-					}
-					
-				/* fix early version 5 quality flags */
-				else if (bathymetry->header.Version == 5
-						&& header->s7kTime.Year < 2006)
-					{
-					for (i=0;i<bathymetry->number_beams;i++)
-						{
-						/* phase picks */
-						if ((bathymetry->quality[i]) == 8)
-							{
-/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
-							bathymetry->quality[i] = 32 + 15;
-/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
-							}
-						else if ((bathymetry->quality[i]) == 4)
-							{
-/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
-							bathymetry->quality[i] = 16 + 15;
-/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
-							}
-						}
-					}
-					
-				/* fix early version 5 quality flags */
-				else if (bathymetry->header.Version == 5
-						&& header->s7kTime.Year < 2008)
-					{
-					for (i=0;i<bathymetry->number_beams;i++)
-						{
-						/* phase picks */
-						if ((bathymetry->quality[i]) == 4)
-							{
-/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
-							bathymetry->quality[i] = 32 + 15;
-/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
-							}
-						else if ((bathymetry->quality[i]) == 2)
-							{
-/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
-							bathymetry->quality[i] = 16 + 15;
-/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
-							}
-						}
-					}
-					
-				/* fix upgraded version 5 quality flags */
-				else if (bathymetry->header.Version >= 5)
-					{
-					for (i=0;i<bathymetry->number_beams;i++)
-						{
-/* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
-						bathymetry->quality[i] = bathymetry->quality[i] & 15;
-						
-						/* phase or amplitude picks */
-						if (bathymetry->quality[i] & 8)
-							{
-/* fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]); */
-							bathymetry->quality[i] += 32;
-/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
-							}
-						else if (bathymetry->quality[i] & 4)
-							{
-/* fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]); */
-							bathymetry->quality[i] += 16;
-/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
-							}
-							
-						/* flagged by sonar */
-						if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0)
-							{
-							bathymetry->quality[i] += 64;
-							}
-/* fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]); */
-						}
-					}
-					
-				/* apply specified offsets to range values */
-				for (j=0;j<nrangeoffset;j++)
-					{
-					for (i=rangeoffsetstart[j];i<=rangeoffsetend[j];i++)
-						{
-						bathymetry->range[i] += rangeoffset[j];
-						}
-					}
-
-				/* recalculate optional values in bathymetry record */
-				interp_status = MB_SUCCESS;
-				
-				/* get nav */
-				j = 0;
-				if (nins > 0)
-					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								ins_time_d-1, ins_lon-1,
-								nins, time_d, &navlon, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose, 
-								ins_time_d-1, ins_lat-1,
-								nins, time_d, &navlat, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								ins_speed_time_d-1, ins_speed-1,
-								nins_speed, time_d, &speed, &j, 
-								&error);
-					}
-				else if (nrock > 0)
-					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								rock_time_d-1, rock_lon-1,
-								nrock, time_d, &navlon, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose, 
-								rock_time_d-1, rock_lat-1,
-								nrock, time_d, &navlat, &j, 
-								&error);
-					if (j > 1)
-						{
-						j1 = j - 2;
-						j2 = j - 1;
-						}
-					else
-						{
-						j1 = j - 1;
-						j2 = j;
-						}
-					mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
-					dx = (rock_lon[j2] - rock_lon[j1])/mtodeglon;
-					dy = (rock_lat[j2] - rock_lat[j1])/mtodeglat;
-					dist = sqrt(dx*dx + dy*dy);
-					dt = (rock_time_d[j2] - rock_time_d[j1]);
-					if (dt > 0.0)
-						speed = 3.6 * dist / dt;
-					}
-				else if (ndsl > 0)
-					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								dsl_time_d-1, dsl_lon-1,
-								ndsl, time_d, &navlon, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose, 
-								dsl_time_d-1, dsl_lat-1,
-								ndsl, time_d, &navlat, &j, 
-								&error);
-					if (j > 1)
-						{
-						j1 = j - 2;
-						j2 = j - 1;
-						}
-					else
-						{
-						j1 = j - 1;
-						j2 = j;
-						}
-					mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
-					dx = (dsl_lon[j2] - dsl_lon[j1])/mtodeglon;
-					dy = (dsl_lat[j2] - dsl_lat[j1])/mtodeglat;
-					dist = sqrt(dx*dx + dy*dy);
-					dt = (dsl_time_d[j2] - dsl_time_d[j1]);
-					if (dt > 0.0)
-						speed = 3.6 * dist / dt;
-					}
-				else if (ndat_nav > 0)
-					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								dat_nav_time_d-1, dat_nav_lon-1,
-								ndat_nav, time_d, &navlon, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose, 
-								dat_nav_time_d-1, dat_nav_lat-1,
-								ndat_nav, time_d, &navlat, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp_degrees(verbose, 
-								dat_nav_time_d-1, dat_nav_speed-1,
-								ndat_nav, time_d, &speed, &j, 
-								&error);
-					}
-				else
-					{
-					navlon = 0.0;
-					navlat = 0.0;
-					speed = 0.0;
-					}
-				
-				/* get heading */
-				j = 0;
-				if (interp_status != MB_SUCCESS)
-					{
-					}
-				else if (nins > 0)
-					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								ins_time_d-1, ins_heading-1,
-								nins, time_d, &heading, &j, 
-								&error);
-					}
-				else if (nrock > 0)
-					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								rock_time_d-1, rock_heading-1,
-								nrock, time_d, &heading, &j, 
-								&error);
-					}
-				else if (ndsl > 0)
-					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								dsl_time_d-1, dsl_heading-1,
-								ndsl, time_d, &heading, &j, 
-								&error);
-					}
-				else if (ndat_heading > 0)
-					{
-					interp_status = mb_linear_interp_degrees(verbose, 
-								dat_heading_time_d-1, dat_heading_heading-1,
-								ndat_heading, time_d, &heading, &j, 
-								&error);
-					}
-				else
-					{
-					heading = 0.0;
-					}
-				
-				/* get sonar depth */
-				if (kluge_useverticaldepth == MB_YES)
-					{
-					verticaldepth = (s7kr_verticaldepth *)&(istore->verticaldepth);
-					sonardepth = (double)(verticaldepth->vertical_depth);
-					}
-				else if (interp_status != MB_SUCCESS)
-					{
-					}
-				else if (nsonardepth > 0)
-					{
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								sonardepth_time_d-1, sonardepth_sonardepth-1,
-								nsonardepth, time_d, &sonardepth, &j, 
-								&error);
-					}
-				else if (nins > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								ins_time_d-1, ins_sonardepth-1,
-								nins, time_d, &sonardepth, &j, 
-								&error);
-					}
-				else if (nrock > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								rock_time_d-1, rock_sonardepth-1,
-								nrock, time_d, &sonardepth, &j, 
-								&error);
-					}
-				else if (ndsl > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								dsl_time_d-1, dsl_sonardepth-1,
-								ndsl, time_d, &sonardepth, &j, 
-								&error);
-					}
-				else if (ndat_sonardepth > 0)
-					{
-					sonardepthlag = 0.0;
-					if (sonardepthlagfix == MB_YES && ndat_sonardepth > 1 
-						&& sonardepthratemax > 0.0
-						&& interp_status == MB_SUCCESS)
-						{
-						interp_status = mb_linear_interp(verbose, 
-								dat_sonardepth_time_d-1, dat_sonardepth_sonardepthrate-1,
-								ndat_sonardepth, time_d, &sonardepthrate, &j, 
-								&error);
-						sonardepthlag = sonardepthrate * sonardepthlagmax / sonardepthratemax;
-						if (sonardepthrate >= sonardepthratemax)
-							sonardepthlag = sonardepthlagmax;
-						}
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
-								ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &j, 
-								&error);
-					}
-				else if (ndat_rph > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								dat_rph_time_d-1, dat_rph_heave-1,
-								ndat_rph, time_d, &heave, &j, 
-								&error);
-					sonardepth = heave;
-					}
-				else
-					{
-					sonardepth = 0.0;
-					}
-				
-				/* get altitude */
-				if (interp_status != MB_SUCCESS)
-					{
-					}
-				else if (nins > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								ins_altitude_time_d-1, ins_altitude-1,
-								nins_altitude, time_d, &altitude, &j, 
-								&error);
-					}
-				else if (ndat_altitude > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								dat_altitude_time_d-1, dat_altitude_altitude-1,
-								ndat_altitude, time_d, &altitude, &j, 
-								&error);
-					}
-				else
-					{
-					altitude = 0.0;
-					}
-				
-				/* get attitude */
-				if (interp_status != MB_SUCCESS)
-					{
-					}
-				else if (nins > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								ins_time_d-1, ins_roll-1,
-								nins, time_d, &roll, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								ins_time_d-1, ins_pitch-1,
-								nins, time_d, &pitch, &j, 
-								&error);
-					}
-				else if (nrock > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								rock_time_d-1, rock_roll-1,
-								nrock, time_d, &roll, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								rock_time_d-1, rock_pitch-1,
-								nrock, time_d, &pitch, &j, 
-								&error);
-					}
-				else if (ndsl > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								dsl_time_d-1, dsl_roll-1,
-								ndsl, time_d, &roll, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								dsl_time_d-1, dsl_pitch-1,
-								ndsl, time_d, &pitch, &j, 
-								&error);
-					}
-				else if (ndat_rph > 0)
-					{
-					interp_status = mb_linear_interp(verbose, 
-								dat_rph_time_d-1, dat_rph_roll-1,
-								ndat_rph, time_d, &roll, &j, 
-								&error);
-					if (interp_status == MB_SUCCESS)
-					interp_status = mb_linear_interp(verbose, 
-								dat_rph_time_d-1, dat_rph_pitch-1,
-								ndat_rph, time_d, &pitch, &j, 
-								&error);
-					}
-				else
-					{
-					roll = 0.0;
-					pitch = 0.0;
-					}
-
-				/* if the optional data are not all available, this ping
-					is not useful, and is discarded by setting
-					*error to MB_ERROR_MISSING_NAVATTITUDE
-					unless the -N flag has been specified */
-				if (interp_status == MB_FAILURE && goodnavattitudeonly == MB_YES)
+				if (last_7k_time_d > time_d)
 					{
 					status = MB_FAILURE;
-					error = MB_ERROR_MISSING_NAVATTITUDE;
+					error = MB_ERROR_IGNORE;
+					}
+					
+				/* apply fixes to good data */
+				if (status == MB_SUCCESS)
+					{
+					/* fix time stamp */
+					if (fix_time_stamps == MB_YES)
+						{
+						found = MB_NO;
+						for (j=0; j < nbatht && found == MB_NO; j++)
+							{
+							if (bathymetry->ping_number == batht_ping[j])
+								{
+								found = MB_YES;
+								time_d = batht_time_d_new[j];
+								mb_get_date(verbose, time_d, time_i);
+								mb_get_jtime(verbose, time_i, time_j);
+								header->s7kTime.Year = time_j[0];
+								header->s7kTime.Day = time_j[1];
+								header->s7kTime.Hours = time_i[3];
+								header->s7kTime.Minutes = time_i[4];
+								header->s7kTime.Seconds = time_i[5] + 0.000001 * time_i[6];
+								}
+							}
+						}
+
+					/* fix version 4 quality flags */
+					if (bathymetry->header.Version < 5)
+						{
+						for (i=0;i<bathymetry->number_beams;i++)
+							{
+							if ((bathymetry->quality[i]) < 16)
+								{
+								if (bathymetry->range[i] > 0.007)
+									{
+									bathymetry->quality[i] = 23;
+									}
+								else if (bathymetry->range[i] > 0.0)
+									{
+									bathymetry->quality[i] = 20;
+									}
+								else
+									{
+									bathymetry->quality[i] = 0;
+									}
+								}
+							}
+						}
+
+					/* fix early version 5 quality flags */
+					else if (bathymetry->header.Version == 5
+							&& header->s7kTime.Year < 2006)
+						{
+						for (i=0;i<bathymetry->number_beams;i++)
+							{
+							/* phase picks */
+							if ((bathymetry->quality[i]) == 8)
+								{
+	/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
+								bathymetry->quality[i] = 32 + 15;
+	/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+								}
+							else if ((bathymetry->quality[i]) == 4)
+								{
+	/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
+								bathymetry->quality[i] = 16 + 15;
+	/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+								}
+							}
+						}
+
+					/* fix early version 5 quality flags */
+					else if (bathymetry->header.Version == 5
+							&& header->s7kTime.Year < 2008)
+						{
+						for (i=0;i<bathymetry->number_beams;i++)
+							{
+							/* phase picks */
+							if ((bathymetry->quality[i]) == 4)
+								{
+	/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
+								bathymetry->quality[i] = 32 + 15;
+	/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+								}
+							else if ((bathymetry->quality[i]) == 2)
+								{
+	/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
+								bathymetry->quality[i] = 16 + 15;
+	/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+								}
+							}
+						}
+
+					/* fix upgraded version 5 quality flags */
+					else if (bathymetry->header.Version >= 5)
+						{
+						for (i=0;i<bathymetry->number_beams;i++)
+							{
+	/* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
+							bathymetry->quality[i] = bathymetry->quality[i] & 15;
+
+							/* phase or amplitude picks */
+							if (bathymetry->quality[i] & 8)
+								{
+	/* fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]); */
+								bathymetry->quality[i] += 32;
+	/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
+								}
+							else if (bathymetry->quality[i] & 4)
+								{
+	/* fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]); */
+								bathymetry->quality[i] += 16;
+	/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
+								}
+
+							/* flagged by sonar */
+							if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0)
+								{
+								bathymetry->quality[i] += 64;
+								}
+	/* fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]); */
+							}
+						}
+
+					/* apply specified offsets to range values */
+					for (j=0;j<nrangeoffset;j++)
+						{
+						for (i=rangeoffsetstart[j];i<=rangeoffsetend[j];i++)
+							{
+							bathymetry->range[i] += rangeoffset[j];
+							}
+						}
+
+					/* recalculate optional values in bathymetry record */
+					interp_status = MB_SUCCESS;
+
+					/* get nav */
+					j = 0;
+					if (nins > 0)
+						{
+						interp_status = mb_linear_interp_degrees(verbose, 
+									ins_time_d-1, ins_lon-1,
+									nins, time_d, &navlon, &j, 
+									&error);
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp_degrees(verbose, 
+									ins_time_d-1, ins_lat-1,
+									nins, time_d, &navlat, &j, 
+									&error);
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp(verbose, 
+									ins_speed_time_d-1, ins_speed-1,
+									nins_speed, time_d, &speed, &j, 
+									&error);
+						}
+					else if (nrock > 0)
+						{
+						interp_status = mb_linear_interp_degrees(verbose, 
+									rock_time_d-1, rock_lon-1,
+									nrock, time_d, &navlon, &j, 
+									&error);
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp_degrees(verbose, 
+									rock_time_d-1, rock_lat-1,
+									nrock, time_d, &navlat, &j, 
+									&error);
+						if (j > 1)
+							{
+							j1 = j - 2;
+							j2 = j - 1;
+							}
+						else
+							{
+							j1 = j - 1;
+							j2 = j;
+							}
+						mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+						dx = (rock_lon[j2] - rock_lon[j1])/mtodeglon;
+						dy = (rock_lat[j2] - rock_lat[j1])/mtodeglat;
+						dist = sqrt(dx*dx + dy*dy);
+						dt = (rock_time_d[j2] - rock_time_d[j1]);
+						if (dt > 0.0)
+							speed = 3.6 * dist / dt;
+						}
+					else if (ndsl > 0)
+						{
+						interp_status = mb_linear_interp_degrees(verbose, 
+									dsl_time_d-1, dsl_lon-1,
+									ndsl, time_d, &navlon, &j, 
+									&error);
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp_degrees(verbose, 
+									dsl_time_d-1, dsl_lat-1,
+									ndsl, time_d, &navlat, &j, 
+									&error);
+						if (j > 1)
+							{
+							j1 = j - 2;
+							j2 = j - 1;
+							}
+						else
+							{
+							j1 = j - 1;
+							j2 = j;
+							}
+						mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+						dx = (dsl_lon[j2] - dsl_lon[j1])/mtodeglon;
+						dy = (dsl_lat[j2] - dsl_lat[j1])/mtodeglat;
+						dist = sqrt(dx*dx + dy*dy);
+						dt = (dsl_time_d[j2] - dsl_time_d[j1]);
+						if (dt > 0.0)
+							speed = 3.6 * dist / dt;
+						}
+					else if (ndat_nav > 0)
+						{
+						interp_status = mb_linear_interp_degrees(verbose, 
+									dat_nav_time_d-1, dat_nav_lon-1,
+									ndat_nav, time_d, &navlon, &j, 
+									&error);
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp_degrees(verbose, 
+									dat_nav_time_d-1, dat_nav_lat-1,
+									ndat_nav, time_d, &navlat, &j, 
+									&error);
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp_degrees(verbose, 
+									dat_nav_time_d-1, dat_nav_speed-1,
+									ndat_nav, time_d, &speed, &j, 
+									&error);
+						}
+					else
+						{
+						navlon = 0.0;
+						navlat = 0.0;
+						speed = 0.0;
+						}
+
+					/* get heading */
+					j = 0;
+					if (interp_status != MB_SUCCESS)
+						{
+						}
+					else if (nins > 0)
+						{
+						interp_status = mb_linear_interp_degrees(verbose, 
+									ins_time_d-1, ins_heading-1,
+									nins, time_d, &heading, &j, 
+									&error);
+						}
+					else if (nrock > 0)
+						{
+						interp_status = mb_linear_interp_degrees(verbose, 
+									rock_time_d-1, rock_heading-1,
+									nrock, time_d, &heading, &j, 
+									&error);
+						}
+					else if (ndsl > 0)
+						{
+						interp_status = mb_linear_interp_degrees(verbose, 
+									dsl_time_d-1, dsl_heading-1,
+									ndsl, time_d, &heading, &j, 
+									&error);
+						}
+					else if (ndat_heading > 0)
+						{
+						interp_status = mb_linear_interp_degrees(verbose, 
+									dat_heading_time_d-1, dat_heading_heading-1,
+									ndat_heading, time_d, &heading, &j, 
+									&error);
+						}
+					else
+						{
+						heading = 0.0;
+						}
+
+					/* get sonar depth */
+					if (kluge_useverticaldepth == MB_YES)
+						{
+						verticaldepth = (s7kr_verticaldepth *)&(istore->verticaldepth);
+						sonardepth = (double)(verticaldepth->vertical_depth);
+						}
+					else if (interp_status != MB_SUCCESS)
+						{
+						}
+					else if (nsonardepth > 0)
+						{
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp(verbose, 
+									sonardepth_time_d-1, sonardepth_sonardepth-1,
+									nsonardepth, time_d, &sonardepth, &j, 
+									&error);
+						}
+					else if (nins > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									ins_time_d-1, ins_sonardepth-1,
+									nins, time_d, &sonardepth, &j, 
+									&error);
+						}
+					else if (nrock > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									rock_time_d-1, rock_sonardepth-1,
+									nrock, time_d, &sonardepth, &j, 
+									&error);
+						}
+					else if (ndsl > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									dsl_time_d-1, dsl_sonardepth-1,
+									ndsl, time_d, &sonardepth, &j, 
+									&error);
+						}
+					else if (ndat_sonardepth > 0)
+						{
+						sonardepthlag = 0.0;
+						if (sonardepthlagfix == MB_YES && ndat_sonardepth > 1 
+							&& sonardepthratemax > 0.0
+							&& interp_status == MB_SUCCESS)
+							{
+							interp_status = mb_linear_interp(verbose, 
+									dat_sonardepth_time_d-1, dat_sonardepth_sonardepthrate-1,
+									ndat_sonardepth, time_d, &sonardepthrate, &j, 
+									&error);
+							sonardepthlag = sonardepthrate * sonardepthlagmax / sonardepthratemax;
+							if (sonardepthrate >= sonardepthratemax)
+								sonardepthlag = sonardepthlagmax;
+							}
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp(verbose, 
+									dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
+									ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &j, 
+									&error);
+						}
+					else if (ndat_rph > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									dat_rph_time_d-1, dat_rph_heave-1,
+									ndat_rph, time_d, &heave, &j, 
+									&error);
+						sonardepth = heave;
+						}
+					else
+						{
+						sonardepth = 0.0;
+						}
+
+					/* get altitude */
+					if (interp_status != MB_SUCCESS)
+						{
+						}
+					else if (nins > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									ins_altitude_time_d-1, ins_altitude-1,
+									nins_altitude, time_d, &altitude, &j, 
+									&error);
+						}
+					else if (ndat_altitude > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									dat_altitude_time_d-1, dat_altitude_altitude-1,
+									ndat_altitude, time_d, &altitude, &j, 
+									&error);
+						}
+					else
+						{
+						altitude = 0.0;
+						}
+
+					/* get attitude */
+					if (interp_status != MB_SUCCESS)
+						{
+						}
+					else if (nins > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									ins_time_d-1, ins_roll-1,
+									nins, time_d, &roll, &j, 
+									&error);
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp(verbose, 
+									ins_time_d-1, ins_pitch-1,
+									nins, time_d, &pitch, &j, 
+									&error);
+						}
+					else if (nrock > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									rock_time_d-1, rock_roll-1,
+									nrock, time_d, &roll, &j, 
+									&error);
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp(verbose, 
+									rock_time_d-1, rock_pitch-1,
+									nrock, time_d, &pitch, &j, 
+									&error);
+						}
+					else if (ndsl > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									dsl_time_d-1, dsl_roll-1,
+									ndsl, time_d, &roll, &j, 
+									&error);
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp(verbose, 
+									dsl_time_d-1, dsl_pitch-1,
+									ndsl, time_d, &pitch, &j, 
+									&error);
+						}
+					else if (ndat_rph > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									dat_rph_time_d-1, dat_rph_roll-1,
+									ndat_rph, time_d, &roll, &j, 
+									&error);
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp(verbose, 
+									dat_rph_time_d-1, dat_rph_pitch-1,
+									ndat_rph, time_d, &pitch, &j, 
+									&error);
+						}
+					else
+						{
+						roll = 0.0;
+						pitch = 0.0;
+						}
+
+					/* if the optional data are not all available, this ping
+						is not useful, and is discarded by setting
+						*error to MB_ERROR_MISSING_NAVATTITUDE
+						unless the -N flag has been specified */
+					if (interp_status == MB_FAILURE && goodnavattitudeonly == MB_YES)
+						{
+						status = MB_FAILURE;
+						error = MB_ERROR_MISSING_NAVATTITUDE;
+						}
 					}
 
 				/* if the optional data are available, then proceed */
@@ -5090,6 +5114,12 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
+			last_bluefinenv_time_d = MAX(last_bluefinenv_time_d, time_d);
+			if (last_bluefinenv_time_d > time_d)
+				{
+				status = MB_FAILURE;
+				error = MB_ERROR_IGNORE;
+				}
 
 			/* get timelag value */
 			timelag = 0.0;
@@ -5319,6 +5349,12 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
+			last_bluefinnav_time_d = MAX(last_bluefinnav_time_d, time_d);
+			if (last_bluefinnav_time_d > time_d)
+				{
+				status = MB_FAILURE;
+				error = MB_ERROR_IGNORE;
+				}
 
 			/* get timelag value */
 			timelag = 0.0;
@@ -5404,6 +5440,12 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
+			last_fsdwsbp_time_d = MAX(last_fsdwsbp_time_d, time_d);
+			if (last_fsdwsbp_time_d > time_d)
+				{
+				status = MB_FAILURE;
+				error = MB_ERROR_IGNORE;
+				}
 			fsdwchannel = &(fsdwsb->channel);
 			fsdwsegyheader = &(fsdwsb->segyheader);
 			if (verbose > 0)
@@ -5429,6 +5471,12 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
+			last_fsdwsslo_time_d = MAX(last_fsdwsslo_time_d, time_d);
+			if (last_fsdwsslo_time_d > time_d)
+				{
+				status = MB_FAILURE;
+				error = MB_ERROR_IGNORE;
+				}
 			for (i=0;i<fsdwsslo->number_channels;i++)
 				{
 				fsdwchannel = &(fsdwsslo->channel[i]);
@@ -5458,6 +5506,12 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
 			mb_get_itime(verbose, time_j, time_i);
 			mb_get_time(verbose, time_i, &time_d);
+			last_fsdwsshi_time_d = MAX(last_fsdwsshi_time_d, time_d);
+			if (last_fsdwsshi_time_d > time_d)
+				{
+				status = MB_FAILURE;
+				error = MB_ERROR_IGNORE;
+				}
 			for (i=0;i<fsdwsshi->number_channels;i++)
 				{
 				fsdwchannel = &(fsdwsshi->channel[i]);
@@ -5503,7 +5557,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	  	/* if using AUV ins data log for navigation and attitude, then
 			output these data in new bluefin racords while not outputting
 			any old bluefin records. */
-		if (nins > 0)
+		if (nins > 0 && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
 			{
 			/* if first output find starting point in ins, attitude, and speed data */
 			if (ins_output_index < 0)

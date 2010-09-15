@@ -92,7 +92,7 @@
 #define	MBSYS_HDCS_MAX_PIXELS		1024
 
 /* define tools (sonars) supported by OMG_HDCS */
-#define MBSYS_HDCS_NUM_TOOLS		40   /* as of March 2008 */
+#define MBSYS_HDCS_NUM_TOOLS		46   /* as of June 2010 */
 #define MBSYS_HDCS_None			-1
 #define MBSYS_HDCS_SingleBeam		0
 #define MBSYS_HDCS_ELAC_BottomChart	1
@@ -134,6 +134,12 @@
 #define MBSYS_HDCS_EM3002D		37
 #define MBSYS_HDCS_SeaBat_8160		38
 #define MBSYS_HDCS_SEA_SwathPlus 	39
+#define MBSYS_HDCS_EM122		40
+#define MBSYS_HDCS_EM302		41
+#define MBSYS_HDCS_SeaBat_7125		42
+#define MBSYS_HDCS_R2Sonic_2024		43
+#define MBSYS_HDCS_SeaBat_7150 		44
+#define MBSYS_HDCS_OMG_GLORIA		45
 #define MBSYS_HDCS_COMMENT		999
 
 static char *mbsys_hdcs_tool_names[MBSYS_HDCS_NUM_TOOLS] = {
@@ -177,6 +183,12 @@ static char *mbsys_hdcs_tool_names[MBSYS_HDCS_NUM_TOOLS] = {
    "Kongsberg - EM3002D",
    "Reson 8160",
    "SEA SwathPlus - Dual sided",
+   "Kongsberg - EM122",
+   "Kongsberg - EM302",
+   "Reson 7125",
+   "R2Sonic 2024",
+   "Reson 7150",
+   "OMG GLORIA"
 };
 
 
@@ -184,6 +196,7 @@ static char *mbsys_hdcs_tool_names[MBSYS_HDCS_NUM_TOOLS] = {
 struct mbsys_hdcs_beam_struct 
 	{
         int	status;           /* status is either OK (0) or bad (other) */
+        mb_u_char scaling_factor; /* V4 */
         int	observedDepth;    /* Depth (mm)                            */
         int	acrossTrack;      /* Across track position of depth (mm)   */
         int	alongTrack;       /* Along track position of depth (mm)    */
@@ -214,7 +227,60 @@ struct mbsys_hdcs_beam_struct
 	mb_u_char	samp_win_length;
 	short	beam_depress_angle;
 	unsigned short	beam_heading_angle;
+	/* V4 */
+	unsigned short other_range;
+	signed short Tx_steer;
+	signed short Rc_steer;
+	mb_u_char TxSector;
+	unsigned int timestampOffset; /* really is a 64 bit integer, trying to compress */
+					/* would'nt even need if didn't have to relate wavefile 
+			 		by this number */
+	unsigned short no_RAMAN; 
+	unsigned short no_IR; 
+	unsigned short no_GAPD; 
+	unsigned short no_PMT;
+	mb_u_char prim_depth_conf; 
+	mb_u_char seco_depth_conf; 
+	signed short scan_azimuth; 	/* 100ths of degree */
+	unsigned short nadir_angle; 	/* 100ths of degree */
+					/* always dynamically compressed for v4 using scaling factor */
+	signed int secondaryDepth;	/* Depth (mm) remember can be +ve or -ve  */
+	signed short wave_height;
+	signed int opaqueDepth_PMT;	/* Depth (mm)                            */
+	signed int extinctionDepth_PMT;/* Depth (mm)                            */
+	signed int pimDepth_PMT;	/* Depth (mm)                            */
+	signed int opaqueDepth_GAPD;	/* Depth (mm)                            */
+	signed int extinctionDepth_GAPD;/* Depth (mm)                            */
+	signed int pimDepth_GAPD;	/* Depth (mm)                            */
+	float twtt;
+	unsigned int snippet_first_sample;
+	unsigned int snippet_last_sample;
+	float intensity;
 	};
+	
+/* specific FOR ATLAS SAPI data */
+struct mbsys_omghdcs_profile_subparams_struct
+{
+
+  unsigned short txBeamIndex;
+  unsigned short txLevel;
+  short txBeamAngle;
+  unsigned short txPulseLength;
+
+  unsigned int ss_offset;
+  unsigned short no_skipped_ss;
+  unsigned short no_acquired_ss;
+  unsigned short ss_sample_interval;
+
+  unsigned short bscatClass;
+  unsigned short nrActualGainSets;
+  short rxGup;
+  short rxGain;
+  short ar;
+  unsigned short rxtime[20];
+  short rxgain[20];
+
+};
 
 /* structure to hold everything */
 struct mbsys_hdcs_struct
@@ -253,6 +319,13 @@ struct mbsys_hdcs_struct
         int    minProcDepth;	/* Minimum depth (mm)                    */
         int    maxProcDepth;	/* Maximum depth (mm)                    */
         int    status_sum;	/* status not actually used at all ....  */
+        
+        /* V4 */
+	int totalProfileBytes;
+	int Profile_BitsDefining[20];
+	int totalBeamBytes;
+	int Beam_BitsDefining[20];
+	/* End V4 Summary */
 
         int    status_pro;	/* status is either OK (0) 
 					or no nav (1)
@@ -300,6 +373,58 @@ struct mbsys_hdcs_struct
 	mb_u_char beam_spacing;
 	mb_u_char coverage_sector;
 	mb_u_char yaw_stab_mode;
+	
+	/* V4 */
+	struct mbsys_omghdcs_profile_subparams_struct params[2];
+
+  	int transducerDepth;		/* transducer or  towfish depth */
+  	int transducerPitch;		/* Transducer pitch (100 nRadians)    */
+  	int transducerRoll;		/* Transducer roll (100 nRadians)     */
+  					/* enough for dyn. stab transducer */
+  	int transducerHeading;		/* Transducer pitch (100 nRadians)    */
+  	int transducerLatOffset;	/* Latitude offset wrt. vessel        */
+  	int transducerLongOffset;	/* Longitude offset wrt. vessel       */
+  	int transducerSlantRange;	/*slantRange(mm) wrt. vessel (cable out) */
+  	int transducerAcross;		/* horizontal Range (mm) wrt. vessel */
+  	int transducerAlong;		/* horizontal Range (mm) wrt. vessel */
+  	int transducerBearing;		/* Bearing (100nRads) wrt. vessel       */
+  	short longperiod_heaveCorrection;
+  	short dynamic_draftCorrection;
+  	short deepdraftoffset_in_metres;
+  	short draft_at_Tx;
+  	short alternateRoll;
+  	short alternatePitch;
+  	short alternateHeave;
+  	short alternateHeading;
+  	short standaloneHeading;
+  	short RTK_at_RP;  		/* in cm units so that can support +/- 320m. */
+  	short Lowpass_RTK_at_RP;  	/* in cm units so that can support +/- 320m. */
+  	short WLZ;
+  	unsigned short samp_rate_SecondHead;
+  	signed int clock_drift_millis;
+  	unsigned int watercol_offset;
+  	unsigned int watercol_size;
+  	unsigned int watercol_offset_2nd;
+  	unsigned int watercol_size_2nd;
+  	unsigned short range_to_normal_incidence;
+  	unsigned int laser_timestampRef;
+  	unsigned int tx_sector_offset;
+  	unsigned short num_tx_sectors;
+  	unsigned int sonar_settings_offset;
+  	unsigned int ping_number;
+  	unsigned short multi_ping_sequence;
+  	unsigned int num_beams;	/* Which is different than numDepths...*/
+					/* (which is usually the number of possible depths and not ACTUAL depths */
+					/* e.g. high-density vs. low-density mode in KM systems) */
+  	unsigned char layer_compensation_flag;
+  	float    bs_beam_position;
+  	unsigned int bs_control_flags;
+  	unsigned short bs_num_beams_per_side;
+  	unsigned short bs_current_beam_number;
+  	unsigned char bs_sample_descriptor;
+  	unsigned int snippet_sample_descriptor;
+  	/* End V4 Profile */
+	
 	struct mbsys_hdcs_beam_struct *beams;
 	mb_s_char	*ss_raw;
 	int	pixel_size;	/* processed sidescan pixel size in mm */

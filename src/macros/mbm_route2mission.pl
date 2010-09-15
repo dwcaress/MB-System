@@ -1288,7 +1288,8 @@ print "Behavior: reson (start, Log_Mode = 1)\n";
 				if ($mwaypoints[$i] == 3)
 					{
 					$camerarunlength = $cameraenddistance - $mdistances[$i];
-					$nphotos = int (1.1 * $camerarunlength / 10.0);
+					# $nphotos = int (1.1 * $camerarunlength / 10.0);
+					$nphotos = 0;
 					print MFILE "#######################################################\r\n";
 					print MFILE "# Start taking pictures with camera.\r\n";
 					print MFILE "#   Distance along survey: $mdistances[$i-1]\r\n";
@@ -1298,7 +1299,7 @@ print "Behavior: reson (start, Log_Mode = 1)\n";
 					print MFILE "{ \r\n";
 					print MFILE "duration  = 1; \r\n";
 					print MFILE "nPhotos = $nphotos; \r\n";
-					print MFILE "nSamplePeriods = 50; \r\n";
+					print MFILE "nSamplePeriods = 9; \r\n";
 					print MFILE "} \r\n";
 					print MFILE "# \r\n";
 					print MFILE "#######################################################\r\n";
@@ -1797,7 +1798,8 @@ print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) 
 		if ($camera && $i > 0 && $mwaypoints[$i-1] == 3)
 			{
 			$camerarunlength = $cameraenddistance - $mdistances[$i-1];
-			$nphotos = int (1.1 * $camerarunlength / 10.0);
+			# $nphotos = int (1.1 * $camerarunlength / 10.0);
+			$nphotos = 0;
 			print MFILE "#######################################################\r\n";
 			print MFILE "# Start taking pictures with camera.\r\n";
 			print MFILE "#   Distance along survey: $mdistances[$i-1]\r\n";
@@ -1807,7 +1809,7 @@ print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) 
 			print MFILE "{ \r\n";
 			print MFILE "duration  = 1; \r\n";
 			print MFILE "nPhotos = $nphotos; \r\n";
-			print MFILE "nSamplePeriods = 50; \r\n";
+			print MFILE "nSamplePeriods = 9; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";
