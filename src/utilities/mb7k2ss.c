@@ -254,7 +254,8 @@ int main (int argc, char **argv)
 	double	ossacrosstrack[MB7K2SS_SSDIMENSION];
 	double	ossalongtrack[MB7K2SS_SSDIMENSION];
 	int	ossbincount[MB7K2SS_SSDIMENSION];
-	double	swath_width;
+	int	swath_width_set = MB_NO;
+	double	swath_width = -1.0;
 	double	pixel_width;
 	
 	/* extract modes */
@@ -362,7 +363,7 @@ int main (int argc, char **argv)
 	int	oktowrite;
 	double	dx, dy;
 	int	kangle, kstart;
-	double	xtrack, ltrack, rr;
+	double	xtrack, ltrack, rr, rangemin;
 	FILE	*fp = NULL;
 	char	*result;
 	int	nget;
@@ -385,7 +386,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:F:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:U:u:XxVvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:F:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:U:u:W:w:XxVvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -496,6 +497,13 @@ int main (int argc, char **argv)
 			sscanf (optarg,"%lf", &rangethreshold);
 			flag++;
 			break;
+		case 'W':
+		case 'w':
+			sscanf (optarg,"%lf", &swath_width);
+			if (swath_width > 0.0)
+				swath_width_set = MB_YES;
+			flag++;
+			break;
 		case 'X':
 		case 'x':
 			ssflip = MB_YES;
@@ -558,6 +566,8 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       bottompickmode:      %d\n",bottompickmode);
 		fprintf(stderr,"dbg2       bottompickthreshold: %f\n",bottompickthreshold);
 		fprintf(stderr,"dbg2       smooth:              %d\n",smooth);
+		fprintf(stderr,"dbg2       swath_width_set:     %d\n",swath_width_set);
+		fprintf(stderr,"dbg2       swath_width:         %f\n",swath_width);
 		fprintf(stderr,"dbg2       interpbins:          %d\n",interpbins);
 		fprintf(stderr,"dbg2       gainmode:            %d\n",gainmode);
 		fprintf(stderr,"dbg2       gainfactor:          %f\n",gainfactor);
@@ -580,6 +590,59 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\n%s\n",help_message);
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(status);
+		}
+
+	/* print starting debug statements */
+	if (verbose == 1)
+		{
+		fprintf(stderr,"\nProgram <%s>\n",program_name);
+		fprintf(stderr,"Version %s\n",rcs_id);
+		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"Control Parameters:\n");
+		if (bottompickmode == MB7K2SS_BOTTOMPICK_BATHYMETRY)
+			fprintf(stderr,"     bottompickmode:      Bathymetry\n");
+		else if (bottompickmode == MB7K2SS_BOTTOMPICK_ALTITUDE)
+			fprintf(stderr,"     bottompickmode:      Altitude\n");
+		else if (bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
+			{
+			fprintf(stderr,"     bottompickmode:      Sidescan first arrival\n");
+			fprintf(stderr,"     bottompickthreshold: %f\n",bottompickthreshold);
+			}
+		else if (bottompickmode == MB7K2SS_BOTTOMPICK_3DBATHY)
+			{
+			fprintf(stderr,"     bottompickmode:      3D Bathymetry\n");
+			fprintf(stderr,"     grid.file:           %s\n",grid.file);
+			}
+		fprintf(stderr,"     bottompickthreshold: %f\n",bottompickthreshold);
+		fprintf(stderr,"     smooth:              %d\n",smooth);
+		if (swath_width_set == MB_YES)
+			fprintf(stderr,"     swath_width:         %f\n",swath_width);
+		else
+			fprintf(stderr,"     swath_width:         Maximum available\n");
+		if (gainmode == MB7K2SS_SSGAIN_OFF)
+			fprintf(stderr,"     gainmode:            Off\n");
+		else
+			{
+			fprintf(stderr,"     gainmode:            TVG applied as gainfactor/R\n");
+			fprintf(stderr,"     gainfactor:          %f\n",gainfactor);
+			}
+		if (sslayoutmode == MB7K2SS_SS_FLAT_BOTTOM)
+			fprintf(stderr,"     sslayoutmode:        Flat bottom\n");
+		else if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM)
+			{
+			fprintf(stderr,"     sslayoutmode:        3D bottom\n");
+			fprintf(stderr,"     grid.file:           %s\n",grid.file);
+			}
+		fprintf(stderr,"     interpolation bins:  %d\n",interpbins);
+		fprintf(stderr,"     file:                %s\n",file);
+		if (route_file_set == MB_YES)
+			fprintf(stderr,"     route_file:          %s\n",route_file);
+		fprintf(stderr,"     checkroutebearing:   %d\n",checkroutebearing);
+		if (output_file_set == MB_YES)
+			fprintf(stderr,"     output_file:         %s\n",output_file);
+		fprintf(stderr,"     lineroot:            %s\n",lineroot);
+		fprintf(stderr,"     extract_type:        %d\n",extract_type);
+		fprintf(stderr,"     print_comments:      %d\n",print_comments);
 		}
 	
 	/* output output types */
@@ -1338,7 +1401,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				/* get flat bottom layout table */
 				if (sslayoutmode == MB7K2SS_SS_FLAT_BOTTOM)
 					mb7k2ss_get_flatbottom_table(verbose, nangle, angle_min, angle_max, 
-									navlon, navlat, ss_altitude, pitch,
+									navlon, navlat, ss_altitude, 0.0,
 									table_xtrack, table_ltrack, table_altitude, 
 									table_range, &error);
 				/* else get 3D bottom layout table */
@@ -1351,7 +1414,8 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					
 				/* get swath width and pixel size */
 				rr = 0.0000000005 * ssv_use *(ssheaderport->samples * ssheaderport->sampleInterval);
-				swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
+				if (swath_width_set == MB_NO)
+					swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
 				pixel_width = swath_width / (opixels_ss - 1);
 
 				/* initialize the output sidescan */
@@ -1364,21 +1428,22 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					}
 									
 				/* find minimum range */
-				rr = table_range[0];
+				rangemin = table_range[0];
 				kstart = 0;
 				for (kangle=1;kangle<nangle;kangle++)
 					{
-					if (table_range[kangle] < rr)
+					if (table_range[kangle] < rangemin)
 						{
-						rr = table_range[kangle];
+						rangemin = table_range[kangle];
 						kstart = kangle;
 						}
 					}
-/*fprintf(stderr,"port minimum range:%f kstart:%d\n",rr,kstart);*/
+/*fprintf(stderr,"port minimum range:%f kstart:%d\n",rangemin,kstart);*/
 
 				/* bin port trace */
 				datashort = (unsigned short *) sschannelport->data;
 				istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
+				istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 				weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
 				for (i=istart;i<ssheaderport->samples;i++)
 					{
@@ -1413,6 +1478,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 							ltrack = table_ltrack[kangle] 
 								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
 							}
 						else if (rr < table_range[kangle] && rr >= table_range[kangle-1])
 							{
@@ -1423,6 +1489,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 							ltrack = table_ltrack[kangle] 
 								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
 							}
 							
 						/* bin the value and position */
@@ -1435,20 +1502,20 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 								ossbincount[j]++;
 								ossalongtrack[j] += ltrack;
 								}
-/*fprintf(stderr,"port:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
-i,rr,xtrack,ltrack,kangle);*/
+/* fprintf(stderr,"port:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
+i,rr,xtrack,ltrack,kangle); */
 							}
 						}
 					}
 									
 				/* find minimum range */
-				rr = table_range[0];
+				rangemin = table_range[0];
 				kstart = 0;
 				for (kangle=1;kangle<nangle;kangle++)
 					{
-					if (table_range[kangle] < rr)
+					if (table_range[kangle] < rangemin)
 						{
-						rr = table_range[kangle];
+						rangemin = table_range[kangle];
 						kstart = kangle;
 						}
 					}
@@ -1461,6 +1528,7 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 				/* bin stbd trace */
 				datashort = (unsigned short *) sschannelstbd->data;
 				istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
+				istart = rangemin / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
 				weight = exp(MB_LN_2 * ((double)ssheaderstbd->weightingFactor));
 				for (i=istart;i<ssheaderstbd->samples;i++)
 					{
@@ -1495,6 +1563,7 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 							ltrack = table_ltrack[kangle] 
 								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
 							}
 						else if (rr < table_range[kangle] && rr >= table_range[kangle+1])
 							{
@@ -1505,6 +1574,7 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 							ltrack = table_ltrack[kangle] 
 								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
 							}
 
 						/* bin the value and position */
@@ -1517,8 +1587,8 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 								ossbincount[j]++;
 								ossalongtrack[j] += ltrack;
 								}
-/*fprintf(stderr,"stbd:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
-i,rr,xtrack,ltrack,kangle);*/
+/* fprintf(stderr,"stbd:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
+i,rr,xtrack,ltrack,kangle); */
 							}
 						}
 					}
@@ -1696,7 +1766,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 				/* get flat bottom layout table */
 				if (sslayoutmode == MB7K2SS_SS_FLAT_BOTTOM)
 					mb7k2ss_get_flatbottom_table(verbose, nangle, angle_min, angle_max, 
-									navlon, navlat, ss_altitude, pitch,
+									navlon, navlat, ss_altitude, 0.0,
 									table_xtrack, table_ltrack, table_altitude, 
 									table_range, &error);
 				/* else get 3D bottom layout table */
@@ -1709,7 +1779,8 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					
 				/* get swath width and pixel size */
 				rr = 0.0000000005 * ssv_use *(ssheaderport->samples * ssheaderport->sampleInterval);
-				swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
+				if (swath_width_set == MB_NO)
+					swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
 				pixel_width = swath_width / (opixels_ss - 1);
 
 				/* initialize the output sidescan */
@@ -1722,13 +1793,13 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					}
 									
 				/* find minimum range */
-				rr = table_range[0];
+				rangemin = table_range[0];
 				kstart = 0;
 				for (kangle=1;kangle<nangle;kangle++)
 					{
-					if (table_range[kangle] < rr)
+					if (table_range[kangle] < rangemin)
 						{
-						rr = table_range[kangle];
+						rangemin = table_range[kangle];
 						kstart = kangle;
 						}
 					}
@@ -1736,6 +1807,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 				/* bin port trace */
 				datashort = (unsigned short *) sschannelport->data;
 				istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
+				istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 				weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
 				for (i=istart;i<ssheaderport->samples;i++)
 					{
@@ -1770,6 +1842,18 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 							ltrack = table_ltrack[kangle] 
 								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
+							}
+						else if (rr < table_range[kangle] && rr >= table_range[kangle-1])
+							{
+							factor = (rr - table_range[kangle]) 
+								/ (table_range[kangle-1] - table_range[kangle]);
+							xtrack = table_xtrack[kangle] 
+								+ factor * (table_xtrack[kangle-1] - table_xtrack[kangle]);
+							ltrack = table_ltrack[kangle] 
+								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
+							found = MB_YES;
+							done = MB_YES;
 							}
 							
 						/* bin the value and position */
@@ -1788,13 +1872,13 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					}
 									
 				/* find minimum range */
-				rr = table_range[0];
+				rangemin = table_range[0];
 				kstart = 0;
 				for (kangle=1;kangle<nangle;kangle++)
 					{
-					if (table_range[kangle] < rr)
+					if (table_range[kangle] < rangemin)
 						{
-						rr = table_range[kangle];
+						rangemin = table_range[kangle];
 						kstart = kangle;
 						}
 					}
@@ -1836,6 +1920,18 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 							ltrack = table_ltrack[kangle] 
 								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
+							}
+						else if (rr < table_range[kangle] && rr >= table_range[kangle+1])
+							{
+							factor = (rr - table_range[kangle]) 
+								/ (table_range[kangle+1] - table_range[kangle]);
+							xtrack = table_xtrack[kangle] 
+								+ factor * (table_xtrack[kangle+1] - table_xtrack[kangle]);
+							ltrack = table_ltrack[kangle] 
+								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
+							found = MB_YES;
+							done = MB_YES;
 							}
 
 						/* bin the value and position */
