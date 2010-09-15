@@ -187,6 +187,28 @@ navigation model. The default is 4.00, and possible ranges are 0.10 to
 second derivatives of the adjusted navigation perturbation is ten
 raised to this power.
 
+Changed MBnavadjust so that default settings for section length and
+contour interval are appropriate for high resolution surveys such
+as those produced by AUV's equipped with >100 kHz multibeams.
+
+Added support for Kongsberg EM2040 multibeam in formats 58 and 59.
+
+Fixed plotting macros mbm_plot, mbm_grdplot, mbm_xyplot, mbm_grd3dplot 
+so that the calls to display postscript graphics using gv in the output
+plotting scripts scale plots to fit on the screen.
+
+Fixed mbm_route2mission to use proper camera control when generating
+mission scripts for the MBARI Benthic Imaging AUV.
+
+Added -W option to set the desired swath width of sidescan output from
+mb7k2ss.
+
+Updated the i/o module supporting OMG HDCS (the John Hughes Clarke format)
+to handle HDCS version 4. These mods contributed by Bob Covill.
+
+Fixed mb7kpreprocess to check for and ignore repeated ancilliary and 
+survey data records.
+
 
 -----> 5.1.3beta1862
 

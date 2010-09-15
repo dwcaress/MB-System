@@ -1381,10 +1381,12 @@ ping_record,*last_ping,*new_ping,*current_ping,done,status,*error); */
 			*save_flag = MB_NO;
 			*last_ping = -1;
 			store->kind = MB_DATA_DATA;
+			store->time_d = *last_7k_time_d;
+			mb_get_date(verbose, store->time_d, store->time_i);
 			}
 
 #ifdef MBR_RESON7KR_DEBUG
-if (status == MB_SUCCESS && *save_flag == MB_NO)
+if (status == MB_SUCCESS && done == MB_NO && *save_flag == MB_NO)
 {
 fprintf(stderr, "Reading record id: %4.4hX  %4.4d | %4.4hX  %4.4d | %4.4hX  %4.4d |", 
 *recordid, *recordid, *deviceid, *deviceid, *enumerator, *enumerator);
@@ -1725,6 +1727,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_ti
 				/* if needed use most recent Edgetech timestamp to fix 7k time */
 				bathymetry = &(store->bathymetry);
 				header = &(bathymetry->header);
+				*last_7k_time_d = store->time_d;
 				if (header->s7kTime.Year < 2004
 					&& *edgetech_time_d > 0.0
 					&& *edgetech_dt > 0.0
@@ -1738,7 +1741,6 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_ti
 						{
 						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
 						}
-					*last_7k_time_d = store->time_d;
 					mb_get_date(verbose, store->time_d, store->time_i);
 					mb_get_jtime(verbose, store->time_i, time_j);
 					header->s7kTime.Year = store->time_i[0];
@@ -1765,6 +1767,7 @@ header->RecordNumber,bathymetry->ping_number);
 				/* if needed use most recent Edgetech timestamp to fix 7k time */
 				backscatter = &(store->backscatter);
 				header = &(backscatter->header);
+				*last_7k_time_d = store->time_d;
 				if (header->s7kTime.Year < 2004
 					&& *edgetech_time_d > 0.0
 					&& *edgetech_dt > 0.0
@@ -1778,7 +1781,6 @@ header->RecordNumber,bathymetry->ping_number);
 						{
 						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
 						}
-					*last_7k_time_d = store->time_d;
 					mb_get_date(verbose, store->time_d, store->time_i);
 					mb_get_jtime(verbose, store->time_i, time_j);
 					header->s7kTime.Year = store->time_i[0];
@@ -1802,6 +1804,7 @@ header->RecordNumber,backscatter->ping_number);
 				/* if needed use most recent Edgetech timestamp to fix 7k time */
 				beam = &(store->beam);
 				header = &(beam->header);
+				*last_7k_time_d = store->time_d;
 				if (header->s7kTime.Year < 2004
 					&& *edgetech_time_d > 0.0
 					&& *edgetech_dt > 0.0
@@ -1815,7 +1818,6 @@ header->RecordNumber,backscatter->ping_number);
 						{
 						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
 						}
-					*last_7k_time_d = store->time_d;
 					mb_get_date(verbose, store->time_d, store->time_i);
 					mb_get_jtime(verbose, store->time_i, time_j);
 					header->s7kTime.Year = store->time_i[0];
@@ -1844,6 +1846,7 @@ header->RecordNumber,beam->ping_number);
 				/* if needed use most recent Edgetech timestamp to fix 7k time */
 				image = &(store->image);
 				header = &(image->header);
+				*last_7k_time_d = store->time_d;
 				if (header->s7kTime.Year < 2004
 					&& *edgetech_time_d > 0.0
 					&& *edgetech_dt > 0.0
@@ -1857,7 +1860,6 @@ header->RecordNumber,beam->ping_number);
 						{
 						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
 						}
-					*last_7k_time_d = store->time_d;
 					mb_get_date(verbose, store->time_d, store->time_i);
 					mb_get_jtime(verbose, store->time_i, time_j);
 					header->s7kTime.Year = store->time_i[0];

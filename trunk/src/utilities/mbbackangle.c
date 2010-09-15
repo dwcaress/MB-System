@@ -275,6 +275,11 @@ by MBprocess.";
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
+	
+	/* ESF File read */
+	char	esffile[MB_PATH_MAXLINE];
+	int     esffile_open = MB_NO;
+	struct  mb_esf_struct esf;
 
 	/* MBIO read values */
 	void	*mbio_ptr = NULL;
@@ -345,7 +350,7 @@ by MBprocess.";
 	double	ssdepression = 20.0;
 	int	corr_slope = MB_NO;
 	int	corr_topogrid = MB_NO;
-	int	corr_symmetry = MBP_SSCORR_SYMMETRIC;
+	int	corr_symmetry = MBP_SSCORR_ASYMMETRIC; /* BOB */
 	int	amp_corr_type;
 	int	amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
 	int	ss_corr_slope = MBP_SSCORR_IGNORESLOPE;
@@ -453,6 +458,7 @@ by MBprocess.";
 		case 'C':
 		case 'c':
 			symmetry = MB_YES;
+			corr_symmetry = MBP_SSCORR_SYMMETRIC;
 			flag++;
 			break;
 		case 'D':
@@ -910,6 +916,13 @@ by MBprocess.";
 	    strcpy(swathfile, read_file);
 	    read_data = MB_YES;
 	    }
+	    
+	/* Deal with ESF File if avialable */
+	if (status == MB_SUCCESS)
+	{
+		status = mb_esf_load(verbose, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
+		
+	}
 
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
@@ -1188,6 +1201,17 @@ by MBprocess.";
 				ss,ssacrosstrack,ssalongtrack,
 				comment,&error);
 
+
+		/* Apply ESF Edits if available */
+		if (esf.nedit > 0 && error == MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
+		{
+			status = mb_esf_apply(verbose, &esf,
+					time_d, 0,
+					beams_bath, beamflag, &error);
+					
+		}	
+
+
 		if ((navg > 0
 			&& (error == MB_ERROR_TIME_GAP
 				|| error == MB_ERROR_EOF))
@@ -1286,7 +1310,8 @@ by MBprocess.";
 				&nslopes,slopes,slopeacrosstrack,
 				depthsmooth,
 				&error);
-				
+
+	     
 		    /* get distance scaling and heading vector */
 		    mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
 		    headingx = sin(heading * DTR);
@@ -1443,8 +1468,9 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 				fprintf(stderr,"dbg5       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n",
 				    nrec, i, slope, altitude_use, bathacrosstrack[i], angle, j);
 				}
-			    }
+			    } 
 			}
+
 
 		    /* do the sidescan */
 		    if (sidescan_on == MB_YES)
@@ -1606,6 +1632,10 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 
 	/* close the swath sonar file */
 	status = mb_close(verbose,&mbio_ptr,&error);
+	/* Close ESF file if avialable and open */
+	if (esf.nedit > 0)
+		mb_esf_close(verbose, &esf, &error);
+
 	if (dump == MB_NO && amplitude_on == MB_YES)
 		fclose(atfp);
 	if (dump == MB_NO && sidescan_on == MB_YES)

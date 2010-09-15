@@ -5335,7 +5335,9 @@ int mbsys_reson7k_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get depth offset (heave + sonar depth) */
-		if (ctd != NULL && ctd->n > 0)
+		if (bathymetry->sound_velocity > 0.0)
+			*ssv = bathymetry->sound_velocity;
+		else if (ctd != NULL && ctd->n > 0)
 			*ssv = ctd->sound_velocity[0];
 		else
 			*ssv = 1500.0;

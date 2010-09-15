@@ -2982,11 +2982,21 @@ elsif ($ps_viewer eq "gv")
 	{
 	if ($portrait)
 		{
-		$view_pageflag = "--orientation=portrait --media=BBox";
+		$pagescale = 11.0 / $page_height_in{$pagesize}; 
+		if ($pagescale > 1.0)
+			{
+			$pagescale = 1.0;
+			}
+		$view_pageflag = "--orientation=portrait --media=BBox -scale=$pagescale -page=$psfile";
 		}
 	elsif ($landscape)
 		{
-		$view_pageflag = "--orientation=landscape --media=BBox";
+		$pagescale = 11.0 / $page_width_in{$pagesize};
+		if ($pagescale > 1.0)
+			{
+			$pagescale = 1.0;
+			}
+		$view_pageflag = "--orientation=landscape --media=BBox -scale=$pagescale -page=$psfile";
 		}
 	}
 elsif ($ps_viewer eq "ggv")

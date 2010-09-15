@@ -315,8 +315,8 @@ int mbnavadjust_init_globals()
  	mbna_status = MBNA_STATUS_GUI;
  	mbna_view_list = MBNA_VIEW_LIST_FILES;
  	mbna_view_mode = MBNA_VIEW_MODE_ALL;
- 	project.section_length = 10.0;
- 	project.section_soundings = 20000;
+ 	project.section_length = 0.14;
+ 	project.section_soundings = 100000;
  	project.decimation = 1;
 	project.precision = SIGMA_MINIMUM;
 	project.smoothing = MBNA_SMOOTHING_DEFAULT;
@@ -333,9 +333,9 @@ int mbnavadjust_init_globals()
  	mbna_section_select = 0;
 	mbna_crossing_select = 0;
 	mbna_tie_select = 0;
-	project.cont_int = 25.;
-	project.col_int = 100.;
-	project.tick_int = 100.;
+	project.cont_int = 1.;
+	project.col_int = 5.;
+	project.tick_int = 5.;
 	project.label_int = 100000.;
 	mbna_contour_algorithm = MB_CONTOUR_OLD;
 	/*mbna_contour_algorithm = MB_CONTOUR_TRIANGLES;*/

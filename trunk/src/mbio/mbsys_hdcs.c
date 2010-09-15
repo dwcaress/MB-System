@@ -392,8 +392,10 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	    /* get heading */
-	    *heading = RTD * (double)store->vesselHeading
-					* 1.0E-07 + M_PI / 2.0;
+	    *heading = RTD * ((double)store->vesselHeading) * 1.0E-07;
+	    if (*heading < 0.0)
+	    	*heading += 360.0;
+
 	    /* get speed */
 	    *speed = 3.6e-3 * store->vesselVelocity;
 
@@ -846,9 +848,7 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	    /* get heading */
-	    store->vesselHeading = DTR * 1.0E7 
-					* (heading 
-						- M_PI / 2.0);
+	    store->vesselHeading = (int)(1.0E7 * DTR * heading);
 
 	    /* get speed */
 	    store->vesselVelocity = speed / 3.6E-3;
@@ -1228,8 +1228,9 @@ int mbsys_hdcs_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	    /* get heading */
-	    *heading = RTD * (double)store->vesselHeading
-					* 1.0E-07 + M_PI / 2.0;
+	    *heading = RTD * ((double)store->vesselHeading) * 1.0E-07;
+	    if (*heading < 0.0)
+	    	*heading += 360.0;
 
 	    /* get speed */
 	    *speed = 3.6e-3 * store->vesselVelocity;
@@ -1411,9 +1412,7 @@ int mbsys_hdcs_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	    /* get heading */
-	    store->vesselHeading = DTR * 1.0E7 
-					* (heading 
-						- M_PI / 2.0);
+	    store->vesselHeading = (int)(1.0E7 * DTR * heading);
 
 	    /* get speed */
 	    store->vesselVelocity = speed / 3.6E-3;
@@ -1579,6 +1578,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 			cbeam = &copy->beams[i];
 			
 			cbeam->status = beam->status;
+			cbeam->scaling_factor = beam->scaling_factor;
 			cbeam->observedDepth = beam->observedDepth;
 			cbeam->acrossTrack = beam->acrossTrack;
 			cbeam->alongTrack = beam->alongTrack;
