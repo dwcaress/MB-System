@@ -187,11 +187,11 @@ navigation model. The default is 4.00, and possible ranges are 0.10 to
 second derivatives of the adjusted navigation perturbation is ten
 raised to this power.
 
+Added support for Kongsberg EM2040 multibeam in formats 58 and 59.
+
 Changed MBnavadjust so that default settings for section length and
 contour interval are appropriate for high resolution surveys such
 as those produced by AUV's equipped with >100 kHz multibeams.
-
-Added support for Kongsberg EM2040 multibeam in formats 58 and 59.
 
 Fixed plotting macros mbm_plot, mbm_grdplot, mbm_xyplot, mbm_grd3dplot 
 so that the calls to display postscript graphics using gv in the output
