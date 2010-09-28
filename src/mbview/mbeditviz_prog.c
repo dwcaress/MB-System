@@ -507,6 +507,11 @@ int mbeditviz_import_file(char *path, int format)
 		if (mbev_status == MB_SUCCESS)
 			{
 			mbev_status = mb_pr_readpar(mbev_verbose, file->path, MB_NO, &(file->process), &mbev_error);
+			if (file->process.mbp_format_specified == MB_NO)
+				{
+				file->process.mbp_format_specified = MB_YES;
+				file->process.mbp_format = file->format;
+				}
 			}
 
 		/* load processed file info */
