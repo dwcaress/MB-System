@@ -177,6 +177,7 @@ static int      DecodeEM3ImagerySpecific(gsfSensorImagery *sdata, unsigned char 
 static int      DecodeEM4ImagerySpecific(gsfSensorImagery *sdata, unsigned char *sptr);
 static int      DecodeReson7100ImagerySpecific(gsfSensorImagery *sdata, unsigned char *sptr);
 static int      DecodeKlein5410BssSpecific(gsfSensorSpecific *sdata, unsigned char *sptr);
+static int      DecodeDeltaTSpecific(gsfSensorSpecific *sdata, unsigned char *sptr);
 
 /********************************************************************
  *
@@ -1317,7 +1318,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                  break;
 
            case (GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY):
-               ret = DecodeSignedByteArray(&ft->rec.mb_ping.incident_beam_adj, (char *) p, ping->number_beams,
+               ret = DecodeSignedByteArray(&ft->rec.mb_ping.incident_beam_adj, (char *)p, ping->number_beams,
                    &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY, handle);
                if (ret < 0)
                {
@@ -1339,7 +1340,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                break;
 
            case (GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY):
-               ret = DecodeSignedByteArray(&ft->rec.mb_ping.doppler_corr,(char *) p, ping->number_beams,
+               ret = DecodeSignedByteArray(&ft->rec.mb_ping.doppler_corr, (char * )p, ping->number_beams,
                    &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY, handle);
                if (ret < 0)
                {
@@ -1515,6 +1516,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
             case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
             case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
             case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
+            case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
                 p += DecodeEM4Specific(&ping->sensor_data, p, ft);
                 ping->sensor_id = subrecord_id;
                 break;
@@ -1527,6 +1529,11 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
             case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
                 p += DecodeKlein5410BssSpecific(&ping->sensor_data, p);
                 ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC;
+                break;
+
+            case (GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC):
+                p += DecodeDeltaTSpecific(&ping->sensor_data, p);
+                ping->sensor_id = GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC;
                 break;
 
             /* 12/20/2002 RWL added SB types, made Echotrac version dependent */
@@ -4131,7 +4138,7 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TAB
 
     /* Next four bytes contains the "ROV depth" */
     memcpy(&ltemp, p, 4);
-    sltemp = (gsfsLong) ntohs(ltemp);
+    sltemp = (gsfsLong) ntohl(ltemp);
     sdata->gsfEM3RawSpecific.vehicle_depth = ((double) sltemp) / 1000.0;
     p += 4;
 
@@ -4142,7 +4149,8 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TAB
     p += 2;
 
     /* Next byte contains the transducer depth offset multiplier */
-    sdata->gsfEM3RawSpecific.offset_multiplier = (signed int) *p;
+    ctemp = (char) *p;
+    sdata->gsfEM3RawSpecific.offset_multiplier = (int) ctemp;
     p += 1;
 
       /* The next 16 bytes are spare space for future use */
@@ -4356,18 +4364,18 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TAB
             sstemp = (gsfsShort) ntohs(stemp);
             sdata->gsfEM3RawSpecific.run_time.tx_along_tilt = ((double) sstemp) / 100.0;
             p += 2;
-            break;	
+            break;      
         
         default:
             /* Then next two byte value is spare */
             p += 2;
-      	    break;
+            break;
     }
 
     /* The contents of the next one byte value depends on the sonar model number */
     switch (sdata->gsfEM3RawSpecific.run_time.model_number) 
     {
-       	default:
+        default:
             /* The next one byte value contains the HiLo frequency absorption coefficient ratio
              * JSB: As of 3/1/09, still don't have final datagram documentation from KM
              * to know whether the filter ID 2 field is EM4 specific or if it will be supported
@@ -4426,8 +4434,8 @@ DecodeEM3RawSpecific(gsfSensorSpecific *sdata, unsigned char *sptr, GSF_FILE_TAB
  * Function Name : DecodeEM4Specific
  *
  * Description : This function decodes the Simrad EM4 series sonar system
- *    (EM710, EM302, EM122) sensor specific information from the GSF byte
- *    stream.
+ *    (EM710, EM302, EM122, and EM2040) sensor specific information from 
+ *    the GSF byte stream.
  *
  * Inputs :
  *    sdata = a pointer to the union of sensor specific data to be loaded
@@ -5429,6 +5437,174 @@ DecodeReson7100Specific(gsfSensorSpecific * sdata, unsigned char *sptr)
 
 /********************************************************************
  *
+ * Function Name : DecodeDeltaTSpecific
+ *
+ * Description : This function decodes the Imagenex Delta T sensor specific
+ *    information from the GSF byte stream.
+ *
+ * Inputs :
+ *    sdata = a pointer to the union of sensor specific data to be loaded
+ *    sptr = a pointer to an unsigned char buffer containing the byte stream
+ *           to read.
+ *
+ * Returns : This function returns the number of bytes encoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+DecodeDeltaTSpecific(gsfSensorSpecific * sdata, unsigned char *sptr)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+    gsfuLong        ltemp;
+
+    /* Next 4 bytes contain the decode file type */
+    memset (sdata->gsfDeltaTSpecific.decode_file_type, 0, 4);
+    memcpy (sdata->gsfDeltaTSpecific.decode_file_type, p, 4);
+    p += 4;
+
+    /* The next byte contains the version field */
+    sdata->gsfDeltaTSpecific.version = *p;
+    p += 1;
+
+    /* Next two byte integer contains the ping byte size */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.ping_byte_size = ntohs(stemp);
+    p += 2;
+
+    /* The next 8 bytes contain the time-tag for the ping interrogation time */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfDeltaTSpecific.interrogation_time.tv_sec = ntohl(ltemp);
+    p += 4;
+    memcpy(&ltemp, p, 4);
+    sdata->gsfDeltaTSpecific.interrogation_time.tv_nsec = ntohl(ltemp);
+    p += 4;
+   
+    /* Next two byte integer contains the samples per beam */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.samples_per_beam = ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the sector size */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.sector_size = (double) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the start angle */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.start_angle = (((double) ntohs(stemp)) / 100.0) - 180.0;
+    p += 2;
+
+    /* Next two byte integer contains the start angle */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.angle_increment = (((double) ntohs(stemp)) / 100.0);
+    p += 2;
+
+    /* Next two byte integer contains the acoustic range */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.acoustic_range = (double) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the acoustic range */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.acoustic_frequency = (double) ntohs(stemp);
+    p += 2;
+
+    /* Next two byte integer contains the acoustic range */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.sound_velocity = (((double) ntohs(stemp)) / 10.0);
+    p += 2;
+
+    /* Next two byte integer contains the range resolution */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.range_resolution = (((double) ntohs(stemp)) / 1000.0);
+    p += 2;
+
+    /* Next two byte integer contains the profile tilt angle */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.profile_tilt_angle = ((double) ntohs(stemp)) - 180.0;
+    p += 2;
+
+    /* Next two byte integer contains the repetition rate */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.repetition_rate = (((double) ntohs(stemp)) / 1000.0);
+    p += 2;
+
+    /* Next four byte integer contains the ping number */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfDeltaTSpecific.ping_number = ntohl(ltemp);
+    p += 4;
+
+    /* The next byte contains the version field */
+    sdata->gsfDeltaTSpecific.intensity_flag = *p;
+    p += 1;
+
+    /* Next two byte integer contains the ping latency field */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.ping_latency = (((double) ntohs(stemp)) / 10000.0);
+    p += 2;
+
+    /* Next two byte integer contains the data latency field */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.data_latency = (((double) ntohs(stemp)) / 10000.0);
+    p += 2;
+
+    /* The next byte contains the sample_rate flag */
+    sdata->gsfDeltaTSpecific.sample_rate_flag = *p;
+    p += 1;
+
+    /* The next byte contains the option flags */
+    sdata->gsfDeltaTSpecific.option_flags = *p;
+    p += 1;
+
+    /* The next byte contains the number of pings averaged */
+    sdata->gsfDeltaTSpecific.num_pings_avg = *p;
+    p += 1;
+
+    /* Next two byte integer contains the center ping time offset field */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.center_ping_time_offset = (((double) ntohs(stemp)) / 10000.0);
+    p += 2;
+
+    /* The next byte contains the user defined byte */
+    sdata->gsfDeltaTSpecific.user_defined_byte = *p;
+    p += 1;
+
+    /* Next four byte integer contains the altitude number */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfDeltaTSpecific.altitude = ntohl(ltemp);
+    p += 4;
+
+    /* The next byte contains the external sensor flags field */
+    sdata->gsfDeltaTSpecific.external_sensor_flags = *p;
+    p += 1;
+
+    /* Next four byte integer contains the pulse length field */
+    memcpy(&ltemp, p, 4);
+    sdata->gsfDeltaTSpecific.pulse_length = (((double) ntohl(ltemp)) / 1.0e6);
+    p += 4;
+
+    /* Next two byte integer contains the fore aft beamwidth field */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.fore_aft_beamwidth = (((double) ntohs(stemp)) / 10.0);
+    p += 2;
+
+    /* Next two byte integer contains the fore aft beamwidth field */
+    memcpy(&stemp, p, 2);
+    sdata->gsfDeltaTSpecific.athwartships_beamwidth = (((double) ntohs(stemp)) / 10.0);
+    p += 2;
+
+    /* The next 32 bytes are spare space for future growth */
+    memset(&sdata->gsfDeltaTSpecific.spare[0], 0, 32);
+    p += 32;
+        
+    return (p - sptr);
+}
+
+/********************************************************************
+ *
  * Function Name : DecodeSBEchotracSpecific
  *
  * Description :
@@ -5855,7 +6031,7 @@ DecodeEM4ImagerySpecific(gsfSensorImagery *sdata, unsigned char *sptr)
     sdata->gsfEM4ImagerySpecific.offset = (gsfsShort) ntohs(sstemp);
     p += 2;
 
-    /* Next two bytes contain the imagery scale value as specified by the manufacturer.  This value is 10 for the EM710/EM302/EM122.
+    /* Next two bytes contain the imagery scale value as specified by the manufacturer.  This value is 10 for the EM710/EM302/EM122/EM2040.
      *  The following formula can be used to convert from the GSF positive biased value to dB:
      *  dB_value = (GSF_I_value - offset) / scale
      */
@@ -6136,6 +6312,7 @@ DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *sptr, int num_beams,
         case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
             sensor_size = DecodeEM4ImagerySpecific(&(*idata)->sensor_imagery, ptr);
             break;
 
@@ -6887,6 +7064,7 @@ gsfDecodeHVNavigationError(gsfHVNavigationError *hv_nav_error, GSF_FILE_TABLE *f
     int             length;
     unsigned char  *p = sptr;
     gsfsShort       stemp;
+    gsfuShort       utemp;
     gsfuLong        ltemp;
     gsfsLong        signed_int;
 
@@ -6923,14 +7101,15 @@ gsfDecodeHVNavigationError(gsfHVNavigationError *hv_nav_error, GSF_FILE_TABLE *f
     signed_int = (signed) ntohl(ltemp);
     hv_nav_error->vertical_error = ((double) signed_int) / 1000.0;
 
-    /* The next four bytes are reserved for future use */
+    /* Next two byte integer contains the SEP uncertainty */
+    memcpy(&utemp, p, 2);
+    p += 2;
+    hv_nav_error->SEP_uncertainty = ((double) ntohs(utemp)) / 100.0;
+        
+    /* The next three bytes are reserved for future use */
     hv_nav_error->spare[0] = (char) *p;
     p += 1;
     hv_nav_error->spare[1] = (char) *p;
-    p += 1;
-    hv_nav_error->spare[2] = (char) *p;
-    p += 1;
-    hv_nav_error->spare[3] = (char) *p;
     p += 1;
 
     /* The next two byte integer contains the length of the positioning type string */
