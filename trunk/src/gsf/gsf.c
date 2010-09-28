@@ -503,6 +503,7 @@ gsfOpen(const char *filename, const int mode, int *handle)
       gsfClose ((int) *handle);
       return(-1);
   }
+
   return (0);
 }
 
@@ -1089,6 +1090,8 @@ gsfRead(int handle, int desiredRecord, gsfDataID *dataID, gsfRecords *rptr, unsi
     }
 
     ret = gsfUnpackStream (handle, desiredRecord, dataID, rptr, buf, max_size);
+
+    gsfFileTable[handle - 1].last_record_type = dataID->recordID;
 
     return (ret);
 }
@@ -1714,6 +1717,7 @@ gsfWrite(int handle, gsfDataID *id, gsfRecords *rptr)
 
     /* Clear gsfError before each write */
     gsfError = 0;
+
     /* JSB 04/05/00 replaced ">=" with ">" */
     if ((handle < 1) || (handle > GSF_MAX_OPEN_FILES))
     {
@@ -1972,6 +1976,8 @@ gsfWrite(int handle, gsfDataID *id, gsfRecords *rptr)
         gsfError = GSF_WRITE_ERROR;
         return (-1);
     }
+
+    gsfFileTable[handle - 1].last_record_type = id->recordID;
 
     /* return the number of bytes written */
     return (dataSize);
@@ -2696,6 +2702,10 @@ gsfStringError(void)
 
         case GSF_READ_TO_END_OF_FILE:
             ptr = "GSF End of File Encountered";
+            break;
+
+        case GSF_OPEN_TEMP_FILE_FAILED:
+            ptr = "GSF Failed to open temporary file for index creation";
             break;
 
         default:
@@ -4022,7 +4032,7 @@ gsfSetParam(int handle, int index, char *val, gsfRecords *rec)
  *         parameters are to be written in the "KEYWORK=VALUE" form.
  *     handle = the integer handle to the file set by gsfOpen.
  *     numArrays = the integer value specifying the number of pairs of
- *         arrays which need to have seperate parameters tracked.
+ *         arrays which need to have separate parameters tracked.
  *
  * Returns : This function returns zero if successful, or -1 if an error
  *  occurs.
@@ -4039,6 +4049,20 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     char            temp2[64];
     int             ret;
     int             number_parameters = 0;
+
+    /* If the file is open update, we do not want to allow a write with 
+     * a larger number of parameters than currently exist.
+     */
+    if ((gsfFileTable[handle-1].access_mode == GSF_UPDATE) ||
+        (gsfFileTable[handle-1].access_mode == GSF_UPDATE_INDEX))
+    {
+        if ((gsfFileTable[handle-1].rec.process_parameters.number_parameters > 0) && 
+            (gsfFileTable[handle-1].rec.process_parameters.number_parameters < GSF_NUMBER_PROCESSING_PARAMS))
+        {       
+            gsfError = GSF_PARAM_SIZE_FIXED;
+            return(-1);
+        }
+    }
 
     /* Load the text descriptor for the start of time epoch */
     sprintf(temp, "REFERENCE TIME=1970/001 00:00:00");
@@ -4177,6 +4201,40 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     else
     {
         sprintf(temp, "RAY_TRACING=NO");
+    }
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return(-1);
+    }
+
+    /* This parameter indicates whether the motion sensor bias - measured from the 
+     *  patch test has been added to the attitude (roll, pitch, heading) data.
+     */
+    if (p->msb_applied_to_attitude == GSF_TRUE)
+    {
+        sprintf(temp, "MSB_APPLIED_TO_ATTITUDE=YES");
+    }
+    else
+    {
+        sprintf(temp, "MSB_APPLIED_TO_ATTITUDE=NO");
+    }
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return(-1);
+    }
+
+    /* This parameter indicates whether the heave data has been subtracted from 
+     *  the GPS tide corrector value.
+     */
+    if (p->heave_removed_from_gps_tc == GSF_TRUE)
+    {
+        sprintf(temp, "HEAVE_REMOVED_FROM_GPS_TC=YES");
+    }
+    else
+    {
+        sprintf(temp, "HEAVE_REMOVED_FROM_GPS_TC=NO");
     }
     ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
@@ -4373,6 +4431,48 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         return(-1);
     }
+    
+    /* The ANTENNA_OFFSET_TO_APPLY parameter is place holder for a antenna
+     *  offset which is known, but not yet applied.
+     */
+    memset(temp, 0, sizeof(temp));
+    sprintf(temp, "ANTENNA_OFFSET_TO_APPLY=");
+    if (p->to_apply.antenna_x_offset == GSF_UNKNOWN_PARAM_VALUE)
+    {
+        sprintf(temp2, "%s,",
+            GSF_UNKNOWN_PARAM_TEXT);
+    }
+    else
+    {
+        sprintf(temp2, "%+06.2f,",
+            p->to_apply.antenna_x_offset);
+    }
+    strcat(temp, temp2);
+    if (p->to_apply.antenna_y_offset == GSF_UNKNOWN_PARAM_VALUE)
+    {
+        sprintf(temp2, "%s,", GSF_UNKNOWN_PARAM_TEXT);
+    }
+    else
+    {
+        sprintf(temp2, "%+06.2f,",
+            p->to_apply.antenna_y_offset);
+    }
+    strcat(temp, temp2);
+    if (p->to_apply.antenna_z_offset == GSF_UNKNOWN_PARAM_VALUE)
+    {
+        sprintf(temp2, "%s", GSF_UNKNOWN_PARAM_TEXT);
+    }
+    else
+    {
+        sprintf(temp2, "%+06.2f",
+            p->to_apply.antenna_z_offset);
+    }
+    strcat(temp, temp2);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return(-1);
+    }
 
     /* The TRANSDUCER_OFFSET_TO_APPLY parameter is place holder for a
      * transducer position offset which is known, but not yet applied.
@@ -4482,6 +4582,117 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->to_apply.transducer_z_offset[1]);
         }
         strcat(temp, temp2);
+    }
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return(-1);
+    }
+
+    /* The TRANSDUCER_PITCH_OFFSET_TO_APPLY parameter is a place holder for a transducer pitch angle
+     *  installation offset which is known, but not yet applied.
+     */
+    if (numArrays == 1)
+    {
+        if (p->to_apply.transducer_pitch_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "TRANSDUCER_PITCH_OFFSET_TO_APPLY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "TRANSDUCER_PITCH_OFFSET_TO_APPLY=%+06.2f",
+                p->to_apply.transducer_pitch_offset[0]);
+        }
+    }
+    else if (numArrays == 2)
+    {
+        if (p->to_apply.transducer_pitch_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "TRANSDUCER_PITCH_OFFSET_TO_APPLY=%s,%s",
+                GSF_UNKNOWN_PARAM_TEXT,
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "TRANSDUCER_PITCH_OFFSET_TO_APPLY=%+06.2f,%+06.2f",
+                p->to_apply.transducer_pitch_offset[0],
+                p->to_apply.transducer_pitch_offset[1]);
+        }
+    }
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return(-1);
+    }
+
+    /* The TRANSDUCER_ROLL_OFFSET_TO_APPLY parameter is a place holder for a transducer roll angle
+     *  installation offset which is known, but not yet applied.
+     */
+    if (numArrays == 1)
+    {
+        if (p->to_apply.transducer_roll_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "TRANSDUCER_ROLL_OFFSET_TO_APPLY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "TRANSDUCER_ROLL_OFFSET_TO_APPLY=%+06.2f",
+                p->to_apply.transducer_roll_offset[0]);
+        }
+    }
+    else if (numArrays == 2)
+    {
+        if (p->to_apply.transducer_roll_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "TRANSDUCER_ROLL_OFFSET_TO_APPLY=%s,%s",
+                GSF_UNKNOWN_PARAM_TEXT,
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "TRANSDUCER_ROLL_OFFSET_TO_APPLY=%+06.2f,%+06.2f",
+                p->to_apply.transducer_roll_offset[0],
+                p->to_apply.transducer_roll_offset[1]);
+        }
+    }
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return(-1);
+    }
+
+    /* The TRANSDUCER_HEADING_OFFSET_TO_APPLY parameter is a place holder for a transducer heading angle
+     *  installation offset which is known, but not yet applied.
+     */
+    if (numArrays == 1)
+    {
+        if (p->to_apply.transducer_heading_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "TRANSDUCER_HEADING_OFFSET_TO_APPLY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "TRANSDUCER_HEADING_OFFSET_TO_APPLY=%+06.2f",
+                p->to_apply.transducer_heading_offset[0]);
+        }
+    }
+    else if (numArrays == 2)
+    {
+        if (p->to_apply.transducer_heading_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "TRANSDUCER_HEADING_OFFSET_TO_APPLY=%s,%s",
+                GSF_UNKNOWN_PARAM_TEXT,
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "TRANSDUCER_HEADING_OFFSET_TO_APPLY=%+06.2f,%+06.2f",
+                p->to_apply.transducer_heading_offset[0],
+                p->to_apply.transducer_heading_offset[1]);
+        }
     }
     ret = gsfSetParam(handle, number_parameters++, temp, rec);
     if (ret)
@@ -4630,6 +4841,66 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->to_apply.center_of_rotation_z_offset);
         }
         strcat(temp, temp2);
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The POSITION_LATENCY_TO_APPLY parameter is a place holder for a navigation
+         * sensor latency value which is known but not yet applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->to_apply.position_latency == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "POSITION_LATENCY_TO_APPLY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "POSITION_LATENCY_TO_APPLY=%+06.3f",
+                p->to_apply.position_latency);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The ATTITUDE_LATENCY_TO_APPLY parameter is a place holder for an attitude
+         * sensor latency value which is known but not yet applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->to_apply.attitude_latency == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "ATTITUDE_LATENCY_TO_APPLY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "ATTITUDE_LATENCY_TO_APPLY=%+06.3f",
+                p->to_apply.attitude_latency);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The DEPTH_SENSOR_LATENCY_TO_APPLY parameter is a place holder for a depth 
+         *  sensor latency value which is known but not yet applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->to_apply.depth_sensor_latency == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "DEPTH_SENSOR_LATENCY_TO_APPLY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "DEPTH_SENSOR_LATENCY_TO_APPLY=%+06.3f",
+                p->to_apply.depth_sensor_latency);
+        }
         ret = gsfSetParam(handle, number_parameters++, temp, rec);
         if (ret)
         {
@@ -4829,6 +5100,51 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         return(-1);
     }
 
+    /* The APPLIED_ANTENNA_OFFSET parameter defines the x,y,z position of the antenna
+     * in ship coordinates to which the lat lons are relative.
+     */
+    memset(temp, 0, sizeof(temp));
+    sprintf(temp, "APPLIED_ANTENNA_OFFSET=");
+    if (p->applied.antenna_x_offset == GSF_UNKNOWN_PARAM_VALUE)
+    {
+        sprintf(temp2, "%s,",
+            GSF_UNKNOWN_PARAM_TEXT);
+    }
+    else
+    {
+        sprintf(temp2, "%+06.2f,",
+            p->applied.antenna_x_offset);
+    }
+    strcat(temp, temp2);
+    if (p->applied.antenna_y_offset == GSF_UNKNOWN_PARAM_VALUE)
+    {
+        sprintf(temp2, "%s,",
+            GSF_UNKNOWN_PARAM_TEXT);
+    }
+    else
+    {
+        sprintf(temp2, "%+06.2f,",
+            p->applied.antenna_y_offset);
+    }
+    strcat(temp, temp2);
+    if (p->applied.antenna_z_offset == GSF_UNKNOWN_PARAM_VALUE)
+    {
+        sprintf(temp2, "%s",
+            GSF_UNKNOWN_PARAM_TEXT);
+    }
+    else
+    {
+        sprintf(temp2, "%+06.2f",
+            p->applied.antenna_z_offset);
+    }
+    strcat(temp, temp2);
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return(-1);
+    }
+
+
     /* The APPLIED_TRANSDUCER_OFFSET parameter defines the x,y,z offsets
      * in ship coordinates to which have been applied to refer the x,y,z
      * beam values to the ship reference point.
@@ -4946,29 +5262,119 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         return(-1);
     }
 
-    if (rec->process_parameters.number_parameters != 21)
+    /* The APPLIED_TRANSDUCER_PITCH_OFFSET parameter defines the transducer pitch installation angle
+     *   previously applied to the data.
+     */
+    if (numArrays == 1)
     {
-        /* The APPLIED_MRU_PITCH parameter defines the pitch bias previously
-         * applied to the data.
-         */
-        memset(temp, 0, sizeof(temp));
-        if (p->applied.mru_pitch_bias == GSF_UNKNOWN_PARAM_VALUE)
+        if (p->applied.transducer_pitch_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
         {
-            sprintf(temp, "APPLIED_MRU_PITCH=%s",
+            sprintf(temp, "APPLIED_TRANSDUCER_PITCH_OFFSET=%s",
                 GSF_UNKNOWN_PARAM_TEXT);
         }
         else
         {
-            sprintf(temp, "APPLIED_MRU_PITCH=%+06.2f",
-                p->applied.mru_pitch_bias);
+            sprintf(temp, "APPLIED_TRANSDUCER_PITCH_OFFSET=%+06.2f",
+                p->applied.transducer_pitch_offset[0]);
         }
-        ret = gsfSetParam(handle, number_parameters++, temp, rec);
-        if (ret)
+    }
+    else if (numArrays == 2)
+    {
+        if (p->applied.transducer_pitch_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
         {
-            return(-1);
+            sprintf(temp, "APPLIED_TRANSDUCER_PITCH_OFFSET=%s,%s",
+                GSF_UNKNOWN_PARAM_TEXT,
+                GSF_UNKNOWN_PARAM_TEXT);
         }
+        else
+        {
+            sprintf(temp, "APPLIED_TRANSDUCER_PITCH_OFFSET=%+06.2f,%+06.2f",
+                p->applied.transducer_pitch_offset[0],
+                p->applied.transducer_pitch_offset[1]);
+        }
+    }
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return(-1);
+    }
 
+    /* The APPLIED_TRANSDUCER_ROLL_OFFSET parameter defines the transducer roll installation angle
+     *   previously applied to the data.
+     */
+    if (numArrays == 1)
+    {
+        if (p->applied.transducer_roll_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_TRANSDUCER_ROLL_OFFSET=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_TRANSDUCER_ROLL_OFFSET=%+06.2f",
+                p->applied.transducer_roll_offset[0]);
+        }
+    }
+    else if (numArrays == 2)
+    {
+        if (p->applied.transducer_roll_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_TRANSDUCER_ROLL_OFFSET=%s,%s",
+                GSF_UNKNOWN_PARAM_TEXT,
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_TRANSDUCER_ROLL_OFFSET=%+06.2f,%+06.2f",
+                p->applied.transducer_roll_offset[0],
+                p->applied.transducer_roll_offset[1]);
+        }
+    }
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return(-1);
+    }
 
+    /* The APPLIED_TRANSDUCER_HEADING_OFFSET parameter defines the transducer heading installation angle
+     *   previously applied to the data.
+     */
+    if (numArrays == 1)
+    {
+        if (p->applied.transducer_heading_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_TRANSDUCER_HEADING_OFFSET=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_TRANSDUCER_HEADING_OFFSET=%+06.2f",
+                p->applied.transducer_heading_offset[0]);
+        }
+    }
+    else if (numArrays == 2)
+    {
+        if (p->applied.transducer_heading_offset[0] == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_TRANSDUCER_HEADING_OFFSET=%s,%s",
+                GSF_UNKNOWN_PARAM_TEXT,
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_TRANSDUCER_HEADING_OFFSET=%+06.2f,%+06.2f",
+                p->applied.transducer_heading_offset[0],
+                p->applied.transducer_heading_offset[1]);
+        }
+    }
+    ret = gsfSetParam(handle, number_parameters++, temp, rec);
+    if (ret)
+    {
+        return(-1);
+    }
+
+    if (rec->process_parameters.number_parameters != 21)
+    {
         /* The APPLIED_MRU_ROLL parameter defines the roll bias previously
          * applied to the data.
          */
@@ -4982,6 +5388,26 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         {
             sprintf(temp, "APPLIED_MRU_ROLL=%+06.2f",
                 p->applied.mru_roll_bias);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The APPLIED_MRU_PITCH parameter defines the pitch bias previously
+         * applied to the data.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->applied.mru_pitch_bias == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_MRU_PITCH=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_MRU_PITCH=%+06.2f",
+                p->applied.mru_pitch_bias);
         }
         ret = gsfSetParam(handle, number_parameters++, temp, rec);
         if (ret)
@@ -5089,6 +5515,66 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
                 p->applied.center_of_rotation_z_offset);
         }
         strcat(temp, temp2);
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+    
+        /* The APPLIED_POSITION_LATENCY parameter defines the navigation
+         * sensor latency value which has already been applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->applied.position_latency == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_POSITION_LATENCY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_POSITION_LATENCY=%+06.3f",
+                p->applied.position_latency);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The APPLIED_ATTITUDE_LATENCY parameter defines the attitude
+         * sensor latency value which has already been applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->applied.attitude_latency == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_ATTITUDE_LATENCY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_ATTITUDE_LATENCY=%+06.3f",
+                p->applied.attitude_latency);
+        }
+        ret = gsfSetParam(handle, number_parameters++, temp, rec);
+        if (ret)
+        {
+            return(-1);
+        }
+
+        /* The APPLIED_DEPTH_SENSOR_LATENCY parameter defines the depth 
+         *  sensor latency value which has already been applied.
+         */
+        memset(temp, 0, sizeof(temp));
+        if (p->applied.depth_sensor_latency == GSF_UNKNOWN_PARAM_VALUE)
+        {
+            sprintf(temp, "APPLIED_DEPTH_SENSOR_LATENCY=%s",
+                GSF_UNKNOWN_PARAM_TEXT);
+        }
+        else
+        {
+            sprintf(temp, "APPLIED_DEPTH_SENSOR_LATENCY=%+06.3f",
+                p->applied.depth_sensor_latency);
+        }
         ret = gsfSetParam(handle, number_parameters++, temp, rec);
         if (ret)
         {
@@ -5338,6 +5824,33 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                 p->ray_tracing = GSF_UNCOMPENSATED;
             }
         }
+
+        else if (strncmp(rec->process_parameters.param[i], "MSB_APPLIED_TO_ATTITUDE", strlen("MSB_APPLIED_TO_ATTITUDE")) == 0)
+        {
+            sscanf (rec->process_parameters.param[i], "MSB_APPLIED_TO_ATTITUDE=%s", str);
+            if (strcmp(str, "YES") == 0)
+            {
+                p->msb_applied_to_attitude = GSF_TRUE;
+            }
+            else
+            {
+                p->msb_applied_to_attitude = GSF_FALSE;
+            }
+        }
+
+        else if (strncmp(rec->process_parameters.param[i], "HEAVE_REMOVED_FROM_GPS_TC", strlen("HEAVE_REMOVED_FROM_GPS_TC")) == 0)
+        {
+            sscanf (rec->process_parameters.param[i], "HEAVE_REMOVED_FROM_GPS_TC=%s", str);
+            if (strcmp(str, "YES") == 0)
+            {
+                p->heave_removed_from_gps_tc = GSF_TRUE;
+            }
+            else
+            {
+                p->heave_removed_from_gps_tc = GSF_FALSE;
+            }
+        }
+
         else if (strncmp(rec->process_parameters.param[i], "DRAFT_TO_APPLY", strlen("DRAFT_TO_APPLY")) == 0)
         {
             p->to_apply.draft[0] = GSF_UNKNOWN_PARAM_VALUE;
@@ -5427,6 +5940,45 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.transducer_z_offset[1]);
             }
         }
+        else if (strncmp(rec->process_parameters.param[i], "TRANSDUCER_PITCH_OFFSET_TO_APPLY", strlen("TRANSDUCER_PITCH_OFFSET_TO_APPLY")) == 0)
+        {
+            p->to_apply.transducer_pitch_offset[0] = GSF_UNKNOWN_PARAM_VALUE;
+            p->to_apply.transducer_pitch_offset[1] = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "TRANSDUCER_PITCH_OFFSET_TO_APPLY=%lf,%lf",
+                    &p->to_apply.transducer_pitch_offset[0],
+                    &p->to_apply.transducer_pitch_offset[1]);
+            }
+            /* Get the number of array pairs from each sonar alignment parameter */
+            *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
+        }
+        else if (strncmp(rec->process_parameters.param[i], "TRANSDUCER_ROLL_OFFSET_TO_APPLY", strlen("TRANSDUCER_ROLL_OFFSET_TO_APPLY")) == 0)
+        {
+            p->to_apply.transducer_roll_offset[0] = GSF_UNKNOWN_PARAM_VALUE;
+            p->to_apply.transducer_roll_offset[1] = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "TRANSDUCER_ROLL_OFFSET_TO_APPLY=%lf,%lf",
+                    &p->to_apply.transducer_roll_offset[0],
+                    &p->to_apply.transducer_roll_offset[1]);
+            }
+            /* Get the number of array pairs from each sonar alignment parameter */
+            *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
+        }
+        else if (strncmp(rec->process_parameters.param[i], "TRANSDUCER_HEADING_OFFSET_TO_APPLY", strlen("TRANSDUCER_HEADING_OFFSET_TO_APPLY")) == 0)
+        {
+            p->to_apply.transducer_heading_offset[0] = GSF_UNKNOWN_PARAM_VALUE;
+            p->to_apply.transducer_heading_offset[1] = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "TRANSDUCER_HEADING_OFFSET_TO_APPLY=%lf,%lf",
+                    &p->to_apply.transducer_heading_offset[0],
+                    &p->to_apply.transducer_heading_offset[1]);
+            }
+            /* Get the number of array pairs from each sonar alignment parameter */
+            *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
+        }
         else if (strncmp(rec->process_parameters.param[i], "MRU_PITCH_TO_APPLY", strlen("MRU_PITCH_TO_APPLY")) == 0)
         {
             p->to_apply.mru_pitch_bias = GSF_UNKNOWN_PARAM_VALUE;
@@ -5467,6 +6019,19 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.mru_z_offset);
             }
         }
+        else if (strncmp(rec->process_parameters.param[i], "ANTENNA_OFFSET_TO_APPLY", strlen("ANTENNA_OFFSET_TO_APPLY")) == 0)
+        {
+            p->to_apply.antenna_x_offset = GSF_UNKNOWN_PARAM_VALUE;
+            p->to_apply.antenna_y_offset = GSF_UNKNOWN_PARAM_VALUE;
+            p->to_apply.antenna_z_offset = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "ANTENNA_OFFSET_TO_APPLY=%lf,%lf,%lf",
+                    &p->to_apply.antenna_x_offset,
+                    &p->to_apply.antenna_y_offset,
+                    &p->to_apply.antenna_z_offset);
+            }
+        }
         else if (strncmp(rec->process_parameters.param[i], "CENTER_OF_ROTATION_OFFSET_TO_APPLY", strlen("CENTER_OF_ROTATION_OFFSET_TO_APPLY")) == 0)
         {
             p->to_apply.center_of_rotation_x_offset = GSF_UNKNOWN_PARAM_VALUE;
@@ -5478,6 +6043,33 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.center_of_rotation_x_offset,
                     &p->to_apply.center_of_rotation_y_offset,
                     &p->to_apply.center_of_rotation_z_offset);
+            }
+        }
+        else if (strncmp(rec->process_parameters.param[i], "POSITION_LATENCY_TO_APPLY", strlen("POSITION_LATENCY_TO_APPLY")) == 0)
+        {
+            p->to_apply.position_latency = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "POSITION_LATENCY_TO_APPLY=%lf",
+                    &p->to_apply.position_latency);
+            }
+        }
+        else if (strncmp(rec->process_parameters.param[i], "ATTITUDE_LATENCY_TO_APPLY", strlen("ATTITUDE_LATENCY_TO_APPLY")) == 0)
+        {
+            p->to_apply.attitude_latency = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "ATTITUDE_LATENCY_TO_APPLY=%lf",
+                    &p->to_apply.attitude_latency);
+            }
+        }
+        else if (strncmp(rec->process_parameters.param[i], "DEPTH_SENSOR_LATENCY_TO_APPLY", strlen("DEPTH_SENSOR_LATENCY_TO_APPLY")) == 0)
+        {
+            p->to_apply.depth_sensor_latency = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "DEPTH_SENSOR_LATENCY_TO_APPLY=%lf",
+                    &p->to_apply.depth_sensor_latency);
             }
         }
         else if (strncmp(rec->process_parameters.param[i], "APPLIED_DRAFT", strlen("APPLIED_DRAFT")) == 0)
@@ -5548,6 +6140,19 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.position_z_offset);
             }
          }
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_ANTENNA_OFFSET", strlen("APPLIED_ANTENNA_OFFSET")) == 0)
+        {
+           p->applied.antenna_x_offset = GSF_UNKNOWN_PARAM_VALUE;
+           p->applied.antenna_y_offset = GSF_UNKNOWN_PARAM_VALUE;
+           p->applied.antenna_z_offset = GSF_UNKNOWN_PARAM_VALUE;
+           if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+           {
+               sscanf (rec->process_parameters.param[i], "APPLIED_ANTENNA_OFFSET=%lf,%lf,%lf",
+                   &p->applied.antenna_x_offset,
+                   &p->applied.antenna_y_offset,
+                   &p->applied.antenna_z_offset);
+           }
+        }
         /* The APPLIED_TRANSDUCER_OFFSET parameter defines the x,y,z offsets
          * in ship coordinates to which have been applied to refer the x,y,z
          * beam values to the ship reference point.
@@ -5570,6 +6175,45 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.transducer_y_offset[1],
                     &p->applied.transducer_z_offset[1]);
             }
+        }
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_TRANSDUCER_PITCH_OFFSET", strlen("APPLIED_TRANSDUCER_PITCH_OFFSET")) == 0)
+        {
+            p->applied.transducer_pitch_offset[0] = GSF_UNKNOWN_PARAM_VALUE;
+            p->applied.transducer_pitch_offset[1] = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_TRANSDUCER_PITCH_OFFSET=%lf,%lf",
+                    &p->applied.transducer_pitch_offset[0],
+                    &p->applied.transducer_pitch_offset[1]);
+            }
+            /* Get the number of array pairs from each sonar alignment parameter */
+            *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
+        }
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_TRANSDUCER_ROLL_OFFSET", strlen("APPLIED_TRANSDUCER_ROLL_OFFSET")) == 0)
+        {
+            p->applied.transducer_roll_offset[0] = GSF_UNKNOWN_PARAM_VALUE;
+            p->applied.transducer_roll_offset[1] = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_TRANSDUCER_ROLL_OFFSET=%lf,%lf",
+                    &p->applied.transducer_roll_offset[0],
+                    &p->applied.transducer_roll_offset[1]);
+            }
+            /* Get the number of array pairs from each sonar alignment parameter */
+            *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
+        }
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_TRANSDUCER_HEADING_OFFSET", strlen("APPLIED_TRANSDUCER_HEADING_OFFSET")) == 0)
+        {
+            p->applied.transducer_heading_offset[0] = GSF_UNKNOWN_PARAM_VALUE;
+            p->applied.transducer_heading_offset[1] = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_TRANSDUCER_HEADING_OFFSET=%lf,%lf",
+                    &p->applied.transducer_heading_offset[0],
+                    &p->applied.transducer_heading_offset[1]);
+            }
+            /* Get the number of array pairs from each sonar alignment parameter */
+            *numArrays = gsfNumberParams(rec->process_parameters.param[i]);
         }
         else if (strncmp(rec->process_parameters.param[i], "APPLIED_MRU_PITCH", strlen("APPLIED_MRU_PITCH")) == 0)
         {
@@ -5622,6 +6266,33 @@ gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.center_of_rotation_x_offset,
                     &p->applied.center_of_rotation_y_offset,
                     &p->applied.center_of_rotation_z_offset);
+            }
+        }
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_POSITION_LATENCY", strlen("APPLIED_POSITION_LATENCY")) == 0)
+        {
+            p->applied.position_latency = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_POSITION_LATENCY=%lf",
+                    &p->applied.position_latency);
+            }
+        }
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_ATTITUDE_LATENCY", strlen("APPLIED_ATTITUDE_LATENCY")) == 0)
+        {
+            p->applied.attitude_latency = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_ATTITUDE_LATENCY=%lf",
+                    &p->applied.attitude_latency);
+            }
+        }
+        else if (strncmp(rec->process_parameters.param[i], "APPLIED_DEPTH_SENSOR_LATENCY", strlen("APPLIED_DEPTH_SENSOR_LATENCY")) == 0)
+        {
+            p->applied.depth_sensor_latency = GSF_UNKNOWN_PARAM_VALUE;
+            if (!strstr(rec->process_parameters.param[i], GSF_UNKNOWN_PARAM_TEXT))
+            {
+                sscanf (rec->process_parameters.param[i], "APPLIED_DEPTH_SENSOR_LATENCY=%lf",
+                    &p->applied.depth_sensor_latency);
             }
         }
         /* The horizontal datum parameter defines the elipsoid to which
@@ -5943,6 +6614,7 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
         case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
             *fore_aft = 1.0;
             *athwartship = 1.0;
             if (data->mb_ping.sensor_data.gsfEM4Specific.run_time.tx_beam_width != 0.0)
@@ -5998,6 +6670,19 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
         case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
             *fore_aft = GSF_BEAM_WIDTH_UNKNOWN;
             *athwartship = GSF_BEAM_WIDTH_UNKNOWN;
+            break;
+        
+        case (GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC):
+            *fore_aft = 3.0;
+            *athwartship = 3.0;
+            if (data->mb_ping.sensor_data.gsfDeltaTSpecific.fore_aft_beamwidth != 0.0)
+            {
+                *fore_aft = data->mb_ping.sensor_data.gsfDeltaTSpecific.fore_aft_beamwidth;
+            }
+            if (data->mb_ping.sensor_data.gsfDeltaTSpecific.athwartships_beamwidth != 0.0)
+            {
+                *athwartship = data->mb_ping.sensor_data.gsfDeltaTSpecific.athwartships_beamwidth;
+            }
             break;
 
         default:
@@ -6669,27 +7354,27 @@ char *gsfGetSonarTextName(gsfSwathBathyPing *ping)
             break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC):
-            case (GSF_SWATH_BATHY_SUBRECORD_EM3000_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000_RAW_SPECIFIC):
             ptr = "Kongsberg EM3000";
             break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC):
-            case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_RAW_SPECIFIC):
             ptr = "Kongsberg EM3000D";
             break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
-             case (GSF_SWATH_BATHY_SUBRECORD_EM3002_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002_RAW_SPECIFIC):
             ptr = "Kongsberg EM3002";
             break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
-             case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_RAW_SPECIFIC):
             ptr = "Kongsberg EM3002D";
             break;
 
         case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC):
-             case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_RAW_SPECIFIC):
             ptr = "Kongsberg EM121A (SIS)";
             break;
 
@@ -6732,12 +7417,23 @@ char *gsfGetSonarTextName(gsfSwathBathyPing *ping)
         case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
             ptr = "Kongsberg EM710";
             break;
+
         case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
             ptr = "Klein 5410";
             break;
+
         case (GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC):
             ptr = "GeoAcoustics GeoSwath+";
             break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
+            ptr = "Kongsberg EM2040";
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC):
+            ptr = "Imagenex Delta T";
+            break;
+
         default:
             ptr = "Unknown";
             break;
@@ -6745,3 +7441,68 @@ char *gsfGetSonarTextName(gsfSwathBathyPing *ping)
 
     return (ptr);
 }
+
+/********************************************************************
+ *
+ * Function Name : gsfIsNewSurveyLine
+ *
+ * Description : This function provides an approach for calling applications
+ *  to determine if the last ping read from a GSF file is from the same survey
+ *  transect line, or if the last ping is from a newly started survey line. The
+ *  implementation looks for a change in platform heading to determine that the
+ *  last ping read is from a new survey line. External to this function, calling
+ *  applications can decide on their own if the first ping read from a newly opened
+ *  GSF file should be considered to be from a new survey transect line or not.
+ *  This function assumes that the GSF file is read in chronological order from 
+ *  the beginning of the file, file access can be either direct or sequential
+ * 
+ * Inputs :
+ *  handle         = The handle to the file as provided by gsfOpen
+ *  rec            = A pointer to a gsfRecords structure containing the data from the most
+ *                    recent call to gsfRead
+ *  azimuth_change = The trigger value specifying the change in platform heading that
+ *                    must be exceeded for a new survey transect line to be determined
+ *  last_heading   = A pointer to a double allocated by the caller and into which this
+ *                    function will place the heading value for each detected line. The
+ *                    value must be allocated as permanent memory that persists through
+ *                    all calls to this function. Startup or reset events can be handled
+ *                    by the caller by placing a negative value in this memory location.
+ *
+ * Returns :
+ *  This function returns 1 if this ping is considered to be the first ping of a new
+ *   survey transect line, otherwise, 0 is returned.
+ *
+ * Error Conditions :
+ *  none
+ *
+ ********************************************************************/
+int
+gsfIsNewSurveyLine(int handle, gsfRecords *rec, double azimuth_change, double *last_heading)
+{
+    double diff;
+    int    new_line;
+
+    new_line = 0;
+
+    if (gsfFileTable[handle-1].last_record_type == GSF_RECORD_SWATH_BATHYMETRY_PING) 
+    {   
+        /* A negative value for last heading is the start/reset trigger. */
+        if (*last_heading < 0.0) 
+        {
+            new_line = 1;
+            *last_heading = rec->mb_ping.heading;        
+        }
+        else
+        {
+            diff = fabs (rec->mb_ping.heading - *last_heading);   
+            if ((diff > azimuth_change) && (diff < 350.0))
+            {
+                new_line = 1;
+                *last_heading = rec->mb_ping.heading;
+            }
+        }
+    }
+
+    return(new_line);
+}
+

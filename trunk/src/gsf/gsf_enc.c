@@ -169,6 +169,7 @@ static int      EncodeSBNavisoundSpecific(unsigned char *sptr, t_gsfSBNavisoundS
 static int      EncodeEM4Specific(unsigned char *sptr, gsfSensorSpecific * sdata, GSF_FILE_TABLE *ft);
 static int      EncodeGeoSwathPlusSpecific(unsigned char *sptr, gsfSensorSpecific * sdata);
 static int      EncodeKlein5410BssSpecific(unsigned char *sptr, gsfSensorSpecific * sdata);
+static int      EncodeDeltaTSpecific(unsigned char *sptr, gsfSensorSpecific * sdata);
 
 /********************************************************************
  *
@@ -1641,6 +1642,7 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
         case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
             sensor_size = EncodeEM4Specific(p, &ping->sensor_data, ft);
             break;
 
@@ -1650,6 +1652,10 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing * ping, GSF_
 
         case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
             sensor_size = EncodeKlein5410BssSpecific(p, &ping->sensor_data);
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC):
+            sensor_size = EncodeDeltaTSpecific(p, &ping->sensor_data);
             break;
 
         default:
@@ -1763,6 +1769,7 @@ EncodeScaleFactors(unsigned char *sptr, gsfScaleFactors *sf)
             sf_counter++;
         }
     }
+
     /* Make sure that we encoded the expected number of array subrecords. If not return an error condition */
     if (sf_counter != sf->numArraySubrecords)
     {
@@ -4080,7 +4087,7 @@ EncodeEM3Specific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TABLE 
  *
  * Function Name : EncodeEM3RawSpecific
  *
- * Description : This function encodes the Kongsberg EM710/EM302/EM122
+ * Description : This function encodes the Kongsberg EM710/EM302/EM122/EM2040
  *  sensor specific information into external byte stream form.
  *
  * Inputs :
@@ -4510,18 +4517,18 @@ EncodeEM3RawSpecific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TAB
             sstemp = htons((gsfsShort) dtemp);
             memcpy(p, &sstemp, 2);
             p += 2;
-            break;	
+            break;      
         
         default:
             /* Then next two byte value is spare */
             p += 2;
-      	    break;
+            break;
     }
 
     /* The contents of the next one byte value depends on the sonar model number */
     switch (sdata->gsfEM3RawSpecific.run_time.model_number) 
     {
-       	default:
+        default:
             /* The next one byte value contains the HiLo frequency absorption coefficient ratio
              * JSB: As of 3/1/09, still don't have final datagram documentation from KM
              * to know whether the filter ID 2 field is EM4 specific or if it will be supported
@@ -4529,7 +4536,7 @@ EncodeEM3RawSpecific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TAB
              */
             *p = (unsigned char) sdata->gsfEM3RawSpecific.run_time.hi_low_absorption_ratio;
             p += 1;
-      	    break;
+            break;
     }
 
     /* The next 16 bytes of space on the byte stream are spare space for future use. */
@@ -4582,7 +4589,7 @@ EncodeEM3RawSpecific(unsigned char *sptr, gsfSensorSpecific *sdata, GSF_FILE_TAB
  *
  * Function Name : EncodeEM4Specific
  *
- * Description : This function encodes the Kongsberg EM710/EM302/EM122
+ * Description : This function encodes the Kongsberg EM710/EM302/EM122/EM2040
  *  sensor specific information into external byte stream form.
  *
  * Inputs :
@@ -5815,6 +5822,182 @@ EncodeReson7100Specific(unsigned char *sptr, gsfSensorSpecific *sdata)
     return (p - sptr);
 }
 
+/********************************************************************
+ *
+ * Function Name : EncodeDeltaTSpecific
+ *
+ * Description : This function encodes the Imagenex Delta T
+ *  sensor specific information into external byte stream form.
+ *
+ * Inputs :
+ *    sptr = a pointer to an unsigned char buffer to write into
+ *    sdata = a pointer to a union of sensor specific data.
+ *
+ * Returns : This function returns the number of bytes encoded.
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+static int
+EncodeDeltaTSpecific(unsigned char *sptr, gsfSensorSpecific *sdata)
+{
+    unsigned char  *p = sptr;
+    gsfuShort       stemp;
+    gsfuLong        ltemp;
+    double          dtemp;
+
+    /* The next four bytes contains the file extension */
+    memcpy (p, (unsigned char *) (sdata->gsfDeltaTSpecific.decode_file_type), 4);
+    p += 4;
+    
+    /* The next byte contains the version number */
+    *p = (unsigned char) sdata->gsfDeltaTSpecific.version;
+    p += 1;
+
+    /* The next two bytes contains the ping byte size field */
+    stemp = htons((gsfuShort) sdata->gsfDeltaTSpecific.ping_byte_size);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* Next 8 bytes contains the original sonar interrogation time */
+    ltemp = htonl(sdata->gsfDeltaTSpecific.interrogation_time.tv_sec);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+    ltemp = htonl(sdata->gsfDeltaTSpecific.interrogation_time.tv_nsec);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* The next two bytes contains the samples per beam field */
+    stemp = htons((gsfuShort) sdata->gsfDeltaTSpecific.samples_per_beam);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* The next two bytes contains the sector size field */
+    stemp = htons((gsfuShort) sdata->gsfDeltaTSpecific.sector_size);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* The next two bytes contains the start angle field. */
+    dtemp = ((sdata->gsfDeltaTSpecific.start_angle + 180.0) * 100.0) + 0.501;
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+    
+    /* The next two bytes contains the angle increment field. */
+    dtemp = ((sdata->gsfDeltaTSpecific.angle_increment) * 100.0) + 0.501;
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+    
+    /* The next two bytes contains the acoustic range field */
+    stemp = htons((gsfuShort) sdata->gsfDeltaTSpecific.acoustic_range);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* The next two bytes contains the acoustic frequency field */
+    stemp = htons((gsfuShort) sdata->gsfDeltaTSpecific.acoustic_frequency);
+    memcpy(p, &stemp, 2);
+    p += 2;
+
+    /* The next two bytes contains the sound speed field. */
+    dtemp = ((sdata->gsfDeltaTSpecific.sound_velocity) * 10.0) + 0.501;
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+    
+    /* The next two bytes contains the range resolution field. */
+    dtemp = ((sdata->gsfDeltaTSpecific.range_resolution) * 1000.0) + 0.501;
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+    
+    /* The next two bytes contains the profile tilt field. */
+    dtemp = ((sdata->gsfDeltaTSpecific.profile_tilt_angle) + 180.0) + 0.501;
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+    
+    /* The next two bytes contains the repetition rate field. */
+    dtemp = ((sdata->gsfDeltaTSpecific.repetition_rate) * 1000.0) + 0.501;
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+    
+    /* The next four bytes contains the ping number field */
+    ltemp = htonl((gsfuLong) sdata->gsfDeltaTSpecific.ping_number);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* The next byte contains the intensity flag field. */
+    *p = (unsigned char) sdata->gsfDeltaTSpecific.intensity_flag;
+    p += 1;
+
+    /* The next two bytes contains the ping latency field. */
+    dtemp = ((sdata->gsfDeltaTSpecific.ping_latency) * 10000.0) + 0.501;
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+    
+    /* The next two bytes contains the data latency field. */
+    dtemp = ((sdata->gsfDeltaTSpecific.data_latency) * 10000.0) + 0.501;
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+    
+    /* The next byte contains the sample rate flag field. */
+    *p = (unsigned char) sdata->gsfDeltaTSpecific.sample_rate_flag;
+    p += 1;
+
+    /* The next byte contains the option flags field. */
+    *p = (unsigned char) sdata->gsfDeltaTSpecific.option_flags;
+    p += 1;
+
+    /* The next byte contains the number of pings averaged field. */
+    *p = (unsigned char) sdata->gsfDeltaTSpecific.num_pings_avg;
+    p += 1;
+
+    /* The next two bytes contains the center ping time offset field. */
+    dtemp = ((sdata->gsfDeltaTSpecific.center_ping_time_offset) * 10000.0) + 0.501;
+    stemp = htons((gsfuShort) dtemp);
+    memcpy(p, &stemp, 2);
+    p += 2;
+    
+    /* The next byte contains the user defined byte field. */
+    *p = (unsigned char) sdata->gsfDeltaTSpecific.user_defined_byte;
+    p += 1;
+
+    /* Next four byte integer contains the altitude field.*/
+    ltemp = htonl((gsfuLong) sdata->gsfDeltaTSpecific.altitude);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* The next byte contains the external sensor flags field. */
+    *p = (unsigned char) sdata->gsfDeltaTSpecific.external_sensor_flags;
+    p += 1;
+
+    /* Next four byte integer contains the pulse length field.*/
+    dtemp = (sdata->gsfDeltaTSpecific.pulse_length * 1.0e6) + 0.501;
+    ltemp = htonl((gsfuLong) dtemp);
+    memcpy(p, &ltemp, 4);
+    p += 4;
+
+    /* The next byte contains the fore aft beamwidth field. */
+    dtemp = (sdata->gsfDeltaTSpecific.fore_aft_beamwidth * 10.0) + 0.501;
+    *p = (unsigned char) dtemp;
+    p += 1;
+
+    /* The next byte contains the athwartships beamwidth field. */
+    dtemp = (sdata->gsfDeltaTSpecific.athwartships_beamwidth * 10.0) + 0.501;
+    *p = (unsigned char) dtemp;
+    p += 1;
+
+    /* The next 32 bytes are spare space for future growth */
+    memset(p, 0, 32);
+    p += 32;
+    
+    return (p - sptr);
+}
 
 /********************************************************************
  *
@@ -6334,7 +6517,7 @@ EncodeEM4ImagerySpecific(unsigned char *sptr, gsfSensorImagery *sdata)
     memcpy(p, &sstemp, 2);
     p += 2;
 
-    /* Next two bytes contain the imagery scale value as specified by the manufacturer.  This value is 10 for the EM710/EM302/EM122.
+    /* Next two bytes contain the imagery scale value as specified by the manufacturer.  This value is 10 for the EM710/EM302/EM122/EM2040.
      *  The following formula can be used to convert from the GSF positive biased value to dB:
      *  dB_value = (GSF_I_value - offset) / scale
      */
@@ -6563,6 +6746,7 @@ EncodeBRBIntensity(unsigned char *sptr, gsfBRBIntensity *idata, int num_beams, i
         case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
         case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
             sensor_size = EncodeEM4ImagerySpecific(ptr, &idata->sensor_imagery);
             break;
 
@@ -7137,6 +7321,7 @@ gsfEncodeHVNavigationError(unsigned char *sptr, gsfHVNavigationError *hv_nav_err
     int             length;
     gsfsLong        ltemp;
     gsfsShort       stemp;
+    gsfuShort       utemp;
 
     /* First four byte integer contains the seconds portion of the time
     *  of navigation error.
@@ -7187,14 +7372,19 @@ gsfEncodeHVNavigationError(unsigned char *sptr, gsfHVNavigationError *hv_nav_err
     memcpy(p, &ltemp, 4);
     p += 4;
 
-    /* The next four bytes are resevered for future use */
+    /* The next two bytes contains the SEP uncertainty estimate.
+     * This value is always >= 0.0, so rounding is a simple addition 
+     */
+    dtemp = (hv_nav_error->SEP_uncertainty * 100.0);    
+    dtemp += 0.501;
+    utemp = htons((gsfuShort) dtemp);
+    memcpy(p, &utemp, 2);
+    p += 2;
+
+    /* The next two bytes are reserved for future use */
     *p = (unsigned char) (hv_nav_error->spare[0]);
     p += 1;
     *p = (unsigned char) (hv_nav_error->spare[1]);
-    p += 1;
-    *p = (unsigned char) (hv_nav_error->spare[2]);
-    p += 1;
-    *p = (unsigned char) (hv_nav_error->spare[3]);
     p += 1;
 
     /* The next two byte integer contains the length of the positioning system type string */

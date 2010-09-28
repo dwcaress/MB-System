@@ -116,6 +116,8 @@
  * mab 02-01-09  Updates to support Reson 7125. Added new subrecord IDs and subrecord definitions for Kongsberg
  *                sonar systems where TWTT and angle are populated from raw range and beam angle datagram. Added
  *                new subrecord definition for EM2000.  Bug fixes in gsfOpen and gsfPercent. 
+ * mab 06-11-09  Moved GSF_MAX_RECORD_SIZE from 256KB to 512KB to accomodate Reson7125 imagery.
+ * jsb 01-14-10  Added new function prototypes to return various status information about the opened GSF file. 
  *
  * Classification : Unclassified
  *
@@ -151,10 +153,10 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library */
-#define GSF_VERSION       "GSF-v03.01"
+#define GSF_VERSION       "GSF-v03.02"
 
 /* Define largest ever expected record size */
-#define GSF_MAX_RECORD_SIZE    262144
+#define GSF_MAX_RECORD_SIZE    524288
 
 /* Define the maximum number of files which may be open at once */
 #define GSF_MAX_OPEN_FILES     4
@@ -315,6 +317,8 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_EM3000D_RAW_SPECIFIC      (unsigned)146
 #define GSF_SWATH_BATHY_SUBRECORD_EM3002D_RAW_SPECIFIC      (unsigned)147
 #define GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_RAW_SPECIFIC   (unsigned)148
+#define GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC           (unsigned)149
+#define GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC          (unsigned)150
 
 #define GSF_SINGLE_BEAM_SUBRECORD_UNKNOWN                   (unsigned)  0
 #define GSF_SINGLE_BEAM_SUBRECORD_ECHOTRAC_SPECIFIC         (unsigned)201
@@ -345,6 +349,9 @@ gsfDataID;
 #define GSF_NULL_SOUND_SPEED_CORRECTION 99.99
 #define GSF_NULL_HORIZONTAL_ERROR       -1.00
 #define GSF_NULL_VERTICAL_ERROR         -1.00
+#define GSF_NULL_HEIGHT               9999.99
+#define GSF_NULL_SEP                  9999.99
+#define	GSF_NULL_SEP_UNCERTAINTY         0.0
 
 /* Define null values for the swath bathymetry ping array types. Note that
  * these zero values do not necessarily indicate a non-valid value.  The
@@ -1101,6 +1108,41 @@ typedef struct t_gsfKlein5410BssSpecific
 }
 t_gsfKlein5410BssSpecific;
 
+/* Define the Imagenex Delta T sensor specific dada structure */
+typedef struct t_gsfDeltaTSpecific 
+{
+    char            decode_file_type[4];     /* contains the decoded files extension. */
+    char            version;                 /* contains the minor version number of the delta t */
+    int             ping_byte_size;          /* size in bytes of this ping (256 + ((((byte 117[1 or 0])*2) + 2) * number of beams)) */
+    struct timespec interrogation_time;      /* The sonar interrogation time */
+    int             samples_per_beam;        /* number of samples per beam */
+    double          sector_size;             /* size of the sector in degrees */
+    double          start_angle;             /* the angle that beam 0 starts at in degrees. */
+    double          angle_increment;         /* the number of degrees the angle increments per beam */
+    int             acoustic_range;          /* acoustic range in meters */
+    int             acoustic_frequency;      /* acoustic frequency in kHz */
+    double          sound_velocity;          /* the velocity of sound at the transducer face in m/s */
+    double          range_resolution;        /* range resolution in centimeters (documentation says mm but all example data is in cm) */
+    double          profile_tilt_angle;      /* the mounting offset */
+    double          repetition_rate;         /* time between pings in milliseconds */
+    unsigned long   ping_number;             /* the current ping number of this ping.  */
+    unsigned char   intensity_flag;          /* this tells whether the GSF will have intensity data (1=true) */
+    double          ping_latency;            /* time from sonar ping interrogation to actual ping in seconds */
+    double          data_latency;            /* time from sonar ping interrogation to 83P UDP datagram in seconds */
+    unsigned char   sample_rate_flag;        /* sampling rate 0 = (1 in 500); 1 = (1 in 5000) */
+    unsigned char   option_flags;            /* this flag states whether the data is roll corrected or raybend corrected (1 = roll, 2 = raybend, 3 = both) */
+    int             num_pings_avg;           /* number of pings averaged 1 - 25 */
+    double          center_ping_time_offset; /* the time difference in seconds between the center ping interrogation and the current ping interrogation */
+    unsigned char   user_defined_byte;       /* contains a user defined byte */
+    double          altitude;                /* the height of the fish above the ocean floor.  */
+    char            external_sensor_flags;   /* this flag is a bit mask where (1 = external heading, 2 = external roll, 4 = external pitch, 8 = external heave) */
+    double          pulse_length;            /* acoustic pulse length in seconds */
+    double          fore_aft_beamwidth;      /* Effective f/a beam width in degrees */
+    double          athwartships_beamwidth;  /* Effective athwartships beam width in degrees */
+    unsigned char   spare[32];               /* room to grow */
+}
+t_gsfDeltaTSpecific;
+
 /* Define a union of the known sensor specific ping subrecords */
 typedef union t_gsfSensorSpecific
 {
@@ -1130,9 +1172,10 @@ typedef union t_gsfSensorSpecific
     t_gsfEM3RawSpecific       gsfEM3RawSpecific;       /* used for EM120, EM300, EM1002, EM3000, EM3002, and EM121A_SIS with raw range and beam angle */
     t_gsfReson8100Specific    gsfReson8100Specific;
     t_gsfReson7100Specific    gsfReson7100Specific;
-    t_gsfEM4Specific          gsfEM4Specific;          /* used for EM710, EM302, and EM122 */
+    t_gsfEM4Specific          gsfEM4Specific;          /* used for EM710, EM302, EM122, and EM2040 */
     t_gsfGeoSwathPlusSpecific gsfGeoSwathPlusSpecific; /* DHG 2006/09/27 Use for GeoSwath+ interferometer */
     t_gsfKlein5410BssSpecific gsfKlein5410BssSpecific; /* Use for Klein 5410 Bathy Sidescan. */
+    t_gsfDeltaTSpecific       gsfDeltaTSpecific;
 
         /* Single beam sensors added */
     t_gsfSBEchotracSpecific   gsfSBEchotracSpecific;
@@ -1512,7 +1555,8 @@ typedef struct t_gsfHVNavigationError
     int             record_id;                 /* Containing nav with these errors */
     double          horizontal_error;          /* RMS error in meters */
     double          vertical_error;            /* RMS error in meters */
-    char            spare[4];                  /* four bytes of reserved space */
+    double          SEP_uncertainty;           /* RMS uncertainty of SEP in meters. Set to 0.0 if not applicable */
+    char            spare[2];                  /* Two bytes of reserved space */
     char           *position_type;             /* A character string code which specifies the type of positioning system */
 }
 gsfHVNavigationError;
@@ -1568,15 +1612,16 @@ typedef struct t_gsfRecords
  * HydroChart II and Reson 9002 which have two pairs of transmit/receive
  * arrays per installation.
  */
-#define GSF_MAX_OFFSETS          2
-#define GSF_COMPENSATED          1
-#define GSF_UNCOMPENSATED        0
-#define GSF_TRUE_DEPTHS          1
-#define GSF_DEPTHS_RE_1500_MS    2
-#define GSF_DEPTH_CALC_UNKNOWN   3
+#define GSF_MAX_OFFSETS                2
+#define GSF_COMPENSATED                1
+#define GSF_UNCOMPENSATED              0
+#define GSF_TRUE_DEPTHS                1
+#define GSF_DEPTHS_RE_1500_MS          2
+#define GSF_DEPTH_CALC_UNKNOWN         3
 #define GSF_UNKNOWN_PARAM_VALUE  DBL_MIN        /* defined in <float.h> */
-#define GSF_TRUE                 1
-#define GSF_FALSE                0
+#define GSF_TRUE                       1
+#define GSF_FALSE                      0
+#define GSF_NUMBER_PROCESSING_PARAMS  49
 
 /* Macro definitions for type of platform */
 #define GSF_PLATFORM_TYPE_SURFACE_SHIP  0              /*DHG 2008/12/22 Add for AUV vs Surface Ship discrimination */
@@ -1585,25 +1630,34 @@ typedef struct t_gsfRecords
 
 typedef struct t_gsfMBOffsets
 {
-    double           draft[GSF_MAX_OFFSETS];                 /* meters */
-    double           roll_bias[GSF_MAX_OFFSETS];             /* degrees */
-    double           pitch_bias[GSF_MAX_OFFSETS];            /* degrees */
-    double           gyro_bias[GSF_MAX_OFFSETS];             /* degrees */
-    double           position_x_offset;                      /* meters */
-    double           position_y_offset;                      /* meters */
-    double           position_z_offset;                      /* meters */
-    double           transducer_x_offset[GSF_MAX_OFFSETS];   /* meters */
-    double           transducer_y_offset[GSF_MAX_OFFSETS];   /* meters */
-    double           transducer_z_offset[GSF_MAX_OFFSETS];   /* meters */
-    double           mru_roll_bias;                          /* degrees */
-    double           mru_pitch_bias;                         /* degrees */
-    double           mru_heading_bias;                       /* degrees */
-    double           mru_x_offset;                           /* meters */
-    double           mru_y_offset;                           /* meters */
-    double           mru_z_offset;                           /* meters */
-    double           center_of_rotation_x_offset;            /* meters */
-    double           center_of_rotation_y_offset;            /* meters */
-    double           center_of_rotation_z_offset;            /* meters */
+    double           draft[GSF_MAX_OFFSETS];                     /* meters */
+    double           pitch_bias[GSF_MAX_OFFSETS];                /* pitch bias in degrees, results from patch test */
+    double           roll_bias[GSF_MAX_OFFSETS];                 /* roll bias in degrees, results from patch test */
+    double           gyro_bias[GSF_MAX_OFFSETS];                 /* gyro bias in degrees, results from patch test */
+    double           position_x_offset;                          /* meters */
+    double           position_y_offset;                          /* meters */
+    double           position_z_offset;                          /* meters */
+    double           antenna_x_offset;                           /* meters */
+    double           antenna_y_offset;                           /* meters */
+    double           antenna_z_offset;                           /* meters */
+    double           transducer_x_offset[GSF_MAX_OFFSETS];       /* sonar X installation offset in meters, from ship alignment survey */
+    double           transducer_y_offset[GSF_MAX_OFFSETS];       /* sonar Y installation offset in meters, from ship alignment survey */
+    double           transducer_z_offset[GSF_MAX_OFFSETS];       /* sonar Z installation offset in meters, from ship alignment survey */
+    double           transducer_pitch_offset[GSF_MAX_OFFSETS];   /* sonar pitch installation angle in degrees, from ship alignment survey */
+    double           transducer_roll_offset[GSF_MAX_OFFSETS];    /* sonar roll installation angle in degrees, from ship alignment survey */
+    double           transducer_heading_offset[GSF_MAX_OFFSETS]; /* sonar heading installation  angle in degrees, from ship alignment survey */
+    double           mru_pitch_bias;                             /* MRU installation pitch angle in degrees, from ship alignment survey */
+    double           mru_roll_bias;                              /* MRU installation roll angle in degrees, from ship alignment survey */
+    double           mru_heading_bias;                           /* MRU installation heading angle in degrees, from ship alignment survey */
+    double           mru_x_offset;                               /* MRU X installation offset in meters, from ship alignment survey */
+    double           mru_y_offset;                               /* MRU Y installation offset in meters, from ship alignment survey meters */
+    double           mru_z_offset;                               /* MUR Z installation offset in meters, from ship alignment survey meters */
+    double           center_of_rotation_x_offset;                /* meters */
+    double           center_of_rotation_y_offset;                /* meters */
+    double           center_of_rotation_z_offset;                /* meters */
+    double           position_latency;                           /* seconds */
+    double           attitude_latency;                           /* seconds */
+    double           depth_sensor_latency;                       /* seconds */
 } gsfMBOffsets;
 
 /* Define a data structure to hold multibeam sonar processing parameters */
@@ -1615,14 +1669,16 @@ typedef struct t_gsfMBParams
     int vertical_datum;
 
     /* These parameters specify what corrections have been applied to the data */
-    int roll_compensated;   /* = GSF_COMPENSATED if the depth data has been corrected for roll */
-    int pitch_compensated;  /* = GSF_COMPENSATED if the depth data has been corrected for pitch */
-    int heave_compensated;  /* = GSF_COMPENSATED if the depth data has been corrected for heave */
-    int tide_compensated;   /* = GSF_COMPENSATED if the depth data has been corrected for tide */
-    int ray_tracing;        /* = GSF_COMPENSATED if the travel time/angle pairs are compensated for ray tracing */
-    int depth_calculation;  /* = GSF_TRUE_DEPTHS, or GSF_DEPTHS_RE_1500_MS, applicable to the depth field */
-    int vessel_type;        /* DHG 2008/12/18 Add "VESSEL_TYPE" to Processing Parameters */
-    int full_raw_data;      /* = GSF_TRUE if this GSF file has sufficient information to support full recalculation of X,Y,Z from raw measurements, otherwise = GSF_FALSE */
+    int roll_compensated;           /* = GSF_COMPENSATED if the depth data has been corrected for roll */
+    int pitch_compensated;          /* = GSF_COMPENSATED if the depth data has been corrected for pitch */
+    int heave_compensated;          /* = GSF_COMPENSATED if the depth data has been corrected for heave */
+    int tide_compensated;           /* = GSF_COMPENSATED if the depth data has been corrected for tide */
+    int ray_tracing;                /* = GSF_COMPENSATED if the travel time/angle pairs are compensated for ray tracing */
+    int depth_calculation;          /* = GSF_TRUE_DEPTHS, or GSF_DEPTHS_RE_1500_MS, applicable to the depth field */
+    int vessel_type;                /* DHG 2008/12/18 Add "VESSEL_TYPE" to Processing Parameters */
+    int full_raw_data;              /* = GSF_TRUE if this GSF file has sufficient information to support full recalculation of X,Y,Z from raw measurements, otherwise = GSF_FALSE */
+    int msb_applied_to_attitude;    /* = GSF_TRUE if the motion sensor bias values (from patch test) have been added to the attitude values in the ping record and attitude record */
+    int heave_removed_from_gps_tc;  /* = GSF_TRUE if the heave has been removed from the gps_tide_corrector */
 
     /* These parameters specify known offsets which have NOT been corrected.
      * If each of these values are zero, then all known offsets have been
@@ -1774,6 +1830,7 @@ typedef struct t_gsfMBParams
 #define GSF_HV_NAV_ERROR_RECORD_DECODE_FAILED    -48
 #define GSF_ATTITUDE_RECORD_ENCODE_FAILED        -49
 #define GSF_ATTITUDE_RECORD_DECODE_FAILED        -50
+#define GSF_OPEN_TEMP_FILE_FAILED                -51
 
 /* The following are the function protoytpes for all functions intended
  * to be exported by the library.
@@ -2330,6 +2387,239 @@ char *gsfGetSonarTextName(gsfSwathBathyPing *ping);
  * Returns : A text string of the sensors name, or "Unknown" if the sensor id is not found
  *
  * Error Conditions : none
+ */
+
+int gsfFileSupportsRecalculateXYZ(int handle, int *status);
+/* Description :
+ *  This function reads the GSF file referenced by handle and determines
+ *  if the file contains sufficient information to support a full recalculation
+ *  of the platform relative XYZ values from raw measurements. This function
+ *  rewinds the file to the first record and reads through the file looking for
+ *  the information required to support a recalculation. On success, the file
+ *  pointer is reset to the beginning of the file before the function returns.
+ *
+ * Inputs :
+ *  handle = the integer handle returned from gsfOpen()
+ *  status = A pointer to an integer allocated by caller into which the 
+ *            function result is placed. *status is assigned a value of 1 
+ *            if this file provides sufficient information to support full
+ *            recalculation of the platform relative XYZ values, otherwise 
+ *            *status is assigned a value of 0.
+ *
+ * Returns :
+ *  This function returns zero if successful, or -1 if an error occurred.
+ *
+ * Error Conditions : none
+ *  GSF_BAD_FILE_HANDLE
+ *  GSF_FILE_SEEK_ERROR
+ *  GSF_FLUSH_ERROR
+ *  GSF_READ_TO_END_OF_FILE
+ *  GSF_READ_ERROR
+ *  GSF_RECORD_SIZE_ERROR
+ *  GSF_INSUFFICIENT_SIZE
+ *  GSF_CHECKSUM_FAILURE
+ *  GSF_UNRECOGNIZED_RECORD_ID
+ *  GSF_HEADER_RECORD_DECODE_FAILED
+ *  GSF_SVP_RECORD_DECODE_FAILED
+ *  GSF_PROCESS_PARAM_RECORD_DECODE_FAILED
+ *  GSF_SENSOR_PARAM_RECORD_DECODE_FAILED
+ *  GSF_COMMENT_RECORD_DECODE_FAILED
+ *  GSF_HISTORY_RECORD_DECODE_FAILED
+ *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
+ */
+
+int gsfFileSupportsRecalculateTPU(int handle, int *status);
+/* Description :
+ *  This function reads the GSF file referenced by handle and determines
+ *  if the file contains sufficient information to support a recalculation
+ *  of the total propagated uncertainty (TPU) estimates. This function
+ *  rewinds the file to the first record and reads through the file looking for
+ *  the information required to support TPU estimation. On success, the file
+ *  pointer is reset to the beginning of the file before the function returns.
+ *
+ * Inputs :
+ *  handle = the integer handle returned from gsfOpen()
+ *  status = A pointer to an integer allocated by caller into which the 
+ *           function result is placed. *status is assigned a value of 1 
+ *           if this file provides sufficient information to support TPU
+ *           estimation, otherwise *status is assigned a value of 0.
+ *
+ * Returns :
+ *  This function returns zero if successful, or -1 if an error occurred.
+ *
+ * Error Conditions : 
+ *  GSF_BAD_FILE_HANDLE
+ *  GSF_FILE_SEEK_ERROR
+ *  GSF_FLUSH_ERROR
+ *  GSF_READ_TO_END_OF_FILE
+ *  GSF_READ_ERROR
+ *  GSF_RECORD_SIZE_ERROR
+ *  GSF_INSUFFICIENT_SIZE
+ *  GSF_CHECKSUM_FAILURE
+ *  GSF_UNRECOGNIZED_RECORD_ID
+ *  GSF_HEADER_RECORD_DECODE_FAILED
+ *  GSF_SVP_RECORD_DECODE_FAILED
+ *  GSF_PROCESS_PARAM_RECORD_DECODE_FAILED
+ *  GSF_SENSOR_PARAM_RECORD_DECODE_FAILED
+ *  GSF_COMMENT_RECORD_DECODE_FAILED
+ *  GSF_HISTORY_RECORD_DECODE_FAILED
+ *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
+ */
+
+int gsfFileSupportsRecalculateNominalDepth(int handle, int *status);
+/* Description :
+ *  This function reads the GSF file referenced by handle and determines
+ *  if the file contains sufficient information to support a recalculation
+ *  of the nominal depth array. This function rewinds the file to the first 
+ *  record and reads through the file looking for the information required 
+ *  to support calculation of the nominal depth values. On success, the file
+ *  pointer is reset to the beginning of the file before the function returns.
+ *
+ * Inputs :
+ *  handle = the integer handle returned from gsfOpen()
+ *  status = A pointer to an integer allocated by caller into which the 
+ *           function result is placed. *status is assigned a value of 1 
+ *           if this file provides sufficient information to support
+ *           nominal depth calculation, otherwise *status is assigned 
+ *           a value of 0.
+ *
+ * Returns :
+ *  This function returns zero if successful, or -1 if an error occurred.
+ *
+ * Error Conditions : 
+ *  GSF_BAD_FILE_HANDLE
+ *  GSF_FILE_SEEK_ERROR
+ *  GSF_FLUSH_ERROR
+ *  GSF_READ_TO_END_OF_FILE
+ *  GSF_READ_ERROR
+ *  GSF_RECORD_SIZE_ERROR
+ *  GSF_INSUFFICIENT_SIZE
+ *  GSF_CHECKSUM_FAILURE
+ *  GSF_UNRECOGNIZED_RECORD_ID
+ *  GSF_HEADER_RECORD_DECODE_FAILED
+ *  GSF_SVP_RECORD_DECODE_FAILED
+ *  GSF_PROCESS_PARAM_RECORD_DECODE_FAILED
+ *  GSF_SENSOR_PARAM_RECORD_DECODE_FAILED
+ *  GSF_COMMENT_RECORD_DECODE_FAILED
+ *  GSF_HISTORY_RECORD_DECODE_FAILED
+ *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
+ */
+
+int gsfFileContainsMBAmplitude(int handle, int *status);
+/* Function Name : gsfFileContainsMBAmplitude
+ *
+ * Description :
+ *  This function reads the GSF file referenced by handle and determines
+ *  if the file contains the average per receive beam amplitude data.
+ *  This function rewinds the file to the first record and reads through 
+ *  the file up to and including the first ping record. If amplitude data
+ *  are contained in the first ping record it is assumed that amplitude 
+ *  data are contained with all ping records in this file. On success, 
+ *  the file pointer is reset to the beginning of the file before the 
+ *  function returns.
+ *
+ * Inputs :
+ *  handle = the integer handle returned from gsfOpen()
+ *  status = A pointer to an integer allocated by caller into which the 
+ *           function result is placed. *status is assigned a value of 1 
+ *           if this file contains the per receive beam amplitude data,
+ *           otherwise *status is assigned a value of 0.
+ *
+ * Returns :
+ *  This function returns zero if successful, or -1 if an error occurred.
+ *
+ * Error Conditions :
+ *  GSF_BAD_FILE_HANDLE
+ *  GSF_FILE_SEEK_ERROR
+ *  GSF_FLUSH_ERROR
+ *  GSF_READ_TO_END_OF_FILE
+ *  GSF_READ_ERROR
+ *  GSF_RECORD_SIZE_ERROR
+ *  GSF_INSUFFICIENT_SIZE
+ *  GSF_CHECKSUM_FAILURE
+ *  GSF_UNRECOGNIZED_RECORD_ID
+ *  GSF_HEADER_RECORD_DECODE_FAILED
+ *  GSF_SVP_RECORD_DECODE_FAILED
+ *  GSF_PROCESS_PARAM_RECORD_DECODE_FAILED
+ *  GSF_SENSOR_PARAM_RECORD_DECODE_FAILED
+ *  GSF_COMMENT_RECORD_DECODE_FAILED
+ *  GSF_HISTORY_RECORD_DECODE_FAILED
+ *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
+ */
+
+int gsfFileContainsMBImagery(int handle, int *status);
+/* Function Name : gsfFileContainsMBImagery
+ *
+ * Description :
+ *  This function reads the GSF file referenced by handle and determines
+ *  if the file contains the per receive beam imagery time series data.
+ *  This function rewinds the file to the first record and reads through 
+ *  the file up to and including the first ping record. If MB imagery data
+ *  are contained in the first ping record it is assumed that MB imagery 
+ *  data are contained with all ping records in this file. On success, 
+ *  the file pointer is reset to the beginning of the file before the 
+ *  function returns.
+ *
+ * Inputs :
+ *  handle = the integer handle returned from gsfOpen()
+ *  status = A pointer to an integer allocated by caller into which the 
+ *           function result is placed. *status is assigned a value of 1 
+ *           if this file contains the per receive beam imagery time  
+ *           series data, otherwise *status is assigned a value of 0.
+ *
+ * Returns :
+ *  This function returns zero if successful, or -1 if an error occurred.
+ *
+ * Error Conditions :
+ *  GSF_BAD_FILE_HANDLE
+ *  GSF_FILE_SEEK_ERROR
+ *  GSF_FLUSH_ERROR
+ *  GSF_READ_TO_END_OF_FILE
+ *  GSF_READ_ERROR
+ *  GSF_RECORD_SIZE_ERROR
+ *  GSF_INSUFFICIENT_SIZE
+ *  GSF_CHECKSUM_FAILURE
+ *  GSF_UNRECOGNIZED_RECORD_ID
+ *  GSF_HEADER_RECORD_DECODE_FAILED
+ *  GSF_SVP_RECORD_DECODE_FAILED
+ *  GSF_PROCESS_PARAM_RECORD_DECODE_FAILED
+ *  GSF_SENSOR_PARAM_RECORD_DECODE_FAILED
+ *  GSF_COMMENT_RECORD_DECODE_FAILED
+ *  GSF_HISTORY_RECORD_DECODE_FAILED
+ *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
+ */
+
+int gsfIsNewSurveyLine(int handle, gsfRecords *rec, double azimuth_change, double *last_heading);
+/* Function Name : gsfIsNewSurveyLine
+ *
+ * Description : This function provides an approach for calling applications
+ *  to determine if the last ping read from a GSF file is from the same survey
+ *  transect line, or if the last ping is from a newly started survey line. The
+ *  implementation looks for a change in platform heading to determine that the
+ *  last ping read is from a new survey line. External to this function, calling
+ *  applications can decide on their own if the first ping read from a newly opened
+ *  GSF file should be considered to be from a new survey transect line or not.
+ *  This function assumes that the GSF file is read in chronological order from 
+ *  the beginning of the file, file access can be either direct or sequential
+ * 
+ * Inputs :
+ *  handle         = The handle to the file as provided by gsfOpen
+ *  rec            = A pointer to a gsfRecords structure containing the data from the most
+ *                    recent call to gsfRead
+ *  azimuth_change = The trigger value specifying the change in platform heading that
+ *                    must be exceeded for a new survey transect line to be determined
+ *  last_heading   = A pointer to a double allocated by the caller and into which this
+ *                    function will place the heading value for each detected line. The
+ *                    value must be allocated as permanent memory that persists through
+ *                    all calls to this function. Startup or reset events can be handled
+ *                    by the caller by placing a negative value in this memory location.
+ *
+ * Returns :
+ *  This function returns 1 if this ping is considered to be the first ping of a new
+ *   survey transect line, otherwise, 0 is returned.
+ *
+ * Error Conditions :
+ *  none
  */
 
 #ifdef __cplusplus
