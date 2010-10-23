@@ -205,7 +205,7 @@ int mb_buffer_init(int verbose, void **buff_ptr, int *error)
 		}
 
 	/* allocate memory for data structure */
-	status = mb_malloc(verbose,sizeof(struct mb_buffer_struct),buff_ptr,error);
+	status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct mb_buffer_struct),buff_ptr,error);
 	buff = (struct mb_buffer_struct *) *buff_ptr;
 
 	/* set nbuffer to zero */

@@ -3378,7 +3378,7 @@ int mb_datalist_open(int verbose,
 		}
 
 	/* allocate memory for datalist structure */
-	if ((status = mb_malloc(verbose,sizeof(struct mb_datalist_struct),
+	if ((status = mb_mallocd(verbose,__FILE__,__LINE__,sizeof(struct mb_datalist_struct),
 				datalist,error)) == MB_SUCCESS)
 		{
 		/* get datalist pointer */

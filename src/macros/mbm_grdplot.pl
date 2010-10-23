@@ -2697,8 +2697,8 @@ elsif ($nlabels < 2)
 if ($gridprojected == 2 && $tick_info && $tick_info =~ /\S+\/\S+/)
 	{
 	($base_tick_x, $base_tick_y) = $tick_info =~ /(\S+)\/(\S+)/;
-	$base_tick_x = "$base_tick_x" . "\":Trace Number:\"";
-	$base_tick_y = "$base_tick_y" . "\":Time (sec):\"";
+	$base_tick_x = "$base_tick_x" . "\":$xunits:\"";
+	$base_tick_y = "$base_tick_y" . "\":$yunits:\"";
 	$axes = "$base_tick_x/$base_tick_y:.\"$tlabel\":WESN";
 	}
 elsif ($tick_info)

@@ -1657,7 +1657,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*nbath = 0;
 		for (i=0;i<ping->png_nbeams;i++)
 			{
-			bath[i] = ping->png_depth[i] + ping->png_xducer_depth;
+			bath[i] = ping->png_depth[i] + ping->png_xducer_depth + ping->png_bheave[i];
 			beamflag[i] = ping->png_beamflag[i];
 			bathacrosstrack[i] = ping->png_acrosstrack[i];
 			bathalongtrack[i] = ping->png_alongtrack[i];
@@ -2225,7 +2225,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			angles_forward[i] = 180.0 - ping->png_azimuth[i];
 			if (angles_forward[i] < 0.0) angles_forward[i] += 360.0;
 			angles_null[i] = 0.0;
-			heave[i] = ping->png_bheave[i];
+			heave[i] = -ping->png_bheave[i];
 			alongtrack_offset[i] = (0.01 * ((double)ping->png_speed)) 
 						* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
 			}
