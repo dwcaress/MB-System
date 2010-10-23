@@ -5366,6 +5366,10 @@ alpha, beta, lever_heave);*/
 			    by raytracing  */
 			if (process.mbp_bathrecalc_mode == MBP_BATHRECALC_RAYTRACE)
 			    {
+/* fprintf(stderr,"\nPING: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f \n",
+time_i[0], time_i[1], time_i[2], 
+time_i[3], time_i[4], time_i[5], time_i[6],
+time_d); */
 			    /* loop over the beams */
 			    for (i=0;i<nbeams;i++)
 			      {
@@ -5459,12 +5463,22 @@ draft_org,draft,depth_offset_use,static_shift);*/
 					0, NULL, NULL, NULL, 
 					&xx, &zz, 
 					&ttime, &ray_stat, &error);
+/* fprintf(stderr,"depth_offset_use:%f draft:%f bheave:%f lever_heave:%f angle:%f tt:%f mode:%d ssv:%f null:%f xx:%f zz:%f tt:%f\n",
+depth_offset_use,draft,bheave[i],lever_heave,angles[i], 0.5*ttimes[i],process.mbp_angle_mode, ssv, angles_null[i],
+xx,zz,ttime); */
 					
 				/* apply static shift if needed */
 				if (static_shift < 0.0)
 				    zz += static_shift;
 /*fprintf(stderr, "%d %d : heave:%f draft:%f %f depth_offset:%f static:%f zz:%f\n", 
 idata, i, bheave[i], draft, draft_org, depth_offset_use, static_shift, zz);*/
+/* fprintf(stderr,"COMPARE %d X:%f %f Y:%f %f Z:%f %f     %.3f %.3f %.3f\n",
+i,bathacrosstrack[i],xx*cos(DTR*angles_forward[i]),
+bathalongtrack[i],xx*sin(DTR*angles_forward[i]),
+bath[i],zz,
+bathacrosstrack[i]-xx*cos(DTR*angles_forward[i]),
+bathalongtrack[i]-xx*sin(DTR*angles_forward[i]),
+bath[i]-zz); */
  
 				/* get alongtrack and acrosstrack distances
 					and depth */

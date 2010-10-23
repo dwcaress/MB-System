@@ -56,7 +56,7 @@
 #include "../../include/mb_swap.h"
 	
 /* turn on debug statements here */
-/* #define MBR_EM710MBA_DEBUG 1 */
+#define MBR_EM710MBA_DEBUG 1
 	
 /* essential function prototypes */
 int mbr_register_em710mba(int verbose, void *mbio_ptr, 
@@ -873,6 +873,10 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO)
 		{
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"\nabove mbr_em710raw_rd_data loop:\n");
+	fprintf(stderr,"label_save_flag:%d mbfp:%d status:%d\n",*label_save_flag,mb_io_ptr->mbfp,status);
+#endif
 		/* if no label saved get next record label */
 		if (*label_save_flag == MB_NO)
 			{
@@ -883,6 +887,9 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"read record size:%d mbfp:%d status:%d\n",record_size,mb_io_ptr->mbfp,status);
+#endif
 				
 			/* read label */
 			if ((read_len = fread(label,
@@ -895,6 +902,9 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 			/* check label - if not a good label read a byte 
 				at a time until a good label is found */
 			skip = 0;
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"read label:%x%x%x%x skip:%d status:%d\n",label[0],label[1],label[2],label[3],skip,status);
+#endif
 			while (status == MB_SUCCESS
 				&& mbr_em710mba_chk_label(verbose, 
 					mbio_ptr, label, &type, &sonar) != MB_SUCCESS)
@@ -912,6 +922,9 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				*error = MB_ERROR_EOF;
 				}
 			    skip++;
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"read label:%x%x%x%x skip:%d status:%d\n",label[0],label[1],label[2],label[3],skip,status);
+#endif
 			    }
 			    
 			/* report problem */
@@ -952,6 +965,9 @@ Have a nice day...\n");
 			type = *typelast;
 			sonar = *sonarlast;
 			record_size = *record_size_save;
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"use previously read label:%x%x%x%x skip:%d status:%d\n",label[0],label[1],label[2],label[3],skip,status);
+#endif
 			}
 
 #ifdef MBR_EM710MBA_DEBUG
@@ -1591,10 +1607,10 @@ Have a nice day...\n");
 			}
 
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr,"record_size:%d bytes read:%d file_pos old:%d new:%d\n", 
+	fprintf(stderr,"record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n", 
 		record_size, ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
-	fprintf(stderr,"done:%d expect:%x status:%d error:%d\n", 
-		done, expect, status, *error);
+	fprintf(stderr,"done:%d expect:%x label_save_flag:%d status:%d error:%d\n", 
+		done, expect, *label_save_flag, status, *error);
 	fprintf(stderr,"end of mbr_em710mba_rd_data loop:\n\n");
 #endif
 		
