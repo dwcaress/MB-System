@@ -3088,6 +3088,7 @@ do_mb3dsdg_rollbias( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+	mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
 		
 	/* replot the data */
 	mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -3134,6 +3135,7 @@ do_mb3dsdg_pitchbias( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+	mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
 		
 	/* replot the data */
 	mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -3180,6 +3182,7 @@ do_mb3dsdg_headingbias( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+	mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
 
 	/* replot the data */
 	mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -3226,6 +3229,7 @@ do_mb3dsdg_timelag( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+	mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
 
 	/* replot the data */
 	mb3dsoundings_plot(mbs_verbose, &mbs_error);

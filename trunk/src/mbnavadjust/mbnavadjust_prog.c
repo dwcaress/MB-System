@@ -841,14 +841,24 @@ int mbnavadjust_file_open(char *projectname)
 		if (strlen(nameptr) > 0)
 			{
 			strcpy(project.name,nameptr);
-			strncpy(project.path,projectname,
-				strlen(projectname)-strlen(nameptr));
+			if (slashptr != (char *) NULL)
+				{
+				strncpy(project.path,projectname,
+					strlen(projectname)-strlen(nameptr));
+				}
+			else
+				{
+				getcwd(project.path, MB_PATH_MAXLINE);
+				strcat(project.path,"/");
+				}
 			strcpy(project.home,project.path);
 			strcat(project.home,project.name);
 			strcat(project.home,".nvh");
 			strcpy(project.datadir,project.path);
 			strcat(project.datadir,project.name);
 			strcat(project.datadir,".dir");
+fprintf(stderr,"In mbnavadjust_file_open: name:%s\npath:%s\nhome:%s\ndatadir:%s\n",
+project.name,project.path,project.home,project.datadir);
 
 			/* cant open unless file or directory already exist */
 			if (stat(project.home,&statbuf) != 0)
@@ -1209,6 +1219,7 @@ fprintf(stderr,"Writing project %s\n", project.name);
 			file = &project.files[i];
 			fprintf(hfp,"%s %d\n", file->file, file->format);
 			}
+		fclose(hfp);
 		}
 	
 	/* else set error */
@@ -1309,89 +1320,106 @@ int mbnavadjust_read_project()
 		if ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 			|| strncmp(buffer,"##MBNAVADJUST PROJECT",21) != 0)
 			status = MB_FAILURE;
-			
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
+
 		/* read basic names and stats */
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
 			    	|| strcmp(label,"MB-SYSTEM_VERSION") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
 				|| strcmp(label,"PROGRAM_VERSION") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %d.%d",label,&versionmajor,&versionminor)) != 3
 				|| strcmp(label,"FILE_VERSION") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
 				|| strcmp(label,"NAME") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
 				|| strcmp(label,"PATH") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
 				|| strcmp(label,"HOME") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %s",label,obuffer)) != 2
 				|| strcmp(label,"DATADIR") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %d",label,&project.num_files)) != 2
 				|| strcmp(label,"NUMFILES") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %d",label,&project.num_crossings)) != 2
 				|| strcmp(label,"NUMCROSSINGS") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %lf",label,&project.section_length)) != 2
 				|| strcmp(label,"SECTIONLENGTH") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((100*versionmajor + versionminor) > 100)
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %d",label,&project.section_soundings)) != 2
 				|| strcmp(label,"SECTIONSOUNDINGS") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %d",label,&project.decimation)) != 2
 				|| strcmp(label,"DECIMATION") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %lf",label,&project.cont_int)) != 2
 				|| strcmp(label,"CONTOURINTERVAL") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %lf",label,&project.col_int)) != 2
 				|| strcmp(label,"COLORINTERVAL") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %lf",label,&project.tick_int)) != 2
 				|| strcmp(label,"TICKINTERVAL") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS
 			&& ((result = fgets(buffer,BUFFER_MAX,hfp)) != buffer
 				|| (nscan = sscanf(buffer,"%s %d",label,&project.inversion)) != 2
 				|| strcmp(label,"INVERSION") != 0))
 			status = MB_FAILURE;
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s buffer:%s\n",__LINE__,__FILE__,buffer);exit(0);}
 		if (status == MB_SUCCESS)
 			{
 			if (versionmajor > 3 || (versionmajor == 3 && versionminor > 0))
@@ -1416,6 +1444,7 @@ int mbnavadjust_read_project()
 				project.smoothing = MBNA_SMOOTHING_DEFAULT;
 				}
 			}
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
 		if (status == MB_SUCCESS)
 			{
 			if ((versionmajor > 1 || (versionmajor == 1 && versionminor > 4))
@@ -1428,6 +1457,7 @@ int mbnavadjust_read_project()
 			}
 
 		/* allocate memory for files array */
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
 		if (project.num_files > 0)
 			{
 			project.files = (struct mbna_file *)
@@ -1444,6 +1474,7 @@ int mbnavadjust_read_project()
 				error = MB_ERROR_MEMORY_FAIL;
 				}
 			}
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
 		if (project.num_crossings > 0)
 			{
 			project.crossings = (struct mbna_crossing *)
@@ -1460,6 +1491,7 @@ int mbnavadjust_read_project()
 				error = MB_ERROR_MEMORY_FAIL;
 				}
 			}
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
 		for (i=0;i<project.num_files;i++)
 			{
 			file = &project.files[i];
@@ -1552,6 +1584,7 @@ fprintf(stderr, "read failed on section: %s\n", buffer);
 					sscanf(&buffer[l], "%1d", &section->coverage[l+k*MBNA_MASK_DIM]);
 					}
 				    }
+if (status == MB_FAILURE){fprintf(stderr,"Die at line:%d file:%s\n",__LINE__,__FILE__);exit(0);}
 /*fprintf(stderr,"%s/nvs_%4.4d_%4.4d.mb71\n",
 project.datadir,file->id,j);
 for (k=MBNA_MASK_DIM-1;k>=0;k--)
@@ -1989,7 +2022,7 @@ fprintf(stderr,"Reset tie snav_2 on read:%d\n",tie->snav_2);
 				crossing = &(project.crossings[i]);
 				if (crossing->overlap <= 0)
 					{
-					mbnavadjust_crossing_overlap(i, NULL, NULL, NULL, NULL);
+					mbnavadjust_crossing_overlap(i);
 					}
 				if (crossing->overlap >= 25)
 					project.num_goodcrossings++;
@@ -2010,6 +2043,24 @@ fprintf(stderr,"Reset tie snav_2 on read:%d\n",tie->snav_2);
 				project.num_crossings_analyzed = 0;
 				project.num_truecrossings_analyzed = 0;
 				project.num_ties = 0;
+				project.inversion = MBNA_INVERSION_NONE;
+				}
+			for (i=0;i<project.num_files;i++)
+				{
+				file = &project.files[i];
+				for (j=0;j<file->num_sections;j++)
+					{
+					section = &file->sections[j];
+					for (k=0;k<section->num_snav;k++)
+						{
+						section->snav_lon_offset[section->num_snav] = 0.0;
+						section->snav_lat_offset[section->num_snav] = 0.0;
+						section->snav_z_offset[section->num_snav] = 0.0;
+						section->snav_lon_offset_int[section->num_snav] = 0.0;
+						section->snav_lat_offset_int[section->num_snav] = 0.0;
+						section->snav_z_offset_int[section->num_snav] = 0.0;
+						}
+					}
 				}
 			}
 			
@@ -3067,20 +3118,20 @@ int mbnavadjust_findcrossings()
 		for (ifile=0;ifile<project.num_files;ifile++)
 			{
 			sprintf(message,"Checking for crossings with file %d of %d...",ifile,project.num_files);
-			do_message_on(message);
+			do_message_update(message);
 			
 			status = mbnavadjust_findcrossingsfile(ifile);
 			}
 			
 		/* resort crossings */
 		sprintf(message,"Sorting crossings....");
-		do_message_on(message);
+		do_message_update(message);
 		if (project.num_crossings > 1)
 		mb_mergesort((void *)project.crossings, (size_t)project.num_crossings, sizeof(struct mbna_crossing), mbnavadjust_crossing_compare);
 			
 		/* recalculate overlap fractions, true crossings, good crossing statistics */
 		sprintf(message,"Calculating crossing overlaps...");
-		do_message_on(message);
+		do_message_update(message);
 		
 		project.num_crossings_analyzed = 0;
 		project.num_goodcrossings = 0;
@@ -3091,7 +3142,7 @@ int mbnavadjust_findcrossings()
 			crossing = &(project.crossings[icrossing]);
 			
 			/* recalculate crossing overlap */
-			mbnavadjust_crossing_overlap(icrossing, NULL, NULL, NULL, NULL);
+			mbnavadjust_crossing_overlap(icrossing);
 			if (crossing->overlap >= 25)
 				project.num_goodcrossings++;
 				
@@ -3715,7 +3766,14 @@ int mbnavadjust_naverr_specific(int new_crossing, int new_tie)
   		/* load the crossing */
   		if (mbna_current_crossing >= 0)
   			{
+			/* put up message */
+			sprintf(message,"Loading crossing %d...",mbna_current_crossing);
+			do_message_on(message);
+			
   			mbnavadjust_crossing_load();
+
+			/* turn off message */
+			do_message_off();
   			}
    		}
 			
@@ -3837,7 +3895,14 @@ int mbnavadjust_naverr_next()
   	/* load the crossing */
   	if (mbna_current_crossing >= 0)
   		{
+		/* put up message */
+		sprintf(message,"Loading crossing %d...",mbna_current_crossing);
+		do_message_on(message);
+			
   		mbnavadjust_crossing_load();
+
+		/* turn off message */
+		do_message_off();
   		}
 			
  	/* print output debug statements */
@@ -3960,7 +4025,14 @@ int mbnavadjust_naverr_previous()
   	/* load the crossing */
   	if (mbna_current_crossing >= 0)
   		{
+		/* put up message */
+		sprintf(message,"Loading crossing %d...",mbna_current_crossing);
+		do_message_on(message);
+		
   		mbnavadjust_crossing_load();
+
+		/* turn off message */
+		do_message_off();
   		}
 			
  	/* print output debug statements */
@@ -4082,7 +4154,14 @@ int mbnavadjust_naverr_nextunset()
   	/* load the crossing */
   	if (mbna_current_crossing >= 0)
   		{
+		/* put up message */
+		sprintf(message,"Loading crossing %d...",mbna_current_crossing);
+		do_message_on(message);
+		
   		mbnavadjust_crossing_load();
+
+		/* turn off message */
+		do_message_off();
   		}
 			
  	/* print output debug statements */
@@ -4871,7 +4950,7 @@ int mbnavadjust_crossing_load()
     		{
 		/* put up message */
 		sprintf(message,"Loading crossing %d...",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		
     		/* retrieve crossing parameters */
 		crossing = &project.crossings[mbna_current_crossing];
@@ -4943,39 +5022,38 @@ int mbnavadjust_crossing_load()
 			
 		/* load sections */
 		sprintf(message,"Loading section 1 of crossing %d...",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		status = mbnavadjust_section_load(mbna_file_id_1, mbna_section_1, (void **) &swathraw1, (void **) &swath1, section1->num_pings);
 		sprintf(message,"Loading section 2 of crossing %d...",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		status = mbnavadjust_section_load(mbna_file_id_2, mbna_section_2, (void **) &swathraw2, (void **) &swath2, section2->num_pings);
 			
 		/* get lon lat positions for soundings */
 		sprintf(message,"Transforming section 1 of crossing %d...",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		status = mbnavadjust_section_translate(mbna_file_id_1, swathraw1, swath1, 0.0);
 		sprintf(message,"Transforming section 2 of crossing %d...",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		status = mbnavadjust_section_translate(mbna_file_id_2, swathraw2, swath2, mbna_offset_z);
 	
 		/* generate contour data */
 		sprintf(message,"Contouring section 1 of crossing %d...",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		status = mbnavadjust_section_contour(mbna_file_id_1,mbna_section_1,swath1,&mbna_contour1);
 		sprintf(message,"Contouring section 2 of crossing %d...",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		status = mbnavadjust_section_contour(mbna_file_id_2,mbna_section_2,swath2,&mbna_contour2);
 		
 		/* generate misfit grids */
 		sprintf(message,"Getting misfit for crossing %d...",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		status = mbnavadjust_get_misfit();
+		
+		/* get overlap region */
+		mbnavadjust_crossing_overlap(mbna_current_crossing);
 
 		/* set loaded flag */
 		mbna_naverr_load = MB_YES;
-	
-		/* turn off message */
-		if (mbna_status == MBNA_STATUS_NAVERR)
-			do_message_off();
    		}
    		
    	/* set mbna_crossing_select */	
@@ -5864,9 +5942,7 @@ int mbnavadjust_sections_intersect(int crossing_id)
 	return(answer);
 }
 /*--------------------------------------------------------------------*/
-int mbnavadjust_crossing_overlap(int crossing_id, 
-				double *lonmin, double *lonmax, 
-				double *latmin, double *latmax)
+int mbnavadjust_crossing_overlap(int crossing_id)
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_crossing_overlap";
@@ -5877,7 +5953,7 @@ int mbnavadjust_crossing_overlap(int crossing_id,
 	struct mbna_section *section2;
 	int	overlap1[MBNA_MASK_DIM * MBNA_MASK_DIM];
 	int	overlap2[MBNA_MASK_DIM * MBNA_MASK_DIM];
-	double	lonoffset1, latoffset1, lonoffset2, latoffset2;
+	double	lonoffset, latoffset;
 	double	lon1min, lon1max;
 	double	lat1min, lat1max;
 	double	lon2min, lon2max;
@@ -5895,7 +5971,7 @@ int mbnavadjust_crossing_overlap(int crossing_id,
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       crossing_id:  %d\n",crossing_id);
+		fprintf(stderr,"dbg2       crossing_id:          %d\n",crossing_id);
 		}
 
 	/* get crossing */
@@ -5904,12 +5980,10 @@ int mbnavadjust_crossing_overlap(int crossing_id,
 	/* get section endpoints */
 	file = &project.files[crossing->file_id_1];
 	section1 = &file->sections[crossing->section_1];
-	lonoffset1 = section1->snav_lon_offset[section1->num_snav/2];
-	latoffset1 = section1->snav_lat_offset[section1->num_snav/2];
 	file = &project.files[crossing->file_id_2];
 	section2 = &file->sections[crossing->section_2];
-	lonoffset2 = section2->snav_lon_offset[section2->num_snav/2];
-	latoffset2 = section2->snav_lat_offset[section2->num_snav/2];
+	lonoffset = section2->snav_lon_offset[section2->num_snav/2] - section1->snav_lon_offset[section1->num_snav/2];
+	latoffset = section2->snav_lat_offset[section2->num_snav/2] - section1->snav_lat_offset[section1->num_snav/2];
 	
 	/* initialize overlap arrays */
 	for (i=0;i<MBNA_MASK_DIM*MBNA_MASK_DIM;i++)
@@ -5930,20 +6004,20 @@ int mbnavadjust_crossing_overlap(int crossing_id,
 		kk1 = ii1 + jj1 * MBNA_MASK_DIM;
 		if (section1->coverage[kk1] == 1)
 		    {
-		    lon1min = section1->lonmin + dx1 * ii1 + lonoffset1;
-		    lon1max = section1->lonmin + dx1 * (ii1 + 1) + lonoffset1;
-		    lat1min = section1->latmin + dy1 * jj1 + latoffset1;
-		    lat1max = section1->latmin + dy1 * (jj1 + 1) + latoffset1;
+		    lon1min = section1->lonmin + dx1 * ii1;
+		    lon1max = section1->lonmin + dx1 * (ii1 + 1);
+		    lat1min = section1->latmin + dy1 * jj1;
+		    lat1max = section1->latmin + dy1 * (jj1 + 1);
 		    for (ii2=0;ii2<MBNA_MASK_DIM;ii2++)
 			for (jj2=0;jj2<MBNA_MASK_DIM;jj2++)
 			    {
 			    kk2 = ii2 + jj2 * MBNA_MASK_DIM;
-			    if (section1->coverage[kk2] == 1)
+			    if (section2->coverage[kk2] == 1)
 				{
-				lon2min = section2->lonmin + dx2 * ii2 + lonoffset2;
-				lon2max = section2->lonmin + dx2 * (ii2 + 1) + lonoffset2;
-				lat2min = section2->latmin + dy2 * jj2 + latoffset2;
-				lat2max = section2->latmin + dy2 * (jj2 + 1) + latoffset2;
+				lon2min = section2->lonmin + dx2 * ii2 + lonoffset;
+				lon2max = section2->lonmin + dx2 * (ii2 + 1) + lonoffset;
+				lat2min = section2->latmin + dy2 * jj2 + latoffset;
+				lat2max = section2->latmin + dy2 * (jj2 + 1) + latoffset;
 				if ((lon1min < lon2max)
 				    && (lon1max > lon2min)
 				    && (lat1min < lat2max)
@@ -5951,24 +6025,6 @@ int mbnavadjust_crossing_overlap(int crossing_id,
 				    {
 				    overlap1[kk1] = 1;
 				    overlap2[kk2] = 1;
-				    if (lonmin != NULL)
-				    	{
-					if (first == MB_NO)
-				    	    {
-					    *lonmin = MIN(*lonmin, MIN(lon1min, lon2min));
-					    *lonmax = MAX(*lonmax, MAX(lon1max, lon2max));
-					    *latmin = MIN(*latmin, MIN(lat1min, lat2min));
-					    *latmax = MAX(*latmax, MAX(lat1max, lat2max));
-					    }
-					else
-					    {
-					    first = MB_NO;
-					    *lonmin = MIN(lon1min, lon2min);
-					    *lonmax = MAX(lon1max, lon2max);
-					    *latmin = MIN(lat1min, lat2min);
-					    *latmax = MAX(lat1max, lat2max);
-					    }
-					}
 				    }
 				}
 			    }
@@ -6005,13 +6061,131 @@ int mbnavadjust_crossing_overlap(int crossing_id,
 		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
 			function_name);
 		fprintf(stderr,"dbg2  Return values:\n");
-		if (lonmin != NULL)
-			{
-			fprintf(stderr,"dbg2       lonmin:      %f\n",*lonmin);
-			fprintf(stderr,"dbg2       lonmax:      %f\n",*lonmax);
-			fprintf(stderr,"dbg2       latmin:      %f\n",*latmin);
-			fprintf(stderr,"dbg2       latmax:      %f\n",*latmax);
-			}
+		fprintf(stderr,"dbg2       crossing->overlap: %d\n",crossing->overlap);
+		fprintf(stderr,"dbg2       status:            %d\n",status);
+		}
+
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+int mbnavadjust_crossing_overlapbounds(int crossing_id, 
+				double offset_x, double offset_y,
+				double *lonmin, double *lonmax, 
+				double *latmin, double *latmax)
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_crossing_overlapbounds";
+	int	status = MB_SUCCESS;
+	struct mbna_file *file;
+	struct mbna_crossing *crossing;
+	struct mbna_section *section1;
+	struct mbna_section *section2;
+	int	overlap1[MBNA_MASK_DIM * MBNA_MASK_DIM];
+	int	overlap2[MBNA_MASK_DIM * MBNA_MASK_DIM];
+	double	lon1min, lon1max;
+	double	lat1min, lat1max;
+	double	lon2min, lon2max;
+	double	lat2min, lat2max;
+	double	dx1, dy1, dx2, dy2;
+	int	first;
+	int	i, ii1, jj1, kk1, ii2, jj2, kk2;
+
+ 	/* print input debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       crossing_id:          %d\n",crossing_id);
+		fprintf(stderr,"dbg2       offset_x:             %f\n",offset_x);
+		fprintf(stderr,"dbg2       offset_y:             %f\n",offset_y);
+		}
+
+	/* get crossing */
+	crossing = (struct mbna_crossing *) &project.crossings[crossing_id];
+	
+	/* get section endpoints */
+	file = &project.files[crossing->file_id_1];
+	section1 = &file->sections[crossing->section_1];
+	file = &project.files[crossing->file_id_2];
+	section2 = &file->sections[crossing->section_2];
+	
+	/* initialize overlap arrays */
+	for (i=0;i<MBNA_MASK_DIM*MBNA_MASK_DIM;i++)
+		{
+		overlap1[i] = 0;
+		overlap2[i] = 0;
+		}
+	
+	/* check coverage masks for overlap */
+	first = MB_YES;
+	*lonmin = 0.0;
+	*lonmax = 0.0;
+	*latmin = 0.0;
+	*latmax = 0.0;
+	dx1 = (section1->lonmax - section1->lonmin) / MBNA_MASK_DIM;
+	dy1 = (section1->latmax - section1->latmin) / MBNA_MASK_DIM;
+	dx2 = (section2->lonmax - section2->lonmin) / MBNA_MASK_DIM;
+	dy2 = (section2->latmax - section2->latmin) / MBNA_MASK_DIM;
+	for (ii1=0;ii1<MBNA_MASK_DIM;ii1++)
+	    for (jj1=0;jj1<MBNA_MASK_DIM;jj1++)
+		{
+		kk1 = ii1 + jj1 * MBNA_MASK_DIM;
+		if (section1->coverage[kk1] == 1)
+		    {
+		    lon1min = section1->lonmin + dx1 * ii1;
+		    lon1max = section1->lonmin + dx1 * (ii1 + 1);
+		    lat1min = section1->latmin + dy1 * jj1;
+		    lat1max = section1->latmin + dy1 * (jj1 + 1);
+		    for (ii2=0;ii2<MBNA_MASK_DIM;ii2++)
+			for (jj2=0;jj2<MBNA_MASK_DIM;jj2++)
+			    {
+			    kk2 = ii2 + jj2 * MBNA_MASK_DIM;
+			    if (section2->coverage[kk2] == 1)
+				{
+				lon2min = section2->lonmin + dx2 * ii2 + offset_x;
+				lon2max = section2->lonmin + dx2 * (ii2 + 1) + offset_x;
+				lat2min = section2->latmin + dy2 * jj2 + offset_y;
+				lat2max = section2->latmin + dy2 * (jj2 + 1) + offset_y;
+				if ((lon1min < lon2max)
+				    && (lon1max > lon2min)
+				    && (lat1min < lat2max)
+				    && (lat1max > lat2min))
+				    {
+				    overlap1[kk1] = 1;
+				    overlap2[kk2] = 1;
+				    if (first == MB_NO)
+					{
+					*lonmin = MIN(*lonmin, MAX(lon1min, lon2min));
+					*lonmax = MAX(*lonmax, MIN(lon1max, lon2max));
+					*latmin = MIN(*latmin, MAX(lat1min, lat2min));
+					*latmax = MAX(*latmax, MIN(lat1max, lat2max));
+					}
+				    else
+					{
+					first = MB_NO;
+					*lonmin = MAX(lon1min, lon2min);
+					*lonmax = MIN(lon1max, lon2max);
+					*latmin = MAX(lat1min, lat2min);
+					*latmax = MIN(lat1max, lat2max);
+					}
+				    }
+				}
+			    }
+		    }
+		}
+			
+ 	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       lonmin:      %f\n",*lonmin);
+		fprintf(stderr,"dbg2       lonmax:      %f\n",*lonmax);
+		fprintf(stderr,"dbg2       latmin:      %f\n",*latmin);
+		fprintf(stderr,"dbg2       latmax:      %f\n",*latmax);
 		fprintf(stderr,"dbg2       status:      %d\n",status);
 		}
 
@@ -6057,7 +6231,7 @@ mbna_plot_lon_min,mbna_plot_lon_max,mbna_plot_lat_min,mbna_plot_lat_max); */
     		if (mbna_verbose > 1)
 			fprintf(stderr,"Making misfit grid for crossing %d\n",mbna_current_crossing);
 		sprintf(message,"Making misfit grid for crossing %d\n",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		
 		/* reset sounding density threshold for misfit calculation
 			- will be tuned down if necessary */
@@ -6324,7 +6498,7 @@ mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z
     		if (mbna_verbose > 1)
 			fprintf(stderr,"Histogram equalizing misfit grid for crossing %d\n",mbna_current_crossing);
 		sprintf(message,"Histogram equalizing misfit grid for crossing %d\n",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		
 		/* sort the misfit to get histogram equalization */
 		grid_nxyzeq = 0;
@@ -6364,7 +6538,7 @@ mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z
     		if (mbna_verbose > 1)
 			fprintf(stderr,"Estimating 3D uncertainty for crossing %d\n",mbna_current_crossing);
 		sprintf(message,"Estimating 3D uncertainty for crossing %d\n",mbna_current_crossing);
-		do_message_on(message);
+		do_message_update(message);
 		
 		/* estimating 3 component uncertainty vector at minimum misfit point */
 		if (grid_nxyzeq > 0)
@@ -6547,9 +6721,7 @@ dotproduct = (mbna_minmisfit_sx1[0] * mbna_minmisfit_sx3[0]
 		+ mbna_minmisfit_sx1[1] * mbna_minmisfit_sx3[1] 
 		+ mbna_minmisfit_sx1[2] * mbna_minmisfit_sx3[2]);
 fprintf(stderr,"3v2:%f\n",dotproduct); */
-		
-		do_message_off();
- 		}
+		}
 			
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -6812,7 +6984,7 @@ mbnavadjust_naverr_plot(int plotmode)
 	struct mbna_file *file1, *file2;
 	struct mbna_section *section1, *section2;
 	struct mbna_tie *tie;
-	int 	ix, iy, idx, idy;
+	int 	ix, iy, ix1, ix2, iy1, iy2, idx, idy;
 	int	boxoff, boxwid;
 	static int 	ixo, iyo;
 	static int 	izx1, izy1, izx2, izy2;
@@ -6932,7 +7104,23 @@ mbnavadjust_naverr_plot(int plotmode)
 				    MAX(izy1, izy2) - MIN(izy1, izy2),
 				    pixel_values[WHITE], XG_SOLIDLINE);
 		}
-			
+	
+	    /* replot overlap box in white */
+	    if (mbna_overlap_lon_max > mbna_overlap_lon_min && mbna_overlap_lat_max > mbna_overlap_lat_min)
+		{
+		ix1 = (int)(mbna_plotx_scale * (mbna_overlap_lon_min - mbna_plot_lon_min));
+		iy1 = (int)(cont_borders[3] - mbna_ploty_scale * (mbna_overlap_lat_min - mbna_plot_lat_min));
+		ix2 = (int)(mbna_plotx_scale * (mbna_overlap_lon_max - mbna_plot_lon_min));
+		iy2 = (int)(cont_borders[3] - mbna_ploty_scale * (mbna_overlap_lat_max - mbna_plot_lat_min));
+		ix = MIN(ix1,ix2);
+		iy = MIN(iy1,iy2);
+		idx = MAX(ix1,ix2) - ix;
+		idy = MAX(iy1,iy2) - iy;
+		xg_drawrectangle(pcont_xgid, 
+	    			    ix, iy, idx, idy, 
+				    pixel_values[WHITE], XG_DASHLINE);
+		}
+
 	    /* plot section 1 */
 	    for (i=0;i<mbna_contour1.nvector;i++)
 		{
@@ -7041,6 +7229,22 @@ mbnavadjust_naverr_plot(int plotmode)
 		    xg_drawline(pcont_xgid, ixo, iyo, ix, iy, pixel_values[BLACK], XG_SOLIDLINE);
 		    }
 		}
+	
+	    /* plot overlap box */
+	    mbnavadjust_crossing_overlapbounds(mbna_current_crossing, mbna_offset_x, mbna_offset_y,
+	    					&mbna_overlap_lon_min, &mbna_overlap_lon_max, 
+						&mbna_overlap_lat_min, &mbna_overlap_lat_max);
+	    ix1 = (int)(mbna_plotx_scale * (mbna_overlap_lon_min - mbna_plot_lon_min));
+	    iy1 = (int)(cont_borders[3] - mbna_ploty_scale * (mbna_overlap_lat_min - mbna_plot_lat_min));
+	    ix2 = (int)(mbna_plotx_scale * (mbna_overlap_lon_max - mbna_plot_lon_min));
+	    iy2 = (int)(cont_borders[3] - mbna_ploty_scale * (mbna_overlap_lat_max - mbna_plot_lat_min));
+	    ix = MIN(ix1,ix2);
+	    iy = MIN(iy1,iy2);
+	    idx = MAX(ix1,ix2) - ix;
+	    idy = MAX(iy1,iy2) - iy;
+	    xg_drawrectangle(pcont_xgid, 
+	    			ix, iy, idx, idy, 
+				pixel_values[BLACK], XG_DASHLINE);
 	
 	    /* plot zoom box if in zoom mode */
 	    if (plotmode == MBNA_PLOT_MODE_ZOOMFIRST || plotmode == MBNA_PLOT_MODE_ZOOM)
@@ -7339,7 +7543,7 @@ ix, iy, idx, idy, pixel_values[ipixel]);*/
 /*--------------------------------------------------------------------*/
 
 int
-mbnavadjust_autopick()
+mbnavadjust_autopick(int do_vertical)
 {
 	/* local variables */
 	char	*function_name = "mbnavadjust_autopick";
@@ -7348,7 +7552,9 @@ mbnavadjust_autopick()
 	struct 	mbna_tie *tie;
 	double	firstsonardepth1, firsttime_d1, secondsonardepth1, secondtime_d1, dsonardepth1;
 	double	firstsonardepth2, firsttime_d2, secondsonardepth2, secondtime_d2, dsonardepth2;
+	double	overlap_scale;
 	int	found, process;
+	int	nprocess;
 	int	i, j, k;
 
  	/* print input debug statements */
@@ -7356,6 +7562,7 @@ mbnavadjust_autopick()
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
+		fprintf(stderr,"dbg2       do_vertical: %d\n",do_vertical);
 		}
 
 	/* make sure that all sections referenced in crossings have up-to-date contours made */
@@ -7371,6 +7578,7 @@ mbnavadjust_autopick()
 		do_info_add(message,MB_YES);
 		
 		/* loop over all crossings */
+		nprocess = 0;
 		for (i=0;i<project.num_crossings;i++)
 			{
 			/* get structure */
@@ -7378,15 +7586,81 @@ mbnavadjust_autopick()
 			
 			/* check if processing should proceed */
 			process = MB_NO;
-			if (crossing->status == MBNA_CROSSING_STATUS_NONE)
+			if (crossing->status == MBNA_CROSSING_STATUS_NONE
+				&& crossing->overlap >=  MBNA_OVERLAP_THRESHOLD / 2)
 				{
-				if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
+				if (mbna_view_list == MBNA_VIEW_LIST_CROSSINGS)
 					{
-					if (crossing->truecrossing == MB_YES)
+					if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
+							&& mbna_survey_select == project.files[crossing->file_id_1].block 
+							&& mbna_survey_select == project.files[crossing->file_id_2].block)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_file_select == crossing->file_id_2)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_section_select == crossing->section_1)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+							&& mbna_file_select == crossing->file_id_2
+							&& mbna_section_select == crossing->section_2))
 						process = MB_YES;
 					}
-				else if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD 
-					|| crossing->truecrossing == MB_YES)
+				else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
+					{
+					if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD
+						&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
+								&& mbna_survey_select == project.files[crossing->file_id_1].block 
+								&& mbna_survey_select == project.files[crossing->file_id_2].block)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+								&& mbna_file_select == crossing->file_id_1
+								&& mbna_file_select == crossing->file_id_2)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+								&& mbna_file_select == crossing->file_id_1
+								&& mbna_section_select == crossing->section_1)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+								&& mbna_file_select == crossing->file_id_2
+								&& mbna_section_select == crossing->section_2)))
+						process = MB_YES;
+					}
+				else if (mbna_view_list == MBNA_VIEW_LIST_BETTERCROSSINGS)
+					{
+					if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD
+						&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
+								&& mbna_survey_select == project.files[crossing->file_id_1].block 
+								&& mbna_survey_select == project.files[crossing->file_id_2].block)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+								&& mbna_file_select == crossing->file_id_1
+								&& mbna_file_select == crossing->file_id_2)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+								&& mbna_file_select == crossing->file_id_1
+								&& mbna_section_select == crossing->section_1)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+								&& mbna_file_select == crossing->file_id_2
+								&& mbna_section_select == crossing->section_2)))
+						process = MB_YES;
+					}
+				else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
+					{
+					if (crossing->truecrossing == MB_YES
+						&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
+								&& mbna_survey_select == project.files[crossing->file_id_1].block 
+								&& mbna_survey_select == project.files[crossing->file_id_2].block)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+								&& mbna_file_select == crossing->file_id_1
+								&& mbna_file_select == crossing->file_id_2)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+								&& mbna_file_select == crossing->file_id_1
+								&& mbna_section_select == crossing->section_1)
+							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+								&& mbna_file_select == crossing->file_id_2
+								&& mbna_section_select == crossing->section_2)))
+						process = MB_YES;
+					}
+				else
 					process = MB_YES;
 				}
 			
@@ -7399,21 +7673,52 @@ mbnavadjust_autopick()
      				mbna_file_id_2 = crossing->file_id_2;
     				mbna_section_2 = crossing->section_2;
 				mbna_current_tie = -1;
-				
-				/* update status */
-				do_update_status();
 
 				/* set message dialog on */
 				sprintf(message,"Loading crossing %d...", mbna_current_crossing);
 				fprintf(stderr,"%s: %s\n",function_name,message);
-				do_message_on(message);
+				do_message_update(message);
 
     				/* load crossing */
   				mbnavadjust_crossing_load();
+				nprocess++;
 				
-				/* get overlap region */
-				mbnavadjust_crossing_overlap(i, &mbna_plot_lon_min, &mbna_plot_lon_max, 
-								&mbna_plot_lat_min, &mbna_plot_lat_max);
+				/* update status */
+				do_update_status();
+				
+				/* if this is a >50% overlap crossing then first set offsets to
+					minimum misfit and then recalculate misfit */
+				if (crossing->overlap > 50)
+					{
+					/* set offsets to minimum misfit */
+					if (do_vertical == MB_YES)
+						{
+						mbna_offset_x = mbna_minmisfit_x;
+						mbna_offset_y = mbna_minmisfit_y;
+						mbna_offset_z = mbna_minmisfit_z;
+						}
+					else
+						{
+						mbna_offset_x = mbna_minmisfit_xh;
+						mbna_offset_y = mbna_minmisfit_yh;
+						mbna_offset_z = mbna_minmisfit_zh;
+						}
+	    	
+					/* get misfit */
+					mbnavadjust_get_misfit();
+					}
+				
+				/* set plot bounds to overlap region */
+				mbnavadjust_crossing_overlapbounds(mbna_current_crossing, 
+							mbna_offset_x, mbna_offset_y,
+	    						&mbna_overlap_lon_min, &mbna_overlap_lon_max, 
+							&mbna_overlap_lat_min, &mbna_overlap_lat_max);
+				mbna_plot_lon_min = mbna_overlap_lon_min;
+				mbna_plot_lon_max = mbna_overlap_lon_max;
+				mbna_plot_lat_min = mbna_overlap_lat_min;
+				mbna_plot_lat_max = mbna_overlap_lat_max;
+				overlap_scale = MIN((mbna_overlap_lon_max - mbna_overlap_lon_min) / mbna_mtodeglon, 
+							(mbna_overlap_lat_max - mbna_overlap_lat_min) / mbna_mtodeglat);
 	    
 				/* get naverr plot scaling */
 				mbnavadjust_naverr_scale();
@@ -7421,71 +7726,96 @@ mbnavadjust_autopick()
 				/* get misfit */
 				mbnavadjust_get_misfit();
 				
-				/* set offsets to minimum misfit */
-				mbna_offset_x = mbna_minmisfit_x;
-				mbna_offset_y = mbna_minmisfit_y;
-				mbna_offset_z = mbna_minmisfit_z;
-/* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
-				
-				/* add tie */
-    				mbnavadjust_naverr_addtie();
-				
-				/* update status */
-				do_update_status();
-			
-				/* deal with each tie */
-				for (j=0;j<crossing->num_ties;j++)
+				/* check uncertainty estimate for a good pick */
+fprintf(stderr,"crossing:%d overlap:%d overlap_scale:%f uncertainty axes: %f %f %f",
+mbna_current_crossing,crossing->overlap,overlap_scale,mbna_minmisfit_sr1,mbna_minmisfit_sr2,mbna_minmisfit_sr3);
+if (MAX(mbna_minmisfit_sr1,mbna_minmisfit_sr2) < 0.5 * overlap_scale
+&& MIN(mbna_minmisfit_sr1,mbna_minmisfit_sr2) > 0.0)
+fprintf(stderr," USE PICK");
+fprintf(stderr,"\n");
+				if (MAX(mbna_minmisfit_sr1,mbna_minmisfit_sr2) < 0.5 * overlap_scale
+					&& MIN(mbna_minmisfit_sr1,mbna_minmisfit_sr2) > 0.0)
 					{
-					tie = &(crossing->ties[j]);
-					
-					/* calculate sonardepth change rate for swath1 */
-					found = MB_NO;
-					for (k=0;k<swathraw1->npings;k++)
-					    {
-					    if (swathraw1->pingraws[k].time_d > tie->snav_1_time_d - 2.0
-					    	&& found == MB_NO)
+				
+					/* set offsets to minimum misfit */
+					if (do_vertical == MB_YES)
 						{
-						firstsonardepth1 = swathraw1->pingraws[k].draft;
-						firsttime_d1 = swathraw1->pingraws[k].time_d;
-						found = MB_YES;
+						mbna_offset_x = mbna_minmisfit_x;
+						mbna_offset_y = mbna_minmisfit_y;
+						mbna_offset_z = mbna_minmisfit_z;
 						}
-					    if (swathraw1->pingraws[k].time_d < tie->snav_1_time_d + 2.0)
+					else
 						{
-						secondsonardepth1 = swathraw1->pingraws[k].draft;
-						secondtime_d1 = swathraw1->pingraws[k].time_d;
+						mbna_offset_x = mbna_minmisfit_xh;
+						mbna_offset_y = mbna_minmisfit_yh;
+						mbna_offset_z = mbna_minmisfit_zh;
 						}
-					    }
-					dsonardepth1 = (secondsonardepth1 - firstsonardepth1) 
-						/ (secondtime_d1 - firsttime_d1);
-					
-					/* calculate sonardepth change rate for swath2 */
-					found = MB_NO;
-					for (k=0;k<swathraw2->npings;k++)
-					    {
-					    if (swathraw2->pingraws[k].time_d > tie->snav_2_time_d - 2.0
-					    	&& found == MB_NO)
+
+					/* add tie */
+    					mbnavadjust_naverr_addtie();
+
+					/* deal with each tie */
+					for (j=0;j<crossing->num_ties;j++)
 						{
-						firstsonardepth2 = swathraw2->pingraws[k].draft;
-						firsttime_d2 = swathraw2->pingraws[k].time_d;
-						found = MB_YES;
-						}
-					    if (swathraw2->pingraws[k].time_d < tie->snav_2_time_d + 2.0)
-						{
-						secondsonardepth2 = swathraw2->pingraws[k].draft;
-						secondtime_d2 = swathraw2->pingraws[k].time_d;
-						}
-					    }
-					dsonardepth2 = (secondsonardepth2 - firstsonardepth2) 
-						/ (secondtime_d2 - firsttime_d2);
+						tie = &(crossing->ties[j]);
+
+						/* calculate sonardepth change rate for swath1 */
+						found = MB_NO;
+						for (k=0;k<swathraw1->npings;k++)
+						    {
+						    if (swathraw1->pingraws[k].time_d > tie->snav_1_time_d - 2.0
+					    		&& found == MB_NO)
+							{
+							firstsonardepth1 = swathraw1->pingraws[k].draft;
+							firsttime_d1 = swathraw1->pingraws[k].time_d;
+							found = MB_YES;
+							}
+						    if (swathraw1->pingraws[k].time_d < tie->snav_1_time_d + 2.0)
+							{
+							secondsonardepth1 = swathraw1->pingraws[k].draft;
+							secondtime_d1 = swathraw1->pingraws[k].time_d;
+							}
+						    }
+						dsonardepth1 = (secondsonardepth1 - firstsonardepth1) 
+							/ (secondtime_d1 - firsttime_d1);
+
+						/* calculate sonardepth change rate for swath2 */
+						found = MB_NO;
+						for (k=0;k<swathraw2->npings;k++)
+						    {
+						    if (swathraw2->pingraws[k].time_d > tie->snav_2_time_d - 2.0
+					    		&& found == MB_NO)
+							{
+							firstsonardepth2 = swathraw2->pingraws[k].draft;
+							firsttime_d2 = swathraw2->pingraws[k].time_d;
+							found = MB_YES;
+							}
+						    if (swathraw2->pingraws[k].time_d < tie->snav_2_time_d + 2.0)
+							{
+							secondsonardepth2 = swathraw2->pingraws[k].draft;
+							secondtime_d2 = swathraw2->pingraws[k].time_d;
+							}
+						    }
+						dsonardepth2 = (secondsonardepth2 - firstsonardepth2) 
+							/ (secondtime_d2 - firsttime_d2);
 fprintf(stderr,"crossing:%d tie:%d zoffset:%f   sdrate1:%f %f %f  sdrate2:%f %f %f   inferred time lag:%f\n",
 i,j,tie->offset_z_m, 
 (secondsonardepth1 - firstsonardepth1), (secondtime_d1 - firsttime_d1), dsonardepth1,
 (secondsonardepth2 - firstsonardepth2), (secondtime_d2 - firsttime_d2), dsonardepth2,
 tie->offset_z_m / (dsonardepth2 - dsonardepth1));
+						}
 					}
 
     				/* unload crossing */
   				mbnavadjust_crossing_unload();
+
+		    		/* update model plot */
+		    		if (nprocess % 10 == 0)
+		    			{
+					do_update_status();
+		    			if (project.modelplot == MB_YES)
+		    				mbnavadjust_modelplot_plot();
+					}
 				}
 			}
 			
@@ -7714,7 +8044,7 @@ mbnavadjust_invertnav()
 
 		    /* construct the inverse problem */
 		    sprintf(message,"Solving for block offsets...");
-		    do_message_on(message);
+		    do_message_update(message);
 		    
 		    done = MB_NO;
 		    iter = 0;
@@ -8016,7 +8346,7 @@ fprintf(stderr, "BAD snav ID: %d %d %d\n", nc1, nc2, nsnav);*/
 		    {
 		    /* set message dialog on */
 		    sprintf(message,"Getting average offsets relative to fixed data...");
-		    do_message_on(message);
+		    do_message_update(message);
 
 		    /* allocate some extra arrays */
 		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, nnav * sizeof(int), (void **)&nxs,&error);
@@ -8365,7 +8695,7 @@ icrossing,jtie,nc1,file1->status,nc2,file2->status,offsetx,offsety,offsetz);
 		    if (iter % 100 == 0)
 		    	{
 		    	sprintf(message,"Performing inversion iteration %d...", iter);
-		    	do_message_on(message);
+		    	do_message_update(message);
 		    	}
 		
 		    for (i=0;i<ncols;i++)
@@ -8799,7 +9129,7 @@ isnav,k,x[3*k+2],xa[3*k+2],section->snav_lat_offset[isnav]); */
     		{
 		/* now output inverse solution */
 		sprintf(message,"Outputting navigation solution...");
-		do_message_on(message);
+		do_message_update(message);
 
 		sprintf(message, " > Final smoothing weight:%12g\n > Final crossing sigma:%12g\n > Final total sigma:%12g\n",
 			smoothweight_best, sigma_crossing_best, sigma_total_best);

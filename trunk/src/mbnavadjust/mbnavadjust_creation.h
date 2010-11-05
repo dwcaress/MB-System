@@ -114,6 +114,7 @@ EXTERNAL Widget   pushButton_poornav;
 EXTERNAL Widget   pushButton_goodnav;
 EXTERNAL Widget   pushButton_fixednav;
 EXTERNAL Widget   pushButton_autopick;
+EXTERNAL Widget   pushButton_autopickhorizontal;
 EXTERNAL Widget   pushButton_newcrossings;
 EXTERNAL Widget   pushButton_analyzecrossings;
 EXTERNAL Widget   pushButton_zerozoffsets;
