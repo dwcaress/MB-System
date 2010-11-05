@@ -160,6 +160,7 @@ extern void do_action_poornav(Widget, XtPointer, XtPointer);
 extern void do_action_goodnav(Widget, XtPointer, XtPointer);
 extern void do_action_fixednav(Widget, XtPointer, XtPointer);
 extern void do_action_autopick(Widget, XtPointer, XtPointer);
+extern void do_action_autopickhorizontal(Widget, XtPointer, XtPointer);
 extern void do_action_checknewcrossings(Widget, XtPointer, XtPointer);
 extern void do_naverr_init(Widget, XtPointer, XtPointer);
 extern void do_action_analyzecrossings(Widget, XtPointer, XtPointer);
@@ -176,6 +177,7 @@ CreatemainWindow(Widget parent)
 {
     Cardinal ac = 0;
     Arg      args[256];
+    Cardinal cdc = 0;
     Boolean  argok = False;
     Widget   mainWindow;
     Widget   dialogShell_modelplot;
@@ -283,7 +285,7 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 82); ac++;
-    XtSetArg(args[ac], XmNy, 242); ac++;
+    XtSetArg(args[ac], XmNy, 286); ac++;
     XtSetArg(args[ac], XmNwidth, 962); ac++;
     XtSetArg(args[ac], XmNheight, 400); ac++;
     mainWindow = XmCreateMainWindow(parent,
@@ -974,10 +976,10 @@ CreatemainWindow(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 167); ac++;
-    XtSetArg(args[ac], XmNheight, 212); ac++;
+    XtSetArg(args[ac], XmNx, 223); ac++;
+    XtSetArg(args[ac], XmNy, 313); ac++;
+    XtSetArg(args[ac], XmNwidth, 182); ac++;
+    XtSetArg(args[ac], XmNheight, 234); ac++;
     pulldownMenu_action = XmCreatePulldownMenu(XtParent(cascadeButton_action),
         (char *)"pulldownMenu_action",
         args, 
@@ -1085,6 +1087,30 @@ CreatemainWindow(Widget parent)
     }
     
     XtAddCallback(pushButton_autopick, XmNactivateCallback, do_action_autopick, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Auto-Pick Horizontal Offsets", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_autopickhorizontal = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_autopickhorizontal",
+            args, 
+            ac);
+        XtManageChild(pushButton_autopickhorizontal);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_autopickhorizontal, XmNactivateCallback, do_action_autopickhorizontal, (XtPointer)0);
     
     ac = 0;
     separator10 = XmCreateSeparator(pulldownMenu_action,
@@ -1788,8 +1814,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNnoResize, True); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-        XtSetArg(args[ac], XmNx, 461); ac++;
-        XtSetArg(args[ac], XmNy, 807); ac++;
+        XtSetArg(args[ac], XmNx, 0); ac++;
+        XtSetArg(args[ac], XmNy, 919); ac++;
         XtSetArg(args[ac], XmNwidth, 935); ac++;
         XtSetArg(args[ac], XmNheight, 685); ac++;
         bulletinBoard_naverr = XtCreateWidget((char *)"bulletinBoard_naverr",

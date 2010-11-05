@@ -71,6 +71,7 @@ identifier BXG_pushButton_invertnav;
 identifier BXG_pushButton_zerozoffsets;
 identifier BXG_pushButton_analyzecrossings;
 identifier BXG_pushButton_newcrossings;
+identifier BXG_pushButton_autopickhorizontal;
 identifier BXG_pushButton_autopick;
 identifier BXG_pushButton_fixednav;
 identifier BXG_pushButton_goodnav;
@@ -157,6 +158,7 @@ procedure BxSetValuesCB(string);
 procedure BxUnmanageCB(string);
 procedure do_action_analyzecrossings();
 procedure do_action_autopick();
+procedure do_action_autopickhorizontal();
 procedure do_action_checknewcrossings();
 procedure do_action_fixednav();
 procedure do_action_goodnav();
@@ -209,9 +211,9 @@ procedure do_naverr_zerozoffset();
 procedure do_quit();
 procedure do_scale_contourinterval();
 procedure do_scale_controls_decimation();
-procedure do_scale_controls_smoothing();
 procedure do_scale_controls_sectionlength();
 procedure do_scale_controls_sectionsoundings();
+procedure do_scale_controls_smoothing();
 procedure do_scale_controls_tickinterval();
 procedure do_scale_controls_zoffset();
 procedure do_view_showallsurveys();
@@ -2416,8 +2418,8 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 461;
-        XmNy = 807;
+        XmNx = 0;
+        XmNy = 919;
         XmNwidth = 935;
         XmNheight = 685;
     };
@@ -3413,6 +3415,23 @@ object pushButton_autopick : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_autopickhorizontal : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Auto-Pick Horizontal Offsets");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_autopickhorizontal);
+        XmNactivateCallback = procedure do_action_autopickhorizontal();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object separator10 : XmSeparator widget {
     arguments {
     };
@@ -3541,10 +3560,10 @@ object pushButton_applynav : XmPushButtonGadget widget {
 object pulldownMenu_action : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
-        XmNwidth = 167;
-        XmNheight = 212;
+        XmNx = 223;
+        XmNy = 313;
+        XmNwidth = 182;
+        XmNheight = 234;
     };
     controls {
          managed XmPushButton pushButton_poornav;
@@ -3552,6 +3571,7 @@ object pulldownMenu_action : XmPulldownMenu widget {
          managed XmPushButton pushButton_fixednav;
          managed XmSeparator separator7;
          managed XmPushButton pushButton_autopick;
+         managed XmPushButton pushButton_autopickhorizontal;
          managed XmSeparator separator10;
          managed XmPushButton pushButton_newcrossings;
          managed XmSeparator separator17;
@@ -3852,7 +3872,7 @@ object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 82;
-        XmNy = 242;
+        XmNy = 286;
         XmNwidth = 962;
         XmNheight = 400;
     };
@@ -3881,7 +3901,7 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNtitle = "MBnavadjust";
 !(BX)        XmNiconName = "MBnavadjust";
 !(BX)        XmNx = 82;
-!(BX)        XmNy = 242;
+!(BX)        XmNy = 286;
 !(BX)        XmNwidth = 962;
 !(BX)        XmNheight = 400;
 !(BX)    };

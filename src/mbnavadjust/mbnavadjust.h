@@ -345,6 +345,10 @@ EXTERNAL double	mbna_plot_lon_min;
 EXTERNAL double	mbna_plot_lon_max;
 EXTERNAL double	mbna_plot_lat_min;
 EXTERNAL double	mbna_plot_lat_max;
+EXTERNAL double	mbna_overlap_lon_min;
+EXTERNAL double	mbna_overlap_lon_max;
+EXTERNAL double	mbna_overlap_lat_min;
+EXTERNAL double	mbna_overlap_lat_max;
 EXTERNAL double	mbna_plotx_scale;
 EXTERNAL double	mbna_ploty_scale;
 EXTERNAL int	mbna_misfit_center;
@@ -420,6 +424,7 @@ void	do_naverr_offsetlabel();
 void	do_naverr_test_graphics();
 void	do_naverr_plot(int plotmode);
 int	do_message_on(char *message);
+int	do_message_update(char *message);
 int	do_message_off();
 int	do_error_dialog(char *s1, char *s2, char *s3);
 void    do_bell();
@@ -463,7 +468,9 @@ int	mbnavadjust_section_contour(int fileid, int sectionid,
 				struct mbna_contour_vector *contour);
 int	mbnavadjust_naverr_snavpoints(int ix, int iy);
 int	mbnavadjust_sections_intersect(int crossing_id);
-int	mbnavadjust_crossing_overlap(int crossing_id, 
+int	mbnavadjust_crossing_overlap(int crossing_id);
+int	mbnavadjust_crossing_overlapbounds(int crossing_id, 
+				double offset_x, double offset_y,
 				double *lonmin, double *lonmax, 
 				double *latmin, double *latmax);
 int	mbnavadjust_get_misfit();
@@ -474,7 +481,7 @@ void 	justify_string(double height,char *string, double *s);
 void 	plot_string(double x, double y, double hgt, double angle, char *label);
 void	mbnavadjust_naverr_scale();
 void	mbnavadjust_naverr_plot(int plotmode);
-int	mbnavadjust_autopick();
+int	mbnavadjust_autopick(int do_vertical);
 int	mbnavadjust_zerozoffsets();
 int	mbnavadjust_invertnav();
 int	mbnavadjust_applynav();
@@ -532,6 +539,7 @@ void	do_view_showselectedsurveys( Widget w, XtPointer client_data, XtPointer cal
 void	do_view_showselectedfile( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_view_showselectedsection( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_action_autopickhorizontal( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_analyzecrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_checknewcrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data);

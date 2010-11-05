@@ -2113,6 +2113,9 @@ void do_update_status()
 		XtVaSetValues(pushButton_autopick,
 			XmNsensitive, True,
 			NULL);
+		XtVaSetValues(pushButton_autopickhorizontal,
+			XmNsensitive, True,
+			NULL);
         	if (project.inversion == MBNA_INVERSION_CURRENT)
 			XtVaSetValues(pushButton_newcrossings,
 				XmNsensitive, True,
@@ -2159,6 +2162,9 @@ void do_update_status()
 	else
 		{
 		XtVaSetValues(pushButton_autopick,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_autopickhorizontal,
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_newcrossings,
@@ -4466,8 +4472,25 @@ do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data)
     /* make sure that contours are generated for all of the existing crossings */
 		
     mbna_status = MBNA_STATUS_MAKECONTOUR;
-    mbnavadjust_autopick();
+    mbnavadjust_autopick(MB_YES);
     mbna_status = MBNA_STATUS_GUI;
+    do_update_status();
+    
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_action_autopickhorizontal( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    
+    /* make sure that contours are generated for all of the existing crossings */
+		
+    mbna_status = MBNA_STATUS_MAKECONTOUR;
+    mbnavadjust_autopick(MB_NO);
+    mbna_status = MBNA_STATUS_GUI;
+    do_update_status();
     
 }
 
@@ -4961,6 +4984,20 @@ do_message_on(char *message)
 	}
 	
     XmUpdateDisplay(topshell);
+		
+    return(MB_SUCCESS);
+}
+/*--------------------------------------------------------------------*/
+
+int
+do_message_update(char *message)
+{    
+    if (mbna_verbose >= 1)
+    	fprintf(stderr,"%s\n",message);
+
+    set_label_string(label_message, message);
+    XSync(XtDisplay(bulletinBoard_message), 0);
+    XmUpdateDisplay(bulletinBoard_message);
 		
     return(MB_SUCCESS);
 }
