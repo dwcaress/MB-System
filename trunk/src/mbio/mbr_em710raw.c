@@ -54,9 +54,25 @@
 
 /* include for byte swapping */
 #include "../../include/mb_swap.h"
+
+/* get NaN detector */
+#if defined(isnanf)
+#define check_fnan(x) isnanf((x))
+#elif defined(isnan)
+#define check_fnan(x) isnan((double)(x))
+#elif HAVE_ISNANF == 1
+#define check_fnan(x) isnanf(x)
+extern int isnanf(float x);
+#elif HAVE_ISNAN == 1
+#define check_fnan(x) isnan((double)(x))
+#elif HAVE_ISNAND == 1
+#define check_fnan(x) isnand((double)(x))
+#else
+#define check_fnan(x) ((x) != (x))
+#endif
 	
 /* turn on debug statements here */
-#define MBR_EM710RAW_DEBUG 1
+/* #define MBR_EM710RAW_DEBUG 1 */
 	
 /* essential function prototypes */
 int mbr_register_em710raw(int verbose, void *mbio_ptr, 
@@ -830,6 +846,12 @@ ping->png_bso);*/
 		ping->png_pitch = (int) rint(pitch / 0.01);
 		ping->png_heave = (int) rint(heave / 0.01);
 		
+		/* estimate effective heave using sonar parameters this ought to work but isn't quite right */
+		heave_ping = ping->png_xducer_depth - 0.5 * (store->par_s1z + store->par_s2z) + store->par_wlz;
+/* fprintf(stderr,"heave_ping:%f ping->png_xducer_depth:%f store->par_s1z:%f store->par_s2z:%f store->par_wlz:%f\n",
+heave_ping,ping->png_xducer_depth,store->par_s1z,store->par_s2z,store->par_wlz); */
+
+		
 		/* make first cut at angles */
 		/* calculate corrected ranges, angles, and bathymetry */
 		theta_nadir = 90.0;
@@ -859,6 +881,8 @@ ping->png_bso);*/
 			ping->png_range[i] = ping->png_raw_rxrange[i];
 			ping->png_bheave[i] = 0.5 * (transmit_heave + receive_heave) - heave_ping;
 			depth_offset_use = ping->png_xducer_depth - ping->png_bheave[i];
+/* fprintf(stderr,"AAA png_count:%d beam:%d heave_ping:%f i:%d transmit_heave:%f receive_heave:%f bheave:%f\n",
+ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i]); */
 
 			/* calculate angles */
 			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) - transmit_pitch + store->par_msp;
@@ -886,9 +910,6 @@ ping->png_bso);*/
 				inadir = i;
 				}
 			}
-		
-		/* estimate effective heave using sonar parameters this ought to work but isn't quite right */
-		heave_ping = ping->png_xducer_depth - 0.5 * (store->par_s1z + store->par_s2z) + store->par_wlz;
 		
 		/* now replace that by re-estimating effective heave by raytracing the depth for the most-vertical
 			beam and subtracting out the xducer_depth and the original depth. Add this in to all beams */
@@ -1005,8 +1026,8 @@ bath_time_d); */
 			ping->png_range[i] = ping->png_raw_rxrange[i];
 			ping->png_bheave[i] = 0.5 * (transmit_heave + receive_heave) - heave_ping;
 			depth_offset_use = ping->png_xducer_depth - ping->png_bheave[i];
-/*fprintf(stderr,"heave:%f heave_ping:%f i:%d transmit_heave:%f receive_heave:%f bheave:%f\n",
-heave,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i]);*/
+/* fprintf(stderr,"BBB png_count:%d beam:%d heave:%f heave_ping:%f i:%d transmit_heave:%f receive_heave:%f bheave:%f\n",
+ping->png_count,i,heave,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i]); */
 
 			/* calculate angles */
 			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) - transmit_pitch + store->par_msp;
@@ -4968,6 +4989,14 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 			*error = MB_ERROR_EOF;
 			}
 		}
+
+	    /* zero out ranges that are NaN values - unfortunately this has actually
+	    	happened in some R/V Langseth EM122 data from 20100616 */
+	    for (i=0;i<ping->png_raw_nbeams;i++)
+		{
+		if (check_fnan(ping->png_raw_rxrange[i]))
+			ping->png_raw_rxrange[i]  = 0.0;
+		}
 	    }
 		
 	/* now get last bytes of record */
@@ -5037,7 +5066,7 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 				ping->png_raw_txsector[i], ping->png_raw_txbandwidth[i]);
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		fprintf(stderr,"dbg5       beam values:\n");
-		fprintf(stderr,"dbg5       angle range sector amp quality window beam\n");
+		fprintf(stderr,"dbg5       beam angle sector detection window quality spare1 range amp clean spare2\n");
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_raw_nbeams;i++)
 			fprintf(stderr,"dbg5       %3d %5d %3d %3d %4d %3d %5d %f %5d %5d %5d\n",

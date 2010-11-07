@@ -56,7 +56,7 @@
 #include "../../include/mb_swap.h"
 	
 /* turn on debug statements here */
-#define MBR_EM710MBA_DEBUG 1
+/* #define MBR_EM710MBA_DEBUG 1 */
 	
 /* essential function prototypes */
 int mbr_register_em710mba(int verbose, void *mbio_ptr, 
@@ -4504,7 +4504,7 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 			ping->png_clean[i] = (int)((mb_s_char) line[17]);
 			mb_get_binary_short(swap, &line[18], &short_val); 
 			    ping->png_amp[i] = (int) short_val;
-			mb_get_binary_float(swap, &line[20], &float_val); 
+			mb_get_binary_float(swap, &line[20], &float_val);
 			    ping->png_depression[i] = float_val;
 			mb_get_binary_float(swap, &line[24], &float_val); 
 			    ping->png_azimuth[i] = float_val;
@@ -4513,6 +4513,11 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 			mb_get_binary_float(swap, &line[32], &float_val); 
 			    ping->png_bheave[i] = float_val;
 			ping->png_beamflag[i] = (int)((mb_s_char) line[36]);
+/* fprintf(stderr,"READ ping:%d beam %d  png_depression:%f ",ping->png_count,i,ping->png_depression[i]);
+fprintf(stderr,"png_azimuth:%f ",ping->png_azimuth[i]);
+fprintf(stderr,"png_range:%f ",ping->png_range[i]);
+fprintf(stderr,"png_bheave:%f ",ping->png_bheave[i]);
+fprintf(stderr,"png_beamflag:%d\n",ping->png_beamflag[i]); */
 			/* ignore line[37] */
 			}
 		else
@@ -8626,6 +8631,11 @@ int mbr_em710mba_wr_bath3_mba(int verbose, FILE *mbfp, int swap,
 		mb_put_binary_float(swap, ping->png_bheave[i], (void *) &line[32]);
 		line[36] = (mb_s_char) ping->png_beamflag[i];
 		line[37] = (mb_u_char) 0;
+/* fprintf(stderr,"WRITE ping:%d beam %d  png_depression:%f ",ping->png_count,i,ping->png_depression[i]);
+fprintf(stderr,"png_azimuth:%f ",ping->png_azimuth[i]);
+fprintf(stderr,"png_range:%f ",ping->png_range[i]);
+fprintf(stderr,"png_bheave:%f ",ping->png_bheave[i]);
+fprintf(stderr,"png_beamflag:%d\n",ping->png_beamflag[i]); */
 		
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
