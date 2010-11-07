@@ -1720,7 +1720,6 @@ int main (int argc, char **argv)
 					nssvar[i] = nssvar[i] + nss;
 					}
 				}
-
 			}
 
 		/* print debug statements */
