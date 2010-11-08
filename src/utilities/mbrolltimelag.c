@@ -164,6 +164,7 @@ int main (int argc, char **argv)
 	int	peakkmax;
 	int	peakksum;
 	double	time_d_avg;
+	int	nmodel = 0;
 	
 	int	nr;
 	double	rollint;	
@@ -630,6 +631,7 @@ int main (int argc, char **argv)
 			{
 			timelag = -lagmax + peakk * lagstep;
 			fprintf(fpm, "%f %f\n", time_d_avg, timelag);
+			nmodel++;
 			}
 
 		/* figure out whether and what to read next */
@@ -676,11 +678,14 @@ int main (int argc, char **argv)
 	fprintf(stderr, "Running: %s...\n", cmdfile);
 	system(cmdfile);
 		
-	/* generate plot shellscript for time lag model */
-	sprintf(cmdfile, "mbm_xyplot -I%s -ISc0.1:%s -L\"Time lag model of %s:Time (sec):Time Lag (sec):\"", 
-			modelfile, modelfile, swathdata);
-	fprintf(stderr, "Running: %s...\n", cmdfile);
-	system(cmdfile);
+	/* generate plot shellscript for time lag model if it exists */
+	if (nmodel > 1)
+		{
+		sprintf(cmdfile, "mbm_xyplot -I%s -ISc0.1:%s -L\"Time lag model of %s:Time (sec):Time Lag (sec):\"", 
+				modelfile, modelfile, swathdata);
+		fprintf(stderr, "Running: %s...\n", cmdfile);
+		system(cmdfile);
+		}
 
 	/* deallocate memory for data arrays */
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&slope_time_d,&error);

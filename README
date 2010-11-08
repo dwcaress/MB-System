@@ -236,6 +236,12 @@ Fixes to  Reson s7k (format 88) support allowing mbnavlist to use position
 records as navigation channel 3. This in turn allows mbrolltimelag to work 
 with Reson 7k data collected by MARUM (University of Bremen).
 
+Added file name and line output to debug messages in mbr_l3xseraw.c to aid
+in later work to fully support the current XSE data format.
+
+Set mbrolltimelag to only attempt to generate a variable time lag model
+plot if more than one robust time lag values have been generated.
+
 Updating in preparation for beta release version 5.1.3beta1874.
 
 -----> 5.1.3beta1862

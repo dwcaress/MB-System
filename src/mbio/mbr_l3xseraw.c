@@ -790,9 +790,10 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 #ifdef MB_DEBUG
 if (*error != MB_ERROR_EOF)
 {
+fprintf(stderr,"%s:%d | \n",__FILE__,__LINE__);
 if (skip > 0)
-fprintf(stderr, "\nBYTES SKIPPED BETWEEN FRAMES: %d\n", skip);
-fprintf(stderr, "\nBUFFER SIZE: %u  MAX FOUND: %u  MAX: %u\n", 
+fprintf(stderr, "\n%s:%d | BYTES SKIPPED BETWEEN FRAMES: %d\n",__FILE__,__LINE__, skip);
+fprintf(stderr, "\n%s:%d | BUFFER SIZE: %u  MAX FOUND: %u  MAX: %u\n",__FILE__,__LINE__, 
 buffer_size,*buffer_size_max,MBSYS_XSE_BUFFER_SIZE);
 }
 #endif
@@ -820,19 +821,19 @@ buffer_size,*buffer_size_max,MBSYS_XSE_BUFFER_SIZE);
 	    if (status == MB_SUCCESS)
 			{
 #ifdef MB_DEBUG
-fprintf(stderr, "FRAME ID: %u  BUFFER SIZE:%d  FRAME SIZE:%d\n",frame_id,buffer_size,frame_size);
+fprintf(stderr, "%s:%d | FRAME ID: %u  BUFFER SIZE:%d  FRAME SIZE:%d\n",__FILE__,__LINE__,frame_id,buffer_size,frame_size);
 #endif
 			if (frame_id == MBSYS_XSE_NAV_FRAME)
 			    {
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV\n");
+fprintf(stderr, "%s:%d | READ NAV\n",__FILE__,__LINE__);
 #endif
 			    status = mbr_l3xseraw_rd_nav(verbose,buffer_size,buffer,store_ptr,error);
 			    if (store->nav_source > 0)
 				{
 				store->kind = MB_DATA_NAV;
 #ifdef MB_DEBUG
-fprintf(stderr,"nav_source:%d  time:%u.%6.6u\n",store->nav_source,store->nav_sec,store->nav_usec);
+fprintf(stderr,"%s:%d | nav_source:%d  time:%u.%6.6u\n",__FILE__,__LINE__,store->nav_source,store->nav_sec,store->nav_usec);
 #endif
 				}
 			    else
@@ -842,7 +843,7 @@ fprintf(stderr,"nav_source:%d  time:%u.%6.6u\n",store->nav_source,store->nav_sec
 			else if (frame_id == MBSYS_XSE_SVP_FRAME)
 			    {
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP\n");
+fprintf(stderr, "%s:%d | READ SVP\n",__FILE__,__LINE__);
 #endif
 			    store->kind = MB_DATA_VELOCITY_PROFILE;
 			    status = mbr_l3xseraw_rd_svp(verbose,buffer_size,buffer,store_ptr,error);
@@ -851,7 +852,7 @@ fprintf(stderr, "READ SVP\n");
 			else if (frame_id == MBSYS_XSE_TID_FRAME)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ TIDE\n");
+fprintf(stderr, "%s:%d | READ TIDE\n",__FILE__,__LINE__);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_tide(verbose,buffer_size,buffer,store_ptr,error);
@@ -860,7 +861,7 @@ fprintf(stderr, "READ TIDE\n");
 			else if (frame_id == MBSYS_XSE_SHP_FRAME)
 			    {
 #ifdef MB_DEBUG
-fprintf(stderr, "READ PARAMETER\n");
+fprintf(stderr, "%s:%d | READ PARAMETER\n",__FILE__,__LINE__);
 #endif
 			    store->kind = MB_DATA_PARAMETER;
 			    status = mbr_l3xseraw_rd_ship(verbose,buffer_size,buffer,store_ptr,error);
@@ -869,7 +870,7 @@ fprintf(stderr, "READ PARAMETER\n");
 			else if (frame_id == MBSYS_XSE_SSN_FRAME)
 			    {
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SIDESCAN\n");
+fprintf(stderr, "%s:%d | READ SIDESCAN\n",__FILE__,__LINE__);
 #endif
 			    store->kind = MB_DATA_DATA;
 			    status = mbr_l3xseraw_rd_sidescan(verbose,buffer_size,buffer,store_ptr,error);
@@ -893,16 +894,16 @@ fprintf(stderr, "READ SIDESCAN\n");
 				    done = MB_NO;
 				    }
 #ifdef MB_DEBUG
-fprintf(stderr, "\tframe_id:%d frame_expect:%d ping:%d %d sid_group_avl:%d\n",
+fprintf(stderr, "%s:%d | \tframe_id:%d frame_expect:%d ping:%d %d sid_group_avl:%d\n",__FILE__,__LINE__,
 frame_id,*frame_expect,store->sid_ping,store->mul_ping,store->sid_group_avl);
-fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_avl_num_samples);
+fprintf(stderr, "%s:%d | \tDONE:%d BEAMS:%d PIXELS:%d\n",__FILE__,__LINE__, done, store->mul_num_beams, store->sid_avl_num_samples);
 #endif
 			    }
 			else if (frame_id == MBSYS_XSE_MBM_FRAME
 				&& *frame_expect == MBSYS_XSE_SSN_FRAME)
 			    {
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NOTHING - SAVE HEADER\n");
+fprintf(stderr, "%s:%d | READ NOTHING - SAVE HEADER\n",__FILE__,__LINE__);
 #endif
 			    store->kind = MB_DATA_DATA;
 			    *frame_save = MB_YES;
@@ -914,13 +915,13 @@ fprintf(stderr, "READ NOTHING - SAVE HEADER\n");
 			    *frame_expect = MBSYS_XSE_NONE_FRAME;
 			    done = MB_YES;
 #ifdef MB_DEBUG
-fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_avl_num_samples);
+fprintf(stderr, "%s:%d | \tDONE:%d BEAMS:%d PIXELS:%d\n",__FILE__,__LINE__, done, store->mul_num_beams, store->sid_avl_num_samples);
 #endif
 			    }
 			else if (frame_id == MBSYS_XSE_MBM_FRAME)
 			    {
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MULTIBEAM\n");
+fprintf(stderr, "%s:%d | READ MULTIBEAM\n",__FILE__,__LINE__);
 #endif
 			    store->kind = MB_DATA_DATA;
 			    status = mbr_l3xseraw_rd_multibeam(verbose,buffer_size,buffer,store_ptr,error);
@@ -942,13 +943,13 @@ fprintf(stderr, "READ MULTIBEAM\n");
 				    done = MB_NO;
 				    }
 #ifdef MB_DEBUG
-fprintf(stderr, "\tDONE:%d BEAMS:%d PIXELS:%d\n", done, store->mul_num_beams, store->sid_avl_num_samples);
+fprintf(stderr, "%s:%d | \tDONE:%d BEAMS:%d PIXELS:%d\n",__FILE__,__LINE__, done, store->mul_num_beams, store->sid_avl_num_samples);
 #endif
 			    }
 			else if (frame_id == MBSYS_XSE_SNG_FRAME)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SINGLEBEAM\n");
+fprintf(stderr, "%s:%d | READ SINGLEBEAM\n",__FILE__,__LINE__);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_singlebeam(verbose,buffer_size,buffer,store_ptr,error);
@@ -957,7 +958,7 @@ fprintf(stderr, "READ SINGLEBEAM\n");
 			else if (frame_id == MBSYS_XSE_CNT_FRAME)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ CONTROL\n");
+fprintf(stderr, "%s:%d | READ CONTROL\n",__FILE__,__LINE__);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_control(verbose,buffer_size,buffer,store_ptr,error);
@@ -966,7 +967,7 @@ fprintf(stderr, "READ CONTROL\n");
 			else if (frame_id == MBSYS_XSE_BTH_FRAME)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ BATHYMETRY\n");
+fprintf(stderr, "%s:%d | READ BATHYMETRY\n",__FILE__,__LINE__);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_bathymetry(verbose,buffer_size,buffer,store_ptr,error);
@@ -975,7 +976,7 @@ fprintf(stderr, "READ BATHYMETRY\n");
 			else if (frame_id == MBSYS_XSE_PRD_FRAME)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ PRODUCT\n");
+fprintf(stderr, "%s:%d | READ PRODUCT\n",__FILE__,__LINE__);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_product(verbose,buffer_size,buffer,store_ptr,error);
@@ -984,7 +985,7 @@ fprintf(stderr, "READ PRODUCT\n");
 			else if (frame_id == MBSYS_XSE_NTV_FRAME)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NATIVE\n");
+fprintf(stderr, "%s:%d | READ NATIVE\n",__FILE__,__LINE__);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_native(verbose,buffer_size,buffer,store_ptr,error);
@@ -993,7 +994,7 @@ fprintf(stderr, "READ NATIVE\n");
 			else if (frame_id == MBSYS_XSE_GEO_FRAME)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ GEODETIC\n");
+fprintf(stderr, "%s:%d | READ GEODETIC\n",__FILE__,__LINE__);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_geodetic(verbose,buffer_size,buffer,store_ptr,error);
@@ -1002,7 +1003,7 @@ fprintf(stderr, "READ GEODETIC\n");
 			else if (frame_id == MBSYS_XSE_SBM_FRAME)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SEABEAM\n");
+fprintf(stderr, "%s:%d | READ SEABEAM\n",__FILE__,__LINE__);
 #endif
 				status = mbr_l3xseraw_rd_seabeam(verbose,buffer_size,buffer,store_ptr,error);
 				if (store->sbm_properties == MB_YES)
@@ -1014,7 +1015,7 @@ fprintf(stderr, "READ SEABEAM\n");
 			else if (frame_id == MBSYS_XSE_MSG_FRAME)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MESSAGE\n");
+fprintf(stderr, "%s:%d | READ MESSAGE\n",__FILE__,__LINE__);
 #endif
 				store->kind = MB_DATA_RAW_LINE;
 				status = mbr_l3xseraw_rd_message(verbose,buffer_size,buffer,store_ptr,error);
@@ -1023,7 +1024,7 @@ fprintf(stderr, "READ MESSAGE\n");
 			else if (frame_id == MBSYS_XSE_COM_FRAME)
 			    {
 #ifdef MB_DEBUG
-fprintf(stderr, "READ COMMENT\n");
+fprintf(stderr, "%s:%d | READ COMMENT\n",__FILE__,__LINE__);
 #endif
 			    store->kind = MB_DATA_COMMENT;
 			    status = mbr_l3xseraw_rd_comment(verbose,buffer_size,buffer,store_ptr,error);
@@ -1032,7 +1033,7 @@ fprintf(stderr, "READ COMMENT\n");
 			else /* handle an unrecognized frame */
 			    {
 #ifdef MB_DEBUG
-fprintf(stderr, "READ OTHER\n");
+fprintf(stderr, "%s:%d | READ OTHER\n",__FILE__,__LINE__);
 #endif
 			    store->kind = MB_DATA_RAW_LINE;
 			    }
@@ -1049,7 +1050,7 @@ fprintf(stderr, "READ OTHER\n");
 		    && frame_id != *frame_expect)
 		    {
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NOTHING - SAVE HEADER\n");
+fprintf(stderr, "%s:%d | READ NOTHING - SAVE HEADER\n",__FILE__,__LINE__);
 #endif
 		    store->kind = MB_DATA_DATA;
 		    *frame_save = MB_YES;
@@ -1172,7 +1173,7 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 #endif
 	    
 #ifdef MB_DEBUG
-if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
+if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -1189,7 +1190,7 @@ if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, fun
 				    group_id, byte_count, function_name);
 			    }
 #ifdef MB_DEBUG
-fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
 	    
@@ -1197,7 +1198,7 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 		    if (group_id == MBSYS_XSE_NAV_GROUP_GEN)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_GEN\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_GEN\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_quality); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_status); index += 4;
@@ -1208,7 +1209,7 @@ fprintf(stderr, "READ NAV_GROUP_GEN\n");
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_POS)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_POS\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_POS\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_description_len); index += 4;
 				for (i=0;i<store->nav_description_len;i++)
@@ -1227,7 +1228,7 @@ fprintf(stderr, "READ NAV_GROUP_POS\n");
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_ACCURACY)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_ACCURACY\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_ACCURACY\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_acc_quality); index += 4;
 				store->nav_acc_numsatellites = buffer[index]; index++;
@@ -1241,7 +1242,7 @@ fprintf(stderr, "READ NAV_GROUP_ACCURACY\n");
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_MOTIONGT)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_MOTIONGT\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_MOTIONGT\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_speed_ground); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_ground); index += 8;
@@ -1252,7 +1253,7 @@ fprintf(stderr, "READ NAV_GROUP_MOTIONGT\n");
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_MOTIONTW)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_MOTIONTW\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_MOTIONTW\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_speed_water); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_water); index += 8;
@@ -1263,7 +1264,7 @@ fprintf(stderr, "READ NAV_GROUP_MOTIONTW\n");
 			else if (group_id == MBSYS_XSE_NAV_GROUP_TRACK)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_TRACK\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_TRACK\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_track); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_trk_offset_sol); index += 8;
@@ -1279,7 +1280,7 @@ fprintf(stderr, "READ NAV_GROUP_TRACK\n");
 			else if (group_id == MBSYS_XSE_NAV_GROUP_HRP)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_HRP\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_HRP\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_heave); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hrp_roll); index += 8;
@@ -1292,7 +1293,7 @@ fprintf(stderr, "READ NAV_GROUP_HRP\n");
 			else if (group_id == MBSYS_XSE_NAV_GROUP_HEAVE)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_HEAVE\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_HEAVE\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hea_heave); index += 8;
 				store->nav_group_heave = MB_YES;
@@ -1303,7 +1304,7 @@ fprintf(stderr, "READ NAV_GROUP_HEAVE\n");
 			else if (group_id == MBSYS_XSE_NAV_GROUP_ROLL)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_ROLL\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_ROLL\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_rol_roll); index += 8;
 				store->nav_group_roll = MB_YES;
@@ -1314,7 +1315,7 @@ fprintf(stderr, "READ NAV_GROUP_ROLL\n");
 			else if (group_id == MBSYS_XSE_NAV_GROUP_PITCH)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_PITCH\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_PITCH\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_pit_pitch); index += 8;
 				store->nav_group_pitch = MB_YES;
@@ -1325,7 +1326,7 @@ fprintf(stderr, "READ NAV_GROUP_PITCH\n");
 			else if (group_id == MBSYS_XSE_NAV_GROUP_HEADING)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_HEADING\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_HEADING\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_hdg_heading); index += 8;
 				store->nav_group_heading = MB_YES;
@@ -1336,7 +1337,7 @@ fprintf(stderr, "READ NAV_GROUP_HEADING\n");
 			else if (group_id == MBSYS_XSE_NAV_GROUP_LOG)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_LOG\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_LOG\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_log_speed); index += 8;
 				store->nav_group_log = MB_YES;
@@ -1348,7 +1349,7 @@ fprintf(stderr, "READ NAV_GROUP_LOG\n");
 			else if (group_id == MBSYS_XSE_NAV_GROUP_GPS)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_LOG\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_LOG\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->nav_gps_altitude); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->nav_gps_geoidalseparation); index += 4;
@@ -1358,7 +1359,7 @@ fprintf(stderr, "READ NAV_GROUP_LOG\n");
 			else
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ NAV_GROUP_OTHER\n");
+fprintf(stderr, "%s:%d | READ NAV_GROUP_OTHER\n",__FILE__,__LINE__);
 #endif
 				}
 			}
@@ -1469,7 +1470,7 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 #endif
 	    
 #ifdef MB_DEBUG
-if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
+if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -1486,7 +1487,7 @@ if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, fun
 				    group_id, byte_count, function_name);
 			    }
 #ifdef MB_DEBUG
-fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
 
@@ -1494,7 +1495,7 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 			if (group_id == MBSYS_XSE_SVP_GROUP_GEN)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP_GROUP_GEN\n");
+fprintf(stderr, "%s:%d | READ SVP_GROUP_GEN\n",__FILE__,__LINE__);
 #endif
 				/* currently unused by MB-System */
 				}
@@ -1503,7 +1504,7 @@ fprintf(stderr, "READ SVP_GROUP_GEN\n");
 		    if (group_id == MBSYS_XSE_SVP_GROUP_DEPTH) 
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP_GROUP_DEPTH\n");
+fprintf(stderr, "%s:%d | READ SVP_GROUP_DEPTH\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nsvp); index += 4;
 				for (i=0;i<store->svp_nsvp;i++)
@@ -1519,7 +1520,7 @@ fprintf(stderr, "READ SVP_GROUP_DEPTH\n");
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_VELOCITY)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP_GROUP_VELOCITY\n");
+fprintf(stderr, "%s:%d | READ SVP_GROUP_VELOCITY\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nsvp); index += 4;
 				for (i=0;i<store->svp_nsvp;i++)
@@ -1535,7 +1536,7 @@ fprintf(stderr, "READ SVP_GROUP_VELOCITY\n");
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_CONDUCTIVITY)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP_GROUP_CONDUCTIVITY\n");
+fprintf(stderr, "%s:%d | READ SVP_GROUP_CONDUCTIVITY\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
@@ -1551,7 +1552,7 @@ fprintf(stderr, "READ SVP_GROUP_CONDUCTIVITY\n");
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_SALINITY)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP_GROUP_SALINITY\n");
+fprintf(stderr, "%s:%d | READ SVP_GROUP_SALINITY\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
@@ -1567,7 +1568,7 @@ fprintf(stderr, "READ SVP_GROUP_SALINITY\n");
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_TEMP)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP_GROUP_TEMP\n");
+fprintf(stderr, "%s:%d | READ SVP_GROUP_TEMP\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
@@ -1583,7 +1584,7 @@ fprintf(stderr, "READ SVP_GROUP_TEMP\n");
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_PRESSURE)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP_GROUP_PRESSURE\n");
+fprintf(stderr, "%s:%d | READ SVP_GROUP_PRESSURE\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_nctd); index += 4;
 				for (i=0;i<store->svp_nctd;i++)
@@ -1599,7 +1600,7 @@ fprintf(stderr, "READ SVP_GROUP_PRESSURE\n");
 		    else if (group_id == MBSYS_XSE_SVP_GROUP_SSV)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP_GROUP_SSV\n");
+fprintf(stderr, "%s:%d | READ SVP_GROUP_SSV\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_ssv); index += 8;
 				}
@@ -1608,7 +1609,7 @@ fprintf(stderr, "READ SVP_GROUP_SSV\n");
 			else if (group_id == MBSYS_XSE_SVP_GROUP_POS)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP_GROUP_POS\n");
+fprintf(stderr, "%s:%d | READ SVP_GROUP_POS\n",__FILE__,__LINE__);
 #endif
 				/* currently unused by MB-System */
 				}
@@ -1616,7 +1617,7 @@ fprintf(stderr, "READ SVP_GROUP_POS\n");
 			else
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SVP_GROUP_OTHER\n");
+fprintf(stderr, "%s:%d | READ SVP_GROUP_OTHER\n",__FILE__,__LINE__);
 #endif
 				}
 			}
@@ -1765,7 +1766,7 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_pt
 #endif
 	    
 #ifdef MB_DEBUG
-if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
+if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -1782,7 +1783,7 @@ if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, fun
 				    group_id, byte_count, function_name);
 			    }
 #ifdef MB_DEBUG
-fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
 
@@ -2086,7 +2087,7 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *stor
 #endif
 	    
 #ifdef MB_DEBUG
-if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
+if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -2103,7 +2104,7 @@ if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, fun
 				    group_id, byte_count, function_name);
 			    }
 #ifdef MB_DEBUG
-fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
 	    
@@ -2111,7 +2112,7 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 		    if (group_id == MBSYS_XSE_SSN_GROUP_GEN)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SSN_GROUP_GEN\n");
+fprintf(stderr, "%s:%d | READ SSN_GROUP_GEN\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_ping); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sid_frequency); index += 4;
@@ -2133,7 +2134,7 @@ fprintf(stderr, "sample=%g\n", store->sid_sample);
 			else if (group_id == MBSYS_XSE_SSN_GROUP_AMPVSTT)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SSN_GROUP_AMPVSTT\n");
+fprintf(stderr, "%s:%d | READ SSN_GROUP_AMPVSTT\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_avt_sampleus); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_avt_offset); index += 4;
@@ -2157,7 +2158,7 @@ for (i=0;i<store->sid_avt_num_samples;i++)
 			else if (group_id == MBSYS_XSE_SSN_GROUP_PHASEVSTT)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SSN_GROUP_PHASEVSTT\n");
+fprintf(stderr, "%s:%d | READ SSN_GROUP_PHASEVSTT\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_pvt_sampleus); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], &store->sid_pvt_offset); index += 4;
@@ -2181,7 +2182,7 @@ for (i=0;i<store->sid_pvt_num_samples;i++)
 		    else if (group_id == MBSYS_XSE_SSN_GROUP_AMPVSLAT)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SSN_GROUP_AMPVSLAT\n");
+fprintf(stderr, "%s:%d | READ SSN_GROUP_AMPVSLAT\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_avl_binsize); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_avl_offset); index += 4;
@@ -2204,7 +2205,7 @@ for (i=0;i<store->sid_avl_num_samples;i++)
 			else if (group_id == MBSYS_XSE_SSN_GROUP_PHASEVSLAT)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SSN_GROUP_PHASEVSLAT\n");
+fprintf(stderr, "%s:%d | READ SSN_GROUP_PHASEVSLAT\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_pvl_binsize); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_pvl_offset); index += 4;
@@ -2227,7 +2228,7 @@ for (i=0;i<store->sid_pvl_num_samples;i++)
 			else if (group_id == MBSYS_XSE_SSN_GROUP_SIGNAL)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBSYS_XSE_SSN_GROUP_SIGNAL\n");
+fprintf(stderr, "%s:%d | READ MBSYS_XSE_SSN_GROUP_SIGNAL\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_sig_ping); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_sig_channel); index += 4;
@@ -2254,7 +2255,7 @@ for (i=0;i<store->sid_sig_num_samples;i++)
 			else if (group_id == MBSYS_XSE_SSN_GROUP_PINGTYPE)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBSYS_XSE_SSN_GROUP_PINGTYPE\n");
+fprintf(stderr, "%s:%d | READ MBSYS_XSE_SSN_GROUP_PINGTYPE\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_png_pulse); index += 4;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->sid_png_startfrequency); index += 8;
@@ -2281,7 +2282,7 @@ fprintf(stderr, "sid_png_pulsename=%s\n", store->sid_png_pulsename);
 			else if (group_id == MBSYS_XSE_SSN_GROUP_COMPLEXSIGNAL)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBSYS_XSE_SSN_GROUP_COMPLEXSIGNAL\n");
+fprintf(stderr, "%s:%d | READ MBSYS_XSE_SSN_GROUP_COMPLEXSIGNAL\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_cmp_ping); index += 4;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_cmp_channel); index += 4;
@@ -2309,7 +2310,7 @@ for (i=0;i<store->sid_cmp_num_samples;i++)
 			else if (group_id == MBSYS_XSE_SSN_GROUP_WEIGHTING)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBSYS_XSE_SSN_GROUP_WEIGHTING\n");
+fprintf(stderr, "%s:%d | READ MBSYS_XSE_SSN_GROUP_WEIGHTING\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_short(SWAPFLAG, &buffer[index], (short *) &store->sid_wgt_factorleft); index += 2;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_wgt_samplesleft); index += 4;
@@ -2327,7 +2328,7 @@ fprintf(stderr, "sid_wgt_samplesright=%d\n", store->sid_wgt_samplesright);
 			else
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SSN_GROUP_OTHER\n");
+fprintf(stderr, "%s:%d | READ SSN_GROUP_OTHER\n",__FILE__,__LINE__);
 #endif
 				}
 			}
@@ -2542,7 +2543,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *sto
 #endif
 
 #ifdef MB_DEBUG
-if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
+if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -2559,7 +2560,7 @@ if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, fun
 				    group_id, byte_count, function_name);
 			    }
 #ifdef MB_DEBUG
-fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
 	    
@@ -2567,7 +2568,7 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 		    if (group_id == MBSYS_XSE_MBM_GROUP_GEN)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_GEN\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_GEN\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_ping); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->mul_frequency); index += 4;
@@ -2591,7 +2592,7 @@ fprintf(stderr, "swath=%f\n", store->mul_swath);
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_BEAM)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_BEAM\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_BEAM\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_beam = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2608,7 +2609,7 @@ fprintf(stderr, "READ MBM_GROUP_BEAM\n");
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_TT)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_TT\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_TT\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_tt = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2630,7 +2631,7 @@ for(i=0;i<store->mul_num_beams;i++)
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_QUALITY)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_QUALITY\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_QUALITY\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_quality = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2650,7 +2651,7 @@ for(i=0;i<store->mul_num_beams;i++)
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_AMP)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_AMP\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_AMP\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_amp = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2672,7 +2673,7 @@ for(i=0;i<store->mul_num_beams;i++)
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_DELAY)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_DELAY\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_DELAY\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_delay = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2694,7 +2695,7 @@ for(i=0;i<store->mul_num_beams;i++)
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_LATERAL)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_LATERAL\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_LATERAL\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_lateral = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2716,7 +2717,7 @@ for(i=0;i<store->mul_num_beams;i++)
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_ALONG)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_ALONG\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_ALONG\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_along = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2738,7 +2739,7 @@ for(i=0;i<store->mul_num_beams;i++)
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_DEPTH)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_DEPTH\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_DEPTH\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_depth = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2760,7 +2761,7 @@ for(i=0;i<store->mul_num_beams;i++)
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_ANGLE)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_ANGLE\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_ANGLE\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_angle = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2782,7 +2783,7 @@ for(i=0;i<store->mul_num_beams;i++)
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_HEAVE)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_HEAVE\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_HEAVE\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_heave = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2804,7 +2805,7 @@ for(i=0;i<store->mul_num_beams;i++)
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_ROLL)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_ROLL\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_ROLL\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_roll = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2826,7 +2827,7 @@ for(i=0;i<store->mul_num_beams;i++)
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_PITCH)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_PITCH\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_PITCH\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_pitch = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2848,7 +2849,7 @@ for(i=0;i<store->mul_num_beams;i++)
 			else if (group_id == MBSYS_XSE_MBM_GROUP_GATES)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_GATES\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_GATES\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_gates = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2873,7 +2874,7 @@ for(i=0;i<store->mul_num_beams;i++)
 			else if (group_id == MBSYS_XSE_MBM_GROUP_NOISE)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_NOISE\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_NOISE\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_noise = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2895,7 +2896,7 @@ for(i=0;i<store->mul_num_beams;i++)
 			else if (group_id == MBSYS_XSE_MBM_GROUP_LENGTH)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_LENGTH\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_LENGTH\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_length = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2917,7 +2918,7 @@ for(i=0;i<store->mul_num_beams;i++)
 			else if (group_id == MBSYS_XSE_MBM_GROUP_HITS)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_HITS\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_HITS\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_hits = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2939,7 +2940,7 @@ for(i=0;i<store->mul_num_beams;i++)
 			else if (group_id == MBSYS_XSE_MBM_GROUP_HEAVERECEIVE)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_HEAVERECEIVE\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_HEAVERECEIVE\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_heavereceive = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2961,7 +2962,7 @@ for(i=0;i<store->mul_num_beams;i++)
 			else if (group_id == MBSYS_XSE_MBM_GROUP_AZIMUTH)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_AZIMUTH\n");
+fprintf(stderr, "%s:%d | READ MBM_GROUP_AZIMUTH\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_azimuth = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_beams); index += 4;
@@ -2983,7 +2984,7 @@ for(i=0;i<store->mul_num_beams;i++)
 			else if (group_id == MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV\n");
+fprintf(stderr, "%s:%d | READ MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV\n",__FILE__,__LINE__);
 #endif
 				store->mul_group_mbsystemnav = MB_YES;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->mul_lon); index += 8;
@@ -3001,7 +3002,7 @@ fprintf(stderr, "lon=%f\n", store->mul_speed);
 			else
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ MBM_GROUP_OTHER  group_id:%d\n", group_id);
+fprintf(stderr, "%s:%d | READ MBM_GROUP_OTHER  group_id:%d\n",__FILE__,__LINE__, group_id);
 #endif
 				}
 		    }
@@ -3292,7 +3293,7 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 #endif
 	    
 #ifdef MB_DEBUG
-if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
+if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -3309,7 +3310,7 @@ if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, fun
 				group_id, byte_count, function_name);
 			}
 #ifdef MB_DEBUG
-fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
 		    
@@ -3317,7 +3318,7 @@ fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
 		    if (group_id == MBSYS_XSE_SBM_GROUP_PROPERTIES)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SBM_GROUP_PROPERTIES\n");
+fprintf(stderr, "%s:%d | READ SBM_GROUP_PROPERTIES\n",__FILE__,__LINE__);
 #endif
 				store->sbm_properties = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_ping); index += 4;
@@ -3338,7 +3339,7 @@ fprintf(stderr, "READ SBM_GROUP_PROPERTIES\n");
 		    if (group_id == MBSYS_XSE_SBM_GROUP_HRP)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SBM_GROUP_HRP\n");
+fprintf(stderr, "%s:%d | READ SBM_GROUP_HRP\n",__FILE__,__LINE__);
 #endif
 				store->sbm_hrp = MB_YES;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->sbm_heave); index += 8;
@@ -3350,7 +3351,7 @@ fprintf(stderr, "READ SBM_GROUP_HRP\n");
 		    if (group_id == MBSYS_XSE_SBM_GROUP_CENTER)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SBM_GROUP_CENTER\n");
+fprintf(stderr, "%s:%d | READ SBM_GROUP_CENTER\n",__FILE__,__LINE__);
 #endif
 				store->sbm_center = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_beam); index += 4;
@@ -3367,7 +3368,7 @@ fprintf(stderr, "READ SBM_GROUP_CENTER\n");
 		    if (group_id == MBSYS_XSE_SBM_GROUP_MESSAGE)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "READ SBM_GROUP_MESSAGE\n");
+fprintf(stderr, "%s:%d | READ SBM_GROUP_MESSAGE\n",__FILE__,__LINE__);
 #endif
 				store->sbm_message = MB_YES;
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_message_id); index += 4;
@@ -3703,7 +3704,7 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,void *store
 #endif
 	    
 #ifdef MB_DEBUG
-if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, function_name);
+if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
 	    
 	    /* deal with group */
@@ -3720,7 +3721,7 @@ if (skip > 4) fprintf(stderr, "skipped %d bytes in function <%s>\n", skip-4, fun
 				    group_id, byte_count, function_name);
 			    }
 #ifdef MB_DEBUG
-fprintf(stderr, "Group %d of %d bytes to be parsed in MBIO function <%s>\n",
+fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
 	    
@@ -3791,13 +3792,13 @@ int mbr_l3xseraw_wr_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 	buffer = mb_io_ptr->hdr_comment;
 
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE KIND: %d\n",store->kind);
+fprintf(stderr, "%s:%d | WRITE KIND: %d\n",__FILE__,__LINE__,store->kind);
 #endif
 
 	if (store->kind == MB_DATA_COMMENT)
 		{
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE COMMMENT\n");
+fprintf(stderr, "%s:%d | WRITE COMMMENT\n",__FILE__,__LINE__);
 #endif
 		status = mbr_l3xseraw_wr_comment(verbose,&buffer_size,buffer,store_ptr,error);
 		if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
@@ -3809,7 +3810,7 @@ fprintf(stderr, "WRITE COMMMENT\n");
 	else if (store->kind == MB_DATA_NAV)
 		{
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE NAV\n");
+fprintf(stderr, "%s:%d | WRITE NAV\n",__FILE__,__LINE__);
 #endif
 		status = mbr_l3xseraw_wr_nav(verbose,&buffer_size,buffer,store_ptr,error);
 		if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
@@ -3821,7 +3822,7 @@ fprintf(stderr, "WRITE NAV\n");
 	else if (store->kind == MB_DATA_VELOCITY_PROFILE)
 		{
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE SVP\n");
+fprintf(stderr, "%s:%d | WRITE SVP\n",__FILE__,__LINE__);
 #endif
 		status = mbr_l3xseraw_wr_svp(verbose,&buffer_size,buffer,store_ptr,error);
 		if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
@@ -3833,7 +3834,7 @@ fprintf(stderr, "WRITE SVP\n");
 	else if (store->kind == MB_DATA_PARAMETER)
 		{
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE SHIP\n");
+fprintf(stderr, "%s:%d | WRITE SHIP\n",__FILE__,__LINE__);
 #endif
 		status = mbr_l3xseraw_wr_ship(verbose,&buffer_size,buffer,store_ptr,error);
 		if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
@@ -3845,7 +3846,7 @@ fprintf(stderr, "WRITE SHIP\n");
 	else if (store->kind == MB_DATA_DATA)
 		{
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE MULTIBEAM\n");
+fprintf(stderr, "%s:%d | WRITE MULTIBEAM\n",__FILE__,__LINE__);
 #endif
 		if (store->mul_frame == MB_YES)
 		    {
@@ -3857,7 +3858,7 @@ fprintf(stderr, "WRITE MULTIBEAM\n");
 			}
 		    }
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE SIDESCAN\n");
+fprintf(stderr, "%s:%d | WRITE SIDESCAN\n",__FILE__,__LINE__);
 #endif
 		if (store->sid_frame == MB_YES)
 		    {
@@ -3872,7 +3873,7 @@ fprintf(stderr, "WRITE SIDESCAN\n");
 	else if (store->kind == MB_DATA_RUN_PARAMETER)
 		{
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE RUN PARAMETER\n");
+fprintf(stderr, "%s:%d | WRITE RUN PARAMETER\n",__FILE__,__LINE__);
 #endif
 		status = mbr_l3xseraw_wr_seabeam(verbose,&buffer_size,buffer,store_ptr,error);
 		if ((write_size = fwrite(buffer,1,buffer_size,mbfp)) != buffer_size)
@@ -3884,7 +3885,7 @@ fprintf(stderr, "WRITE RUN PARAMETER\n");
 	else if (store->kind == MB_DATA_RAW_LINE)
 		{
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE RAW LINE\n");
+fprintf(stderr, "%s:%d | WRITE RAW LINE\n",__FILE__,__LINE__);
 #endif
 		if (store->rawsize > 0)
 		    {
@@ -3898,7 +3899,7 @@ fprintf(stderr, "WRITE RAW LINE\n");
 	else
 		{
 #ifdef MB_DEBUG
-fprintf(stderr, "WRITE FAILURE BAD KIND\n");
+fprintf(stderr, "%s:%d | WRITE FAILURE BAD KIND\n",__FILE__,__LINE__);
 #endif
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_KIND;
