@@ -5431,46 +5431,52 @@ time_d); */
     
 				/* add heave and draft */
 				depth_offset_use = bheave[i] + draft + lever_heave;
-				static_shift = 0.0;
 	
 				/* check depth_offset - use static shift if depth_offset negative */
-				if (depth_offset_use < depth[0])
+				if (depth_offset_use >= depth[0])
 				    {
-				    fprintf(stderr, "\nWarning: Sonar depth is shallower than the top\n");
-				    fprintf(stderr, "of the SVP - transducers above water?!\n");
-				    fprintf(stderr, "Raytracing performed from top of SVP followed by static shift.\n");
-				    fprintf(stderr, "Sonar depth is sum of heave + draft (or transducer depth).\n");
-				    fprintf(stderr, "Draft from data:       %f\n", draft);
-				    fprintf(stderr, "Heave from data:       %f\n", bheave[i]);
-				    fprintf(stderr, "Heave from lever calc: %f\n", lever_heave);
-				    fprintf(stderr, "User specified draft:  %f\n", process.mbp_draft);
-				    fprintf(stderr, "Depth offset used:     %f\n", depth_offset_use);
-				    fprintf(stderr, "Data Record: %d\n",odata);
-				    fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n", 
-					    time_i[0], time_i[1], time_i[2], 
-					    time_i[3], time_i[4], time_i[5], time_i[6]);
-	    
-				    static_shift = depth_offset_use + depth[0];
-				    depth_offset_use = depth[0];
+				    static_shift = 0.0;
 				    }
-/*fprintf(stderr,"draft_org:%f draft:%f depth_offset_use:%f static_shift:%f\n",
+				else
+				    {
+				    static_shift = depth_offset_use - depth[0];
+				    
+				    if (verbose > 0)
+				    	{
+					fprintf(stderr, "\nWarning: Sonar depth is shallower than the top\n");
+					fprintf(stderr, "of the SVP - transducers above water?!\n");
+					fprintf(stderr, "Raytracing performed from top of SVP followed by static shift.\n");
+					fprintf(stderr, "Sonar depth is sum of heave + draft (or transducer depth).\n");
+					fprintf(stderr, "Draft from data:       %f\n", draft);
+					fprintf(stderr, "Heave from data:       %f\n", bheave[i]);
+					fprintf(stderr, "Heave from lever calc: %f\n", lever_heave);
+					fprintf(stderr, "User specified draft:  %f\n", process.mbp_draft);
+					fprintf(stderr, "Depth offset used:     %f\n", depth_offset_use);
+					fprintf(stderr, "Data Record: %d\n",odata);
+					fprintf(stderr, "Ping time:  %4d %2d %2d %2d:%2d:%2d.%6d\n", 
+						time_i[0], time_i[1], time_i[2], 
+						time_i[3], time_i[4], time_i[5], time_i[6]);
+	    				}
+				    }
+/* fprintf(stderr,"draft_org:%f draft:%f depth_offset_use:%f static_shift:%f\n",
 draft_org,draft,depth_offset_use,static_shift);*/
 
 				/* raytrace */
-				status = mb_rt(verbose, rt_svp, depth_offset_use, 
+				status = mb_rt(verbose, rt_svp, (depth_offset_use - static_shift), 
 					angles[i], 0.5*ttimes[i],
 					process.mbp_angle_mode, ssv, angles_null[i], 
 					0, NULL, NULL, NULL, 
 					&xx, &zz, 
 					&ttime, &ray_stat, &error);
-/* fprintf(stderr,"depth_offset_use:%f draft:%f bheave:%f lever_heave:%f angle:%f tt:%f mode:%d ssv:%f null:%f xx:%f zz:%f tt:%f\n",
+					
+				/* apply static shift if any */
+				zz += static_shift;
+				
+/* fprintf(stderr,"PING:%4d %2d %2d %2d:%2d:%2d.%6d BEAM:%d depth_offset_use:%f draft:%f bheave:%f lever_heave:%f angle:%f tt:%f mode:%d ssv:%f null:%f xx:%f zz:%f tt:%f\n",
+time_i[0], time_i[1], time_i[2], time_i[3], time_i[4], time_i[5], time_i[6],i,
 depth_offset_use,draft,bheave[i],lever_heave,angles[i], 0.5*ttimes[i],process.mbp_angle_mode, ssv, angles_null[i],
 xx,zz,ttime); */
-					
-				/* apply static shift if needed */
-				if (static_shift < 0.0)
-				    zz += static_shift;
-/*fprintf(stderr, "%d %d : heave:%f draft:%f %f depth_offset:%f static:%f zz:%f\n", 
+/* fprintf(stderr, "%d %d : heave:%f draft:%f %f depth_offset:%f static:%f zz:%f\n", 
 idata, i, bheave[i], draft, draft_org, depth_offset_use, static_shift, zz);*/
 /* fprintf(stderr,"COMPARE %d X:%f %f Y:%f %f Z:%f %f     %.3f %.3f %.3f\n",
 i,bathacrosstrack[i],xx*cos(DTR*angles_forward[i]),

@@ -1298,6 +1298,7 @@ int mbnavadjust_read_project()
 	char	label[STRING_MAX];
 	char	buffer[BUFFER_MAX];
 	char	obuffer[BUFFER_MAX];
+	char	command[MB_PATH_MAXLINE];
 	char	*result;
 	int	versionmajor, versionminor;
 	double	dummy;
@@ -1311,6 +1312,10 @@ int mbnavadjust_read_project()
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		}
+		
+	/* first save copy of the project file */
+	sprintf(command,"cp %s %s.save", project.home, project.home);
+	system(command);
 
 	/* open and read home file */
 	status = MB_SUCCESS;
@@ -4066,7 +4071,7 @@ int mbnavadjust_naverr_nextunset()
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		}
-		
+
      	/* find next current unset crossing */
     	if (project.open == MB_YES
     		&& project.num_crossings > 0)
@@ -4163,6 +4168,12 @@ int mbnavadjust_naverr_nextunset()
 		/* turn off message */
 		do_message_off();
   		}
+		
+	/* else unload previously loaded crossing */
+	else if (mbna_naverr_load == MB_YES)
+		{
+		status = mbnavadjust_crossing_unload();
+		}
 			
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -5225,9 +5236,9 @@ int mbnavadjust_crossing_replot()
 		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
 			function_name);
 		}
-		
+
 	/* replot loaded crossing */
-	if (mbna_status == MBNA_STATUS_NAVERR
+	if ((mbna_status == MBNA_STATUS_NAVERR  || mbna_status == MBNA_STATUS_MAKECONTOUR)
 		&& mbna_naverr_load == MB_YES)
 		{					
 		/* get lon lat positions for soundings */
@@ -6225,8 +6236,10 @@ int mbnavadjust_get_misfit()
     		&& project.num_crossings > 0
     		&& mbna_current_crossing >= 0)
     		{
-/* fprintf(stderr,"mbnavadjust_get_misfit: mbna_plot minmax: %f %f %f %f\n",
+/* fprintf(stderr,"\nDEBUG %s %d: mbnavadjust_get_misfit: mbna_plot minmax: %f %f %f %f\n",
+__FILE__,__LINE__,
 mbna_plot_lon_min,mbna_plot_lon_max,mbna_plot_lat_min,mbna_plot_lat_max); */
+
     		/* set message on */
     		if (mbna_verbose > 1)
 			fprintf(stderr,"Making misfit grid for crossing %d\n",mbna_current_crossing);
@@ -6245,25 +6258,26 @@ mbna_plot_lon_min,mbna_plot_lon_max,mbna_plot_lat_min,mbna_plot_lat_max); */
 		    {
 		    grid_dx = (mbna_plot_lon_max - mbna_plot_lon_min) / (grid_nx - 1);
 		    grid_dy = grid_dx * mbna_mtodeglat / mbna_mtodeglon;
-/* fprintf(stderr,"1 grid scale: grid_dx:%f grid_dy:%f\n",grid_dx,grid_dy); */
+/* fprintf(stderr,"DEBUG %s %d: grid scale: grid_dx:%f grid_dy:%f\n",
+__FILE__,__LINE__,
+grid_dx,grid_dy); */
 		    }
 		else
 		    {
 		    grid_dy = (mbna_plot_lat_max - mbna_plot_lat_min) / (grid_ny - 1);
 		    grid_dx = grid_dy * mbna_mtodeglon / mbna_mtodeglat;
-/* fprintf(stderr,"2 grid scale: grid_dx:%f grid_dy:%f\n",grid_dx,grid_dy); */
+/* fprintf(stderr,"DEBUG %s %d: grid scale: grid_dx:%f grid_dy:%f\n",
+__FILE__,__LINE__,
+grid_dx,grid_dy); */
 		    }
 		grid_nxy = grid_nx * grid_ny;
 		grid_olon = 0.5 * (mbna_plot_lon_min + mbna_plot_lon_max)
 				    - (grid_nx / 2 + 0.5) * grid_dx;
 		grid_olat = 0.5 * (mbna_plot_lat_min + mbna_plot_lat_max)
 				    - (grid_ny / 2 + 0.5) * grid_dy;
-/* fprintf(stderr,"grid_olon:%f grid_olat:%f\n",grid_olon,grid_olat); */
-
-		/* figure out range of z offsets */
-		zmin = mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
-		zmax = mbna_misfit_offset_z + 0.5 * project.zoffsetwidth;
-		zoff_dz = project.zoffsetwidth / (nzmisfitcalc - 1);
+/* fprintf(stderr,"DEBUG %s %d: grid_olon:%f grid_olat:%f\n",
+__FILE__,__LINE__,
+grid_olon,grid_olat); */
 		
 		/* get 3d misfit grid */
 		nzmisfitcalc = MBNA_MISFIT_DIMZ;
@@ -6293,6 +6307,9 @@ mbna_lon_min, mbna_lon_max, mbna_lat_min, mbna_lat_max); */
 		zmin = mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
 		zmax = mbna_misfit_offset_z + 0.5 * project.zoffsetwidth;
 		zoff_dz = project.zoffsetwidth / (nzmisfitcalc - 1);
+/* fprintf(stderr,"DEBUG %s %d: mbna_misfit_offset_z:%f project.zoffsetwidth:%f nzmisfitcalc:%d zmin:%f zmax:%f zoff_dz:%f\n",
+__FILE__,__LINE__,
+mbna_misfit_offset_z,project.zoffsetwidth,nzmisfitcalc,zmin,zmax,zoff_dz); */
 
 		/* allocate and initialize grids and arrays */
 		grid1 = (double *) realloc(grid1, sizeof(double) * (grid_nxy));
@@ -6373,6 +6390,8 @@ i, j, swath2->pings[i].bathlon[j], swath2->pings[i].bathlat[j], x, y, igx, igy);
 			{
 			grid2[k] = (grid2[k] / gridn2[k]);
 			}
+/* fprintf(stderr,"GRIDDED BATH: k:%d 1:%d %f   2:%d %f\n",
+k,gridn1[k],grid1[k],gridn2[k],grid2[k]); */
 		    }		
 			
 		/* calculate gridded misfit over lateral and z offsets */
@@ -6427,6 +6446,8 @@ i, j, swath2->pings[i].bathlon[j], swath2->pings[i].bathlat[j], x, y, igx, igy);
 			    	    {
 				    misfit_min = gridm[lc];
 				    }
+				misfit_min = MIN(misfit_min, gridm[lc]);
+				misfit_max = MAX(misfit_max, gridm[lc]);
 				if (gridnm[lc] > mbna_minmisfit_nthreshold
 				    && (mbna_minmisfit_n == 0 || gridm[lc] < mbna_minmisfit))
 				    {
@@ -6439,17 +6460,17 @@ i, j, swath2->pings[i].bathlon[j], swath2->pings[i].bathlat[j], x, y, igx, igy);
 				    jmin = jc,
 				    kmin = kc;
 				    found = MB_YES;
-/* fprintf(stderr,"DEBUG %s %d: ic:%d jc:%d kc:%d misfit:%f %f %d  pos:%f %f %f\n",
+/* zoff = zmin + zoff_dz * kc;
+fprintf(stderr,"DEBUG %s %d: ic:%d jc:%d kc:%d misfit:%f %f %d  pos:%f %f %f zoff:%f mbna_ofset_z:%f\n",
 __FILE__,__LINE__,
-ic,jc,kc,misfit_min,mbna_minmisfit,mbna_minmisfit_n,mbna_minmisfit_x,mbna_minmisfit_y,mbna_minmisfit_z); */
+ic,jc,kc,misfit_min,mbna_minmisfit,mbna_minmisfit_n,mbna_minmisfit_x,mbna_minmisfit_y,mbna_minmisfit_z,
+zoff,mbna_offset_z); */
  			    	    }
-				misfit_min = MIN(misfit_min, gridm[lc]);
-				misfit_max = MAX(misfit_max, gridm[lc]);
 				}
 /* if (ic == jc && kc == 0)
 fprintf(stderr,"DEBUG %s %d: ic:%d jc:%d misfit:%d %f\n",
 __FILE__,__LINE__,
-ic,jc,gridnm[lc],gridm[lc]); */
+ic,jc,gridnm[lc],gridm[lc]);*/
 			    }
 		if (found == MB_NO)
 		    {
@@ -7681,10 +7702,20 @@ mbnavadjust_autopick(int do_vertical)
 
     				/* load crossing */
   				mbnavadjust_crossing_load();
+/* fprintf(stderr,"mbnavadjust_autopick AA crossing:%d overlap:%d overlap_scale:%f current offsets:%f %f %f  minmisfit3D:%f %f %f  minmisfit2D:%f %f %f\n",
+mbna_current_crossing,crossing->overlap,overlap_scale,
+mbna_offset_x/mbna_mtodeglon,mbna_offset_y/mbna_mtodeglat,mbna_offset_z,
+mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z,
+mbna_minmisfit_xh/mbna_mtodeglon,mbna_minmisfit_yh/mbna_mtodeglat,mbna_minmisfit_zh); */
 				nprocess++;
 				
 				/* update status */
 				do_update_status();
+/* fprintf(stderr,"mbnavadjust_autopick A crossing:%d overlap:%d overlap_scale:%f current offsets:%f %f %f  minmisfit3D:%f %f %f  minmisfit2D:%f %f %f\n",
+mbna_current_crossing,crossing->overlap,overlap_scale,
+mbna_offset_x/mbna_mtodeglon,mbna_offset_y/mbna_mtodeglat,mbna_offset_z,
+mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z,
+mbna_minmisfit_xh/mbna_mtodeglon,mbna_minmisfit_yh/mbna_mtodeglat,mbna_minmisfit_zh); */
 				
 				/* if this is a >50% overlap crossing then first set offsets to
 					minimum misfit and then recalculate misfit */
@@ -7703,9 +7734,18 @@ mbnavadjust_autopick(int do_vertical)
 						mbna_offset_y = mbna_minmisfit_yh;
 						mbna_offset_z = mbna_minmisfit_zh;
 						}
+					mbna_misfit_offset_x = mbna_offset_x;
+					mbna_misfit_offset_y = mbna_offset_y;
+					mbna_misfit_offset_z = mbna_offset_z;
+					mbnavadjust_crossing_replot();
 	    	
 					/* get misfit */
 					mbnavadjust_get_misfit();
+/* fprintf(stderr,"mbnavadjust_autopick B crossing:%d overlap:%d overlap_scale:%f current offsets:%f %f %f  minmisfit3D:%f %f %f  minmisfit2D:%f %f %f\n",
+mbna_current_crossing,crossing->overlap,overlap_scale,
+mbna_offset_x/mbna_mtodeglon,mbna_offset_y/mbna_mtodeglat,mbna_offset_z,
+mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z,
+mbna_minmisfit_xh/mbna_mtodeglon,mbna_minmisfit_yh/mbna_mtodeglat,mbna_minmisfit_zh); */
 					}
 				
 				/* set plot bounds to overlap region */
@@ -7727,12 +7767,17 @@ mbnavadjust_autopick(int do_vertical)
 				mbnavadjust_get_misfit();
 				
 				/* check uncertainty estimate for a good pick */
+/* fprintf(stderr,"mbnavadjust_autopick C crossing:%d overlap:%d overlap_scale:%f current offsets:%f %f %f  minmisfit3D:%f %f %f  minmisfit2D:%f %f %f\n",
+mbna_current_crossing,crossing->overlap,overlap_scale,
+mbna_offset_x/mbna_mtodeglon,mbna_offset_y/mbna_mtodeglat,mbna_offset_z,
+mbna_minmisfit_x/mbna_mtodeglon,mbna_minmisfit_y/mbna_mtodeglat,mbna_minmisfit_z,
+mbna_minmisfit_xh/mbna_mtodeglon,mbna_minmisfit_yh/mbna_mtodeglat,mbna_minmisfit_zh);
 fprintf(stderr,"crossing:%d overlap:%d overlap_scale:%f uncertainty axes: %f %f %f",
 mbna_current_crossing,crossing->overlap,overlap_scale,mbna_minmisfit_sr1,mbna_minmisfit_sr2,mbna_minmisfit_sr3);
 if (MAX(mbna_minmisfit_sr1,mbna_minmisfit_sr2) < 0.5 * overlap_scale
 && MIN(mbna_minmisfit_sr1,mbna_minmisfit_sr2) > 0.0)
 fprintf(stderr," USE PICK");
-fprintf(stderr,"\n");
+fprintf(stderr,"\n"); */
 				if (MAX(mbna_minmisfit_sr1,mbna_minmisfit_sr2) < 0.5 * overlap_scale
 					&& MIN(mbna_minmisfit_sr1,mbna_minmisfit_sr2) > 0.0)
 					{
@@ -7798,11 +7843,11 @@ fprintf(stderr,"\n");
 						    }
 						dsonardepth2 = (secondsonardepth2 - firstsonardepth2) 
 							/ (secondtime_d2 - firsttime_d2);
-fprintf(stderr,"crossing:%d tie:%d zoffset:%f   sdrate1:%f %f %f  sdrate2:%f %f %f   inferred time lag:%f\n",
+/* fprintf(stderr,"mbnavadjust_autopick D crossing:%d tie:%d zoffset:%f   sdrate1:%f %f %f  sdrate2:%f %f %f   inferred time lag:%f\n",
 i,j,tie->offset_z_m, 
 (secondsonardepth1 - firstsonardepth1), (secondtime_d1 - firsttime_d1), dsonardepth1,
 (secondsonardepth2 - firstsonardepth2), (secondtime_d2 - firsttime_d2), dsonardepth2,
-tie->offset_z_m / (dsonardepth2 - dsonardepth1));
+tie->offset_z_m / (dsonardepth2 - dsonardepth1)); */
 						}
 					}
 

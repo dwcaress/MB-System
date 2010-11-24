@@ -659,7 +659,7 @@ int main (int argc, char **argv)
 				&& svp_count == 1)
 				{
 	    			status = mb_pr_update_svp(verbose, file, 
-						MB_YES, svp_file, MBP_ANGLES_SNELL, MB_YES, &error);
+						MB_YES, svp_file, MBP_ANGLES_OK, MB_YES, &error);
 				}
 
 			/* reset svp flag */
