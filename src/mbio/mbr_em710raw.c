@@ -70,6 +70,22 @@ extern int isnanf(float x);
 #else
 #define check_fnan(x) ((x) != (x))
 #endif
+
+/* set precision of iterative raytracing depth & distance matching */
+#define MBR_EM710RAW_BATH_RECALC_PRECISION 0.0001
+#define MBR_EM710RAW_BATH_RECALC_NCALCMAX 50
+#define MBR_EM710RAW_BATH_RECALC_ANGLEMODE 0
+
+/* control method of estimating range and angles for bathymetry recalculation
+	- by default the code solves for the angles and heave offsets that come
+	  close to matching the original reported bathymetry by raytracing through
+	  the original water sound speed model.
+	- if the define below is uncommented, then the code will instead adjust
+	  the angles and ranges to match the original bathymetry - this will 
+	  generally achieve bathymetry closer to that reported by the sonar, but
+	  requires modifying the travel times (an unsavory and unsatisfactory
+	  approach). */
+/* #define MBR_EM710RAW_BATH_RECALC_TWEAK_ANGLE_RANGE 1 */
 	
 /* turn on debug statements here */
 /* #define MBR_EM710RAW_DEBUG 1 */
@@ -517,7 +533,9 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	ntime_d, ptime_d, atime_d;
 	double	bath_time_d, ss_time_d;
 	double	rawspeed, pheading;
-	double	plon, plat, pspeed, roll, pitch, heave, heave_ping;
+	double	plon, plat, pspeed, roll, pitch, heave;
+	double	heave_offset = 0.0;
+	double	heave_ping, heave_beam;
 	double	soundspeed;
 	double	transmit_alongtrack;
 	double	alpha, beta, theta, phi, theta_bath, phi_bath;
@@ -533,11 +551,11 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	receive_time_d, receive_heading, receive_heave, receive_roll, receive_pitch;
 	double	*svpdepth = NULL;
 	double	*svpvel = NULL;
-	double	xx, zz, dx, dz;
-	double	xxcalc, zzcalc, ttt, xxcalc_old, zzcalc_old;
-	double	depth_offset_use;
-	double	factor;
-	int	ray_stat, iterx, iterz, anglemode;
+	double	xx, zz, dx, dz, dr, dt;
+	double	xxcalc, zzcalc, tt, ttt, tt_use, xxcalc_old, zzcalc_old;
+	double	depth_offset_use, static_shift, svpdepthstart;
+	double	weight;
+	int	ray_stat, iterx, iterz;
 	int	i;
 
 	/* print input debug statements */
@@ -693,8 +711,8 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 
 		/* allocate memory for svp data */
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->svp_num * sizeof(double),(void **)&svpdepth,error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, store->svp_num * sizeof(double),(void **)&svpvel,error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, store->svp_num * sizeof(double),(void **)&svpdepth, error);
+		status = mb_mallocd(verbose, __FILE__, __LINE__, store->svp_num * sizeof(double),(void **)&svpvel, error);
 		
 		/* construct svp from raw values */
 		for (i=0;i<store->svp_num;i++)
@@ -705,6 +723,10 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			
 		/* initialize raytracing */
 		status = mb_rt_init(verbose, store->svp_num, svpdepth, svpvel, (void **) &(mb_io_ptr->saveptr1), error);
+		
+		/* deallocate arrays */
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&svpvel, error);
+		mb_freed(verbose, __FILE__, __LINE__, (void **)&svpdepth, error);
 		}
 	
 	/* if no sidescan read then zero sidescan data */
@@ -847,7 +869,7 @@ ping->png_bso);*/
 		ping->png_heave = (int) rint(heave / 0.01);
 		
 		/* estimate effective heave using sonar parameters this ought to work but isn't quite right */
-		heave_ping = ping->png_xducer_depth - 0.5 * (store->par_s1z + store->par_s2z) + store->par_wlz;
+		heave_ping = 0.5 * (store->par_s1z + store->par_s2z) + store->par_wlz - ping->png_xducer_depth;
 /* fprintf(stderr,"heave_ping:%f ping->png_xducer_depth:%f store->par_s1z:%f store->par_s2z:%f store->par_wlz:%f\n",
 heave_ping,ping->png_xducer_depth,store->par_s1z,store->par_s2z,store->par_wlz); */
 
@@ -879,7 +901,8 @@ heave_ping,ping->png_xducer_depth,store->par_s1z,store->par_s2z,store->par_wlz);
 				ping->png_ssv = 150;
 			soundspeed = 0.1 * ((double)ping->png_ssv);
 			ping->png_range[i] = ping->png_raw_rxrange[i];
-			ping->png_bheave[i] = 0.5 * (transmit_heave + receive_heave) - heave_ping;
+			heave_beam = 0.5 * (transmit_heave + receive_heave);
+			ping->png_bheave[i] = heave_beam - heave_ping;
 			depth_offset_use = ping->png_xducer_depth - ping->png_bheave[i];
 /* fprintf(stderr,"AAA png_count:%d beam:%d heave_ping:%f i:%d transmit_heave:%f receive_heave:%f bheave:%f\n",
 ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i]); */
@@ -910,20 +933,98 @@ ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i])
 				inadir = i;
 				}
 			}
+
+/* fprintf(stderr,"ptime_d:%f png_xducer_depth:%f s1z:%f s2z:%f wlz:%f heave:%f heave_ping:%f\n",
+ptime_d,ping->png_xducer_depth,store->par_s1z,store->par_s2z,store->par_wlz,heave,heave_ping);*/
+/*fprintf(stderr,"\navailable attitude:\n");
+for (i=0;i<mb_io_ptr->nattitude;i++)
+fprintf(stderr,"     %d %f %f %f %f\n",
+i,mb_io_ptr->attitude_time_d[i],mb_io_ptr->attitude_heave[i],mb_io_ptr->attitude_roll[i],mb_io_ptr->attitude_pitch[i]);
+fprintf(stderr,"\nbeams:\n");*/
+
+/* fprintf(stderr,"\nPING: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f \n",
+time_i[0], time_i[1], time_i[2], 
+time_i[3], time_i[4], time_i[5], time_i[6],
+bath_time_d); */
+		/* Unfortunately, the above code is not succeeding in calculating angles that, after
+			raytracing, replicate the sounding positions reported by the sonar. I am
+			probably missing some aspect of the calculation of attitude compensation, or
+			I've just got something wrong.
+			To get bathymetry recalculation close to right, I will estimate the azimuthal
+			angle phi using the originally reported beam positions. I will then estimate
+			the takeoff angle theta by the following three steps:
+				1. Iteratively raytrace the most vertical beam to find the angle
+					reproducing the original position. Then take the difference
+					between the calculated and originally reported depth and
+					treat that as an effective heave offset that is added to all beams.
+				2. For each beam iteratively raytrace to match the originally reported position.
+					Also iteratively raytrace to match the originally reported depth.
+				3. Estimate takeoff angle for the beam as a weighted average of the position
+					and depth matching takeoff angles, where the weighting for the position
+					matching estimate is cos(theta)**2 and the weighting for the depth-matching 
+					estimate is (1 - cos(theta)**2). */
 		
-		/* now replace that by re-estimating effective heave by raytracing the depth for the most-vertical
-			beam and subtracting out the xducer_depth and the original depth. Add this in to all beams */
+		/* estimate effective heave by raytracing the most-vertical beam and matching the position to within
+			1 mm. Add the depth difference to all beams as an effective heave offset */
+		heave_offset = 0.0;
+		dt = 0.0;
 		if (mb_io_ptr->saveptr1 != NULL)
 			{
+#ifndef MBR_EM710RAW_BATH_RECALC_TWEAK_ANGLE_RANGE
+			/* get attitude and heave at ping and receive time */
+			transmit_time_d = ptime_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[inadir]];
+			mb_hedint_interp(verbose, mbio_ptr, transmit_time_d,  
+				    		&transmit_heading, error);
+			mb_attint_interp(verbose, mbio_ptr, transmit_time_d,  
+				    		&transmit_heave, &transmit_roll, &transmit_pitch, error);
+			receive_time_d = transmit_time_d + ping->png_raw_rxrange[inadir];
+			mb_hedint_interp(verbose, mbio_ptr, receive_time_d,  
+				    		&receive_heading, error);
+			mb_attint_interp(verbose, mbio_ptr, receive_time_d,  
+				    		&receive_heave, &receive_roll, &receive_pitch, error);
+	
+			/* get range */
+			if (ping->png_ssv <= 0)
+				ping->png_ssv = 150;
+			soundspeed = 0.1 * ((double)ping->png_ssv);
+			ping->png_range[inadir] = ping->png_raw_rxrange[inadir];
+			heave_beam = 0.5 * (transmit_heave + receive_heave);
+			ping->png_bheave[inadir] = heave_beam - heave_ping + heave_offset;
+			depth_offset_use = ping->png_xducer_depth - ping->png_bheave[inadir];
+/* fprintf(stderr,"BBB png_count:%d beam:%d heave:%f heave_ping:%f heave_beam:%f transmit_heave:%f receive_heave:%f heave_offset:%f bheave:%f xducerdepth:%f\n",
+ping->png_count,i,heave,heave_ping,heave_beam,transmit_heave,receive_heave,heave_offset,ping->png_bheave[inadir],ping->png_xducer_depth); */
+
+			/* calculate angles */
+			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[inadir]]) - transmit_pitch + store->par_msp;
+/*fprintf(stderr,"ANGLES: %d tx:%d pitch:%f bias:%f  alpha:%f\n",
+i,ping->png_raw_txtiltangle[ping->png_raw_rxsector[inadir]],transmit_pitch,store->par_msp,alpha);
+fprintf(stderr,"HEADING: %d transmit:%f receive:%f\n",i,transmit_heading,receive_heading);*/
+			beta = 90.0 - ((0.01 * (double)ping->png_raw_rxpointangle[inadir]) + receive_roll - store->par_msr);
+			mb_rollpitch_to_takeoff(
+				verbose, 
+				alpha, beta, 
+				&theta, &phi, 
+				error);
+			
+			/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
+				the ping heading and the heading at sector transmit time */
+			phi -= transmit_heading - pheading;
+			if (phi > 180.0) phi -= 360.0;
+			if (phi < -180.0) phi += 360.0;
+			
+			/* alongtrack offset distance */
+			transmit_alongtrack = (0.01 * ((double)ping->png_speed)) 
+						* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[inadir]]);
+
+			/* corrected lateral distance */
 			xx = sqrt(ping->png_acrosstrack[inadir] * ping->png_acrosstrack[inadir]
-					+ ping->png_alongtrack[inadir] * ping->png_alongtrack[inadir]);
+					+ (ping->png_alongtrack[inadir] - transmit_alongtrack) 
+						* (ping->png_alongtrack[inadir] - transmit_alongtrack));
 			zz = ping->png_depth[inadir] + ping->png_xducer_depth;
 			mb_xyz_to_takeoff(verbose,-ping->png_acrosstrack[inadir],ping->png_alongtrack[inadir], zz,
 						&theta_bath,&phi_bath,error);
 			phi = phi_bath;
-			anglemode = 0;
-			depth_offset_use = ping->png_xducer_depth - ping->png_bheave[inadir];
-
+						
 			/* find vertical takeoff angle that matches the position to within 1 mm */
 			iterx = 0;
 			iterz = 0;
@@ -935,7 +1036,8 @@ ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i])
 			dz = zz;
 			zzcalc = zz;
 			zzcalc_old = 0.0;
-			while (iterx < 3 || (fabs(dx) > 0.001 && iterx < 25))
+			while (iterx < 3 || (fabs(dx) > MBR_EM710RAW_BATH_RECALC_PRECISION 
+				&& iterx < MBR_EM710RAW_BATH_RECALC_NCALCMAX))
 				{
 				theta_old = theta_x;
 				xxcalc_old = xxcalc;
@@ -946,11 +1048,15 @@ ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i])
 					theta_x = theta_x - 0.5 * (theta_x - thetamin);
 				else if (dtheta > 0.0)
 					theta_x = theta_x + 0.5 * (thetamax - theta_x);
+				tt = 0.5 * ping->png_range[inadir];
 
 				mb_rt(verbose, (void *) mb_io_ptr->saveptr1, 
 					depth_offset_use, 
-					theta_x,0.5*ping->png_range[inadir],
-					anglemode, soundspeed, 0.0, 0, NULL, NULL, NULL, &xxcalc, &zzcalc, &ttt, &ray_stat,error);
+					theta_x, tt,
+					MBR_EM710RAW_BATH_RECALC_ANGLEMODE, soundspeed, 0.0, 
+					0, NULL, NULL, NULL, 
+					&xxcalc, &zzcalc, &ttt, &ray_stat,error);
+				zzcalc += static_shift;
 				dx = xx - xxcalc;
 				dz = zz - zzcalc;
 				if (xxcalc > xx)
@@ -970,7 +1076,7 @@ ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i])
 						thetamin = MAX(thetamin, theta_x);
 						}
 					}
-				else if (fabs(dx) < 0.001)
+				else if (fabs(dx) < MBR_EM710RAW_BATH_RECALC_PRECISION)
 					{
 					dtheta = 0.0;
 					}
@@ -979,271 +1085,410 @@ ping->png_count,i,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i])
 					dtheta = (xx - xxcalc) * (theta_x - theta_old) / (xxcalc - xxcalc_old);
 					}
 
-/* fprintf(stderr,"MATCH X: iterx:%d theta_x:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  theta_x:%f theta_old:%f dtheta:%f min:%f max:%f\n",
-iterx,theta_x,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetamin,thetamax); */
+/* fprintf(stderr,"     MATCH X0: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  theta_x:%f theta_old:%f dtheta:%f min:%f max:%f\n",
+iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetamin,thetamax); */
 				iterx++;
 				}
-			heave_ping = ping->png_depth[inadir] + depth_offset_use - zzcalc;
-			}
-/* fprintf(stderr,"inadir:%d png_depth:%f depth_offset_use:%f zzcalc:%f heave_ping:%f\n",
-inadir,ping->png_depth[inadir],depth_offset_use,zzcalc,heave_ping);*/
+				
+			/* set the heave offset that will be added to all beams */
+			heave_offset = -dz;
+#endif
 
-/*fprintf(stderr,"ptime_d:%f png_xducer_depth:%f s1z:%f s2z:%f wlz:%f heave:%f heave_ping:%f\n",
-ptime_d,ping->png_xducer_depth,store->par_s1z,store->par_s2z,store->par_wlz,heave,heave_ping);*/
-/*fprintf(stderr,"\navailable attitude:\n");
-for (i=0;i<mb_io_ptr->nattitude;i++)
-fprintf(stderr,"     %d %f %f %f %f\n",
-i,mb_io_ptr->attitude_time_d[i],mb_io_ptr->attitude_heave[i],mb_io_ptr->attitude_roll[i],mb_io_ptr->attitude_pitch[i]);
-fprintf(stderr,"\nbeams:\n");*/
+			/* now calculate ranges, angles, and bathymetry */
+			for (i=0;i<ping->png_nbeams;i++)
+				{
+				/* get attitude and heave at ping and receive time */
+				transmit_time_d = ptime_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
+				mb_hedint_interp(verbose, mbio_ptr, transmit_time_d,  
+				    			&transmit_heading, error);
+				mb_attint_interp(verbose, mbio_ptr, transmit_time_d,  
+				    			&transmit_heave, &transmit_roll, &transmit_pitch, error);
+				receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
+				mb_hedint_interp(verbose, mbio_ptr, receive_time_d,  
+				    			&receive_heading, error);
+				mb_attint_interp(verbose, mbio_ptr, receive_time_d,  
+				    			&receive_heave, &receive_roll, &receive_pitch, error);
 
-/* fprintf(stderr,"\nPING: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f \n",
-time_i[0], time_i[1], time_i[2], 
-time_i[3], time_i[4], time_i[5], time_i[6],
-bath_time_d); */
-		/* calculate ranges, angles, and bathymetry */
-		for (i=0;i<ping->png_nbeams;i++)
-			{
-			/* get attitude and heave at ping and receive time */
-			transmit_time_d = ptime_d + (double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]];
-			mb_hedint_interp(verbose, mbio_ptr, transmit_time_d,  
-				    		&transmit_heading, error);
-			mb_attint_interp(verbose, mbio_ptr, transmit_time_d,  
-				    		&transmit_heave, &transmit_roll, &transmit_pitch, error);
-			receive_time_d = transmit_time_d + ping->png_raw_rxrange[i];
-			mb_hedint_interp(verbose, mbio_ptr, receive_time_d,  
-				    		&receive_heading, error);
-			mb_attint_interp(verbose, mbio_ptr, receive_time_d,  
-				    		&receive_heave, &receive_roll, &receive_pitch, error);
+				/* get range */
+				if (ping->png_ssv <= 0)
+					ping->png_ssv = 150;
+				soundspeed = 0.1 * ((double)ping->png_ssv);
+				ping->png_range[i] = ping->png_raw_rxrange[i];
+				heave_beam = 0.5 * (transmit_heave + receive_heave);
+				ping->png_bheave[i] = heave_beam - heave_ping + heave_offset;
+				depth_offset_use = ping->png_xducer_depth - ping->png_bheave[i];
+/* fprintf(stderr,"BBB png_count:%d beam:%d heave:%f heave_ping:%f heave_beam:%f transmit_heave:%f receive_heave:%f heave_offset:%f bheave:%f xducerdepth:%f\n",
+ping->png_count,i,heave,heave_ping,heave_beam,transmit_heave,receive_heave,heave_offset,ping->png_bheave[i],ping->png_xducer_depth); */
 
-			/* alongtrack offset distance */
-			transmit_alongtrack = (0.01 * ((double)ping->png_speed)) 
-						* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
-	
-			/* get range */
-			if (ping->png_ssv <= 0)
-				ping->png_ssv = 150;
-			soundspeed = 0.1 * ((double)ping->png_ssv);
-			ping->png_range[i] = ping->png_raw_rxrange[i];
-			ping->png_bheave[i] = 0.5 * (transmit_heave + receive_heave) - heave_ping;
-			depth_offset_use = ping->png_xducer_depth - ping->png_bheave[i];
-/* fprintf(stderr,"BBB png_count:%d beam:%d heave:%f heave_ping:%f i:%d transmit_heave:%f receive_heave:%f bheave:%f\n",
-ping->png_count,i,heave,heave_ping,i,transmit_heave,receive_heave,ping->png_bheave[i]); */
-
-			/* calculate angles */
-			alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) - transmit_pitch + store->par_msp;
+				/* calculate angles */
+				alpha = (0.01 * (double)ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]]) - transmit_pitch + store->par_msp;
 /*fprintf(stderr,"ANGLES: %d tx:%d pitch:%f bias:%f  alpha:%f\n",
 i,ping->png_raw_txtiltangle[ping->png_raw_rxsector[i]],transmit_pitch,store->par_msp,alpha);
 fprintf(stderr,"HEADING: %d transmit:%f receive:%f\n",i,transmit_heading,receive_heading);*/
-			beta = 90.0 - ((0.01 * (double)ping->png_raw_rxpointangle[i]) + receive_roll - store->par_msr);
-			mb_rollpitch_to_takeoff(
-				verbose, 
-				alpha, beta, 
-				&theta, &phi, 
-				error);
-			
-			/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
-				the ping heading and the heading at sector transmit time */
-			phi -= transmit_heading - pheading;
-			if (phi > 180.0) phi -= 360.0;
-			if (phi < -180.0) phi += 360.0;
-			
-			/* KLUGE ALERT! */
-			/* Unfortunately, the above code is not succeeding in calculating angles that, after
-				raytracing, replicate the sounding positions reported by the sonar. I am
-				probably missing some aspect of the calculation of attitude compensation, or
-				I've just got something wrong.
-				To get bathymetry recalculation close to right, I will estimate the azimuthal
-				angle phi using the originally reported beam positions.  */
-			xx = sqrt(ping->png_acrosstrack[i] * ping->png_acrosstrack[i]
-					+ ping->png_alongtrack[i] * ping->png_alongtrack[i]);
-			zz = ping->png_depth[i] + ping->png_xducer_depth;
-			mb_xyz_to_takeoff(verbose,-ping->png_acrosstrack[i],ping->png_alongtrack[i], zz,
-						&theta_bath,&phi_bath,error);
-			phi = phi_bath;
-			anglemode = 0;
-						
-			/* Further, I will iterate test raytraces to find the vertical angle that
-				best matches the original bathymetry. For angles > 20.0 degrees from vertical the code
-				iterates to match the depth within 1 mm. For angles < 15 degrees the code
-				iterates to match the position to within 1 mm. Between 15 and 20 degrees the code
-				calculates both solutions and takes a weighted average of the two. */
-			if (mb_io_ptr->saveptr1 != NULL)
-				{
-				/* for angles <= 20 degrees find vertical takeoff angle that matches the position to within 1 mm */
+				beta = 90.0 - ((0.01 * (double)ping->png_raw_rxpointangle[i]) + receive_roll - store->par_msr);
+				mb_rollpitch_to_takeoff(
+					verbose, 
+					alpha, beta, 
+					&theta, &phi, 
+					error);
+
+				/* apply yaw correction by rotating the azimuthal angle to reflect the difference between
+					the ping heading and the heading at sector transmit time */
+				phi -= transmit_heading - pheading;
+				if (phi > 180.0) phi -= 360.0;
+				if (phi < -180.0) phi += 360.0;
+
+				/* alongtrack offset distance */
+				transmit_alongtrack = (0.01 * ((double)ping->png_speed)) 
+							* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
+
+				/* corrected lateral distance */
+				xx = sqrt(ping->png_acrosstrack[i] * ping->png_acrosstrack[i]
+						+ (ping->png_alongtrack[i] - transmit_alongtrack) 
+							* (ping->png_alongtrack[i] - transmit_alongtrack));
+				zz = ping->png_depth[i] + ping->png_xducer_depth;
+				mb_xyz_to_takeoff(verbose,-ping->png_acrosstrack[i],ping->png_alongtrack[i], zz,
+							&theta_bath,&phi_bath,error);
+				phi = phi_bath;
+
+				/* get depth_offset_use and static_shift for raytracing */
+				if (store->svp_num > 0)
+					svpdepthstart = 0.01 * store->svp_depth_res * store->svp_depth[0];
+				else
+					svpdepthstart = 0.0;
+				depth_offset_use = ping->png_xducer_depth - ping->png_bheave[i];
+				if (depth_offset_use < svpdepthstart)
+					static_shift = depth_offset_use - svpdepthstart;
+				else
+					static_shift = 0.0;
+
+				/* find vertical takeoff angle that matches the position to within 1 mm */
 				iterx = 0;
 				iterz = 0;
-				if (theta <= 20.0)
+				theta_x = theta;
+				thetamin = 0.0;
+				thetamax = 90.0;
+				dtheta = 0.0;
+				dx = zz;
+				dz = zz;
+				zzcalc = zz;
+				zzcalc_old = 0.0;
+				while (iterx < 3 || (fabs(dx) > MBR_EM710RAW_BATH_RECALC_PRECISION 
+					&& iterx < MBR_EM710RAW_BATH_RECALC_NCALCMAX))
 					{
-					theta_x = theta;
-					thetamin = 0.0;
-					thetamax = 90.0;
-					dtheta = 0.0;
-					dx = zz;
-					dz = zz;
-					zzcalc = zz;
-					zzcalc_old = 0.0;
-					while (iterx < 3 || (fabs(dx) > 0.001 && iterx < 25))
-						{
-						theta_old = theta_x;
-						xxcalc_old = xxcalc;
-						zzcalc_old = zzcalc;
-						if (theta_x + dtheta > thetamin && theta_x + dtheta < thetamax)
-							theta_x += dtheta;
-						else if (dtheta < 0.0)
-							theta_x = theta_x - 0.5 * (theta_x - thetamin);
-						else if (dtheta > 0.0)
-							theta_x = theta_x + 0.5 * (thetamax - theta_x);
+					theta_old = theta_x;
+					xxcalc_old = xxcalc;
+					zzcalc_old = zzcalc;
+					if (theta_x + dtheta > thetamin && theta_x + dtheta < thetamax)
+						theta_x += dtheta;
+					else if (dtheta < 0.0)
+						theta_x = theta_x - 0.5 * (theta_x - thetamin);
+					else if (dtheta > 0.0)
+						theta_x = theta_x + 0.5 * (thetamax - theta_x);
+					tt = 0.5 * ping->png_range[i];
 
-						mb_rt(verbose, (void *) mb_io_ptr->saveptr1, 
-							depth_offset_use, 
-							theta_x,0.5*ping->png_range[i],
-							anglemode, soundspeed, 0.0, 0, NULL, NULL, NULL, &xxcalc, &zzcalc, &ttt, &ray_stat,error);
-						dx = xx - xxcalc;
-						dz = zz - zzcalc;
+					mb_rt(verbose, (void *) mb_io_ptr->saveptr1, 
+						(depth_offset_use - static_shift), 
+						theta_x, tt,
+						MBR_EM710RAW_BATH_RECALC_ANGLEMODE, soundspeed, 0.0, 
+						0, NULL, NULL, NULL, 
+						&xxcalc, &zzcalc, &ttt, &ray_stat,error);
+					zzcalc += static_shift;
+					dx = xx - xxcalc;
+					dz = zz - zzcalc;
+					if (xxcalc > xx)
+						thetamax = MIN(thetamax, theta_x);
+					if (xxcalc < xx)
+						thetamin = MAX(thetamin, theta_x);
+					if (iterx == 0)
+						{
 						if (xxcalc > xx)
+							{
+							dtheta = -0.01;
 							thetamax = MIN(thetamax, theta_x);
-						if (xxcalc < xx)
+							}
+						else
+							{
+							dtheta = 0.01;
 							thetamin = MAX(thetamin, theta_x);
-						if (iterx == 0)
-							{
-							if (xxcalc > xx)
-								{
-								dtheta = -0.01;
-								thetamax = MIN(thetamax, theta_x);
-								}
-							else
-								{
-								dtheta = 0.01;
-								thetamin = MAX(thetamin, theta_x);
-								}
 							}
-						else if (fabs(dx) < 0.001)
-							{
-							dtheta = 0.0;
-							}
-						else
-							{
-							dtheta = (xx - xxcalc) * (theta_x - theta_old) / (xxcalc - xxcalc_old);
-							}
-
-/* fprintf(stderr,"MATCH X: iterx:%d theta_x:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  theta_x:%f theta_old:%f dtheta:%f min:%f max:%f\n",
-iterx,theta_x,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetamin,thetamax); */
-						iterx++;
 						}
-					}
-
-				/* for angles >= 15 degrees find vertical takeoff angle that matches the depth to within 1 mm */
-				if (theta >= 15.0)
-					{
-					theta_z = theta;
-					thetamin = 0.0;
-					thetamax = 90.0;
-					dtheta = 0.0;
-					dx = zz;
-					dz = zz;
-					zzcalc = zz;
-					zzcalc_old = 0.0;
-					while (iterz < 3 || (fabs(dz) > 0.001 && iterz < 25))
+					else if (fabs(dx) < MBR_EM710RAW_BATH_RECALC_PRECISION)
 						{
-						theta_old = theta_z;
-						xxcalc_old = xxcalc;
-						zzcalc_old = zzcalc;
-						if (theta_z + dtheta > thetamin && theta_z + dtheta < thetamax)
-							theta_z += dtheta;
-						else if (dtheta < 0.0)
-							theta_z = theta_z - 0.5 * (theta_z - thetamin);
-						else if (dtheta > 0.0)
-							theta_z = theta_z + 0.5 * (thetamax - theta_z);
+						dtheta = 0.0;
+						}
+					else
+						{
+						dtheta = (xx - xxcalc) * (theta_x - theta_old) / (xxcalc - xxcalc_old);
+						}
 
-						mb_rt(verbose, (void *) mb_io_ptr->saveptr1, 
-							depth_offset_use, 
-							theta_z,0.5*ping->png_range[i],
-							anglemode, soundspeed, 0.0, 0, NULL, NULL, NULL, &xxcalc, &zzcalc, &ttt, &ray_stat,error);
-						dx = xx - xxcalc;
-						dz = zz - zzcalc;
-						if (zzcalc > zz)
-							thetamin = MAX(thetamin, theta_z);
-						if (zzcalc < zz)
-							thetamax = MIN(thetamax, theta_z);
-						if (iterz == 0)
+/* fprintf(stderr,"     MATCH X1: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  theta_x:%f theta_old:%f dtheta:%f min:%f max:%f\n",
+iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetamin,thetamax); */
+					iterx++;
+					}
+
+#ifdef MBR_EM710RAW_BATH_RECALC_TWEAK_ANGLE_RANGE
+				/* calculate range adjustment to allow matching of both 
+					position and depth */
+				dr = dz * cos(DTR * theta_x);
+				dt = 2.0 * dr / 1500.0;
+
+				/* find vertical takeoff angle that matches the position to within 1 mm */
+				iterx = 0;
+				iterz = 0;
+				thetamin = 0.0;
+				thetamax = 90.0;
+				dtheta = 0.0;
+				dx = zz;
+				dz = zz;
+				zzcalc = zz;
+				zzcalc_old = 0.0;
+				while (iterx < 3 || (fabs(dx) > MBR_EM710RAW_BATH_RECALC_PRECISION 
+					&& iterx < MBR_EM710RAW_BATH_RECALC_NCALCMAX))
+					{
+					theta_old = theta_x;
+					xxcalc_old = xxcalc;
+					zzcalc_old = zzcalc;
+					if (theta_x + dtheta > thetamin && theta_x + dtheta < thetamax)
+						theta_x += dtheta;
+					else if (dtheta < 0.0)
+						theta_x = theta_x - 0.5 * (theta_x - thetamin);
+					else if (dtheta > 0.0)
+						theta_x = theta_x + 0.5 * (thetamax - theta_x);
+					tt = 0.5 * (ping->png_range[i] + dt);
+
+					mb_rt(verbose, (void *) mb_io_ptr->saveptr1, 
+						(depth_offset_use - static_shift), 
+						theta_x, tt,
+						MBR_EM710RAW_BATH_RECALC_ANGLEMODE, soundspeed, 0.0, 
+						0, NULL, NULL, NULL, 
+						&xxcalc, &zzcalc, &ttt, &ray_stat,error);
+					zzcalc += static_shift;
+					dx = xx - xxcalc;
+					dz = zz - zzcalc;
+					if (xxcalc > xx)
+						thetamax = MIN(thetamax, theta_x);
+					if (xxcalc < xx)
+						thetamin = MAX(thetamin, theta_x);
+					if (iterx == 0)
+						{
+						if (xxcalc > xx)
 							{
-							if (zzcalc > zz)
-								{
-								dtheta = 0.01;
-								thetamin = MAX(thetamin, theta_z);
-								}
-							else
-								{
-								dtheta = -0.01;
-								thetamax = MIN(thetamax, theta_z);
-								}
-							}
-						else if (fabs(dz) < 0.001)
-							{
-							dtheta = 0.0;
+							dtheta = -0.01;
+							thetamax = MIN(thetamax, theta_x);
 							}
 						else
 							{
-							dtheta = (zz - zzcalc) * (theta_z - theta_old) / (zzcalc - zzcalc_old);
+							dtheta = 0.01;
+							thetamin = MAX(thetamin, theta_x);
 							}
-
-/* fprintf(stderr,"MATCH Z: iterz:%d theta_z:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  theta_z:%f theta_old:%f dtheta:%f min:%f max:%f\n",
-iterz,theta_z,xxcalc,xx,dx,zzcalc,zz,dz,theta_z,theta_old,dtheta,thetamin,thetamax); */
-						iterz++;
 						}
+					else if (fabs(dx) < MBR_EM710RAW_BATH_RECALC_PRECISION)
+						{
+						dtheta = 0.0;
+						}
+					else
+						{
+						dtheta = (xx - xxcalc) * (theta_x - theta_old) / (xxcalc - xxcalc_old);
+						}
+
+/* fprintf(stderr,"     MATCH X2: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  theta_x:%f theta_old:%f dtheta:%f min:%f max:%f\n",
+iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetamin,thetamax); */
+					iterx++;
 					}
+/* fprintf(stderr,"     MATCH X2: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  dr:%f dt:%f  theta_x:%f theta_old:%f dtheta:%f min:%f max:%f\n",
+iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,dr,dt,theta_x,theta_old,dtheta,thetamin,thetamax); */
 					
-				/* calculate takeoff angle */
-				if (theta >= 15.0 && theta <= 20.0)
+				/* calculate range adjustment to allow matching of both 
+					position and depth */
+				dr = dz * cos(DTR * theta_x);
+				dt += 2.0 * dr / 1500.0;
+
+				/* find vertical takeoff angle that matches the position to within 1 mm */
+				iterx = 0;
+				iterz = 0;
+				thetamin = 0.0;
+				thetamax = 90.0;
+				dtheta = 0.0;
+				dx = zz;
+				dz = zz;
+				zzcalc = zz;
+				zzcalc_old = 0.0;
+				while (iterx < 3 || (fabs(dx) > MBR_EM710RAW_BATH_RECALC_PRECISION 
+					&& iterx < MBR_EM710RAW_BATH_RECALC_NCALCMAX))
 					{
-					factor = (theta - 15.0) / 5.0;
-					theta_new = (1.0 - factor) * theta_x + factor * theta_z;
+					theta_old = theta_x;
+					xxcalc_old = xxcalc;
+					zzcalc_old = zzcalc;
+					if (theta_x + dtheta > thetamin && theta_x + dtheta < thetamax)
+						theta_x += dtheta;
+					else if (dtheta < 0.0)
+						theta_x = theta_x - 0.5 * (theta_x - thetamin);
+					else if (dtheta > 0.0)
+						theta_x = theta_x + 0.5 * (thetamax - theta_x);
+					tt = 0.5 * (ping->png_range[i] + dt);
+
+					mb_rt(verbose, (void *) mb_io_ptr->saveptr1, 
+						(depth_offset_use - static_shift), 
+						theta_x, tt,
+						MBR_EM710RAW_BATH_RECALC_ANGLEMODE, soundspeed, 0.0, 
+						0, NULL, NULL, NULL, 
+						&xxcalc, &zzcalc, &ttt, &ray_stat,error);
+					zzcalc += static_shift;
+					dx = xx - xxcalc;
+					dz = zz - zzcalc;
+					if (xxcalc > xx)
+						thetamax = MIN(thetamax, theta_x);
+					if (xxcalc < xx)
+						thetamin = MAX(thetamin, theta_x);
+					if (iterx == 0)
+						{
+						if (xxcalc > xx)
+							{
+							dtheta = -0.01;
+							thetamax = MIN(thetamax, theta_x);
+							}
+						else
+							{
+							dtheta = 0.01;
+							thetamin = MAX(thetamin, theta_x);
+							}
+						}
+					else if (fabs(dx) < MBR_EM710RAW_BATH_RECALC_PRECISION)
+						{
+						dtheta = 0.0;
+						}
+					else
+						{
+						dtheta = (xx - xxcalc) * (theta_x - theta_old) / (xxcalc - xxcalc_old);
+						}
+
+/* fprintf(stderr,"     MATCH X3: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  theta_x:%f theta_old:%f dtheta:%f min:%f max:%f\n",
+iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetamin,thetamax); */
+					iterx++;
 					}
-				else if (theta < 20.0)
+/* fprintf(stderr,"     MATCH X3: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  dr:%f dt:%f  theta_x:%f theta_old:%f dtheta:%f min:%f max:%f\n",
+iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,dr,dt,theta_x,theta_old,dtheta,thetamin,thetamax); */
+					
+				/* calculate range adjustment to allow matching of both 
+					position and depth */
+				dr = dz * cos(DTR * theta_x);
+				dt += 2.0 * dr / 1500.0;
+					
+				/* set final theta_new */
+				theta_new = theta_x;
+
+#else
+				/* find vertical takeoff angle that matches the depth to within 1 mm */
+				iterx = 0;
+				iterz = 0;
+				theta_z = theta_x;
+				thetamin = 0.0;
+				thetamax = 90.0;
+				dtheta = 0.0;
+				dx = zz;
+				dz = zz;
+				zzcalc = zz;
+				zzcalc_old = 0.0;
+				while (iterz < 3 || (fabs(dz) > MBR_EM710RAW_BATH_RECALC_PRECISION 
+					&& iterz < MBR_EM710RAW_BATH_RECALC_NCALCMAX))
 					{
-					factor = 0.0;
-					theta_new = theta_x;
+					theta_old = theta_z;
+					xxcalc_old = xxcalc;
+					zzcalc_old = zzcalc;
+					if (theta_z + dtheta > thetamin && theta_z + dtheta < thetamax)
+						theta_z += dtheta;
+					else if (dtheta < 0.0)
+						theta_z = theta_z - 0.5 * (theta_z - thetamin);
+					else if (dtheta > 0.0)
+						theta_z = theta_z + 0.5 * (thetamax - theta_z);
+					tt = 0.5 * ping->png_range[i];
+
+					mb_rt(verbose, (void *) mb_io_ptr->saveptr1, 
+						(depth_offset_use - static_shift), 
+						theta_z, tt,
+						MBR_EM710RAW_BATH_RECALC_ANGLEMODE, soundspeed, 0.0, 
+						0, NULL, NULL, NULL, 
+						&xxcalc, &zzcalc, &ttt, &ray_stat,error);
+					zzcalc += static_shift;
+					dx = xx - xxcalc;
+					dz = zz - zzcalc;
+					if (zzcalc < zz)
+						thetamax = MIN(thetamax, theta_z);
+					if (zzcalc > zz)
+						thetamin = MAX(thetamin, theta_z);
+					if (iterz == 0)
+						{
+						if (zzcalc < zz)
+							{
+							dtheta = -0.01;
+							thetamax = MIN(thetamax, theta_z);
+							}
+						else
+							{
+							dtheta = 0.01;
+							thetamin = MAX(thetamin, theta_z);
+							}
+						}
+					else if (fabs(dz) < MBR_EM710RAW_BATH_RECALC_PRECISION)
+						{
+						dtheta = 0.0;
+						}
+					else
+						{
+						dtheta = (zz - zzcalc) * (theta_z - theta_old) / (zzcalc - zzcalc_old);
+						}
+
+/* fprintf(stderr,"     MATCH Z1: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  theta_z:%f theta_old:%f dtheta:%f min:%f max:%f\n",
+iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_z,theta_old,dtheta,thetamin,thetamax); */
+					iterz++;
+					}
+
+				weight = cos(DTR * theta) * cos (DTR * theta);
+				theta_new = weight * theta_x + (1.0 - weight) * theta_z;
+#endif
+
+				ping->png_depression[i] = theta_new;
+				ping->png_azimuth[i] = phi;
+				ping->png_range[i] += dt;
+mb_rt(verbose, (void *) mb_io_ptr->saveptr1, 
+(depth_offset_use - static_shift), 
+theta_new, 0.5 * (ping->png_range[i]),
+MBR_EM710RAW_BATH_RECALC_ANGLEMODE, soundspeed, 0.0, 
+0, NULL, NULL, NULL, 
+&xxcalc, &zzcalc, &ttt, &ray_stat,error);
+zzcalc += static_shift;
+/*if (*error == MB_ERROR_NO_ERROR)
+fprintf(stderr,"PING:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d BEAM:%d depth_offset_use:%f xducer_depth:%f bheave:%f angle:%f tt:%f mode:%d ssv:%f null:%f xx:%f %f zzcalc:%f %f tt:%f %f\n",
+time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],i,
+depth_offset_use,ping->png_xducer_depth,ping->png_bheave[i],theta_new, 0.5*ping->png_range[i],
+MBR_EM710RAW_BATH_RECALC_ANGLEMODE, soundspeed, 0.0,xxcalc,xxcalc-xx,zzcalc,zzcalc-zz,ttt,dt);
+else
+fprintf(stderr,"PING:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d BEAM:%d depth_offset_use:%f xducer_depth:%f bheave:%f angle:%f tt:%f mode:%d ssv:%f null:%f FAIL ERROR CATASTROPHE\n",
+time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],i,
+depth_offset_use,ping->png_xducer_depth,ping->png_bheave[i],theta_new, 0.5*ping->png_range[i],
+MBR_EM710RAW_BATH_RECALC_ANGLEMODE, soundspeed, 0.0);*/
+
+/* fprintf(stderr,"Png:%6.6d:%3.3d SZ:%10.4f Ang:%9.5f Rng:%8.6f M:%d SV:%8.3f  X:%10.4f %10.4f %10.4f  Y:%10.4f %10.4f %10.4f  Z:%10.4f %10.4f %10.4f\n",
+ping->png_count,i,depth_offset_use,theta_new,0.5*ping->png_range[i],MBR_EM710RAW_BATH_RECALC_ANGLEMODE,soundspeed,
+ping->png_acrosstrack[i],xxcalc*cos(DTR*(180.0 - ping->png_azimuth[i])),ping->png_acrosstrack[i]-xxcalc*cos(DTR*(180.0 - ping->png_azimuth[i])),
+ping->png_alongtrack[i],xxcalc*sin(DTR*(180.0 - ping->png_azimuth[i])),ping->png_alongtrack[i]-xxcalc*sin(DTR*(180.0 - ping->png_azimuth[i])),
+ping->png_depth[i]+ping->png_xducer_depth,zzcalc,ping->png_depth[i]+ping->png_xducer_depth-zzcalc);*/
+
+				/* calculate beamflag */
+				detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];
+				if (((detection_mask & 128) == 128) && (((detection_mask & 32) == 32) || ((detection_mask & 24) == 24)))
+					{
+					ping->png_beamflag[i] = MB_FLAG_NULL;
+					}
+				else if ((detection_mask & 128) == 128)
+					{
+					ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
 					}
 				else
 					{
-					factor = 1.0;
-					theta_new = theta_z;
+					ping->png_beamflag[i] = MB_FLAG_NONE;
 					}
-				
-				}
-			
-/* mb_rt(verbose, (void *) mb_io_ptr->saveptr1, 
-depth_offset_use, 
-theta_new,0.5*ping->png_range[i],
-anglemode, soundspeed, 0.0, 0, NULL, NULL, NULL, &xxcalc, &zzcalc, &ttt, &ray_stat,error); */
-			ping->png_depression[i] = theta_new;
-			ping->png_azimuth[i] = phi;
-/*fprintf(stderr,"depth_offset_use:%f xducer_depth:%f bheave:%f angle:%f tt:%f mode:%d ssv:%f null:%f xx:%f zzcalc:%f tt:%f\n",
-depth_offset_use,ping->png_xducer_depth,ping->png_bheave[i],ping->png_depression[i], 0.5*ping->png_range[i],
-anglemode, soundspeed, 0.0,xxcalc,zzcalc,ttt);*/
-
-/* dz = ping->png_depth[i]+ping->png_xducer_depth - zzcalc;
-dtheta = theta_new - theta; */
-
-/* fprintf(stderr,"COMPARE %d X:%f %f Y:%f %f Z:%f %f     %.3f %.3f %.3f   theta: %.3f %.3f %.3f factor:%.2f iter:%d %d\n",
-i,ping->png_acrosstrack[i],xxcalc*cos(DTR*(180.0 - ping->png_azimuth[i])),
-ping->png_alongtrack[i],xxcalc*sin(DTR*(180.0 - ping->png_azimuth[i])),ping->png_depth[i]+ping->png_xducer_depth,zzcalc,
-ping->png_acrosstrack[i]-xxcalc*cos(DTR*(180.0 - ping->png_azimuth[i])),ping->png_alongtrack[i]-xxcalc*sin(DTR*(180.0 - ping->png_azimuth[i])),dz,
-theta,theta_new,dtheta,factor,iterx,iterz);*/
-			
-			/* calculate beamflag */
-			detection_mask = (mb_u_char) ping->png_raw_rxdetection[i];
-			if (((detection_mask & 128) == 128) && (((detection_mask & 32) == 32) || ((detection_mask & 24) == 24)))
-				{
-				ping->png_beamflag[i] = MB_FLAG_NULL;
-				}
-			else if ((detection_mask & 128) == 128)
-				{
-				ping->png_beamflag[i] = MB_FLAG_FLAG + MB_FLAG_SONAR;
-				}
-			else
-				{
-				ping->png_beamflag[i] = MB_FLAG_NONE;
 				}
 			}
 

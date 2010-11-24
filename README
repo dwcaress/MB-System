@@ -26,7 +26,8 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-  Version 5.1.3beta1874  November7, 2010
+  Version 5.1.3beta1875  November 23, 2010
+  Version 5.1.3beta1874  November 7, 2010
   Version 5.1.3beta1862  June 7, 2010
   Version 5.1.3beta1858  May 18, 2010
   Version 5.1.3beta1855  May 4, 2010
@@ -174,6 +175,51 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
+
+-----> 5.1.3beta1875
+
+Altered -P option in mbsvplist. Previously this option (which turns on 
+bathymetry recalculation by raytracing in mbprocess using the water sound 
+speed models extracted from the data files) set the raytracing to
+correct the takeoff angles for the difference between the sound speed
+used for beamforming (surface sound velocity or SSV) and the sound speed
+at the sonar depth in the water sound speed model. Now, mbsvplist sets
+mbprocess to leave the takeoff angles unchanged. This is more more 
+consistent with the expectation that raytracing through the original
+sound speed model should yield values matching the original bathymetry.
+
+Altered mbprocess bathymetry recalculation by raytracing to better handle
+cases where large heave values bring the sonar array above the nominal
+water line. In this case, a static heave offset is calculated, raytracing
+is done from the top of the water sound speed model, and the heave offset
+is added to the raytracing result.
+
+Improved the autopicking function of mbnavadjust. 
+
+Fixed a bug in handling the per-beam heave values in current generation
+Kongsberg data (formats 58 & 59).
+
+Changed mbm_route2mission to allow command line argument control of AUV
+speed during ascent/descent, survey lines, and transit lines. Also added
+control of the "deltaDepthRestart" value controlling how far up the AUV
+should float after an altitude abort before resuming the mission.
+
+More changes to support of Kongsberg current generation multibeam
+data in formats 58 and 59. As previously noted, the angles used to recalculate
+bathymetry from raw travel times by raytracing are estimated by iteratively
+seeking to match the original bathymetry reported by the sonar. These angles
+are estimated when data are first read as format 58 and then embedded in 
+format 59 data (presumably when mbcopy is used to translate format 58 files to
+format 59)for later use by mbprocess. The default algorithm matches the original
+bathymetry to within about 0.1% altitude by calculating an effective heave for
+each ping and takeoff angles for each beam. A second algorithm (which can only
+be activated by uncommenting an #ifdef statement in mbr_em710raw.c) matches the
+orginal bathymetry by modifying both the takeoff angles and the travel time
+measurement - this achieves matching of the original bathymetry to about 0.02%
+of altitude. Use of the second algorithm is not recommended because modifying
+the fundamental observations (travel times) to match the sonar's calculation
+is, well, unsatisfying and wrong. The bad option is there because I took the
+time to code it to see how well it would work.
 
 -----> 5.1.3beta1874
 

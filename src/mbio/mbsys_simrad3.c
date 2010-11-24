@@ -1657,7 +1657,7 @@ int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*nbath = 0;
 		for (i=0;i<ping->png_nbeams;i++)
 			{
-			bath[i] = ping->png_depth[i] + ping->png_xducer_depth + ping->png_bheave[i];
+			bath[i] = ping->png_depth[i] + ping->png_xducer_depth;
 			beamflag[i] = ping->png_beamflag[i];
 			bathacrosstrack[i] = ping->png_acrosstrack[i];
 			bathalongtrack[i] = ping->png_alongtrack[i];
