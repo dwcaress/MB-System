@@ -8788,7 +8788,7 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
-		store->kind = MB_DATA_DATA;
+		store->kind = MB_DATA_RAW_LINE;
 		store->type = R7KRECID_7kReserved;
 		
 		/* get the time */
@@ -14893,7 +14893,6 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
 	int	index;
 	char	*buffer;
 	int	i, j, k;
-verbose = 5;
 
 	/* print input debug statements */
 	if (verbose >= 2)

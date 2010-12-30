@@ -693,7 +693,8 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			soundspeed = 1500.0;
 		store->sonar_depth = 0.0;
 		store->heave = 0.0;
-		for (i=0;i<store->num_beams;i++)
+		store->num_proc_beams = store->num_beams;
+		for (i=0;i<store->num_proc_beams;i++)
 			{
 			if (store->range[i] > 0)
 				{
@@ -708,6 +709,9 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				rr = (soundspeed / 1500.0) * 0.001 * store->range_resolution * store->range[i];
 				xx = rr * sin(DTR * theta);
 				zz = rr * cos(DTR * theta);
+				store->beamrange[i] = rr;
+				store->angles[i] = theta;
+				store->angles_forward[i] = phi;
 				store->bathacrosstrack[i] = xx * cos(DTR * phi);
 				store->bathalongtrack[i] = xx * sin(DTR * phi);
 				store->bath[i] = zz + store->sonar_depth - store->heave;
@@ -715,6 +719,9 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				}
 			else
 				{
+				store->beamrange[i] = 0.0;
+				store->angles[i] = 0.0;
+				store->angles_forward[i] = 0.0;
 				store->beamflag[i] = MB_FLAG_NULL;
 				store->bath[i] = 0.0;
 				store->bathacrosstrack[i] = 0.0;
@@ -762,9 +769,11 @@ int mbr_rt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"dbg4       range[%d]:            %d\n",i,store->range[i]);
 		fprintf(stderr,"dbg4       sonar_depth:        %f\n",store->sonar_depth);
 		fprintf(stderr,"dbg4       heave:              %f\n",store->heave);
-		for (i=0;i<store->num_beams;i++)
-			fprintf(stderr,"dbg4       bath[%d]:    %f %f %f %d\n",
-				i,store->bath[i],store->bathacrosstrack[i],
+		fprintf(stderr,"dbg4       num_proc_beams:     %d\n",store->num_proc_beams);
+		for (i=0;i<store->num_proc_beams;i++)
+			fprintf(stderr,"dbg4       tt[%d]: %f angles:%f %f   bath: %f %f %f %d\n",
+				i,store->beamrange[i],store->angles[i],store->angles_forward[i],
+				store->bath[i],store->bathacrosstrack[i],
 				store->bathalongtrack[i],store->beamflag[i]);
 		}
 
@@ -868,9 +877,11 @@ int mbr_wt_image83p(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"dbg4       range[%d]:            %d\n",i,store->range[i]);
 		fprintf(stderr,"dbg4       sonar_depth:        %f\n",store->sonar_depth);
 		fprintf(stderr,"dbg4       heave:              %f\n",store->heave);
-		for (i=0;i<store->num_beams;i++)
-			fprintf(stderr,"dbg4       bath[%d]:    %f %f %f %d\n",
-				i,store->bath[i],store->bathacrosstrack[i],
+		fprintf(stderr,"dbg4       num_proc_beams:     %d\n",store->num_proc_beams);
+		for (i=0;i<store->num_proc_beams;i++)
+			fprintf(stderr,"dbg4       tt[%d]: %f angles:%f %f   bath: %f %f %f %d\n",
+				i,store->beamrange[i],store->angles[i],store->angles_forward[i],
+				store->bath[i],store->bathacrosstrack[i],
 				store->bathalongtrack[i],store->beamflag[i]);
 		}
 

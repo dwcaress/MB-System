@@ -1257,7 +1257,7 @@ dvl->depth,dvl->pitch,dvl->roll,dvl->heading,dvl->soundspeed);
 				/* break up NMEA string into arguments */
 				nargc = 0;
 				string = (char *) nmeastring;
-				for (nap = nargv; (*nap = strsep(&string, ",*")) != NULL;)
+				for (nap = nargv; (*nap = strtok(string, ",*")) != NULL;)
 					{
 					if (++nap >= &nargv[25]) 
 						break;

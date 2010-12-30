@@ -2636,7 +2636,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		      if (summary->Profile_BitsDefining[6] & PROF_f_bs_beam_position)
 			{
 			  float_ptr = (float *) &buffer[offset];
-			  profile->bs_beam_position = float_ptr;
+			  profile->bs_beam_position = *float_ptr;
 			  offset += 4;
 			}
 		      if (summary->Profile_BitsDefining[6] & PROF_ui_bs_control_flags)
@@ -3433,7 +3433,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			if (summary->Beam_BitsDefining[0] & BEAM_si_acrossTrack)
 			{
 				short_ptr = (short *) &buffer[offset];
-				beam->acrossTrack = *short_ptr
+				beam->acrossTrack = *short_ptr;
 				beam->acrossTrack *= ScaleFactor;
 				offset+=2;
 			}

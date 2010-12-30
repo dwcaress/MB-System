@@ -83,6 +83,10 @@ struct mbsys_image83p_struct
 	/* important values not in vendor format */
 	float	sonar_depth;
 	float	heave;
+	int	num_proc_beams;
+	double	beamrange[MBSYS_IMAGE83P_BEAMS];
+	double	angles[MBSYS_IMAGE83P_BEAMS];
+	double	angles_forward[MBSYS_IMAGE83P_BEAMS];
 	float	bath[MBSYS_IMAGE83P_BEAMS];
 	float	bathacrosstrack[MBSYS_IMAGE83P_BEAMS];
 	float	bathalongtrack[MBSYS_IMAGE83P_BEAMS];

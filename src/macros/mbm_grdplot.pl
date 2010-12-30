@@ -1868,8 +1868,31 @@ if ($color_mode)
 	# colormap above sealevel
 	else
 		{
+		# Find zero break
+		$izero = int(-$color_start / $color_int);
+		
 		# interpolate colors
-		for ($i = 0; $i < $ncolors; $i++)
+		for ($i = 0; $i < $ncolors - $izero; $i++)
+			{
+			$xx = ($ncpt - 1) * $i / ($ncolors - 1);
+			$i1 = int($xx);
+			$i2 = $i1 + 1;
+			$red = $cptbr8[$i1] 
+				+ ($cptbr8[$i2] - $cptbr8[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			$green = $cptbg8[$i1] 
+				+ ($cptbg8[$i2] - $cptbg8[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			$blue = $cptbb8[$i1] 
+				+ ($cptbb8[$i2] - $cptbb8[$i1])
+				* ($xx - $i1) / ($i2 - $i1);
+			push (@cptr, $red);
+			push (@cptg, $green);
+			push (@cptb, $blue);
+			}
+
+		# interpolate colors
+		for ($i = $izero; $i < $ncolors; $i++)
 			{
 			$xx = ($ncpt - 1) * $i / ($ncolors - 1);
 			$i1 = int($xx);
@@ -1886,26 +1909,6 @@ if ($color_mode)
 			push (@cptr, $red);
 			push (@cptg, $green);
 			push (@cptb, $blue);
-			}
-
-		# interpolate colors
-		for ($i = 0; $i < $ncolors; $i++)
-			{
-			$xx = ($ncpt - 1) * $i / ($ncolors - 1);
-			$i1 = int($xx);
-			$i2 = $i1 + 1;
-			$red = $cptbr8[$i1] 
-				+ ($cptbr8[$i2] - $cptbr8[$i1])
-				* ($xx - $i1) / ($i2 - $i1);
-			$green = $cptbg8[$i1] 
-				+ ($cptbg8[$i2] - $cptbg8[$i1])
-				* ($xx - $i1) / ($i2 - $i1);
-			$blue = $cptbb8[$i1] 
-				+ ($cptbb8[$i2] - $cptbb8[$i1])
-				* ($xx - $i1) / ($i2 - $i1);
-			push (@cptrr, $red);
-			push (@cptgg, $green);
-			push (@cptbb, $blue);
 			}
 		}
 	}

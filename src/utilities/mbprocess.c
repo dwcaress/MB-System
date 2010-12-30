@@ -5489,7 +5489,7 @@ bath[i]-zz); */
 				/* get alongtrack and acrosstrack distances
 					and depth */
 				bathacrosstrack[i] = xx*cos(DTR*angles_forward[i]);
-				bathalongtrack[i] = xx*sin(DTR*angles_forward[i]);
+				bathalongtrack[i] = xx*sin(DTR*angles_forward[i]) + alongtrack_offset[i];
 				bath[i] = zz;
 				
 				/* output some debug values */

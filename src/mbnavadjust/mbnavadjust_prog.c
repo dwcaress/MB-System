@@ -5054,6 +5054,9 @@ int mbnavadjust_crossing_load()
 		sprintf(message,"Contouring section 2 of crossing %d...",mbna_current_crossing);
 		do_message_update(message);
 		status = mbnavadjust_section_contour(mbna_file_id_2,mbna_section_2,swath2,&mbna_contour2);
+
+		/* set loaded flag */
+		mbna_naverr_load = MB_YES;
 		
 		/* generate misfit grids */
 		sprintf(message,"Getting misfit for crossing %d...",mbna_current_crossing);
@@ -5062,10 +5065,7 @@ int mbnavadjust_crossing_load()
 		
 		/* get overlap region */
 		mbnavadjust_crossing_overlap(mbna_current_crossing);
-
-		/* set loaded flag */
-		mbna_naverr_load = MB_YES;
-   		}
+  		}
    		
    	/* set mbna_crossing_select */	
     	if (project.open == MB_YES
@@ -6234,7 +6234,8 @@ int mbnavadjust_get_misfit()
 		
     	if (project.open == MB_YES
     		&& project.num_crossings > 0
-    		&& mbna_current_crossing >= 0)
+    		&& mbna_current_crossing >= 0
+		&& mbna_naverr_load == MB_YES)
     		{
 /* fprintf(stderr,"\nDEBUG %s %d: mbnavadjust_get_misfit: mbna_plot minmax: %f %f %f %f\n",
 __FILE__,__LINE__,
@@ -6774,7 +6775,8 @@ int mbnavadjust_get_misfitxy()
 		
     	if (project.open == MB_YES
     		&& project.num_crossings > 0
-    		&& mbna_current_crossing >= 0)
+    		&& mbna_current_crossing >= 0
+		&& mbna_naverr_load == MB_YES)
     		{				
 		/* get minimum misfit in plane at current z offset */
 		if (grid_nxyzeq > 0)
@@ -7999,9 +8001,6 @@ mbnavadjust_invertnav()
 	double	perturbationsizeold;
 	double	perturbationchange;
 	double	convergencecriterea;
-	double	smoothweight_best;
-	double	sigma_crossing_best;
-	double	sigma_total_best;
 	double	offset_x;
 	double	offset_y;
 	double	offset_z;
@@ -8238,7 +8237,7 @@ iter,ntie,misfit_initial,misfit_ties,perturbationsize,perturbationchange,converg
 block_offset_avg_x,block_offset_avg_y,block_offset_avg_z,navg,project.num_blocks); */
 
 		    /* output solution */
-		    if (mbna_verbose > 1)
+		    if (mbna_verbose > 0)
 		    	{
 			fprintf(stderr,"average offsets: %f %f %f\n",block_offset_avg_x,block_offset_avg_y,block_offset_avg_z);
 			for (i=0;i<ncols/3;i++)
@@ -8736,13 +8735,7 @@ icrossing,jtie,nc1,file1->status,nc2,file2->status,offsetx,offsety,offsetz);
 		mbna_smoothweight = pow(10.0, project.smoothing) * mbna_offsetweight;
 		while (done == MB_NO)
 		    {
-		    /* set message dialog on */
-		    if (iter % 100 == 0)
-		    	{
-		    	sprintf(message,"Performing inversion iteration %d...", iter);
-		    	do_message_update(message);
-		    	}
-		
+		    /* zero solution */
 		    for (i=0;i<ncols;i++)
 			{
 			xx[i] = 0.0;
@@ -9159,6 +9152,14 @@ isnav,k,x[3*k+2],xa[3*k+2],section->snav_lat_offset[isnav]); */
 			    }
 			}
 
+		    /* set message dialog on */
+		    if (iter % 100 == 0)
+		    	{
+		    	sprintf(message,"Completed inversion iteration %d Convergence:%.2f", iter, convergencecriterea / MBNA_CONVERGENCE);
+		    	do_message_update(message);
+		    	}
+		
+
 		    /* update model plot */
 		    if (project.modelplot == MB_YES && iter % 25 == 0)
 		    	mbnavadjust_modelplot_plot();
@@ -9176,8 +9177,8 @@ isnav,k,x[3*k+2],xa[3*k+2],section->snav_lat_offset[isnav]); */
 		sprintf(message,"Outputting navigation solution...");
 		do_message_update(message);
 
-		sprintf(message, " > Final smoothing weight:%12g\n > Final crossing sigma:%12g\n > Final total sigma:%12g\n",
-			smoothweight_best, sigma_crossing_best, sigma_total_best);
+		sprintf(message, " > Final misfit:%12g\n > Initial misfit:%12g\n",
+			misfit_ties, misfit_initial);
 		do_info_add(message, MB_NO);
 		
 		/* get crossing offset results */
@@ -9220,15 +9221,7 @@ offset_x,offset_y,offset_z,tie->inversion_offset_x_m,tie->inversion_offset_y_m,t
 				(tie->inversion_offset_y_m - tie->offset_y_m),
 				(tie->inversion_offset_z_m - tie->offset_z_m));
 			do_info_add(message, MB_NO);
-/* fprintf(stderr,"%s",message);*/
 			}
-		    }
-
-		if (mbna_verbose >= 1)
-		for (i=0;i<ncols/3;i++)
-		    {
-		    fprintf(stderr, "i:%d  offsets: %f %f %f\n",
-		    		i, xx[3*i], xx[3*i+1], xx[3*i+2]);
 		    }
 		
 		/* write updated project */
@@ -9428,10 +9421,10 @@ mbnavadjust_applynav()
 					{
 					factor = (time_d - section->snav_time_d[isnav])
 						    / (section->snav_time_d[isnav+1] - section->snav_time_d[isnav]);
-    /*if (fabs(time_d - section->snav_time_d[isnav]) < 1.0)
-    fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav]);
-    else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
-    fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
+/*if (fabs(time_d - section->snav_time_d[isnav]) < 1.0)
+fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav]);
+else if (fabs(time_d - section->snav_time_d[isnav+1]) < 1.0)
+fprintf(stderr,"%f %f\n",pitch,section->snav_z_offset[isnav+1]);*/
 					}
 				    else
 					factor = 0.0;
@@ -9455,23 +9448,19 @@ mbnavadjust_applynav()
 					    print has the time_d value come out as "nan" - this is the worst sort
 					    of kluge for a real but mysterious bug - apologies to all who find this
 					    - DWC 18 Aug 2007 R/V Atlantis Cobb Segment JDF Ridge */
-				    sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+				    sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.3f %.2f %.2f %.2f %.3f\r\n",
 						time_i[0], time_i[1], time_i[2], time_i[3],
 						time_i[4], time_i[5], time_i[6], time_d,
 						navlon, navlat, heading, speed, 
 						draft, roll, pitch, heave, zoffset);
-				    sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\r\n",
+				    sprintf(ostring, "%4.4d %2.2d %2.2d %2.2d %2.2d %2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.3f %.2f %.2f %.2f %.3f\r\n",
 						time_i[0], time_i[1], time_i[2], time_i[3],
 						time_i[4], time_i[5], time_i[6], time_d,
 						navlon, navlat, heading, speed, 
 						draft, roll, pitch, heave, zoffset);
 				    fprintf(ofp, "%s", ostring);
 				    fprintf(afp, "%s", ostring);
-    /*fprintf(stderr, "%2.2d:%2.2d:%2.2d:%5.3f %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %16.6f %.6f %.6f %.2f %.2f %.2f\n\n",
-    i, isection, isnav, factor, 
-    time_i[0], time_i[1], time_i[2], time_i[3],
-    time_i[4], time_i[5], time_i[6], time_d,
-    navlon, navlat, heading, speed, zoffset);*/
+/* fprintf(stderr, "NAV OUT: %3.3d:%3.3d:%2.2d factor:%f | %s", i,isection,isnav,factor,ostring); */
 				    }
 				}
 			    }

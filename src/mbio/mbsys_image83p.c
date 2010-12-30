@@ -248,7 +248,7 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_io_ptr->beamwidth_xtrack = 0.75;
 
 		/* read distance and depth values into storage arrays */
-		*nbath = store->num_beams;
+		*nbath = store->num_proc_beams;
 		*namp = 0;
 		*nss = 0;
 		for (i=0;i<*nbath;i++)
@@ -472,7 +472,7 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* put depth values 
 			into data structure */
-		store->num_beams = nbath; 
+		store->num_proc_beams = nbath; 
 		for (i=0;i<nbath;i++)
 			{
 			store->beamflag[i] = beamflag[i];
@@ -513,7 +513,6 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	double	alpha, beta, theta, phi;
 	int	i;
 
 	/* print input debug statements */
@@ -546,7 +545,7 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get nbeams */
-		*nbeams = store->num_beams;
+		*nbeams = store->num_proc_beams;
 		
 		*draft = store->sonar_depth;
 		if (store->sound_velocity > 13000 && store->sound_velocity < 17000)
@@ -555,18 +554,11 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			*ssv = 1500.0;
 
 		/* get travel times, angles */
-		for (i=0;i<store->num_beams;i++)
+		for (i=0;i<store->num_proc_beams;i++)
 			{
-			alpha = 0.1 * (store->pitch - 900);
-			beta = 0.01 * (store->start_angle + i * store->angle_increment) - 180.0 
-				+ 0.1 * (store->roll - 900);
-			mb_rollpitch_to_takeoff(
-				verbose, 
-				alpha, beta, 
-				&theta, &phi, 
-				error);
-			angles[i] = theta;
-			angles_forward[i] = phi;
+			ttimes[i] = store->beamrange[i];
+			angles[i] = store->angles[i];
+			angles_forward[i] = store->angles_forward[i];
 			angles_null[i] = 0.0;
 			alongtrack_offset[i] = 0.0;
 			heave[i] = store->heave;
@@ -667,7 +659,7 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 		altitude_found = MB_NO;
 		xtrackmin = 999999.9;
 		*altitudev = 0.0;
-		for (i=0;i<store->num_beams;i++)
+		for (i=0;i<store->num_proc_beams;i++)
 			{
 			if (mb_beam_ok(store->beamflag[i])
 				&& fabs(store->bathacrosstrack[i]) < xtrackmin)

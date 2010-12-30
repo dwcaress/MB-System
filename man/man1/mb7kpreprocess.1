@@ -1,4 +1,4 @@
-.TH mb7kpreprocess 1 "27 August 2010" "MB-System 5.0" "MB-System 5.0"
+.TH mb7kpreprocess 1 "29 December 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7kpreprocess\fP - performs preprocessing of Reson 7k multibeam data 
 in the 7k format (\fBMBIO\fP format 88).
@@ -8,7 +8,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmb7kpreprocess\fP [\fB-A\fP \fB-B\fP \fB-D\fP\fIoffx/offy[/offdepth]\fP \fB-F\fP\fIformat\fP 
-\fB-I\fIfile \fB-L\fP \fB-M\fP\fIrockfile\fP \fB-N\fP\fIinsfile\fP \fB-O\fP\fIoutfile\fP  
+\fB-I\fIfile \fB-K\fP\fIklugemode\fP \fB-L\fP \fB-M\fP\fIrockfile\fP \fB-N\fP\fIinsfile\fP \fB-O\fP\fIoutfile\fP  
 \fB-P\fP\fIsonardepthfile\fP \fB-PF\fP\fIfilterlength/filterdepth\fP 
 \fB-T\fP\fItimelag\fP \fB-W\fP\fIdslfile\fP \fB-H -V\fP]
 
@@ -78,6 +78,16 @@ data file should be followed by a data format identifier, e.g.:
 .br
 This program only reads Reson 7k format data files (\fBMBIO\fP
 format 88).
+.TP
+.B \-K
+\fIklugemode\fP
+.br
+This option causes the program to implement one of the available 
+processing "kluge" fixes. This are unusual steps required to fix
+data with particular, unusual problems. Kluge 1 forces \fBmb7kpreprocess\fP
+to replace the sonar depth value with values from vertical
+depth data records. Kuge 2 forces \fBmb7kpreprocess\fP to zero the initial
+beam alongtrack distance values.
 .TP
 .B \-L
 .br

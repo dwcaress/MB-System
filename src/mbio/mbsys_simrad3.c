@@ -2167,6 +2167,7 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int	time_i[7];
 	double	ptime_d;
 	double	soundspeed;
+	double	lever_x, lever_y, lever_z, offset_x, offset_y, offset_z;
 	int	i;
 
 	/* print input debug statements */
@@ -2211,9 +2212,21 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		time_i[6] = (ping->png_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &ptime_d);
 
+		/* obtain lever arm offset for sonar relative to the position sensor */
+		mb_lever(verbose, store->par_s1y, store->par_s1x, store->par_s1z - store->par_wlz, 
+				store->par_p1y, store->par_p1x, store->par_p1z,
+				store->par_msy, store->par_msx, store->par_msz,  
+				-0.01 * ping->png_pitch + store->par_msp, -0.01 * ping->png_roll + store->par_msr, 
+				&lever_x, &lever_y, &lever_z, error);
+
+		/* obtain position offset for beam */
+		offset_x = store->par_s1y - store->par_p1y + lever_x;
+		offset_y = store->par_s1x - store->par_p1x + lever_y;
+		offset_z =  lever_z;
+
 		/* get depth offset (heave + heave offset) */
 		*ssv = 0.1 * ping->png_ssv;
-		*draft = ping->png_xducer_depth;
+		*draft = ping->png_xducer_depth + offset_z;
 
 		/* get travel times, angles */
 		*nbeams = ping->png_nbeams;
@@ -2225,9 +2238,10 @@ int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			angles_forward[i] = 180.0 - ping->png_azimuth[i];
 			if (angles_forward[i] < 0.0) angles_forward[i] += 360.0;
 			angles_null[i] = 0.0;
-			heave[i] = -ping->png_bheave[i];
+			heave[i] = -ping->png_bheave[i] + lever_z;
 			alongtrack_offset[i] = (0.01 * ((double)ping->png_speed)) 
-						* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]]);
+						* ((double) ping->png_raw_txoffset[ping->png_raw_rxsector[i]])
+						+ offset_y;
 			}
 
 		/* set status */

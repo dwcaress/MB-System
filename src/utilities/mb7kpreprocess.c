@@ -121,6 +121,7 @@
 #define	MB7KPREPROCESS_TIMELAG_CONSTANT	1
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 #define	MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH	1
+#define	MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES	2
 static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -483,6 +484,7 @@ int main (int argc, char **argv)
 	/* kluge modes */
 	int	klugemode;
 	int	kluge_useverticaldepth = MB_NO; /* kluge 1 */
+	int	kluge_zeroalongtrackangles = MB_NO; /* kluge 2 */
 	
 	int	interp_status;
 	double	soundspeed;
@@ -585,6 +587,10 @@ int main (int argc, char **argv)
 			if (klugemode == MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH)
 				{
 				kluge_useverticaldepth = MB_YES;
+				}
+			if (klugemode == MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES)
+				{
+				kluge_zeroalongtrackangles = MB_YES;
 				}
 			flag++;
 			break;
@@ -4275,7 +4281,15 @@ sonardepth_sonardepth[nsonardepth]);*/
 					bathymetry->pitch = DTR * pitch;
 					bathymetry->heave = 0.0;
 					bathymetry->vehicle_height = -sonardepth;
-
+					
+					/* zero alongtrack angles if requested */
+					if (kluge_zeroalongtrackangles == MB_YES)
+						{for (i=0;i<bathymetry->number_beams;i++)
+							{
+							beamgeometry->angle_alongtrack[i] = 0.0;
+							}
+						}
+					
 					/* get bathymetry */
 					if (volatilesettings->sound_velocity > 0.0)
 						soundspeed = volatilesettings->sound_velocity;
