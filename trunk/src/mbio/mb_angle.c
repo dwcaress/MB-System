@@ -471,11 +471,11 @@ int mb_lever(int verbose,
 	if (r > 0.0)
 	    {
 	    /* get initial angles */
-	    pitch = RTD * asin(yy / r);
-	    if (cos(DTR * pitch) != 0.0)
-		roll = RTD * acos(xx / (r * cos(DTR * pitch)));
+	    roll = RTD * acos(xx / r );
+	    if (sin(DTR * roll) != 0.0)
+		pitch = RTD * asin(yy / (r * sin(DTR * roll)));
 	    else
-		roll = 0.0;
+		pitch = 0.0;
 		
   	    /* apply angle change */
 	    pitch += vru_pitch;
@@ -509,11 +509,11 @@ int mb_lever(int verbose,
 	if (r > 0.0)
 	    {
 	    /* get initial angles */
-	    pitch = RTD * asin(yy / r);
-	    if (cos(DTR * pitch) != 0.0)
-		roll = RTD * acos(xx / (r * cos(DTR * pitch)));
+	    roll = RTD * acos(xx / r );
+	    if (sin(DTR * roll) != 0.0)
+		pitch = RTD * asin(yy / (r * sin(DTR * roll)));
 	    else
-		roll = 0.0;
+		pitch = 0.0;
 		
   	    /* apply angle change */
 	    pitch += vru_pitch;

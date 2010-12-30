@@ -176,6 +176,38 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.1.3 RELEASE NOTES:
 ------------------------------------------
 
+-----> 5.1.3
+
+Augmented mbotps to output tide in both
+ 	time_d tide
+and
+ 	year month day hour minute seconds tide
+using a -Atideformat command line option.
+
+Added new kluge processing option to mb7kpreprocess (-K2) 
+that zeros alongtrack angles. This fixes some recent sample 
+Reson 7k data.
+
+Recast lever arm calculation due to roll and pitch rotations
+in mb_angle.c.
+
+More changes to the handling of current generation Kongsberg
+data in mbr_em710raw.c. 
+
+Fixed handling of beam alongtrack distance values during bathymetry
+recalculation by raytracing.
+
+Improved beam info display in mbeditviz.
+
+Fixed mbnavadjust recalculation of the 3D cross-correlation function 
+after changing the vertical offset.
+
+Changed mbr_image83p.c, mbr_imagemba.c, and mbsys_imae83p.c so that
+calculation of beam angles happens during the first read of the data.
+
+Replaced strsep() with strtok() in mbr_edgjstar.c. This is to allow
+MB-System to be more easily built on Solaris systems.
+
 -----> 5.1.3beta1875
 
 Altered -P option in mbsvplist. Previously this option (which turns on 

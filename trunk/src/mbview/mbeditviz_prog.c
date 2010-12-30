@@ -3965,9 +3965,10 @@ ifile, iping, ibeam);
 	/* generate info string */
 	file = &mbev_files[ifile];
 	ping = &(file->pings[iping]);
-	sprintf(infostring,"Beam %d of %d   Ping %d of %d   File:%s\nPing Time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f",
+	sprintf(infostring,"Beam %d of %d   Ping %d of %d   File:%s\nPing Time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f\nLon:%.6f Lat:%.6f Depth:%.3f X:%.3f L:%.3f",
 		ibeam,ping->beams_bath,iping,file->num_pings,file->name,ping->time_i[0],ping->time_i[1],ping->time_i[2],
-		ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],ping->time_d);
+		ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],ping->time_d,
+		ping->bathlon[ibeam],ping->bathlat[ibeam],ping->bath[ibeam],ping->bathacrosstrack[ibeam],ping->bathalongtrack[ibeam]);
 		
 	/* print output debug statements */
 	if (mbev_verbose >= 2)

@@ -172,7 +172,7 @@ $ascendenddepth = 2;
 # behavior reson
 $resonduration = 6;
 $sonaraltitudemax = 100.0;
-$mb_pingrate = 2.0;
+$mb_pingrate = 4.0;
 $mb_transmitgain = 220.0;
 $mb_receivegain = 75.0;
 $mb_minrangefraction = 0.2;
@@ -1293,7 +1293,7 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 			{
 			$sslo_range = 200.0;
 			}
-		$sbp_duration = 1000.0 * 0.9 / $mb_pingrate;
+		$sbp_duration = 1000.0 * 0.8 / $mb_pingrate;
 		if ($sbp_duration > 400.0)
 			{
 			$sbp_duration = 400.0;
