@@ -586,7 +586,7 @@ the manual pages for mbprocess and mbset. \n\n";
 				process.mbp_cut_num++;
 				}
 			}
-		    else if (strncmp(pargv[i], "SSCUTNUMBER", 12) == 0)
+		    else if (strncmp(pargv[i], "SSCUTNUMBER", 11) == 0)
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
@@ -598,7 +598,7 @@ the manual pages for mbprocess and mbset. \n\n";
 				process.mbp_cut_num++;
 				}
 			}
-		    else if (strncmp(pargv[i], "SSCUTDISTANCE", 14) == 0)
+		    else if (strncmp(pargv[i], "SSCUTDISTANCE", 13) == 0)
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
