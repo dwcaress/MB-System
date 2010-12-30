@@ -208,6 +208,9 @@ calculation of beam angles happens during the first read of the data.
 Replaced strsep() with strtok() in mbr_edgjstar.c. This is to allow
 MB-System to be more easily built on Solaris systems.
 
+Fixed mbset so that it recognizes sidescan cutting commands (SSCUTNUMBER,
+SSCUTDISTANCE, SSCUTSPEED).
+
 -----> 5.1.3beta1875
 
 Altered -P option in mbsvplist. Previously this option (which turns on 
