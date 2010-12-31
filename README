@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.2.1879 README FILE:
+MB-SYSTEM VERSION 5.2.1880 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.2.1879 release of the MB-System software package for 
+5.2.1880 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.2.1879       December 30, 2010
+* Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
   Version 5.1.3beta1862  June 7, 2010
@@ -177,7 +177,7 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.2 RELEASE NOTES:
 ------------------------------------------
 
------> 5.2.1879
+-----> 5.2.1880
 
 Augmented mbotps to output tide in both
  	time_d tide
