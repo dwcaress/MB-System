@@ -3926,7 +3926,7 @@ int mbnavadjust_naverr_save()
 		    
 		    /* get new tie values */
 /* fprintf(stderr, "tie %d of crossing %d saved...\n", mbna_current_tie, mbna_current_crossing); */
-		    tie->status = MBNA_TIE_XYZ;
+		    /* tie->status = tie->status; */
 		    tie->snav_1 = mbna_snav_1;
 		    tie->snav_1_time_d = mbna_snav_1_time_d;
 		    tie->snav_2 = mbna_snav_2;
