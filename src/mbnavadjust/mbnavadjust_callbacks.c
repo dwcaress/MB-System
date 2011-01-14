@@ -769,6 +769,10 @@ void do_update_status()
 	int	num_sections;
 	double	dr1, dr2, dr3;
 	double	dx, dy, dz;
+	char	*tiestatus;
+	char	*tiestatus_xyz = "XYZ";
+	char	*tiestatus_xy  = "XY ";
+	char	*tiestatus_z   = "  Z";
     	int	i, ii, j, k;
 
 	/* set status label */
@@ -1525,9 +1529,16 @@ void do_update_status()
 							    + (tie->inversion_offset_y_m - tie->offset_y_m) * tie->sigmax3[1]
 							    + (tie->inversion_offset_z_m - tie->offset_z_m) * tie->sigmax3[2]) / tie->sigmar3;
 						    }
+					    if (tie->status == MBNA_TIE_XYZ)
+					    	tiestatus = tiestatus_xyz;
+					    else if (tie->status == MBNA_TIE_XY)
+					    	tiestatus = tiestatus_xy;
+					    else if (tie->status == MBNA_TIE_Z)
+					    	tiestatus = tiestatus_z;
 					    if (tie->inversion_status == MBNA_INVERSION_CURRENT)
-						sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f",
+						sprintf(string,"%4d %2d %s %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f",
 						    i, j,
+						    tiestatus,
 						    crossing->file_id_1,
 						    crossing->section_1,
 						    tie->snav_1,
@@ -1545,8 +1556,9 @@ void do_update_status()
 						    tie->sigmar3,
 						    dr1, dr2, dr3);
 					    else if (tie->inversion_status == MBNA_INVERSION_OLD)
-						sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f ***",
+						sprintf(string,"%4d %2d %s %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f ***",
 						    i, j,
+						    tiestatus,
 						    crossing->file_id_1,
 						    crossing->section_1,
 						    tie->snav_1,
@@ -1564,8 +1576,9 @@ void do_update_status()
 						    tie->sigmar3,
 						    dr1, dr2, dr3);
 					    else
-						sprintf(string,"%4d %2d %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
+						sprintf(string,"%4d %2d %s %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
 						    i, j,
+						    tiestatus,
 						    crossing->file_id_1,
 						    crossing->section_1,
 						    tie->snav_1,
@@ -1692,6 +1705,64 @@ void do_update_status()
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_fixednav,
+			XmNsensitive, False,
+			NULL);
+		}
+	
+	if (mbna_view_list == MBNA_VIEW_LIST_TIES
+		&& project.num_files > 0
+		&& mbna_tie_select != MBNA_SELECT_NONE
+		&& project.crossings[mbna_crossing_select].ties[mbna_tie_select].status == MBNA_TIE_XY)
+		{
+		XtVaSetValues(pushButton_tie_xyz,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_tie_xy,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_tie_z,
+			XmNsensitive, True,
+			NULL);
+		}
+	else if (mbna_view_list == MBNA_VIEW_LIST_TIES
+		&& project.num_files > 0
+		&& mbna_tie_select != MBNA_SELECT_NONE
+		&& project.crossings[mbna_crossing_select].ties[mbna_tie_select].status == MBNA_TIE_Z)
+		{
+		XtVaSetValues(pushButton_tie_xyz,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_tie_xy,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_tie_z,
+			XmNsensitive, False,
+			NULL);
+		}
+	else if (mbna_view_list == MBNA_VIEW_LIST_TIES
+		&& project.num_files > 0
+		&& mbna_tie_select != MBNA_SELECT_NONE
+		&& project.crossings[mbna_crossing_select].ties[mbna_tie_select].status == MBNA_TIE_XYZ)
+		{
+		XtVaSetValues(pushButton_tie_xyz,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_tie_xy,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_tie_z,
+			XmNsensitive, True,
+			NULL);
+		}
+	else
+		{
+		XtVaSetValues(pushButton_tie_xyz,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_tie_xy,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_tie_z,
 			XmNsensitive, False,
 			NULL);
 		}
@@ -4459,6 +4530,39 @@ do_action_fixednav( Widget w, XtPointer client_data, XtPointer call_data)
     acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_fixednav_file();
+    do_update_status();
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_action_tie_xy( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mbnavadjust_set_tie_xy();
+    do_update_status();
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_action_z( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mbnavadjust_set_tie_z();
+    do_update_status();
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_action_tie_xyz( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs = (XmAnyCallbackStruct*)call_data;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mbnavadjust_set_tie_xyz();
     do_update_status();
 }
 /*--------------------------------------------------------------------*/

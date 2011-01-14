@@ -159,6 +159,9 @@ extern void do_modelplot_show(Widget, XtPointer, XtPointer);
 extern void do_action_poornav(Widget, XtPointer, XtPointer);
 extern void do_action_goodnav(Widget, XtPointer, XtPointer);
 extern void do_action_fixednav(Widget, XtPointer, XtPointer);
+extern void do_action_tie_xy(Widget, XtPointer, XtPointer);
+extern void do_action_z(Widget, XtPointer, XtPointer);
+extern void do_action_tie_xyz(Widget, XtPointer, XtPointer);
 extern void do_action_autopick(Widget, XtPointer, XtPointer);
 extern void do_action_autopickhorizontal(Widget, XtPointer, XtPointer);
 extern void do_action_checknewcrossings(Widget, XtPointer, XtPointer);
@@ -285,7 +288,7 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 82); ac++;
-    XtSetArg(args[ac], XmNy, 286); ac++;
+    XtSetArg(args[ac], XmNy, 308); ac++;
     XtSetArg(args[ac], XmNwidth, 962); ac++;
     XtSetArg(args[ac], XmNheight, 400); ac++;
     mainWindow = XmCreateMainWindow(parent,
@@ -977,9 +980,9 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 223); ac++;
-    XtSetArg(args[ac], XmNy, 313); ac++;
+    XtSetArg(args[ac], XmNy, 335); ac++;
     XtSetArg(args[ac], XmNwidth, 182); ac++;
-    XtSetArg(args[ac], XmNheight, 234); ac++;
+    XtSetArg(args[ac], XmNheight, 300); ac++;
     pulldownMenu_action = XmCreatePulldownMenu(XtParent(cascadeButton_action),
         (char *)"pulldownMenu_action",
         args, 
@@ -1056,6 +1059,78 @@ CreatemainWindow(Widget parent)
     }
     
     XtAddCallback(pushButton_fixednav, XmNactivateCallback, do_action_fixednav, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set tie to XY only", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_tie_xy = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_tie_xy",
+            args, 
+            ac);
+        XtManageChild(pushButton_tie_xy);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_tie_xy, XmNactivateCallback, do_action_tie_xy, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set tie to Z only", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_tie_z = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_tie_z",
+            args, 
+            ac);
+        XtManageChild(pushButton_tie_z);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_tie_z, XmNactivateCallback, do_action_z, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set tie to full XYZ", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_tie_xyz = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_tie_xyz",
+            args, 
+            ac);
+        XtManageChild(pushButton_tie_xyz);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_tie_xyz, XmNactivateCallback, do_action_tie_xyz, (XtPointer)0);
     
     ac = 0;
     separator7 = XmCreateSeparator(pulldownMenu_action,
@@ -1486,7 +1561,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_ANY); ac++;
-    XtSetArg(args[ac], XmNx, 1010); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1219); ac++;
     XtSetArg(args[ac], XmNwidth, 542); ac++;
     XtSetArg(args[ac], XmNheight, 86); ac++;
@@ -1565,7 +1640,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1125); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1182); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 160); ac++;
@@ -1699,7 +1774,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 975); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 997); ac++;
     XtSetArg(args[ac], XmNwidth, 611); ac++;
     XtSetArg(args[ac], XmNheight, 530); ac++;
@@ -1814,7 +1889,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNnoResize, True); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
+        XtSetArg(args[ac], XmNx, 813); ac++;
         XtSetArg(args[ac], XmNy, 919); ac++;
         XtSetArg(args[ac], XmNwidth, 935); ac++;
         XtSetArg(args[ac], XmNheight, 685); ac++;
@@ -2589,7 +2664,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1139); ac++;
+        XtSetArg(args[ac], XmNx, 0); ac++;
         XtSetArg(args[ac], XmNy, 1039); ac++;
         XtSetArg(args[ac], XmNwidth, 284); ac++;
         XtSetArg(args[ac], XmNheight, 446); ac++;
@@ -2965,7 +3040,7 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1037); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1020); ac++;
     XtSetArg(args[ac], XmNwidth, 488); ac++;
     XtSetArg(args[ac], XmNheight, 484); ac++;
@@ -3334,7 +3409,7 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 963); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1043); ac++;
     XtSetArg(args[ac], XmNwidth, 635); ac++;
     XtSetArg(args[ac], XmNheight, 438); ac++;
@@ -3857,7 +3932,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 774); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1021); ac++;
     XtSetArg(args[ac], XmNwidth, 1014); ac++;
     XtSetArg(args[ac], XmNheight, 481); ac++;

@@ -42,6 +42,7 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
+!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/opt/bx-6.1")
 !(BX) bx_info("builder_version", "BuilderXcessory Version 6.1.3")
 !(BX) bx_info("build_lang", "C")
@@ -73,6 +74,9 @@ identifier BXG_pushButton_analyzecrossings;
 identifier BXG_pushButton_newcrossings;
 identifier BXG_pushButton_autopickhorizontal;
 identifier BXG_pushButton_autopick;
+identifier BXG_pushButton_tie_xyz;
+identifier BXG_pushButton_tie_z;
+identifier BXG_pushButton_tie_xy;
 identifier BXG_pushButton_fixednav;
 identifier BXG_pushButton_goodnav;
 identifier BXG_pushButton_poornav;
@@ -164,6 +168,9 @@ procedure do_action_fixednav();
 procedure do_action_goodnav();
 procedure do_action_invertnav();
 procedure do_action_poornav();
+procedure do_action_tie_xy();
+procedure do_action_tie_xyz();
+procedure do_action_z();
 procedure do_apply_nav();
 procedure do_biases_apply();
 procedure do_biases_applyall();
@@ -407,7 +414,7 @@ object bulletinBoard_modelplot : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 774;
+        XmNx = 0;
         XmNy = 1021;
         XmNwidth = 1014;
         XmNheight = 481;
@@ -1045,7 +1052,7 @@ object form_controls : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 963;
+        XmNx = 0;
         XmNy = 1043;
         XmNwidth = 635;
         XmNheight = 438;
@@ -1398,7 +1405,7 @@ object form_about : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1037;
+        XmNx = 0;
         XmNy = 1020;
         XmNwidth = 488;
         XmNheight = 484;
@@ -1743,7 +1750,7 @@ object bulletinBoard_biases : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Heading & Roll Bias");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1139;
+        XmNx = 0;
         XmNy = 1039;
         XmNwidth = 284;
         XmNheight = 446;
@@ -2418,7 +2425,7 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 0;
+        XmNx = 813;
         XmNy = 919;
         XmNwidth = 935;
         XmNheight = 685;
@@ -2550,7 +2557,7 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 975;
+        XmNx = 0;
         XmNy = 997;
         XmNwidth = 611;
         XmNheight = 530;
@@ -2667,7 +2674,7 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1125;
+        XmNx = 0;
         XmNy = 1182;
         XmNwidth = 311;
         XmNheight = 160;
@@ -2747,7 +2754,7 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_ANY;
-        XmNx = 1010;
+        XmNx = 0;
         XmNy = 1219;
         XmNwidth = 542;
         XmNheight = 86;
@@ -3389,6 +3396,57 @@ object pushButton_fixednav : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_tie_xy : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Set tie to XY only");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_tie_xy);
+        XmNactivateCallback = procedure do_action_tie_xy();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_tie_z : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Set tie to Z only");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_tie_z);
+        XmNactivateCallback = procedure do_action_z();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_tie_xyz : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Set tie to full XYZ");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_tie_xyz);
+        XmNactivateCallback = procedure do_action_tie_xyz();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object separator7 : XmSeparator widget {
     arguments {
     };
@@ -3561,14 +3619,17 @@ object pulldownMenu_action : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
         XmNx = 223;
-        XmNy = 313;
+        XmNy = 335;
         XmNwidth = 182;
-        XmNheight = 234;
+        XmNheight = 300;
     };
     controls {
          managed XmPushButton pushButton_poornav;
          managed XmPushButton pushButton_goodnav;
          managed XmPushButton pushButton_fixednav;
+         managed XmPushButton pushButton_tie_xy;
+         managed XmPushButton pushButton_tie_z;
+         managed XmPushButton pushButton_tie_xyz;
          managed XmSeparator separator7;
          managed XmPushButton pushButton_autopick;
          managed XmPushButton pushButton_autopickhorizontal;
@@ -3872,7 +3933,7 @@ object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 82;
-        XmNy = 286;
+        XmNy = 308;
         XmNwidth = 962;
         XmNheight = 400;
     };
@@ -3901,7 +3962,7 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNtitle = "MBnavadjust";
 !(BX)        XmNiconName = "MBnavadjust";
 !(BX)        XmNx = 82;
-!(BX)        XmNy = 286;
+!(BX)        XmNy = 308;
 !(BX)        XmNwidth = 962;
 !(BX)        XmNheight = 400;
 !(BX)    };

@@ -100,6 +100,9 @@
 #define	MBNA_FILE_POORNAV		1
 #define	MBNA_FILE_GOODNAV		2
 #define	MBNA_FILE_FIXEDNAV		3
+#define	MBNA_TIE_XYZ			1
+#define	MBNA_TIE_XY			2
+#define	MBNA_TIE_Z			3
 #define	MBNA_CROSSING_STATUS_NONE	0
 #define	MBNA_CROSSING_STATUS_SET	1
 #define	MBNA_CROSSING_STATUS_SKIP	2
@@ -211,6 +214,7 @@ struct mbna_file {
 	struct mbna_section *sections;
 };
 struct mbna_tie {
+	int	status;
 	int	snav_1;
 	double	snav_1_time_d;
 	int	snav_2;
@@ -445,6 +449,9 @@ int	mbnavadjust_findcrossingsfile(int ifile);
 int	mbnavadjust_poornav_file();
 int	mbnavadjust_goodnav_file();
 int	mbnavadjust_fixednav_file();
+int	mbnavadjust_set_tie_xy();
+int	mbnavadjust_set_tie_z();
+int	mbnavadjust_set_tie_xyz();
 int	mbnavadjust_naverr_save();
 int	mbnavadjust_naverr_specific(int new_crossing, int new_tie);
 int	mbnavadjust_naverr_next();
