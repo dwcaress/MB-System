@@ -412,8 +412,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.2.1880"
-#define	MB_BUILD_DATE	"30 December 2010"
+#define	MB_VERSION	"5.2.1882"
+#define	MB_BUILD_DATE	"14 January 2011"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
