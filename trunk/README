@@ -177,6 +177,10 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.2 RELEASE NOTES:
 ------------------------------------------
 
+Changed MBnavadjust to output user, cpu, and time of changes to
+project files and as comments to the adjusted navigation files. Also changed
+mbprocess to handle comments in adjusted navigation files.
+
 -----> 5.2.1880
 
 Augmented mbotps to output tide in both

@@ -2190,8 +2190,10 @@ and mbedit edit save files.\n";
 		    exit(error);
 		    }
 	    while ((result = fgets(buffer,nchar,tfp)) == buffer)
-		    nanav++;
+		    if (buffer[0] != '#')
+		    	nanav++;
 	    fclose(tfp);
+fprintf(stderr,"Allocated space for %d navadj nav points from file %s\n",nanav,process.mbp_navadjfile);
 	    
 	    /* allocate arrays for adjusted nav */
 	    if (nanav > 1)
@@ -2241,18 +2243,21 @@ and mbedit edit save files.\n";
 		nav_ok = MB_NO;
 
 		/* deal with nav in form: yr mon day hour min sec time_d lon lat */
-		nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
-			&time_i[0],&time_i[1],&time_i[2],
-			&time_i[3],&time_i[4],&sec,
-			&natime[nanav],
-			&nalon[nanav],&nalat[nanav],
-			&heading, &speed, &draft, 
-			&roll, &pitch, &heave, 
-			&naz[nanav]);
-		if (process.mbp_navadj_mode == MBP_NAVADJ_LL && nget >= 9)
-			nav_ok = MB_YES;
-		else if (process.mbp_navadj_mode == MBP_NAVADJ_LLZ && nget >= 16)
-			nav_ok = MB_YES;
+		if (buffer[0] != '#')
+			{
+			nget = sscanf(buffer,"%d %d %d %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
+				&time_i[0],&time_i[1],&time_i[2],
+				&time_i[3],&time_i[4],&sec,
+				&natime[nanav],
+				&nalon[nanav],&nalat[nanav],
+				&heading, &speed, &draft, 
+				&roll, &pitch, &heave, 
+				&naz[nanav]);
+			if (process.mbp_navadj_mode == MBP_NAVADJ_LL && nget >= 9)
+				nav_ok = MB_YES;
+			else if (process.mbp_navadj_mode == MBP_NAVADJ_LLZ && nget >= 16)
+				nav_ok = MB_YES;
+			}
 
 		/* make sure longitude is defined according to lonflip */
 		if (nav_ok == MB_YES)
@@ -2302,7 +2307,7 @@ and mbedit edit save files.\n";
 		strncpy(buffer,"\0",sizeof(buffer));
 		}
 	    fclose(tfp);
-
+fprintf(stderr,"Read in %d navadj nav points from file %s\n",nanav,process.mbp_navadjfile);
 		
 	    /* check for adjusted nav */
 	    if (nanav < 2)
