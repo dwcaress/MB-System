@@ -181,6 +181,8 @@ Changed MBnavadjust to output user, cpu, and time of changes to
 project files and as comments to the adjusted navigation files. Also changed
 mbprocess to handle comments in adjusted navigation files.
 
+Fixed -C option of mbm_copy.
+
 -----> 5.2.1880
 
 Augmented mbotps to output tide in both

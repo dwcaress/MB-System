@@ -54,7 +54,7 @@ $program_name = "mbm_copy";
 
 # Deal with command line arguments
 $command_line = "@ARGV";
-&MBGetopts('F:f:HhI:i:TtVv');
+&MBGetopts('CcF:f:HhI:i:TtVv');
 $oformat = 		($opt_F || $opt_f);
 $help =    		($opt_H || $opt_h);
 $datalist =    		($opt_I || $opt_i);
