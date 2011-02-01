@@ -6025,6 +6025,15 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       file:       %s\n",file);
 		}
+	
+	/* initialize return parameters */
+	*locked = MB_NO;
+	*purpose = 0;
+	program[0] = '\0';
+	user[0] = '\0';
+	cpu[0] = '\0';
+	date[0] = '\0';
+	
 
 	/* check if lock file exists */
 	sprintf(lockfile, "%s.lck", file);
@@ -6034,11 +6043,6 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked,
 		*locked = MB_YES;
 	    	if ((fp = fopen(lockfile, "r")) != NULL)
 			{
-			program[0] = '\0';
-			user[0] = '\0';
-			cpu[0] = '\0';
-			date[0] = '\0';
-			*purpose = 0;
 			while(fgets(line, MBP_FILENAMESIZE, fp) != NULL)
 				{
 				line[strlen(line)-1] = '\0';
@@ -6075,7 +6079,6 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked,
 		}
 	else
 		{
-		*locked = MB_NO;
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		}

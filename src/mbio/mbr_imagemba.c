@@ -689,46 +689,6 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	mb_io_ptr->new_kind = store->kind;	
 	mb_io_ptr->new_error = *error;
-	
-	/* if success then calculate travel times and angles */
-	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA)
-		{
-		if (store->sound_velocity > 13000 && store->sound_velocity < 17000)
-			soundspeed = 0.1 * store->sound_velocity;
-		else
-			soundspeed = 1500.0;
-		store->sonar_depth = 0.0;
-		store->heave = 0.0;
-		store->num_proc_beams = store->num_beams;
-		for (i=0;i<store->num_proc_beams;i++)
-			{
-			if (store->range[i] > 0)
-				{
-				alpha = 0.1 * (store->pitch - 900);
-				beta = 270.0 - 0.01 * (store->start_angle + i * store->angle_increment) 
-					+ 0.1 * (store->roll - 900);
-				mb_rollpitch_to_takeoff(
-					verbose, 
-					alpha, beta, 
-					&theta, &phi, 
-					error);
-				rr = (soundspeed / 1500.0) * 0.001 * store->range_resolution * store->range[i];
-				store->beamrange[i] = rr;
-				store->angles[i] = theta;
-				store->angles_forward[i] = phi;
-				}
-			else
-				{
-				store->beamrange[i] = 0.0;
-				store->angles[i] = 0.0;
-				store->angles_forward[i] = 0.0;
-				store->beamflag[i] = MB_FLAG_NULL;
-				store->bath[i] = 0.0;
-				store->bathacrosstrack[i] = 0.0;
-				store->bathalongtrack[i] = 0.0;
-				}
-			}
-		}
 
 	/* print output debug statements */
 	if (verbose >= 4)

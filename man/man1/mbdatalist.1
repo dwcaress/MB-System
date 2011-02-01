@@ -1,4 +1,4 @@
-.TH mbdatalist 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbdatalist 1 "26 January 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdatalist\fP - parses recursive datalist files and outputs the
 complete list of data files, formats, and file weights.
@@ -7,7 +7,7 @@ complete list of data files, formats, and file weights.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbdatalist\fP [\fB-C\fP \fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-N -O -P -Q -R -U -Z -V -H\fP]
+\fBmbdatalist\fP [\fB-C\fP \fB-F\fP\fIformat\fP \fB-I\fP\fIfilename\fP \fB-N -O -P -Q -R -S -U -Y -Z -V -H\fP]
 
 .SH DESCRIPTION
 \fBMBdatalist\fP is a utility for parsing datalist files. 
@@ -100,6 +100,20 @@ reference the swath files listed (directly or recursively) through
 the datalist "datalist.mb-1" with the $PROCESSED flag on. So, in order to
 grid the processed bathymetry rather than the raw bathymetry, run \fBmbgrid\fP
 with "datalistp.mb-1" as the input rather than "datalist.mb-1".
+
+The \fB-S\fP option causes \fBmbdatalist\fP to report the status of the files
+it lists, including whether the file is up to date or needs reprocessing,
+and if the file is locked. \fBMBprocess\fP sets locks while operating on 
+a swath file to prevent other instances of \fBmbprocess\fP from simultaneously
+operating on that same file. This allows one to run \fmbprocess\fP multiple
+times simultaneously on a single datalist, either on a single multiprocessor
+machine or on multiple computers mounting the same filesystem. 
+The consists of creating a small text file
+named by appending ".lck" to the swath filename; while this file exists
+other programs will not modify the locked file. The locking program deletes
+the lock file when it is done. Orphaned lock files may be left if \fBmbprocess\fP
+crashes or is interrupted. These will prevent reprocessing by \fBmbprocess\fP, 
+but can be both detected with the \fB-S\fP option and removed using the \fB-Y\fP option.
 
 Finally, this program can be used to copy the swath files referenced in a
 datalist structure to a single directory and to create a datalist there
@@ -212,6 +226,18 @@ files with data in the desired area (or no
 \fBmbgrid\fP, allowing users to check what data files will 
 contribute to gridding some particular area.
 .TP
+.B \-S
+This option causes \fBmbdatalist\fP to report the status of the files
+it lists, including whether the file is up to date or needs reprocessing,
+and if the file is locked. \fBMBprocess\fP sets locks while operating on 
+a swath file to prevent other instances of \fBmbprocess\fP from simultaneously
+operating on that same file. Locking consists of creating a small text file
+named by appending ".lck" to the swath filename; while this file exists
+other programs will not modify the locked file. The locking program deletes
+the lock file when it is done. Orphaned lock files may be left if \fBmbprocess\fP
+crashes or is interrupted. These will prevent reprocessing by \fBmbprocess\fP, 
+but can be both detected and removed using \fBmbdatalist\fP.
+.TP
 .B \-U
 Normally, \fBmbdatalist\fP allows $PROCESSED and $RAW tags within
 the datalist files to determine whether processed file names are
@@ -224,6 +250,17 @@ to only output raw file names.
 Normally, \fBmbdatalist\fP only prints out the filenames and formats.  
 If the \fB-V\fP flag is given, then \fBmbinfo\fP works in a "verbose" mode and
 outputs the program version being used.
+.TP
+.B \-Y
+This option causes \fBmbdatalist\fP to remove any processing locks on files
+it parses. \fBMBprocess\fP and other programs may set locks while
+operating on a swath file to prevent other programs from simultaneously
+operating on that same file.The consists of creating a small text file
+named by appending ".lck" to the swath filename; while this file exists
+other programs will not modify the locked file. The locking program deletes
+the lock file when it is done. Orphaned lock files may be left if \fBMB-System\fP
+programs crash or are interrupted. These can be detected using the \fB-S\fP
+option of \fBmbdatalist\fP.
 .TP
 .B \-Z
 The \fB-Z\fP option causes the program to generate a datalist file that
