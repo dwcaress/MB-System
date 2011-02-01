@@ -183,6 +183,11 @@ mbprocess to handle comments in adjusted navigation files.
 
 Fixed -C option of mbm_copy.
 
+Fixed i/o module for extended format Imagenex DeltaT data (format 192) by removing code
+that recalculated bathymetry unnecessarily.
+
+Added -Y option to mbdatalist to remove any leftover lock files.
+
 -----> 5.2.1880
 
 Augmented mbotps to output tide in both

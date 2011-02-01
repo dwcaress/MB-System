@@ -2193,7 +2193,6 @@ and mbedit edit save files.\n";
 		    if (buffer[0] != '#')
 		    	nanav++;
 	    fclose(tfp);
-fprintf(stderr,"Allocated space for %d navadj nav points from file %s\n",nanav,process.mbp_navadjfile);
 	    
 	    /* allocate arrays for adjusted nav */
 	    if (nanav > 1)
@@ -2307,7 +2306,6 @@ fprintf(stderr,"Allocated space for %d navadj nav points from file %s\n",nanav,p
 		strncpy(buffer,"\0",sizeof(buffer));
 		}
 	    fclose(tfp);
-fprintf(stderr,"Read in %d navadj nav points from file %s\n",nanav,process.mbp_navadjfile);
 		
 	    /* check for adjusted nav */
 	    if (nanav < 2)
