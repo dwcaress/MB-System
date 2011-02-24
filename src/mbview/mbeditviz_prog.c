@@ -197,7 +197,7 @@ int mbeditviz_init(int argc,char **argv)
 	mbev_timelag = 0.0;
 
 	/* set mbio default values */
-	mbev_status = mb_lonflip(mbev_verbose,&mbdef_lonflip);
+	mb_lonflip(mbev_verbose,&mbdef_lonflip);
 	mbdef_pings = 1;
 	mbdef_format = 0;
 	mbdef_bounds[0] = -360.;
@@ -458,6 +458,7 @@ int mbeditviz_import_file(char *path, int format)
 	do_mbeditviz_message_on(message);
 		
 	/* allocate mbpr_file_struct array if needed */
+	mbev_status = MB_SUCCESS;
 	if (mbev_num_files_alloc <= mbev_num_files)
 		{
 		mbev_files = (struct mbev_file_struct *) realloc(mbev_files,
