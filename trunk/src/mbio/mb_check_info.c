@@ -524,7 +524,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 				{
 			    	nscan = sscanf(line, "Time:  %d %d %d %d:%d:%d.%d  JD", 
 					    &time_i[1], &time_i[2], &time_i[0], 
-					    &time_i[4], &time_i[5], &time_i[6], &time_i[7]);
+					    &time_i[3], &time_i[4], &time_i[5], &time_i[6]);
 				if (nscan == 7)
 					mb_get_time(verbose, time_i, &(mb_info->time_start));
 				}
@@ -551,7 +551,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 				{
 			    	nscan = sscanf(line, "Time:  %d %d %d %d:%d:%d.%d  JD", 
 					    &time_i[1], &time_i[2], &time_i[0], 
-					    &time_i[4], &time_i[5], &time_i[6], &time_i[7]);
+					    &time_i[3], &time_i[4], &time_i[5], &time_i[6]);
 				if (nscan == 7)
 					mb_get_time(verbose, time_i, &(mb_info->time_end));
 				}

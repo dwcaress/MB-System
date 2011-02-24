@@ -143,6 +143,9 @@ int mb_defaults(int verbose, int *format, int *pings,
 		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
 		}
 
+	/* successful no matter what happens */
+	status = MB_SUCCESS;
+
 	/* set system default values */
 	*format = 0;
 	*pings = 1;
@@ -177,7 +180,6 @@ int mb_defaults(int verbose, int *format, int *pings,
 		/* open and read values from file if possible */
 		if ((fp = fopen(file, "r")) != NULL)
 			{
-			status = MB_SUCCESS;
 			while (fgets(string,sizeof(string),fp) != NULL)
 				{
 				if (strncmp(string,"lonflip:",8) == 0)
@@ -187,11 +189,7 @@ int mb_defaults(int verbose, int *format, int *pings,
 				}
  			fclose(fp);
 			}
-		else
-			status = MB_FAILURE;
 		}
-	else
-		status = MB_FAILURE;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -292,6 +290,9 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 	strcpy(imgdisplay, "xv");
 #endif
 
+	/* successful no matter what happens */
+	status = MB_SUCCESS;
+	
 	/* set system default project name */
 	strcpy(mbproject, "none");
 
@@ -316,11 +317,7 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 				}
  			fclose(fp);
 			}
-		else
-			status = MB_FAILURE;
 		}
-	else
-		status = MB_FAILURE;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -358,6 +355,9 @@ int mb_lonflip(int verbose, int *lonflip)
 		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
 		}
 
+	/* successful no matter what happens */
+	status = MB_SUCCESS;
+
 	/* set system default values */
 	*lonflip = 0;
 
@@ -370,7 +370,6 @@ int mb_lonflip(int verbose, int *lonflip)
 		/* open and read values from file if possible */
 		if ((fp = fopen(file, "r")) != NULL)
 			{
-			status = MB_SUCCESS;
 			while (fgets(string,sizeof(string),fp) != NULL)
 				{
 				if (strncmp(string,"lonflip:",8) == 0)
@@ -378,11 +377,7 @@ int mb_lonflip(int verbose, int *lonflip)
 				}
  			fclose(fp);
 			}
-		else
-			status = MB_FAILURE;
 		}
-	else
-		status = MB_FAILURE;
 
 	/* print output debug statements */
 	if (verbose >= 2)

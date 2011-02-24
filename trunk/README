@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.2.1880 README FILE:
+MB-SYSTEM VERSION 5.2.1885 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.2.1880 release of the MB-System software package for 
+5.2.1885 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -187,6 +187,19 @@ Fixed i/o module for extended format Imagenex DeltaT data (format 192) by removi
 that recalculated bathymetry unnecessarily.
 
 Added -Y option to mbdatalist to remove any leftover lock files.
+
+Fixed bug in parsing file start and end times in *.inf files.
+
+Changed mb_defaults(), mb_env(), and mb_lonflip() functions to always return
+MB_SUCCESS status even when ~/.mbio_defaults file does not exist. Working with 
+system defaults hould not be an error.
+
+Changed mbeditviz_import_file() function in mbeditviz_prog.c to reset global
+status to MB_SUCCESS on entry.
+
+Incomplete implementation of Dana Yoerger's changes to mbclean. Not yet tested.
+
+Increased verbosity of mbnavedit for -X option.
 
 -----> 5.2.1880
 

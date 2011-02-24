@@ -1014,6 +1014,8 @@ int mbnavedit_close_file()
 			sprintf(command, "mbprocess -I %s -N\n",ifile);
 		    else
 			sprintf(command, "mbprocess -I %s\n",ifile);
+		    if (verbose >= 1)
+			fprintf(stderr,"\nExecuting command:\n%s\n",command);
 		    system(command);
 
 		    /* turn message off */
