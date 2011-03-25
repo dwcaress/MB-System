@@ -77,12 +77,16 @@ identifier BXG_pushButton_autopick;
 identifier BXG_pushButton_tie_xyz;
 identifier BXG_pushButton_tie_z;
 identifier BXG_pushButton_tie_xy;
+identifier BXG_pushButton_fixedznav;
+identifier BXG_pushButton_fixedxynav;
 identifier BXG_pushButton_fixednav;
 identifier BXG_pushButton_goodnav;
 identifier BXG_pushButton_poornav;
 identifier BXG_pushButton_showmodelplot;
 identifier BXG_pushButton_makegrid;
 identifier BXG_toggleButton_showselectedsection;
+identifier BXG_toggleButton_showwithselectedfile;
+identifier BXG_toggleButton_showwithselectedsurvey;
 identifier BXG_toggleButton_showselectedfile;
 identifier BXG_toggleButton_showselectedsurvey;
 identifier BXG_toggleButton_showallsurveys;
@@ -165,6 +169,8 @@ procedure do_action_autopick();
 procedure do_action_autopickhorizontal();
 procedure do_action_checknewcrossings();
 procedure do_action_fixednav();
+procedure do_action_fixedxynav();
+procedure do_action_fixedznav();
 procedure do_action_goodnav();
 procedure do_action_invertnav();
 procedure do_action_poornav();
@@ -235,6 +241,8 @@ procedure do_view_showselectedsurveys();
 procedure do_view_showsurveys();
 procedure do_view_showties();
 procedure do_view_showtruecrossings();
+procedure do_view_showwithselectedfile();
+procedure do_view_showwithselectedsurveys();
 procedure do_zerozoffsets();
 
 list BaseStyle : arguments {
@@ -3228,10 +3236,44 @@ object toggleButton_showselectedfile : XmToggleButton widget {
 !(BX)    };
 };
 
+object toggleButton_showwithselectedsurvey : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show Only With Selected Survey");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showwithselectedsurvey);
+        XmNvalueChangedCallback = procedure do_view_showwithselectedsurveys();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_showwithselectedfile : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Show Only With Selected File");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showwithselectedfile);
+        XmNvalueChangedCallback = procedure do_view_showwithselectedfile();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object toggleButton_showselectedsection : XmToggleButton widget {
     arguments {
         arguments Style_use;
-        XmNlabelString = compound_string("Show Only Selected Section");
+        XmNlabelString = compound_string("Show Only With Selected Section");
     };
     controls {
     };
@@ -3296,8 +3338,8 @@ object pulldownMenu_view : XmPulldownMenu widget {
         arguments Style_use;
         XmNx = 0;
         XmNy = 0;
-        XmNwidth = 209;
-        XmNheight = 316;
+        XmNwidth = 225;
+        XmNheight = 360;
     };
     controls {
          managed XmPushButton pushButton_showsurveys;
@@ -3312,6 +3354,8 @@ object pulldownMenu_view : XmPulldownMenu widget {
          managed XmToggleButton toggleButton_showallsurveys;
          managed XmToggleButton toggleButton_showselectedsurvey;
          managed XmToggleButton toggleButton_showselectedfile;
+         managed XmToggleButton toggleButton_showwithselectedsurvey;
+         managed XmToggleButton toggleButton_showwithselectedfile;
          managed XmToggleButton toggleButton_showselectedsection;
          managed XmSeparator separator15;
          managed XmPushButton pushButton_makegrid;
@@ -3390,6 +3434,40 @@ object pushButton_fixednav : XmPushButton widget {
         callbacks Style_useReasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_fixednav);
         XmNactivateCallback = procedure do_action_fixednav();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_fixedxynav : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Set File Fixed XY Navigation");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_fixedxynav);
+        XmNactivateCallback = procedure do_action_fixedxynav();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_fixedznav : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Set File Fixed Z Navigation");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_fixedznav);
+        XmNactivateCallback = procedure do_action_fixedznav();
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -3619,14 +3697,16 @@ object pulldownMenu_action : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
         XmNx = 223;
-        XmNy = 335;
+        XmNy = 379;
         XmNwidth = 182;
-        XmNheight = 300;
+        XmNheight = 344;
     };
     controls {
          managed XmPushButton pushButton_poornav;
          managed XmPushButton pushButton_goodnav;
          managed XmPushButton pushButton_fixednav;
+         managed XmPushButton pushButton_fixedxynav;
+         managed XmPushButton pushButton_fixedznav;
          managed XmPushButton pushButton_tie_xy;
          managed XmPushButton pushButton_tie_z;
          managed XmPushButton pushButton_tie_xyz;
@@ -3933,7 +4013,7 @@ object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 82;
-        XmNy = 308;
+        XmNy = 352;
         XmNwidth = 962;
         XmNheight = 400;
     };
@@ -3962,7 +4042,7 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNtitle = "MBnavadjust";
 !(BX)        XmNiconName = "MBnavadjust";
 !(BX)        XmNx = 82;
-!(BX)        XmNy = 308;
+!(BX)        XmNy = 352;
 !(BX)        XmNwidth = 962;
 !(BX)        XmNheight = 400;
 !(BX)    };

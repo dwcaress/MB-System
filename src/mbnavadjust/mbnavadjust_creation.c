@@ -153,12 +153,16 @@ extern void do_view_showties(Widget, XtPointer, XtPointer);
 extern void do_view_showallsurveys(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedsurveys(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedfile(Widget, XtPointer, XtPointer);
+extern void do_view_showwithselectedsurveys(Widget, XtPointer, XtPointer);
+extern void do_view_showwithselectedfile(Widget, XtPointer, XtPointer);
 extern void do_view_showselectedsection(Widget, XtPointer, XtPointer);
 extern void do_make_grid(Widget, XtPointer, XtPointer);
 extern void do_modelplot_show(Widget, XtPointer, XtPointer);
 extern void do_action_poornav(Widget, XtPointer, XtPointer);
 extern void do_action_goodnav(Widget, XtPointer, XtPointer);
 extern void do_action_fixednav(Widget, XtPointer, XtPointer);
+extern void do_action_fixedxynav(Widget, XtPointer, XtPointer);
+extern void do_action_fixedznav(Widget, XtPointer, XtPointer);
 extern void do_action_tie_xy(Widget, XtPointer, XtPointer);
 extern void do_action_z(Widget, XtPointer, XtPointer);
 extern void do_action_tie_xyz(Widget, XtPointer, XtPointer);
@@ -288,7 +292,7 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 82); ac++;
-    XtSetArg(args[ac], XmNy, 308); ac++;
+    XtSetArg(args[ac], XmNy, 352); ac++;
     XtSetArg(args[ac], XmNwidth, 962); ac++;
     XtSetArg(args[ac], XmNheight, 400); ac++;
     mainWindow = XmCreateMainWindow(parent,
@@ -589,8 +593,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 209); ac++;
-    XtSetArg(args[ac], XmNheight, 316); ac++;
+    XtSetArg(args[ac], XmNwidth, 225); ac++;
+    XtSetArg(args[ac], XmNheight, 360); ac++;
     pulldownMenu_view = XmCreatePulldownMenu(XtParent(cascadeButton_view),
         (char *)"pulldownMenu_view",
         args, 
@@ -871,7 +875,55 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only Selected Section", 
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only With Selected Survey", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_showwithselectedsurvey = XmCreateToggleButton(pulldownMenu_view,
+            (char *)"toggleButton_showwithselectedsurvey",
+            args, 
+            ac);
+        XtManageChild(toggleButton_showwithselectedsurvey);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_showwithselectedsurvey, XmNvalueChangedCallback, do_view_showwithselectedsurveys, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only With Selected File", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_view, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_showwithselectedfile = XmCreateToggleButton(pulldownMenu_view,
+            (char *)"toggleButton_showwithselectedfile",
+            args, 
+            ac);
+        XtManageChild(toggleButton_showwithselectedfile);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_showwithselectedfile, XmNvalueChangedCallback, do_view_showwithselectedfile, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_view, (char *)"Show Only With Selected Section", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
@@ -980,9 +1032,9 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 223); ac++;
-    XtSetArg(args[ac], XmNy, 335); ac++;
+    XtSetArg(args[ac], XmNy, 379); ac++;
     XtSetArg(args[ac], XmNwidth, 182); ac++;
-    XtSetArg(args[ac], XmNheight, 300); ac++;
+    XtSetArg(args[ac], XmNheight, 344); ac++;
     pulldownMenu_action = XmCreatePulldownMenu(XtParent(cascadeButton_action),
         (char *)"pulldownMenu_action",
         args, 
@@ -1059,6 +1111,54 @@ CreatemainWindow(Widget parent)
     }
     
     XtAddCallback(pushButton_fixednav, XmNactivateCallback, do_action_fixednav, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set File Fixed XY Navigation", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_fixedxynav = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_fixedxynav",
+            args, 
+            ac);
+        XtManageChild(pushButton_fixedxynav);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_fixedxynav, XmNactivateCallback, do_action_fixedxynav, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_action, (char *)"Set File Fixed Z Navigation", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_action, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_fixedznav = XmCreatePushButton(pulldownMenu_action,
+            (char *)"pushButton_fixedznav",
+            args, 
+            ac);
+        XtManageChild(pushButton_fixedznav);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_fixedznav, XmNactivateCallback, do_action_fixedznav, (XtPointer)0);
     
     ac = 0;
     {

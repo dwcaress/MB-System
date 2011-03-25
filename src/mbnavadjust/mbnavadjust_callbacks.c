@@ -773,6 +773,13 @@ void do_update_status()
 	char	*tiestatus_xyz = "XYZ";
 	char	*tiestatus_xy  = "XY ";
 	char	*tiestatus_z   = "  Z";
+	char	*filestatus;
+	char	*filestatus_poor    = " poor  ";
+	char	*filestatus_good    = " good  ";
+	char	*filestatus_fixed   = " fixed ";
+	char	*filestatus_fixedxy = "fixedxy";
+	char	*filestatus_fixedz  = "fixedz ";
+	char	*filestatus_unknown = "unknown";
     	int	i, ii, j, k;
 
 	/* set status label */
@@ -857,12 +864,25 @@ void do_update_status()
 						}
 						
 					/* make survey list item */
+					if (file->status == MBNA_FILE_POORNAV)
+					    filestatus = filestatus_poor;
+					else if (file->status == MBNA_FILE_GOODNAV)
+					    filestatus = filestatus_good;
+					else if (file->status == MBNA_FILE_FIXEDNAV)
+					    filestatus = filestatus_fixed;
+					else if (file->status == MBNA_FILE_FIXEDXYNAV)
+					    filestatus = filestatus_fixedxy;
+					else if (file->status == MBNA_FILE_FIXEDZNAV)
+					    filestatus = filestatus_fixedz;
+					else
+					    filestatus = filestatus_unknown;
 					mb_get_date(mbna_verbose,btime_d,btime_i);
 					mb_get_date(mbna_verbose,etime_d,etime_i);
-				    	sprintf(string,"%2.2d %2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d",
+				    	sprintf(string,"%2.2d %2.2d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %s",
 					    num_surveys,num_files,
 					    btime_i[0],btime_i[1],btime_i[2],btime_i[3],btime_i[4],btime_i[5],btime_i[6],
-					    etime_i[0],etime_i[1],etime_i[2],etime_i[3],etime_i[4],etime_i[5],etime_i[6]);
+					    etime_i[0],etime_i[1],etime_i[2],etime_i[3],etime_i[4],etime_i[5],etime_i[6],
+					    filestatus);
     					xstr[num_surveys] = XmStringCreateLocalized(string);
 					if (mbna_verbose > 0)
 						fprintf(stderr,"%s\n",string);
@@ -893,7 +913,11 @@ void do_update_status()
 			sprintf(string,"Data Files of Survey %d:",mbna_survey_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
 			sprintf(string,"Data File %d:%d:",mbna_survey_select,mbna_file_select);
-		else if (mbna_view_mode == MBNA_VIEW_MODE_SECTION)
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
+			sprintf(string,"Data Files of Survey %d:",mbna_survey_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
+			sprintf(string,"Data File %d:%d:",mbna_survey_select,mbna_file_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
 			sprintf(string,"Data File of Selected Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
 		else
 			sprintf(string,"Data Files:");
@@ -910,7 +934,9 @@ void do_update_status()
 				if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION && mbna_file_select == i))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i))
 					num_files++;
 				}
 			xstr = (XmString *) malloc(project.num_files * sizeof(XmString));
@@ -924,28 +950,26 @@ void do_update_status()
 				if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION && mbna_file_select == i))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i))
 					{
 					if (file->status == MBNA_FILE_POORNAV)
-					    sprintf(string,"%4.4d:%2.2d pr %4d %4.1f %4.1f %s",
-						    file->id,file->block,file->num_sections,
-						    file->heading_bias,file->roll_bias,
-						    file->file);
+					    filestatus = filestatus_poor;
 					else if (file->status == MBNA_FILE_GOODNAV)
-					    sprintf(string,"%4.4d:%2.2d gd %4d %4.1f %4.1f %s",
-						    file->id,file->block,file->num_sections,
-						    file->heading_bias,file->roll_bias,
-						    file->file);
+					    filestatus = filestatus_good;
 					else if (file->status == MBNA_FILE_FIXEDNAV)
-					    sprintf(string,"%4.4d:%2.2d fx %4d %4.1f %4.1f %s",
-						    file->id,file->block,file->num_sections,
-						    file->heading_bias,file->roll_bias,
-						    file->file);
+					    filestatus = filestatus_fixed;
+					else if (file->status == MBNA_FILE_FIXEDXYNAV)
+					    filestatus = filestatus_fixedxy;
+					else if (file->status == MBNA_FILE_FIXEDZNAV)
+					    filestatus = filestatus_fixedz;
 					else
-					    sprintf(string,"%4.4d:%2.2d ?? %4d %4.1f %4.1f %s",
-						    file->id,file->block,file->num_sections,
-						    file->heading_bias,file->roll_bias,
-						    file->file);
+					    filestatus = filestatus_unknown;
+					sprintf(string,"%4.4d:%2.2d %s %4d %4.1f %4.1f %s",
+						file->id,file->block,filestatus,file->num_sections,
+						file->heading_bias,file->roll_bias,
+						file->file);
     					xstr[num_files] = XmStringCreateLocalized(string);
 					if (mbna_verbose > 0)
 						fprintf(stderr,"%s\n",string);
@@ -976,7 +1000,11 @@ void do_update_status()
 			sprintf(string,"Data File Sections of Survey %d:",mbna_survey_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
 			sprintf(string,"Data File Sections of File %d:%d:",mbna_survey_select,mbna_file_select);
-		else if (mbna_view_mode == MBNA_VIEW_MODE_SECTION)
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
+			sprintf(string,"Data File Sections of Survey %d:",mbna_survey_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
+			sprintf(string,"Data File Sections of File %d:%d:",mbna_survey_select,mbna_file_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
 			sprintf(string,"Data File Sections of File %d:%d:",mbna_survey_select,mbna_file_select);
 		else
 			sprintf(string,"Data Files Sections:");
@@ -996,7 +1024,9 @@ void do_update_status()
 					if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION && mbna_file_select == i))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i))
 						{
 						num_sections++;
 						}
@@ -1016,7 +1046,9 @@ void do_update_status()
 					if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION && mbna_file_select == i))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i))
 						{
 						mb_get_date(mbna_verbose,section->btime_d,btime_i);
 						mb_get_date(mbna_verbose,section->etime_d,etime_i);
@@ -1055,8 +1087,12 @@ void do_update_status()
 			sprintf(string,"Crossings of Survey %d:",mbna_survey_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
 			sprintf(string,"Crossings of File %d:%d:",mbna_survey_select,mbna_file_select);
-		else if (mbna_view_mode == MBNA_VIEW_MODE_SECTION)
-			sprintf(string,"Crossings of Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
+			sprintf(string,"Crossings with Survey %d:",mbna_survey_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
+			sprintf(string,"Crossings with File %d:%d:",mbna_survey_select,mbna_file_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
+			sprintf(string,"Crossings with Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
 		else
 			sprintf(string,"Crossings:");
 		set_label_string(label_listdata,string);
@@ -1076,10 +1112,16 @@ void do_update_status()
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+							|| mbna_survey_select == project.files[crossing->file_id_2].block))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+						&& (mbna_file_select == crossing->file_id_1
+							|| mbna_file_select == crossing->file_id_2))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2))
 					num_crossings++;
@@ -1099,10 +1141,16 @@ void do_update_status()
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+							|| mbna_survey_select == project.files[crossing->file_id_2].block))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+						&& (mbna_file_select == crossing->file_id_1
+							|| mbna_file_select == crossing->file_id_2))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2))
 					{
@@ -1154,8 +1202,12 @@ void do_update_status()
 			sprintf(string,">25%% Overlap Crossings of Survey %d:",mbna_survey_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
 			sprintf(string,">25%% Overlap Crossings of File %d:%d:",mbna_survey_select,mbna_file_select);
-		else if (mbna_view_mode == MBNA_VIEW_MODE_SECTION)
-			sprintf(string,">25%% Overlap Crossings of Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
+			sprintf(string,">25%% Overlap Crossings with Survey %d:",mbna_survey_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
+			sprintf(string,">25%% Overlap Crossings with File %d:%d:",mbna_survey_select,mbna_file_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
+			sprintf(string,">25%% Overlap Crossings with Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
 		else
 			sprintf(string,">25%% Overlap Crossings:");
 		set_label_string(label_listdata,string);
@@ -1176,10 +1228,16 @@ void do_update_status()
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					num_crossings++;
@@ -1200,10 +1258,16 @@ void do_update_status()
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					{
@@ -1255,8 +1319,12 @@ void do_update_status()
 			sprintf(string,">50%% Crossings of Survey %d:",mbna_survey_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
 			sprintf(string,">50%% Crossings of File %d:%d:",mbna_survey_select,mbna_file_select);
-		else if (mbna_view_mode == MBNA_VIEW_MODE_SECTION)
-			sprintf(string,">50%% Crossings of Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
+			sprintf(string,">50%% Overlap Crossings with Survey %d:",mbna_survey_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
+			sprintf(string,">50%% Overlap Crossings with File %d:%d:",mbna_survey_select,mbna_file_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
+			sprintf(string,">50%% Overlap Crossings with Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
 		else
 			sprintf(string,">50%% Crossings:");
 		set_label_string(label_listdata,string);
@@ -1277,10 +1345,16 @@ void do_update_status()
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					num_crossings++;
@@ -1301,10 +1375,16 @@ void do_update_status()
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					{
@@ -1356,8 +1436,12 @@ void do_update_status()
 			sprintf(string,"True Crossings of Survey %d:",mbna_survey_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
 			sprintf(string,"True Crossings of File %d:%d:",mbna_survey_select,mbna_file_select);
-		else if (mbna_view_mode == MBNA_VIEW_MODE_SECTION)
-			sprintf(string,"True Crossings of Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
+			sprintf(string,"True Crossings with Survey %d:",mbna_survey_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
+			sprintf(string,"True Crossings with File %d:%d:",mbna_survey_select,mbna_file_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
+			sprintf(string,"True Crossings with Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
 		else
 			sprintf(string,"True Crossings:");
 		set_label_string(label_listdata,string);
@@ -1378,10 +1462,16 @@ void do_update_status()
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					num_crossings++;
@@ -1402,10 +1492,16 @@ void do_update_status()
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					{
@@ -1454,8 +1550,12 @@ void do_update_status()
 			sprintf(string,"Ties of Survey %d:",mbna_survey_select);
 		else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
 			sprintf(string,"Ties of File %d:%d:",mbna_survey_select,mbna_file_select);
-		else if (mbna_view_mode == MBNA_VIEW_MODE_SECTION)
-			sprintf(string,"Ties of Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
+			sprintf(string,"Ties with Survey %d:",mbna_survey_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
+			sprintf(string,"Ties with File %d:%d:",mbna_survey_select,mbna_file_select);
+		else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
+			sprintf(string,"Ties with Section %d:%d:%d:",mbna_survey_select,mbna_file_select,mbna_section_select);
 		else
 			sprintf(string,"Ties:");
 		set_label_string(label_listdata,string);
@@ -1477,10 +1577,16 @@ void do_update_status()
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
-						&& mbna_file_select == crossing->file_id_1
-						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+							|| mbna_survey_select == project.files[crossing->file_id_2].block))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+						&& (mbna_file_select == crossing->file_id_1
+							|| mbna_file_select == crossing->file_id_2))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						&& (mbna_file_select == crossing->file_id_1
+						&& mbna_section_select == crossing->section_1))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2))
 					{
@@ -1503,10 +1609,16 @@ void do_update_status()
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+							|| mbna_survey_select == project.files[crossing->file_id_2].block))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+						&& (mbna_file_select == crossing->file_id_1
+							|| mbna_file_select == crossing->file_id_2))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2))
 					{
@@ -1627,6 +1739,12 @@ void do_update_status()
 	XtVaSetValues(toggleButton_showselectedfile,
 		XmNsensitive, True,
 		NULL);
+	XtVaSetValues(toggleButton_showwithselectedsurvey,
+		XmNsensitive, True,
+		NULL);
+	XtVaSetValues(toggleButton_showwithselectedfile,
+		XmNsensitive, True,
+		NULL);
 	XtVaSetValues(toggleButton_showselectedsection,
 		XmNsensitive, True,
 		NULL);
@@ -1635,6 +1753,10 @@ void do_update_status()
 	XmToggleButtonSetState(toggleButton_showselectedsurvey, 
 		FALSE, FALSE);
 	XmToggleButtonSetState(toggleButton_showselectedfile, 
+		FALSE, FALSE);
+	XmToggleButtonSetState(toggleButton_showwithselectedsurvey, 
+		FALSE, FALSE);
+	XmToggleButtonSetState(toggleButton_showwithselectedfile, 
 		FALSE, FALSE);
 	XmToggleButtonSetState(toggleButton_showselectedsection, 
 		FALSE, FALSE);
@@ -1647,17 +1769,22 @@ void do_update_status()
 	else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
 		XmToggleButtonSetState(toggleButton_showselectedfile, 
 			TRUE, FALSE);
-	else if (mbna_view_mode == MBNA_VIEW_MODE_SECTION)
+	else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
+		XmToggleButtonSetState(toggleButton_showwithselectedsurvey, 
+			TRUE, FALSE);
+	else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
+		XmToggleButtonSetState(toggleButton_showwithselectedfile, 
+			TRUE, FALSE);
+	else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
 		XmToggleButtonSetState(toggleButton_showselectedsection, 
 			TRUE, FALSE);		
 	
-	if (mbna_view_list == MBNA_VIEW_LIST_FILES
+	if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS
 		&& project.num_files > 0
-		&& mbna_file_select != MBNA_SELECT_NONE
-		&& project.files[mbna_file_select].status == MBNA_FILE_POORNAV)
+		&& mbna_survey_select != MBNA_SELECT_NONE)
 		{
 		XtVaSetValues(pushButton_poornav,
-			XmNsensitive, False,
+			XmNsensitive, True,
 			NULL);
 		XtVaSetValues(pushButton_goodnav,
 			XmNsensitive, True,
@@ -1665,26 +1792,46 @@ void do_update_status()
 		XtVaSetValues(pushButton_fixednav,
 			XmNsensitive, True,
 			NULL);
+		XtVaSetValues(pushButton_fixedxynav,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_fixedznav,
+			XmNsensitive, True,
+			NULL);
+		if (project.files[mbna_file_select].status == MBNA_FILE_POORNAV)
+			{
+			XtVaSetValues(pushButton_poornav,
+				XmNsensitive, False,
+				NULL);
+			}
+		else if (project.files[mbna_file_select].status == MBNA_FILE_GOODNAV)
+			{
+			XtVaSetValues(pushButton_goodnav,
+				XmNsensitive, False,
+				NULL);
+			}
+		else if (project.files[mbna_file_select].status == MBNA_FILE_FIXEDNAV)
+			{
+			XtVaSetValues(pushButton_fixednav,
+				XmNsensitive, False,
+				NULL);
+			}
+		else if (project.files[mbna_file_select].status == MBNA_FILE_FIXEDXYNAV)
+			{
+			XtVaSetValues(pushButton_fixedxynav,
+				XmNsensitive, False,
+				NULL);
+			}
+		else if (project.files[mbna_file_select].status == MBNA_FILE_FIXEDZNAV)
+			{
+			XtVaSetValues(pushButton_fixedznav,
+				XmNsensitive, False,
+				NULL);
+			}
 		}
 	else if (mbna_view_list == MBNA_VIEW_LIST_FILES
 		&& project.num_files > 0
-		&& mbna_file_select != MBNA_SELECT_NONE
-		&& project.files[mbna_file_select].status == MBNA_FILE_GOODNAV)
-		{
-		XtVaSetValues(pushButton_poornav,
-			XmNsensitive, True,
-			NULL);
-		XtVaSetValues(pushButton_goodnav,
-			XmNsensitive, False,
-			NULL);
-		XtVaSetValues(pushButton_fixednav,
-			XmNsensitive, True,
-			NULL);
-		}
-	else if (mbna_view_list == MBNA_VIEW_LIST_FILES
-		&& project.num_files > 0
-		&& mbna_file_select != MBNA_SELECT_NONE
-		&& project.files[mbna_file_select].status == MBNA_FILE_FIXEDNAV)
+		&& mbna_file_select != MBNA_SELECT_NONE)
 		{
 		XtVaSetValues(pushButton_poornav,
 			XmNsensitive, True,
@@ -1693,8 +1840,44 @@ void do_update_status()
 			XmNsensitive, True,
 			NULL);
 		XtVaSetValues(pushButton_fixednav,
-			XmNsensitive, False,
+			XmNsensitive, True,
 			NULL);
+		XtVaSetValues(pushButton_fixedxynav,
+			XmNsensitive, True,
+			NULL);
+		XtVaSetValues(pushButton_fixedznav,
+			XmNsensitive, True,
+			NULL);
+		if (project.files[mbna_file_select].status == MBNA_FILE_POORNAV)
+			{
+			XtVaSetValues(pushButton_poornav,
+				XmNsensitive, False,
+				NULL);
+			}
+		else if (project.files[mbna_file_select].status == MBNA_FILE_GOODNAV)
+			{
+			XtVaSetValues(pushButton_goodnav,
+				XmNsensitive, False,
+				NULL);
+			}
+		else if (project.files[mbna_file_select].status == MBNA_FILE_FIXEDNAV)
+			{
+			XtVaSetValues(pushButton_fixednav,
+				XmNsensitive, False,
+				NULL);
+			}
+		else if (project.files[mbna_file_select].status == MBNA_FILE_FIXEDXYNAV)
+			{
+			XtVaSetValues(pushButton_fixedxynav,
+				XmNsensitive, False,
+				NULL);
+			}
+		else if (project.files[mbna_file_select].status == MBNA_FILE_FIXEDZNAV)
+			{
+			XtVaSetValues(pushButton_fixedznav,
+				XmNsensitive, False,
+				NULL);
+			}
 		}
 	else
 		{
@@ -1705,6 +1888,12 @@ void do_update_status()
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_fixednav,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_fixedxynav,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_fixedznav,
 			XmNsensitive, False,
 			NULL);
 		}
@@ -2708,6 +2897,16 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		mbna_section_select = 0;
 		mbna_file_select = 0;
 		mbna_survey_select = position_list[0] - 1;
+		
+		/* get selected file from list */
+		for (i=0;i<project.num_files;i++)
+			{
+			file = &(project.files[i]);
+			if (mbna_file_select == 0 && mbna_survey_select == file->block)
+				{
+				mbna_file_select = i;
+				}
+ 			}
 		}
 	else if (mbna_view_list == MBNA_VIEW_LIST_FILES)
 		{
@@ -2720,7 +2919,9 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 			if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 				|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block)
 				|| (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION && mbna_file_select == i))
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block)
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i)
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i))
 				{
 				if (num_files == position_list[0] - 1)
 					{
@@ -2744,7 +2945,9 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 				if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY && mbna_survey_select == file->block)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE && mbna_file_select == i)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION && mbna_file_select == i))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY && mbna_survey_select == file->block)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE && mbna_file_select == i)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION && mbna_file_select == i))
 					{
 					if (num_sections == position_list[0] - 1)
 						{
@@ -2771,10 +2974,16 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 				|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 					&& mbna_file_select == crossing->file_id_1
 					&& mbna_file_select == crossing->file_id_2)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+					&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| mbna_survey_select == project.files[crossing->file_id_2].block))
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+					&& (mbna_file_select == crossing->file_id_1
+						|| mbna_file_select == crossing->file_id_2))
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 					&& mbna_file_select == crossing->file_id_1
 					&& mbna_section_select == crossing->section_1)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 					&& mbna_file_select == crossing->file_id_2
 					&& mbna_section_select == crossing->section_2))
 				{
@@ -2819,10 +3028,16 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+							|| mbna_survey_select == project.files[crossing->file_id_2].block))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+						&& (mbna_file_select == crossing->file_id_1
+							|| mbna_file_select == crossing->file_id_2))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2)))
 				{
@@ -2859,20 +3074,26 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		for (i=0;i<project.num_crossings;i++)
 			{
 			crossing = &(project.crossings[i]);
-				if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD
-					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-							&& mbna_survey_select == project.files[crossing->file_id_1].block 
-							&& mbna_survey_select == project.files[crossing->file_id_2].block)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
-							&& mbna_file_select == crossing->file_id_1
-							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
-							&& mbna_file_select == crossing->file_id_1
-							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
-							&& mbna_file_select == crossing->file_id_2
-							&& mbna_section_select == crossing->section_2)))
+			if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD
+				&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
+						&& mbna_survey_select == project.files[crossing->file_id_1].block 
+						&& mbna_survey_select == project.files[crossing->file_id_2].block)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+						&& mbna_file_select == crossing->file_id_1
+						&& mbna_file_select == crossing->file_id_2)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+							|| mbna_survey_select == project.files[crossing->file_id_2].block))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+						&& (mbna_file_select == crossing->file_id_1
+							|| mbna_file_select == crossing->file_id_2))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						&& mbna_file_select == crossing->file_id_1
+						&& mbna_section_select == crossing->section_1)
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						&& mbna_file_select == crossing->file_id_2
+						&& mbna_section_select == crossing->section_2)))
 				{
 				if (num_crossings == position_list[0] - 1)
 					{
@@ -2915,10 +3136,16 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+							|| mbna_survey_select == project.files[crossing->file_id_2].block))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+						&& (mbna_file_select == crossing->file_id_1
+							|| mbna_file_select == crossing->file_id_2))
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2)))
 				{
@@ -2963,10 +3190,16 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 				|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 					&& mbna_file_select == crossing->file_id_1
 					&& mbna_file_select == crossing->file_id_2)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+					&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| mbna_survey_select == project.files[crossing->file_id_2].block))
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+					&& (mbna_file_select == crossing->file_id_1
+						|| mbna_file_select == crossing->file_id_2))
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 					&& mbna_file_select == crossing->file_id_1
 					&& mbna_section_select == crossing->section_1)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 					&& mbna_file_select == crossing->file_id_2
 					&& mbna_section_select == crossing->section_2))
 				{
@@ -4399,12 +4632,36 @@ do_view_showselectedfile( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
+do_view_showwithselectedsurveys( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    
+    mbna_view_mode = MBNA_VIEW_MODE_WITHSURVEY;
+    do_update_status();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_view_showwithselectedfile( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    
+    mbna_view_mode = MBNA_VIEW_MODE_WITHFILE;
+    do_update_status();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
 do_view_showselectedsection( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
     
-    mbna_view_mode = MBNA_VIEW_MODE_SECTION;
+    mbna_view_mode = MBNA_VIEW_MODE_WITHSECTION;
     do_update_status();
 }
 
@@ -4530,6 +4787,28 @@ do_action_fixednav( Widget w, XtPointer client_data, XtPointer call_data)
     acs = (XmAnyCallbackStruct*)call_data;
 
     mbnavadjust_fixednav_file();
+    do_update_status();
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_action_fixedxynav( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mbnavadjust_fixedxynav_file();
+    do_update_status();
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_action_fixedznav( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mbnavadjust_fixedznav_file();
     do_update_status();
 }
 /*--------------------------------------------------------------------*/

@@ -177,6 +177,19 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.2 RELEASE NOTES:
 ------------------------------------------
 
+Changed MBnavadjust to allow more file modes, in turn allowing
+more control over which data has the most influence over the navigation
+solutions. In addition to the previously existing modes (Fixed, Good, Poor),
+surveys can now be set to FixedXY and FixedZ modes where the navigation 
+of the files so identified will have the specified coordinates fixed 
+(unadjusted) and the other coordinate(s) treated as Good. In particular,
+this allowed us to simultaneously adjust navigation from overlapping
+MBARI Mapping AUV and ABE surveys in which the Mapping AUV pressure depth
+was clearly more accurate than the ABE vehicle depths. By setting the
+MBARI data to mode FixedZ, we were able to force the solution to adjust
+the ABE navigation to match the Mapping AUV vertical reference, while still
+allowing lateral (XY) adjustments of all the AUV navigation.
+
 Changed MBnavadjust to output user, cpu, and time of changes to
 project files and as comments to the adjusted navigation files. Also changed
 mbprocess to handle comments in adjusted navigation files.
