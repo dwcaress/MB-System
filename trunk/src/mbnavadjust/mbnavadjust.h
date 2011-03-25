@@ -100,6 +100,8 @@
 #define	MBNA_FILE_POORNAV		1
 #define	MBNA_FILE_GOODNAV		2
 #define	MBNA_FILE_FIXEDNAV		3
+#define	MBNA_FILE_FIXEDXYNAV		4
+#define	MBNA_FILE_FIXEDZNAV		5
 #define	MBNA_TIE_XYZ			1
 #define	MBNA_TIE_XY			2
 #define	MBNA_TIE_Z			3
@@ -118,8 +120,10 @@
 #define MBNA_VIEW_LIST_TIES		7
 #define MBNA_VIEW_MODE_ALL		0
 #define MBNA_VIEW_MODE_SURVEY		1
-#define MBNA_VIEW_MODE_FILE		2
-#define MBNA_VIEW_MODE_SECTION		3
+#define MBNA_VIEW_MODE_WITHSURVEY	2
+#define MBNA_VIEW_MODE_FILE		3
+#define MBNA_VIEW_MODE_WITHFILE		4
+#define MBNA_VIEW_MODE_WITHSECTION	5
 #define MBNA_SELECT_NONE		-1
 #define MBNA_VECTOR_ALLOC_INC		1000
 #define MBNA_PEN_UP			3
@@ -449,6 +453,8 @@ int	mbnavadjust_findcrossingsfile(int ifile);
 int	mbnavadjust_poornav_file();
 int	mbnavadjust_goodnav_file();
 int	mbnavadjust_fixednav_file();
+int	mbnavadjust_fixedxynav_file();
+int	mbnavadjust_fixedznav_file();
 int	mbnavadjust_set_tie_xy();
 int	mbnavadjust_set_tie_z();
 int	mbnavadjust_set_tie_xyz();

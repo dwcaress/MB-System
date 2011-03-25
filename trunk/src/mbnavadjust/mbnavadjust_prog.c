@@ -3576,8 +3576,17 @@ int mbnavadjust_poornav_file()
 		&& mbna_file_select >= 0
 		&& mbna_file_select < project.num_files)
 		{
+		/* get affected survey block */
+		if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS)
+			{
+			block = mbna_survey_select;
+			}
+		else if (mbna_view_list == MBNA_VIEW_LIST_FILES)	
+			{
+			block = project.files[mbna_file_select].block;
+			}
+
 		/* set all files in block of selected file to poor nav */
-		block = project.files[mbna_file_select].block;
 		for (i=0;i<project.num_files;i++)
 			{
 			if (project.files[i].block == block)
@@ -3630,8 +3639,17 @@ int mbnavadjust_goodnav_file()
 		&& mbna_file_select >= 0
 		&& mbna_file_select < project.num_files)
 		{
+		/* get affected survey block */
+		if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS)
+			{
+			block = mbna_survey_select;
+			}
+		else if (mbna_view_list == MBNA_VIEW_LIST_FILES)	
+			{
+			block = project.files[mbna_file_select].block;
+			}
+
 		/* set all files in block of selected file to good nav */
-		block = project.files[mbna_file_select].block;
 		for (i=0;i<project.num_files;i++)
 			{
 			if (project.files[i].block == block)
@@ -3687,8 +3705,17 @@ int mbnavadjust_fixednav_file()
 		&& mbna_file_select >= 0
 		&& mbna_file_select < project.num_files)
 		{
+		/* get affected survey block */
+		if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS)
+			{
+			block = mbna_survey_select;
+			}
+		else if (mbna_view_list == MBNA_VIEW_LIST_FILES)	
+			{
+			block = project.files[mbna_file_select].block;
+			}
+
 		/* set all files in block of selected file to fixed nav */
-		block = project.files[mbna_file_select].block;
 		for (i=0;i<project.num_files;i++)
 			{
 			if (project.files[i].block == block)
@@ -3705,6 +3732,140 @@ int mbnavadjust_fixednav_file()
 		
 		/* add info text */
 		sprintf(message, "Set file %d to have fixed nav: %s\n",
+			    mbna_file_select,project.files[mbna_file_select].file);
+		do_info_add(message, MB_YES);
+   		}
+			
+ 	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+		
+/*--------------------------------------------------------------------*/
+int mbnavadjust_fixedxynav_file()
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_fixedxynav_file";
+	int	status = MB_SUCCESS;
+ 	int	block;
+	int	i;
+
+ 	/* print input debug statements */
+	if (mbna_verbose >= 0)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+		
+     	/* set selected file's block to good nav */
+    	if (project.open == MB_YES
+    		&& project.num_files > 0
+		&& mbna_file_select >= 0
+		&& mbna_file_select < project.num_files)
+		{
+		/* get affected survey block */
+		if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS)
+			{
+			block = mbna_survey_select;
+			}
+		else if (mbna_view_list == MBNA_VIEW_LIST_FILES)	
+			{
+			block = project.files[mbna_file_select].block;
+			}
+
+		/* set all files in block of selected file to fixed nav */
+		for (i=0;i<project.num_files;i++)
+			{
+			if (project.files[i].block == block)
+				{
+				project.files[i].status = MBNA_FILE_FIXEDXYNAV;
+				fprintf(stderr,"Set file to have fixed xy nav: %d %s\n",i,project.files[i].file);
+				}
+			}
+		if (project.inversion == MBNA_INVERSION_CURRENT)
+			project.inversion = MBNA_INVERSION_OLD;
+						
+		/* write out updated project */
+		mbnavadjust_write_project();
+		
+		/* add info text */
+		sprintf(message, "Set file %d to have fixed xy nav: %s\n",
+			    mbna_file_select,project.files[mbna_file_select].file);
+		do_info_add(message, MB_YES);
+   		}
+			
+ 	/* print output debug statements */
+	if (mbna_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBnavadjust function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	return(status);
+}
+		
+/*--------------------------------------------------------------------*/
+int mbnavadjust_fixedznav_file()
+{
+	/* local variables */
+	char	*function_name = "mbnavadjust_fixedznav_file";
+	int	status = MB_SUCCESS;
+ 	int	block;
+	int	i;
+
+ 	/* print input debug statements */
+	if (mbna_verbose >= 0)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+		
+     	/* set selected file's block to good nav */
+    	if (project.open == MB_YES
+    		&& project.num_files > 0
+		&& mbna_file_select >= 0
+		&& mbna_file_select < project.num_files)
+		{
+		/* get affected survey block */
+		if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS)
+			{
+			block = mbna_survey_select;
+			}
+		else if (mbna_view_list == MBNA_VIEW_LIST_FILES)	
+			{
+			block = project.files[mbna_file_select].block;
+			}
+
+		/* set all files in block of selected file to fixed nav */
+		for (i=0;i<project.num_files;i++)
+			{
+			if (project.files[i].block == block)
+				{
+				project.files[i].status = MBNA_FILE_FIXEDZNAV;
+				fprintf(stderr,"Set file to have fixed z nav: %d %s\n",i,project.files[i].file);
+				}
+			}
+		if (project.inversion == MBNA_INVERSION_CURRENT)
+			project.inversion = MBNA_INVERSION_OLD;
+						
+		/* write out updated project */
+		mbnavadjust_write_project();
+		
+		/* add info text */
+		sprintf(message, "Set file %d to have fixed z nav: %s\n",
 			    mbna_file_select,project.files[mbna_file_select].file);
 		do_info_add(message, MB_YES);
    		}
@@ -4136,7 +4297,13 @@ int mbnavadjust_naverr_next()
 				|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 					&& (mbna_file_select != crossing->file_id_1
 						|| mbna_file_select != crossing->file_id_2))
-				|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+					&& mbna_survey_select != project.files[crossing->file_id_1].block 
+					&& mbna_survey_select != project.files[crossing->file_id_2].block)
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+					&& mbna_file_select != crossing->file_id_1
+					&& mbna_file_select != crossing->file_id_2)
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 					&& (mbna_file_select != crossing->file_id_1
 						|| mbna_section_select != crossing->section_1)
 					&& (mbna_file_select != crossing->file_id_2
@@ -4265,7 +4432,13 @@ int mbnavadjust_naverr_previous()
 				|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 					&& (mbna_file_select != crossing->file_id_1
 						|| mbna_file_select != crossing->file_id_2))
-				|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+					&& mbna_survey_select != project.files[crossing->file_id_1].block 
+					&& mbna_survey_select != project.files[crossing->file_id_2].block)
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+					&& mbna_file_select != crossing->file_id_1
+					&& mbna_file_select != crossing->file_id_2)
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 					&& (mbna_file_select != crossing->file_id_1
 						|| mbna_section_select != crossing->section_1)
 					&& (mbna_file_select != crossing->file_id_2
@@ -4394,7 +4567,13 @@ int mbnavadjust_naverr_nextunset()
 				|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 					&& (mbna_file_select != crossing->file_id_1
 						|| mbna_file_select != crossing->file_id_2))
-				|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+					&& mbna_survey_select != project.files[crossing->file_id_1].block 
+					&& mbna_survey_select != project.files[crossing->file_id_2].block)
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+					&& mbna_file_select != crossing->file_id_1
+					&& mbna_file_select != crossing->file_id_2)
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 					&& (mbna_file_select != crossing->file_id_1
 						|| mbna_section_select != crossing->section_1)
 					&& (mbna_file_select != crossing->file_id_2
@@ -7913,10 +8092,16 @@ mbnavadjust_autopick(int do_vertical)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2))
 						process = MB_YES;
@@ -7924,55 +8109,70 @@ mbnavadjust_autopick(int do_vertical)
 				else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
 					{
 					if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD
-						&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-								&& mbna_survey_select == project.files[crossing->file_id_1].block 
-								&& mbna_survey_select == project.files[crossing->file_id_2].block)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
-								&& mbna_file_select == crossing->file_id_1
-								&& mbna_file_select == crossing->file_id_2)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
-								&& mbna_file_select == crossing->file_id_1
-								&& mbna_section_select == crossing->section_1)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
-								&& mbna_file_select == crossing->file_id_2
-								&& mbna_section_select == crossing->section_2)))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
+							&& mbna_survey_select == project.files[crossing->file_id_1].block 
+							&& mbna_survey_select == project.files[crossing->file_id_2].block)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_file_select == crossing->file_id_2)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_section_select == crossing->section_1)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+							&& mbna_file_select == crossing->file_id_2
+							&& mbna_section_select == crossing->section_2))
 						process = MB_YES;
 					}
 				else if (mbna_view_list == MBNA_VIEW_LIST_BETTERCROSSINGS)
 					{
 					if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD
-						&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-								&& mbna_survey_select == project.files[crossing->file_id_1].block 
-								&& mbna_survey_select == project.files[crossing->file_id_2].block)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
-								&& mbna_file_select == crossing->file_id_1
-								&& mbna_file_select == crossing->file_id_2)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
-								&& mbna_file_select == crossing->file_id_1
-								&& mbna_section_select == crossing->section_1)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
-								&& mbna_file_select == crossing->file_id_2
-								&& mbna_section_select == crossing->section_2)))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
+							&& mbna_survey_select == project.files[crossing->file_id_1].block 
+							&& mbna_survey_select == project.files[crossing->file_id_2].block)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_file_select == crossing->file_id_2)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_section_select == crossing->section_1)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+							&& mbna_file_select == crossing->file_id_2
+							&& mbna_section_select == crossing->section_2))
 						process = MB_YES;
 					}
 				else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
 					{
 					if (crossing->truecrossing == MB_YES
-						&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-								&& mbna_survey_select == project.files[crossing->file_id_1].block 
-								&& mbna_survey_select == project.files[crossing->file_id_2].block)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
-								&& mbna_file_select == crossing->file_id_1
-								&& mbna_file_select == crossing->file_id_2)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
-								&& mbna_file_select == crossing->file_id_1
-								&& mbna_section_select == crossing->section_1)
-							|| (mbna_view_mode == MBNA_VIEW_MODE_SECTION 
-								&& mbna_file_select == crossing->file_id_2
-								&& mbna_section_select == crossing->section_2)))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
+							&& mbna_survey_select == project.files[crossing->file_id_1].block 
+							&& mbna_survey_select == project.files[crossing->file_id_2].block)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_file_select == crossing->file_id_2)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+								|| mbna_survey_select == project.files[crossing->file_id_2].block))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
+							&& (mbna_file_select == crossing->file_id_1
+								|| mbna_file_select == crossing->file_id_2))
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+							&& mbna_file_select == crossing->file_id_1
+							&& mbna_section_select == crossing->section_1)
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+							&& mbna_file_select == crossing->file_id_2
+							&& mbna_section_select == crossing->section_2))
 						process = MB_YES;
 					}
 				else
@@ -8349,6 +8549,15 @@ mbnavadjust_invertnav()
 		misfit_initial = sqrt(misfit_initial) / ntie;
 		perturbationsizeold = misfit_initial;
 		
+		/* count the number of fixed files */
+		nfixed = 0;
+		for (i=0;i<project.num_files;i++)
+		    {
+		    file = &project.files[i];
+		    if (file->status == MBNA_FILE_FIXEDNAV)
+		    	nfixed++;
+		    }
+		
 		/* if only one block just set average offsets to zero */
 		if (project.num_blocks <= 1)
 		    {
@@ -8437,7 +8646,8 @@ mbnavadjust_invertnav()
 icrossing,j,nc1,nc2,offsetx,offsety,offsetz); */
 
 				/* deal with fixed or unfixed status of sections */
-				if (file1->status != MBNA_FILE_FIXEDNAV && file2->status != MBNA_FILE_FIXEDNAV)
+				if ((file1->status == MBNA_FILE_GOODNAV && file2->status == MBNA_FILE_GOODNAV)
+					|| (file1->status == MBNA_FILE_POORNAV && file2->status == MBNA_FILE_POORNAV))
 				    {
 				    xx[3*nc1]   += -0.5 * offsetx;
 				    xx[3*nc1+1] += -0.5 * offsety;
@@ -8446,33 +8656,110 @@ icrossing,j,nc1,nc2,offsetx,offsety,offsetz); */
 				    xx[3*nc2+1] +=  0.5 * offsety;
 				    xx[3*nc2+2] +=  0.5 * offsetz;
 				    }
-				else if (file1->status == MBNA_FILE_FIXEDNAV && file2->status != MBNA_FILE_FIXEDNAV)
+				else if (file1->status == MBNA_FILE_GOODNAV && file2->status == MBNA_FILE_POORNAV)
 				    {
-				    nfixed++;
+				    xx[3*nc1]   += -0.005 * offsetx;
+				    xx[3*nc1+1] += -0.005 * offsety;
+				    xx[3*nc1+2] += -0.005 * offsetz;
+				    xx[3*nc2]   +=  0.995 * offsetx;
+				    xx[3*nc2+1] +=  0.995 * offsety;
+				    xx[3*nc2+2] +=  0.995 * offsetz;
+				    }
+				else if (file1->status == MBNA_FILE_POORNAV && file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    xx[3*nc1]   += -0.995 * offsetx;
+				    xx[3*nc1+1] += -0.995 * offsety;
+				    xx[3*nc1+2] += -0.995 * offsetz;
+				    xx[3*nc2]   +=  0.005 * offsetx;
+				    xx[3*nc2+1] +=  0.005 * offsety;
+				    xx[3*nc2+2] +=  0.005 * offsetz;
+				    }
+				else if (file1->status == MBNA_FILE_FIXEDNAV && file2->status == MBNA_FILE_FIXEDNAV)
+				    {
 				    /* 
 				    xx[3*nc1]   +=  0.0;
 				    xx[3*nc1+1] +=  0.0;
-				    xx[3*nc1+2] +=  0.0; */
-				    xx[3*nc2]   +=  offsetx;
-				    xx[3*nc2+1] +=  offsety;
-				    xx[3*nc2+2] +=  offsetz;
-/* fprintf(stderr,"Fixed nc1:%d %f %f %f   nc2:%d %f %f %f\n",
-nc1,xx[3*nc1],x[3*nc1+1],xx[3*nc1+2],
-nc2,xx[3*nc2],x[3*nc2+1],xx[3*nc2+2]);*/
-				    }
-				else if (file1->status != MBNA_FILE_FIXEDNAV && file2->status == MBNA_FILE_FIXEDNAV)
-				    {
-				    nfixed++;
-				    xx[3*nc1]   += -offsetx;
-				    xx[3*nc1+1] += -offsety;
-				    xx[3*nc1+2] += -offsetz;
-				    /* 
+				    xx[3*nc1+2] +=  0.0;
 				    xx[3*nc2]   +=  0.0;
 				    xx[3*nc2+1] +=  0.0;
-				    xx[3*nc2+2] +=  0.0; */
-/* fprintf(stderr,"nc1:%d %f %f %f   Fixed nc2:%d %f %f %f\n",
-nc1,xx[3*nc1],x[3*nc1+1],xx[3*nc1+2],
-nc2,xx[3*nc2],x[3*nc2+1],xx[3*nc2+2]);*/
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file1->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    	{
+				    	/* 
+					xx[3*nc1]   +=  0.0;
+					xx[3*nc1+1] +=  0.0;
+					xx[3*nc1+2] +=  0.0;
+					xx[3*nc2]   +=  0.0;
+					xx[3*nc2+1] +=  0.0;
+				    	*/
+					xx[3*nc2+2] +=  offsetz;
+					}
+				    else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    	{
+				    	/* 
+					xx[3*nc1]   +=  0.0;
+					xx[3*nc1+1] +=  0.0;
+					xx[3*nc1+2] +=  0.0;
+				    	*/
+					xx[3*nc2]   +=  offsetx;
+					xx[3*nc2+1] +=  offsety;
+				    	/*
+					xx[3*nc2+2] +=  0.0;
+					*/
+					}
+				    else
+				    	{
+				    	/* 
+					xx[3*nc1]   +=  0.0;
+					xx[3*nc1+1] +=  0.0;
+					xx[3*nc1+2] +=  0.0;
+				    	*/
+					xx[3*nc2]   +=  offsetx;
+					xx[3*nc2+1] +=  offsety;
+					xx[3*nc2+2] +=  offsetz;
+					}
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    if (file1->status == MBNA_FILE_FIXEDXYNAV)
+				    	{
+				    	/* 
+					xx[3*nc1]   +=  0.0;
+					xx[3*nc1+1] +=  0.0;
+				    	*/
+					xx[3*nc1+2] +=  -offsetz;
+				    	/* 
+					xx[3*nc2]   +=  0.0;
+					xx[3*nc2+1] +=  0.0;
+					xx[3*nc2+2] +=  0.0;
+				    	*/
+					}
+				    else if (file1->status == MBNA_FILE_FIXEDZNAV)
+				    	{
+					xx[3*nc1]   +=  -offsetx;
+					xx[3*nc1+1] +=  -offsety;
+				    	/* 
+					xx[3*nc1+2] +=  0.0;
+					xx[3*nc2]   +=  0.0;
+					xx[3*nc2+1] +=  0.0;
+					xx[3*nc2+2] +=  0.0;
+				    	*/
+					}
+				    else
+				    	{
+					xx[3*nc1]   +=  -offsetx;
+					xx[3*nc1+1] +=  -offsety;
+					xx[3*nc1+2] +=  -offsetz;
+				    	/* 
+					xx[3*nc2]   +=  0.0;
+					xx[3*nc2+1] +=  0.0;
+					xx[3*nc2+2] +=  0.0;
+				    	*/
+					}
 				    }
 				}
 			    }
@@ -9137,41 +9424,270 @@ icrossing,jtie,nc1,file1->status,nc2,file2->status,offsetx,offsety,offsetz);
 			    else
 			    	weight = 1.0;
 
-			    /* deal with fixed or unfixed status of sections */
-			    if (file1->status != MBNA_FILE_FIXEDNAV && file2->status != MBNA_FILE_FIXEDNAV)
-				{
-				xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax1[0];
-				xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax1[1];
-				xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax1[2];
-				xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax1[0];
-				xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax1[1];
-				xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax1[2];
+			    /* deal with fixed, good, or poor status of sections */
+			    if (file1->status == file2->status)
+			    	{
+				if (file1->status == MBNA_FILE_GOODNAV || file1->status == MBNA_FILE_POORNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax1[2];
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    /* 
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax1[2];
+				    /*
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file1->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax1[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax1[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
 				}
-			    else if (file1->status == MBNA_FILE_FIXEDNAV && file2->status != MBNA_FILE_FIXEDNAV)
-				{
-				/* 
-				xx[3*nc1]   +=  0.0;
-				xx[3*nc1+1] +=  0.0;
-				xx[3*nc1+2] +=  0.0; */
-				xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax1[0];
-				xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax1[1];
-				xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax1[2];
-/* fprintf(stderr,"Fixed nc1:%d %f %f %f   nc2:%d %f %f %f\n",
-nc1,xx[3*nc1],x[3*nc1+1],xx[3*nc1+2],
-nc2,xx[3*nc2],x[3*nc2+1],xx[3*nc2+2]);*/
+			    else if (file1->status == MBNA_FILE_GOODNAV)
+			    	{
+				if (file2->status == MBNA_FILE_POORNAV)
+				    {
+				    xx[3*nc1]   += -0.005 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -0.005 * weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc1+2] += -0.005 * weight * offsetsigma * tie->sigmax1[2];
+				    xx[3*nc2]   +=  -0.995 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  -0.995 * weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc2+2] +=  -0.995 * weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax1[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax1[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax1[2];
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax1[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
 				}
-			    else if (file1->status != MBNA_FILE_FIXEDNAV && file2->status == MBNA_FILE_FIXEDNAV)
-				{
-				xx[3*nc1]   += -weight * offsetsigma * tie->sigmax1[0];
-				xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax1[1];
-				xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax1[2];
-				/* 
-				xx[3*nc2]   +=  0.0;
-				xx[3*nc2+1] +=  0.0;
-				xx[3*nc2+2] +=  0.0; */
-/* fprintf(stderr,"nc1:%d %f %f %f   Fixed nc2:%d %f %f %f\n",
-nc1,xx[3*nc1],x[3*nc1+1],xx[3*nc1+2],
-nc2,xx[3*nc2],x[3*nc2+1],xx[3*nc2+2]);*/
+			    else if (file1->status == MBNA_FILE_POORNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    xx[3*nc1]   += -0.995 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -0.995 * weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc1+2] += -0.995 * weight * offsetsigma * tie->sigmax1[2];
+				    xx[3*nc2]   +=  -0.005 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  -0.005 * weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc2+2] +=  -0.005 * weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax1[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc1+2] += -0.995 * weight * offsetsigma * tie->sigmax1[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  0.005 * weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    xx[3*nc1]   += -0.995 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -0.995 * weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax1[2];
+				    xx[3*nc2]   +=  0.005 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  0.005 * weight * offsetsigma * tie->sigmax1[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				}
+			    else if (file1->status == MBNA_FILE_FIXEDNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV || file2->status == MBNA_FILE_POORNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    /* 
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    xx[3*nc1+2] +=  0.0;
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax1[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				}
+			    else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax1[2];
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file2->status == MBNA_FILE_POORNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -0.005 * weight * offsetsigma * tie->sigmax1[2];
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc2+2] +=  0.995 * weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    /* 
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax1[2];
+				    /*
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax1[2];
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax1[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				}
+			    else if (file1->status == MBNA_FILE_FIXEDZNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax1[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file2->status == MBNA_FILE_POORNAV)
+				    {
+				    xx[3*nc1]   += -0.005 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -0.005 * weight * offsetsigma * tie->sigmax1[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  0.995 * weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc2+1] +=  0.995 * weight * offsetsigma * tie->sigmax1[1];
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax1[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax1[1];
+				    /* 
+				    xx[3*nc1+2] +=  0.0;
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax1[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax1[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax1[2];
+				    }
 				}
 /* fprintf(stderr,"long axis:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xx[3*nc1],xx[3*nc1+1],xx[3*nc1+2],
@@ -9186,35 +9702,270 @@ nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
 			    else
 			    	weight = 1.0;
 
-			    /* deal with fixed or unfixed status of sections */
-			    if (file1->status != MBNA_FILE_FIXEDNAV && file2->status != MBNA_FILE_FIXEDNAV)
-				{
-				xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax2[0];
-				xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax2[1];
-				xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax2[2];
-				xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax2[0];
-				xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax2[1];
-				xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax2[2];
+			    /* deal with fixed, good, or poor status of sections */
+			    if (file1->status == file2->status)
+			    	{
+				if (file1->status == MBNA_FILE_GOODNAV || file1->status == MBNA_FILE_POORNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax2[2];
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    /* 
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax2[2];
+				    /*
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file1->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax2[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax2[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
 				}
-			    else if (file1->status == MBNA_FILE_FIXEDNAV && file2->status != MBNA_FILE_FIXEDNAV)
-				{
-				/* 
-				xx[3*nc1]   +=  0.0;
-				xx[3*nc1+1] +=  0.0;
-				xx[3*nc1+2] +=  0.0; */
-				xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax2[0];
-				xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax2[1];
-				xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax2[2];
+			    else if (file1->status == MBNA_FILE_GOODNAV)
+			    	{
+				if (file2->status == MBNA_FILE_POORNAV)
+				    {
+				    xx[3*nc1]   += -0.005 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -0.005 * weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc1+2] += -0.005 * weight * offsetsigma * tie->sigmax2[2];
+				    xx[3*nc2]   +=  -0.995 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  -0.995 * weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc2+2] +=  -0.995 * weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax2[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax2[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax2[2];
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax2[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
 				}
-			    else if (file1->status != MBNA_FILE_FIXEDNAV && file2->status == MBNA_FILE_FIXEDNAV)
-				{
-				xx[3*nc1]   += -weight * offsetsigma * tie->sigmax2[0];
-				xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax2[1];
-				xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax2[2];
-				/* 
-				xx[3*nc2]   +=  0.0;
-				xx[3*nc2+1] +=  0.0;
-				xx[3*nc2+2] +=  0.0; */
+			    else if (file1->status == MBNA_FILE_POORNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    xx[3*nc1]   += -0.995 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -0.995 * weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc1+2] += -0.995 * weight * offsetsigma * tie->sigmax2[2];
+				    xx[3*nc2]   +=  -0.005 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  -0.005 * weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc2+2] +=  -0.005 * weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax2[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc1+2] += -0.995 * weight * offsetsigma * tie->sigmax2[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  0.005 * weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    xx[3*nc1]   += -0.995 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -0.995 * weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax2[2];
+				    xx[3*nc2]   +=  0.005 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  0.005 * weight * offsetsigma * tie->sigmax2[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				}
+			    else if (file1->status == MBNA_FILE_FIXEDNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV || file2->status == MBNA_FILE_POORNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    /* 
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    xx[3*nc1+2] +=  0.0;
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax2[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				}
+			    else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax2[2];
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file2->status == MBNA_FILE_POORNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -0.005 * weight * offsetsigma * tie->sigmax2[2];
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc2+2] +=  0.995 * weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    /* 
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax2[2];
+				    /*
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax2[2];
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax2[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				}
+			    else if (file1->status == MBNA_FILE_FIXEDZNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax2[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file2->status == MBNA_FILE_POORNAV)
+				    {
+				    xx[3*nc1]   += -0.005 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -0.005 * weight * offsetsigma * tie->sigmax2[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  0.995 * weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc2+1] +=  0.995 * weight * offsetsigma * tie->sigmax2[1];
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax2[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax2[1];
+				    /* 
+				    xx[3*nc1+2] +=  0.0;
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax2[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax2[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax2[2];
+				    }
 				}
 /* fprintf(stderr,"horizontal:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xx[3*nc1],xx[3*nc1+1],xx[3*nc1+2],
@@ -9229,35 +9980,270 @@ nc2,xx[3*nc2],xx[3*nc2+1],xx[3*nc2+2]);*/
 			    else
 			    	weight = 1.0;
 
-			    /* deal with fixed or unfixed status of sections */
-			    if (file1->status != MBNA_FILE_FIXEDNAV && file2->status != MBNA_FILE_FIXEDNAV)
-				{
-				xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax3[0];
-				xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax3[1];
-				xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax3[2];
-				xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax3[0];
-				xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax3[1];
-				xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax3[2];
+			    /* deal with fixed, good, or poor status of sections */
+			    if (file1->status == file2->status)
+			    	{
+				if (file1->status == MBNA_FILE_GOODNAV || file1->status == MBNA_FILE_POORNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax3[2];
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    /* 
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax3[2];
+				    /*
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file1->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax3[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax3[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
 				}
-			    else if (file1->status == MBNA_FILE_FIXEDNAV && file2->status != MBNA_FILE_FIXEDNAV)
-				{
-				/* 
-				xx[3*nc1]   +=  0.0;
-				xx[3*nc1+1] +=  0.0;
-				xx[3*nc1+2] +=  0.0; */
-				xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax3[0];
-				xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax3[1];
-				xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax3[2];
+			    else if (file1->status == MBNA_FILE_GOODNAV)
+			    	{
+				if (file2->status == MBNA_FILE_POORNAV)
+				    {
+				    xx[3*nc1]   += -0.005 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -0.005 * weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc1+2] += -0.005 * weight * offsetsigma * tie->sigmax3[2];
+				    xx[3*nc2]   +=  -0.995 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  -0.995 * weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc2+2] +=  -0.995 * weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax3[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax3[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax3[2];
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax3[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
 				}
-			    else if (file1->status != MBNA_FILE_FIXEDNAV && file2->status == MBNA_FILE_FIXEDNAV)
-				{
-				xx[3*nc1]   += -weight * offsetsigma * tie->sigmax3[0];
-				xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax3[1];
-				xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax3[2];
-				/* 
-				xx[3*nc2]   +=  0.0;
-				xx[3*nc2+1] +=  0.0;
-				xx[3*nc2+2] +=  0.0; */
+			    else if (file1->status == MBNA_FILE_POORNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    xx[3*nc1]   += -0.995 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -0.995 * weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc1+2] += -0.995 * weight * offsetsigma * tie->sigmax3[2];
+				    xx[3*nc2]   +=  -0.005 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  -0.005 * weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc2+2] +=  -0.005 * weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax3[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc1+2] += -0.995 * weight * offsetsigma * tie->sigmax3[2];
+				    /* 
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  0.005 * weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    xx[3*nc1]   += -0.995 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -0.995 * weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax3[2];
+				    xx[3*nc2]   +=  0.005 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  0.005 * weight * offsetsigma * tie->sigmax3[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				}
+			    else if (file1->status == MBNA_FILE_FIXEDNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV || file2->status == MBNA_FILE_POORNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    /* 
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    xx[3*nc1+2] +=  0.0;
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax3[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				}
+			    else if (file1->status == MBNA_FILE_FIXEDXYNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -0.5 * weight * offsetsigma * tie->sigmax3[2];
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc2+2] +=  0.5 * weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file2->status == MBNA_FILE_POORNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -0.005 * weight * offsetsigma * tie->sigmax3[2];
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc2+2] +=  0.995 * weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    /* 
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax3[2];
+				    /*
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    {
+				    /*
+				    xx[3*nc1]   +=  0.0;
+				    xx[3*nc1+1] +=  0.0;
+				    */
+				    xx[3*nc1+2] += -weight * offsetsigma * tie->sigmax3[2];
+				    xx[3*nc2]   +=  weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  weight * offsetsigma * tie->sigmax3[1];
+				    /*
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				}
+			    else if (file1->status == MBNA_FILE_FIXEDZNAV)
+			    	{
+				if (file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    xx[3*nc1]   += -0.5 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -0.5 * weight * offsetsigma * tie->sigmax3[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  0.5 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  0.5 * weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file2->status == MBNA_FILE_POORNAV)
+				    {
+				    xx[3*nc1]   += -0.005 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -0.005 * weight * offsetsigma * tie->sigmax3[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    */
+				    xx[3*nc2]   +=  0.995 * weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc2+1] +=  0.995 * weight * offsetsigma * tie->sigmax3[1];
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax3[2];
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax3[1];
+				    /* 
+				    xx[3*nc1+2] +=  0.0;
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    xx[3*nc2+2] +=  0.0;
+				    */
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    {
+				    xx[3*nc1]   += -weight * offsetsigma * tie->sigmax3[0];
+				    xx[3*nc1+1] += -weight * offsetsigma * tie->sigmax3[1];
+				    /*
+				    xx[3*nc1+2] +=  0.0;
+				    xx[3*nc2]   +=  0.0;
+				    xx[3*nc2+1] +=  0.0;
+				    */
+				    xx[3*nc2+2] +=  weight * offsetsigma * tie->sigmax3[2];
+				    }
 				}
 /* fprintf(stderr,"semi-vertical:  nc1:%d xx:%f %f %f  nc2:%d xx:%f %f %f\n",
 nc1,xx[3*nc1],xx[3*nc1+1],xx[3*nc1+2],
