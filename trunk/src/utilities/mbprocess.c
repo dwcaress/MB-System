@@ -1953,16 +1953,19 @@ and mbedit edit save files.\n";
 				    strncpy(dummy,"\0",128);
 				    dminute = atof(strncpy(dummy,bufftmp+3,5));
 				    strncpy(NorS,"\0",sizeof(NorS));
-				    strncpy(NorS,bufftmp+9,1);
+				    bufftmp = strchr(&bufftmp[1], ',');
+				    strncpy(NorS,bufftmp+1,1);
 				    nlat[nnav] = degree + dminute/60.;
 				    if (strncmp(NorS,"S",1) == 0) 
 					nlat[nnav] = -nlat[nnav];
+				    bufftmp = strchr(&bufftmp[1], ',');
 				    strncpy(dummy,"\0",128);
-				    degree = atoi(strncpy(dummy,bufftmp+11,3));
+				    degree = atoi(strncpy(dummy,bufftmp+1,3));
 				    strncpy(dummy,"\0",128);
-				    dminute = atof(strncpy(dummy,bufftmp+14,5));
+				    dminute = atof(strncpy(dummy,bufftmp+4,5));
+				    bufftmp = strchr(&bufftmp[1], ',');
 				    strncpy(EorW,"\0",sizeof(EorW));
-				    strncpy(EorW,bufftmp+20,1);
+				    strncpy(EorW,bufftmp+1,1);
 				    nlon[nnav] = degree + dminute/60.;
 				    if (strncmp(EorW,"W",1) == 0) 
 					nlon[nnav] = -nlon[nnav];
