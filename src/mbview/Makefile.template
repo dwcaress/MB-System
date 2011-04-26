@@ -256,11 +256,11 @@ mbeditviz_bxutils.o: mbeditviz_bxutils.c
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_bxutils.c
 mbeditviz_creation.o: mbeditviz_creation.c mbeditviz_creation.h 
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_creation.c
-mbeditviz_main.o: mbeditviz_main.c $(INCDIR)/mbview.h
+mbeditviz_main.o: mbeditviz_main.c mbeditviz.h $(INCDIR)/mbview.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_main.c
-mbeditviz_callbacks.o: mbeditviz_callbacks.c $(INCDIR)/mbview.h
+mbeditviz_callbacks.o: mbeditviz_callbacks.c mbeditviz.h $(INCDIR)/mbview.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbeditviz_callbacks.c
-mbeditviz_prog.o: mbeditviz_prog.c $(INCDIR)/mbview.h
+mbeditviz_prog.o: mbeditviz_prog.c mbeditviz.h $(INCDIR)/mbview.h
 	$(CC) $(CFLAGS)  -DMBEDITVIZ_DECLARE_GLOBALS -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbeditviz_prog.c
 
 ## copy the include files to the include file directory
