@@ -54,6 +54,9 @@ names = case_sensitive
 !(BX) bx_info("integrate_xrunner", "false")
 
 procedure BxGlobalWidgetId;
+identifier BXG_pushButton_end;
+identifier BXG_pushButton_start;
+identifier BXG_pushButton_file;
 identifier BXG_pushButton_interpolaterepeats;
 identifier BXG_pushButton_unflag;
 identifier BXG_pushButton_flag;
@@ -66,7 +69,9 @@ identifier BXG_toggleButton_dr_lat;
 identifier BXG_toggleButton_dr_lon;
 identifier BXG_toggleButton_org_time;
 identifier BXG_toggleButton_time;
-identifier BXG_pushButton_file;
+identifier BXG_pushButton_done;
+identifier BXG_pushButton_forward;
+identifier BXG_pushButton_reverse;
 identifier BXG_toggleButton_vru;
 identifier BXG_pushButton_revert;
 identifier BXG_pushButton_interpolate;
@@ -98,8 +103,6 @@ identifier BXG_label_error_two;
 identifier BXG_label_error_one;
 identifier BXG_label_error_three;
 identifier BXG_bulletinBoard_error;
-identifier BXG_textField_output_file;
-identifier BXG_label_filename;
 identifier BXG_label_output_mode;
 identifier BXG_toggleButton_output_off;
 identifier BXG_toggleButton_output_on;
@@ -131,6 +134,9 @@ identifier BXG_pushButton_offset_dismiss;
 identifier BXG_pushButton_offset_apply;
 identifier BXG_textField_lat_offset;
 identifier BXG_textField_lon_offset;
+identifier BXG_toggleButton_output_off_filelist;
+identifier BXG_toggleButton_output_on_filelist;
+identifier BXG_list_filelist;
 procedure BxExitCB(integer);
 procedure BxManageCB(string);
 procedure BxSetValuesCB(string);
@@ -142,8 +148,11 @@ procedure do_deletebadtimetag_apply();
 procedure do_done();
 procedure do_driftlat();
 procedure do_driftlon();
+procedure do_editlistselection();
+procedure do_end();
 procedure do_event();
 procedure do_expose();
+procedure do_filelist_remove();
 procedure do_fileselection_cancel();
 procedure do_fileselection_filter();
 procedure do_fileselection_nomatch();
@@ -162,6 +171,7 @@ procedure do_reverse();
 procedure do_revert();
 procedure do_set_interval();
 procedure do_showall();
+procedure do_start();
 procedure do_timeinterpolation_apply();
 procedure do_timespan();
 procedure do_timestep();
@@ -179,7 +189,9 @@ procedure do_toggle_org_sonardepth();
 procedure do_toggle_org_speed();
 procedure do_toggle_org_time();
 procedure do_toggle_output_off();
+procedure do_toggle_output_off_filelist();
 procedure do_toggle_output_on();
+procedure do_toggle_output_on_filelist();
 procedure do_toggle_pick();
 procedure do_toggle_select();
 procedure do_toggle_selectall();
@@ -216,6 +228,278 @@ list Style_useReasons : callbacks {
 !(BX)    handlers BaseStyleHandlers;
 !(BX)};
 
+
+object list_filelist : XmList widget {
+    arguments {
+        arguments Style_use;
+        XmNfontList = font_table(
+		font('-*-monaco-bold-r-*-*-*-120-*-*-*-*-iso8859-1'));
+        XmNselectionPolicy = XmSINGLE_SELECT;
+        XmNwidth = 339;
+        XmNheight = 450;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_list_filelist);
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object scrolledWindow_filelist : XmScrolledWindow widget {
+    arguments {
+        arguments Style_use;
+        XmNscrollingPolicy = XmAPPLICATION_DEFINED;
+        XmNtopAttachment = XmATTACH_WIDGET;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_WIDGET;
+        XmNbottomOffset = 10;
+        XmNbottomWidget = XmPushButton pushButton_filelist_remove;
+        XmNleftOffset = 0;
+        XmNrightOffset = 4;
+        XmNtopOffset = 6;
+        XmNtopWidget = XmRowColumn setting_output_filelist;
+        XmNx = 0;
+        XmNy = 50;
+        XmNwidth = 339;
+        XmNheight = 450;
+    };
+    controls {
+         managed XmList list_filelist;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_filelist_dismiss : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Dismiss");
+        XmNrecomputeSize = false;
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNrightAttachment = XmATTACH_FORM;
+        XmNleftAttachment = XmATTACH_NONE;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 10;
+        XmNrightOffset = 13;
+        XmNx = 250;
+        XmNy = 510;
+        XmNwidth = 80;
+        XmNheight = 60;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure BxUnmanageCB("form_filelist");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_output_on_filelist : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Output Edits");
+        XmNwidth = 116;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_output_on_filelist);
+        XmNvalueChangedCallback = procedure do_toggle_output_on_filelist();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object toggleButton_output_off_filelist : XmToggleButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Browse Only");
+        XmNwidth = 116;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_output_off_filelist);
+        XmNvalueChangedCallback = procedure do_toggle_output_off_filelist();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object setting_output_filelist : XmRowColumn widget {
+    arguments {
+        arguments Style_use;
+        XmNnumColumns = 1;
+        XmNpacking = XmPACK_COLUMN;
+        XmNradioBehavior = true;
+        XmNspacing = 0;
+        XmNorientation = XmHORIZONTAL;
+        XmNtopAttachment = XmATTACH_FORM;
+        XmNrightAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_WIDGET;
+        XmNbottomAttachment = XmATTACH_NONE;
+        XmNbottomOffset = 0;
+        XmNleftOffset = 3;
+        XmNtopOffset = 10;
+        XmNleftWidget = XmLabel setting_output_label_filelist;
+        XmNx = 110;
+        XmNy = 10;
+        XmNwidth = 238;
+        XmNheight = 34;
+    };
+    controls {
+         managed XmToggleButton toggleButton_output_on_filelist;
+         managed XmToggleButton toggleButton_output_off_filelist;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object setting_output_label_filelist : XmLabel widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Output Mode:");
+        XmNmarginWidth = 0;
+        XmNrightAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNleftOffset = 10;
+        XmNtopOffset = 10;
+        XmNx = 10;
+        XmNy = 10;
+        XmNheight = 30;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_filelist_edit : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Edit", separate=true) &
+ compound_string("Selected", separate=true) &
+ compound_string("File");
+        XmNrecomputeSize = false;
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_FORM;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 10;
+        XmNleftOffset = 10;
+        XmNx = 10;
+        XmNy = 510;
+        XmNwidth = 90;
+        XmNheight = 60;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_editlistselection();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_filelist_remove : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("Remove", separate=true) &
+ compound_string("Selected", separate=true) &
+ compound_string("File");
+        XmNrecomputeSize = false;
+        XmNtopAttachment = XmATTACH_NONE;
+        XmNrightAttachment = XmATTACH_NONE;
+        XmNleftAttachment = XmATTACH_WIDGET;
+        XmNbottomAttachment = XmATTACH_FORM;
+        XmNbottomOffset = 10;
+        XmNleftOffset = 10;
+        XmNleftWidget = XmPushButton pushButton_filelist_edit;
+        XmNx = 110;
+        XmNy = 510;
+        XmNwidth = 104;
+        XmNheight = 60;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure do_filelist_remove();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object form_filelist : XmFormDialog widget {
+    arguments {
+        arguments Style_use;
+        XmNdialogTitle = compound_string("Files Available for Editing");
+        XmNautoUnmanage = false;
+        XmNresizePolicy = XmRESIZE_GROW;
+        XmNx = 0;
+        XmNy = 1047;
+        XmNwidth = 343;
+        XmNheight = 580;
+    };
+    controls {
+         managed XmPushButton pushButton_filelist_remove;
+         managed XmPushButton pushButton_filelist_edit;
+         managed XmLabel setting_output_label_filelist;
+         managed XmRowColumn setting_output_filelist;
+         managed XmPushButton pushButton_filelist_dismiss;
+         managed XmScrolledWindow scrolledWindow_filelist;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+!(BX)object dialogShell_filelist : XmDialogShell widget {
+!(BX)    arguments {
+!(BX)        arguments Style_use;
+!(BX)        XmNwidth = 343;
+!(BX)        XmNheight = 580;
+!(BX)    };
+!(BX)    controls {
+!(BX)         managed XmFormDialog form_filelist;
+!(BX)    };
+!(BX)    callbacks {
+!(BX)        callbacks Style_useReasons;
+!(BX)    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+!(BX)};
 
 object label_offset_lon : XmLabel widget {
     arguments {
@@ -383,7 +667,7 @@ object form_offset : XmFormDialog widget {
         XmNdialogTitle = compound_string("Position Offset");
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
-        XmNy = 986;
+        XmNy = 1250;
         XmNwidth = 401;
         XmNheight = 174;
     };
@@ -492,7 +776,7 @@ object bulletinBoard_deletebadtimetag : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
-        XmNy = 998;
+        XmNy = 1262;
         XmNwidth = 310;
         XmNheight = 149;
     };
@@ -601,7 +885,7 @@ object bulletinBoard_timeinterpolation : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
-        XmNy = 998;
+        XmNy = 1262;
         XmNwidth = 307;
         XmNheight = 149;
     };
@@ -706,7 +990,7 @@ object bulletinBoard_useprevious : XmBulletinBoardDialog widget {
         XmNautoUnmanage = true;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
-        XmNy = 1010;
+        XmNy = 1274;
         XmNwidth = 503;
         XmNheight = 126;
     };
@@ -1143,8 +1427,8 @@ object bulletinBoard_modeling : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Navigation Modeling");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1090;
-        XmNy = 507;
+        XmNx = 0;
+        XmNy = 1063;
         XmNwidth = 492;
         XmNheight = 548;
     };
@@ -1385,7 +1669,7 @@ object bulletinBoard_timestepping : XmBulletinBoardDialog widget {
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
-        XmNy = 975;
+        XmNy = 1239;
         XmNwidth = 491;
         XmNheight = 195;
     };
@@ -1561,52 +1845,15 @@ object label_output_mode : XmLabel widget {
     };
 };
 
-object label_filename : XmLabel widget {
-    arguments {
-        XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNfontList = font_table(
-		font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1'));
-        XmNlabelString = compound_string("Output File Name:");
-        XmNrecomputeSize = false;
-        XmNx = 20;
-        XmNy = 520;
-        XmNwidth = 150;
-        XmNheight = 30;
-    };
-    controls {
-    };
-    callbacks {
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_filename);
-    };
-};
-
-object textField_output_file : XmTextField widget {
-    arguments {
-        XmNfontList = font_table(
-		font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1'));
-        XmNx = 20;
-        XmNy = 550;
-        XmNwidth = 570;
-        XmNheight = 40;
-    };
-    controls {
-    };
-    callbacks {
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_textField_output_file);
-    };
-};
-
 object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 110;
-        XmNy = 425;
-        XmNwidth = 614;
-        XmNheight = 606;
+        XmNx = 978;
+        XmNy = 1058;
+        XmNwidth = 606;
+        XmNheight = 557;
     };
     controls {
-         managed XmTextField textField_output_file;
-         managed XmLabel label_filename;
          managed XmLabel label_output_mode;
          managed XmRadioBox radioBox_output;
          managed XmTextField textField_format;
@@ -1622,8 +1869,8 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
 !(BX)    arguments {
 !(BX)        XmNtitle = "Select Input Data File";
 !(BX)        XmNallowShellResize = false;
-!(BX)        XmNwidth = 614;
-!(BX)        XmNheight = 606;
+!(BX)        XmNwidth = 606;
+!(BX)        XmNheight = 557;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_fileselection;
@@ -1721,7 +1968,7 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
-        XmNy = 992;
+        XmNy = 1256;
         XmNwidth = 311;
         XmNheight = 161;
     };
@@ -1802,7 +2049,7 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
         XmNx = 0;
-        XmNy = 1030;
+        XmNy = 1294;
         XmNwidth = 379;
         XmNheight = 86;
     };
@@ -2070,8 +2317,8 @@ object label_about_create1 : XmLabel widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 176;
-        XmNy = 542;
+        XmNx = 0;
+        XmNy = 1104;
         XmNwidth = 481;
         XmNheight = 466;
     };
@@ -2658,7 +2905,7 @@ object pushButton_showall : XmPushButton widget {
 		font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1'));
         XmNlabelString = compound_string("Show All");
         XmNrecomputeSize = false;
-        XmNx = 550;
+        XmNx = 580;
         XmNy = 10;
         XmNwidth = 80;
         XmNheight = 30;
@@ -2681,7 +2928,7 @@ object pushButton_set_interval : XmPushButton widget {
 		font('-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1'));
         XmNlabelString = compound_string("Pick Zoom");
         XmNrecomputeSize = false;
-        XmNx = 640;
+        XmNx = 670;
         XmNy = 10;
         XmNwidth = 80;
         XmNheight = 30;
@@ -2725,12 +2972,12 @@ object pushButton_about : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNfontList = font_table(
-		font('-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1'));
+		font('-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
         XmNlabelString = compound_string("About");
         XmNx = 920;
         XmNy = 10;
-        XmNwidth = 90;
-        XmNheight = 29;
+        XmNwidth = 80;
+        XmNheight = 28;
     };
     controls {
     };
@@ -2747,12 +2994,12 @@ object pushButton_quit : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNfontList = font_table(
-		font('-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1'));
+		font('-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
         XmNlabelString = compound_string("Quit");
-        XmNx = 830;
+        XmNx = 840;
         XmNy = 10;
-        XmNwidth = 90;
-        XmNheight = 29;
+        XmNwidth = 70;
+        XmNheight = 28;
     };
     controls {
     };
@@ -2769,17 +3016,18 @@ object pushButton_reverse : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNfontList = font_table(
-		font('-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1'));
+		font('-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
         XmNlabelString = compound_string("Reverse");
-        XmNx = 450;
+        XmNx = 250;
         XmNy = 10;
-        XmNwidth = 90;
-        XmNheight = 30;
+        XmNwidth = 69;
+        XmNheight = 28;
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_reverse);
         XmNactivateCallback = procedure do_reverse();
     };
 !(BX)    handlers {
@@ -2791,17 +3039,18 @@ object pushButton_forward : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNfontList = font_table(
-		font('-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1'));
+		font('-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
         XmNlabelString = compound_string("Forward");
-        XmNx = 350;
+        XmNx = 320;
         XmNy = 10;
-        XmNwidth = 90;
-        XmNheight = 30;
+        XmNwidth = 69;
+        XmNheight = 28;
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_forward);
         XmNactivateCallback = procedure do_forward();
     };
 !(BX)    handlers {
@@ -2813,17 +3062,18 @@ object pushButton_done : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNfontList = font_table(
-		font('-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1'));
+		font('-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
         XmNlabelString = compound_string("Done");
-        XmNx = 740;
+        XmNx = 760;
         XmNy = 10;
-        XmNwidth = 90;
-        XmNheight = 30;
+        XmNwidth = 70;
+        XmNheight = 28;
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_done);
         XmNactivateCallback = procedure do_done();
     };
 !(BX)    handlers {
@@ -2835,45 +3085,18 @@ object pushButton_nextbuffer : XmPushButton widget {
     arguments {
         arguments Style_use;
         XmNfontList = font_table(
-		font('-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1'));
+		font('-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
         XmNlabelString = compound_string("Next Buffer");
-        XmNx = 250;
+        XmNx = 480;
         XmNy = 10;
-        XmNwidth = 90;
-        XmNheight = 30;
+        XmNwidth = 88;
+        XmNheight = 28;
     };
     controls {
     };
     callbacks {
         callbacks Style_useReasons;
         XmNactivateCallback = procedure do_nextbuffer();
-    };
-!(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
-!(BX)    };
-};
-
-object pushButton_file : XmPushButton widget {
-    arguments {
-        arguments Style_use;
-        XmNfontList = font_table(
-		font('-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1'));
-        XmNlabelString = compound_string("File");
-        XmNx = 10;
-        XmNy = 10;
-        XmNwidth = 90;
-        XmNheight = 30;
-    };
-    controls {
-    };
-    callbacks {
-        callbacks Style_useReasons;
-        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_file);
-       XmNactivateCallback = procedures {
-                 BxManageCB("bulletinBoard_fileselection");
-                 BxSetValuesCB("label_format.labelString=MBIO F" &
- "ormat ID:");
-        };
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -3188,7 +3411,7 @@ object cascadeButton_controls : XmCascadeButton widget {
 object menuBar_controls : XmMenuBar widget {
     arguments {
         arguments Style_use;
-        XmNx = 120;
+        XmNx = 80;
         XmNy = 10;
         XmNwidth = 87;
         XmNheight = 34;
@@ -3270,14 +3493,161 @@ object pushButton_interpolaterepeats : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_file : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNfontList = font_table(
+		font('-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1'));
+        XmNlabelString = compound_string("Open");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_file);
+       XmNactivateCallback = procedures {
+                 BxManageCB("bulletinBoard_fileselection");
+                 BxSetValuesCB("label_format.labelString=MBIO F" &
+ "ormat ID:");
+        };
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_filelist : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("File Selection List");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        XmNactivateCallback = procedure BxManageCB("form_filelist");
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pulldownMenu_file : XmPulldownMenu widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 0;
+        XmNy = 0;
+        XmNwidth = 135;
+        XmNheight = 52;
+    };
+    controls {
+         managed XmPushButton pushButton_file;
+         managed XmPushButton pushButton_filelist;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object cascadeButton_file : XmCascadeButton widget {
+    arguments {
+        arguments Style_use;
+        XmNlabelString = compound_string("File");
+        XmNx = 5;
+        XmNy = 5;
+        XmNwidth = 41;
+        XmNheight = 24;
+    };
+    controls {
+         unmanaged XmPulldownMenu pulldownMenu_file;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object menuBar_file : XmMenuBar widget {
+    arguments {
+        arguments Style_use;
+        XmNx = 10;
+        XmNy = 10;
+        XmNwidth = 51;
+        XmNheight = 34;
+    };
+    controls {
+         managed XmCascadeButton cascadeButton_file;
+    };
+    callbacks {
+        callbacks Style_useReasons;
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_start : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNfontList = font_table(
+		font('-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
+        XmNlabelString = compound_string("Start");
+        XmNx = 180;
+        XmNy = 10;
+        XmNwidth = 70;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_start);
+        XmNactivateCallback = procedure do_start();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
+object pushButton_end : XmPushButton widget {
+    arguments {
+        arguments Style_use;
+        XmNfontList = font_table(
+		font('-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1'));
+        XmNlabelString = compound_string("End");
+        XmNx = 390;
+        XmNy = 10;
+        XmNwidth = 70;
+        XmNheight = 28;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_useReasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_end);
+        XmNactivateCallback = procedure do_end();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_useHandlers;
+!(BX)    };
+};
+
 object bulletinBoard : XmBulletinBoard widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNwidth = 1018;
-        XmNheight = 695;
+        XmNwidth = 1024;
+        XmNheight = 683;
     };
     controls {
+         managed XmPushButton pushButton_end;
+         managed XmPushButton pushButton_start;
+         managed XmMenuBar menuBar_file;
          managed XmPushButton pushButton_interpolaterepeats;
          managed XmPushButton pushButton_unflag;
          managed XmPushButton pushButton_flag;
@@ -3289,7 +3659,6 @@ object bulletinBoard : XmBulletinBoard widget {
          managed XmToggleButton toggleButton_dr_lon;
          managed XmToggleButton toggleButton_org_time;
          managed XmToggleButton toggleButton_time;
-         managed XmPushButton pushButton_file;
          managed XmPushButton pushButton_nextbuffer;
          managed XmPushButton pushButton_done;
          managed XmPushButton pushButton_forward;
@@ -3328,12 +3697,13 @@ object bulletinBoard : XmBulletinBoard widget {
 object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 89;
-        XmNy = 127;
-        XmNwidth = 1018;
-        XmNheight = 695;
+        XmNx = 964;
+        XmNy = 278;
+        XmNwidth = 1024;
+        XmNheight = 683;
     };
     controls {
+!(BX)         unmanaged XmDialogShell dialogShell_filelist;
 !(BX)         unmanaged XmDialogShell xmDialogShell_offset;
 !(BX)         unmanaged XmDialogShell dialogShell_deletebadtimetag;
 !(BX)         unmanaged XmDialogShell xmDialogShell_timeinterpolation;
@@ -3360,10 +3730,10 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNtitle = "MBnavedit";
 !(BX)        XmNiconName = "MBnavedit";
 !(BX)        XmNallowShellResize = true;
-!(BX)        XmNx = 89;
-!(BX)        XmNy = 127;
-!(BX)        XmNwidth = 1018;
-!(BX)        XmNheight = 695;
+!(BX)        XmNx = 964;
+!(BX)        XmNy = 278;
+!(BX)        XmNwidth = 1024;
+!(BX)        XmNheight = 683;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmMainWindow mainWindow;

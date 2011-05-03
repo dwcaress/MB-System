@@ -525,6 +525,10 @@ int mbview_reset_prglx(size_t instance)
 		XtGetValues(view->prglwmda, args, ac);
 		view->prglx_context = glXCreateContext(view->dpy, view->prvi,
                 		     NULL, GL_FALSE);
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->prglwmda),(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+#endif
 		glXMakeCurrent(XtDisplay(view->prglwmda),XtWindow(view->prglwmda),view->prglx_context);
 		view->prglx_init = MB_YES;
         	glViewport(0, 0, data->prwidth, data->prheight);
@@ -653,6 +657,10 @@ int mbview_plotprofile(size_t instance)
 		clip = MB_NO;
 
 		/* set projection to 2D */
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->prglwmda),(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+#endif
 		glXMakeCurrent(XtDisplay(view->prglwmda),XtWindow(view->prglwmda),view->prglx_context);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();

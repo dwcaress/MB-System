@@ -840,7 +840,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 					zz = store->depth_scale * (fabs((double)store->depth[i]) + store->draught + store->heave);
 					xx = store->depth_scale * store->distance[i];
 					rr = sqrt(xx * xx + zz * zz);
-					tt = rr / store->vel_mean;
+					tt = 2 * rr / store->vel_mean;
 					store->time[i] = tt / store->time_scale;
 					}
 				}

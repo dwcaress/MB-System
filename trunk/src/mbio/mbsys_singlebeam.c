@@ -137,6 +137,10 @@ int mbsys_singlebeam_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->speed = 0.0;
 	store->nav_type = 9;
 	store->nav_quality = 9;
+	store->gps_quality = 0;
+	store->gps_nsat = 0;
+	store->gps_dilution = 0;
+	store->gps_height = 0;
 	store->roll = 0.0;
 	store->pitch = 0.0;
 	store->heave = 0.0;

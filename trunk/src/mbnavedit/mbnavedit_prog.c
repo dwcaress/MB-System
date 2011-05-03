@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavedit_prog.c	6/23/95
  *    $Id$
  *
- *    Copyright (c) 1995-2009 by
+ *    Copyright (c) 1995-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -445,14 +445,12 @@ int mbnavedit_init_globals()
 
 
 /*--------------------------------------------------------------------*/
-int mbnavedit_init(int argc, char **argv)
+int mbnavedit_init(int argc, char **argv, int *startup_file)
 {
 	/* local variables */
 	char	*function_name = "mbnavedit_init";
 	int	status = MB_SUCCESS;
 	int	fileflag = 0;
-	struct stat file_status;
-	int	fstat;
 	int	i;
 
 	/* parsing variables */
@@ -535,6 +533,7 @@ int mbnavedit_init(int argc, char **argv)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", ifile);
+			do_parse_datalist(ifile, format);
 			flag++;
 			fileflag++;
 			break;
@@ -610,26 +609,9 @@ int mbnavedit_init(int argc, char **argv)
 
 	/* if file specified then use it */
 	if (fileflag > 0)
-		{    
-		/* get the output filename */
-		strcpy(nfile,ifile);
-		strcat(nfile,".nve");
-		
-		/* check if output file exists */
-		fstat = stat(nfile, &file_status);
-		if (fstat != 0 
-		    || (file_status.st_mode & S_IFMT) == S_IFDIR)
-		    {
-		    /* open file directly */
-		    do_open_file(MB_NO);
-		    }
-		else
-		    {
-		    /* check if previous edits to be used
-		       - then open the file */
-		    do_checkuseprevious();
-		    }
-		}
+		*startup_file = MB_YES;
+	else
+		*startup_file = MB_NO;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -774,6 +756,18 @@ int mbnavedit_open_file(int useprevious)
 	int	format_error;
 	struct stat file_status;
 	int	fstat;
+	mb_path	error1;
+	mb_path	error2;
+	mb_path	error3;
+	
+	/* swath file locking variables */
+	int	lock_status;
+	int	locked;
+	int	lock_purpose;
+	mb_path	lock_program;
+	mb_path lock_cpu;
+	mb_path lock_user;
+	char	lock_date[25];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -785,6 +779,9 @@ int mbnavedit_open_file(int useprevious)
 		fprintf(stderr,"dbg2       format:      %d\n",format);
 		fprintf(stderr,"dbg2       useprevious: %d\n",useprevious);
 		}
+
+	/* reset message */
+	do_message_on("MBedit is opening a data file...");	
 		
 	/* get format if required */
 	if (format == 0)
@@ -796,164 +793,217 @@ int mbnavedit_open_file(int useprevious)
 		    format = form;
 		    }
 	    }
- 		
-	/* if output on and using previously edited nav first copy old nav
-	    and then read it as input instead of specified
-	    input file */
-	if (useprevious == MB_YES
-	    && output_mode != OUTPUT_MODE_BROWSE)
-	    {
-	    /* get temporary file name */
-	    sprintf(ifile_use, "%s.tmp", nfile);
-    
-	    /* copy old edit save file to tmp file */
-	    sprintf(command, "cp %s %s\n", 
-		nfile, ifile_use);
-	    format_use = MBF_MBPRONAV;
-	    system(command);
-	    fstat = stat(ifile_use, &file_status);
-	    if (fstat != 0
-		|| (file_status.st_mode & S_IFMT) == S_IFDIR)
-		{
-		do_error_dialog("Unable to copy previously edited", 
-				"navigation. You may not have read", 
-				"permission in this directory!");
-		status = MB_FAILURE;
-		return(status);
+
+	/* get the output filename */
+	strcpy(nfile,ifile);
+	strcat(nfile,".nve");
+
+	/* try to lock file */
+	status = mb_pr_lockswathfile(verbose, ifile, 
+				MBP_LOCK_EDITNAV, program_name, &error);
+		
+	/* if locked let the user know file can't be opened */
+	if (status == MB_FAILURE)
+		{	
+		/* turn off message */
+		do_message_off();
+	
+		/* if locked get lock info */
+		if (error == MB_ERROR_FILE_LOCKED)
+			{
+			lock_status = mb_pr_lockinfo(verbose, ifile, &locked,
+					&lock_purpose, lock_program, lock_user, lock_cpu, 
+					lock_date, &error);
+
+			sprintf(error1, "Unable to open input file:");
+			sprintf(error2, "File locked by <%s> running <%s>", lock_user, lock_program);
+			sprintf(error3, "on cpu <%s> at <%s>", lock_cpu, lock_date);
+			fprintf(stderr, "\nUnable to open input file:\n");
+			fprintf(stderr, "  %s\n", ifile);
+			fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
+			fprintf(stderr, "on cpu <%s> at <%s>\n", lock_cpu, lock_date);
+			}
+
+		/* else if unable to create lock file there is a permissions problem */
+		else if (error == MB_ERROR_OPEN_FAIL)
+			{
+			sprintf(error1, "Unable to create lock file");
+			sprintf(error2, "for intended input file:");
+			sprintf(error3, "-Likely permissions issue");
+			fprintf(stderr, "Unable to create lock file\n");
+			fprintf(stderr, "for intended input file:\n");
+			fprintf(stderr, "  %s\n", ifile);
+			fprintf(stderr, "-Likely permissions issue\n");
+			}
+
+		/* put up error dialog */
+		do_error_dialog(error1,error2, error3);
 		}
-	    }
-		
-	/* if output off and using previously edited nav 
-	    reset input names */
-	else if (useprevious == MB_YES)
-	    {
-	    sprintf(ifile_use, "%s", nfile);
-	    format_use = MBF_MBPRONAV;
-	    }
-		
-	/* else just read from previously edited nav */
-	else
-	    {
-	    strcpy(ifile_use, ifile);
-	    format_use = format;
-	    }
-
-	/* initialize reading the input multibeam file */
-	status = mb_format_source(verbose, &format_use, 
-			&nav_source, &heading_source, 
-			&vru_source, &svp_source, 
-			&error);
-	if ((status = mb_read_init(
-		verbose,ifile_use,format_use,pings,lonflip,bounds,
-		btime_i,etime_i,speedmin,timegap,
-		&imbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+				
+	/* if successfully locked proceed */
+	if (status == MB_SUCCESS)
 		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
-		status = MB_FAILURE;
-		do_error_dialog("Unable to open input file.", 
-				"You may not have read", 
-				"permission in this directory!");
-		return(status);
-		}
-
-	/* allocate memory for data arrays */
-	beamflag = NULL;
-	bath = NULL;
-	amp = NULL;
-	bathacrosstrack = NULL;
-	bathalongtrack = NULL;
-	ss = NULL;
-	ssacrosstrack = NULL;
-	ssalongtrack = NULL;
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(char), (void **)&beamflag, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bath, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
-						sizeof(double), (void **)&amp, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bathacrosstrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bathalongtrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
-						sizeof(double), (void **)&ss, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
-						sizeof(double), (void **)&ssacrosstrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
-						sizeof(double), (void **)&ssalongtrack, &error);
-
-	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* initialize the buffer */
-	nbuff = 0;
-	first_read = MB_NO;
-
-	/* reset plotting time span */
-	plot_start_time = 0.0;
-	plot_end_time = data_show_size;
-		
-	/* now deal with new nav save file */
-	nfile_open = MB_NO;
-	if (status == MB_SUCCESS
-		&& output_mode != OUTPUT_MODE_BROWSE)
-		{
-		/* get nav edit save file */
-		sprintf(nfile, "%s.nve", ifile);
-		
-		/* open the nav edit save file */
-		if ((nfp = fopen(nfile,"w")) != NULL)
+		/* if output on and using previously edited nav first copy old nav
+		    and then read it as input instead of specified
+		    input file */
+		if (useprevious == MB_YES
+		    && output_mode != OUTPUT_MODE_BROWSE)
 		    {
-		    nfile_open = MB_YES;
+		    /* get temporary file name */
+		    sprintf(ifile_use, "%s.tmp", nfile);
+
+		    /* copy old edit save file to tmp file */
+		    sprintf(command, "cp %s %s\n", 
+			nfile, ifile_use);
+		    format_use = MBF_MBPRONAV;
+		    system(command);
+		    fstat = stat(ifile_use, &file_status);
+		    if (fstat != 0
+			|| (file_status.st_mode & S_IFMT) == S_IFDIR)
+			{
+			do_error_dialog("Unable to copy previously edited", 
+					"navigation. You may not have read", 
+					"permission in this directory!");
+			status = MB_FAILURE;
+			return(status);
+			}
 		    }
+
+		/* if output off and using previously edited nav 
+		    reset input names */
+		else if (useprevious == MB_YES)
+		    {
+		    sprintf(ifile_use, "%s", nfile);
+		    format_use = MBF_MBPRONAV;
+		    }
+
+		/* else just read from previously edited nav */
 		else
 		    {
-		    nfile_open = MB_NO;
-		    fprintf(stderr, "\nUnable to open new nav save file %s\n",
-			nfile);
-		    do_error_dialog("Unable to open new nav edit save file.",
-				    "You may not have write",
-				    "permission in this directory!");
+		    strcpy(ifile_use, ifile);
+		    format_use = format;
 		    }
-		}
 
-	/* if we got here we must have succeeded */
-	if (verbose >= 1)
-		{
-		if (useprevious == MB_YES)
-		    {
-		    fprintf(stderr,"\nSwath data file <%s> specified for input\n",ifile);
-		    fprintf(stderr,"MB-System Data Format ID: %d\n",format);
-		    fprintf(stderr,"Navigation data file <%s> initialized for reading\n",ifile_use);
-		    fprintf(stderr,"MB-System Data Format ID: %d\n",format_use);
-		    }
-		else
-		    {
-		    fprintf(stderr,"\nSwath data file <%s> initialized for reading\n",ifile_use);
-		    fprintf(stderr,"MB-System Data Format ID: %d\n",format_use);
-		    }
-		if (output_mode == OUTPUT_MODE_OUTPUT)
-		    fprintf(stderr,"Navigation File <%s> initialized for writing\n",nfile);
+		/* initialize reading the input multibeam file */
+		status = mb_format_source(verbose, &format_use, 
+				&nav_source, &heading_source, 
+				&vru_source, &svp_source, 
+				&error);
+		if ((status = mb_read_init(
+			verbose,ifile_use,format_use,pings,lonflip,bounds,
+			btime_i,etime_i,speedmin,timegap,
+			&imbio_ptr,&btime_d,&etime_d,
+			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+			fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
+			status = MB_FAILURE;
+			do_error_dialog("Unable to open input file.", 
+					"You may not have read", 
+					"permission in this directory!");
+			return(status);
+			}
+
+		/* allocate memory for data arrays */
+		beamflag = NULL;
+		bath = NULL;
+		amp = NULL;
+		bathacrosstrack = NULL;
+		bathalongtrack = NULL;
+		ss = NULL;
+		ssacrosstrack = NULL;
+		ssalongtrack = NULL;
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(char), (void **)&beamflag, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bath, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							sizeof(double), (void **)&amp, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathalongtrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&ss, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&ssacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+							sizeof(double), (void **)&ssalongtrack, &error);
+
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		/* initialize the buffer */
+		nbuff = 0;
+		first_read = MB_NO;
+
+		/* reset plotting time span */
+		plot_start_time = 0.0;
+		plot_end_time = data_show_size;
+
+		/* now deal with new nav save file */
+		nfile_open = MB_NO;
+		if (status == MB_SUCCESS
+			&& output_mode != OUTPUT_MODE_BROWSE)
+			{
+			/* get nav edit save file */
+			sprintf(nfile, "%s.nve", ifile);
+
+			/* open the nav edit save file */
+			if ((nfp = fopen(nfile,"w")) != NULL)
+			    {
+			    nfile_open = MB_YES;
+			    }
+			else
+			    {
+			    nfile_open = MB_NO;
+			    fprintf(stderr, "\nUnable to open new nav save file %s\n",
+				nfile);
+			    do_error_dialog("Unable to open new nav edit save file.",
+					    "You may not have write",
+					    "permission in this directory!");
+			    }
+			}
+
+		/* if we got here we must have succeeded */
+		if (verbose >= 1)
+			{
+			if (useprevious == MB_YES)
+			    {
+			    fprintf(stderr,"\nSwath data file <%s> specified for input\n",ifile);
+			    fprintf(stderr,"MB-System Data Format ID: %d\n",format);
+			    fprintf(stderr,"Navigation data file <%s> initialized for reading\n",ifile_use);
+			    fprintf(stderr,"MB-System Data Format ID: %d\n",format_use);
+			    }
+			else
+			    {
+			    fprintf(stderr,"\nSwath data file <%s> initialized for reading\n",ifile_use);
+			    fprintf(stderr,"MB-System Data Format ID: %d\n",format_use);
+			    }
+			if (output_mode == OUTPUT_MODE_OUTPUT)
+			    fprintf(stderr,"Navigation File <%s> initialized for writing\n",nfile);
+			}
+		file_open = MB_YES;
 		}
-	file_open = MB_YES;
+	
+	/* turn off message */
+	do_message_off();
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -984,6 +1034,9 @@ int mbnavedit_close_file()
 			function_name);
 		}
 
+	/* reset message */
+	do_message_on("MBedit is closing a data file...");	
+
 	/* close the files */
 	status = mb_close(verbose,&imbio_ptr,&error);
 	if (nfile_open == MB_YES)
@@ -991,6 +1044,11 @@ int mbnavedit_close_file()
 	    /* close navigation file */
 	    fclose(nfp);
 	    nfile_open = MB_NO;
+	    }
+	
+	/* unlock the raw swath file */
+	status = mb_pr_unlockswathfile(verbose, ifile, 
+						MBP_LOCK_EDITNAV, program_name, &error);
 	    
 	    /* update mbprocess parameter file */
 	    status = mb_pr_update_format(verbose, ifile, 
@@ -1002,7 +1060,10 @@ int mbnavedit_close_file()
 			MBP_NAV_LINEAR, 
 			(double) 0.0, 
 			&error);
-			
+									
+	/* set mbprocess parameters */
+	if (output_mode == OUTPUT_MODE_OUTPUT)
+	    {
 	    /* run mbprocess if desired */
 	    if (run_mbprocess == MB_YES)
 		    {
@@ -1049,6 +1110,9 @@ int mbnavedit_close_file()
 
 	/* turn file button on */
 	do_filebutton_on();
+	
+	/* turn off message */
+	do_message_off();
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -1816,6 +1880,154 @@ int mbnavedit_action_step(int step)
 
 		/* set failure flag if no step was made */
 		if (new_id == old_id)
+			status = MB_FAILURE;
+		}
+
+	/* if no file open set failure status */
+	else
+		{
+		status = MB_FAILURE;
+		current_id = 0;
+		}
+
+	/* print out information */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Current buffer values:\n");
+		fprintf(stderr,"dbg2       nload:       %d\n",nload);
+		fprintf(stderr,"dbg2       nbuff:       %d\n",nbuff);
+		fprintf(stderr,"dbg2       nbuff:       %d\n",nbuff);
+		fprintf(stderr,"dbg2       nbuff:       %d\n",nbuff);
+		fprintf(stderr,"dbg2       current_id:  %d\n",current_id);
+		}
+
+	/* reset data_save */
+	data_save = MB_NO;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_action_end()
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_action_end";
+	int	status = MB_SUCCESS;
+	int	old_id;
+	int	set;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* check if a file has been opened */
+	if (file_open == MB_YES && nbuff > 0)
+		{
+		/* set time span to include last data */
+		plot_end_time = ping[nbuff-1].file_time_d;
+		plot_start_time = plot_end_time - data_show_size;
+
+		/* get current start of plotting data */
+		old_id = current_id;
+		set = MB_NO;
+		for (i=0;i<nbuff && set == MB_NO;i++)
+			{
+			if (ping[i].file_time_d >= plot_start_time)
+				{
+				current_id = i;
+				set = MB_YES;
+				}
+			}
+
+		/* replot */
+		status = mbnavedit_plot_all();
+
+		/* set failure flag if no step was made */
+		if (current_id == old_id)
+			status = MB_FAILURE;
+		}
+
+	/* if no file open set failure status */
+	else
+		{
+		status = MB_FAILURE;
+		current_id = 0;
+		}
+
+	/* print out information */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  Current buffer values:\n");
+		fprintf(stderr,"dbg2       nload:       %d\n",nload);
+		fprintf(stderr,"dbg2       nbuff:       %d\n",nbuff);
+		fprintf(stderr,"dbg2       nbuff:       %d\n",nbuff);
+		fprintf(stderr,"dbg2       nbuff:       %d\n",nbuff);
+		fprintf(stderr,"dbg2       current_id:  %d\n",current_id);
+		}
+
+	/* reset data_save */
+	data_save = MB_NO;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:       %d\n",error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:      %d\n",status);
+		}
+
+	/* return */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbnavedit_action_start()
+{
+	/* local variables */
+	char	*function_name = "mbnavedit_action_start";
+	int	status = MB_SUCCESS;
+	int	old_id;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+			function_name);
+		}
+
+	/* check if a file has been opened */
+	if (file_open == MB_YES && nbuff > 0)
+		{
+		old_id = current_id;
+		current_id = 0;
+		plot_start_time = ping[current_id].file_time_d;
+		plot_end_time = plot_start_time + data_show_size;
+
+		/* replot */
+		if (nbuff > 0)
+			{
+			status = mbnavedit_plot_all();
+			}
+
+		/* set failure flag if no step was made */
+		if (current_id == old_id)
 			status = MB_FAILURE;
 		}
 

@@ -123,6 +123,24 @@ struct mbsys_singlebeam_struct
                                  center
                              9 - No identifiable problem
                                  found */
+	int	gps_quality;	/* R2Rnav GPS quality using NMEA-0183 definition:
+					The National Marine Electronics Association 
+					has defined the following indicator:
+						0 = fix not available or invalid 
+						1 = GPS Standard Positioning Service (SPS) mode, fix valid 
+						2 = differential GPS, SPS mode, fix valid 
+						3 = GPS Precise Positioning Service (PPS) mode, fix valid
+							values for the GPS quality
+						4 = Real Time Kinematic (RTK). Satellite system used in 
+							RTK mode with fixed integers 
+						5 = Float RTK. Satellite system used in RTK mode with 
+							floating integers 
+						6 = Estimated (dead reckoning) mode 
+						7 = Manual input mode
+						8 = Simulator mode */
+	int	gps_nsat;	/* R2Rnav GPS height (m) */
+	int	gps_dilution;	/* R2Rnav GPS height (m) */
+	int	gps_height;	/* R2Rnav GPS height (m) */
 				
 	/* motion sensor data */
 	double	roll;

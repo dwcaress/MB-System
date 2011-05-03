@@ -470,6 +470,7 @@ and mbedit edit save files.\n";
 	int	time_j[5], stime_i[7], ftime_i[7];
 	int	ihr;
 	double	sec, hr;
+	int	quality, nsatellite, dilution, gpsheight;
 	char	*bufftmp;
 	char	NorS[2], EorW[2];
 	double	mlon, llon, mlat, llat;
@@ -2060,6 +2061,36 @@ and mbedit edit save files.\n";
 				nheave[nnav] = 0.0;
 				}
 			    }
+			}
+
+		/* deal with nav in r2rnav form: 
+			yyyy-mm-ddThh:mm:ss.sssZ decimalLongitude decimalLatitude quality nsat dilution height */
+		else if (process.mbp_nav_format == 10)
+			{
+			nget = sscanf(buffer,"%d-%d-%dT%d:%d:%lfZ %lf %lf %d %d %d %d",
+				&time_i[0],&time_i[1],&time_i[2],
+				&time_i[3],&time_i[4],&sec,
+				&nlon[nnav],&nlat[nnav], 
+				&quality,&nsatellite,&dilution,&gpsheight);
+			if (nget != 12)
+				{
+				quality = 0;
+				nsatellite = 0;
+				dilution = 0;
+				gpsheight = 0;
+				}
+			time_i[5] = (int) floor(sec);
+			time_i[6] = (int)((sec - time_i[5]) * 1000000);
+			mb_get_time(verbose,time_i,&time_d);
+			ntime[nnav] = time_d;
+			nheading[nnav] = 0.0;
+			nspeed[nnav] = 0.0;
+			ndraft[nnav] = 0.0;
+			nroll[nnav] = 0.0;
+			npitch[nnav] = 0.0;
+			nheave[nnav] = 0.0;
+			if (nget >= 8)
+				nav_ok = MB_YES;
 			}
 
 

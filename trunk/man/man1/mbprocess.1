@@ -1,4 +1,4 @@
-.TH mbprocess 1 "15 March 2010" "MB-System 5.0" "MB-System 5.0"
+.TH mbprocess 1 "29 April 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbprocess\fP - this program performs a 
 variety of swath data processing 
@@ -875,6 +875,7 @@ include the following:
  	         7              NMEA 0183 - GGA
  	         8              Simrad 90 Nav
  	         9              MBPRONAV (*.nve Files)
+ 	         10             R2RNAV (*_hires.r2rnav Files)
 
 Format 1 (Simple Decimal Time):
  	- text
@@ -999,7 +1000,30 @@ Format 9 (MBPRONAV (*.nve Files)):
  	- hg: decimal heading (deg)
  	- sp: decimal speed (km/hr)
  	- dr: decimal draft (m)
-
+	
+Format 10 (R2RNAV (*_hires.r2rnav Files)):
+ 	- text
+	- also works with *_1min.r2rnav and *_control.r2rnav files
+ 		- these lack the GPS parameters
+ 	- defined by SIO GDC as part of the R2R project
+ 	- columns separated by tabs
+ 	- each line contains the following fields
+ 		yyyy-mm-ddThh:mm:ss.sssZ lon lat q n d h
+  	- yyyy: four-digit year
+  	- mm: integer month of year
+  	- dd: integer day of month
+ 	- T: the letter "T" is always between the date and the time
+  	- hh: integer hour of day
+  	- mm: integer minute of hour
+  	- ss.sss: decimal second of minute
+ 	- Z: the letter "Z" is always there to specify UTC time zone
+  	- lo: decimal longitude (deg) (-180 to +180
+  	- la: decimal latitude (deg) (-90 to +90)
+  	- q: GPS quality
+  	- n: number of GPS satellites
+  	- d: GPS dilution
+ 	- h: GPS antenna height (m)
+ 
 .SH EXAMPLES
 Suppose the user has a Simrad EM120 data file called
 "0051_20010829_223755.mb57" that requires processing.

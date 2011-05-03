@@ -74,6 +74,7 @@
 
 /* OpenGL Error checking */
 /* #define MBV_GETERRORS 1 */
+#define MBV_GETGLXMAKECURRENT 1
 
 /* OpenGL plotting parameters */
 #define LEFT_WIDTH 200

@@ -388,7 +388,6 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	int_val;
 	int	numberbytes, seconds_hundredths;
 	double	degrees, minutes, dec_minutes;
-	double	soundspeed, alpha, beta, theta, phi, rr;
 	int	i;
 
 	/* print input debug statements */

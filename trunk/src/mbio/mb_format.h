@@ -284,7 +284,7 @@
 #define	MB_SYS_IMAGE83P		31
 
 /* Number of supported MBIO data formats */
-#define	MB_FORMATS	69
+#define	MB_FORMATS	70
 
 /* Data formats supported by MBIO */
 #define MBF_DATALIST	-1
@@ -481,6 +481,7 @@
 #define MBF_MBARROV2    170     /* MBARI ROV navigation format, ascii, MBARI */ 
 #define MBF_HS10JAMS    171     /* Furuno HS10 multibeam format, 45 beams, 
 					bathymetry and amplitude, ascii, JAMSTEC */ 
+#define MBF_HIR2RNAV    172     /* SIO GDC R2R navigation format, ascii, navigation, SIO */ 
 #define MBF_SAMESURF    181     /* STN Atlas processing multibeam format, 
 					Hydrosweep DS2, Hydrosweep MD, 
 					Fansweep 10, Fansweep 20, 
@@ -584,6 +585,7 @@ int mbr_register_hsds2lam(int verbose, void *mbio_ptr, int *error);
 int mbr_register_samesurf(int verbose, void *mbio_ptr, int *error); 
 int mbr_register_image83p(int verbose, void *mbio_ptr, int *error);
 int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error);
+int mbr_register_hir2rnav(int verbose, void *mbio_ptr, int *error);
 int mbr_info_sbsiomrg(int verbose, 
 			int *system, 
 			int *beams_bath_max, 
@@ -1985,6 +1987,26 @@ int mbr_info_image83p(int verbose,
 			double *beamwidth_ltrack, 
 			int *error);
 int mbr_info_imagemba(int verbose, 
+			int *system, 
+			int *beams_bath_max, 
+			int *beams_amp_max, 
+			int *pixels_ss_max, 
+			char *format_name, 
+			char *system_name, 
+			char *format_description, 
+			int *numfile, 
+			int *filetype, 
+			int *variable_beams, 
+			int *traveltime, 
+			int *beam_flagging, 
+			int *nav_source, 
+			int *heading_source, 
+			int *vru_source, 
+			int *svp_source,
+			double *beamwidth_xtrack, 
+			double *beamwidth_ltrack, 
+			int *error);
+int mbr_info_hir2rnav(int verbose, 
 			int *system, 
 			int *beams_bath_max, 
 			int *beams_amp_max, 

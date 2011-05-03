@@ -1,4 +1,4 @@
-MB-SYSTEM VERSION 5.2.1885 README FILE:
+MB-SYSTEM VERSION 5.3.1890 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
@@ -26,6 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+* Version 5.3.1890       May 3, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -174,8 +175,26 @@ organizations involved in the design and maintenance of the
 MB-System software package are NOT responsible for any damage 
 that may follow from correct or incorrect use of these programs.
 
-MB-SYSTEM VERSION 5.2 RELEASE NOTES:
+MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+
+Added support for the "Rolling Deck to Repository" (R2R) navigation format
+as both an MB-System format (format id 172) and an mbprocess navigation
+merging format (NAVFORMAT=10)
+
+Modified mbm_grdplot and mbm_grdtiff so that the -Y option strictly enforces
+the colormap min max bounds set with the -Z option.
+
+Fixed support for Edgetech Jstar files (formats 132 and 133) so that the
+output of mb7k2jstar and mbprocess are compatible with Edgetech programs.
+
+Added file locking to mbedit, mbeditviz, and mbnavedit. All three programs
+can now load datalists and display lists of files available for editing.
+These lists show whether the file has been previously edited and if the
+file is locked. Locked files cannot be loaded or edited. As before, mbprocess
+also locks files during processing and skips files that are locked by
+other programs. The program mbdatalist can be used to detect (-S) and remove
+(-Y) orphan file locks in files referenced by datalist structures.
 
 Fixed bug in mbprocess.c involving parsing of NMEA GGA strings when
 reading in navigation for merging with survey data.
@@ -216,6 +235,9 @@ status to MB_SUCCESS on entry.
 Incomplete implementation of Dana Yoerger's changes to mbclean. Not yet tested.
 
 Increased verbosity of mbnavedit for -X option.
+
+MB-SYSTEM VERSION 5.2 RELEASE NOTES:
+------------------------------------------
 
 -----> 5.2.1880
 

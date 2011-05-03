@@ -62,15 +62,13 @@ int mbedit_get_defaults(
 		int	*yntrvl, 
 		int	*ttime_i, 
 		int	*outmode);
-int mbedit_get_startup(
-		int	*save_mode, 
-		char	*file, 
-		int	*form);
 int mbedit_get_viewmode(int *vw_mode);
 int mbedit_set_viewmode(int vw_mode);
 int mbedit_action_open(
 		char	*file, 
 		int	form, 
+		int	fileid, 
+		int	numfiles, 
 		int	savemode, 
 		int	outmode, 
 		int	plwd, 
@@ -429,7 +427,10 @@ int mbedit_tsminmax(int iping, int nping, int data_id, double *tsmin, double *ts
 int mbedit_xtrackslope(int iping, double *slope);
 
 void do_mbedit_init(int argc, char **argv);
+void do_editlistselection( Widget w, XtPointer client_data, XtPointer call_data);
+void do_parse_datalist( char *file, int form);
 int do_setup_data();
+void do_build_filelist();
 void do_get_filters();
 void do_file_selection_cancel( Widget w, XtPointer client_data, XtPointer call_data);
 void do_expose( Widget w, XtPointer client_data, XtPointer call_data);
@@ -448,10 +449,9 @@ void do_output_browse( Widget w, XtPointer client_data, XtPointer call_data);
 void do_x_interval( Widget w, XtPointer client_data, XtPointer call_data);
 void do_y_interval( Widget w, XtPointer client_data, XtPointer call_data);
 void do_load(int save_mode);
-void do_load_ok( Widget w, XtPointer client_data, XtPointer call_data);
 void do_load_check( Widget w, XtPointer client_data, XtPointer call_data);
+void do_load_specific_file(int i_file);
 void do_checkuseprevious( );
-void do_load_ok_with_save( Widget w, XtPointer client_data, XtPointer call_data);
 void do_filebutton_on();
 void do_filebutton_off();
 void do_nextbutton_on();
@@ -481,6 +481,8 @@ void do_reset_filters( Widget w, XtPointer client_data, XtPointer call_data);
 void do_check_median_xtrack( Widget w, XtPointer client_data, XtPointer call_data);
 void do_check_median_ltrack( Widget w, XtPointer client_data, XtPointer call_data);
 int do_wait_until_viewed(XtAppContext app);
+int do_mbedit_settimer();
+int do_mbedit_workfunction(XtPointer client_data);
 int do_message_on(char *message);
 int do_message_off();
 int do_error_dialog(char *s1, char *s2, char *s3);

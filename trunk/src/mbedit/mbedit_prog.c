@@ -2,7 +2,7 @@
  *    The MB-system:	mbedit.c	4/8/93
  *    $Id$
  *
- *    Copyright (c) 1993-2010 by
+ *    Copyright (c) 1993-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -463,7 +463,6 @@ static void	*imbio_ptr = NULL;
 static int	output_mode = MBEDIT_OUTPUT_EDIT;
 static int	run_mbprocess = MB_NO;
 static int	gui_mode = MB_NO;
-static int	startup_save_mode = MB_NO;
 
 /* mbio read and write values */
 static void	*store_ptr = NULL;
@@ -496,6 +495,8 @@ static int	current_id = 0;
 static int	nload_total = 0;
 static int	ndump_total = 0;
 static char	last_ping[MB_PATH_MAXLINE];
+static int	file_id;
+static int	num_files;
 
 /* info parameters */
 static int	info_set = MB_NO;
@@ -605,6 +606,7 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 	/* set default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
+	format = 0;
 	pings = 1;
 	lonflip = 0;
 	bounds[0] = -360.;
@@ -676,13 +678,9 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", ifile);
+			do_parse_datalist(ifile, format);
 			flag++;
 			fileflag++;
-			break;
-		case 'S':
-		case 's':
-			startup_save_mode = MB_YES;
-			flag++;
 			break;
 		case 'X':
 		case 'x':
@@ -723,7 +721,6 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 		fprintf(stderr,"dbg2       help:            %d\n",help);
 		fprintf(stderr,"dbg2       format:          %d\n",format);
 		fprintf(stderr,"dbg2       input file:      %s\n",ifile);
-		fprintf(stderr,"dbg2       save mode:       %d\n",startup_save_mode);
 		fprintf(stderr,"dbg2       output mode:     %d\n",output_mode);
 		}
 
@@ -1150,52 +1147,6 @@ int mbedit_get_defaults(
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbedit_get_startup(
-		int	*save_mode, 
-		char	*file, 
-		int	*form)
-{
-	/* local variables */
-	char	*function_name = "mbedit_get_startup";
-	int	status = MB_SUCCESS;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
-			function_name);
-		}
-
-	/* get save mode */
-	*save_mode = startup_save_mode;
-
-	/* get file */
-	strcpy(file, ifile);
-
-	/* get format if required */
-	if (format == 0)
-		mb_get_format(verbose,ifile,NULL,&format,&error);
-
-	/* get format */
-	*form = format;
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       save_mode:   %d\n",*save_mode);
-		fprintf(stderr,"dbg2       file:        %s\n",file);
-		fprintf(stderr,"dbg2       format:      %d\n",*form);
-		fprintf(stderr,"dbg2       error:       %d\n",error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:      %d\n",status);
-		}
-
-	return(status);
-}
-/*--------------------------------------------------------------------*/
 int mbedit_get_viewmode(int *vw_mode)
 {
 	/* local variables */
@@ -1262,6 +1213,8 @@ int mbedit_set_viewmode(int vw_mode)
 int mbedit_action_open(
 		char	*file, 
 		int	form, 
+		int	fileid, 
+		int	numfiles, 
 		int	savemode, 
 		int	outmode, 
 		int	plwd, 
@@ -1294,6 +1247,8 @@ int mbedit_action_open(
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       file:            %s\n",file);
 		fprintf(stderr,"dbg2       format:          %d\n",form);
+		fprintf(stderr,"dbg2       fileid:          %d\n",fileid);
+		fprintf(stderr,"dbg2       numfiles:        %d\n",numfiles);
 		fprintf(stderr,"dbg2       savemode:        %d\n",savemode);
 		fprintf(stderr,"dbg2       outmode:         %d\n",outmode);
 		fprintf(stderr,"dbg2       plot_width:      %d\n",plwd);
@@ -1333,11 +1288,19 @@ int mbedit_action_open(
 
 	/* load the buffer */
 	if (status == MB_SUCCESS)
+		{
 		status = mbedit_load_data(*buffer_size,nloaded,nbuffer,
 			ngood,icurrent);
+		
+		/* if no data read show error dialog */
+		if (*nloaded == 0)
+			do_error_dialog("No data were loaded from the input", 
+					"file. You may have specified an", 
+					"incorrect MB-System format id!");
+		}
 
 	/* set up plotting */
-	if (*ngood > 0)
+	if (status == MB_SUCCESS && *ngood > 0)
 		{		
 		/* turn file button off */
 		do_filebutton_off();
@@ -1345,13 +1308,11 @@ int mbedit_action_open(
 		/* now plot it */
 		status = mbedit_plot_all(plwd,exgr,xntrvl,yntrvl,
 			    plt_size,sh_mode,sh_flggd,sh_time,nplt,MB_YES);
-		}
 		
-	/* if no data read show error dialog */
-	else
-		do_error_dialog("No data were read from the input", 
-				"file. You may have specified an", 
-				"incorrect MB-System format id!");
+		/* set fileid and numfiles */
+		file_id = fileid;
+		num_files = numfiles;
+		}
 
 	/* reset beam_save */
 	beam_save = MB_NO;
@@ -4881,6 +4842,18 @@ int mbedit_open_file(char *file, int form, int savemode)
 	int	status = MB_SUCCESS;
 	int	outputmode;
 	int	i;
+	mb_path	error1;
+	mb_path	error2;
+	mb_path	error3;
+	
+	/* swath file locking variables */
+	int	lock_status;
+	int	locked;
+	int	lock_purpose;
+	mb_path	lock_program;
+	mb_path lock_cpu;
+	mb_path lock_user;
+	char	lock_date[25];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -4900,87 +4873,133 @@ int mbedit_open_file(char *file, int form, int savemode)
 	strcpy(ifile,file);
 	format = form;
 
-	/* initialize reading the input multibeam file */
-	if ((status = mb_read_init(
-		verbose,ifile,format,pings,lonflip,bounds,
-		btime_i,etime_i,speedmin,timegap,
-		&imbio_ptr,&btime_d,&etime_d,
-		&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
-		status = MB_FAILURE;
-		do_error_dialog("Unable to open input file.", 
-				"You may not have read", 
-				"permission in this directory!");
-		return(status);
-		}
-
-	/* allocate memory for data arrays */
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(char), (void **)&beamflag, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bath, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
-						sizeof(double), (void **)&amp, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bathacrosstrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(double), (void **)&bathalongtrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
-						sizeof(double), (void **)&ss, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
-						sizeof(double), (void **)&ssacrosstrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
-						sizeof(double), (void **)&ssalongtrack, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(int), (void **)&detect, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(int), (void **)&pulses, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(int), (void **)&editcount, &error);
-	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						MBEDIT_MAX_PINGS*sizeof(double), (void **)&bathlist, &error);
-	for (i=0;i<MBEDIT_BUFFER_SIZE;i++)
-		{
-		ping[i].allocated = 0;
-		ping[i].beamflag = NULL;
-		ping[i].bath = NULL;
-		ping[i].bathacrosstrack = NULL;
-		ping[i].bathalongtrack = NULL;
-		ping[i].detect = NULL;
-		ping[i].pulses = NULL;
-		ping[i].bath_x = NULL;
-		ping[i].bath_y = NULL;
-		}
-
-	/* if error initializing memory then quit */
-	if (error != MB_ERROR_NO_ERROR)
-		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* initialize the buffer */
-	nbuff = 0;
+	/* try to lock file */
+	status = mb_pr_lockswathfile(verbose, ifile, 
+				MBP_LOCK_EDITBATHY, program_name, &error);
+		
+	/* if locked let the user know file can't be opened */
+	if (status == MB_FAILURE)
+		{	
+		/* turn off message */
+		do_message_off();
 	
-	/* deal with edit save files */
+		/* if locked get lock info */
+		if (error == MB_ERROR_FILE_LOCKED)
+			{
+			lock_status = mb_pr_lockinfo(verbose, ifile, &locked,
+					&lock_purpose, lock_program, lock_user, lock_cpu, 
+					lock_date, &error);
+
+			sprintf(error1, "Unable to open input file:");
+			sprintf(error2, "File locked by <%s> running <%s>", lock_user, lock_program);
+			sprintf(error3, "on cpu <%s> at <%s>", lock_cpu, lock_date);
+			fprintf(stderr, "\nUnable to open input file:\n");
+			fprintf(stderr, "  %s\n", ifile);
+			fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
+			fprintf(stderr, "on cpu <%s> at <%s>\n", lock_cpu, lock_date);
+			}
+
+		/* else if unable to create lock file there is a permissions problem */
+		else if (error == MB_ERROR_OPEN_FAIL)
+			{
+			sprintf(error1, "Unable to create lock file");
+			sprintf(error2, "for intended input file:");
+			sprintf(error3, "-Likely permissions issue");
+			fprintf(stderr, "Unable to create lock file\n");
+			fprintf(stderr, "for intended input file:\n");
+			fprintf(stderr, "  %s\n", ifile);
+			fprintf(stderr, "-Likely permissions issue\n");
+			}
+
+		/* put up error dialog */
+		do_error_dialog(error1,error2, error3);
+		}
+		
+	/* if successfully locked proceed */
+	if (status == MB_SUCCESS)
+		{
+		/* initialize reading the input multibeam file */
+		if ((status = mb_read_init(
+			verbose,ifile,format,pings,lonflip,bounds,
+			btime_i,etime_i,speedmin,timegap,
+			&imbio_ptr,&btime_d,&etime_d,
+			&beams_bath,&beams_amp,&pixels_ss,&error)) != MB_SUCCESS)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error returned from function <mb_read_init>:\n%s\n",message);
+			fprintf(stderr,"\nMultibeam File <%s> not initialized for reading\n",ifile);
+			status = MB_FAILURE;
+			do_error_dialog("Unable to open input file.", 
+					"You may not have read", 
+					"permission in this directory!");
+			return(status);
+			}
+
+		/* allocate memory for data arrays */
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(char), (void **)&beamflag, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bath, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_AMPLITUDE,
+							sizeof(double), (void **)&amp, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(double), (void **)&bathalongtrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							sizeof(double), (void **)&ss, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							sizeof(double), (void **)&ssacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
+							sizeof(double), (void **)&ssalongtrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(int), (void **)&detect, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(int), (void **)&pulses, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							sizeof(int), (void **)&editcount, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							MBEDIT_MAX_PINGS*sizeof(double), (void **)&bathlist, &error);
+		for (i=0;i<MBEDIT_BUFFER_SIZE;i++)
+			{
+			ping[i].allocated = 0;
+			ping[i].beamflag = NULL;
+			ping[i].bath = NULL;
+			ping[i].bathacrosstrack = NULL;
+			ping[i].bathalongtrack = NULL;
+			ping[i].detect = NULL;
+			ping[i].pulses = NULL;
+			ping[i].bath_x = NULL;
+			ping[i].bath_y = NULL;
+			}
+
+		/* if error initializing memory then quit */
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error allocating data arrays:\n%s\n",message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		/* initialize the buffer */
+		nbuff = 0;
+		}
+	
+	/* if success so far deal with edit save files */
 	if (status == MB_SUCCESS)
 		{
 		/* reset message */
@@ -5025,13 +5044,28 @@ int mbedit_open_file(char *file, int form, int savemode)
 			}
 		}
 
-	/* if we got here we must have succeeded */
-	if (verbose >= 0)
+	/* deal with success */
+	if (status == MB_SUCCESS)
 		{
-		fprintf(stderr,"\nMultibeam File <%s> initialized for reading\n",ifile);
-		fprintf(stderr,"Multibeam Data Format ID: %d\n",format);
+		file_open = MB_YES;
+		if (verbose >= 0)
+			{
+			fprintf(stderr,"\nMultibeam File <%s> initialized for reading\n",ifile);
+			fprintf(stderr,"Multibeam Data Format ID: %d\n",format);
+			}
 		}
-	file_open = MB_YES;
+	else
+		{
+		file_open = MB_NO;
+		if (verbose >= 0)
+			{
+			fprintf(stderr,"\nERROR: Multibeam File <%s> NOT initialized for reading\n",ifile);
+			fprintf(stderr,"Multibeam Data Format ID: %d\n",format);
+			}
+		}
+	
+	/* turn off message */
+	do_message_off();
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -5044,6 +5078,7 @@ int mbedit_open_file(char *file, int form, int savemode)
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
 
+verbose = 0;
 	/* return */
 	return(status);
 }
@@ -5100,6 +5135,12 @@ int mbedit_close_file()
 	    {
 	    status = mb_esf_close(verbose, &esf, &error);
 	    }
+	
+	/* unlock the raw swath file */
+	status = mb_pr_unlockswathfile(verbose, ifile, 
+						MBP_LOCK_EDITBATHY, program_name, &error);
+						
+	/* set mbprocess parameters */
 	if (output_mode == MBEDIT_OUTPUT_EDIT)
 	    {
 	    /* update mbprocess parameter file */
@@ -5119,9 +5160,6 @@ int mbedit_close_file()
 		    /* run mbprocess */
 		    sprintf(command, "mbprocess -I %s\n",ifile);
 		    system(command);
-
-		    /* turn message off */
-		    do_message_off();
 		    }
 	    }
 
@@ -5943,7 +5981,7 @@ int mbedit_plot_all(
 		pixel_values[BLACK],XG_SOLIDLINE);
 
 	/* plot filename */
-	sprintf(string,"Current Data File:");
+	sprintf(string,"File %d of %d:", file_id + 1, num_files);
 	xg_justify(mbedit_xgid,string,&swidth,
 		&sascent,&sdescent);
 	xg_drawstring(mbedit_xgid,margin/2,

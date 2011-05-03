@@ -476,6 +476,10 @@ int mbeditviz_import_file(char *path, int format)
 	if (mbev_status == MB_SUCCESS)
 		{
 		file = &(mbev_files[mbev_num_files]);
+		file->load_status = MB_NO;
+		file->load_status_shown = MB_NO;
+		file->locked = MB_NO;
+		file->esf_exists = MB_NO;
 		strcpy(file->path, path);
 		strcpy(file->name, root);	
 		file->format = format;
@@ -559,6 +563,19 @@ int mbeditviz_load_file(int ifile)
 	char	buffer[MBP_FILENAMESIZE], *result;
 	char	command[MBP_FILENAMESIZE];
 	int	nread;
+	
+	mb_path	error1;
+	mb_path	error2;
+	mb_path	error3;
+	
+	/* swath file locking variables */
+	int	lock_status;
+	int	locked;
+	int	lock_purpose;
+	mb_path	lock_program;
+	mb_path lock_cpu;
+	mb_path lock_user;
+	char	lock_date[25];
 
 	/* mbio read and write values */
 	int	format;
@@ -583,7 +600,7 @@ int mbeditviz_load_file(int ifile)
 
 	int	rawmodtime = 0;
 	int	gefmodtime = 0;
-	
+
 	double	mtodeglon, mtodeglat;
 	double	heading, sonardepth;
 	double	headingx, headingy;
@@ -601,11 +618,61 @@ int mbeditviz_load_file(int ifile)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       ifile:       %d\n",ifile);
 		}
-		
-	/* load the file */
+
+	/* lock the file if it needs loading */
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
 	if (ifile >= 0 && ifile < mbev_num_files 
+		&& mbev_files[ifile].load_status == MB_NO)
+		{
+		file = &(mbev_files[ifile]);
+
+		/* try to lock file */
+		mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path, 
+					MBP_LOCK_EDITBATHY, program_name, &mbev_error);
+		
+		/* if locked let the user know file can't be opened */
+		if (mbev_status == MB_FAILURE)
+			{	
+			/* turn off message */
+			do_mbeditviz_message_off();
+
+			/* if locked get lock info */
+			if (mbev_error == MB_ERROR_FILE_LOCKED)
+				{
+				lock_status = mb_pr_lockinfo(mbev_verbose, file->path, &locked,
+						&lock_purpose, lock_program, lock_user, lock_cpu, 
+						lock_date, &mbev_error);
+
+				sprintf(error1, "Unable to open input file:");
+				sprintf(error2, "File locked by <%s> running <%s>", lock_user, lock_program);
+				sprintf(error3, "on cpu <%s> at <%s>", lock_cpu, lock_date);
+				fprintf(stderr, "\nUnable to open input file:\n");
+				fprintf(stderr, "  %s\n", file->path);
+				fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
+				fprintf(stderr, "on cpu <%s> at <%s>\n", lock_cpu, lock_date);
+				}
+
+			/* else if unable to create lock file there is a permissions problem */
+			else if (mbev_error == MB_ERROR_OPEN_FAIL)
+				{
+				sprintf(error1, "Unable to create lock file");
+				sprintf(error2, "for intended input file:");
+				sprintf(error3, "-Likely permissions issue");
+				fprintf(stderr, "Unable to create lock file\n");
+				fprintf(stderr, "for intended input file:\n");
+				fprintf(stderr, "  %s\n", file->path);
+				fprintf(stderr, "-Likely permissions issue\n");
+				}
+
+			/* put up error dialog */
+			do_error_dialog(error1,error2, error3);
+			}
+		}
+		
+	/* load the file if it needs loading and has been locked */
+	if (mbev_status == MB_SUCCESS
+		&& ifile >= 0 && ifile < mbev_num_files 
 		&& mbev_files[ifile].load_status == MB_NO)
 		{
 		file = &(mbev_files[ifile]);
@@ -1782,6 +1849,8 @@ int mbeditviz_unload_file(int ifile)
 	char	*function_name = "mbeditviz_unload_file";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
+	int	lock_status;
+	int	lock_error = MB_ERROR_NO_ERROR;
 	int	iping;	
 
 	/* print input debug statements */
@@ -1948,8 +2017,15 @@ int mbeditviz_unload_file(int ifile)
 			file->sync_attitude_pitch = NULL;
 			}
 		    }
+		    
+		/* reset load status */
 		file->load_status = MB_NO;
 		mbev_num_files_loaded--;
+		
+		/* unlock the file */
+		lock_status = mb_pr_unlockswathfile(mbev_verbose, file->path, 
+						MBP_LOCK_EDITBATHY, program_name, &lock_error);
+		
 		}
 
 	/* print output debug statements */

@@ -136,7 +136,7 @@ int main (int argc, char **argv)
 	mb_path	lock_program;
 	mb_path lock_cpu;
 	mb_path lock_user;
-	char	lock_date[24];
+	char	lock_date[25];
 	mb_path	lockfile;
 	
 	/* output stream for basic stuff (stdout if verbose <= 1,

@@ -31,6 +31,10 @@
  * Start Global Widget Declarations.
  */
 EXTERNAL Widget   window_mbedit;
+EXTERNAL Widget   setting_output_filelist;
+EXTERNAL Widget   setting_output_toggle_edit_filelist;
+EXTERNAL Widget   setting_output_toggle_browse_filelist;
+EXTERNAL Widget   list_filelist;
 EXTERNAL Widget   radioBox_mediancalc;
 EXTERNAL Widget   scale_median_local_ltrack;
 EXTERNAL Widget   scale_median_local_xtrack;
@@ -80,9 +84,9 @@ EXTERNAL Widget   setting_output_label;
 EXTERNAL Widget   setting_output;
 EXTERNAL Widget   setting_output_toggle_edit;
 EXTERNAL Widget   setting_output_toggle_browse;
+EXTERNAL Widget   pushButton_file;
 EXTERNAL Widget   pushButton_end;
 EXTERNAL Widget   pushButton_start;
-EXTERNAL Widget   pushButton_file;
 EXTERNAL Widget   toggleButton_view_waterfall;
 EXTERNAL Widget   toggleButton_view_alongtrack;
 EXTERNAL Widget   toggleButton_view_acrosstrack;

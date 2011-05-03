@@ -141,6 +141,7 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
+    Boolean      argok=False;
     Widget   topLevelShell;
     Widget   mainWindow_mbeditviz;
     
@@ -192,7 +193,7 @@ int main( int argc, char **argv)
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBeditviz"); ac++;
     XtSetArg(args[ac], XmNx, 69); ac++;
-    XtSetArg(args[ac], XmNy, 431); ac++;
+    XtSetArg(args[ac], XmNy, 497); ac++;
     XtSetArg(args[ac], XmNwidth, 453); ac++;
     XtSetArg(args[ac], XmNheight, 557); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",
