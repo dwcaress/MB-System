@@ -313,7 +313,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
 		mbr_samesurf.o mbr_reson7kr.o \
 		mbr_edgjstar.o mbr_segysegy.o \
-		mbr_image83p.o mbr_imagemba.o
+		mbr_image83p.o mbr_imagemba.o \
+		mbr_hir2rnav.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -376,7 +377,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
 		mbr_samesurf.o mbr_reson7kr.o \
 		mbr_edgjstar.o mbr_segysegy.o \
-		mbr_image83p.o mbr_imagemba.o
+		mbr_image83p.o mbr_imagemba.o \
+		mbr_hir2rnav.o
 	ranlib $(LIBDIR)/libmbio.a
 	
 ### compile the source files
@@ -629,6 +631,8 @@ mbr_image83p.o: mbr_image83p.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_image83p.c
 mbr_imagemba.o: mbr_imagemba.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_image83p.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_imagemba.c
+mbr_hir2rnav.o: mbr_hir2rnav.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_singlebeam.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_hir2rnav.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_format.h:	mb_format.h

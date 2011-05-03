@@ -1,4 +1,4 @@
-.TH mbedit 1 "7 June 2010" "MB-System 5.0" "MB-System 5.0"
+.TH mbedit 1 "29 April 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbedit\fP - Interactive editor used to flag bad bathymetry values in swath sonar bathymetry data.
 
@@ -8,7 +8,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbedit\fP [\fB-B\fIyr/mo/da/hr/mn/sc\fP 
 \fB-D\fP \fB-E\fIyr/mo/da/hr/mn/sc\fP 
-\fB-F\fIformat\fP \fB -G -I\fIinfile\fP \fB-S -X -V -H\fP]
+\fB-F\fIformat\fP \fB -G -I\fIinfile\fP \fB-X -V -H\fP]
 
 .SH DESCRIPTION
 \fBMBedit\fP is an interactive editor 
@@ -41,11 +41,6 @@ at once, frequently requiring users to process files in
 small pieces. The current version only stores the bathymetry
 data and only outputs changes to the beam flag status
 (good data or bad data) of bathymetry soundings.
-The previous form of \fBmbedit\fP is now distributed
-as \fBmbeditold\fP. The old version will continue to
-be supported for \fBMB-System\fP version 5.0. However,
-no improvements will be made to the old program, and
-it may be dropped from later \fBMB-System\fP distributions.
 
 The default \fBmbedit\fP display consists of several 
 bathymetry acrosstrack profiles plotted with vertical
@@ -244,12 +239,6 @@ also be used to set the data format id. If the \fB-B\fP option is
 not used to specify browse mode, then the edit save output file is
 automatically set as \fIinfile\fP with ".esf" appended.
 .TP
-.B \-S
-This flag modifies how the program handles an input data file
-read at startup, as specified with the \fB-I\fP option. If the
-\fB-S\fP flag is given and an edit save file exists for the
-startup input data file, the edit save file will be used. 
-.TP
 .B \-X
 This option causes \fBmbprocess\fP to run automatically
 on an input swath data file when the \fBmbedit\fP editing session
@@ -269,9 +258,13 @@ beams flagged or zeroed.
 .SH INTERACTIVE CONTROLS
 .TP
 .B File
+This button accesses a pulldown menu with two push buttons: 
+\fBOpen\fP and \fBFile Selection List\fP, 
+.TP
+.B File->Open
 This button brings up a popup window which allows the user to
-specify the input swath sonar bathymetry data file, its \fBMBIO\fP
-format id, the output mode, and the output filename. 
+specify an input swath sonar bathymetry data file, its \fBMBIO\fP
+format id, and  the output mode. 
 This program uses the \fBMBIO\fP library and 
 will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data
@@ -285,9 +278,34 @@ format must be set by the user.
 The popup window also allows the output mode to be set to "browse"
 so that no edit events are output. 
 When a valid file is specified and the \fBOK\fP button
-is clicked, as much data as will fit
-into the data buffer are read and several pings are displayed as 
-stacked bathymetry profiles.
+is clicked, file will be added to an internal list of swath files
+available for editing, and then that file will be loaded into
+memory for editing (if another file was already loaded, that file
+is closed out gracefully before the new file is loaded). 
+If the specified input is a datalist (format
+id = -1), then all of the files referenced through that datalist 
+will be added to the internal list, and the first of those files
+loaded. When a file is loaded for editing, \fBMBedit\fP reads 
+as much data as will fit into the data buffer (typically 25000 records)
+and several pings are displayed as stacked bathymetry profiles.
+.TP
+.B File->File Selection List
+This button brings up a popup window displaying the internal list of
+swath files available for editing. The list has four columns. 
+The first (left-most) column is either blank or shows "<locked>" or "<loaded>".
+If a file is loaded for editing by this program, it shows as "<loaded>".
+If a file is being edited or processed by another program, it shows as
+"<locked>". Locked files cannot be opened for editing, and any file 
+loaded for editing by \fBMBedit\fP will show as "locked" to other
+programs. The second column is either blank or shows "<esf>". This indicates if
+a file has been previously edited so that an edit save file already
+exists. The third and fourth columns show the filename path and the \fBMBIO\fP
+format id, respectively.
+Users can select one of the files in the available list. If the "Edit Selected File"
+button is clicked, the selected file will be opened for editing (and any
+file already loaded will be closed first). If the "Remove Selected File" 
+button is selected, then the selected file will be removed from the available
+list.
 .TP
 .B View
 This button accesses a pulldown menu with several toggle buttons: 
@@ -309,6 +327,7 @@ This button accesses a pulldown menu with several toggle buttons:
 \fBPlot Roll\fP, 
 \fBPlot Pitch\fP, and
 \fBPlot Heave\fP.
+.br
 The first three toggle buttons set the view mode, which may
 be a waterfall view, an alongtrack view, or an acrosstrack
 view. The next two toggle buttons set simple display options
@@ -634,13 +653,16 @@ current buffer and then read in and display the next buffer.
 If there is no more data to be read in after the current buffer
 has been written out, then the input and output files are closed.
 .TP
-.B Done
-This button causes the program to write out all of the data from the
-input file and then close the input and output files.
+.B Done | Next File
+When the last file in the list of files available for editing has been loaded,
+this button shows as "Done". Otherwise, it shows as "Next File". In either
+case, this button causes the program to write out all of the edited navigation 
+data and then close the current file. If the current file is not the last
+one in the available list, then the next unlocked file will be loaded for editing.
 .TP
 .B Quit
 This button causes the program to exit gracefully.  If a data file
-has been read, all of the data will be written to the output file
+has been loaded, all of the edited navigation will be written to the output file
 before exiting.
 .TP
 .B About

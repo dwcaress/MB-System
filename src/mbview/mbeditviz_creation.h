@@ -30,6 +30,10 @@
 /**
  * Start Global Widget Declarations.
  */
+EXTERNAL Widget   bulletinBoard_error;
+EXTERNAL Widget   label_error_two;
+EXTERNAL Widget   label_error_one;
+EXTERNAL Widget   label_error_three;
 EXTERNAL Widget   scale_cellsize;
 EXTERNAL Widget   label_current;
 EXTERNAL Widget   label_implied;

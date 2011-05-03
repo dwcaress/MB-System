@@ -1081,6 +1081,10 @@ int mb3dsoundings_reset_glx()
 	XtGetValues(mb3dsoundings.glwmda, args, ac);
 	mb3dsoundings.glx_context = glXCreateContext(mb3dsoundings.dpy, mb3dsoundings.vi,
                 	     NULL, GL_FALSE);
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,(size_t)XtDisplay(mb3dsoundings.glwmda),(size_t)XtWindow(mb3dsoundings.glwmda),(size_t)mb3dsoundings.glx_context);
+#endif
 	glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda),
 			XtWindow(mb3dsoundings.glwmda),
 			mb3dsoundings.glx_context);
@@ -2717,6 +2721,9 @@ mb3dsoundings_setzscale(int verbose, int *error)
 int
 mb3dsoundings_plot(int verbose, int *error)
 {
+	/* local variables */
+	char	*function_name = "mb3dsoundings_plot";
+
     struct mb3dsoundings_struct *soundingdata;
     struct mb3dsoundings_sounding_struct *sounding;
     struct mb3dsoundings_sounding_struct *sounding2;
@@ -2734,6 +2741,10 @@ mb3dsoundings_plot(int verbose, int *error)
 soundingdata->num_soundings); */
 	
 	/* make correct window current for OpenGL */
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,(size_t)XtDisplay(mb3dsoundings.glwmda),(size_t)XtWindow(mb3dsoundings.glwmda),(size_t)mb3dsoundings.glx_context);
+#endif
 	glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda),
 			XtWindow(mb3dsoundings.glwmda),
 			mb3dsoundings.glx_context);

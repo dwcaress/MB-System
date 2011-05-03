@@ -344,6 +344,17 @@ the manual pages for mbprocess and mbset. \n\n";
 			&process, &error);
 	process.mbp_ifile_specified = MB_YES;
 	
+	if (process.mbp_format_specified == MB_NO)
+		{
+		process.mbp_format = mbp_format;
+		process.mbp_format_specified = MB_YES;
+		}
+	if (process.mbp_ofile_specified == MB_NO)
+		{
+		process.mbp_ofile_specified == MB_YES;
+		mb_pr_default_output(verbose, &process, &error);
+		}
+	
 	/* process parameter list */
 	for (i=0;i<pargc;i++)
 		{

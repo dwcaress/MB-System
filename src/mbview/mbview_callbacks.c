@@ -5079,6 +5079,10 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 		if (view->prglx_init == MB_YES)
 		    {
 		    /* make correct window current for OpenGL */
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->prglwmda),(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+#endif
 		    glXMakeCurrent(XtDisplay(view->prglwmda),XtWindow(view->prglwmda),view->prglx_context);
 
 		    glXDestroyContext(view->dpy, view->prglx_context);
@@ -5089,6 +5093,10 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 		if (view->glx_init == MB_YES)
 		    {
 		    /* make correct window current for OpenGL */
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
 		    glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 
 		    glXDestroyContext(view->dpy, view->glx_context);

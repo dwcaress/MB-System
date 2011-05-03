@@ -738,8 +738,8 @@ if ($color_mode && !$no_nice_color_int && $dzz > 0)
 	}
 elsif ($color_mode)
 	{
-	$color_int = 1.02 * ($zmax - $zmin)/($ncolors_use - 1);
-	$color_start = $zmin - 0.01*($zmax - $zmin);
+	$color_int = ($zmax - $zmin)/($ncolors_use - 1);
+	$color_start = $zmin;
 	$color_end = $color_start + $color_int * ($ncolors_use - 1);
 	}
 

@@ -2285,8 +2285,13 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 	else if (process->mbp_ofile_specified == MB_NO
 		&& process->mbp_format_specified == MB_YES)
 	    {
+	    status = MB_SUCCESS;
+	    *error = MB_ERROR_NO_ERROR;
+	    strcpy(fileroot, process->mbp_ifile);
+	    if (strncmp(&process->mbp_ifile[strlen(process->mbp_ifile)-4], ".txt", 4) == 0)
+	    	fileroot[strlen(process->mbp_ifile)-4] = '\0';
 	    sprintf(process->mbp_ofile, "%sp.mb%d", 
-			process->mbp_ifile, process->mbp_format);
+			fileroot, process->mbp_format);
 	    process->mbp_ofile_specified = MB_YES;
 	    }
 

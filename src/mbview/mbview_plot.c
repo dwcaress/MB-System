@@ -155,7 +155,10 @@ int mbview_reset_glx(size_t instance)
 	XtGetValues(view->glwmda, args, ac);
 	view->glx_context = glXCreateContext(view->dpy, view->vi,
                 	     NULL, GL_FALSE);
-/*fprintf(stderr,"%s(instance:%ld): glXMakeCurrent\n",function_name,instance);*/
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
 	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 	view->glx_init = MB_YES;
         glViewport(0, 0, data->width, data->height);
@@ -1014,7 +1017,10 @@ int mbview_plot(size_t instance, int rez)
 	data = &(view->data);
 	
 	/* make correct window current for OpenGL */
-/*fprintf(stderr,"%s(instance:%ld): glXMakeCurrent\n",function_name,instance);*/
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
 	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 /*fprintf(stderr,"\nmbview_plot: instance:%ld rez:%d recursion:%ld\n",instance,rez,view->plot_recursion);
 fprintf(stderr,"     view->plot_done:        %d\n",view->plot_done);
@@ -1155,6 +1161,10 @@ fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
 /*fprintf(stderr,"%s(instance:%ld) (flush): glXMakeCurrent\n",function_name,instance);*/
 
 		/* make correct window current for OpenGL (may have changed due to recursion) */
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
 		glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 
 /*fprintf(stderr,"mbview_plot(instance:%ld, rez:%d): calling glXSwapBuffers(display:%d, window:%d)\n",
@@ -1398,7 +1408,10 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel,
 	data = &(view->data);
 	
 	/* make correct window current for OpenGL */
-/*fprintf(stderr,"%s(instance:%ld): glXMakeCurrent\n",function_name,instance);*/
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
 	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 /*fprintf(stderr,"\nmbview_findpointrez: instance:%ld point:%d %d  bounds:%d %d %d %d\n", 
 instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
@@ -1712,7 +1725,10 @@ int mbview_viewbounds(size_t instance)
 	data = &(view->data);
 	
 	/* make correct window current for OpenGL */
-/*fprintf(stderr,"%s(instance:%ld): glXMakeCurrent\n",function_name,instance);*/
+#ifdef MBV_GETGLXMAKECURRENT
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
 	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
 	
 	/* apply projection if needed */
