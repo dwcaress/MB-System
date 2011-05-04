@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_dslnavfix.perl	8/9/96
 #    $Id$
 #
-#    Copyright (c) 1996-2009 by 
+#    Copyright (c) 1996-2011 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA

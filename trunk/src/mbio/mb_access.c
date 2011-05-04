@@ -2,7 +2,7 @@
  *    The MB-system:	mb_access.c	11/1/00
  *    $Id$
 
- *    Copyright (c) 2000-2010 by
+ *    Copyright (c) 2000-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

@@ -2,7 +2,7 @@
  *    The MB-system:	mbfilter.c	1/16/95
  *    $Id$
  *
- *    Copyright (c) 1995-2009 by
+ *    Copyright (c) 1995-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

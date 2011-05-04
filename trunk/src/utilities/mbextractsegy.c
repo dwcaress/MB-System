@@ -2,7 +2,7 @@
  *    The MB-system:	mbextractsegy.c	4/18/2004
  *    $Id$
  *
- *    Copyright (c) 2004-2009 by
+ *    Copyright (c) 2004-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -706,7 +706,8 @@ int main (int argc, char **argv)
 	    }
 	    
 	/* set up plotting script file */
-	if (route_file_set == MB_YES && nroutepoint > 1)
+	if ((route_file_set == MB_YES && nroutepoint > 1) ||
+		(timelist_file_set == MB_YES && ntimepoint > 1))
 		{
 		sprintf(scriptfile, "%s_section.cmd", lineroot);
 		}
@@ -792,13 +793,13 @@ int main (int argc, char **argv)
 		
 		/* read next data record */
 		status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
-		    time_i,&time_d,&navlon,&navlat,
-		    &speed,&heading,
-		    &distance,&altitude,&sonardepth,
-		    &beams_bath,&beams_amp,&pixels_ss,
-		    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
-		    ss,ssacrosstrack,ssalongtrack,
-		    comment,&error);
+				    time_i,&time_d,&navlon,&navlat,
+				    &speed,&heading,
+				    &distance,&altitude,&sonardepth,
+				    &beams_bath,&beams_amp,&pixels_ss,
+				    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
+				    ss,ssacrosstrack,ssalongtrack,
+				    comment,&error);
 		    
 		/* deal with nav and time from survey data only - not nav, sidescan, or subbottom */
 		if (error <= MB_ERROR_NO_ERROR && kind == MB_DATA_DATA)
@@ -824,6 +825,8 @@ int main (int argc, char **argv)
 					&& activewaypoint < ntimepoint)
 					{
 					linechange = MB_YES;
+/* fprintf(stderr,"LINECHANGE 1!! dx:%f dy:%f range:%f activewaypoint:%d time_d: %f %f\n",
+dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 					}
 				}
 
@@ -840,6 +843,7 @@ int main (int argc, char **argv)
 					&& activewaypoint < nroutepoint - 1)
 					{
 					linechange = MB_YES;
+/* fprintf(stderr,"LINECHANGE 2!! dx:%f dy:%f range:%f %f activewaypoint:%d\n",dx,dy,range,rangethreshold,activewaypoint); */
 					}
 				}
 
@@ -956,43 +960,6 @@ int main (int argc, char **argv)
 				|| kind == MB_DATA_SUBBOTTOM_CNTRBEAM
 				|| kind == MB_DATA_SUBBOTTOM_SUBBOTTOM))
 		    {
-		    /* open output segy file if needed */
-		    if (fp == NULL)
-			{
-			/* set up output filename */
-			if (output_file_set == MB_NO)
-			    {
-			    if (nroutepoint > 1 || ntimepoint > 1)
-				    {
-				    sprintf(output_file, "%s_%4.4d.segy", lineroot, linenumber);
-				    }
-			    else
-				    {
-				    strcpy(output_file, file);
-				    strcat(output_file,".segy");
-				    }
-			    }
-			    
-			/* open the new file */
-			nwrite = 0;
-			if ((fp = fopen(output_file, "w")) == NULL) 
-				{
-				status = MB_FAILURE;
-				error = MB_ERROR_WRITE_FAIL;
-				fprintf(stderr,"\nError opening output segy file:\n%s\n",
-					output_file);
-				fprintf(stderr,"\nProgram <%s> Terminated\n",
-					program_name);
-				exit(error);
-				}
-			else if (verbose > 0)
-				{
-				/* output info on file output */
-				fprintf(stderr,"Outputting subbottom data to segy file %s\n",
-					output_file);
-				}
-			}
-
 		    /* extract the header */
 		    status = mb_extract_segytraceheader(verbose,mbio_ptr,store_ptr,&kind,
 				    (void *)&segytraceheader,&error);
@@ -1052,7 +1019,7 @@ int main (int argc, char **argv)
 		    	(within MBES_ONLINE_THRESHOLD degrees)
 		    	before writing any data */
 		    if (activewaypoint > 0 && checkroutebearing == MB_YES 
-		    	&& nroutepoint > 1 && activewaypoint > 0)
+		    	&& nroutepoint > 1)
 		    	{
 			headingdiff = fabs(routeheading[activewaypoint-1] - segytraceheader.heading);
 			if (headingdiff > 180.0)
@@ -1066,12 +1033,49 @@ routeheading[activewaypoint-1],segytraceheader.heading,headingdiff,oktowrite);*/
 			}
 		    else if (activewaypoint > 0)
 		    	oktowrite = MBES_ONLINE_COUNT;
-		    else if (nroutepoint == 0)
+		    else if (nroutepoint == 0 && ntimepoint == 0)
 		    	oktowrite = MBES_ONLINE_COUNT;
 /*if (status == MB_SUCCESS)
 fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
 activewaypoint,linenumber,range, navlon, 
 routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
+
+		    /* open output segy file if needed */
+		    if (fp == NULL && oktowrite > 0)
+			{
+			/* set up output filename */
+			if (output_file_set == MB_NO)
+			    {
+			    if (nroutepoint > 1 || ntimepoint > 1)
+				    {
+				    sprintf(output_file, "%s_%4.4d.segy", lineroot, linenumber);
+				    }
+			    else
+				    {
+				    strcpy(output_file, file);
+				    strcat(output_file,".segy");
+				    }
+			    }
+			    
+			/* open the new file */
+			nwrite = 0;
+			if ((fp = fopen(output_file, "w")) == NULL) 
+				{
+				status = MB_FAILURE;
+				error = MB_ERROR_WRITE_FAIL;
+				fprintf(stderr,"\nError opening output segy file:\n%s\n",
+					output_file);
+				fprintf(stderr,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
+				}
+			else if (verbose > 0)
+				{
+				/* output info on file output */
+				fprintf(stderr,"Outputting subbottom data to segy file %s\n",
+					output_file);
+				}
+			}
 				    
 		    /* note good status */
 		    if (status == MB_SUCCESS)

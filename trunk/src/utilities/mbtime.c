@@ -2,7 +2,7 @@
  *    The MB-system:	mbtime.c	6/5/2008
  *    $Id$
  *
- *    Copyright (c) 2008-2009 by
+ *    Copyright (c) 2008-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
