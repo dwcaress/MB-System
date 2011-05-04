@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_singlebeam.h	4/13/93
  *	$Id$
  *
- *    Copyright (c) 1999-2009 by
+ *    Copyright (c) 1999-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -139,7 +139,7 @@ struct mbsys_singlebeam_struct
 						7 = Manual input mode
 						8 = Simulator mode */
 	int	gps_nsat;	/* R2Rnav GPS height (m) */
-	int	gps_dilution;	/* R2Rnav GPS height (m) */
+	double	gps_dilution;	/* R2Rnav GPS height (m) */
 	int	gps_height;	/* R2Rnav GPS height (m) */
 				
 	/* motion sensor data */

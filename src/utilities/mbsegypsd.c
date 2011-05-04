@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsegypsd.c	11/2/2009
- *    $Id: mbsegypsd.c 1770 2009-10-19 17:16:39Z caress $
+ *    $Id$
  *
- *    Copyright (c) 2009-2009 by
+ *    Copyright (c) 2009-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -81,7 +81,7 @@ char	*getenv();
 	stderr if verbose > 1) */
 FILE	*outfp;
 
-static char rcs_id[] = "$Id: mbsegypsd.c 1770 2009-10-19 17:16:39Z caress $";
+static char rcs_id[] = "$Id$";
 char program_name[] = "mbsegypsd";
 char help_message[] =  "mbsegypsd calculates the power spectral density function of each trace in a segy data file, \noutputting the results as a GMT grid file.";
 char usage_message[] = "mbsegypsd -Ifile -Oroot [-Ashotscale \n\

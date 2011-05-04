@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_profile.c	3/8/2006
  *    $Id$
  *
- *    Copyright (c) 2006-2009
+ *    Copyright (c) 2006-2011
 		 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute

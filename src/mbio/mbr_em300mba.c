@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_em300mba.c	10/16/98
  *	$Id$
  *
- *    Copyright (c) 1998-2009 by
+ *    Copyright (c) 1998-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

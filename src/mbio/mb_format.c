@@ -2,7 +2,7 @@
  *    The MB-system:	mb_format.c	2/18/94
  *    $Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -3305,6 +3305,31 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
 		*format = MBF_IMAGE83P;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for an R2R navigation format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 8)
+		i = strlen(filename) - 7;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".r2rnav")) != NULL)
+		suffix_len = 7;
+	    else if ((suffix = strstr(&filename[i],".R2RNAV")) != NULL)
+		suffix_len = 7;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 7)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_HIR2RNAV;
 		found = MB_YES;
 		}
 	    }
