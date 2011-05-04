@@ -2,7 +2,7 @@
  *    The MB-system:	mbio_status.h	2/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2010 by
+ *    Copyright (c) 1993-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -412,8 +412,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.3.1890"
-#define	MB_BUILD_DATE	"3 May 2011"
+#define	MB_VERSION	"5.3.1892"
+#define	MB_BUILD_DATE	"4 May 2011"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
