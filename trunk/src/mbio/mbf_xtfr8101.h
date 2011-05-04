@@ -2,7 +2,7 @@
  *    The MB-system:	mbf_xtfr8101.h	8/24/01
  *	$Id$
  *
- *    Copyright (c) 2001-2009 by
+ *    Copyright (c) 2001-2011 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
