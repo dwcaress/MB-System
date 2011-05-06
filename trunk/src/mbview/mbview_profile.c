@@ -523,13 +523,21 @@ int mbview_reset_prglx(size_t instance)
 		XtSetArg(args[ac], mbGLwNvisualInfo, &(view->prvi));
 		ac++;
 		XtGetValues(view->prglwmda, args, ac);
-		view->prglx_context = glXCreateContext(view->dpy, view->prvi,
-                		     NULL, GL_FALSE);
-#ifdef MBV_GETGLXMAKECURRENT
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->prglwmda),(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXCreateContext(%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)view->prvi);
 #endif
-		glXMakeCurrent(XtDisplay(view->prglwmda),XtWindow(view->prglwmda),view->prglx_context);
+		view->prglx_context = glXCreateContext(view->dpy, view->prvi,
+                		     NULL, GL_TRUE);
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+#endif
+		glXMakeCurrent(view->dpy,XtWindow(view->prglwmda),view->prglx_context);
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 		view->prglx_init = MB_YES;
         	glViewport(0, 0, data->prwidth, data->prheight);
 		view->praspect_ratio = ((float)data->prheight) / ((float)data->prwidth);
@@ -657,11 +665,15 @@ int mbview_plotprofile(size_t instance)
 		clip = MB_NO;
 
 		/* set projection to 2D */
-#ifdef MBV_GETGLXMAKECURRENT
+#ifdef MBV_DEBUG_GLX
 fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->prglwmda),(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
 #endif
-		glXMakeCurrent(XtDisplay(view->prglwmda),XtWindow(view->prglwmda),view->prglx_context);
+		glXMakeCurrent(view->dpy,XtWindow(view->prglwmda),view->prglx_context);
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(left, right, bottom, top, 
@@ -762,7 +774,7 @@ __FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->prglwmda),(size
 		glVertex3f((float)(0.0), yzmax, (float)(MBV_OPENGL_ZPROFILE1));
 		glEnd();
 #ifdef MBV_GETERRORS
-mbview_glerrorcheck(instance, 1, function_name);
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 
 		/* flush opengl buffers */

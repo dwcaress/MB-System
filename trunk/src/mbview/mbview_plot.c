@@ -144,8 +144,21 @@ int mbview_reset_glx(size_t instance)
 	/* delete old glx_context if it exists */
 	if (view->glx_init == MB_YES)
 		{
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
+		glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXDestroyContext(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
 		glXDestroyContext(view->dpy, view->glx_context);
 		view->glx_init = MB_NO;
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 		}
 	
 	/* set up a new opengl context */
@@ -153,13 +166,17 @@ int mbview_reset_glx(size_t instance)
 	XtSetArg(args[ac], mbGLwNvisualInfo, &(view->vi));
 	ac++;
 	XtGetValues(view->glwmda, args, ac);
-	view->glx_context = glXCreateContext(view->dpy, view->vi,
-                	     NULL, GL_FALSE);
-#ifdef MBV_GETGLXMAKECURRENT
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXCreateContext(%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)view->vi);
 #endif
-	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
+	view->glx_context = glXCreateContext(view->dpy, view->vi,
+                	     NULL, GL_TRUE);
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
+	glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
 	view->glx_init = MB_YES;
         glViewport(0, 0, data->width, data->height);
 	view->aspect_ratio = ((float)data->width) / ((float)data->height);
@@ -168,8 +185,8 @@ __FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t
 	view->contourhirez = MB_NO;
 	view->contourfullrez = MB_NO;
 	
-#ifdef MBV_GETERRORS
-mbview_glerrorcheck(instance, 1, function_name);
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 
 	/* print output debug statements */
@@ -250,8 +267,8 @@ int mbview_drawdata(size_t instance, int rez)
 	if (data->display_mode == MBV_DISPLAY_3D
 		|| data->display_projection_mode == MBV_PROJECTION_SPHEROID)
 		glEnable(GL_DEPTH_TEST);
-#ifdef MBV_GETERRORS
-mbview_glerrorcheck(instance, 1, function_name);
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 		
 	/* set color parameters */
@@ -479,9 +496,8 @@ data->primary_x[kk],data->primary_y[kk],data->primary_z[kk]);*/
 			 if (on == MB_YES)
 			 	{
 			 	glEnd();
-#ifdef MBV_GETERRORS
-fprintf(stderr,"glEnd called ");
-mbview_glerrorcheck(instance, 24, function_name);
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 				on = MB_NO;
 				}
@@ -519,9 +535,8 @@ mbview_glerrorcheck(instance, 24, function_name);
 			if (on == MB_YES)
 				{
 				glEnd();
-#ifdef MBV_GETERRORS
-fprintf(stderr,"glEnd called ");
-mbview_glerrorcheck(instance, 28, function_name);
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 				on = MB_NO;
 				}
@@ -531,9 +546,8 @@ mbview_glerrorcheck(instance, 28, function_name);
 	if (on == MB_YES)
 		{
 		glEnd();
-#ifdef MBV_GETERRORS
-fprintf(stderr,"glEnd called ");
-mbview_glerrorcheck(instance, 29, function_name);
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 		on = MB_NO;
 		flip = MB_NO;
@@ -551,8 +565,8 @@ mbview_glerrorcheck(instance, 29, function_name);
 	if (view->plot_done == MB_YES)
 		i = data->primary_nx;
 	}
-#ifdef MBV_GETERRORS
-mbview_glerrorcheck(instance, 2, function_name);
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 
 	/* draw contours */
@@ -566,8 +580,8 @@ mbview_glerrorcheck(instance, 2, function_name);
 	    		glCallList((GLuint)(3*instance+1));
 		}
 	
-#ifdef MBV_GETERRORS
-mbview_glerrorcheck(instance, 3, function_name);
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 #endif
 		
 	/* draw current pick */
@@ -1016,12 +1030,21 @@ int mbview_plot(size_t instance, int rez)
 	view = &(mbviews[instance]);
 	data = &(view->data);
 	
-	/* make correct window current for OpenGL */
-#ifdef MBV_GETGLXMAKECURRENT
+	/* only plot if this view is still active */
+	if (view->glx_init == MB_YES)
+		{
+	
+		/* make correct window current for OpenGL */
+#ifdef MBV_DEBUG_GLX
 fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
 #endif
-	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
+		glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
+
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
+
 /*fprintf(stderr,"\nmbview_plot: instance:%ld rez:%d recursion:%ld\n",instance,rez,view->plot_recursion);
 fprintf(stderr,"     view->plot_done:        %d\n",view->plot_done);
 fprintf(stderr,"     view->plot_recursion:   %d\n",view->plot_recursion);
@@ -1030,154 +1053,156 @@ fprintf(stderr,"     view->contourlorez:     %d\n",view->contourlorez);
 fprintf(stderr,"     view->contourhirez:     %d\n",view->contourhirez);
 fprintf(stderr,"     view->contourfullrez:   %d\n",view->contourfullrez);
 fprintf(stderr,"     data->pick_type:  %d\n",data->pick_type);*/
-	
-	/* apply projection if needed */
-	if (view->plot_done == MB_NO
-		&& view->projected == MB_NO)
-		{
-		do_mbview_status("Projecting data...", instance);
-		mbview_projectdata(instance);
-		}
-	
-	/* apply projection to global data if needed */
-	if (view->plot_done == MB_NO
-		&& view->globalprojected == MB_NO)
-		{
-		do_mbview_status("Projecting global data...", instance);
-		mbview_projectglobaldata(instance);
-		}
 
-	/* contour if needed */
-	if (view->plot_done == MB_NO
-		&& (data->grid_contour_mode == MBV_VIEW_ON)
-		&& ((rez == MBV_REZ_FULL && view->contourfullrez == MB_NO)
-			|| (rez == MBV_REZ_HIGH && view->contourhirez == MB_NO)
-			|| (rez == MBV_REZ_LOW && view->contourlorez == MB_NO)))
-		{
-		if (rez == MBV_REZ_FULL)
-			do_mbview_status("Contouring data...", instance);
-	    	mbview_contour(instance, rez);
-		}
-	
-
-	/* get bounds of grid seen in current view */
-	if (rez == MBV_REZ_FULL
-		&& data->display_mode == MBV_DISPLAY_3D)
-		{
-		data->viewbounds[0] = 0;
-		data->viewbounds[1] = data->primary_nx - 1;
-		data->viewbounds[2] = 0;
-		data->viewbounds[3] = data->primary_ny - 1;
-		}
-	else if (view->viewboundscount >= MBV_BOUNDSFREQUENCY)
-		{
-		mbview_viewbounds(instance);
-		view->viewboundscount = 0;
-			
-		/* regenerate 3D drape of pick marks if either 3D display 
-			or the pick move is final */
-		if (data->pick_type != MBV_PICK_NONE
-			&& data->display_mode == MBV_DISPLAY_3D)
+		/* apply projection if needed */
+		if (view->plot_done == MB_NO
+			&& view->projected == MB_NO)
 			{
-			mbview_picksize(instance);
-			}
-		}
-	
-	/* do the actual openGL plotting */
-	if (view->plot_done == MB_NO)
-		{
-		/* set projection to 2D or 3D */
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		view->right = MBV_OPENGL_WIDTH / view->size2d;
-		view->left = -MBV_OPENGL_WIDTH / view->size2d;
-		view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-		view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-		if (data->display_mode == MBV_DISPLAY_2D)
-			{
-			glOrtho(view->left, 
-				view->right, 
-				view->bottom, 
-				view->top, 
-				MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
-			}
-		else
-			{
-			gluPerspective(40.0, 
-				view->aspect_ratio, 
-				0.01 * MBV_OPENGL_WIDTH,
-				1000 * MBV_OPENGL_WIDTH);
+			do_mbview_status("Projecting data...", instance);
+			mbview_projectdata(instance);
 			}
 
-		/* set up translations */
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		if (data->display_mode == MBV_DISPLAY_2D)
+		/* apply projection to global data if needed */
+		if (view->plot_done == MB_NO
+			&& view->globalprojected == MB_NO)
 			{
-			glTranslated (view->offset2d_x, 
-					view->offset2d_y, 
-					MBV_OPENGL_ZMIN2D);
-			}
-		else if (data->display_mode == MBV_DISPLAY_3D)
-			{
-			viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
-					/ view->aspect_ratio;
-			glTranslated (0.0, 0.0, 
-					-viewdistance + view->viewoffset3d_z);
-			glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
-			glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
-			glTranslated (view->offset3d_x, 
-					view->offset3d_y, 
-					-viewdistance + view->offset3d_z);
-			glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
-			glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
+			do_mbview_status("Projecting global data...", instance);
+			mbview_projectglobaldata(instance);
 			}
 
-		/* set background color */
-		glClearColor(1.0, 1.0, 1.0, 0.0);
-		glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
-		glDepthFunc(GL_LESS);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		/* draw data */
-		if (view->plot_done == MB_NO)
+		/* contour if needed */
+		if (view->plot_done == MB_NO
+			&& (data->grid_contour_mode == MBV_VIEW_ON)
+			&& ((rez == MBV_REZ_FULL && view->contourfullrez == MB_NO)
+				|| (rez == MBV_REZ_HIGH && view->contourhirez == MB_NO)
+				|| (rez == MBV_REZ_LOW && view->contourlorez == MB_NO)))
 			{
 			if (rez == MBV_REZ_FULL)
-				do_mbview_status("Drawing full rez...", instance);
-			else if (rez == MBV_REZ_HIGH)
-				do_mbview_status("Drawing high rez...", instance);
-			mbview_drawdata(instance, rez);
+				do_mbview_status("Contouring data...", instance);
+	    		mbview_contour(instance, rez);
+			}
+
+
+		/* get bounds of grid seen in current view */
+		if (rez == MBV_REZ_FULL
+			&& data->display_mode == MBV_DISPLAY_3D)
+			{
+			data->viewbounds[0] = 0;
+			data->viewbounds[1] = data->primary_nx - 1;
+			data->viewbounds[2] = 0;
+			data->viewbounds[3] = data->primary_ny - 1;
+			}
+		else if (view->viewboundscount >= MBV_BOUNDSFREQUENCY)
+			{
+			mbview_viewbounds(instance);
+			view->viewboundscount = 0;
+
+			/* regenerate 3D drape of pick marks if either 3D display 
+				or the pick move is final */
+			if (data->pick_type != MBV_PICK_NONE
+				&& data->display_mode == MBV_DISPLAY_3D)
+				{
+				mbview_picksize(instance);
+				}
+			}
+
+		/* do the actual openGL plotting */
+		if (view->plot_done == MB_NO)
+			{
+			/* set projection to 2D or 3D */
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			view->right = MBV_OPENGL_WIDTH / view->size2d;
+			view->left = -MBV_OPENGL_WIDTH / view->size2d;
+			view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
+			view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
+			if (data->display_mode == MBV_DISPLAY_2D)
+				{
+				glOrtho(view->left, 
+					view->right, 
+					view->bottom, 
+					view->top, 
+					MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
+				}
+			else
+				{
+				gluPerspective(40.0, 
+					view->aspect_ratio, 
+					0.01 * MBV_OPENGL_WIDTH,
+					1000 * MBV_OPENGL_WIDTH);
+				}
+
+			/* set up translations */
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			if (data->display_mode == MBV_DISPLAY_2D)
+				{
+				glTranslated (view->offset2d_x, 
+						view->offset2d_y, 
+						MBV_OPENGL_ZMIN2D);
+				}
+			else if (data->display_mode == MBV_DISPLAY_3D)
+				{
+				viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
+						/ view->aspect_ratio;
+				glTranslated (0.0, 0.0, 
+						-viewdistance + view->viewoffset3d_z);
+				glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
+				glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
+				glTranslated (view->offset3d_x, 
+						view->offset3d_y, 
+						-viewdistance + view->offset3d_z);
+				glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
+				glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
+				}
+
+			/* set background color */
+			glClearColor(1.0, 1.0, 1.0, 0.0);
+			glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
+			glDepthFunc(GL_LESS);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			/* draw data */
+			if (view->plot_done == MB_NO)
+				{
+				if (rez == MBV_REZ_FULL)
+					do_mbview_status("Drawing full rez...", instance);
+				else if (rez == MBV_REZ_HIGH)
+					do_mbview_status("Drawing high rez...", instance);
+				mbview_drawdata(instance, rez);
+				}
+			}
+
+		/* the plot_done flag will still be MB_NO if this
+		   is the highest recursion level to be reached - finish the plot
+		   only in this case */
+		if (view->plot_done == MB_NO)
+			{
+			/* flush opengl buffers */
+			glFlush();
+
+			/* make correct window current for OpenGL (may have changed due to recursion) */
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
+			glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
+
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
+
+			/* swap opengl buffers */
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXSwapBuffers(%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda));
+#endif
+			glXSwapBuffers (view->dpy, XtWindow(view->glwmda));
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 			}
 		}
-
-	/* the plot_done flag will still be MB_NO if this
-	   is the highest recursion level to be reached - finish the plot
-	   only in this case */
-	if (view->plot_done == MB_NO)
-		{
-		/* flush opengl buffers */
-		glFlush();
-
-/*fprintf(stderr,"%s(instance:%ld) (flush): glXMakeCurrent\n",function_name,instance);*/
-
-		/* make correct window current for OpenGL (may have changed due to recursion) */
-#ifdef MBV_GETGLXMAKECURRENT
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
-#endif
-		glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
-
-/*fprintf(stderr,"mbview_plot(instance:%ld, rez:%d): calling glXSwapBuffers(display:%d, window:%d)\n",
-instance, rez, XtDisplay(view->glwmda), XtWindow(view->glwmda));
-mbview_glerrorcheck(instance, 1, function_name);*/
-
-		/* swap opengl buffers */
-		glXSwapBuffers (XtDisplay(view->glwmda), 
-				XtWindow(view->glwmda));
-		}
-#ifdef MBV_GETERRORS
-mbview_glerrorcheck(instance, 1, function_name);
-#endif
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -1230,119 +1255,124 @@ int mbview_findpoint(size_t instance, int xpixel, int ypixel,
 	view = &(mbviews[instance]);
 	data = &(view->data);
 	
-	/* look for point at low resolution */
-	*found = MB_NO;
-	foundsave = MB_NO;
-	ijbounds[0] = 0;
-	ijbounds[1] = data->primary_nx;
-	ijbounds[2] = 0;
-	ijbounds[3] = data->primary_ny;
-	rez = MBV_REZ_LOW;
-	mbview_findpointrez(instance, rez, xpixel, ypixel, 
-			ijbounds, found, 
-			xgrid, ygrid,
-			xlon, ylat, zdata,
-			xdisplay, ydisplay, zdisplay);
+	/* only plot if this view is still active */
+	if (view->glx_init == MB_YES)
+		{
+
+		/* look for point at low resolution */
+		*found = MB_NO;
+		foundsave = MB_NO;
+		ijbounds[0] = 0;
+		ijbounds[1] = data->primary_nx;
+		ijbounds[2] = 0;
+		ijbounds[3] = data->primary_ny;
+		rez = MBV_REZ_LOW;
+		mbview_findpointrez(instance, rez, xpixel, ypixel, 
+				ijbounds, found, 
+				xgrid, ygrid,
+				xlon, ylat, zdata,
+				xdisplay, ydisplay, zdisplay);
 /*fprintf(stderr,"First findpointrez: rez:%d pixels:%d %d found:%d xlon:%f ylat:%f zdata:%f\n",
 rez,xpixel,ypixel,found,xlon,ylat,zdata);*/
-	if (*found == MB_YES)
-		{
-		/* save last good results */
-		foundsave = *found;
-		xgridsave = *xgrid;
-		ygridsave = *ygrid;
-		xlonsave = *xlon;
-		ylatsave = *ylat;
-		zdatasave = *zdata;
-		xdisplaysave = *xdisplay;
-		ydisplaysave = *ydisplay;
-		zdisplaysave = *zdisplay;
-		}
+		if (*found == MB_YES)
+			{
+			/* save last good results */
+			foundsave = *found;
+			xgridsave = *xgrid;
+			ygridsave = *ygrid;
+			xlonsave = *xlon;
+			ylatsave = *ylat;
+			zdatasave = *zdata;
+			xdisplaysave = *xdisplay;
+			ydisplaysave = *ydisplay;
+			zdisplaysave = *zdisplay;
+			}
 
-	/* now check high rez */
-	rez = MBV_REZ_HIGH;
-	mbview_findpointrez(instance, rez, xpixel, ypixel, 
-			ijbounds, found, 
-			xgrid, ygrid, 
-			xlon, ylat, zdata,
-			xdisplay, ydisplay, zdisplay);
-	if (*found == MB_NO && foundsave == MB_YES)
-		{
-		rez = MBV_REZ_LOW;
-		*found = foundsave;
-		*xgrid = xgridsave;
-		*ygrid = ygridsave;
-		*xlon = xlonsave;
-		*ylat = ylatsave;
-		*xdisplay = xdisplaysave;
-		*ydisplay = ydisplaysave;
-		*zdisplay = zdisplaysave;
-		}
-
-	/* repeat until found at highest resolution possible */
-	while (*found == MB_YES
-		&& ijbounds[1] > ijbounds[0]
-		&& ijbounds[3] > ijbounds[2])
-		{
-		/* save last good results */
-		foundsave = *found;
-		xgridsave = *xgrid;
-		ygridsave = *ygrid;
-		xlonsave = *xlon;
-		ylatsave = *ylat;
-		zdatasave = *zdata;
-		xdisplaysave = *xdisplay;
-		ydisplaysave = *ydisplay;
-		zdisplaysave = *zdisplay;
-		
-		/* choose resolution */
-		if ((ijbounds[1] - ijbounds[0]) 
-				> data->hirez_dimension
-			|| (ijbounds[3] - ijbounds[2]) 
-				> data->hirez_dimension)
-			rez = MBV_REZ_HIGH;
-		else
-			rez = MBV_REZ_FULL;
-		
-		/* try again */
+		/* now check high rez */
+		rez = MBV_REZ_HIGH;
 		mbview_findpointrez(instance, rez, xpixel, ypixel, 
-			ijbounds, found, 
-			xgrid, ygrid,
-			xlon, ylat, zdata,
-			xdisplay, ydisplay, zdisplay);
-		}
-				
-	/* if not found and 2D get position directly from pixels */
-	if (*found == MB_NO && data->display_mode == MBV_DISPLAY_2D)
-		{
-		*xdisplay = view->left - view->offset2d_x
-			+ 2.0 * MBV_OPENGL_WIDTH / view->size2d 
-			* ((double)xpixel) / ((double)data->width);
-		*ydisplay = view->bottom - view->offset2d_y
-			+ 2.0 * MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d 
-			* ((double)ypixel) / ((double)data->height);
-		*zdisplay = 0.0;
-		mbview_projectdisplay2ll(instance,
-			*xdisplay, *ydisplay, *zdisplay,
-			xlon, ylat);
-		mbview_projectll2xyzgrid(instance,
-			*xlon, *ylat,
-			xgrid, ygrid, zdata);
-		*found = MB_YES;
-		}
+				ijbounds, found, 
+				xgrid, ygrid, 
+				xlon, ylat, zdata,
+				xdisplay, ydisplay, zdisplay);
+		if (*found == MB_NO && foundsave == MB_YES)
+			{
+			rez = MBV_REZ_LOW;
+			*found = foundsave;
+			*xgrid = xgridsave;
+			*ygrid = ygridsave;
+			*xlon = xlonsave;
+			*ylat = ylatsave;
+			*xdisplay = xdisplaysave;
+			*ydisplay = ydisplaysave;
+			*zdisplay = zdisplaysave;
+			}
 
-	/* if not found and 3D use the best pick location found */
-	if (*found == MB_NO && foundsave == MB_YES)
-		{
-		*found = foundsave;
-		*xgrid = xgridsave;
-		*ygrid = ygridsave;
-		*xlon = xlonsave;
-		*ylat = ylatsave;
-		*zdata = zdatasave;
-		*xdisplay = xdisplaysave;
-		*ydisplay = ydisplaysave;
-		*zdisplay = zdisplaysave;
+		/* repeat until found at highest resolution possible */
+		while (*found == MB_YES
+			&& ijbounds[1] > ijbounds[0]
+			&& ijbounds[3] > ijbounds[2])
+			{
+			/* save last good results */
+			foundsave = *found;
+			xgridsave = *xgrid;
+			ygridsave = *ygrid;
+			xlonsave = *xlon;
+			ylatsave = *ylat;
+			zdatasave = *zdata;
+			xdisplaysave = *xdisplay;
+			ydisplaysave = *ydisplay;
+			zdisplaysave = *zdisplay;
+
+			/* choose resolution */
+			if ((ijbounds[1] - ijbounds[0]) 
+					> data->hirez_dimension
+				|| (ijbounds[3] - ijbounds[2]) 
+					> data->hirez_dimension)
+				rez = MBV_REZ_HIGH;
+			else
+				rez = MBV_REZ_FULL;
+
+			/* try again */
+			mbview_findpointrez(instance, rez, xpixel, ypixel, 
+				ijbounds, found, 
+				xgrid, ygrid,
+				xlon, ylat, zdata,
+				xdisplay, ydisplay, zdisplay);
+			}
+
+		/* if not found and 2D get position directly from pixels */
+		if (*found == MB_NO && data->display_mode == MBV_DISPLAY_2D)
+			{
+			*xdisplay = view->left - view->offset2d_x
+				+ 2.0 * MBV_OPENGL_WIDTH / view->size2d 
+				* ((double)xpixel) / ((double)data->width);
+			*ydisplay = view->bottom - view->offset2d_y
+				+ 2.0 * MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d 
+				* ((double)ypixel) / ((double)data->height);
+			*zdisplay = 0.0;
+			mbview_projectdisplay2ll(instance,
+				*xdisplay, *ydisplay, *zdisplay,
+				xlon, ylat);
+			mbview_projectll2xyzgrid(instance,
+				*xlon, *ylat,
+				xgrid, ygrid, zdata);
+			*found = MB_YES;
+			}
+
+		/* if not found and 3D use the best pick location found */
+		if (*found == MB_NO && foundsave == MB_YES)
+			{
+			*found = foundsave;
+			*xgrid = xgridsave;
+			*ygrid = ygridsave;
+			*xlon = xlonsave;
+			*ylat = ylatsave;
+			*zdata = zdatasave;
+			*xdisplay = xdisplaysave;
+			*ydisplay = ydisplaysave;
+			*zdisplay = zdisplaysave;
+			}
 		}
 	
 	/* print output debug statements */
@@ -1407,261 +1437,274 @@ int mbview_findpointrez(size_t instance, int rez, int xpixel, int ypixel,
 	view = &(mbviews[instance]);
 	data = &(view->data);
 	
-	/* make correct window current for OpenGL */
-#ifdef MBV_GETGLXMAKECURRENT
+	/* only plot if this view is still active */
+	if (view->glx_init == MB_YES)
+		{
+	
+		/* make correct window current for OpenGL */
+#ifdef MBV_DEBUG_GLX
 fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
 #endif
-	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
+	glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
 /*fprintf(stderr,"\nmbview_findpointrez: instance:%ld point:%d %d  bounds:%d %d %d %d\n", 
 instance,xpixel,ypixel,ijbounds[0],ijbounds[1],ijbounds[2],ijbounds[3]);*/
 	
-	/* apply projection if needed */
-	if (view->projected == MB_NO)
-		{
-		do_mbview_status("Projecting data...", instance);
-		mbview_projectdata(instance);
-		}
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 	
-	/* set projection to 2D or 3D */
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	view->right = MBV_OPENGL_WIDTH / view->size2d;
-	view->left = -MBV_OPENGL_WIDTH / view->size2d;
-	view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-	view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-	if (data->display_mode == MBV_DISPLAY_2D)
-		{
-		glOrtho(view->left, 
-			view->right, 
-			view->bottom, 
-			view->top, 
-			MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
-		}
-	else
-		{
-		gluPerspective(40.0, 
-			view->aspect_ratio, 
-			0.01 * MBV_OPENGL_WIDTH,
-			1000 * MBV_OPENGL_WIDTH);
-		}
-
-	/* set up translations */
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	if (data->display_mode == MBV_DISPLAY_2D)
-		{
-		glTranslated (view->offset2d_x, 
-				view->offset2d_y, 
-				MBV_OPENGL_ZMIN2D);
-		}
-	else if (data->display_mode == MBV_DISPLAY_3D)
-		{
-		viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
-				/ view->aspect_ratio;
-		glTranslated (0.0, 0.0, 
-				-viewdistance + view->viewoffset3d_z);
-		glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
-		glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
-		glTranslated (view->offset3d_x, 
-				view->offset3d_y, 
-				-viewdistance + view->offset3d_z);
-		glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
-		glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
-		}
-
-	/* set background color */
-	glClearColor(1.0, 1.0, 1.0, 1.0);
-	glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
-	glDepthFunc(GL_LESS);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	/* enable depth test for 3D plots */
-	if (data->display_mode == MBV_DISPLAY_3D)
-		glEnable(GL_DEPTH_TEST);
-	
-	/* get bounds of interest in grid */
-	imin = ijbounds[0];
-	imax = ijbounds[1];
-	ni = imax - imin + 1;
-	jmin = ijbounds[2];
-	jmax = ijbounds[3];
-	nj = jmax - jmin + 1;
-
-	/* set stride for looping over data */
-	if (rez == MBV_REZ_FULL)
-	    stride = 1;
-	else if (rez == MBV_REZ_HIGH)
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->hirez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->hirez_dimension)));
-	else
-	    stride = MAX((int)ceil(((double)data->primary_nx) 
-				/ ((double)data->lorez_dimension)), 
-			(int)ceil(((double)data->primary_ny) 
-				/ ((double)data->lorez_dimension)));
-				
-	/* get number of grid cells used in picking */
-	npickx = (ni / stride);
-	ipickstride = stride * (int)floor((npickx / MBV_PICK_DIVISION) + 1);
-	npicky = (nj / stride);
-	jpickstride = stride * (int)floor((npicky / MBV_PICK_DIVISION) + 1);
-	
-/*fprintf(stderr,"mbview_findpointrez: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n", 
-stride, npickx, npicky, ipickstride, jpickstride);*/
-	
-	/* draw the triangles */
-	glBegin(GL_TRIANGLES);
-	for (i=imin;i<imax-stride;i+=stride)
-	{
-	for (j=jmin;j<jmax-stride;j+=stride)
-		{
-		k = i * data->primary_ny + j;
-		l = (i + stride) * data->primary_ny + j;
-		m = i * data->primary_ny + j + stride;
-		n = (i + stride) * data->primary_ny + j + stride;
-		
-		rgb[0] = (float)floor(((double)((i - imin) / ipickstride))) 
-				/ (MBV_PICK_DIVISION + 1.0);
-		rgb[1] = (float)floor(((double)((j - jmin) / jpickstride)))
-				/ (MBV_PICK_DIVISION + 1.0);
-		if (data->primary_data[k] != data->primary_nodatavalue
-			&& data->primary_data[l] != data->primary_nodatavalue
-			&& data->primary_data[m] != data->primary_nodatavalue)
+		/* apply projection if needed */
+		if (view->projected == MB_NO)
 			{
-			if (!(data->primary_stat_z[k/8] & statmask[k%8]))
-				mbview_zscalegridpoint(instance,k);
-			if (!(data->primary_stat_z[l/8] & statmask[l%8]))
-				mbview_zscalegridpoint(instance,l);
-			if (!(data->primary_stat_z[m/8] & statmask[m%8]))
-				mbview_zscalegridpoint(instance,m);
-			rgb[2] = 0.25;
-/*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
-i,j, rgb[0], rgb[1], rgb[2]);*/
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[k],
-				data->primary_y[k],
-				data->primary_z[k]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[l],
-				data->primary_y[l],
-				data->primary_z[l]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[m],
-				data->primary_y[m],
-				data->primary_z[m]);
+			do_mbview_status("Projecting data...", instance);
+			mbview_projectdata(instance);
 			}
-		if (data->primary_data[l] != data->primary_nodatavalue
-			&& data->primary_data[m] != data->primary_nodatavalue
-			&& data->primary_data[n] != data->primary_nodatavalue)
+
+		/* set projection to 2D or 3D */
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		view->right = MBV_OPENGL_WIDTH / view->size2d;
+		view->left = -MBV_OPENGL_WIDTH / view->size2d;
+		view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
+		view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
+		if (data->display_mode == MBV_DISPLAY_2D)
 			{
-			if (!(data->primary_stat_z[l/8] & statmask[l%8]))
-				mbview_zscalegridpoint(instance,l);
-			if (!(data->primary_stat_z[m/8] & statmask[m%8]))
-				mbview_zscalegridpoint(instance,m);
-			if (!(data->primary_stat_z[n/8] & statmask[n%8]))
-				mbview_zscalegridpoint(instance,n);
-			rgb[2] = 0.75;
-/*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
-i,j, rgb[0], rgb[1], rgb[2]);*/
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[l],
-				data->primary_y[l],
-				data->primary_z[l]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[n],
-				data->primary_y[n],
-				data->primary_z[n]);
-			glColor3f(rgb[0], rgb[1], rgb[2]);
-			glVertex3f(data->primary_x[m],
-				data->primary_y[m],
-				data->primary_z[m]);
-			}
-		}
-	}
-	glEnd();
-
-	/* flush opengl buffers */
-	glFlush();
-
-	/* make sure depth test is off */
-	glDisable(GL_DEPTH_TEST);
-	
-	/* now read the color at the pick point */
-	glReadBuffer(GL_BACK);
-	glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
-	glReadBuffer(GL_FRONT);
-
-	/* calculate pick location */
-	if (rgba[0] != 1.0 
-		&& rgba[1] != 1.0 
-		&& (rgba[2] > 0.2 && rgba[2] < 0.8))
-		{
-		*found = MB_YES;
-		
-		i = imin + ipickstride 
-				* ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
-		j = jmin + jpickstride 
-				* ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
-		k = i * data->primary_ny + j;
-		l = (i + stride) * data->primary_ny + j;
-		m = i * data->primary_ny + j + stride;
-		n = (i + stride) * data->primary_ny + j + stride;
-		if (rint((MBV_PICK_DIVISION + 1.0) * rgba[2]) 
-			== (MBV_PICK_DIVISION + 1.0) / 4.0)
-			{
-			*xgrid = data->primary_xmin 
-					+ (3 * i + stride) * data->primary_dx / 3.0;
-			*ygrid = data->primary_ymin 
-					+ (3 * j + stride) * data->primary_dy / 3.0;
-			*zdata = (data->primary_data[k] 
-					+ data->primary_data[l] 
-					+ data->primary_data[m]) / 3.0;
+			glOrtho(view->left, 
+				view->right, 
+				view->bottom, 
+				view->top, 
+				MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
 			}
 		else
 			{
-			*xgrid = data->primary_xmin 
-					+ (3 * i + 2 * stride) * data->primary_dx / 3.0;
-			*ygrid = data->primary_ymin 
-					+ (3 * j + 2 * stride) * data->primary_dy / 3.0;
-			*zdata = (data->primary_data[l] 
-					+ data->primary_data[n] 
-					+ data->primary_data[m]) / 3.0;
+			gluPerspective(40.0, 
+				view->aspect_ratio, 
+				0.01 * MBV_OPENGL_WIDTH,
+				1000 * MBV_OPENGL_WIDTH);
 			}
+
+		/* set up translations */
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		if (data->display_mode == MBV_DISPLAY_2D)
+			{
+			glTranslated (view->offset2d_x, 
+					view->offset2d_y, 
+					MBV_OPENGL_ZMIN2D);
+			}
+		else if (data->display_mode == MBV_DISPLAY_3D)
+			{
+			viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
+					/ view->aspect_ratio;
+			glTranslated (0.0, 0.0, 
+					-viewdistance + view->viewoffset3d_z);
+			glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
+			glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
+			glTranslated (view->offset3d_x, 
+					view->offset3d_y, 
+					-viewdistance + view->offset3d_z);
+			glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
+			glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
+			}
+
+		/* set background color */
+		glClearColor(1.0, 1.0, 1.0, 1.0);
+		glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
+		glDepthFunc(GL_LESS);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		/* enable depth test for 3D plots */
+		if (data->display_mode == MBV_DISPLAY_3D)
+			glEnable(GL_DEPTH_TEST);
+
+		/* get bounds of interest in grid */
+		imin = ijbounds[0];
+		imax = ijbounds[1];
+		ni = imax - imin + 1;
+		jmin = ijbounds[2];
+		jmax = ijbounds[3];
+		nj = jmax - jmin + 1;
+
+		/* set stride for looping over data */
+		if (rez == MBV_REZ_FULL)
+		    stride = 1;
+		else if (rez == MBV_REZ_HIGH)
+		    stride = MAX((int)ceil(((double)data->primary_nx) 
+					/ ((double)data->hirez_dimension)), 
+				(int)ceil(((double)data->primary_ny) 
+					/ ((double)data->hirez_dimension)));
+		else
+		    stride = MAX((int)ceil(((double)data->primary_nx) 
+					/ ((double)data->lorez_dimension)), 
+				(int)ceil(((double)data->primary_ny) 
+					/ ((double)data->lorez_dimension)));
+
+		/* get number of grid cells used in picking */
+		npickx = (ni / stride);
+		ipickstride = stride * (int)floor((npickx / MBV_PICK_DIVISION) + 1);
+		npicky = (nj / stride);
+		jpickstride = stride * (int)floor((npicky / MBV_PICK_DIVISION) + 1);
+
+/*fprintf(stderr,"mbview_findpointrez: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n", 
+stride, npickx, npicky, ipickstride, jpickstride);*/
+
+		/* draw the triangles */
+		glBegin(GL_TRIANGLES);
+		for (i=imin;i<imax-stride;i+=stride)
+		{
+		for (j=jmin;j<jmax-stride;j+=stride)
+			{
+			k = i * data->primary_ny + j;
+			l = (i + stride) * data->primary_ny + j;
+			m = i * data->primary_ny + j + stride;
+			n = (i + stride) * data->primary_ny + j + stride;
+
+			rgb[0] = (float)floor(((double)((i - imin) / ipickstride))) 
+					/ (MBV_PICK_DIVISION + 1.0);
+			rgb[1] = (float)floor(((double)((j - jmin) / jpickstride)))
+					/ (MBV_PICK_DIVISION + 1.0);
+			if (data->primary_data[k] != data->primary_nodatavalue
+				&& data->primary_data[l] != data->primary_nodatavalue
+				&& data->primary_data[m] != data->primary_nodatavalue)
+				{
+				if (!(data->primary_stat_z[k/8] & statmask[k%8]))
+					mbview_zscalegridpoint(instance,k);
+				if (!(data->primary_stat_z[l/8] & statmask[l%8]))
+					mbview_zscalegridpoint(instance,l);
+				if (!(data->primary_stat_z[m/8] & statmask[m%8]))
+					mbview_zscalegridpoint(instance,m);
+				rgb[2] = 0.25;
+/*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
+i,j, rgb[0], rgb[1], rgb[2]);*/
+				glColor3f(rgb[0], rgb[1], rgb[2]);
+				glVertex3f(data->primary_x[k],
+					data->primary_y[k],
+					data->primary_z[k]);
+				glColor3f(rgb[0], rgb[1], rgb[2]);
+				glVertex3f(data->primary_x[l],
+					data->primary_y[l],
+					data->primary_z[l]);
+				glColor3f(rgb[0], rgb[1], rgb[2]);
+				glVertex3f(data->primary_x[m],
+					data->primary_y[m],
+					data->primary_z[m]);
+				}
+			if (data->primary_data[l] != data->primary_nodatavalue
+				&& data->primary_data[m] != data->primary_nodatavalue
+				&& data->primary_data[n] != data->primary_nodatavalue)
+				{
+				if (!(data->primary_stat_z[l/8] & statmask[l%8]))
+					mbview_zscalegridpoint(instance,l);
+				if (!(data->primary_stat_z[m/8] & statmask[m%8]))
+					mbview_zscalegridpoint(instance,m);
+				if (!(data->primary_stat_z[n/8] & statmask[n%8]))
+					mbview_zscalegridpoint(instance,n);
+				rgb[2] = 0.75;
+/*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
+i,j, rgb[0], rgb[1], rgb[2]);*/
+				glColor3f(rgb[0], rgb[1], rgb[2]);
+				glVertex3f(data->primary_x[l],
+					data->primary_y[l],
+					data->primary_z[l]);
+				glColor3f(rgb[0], rgb[1], rgb[2]);
+				glVertex3f(data->primary_x[n],
+					data->primary_y[n],
+					data->primary_z[n]);
+				glColor3f(rgb[0], rgb[1], rgb[2]);
+				glVertex3f(data->primary_x[m],
+					data->primary_y[m],
+					data->primary_z[m]);
+				}
+			}
+		}
+		glEnd();
+
+		/* flush opengl buffers */
+		glFlush();
+
+		/* make sure depth test is off */
+		glDisable(GL_DEPTH_TEST);
+
+		/* now read the color at the pick point */
+		glReadBuffer(GL_BACK);
+		glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
+		glReadBuffer(GL_FRONT);
+
+		/* calculate pick location */
+		if (rgba[0] != 1.0 
+			&& rgba[1] != 1.0 
+			&& (rgba[2] > 0.2 && rgba[2] < 0.8))
+			{
+			*found = MB_YES;
+
+			i = imin + ipickstride 
+					* ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
+			j = jmin + jpickstride 
+					* ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
+			k = i * data->primary_ny + j;
+			l = (i + stride) * data->primary_ny + j;
+			m = i * data->primary_ny + j + stride;
+			n = (i + stride) * data->primary_ny + j + stride;
+			if (rint((MBV_PICK_DIVISION + 1.0) * rgba[2]) 
+				== (MBV_PICK_DIVISION + 1.0) / 4.0)
+				{
+				*xgrid = data->primary_xmin 
+						+ (3 * i + stride) * data->primary_dx / 3.0;
+				*ygrid = data->primary_ymin 
+						+ (3 * j + stride) * data->primary_dy / 3.0;
+				*zdata = (data->primary_data[k] 
+						+ data->primary_data[l] 
+						+ data->primary_data[m]) / 3.0;
+				}
+			else
+				{
+				*xgrid = data->primary_xmin 
+						+ (3 * i + 2 * stride) * data->primary_dx / 3.0;
+				*ygrid = data->primary_ymin 
+						+ (3 * j + 2 * stride) * data->primary_dy / 3.0;
+				*zdata = (data->primary_data[l] 
+						+ data->primary_data[n] 
+						+ data->primary_data[m]) / 3.0;
+				}
 /*fprintf(stderr,"pickrez:%d %d   rgb: %f %f %f %f   i:%d j:%d\n",
 xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3], i, j);*/
 
-		/* project grid positions to geographic and display coordinates */
-		mbview_projectforward(instance, MB_YES,
-					*xgrid, *ygrid, *zdata,
-					xlon, ylat,
-					xdisplay, ydisplay,zdisplay);
-					
+			/* project grid positions to geographic and display coordinates */
+			mbview_projectforward(instance, MB_YES,
+						*xgrid, *ygrid, *zdata,
+						xlon, ylat,
+						xdisplay, ydisplay,zdisplay);
+
 /*fprintf(stderr," pickrez: grid: %f %f %f     lonlat: %f %f display: %f %f %f\n", 
 *xgrid, *ygrid, *zdata, *xlon, *ylat, *xdisplay, *ydisplay, *zdisplay);*/
 
-					
-		/* reset ijbounds */
-		ijbounds[0] = i;
-		ijbounds[2] = j;
-		if (ipickstride == 1)
-			{
-			ijbounds[1] = i;
-			ijbounds[3] = j;
+
+			/* reset ijbounds */
+			ijbounds[0] = i;
+			ijbounds[2] = j;
+			if (ipickstride == 1)
+				{
+				ijbounds[1] = i;
+				ijbounds[3] = j;
+				}
+			else
+				{
+				ijbounds[1] = MIN(i + 2 * ipickstride - 1, data->primary_nx - 1);
+				ijbounds[3] = MIN(j + 2 * jpickstride - 1, data->primary_ny - 1);
+				}
 			}
+
 		else
 			{
-			ijbounds[1] = MIN(i + 2 * ipickstride - 1, data->primary_nx - 1);
-			ijbounds[3] = MIN(j + 2 * jpickstride - 1, data->primary_ny - 1);
-			}
-		}
-		
-	else
-		{
-		*found = MB_NO;
+			*found = MB_NO;
 /*fprintf(stderr,"pickrez bad pick!!:%d %d   rgba: %f %f %f %f\n",
 xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
+			}
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 		}
 	
 	/* print output debug statements */
@@ -1724,23 +1767,31 @@ int mbview_viewbounds(size_t instance)
 	view = &(mbviews[instance]);
 	data = &(view->data);
 	
-	/* make correct window current for OpenGL */
-#ifdef MBV_GETGLXMAKECURRENT
-fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
-#endif
-	glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
+	/* only plot if this view is still active */
+	if (view->glx_init == MB_YES)
+		{
 	
-	/* apply projection if needed */
-	if (view->projected == MB_NO)
-		{
-		do_mbview_status("Projecting data...", instance);
-		mbview_projectdata(instance);
-		}
-		
-	/* 2D case doesn't require plotting */
-	if (data->display_mode == MBV_DISPLAY_2D)
-		{
+	/* make correct window current for OpenGL */
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
+		glXMakeCurrent(view->dpy,XtWindow(view->glwmda),view->glx_context);
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
+	
+		/* apply projection if needed */
+		if (view->projected == MB_NO)
+			{
+			do_mbview_status("Projecting data...", instance);
+			mbview_projectdata(instance);
+			}
+
+		/* 2D case doesn't require plotting */
+		if (data->display_mode == MBV_DISPLAY_2D)
+			{
 /*fprintf(stderr,"2D GL bounds: %f %f %f %f\n",
 view->left, view->right, view->bottom, view->top);
 fprintf(stderr,"2D GL offsets: %f %f\n", 
@@ -1759,326 +1810,331 @@ i = data->primary_nx - 1; j = data->primary_ny - 1; k = i * data->primary_ny + j
 fprintf(stderr,"UR:%f %f\n",
 data->primary_x[k],data->primary_y[k]);*/
 
-		/* set stride for looping over data using rule for low rez plotting */
-		stride = MAX((int)ceil(((double)data->primary_nx) 
-					/ ((double)data->lorez_dimension)), 
-				(int)ceil(((double)data->primary_ny) 
-					/ ((double)data->lorez_dimension)));
+			/* set stride for looping over data using rule for low rez plotting */
+			stride = MAX((int)ceil(((double)data->primary_nx) 
+						/ ((double)data->lorez_dimension)), 
+					(int)ceil(((double)data->primary_ny) 
+						/ ((double)data->lorez_dimension)));
 
-		/* get 2D view bounds */
-		left2d = view->left - view->offset2d_x;
-		right2d = view->right - view->offset2d_x;
-		bottom2d = view->bottom - view->offset2d_y;
-		top2d = view->top - view->offset2d_y;
-		found = MB_NO;
-		data->viewbounds[0] = 0;
-		data->viewbounds[1] = data->primary_nx - 1;
-		data->viewbounds[2] = 0;
-		data->viewbounds[3] = data->primary_ny - 1;
-		for (i=0;i<data->primary_nx;i+=stride)
-			{
-			for (j=0;j<data->primary_ny;j+=stride)
+			/* get 2D view bounds */
+			left2d = view->left - view->offset2d_x;
+			right2d = view->right - view->offset2d_x;
+			bottom2d = view->bottom - view->offset2d_y;
+			top2d = view->top - view->offset2d_y;
+			found = MB_NO;
+			data->viewbounds[0] = 0;
+			data->viewbounds[1] = data->primary_nx - 1;
+			data->viewbounds[2] = 0;
+			data->viewbounds[3] = data->primary_ny - 1;
+			for (i=0;i<data->primary_nx;i+=stride)
 				{
-				k = i * data->primary_ny + j;
-				if (data->primary_data[k] != data->primary_nodatavalue
-					&& data->primary_x[k] >= left2d
-					&& data->primary_x[k] <= right2d
-					&& data->primary_y[k] >= bottom2d
-					&& data->primary_y[k] <= top2d)
+				for (j=0;j<data->primary_ny;j+=stride)
 					{
-					if (found == MB_NO)
+					k = i * data->primary_ny + j;
+					if (data->primary_data[k] != data->primary_nodatavalue
+						&& data->primary_x[k] >= left2d
+						&& data->primary_x[k] <= right2d
+						&& data->primary_y[k] >= bottom2d
+						&& data->primary_y[k] <= top2d)
 						{
-						data->viewbounds[0] = i;
-						data->viewbounds[1] = i + stride;
-						data->viewbounds[2] = j;
-						data->viewbounds[3] = j + stride;
-						found = MB_YES;
-						}
-					else
-						{
-						data->viewbounds[0] = MIN(i, data->viewbounds[0]);
-						data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
-						data->viewbounds[2] = MIN(j, data->viewbounds[2]);
-						data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
+						if (found == MB_NO)
+							{
+							data->viewbounds[0] = i;
+							data->viewbounds[1] = i + stride;
+							data->viewbounds[2] = j;
+							data->viewbounds[3] = j + stride;
+							found = MB_YES;
+							}
+						else
+							{
+							data->viewbounds[0] = MIN(i, data->viewbounds[0]);
+							data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
+							data->viewbounds[2] = MIN(j, data->viewbounds[2]);
+							data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
+							}
 						}
 					}
 				}
-			}
-		for (i=0;i<data->primary_nx;i+=data->primary_nx-1)
-			{
-			for (j=0;j<data->primary_ny;j+=data->primary_ny-1)
+			for (i=0;i<data->primary_nx;i+=data->primary_nx-1)
 				{
-				k = i * data->primary_ny + j;
-				if (data->primary_data[k] != data->primary_nodatavalue
-					&& data->primary_x[k] >= left2d
-					&& data->primary_x[k] <= right2d
-					&& data->primary_y[k] >= bottom2d
-					&& data->primary_y[k] <= top2d)
+				for (j=0;j<data->primary_ny;j+=data->primary_ny-1)
 					{
-					if (found == MB_NO)
+					k = i * data->primary_ny + j;
+					if (data->primary_data[k] != data->primary_nodatavalue
+						&& data->primary_x[k] >= left2d
+						&& data->primary_x[k] <= right2d
+						&& data->primary_y[k] >= bottom2d
+						&& data->primary_y[k] <= top2d)
 						{
-						data->viewbounds[0] = i;
-						data->viewbounds[1] = i + stride;
-						data->viewbounds[2] = j;
-						data->viewbounds[3] = j + stride;
-						found = MB_YES;
-						}
-					else
-						{
-						data->viewbounds[0] = MIN(i, data->viewbounds[0]);
-						data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
-						data->viewbounds[2] = MIN(j, data->viewbounds[2]);
-						data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
+						if (found == MB_NO)
+							{
+							data->viewbounds[0] = i;
+							data->viewbounds[1] = i + stride;
+							data->viewbounds[2] = j;
+							data->viewbounds[3] = j + stride;
+							found = MB_YES;
+							}
+						else
+							{
+							data->viewbounds[0] = MIN(i, data->viewbounds[0]);
+							data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
+							data->viewbounds[2] = MIN(j, data->viewbounds[2]);
+							data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
+							}
 						}
 					}
 				}
-			}
-		data->viewbounds[0] = MAX(data->viewbounds[0] - stride, 0);
-		data->viewbounds[1] = MIN(data->viewbounds[1] + stride, data->primary_nx - 1);
-		data->viewbounds[2] = MAX(data->viewbounds[2] - stride, 0);
-		data->viewbounds[3] = MIN(data->viewbounds[3] + stride, data->primary_ny - 1);
+			data->viewbounds[0] = MAX(data->viewbounds[0] - stride, 0);
+			data->viewbounds[1] = MIN(data->viewbounds[1] + stride, data->primary_nx - 1);
+			data->viewbounds[2] = MAX(data->viewbounds[2] - stride, 0);
+			data->viewbounds[3] = MIN(data->viewbounds[3] + stride, data->primary_ny - 1);
 
-		}
-	
-	/* 3D case requires plotting */
-	else
-		{	
-		/* set projection to 2D or 3D */
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		view->right = MBV_OPENGL_WIDTH / view->size2d;
-		view->left = -MBV_OPENGL_WIDTH / view->size2d;
-		view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-		view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
-		if (data->display_mode == MBV_DISPLAY_2D)
-			{
-			glOrtho(view->left, 
-				view->right, 
-				view->bottom, 
-				view->top, 
-				MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
 			}
+
+		/* 3D case requires plotting */
 		else
-			{
-			gluPerspective(40.0, 
-				view->aspect_ratio, 
-				0.01 * MBV_OPENGL_WIDTH,
-				1000 * MBV_OPENGL_WIDTH);
-			}
+			{	
+			/* set projection to 2D or 3D */
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			view->right = MBV_OPENGL_WIDTH / view->size2d;
+			view->left = -MBV_OPENGL_WIDTH / view->size2d;
+			view->top = MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
+			view->bottom = -MBV_OPENGL_WIDTH / view->aspect_ratio / view->size2d;
+			if (data->display_mode == MBV_DISPLAY_2D)
+				{
+				glOrtho(view->left, 
+					view->right, 
+					view->bottom, 
+					view->top, 
+					MBV_OPENGL_ZMIN2D, MBV_OPENGL_ZMAX2D);
+				}
+			else
+				{
+				gluPerspective(40.0, 
+					view->aspect_ratio, 
+					0.01 * MBV_OPENGL_WIDTH,
+					1000 * MBV_OPENGL_WIDTH);
+				}
 
-		/* set up translations */
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		if (data->display_mode == MBV_DISPLAY_2D)
-			{
-			glTranslated (view->offset2d_x, 
-					view->offset2d_y, 
-					MBV_OPENGL_ZMIN2D);
-			}
-		else if (data->display_mode == MBV_DISPLAY_3D)
-			{
-			viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
-					/ view->aspect_ratio;
-			glTranslated (0.0, 0.0, 
-					-viewdistance + view->viewoffset3d_z);
-			glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
-			glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
-			glTranslated (view->offset3d_x, 
-					view->offset3d_y, 
-					-viewdistance + view->offset3d_z);
-			glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
-			glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
-			}
+			/* set up translations */
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			if (data->display_mode == MBV_DISPLAY_2D)
+				{
+				glTranslated (view->offset2d_x, 
+						view->offset2d_y, 
+						MBV_OPENGL_ZMIN2D);
+				}
+			else if (data->display_mode == MBV_DISPLAY_3D)
+				{
+				viewdistance = 0.48 * MBV_OPENGL_WIDTH * MBV_OPENGL_WIDTH 
+						/ view->aspect_ratio;
+				glTranslated (0.0, 0.0, 
+						-viewdistance + view->viewoffset3d_z);
+				glRotated ((float)(data->viewelevation3d - 90.0), 1.0, 0.0, 0.0); 
+				glRotated ((float)(data->viewazimuth3d), 0.0, 1.0, 1.0); 
+				glTranslated (view->offset3d_x, 
+						view->offset3d_y, 
+						-viewdistance + view->offset3d_z);
+				glRotated ((float)(data->modelelevation3d - 90.0), 1.0, 0.0, 0.0); 
+				glRotated ((float)(data->modelazimuth3d), 0.0, 0.0, 1.0); 
+				}
 
-		/* set background color */
-		glClearColor(1.0, 1.0, 1.0, 1.0);
-		glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
-		glDepthFunc(GL_LESS);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			/* set background color */
+			glClearColor(1.0, 1.0, 1.0, 1.0);
+			glClearDepth((GLclampd)(2000 * MBV_OPENGL_WIDTH));
+			glDepthFunc(GL_LESS);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		/* enable depth test for 3D plots */
-		if (data->display_mode == MBV_DISPLAY_3D)
-			glEnable(GL_DEPTH_TEST);
+			/* enable depth test for 3D plots */
+			if (data->display_mode == MBV_DISPLAY_3D)
+				glEnable(GL_DEPTH_TEST);
 
-		/* set stride for looping over data using rule for low rez plotting */
-		stride = MAX((int)ceil(((double)data->primary_nx) 
-					/ ((double)data->lorez_dimension)), 
-				(int)ceil(((double)data->primary_ny) 
-					/ ((double)data->lorez_dimension)));
+			/* set stride for looping over data using rule for low rez plotting */
+			stride = MAX((int)ceil(((double)data->primary_nx) 
+						/ ((double)data->lorez_dimension)), 
+					(int)ceil(((double)data->primary_ny) 
+						/ ((double)data->lorez_dimension)));
 
-		/* get number of grid cells used in picking */
-		npickx = (data->primary_nx / stride);
-		ipickstride = stride * (int)floor((npickx / MBV_PICK_DIVISION) + 1);
-		npicky = (data->primary_ny / stride);
-		jpickstride = stride * (int)floor((npicky / MBV_PICK_DIVISION) + 1);
+			/* get number of grid cells used in picking */
+			npickx = (data->primary_nx / stride);
+			ipickstride = stride * (int)floor((npickx / MBV_PICK_DIVISION) + 1);
+			npicky = (data->primary_ny / stride);
+			jpickstride = stride * (int)floor((npicky / MBV_PICK_DIVISION) + 1);
 
 /*fprintf(stderr,"mbview_viewbounds: stride:%d npickx:%d npicky:%d ipickstride:%d jpickstride:%d\n", 
 stride, npickx, npicky, ipickstride, jpickstride);*/
 
-		/* draw the triangles */
-		glBegin(GL_TRIANGLES);
-		for (i=0;i<data->primary_nx-stride;i+=stride)
-		{
-		for (j=0;j<data->primary_ny-stride;j+=stride)
-			{
-			k = i * data->primary_ny + j;
-			l = (i + stride) * data->primary_ny + j;
-			m = i * data->primary_ny + j + stride;
-			n = (i + stride) * data->primary_ny + j + stride;
-
-			rgb[0] = (float)floor(((double)(i / ipickstride))) 
-					/ (MBV_PICK_DIVISION + 1.0);
-			rgb[1] = (float)floor(((double)(j / jpickstride)))
-					/ (MBV_PICK_DIVISION + 1.0);
-			if (data->primary_data[k] != data->primary_nodatavalue
-				&& data->primary_data[l] != data->primary_nodatavalue
-				&& data->primary_data[m] != data->primary_nodatavalue)
+			/* draw the triangles */
+			glBegin(GL_TRIANGLES);
+			for (i=0;i<data->primary_nx-stride;i+=stride)
 				{
-				rgb[2] = 0.25;
+				for (j=0;j<data->primary_ny-stride;j+=stride)
+					{
+					k = i * data->primary_ny + j;
+					l = (i + stride) * data->primary_ny + j;
+					m = i * data->primary_ny + j + stride;
+					n = (i + stride) * data->primary_ny + j + stride;
+
+					rgb[0] = (float)floor(((double)(i / ipickstride))) 
+							/ (MBV_PICK_DIVISION + 1.0);
+					rgb[1] = (float)floor(((double)(j / jpickstride)))
+							/ (MBV_PICK_DIVISION + 1.0);
+					if (data->primary_data[k] != data->primary_nodatavalue
+						&& data->primary_data[l] != data->primary_nodatavalue
+						&& data->primary_data[m] != data->primary_nodatavalue)
+						{
+						rgb[2] = 0.25;
 /*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
 i,j, rgb[0], rgb[1], rgb[2]);*/
-				glColor3f(rgb[0], rgb[1], rgb[2]);
-				glVertex3f(data->primary_x[k],
-					data->primary_y[k],
-					data->primary_z[k]);
-				glColor3f(rgb[0], rgb[1], rgb[2]);
-				glVertex3f(data->primary_x[l],
-					data->primary_y[l],
-					data->primary_z[l]);
-				glColor3f(rgb[0], rgb[1], rgb[2]);
-				glVertex3f(data->primary_x[m],
-					data->primary_y[m],
-					data->primary_z[m]);
-				}
-			if (data->primary_data[l] != data->primary_nodatavalue
-				&& data->primary_data[m] != data->primary_nodatavalue
-				&& data->primary_data[n] != data->primary_nodatavalue)
-				{
-				rgb[2] = 0.75;
+						glColor3f(rgb[0], rgb[1], rgb[2]);
+						glVertex3f(data->primary_x[k],
+							data->primary_y[k],
+							data->primary_z[k]);
+						glColor3f(rgb[0], rgb[1], rgb[2]);
+						glVertex3f(data->primary_x[l],
+							data->primary_y[l],
+							data->primary_z[l]);
+						glColor3f(rgb[0], rgb[1], rgb[2]);
+						glVertex3f(data->primary_x[m],
+							data->primary_y[m],
+							data->primary_z[m]);
+						}
+					if (data->primary_data[l] != data->primary_nodatavalue
+						&& data->primary_data[m] != data->primary_nodatavalue
+						&& data->primary_data[n] != data->primary_nodatavalue)
+						{
+						rgb[2] = 0.75;
 /*fprintf(stderr,"triangle:%d %d   rgb: %f %f %f\n",
 i,j, rgb[0], rgb[1], rgb[2]);*/
-				glColor3f(rgb[0], rgb[1], rgb[2]);
-				glVertex3f(data->primary_x[l],
-					data->primary_y[l],
-					data->primary_z[l]);
-				glColor3f(rgb[0], rgb[1], rgb[2]);
-				glVertex3f(data->primary_x[n],
-					data->primary_y[n],
-					data->primary_z[n]);
-				glColor3f(rgb[0], rgb[1], rgb[2]);
-				glVertex3f(data->primary_x[m],
-					data->primary_y[m],
-					data->primary_z[m]);
+						glColor3f(rgb[0], rgb[1], rgb[2]);
+						glVertex3f(data->primary_x[l],
+							data->primary_y[l],
+							data->primary_z[l]);
+						glColor3f(rgb[0], rgb[1], rgb[2]);
+						glVertex3f(data->primary_x[n],
+							data->primary_y[n],
+							data->primary_z[n]);
+						glColor3f(rgb[0], rgb[1], rgb[2]);
+						glVertex3f(data->primary_x[m],
+							data->primary_y[m],
+							data->primary_z[m]);
+						}
+					}
 				}
-			}
-		}
-		glEnd();
+			glEnd();
 
-		/* flush opengl buffers */
-		glFlush();
+			/* flush opengl buffers */
+			glFlush();
 
-		/* make sure depth test is off */
-		glDisable(GL_DEPTH_TEST);
+			/* make sure depth test is off */
+			glDisable(GL_DEPTH_TEST);
 
-		/* now read the color at a number of points in the screen */
-		glReadBuffer(GL_BACK);
-		found = MB_NO;
-		data->viewbounds[0] = 0;
-		data->viewbounds[1] = data->primary_nx - 1;
-		data->viewbounds[2] = 0;
-		data->viewbounds[3] = data->primary_ny - 1;
-		iscreenstride = data->width / 20;
-		jscreenstride = data->height / 20;
-		for (xpixel = 0; xpixel < data->width; xpixel += iscreenstride)
-		{
-		for (ypixel = 0; ypixel < data->height; ypixel += jscreenstride)
-			{
-			glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
+			/* now read the color at a number of points in the screen */
+			glReadBuffer(GL_BACK);
+			found = MB_NO;
+			data->viewbounds[0] = 0;
+			data->viewbounds[1] = data->primary_nx - 1;
+			data->viewbounds[2] = 0;
+			data->viewbounds[3] = data->primary_ny - 1;
+			iscreenstride = data->width / 20;
+			jscreenstride = data->height / 20;
+			for (xpixel = 0; xpixel < data->width; xpixel += iscreenstride)
+				{
+				for (ypixel = 0; ypixel < data->height; ypixel += jscreenstride)
+					{
+					glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
 /*fprintf(stderr,"xpixel:%d ypixel:%d rgba: %f %f %f %f\n",
 xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
-			if (rgba[0] != 1.0 && rgba[1] != 1.0)
-				{
-				i = ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
-				j = jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
-				if (found == MB_NO)
-					{
-					data->viewbounds[0] = i;
-					data->viewbounds[1] = i + stride;
-					data->viewbounds[2] = j;
-					data->viewbounds[3] = j + stride;
-					found = MB_YES;
-					}
-				else
-					{
-					data->viewbounds[0] = MIN(i, data->viewbounds[0]);
-					data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
-					data->viewbounds[2] = MIN(j, data->viewbounds[2]);
-					data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
-					}
+					if (rgba[0] != 1.0 && rgba[1] != 1.0)
+						{
+						i = ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
+						j = jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
+						if (found == MB_NO)
+							{
+							data->viewbounds[0] = i;
+							data->viewbounds[1] = i + stride;
+							data->viewbounds[2] = j;
+							data->viewbounds[3] = j + stride;
+							found = MB_YES;
+							}
+						else
+							{
+							data->viewbounds[0] = MIN(i, data->viewbounds[0]);
+							data->viewbounds[1] = MAX(i + stride, data->viewbounds[1]);
+							data->viewbounds[2] = MIN(j, data->viewbounds[2]);
+							data->viewbounds[3] = MAX(j + stride, data->viewbounds[3]);
+							}
 /*fprintf(stderr,"i:%d j:%d data->viewbounds: %d %d %d %d\n",
 i,j,data->viewbounds[0],
 data->viewbounds[1],
 data->viewbounds[2],
 data->viewbounds[3]);*/
+						}
+					}
 				}
-			}
-		}
-		for (xpixel = 0; xpixel < data->width; xpixel += data->width - 1)
-		{
-		for (ypixel = 0; ypixel < data->height; ypixel += data->height - 1)
-			{
-			glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
-/*fprintf(stderr,"xpixel:%d ypixel:%d rgba: %f %f %f %f\n",
-xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
-			if (rgba[0] != 1.0 && rgba[1] != 1.0)
+			for (xpixel = 0; xpixel < data->width; xpixel += data->width - 1)
 				{
-				i = ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
-				j = jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
-				ijbounds[0] = i;
-				ijbounds[2] = j;
-				if (ipickstride == 1)
+				for (ypixel = 0; ypixel < data->height; ypixel += data->height - 1)
 					{
-					ijbounds[1] = i;
-					ijbounds[3] = j;
-					}
-				else
-					{
-					ijbounds[1] = MIN(i + 2 * ipickstride - 1, data->primary_nx - 1);
-					ijbounds[3] = MIN(j + 2 * jpickstride - 1, data->primary_ny - 1);
-					}
-				if (found == MB_NO)
-					{
-					data->viewbounds[0] = ijbounds[0];
-					data->viewbounds[1] = ijbounds[1];
-					data->viewbounds[2] = ijbounds[2];
-					data->viewbounds[3] = ijbounds[3];
-					found = MB_YES;
-					}
-				else
-					{
-					data->viewbounds[0] = MIN(ijbounds[0], data->viewbounds[0]);
-					data->viewbounds[1] = MAX(ijbounds[1], data->viewbounds[1]);
-					data->viewbounds[2] = MIN(ijbounds[2], data->viewbounds[2]);
-					data->viewbounds[3] = MAX(ijbounds[3], data->viewbounds[3]);
-					}
+					glReadPixels(xpixel, ypixel, 1, 1, GL_RGBA, GL_FLOAT, rgba);
+/*fprintf(stderr,"xpixel:%d ypixel:%d rgba: %f %f %f %f\n",
+	xpixel,ypixel, rgba[0], rgba[1], rgba[2], rgba[3]);*/
+					if (rgba[0] != 1.0 && rgba[1] != 1.0)
+						{
+						i = ipickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[0]));
+						j = jpickstride * ((int)rint((MBV_PICK_DIVISION + 1.0) * rgba[1]));
+						ijbounds[0] = i;
+						ijbounds[2] = j;
+						if (ipickstride == 1)
+							{
+							ijbounds[1] = i;
+							ijbounds[3] = j;
+							}
+						else
+							{
+							ijbounds[1] = MIN(i + 2 * ipickstride - 1, data->primary_nx - 1);
+							ijbounds[3] = MIN(j + 2 * jpickstride - 1, data->primary_ny - 1);
+							}
+						if (found == MB_NO)
+							{
+							data->viewbounds[0] = ijbounds[0];
+							data->viewbounds[1] = ijbounds[1];
+							data->viewbounds[2] = ijbounds[2];
+							data->viewbounds[3] = ijbounds[3];
+							found = MB_YES;
+							}
+						else
+							{
+							data->viewbounds[0] = MIN(ijbounds[0], data->viewbounds[0]);
+							data->viewbounds[1] = MAX(ijbounds[1], data->viewbounds[1]);
+							data->viewbounds[2] = MIN(ijbounds[2], data->viewbounds[2]);
+							data->viewbounds[3] = MAX(ijbounds[3], data->viewbounds[3]);
+							}
 /*fprintf(stderr,"CORNERS: i:%d j:%d data->viewbounds: %d %d %d %d\n",
 i,j,data->viewbounds[0],
 data->viewbounds[1],
 data->viewbounds[2],
 data->viewbounds[3]);*/
+						}
+					}
 				}
-			}
-		}
-		data->viewbounds[0] = MAX(data->viewbounds[0] - stride, 0);
-		data->viewbounds[1] = MIN(data->viewbounds[1] + stride, data->primary_nx - 1);
-		data->viewbounds[2] = MAX(data->viewbounds[2] - stride, 0);
-		data->viewbounds[3] = MIN(data->viewbounds[3] + stride, data->primary_ny - 1);
+			data->viewbounds[0] = MAX(data->viewbounds[0] - stride, 0);
+			data->viewbounds[1] = MIN(data->viewbounds[1] + stride, data->primary_nx - 1);
+			data->viewbounds[2] = MAX(data->viewbounds[2] - stride, 0);
+			data->viewbounds[3] = MIN(data->viewbounds[3] + stride, data->primary_ny - 1);
 
-		/* reset buffer mode */
-		glReadBuffer(GL_FRONT);
-	}
+			/* reset buffer mode */
+			glReadBuffer(GL_FRONT);
+			}
 /*fprintf(stderr,"data->viewbounds: %d %d %d %d\n",
 data->viewbounds[0], data->viewbounds[1], data->viewbounds[2], data->viewbounds[3]);*/
+
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
+		}
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -2131,19 +2187,24 @@ int mbview_drapesegment(size_t instance, struct mbview_linesegment_struct *seg)
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-
-	/* if spheroid dipslay project on great circle arc */
-	if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
-		{
-		status = mbview_drapesegment_gc(instance, seg);
-		}
-		
-	/* else project on straight lines in grid projection */
-	else
-		{
-		status = mbview_drapesegment_grid(instance, seg);
-		}
 	
+	/* only plot if this view is still active */
+	if (view->glx_init == MB_YES)
+		{
+
+		/* if spheroid dipslay project on great circle arc */
+		if (data->display_projection_mode == MBV_PROJECTION_SPHEROID)
+			{
+			status = mbview_drapesegment_gc(instance, seg);
+			}
+
+		/* else project on straight lines in grid projection */
+		else
+			{
+			status = mbview_drapesegment_grid(instance, seg);
+			}
+		}
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -3412,7 +3473,7 @@ seg->nls,jcnt,insert,jadd,i,j,k,l,xgrid,ygrid,zdata);*/
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_glerrorcheck(size_t instance, int id, char *sourcefunction)
+int mbview_glerrorcheck(size_t instance, char *sourcefile, int line, char *sourcefunction)
 {
 
 	/* local variables */
@@ -3430,16 +3491,17 @@ int mbview_glerrorcheck(size_t instance, int id, char *sourcefunction)
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
-		fprintf(stderr,"dbg2       id:               %d\n",id);
+		fprintf(stderr,"dbg2       sourcefile:       %s\n",sourcefile);
+		fprintf(stderr,"dbg2       line:             %d\n",line);
 		fprintf(stderr,"dbg2       sourcefunction:   %s\n",sourcefunction);
 		}
 	
-	/* check for OpenGL error if MBV_GETERRORS set */
+	/* check for OpenGL error if MBV_GET_GLX_ERRORS set */
 	gl_error = (GLenum)glGetError();
 	gl_error_msg = (GLubyte *)gluErrorString(gl_error);
 	if (gl_error != GL_NO_ERROR)
-		fprintf(stderr,"Function %s: instance:%ld id:%d OpenGL error: %s\n", 
-			sourcefunction, instance, id, gl_error_msg);
+		fprintf(stderr,"GLerror: Instance:%lu %s:%d Function %s: OpenGL error: %s\n", 
+			instance, sourcefile, line, sourcefunction, gl_error_msg);
 	
 	/* print output debug statements */
 	if (mbv_verbose >= 2)

@@ -153,6 +153,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
 {
     Cardinal ac = 0;
     Arg      args[256];
+    Cardinal cdc = 0;
     Boolean  argok = False;
     
     /**
@@ -262,7 +263,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNx, 10); ac++;
     XtSetArg(args[ac], XmNy, 490); ac++;
     XtSetArg(args[ac], XmNwidth, 131); ac++;
-    XtSetArg(args[ac], XmNheight, 262); ac++;
+    XtSetArg(args[ac], XmNheight, 294); ac++;
     XtSetArg(args[ac], XmNisHomogeneous, False); ac++;
     class_in->mbview_radioBox_mouse = XmCreateRadioBox(class_in->MB3DView,
         (char *)"mbview_radioBox_mouse",
@@ -650,7 +651,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 211); ac++;
-    XtSetArg(args[ac], XmNheight, 518); ac++;
+    XtSetArg(args[ac], XmNheight, 544); ac++;
     class_in->mbview_pulldownMenu_view = XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_view),
         (char *)"mbview_pulldownMenu_view",
         args, 
@@ -1517,8 +1518,8 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     ac = 0;
     XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 0); ac++;
-    XtSetArg(args[ac], XmNwidth, 119); ac++;
-    XtSetArg(args[ac], XmNheight, 196); ac++;
+    XtSetArg(args[ac], XmNwidth, 129); ac++;
+    XtSetArg(args[ac], XmNheight, 220); ac++;
     class_in->mbview_pulldownMenu_mouse = XmCreatePulldownMenu(XtParent(class_in->mbview_cascadeButton_mouse),
         (char *)"mbview_pulldownMenu_mouse",
         args, 
@@ -2128,7 +2129,7 @@ MB3DViewCreate ( MB3DViewDataPtr class_in, Widget parent, String name, ArgList a
     
     XtAddCallback(class_in->mbview_scale_profile_exager, XmNvalueChangedCallback, do_mbview_profile_exager, (XtPointer)0);
     XtAddCallback(class_in->mbview_scale_profile_exager, XmNdragCallback, do_mbview_profile_exager, (XtPointer)0);
-     
+    
     ac = 0;
     {
         XmString    tmp0;

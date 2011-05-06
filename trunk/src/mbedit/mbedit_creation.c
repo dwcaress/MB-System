@@ -264,7 +264,7 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 114); ac++;
-    XtSetArg(args[ac], XmNy, 609); ac++;
+    XtSetArg(args[ac], XmNy, 631); ac++;
     XtSetArg(args[ac], XmNwidth, 1014); ac++;
     XtSetArg(args[ac], XmNheight, 663); ac++;
     window_mbedit = XmCreateMainWindow(parent,
@@ -2018,7 +2018,7 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNx, 1016); ac++;
     XtSetArg(args[ac], XmNy, 1092); ac++;
     XtSetArg(args[ac], XmNwidth, 529); ac++;
     XtSetArg(args[ac], XmNheight, 489); ac++;
@@ -2190,7 +2190,7 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1183); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1164); ac++;
     XtSetArg(args[ac], XmNwidth, 196); ac++;
     XtSetArg(args[ac], XmNheight, 346); ac++;
@@ -2516,7 +2516,7 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1044); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1086); ac++;
     XtSetArg(args[ac], XmNwidth, 473); ac++;
     XtSetArg(args[ac], XmNheight, 501); ac++;
@@ -2888,7 +2888,7 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 1033); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1281); ac++;
     XtSetArg(args[ac], XmNwidth, 496); ac++;
     XtSetArg(args[ac], XmNheight, 112); ac++;
@@ -2969,7 +2969,7 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1065); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1248); ac++;
     XtSetArg(args[ac], XmNwidth, 431); ac++;
     XtSetArg(args[ac], XmNheight, 177); ac++;
@@ -3103,7 +3103,7 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1125); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1234); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 205); ac++;
@@ -3235,7 +3235,7 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1013); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1244); ac++;
     XtSetArg(args[ac], XmNwidth, 536); ac++;
     XtSetArg(args[ac], XmNheight, 186); ac++;
@@ -3446,7 +3446,7 @@ Createwindow_mbedit(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1013); ac++;
+        XtSetArg(args[ac], XmNx, 0); ac++;
         XtSetArg(args[ac], XmNy, 1247); ac++;
         XtSetArg(args[ac], XmNwidth, 536); ac++;
         XtSetArg(args[ac], XmNheight, 179); ac++;
@@ -3658,7 +3658,7 @@ Createwindow_mbedit(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 1066); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1181); ac++;
     XtSetArg(args[ac], XmNwidth, 430); ac++;
     XtSetArg(args[ac], XmNheight, 311); ac++;
@@ -4321,8 +4321,8 @@ Createwindow_mbedit(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1109); ac++;
-        XtSetArg(args[ac], XmNy, 1047); ac++;
+        XtSetArg(args[ac], XmNx, 167); ac++;
+        XtSetArg(args[ac], XmNy, 1022); ac++;
         XtSetArg(args[ac], XmNwidth, 343); ac++;
         XtSetArg(args[ac], XmNheight, 580); ac++;
         form_filelist = XtCreateWidget((char *)"form_filelist",
@@ -4533,7 +4533,7 @@ Createwindow_mbedit(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(scrolledWindow_filelist, (char *)"-*-monaco-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
+        BX_CONVERT(scrolledWindow_filelist, (char *)"-*-courier-*-r-*-*-*-90-*-*-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
     XtSetArg(args[ac], XmNselectionPolicy, XmSINGLE_SELECT); ac++;
     XtSetArg(args[ac], XmNwidth, 339); ac++;

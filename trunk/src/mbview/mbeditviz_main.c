@@ -193,7 +193,7 @@ int main( int argc, char **argv)
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBeditviz"); ac++;
     XtSetArg(args[ac], XmNx, 69); ac++;
-    XtSetArg(args[ac], XmNy, 497); ac++;
+    XtSetArg(args[ac], XmNy, 585); ac++;
     XtSetArg(args[ac], XmNwidth, 453); ac++;
     XtSetArg(args[ac], XmNheight, 557); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",

@@ -80,6 +80,7 @@ MB3DRouteListCreate ( MB3DRouteListDataPtr class_in, Widget parent, String name,
 {
     Cardinal ac = 0;
     Arg      args[256];
+    Cardinal cdc = 0;
     Boolean  argok = False;
     
     /**
