@@ -3659,8 +3659,8 @@ acs->width, acs->height, instance, event->xany.type);
     acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
     event = acs->event;
     
-    /* If there is input in the drawing area */
-    if (acs->reason == XmCR_INPUT)
+    /* If there is input in the drawing area and the drawing area is still initialized */
+    if (acs->reason == XmCR_INPUT && view->init != MBV_WINDOW_NULL)
     {
       
       /* Check for mouse pressed. */
@@ -5079,32 +5079,64 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 		if (view->prglx_init == MB_YES)
 		    {
 		    /* make correct window current for OpenGL */
-#ifdef MBV_GETGLXMAKECURRENT
+#ifdef MBV_DEBUG_GLX
 fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
-__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->prglwmda),(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
 #endif
-		    glXMakeCurrent(XtDisplay(view->prglwmda),XtWindow(view->prglwmda),view->prglx_context);
+		    glXMakeCurrent(view->dpy,XtWindow(view->prglwmda),view->prglx_context);
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXDestroyContext(%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)view->prglx_context);
+#endif
 		    glXDestroyContext(view->dpy, view->prglx_context);
 		    view->prglx_init = MB_NO;
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 		    }
 
 		/* delete old glx_context if it exists */
 		if (view->glx_init == MB_YES)
 		    {
 		    /* make correct window current for OpenGL */
-#ifdef MBV_GETGLXMAKECURRENT
+#ifdef MBV_DEBUG_GLX
 fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
 __FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
 #endif
 		    glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXDestroyContext(%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)view->glx_context);
+#endif
 		    glXDestroyContext(view->dpy, view->glx_context);
 		    view->glx_init = MB_NO;
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 		    }
 
 		/* destroy the topLevelShell and all its children */
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld XtDestroyWidget(%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->topLevelShell);
+#endif
 		XtDestroyWidget(view->topLevelShell);
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 		}
 
 	    data->active = MB_NO;

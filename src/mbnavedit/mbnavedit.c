@@ -133,7 +133,7 @@ int main( int argc, char **argv)
     XtSetArg(args[ac], XmNiconName, "MBnavedit"); ac++;
     XtSetArg(args[ac], XmNallowShellResize, True); ac++;
     XtSetArg(args[ac], XmNx, 964); ac++;
-    XtSetArg(args[ac], XmNy, 278); ac++;
+    XtSetArg(args[ac], XmNy, 300); ac++;
     XtSetArg(args[ac], XmNwidth, 1024); ac++;
     XtSetArg(args[ac], XmNheight, 683); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",

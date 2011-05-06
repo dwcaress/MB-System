@@ -73,8 +73,8 @@
 /*--------------------------------------------------------------------*/
 
 /* OpenGL Error checking */
-/* #define MBV_GETERRORS 1 */
-#define MBV_GETGLXMAKECURRENT 1
+/* #define MBV_GET_GLX_ERRORS	1 */
+/* #define MBV_DEBUG_GLX		1 */
 
 /* OpenGL plotting parameters */
 #define LEFT_WIDTH 200
@@ -858,7 +858,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg);
 int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *seg);
 int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct *seg);
-int mbview_glerrorcheck(size_t instance, int id, char *sourcefunction);
+int mbview_glerrorcheck(size_t instance, char *sourcefile, int line, char *sourcefunction);
 
 /* mbview_pick.c function prototypes */
 int mbview_pick(size_t instance, int which, int xpixel, int ypixel);

@@ -107,6 +107,7 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
 {
     Cardinal ac = 0;
     Arg      args[256];
+    Cardinal cdc = 0;
     Boolean  argok = False;
     
     /**
@@ -483,8 +484,8 @@ Mb3dsdgCreate ( Mb3dsdgDataPtr class_in, Widget parent, String name, ArgList arg
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 757); ac++;
-    XtSetArg(args[ac], XmNy, 290); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 236); ac++;
     XtSetArg(args[ac], XmNheight, 154); ac++;
     class_in->pulldownMenu_view = XmCreatePulldownMenu(XtParent(class_in->cascadeButton_view),

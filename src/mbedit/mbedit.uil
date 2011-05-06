@@ -235,7 +235,7 @@ object list_filelist : XmList widget {
     arguments {
         arguments Style_use;
         XmNfontList = font_table(
-		font('-*-monaco-bold-r-*-*-*-120-*-*-*-*-iso8859-1'));
+		font('-*-courier-*-r-*-*-*-90-*-*-*-*-iso8859-1'));
         XmNselectionPolicy = XmSINGLE_SELECT;
         XmNwidth = 339;
         XmNheight = 450;
@@ -466,8 +466,8 @@ object form_filelist : XmFormDialog widget {
         XmNdialogTitle = compound_string("Files Available for Editing");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1109;
-        XmNy = 1047;
+        XmNx = 167;
+        XmNy = 1022;
         XmNwidth = 343;
         XmNheight = 580;
     };
@@ -1075,7 +1075,7 @@ object bulletinBoard_filters : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1066;
+        XmNx = 0;
         XmNy = 1181;
         XmNwidth = 430;
         XmNheight = 311;
@@ -1290,7 +1290,7 @@ object bulletinBoard_annotation : XmBulletinBoardDialog widget {
     arguments {
         XmNdialogTitle = compound_string("Annotation");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1013;
+        XmNx = 0;
         XmNy = 1247;
         XmNwidth = 536;
         XmNheight = 179;
@@ -1504,7 +1504,7 @@ object pushButton_buffer_dismiss : XmPushButton widget {
 object bulletinBoard_buffer : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1013;
+        XmNx = 0;
         XmNy = 1244;
         XmNwidth = 536;
         XmNheight = 186;
@@ -1622,7 +1622,7 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1125;
+        XmNx = 0;
         XmNy = 1234;
         XmNwidth = 311;
         XmNheight = 205;
@@ -1742,7 +1742,7 @@ object bulletinBoard_editsave : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1065;
+        XmNx = 0;
         XmNy = 1248;
         XmNwidth = 431;
         XmNheight = 177;
@@ -1829,7 +1829,7 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 1033;
+        XmNx = 0;
         XmNy = 1281;
         XmNwidth = 496;
         XmNheight = 112;
@@ -2099,7 +2099,7 @@ object label_about_create1 : XmLabel widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1044;
+        XmNx = 0;
         XmNy = 1086;
         XmNwidth = 473;
         XmNheight = 501;
@@ -2414,7 +2414,7 @@ object bulletinBoard_goto : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 1183;
+        XmNx = 0;
         XmNy = 1164;
         XmNwidth = 196;
         XmNheight = 346;
@@ -2735,7 +2735,7 @@ object bulletinBoard_file : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1016;
         XmNy = 1092;
         XmNwidth = 529;
         XmNheight = 489;
@@ -4293,7 +4293,7 @@ object window_mbedit : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 114;
-        XmNy = 609;
+        XmNy = 631;
         XmNwidth = 1014;
         XmNheight = 663;
     };
@@ -4360,7 +4360,7 @@ object window_mbedit : XmMainWindow widget {
 !(BX)        XmNallowShellResize = false;
 !(BX)        XmNdeleteResponse = XmDESTROY;
 !(BX)        XmNx = 114;
-!(BX)        XmNy = 609;
+!(BX)        XmNy = 631;
 !(BX)        XmNwidth = 1014;
 !(BX)        XmNheight = 663;
 !(BX)    };

@@ -1,4 +1,4 @@
-MB-SYSTEM VERSION 5.3.1890 README FILE:
+MB-SYSTEM VERSION 5.3.1893 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.1890       May 3, 2011
+* Version 5.3.1893       May 6, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -177,6 +177,19 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+
+Implemented workaround for MBeditviz crash problem on Poseidon Linux.
+MBeditviz would shut down whenever a second map view was requested with
+an Xserver error named GLXBadContextTag. Previously, the OpenGL rendering
+within X11/Motif widgets has been implemented with the graphics calls 
+always sent through the X11 window server. I have now set the code to
+allow direct rendering through hardware when that is possible. For reasons
+I do not understand, this change results in MBeditviz no longer crashing
+on my Poseidon Linux test machine.
+
+Fixed font issue for MBedit, MBnavedit, and MBeditviz by using courier
+rather than monaco as a fixed-width font for the available file list
+widgets.
 
 Added support for the "Rolling Deck to Repository" (R2R) navigation format
 as both an MB-System format (format id 172) and an mbprocess navigation

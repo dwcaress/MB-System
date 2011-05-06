@@ -133,7 +133,7 @@ int main( int argc, char **argv)
     XtSetArg(args[ac], XmNallowShellResize, False); ac++;
     XtSetArg(args[ac], XmNdeleteResponse, XmDESTROY); ac++;
     XtSetArg(args[ac], XmNx, 114); ac++;
-    XtSetArg(args[ac], XmNy, 609); ac++;
+    XtSetArg(args[ac], XmNy, 631); ac++;
     XtSetArg(args[ac], XmNwidth, 1014); ac++;
     XtSetArg(args[ac], XmNheight, 663); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",

@@ -233,7 +233,7 @@ object list_filelist : XmList widget {
     arguments {
         arguments Style_use;
         XmNfontList = font_table(
-		font('-*-monaco-bold-r-*-*-*-120-*-*-*-*-iso8859-1'));
+		font('-*-courier-*-r-*-*-*-90-*-*-*-*-iso8859-1'));
         XmNselectionPolicy = XmSINGLE_SELECT;
         XmNwidth = 339;
         XmNheight = 450;
@@ -463,7 +463,7 @@ object form_filelist : XmFormDialog widget {
         XmNdialogTitle = compound_string("Files Available for Editing");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1109;
         XmNy = 1047;
         XmNwidth = 343;
         XmNheight = 580;
@@ -666,7 +666,7 @@ object form_offset : XmFormDialog widget {
         arguments Style_use;
         XmNdialogTitle = compound_string("Position Offset");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1080;
         XmNy = 1250;
         XmNwidth = 401;
         XmNheight = 174;
@@ -775,7 +775,7 @@ object bulletinBoard_deletebadtimetag : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1126;
         XmNy = 1262;
         XmNwidth = 310;
         XmNheight = 149;
@@ -884,7 +884,7 @@ object bulletinBoard_timeinterpolation : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1127;
         XmNy = 1262;
         XmNwidth = 307;
         XmNheight = 149;
@@ -989,7 +989,7 @@ object bulletinBoard_useprevious : XmBulletinBoardDialog widget {
  "?");
         XmNautoUnmanage = true;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1029;
         XmNy = 1274;
         XmNwidth = 503;
         XmNheight = 126;
@@ -1427,7 +1427,7 @@ object bulletinBoard_modeling : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Navigation Modeling");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1035;
         XmNy = 1063;
         XmNwidth = 492;
         XmNheight = 548;
@@ -1668,7 +1668,7 @@ object bulletinBoard_timestepping : XmBulletinBoardDialog widget {
         XmNdialogTitle = compound_string("Time Stepping");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1035;
         XmNy = 1239;
         XmNwidth = 491;
         XmNheight = 195;
@@ -1848,7 +1848,7 @@ object label_output_mode : XmLabel widget {
 object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 978;
+        XmNx = 0;
         XmNy = 1058;
         XmNwidth = 606;
         XmNheight = 557;
@@ -1967,7 +1967,7 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1125;
         XmNy = 1256;
         XmNwidth = 311;
         XmNheight = 161;
@@ -2048,7 +2048,7 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
         arguments Style_use;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 0;
+        XmNx = 1091;
         XmNy = 1294;
         XmNwidth = 379;
         XmNheight = 86;
@@ -2317,7 +2317,7 @@ object label_about_create1 : XmLabel widget {
 object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1040;
         XmNy = 1104;
         XmNwidth = 481;
         XmNheight = 466;
@@ -3698,7 +3698,7 @@ object mainWindow : XmMainWindow widget {
     arguments {
         arguments Style_use;
         XmNx = 964;
-        XmNy = 278;
+        XmNy = 300;
         XmNwidth = 1024;
         XmNheight = 683;
     };
@@ -3731,7 +3731,7 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNiconName = "MBnavedit";
 !(BX)        XmNallowShellResize = true;
 !(BX)        XmNx = 964;
-!(BX)        XmNy = 278;
+!(BX)        XmNy = 300;
 !(BX)        XmNwidth = 1024;
 !(BX)        XmNheight = 683;
 !(BX)    };

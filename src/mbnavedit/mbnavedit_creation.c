@@ -268,7 +268,7 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 964); ac++;
-    XtSetArg(args[ac], XmNy, 278); ac++;
+    XtSetArg(args[ac], XmNy, 300); ac++;
     XtSetArg(args[ac], XmNwidth, 1024); ac++;
     XtSetArg(args[ac], XmNheight, 683); ac++;
     mainWindow = XmCreateMainWindow(parent,
@@ -1803,7 +1803,7 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNx, 1040); ac++;
     XtSetArg(args[ac], XmNy, 1104); ac++;
     XtSetArg(args[ac], XmNwidth, 481); ac++;
     XtSetArg(args[ac], XmNheight, 466); ac++;
@@ -2175,7 +2175,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNx, 1091); ac++;
     XtSetArg(args[ac], XmNy, 1294); ac++;
     XtSetArg(args[ac], XmNwidth, 379); ac++;
     XtSetArg(args[ac], XmNheight, 86); ac++;
@@ -2254,7 +2254,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNx, 1125); ac++;
     XtSetArg(args[ac], XmNy, 1256); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 161); ac++;
@@ -2387,7 +2387,7 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 978); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
     XtSetArg(args[ac], XmNy, 1058); ac++;
     XtSetArg(args[ac], XmNwidth, 606); ac++;
     XtSetArg(args[ac], XmNheight, 557); ac++;
@@ -2594,7 +2594,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
+        XtSetArg(args[ac], XmNx, 1035); ac++;
         XtSetArg(args[ac], XmNy, 1239); ac++;
         XtSetArg(args[ac], XmNwidth, 491); ac++;
         XtSetArg(args[ac], XmNheight, 195); ac++;
@@ -2819,7 +2819,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
+        XtSetArg(args[ac], XmNx, 1035); ac++;
         XtSetArg(args[ac], XmNy, 1063); ac++;
         XtSetArg(args[ac], XmNwidth, 492); ac++;
         XtSetArg(args[ac], XmNheight, 548); ac++;
@@ -3315,7 +3315,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, True); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
+        XtSetArg(args[ac], XmNx, 1029); ac++;
         XtSetArg(args[ac], XmNy, 1274); ac++;
         XtSetArg(args[ac], XmNwidth, 503); ac++;
         XtSetArg(args[ac], XmNheight, 126); ac++;
@@ -3427,7 +3427,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNx, 1127); ac++;
     XtSetArg(args[ac], XmNy, 1262); ac++;
     XtSetArg(args[ac], XmNwidth, 307); ac++;
     XtSetArg(args[ac], XmNheight, 149); ac++;
@@ -3533,7 +3533,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNx, 1126); ac++;
     XtSetArg(args[ac], XmNy, 1262); ac++;
     XtSetArg(args[ac], XmNwidth, 310); ac++;
     XtSetArg(args[ac], XmNheight, 149); ac++;
@@ -3643,7 +3643,7 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
+        XtSetArg(args[ac], XmNx, 1080); ac++;
         XtSetArg(args[ac], XmNy, 1250); ac++;
         XtSetArg(args[ac], XmNwidth, 401); ac++;
         XtSetArg(args[ac], XmNheight, 174); ac++;
@@ -3817,7 +3817,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
+        XtSetArg(args[ac], XmNx, 1109); ac++;
         XtSetArg(args[ac], XmNy, 1047); ac++;
         XtSetArg(args[ac], XmNwidth, 343); ac++;
         XtSetArg(args[ac], XmNheight, 580); ac++;
@@ -4029,7 +4029,7 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(scrolledWindow_filelist, (char *)"-*-monaco-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
+        BX_CONVERT(scrolledWindow_filelist, (char *)"-*-courier-*-r-*-*-*-90-*-*-*-*-iso8859-1", 
         XmRFontList, 0, &argok)); if (argok) ac++;
     XtSetArg(args[ac], XmNselectionPolicy, XmSINGLE_SELECT); ac++;
     XtSetArg(args[ac], XmNwidth, 339); ac++;
