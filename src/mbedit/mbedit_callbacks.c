@@ -618,7 +618,7 @@ do_parse_datalist( char *file, int form)
     
     	/* try to resolve format if necessary */
 	format = form;
-	mb_get_format(verbose, file, NULL, &format, &error);
+	mbedit_get_format(file, &format);
     
 	/* read in a single file */
 	if (format > 0 && numfiles < NUM_FILES_MAX)

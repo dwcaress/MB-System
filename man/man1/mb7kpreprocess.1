@@ -147,14 +147,13 @@ the depths to which filtering is applied. The filtered sonar depth is used
 to depths up to twice the \fIfilterdepth\fP value. Below that threshold, the
 value used transitions to unfiltered with an exponential taper. This filtering
 is used in two ways. First, one can apply short period smoothing of noisy 
-sonar depth at all by specifying a small \fIfilterlength\fp (e.g. 2 seconds)
+sonar depth at all by specifying a small \fIfilterlength\fP (e.g. 2 seconds)
 and a \fIfilterdepth\fP value deeper than the vehicle's track. Second, when
 an AUV or ROV is operated at shallow depths, the pressure
 values used to determine depth are affected by waves at the sea surface. In this
-case, a longer period \fIfilterlength\fp (e.g. 10 seconds) and a shallower 
-fIfilterdepth\fp (e.g. 50 meters) may be used to lessen the artifacts due to
+case, a longer period \fIfilterlength\fP (e.g. 10 seconds) and a shallower 
+\fIfilterdepth\fP (e.g. 50 meters) may be used to lessen the artifacts due to
 surface swell.
-the 
 .TP
 .B \-T
 \fItimelag\fP

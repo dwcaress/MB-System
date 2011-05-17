@@ -1282,10 +1282,25 @@ if ($nlabels < 3)
 # set basemap axes annotation
 if ($tick_info)
 	{
-	$axes = $tick_info;
-	if (!($tick_info =~ /.*:\..*/))
+	if ($tick_info =~ /.*\/.*/)
 		{
-		$axes = "$axes:.\"$tlabel\":";
+		($xtick, $ytick) = $tick_info =~ /(.*)\/(.*)/;
+		}
+	if ($tick_info =~ /.*:\..*/)
+		{
+		($title) = $tick_info =~ /.*:\.(.*)/;
+		}
+	else
+		{
+		$title = $tlabel;
+		}
+	if ($xtick && $ytick)
+		{
+		$axes = "$xtick:\"$xlabel\":/$ytick:\"$ylabel\"::.\"$title\":";
+		}
+	else
+		{
+		$axes = "$axes:.\"$title\":";
 		}
 	}
 elsif ($projection =~ /^[Xx].*/ && !$geographic)

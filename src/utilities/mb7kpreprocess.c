@@ -486,6 +486,9 @@ int main (int argc, char **argv)
 	int	kluge_useverticaldepth = MB_NO; /* kluge 1 */
 	int	kluge_zeroalongtrackangles = MB_NO; /* kluge 2 */
 	
+	/* MBARI data flag */
+	int	MBARIdata = MB_NO;
+	
 	int	interp_status;
 	double	soundspeed;
 	double	alpha, beta, theta, phi;
@@ -2295,6 +2298,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_SSV) 
 			{
 			nrec_bluefinenv++;
+			MBARIdata = MB_YES;
 			
 			bluefin = &(istore->bluefin);
 			header = &(bluefin->header);
@@ -2332,6 +2336,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 		else if (status == MB_SUCCESS && istore->type == R7KRECID_Bluefin && kind == MB_DATA_NAV2) 
 			{
 			nrec_bluefinnav++;
+			MBARIdata = MB_YES;
 			
 			bluefin = &(istore->bluefin);
 			header = &(bluefin->header);
@@ -2812,6 +2817,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 		{
 		/* correct time of navigation, heading, attitude, sonardepth, altitude 
 			read from asynchronous records in 7k files */
+fprintf(stderr,"Applying timelag to %d nav data\n", ndat_nav);
 		j = 0;
 		for (i=0;i<ndat_nav;i++)
 			{
@@ -2836,6 +2842,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			dat_nav_time_d[i] -= timelag;
 			}
+fprintf(stderr,"Applying timelag to %d heading data\n", ndat_heading);
 		j = 0;
 		for (i=0;i<ndat_heading;i++)
 			{
@@ -2860,6 +2867,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			dat_heading_time_d[i] -= timelag;
 			}
+fprintf(stderr,"Applying timelag to %d attitude data\n", ndat_rph);
 		j = 0;
 		for (i=0;i<ndat_rph;i++)
 			{
@@ -2884,6 +2892,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			dat_rph_time_d[i] -= timelag;
 			}
+fprintf(stderr,"Applying timelag to %d sonardepth data\n", ndat_sonardepth);
 		j = 0;
 		for (i=0;i<ndat_sonardepth;i++)
 			{
@@ -2908,6 +2917,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			dat_sonardepth_time_d[i] -= timelag;
 			}
+fprintf(stderr,"Applying timelag to %d altitude data\n", ndat_altitude);
 		j = 0;
 		for (i=0;i<ndat_altitude;i++)
 			{
@@ -2934,6 +2944,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			}
 			
 		/* correct time of INS data read from MBARI AUV log file */
+fprintf(stderr,"Applying timelag to %d INS data\n", nins);
 		for (i=0;i<nins;i++)
 			{
 			/* get timelag value */
@@ -2957,6 +2968,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			ins_time_d[i] -= timelag;
 			}
+fprintf(stderr,"Applying timelag to %d INS altitude data\n", nins_altitude);
 		for (i=0;i<nins_altitude;i++)
 			{
 			/* get timelag value */
@@ -2980,6 +2992,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				}
 			ins_altitude_time_d[i] -= timelag;
 			}
+fprintf(stderr,"Applying timelag to %d INS speed data\n", nins_speed);
 		for (i=0;i<nins_speed;i++)
 			{
 			/* get timelag value */
@@ -3005,6 +3018,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			}
 			
 		/* correct time of navigation and attitude data read from WHOI DSL nav and attitude file */
+fprintf(stderr,"Applying timelag to %d DSL nav data\n", ndsl);
 		for (i=0;i<ndsl;i++)
 			{
 			/* get timelag value */
@@ -3030,6 +3044,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			}
 			
 		/* correct time of navigation and attitude data read from Steve Rock file */
+fprintf(stderr,"Applying timelag to %d Steve Rock nav data\n", nrock);
 		for (i=0;i<nrock;i++)
 			{
 			/* get timelag value */
@@ -3055,6 +3070,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 			}
 			
 		/* correct time of sonar depth data read from separate file */
+fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		for (i=0;i<nsonardepth;i++)
 			{
 			/* get timelag value */
@@ -3888,21 +3904,22 @@ sonardepth_sonardepth[nsonardepth]);*/
 							/* phase picks */
 							if ((bathymetry->quality[i]) == 8)
 								{
-	/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
+/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
 								bathymetry->quality[i] = 32 + 15;
-	/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
 								}
 							else if ((bathymetry->quality[i]) == 4)
 								{
-	/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
+/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
 								bathymetry->quality[i] = 16 + 15;
-	/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
 								}
 							}
 						}
 
-					/* fix early version 5 quality flags */
-					else if (bathymetry->header.Version == 5
+					/* fix early MBARI version 5 quality flags */
+					else if (bathymetry->header.Version == 5 
+							&& MBARIdata == MB_YES
 							&& header->s7kTime.Year < 2008)
 						{
 						for (i=0;i<bathymetry->number_beams;i++)
@@ -3910,16 +3927,49 @@ sonardepth_sonardepth[nsonardepth]);*/
 							/* phase picks */
 							if ((bathymetry->quality[i]) == 4)
 								{
-	/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
+/*fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]);*/
 								bathymetry->quality[i] = 32 + 15;
-	/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
 								}
 							else if ((bathymetry->quality[i]) == 2)
 								{
-	/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
+/*fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]);*/
 								bathymetry->quality[i] = 16 + 15;
-	/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
+/*fprintf(stderr," %d\n",bathymetry->quality[i]);*/
 								}
+							}
+						}
+
+					/* fix upgraded MBARI version 5 quality flags */
+					else if (bathymetry->header.Version >= 5 
+							&& MBARIdata == MB_YES
+							&& header->s7kTime.Year <= 2010)
+						{
+						for (i=0;i<bathymetry->number_beams;i++)
+							{
+/* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
+							bathymetry->quality[i] = bathymetry->quality[i] & 15;
+
+							/* phase or amplitude picks */
+							if (bathymetry->quality[i] & 8)
+								{
+/* fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]); */
+								bathymetry->quality[i] += 32;
+/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
+								}
+							else if (bathymetry->quality[i] & 4)
+								{
+/* fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]); */
+								bathymetry->quality[i] += 16;
+/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
+								}
+
+							/* flagged by sonar */
+							if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0)
+								{
+								bathymetry->quality[i] += 64;
+								}
+/* fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]); */
 							}
 						}
 
@@ -3928,29 +3978,36 @@ sonardepth_sonardepth[nsonardepth]);*/
 						{
 						for (i=0;i<bathymetry->number_beams;i++)
 							{
-	/* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
+/* fprintf(stderr,"S Flag[%d]: %d\n",i,bathymetry->quality[i]); */
 							bathymetry->quality[i] = bathymetry->quality[i] & 15;
 
 							/* phase or amplitude picks */
 							if (bathymetry->quality[i] & 8)
 								{
-	/* fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]); */
+/* fprintf(stderr,"beam %d: PHASE quality: %d",i,bathymetry->quality[i]); */
 								bathymetry->quality[i] += 32;
-	/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
+/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
 								}
 							else if (bathymetry->quality[i] & 4)
 								{
-	/* fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]); */
+/* fprintf(stderr,"beam %d: AMPLI quality: %d",i,bathymetry->quality[i]); */
 								bathymetry->quality[i] += 16;
-	/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
+/* fprintf(stderr," %d\n",bathymetry->quality[i]); */
 								}
 
 							/* flagged by sonar */
-							if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0)
+							if ((bathymetry->quality[i] & 3) == 3)
+								{
+								}
+							else if ((bathymetry->quality[i] & 3) == 0 && bathymetry->quality[i] > 0)
 								{
 								bathymetry->quality[i] += 64;
 								}
-	/* fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]); */
+							else if (bathymetry->quality[i] > 0)
+								{
+								bathymetry->quality[i] += 64;
+								}
+/* fprintf(stderr,"E Flag[%d]: %d\n\n",i,bathymetry->quality[i]); */
 							}
 						}
 

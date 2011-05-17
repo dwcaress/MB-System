@@ -1276,9 +1276,9 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 		# sonar range allows for 150 degree swath on flat bottom
 		# sonar range cut off at 100 m for recorded full beamformed data
 		$mb_range = 4.0 * $sonaraltitudeuse;
-		if ($mb_range > 350.0)
+		if ($mb_range > 175.0)
 			{
-			$mb_range = 350.0;
+			$mb_range = 175.0;
 			}
 		if ($beamdata && $mb_range > 100.0)
 			{
@@ -1289,14 +1289,14 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 		$mb_mindepth = 0.0;
 		$mb_maxdepth = $mb_range;
 		$sslo_range = 0.9 * 750.0 / $mb_pingrate;
-		if ($sslo_range > 200.0)
+		if ($sslo_range > $mb_range)
 			{
-			$sslo_range = 200.0;
+			$sslo_range = $mb_range;
 			}
 		$sbp_duration = 1000.0 * 0.6 / $mb_pingrate;
-		if ($sbp_duration > 400.0)
+		if ($sbp_duration > 200.0)
 			{
-			$sbp_duration = 400.0;
+			$sbp_duration = 200.0;
 			}
 
 		# do ascend, gps, descend at line starts and ends if specified

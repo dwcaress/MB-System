@@ -135,6 +135,7 @@ int main (int argc, char **argv)
 	int	read_datalist = MB_NO;
 	mb_path	read_file;
 	mb_path	output_file;
+	mb_path	output_list_file;
 	int	output_file_set = MB_NO;
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
@@ -241,7 +242,7 @@ int main (int argc, char **argv)
 	double	yscale = 50.0;
 	double	maxwidth = 30.0;
 	char	*zbounds = NULL;
-	char	*zbounds_envelope = "0/400/1";
+	char	*zbounds_envelope = "0/10/1";
 	char	*zbounds_trace = "-400/400";
 
 	mb_path	command;
@@ -256,6 +257,7 @@ int main (int argc, char **argv)
 	int	linechange;
 	double	dx, dy;
 	FILE	*fp = NULL;
+	FILE	*cfp = NULL;
 	char	*result;
 	int	nget;
 	int	point_ok;
@@ -264,7 +266,9 @@ int main (int argc, char **argv)
 	int	nwrite;
 	int	first;
 	int	index;
-	double	tracemin, tracemax;
+	double	tracemin, tracemax, tracerms;
+	double	linetracemin, linetracemax;
+	double	draft, roll, pitch, heave;
 	int	i, j;
 
 	/* get current default values */
@@ -806,7 +810,12 @@ int main (int argc, char **argv)
 			{
 			/* reset output flag */
 			linechange = MB_NO;
-		    
+			
+			/* get nav data */
+			status = mb_extract_nav(verbose,mbio_ptr,store_ptr,&kind,
+					time_i,&time_d,&navlon,&navlat,
+					&speed,&heading,&draft,&roll,&pitch,&heave,&error);
+		   
 			/* save last nav and heading */
 			if (navlon != 0.0)
 				lastlon = navlon;
@@ -855,6 +864,8 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				    {
 				    fclose(fp);
 				    fp = NULL;
+				    fclose(cfp);
+				    cfp = NULL;
 
 				    /* output count of segy records */
 				    fprintf(stderr,"%d records output to segy file %s\n",
@@ -1075,6 +1086,17 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				fprintf(stderr,"Outputting subbottom data to segy file %s\n",
 					output_file);
 				}
+			sprintf(output_list_file,"%s.txt",output_file);
+			if ((cfp = fopen(output_list_file, "w")) == NULL) 
+				{
+				status = MB_FAILURE;
+				error = MB_ERROR_WRITE_FAIL;
+				fprintf(stderr,"\nError opening output segy list file:\n%s\n",
+					output_list_file);
+				fprintf(stderr,"\nProgram <%s> Terminated\n",
+					program_name);
+				exit(error);
+				}
 			}
 				    
 		    /* note good status */
@@ -1083,11 +1105,14 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 			/* get trace min and max */
 			tracemin = segydata[0];
 			tracemax = segydata[0];
+			tracerms = 0.0;
 			for (i=0;i<segytraceheader.nsamps;i++)
 				{
 				tracemin = MIN(tracemin, segydata[i]);
 				tracemax = MAX(tracemax, segydata[i]);
+				tracerms += segydata[i] * segydata[i];
 				}
+			tracerms = sqrt(tracerms / segytraceheader.nsamps);
 				
 			/* get starting and ending positions */
 			if (nwrite == 0)
@@ -1095,12 +1120,16 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				startlon = ((double)segytraceheader.src_long) / 360000.0;
 				startlat = ((double)segytraceheader.src_lat) / 360000.0;
 				startshot = segytraceheader.shot_num;
+				linetracemin = tracemin;
+				linetracemax = tracemax;
 				}
 			else
 				{
 				endlon = ((double)segytraceheader.src_long) / 360000.0;
 				endlat = ((double)segytraceheader.src_lat) / 360000.0;
 				endshot = segytraceheader.shot_num;
+				linetracemin = MIN(tracemin,linetracemin);
+				linetracemax = MAX(tracemax,linetracemax);
 				}
 				
 			/* get seafloor depth min and max */
@@ -1117,7 +1146,6 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					seafloordepthmax = MAX(seafloordepthmax, 0.01 * ((double) segytraceheader.src_wbd));
 					}
 				}
-			
 			/* output info */
 			nread++;
 			if (nread % 10 == 0 && verbose > 0)
@@ -1130,6 +1158,12 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 			/* only write data if ok */
 			if (oktowrite >= MBES_ONLINE_COUNT)
 				{	
+				/* write characteristics file */
+				fprintf(stderr,"%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  %d %d %d   %f %f %f  %f %f %f %f\n",
+					time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
+					segytraceheader.shot_num,segytraceheader.nsamps,segytraceheader.si_micros,
+					tracemin,tracemax,tracerms,
+					sonardepth,altitude,roll,pitch);
 				    
 				/* write fileheader if needed */
 				if (status == MB_SUCCESS && nwrite == 0)

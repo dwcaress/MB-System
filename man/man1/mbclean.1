@@ -10,7 +10,7 @@ Version 5.0
 \fB-D\fImin/max\fP \fB-F\fIformat\fP 
 \fB-G\fIfraction_low/fraction_high\fP 
 \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP 
-\fB-M\fImode\fP \fB-Q\fP \fB-S\fIslope/mode/units\fP
+\fB-M\fImode\fP \fB-Q\fIbackup\fP \fB-S\fIslope/mode/units\fP
 \fB-U\fInmin\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
@@ -221,12 +221,14 @@ prohibits storage of negative depths, an error message will be output
 and the program will exit. Default: \fImode\fP = 1.
 .TP
 .B \-Q
+\fIbackup\fP
+.br
 This flag causes \fBmbclean\fP to search for bad "rails" in the
 swath sonar swath; the "rails" refer to groups of outer beams which
 have crosstrack distances (and depths) much less than they should 
 have.  These are identified when one or more outer beams lies
-inboard of a more inner beam; all beams outboard of the first
-offending beam are flagged.
+more than \fIbackup\fp meters inboard of a more inner beam; all beams 
+meeting this criteria are flagged.
 .TP
 .B \-S
 \fIslope/mode/unit\fP

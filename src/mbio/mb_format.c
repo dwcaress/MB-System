@@ -2107,7 +2107,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	char	*suffix;
 	int	suffix_len;
 	FILE	*checkfp;
+	mb_path	parfile;
+	mb_path	dummy;
+	int	pformat;
+	struct	stat statbuf;
 	char	buffer[MB_COMMENT_MAXLINE];
+	char	*result;
+	
 	short	*shortptr;
 	short	type1, sonar1, type2, sonar2, type1swap, sonar1swap, type2swap, sonar2swap;
 	int	nsonar, nlow, nhigh, subsystem, size;
@@ -2129,25 +2135,59 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	found = MB_NO;
 	*format = 0;
 	
-	/* first look for MB suffix convention */
-	if (strlen(filename) > 6)
-	    i = strlen(filename) - 6;
-	else
-	    i = 0;
-	if ((suffix = strstr(&filename[i],".mb")) != NULL 
-		|| (suffix = strstr(&filename[i],".MB")) != NULL)
+	/* first look for parameter file */
+	sprintf(parfile, "%s.par", filename);
+	if (stat(parfile, &statbuf) == 0)
 	    {
-	    suffix_len = strlen(suffix);
-	    if (suffix_len >= 4 && suffix_len <= 6)
+	    if ((checkfp = fopen(parfile,"r")) != NULL)
 		{
-		if (fileroot != NULL)
+		while ((result = fgets(buffer,MBP_FILENAMESIZE,checkfp)) == buffer)
 		    {
-		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
-		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    if (buffer[0] != '#')
+			{
+			if (strlen(buffer) > 0)
+			    {
+			    if (buffer[strlen(buffer)-1] == '\n')
+				    buffer[strlen(buffer)-1] = '\0';
+			    }
+
+			if (strncmp(buffer, "FORMAT", 6) == 0)
+			    {
+			    sscanf(buffer, "%s %d", dummy, &pformat);
+			    if (pformat != 0)
+		    		{
+				*format = pformat;
+				found = MB_YES;
+				}
+			    }
+			}
 		    }
-		if (sscanf(suffix, ".mb%d", format) > 0 
-			|| sscanf(suffix, ".MB%d", format) > 0)
-		    found = MB_YES;
+		fclose(checkfp);
+		}
+	    }
+
+	/* first look for MB suffix convention */
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) > 6)
+		i = strlen(filename) - 6;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".mb")) != NULL 
+		    || (suffix = strstr(&filename[i],".MB")) != NULL)
+		{
+		suffix_len = strlen(suffix);
+		if (suffix_len >= 4 && suffix_len <= 6)
+		    {
+		    if (fileroot != NULL)
+			{
+			strncpy(fileroot, filename, strlen(filename)-suffix_len);
+			fileroot[strlen(filename)-suffix_len] = '\0';
+			}
+		    if (sscanf(suffix, ".mb%d", format) > 0 
+			    || sscanf(suffix, ".MB%d", format) > 0)
+			found = MB_YES;
+		    }
 		}
 	    }
 

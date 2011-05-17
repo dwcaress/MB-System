@@ -5325,7 +5325,7 @@ alpha, beta, lever_heave);*/
 					+ bathalongtrack[i] * bathalongtrack[i]);
 				    ttimes[i] = rr / 750.0;
 				    mb_xyz_to_takeoff(verbose, 
-						-bathacrosstrack[i], 
+						bathacrosstrack[i], 
 						bathalongtrack[i], 
 						(bath[i] - sonardepth), 
 						&angles[i],

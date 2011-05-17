@@ -1,4 +1,4 @@
-MB-SYSTEM VERSION 5.3.1893 README FILE:
+MB-SYSTEM VERSION 5.3.1895 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.1893       May 6, 2011
+* Version 5.3.1895       May 17, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -177,6 +177,21 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+
+Fixed translation of beam quality values into MB-System beam flags
+by mb7kpreprocess.
+
+Fixed calculation of line breaks by mbextractsegy.
+
+Augmented mb_get_format() in mb_format.c to look for the format id
+value in mbprocess parameter files before trying to make sense of
+file suffixes.
+
+Fixed MBedit's handling of files not conforming to the MB-System
+filename suffix convention.
+
+Allow users of mbm_xyplot to specify both axis annotation with the
+-B option and axis labeling with the -L option.
 
 Implemented workaround for MBeditviz crash problem on Poseidon Linux.
 MBeditviz would shut down whenever a second map view was requested with
