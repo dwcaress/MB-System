@@ -1202,14 +1202,12 @@ int main (int argc, char **argv)
 			      highdist = ping[irec].bathacrosstrack[j];
 			    
 			  }
-fprintf(stderr,"%d %d xtrack: %.2f highdist=%.2lf %d\n",irec,j,ping[irec].bathacrosstrack[j], highdist,ping[irec].beamflag[j]);		    
 
 			if (mb_beam_ok(ping[irec].beamflag[k]))
 			  {
 			    if (ping[irec].bathacrosstrack[k] >= lowdist+backup_dist)
 			      {
 				find_bad = MB_YES;
-fprintf(stderr,"2 writing %d %d\n",irec,k); 
 				if (mode <= 2)
 				  {
 				    ping[irec].beamflag[k] = MB_FLAG_FLAG + MB_FLAG_FILTER;

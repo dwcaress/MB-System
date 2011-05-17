@@ -533,11 +533,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		{
 		if (buffer[0] != '#')
 		    {
-			if (strlen(buffer) > 0)
-				{
-				if (buffer[strlen(buffer)-1] == '\n')
-					buffer[strlen(buffer)-1] = '\0';
-				}
+		    if (strlen(buffer) > 0)
+			    {
+			    if (buffer[strlen(buffer)-1] == '\n')
+				    buffer[strlen(buffer)-1] = '\0';
+			    }
 
 		    /* general parameters */
 		    if (strncmp(buffer, "EXPLICIT", 8) == 0)
