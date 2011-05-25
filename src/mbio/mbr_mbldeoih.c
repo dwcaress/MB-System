@@ -142,6 +142,7 @@
  *           "dd" = 25700 : Old data - 30 byte header
  *           "cc" = 25443 : New comment - 36 byte header
  *           "nn" = 28270 : New data - 2 byte header
+ *           "DD" = 17476 : Even newer data - 2 byte header
  *      In the case of data records, the header contains the time stamp,
  *      navigation, and the numbers of depth, beam amplitude, and
  *      sidescan values.  The data section contains the depth and
@@ -221,6 +222,11 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 /* define header sizes */
 #define	MBF_MBLDEOIH_OLDHEADERSIZE	38
 #define	MBF_MBLDEOIH_NEWHEADERSIZE	44
+#define	MBF_MBLDEOIH_ID_COMMENT1	8995	/* ## */
+#define	MBF_MBLDEOIH_ID_COMMENT2	25443	/* cc */
+#define	MBF_MBLDEOIH_ID_DATA1		25700	/* dd */
+#define	MBF_MBLDEOIH_ID_DATA2		28270	/* nn */
+#define	MBF_MBLDEOIH_ID_DATA3		17476	/* DD */
 
 static char rcs_id[]="$Id$";
 
@@ -553,12 +559,12 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	if (status == MB_SUCCESS)
 		{
 		flag = (short *) buffer;
-		if (*flag == 8995)
+		if (*flag == MBF_MBLDEOIH_ID_COMMENT1)
 			{
 			store->kind = MB_DATA_COMMENT;
 			header_length = MBF_MBLDEOIH_OLDHEADERSIZE;
 			}
-		else if (*flag == 25443)
+		else if (*flag == MBF_MBLDEOIH_ID_COMMENT2)
 			{
 			store->kind = MB_DATA_COMMENT;
 			header_length = 2;
@@ -940,16 +946,17 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	store = (struct mbsys_ldeoih_struct *) store_ptr;
 
 	/* set data flag 
-		(data: flag='nn'=28270 or comment:flag='cc'=25443) */
+		(data: flag='nn'=28270 = MBF_MBLDEOIH_ID_DATA2 
+			or comment:flag='cc'=25443 = MBF_MBLDEOIH_ID_COMMENT2) */
 	flag = (short *) buffer;
 	if (store->kind == MB_DATA_DATA)
 		{
-		*flag = 28270;
+		*flag = MBF_MBLDEOIH_ID_DATA2;
 		header_length = MBF_MBLDEOIH_NEWHEADERSIZE;
 		}
 	else
 		{
-		*flag = 25443;
+		*flag = MBF_MBLDEOIH_ID_COMMENT2;
 		header_length = 2;
 		}
 

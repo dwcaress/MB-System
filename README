@@ -1,4 +1,4 @@
-MB-SYSTEM VERSION 5.3.1895 README FILE:
+MB-SYSTEM VERSION 5.3.1896 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.1895       May 17, 2011
+* Version 5.3.1896       May 25, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -177,6 +177,16 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+
+Fixed mbinfo handling of swath files with no good data
+(Thanks Suzanne O'Hara)
+
+Changed mb_get_format() function in mb_format.c so that formats
+are inferred from parameter files if they exist.
+
+Supplemented informational output to stdout from MBnavadjust.
+
+Started development of new version of format 71 (mbf_ldeoih).
 
 Fixed translation of beam quality values into MB-System beam flags
 by mb7kpreprocess.

@@ -291,15 +291,15 @@ int main (int argc, char **argv)
 	char	file[MB_PATH_MAXLINE];
 	int	pings_get = 1;
 	int	pings_read = 1;
-	int	beams_bath_alloc;
-	int	beams_amp_alloc;
-	int	pixels_ss_alloc;
+	int	beams_bath_alloc = 0;
+	int	beams_amp_alloc = 0;
+	int	pixels_ss_alloc = 0;
 	int	beams_bath_max = 0;
 	int	beams_amp_max = 0;
 	int	pixels_ss_max = 0;
-	int	beams_bath;
-	int	beams_amp;
-	int	pixels_ss;
+	int	beams_bath = 0;
+	int	beams_amp = 0;
+	int	pixels_ss = 0;
 
 	/* MBIO read values */
 	void	*mbio_ptr = NULL;
@@ -1764,7 +1764,6 @@ int main (int argc, char **argv)
 						(void **)&bathvartot,&error);
 			status = mb_reallocd(verbose,__FILE__,__LINE__,beams_bath_max*sizeof(int),
 						(void **)&nbathvartot,&error);
-			nbathtot_alloc = beams_bath_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
@@ -1772,6 +1771,16 @@ int main (int argc, char **argv)
 				fprintf(stream,"\nProgram <%s> Terminated\n",
 					program_name);
 				exit(error);
+				}				
+			else
+				{
+				for (i=nbathtot_alloc;i<beams_bath_max;i++)
+					{
+					bathmeantot[i] = 0.0;
+					bathvartot[i] = 0.0;
+					nbathvartot[i] = 0;
+					}
+				nbathtot_alloc = beams_bath_max;
 				}				
 			}
 		if (namptot_alloc < beams_amp_max)
@@ -1791,6 +1800,16 @@ int main (int argc, char **argv)
 					program_name);
 				exit(error);
 				}				
+			else
+				{
+				for (i=namptot_alloc;i<beams_amp_max;i++)
+					{
+					ampmeantot[i] = 0.0;
+					ampvartot[i] = 0.0;
+					nampvartot[i] = 0;
+					}
+				namptot_alloc = beams_amp_max;
+				}				
 			}
 		if (nsstot_alloc < pixels_ss_max)
 			{
@@ -1800,7 +1819,6 @@ int main (int argc, char **argv)
 						(void **)&ssvartot,&error);
 			status = mb_reallocd(verbose,__FILE__,__LINE__,pixels_ss_max*sizeof(int),
 						(void **)&nssvartot,&error);
-			nsstot_alloc = pixels_ss_max;
 			if (error != MB_ERROR_NO_ERROR)
 				{
 				mb_error(verbose,error,&message);
@@ -1808,6 +1826,16 @@ int main (int argc, char **argv)
 				fprintf(stream,"\nProgram <%s> Terminated\n",
 					program_name);
 				exit(error);
+				}				
+			else
+				{
+				for (i=nsstot_alloc;i<pixels_ss_max;i++)
+					{
+					ssmeantot[i] = 0.0;
+					ssvartot[i] = 0.0;
+					nssvartot[i] = 0;
+					}
+				nsstot_alloc = pixels_ss_max;
 				}				
 			}
 
@@ -1866,19 +1894,19 @@ int main (int argc, char **argv)
 	/* calculate final variances */
 	if (pings_read > 2)
 		{
-		for (i=0;i<beams_bath_alloc;i++)
+		for (i=0;i<nbathtot_alloc;i++)
 			if (nbathvartot[i] > 0)
 				{
 				bathmeantot[i] = bathmeantot[i]/nbathvartot[i];
 				bathvartot[i] = bathvartot[i]/nbathvartot[i];
 				}
-		for (i=0;i<beams_amp_alloc;i++)
+		for (i=0;i<namptot_alloc;i++)
 			if (nampvartot[i] > 0)
 				{
 				ampmeantot[i] = ampmeantot[i]/nampvartot[i];
 				ampvartot[i] = ampvartot[i]/nampvartot[i];
 				}
-		for (i=0;i<pixels_ss_alloc;i++)
+		for (i=0;i<nsstot_alloc;i++)
 			if (nssvartot[i] > 0)
 				{
 				ssmeantot[i] = ssmeantot[i]/nssvartot[i];

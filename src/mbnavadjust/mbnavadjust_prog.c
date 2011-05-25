@@ -2448,6 +2448,7 @@ int mbnavadjust_import_file(char *path, int iformat)
 		root = ipath;
 	sprintf(message,"Importing format %d data from %s",iformat,root);
 	do_message_on(message);
+	fprintf(stderr,"%s\n",message);
 	output_open = MB_NO;
 	project.inversion = MBNA_INVERSION_NONE;
 	new_pings = 0;

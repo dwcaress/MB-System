@@ -2135,37 +2135,6 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 	found = MB_NO;
 	*format = 0;
 	
-	/* first look for parameter file */
-	sprintf(parfile, "%s.par", filename);
-	if (stat(parfile, &statbuf) == 0)
-	    {
-	    if ((checkfp = fopen(parfile,"r")) != NULL)
-		{
-		while ((result = fgets(buffer,MBP_FILENAMESIZE,checkfp)) == buffer)
-		    {
-		    if (buffer[0] != '#')
-			{
-			if (strlen(buffer) > 0)
-			    {
-			    if (buffer[strlen(buffer)-1] == '\n')
-				    buffer[strlen(buffer)-1] = '\0';
-			    }
-
-			if (strncmp(buffer, "FORMAT", 6) == 0)
-			    {
-			    sscanf(buffer, "%s %d", dummy, &pformat);
-			    if (pformat != 0)
-		    		{
-				*format = pformat;
-				found = MB_YES;
-				}
-			    }
-			}
-		    }
-		fclose(checkfp);
-		}
-	    }
-
 	/* first look for MB suffix convention */
 	if (found == MB_NO)
 	    {
@@ -3371,6 +3340,41 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    }
 		*format = MBF_HIR2RNAV;
 		found = MB_YES;
+		}
+	    }
+	
+	/* finally check for parameter file */
+	sprintf(parfile, "%s.par", filename);
+	if (stat(parfile, &statbuf) == 0)
+	    {
+	    if ((checkfp = fopen(parfile,"r")) != NULL)
+		{
+		while ((result = fgets(buffer,MBP_FILENAMESIZE,checkfp)) == buffer)
+		    {
+		    if (buffer[0] != '#')
+			{
+			if (strlen(buffer) > 0)
+			    {
+			    if (buffer[strlen(buffer)-1] == '\n')
+				    buffer[strlen(buffer)-1] = '\0';
+			    }
+
+			if (strncmp(buffer, "FORMAT", 6) == 0)
+			    {
+			    sscanf(buffer, "%s %d", dummy, &pformat);
+			    if (pformat != 0)
+		    		{
+				*format = pformat;
+				if (found == MB_NO)
+				    {
+				    strcpy(fileroot, filename);
+				    found = MB_YES;
+				    }
+				}
+			    }
+			}
+		    }
+		fclose(checkfp);
 		}
 	    }
 
