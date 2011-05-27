@@ -2541,6 +2541,62 @@ int mbsys_reson7k_print_attitude(int verbose,
 }
 
 /*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_rec1022(int verbose, 
+			s7kr_rec1022 *rec1022,
+			int *error)
+{
+	char	*function_name = "mbsys_reson7k_print_rec1022";
+	int	status = MB_SUCCESS;
+	char	*debug_str = "dbg2  ";
+	char	*nodebug_str = "  ";
+	char	*first;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:      %d\n",verbose);
+		fprintf(stderr,"dbg2       rec1022:      %lu\n",(size_t)rec1022);
+		}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &rec1022->header, error);
+
+	/* print Attitude (record 1016) */
+	if (verbose >= 2)
+		first = debug_str;
+	else
+		{
+		first = nodebug_str;
+		fprintf(stderr,"\n%sMBIO function <%s> called\n",
+			first,function_name);
+		}
+	fprintf(stderr,"%sStructure Contents:\n", first);
+	fprintf(stderr,"%s     record bytes in hex:        |",first);
+	for (i=0;i<R7KHDRSIZE_Rec1022;i++)
+		{
+		fprintf(stderr,"%x|",rec1022->data[i]);
+		}
+	fprintf(stderr,"\n");
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format,
 			s7k_fsdwchannel *fsdwchannel,
 			int *error)

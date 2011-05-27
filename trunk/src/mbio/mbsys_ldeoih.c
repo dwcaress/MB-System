@@ -405,6 +405,7 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	int	time_j[5];
 	double	depthscale;
 	double	distscale;
+	double	transducer_depth;
 	int	i;
 
 	/* print input debug statements */
@@ -468,10 +469,11 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*nss = store->pixels_ss;
 		depthscale = 0.001 * store->depth_scale;
 		distscale = 0.001 * store->distance_scale;
+		transducer_depth = 0.001 * store->transducer_depth;
 		for (i=0;i<*nbath;i++)
 			{
 			beamflag[i] = store->beamflag[i];
-			bath[i] = depthscale * store->bath[i];
+			bath[i] = depthscale * store->bath[i] + transducer_depth;
 			bathacrosstrack[i] = distscale * store->bath_acrosstrack[i];
 			bathalongtrack[i] = distscale * store->bath_alongtrack[i];
 			}
@@ -850,21 +852,19 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    
 		/* save existing altitude and transducer_depth values */
 		depthscale = 0.001 * store->depth_scale;
-		transducer_depth = depthscale * store->transducer_depth;
-		altitude = depthscale * store->altitude;
+		transducer_depth = 0.001 * store->transducer_depth;
+		altitude = 0.001 * store->altitude;
 
 		/* get scaling */
 		store->depth_scale = 1000;
 		store->distance_scale = 1000;
 		depthmax = 0.0;
 		distmax = 0.0;
-		depthmax = MAX(depthmax, transducer_depth);
-		depthmax = MAX(depthmax, altitude);
 		for (i=0;i<nbath;i++)
 		    {
 		    if (beamflag[i] != MB_FLAG_NULL)
 			{
-			depthmax = MAX(depthmax, bath[i]);
+			depthmax = MAX(depthmax, (bath[i] - transducer_depth));
 			distmax = MAX(distmax, fabs(bathacrosstrack[i]));
 			distmax = MAX(distmax, fabs(bathalongtrack[i]));
 			}
@@ -896,7 +896,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<nbath;i++)
 			{
 			store->beamflag[i] = beamflag[i];
-			store->bath[i] = bath[i] / depthscale;
+			store->bath[i] = (bath[i] - transducer_depth) / depthscale;
 			store->bath_acrosstrack[i] = bathacrosstrack[i]
 							/ distscale;
 			store->bath_alongtrack[i] = bathalongtrack[i]
@@ -919,10 +919,6 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			store->ss_alongtrack[i] = ssalongtrack[i]
 							/ distscale;
 			}
-		    
-		/* save existing altitude and transducer_depth values */
-		store->transducer_depth = transducer_depth / depthscale;
-		store->altitude = altitude / depthscale;
 		}
 
 	/* insert comment in structure */
@@ -1098,12 +1094,12 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		depthscale = 0.001 * store->depth_scale;
 		distscale = 0.001 * store->distance_scale;
-		*transducer_depth = depthscale * store->transducer_depth;
+		*transducer_depth = 0.001 * store->transducer_depth;
 		if (store->altitude <= 0 && store->beams_bath > 0)
 		    {		
 		    bath_best = 0.0;
 		    if (store->bath[store->beams_bath/2] > 0.0)
-			bath_best = depthscale * store->bath[store->beams_bath/2];
+			bath_best = depthscale * store->bath[store->beams_bath/2] + (*transducer_depth);
 		    else
 			{
 			xtrack_min = 99999999.9;
@@ -1113,7 +1109,7 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 				&& fabs(distscale * store->bath_acrosstrack[i]) < xtrack_min)
 				{
 				xtrack_min = fabs(distscale * store->bath_acrosstrack[i]);
-				bath_best = depthscale * store->bath[i];
+				bath_best = depthscale * store->bath[i] + (*transducer_depth);
 				}
 			    }		
 			}
@@ -1126,14 +1122,14 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 				&& fabs(distscale * store->bath_acrosstrack[i]) < xtrack_min)
 				{
 				xtrack_min = fabs(distscale * store->bath_acrosstrack[i]);
-				bath_best = -depthscale * store->bath[i];
+				bath_best = -depthscale * store->bath[i] + (*transducer_depth);
 				}
 			    }		
 			}
 		    *altitude = bath_best - *transducer_depth;
 		    }
 		else
-		    *altitude = depthscale * store->altitude;
+		    *altitude = 0.001 * store->altitude;
 		}
 
 	/* deal with comment */
@@ -1177,7 +1173,6 @@ int mbsys_ldeoih_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
-	double	depthscale;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1201,14 +1196,8 @@ int mbsys_ldeoih_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	/* insert data into structure */
 	if (store->kind == MB_DATA_DATA)
 		{
-		if (store->depth_scale <= 0)
-			{
-		 	store->depth_scale = MAX((int) (1 + transducer_depth / 30.0), 1);
-		 	store->depth_scale = MAX((int) (1 + altitude / 30.0), store->depth_scale);
-			}
-		depthscale = 0.001 * store->depth_scale;
-		store->transducer_depth = transducer_depth / depthscale;
-		store->altitude = altitude / depthscale;
+		store->transducer_depth = 1000 * transducer_depth;
+		store->altitude = 1000 * altitude;
 		}
 
 	/* deal with comment */
@@ -1253,7 +1242,6 @@ int mbsys_ldeoih_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	int	time_j[5];
-	double	depthscale;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1300,8 +1288,7 @@ int mbsys_ldeoih_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*speed = 0.01 * store->speed;
 
 		/* set draft to zero */
-		depthscale = 0.001 * store->depth_scale;
-		*draft = depthscale * store->transducer_depth;
+		*draft = 0.001 * store->transducer_depth;
 
 		/* get roll pitch and heave */
 		*roll = 0.0;
@@ -1422,7 +1409,6 @@ int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	int	time_j[5];
-	double	depthscale;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1485,13 +1471,7 @@ int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->speed = 100 * speed;
 
 		/* get draft */
-
-		if (store->depth_scale <= 0)
-			{
-		 	store->depth_scale = MAX((int) (1 + draft / 30.0), 1);
-			}
-		depthscale = 0.001 * store->depth_scale;
-		store->transducer_depth = draft / depthscale;
+		store->transducer_depth = 1000 * draft;
 
 		/* get roll pitch and heave */
 		}

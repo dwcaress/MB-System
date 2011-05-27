@@ -232,8 +232,7 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbf_sb2100rw.h \
 	$(INCDIR)/mbf_em12darw.h $(INCDIR)/mbf_em12ifrm.h \
 	$(INCDIR)/mbf_mr1prhig.h $(INCDIR)/mbf_mr1aldeo.h \
-	$(INCDIR)/mbf_mr1bldeo.h \
-	$(INCDIR)/mbf_mbldeoih.h $(INCDIR)/mbf_cbat9001.h \
+	$(INCDIR)/mbf_mr1bldeo.h $(INCDIR)/mbf_cbat9001.h \
 	$(INCDIR)/mbf_cbat8101.h $(INCDIR)/mbf_hypc8101.h \
 	$(INCDIR)/mbf_bchrtunb.h $(INCDIR)/mbf_elmk2unb.h \
 	$(INCDIR)/mbf_bchrxunb.h \
@@ -555,7 +554,7 @@ mbr_mr1bldeo.o: mbr_mr1bldeo.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_mr1bldeo.c
 mbr_mr1prvr2.o: mbr_mr1prvr2.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_mr1v2001.h
 	$(CC) -c $(CFLAGS) mbr_mr1prvr2.c
-mbr_mbldeoih.o: mbr_mbldeoih.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbldeoih.h $(INCDIR)/mbsys_ldeoih.h
+mbr_mbldeoih.o: mbr_mbldeoih.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_ldeoih.h
 	$(CC) -c $(CFLAGS) mbr_mbldeoih.c
 mbr_cbat9001.o: mbr_cbat9001.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_cbat9001.h $(INCDIR)/mbsys_reson.h
 	$(CC) -c $(CFLAGS) mbr_cbat9001.c
@@ -797,9 +796,6 @@ $(INCDIR)/mbf_mr1aldeo.h:	mbf_mr1aldeo.h
 $(INCDIR)/mbf_mr1bldeo.h:	mbf_mr1bldeo.h
 	cp mbf_mr1bldeo.h $(INCDIR)/mbf_mr1bldeo.h
 	chmod 664 $(INCDIR)/mbf_mr1bldeo.h
-$(INCDIR)/mbf_mbldeoih.h:	mbf_mbldeoih.h
-	cp mbf_mbldeoih.h $(INCDIR)/mbf_mbldeoih.h
-	chmod 664 $(INCDIR)/mbf_mbldeoih.h
 $(INCDIR)/mbf_cbat9001.h:	mbf_cbat9001.h
 	cp mbf_cbat9001.h $(INCDIR)/mbf_cbat9001.h
 	chmod 664 $(INCDIR)/mbf_cbat9001.h
