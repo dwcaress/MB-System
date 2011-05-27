@@ -128,10 +128,23 @@ struct mbsys_ldeoih_struct
 	short	beams_bath_alloc;	/* number of depth values allocated */
 	short	beams_amp_alloc;	/* number of amplitude values allocated */
 	short	pixels_ss_alloc;	/* number of sidescan pixels allocated */
-	short	depth_scale;	/* 1000 X scale where depth = bath X scale */
-	short	distance_scale;	/* 1000 X scale where distance = dist X scale */
-	short	transducer_depth; /* scaled by depth_scale */
-	short	altitude;	/* scaled by depth_scale */
+	
+	/* obsolete scaling */
+/* 	short	depth_scale;	/* 1000 X scale where depth = bath X scale */
+/* 	short	distance_scale;	/* 1000 X scale where distance = dist X scale */
+/* 	short	transducer_depth; /* scaled by depth_scale */
+/* 	short	altitude;	/* scaled by depth_scale */
+/* 	short	beam_xwidth;	/* 0.01 degrees */
+/* 	short	beam_lwidth;	/* 0.01 degrees */
+/* 	short	ss_type;	/* indicates if sidescan values are logarithmic or linear
+					ss_type = 0: logarithmic (dB)
+					ss_type = 1: linear (voltage) */
+	
+	/* scaling */
+	short	depth_scale;	/* 1000*scale where depth = bath*scale + transducer_depth * 1000 */
+	short	distance_scale;	/* 1000*scale where distance = dist*scale */
+	int	transducer_depth; /* 0.001 m */
+	int	altitude;	/* 0.001 m */
 	short	beam_xwidth;	/* 0.01 degrees */
 	short	beam_lwidth;	/* 0.01 degrees */
 	short	ss_type;	/* indicates if sidescan values are logarithmic or linear

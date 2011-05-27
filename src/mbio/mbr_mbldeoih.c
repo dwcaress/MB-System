@@ -139,10 +139,10 @@
  *      The beginning of each header is a two byte identifier.
  *      The size of the header depends on the identifier:
  *           "##" =  8995 : Old comment - 30 byte header
- *           "dd" = 25700 : Old data - 30 byte header
  *           "cc" = 25443 : New comment - 36 byte header
- *           "nn" = 28270 : New data - 2 byte header
- *           "DD" = 17476 : Even newer data - 2 byte header
+ *           "dd" = 25700 : Version 1 survey data - 38 byte header
+ *           "nn" = 28270 : Version 2 survey data - 44 byte header
+ *           "DD" = 17476 : Version 3 survey data - 48 byte header
  *      In the case of data records, the header contains the time stamp,
  *      navigation, and the numbers of depth, beam amplitude, and
  *      sidescan values.  The data section contains the depth and
@@ -153,13 +153,19 @@
  *      records, the header contains no information other than the
  *      identifier whether it is old (30 byte) or new (2 byte). The
  *      data section of the comment record is always 128 bytes. 
- *   4. The data headers have changed and now include beam angle
+ *   4. The data headers changed for version 2, including beam angle
  *      widths to allow beam footprint calculation. Older data 
- *      is read without complaint, and the beam widths are passed
+ *      are read without complaint, and the beam widths are passed
  *      as zero.
- *   5. The data consist of variable length binary records encoded
+ *   5. The data headers changed again for version 3. Previously the
+ *      bathymetry values were absolute depths. For version 3 the 
+ *      stored bathymetry are in depths relative to the sonar, and the
+ *      transducer depth must be added to calculate absolute depths.
+ *      Older data are read without complaint, and converted to version
+ *      3 on writing.
+ *   6. The data consist of variable length binary records encoded
  *	entirely in 2-byte integers.
- *   6. All data arrays are centered.
+ *   7. All data arrays are centered.
  *
  * The kind value in the mbsys_ldeoih_struct indicates whether the
  * structure holds data (kind = 1) or an
@@ -179,7 +185,6 @@
 #include "../../include/mb_format.h"
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
-#include "../../include/mbf_mbldeoih.h"
 #include "../../include/mbsys_ldeoih.h"
 
 /* include for byte swapping on little-endian machines */
@@ -220,8 +225,9 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 #define	MBF_MBLDEOIH_MAX_PIXELS	10000
 
 /* define header sizes */
-#define	MBF_MBLDEOIH_OLDHEADERSIZE	38
-#define	MBF_MBLDEOIH_NEWHEADERSIZE	44
+#define	MBF_MBLDEOIH_V1HEADERSIZE	38
+#define	MBF_MBLDEOIH_V2HEADERSIZE	44
+#define	MBF_MBLDEOIH_V3HEADERSIZE	48
 #define	MBF_MBLDEOIH_ID_COMMENT1	8995	/* ## */
 #define	MBF_MBLDEOIH_ID_COMMENT2	25443	/* cc */
 #define	MBF_MBLDEOIH_ID_DATA1		25700	/* dd */
@@ -518,9 +524,14 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_ldeoih_struct *store;
 	int	read_size;
 	short	*flag;
+	short	short_transducer_depth;
+	short	short_altitude;
 	int	header_length;
-	char	buffer[MBF_MBLDEOIH_NEWHEADERSIZE];
+	char	buffer[MBF_MBLDEOIH_V3HEADERSIZE];
+	int	version;
 	int	index;
+	double	depthscale, newdepthscale;
+	double	depthmax, transducer_depth;
 	int	i;
 
 	/* print input debug statements */
@@ -562,22 +573,30 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		if (*flag == MBF_MBLDEOIH_ID_COMMENT1)
 			{
 			store->kind = MB_DATA_COMMENT;
-			header_length = MBF_MBLDEOIH_OLDHEADERSIZE;
+			header_length = MBF_MBLDEOIH_V1HEADERSIZE;
 			}
 		else if (*flag == MBF_MBLDEOIH_ID_COMMENT2)
 			{
 			store->kind = MB_DATA_COMMENT;
 			header_length = 2;
 			}
-		else if (*flag == 28270)
+		else if (*flag == MBF_MBLDEOIH_ID_DATA3)
 			{
 			store->kind = MB_DATA_DATA;
-			header_length = MBF_MBLDEOIH_NEWHEADERSIZE;
+			header_length = MBF_MBLDEOIH_V3HEADERSIZE;
+			version = 3;
 			}
-		else if (*flag == 25700)
+		else if (*flag == MBF_MBLDEOIH_ID_DATA2)
 			{
 			store->kind = MB_DATA_DATA;
-			header_length = MBF_MBLDEOIH_OLDHEADERSIZE;
+			header_length = MBF_MBLDEOIH_V2HEADERSIZE;
+			version = 2;
+			}
+		else if (*flag == MBF_MBLDEOIH_ID_DATA1)
+			{
+			store->kind = MB_DATA_DATA;
+			header_length = MBF_MBLDEOIH_V1HEADERSIZE;
+			version = 1;
 			}
 		else
 			{
@@ -625,12 +644,33 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beams_bath); index +=2;
 		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beams_amp); index +=2;
 		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->pixels_ss); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->transducer_depth); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->altitude); index +=2;
-		if (header_length == MBF_MBLDEOIH_NEWHEADERSIZE)
+		if (header_length == MBF_MBLDEOIH_V1HEADERSIZE)
 			{
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_transducer_depth); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_altitude); index +=2;
+			store->transducer_depth = (int) (store->depth_scale * short_transducer_depth);
+			store->altitude = (int) (store->depth_scale * short_altitude);
+			}
+		else if (header_length == MBF_MBLDEOIH_V2HEADERSIZE)
+			{
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_transducer_depth); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_altitude); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_xwidth); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_lwidth); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->ss_type); index +=2;
+			store->transducer_depth = (int) (store->depth_scale * short_transducer_depth);
+			store->altitude = (int) (store->depth_scale * short_altitude);
+			}
+		else if (header_length == MBF_MBLDEOIH_V3HEADERSIZE)
+			{
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=2;
+			mb_get_binary_int(MB_NO, (void *)  &buffer[index], &store->transducer_depth); index +=4;
+			mb_get_binary_int(MB_NO, (void *)  &buffer[index], &store->altitude); index +=4;
 			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_xwidth); index +=2;
 			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_lwidth); index +=2;
 			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->ss_type); index +=2;
@@ -866,6 +906,26 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 #endif
 
+		/* subtract the transducer depth from the bathymetry if version
+			1 or 2 data has been read */
+		if (version < 3)
+			{
+			depthscale = 0.001 * store->depth_scale;
+			transducer_depth = 0.001 * store->transducer_depth;
+			depthmax = 0.0;
+			for (i=0;i<store->beams_bath;i++)
+				{
+				depthmax = MAX(depthmax, (depthscale * store->bath[i] - transducer_depth));
+				}
+			if (depthmax > 0.0)
+				store->depth_scale = MAX((int) (1 + depthmax / 30.0), 1);
+			newdepthscale = 0.001 * store->depth_scale;
+			for (i=0;i<store->beams_bath;i++)
+				{
+				store->bath[i] = (depthscale * store->bath[i] - transducer_depth) / newdepthscale;
+				}
+			}
+			
 		/* check for end of file */
 		if (status == read_size) 
 			{
@@ -926,7 +986,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	write_size;
 	short	*flag;
 	int	header_length;
-	char	buffer[MBF_MBLDEOIH_NEWHEADERSIZE];
+	char	buffer[MBF_MBLDEOIH_V3HEADERSIZE];
 	int	index;
 	int	i;
 
@@ -946,13 +1006,13 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	store = (struct mbsys_ldeoih_struct *) store_ptr;
 
 	/* set data flag 
-		(data: flag='nn'=28270 = MBF_MBLDEOIH_ID_DATA2 
+		(data: flag='DD'=17476 = MBF_MBLDEOIH_ID_DATA3 
 			or comment:flag='cc'=25443 = MBF_MBLDEOIH_ID_COMMENT2) */
 	flag = (short *) buffer;
 	if (store->kind == MB_DATA_DATA)
 		{
-		*flag = MBF_MBLDEOIH_ID_DATA2;
-		header_length = MBF_MBLDEOIH_NEWHEADERSIZE;
+		*flag = MBF_MBLDEOIH_ID_DATA3;
+		header_length = MBF_MBLDEOIH_V3HEADERSIZE;
 		}
 	else
 		{
@@ -1012,8 +1072,8 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_put_binary_short(MB_NO, store->pixels_ss, (void *)  &buffer[index]); index +=2;
 		mb_put_binary_short(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=2;
 		mb_put_binary_short(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->transducer_depth, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->altitude, (void *)  &buffer[index]); index +=2;
+		mb_put_binary_int(MB_NO, store->transducer_depth, (void *)  &buffer[index]); index +=4;
+		mb_put_binary_int(MB_NO, store->altitude, (void *)  &buffer[index]); index +=4;
 		mb_put_binary_short(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=2;
 		mb_put_binary_short(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=2;
 		mb_put_binary_short(MB_NO, store->ss_type, (void *)  &buffer[index]); index +=2;

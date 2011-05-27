@@ -1,9 +1,9 @@
-MB-SYSTEM VERSION 5.3.1896 README FILE:
+MB-SYSTEM VERSION 5.3.1897 README FILE:
 ----------------------------------------
 
 This file is located at the top of the MB-System directory
 structure. This directory structure contains the version 
-5.2.1887 release of the MB-System software package for 
+5.3.1897 release of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,7 +26,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.1896       May 25, 2011
+* Version 5.3.1897       May 27, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -177,6 +177,23 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+
+Updated the definition of swath format MBF_LDEOIH (format 71),
+which is used for the "fast bathymetry" or *.fbt files in MB-System
+processing environments. The previous form of *.fbt files had a
+serious limitation in that bathymetry from multibeams operated
+near the seafloor in deep water did not represent the full
+numerical resolution of those data. The updated format allows for
+depth and distance resolution to 0.001 m even in the deep ocean.
+Old *.fbt files are read transparently, but newly written files
+will be in the new form.
+IMPORTANT: In order to avoid compatibility issues, all users 
+operating on the same projects should upgrade to this version or
+higher once one user upgrades.
+
+Updated support for Reson 7k data to include the "1022" record.
+We still don't know what this is, but the code now reads and 
+writes it without complaint.
 
 Fixed mbinfo handling of swath files with no good data
 (Thanks Suzanne O'Hara)

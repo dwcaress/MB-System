@@ -149,6 +149,7 @@
 #define R7KRECID_SurveyLine				1014
 #define R7KRECID_Navigation				1015
 #define R7KRECID_Attitude				1016
+#define R7KRECID_Rec1022				1022
 #define R7KRECID_GenericSensorCalibration		1050
 #define R7KRECID_GenericSidescan			1200
 
@@ -245,6 +246,7 @@
 #define R7KHDRSIZE_Navigation					41
 #define R7KHDRSIZE_Attitude					1
 #define R7KRDTSIZE_Attitude					18
+#define R7KHDRSIZE_Rec1022					40
 
 /* 2000-2999 reserved for user defined records */
 
@@ -815,6 +817,14 @@ typedef struct s7kr_attitude_struct
 	float		*heading;		/* Heading (radians) */
 }
 s7kr_attitude;
+	
+/* Unknown record 1022 (record 1022) */
+typedef struct s7kr_rec1022_struct
+{	
+	s7k_header	header;
+	mb_u_char	data[R7KHDRSIZE_Rec1022];/* raw bytes in unknown record */
+}
+s7kr_rec1022;
 
 /* Edgetech sidescan or subbottom channel header data */
 typedef struct s7k_fsdwchannel_struct
@@ -2224,6 +2234,9 @@ struct mbsys_reson7k_struct
 	/* Attitude (record 1016) */
 	s7kr_attitude	attitude;
 	
+	/* Unknown record 1022 (record 1022) */
+	s7kr_rec1022	rec1022;
+	
 	/* Edgetech FS-DW low frequency sidescan (record 3000) */
 	s7kr_fsdwss	fsdwsslo;
 	
@@ -2506,6 +2519,9 @@ int mbsys_reson7k_print_navigation(int verbose,
 			int *error);
 int mbsys_reson7k_print_attitude(int verbose, 
 			s7kr_attitude *attitude,
+			int *error);
+int mbsys_reson7k_print_rec1022(int verbose, 
+			s7kr_rec1022 *rec1022,
 			int *error);
 int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format,
 			s7k_fsdwchannel *fsdwchannel,
