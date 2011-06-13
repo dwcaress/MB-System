@@ -24,9 +24,9 @@
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/BulletinB.h>
+#include <Xm/PushB.h>
 #include <Xm/RowColumn.h>
 #include <Xm/ToggleB.h>
-#include <Xm/PushB.h>
 #include <Xm/Label.h>
 #include <Xm/DrawingA.h>
 #include <Xm/Form.h>
@@ -43,9 +43,9 @@
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/BulletinB.h>
+#include <Xm/PushB.h>
 #include <Xm/RowColumn.h>
 #include <Xm/ToggleB.h>
-#include <Xm/PushB.h>
 #include <Xm/Label.h>
 #include <Xm/DrawingA.h>
 #include <Xm/Form.h>
@@ -92,6 +92,7 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  * Declarations for callbacks and handlers.
  */
 extern void BxExitCB(Widget, XtPointer, XtPointer);
+extern void do_modelplot_clearblock(Widget, XtPointer, XtPointer);
 extern void do_modelplot_fullsize(Widget, XtPointer, XtPointer);
 extern void do_modelplot_input(Widget, XtPointer, XtPointer);
 extern void do_modelplot_expose(Widget, XtPointer, XtPointer);
@@ -189,7 +190,6 @@ CreatemainWindow(Widget parent)
     Widget   mainWindow;
     Widget   dialogShell_modelplot;
     Widget   pushButton_modelplot_fullsize;
-    Widget   label_modelplot_status;
     Widget   pushButton_modelplot_dismiss;
     Widget   dialogShell_controls;
     Widget   form_controls;
@@ -271,9 +271,9 @@ CreatemainWindow(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmMainWindowWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
@@ -292,7 +292,7 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNx, 82); ac++;
-    XtSetArg(args[ac], XmNy, 352); ac++;
+    XtSetArg(args[ac], XmNy, 396); ac++;
     XtSetArg(args[ac], XmNwidth, 962); ac++;
     XtSetArg(args[ac], XmNheight, 400); ac++;
     mainWindow = XmCreateMainWindow(parent,
@@ -1031,8 +1031,8 @@ CreatemainWindow(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 223); ac++;
-    XtSetArg(args[ac], XmNy, 379); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
     XtSetArg(args[ac], XmNwidth, 182); ac++;
     XtSetArg(args[ac], XmNheight, 344); ac++;
     pulldownMenu_action = XmCreatePulldownMenu(XtParent(cascadeButton_action),
@@ -1662,7 +1662,7 @@ CreatemainWindow(Widget parent)
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_ANY); ac++;
     XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1219); ac++;
+    XtSetArg(args[ac], XmNy, 1294); ac++;
     XtSetArg(args[ac], XmNwidth, 542); ac++;
     XtSetArg(args[ac], XmNheight, 86); ac++;
     bulletinBoard_message = XtCreateWidget((char *)"bulletinBoard_message",
@@ -1741,7 +1741,7 @@ CreatemainWindow(Widget parent)
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
     XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1182); ac++;
+    XtSetArg(args[ac], XmNy, 1257); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 160); ac++;
     bulletinBoard_error = XtCreateWidget((char *)"bulletinBoard_error",
@@ -1875,7 +1875,7 @@ CreatemainWindow(Widget parent)
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
     XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 997); ac++;
+    XtSetArg(args[ac], XmNy, 1072); ac++;
     XtSetArg(args[ac], XmNwidth, 611); ac++;
     XtSetArg(args[ac], XmNheight, 530); ac++;
     bulletinBoard_fileselection = XtCreateWidget((char *)"bulletinBoard_fileselection",
@@ -1989,8 +1989,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNnoResize, True); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-        XtSetArg(args[ac], XmNx, 813); ac++;
-        XtSetArg(args[ac], XmNy, 919); ac++;
+        XtSetArg(args[ac], XmNx, 258); ac++;
+        XtSetArg(args[ac], XmNy, 456); ac++;
         XtSetArg(args[ac], XmNwidth, 935); ac++;
         XtSetArg(args[ac], XmNheight, 685); ac++;
         bulletinBoard_naverr = XtCreateWidget((char *)"bulletinBoard_naverr",
@@ -2765,7 +2765,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
         XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 1039); ac++;
+        XtSetArg(args[ac], XmNy, 1114); ac++;
         XtSetArg(args[ac], XmNwidth, 284); ac++;
         XtSetArg(args[ac], XmNheight, 446); ac++;
         bulletinBoard_biases = XtCreateWidget((char *)"bulletinBoard_biases",
@@ -3141,7 +3141,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
     XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1020); ac++;
+    XtSetArg(args[ac], XmNy, 1095); ac++;
     XtSetArg(args[ac], XmNwidth, 488); ac++;
     XtSetArg(args[ac], XmNheight, 484); ac++;
     form_about = XtCreateWidget((char *)"form_about",
@@ -3510,7 +3510,7 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
     XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1043); ac++;
+    XtSetArg(args[ac], XmNy, 1118); ac++;
     XtSetArg(args[ac], XmNwidth, 635); ac++;
     XtSetArg(args[ac], XmNheight, 438); ac++;
     form_controls = XtCreateWidget((char *)"form_controls",
@@ -4022,8 +4022,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "Navigation Adjustment Model Plot"); ac++;
     XtSetArg(args[ac], XmNallowShellResize, True); ac++;
-    XtSetArg(args[ac], XmNwidth, 1014); ac++;
-    XtSetArg(args[ac], XmNheight, 481); ac++;
+    XtSetArg(args[ac], XmNwidth, 1021); ac++;
+    XtSetArg(args[ac], XmNheight, 483); ac++;
     dialogShell_modelplot = XmCreateDialogShell(mainWindow,
         (char *)"dialogShell_modelplot",
         args, 
@@ -4032,10 +4032,10 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1021); ac++;
-    XtSetArg(args[ac], XmNwidth, 1014); ac++;
-    XtSetArg(args[ac], XmNheight, 481); ac++;
+    XtSetArg(args[ac], XmNx, 757); ac++;
+    XtSetArg(args[ac], XmNy, 995); ac++;
+    XtSetArg(args[ac], XmNwidth, 1021); ac++;
+    XtSetArg(args[ac], XmNheight, 483); ac++;
     bulletinBoard_modelplot = XtCreateWidget((char *)"bulletinBoard_modelplot",
         xmBulletinBoardWidgetClass,
         dialogShell_modelplot,
@@ -4043,8 +4043,36 @@ CreatemainWindow(Widget parent)
         ac);
     
     ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"Clear Block", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 360); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 80); ac++;
+        XtSetArg(args[ac], XmNheight, 32); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_modelplot_clearblock = XmCreatePushButton(bulletinBoard_modelplot,
+            (char *)"pushButton_modelplot_clearblock",
+            args, 
+            ac);
+        XtManageChild(pushButton_modelplot_clearblock);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_modelplot_clearblock, XmNactivateCallback, do_modelplot_clearblock, (XtPointer)0);
+    
+    ac = 0;
     XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
-    XtSetArg(args[ac], XmNx, 100); ac++;
+    XtSetArg(args[ac], XmNx, 80); ac++;
     XtSetArg(args[ac], XmNy, 10); ac++;
     XtSetArg(args[ac], XmNwidth, 185); ac++;
     XtSetArg(args[ac], XmNheight, 32); ac++;
@@ -4114,7 +4142,7 @@ CreatemainWindow(Widget parent)
         tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"Full Size", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 290); ac++;
+        XtSetArg(args[ac], XmNx, 270); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
@@ -4139,14 +4167,15 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)"Mouse: <left> select closest tie; <middle> select closest untied crossing; <right> drag zoom extent", 
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard_modelplot, (char *)":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom extent\"\"Selection: No selection\"", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNx, 400); ac++;
+        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
+        XtSetArg(args[ac], XmNx, 450); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 600); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNwidth, 550); ac++;
+        XtSetArg(args[ac], XmNheight, 40); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
@@ -4189,7 +4218,7 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 10); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 70); ac++;
+        XtSetArg(args[ac], XmNwidth, 60); ac++;
         XtSetArg(args[ac], XmNheight, 32); ac++;
         XtSetArg(args[ac], XmNfontList, 
             BX_CONVERT(bulletinBoard_modelplot, (char *)"-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1", 

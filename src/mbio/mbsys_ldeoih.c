@@ -473,9 +473,18 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<*nbath;i++)
 			{
 			beamflag[i] = store->beamflag[i];
-			bath[i] = depthscale * store->bath[i] + transducer_depth;
-			bathacrosstrack[i] = distscale * store->bath_acrosstrack[i];
-			bathalongtrack[i] = distscale * store->bath_alongtrack[i];
+			if (beamflag[i] != MB_FLAG_NULL)
+				{
+				bath[i] = depthscale * store->bath[i] + transducer_depth;
+				bathacrosstrack[i] = distscale * store->bath_acrosstrack[i];
+				bathalongtrack[i] = distscale * store->bath_alongtrack[i];
+				}
+			else
+				{
+				bath[i] = 0.0;
+				bathacrosstrack[i] = 0.0;
+				bathalongtrack[i] = 0.0;
+				}
 			}
 		for (i=0;i<*namp;i++)
 			{

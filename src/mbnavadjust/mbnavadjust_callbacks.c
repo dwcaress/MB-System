@@ -1164,10 +1164,12 @@ void do_update_status()
 						truecrossing = ' ';
 					else
 						truecrossing = 'X';
-					sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %3d %2d",
+					sprintf(string,"%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d",
 						status_char, truecrossing, i,
+						project.files[crossing->file_id_1].block,
 						crossing->file_id_1,
 						crossing->section_1,
+						project.files[crossing->file_id_2].block,
 						crossing->file_id_2,
 						crossing->section_2,
 						crossing->overlap,
@@ -1281,10 +1283,12 @@ void do_update_status()
 						truecrossing = ' ';
 					else
 						truecrossing = 'X';
-					sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %3d %2d",
+					sprintf(string,"%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d",
 						status_char, truecrossing, i,
+						project.files[crossing->file_id_1].block,
 						crossing->file_id_1,
 						crossing->section_1,
+						project.files[crossing->file_id_2].block,
 						crossing->file_id_2,
 						crossing->section_2,
 						crossing->overlap,
@@ -1398,10 +1402,12 @@ void do_update_status()
 						truecrossing = ' ';
 					else
 						truecrossing = 'X';
-					sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %3d %2d",
+					sprintf(string,"%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d",
 						status_char, truecrossing, i,
+						project.files[crossing->file_id_1].block,
 						crossing->file_id_1,
 						crossing->section_1,
+						project.files[crossing->file_id_2].block,
 						crossing->file_id_2,
 						crossing->section_2,
 						crossing->overlap,
@@ -1512,10 +1518,12 @@ void do_update_status()
 					else
 						status_char = '-';
 					truecrossing = 'X';
-					sprintf(string,"%c%c %4d %3.3d:%3.3d %3.3d:%3.3d %3d %2d",
+					sprintf(string,"%c%c %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d %3d %2d",
 						status_char, truecrossing, i,
+						project.files[crossing->file_id_1].block,
 						crossing->file_id_1,
 						crossing->section_1,
+						project.files[crossing->file_id_2].block,
 						crossing->file_id_2,
 						crossing->section_2,
 						crossing->overlap,
@@ -1648,17 +1656,17 @@ void do_update_status()
 					    else if (tie->status == MBNA_TIE_Z)
 					    	tiestatus = tiestatus_z;
 					    if (tie->inversion_status == MBNA_INVERSION_CURRENT)
-						sprintf(string,"%4d %2d %s %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f",
+						sprintf(string,"%4d %2d %s %2.2d:%3.3d:%3.3d:%2.2d %2.2d:%3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f",
 						    i, j,
 						    tiestatus,
+						    project.files[crossing->file_id_1].block,
 						    crossing->file_id_1,
 						    crossing->section_1,
 						    tie->snav_1,
+						    project.files[crossing->file_id_2].block,
 						    crossing->file_id_2,
 						    crossing->section_2,
 						    tie->snav_2,
-						    project.files[crossing->file_id_1].block,
-						    project.files[crossing->file_id_2].block,
 						    tie->offset_x_m,
 						    tie->offset_y_m,
 						    tie->offset_z_m,
@@ -1668,17 +1676,17 @@ void do_update_status()
 						    tie->sigmar3,
 						    dr1, dr2, dr3);
 					    else if (tie->inversion_status == MBNA_INVERSION_OLD)
-						sprintf(string,"%4d %2d %s %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f ***",
+						sprintf(string,"%4d %2d %s %2.2d:%3.3d:%3.3d:%2.2d %2.2d:%3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f | %4.3f %4.3f %4.3f ***",
 						    i, j,
 						    tiestatus,
+						    project.files[crossing->file_id_1].block,
 						    crossing->file_id_1,
 						    crossing->section_1,
 						    tie->snav_1,
+						    project.files[crossing->file_id_2].block,
 						    crossing->file_id_2,
 						    crossing->section_2,
 						    tie->snav_2,
-						    project.files[crossing->file_id_1].block,
-						    project.files[crossing->file_id_2].block,
 						    tie->offset_x_m,
 						    tie->offset_y_m,
 						    tie->offset_z_m,
@@ -1688,17 +1696,17 @@ void do_update_status()
 						    tie->sigmar3,
 						    dr1, dr2, dr3);
 					    else
-						sprintf(string,"%4d %2d %s %3.3d:%3.3d:%2.2d %3.3d:%3.3d:%2.2d %2.2d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
+						sprintf(string,"%4d %2d %s %2.2d:%3.3d:%3.3d:%2.2d %2.2d:%3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f",
 						    i, j,
 						    tiestatus,
+						    project.files[crossing->file_id_1].block,
 						    crossing->file_id_1,
 						    crossing->section_1,
 						    tie->snav_1,
+						    project.files[crossing->file_id_2].block,
 						    crossing->file_id_2,
 						    crossing->section_2,
 						    tie->snav_2,
-						    project.files[crossing->file_id_1].block,
-						    project.files[crossing->file_id_2].block,
 						    tie->offset_x_m,
 						    tie->offset_y_m,
 						    tie->offset_z_m,
@@ -2394,7 +2402,7 @@ void do_update_status()
 			XmNsensitive, True,
 			NULL);
 		if (project.num_truecrossings == project.num_truecrossings_analyzed
-			|| project.num_crossings == project.num_truecrossings_analyzed)
+			|| project.num_crossings_analyzed >= 10)
 			XtVaSetValues(pushButton_invertnav,
 				XmNsensitive, True,
 				NULL);
@@ -2542,6 +2550,43 @@ void do_update_status()
 	    XmToggleButtonSetState(toggleButton_misfitcenter_auto, 
 			TRUE, TRUE);
 	    }
+	    
+	/* deal with modelplot */
+	if (project.modelplot == MB_YES)
+	    {
+	    /* set model view clear block button sensitivity */
+	    if (mbna_crossing_select == MBNA_SELECT_NONE)
+		    {
+		    XtVaSetValues(pushButton_modelplot_clearblock,
+			    XmNsensitive, False,
+			    NULL);
+		    }
+	    else
+		    {
+		    XtVaSetValues(pushButton_modelplot_clearblock,
+			    XmNsensitive, True,
+			    NULL);
+		    }
+
+	   /* set model view status label */
+	   if (mbna_crossing_select == MBNA_SELECT_NONE)
+		   {
+        	   sprintf(string,":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom extent\":t\"No Selection\"");
+		   }
+	   else
+		   {
+		   crossing = &(project.crossings[mbna_crossing_select]);
+        	   sprintf(string,":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
+			       mbna_crossing_select,
+			       project.files[crossing->file_id_1].block,
+			       crossing->file_id_1,
+			       crossing->section_1,
+			       project.files[crossing->file_id_2].block,
+			       crossing->file_id_2,
+			       crossing->section_2);
+		   }
+	    set_label_multiline_string(label_modelplot_status, string);
+	    }
 }
 /*--------------------------------------------------------------------*/
 
@@ -2641,22 +2686,22 @@ do_update_naverr()
 	if (crossing->status == MBNA_CROSSING_STATUS_NONE)
 		{
         	sprintf(string,":::t\"Crossing: %d of %d\"\
-:t\"Sections: %4.4d:%4.4d and %4.4d:%4.4d\"\
+:t\"Sections: %2.2d:%3.3d:%3.3d and %2.2d:%3.3d:%3.3d\"\
 :t\"Time Difference: %f days \"\
 :t\"Status: Unset \"\
 :t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets:   None None None\"",
                	 	mbna_current_crossing, project.num_crossings,
-                	crossing->file_id_1,crossing->section_1,
-                	crossing->file_id_2,crossing->section_2,
+                	project.files[crossing->file_id_1].block,crossing->file_id_1,crossing->section_1,
+                	project.files[crossing->file_id_2].block,crossing->file_id_2,crossing->section_2,
 			timediff,
                	 	plot_width, misfit_width, project.zoffsetwidth, zoom_factor);
                 }
 	else if (crossing->status == MBNA_CROSSING_STATUS_SET)
 		{
         	sprintf(string,":::t\"Crossing: %d of %d\"\
-:t\"Sections: %4.4d:%4.4d and %4.4d:%4.4d\"\
+:t\"Sections: %2.2d:%3.3d:%3.3d and %2.2d:%3.3d:%3.3d\"\
 :t\"Time Difference: %f days \"\
 :t\"Current Tie Point: %2d of %2d  Nav Points: %4d %4d\"\
 :t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
@@ -2664,8 +2709,8 @@ do_update_naverr()
 :t\"Relative Offsets (m):   %.3f %.3f %.3f\"\
 :t\"Sigma (m):   %.3f %.3f %.3f\"",
                	 	mbna_current_crossing, project.num_crossings,
-                	crossing->file_id_1,crossing->section_1,
-                	crossing->file_id_2,crossing->section_2,
+                	project.files[crossing->file_id_1].block,crossing->file_id_1,crossing->section_1,
+                	project.files[crossing->file_id_2].block,crossing->file_id_2,crossing->section_2,
 			timediff,
                 	mbna_current_tie, crossing->num_ties,
                 	tie->snav_1,
@@ -2681,15 +2726,15 @@ do_update_naverr()
 	else
 		{
         	sprintf(string,":::t\"Crossing: %d of %d\"\
-:t\"Sections: %4.4d:%4.4d and %4.4d:%4.4d\"\
+:t\"Sections: %2.2d:%3.3d:%3.3d and %2.2d:%3.3d:%3.3d\"\
 :t\"Time Difference: %f days \"\
 :t\"Status: Skipped \"\
 :t\"Plot Widths (m): Contour: %.2f Misfit: %.2f Z: %.2f\"\
 :t\"Zoom Factor: %.2f \"\
 :t\"Relative Offsets:   Skipped Skipped Skipped\"",
                	 	mbna_current_crossing, project.num_crossings,
-                 	crossing->file_id_1,crossing->section_1,
-                	crossing->file_id_2,crossing->section_2,
+                 	project.files[crossing->file_id_1].block,crossing->file_id_1,crossing->section_1,
+                	project.files[crossing->file_id_2].block,crossing->file_id_2,crossing->section_2,
 			timediff,
               	 	plot_width, misfit_width, project.zoffsetwidth, zoom_factor);
                 }
@@ -4999,6 +5044,8 @@ do_modelplot_show( Widget w, XtPointer client_data, XtPointer call_data)
     
     /* plot the model */
     mbnavadjust_modelplot_plot();
+
+    do_update_status();
 }
 /*--------------------------------------------------------------------*/
 
@@ -5249,6 +5296,28 @@ do_modelplot_sequential( Widget w, XtPointer client_data, XtPointer call_data)
 	    }
 	else
 	    project.modelplot_style = MBNA_MODELPLOT_SURVEY;
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_modelplot_clearblock( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+/* fprintf(stderr,"Called do_modelplot_clearblock\n"); */
+
+	mbnavadjust_modelplot_clearblock();
+	
+        if (mbna_naverr_load == MB_YES)
+	    {
+	    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+	    do_update_naverr();
+	    }
+	if (project.modelplot == MB_YES)
+	    mbnavadjust_modelplot_plot();
+	do_update_status();
+
 }
 
 /*--------------------------------------------------------------------*/
@@ -5536,3 +5605,4 @@ do_make_grid( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 }
+

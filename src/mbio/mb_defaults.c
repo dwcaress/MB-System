@@ -394,3 +394,64 @@ int mb_lonflip(int verbose, int *lonflip)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_fbtversion(int verbose, int *fbtversion)
+{
+	char	*function_name = "mb_fbtversion";
+	int	status;
+	FILE	*fp;
+	char	file[MB_PATH_MAXLINE];
+	char	string[MB_PATH_MAXLINE];
+	char	*HOME = "HOME";
+	char	*home_ptr;
+	char	*getenv();
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose: %d\n",verbose);
+		}
+
+	/* successful no matter what happens */
+	status = MB_SUCCESS;
+
+	/* set system default values */
+	*fbtversion = 3;
+
+	/* set the filename */
+	if ((home_ptr = getenv(HOME)) != NULL)
+		{
+		strcpy(file,home_ptr);
+		strcat(file,"/.mbio_defaults");
+
+		/* open and read values from file if possible */
+		if ((fp = fopen(file, "r")) != NULL)
+			{
+			while (fgets(string,sizeof(string),fp) != NULL)
+				{
+				if (strncmp(string,"fbtversion: 2",13) == 0)
+					*fbtversion = 2;
+				else if (strncmp(string,"fbtversion: 3",13) == 0)
+					*fbtversion = 3;
+				}
+ 			fclose(fp);
+			}
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id:     %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       fbtversion: %d\n",*fbtversion);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/

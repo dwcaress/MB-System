@@ -1,9 +1,11 @@
-MB-SYSTEM VERSION 5.3.1897 README FILE:
-----------------------------------------
+MB-SYSTEM README FILE:
+----------------------
+Version: $Id$
+----------------------
 
-This file is located at the top of the MB-System directory
-structure. This directory structure contains the version 
-5.3.1897 release of the MB-System software package for 
+This file is located at the top of the MB-System 
+directory structure. This directory structure contains 
+the source code of the MB-System software package for 
 processing and display of swath sonar data.  
 
 MB-SYSTEM VERSION 5 DESCRIPTION:
@@ -26,7 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.1897       May 27, 2011
+* Version 5.3.1898       June 13, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -133,7 +135,7 @@ Palisades, NY 10964
 
 MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
 -----------------------------------------
-MB-System Copyright (C) 1993-2010 by
+MB-System Copyright (C) 1993-2011 by
 David W. Caress (caress@mbari.org)
   Monterey Bay Aquarium Research Institute
   Moss Landing, CA 95039
@@ -177,6 +179,26 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+
+Provided a means to continue using the old definition of 
+swath format MBF_LDEOIH (format 71) for fbt files.
+Users can now use mbdefaults to set the format 71 version that
+will be generated when fbt files are created by mbdatalist and
+mbprocess. If 
+ 	mbdefaults -Fold
+is executed, the .mbio_defaults file in the user's home directory
+will be altered so that all new fbt files are in the old format.
+The purpose of this backwards compatibility is to allow users to
+take advantage of the Fledermaus capability for editing bathymetry
+in MB-System processing environments. This involved changes to mbcopy
+as well as to the MBF_LDEOIH i/o module.
+
+Changed the swath data import code so that sections will be created even
+when all beams have been flagged as bad. This is to allow surveys
+to remain intact, with no breaks, because the concept of a continuous
+survey is increasingly important in MBnavadjust. Also altered the 
+status displays and listings to show survey id along with file and
+section id's.
 
 Updated the definition of swath format MBF_LDEOIH (format 71),
 which is used for the "fast bathymetry" or *.fbt files in MB-System

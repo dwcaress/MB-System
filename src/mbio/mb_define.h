@@ -288,8 +288,8 @@ int mb_defaults(int verbose, int *format, int *pings,
 		double *speedmin, double *timegap);
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject);
 int mb_lonflip(int verbose, int *lonflip);
-int mb_format_register(int verbose, int *format, void *mbio_ptr, 
-		int *error);
+int mb_fbtversion(int verbose, int *fbtversion);
+int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error);
 int mb_format_info(int verbose, int *format, int *system, 
 		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
 		char *format_name, char *system_name, char *format_description, 

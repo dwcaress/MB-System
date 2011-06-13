@@ -1,4 +1,4 @@
-.TH mbdefaults 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbdefaults 1 "10 June 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdefaults\fP - Set or list default mbio parameters for 
 reading and writing swath sonar data
@@ -48,9 +48,19 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 Sets the program used for displaying Postscript graphics files
 on a screen; this facility is used by shellscripts created through
 macros like \fBmbm_plot\fP. The default Postscript display
-utility is \fBghostview\fP. Other common Postscript display utilities
-are \fBpageview\fP (for Sun workstations) and \fBxpsview\fP 
-(for Silicon Graphics workstations.
+utility is \fBghostview\fP. Another common Postscript display utilities
+is \fBgv\fP; past postscript viewers included \fBpageview\fP 
+(for Sun workstations) and \fBxpsview\fP (for Silicon Graphics workstations).
+.TP
+.B \-F
+\fIfbtversion\fP
+.br
+Set the version of fbt files created by \fBmbdatalist\fP and \fBmbprocess\fP. 
+If \fIfbtversion\fP = 2, "old", or "OLD", then the pre-5.3.1897 version of
+format 71 will be used to write the "fast bathymetry" or "*.fbt" files.
+If \fIfbtversion\fP = 3, "new", or "NEW", then the new, 5.3.1897-or-later version of
+format 71 will be used to write the "fast bathymetry" or "*.fbt" files.
+
 .TP
 .B \-H
 This "help" flag cause the program to print out a description
@@ -111,6 +121,7 @@ The output will be:
  ps viewer:  xspsview
  img viewer: xv
  project:    none
+ fbtversion: 3 (new)
 
 Suppose that one just wishes to see what the current default
 parameters are.  The following will suffice:
@@ -119,11 +130,12 @@ parameters are.  The following will suffice:
 The output will be
 
  Current MBIO Default Control Parameters:
- lonflip:  0
- timegap:  1.000000
+ lonflip:    0
+ timegap:    1.000000
  ps viewer:  ghostview
  img viewer: xv
  project:    none
+ fbtversion: 3 (new)
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbcontour\fP(l), 
