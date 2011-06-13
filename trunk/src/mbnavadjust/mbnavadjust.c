@@ -137,7 +137,7 @@ int main( int argc, char **argv)
     XtSetArg(args[ac], XmNtitle, "MBnavadjust"); ac++;
     XtSetArg(args[ac], XmNiconName, "MBnavadjust"); ac++;
     XtSetArg(args[ac], XmNx, 82); ac++;
-    XtSetArg(args[ac], XmNy, 352); ac++;
+    XtSetArg(args[ac], XmNy, 396); ac++;
     XtSetArg(args[ac], XmNwidth, 962); ac++;
     XtSetArg(args[ac], XmNheight, 400); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",

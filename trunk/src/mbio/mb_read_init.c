@@ -447,6 +447,27 @@ int mb_read_init(int verbose, char *file,
 		to save information in certain cases */
 	mb_io_ptr->save_flag = MB_NO;
 	mb_io_ptr->save_label_flag = MB_NO;
+	mb_io_ptr->save1 = 0;
+	mb_io_ptr->save2 = 0;
+	mb_io_ptr->save3 = 0;
+	mb_io_ptr->save4 = 0;
+	mb_io_ptr->save5 = 0;
+	mb_io_ptr->save6 = 0;
+	mb_io_ptr->save7 = 0;
+	mb_io_ptr->save8 = 0;
+	mb_io_ptr->save9 = 0;
+	mb_io_ptr->save10 = 0;
+	mb_io_ptr->save11 = 0;
+	mb_io_ptr->save12 = 0;
+	mb_io_ptr->save13 = 0;
+	mb_io_ptr->save14 = 0;
+	mb_io_ptr->saved1 = 0;
+	mb_io_ptr->saved2 = 0;
+	mb_io_ptr->saved3 = 0;
+	mb_io_ptr->saved4 = 0;
+	mb_io_ptr->saved5 = 0;
+	mb_io_ptr->saveptr1 = NULL;
+	mb_io_ptr->saveptr2 = NULL;
 
 	/* allocate arrays */
 	mb_io_ptr->beams_bath_alloc = mb_io_ptr->beams_bath_max;

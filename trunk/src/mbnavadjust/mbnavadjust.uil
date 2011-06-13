@@ -42,7 +42,6 @@ names = case_sensitive
 !(BX) bx_info("c_dirpath", "")
 !(BX) bx_info("include_path", ".", false)
 !(BX) bx_info("xrunner_command", "$(M_ROOT)/arch/X11.5/Xm1.2/mic_xm.o", false)
-!(BX) bx_info("purify_command", "purify", false)
 !(BX) bx_info("system_directory", "/opt/bx-6.1")
 !(BX) bx_info("builder_version", "BuilderXcessory Version 6.1.3")
 !(BX) bx_info("build_lang", "C")
@@ -155,9 +154,11 @@ identifier BXG_scale_controls_colorinterval;
 identifier BXG_scale_controls_contourinterval;
 identifier BXG_scale_controls_decimation;
 identifier BXG_scale_controls_sectionsoundings;
+identifier BXG_pushButton_modelplot_clearblock;
 identifier BXG_toggleButton_modelplot_block;
 identifier BXG_toggleButton_modelplot_sequential;
 identifier BXG_radioBox;
+identifier BXG_label_modelplot_status;
 identifier BXG_drawingArea_modelplot;
 identifier BXG_bulletinBoard_modelplot;
 procedure BxExitCB(integer);
@@ -193,6 +194,7 @@ procedure do_fileselection_ok();
 procedure do_list_data_select();
 procedure do_make_grid();
 procedure do_modelplot_block();
+procedure do_modelplot_clearblock();
 procedure do_modelplot_dismiss();
 procedure do_modelplot_expose();
 procedure do_modelplot_fullsize();
@@ -257,7 +259,7 @@ list BaseStyleReasons : callbacks {
 list Style_use : arguments {
         arguments BaseStyle;
         XmNfontList = font_table(
-		font('-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1'));
+		font('-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1'));
 };
 
 list Style_useReasons : callbacks {
@@ -268,33 +270,47 @@ list Style_useReasons : callbacks {
 !(BX)    handlers BaseStyleHandlers;
 !(BX)};
 
+list Style_use2 : arguments {
+        arguments BaseStyle;
+        XmNfontList = font_table(
+		font('-*-helvetica-bold-r-*-*-*-120-75-75-*-*-iso8859-1'));
+};
+
+list Style_use2Reasons : callbacks {
+        callbacks BaseStyleReasons;
+};
+
+!(BX)list Style_use2Handlers : handlers {
+!(BX)    handlers BaseStyleHandlers;
+!(BX)};
+
 
 object pushButton_modelplot_dismiss : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Dismiss");
         XmNx = 10;
         XmNy = 10;
-        XmNwidth = 70;
+        XmNwidth = 60;
         XmNheight = 32;
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
        XmNactivateCallback = procedures {
                  BxUnmanageCB("bulletinBoard_modelplot");
                  do_modelplot_dismiss();
         };
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object drawingArea_modelplot : XmDrawingArea widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNborderWidth = 1;
         XmNbackground = color('white');
         XmNx = 10;
@@ -305,43 +321,45 @@ object drawingArea_modelplot : XmDrawingArea widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_drawingArea_modelplot);
         XmNinputCallback = procedure do_modelplot_input();
         XmNexposeCallback = procedure do_modelplot_expose();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_modelplot_status : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
-        XmNlabelString = compound_string("Mouse: <left> select closest tie" &
- "; <middle> select closest untied crossing; <right> drag zoom exten" &
- "t");
-        XmNx = 400;
+        XmNlabelString = compound_string("Mouse: <left> select  tie; <midd" &
+ "le> select untied crossing; <right> drag zoom extent", separate=true) &
+ compound_string("Selection: No selection");
+        XmNrecomputeSize = false;
+        XmNx = 450;
         XmNy = 10;
-        XmNwidth = 600;
-        XmNheight = 30;
+        XmNwidth = 550;
+        XmNheight = 40;
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_modelplot_status);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_modelplot_fullsize : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Full Size");
-        XmNx = 290;
+        XmNx = 270;
         XmNy = 10;
         XmNwidth = 80;
         XmNheight = 32;
@@ -349,17 +367,17 @@ object pushButton_modelplot_fullsize : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         XmNactivateCallback = procedure do_modelplot_fullsize();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_modelplot_sequential : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Sequential");
         XmNwidth = 88;
         XmNheight = 26;
@@ -367,18 +385,18 @@ object toggleButton_modelplot_sequential : XmToggleButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_modelplot_sequential);
         XmNvalueChangedCallback = procedure do_modelplot_sequential();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_modelplot_block : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Block");
         XmNwidth = 88;
         XmNheight = 26;
@@ -386,20 +404,20 @@ object toggleButton_modelplot_block : XmToggleButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_modelplot_block);
         XmNvalueChangedCallback = procedure do_modelplot_block();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object radioBox : XmRadioBox widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNorientation = XmHORIZONTAL;
-        XmNx = 100;
+        XmNx = 80;
         XmNy = 10;
         XmNwidth = 185;
         XmNheight = 32;
@@ -409,25 +427,47 @@ object radioBox : XmRadioBox widget {
          managed XmToggleButton toggleButton_modelplot_block;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_radioBox);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
+!(BX)    };
+};
+
+object pushButton_modelplot_clearblock : XmPushButton widget {
+    arguments {
+        arguments Style_use2;
+        XmNlabelString = compound_string("Clear Block");
+        XmNx = 360;
+        XmNy = 10;
+        XmNwidth = 80;
+        XmNheight = 32;
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_use2Reasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_modelplot_clearblock);
+        XmNactivateCallback = procedure do_modelplot_clearblock();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object bulletinBoard_modelplot : XmBulletinBoardDialog widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
-        XmNy = 1021;
-        XmNwidth = 1014;
-        XmNheight = 481;
+        XmNx = 757;
+        XmNy = 995;
+        XmNwidth = 1021;
+        XmNheight = 483;
     };
     controls {
+         managed XmPushButton pushButton_modelplot_clearblock;
          managed XmRadioBox radioBox;
          managed XmPushButton pushButton_modelplot_fullsize;
          managed XmLabel label_modelplot_status;
@@ -435,37 +475,37 @@ object bulletinBoard_modelplot : XmBulletinBoardDialog widget {
          managed XmPushButton pushButton_modelplot_dismiss;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_bulletinBoard_modelplot);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 !(BX)object dialogShell_modelplot : XmDialogShell widget {
 !(BX)    arguments {
-!(BX)        arguments Style_use;
+!(BX)        arguments Style_use2;
 !(BX)        XmNtitle = "Navigation Adjustment Model Plot" &
 !(BX) "";
 !(BX)        XmNallowShellResize = true;
-!(BX)        XmNwidth = 1014;
-!(BX)        XmNheight = 481;
+!(BX)        XmNwidth = 1021;
+!(BX)        XmNheight = 483;
 !(BX)    };
 !(BX)    controls {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_modelplot;
 !(BX)    };
 !(BX)    callbacks {
-!(BX)        callbacks Style_useReasons;
+!(BX)        callbacks Style_use2Reasons;
 !(BX)    };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 !(BX)};
 
 object pushButton_controls_dismiss : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Dismiss");
         XmNtopAttachment = XmATTACH_NONE;
         XmNrightAttachment = XmATTACH_FORM;
@@ -483,17 +523,17 @@ object pushButton_controls_dismiss : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         XmNactivateCallback = procedure BxUnmanageCB("form_controls");
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_controls_sectionsoundings : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = 1000;
         XmNdecimalPoints = 0;
         XmNvalue = 10000;
@@ -520,18 +560,18 @@ object scale_controls_sectionsoundings : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_sectionsoundings);
         XmNvalueChangedCallback = procedure do_scale_controls_sectionsoundings();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_controls_sectionsoundings : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Max # Soundings in Section:");
         XmNleftAttachment = XmATTACH_FORM;
@@ -545,16 +585,16 @@ object label_controls_sectionsoundings : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_controls_decimation : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Decimation:");
         XmNleftAttachment = XmATTACH_FORM;
@@ -568,16 +608,16 @@ object label_controls_decimation : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_controls_decimation : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = 1;
         XmNvalue = 1;
         XmNmaximum = 10;
@@ -601,12 +641,12 @@ object scale_controls_decimation : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_decimation);
         XmNvalueChangedCallback = procedure do_scale_controls_decimation();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -655,7 +695,7 @@ object separator4 : XmSeparator widget {
 
 object pushButton_controls_apply : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Apply");
         XmNtopAttachment = XmATTACH_NONE;
         XmNleftAttachment = XmATTACH_FORM;
@@ -670,17 +710,17 @@ object pushButton_controls_apply : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         XmNactivateCallback = procedure do_controls_apply();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_controls_tickinterval : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Tick Interval (m):");
         XmNleftAttachment = XmATTACH_FORM;
@@ -694,16 +734,16 @@ object label_controls_tickinterval : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_controls_colorinterval : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Color Interval (m):");
         XmNleftAttachment = XmATTACH_FORM;
@@ -717,16 +757,16 @@ object label_controls_colorinterval : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_controls_contourinterval : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Contour Interval (m):");
         XmNleftAttachment = XmATTACH_FORM;
@@ -740,16 +780,16 @@ object label_controls_contourinterval : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_controls_contourinterval : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = 1;
         XmNdecimalPoints = 2;
         XmNvalue = 2500;
@@ -774,18 +814,18 @@ object scale_controls_contourinterval : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_contourinterval);
         XmNvalueChangedCallback = procedure do_scale_contourinterval();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_controls_colorinterval : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = 1;
         XmNdecimalPoints = 2;
         XmNvalue = 10000;
@@ -810,18 +850,18 @@ object scale_controls_colorinterval : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_colorinterval);
         XmNvalueChangedCallback = procedure do_controls_scale_colorinterval();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_controls_tickinterval : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = 1;
         XmNdecimalPoints = 2;
         XmNvalue = 10000;
@@ -846,18 +886,18 @@ object scale_controls_tickinterval : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_tickinterval);
         XmNvalueChangedCallback = procedure do_scale_controls_tickinterval();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_controls_sectionlength : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = 1;
         XmNdecimalPoints = 2;
         XmNvalue = 2000;
@@ -879,18 +919,18 @@ object scale_controls_sectionlength : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_sectionlength);
         XmNvalueChangedCallback = procedure do_scale_controls_sectionlength();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_controls_sectionlength : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Max Section Length (km):");
         XmNtopAttachment = XmATTACH_FORM;
@@ -906,10 +946,10 @@ object label_controls_sectionlength : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -933,7 +973,7 @@ object separator12 : XmSeparator widget {
 
 object scale_controls_smoothing : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = 1;
         XmNdecimalPoints = 2;
         XmNvalue = 10;
@@ -954,18 +994,18 @@ object scale_controls_smoothing : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_smoothing);
         XmNvalueChangedCallback = procedure do_scale_controls_smoothing();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_controls_smoothing : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Inversion", separate=true) &
  compound_string("Smoothing (m):");
@@ -980,16 +1020,16 @@ object label_controls_smoothing : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_controls_zoffset : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Z Offset Width (m):");
         XmNleftAttachment = XmATTACH_FORM;
@@ -1003,16 +1043,16 @@ object label_controls_zoffset : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_controls_zoffset : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = 1;
         XmNdecimalPoints = 0;
         XmNvalue = 10;
@@ -1031,12 +1071,12 @@ object scale_controls_zoffset : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_controls_zoffset);
         XmNvalueChangedCallback = procedure do_scale_controls_zoffset();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -1058,10 +1098,10 @@ object separator14 : XmSeparator widget {
 
 object form_controls : XmFormDialog widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
-        XmNy = 1043;
+        XmNy = 1118;
         XmNwidth = 635;
         XmNheight = 438;
     };
@@ -1090,16 +1130,16 @@ object form_controls : XmFormDialog widget {
          managed XmPushButton pushButton_controls_dismiss;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 !(BX)object dialogShell_controls : XmDialogShell widget {
 !(BX)    arguments {
-!(BX)        arguments Style_use;
+!(BX)        arguments Style_use2;
 !(BX)        XmNtitle = "Controls";
 !(BX)        XmNwidth = 635;
 !(BX)        XmNheight = 438;
@@ -1108,10 +1148,10 @@ object form_controls : XmFormDialog widget {
 !(BX)         managed XmFormDialog form_controls;
 !(BX)    };
 !(BX)    callbacks {
-!(BX)        callbacks Style_useReasons;
+!(BX)        callbacks Style_use2Reasons;
 !(BX)    };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 !(BX)};
 
@@ -1411,10 +1451,10 @@ object label_about_create1 : XmLabel widget {
 
 object form_about : XmFormDialog widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
-        XmNy = 1020;
+        XmNy = 1095;
         XmNwidth = 488;
         XmNheight = 484;
     };
@@ -1435,16 +1475,16 @@ object form_about : XmFormDialog widget {
          managed XmLabel label_about_mbedit;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 !(BX)object dialogShell_about : XmDialogShell widget {
 !(BX)    arguments {
-!(BX)        arguments Style_use;
+!(BX)        arguments Style_use2;
 !(BX)        XmNtitle = "About MBnavadjust";
 !(BX)        XmNwidth = 488;
 !(BX)        XmNheight = 484;
@@ -1453,16 +1493,16 @@ object form_about : XmFormDialog widget {
 !(BX)         managed XmFormDialog form_about;
 !(BX)    };
 !(BX)    callbacks {
-!(BX)        callbacks Style_useReasons;
+!(BX)        callbacks Style_use2Reasons;
 !(BX)    };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 !(BX)};
 
 object pushButton_biases_dismiss : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Dismiss");
         XmNx = 140;
         XmNy = 400;
@@ -1472,17 +1512,17 @@ object pushButton_biases_dismiss : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         XmNactivateCallback = procedure BxUnmanageCB("bulletinBoard_biases");
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_biases_apply : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Apply");
         XmNx = 70;
         XmNy = 400;
@@ -1492,17 +1532,17 @@ object pushButton_biases_apply : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         XmNactivateCallback = procedure do_biases_apply();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_biases_together : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Same biases");
         XmNwidth = 121;
         XmNheight = 26;
@@ -1510,18 +1550,18 @@ object toggleButton_biases_together : XmToggleButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_biases_together);
         XmNvalueChangedCallback = procedure do_biases_toggle();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_biases_separate : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Different biases");
         XmNwidth = 121;
         XmNheight = 26;
@@ -1529,17 +1569,17 @@ object toggleButton_biases_separate : XmToggleButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_biases_separate);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object radioBox_biases_together : XmRadioBox widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNx = 150;
         XmNy = 10;
         XmNwidth = 127;
@@ -1550,16 +1590,16 @@ object radioBox_biases_together : XmRadioBox widget {
          managed XmToggleButton toggleButton_biases_separate;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_biases_files : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Section ID\'s:", separate=true) &
  compound_string("  Section 1: XXX:XXX", separate=true) &
@@ -1572,17 +1612,17 @@ object label_biases_files : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_biases_files);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_biases_heading1 : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = -99;
         XmNdecimalPoints = 1;
         XmNvalue = 0;
@@ -1601,18 +1641,18 @@ object scale_biases_heading1 : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_biases_heading1);
         XmNvalueChangedCallback = procedure do_biases_heading();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_biases_roll1 : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = -99;
         XmNdecimalPoints = 1;
         XmNvalue = 0;
@@ -1629,18 +1669,18 @@ object scale_biases_roll1 : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_biases_roll1);
         XmNvalueChangedCallback = procedure do_biases_roll();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_biases_roll2 : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = -99;
         XmNdecimalPoints = 1;
         XmNvalue = 0;
@@ -1657,17 +1697,17 @@ object scale_biases_roll2 : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_biases_roll2);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scale_biases_heading2 : XmScale widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNminimum = -99;
         XmNdecimalPoints = 1;
         XmNvalue = 0;
@@ -1684,11 +1724,11 @@ object scale_biases_heading2 : XmScale widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scale_biases_heading2);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -1720,7 +1760,7 @@ object separator8 : XmSeparator widget {
 
 object pushButton_biases_applyall : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Apply to All Files");
         XmNx = 70;
         XmNy = 360;
@@ -1730,12 +1770,12 @@ object pushButton_biases_applyall : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_biases_applyall);
         XmNactivateCallback = procedure do_biases_applyall();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -1754,12 +1794,12 @@ object separator9 : XmSeparator widget {
 
 object bulletinBoard_biases : XmBulletinBoardDialog widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNdialogTitle = compound_string("Heading & Roll Bias");
         XmNautoUnmanage = false;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
-        XmNy = 1039;
+        XmNy = 1114;
         XmNwidth = 284;
         XmNheight = 446;
     };
@@ -1778,16 +1818,16 @@ object bulletinBoard_biases : XmBulletinBoardDialog widget {
          managed XmPushButton pushButton_biases_dismiss;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 !(BX)object dialogShell_biases : XmDialogShell widget {
 !(BX)    arguments {
-!(BX)        arguments Style_use;
+!(BX)        arguments Style_use2;
 !(BX)        XmNtitle = "Attitude Biases";
 !(BX)        XmNwidth = 284;
 !(BX)        XmNheight = 446;
@@ -1796,16 +1836,16 @@ object bulletinBoard_biases : XmBulletinBoardDialog widget {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_biases;
 !(BX)    };
 !(BX)    callbacks {
-!(BX)        callbacks Style_useReasons;
+!(BX)        callbacks Style_use2Reasons;
 !(BX)    };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 !(BX)};
 
 object pushButton_naverr_setnone : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Skip Crossing");
         XmNrecomputeSize = false;
         XmNx = 350;
@@ -1816,18 +1856,18 @@ object pushButton_naverr_setnone : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_setnone);
         XmNactivateCallback = procedure do_naverr_setnone();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_previous : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Previous");
         XmNrecomputeSize = false;
         XmNx = 90;
@@ -1838,18 +1878,18 @@ object pushButton_naverr_previous : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_previous);
         XmNactivateCallback = procedure do_naverr_previous();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_next : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Next");
         XmNrecomputeSize = false;
         XmNx = 170;
@@ -1860,18 +1900,18 @@ object pushButton_naverr_next : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_next);
         XmNactivateCallback = procedure do_naverr_next();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_minmisfit : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Minimum Misfit");
         XmNrecomputeSize = false;
         XmNx = 10;
@@ -1882,18 +1922,18 @@ object pushButton_naverr_minmisfit : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_minimum);
         XmNactivateCallback = procedure do_naverr_minmisfit();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_selecttie : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Select Tie");
         XmNrecomputeSize = false;
         XmNx = 750;
@@ -1904,18 +1944,18 @@ object pushButton_naverr_selecttie : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_selecttie);
         XmNactivateCallback = procedure do_naverr_selecttie();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_dismiss : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Dismiss");
         XmNrecomputeSize = false;
         XmNx = 850;
@@ -1926,7 +1966,7 @@ object pushButton_naverr_dismiss : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_dismiss);
        XmNactivateCallback = procedures {
                  do_dismiss_naverr();
@@ -1935,13 +1975,13 @@ object pushButton_naverr_dismiss : XmPushButton widget {
         };
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object drawingArea_naverr_corr : XmDrawingArea widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNborderWidth = 1;
         XmNbackground = color('white');
         XmNresizePolicy = XmRESIZE_NONE;
@@ -1953,19 +1993,19 @@ object drawingArea_naverr_corr : XmDrawingArea widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_drawingArea_naverr_corr);
         XmNinputCallback = procedure do_naverr_corr_input();
         XmNexposeCallback = procedure do_naverr_corr_expose();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object drawingArea_naverr_cont : XmDrawingArea widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNborderWidth = 1;
         XmNbackground = color('white');
         XmNresizePolicy = XmRESIZE_NONE;
@@ -1977,19 +2017,19 @@ object drawingArea_naverr_cont : XmDrawingArea widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_drawingArea_naverr_cont);
         XmNinputCallback = procedure do_naverr_cont_input();
         XmNexposeCallback = procedure do_naverr_cont_expose();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_naverr_status : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("No Data Imported");
         XmNrecomputeSize = false;
@@ -2001,17 +2041,17 @@ object label_naverr_status : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_naverr_status);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_nextunset : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Next Unset");
         XmNrecomputeSize = false;
         XmNx = 250;
@@ -2022,18 +2062,18 @@ object pushButton_naverr_nextunset : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_nextunset);
         XmNactivateCallback = procedure do_naverr_nextunset();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_naverr_offsets : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("No Data Imported");
         XmNrecomputeSize = false;
@@ -2045,17 +2085,17 @@ object label_naverr_offsets : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_naverr_offsets);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_zerooffset : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Zero Offset");
         XmNx = 650;
         XmNy = 40;
@@ -2065,18 +2105,18 @@ object pushButton_naverr_zerooffset : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_zerooffset);
         XmNactivateCallback = procedure do_naverr_zerooffset();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_fullsize : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Full Size");
         XmNx = 350;
         XmNy = 40;
@@ -2086,18 +2126,18 @@ object pushButton_naverr_fullsize : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_fullsize);
         XmNactivateCallback = procedure do_naverr_fullsize();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_deletetie : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Delete Tie");
         XmNrecomputeSize = false;
         XmNx = 750;
@@ -2108,18 +2148,18 @@ object pushButton_naverr_deletetie : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_deletetie);
         XmNactivateCallback = procedure do_naverr_deletetie();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_addtie : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Add Tie");
         XmNrecomputeSize = false;
         XmNx = 650;
@@ -2130,18 +2170,18 @@ object pushButton_naverr_addtie : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_addtie);
         XmNactivateCallback = procedure do_naverr_addtie();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_resettie : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Reset Offset");
         XmNrecomputeSize = false;
         XmNx = 450;
@@ -2152,18 +2192,18 @@ object pushButton_naverr_resettie : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_resettie);
         XmNactivateCallback = procedure do_naverr_resettie();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_misfitcenter_zero : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNindicatorOn = XmINDICATOR_CHECK_BOX;
         XmNlabelString = compound_string("Center on Zero Offset");
         XmNwidth = 174;
@@ -2172,18 +2212,18 @@ object toggleButton_misfitcenter_zero : XmToggleButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_misfitcenter_zero);
         XmNvalueChangedCallback = procedure do_naverr_misfitcenter();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_misfitcenter_auto : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNindicatorOn = XmINDICATOR_CHECK_BOX;
         XmNlabelString = compound_string("Center on Current Offset");
         XmNwidth = 174;
@@ -2192,18 +2232,18 @@ object toggleButton_misfitcenter_auto : XmToggleButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_misfitcenter_auto);
         XmNvalueChangedCallback = procedure do_naverr_misfitcenter();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object radioBox_misfitcenter : XmRadioBox widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNx = 130;
         XmNy = 620;
         XmNwidth = 180;
@@ -2214,16 +2254,16 @@ object radioBox_misfitcenter : XmRadioBox widget {
          managed XmToggleButton toggleButton_misfitcenter_auto;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_settie : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Set Offset");
         XmNx = 550;
         XmNy = 10;
@@ -2233,53 +2273,53 @@ object pushButton_naverr_settie : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_settie);
         XmNactivateCallback = procedure do_naverr_setoffset();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_biases : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Biases");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
        XmNactivateCallback = procedures {
                  BxManageCB("bulletinBoard_biases");
                  do_biases_init();
         };
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_controls : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Contours");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         XmNactivateCallback = procedure BxManageCB("form_controls");
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pulldownMenu_settings : XmPulldownMenu widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNx = 0;
         XmNy = 0;
         XmNwidth = 65;
@@ -2290,16 +2330,16 @@ object pulldownMenu_settings : XmPulldownMenu widget {
          managed XmPushButton pushButton_naverr_controls;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object cascadeButton_settings : XmCascadeButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Settings");
         XmNx = 5;
         XmNy = 5;
@@ -2310,16 +2350,16 @@ object cascadeButton_settings : XmCascadeButton widget {
          unmanaged XmPulldownMenu pulldownMenu_settings;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object menuBar_settings : XmMenuBar widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNx = 10;
         XmNy = 10;
         XmNwidth = 76;
@@ -2329,16 +2369,16 @@ object menuBar_settings : XmMenuBar widget {
          managed XmCascadeButton cascadeButton_settings;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_zerozoffset : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Zero Z Offset");
         XmNx = 550;
         XmNy = 40;
@@ -2348,18 +2388,18 @@ object pushButton_naverr_zerozoffset : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_zerozoffset);
         XmNactivateCallback = procedure do_naverr_zerozoffset();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object drawingArea_naverr_zcorr : XmDrawingArea widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNborderWidth = 1;
         XmNbackground = color('white');
         XmNresizePolicy = XmRESIZE_NONE;
@@ -2371,19 +2411,19 @@ object drawingArea_naverr_zcorr : XmDrawingArea widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_drawingArea_naverr_zcorr);
         XmNinputCallback = procedure do_naverr_zcorr_input();
         XmNexposeCallback = procedure do_naverr_corr_expose();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_minxymisfit : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Minimum XY Misfit");
         XmNx = 10;
         XmNy = 650;
@@ -2393,18 +2433,18 @@ object pushButton_naverr_minxymisfit : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_minxymisfit);
         XmNactivateCallback = procedure do_naverr_minxymisfit();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_naverr_unset : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Unset Crossing");
         XmNrecomputeSize = false;
         XmNx = 450;
@@ -2415,26 +2455,26 @@ object pushButton_naverr_unset : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_naverr_unset);
         XmNactivateCallback = procedure do_naverr_unset();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object bulletinBoard_naverr : XmBulletinBoardDialog widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNdialogTitle = compound_string("Navadjust: Nav Error at Crossing" &
  "s");
         XmNdefaultPosition = true;
         XmNautoUnmanage = false;
         XmNnoResize = true;
         XmNresizePolicy = XmRESIZE_NONE;
-        XmNx = 813;
-        XmNy = 919;
+        XmNx = 258;
+        XmNy = 456;
         XmNwidth = 935;
         XmNheight = 685;
     };
@@ -2464,17 +2504,17 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
          managed XmPushButton pushButton_naverr_setnone;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_bulletinBoard_naverr);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 !(BX)object dialogShell_naverr : XmDialogShell widget {
 !(BX)    arguments {
-!(BX)        arguments Style_use;
+!(BX)        arguments Style_use2;
 !(BX)        XmNwidth = 935;
 !(BX)        XmNheight = 685;
 !(BX)    };
@@ -2482,10 +2522,10 @@ object bulletinBoard_naverr : XmBulletinBoardDialog widget {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_naverr;
 !(BX)    };
 !(BX)    callbacks {
-!(BX)        callbacks Style_useReasons;
+!(BX)        callbacks Style_use2Reasons;
 !(BX)    };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 !(BX)};
 
@@ -2566,7 +2606,7 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_NONE;
         XmNx = 0;
-        XmNy = 997;
+        XmNy = 1072;
         XmNwidth = 611;
         XmNheight = 530;
     };
@@ -2597,7 +2637,7 @@ object bulletinBoard_fileselection : XmBulletinBoardDialog widget {
 
 object pushButton_error : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("OK");
         XmNx = 110;
         XmNy = 110;
@@ -2607,16 +2647,16 @@ object pushButton_error : XmPushButton widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_error_three : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("permission in this directory!");
         XmNrecomputeSize = false;
         XmNx = 10;
@@ -2627,17 +2667,17 @@ object label_error_three : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_error_three);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_error_one : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Unable to open output file.");
         XmNrecomputeSize = false;
         XmNx = 10;
@@ -2648,17 +2688,17 @@ object label_error_one : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_error_one);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_error_two : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("You probably do not have write");
         XmNrecomputeSize = false;
         XmNx = 10;
@@ -2669,21 +2709,21 @@ object label_error_two : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_error_two);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object bulletinBoard_error : XmBulletinBoardDialog widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNx = 0;
-        XmNy = 1182;
+        XmNy = 1257;
         XmNwidth = 311;
         XmNheight = 160;
     };
@@ -2694,11 +2734,11 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
          managed XmPushButton pushButton_error;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_bulletinBoard_error);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -2717,7 +2757,7 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
 
 object label_message : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("MBnavadjust is loading data...");
         XmNx = 10;
@@ -2728,17 +2768,17 @@ object label_message : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_message);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_pleasewait : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Thank you for your patience.");
         XmNrecomputeSize = false;
@@ -2750,20 +2790,20 @@ object label_pleasewait : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object bulletinBoard_message : XmBulletinBoardDialog widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNdialogStyle = XmDIALOG_FULL_APPLICATION_MODAL;
         XmNresizePolicy = XmRESIZE_ANY;
         XmNx = 0;
-        XmNy = 1219;
+        XmNy = 1294;
         XmNwidth = 542;
         XmNheight = 86;
     };
@@ -2772,17 +2812,17 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
          managed XmLabel label_message;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_bulletinBoard_message);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 !(BX)object xmDialogShell_message : XmDialogShell widget {
 !(BX)    arguments {
-!(BX)        arguments Style_use;
+!(BX)        arguments Style_use2;
 !(BX)        XmNtitle = "Please Wait...";
 !(BX)        XmNallowShellResize = true;
 !(BX)        XmNmwmInputMode = MWM_INPUT_MODELESS;
@@ -2794,22 +2834,22 @@ object bulletinBoard_message : XmBulletinBoardDialog widget {
 !(BX)         managed XmBulletinBoardDialog bulletinBoard_message;
 !(BX)    };
 !(BX)    callbacks {
-!(BX)        callbacks Style_useReasons;
+!(BX)        callbacks Style_use2Reasons;
 !(BX)    };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 !(BX)};
 
 object pushButton_new : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("New");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_new);
        XmNactivateCallback = procedures {
                  BxManageCB("bulletinBoard_fileselection");
@@ -2821,19 +2861,19 @@ object pushButton_new : XmPushButton widget {
         };
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_open : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Open");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_open);
        XmNactivateCallback = procedures {
                  BxManageCB("bulletinBoard_fileselection");
@@ -2845,50 +2885,50 @@ object pushButton_open : XmPushButton widget {
         };
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_close : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Close");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_close);
         XmNactivateCallback = procedure do_file_close();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object separator2 : XmSeparator widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_importdata : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Import Swath Data");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_importdata);
        XmNactivateCallback = procedures {
                  BxSetValuesCB("xmDialogShell_fileselection.tit" &
@@ -2902,33 +2942,33 @@ object pushButton_importdata : XmPushButton widget {
         };
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object separator3 : XmSeparator widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_quit : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Quit");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_quit);
        XmNactivateCallback = procedures {
                  do_quit();
@@ -2936,13 +2976,13 @@ object pushButton_quit : XmPushButton widget {
         };
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pulldownMenu_file : XmPulldownMenu widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNx = 0;
         XmNy = 0;
         XmNwidth = 126;
@@ -2958,16 +2998,16 @@ object pulldownMenu_file : XmPulldownMenu widget {
          managed XmPushButton pushButton_quit;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object cascadeButton_file : XmCascadeButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("File");
         XmNx = 5;
         XmNy = 5;
@@ -2978,32 +3018,32 @@ object cascadeButton_file : XmCascadeButton widget {
          unmanaged XmPulldownMenu pulldownMenu_file;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_controls : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Controls");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         XmNactivateCallback = procedure BxManageCB("form_controls");
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pulldownMenu_option : XmPulldownMenu widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNx = 0;
         XmNy = 0;
         XmNwidth = 61;
@@ -3013,16 +3053,16 @@ object pulldownMenu_option : XmPulldownMenu widget {
          managed XmPushButton pushButton_controls;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object cascadeButton_option : XmCascadeButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Option");
         XmNx = 41;
         XmNy = 5;
@@ -3033,146 +3073,146 @@ object cascadeButton_option : XmCascadeButton widget {
          unmanaged XmPulldownMenu pulldownMenu_option;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_showsurveys : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show Surveys");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showsurveys);
         XmNactivateCallback = procedure do_view_showsurveys();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_showdata : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show Data Files");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showdata);
         XmNactivateCallback = procedure do_view_showdata();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_showsections : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show Data File Sections");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showsections);
         XmNactivateCallback = procedure do_view_showsections();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_showcrossings : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show All Crossings");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showcrossings);
         XmNactivateCallback = procedure do_view_showcrossings();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_showgoodcrossings : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show >25% Overlap Crossings");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showgoodcrossings);
         XmNactivateCallback = procedure do_view_showgoodcrossings();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_showbettercrossings : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show >50% Overlap Crossings");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showbettercrossings);
         XmNactivateCallback = procedure do_view_showbettercrossings();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_showtruecrossings : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show True Crossings");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showtruecrossings);
         XmNactivateCallback = procedure do_view_showtruecrossings();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_showties : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show Ties");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showties);
         XmNactivateCallback = procedure do_view_showties();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -3187,103 +3227,103 @@ object separator13 : XmSeparator widget {
 
 object toggleButton_showallsurveys : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show All Surveys");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showallsurveys);
         XmNvalueChangedCallback = procedure do_view_showallsurveys();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_showselectedsurvey : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show Only Selected Survey");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showselectedsurvey);
         XmNvalueChangedCallback = procedure do_view_showselectedsurveys();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_showselectedfile : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show Only Selected File");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showselectedfile);
         XmNvalueChangedCallback = procedure do_view_showselectedfile();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_showwithselectedsurvey : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show Only With Selected Survey");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showwithselectedsurvey);
         XmNvalueChangedCallback = procedure do_view_showwithselectedsurveys();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_showwithselectedfile : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show Only With Selected File");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showwithselectedfile);
         XmNvalueChangedCallback = procedure do_view_showwithselectedfile();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object toggleButton_showselectedsection : XmToggleButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show Only With Selected Section");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_toggleButton_showselectedsection);
         XmNvalueChangedCallback = procedure do_view_showselectedsection();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -3298,30 +3338,30 @@ object separator15 : XmSeparator widget {
 
 object pushButton_makegrid : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Visualize Survey");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_makegrid);
         XmNactivateCallback = procedure do_make_grid();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_showmodelplot : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Show Modelplot");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_showmodelplot);
        XmNactivateCallback = procedures {
                  BxManageCB("bulletinBoard_modelplot");
@@ -3329,13 +3369,13 @@ object pushButton_showmodelplot : XmPushButton widget {
         };
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pulldownMenu_view : XmPulldownMenu widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNx = 0;
         XmNy = 0;
         XmNwidth = 225;
@@ -3362,16 +3402,16 @@ object pulldownMenu_view : XmPulldownMenu widget {
          managed XmPushButton pushButton_showmodelplot;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object cascadeButton_view : XmCascadeButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("View");
         XmNx = 96;
         XmNy = 5;
@@ -3382,146 +3422,146 @@ object cascadeButton_view : XmCascadeButton widget {
          unmanaged XmPulldownMenu pulldownMenu_view;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_poornav : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Set File Poor Navigation");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_poornav);
         XmNactivateCallback = procedure do_action_poornav();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_goodnav : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Set File Good Navigation");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_goodnav);
         XmNactivateCallback = procedure do_action_goodnav();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_fixednav : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Set File Fixed Navigation");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_fixednav);
         XmNactivateCallback = procedure do_action_fixednav();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_fixedxynav : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Set File Fixed XY Navigation");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_fixedxynav);
         XmNactivateCallback = procedure do_action_fixedxynav();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_fixedznav : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Set File Fixed Z Navigation");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_fixedznav);
         XmNactivateCallback = procedure do_action_fixedznav();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_tie_xy : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Set tie to XY only");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_tie_xy);
         XmNactivateCallback = procedure do_action_tie_xy();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_tie_z : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Set tie to Z only");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_tie_z);
         XmNactivateCallback = procedure do_action_z();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_tie_xyz : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Set tie to full XYZ");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_tie_xyz);
         XmNactivateCallback = procedure do_action_tie_xyz();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -3536,35 +3576,35 @@ object separator7 : XmSeparator widget {
 
 object pushButton_autopick : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Auto-Pick Offsets");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_autopick);
         XmNactivateCallback = procedure do_action_autopick();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_autopickhorizontal : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Auto-Pick Horizontal Offsets");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_autopickhorizontal);
         XmNactivateCallback = procedure do_action_autopickhorizontal();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -3579,18 +3619,18 @@ object separator10 : XmSeparator widget {
 
 object pushButton_newcrossings : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Check For New Crossings");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_newcrossings);
         XmNactivateCallback = procedure do_action_checknewcrossings();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -3605,13 +3645,13 @@ object separator17 : XmSeparator widget {
 
 object pushButton_analyzecrossings : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Analyze Crossings");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_analyzecrossings);
        XmNactivateCallback = procedures {
                  BxManageCB("bulletinBoard_naverr");
@@ -3620,7 +3660,7 @@ object pushButton_analyzecrossings : XmPushButton widget {
         };
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -3635,18 +3675,18 @@ object separator11 : XmSeparator widget {
 
 object pushButton_zerozoffsets : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Zero All Z Offsets");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_zerozoffsets);
         XmNactivateCallback = procedure do_zerozoffsets();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -3661,43 +3701,43 @@ object separator16 : XmSeparator widget {
 
 object pushButton_invertnav : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Invert Navigation");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_invertnav);
         XmNactivateCallback = procedure do_action_invertnav();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_applynav : XmPushButtonGadget widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Apply Adjusted Navigation");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_applynav);
         XmNactivateCallback = procedure do_apply_nav();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pulldownMenu_action : XmPulldownMenu widget {
     arguments {
-        arguments Style_use;
-        XmNx = 223;
-        XmNy = 379;
+        arguments Style_use2;
+        XmNx = 0;
+        XmNy = 0;
         XmNwidth = 182;
         XmNheight = 344;
     };
@@ -3724,16 +3764,16 @@ object pulldownMenu_action : XmPulldownMenu widget {
          managed XmPushButtonGadget pushButton_applynav;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object cascadeButton_action : XmCascadeButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("Action");
         XmNx = 141;
         XmNy = 5;
@@ -3744,32 +3784,32 @@ object cascadeButton_action : XmCascadeButton widget {
          unmanaged XmPulldownMenu pulldownMenu_action;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pushButton_about : XmPushButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("About");
     };
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         XmNactivateCallback = procedure BxManageCB("form_about");
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object pulldownMenu_about : XmPulldownMenu widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNx = 0;
         XmNy = 0;
         XmNwidth = 46;
@@ -3779,16 +3819,16 @@ object pulldownMenu_about : XmPulldownMenu widget {
          managed XmPushButton pushButton_about;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object cascadeButton_about : XmCascadeButton widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNlabelString = compound_string("About");
         XmNx = 907;
         XmNy = 5;
@@ -3799,16 +3839,16 @@ object cascadeButton_about : XmCascadeButton widget {
          unmanaged XmPulldownMenu pulldownMenu_about;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object menuBar_mbnavadjust : XmMenuBar widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNmenuHelpWidget = XmCascadeButton cascadeButton_about;
         XmNwidth = 962;
         XmNheight = 32;
@@ -3821,16 +3861,16 @@ object menuBar_mbnavadjust : XmMenuBar widget {
          managed XmCascadeButton cascadeButton_about;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object list_data : XmList widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNitemCount = 1;
         XmNitems = string_table(
 	compound_string(" "));
@@ -3844,18 +3884,18 @@ object list_data : XmList widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_list_data);
         XmNsingleSelectionCallback = procedure do_list_data_select();
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scrolledWindow_datalist : XmScrolledWindow widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNscrollingPolicy = XmAPPLICATION_DEFINED;
         XmNtopAttachment = XmATTACH_FORM;
         XmNrightAttachment = XmATTACH_FORM;
@@ -3876,17 +3916,17 @@ object scrolledWindow_datalist : XmScrolledWindow widget {
          managed XmList list_data;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scrolledWindow_datalist);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_listdata : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("Data Files:");
         XmNrightAttachment = XmATTACH_NONE;
@@ -3900,17 +3940,17 @@ object label_listdata : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_listdata);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object label_status : XmLabel widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNalignment = XmALIGNMENT_BEGINNING;
         XmNlabelString = compound_string("No Data Imported");
         XmNtopAttachment = XmATTACH_FORM;
@@ -3927,17 +3967,17 @@ object label_status : XmLabel widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_label_status);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object text_messages : XmText widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNeditMode = XmMULTI_LINE_EDIT;
         XmNfontList = font_table(
 		font('-*-fixed-medium-r-*-*-*-120-*-*-*-*-iso8859-1'));
@@ -3950,17 +3990,17 @@ object text_messages : XmText widget {
     controls {
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_text_messages);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object scrolledWindow_messages : XmScrolledWindow widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNscrollingPolicy = XmAUTOMATIC;
         XmNscrollBarDisplayPolicy = XmAS_NEEDED;
         XmNtopAttachment = XmATTACH_WIDGET;
@@ -3979,17 +4019,17 @@ object scrolledWindow_messages : XmScrolledWindow widget {
          managed XmText text_messages;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_scrolledWindow_messages);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object form_mbnavadjust : XmForm widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNresizePolicy = XmRESIZE_GROW;
         XmNwidth = 962;
         XmNheight = 368;
@@ -4001,19 +4041,19 @@ object form_mbnavadjust : XmForm widget {
          managed XmScrolledWindow scrolledWindow_datalist;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
         MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_form_mbnavadjust);
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
 object mainWindow : XmMainWindow widget {
     arguments {
-        arguments Style_use;
+        arguments Style_use2;
         XmNx = 82;
-        XmNy = 352;
+        XmNy = 396;
         XmNwidth = 962;
         XmNheight = 400;
     };
@@ -4030,10 +4070,10 @@ object mainWindow : XmMainWindow widget {
          managed XmForm form_mbnavadjust;
     };
     callbacks {
-        callbacks Style_useReasons;
+        callbacks Style_use2Reasons;
     };
 !(BX)    handlers {
-!(BX)        handlers Style_useHandlers;
+!(BX)        handlers Style_use2Handlers;
 !(BX)    };
 };
 
@@ -4042,7 +4082,7 @@ object mainWindow : XmMainWindow widget {
 !(BX)        XmNtitle = "MBnavadjust";
 !(BX)        XmNiconName = "MBnavadjust";
 !(BX)        XmNx = 82;
-!(BX)        XmNy = 352;
+!(BX)        XmNy = 396;
 !(BX)        XmNwidth = 962;
 !(BX)        XmNheight = 400;
 !(BX)    };

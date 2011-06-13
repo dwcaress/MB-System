@@ -292,6 +292,7 @@ int main (int argc, char **argv)
 	double	etime_d;
 	double	speedmin;
 	double	timegap;
+	int	fbtversion;
 	char	ifile[MB_PATH_MAXLINE];
 	int	ibeams_bath;
 	int	ibeams_amp;
@@ -413,6 +414,7 @@ int main (int argc, char **argv)
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
+	status = mb_fbtversion(verbose, &fbtversion);
 
 	/* set default input and output */
 	iformat = 0;
@@ -587,6 +589,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       bath only:      %d\n",bathonly);
 		fprintf(stderr,"dbg2       use sleep:      %d\n",use_sleep);
 		fprintf(stderr,"dbg2       sleep factor:   %f\n",sleep_factor);
+		fprintf(stderr,"dbg2       fbtversion:     %d\n",fbtversion);
 		}
 
 	/* if help desired then print it and exit */
@@ -699,6 +702,15 @@ int main (int argc, char **argv)
 		    fprintf(stderr,"\nThe -D option (strip amplitude and sidescan) is only valid for output format %d\n",MBF_MBLDEOIH);
 		    fprintf(stderr,"Program %s is ignoring the -D argument\n",program_name);
 		    }
+		}
+		
+	/* if bathonly mode for mbldeoih format, assume we are making an fbt file
+		- set the format to use - this allows user to set use of old format
+		in .mbio_defaults file - purpose is to keep compatibility with 
+		Fledermaus */
+	if (bathonly == MB_YES && oformat == MBF_MBLDEOIH)
+		{
+		omb_io_ptr->save1 = fbtversion;
 		}
 		
 	/* determine if full or partial copies will be made */

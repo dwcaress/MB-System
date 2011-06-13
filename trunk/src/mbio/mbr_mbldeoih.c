@@ -988,6 +988,10 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	header_length;
 	char	buffer[MBF_MBLDEOIH_V3HEADERSIZE];
 	int	index;
+	double	depthscale, newdepthscale;
+	double	depthmax, transducer_depth;
+	short	short_transducer_depth;
+	short	short_altitude;
 	int	i;
 
 	/* print input debug statements */
@@ -1009,11 +1013,24 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		(data: flag='DD'=17476 = MBF_MBLDEOIH_ID_DATA3 
 			or comment:flag='cc'=25443 = MBF_MBLDEOIH_ID_COMMENT2) */
 	flag = (short *) buffer;
-	if (store->kind == MB_DATA_DATA)
+
+	/* if set, write old format - this should only happen for writing fbt files
+		when the user has set fbtversion = old in the .mbio_defaults file
+		using mbdefaults */
+	if (store->kind == MB_DATA_DATA && mb_io_ptr->save1 == 2)
+		{
+		*flag = MBF_MBLDEOIH_ID_DATA2;
+		header_length = MBF_MBLDEOIH_V2HEADERSIZE;
+		}
+
+	/* otherwise write curent version data */
+	else if (store->kind == MB_DATA_DATA)
 		{
 		*flag = MBF_MBLDEOIH_ID_DATA3;
 		header_length = MBF_MBLDEOIH_V3HEADERSIZE;
 		}
+
+	/* otherwise write comment */
 	else
 		{
 		*flag = MBF_MBLDEOIH_ID_COMMENT2;
@@ -1055,28 +1072,82 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA)
 		{
-		index = 2;
-		mb_put_binary_short(MB_NO, store->year, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->day, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->min, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->sec, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->msec, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->lon2u, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->lon2b, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->lat2u, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->lat2b, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->heading, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->speed, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->beams_bath, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->beams_amp, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->pixels_ss, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_int(MB_NO, store->transducer_depth, (void *)  &buffer[index]); index +=4;
-		mb_put_binary_int(MB_NO, store->altitude, (void *)  &buffer[index]); index +=4;
-		mb_put_binary_short(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=2;
-		mb_put_binary_short(MB_NO, store->ss_type, (void *)  &buffer[index]); index +=2;
+		/* if set, write old format - this should only happen for writing fbt files
+			when the user has set fbtversion = old in the .mbio_defaults file
+			using mbdefaults */
+		if (mb_io_ptr->save1 == 2)
+			{
+			/* recalculate depth scaling so that it encompasses full bathymetry values, not
+				just bathymetry relative to the sonar  
+				- to convert to old format add transducer depth to the bathymetry 
+				and reset the scaling */
+			depthscale = 0.001 * store->depth_scale;
+			transducer_depth = 0.001 * store->transducer_depth;
+			depthmax = 0.0;
+			for (i=0;i<store->beams_bath;i++)
+				{
+				depthmax = MAX(depthmax, (depthscale * store->bath[i] + transducer_depth));
+				}
+			if (depthmax > 0.0)
+				store->depth_scale = MAX((int) (1 + depthmax / 30.0), 1);
+			newdepthscale = 0.001 * store->depth_scale;
+			for (i=0;i<store->beams_bath;i++)
+				{
+				store->bath[i] = (depthscale * store->bath[i] + transducer_depth) / newdepthscale;
+				}
+
+			short_transducer_depth = (short)(store->transducer_depth / store->depth_scale);
+			short_altitude = (short)(store->altitude / store->depth_scale);
+
+			index = 2;
+			mb_put_binary_short(MB_NO, store->year, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->day, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->min, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->sec, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->msec, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->lon2u, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->lon2b, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->lat2u, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->lat2b, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->heading, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->speed, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->beams_bath, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->beams_amp, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->pixels_ss, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, short_transducer_depth, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, short_altitude, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->ss_type, (void *)  &buffer[index]); index +=2;
+			}
+		/* otherwise write curent version file */
+		else
+			{
+			index = 2;
+			mb_put_binary_short(MB_NO, store->year, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->day, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->min, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->sec, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->msec, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->lon2u, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->lon2b, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->lat2u, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->lat2b, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->heading, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->speed, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->beams_bath, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->beams_amp, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->pixels_ss, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_int(MB_NO, store->transducer_depth, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_int(MB_NO, store->altitude, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_short(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->ss_type, (void *)  &buffer[index]); index +=2;
+			}
 		}
 
 	/* write next header to file */
@@ -1106,24 +1177,24 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	if (verbose >= 5 && store->kind == MB_DATA_DATA)
 		{
-			fprintf(stderr,"dbg5       beams_bath: %d\n",
-				store->beams_bath);
-			for (i=0;i<store->beams_bath;i++)
-			  fprintf(stderr,"dbg5       beam:%d  flag:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
-				i,store->beamflag[i],store->bath[i],
-				store->bath_acrosstrack[i],store->bath_alongtrack[i]);
-			fprintf(stderr,"dbg5       beams_amp:  %d\n",
-				store->beams_amp);
-			for (i=0;i<store->beams_amp;i++)
-			  fprintf(stderr,"dbg5       beam:%d  flag:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
-				i,store->beamflag[i],store->amp[i],
-				store->bath_acrosstrack[i],store->bath_alongtrack[i]);
-			fprintf(stderr,"dbg5       pixels_ss:  %d\n",
-				store->pixels_ss);
-			for (i=0;i<store->pixels_ss;i++)
-			  fprintf(stderr,"dbg5       pixel:%d  ss:%d acrosstrack:%d  alongtrack:%d\n",
-				i,store->ss[i],
-				store->ss_acrosstrack[i],store->ss_alongtrack[i]);
+		fprintf(stderr,"dbg5       beams_bath: %d\n",
+			store->beams_bath);
+		for (i=0;i<store->beams_bath;i++)
+		  fprintf(stderr,"dbg5       beam:%d  flag:%d  bath:%d  acrosstrack:%d  alongtrack:%d\n",
+			i,store->beamflag[i],store->bath[i],
+			store->bath_acrosstrack[i],store->bath_alongtrack[i]);
+		fprintf(stderr,"dbg5       beams_amp:  %d\n",
+			store->beams_amp);
+		for (i=0;i<store->beams_amp;i++)
+		  fprintf(stderr,"dbg5       beam:%d  flag:%d  amp:%d  acrosstrack:%d  alongtrack:%d\n",
+			i,store->beamflag[i],store->amp[i],
+			store->bath_acrosstrack[i],store->bath_alongtrack[i]);
+		fprintf(stderr,"dbg5       pixels_ss:  %d\n",
+			store->pixels_ss);
+		for (i=0;i<store->pixels_ss;i++)
+		  fprintf(stderr,"dbg5       pixel:%d  ss:%d acrosstrack:%d  alongtrack:%d\n",
+			i,store->ss[i],
+			store->ss_acrosstrack[i],store->ss_alongtrack[i]);
 		}
 
 	/* write next chunk of the data */
@@ -1144,7 +1215,6 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	else if (store->kind == MB_DATA_DATA)
 		{
-
 		/* byte swap the data if necessary */
 #ifdef BYTESWAPPED
 		for (i=0;i<store->beams_bath;i++)

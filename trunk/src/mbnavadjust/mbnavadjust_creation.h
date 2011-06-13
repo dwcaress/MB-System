@@ -35,9 +35,11 @@
  * Start Global Widget Declarations.
  */
 EXTERNAL Widget   bulletinBoard_modelplot;
+EXTERNAL Widget   pushButton_modelplot_clearblock;
 EXTERNAL Widget   radioBox;
 EXTERNAL Widget   toggleButton_modelplot_sequential;
 EXTERNAL Widget   toggleButton_modelplot_block;
+EXTERNAL Widget   label_modelplot_status;
 EXTERNAL Widget   drawingArea_modelplot;
 EXTERNAL Widget   scale_controls_zoffset;
 EXTERNAL Widget   scale_controls_smoothing;

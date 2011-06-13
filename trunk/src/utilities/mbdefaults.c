@@ -107,7 +107,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "MBDEFAULTS";
 	char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
-	char usage_message[] = "mbdefaults [-Dpsdisplay -Fformat -Iimagedisplay\n\t-Rw/e/s/n -Ppings -Sspeed -Llonflip\n\t-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc -Wproject -V -H]";
+	char usage_message[] = "mbdefaults [-Dpsdisplay -Ffbtversion -Iimagedisplay -Llonflip\n\t-Ttimegap -Wproject -V -H]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -121,6 +121,8 @@ int main (int argc, char **argv)
 	char	psdisplay[MB_PATH_MAXLINE];
 	char	imgdisplay[MB_PATH_MAXLINE];
 	char	mbproject[MB_PATH_MAXLINE];
+	char	fbt[MB_PATH_MAXLINE];
+	int	fbtversion = 3;
 	char	*HOME = "HOME";
 	char	*getenv();
 
@@ -141,13 +143,29 @@ int main (int argc, char **argv)
 	/* now get current mb environment values */
 	status = mb_env(verbose,psdisplay,imgdisplay,mbproject);
 
+	/* now get current fbtversion value */
+	status = mb_fbtversion(verbose,&fbtversion);
+
 	/* process argument list */
-	while ((c = getopt(argc, argv, "D:d:HhI:i:L:l:T:t:VvW:w:")) != -1)
+	while ((c = getopt(argc, argv, "D:d:F:f:HhI:i:L:l:T:t:VvW:w:")) != -1)
 	  switch (c) 
 		{
 		case 'D':
 		case 'd':
 			sscanf (optarg,"%s",psdisplay);
+			flag++;
+			break;
+		case 'F':
+		case 'f':
+			sscanf (optarg,"%s",fbt);
+			if (strncmp(fbt,"new",3) == 0 || strncmp(fbt,"NEW",3) == 0)
+				fbtversion = 3;
+			else if (strncmp(fbt,"old",2) == 0 || strncmp(fbt,"OLD",2) == 0)
+				fbtversion = 2;
+			else if (strncmp(fbt,"2",1) == 0)
+				fbtversion = 2;
+			else if (strncmp(fbt,"3",1) == 0)
+				fbtversion = 3;
 			flag++;
 			break;
 		case 'I':
@@ -233,6 +251,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       psdisplay:  %s\n",psdisplay);
 		fprintf(stderr,"dbg2       imgdisplay: %s\n",imgdisplay);
 		fprintf(stderr,"dbg2       mbproject:  %s\n",mbproject);
+		fprintf(stderr,"dbg2       fbtversion: %d\n",fbtversion);
 		}
 
 	/* if help desired then print it and exit */
@@ -260,25 +279,38 @@ int main (int argc, char **argv)
 		fprintf(fp,"ps viewer:  %s\n",psdisplay);
 		fprintf(fp,"img viewer: %s\n",imgdisplay);
 		fprintf(fp,"project:    %s\n",mbproject);
+		fprintf(fp,"fbtversion: %d\n",fbtversion);
 		fclose(fp);
 
 		printf("\nNew MBIO Default Control Parameters:\n");
-		printf("lonflip:  %d\n",lonflip);
-		printf("timegap:  %f\n",timegap);
+		printf("lonflip:    %d\n",lonflip);
+		printf("timegap:    %f\n",timegap);
 		printf("ps viewer:  %s\n",psdisplay);
 		printf("img viewer: %s\n",imgdisplay);
 		printf("project:    %s\n",mbproject);
+		if (fbtversion == 2)
+			printf("fbtversion: 2 (old)\n");
+		else if (fbtversion == 3)
+			printf("fbtversion: 3 (new)\n");
+		else
+			printf("fbtversion: %d\n",fbtversion);
 		}
 
 	/* else just list the current defaults */
 	else
 		{
 		printf("\nCurrent MBIO Default Control Parameters:\n");
-		printf("lonflip:  %d\n",lonflip);
-		printf("timegap:  %f\n",timegap);
+		printf("lonflip:    %d\n",lonflip);
+		printf("timegap:    %f\n",timegap);
 		printf("ps viewer:  %s\n",psdisplay);
 		printf("img viewer: %s\n",imgdisplay);
 		printf("project:    %s\n",mbproject);
+		if (fbtversion == 2)
+			printf("fbtversion: 2 (old)\n");
+		else if (fbtversion == 3)
+			printf("fbtversion: 3 (new)\n");
+		else
+			printf("fbtversion: %d\n",fbtversion);
 		}
 
 	/* print output debug statements */
