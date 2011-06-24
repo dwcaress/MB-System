@@ -171,14 +171,16 @@ CreatemainWindow_mbeditviz(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmListWidgetClass);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 69); ac++;
-    XtSetArg(args[ac], XmNy, 585); ac++;
+    XtSetArg(args[ac], XmNx, 180); ac++;
+    XtSetArg(args[ac], XmNy, 583); ac++;
     XtSetArg(args[ac], XmNwidth, 453); ac++;
     XtSetArg(args[ac], XmNheight, 557); ac++;
     mainWindow_mbeditviz = XmCreateMainWindow(parent,
         (char *)"mainWindow_mbeditviz",
         args, 
         ac);
+    XtAddCallback(mainWindow_mbeditviz, XmNdestroyCallback, do_mbeditviz_quit, (XtPointer)0);
+    XtAddCallback(mainWindow_mbeditviz, XmNdestroyCallback, BxExitCB, (XtPointer)0);
     
     ac = 0;
     XtSetArg(args[ac], XmNpacking, XmPACK_TIGHT); ac++;
@@ -218,8 +220,8 @@ CreatemainWindow_mbeditviz(Widget parent)
     
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNx, 185); ac++;
+    XtSetArg(args[ac], XmNy, 612); ac++;
     XtSetArg(args[ac], XmNwidth, 132); ac++;
     XtSetArg(args[ac], XmNheight, 54); ac++;
     pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file),

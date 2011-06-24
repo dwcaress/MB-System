@@ -468,7 +468,7 @@
 #define	MB_DATA_SPREADINGLOSS		43	/* Reson 7k */
 #define	MB_DATA_INSTALLATION		44	/* Reson 7k */
 #define	MB_DATA_WATER_COLUMN		45	/* Simrad */
-#define	MB_DATA_STATUS			46	/* Simrad */
+#define	MB_DATA_STATUS			46	/* Simrad, XTF */
 #define	MB_DATA_DVL			47	/* JSTAR */
 #define	MB_DATA_NMEA_RMC		48	/* NMEA */
 #define	MB_DATA_NMEA_DBT		49	/* NMEA */

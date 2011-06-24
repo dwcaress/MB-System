@@ -210,7 +210,7 @@ object bulletinBoard_error : XmBulletinBoardDialog widget {
         XmNdialogStyle = XmDIALOG_APPLICATION_MODAL;
         XmNdialogTitle = compound_string("Error");
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1125;
         XmNy = 1234;
         XmNwidth = 311;
         XmNheight = 205;
@@ -422,7 +422,7 @@ object form_gridparameters : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1054;
         XmNy = 1168;
         XmNwidth = 453;
         XmNheight = 337;
@@ -788,7 +788,7 @@ object form_open : XmFormDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1029;
         XmNy = 1062;
         XmNwidth = 504;
         XmNheight = 550;
@@ -873,7 +873,7 @@ object bulletinBoard_mbeditviz_message : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1076;
         XmNy = 1290;
         XmNwidth = 409;
         XmNheight = 93;
@@ -935,6 +935,7 @@ object label_about_title : XmLabel widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-180-*-*-*-*-iso8859-1',character_set=character_set('TimesBold18')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')));
         XmNlabelString = compound_string(#character_set("TimesBold24")"MBe" &
  "ditviz") &
@@ -980,6 +981,7 @@ object label_about_mbsystem : XmLabel widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')));
         XmNlabelString = compound_string(#character_set("TimesBold14")"One" &
  " component of the", separate=true) &
@@ -1042,6 +1044,22 @@ object label_about_LDEO : XmLabel widget {
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')));
         XmNlabelString = compound_string(#character_set("TimesBold12")"Lam" &
  "ont-Doherty", separate=true) &
@@ -1068,6 +1086,22 @@ object label_about_MBARI : XmLabel widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
@@ -1110,6 +1144,8 @@ object label_about_authors : XmLabel widget {
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')));
         XmNlabelString = compound_string(#character_set("TimesBold14")"Cre" &
  "ated By:", separate=true) &
@@ -1135,6 +1171,9 @@ object label_about_version : XmLabel widget {
         arguments Style_use;
         XmNfontList = font_table(
 		font('-*-times-bold-r-*-*-*-240-*-*-*-*-iso8859-1',character_set=character_set('TimesBold24')),
+		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
+		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
+		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')),
 		font('-*-times-bold-r-*-*-*-120-*-*-*-*-iso8859-1',character_set=character_set('TimesBold12')),
 		font('-*-times-bold-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesBold14')),
 		font('-*-times-medium-r-*-*-*-140-*-*-*-*-iso8859-1',character_set=character_set('TimesMedium14')));
@@ -1163,7 +1202,7 @@ object bulletinBoard_about : XmBulletinBoardDialog widget {
     arguments {
         arguments Style_use;
         XmNresizePolicy = XmRESIZE_GROW;
-        XmNx = 0;
+        XmNx = 1049;
         XmNy = 1071;
         XmNwidth = 463;
         XmNheight = 531;
@@ -1261,8 +1300,8 @@ object pushButton_quit : XmPushButton widget {
 object pulldownMenu_file : XmPulldownMenu widget {
     arguments {
         arguments Style_use;
-        XmNx = 0;
-        XmNy = 0;
+        XmNx = 185;
+        XmNy = 612;
         XmNwidth = 132;
         XmNheight = 54;
     };
@@ -1773,8 +1812,8 @@ object form_mbeditviz : XmForm widget {
 object mainWindow_mbeditviz : XmMainWindow widget {
     arguments {
         arguments Style_use;
-        XmNx = 69;
-        XmNy = 563;
+        XmNx = 180;
+        XmNy = 583;
         XmNwidth = 453;
         XmNheight = 557;
     };
@@ -1822,6 +1861,10 @@ object mainWindow_mbeditviz : XmMainWindow widget {
     };
     callbacks {
         callbacks Style_useReasons;
+       XmNdestroyCallback = procedures {
+                 do_mbeditviz_quit();
+                 BxExitCB(0);
+        };
     };
 !(BX)    handlers {
 !(BX)        handlers Style_useHandlers;
@@ -1832,8 +1875,8 @@ object mainWindow_mbeditviz : XmMainWindow widget {
 !(BX)    arguments {
 !(BX)        arguments Style_use;
 !(BX)        XmNtitle = "MBeditviz";
-!(BX)        XmNx = 69;
-!(BX)        XmNy = 563;
+!(BX)        XmNx = 180;
+!(BX)        XmNy = 583;
 !(BX)        XmNwidth = 453;
 !(BX)        XmNheight = 557;
 !(BX)    };

@@ -216,7 +216,7 @@
  */
 
 /* maximum number of beams and pixels */
-#define	MBSYS_XSE_MAXBEAMS		151
+#define	MBSYS_XSE_MAXBEAMS		630
 #define	MBSYS_XSE_MAXPIXELS		4096
 #define	MBSYS_XSE_MAXSAMPLES		8192
 #define	MBSYS_XSE_MAXSVP		200
