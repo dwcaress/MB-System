@@ -440,9 +440,11 @@ int main (int argc, char **argv)
 	int	use_amp = MB_NO;
 	int	use_ss = MB_NO;
 	int	use_slope = MB_NO;
+	int	use_attitude = MB_NO;
 	int	use_nav = MB_NO;
 	int	use_gains = MB_NO;
 	int	check_values = MBLIST_CHECK_ON;
+	int	check_nav = MB_NO;
 	int	check_bath = MB_NO;
 	int	check_amp = MB_NO;
 	int	check_ss = MB_NO;
@@ -744,10 +746,15 @@ int main (int argc, char **argv)
 			break;
 		case 'U':
 		case 'u':
-			sscanf (optarg,"%d", &check_values);
-			if (check_values < MBLIST_CHECK_ON 
-			    || check_values > MBLIST_CHECK_OFF_FLAGNAN)
-			    check_values = MBLIST_CHECK_ON;
+			if (optarg[0] == 'N')
+				check_nav =MB_YES;
+			else
+			    {
+			    sscanf (optarg,"%d", &check_values);
+			    if (check_values < MBLIST_CHECK_ON 
+			      || check_values > MBLIST_CHECK_OFF_FLAGNAN)
+				check_values = MBLIST_CHECK_ON;
+			    }
 			flag++;
 			break;
 		case 'W':
@@ -835,6 +842,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       pixel_end:      %d\n",pixel_end);
 		fprintf(stderr,"dbg2       dump_mode:      %d\n",dump_mode);
 		fprintf(stderr,"dbg2       check_values:   %d\n",check_values);
+		fprintf(stderr,"dbg2       check_nav:      %d\n",check_nav);
 		fprintf(stderr,"dbg2       n_list:         %d\n",n_list);
 		for (i=0;i<n_list;i++)
 			fprintf(stderr,"dbg2         list[%d]:      %c\n",
@@ -2303,6 +2311,9 @@ int main (int argc, char **argv)
 				use_slope = MB_YES;
 			if (list[i] == 'P' || list[i] == 'p' 
 				|| list[i] == 'R' || list[i] == 'r')
+				use_attitude = MB_YES;
+			if (list[i] == 'X' || list[i] == 'x' 
+				|| list[i] == 'Y' || list[i] == 'y')
 				use_nav = MB_YES;
 			if (list[i] == '.')
 			  raw_next_value = MB_YES;
@@ -2422,7 +2433,7 @@ int main (int argc, char **argv)
 		error = MB_ERROR_NO_ERROR;
 		
 		/* read a ping of data */
-		if (pings == 1 || use_nav == MB_YES)
+		if (pings == 1 || use_attitude == MB_YES)
 		    {
 		    /* read next data record */
 		    status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
@@ -2739,6 +2750,8 @@ int main (int argc, char **argv)
 				beam_status = MB_FAILURE;
 		  if (use_time_interval == MB_YES && first == MB_YES)
 			beam_status = MB_FAILURE;
+		  if (check_nav == MB_YES && (navlon == 0.0 || navlon == 0.0))
+		  	beam_status = MB_FAILURE;
 
 		  /* print out good beams */
 		  if (beam_status == MB_SUCCESS)
@@ -3650,6 +3663,8 @@ int main (int argc, char **argv)
 			pixel_status = MB_FAILURE;
 		  if (use_time_interval == MB_YES && first == MB_YES)
 			pixel_status = MB_FAILURE;
+		  if (check_nav == MB_YES && (navlon == 0.0 || navlon == 0.0))
+		  	pixel_status = MB_FAILURE;
 
 		  /* print out good pixels */
 		  if (pixel_status == MB_SUCCESS)

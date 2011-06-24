@@ -632,7 +632,12 @@ int main (int argc, char **argv)
 			timelag = -lagmax + peakk * lagstep;
 			fprintf(fpm, "%f %f\n", time_d_avg, timelag);
 			nmodel++;
+			fprintf(stderr,"Time lag model point: %f %f | nslope:%d peakksum:%d peakkmax:%d\n",
+				time_d_avg, timelag, nslope, peakksum, peakkmax);
 			}
+		else
+			fprintf(stderr,"Time lag model point: %f %f | nslope:%d peakksum:%d peakkmax:%d | REJECTED\n",
+				time_d_avg, timelag, nslope, peakksum, peakkmax);
 
 		/* figure out whether and what to read next */
         	if (read_datalist == MB_YES)

@@ -122,6 +122,7 @@
 #define	MB7KPREPROCESS_TIMELAG_MODEL	2
 #define	MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH	1
 #define	MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES	2
+#define	MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION	3
 static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -187,8 +188,8 @@ int main (int argc, char **argv)
 	double	distance;
 	double	altitude;
 	double	sonardepth;
-	double	roll;
-	double	pitch;
+	double	roll, rollr;
+	double	pitch, pitchr;
 	double	heave;
 	char	*beamflag = NULL;
 	double	*bath = NULL;
@@ -485,6 +486,7 @@ int main (int argc, char **argv)
 	int	klugemode;
 	int	kluge_useverticaldepth = MB_NO; /* kluge 1 */
 	int	kluge_zeroalongtrackangles = MB_NO; /* kluge 2 */
+	int	kluge_zeroattitudecorrection = MB_NO; /* kluge 3 */
 	
 	/* MBARI data flag */
 	int	MBARIdata = MB_NO;
@@ -594,6 +596,10 @@ int main (int argc, char **argv)
 			if (klugemode == MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES)
 				{
 				kluge_zeroalongtrackangles = MB_YES;
+				}
+			if (klugemode == MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION)
+				{
+				kluge_zeroattitudecorrection = MB_YES;
 				}
 			flag++;
 			break;
@@ -2519,10 +2525,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 				if (ndat_sonardepth == 0 || dat_sonardepth_time_d[ndat_sonardepth-1] < bluefin->nav[i].depth_time)
 					{
 					dat_sonardepth_time_d[ndat_sonardepth] = bluefin->nav[i].depth_time;
-					dat_sonardepth_sonardepth[ndat_sonardepth] = bluefin->nav[i].depth 
-						+ depthsensoroffx * sin(bluefin->nav[i].pitch)
-						+ depthsensoroffz * cos(bluefin->nav[i].pitch)
-						+ sonardepthoffset;
+					dat_sonardepth_sonardepth[ndat_sonardepth] = bluefin->nav[i].depth;
 					dat_sonardepth_sonardepthrate[ndat_sonardepth] = 0.0;
 					dat_sonardepth_sonardepthfilter[ndat_sonardepth] = 0.0;
 					ndat_sonardepth++;
@@ -4162,78 +4165,6 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 						heading = 0.0;
 						}
 
-					/* get sonar depth */
-					if (kluge_useverticaldepth == MB_YES)
-						{
-						verticaldepth = (s7kr_verticaldepth *)&(istore->verticaldepth);
-						sonardepth = (double)(verticaldepth->vertical_depth);
-						}
-					else if (interp_status != MB_SUCCESS)
-						{
-						}
-					else if (nsonardepth > 0)
-						{
-						if (interp_status == MB_SUCCESS)
-						interp_status = mb_linear_interp(verbose, 
-									sonardepth_time_d-1, sonardepth_sonardepth-1,
-									nsonardepth, time_d, &sonardepth, &j, 
-									&error);
-						}
-					else if (nins > 0)
-						{
-						interp_status = mb_linear_interp(verbose, 
-									ins_time_d-1, ins_sonardepth-1,
-									nins, time_d, &sonardepth, &j, 
-									&error);
-						}
-					else if (nrock > 0)
-						{
-						interp_status = mb_linear_interp(verbose, 
-									rock_time_d-1, rock_sonardepth-1,
-									nrock, time_d, &sonardepth, &j, 
-									&error);
-						}
-					else if (ndsl > 0)
-						{
-						interp_status = mb_linear_interp(verbose, 
-									dsl_time_d-1, dsl_sonardepth-1,
-									ndsl, time_d, &sonardepth, &j, 
-									&error);
-						}
-					else if (ndat_sonardepth > 0)
-						{
-						sonardepthlag = 0.0;
-						if (sonardepthlagfix == MB_YES && ndat_sonardepth > 1 
-							&& sonardepthratemax > 0.0
-							&& interp_status == MB_SUCCESS)
-							{
-							interp_status = mb_linear_interp(verbose, 
-									dat_sonardepth_time_d-1, dat_sonardepth_sonardepthrate-1,
-									ndat_sonardepth, time_d, &sonardepthrate, &j, 
-									&error);
-							sonardepthlag = sonardepthrate * sonardepthlagmax / sonardepthratemax;
-							if (sonardepthrate >= sonardepthratemax)
-								sonardepthlag = sonardepthlagmax;
-							}
-						if (interp_status == MB_SUCCESS)
-						interp_status = mb_linear_interp(verbose, 
-									dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
-									ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &j, 
-									&error);
-						}
-					else if (ndat_rph > 0)
-						{
-						interp_status = mb_linear_interp(verbose, 
-									dat_rph_time_d-1, dat_rph_heave-1,
-									ndat_rph, time_d, &heave, &j, 
-									&error);
-						sonardepth = heave;
-						}
-					else
-						{
-						sonardepth = 0.0;
-						}
-
 					/* get altitude */
 					if (interp_status != MB_SUCCESS)
 						{
@@ -4315,6 +4246,83 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 						pitch = 0.0;
 						}
 
+					/* get sonar depth */
+					if (kluge_useverticaldepth == MB_YES)
+						{
+						verticaldepth = (s7kr_verticaldepth *)&(istore->verticaldepth);
+						sonardepth = (double)(verticaldepth->vertical_depth);
+						}
+					else if (interp_status != MB_SUCCESS)
+						{
+						}
+					else if (nsonardepth > 0)
+						{
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp(verbose, 
+									sonardepth_time_d-1, sonardepth_sonardepth-1,
+									nsonardepth, time_d, &sonardepth, &j, 
+									&error);
+						}
+					else if (nins > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									ins_time_d-1, ins_sonardepth-1,
+									nins, time_d, &sonardepth, &j, 
+									&error);
+						}
+					else if (nrock > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									rock_time_d-1, rock_sonardepth-1,
+									nrock, time_d, &sonardepth, &j, 
+									&error);
+						}
+					else if (ndsl > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									dsl_time_d-1, dsl_sonardepth-1,
+									ndsl, time_d, &sonardepth, &j, 
+									&error);
+						}
+					else if (ndat_sonardepth > 0)
+						{
+						sonardepthlag = 0.0;
+						if (sonardepthlagfix == MB_YES && ndat_sonardepth > 1 
+							&& sonardepthratemax > 0.0
+							&& interp_status == MB_SUCCESS)
+							{
+							interp_status = mb_linear_interp(verbose, 
+									dat_sonardepth_time_d-1, dat_sonardepth_sonardepthrate-1,
+									ndat_sonardepth, time_d, &sonardepthrate, &j, 
+									&error);
+							sonardepthlag = sonardepthrate * sonardepthlagmax / sonardepthratemax;
+							if (sonardepthrate >= sonardepthratemax)
+								sonardepthlag = sonardepthlagmax;
+							}
+						if (interp_status == MB_SUCCESS)
+						interp_status = mb_linear_interp(verbose, 
+									dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
+									ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &j, 
+									&error);
+						}
+					else if (ndat_rph > 0)
+						{
+						interp_status = mb_linear_interp(verbose, 
+									dat_rph_time_d-1, dat_rph_heave-1,
+									ndat_rph, time_d, &heave, &j, 
+									&error);
+						sonardepth = heave;
+						}
+					else
+						{
+						sonardepth = 0.0;
+						}
+
+					/* apply offset between depth sensor and sonar */
+					sonardepth += sonardepthoffset 
+							+ depthsensoroffx * sin(DTR * pitch)
+							+ depthsensoroffz * cos(DTR * pitch);
+
 					/* if the optional data are not all available, this ping
 						is not useful, and is discarded by setting
 						*error to MB_ERROR_MISSING_NAVATTITUDE
@@ -4341,10 +4349,18 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 					
 					/* zero alongtrack angles if requested */
 					if (kluge_zeroalongtrackangles == MB_YES)
-						{for (i=0;i<bathymetry->number_beams;i++)
+						{
+						for (i=0;i<bathymetry->number_beams;i++)
 							{
 							beamgeometry->angle_alongtrack[i] = 0.0;
 							}
+						}
+					
+					/* zero atttitude correction if requested */
+					if (kluge_zeroattitudecorrection == MB_YES)
+						{
+						bathymetry->roll = 0.0;
+						bathymetry->pitch = 0.0;
 						}
 					
 					/* get bathymetry */
@@ -4355,13 +4371,21 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 					else
 						soundspeed = 1500.0;
 /* fprintf(stderr,"roll:%f pitch:%f\n",bathymetry->roll,bathymetry->pitch); */
+					rollr = DTR * roll;
+					pitchr = DTR * pitch;
+					/* zero atttitude correction if requested */
+					if (kluge_zeroattitudecorrection == MB_YES)
+						{
+						rollr = 0.0;
+						pitchr = 0.0;
+						}
 					for (i=0;i<bathymetry->number_beams;i++)
 						{
 /* fprintf(stderr,"i:%d quality:%d range:%f\n",i,bathymetry->quality[i],bathymetry->range[i]); */
 						if ((bathymetry->quality[i] & 15) > 0)
 							{
-							alpha = RTD * (beamgeometry->angle_alongtrack[i] + bathymetry->pitch);
-							beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - bathymetry->roll);
+							alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr);
+							beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - rollr);
 							mb_rollpitch_to_takeoff(
 								verbose, 
 								alpha, beta, 
@@ -4569,7 +4593,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4619,7 +4643,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4690,7 +4714,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4740,7 +4764,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4790,7 +4814,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4840,7 +4864,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4890,7 +4914,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4962,7 +4986,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5012,7 +5036,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5084,7 +5108,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5134,7 +5158,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5211,7 +5235,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5234,7 +5258,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				time_j[4] = (int) (1000000 * (bluefin->environmental[i].s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
-				time_d -= timelag;
+				time_d += timelag;
 				bluefin->environmental[i].ctd_time = time_d;
 				bluefin->environmental[i].temperature_time = time_d;
 				mb_get_date(verbose, time_d,time_i);
@@ -5446,7 +5470,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5469,9 +5493,9 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				time_j[4] = (int) (1000000 * (bluefin->nav[i].s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
-				time_d -= timelag;
-				bluefin->nav[i].position_time -= timelag;
-				bluefin->nav[i].depth_time -= timelag;
+				time_d += timelag;
+				bluefin->nav[i].position_time += timelag;
+				bluefin->nav[i].depth_time += timelag;
 				mb_get_date(verbose, time_d,time_i);
 				mb_get_jtime(verbose, time_i, time_j);
 				bluefin->nav[i].s7kTime.Year = time_i[0];

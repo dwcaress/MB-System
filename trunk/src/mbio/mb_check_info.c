@@ -893,7 +893,7 @@ int mb_make_info(int verbose, int force,
 		{
 		if (verbose >= 1)
 			fprintf(stderr,"Generating fnv file for %s\n",file);
-		sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y > %s.fnv", 
+		sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN > %s.fnv", 
 			format, file, file);
 		system(command);
 		}
