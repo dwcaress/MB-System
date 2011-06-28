@@ -2833,7 +2833,7 @@ fprintf(stderr,"Applying timelag to %d nav data\n", ndat_nav);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dat_nav_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -2858,7 +2858,7 @@ fprintf(stderr,"Applying timelag to %d heading data\n", ndat_heading);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dat_heading_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -2883,7 +2883,7 @@ fprintf(stderr,"Applying timelag to %d attitude data\n", ndat_rph);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dat_rph_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -2908,7 +2908,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth data\n", ndat_sonardepth);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dat_sonardepth_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -2933,7 +2933,7 @@ fprintf(stderr,"Applying timelag to %d altitude data\n", ndat_altitude);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dat_altitude_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -2959,7 +2959,7 @@ fprintf(stderr,"Applying timelag to %d INS data\n", nins);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, ins_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -2983,7 +2983,7 @@ fprintf(stderr,"Applying timelag to %d INS altitude data\n", nins_altitude);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, ins_altitude_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -3007,7 +3007,7 @@ fprintf(stderr,"Applying timelag to %d INS speed data\n", nins_speed);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, ins_speed_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -3033,7 +3033,7 @@ fprintf(stderr,"Applying timelag to %d DSL nav data\n", ndsl);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, dsl_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -3059,7 +3059,7 @@ fprintf(stderr,"Applying timelag to %d Steve Rock nav data\n", nrock);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, rock_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -3085,7 +3085,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, sonardepth_time_d[i], &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -4583,7 +4583,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -4593,7 +4593,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4633,7 +4633,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -4643,7 +4643,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4704,7 +4704,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -4714,7 +4714,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4754,7 +4754,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -4764,7 +4764,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4804,7 +4804,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -4814,7 +4814,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4854,7 +4854,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -4864,7 +4864,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4904,7 +4904,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -4914,7 +4914,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4976,7 +4976,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -4986,7 +4986,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5026,7 +5026,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -5036,7 +5036,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5098,7 +5098,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -5108,7 +5108,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5148,7 +5148,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -5158,7 +5158,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5225,7 +5225,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -5235,7 +5235,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5258,7 +5258,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				time_j[4] = (int) (1000000 * (bluefin->environmental[i].s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
-				time_d += timelag;
+				time_d -= timelag;
 				bluefin->environmental[i].ctd_time = time_d;
 				bluefin->environmental[i].temperature_time = time_d;
 				mb_get_date(verbose, time_d,time_i);
@@ -5460,7 +5460,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							timedelay_time_d-1, timedelay_timedelay-1,
 							ntimedelay, time_d, &timelag, &j, 
 							&error);
-				timelag += timelagconstant;
+				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
 				{
@@ -5470,7 +5470,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							ntimelag, time_d, &timelag, &j, 
 							&error);
 				}
-			time_d += timelag;
+			time_d -= timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5493,9 +5493,9 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				time_j[4] = (int) (1000000 * (bluefin->nav[i].s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
-				time_d += timelag;
-				bluefin->nav[i].position_time += timelag;
-				bluefin->nav[i].depth_time += timelag;
+				time_d -= timelag;
+				bluefin->nav[i].position_time -= timelag;
+				bluefin->nav[i].depth_time -= timelag;
 				mb_get_date(verbose, time_d,time_i);
 				mb_get_jtime(verbose, time_i, time_j);
 				bluefin->nav[i].s7kTime.Year = time_i[0];

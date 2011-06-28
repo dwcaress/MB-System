@@ -28,7 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.1898       June 13, 2011
+* Version 5.3.1900       June 27, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -179,6 +179,13 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+Fixed extraction of raw, asynchronous attitude data from Reson 7k 
+data using rollpitchheave records (e.g. from the MARUM AUV), which in
+turn fixes the calculation of attitude time lag estimates using
+mbrolltimelag.
+
+Fixed application of time lag model by mb7kpreprocess for the case
+of Reson 7k data using rollpitchheave records (e.g. from the MARUM AUV).
 
 Added -UN option to mblist that ignores output of lines 
 associated with zero longitude or latitude values. This option
