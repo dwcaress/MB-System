@@ -221,7 +221,7 @@ int mb_segy_read_init(int verbose, char *segyfile,
 		for (j=0;j<40;j++)
 			{
 			fprintf(stderr,"dbg2       asciiheader[%d]:",j);
-			for (i=0;i<80;j++)
+			for (i=0;i<80;i++)
 				fprintf(stderr,"%c",asciiheader->line[j][i]);
 			fprintf(stderr,"\n");
 			}

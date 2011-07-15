@@ -190,6 +190,7 @@ int main (int argc, char **argv)
 	int	gainmode = MBSEGYGRID_GAIN_OFF;
 	double	gain = 0.0;
 	double	gainwindow = 0.0;
+	double	gaindelay = 0.0;
 	int	agcmode = MB_NO;
 	double	agcwindow = 0.0;
 	double	agcmaxvalue = 0.0;
@@ -279,7 +280,9 @@ int main (int argc, char **argv)
 			break;
 		case 'G':
 		case 'g':
-			n = sscanf (optarg,"%d/%lf/%lf", &gainmode, &gain, &gainwindow);
+			n = sscanf (optarg,"%d/%lf/%lf/%lf", &gainmode, &gain, &gainwindow, &gaindelay);
+			if (n < 4)
+				gaindelay = 0.0;
 			if (n < 3)
 				gainwindow = 0.0;
 			flag++;
@@ -385,6 +388,7 @@ int main (int argc, char **argv)
 		fprintf(outfp,"dbg2       gainmode:       %d\n",gainmode);
 		fprintf(outfp,"dbg2       gain:           %f\n",gain);
 		fprintf(outfp,"dbg2       gainwindow:     %f\n",gainwindow);
+		fprintf(outfp,"dbg2       gaindelay:      %f\n",gaindelay);
 		fprintf(outfp,"dbg2       scale2distance: %d\n",scale2distance);
 		fprintf(outfp,"dbg2       shotscale:      %f\n",shotscale);
 		fprintf(outfp,"dbg2       timescale:      %f\n",timescale);
@@ -513,6 +517,7 @@ int main (int argc, char **argv)
 		fprintf(outfp,"     gain mode:          %d\n",gainmode);
 		fprintf(outfp,"     gain:               %f\n",gain);
 		fprintf(outfp,"     gainwindow:         %f\n",gainwindow);
+		fprintf(outfp,"     gaindelay:          %f\n",gaindelay);
 		fprintf(outfp,"Output Parameters:\n");
 		fprintf(outfp,"     grid filename:      %s\n",gridfile);
 		fprintf(outfp,"     x grid dimension:   %d\n",ngridx);
@@ -682,9 +687,9 @@ int main (int argc, char **argv)
 						|| gainmode == MBSEGYGRID_GAIN_SEAFLOOR)
 						{
 						if (gainmode == MBSEGYGRID_GAIN_TZERO)
-							igainstart = (dtime - btime) / sampleinterval;
+							igainstart = (dtime - btime + gaindelay) / sampleinterval;
 						else if (gainmode == MBSEGYGRID_GAIN_SEAFLOOR)
-							igainstart = (stime - btime) / sampleinterval;
+							igainstart = (stime - btime + gaindelay) / sampleinterval;
 						igainstart = MAX(0, igainstart);
 						if (gainwindow <= 0.0)
 							{

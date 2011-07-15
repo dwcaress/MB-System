@@ -1577,7 +1577,7 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 			print MFILE "{ \r\n";
 			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
-			printf MFILE "duration     = %d; \r\n", ($durationfactorwaypoint * (0.25 * $mmissiondepths[$i]) / $ascentdescent_speed);
+			printf MFILE "duration     = %d; \r\n", ($durationfactorwaypoint * (0.5 * $mmissiondepths[$i]) / $ascentdescent_speed);
 			printf MFILE "depth        = %f; \r\n", $mmissiondepths[$i];
 			print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "} \r\n";
@@ -2069,51 +2069,51 @@ print "Behavior: reson (start, reset, Log_Mode = 0)\n";
  		}
 	close(WFILE);
 
-	# output Capn Voyager WPL waypoint file unless outputoff option selected
-	$winfrogfile = "$root" . "_capnwpt.rut";
-	open(WFILE,">$winfrogfile") || die "Cannot open output Capn Voyager file: $winfrogfile\r\n$program_name aborted.\r\n";
-	$cnt = 0;
-	for ($i = 0; $i < $npoints; $i++)
- 		{
-		if ($waypoints[$i] != 0)
-			{
-			$cnt++;
-			if ($lats[$i] > 0.0)
-				{
-				$NorS = "N";
-				$latdeg = int($lats[$i]);
-				$latmin = ($lats[$i] - $latdeg) * 60.0;
-				$latminb = int($latmin);
-				$latmins = int(($latmin - $latminb) * 1000 + 0.5);
-				}
-			else
-				{
-				$NorS = 'S';
-				$latdeg = int(-$lats[$i]);
-				$latmin = (-$lats[$i] - $latdeg) * 60.0;
-				$latminb = int($latmin);
-				$latmins = int(($latmin - $latminb) * 1000 + 0.5);
-				}
-			if ($lons[$i] > 0.0)
-				{
-				$EorW = "E";
-				$londeg = int($lons[$i]);
-				$lonmin = ($lons[$i] - $londeg) * 60.0;
-				$lonminb = int($lonmin);
-				$lonmins = int(($lonmin - $lonminb) * 1000 + 0.5);
-				}
-			else
-				{
-				$EorW = 'W';
-				$londeg = int(-$lons[$i]);
-				$lonmin = (-$lons[$i] - $londeg) * 60.0;
-				$lonminb = int($lonmin);
-				$lonmins = int(($lonmin - $lonminb) * 1000 + 0.5);
-				}
- 			printf WFILE "\$IIWPL,%2.2d%2.2d.%3.3d,%s,%3.3d%2.2d.%3.3d,%s,AUV %d\r\n", $latdeg, $latminb, $latmins, $NorS,, $londeg, $lonminb, $lonmins, $EorW, $cnt;
-			}
- 		}
-	close(WFILE);
+# 	# output Capn Voyager WPL waypoint file unless outputoff option selected
+# 	$winfrogfile = "$root" . "_capnwpt.rut";
+# 	open(WFILE,">$winfrogfile") || die "Cannot open output Capn Voyager file: $winfrogfile\r\n$program_name aborted.\r\n";
+# 	$cnt = 0;
+# 	for ($i = 0; $i < $npoints; $i++)
+#  		{
+# 		if ($waypoints[$i] != 0)
+# 			{
+# 			$cnt++;
+# 			if ($lats[$i] > 0.0)
+# 				{
+# 				$NorS = "N";
+# 				$latdeg = int($lats[$i]);
+# 				$latmin = ($lats[$i] - $latdeg) * 60.0;
+# 				$latminb = int($latmin);
+# 				$latmins = int(($latmin - $latminb) * 1000 + 0.5);
+# 				}
+# 			else
+# 				{
+# 				$NorS = 'S';
+# 				$latdeg = int(-$lats[$i]);
+# 				$latmin = (-$lats[$i] - $latdeg) * 60.0;
+# 				$latminb = int($latmin);
+# 				$latmins = int(($latmin - $latminb) * 1000 + 0.5);
+# 				}
+# 			if ($lons[$i] > 0.0)
+# 				{
+# 				$EorW = "E";
+# 				$londeg = int($lons[$i]);
+# 				$lonmin = ($lons[$i] - $londeg) * 60.0;
+# 				$lonminb = int($lonmin);
+# 				$lonmins = int(($lonmin - $lonminb) * 1000 + 0.5);
+# 				}
+# 			else
+# 				{
+# 				$EorW = 'W';
+# 				$londeg = int(-$lons[$i]);
+# 				$lonmin = (-$lons[$i] - $londeg) * 60.0;
+# 				$lonminb = int($lonmin);
+# 				$lonmins = int(($lonmin - $lonminb) * 1000 + 0.5);
+# 				}
+#  			printf WFILE "\$IIWPL,%2.2d%2.2d.%3.3d,%s,%3.3d%2.2d.%3.3d,%s,AUV %d\r\n", $latdeg, $latminb, $latmins, $NorS,, $londeg, $lonminb, $lonmins, $EorW, $cnt;
+# 			}
+#  		}
+# 	close(WFILE);
 
 	# generate data for plots
 	$topodatafile = "$root" . "_topo.xy";
