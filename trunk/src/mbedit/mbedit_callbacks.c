@@ -243,7 +243,7 @@ Widget	fileSelectionText;
 #define GRAB_START		0
 #define GRAB_MOVE		1
 #define GRAB_END		2
-#define	NUM_FILES_MAX		100
+#define	NUM_FILES_MAX		500
 
 /* global variables */
 XtAppContext app_context;

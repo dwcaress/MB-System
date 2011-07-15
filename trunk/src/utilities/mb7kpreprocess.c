@@ -441,6 +441,7 @@ int main (int argc, char **argv)
 	/* timelag parameters */
 	int	timelagmode = MB7KPREPROCESS_TIMELAG_OFF;
 	double	timelag = 0.0;
+	double	timelagm = 0.0;
 	double	timelagconstant = 0.0;
 	char	timelagfile[MB_PATH_MAXLINE];
 	int	ntimelag = 0;
@@ -2826,24 +2827,24 @@ fprintf(stderr,"Applying timelag to %d nav data\n", ndat_nav);
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, dat_nav_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, dat_nav_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_nav_time_d[i], &timelag, &j, 
+							ntimelag, dat_nav_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			dat_nav_time_d[i] -= timelag;
+			dat_nav_time_d[i] += timelag;
 			}
 fprintf(stderr,"Applying timelag to %d heading data\n", ndat_heading);
 		j = 0;
@@ -2851,24 +2852,24 @@ fprintf(stderr,"Applying timelag to %d heading data\n", ndat_heading);
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, dat_heading_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, dat_heading_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_heading_time_d[i], &timelag, &j, 
+							ntimelag, dat_heading_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			dat_heading_time_d[i] -= timelag;
+			dat_heading_time_d[i] += timelag;
 			}
 fprintf(stderr,"Applying timelag to %d attitude data\n", ndat_rph);
 		j = 0;
@@ -2876,24 +2877,24 @@ fprintf(stderr,"Applying timelag to %d attitude data\n", ndat_rph);
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, dat_rph_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, dat_rph_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_rph_time_d[i], &timelag, &j, 
+							ntimelag, dat_rph_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			dat_rph_time_d[i] -= timelag;
+			dat_rph_time_d[i] += timelag;
 			}
 fprintf(stderr,"Applying timelag to %d sonardepth data\n", ndat_sonardepth);
 		j = 0;
@@ -2901,24 +2902,24 @@ fprintf(stderr,"Applying timelag to %d sonardepth data\n", ndat_sonardepth);
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, dat_sonardepth_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, dat_sonardepth_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_sonardepth_time_d[i], &timelag, &j, 
+							ntimelag, dat_sonardepth_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			dat_sonardepth_time_d[i] -= timelag;
+			dat_sonardepth_time_d[i] += timelag;
 			}
 fprintf(stderr,"Applying timelag to %d altitude data\n", ndat_altitude);
 		j = 0;
@@ -2926,24 +2927,24 @@ fprintf(stderr,"Applying timelag to %d altitude data\n", ndat_altitude);
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, dat_altitude_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, dat_altitude_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_altitude_time_d[i], &timelag, &j, 
+							ntimelag, dat_altitude_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			dat_altitude_time_d[i] -= timelag;
+			dat_altitude_time_d[i] += timelag;
 			}
 			
 		/* correct time of INS data read from MBARI AUV log file */
@@ -2952,72 +2953,72 @@ fprintf(stderr,"Applying timelag to %d INS data\n", nins);
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, ins_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, ins_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, ins_time_d[i], &timelag, &j, 
+							ntimelag, ins_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			ins_time_d[i] -= timelag;
+			ins_time_d[i] += timelag;
 			}
 fprintf(stderr,"Applying timelag to %d INS altitude data\n", nins_altitude);
 		for (i=0;i<nins_altitude;i++)
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, ins_altitude_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, ins_altitude_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, ins_altitude_time_d[i], &timelag, &j, 
+							ntimelag, ins_altitude_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			ins_altitude_time_d[i] -= timelag;
+			ins_altitude_time_d[i] += timelag;
 			}
 fprintf(stderr,"Applying timelag to %d INS speed data\n", nins_speed);
 		for (i=0;i<nins_speed;i++)
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, ins_speed_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, ins_speed_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, ins_speed_time_d[i], &timelag, &j, 
+							ntimelag, ins_speed_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			ins_speed_time_d[i] -= timelag;
+			ins_speed_time_d[i] += timelag;
 			}
 			
 		/* correct time of navigation and attitude data read from WHOI DSL nav and attitude file */
@@ -3026,24 +3027,24 @@ fprintf(stderr,"Applying timelag to %d DSL nav data\n", ndsl);
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, dsl_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, dsl_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dsl_time_d[i], &timelag, &j, 
+							ntimelag, dsl_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			dsl_time_d[i] -= timelag;
+			dsl_time_d[i] += timelag;
 			}
 			
 		/* correct time of navigation and attitude data read from Steve Rock file */
@@ -3052,24 +3053,24 @@ fprintf(stderr,"Applying timelag to %d Steve Rock nav data\n", nrock);
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, rock_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, rock_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, rock_time_d[i], &timelag, &j, 
+							ntimelag, rock_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			rock_time_d[i] -= timelag;
+			rock_time_d[i] += timelag;
 			}
 			
 		/* correct time of sonar depth data read from separate file */
@@ -3078,24 +3079,24 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			{
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, sonardepth_time_d[i], &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, sonardepth_time_d[i], &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, sonardepth_time_d[i], &timelag, &j, 
+							ntimelag, sonardepth_time_d[i], &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			sonardepth_time_d[i] -= timelag;
+			sonardepth_time_d[i] += timelag;
 			}
 		}
 				
@@ -4356,13 +4357,6 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 							}
 						}
 					
-					/* zero atttitude correction if requested */
-					if (kluge_zeroattitudecorrection == MB_YES)
-						{
-						bathymetry->roll = 0.0;
-						bathymetry->pitch = 0.0;
-						}
-					
 					/* get bathymetry */
 					if (volatilesettings->sound_velocity > 0.0)
 						soundspeed = volatilesettings->sound_velocity;
@@ -4576,24 +4570,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4626,24 +4620,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4697,24 +4691,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4747,24 +4741,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4797,6 +4791,11 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
 				if (ntimedelay > 0)
@@ -4806,15 +4805,15 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4847,24 +4846,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4897,24 +4896,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -4969,24 +4968,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5019,24 +5018,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5091,24 +5090,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5141,24 +5140,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5218,24 +5217,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5258,7 +5257,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				time_j[4] = (int) (1000000 * (bluefin->environmental[i].s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
-				time_d -= timelag;
+				time_d += timelag;
 				bluefin->environmental[i].ctd_time = time_d;
 				bluefin->environmental[i].temperature_time = time_d;
 				mb_get_date(verbose, time_d,time_i);
@@ -5453,24 +5452,24 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			/* get timelag value */
 			timelag = 0.0;
+			if (ntimedelay > 0)
+			interp_status = mb_linear_interp(verbose, 
+						timedelay_time_d-1, timedelay_timedelay-1,
+						ntimedelay, time_d, &timelag, &j, 
+						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose, 
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j, 
-							&error);
 				timelag -= timelagconstant;
 				}
-			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL)
+			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				if (ntimelag > 0)
 				interp_status = mb_linear_interp(verbose, 
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelag, &j, 
+							ntimelag, time_d, &timelagm, &j, 
 							&error);
+				timelag -= timelagm;
 				}
-			time_d -= timelag;
+			time_d += timelag;
 			mb_get_date(verbose, time_d,time_i);
 			mb_get_jtime(verbose, time_i, time_j);
 			header->s7kTime.Year = time_i[0];
@@ -5493,9 +5492,9 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				time_j[4] = (int) (1000000 * (bluefin->nav[i].s7kTime.Seconds - time_j[3]));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
-				time_d -= timelag;
-				bluefin->nav[i].position_time -= timelag;
-				bluefin->nav[i].depth_time -= timelag;
+				time_d += timelag;
+				bluefin->nav[i].position_time += timelag;
+				bluefin->nav[i].depth_time += timelag;
 				mb_get_date(verbose, time_d,time_i);
 				mb_get_jtime(verbose, time_i, time_j);
 				bluefin->nav[i].s7kTime.Year = time_i[0];

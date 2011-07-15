@@ -1007,8 +1007,8 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			{
 			if ((bathymetry->quality[i] & 15) > 0)
 				{
-				alpha = RTD * beamgeometry->angle_alongtrack[i] + bathymetry->pitch;
-				beta = 90.0 - RTD * beamgeometry->angle_acrosstrack[i] - bathymetry->roll;
+				alpha = RTD * (beamgeometry->angle_alongtrack[i] + bathymetry->pitch);
+				beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - bathymetry->roll);
 				mb_rollpitch_to_takeoff(
 					verbose, 
 					alpha, beta, 

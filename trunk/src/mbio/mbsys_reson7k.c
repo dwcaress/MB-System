@@ -7900,6 +7900,7 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 	float	fwatertime;
 	double	longitude, latitude;
 	double	speed, heading;
+	double	xtrackmin;
 	int	time_j[5];
 	int	i;
 
@@ -7944,6 +7945,25 @@ int mbsys_reson7k_extract_segytraceheader(int verbose, void *mbio_ptr, void *sto
 		mb_altint_interp(verbose, mbio_ptr, store->time_d,  
 				    &dsonaraltitude, error);
 		dwaterdepth = dsonardepth + dsonaraltitude;
+		
+		/* if possible get altitude from nadir of multibeam bathymetry */
+		if (bathymetry->optionaldata == MB_YES)
+			{
+			/* get depth closest to nadir */
+			xtrackmin = 999999.9;
+			for (i=0;i<bathymetry->number_beams;i++)
+				{
+				if (((bathymetry->quality[i] & 15) == 15)
+					&& fabs((double)bathymetry->acrosstrack[i]) < xtrackmin)
+					{
+					dwaterdepth = bathymetry->depth[i];
+					dsonaraltitude = bathymetry->depth[i] - dsonardepth;
+					xtrackmin = fabs((double)bathymetry->acrosstrack[i]);
+					}
+				}
+			}
+		
+		/* get needed values */
 		sonardepth = (int) (100 * dsonardepth);
 		waterdepth = (int) (100 * dwaterdepth);
 		if (ctd->n > 0)

@@ -1433,10 +1433,10 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		    for (i=0;i<nplot;i++)
 		    	{
 		        fprintf(stderr, "# Section plot %d of %d\n", i + 1, nplot);
-			fprintf(stderr, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
+			fprintf(stderr, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-G2/50.0/0.5/-0.02 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
 					output_file, (startshot + i * nshotmax),
 					MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
-					sweep, delay, sweep, lineroot, linenumber, i + 1);
+					sweep, delay, lineroot, linenumber, i + 1);
 			fprintf(stderr, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
 					lineroot, linenumber, i + 1, scale, zbounds, 
 					lineroot, linenumber, i + 1, lineroot, linenumber,
@@ -1444,10 +1444,10 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 			fprintf(stderr, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
 					lineroot, linenumber, i + 1);
 		        fprintf(sfp, "#   Section plot %d of %d\n", i + 1, nplot);
-			fprintf(sfp, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
+			fprintf(sfp, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-G2/50.0/0.5/-0.02 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
 					output_file, (startshot + i * nshotmax),
 					MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
-					sweep, delay, sweep, lineroot, linenumber, i + 1);
+					sweep, delay, lineroot, linenumber, i + 1);
 			fprintf(sfp, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
 					lineroot, linenumber, i + 1, scale, zbounds,
 					lineroot, linenumber, i + 1, lineroot, linenumber,

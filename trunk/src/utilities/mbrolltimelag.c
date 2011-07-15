@@ -100,6 +100,7 @@ int main (int argc, char **argv)
 	char	xcorfile[MB_PATH_MAXLINE];
 	char	xcorfiletot[MB_PATH_MAXLINE];
 	char	cmdfile[MB_PATH_MAXLINE];
+	char	estimatefile[MB_PATH_MAXLINE];
 	char	histfile[MB_PATH_MAXLINE];
 	char	fhistfile[MB_PATH_MAXLINE];
 	char	modelfile[MB_PATH_MAXLINE];
@@ -109,6 +110,7 @@ int main (int argc, char **argv)
 	FILE	*fpx = NULL;
 	FILE	*fpf = NULL;
 	FILE	*fpt = NULL;
+	FILE	*fpe = NULL;
 	FILE	*fph = NULL;
 	FILE	*fpm = NULL;
 	int	read_datalist = MB_NO;
@@ -151,6 +153,8 @@ int main (int argc, char **argv)
 	double	slopeminusmean;
 	double	rollminusmean;
 	double	r;
+	double	sum_x, sum_y, sum_xy, sum_x2, sum_y2;
+	double	mmm, bbb;
 	
 	int	nrollmean;
 	double	rollmean;
@@ -164,6 +168,7 @@ int main (int argc, char **argv)
 	int	peakkmax;
 	int	peakksum;
 	double	time_d_avg;
+	int	nestimate = 0;
 	int	nmodel = 0;
 	
 	int	nr;
@@ -333,6 +338,18 @@ int main (int argc, char **argv)
 			}
 		}
 	
+	/* open time lag estimate file */
+	sprintf(estimatefile, "%s_timelagest.txt", outroot);
+	if ((fpe = fopen(estimatefile, "w")) == NULL)
+		{
+		error = MB_ERROR_OPEN_FAIL;
+		fprintf(stderr,"\nUnable to open estimate output: %s\n",
+			estimatefile);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",
+			program_name);
+		exit(error);
+		}
+	
 	/* open time lag histogram file */
 	sprintf(histfile, "%s_timelaghist.txt", outroot);
 	if ((fph = fopen(histfile, "w")) == NULL)
@@ -387,6 +404,7 @@ int main (int argc, char **argv)
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 		{
+		nestimate = 0;
 		nslope = 0;
 		time_d_avg = 0.0;
 		sprintf(cmdfile, "mblist -I%s -F%d -OMAR", swathfile, format);
@@ -586,8 +604,15 @@ int main (int argc, char **argv)
 			/* augment histogram */
 			if (peakr > 0.90)
 				{
+				fprintf(fpe, "%10.3f %6.3f\n", slope_time_d[(j0+j1)/2], peaktimelag);
 				fprintf(fpf, "%6.3f\n", peaktimelag);
 				fprintf(fph, "%6.3f\n", peaktimelag);
+				sum_x += slope_time_d[(j0+j1)/2];
+				sum_y += peaktimelag;
+				sum_xy += slope_time_d[(j0+j1)/2] * peaktimelag;
+				sum_x2 += slope_time_d[(j0+j1)/2] * slope_time_d[(j0+j1)/2];
+				sum_y2 += peaktimelag * peaktimelag;
+				nestimate++;
 				}
 
 			/* print out max and closest peak cross correlations */
@@ -663,6 +688,9 @@ int main (int argc, char **argv)
 	if (read_datalist == MB_YES)
 		fclose(fpt);
 			
+	/* close estimate file */
+	fclose(fpe);
+			
 	/* close histogram file */
 	fclose(fph);
 			
@@ -684,10 +712,13 @@ int main (int argc, char **argv)
 	system(cmdfile);
 		
 	/* generate plot shellscript for time lag model if it exists */
-	if (nmodel > 1)
+	if (nmodel > 1 || nestimate > 1)
 		{
-		sprintf(cmdfile, "mbm_xyplot -I%s -ISc0.1:%s -L\"Time lag model of %s:Time (sec):Time Lag (sec):\"", 
-				modelfile, modelfile, swathdata);
+		mmm = (nestimate * sum_xy - sum_x * sum_y) / (nestimate * sum_x2 - sum_x * sum_x);
+		bbb = (sum_y - mmm * sum_x) / nestimate;
+		
+		sprintf(cmdfile, "mbm_xyplot -I%s -ISc0.05:%s -I%s -ISc0.1:%s -L\"Time lag model of %s:Time (sec):Time Lag (sec):\"", 
+				modelfile, estimatefile, modelfile, modelfile, swathdata);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		system(cmdfile);
 		}
