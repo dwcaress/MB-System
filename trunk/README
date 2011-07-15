@@ -28,7 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.1900       June 27, 2011
+* Version 5.3.1902       July 15, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -179,6 +179,13 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+Fixes to handling of asynchronous attitude data in format 88 (Reson s7k) 
+and calculation of time lag estimates.
+
+Adjustments to the default plots of segy data by mbextractsegy.
+
+Fixes to generation of MBARI AUV missions by mbm_route2mission.
+
 Fixed extraction of raw, asynchronous attitude data from Reson 7k 
 data using rollpitchheave records (e.g. from the MARUM AUV), which in
 turn fixes the calculation of attitude time lag estimates using
