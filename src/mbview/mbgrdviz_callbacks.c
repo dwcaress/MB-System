@@ -2731,6 +2731,18 @@ int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr)
 			    	    fprintf(sfp," ## WAYPOINT STARTLINE\n");
 				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE)
 			    	    fprintf(sfp," ## WAYPOINT ENDLINE\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE2)
+			    	    fprintf(sfp," ## WAYPOINT STARTLINE2\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE2)
+			    	    fprintf(sfp," ## WAYPOINT ENDLINE2\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE3)
+			    	    fprintf(sfp," ## WAYPOINT STARTLINE3\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE3)
+			    	    fprintf(sfp," ## WAYPOINT ENDLINE3\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_STARTLINE4)
+			    	    fprintf(sfp," ## WAYPOINT STARTLINE4\n");
+				else if (routewaypoint[j] == MBV_ROUTE_WAYPOINT_ENDLINE4)
+			    	    fprintf(sfp," ## WAYPOINT ENDLINE4\n");
 				else
 			    	    fprintf(sfp,"\n");
 				}

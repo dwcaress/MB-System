@@ -1,4 +1,4 @@
-.TH mbextractsegy 1 "6 June 2010" "MB-System 5.0" "MB-System 5.0"
+.TH mbextractsegy 1 "27 July 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbextractsegy\fP - extracts subbottom profiler, center beam reflection,
 or seismic reflection data from swath data supported by MB-System and
@@ -12,7 +12,7 @@ Version 5.0
 \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-J\fP\fIxscale/yscale/maxwidth\fP 
 \fB-L\fP\fIstartline/lineroot\fP \fB-M -O\fP\fIsegyfile\fP \fB-Q\fP\fIroutetimefile\fP
 \fB-R\fP\fIroutefile\fP \fB-S\fP\fIsampleformat\fP 
-\fB-T\fP\fItimeshift\fP \fB-U\fP\fIrangethreshold\fP \fB-V -H\fP]
+\fB-T\fP\fItimeshift\fP \fB-U\fP\fIrangethreshold\fP \fB-Z\fP\fIplotmax\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBMBextractsegy\fP is a utility for reading a swath sonar data file 
@@ -43,6 +43,11 @@ using the line root name specified by \fB-L\fP\fIstartline/lineroot\fP with a
 sequential line number starting from \fIstartline\fP. If neither the \fB-O\fP or 
 \fB-L\fP options are used, each input swath file will have a corresponding 
 segy output file with the ".segy" suffix added to the original filename.
+
+\fBMBextractsegy\fP also generates a "first cut plot" script that will generate
+grayscale section plots in Postscript of each segy file using the programs
+\fBMBsegygrid\fP and \fBmbm_grdplot\fP. The \fB-Z\fP sets the trace value 
+corresponding to the maximum grayscale (black) in the section plots.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -213,6 +218,12 @@ a waypoint along the route has been reached; the program considers the
 next waypoint reached when the range to the waypoint becomes smaller
 than \fIrangethreshold\fP and then ceases to decrease. 
 Default: \fIrangethreshold\fP = 25 m.
+.TP
+.B \-Z
+\fIplotmax\fP
+.br
+Specifies the trace value corresponding to the maximum grayscale (black) 
+in the section plots. Default: \fIplotmax\fP = 50.
 .TP
 .B \-V
 This option increases the verbosity of \fBmbextractsegy\fP, causing it

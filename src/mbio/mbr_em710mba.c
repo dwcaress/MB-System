@@ -346,7 +346,7 @@ int mbr_info_em710mba(int verbose,
 	*pixels_ss_max = 1024;
 	strncpy(format_name, "EM710MBA", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD3", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_EM710MBA\nInformal Description: Simrad current multibeam vendor format\nAttributes:           Simrad EM710,\n                      bathymetry, amplitude, and sidescan,\n                      up to 400 beams, variable pixels, binary, Simrad.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:          MBF_EM710MBA\nInformal Description: Kongsberg current multibeam vendor format\nAttributes:           Kongsberg EM122, EM302, EM710,\n                      bathymetry, amplitude, and sidescan,\n                      up to 400 beams, variable pixels, binary, Simrad.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_YES;
