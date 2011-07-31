@@ -118,7 +118,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "MBextractsegy";
 	char help_message[] =  "MBextractsegy extracts subbottom profiler, center beam reflection,\nor seismic reflection data from data supported by MB-System and\nrewrites it as a SEGY file in the form used by SIOSEIS.";
-	char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat -Ifile -Jxscale/yscale -Lstartline/lineroot -Osegyfile -Qtimelistfile -Rroutefile -Ssampleformat -H -V]";
+	char usage_message[] = "mbextractsegy [-Byr/mo/dy/hr/mn/sc/us -Eyr/mo/dy/hr/mn/sc/us -Fformat \n\t-Ifile -Jxscale/yscale -Lstartline/lineroot \n\t-Osegyfile -Qtimelistfile -Rroutefile \n\t-Ssampleformat -Zplotmax -H -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -241,9 +241,8 @@ int main (int argc, char **argv)
 	double	xscale = 0.01;
 	double	yscale = 50.0;
 	double	maxwidth = 30.0;
-	char	*zbounds = NULL;
-	char	*zbounds_envelope = "0/10/1";
-	char	*zbounds_trace = "-400/400";
+	mb_path	zbounds;
+	double	zmax = 50;
 
 	mb_path	command;
 	mb_path	scale;
@@ -316,7 +315,7 @@ int main (int argc, char **argv)
 		segyfileheader.extra[i] = 0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:MmO:o:Q:q:R:r:S:s:T:t:U:u:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "B:b:D:d:E:e:F:f:I:i:J:j:L:l:MmO:o:Q:q:R:r:S:s:T:t:U:u:Z:z:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -399,6 +398,11 @@ int main (int argc, char **argv)
 		case 'U':
 		case 'u':
 			sscanf (optarg,"%lf", &rangethreshold);
+			flag++;
+			break;
+		case 'Z':
+		case 'z':
+			sscanf (optarg,"%lf", &zmax);
 			flag++;
 			break;
 		case '?':
@@ -674,9 +678,9 @@ int main (int argc, char **argv)
 		
 	/* get plot zbounds from sampleformat */
 	if (sampleformat == MB_SEGY_SAMPLEFORMAT_ENVELOPE)
-		zbounds = zbounds_envelope;
+		sprintf(zbounds, "0/%f/1", zmax);
 	else
-		zbounds = zbounds_trace;
+		sprintf(zbounds, "-%f/%f", zmax, zmax);
 
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
@@ -913,28 +917,28 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				    fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
 				    for (i=0;i<nplot;i++)
 		    			{
-		        		fprintf(stderr, "# Section plot %d of %d\n", i + 1, nplot);
-					fprintf(stderr, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
+		        		sprintf(command, "#   Section plot %d of %d\n", i + 1, nplot);
+					fprintf(stderr, "%s", command);
+					fprintf(sfp, "%s", command);
+
+					sprintf(command, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-O %s_%4.4d_%2.2d_section\n", 
 							output_file, (startshot + i * nshotmax),
 							MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
-							sweep, delay, sweep, lineroot, linenumber, i + 1);
-					fprintf(stderr, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
-							lineroot, linenumber, i + 1, scale, zbounds, 
+							sweep, delay, lineroot, linenumber, i + 1);
+					fprintf(stderr, "%s", command);
+					fprintf(sfp, "%s", command);
+
+					sprintf(command, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+							lineroot, linenumber, i + 1, scale, zbounds,
 							lineroot, linenumber, i + 1, lineroot, linenumber,
 							i + 1, nplot);
-					fprintf(stderr, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
+					fprintf(stderr, "%s", command);
+					fprintf(sfp, "%s", command);
+
+					sprintf(command, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
 							lineroot, linenumber, i + 1);
-		        		fprintf(sfp, "#   Section plot %d of %d\n", i + 1, nplot);
-					fprintf(sfp, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f -W3/-0.01/%.2f \\\n\t-G2/50.0/0.1 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
-							output_file, (startshot + i * nshotmax),
-							MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
-							sweep, delay, sweep, lineroot, linenumber, i + 1);
-					fprintf(sfp, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
-							lineroot, linenumber, i + 1, scale, zbounds, 
-							lineroot, linenumber, i + 1, lineroot, linenumber,
-							i + 1, nplot);
-					fprintf(sfp, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
-							lineroot, linenumber, i + 1);
+					fprintf(stderr, "%s", command);
+					fprintf(sfp, "%s", command);
 					fflush(sfp);
 					}
 				    }
@@ -1432,28 +1436,28 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		    fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
 		    for (i=0;i<nplot;i++)
 		    	{
-		        fprintf(stderr, "# Section plot %d of %d\n", i + 1, nplot);
-			fprintf(stderr, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-G2/50.0/0.5/-0.02 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
+		        sprintf(command, "#   Section plot %d of %d\n", i + 1, nplot);
+			fprintf(stderr, "%s", command);
+			fprintf(sfp, "%s", command);
+
+			sprintf(command, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-O %s_%4.4d_%2.2d_section\n", 
 					output_file, (startshot + i * nshotmax),
 					MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
 					sweep, delay, lineroot, linenumber, i + 1);
-			fprintf(stderr, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
-					lineroot, linenumber, i + 1, scale, zbounds, 
-					lineroot, linenumber, i + 1, lineroot, linenumber,
-					i + 1, nplot);
-			fprintf(stderr, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
-					lineroot, linenumber, i + 1);
-		        fprintf(sfp, "#   Section plot %d of %d\n", i + 1, nplot);
-			fprintf(sfp, "mbsegygrid -I %s \\\n\t-S0/%d/%d -T%.2f/%.2f \\\n\t-G2/50.0/0.5/-0.02 \\\n\t-O %s_%4.4d_%2.2d_section\n", 
-					output_file, (startshot + i * nshotmax),
-					MIN((startshot  + (i + 1) * nshotmax - 1), endshot),
-					sweep, delay, lineroot, linenumber, i + 1);
-			fprintf(sfp, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
+			fprintf(stderr, "%s", command);
+			fprintf(sfp, "%s", command);
+
+			sprintf(command, "mbm_grdplot -I %s_%4.4d_%2.2d_section.grd \\\n\t%s -Z%s \\\n\t-Ba250/a0.05g0.05 -G1 -W1/4 -D -V \\\n\t-O %s_%4.4d_%2.2d_sectionplot \\\n\t-L\"%s Line %d Plot %d of %d\"\n",
 					lineroot, linenumber, i + 1, scale, zbounds,
 					lineroot, linenumber, i + 1, lineroot, linenumber,
 					i + 1, nplot);
-			fprintf(sfp, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
+			fprintf(stderr, "%s", command);
+			fprintf(sfp, "%s", command);
+
+			sprintf(command, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
 					lineroot, linenumber, i + 1);
+			fprintf(stderr, "%s", command);
+			fprintf(sfp, "%s", command);
 			fflush(sfp);
 			}
 				    

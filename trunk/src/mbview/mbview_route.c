@@ -620,7 +620,7 @@ int mbview_addroute(int verbose, size_t instance,
 		{
 		/* check waypoint flag correct */
 		if (waypoint[i] <= MBV_ROUTE_WAYPOINT_NONE
-			|| waypoint[i] > MBV_ROUTE_WAYPOINT_ENDLINE)
+			|| waypoint[i] > MBV_ROUTE_WAYPOINT_ENDLINE4)
 			waypoint[i] = MBV_ROUTE_WAYPOINT_SIMPLE;
 		
 		/* get route positions in grid coordinates */
@@ -2594,7 +2594,7 @@ int mbview_updateroutelist()
 	int	iitem;
 	char	lonstr0[24];
 	char	latstr0[24];
-	char	waypointstr[8];
+	char	waypointstr[10];
 	int	iroute, jwaypoint;
 
 	/* print starting debug statements */
@@ -2648,13 +2648,25 @@ int mbview_updateroutelist()
 								lonstr0, latstr0);
 				
 					if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_SIMPLE)
-						strcpy(waypointstr, "-------");
+						strcpy(waypointstr, "---------");
 					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_TRANSIT)
-						strcpy(waypointstr, "TRANSIT");
+						strcpy(waypointstr, "-TRANSIT-");
 					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE)
-						strcpy(waypointstr, "-START-");
+						strcpy(waypointstr, "--START--");
 					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE)
-						strcpy(waypointstr, "--END--");
+						strcpy(waypointstr, "---END---");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE2)
+						strcpy(waypointstr, "--START2-");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE2)
+						strcpy(waypointstr, "---END2--");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE3)
+						strcpy(waypointstr, "--START3-");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE3)
+						strcpy(waypointstr, "---END3--");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_STARTLINE4)
+						strcpy(waypointstr, "--START4-");
+					else if (shared.shareddata.routes[iroute].waypoint[jpoint] == MBV_ROUTE_WAYPOINT_ENDLINE4)
+						strcpy(waypointstr, "---END4--");
 					else
 						strcpy(waypointstr, "-------");
 					sprintf(value_string,"%3d | %3d | %s | %s | %.2f | %.2f | %.2f | %s", 

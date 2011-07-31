@@ -363,11 +363,11 @@
 					up to 254 beam bathymetry and 
 					amplitude, variable pixel sidescan, 
 					ascii + binary, MBARI */ 
-#define	MBF_EM710RAW	58	/* Simrad EM710 multibeam vendor format, 
+#define	MBF_EM710RAW	58	/* Kongsberg EM122, EM302, EM710 multibeam vendor format, 
 					up to 400 beam bathymetry and 
 					amplitude, variable pixel sidescan, 
-					binary, Simrad */ 
-#define	MBF_EM710MBA	59	/* Simrad EM710 multibeam processing format, 
+					binary, Kongsberg */ 
+#define	MBF_EM710MBA	59	/* Kongsberg EM122, EM302, EM710 multibeam processing format, 
 					up to 400 beam bathymetry and 
 					amplitude, variable pixel sidescan, 
 					binary, MBARI */ 
