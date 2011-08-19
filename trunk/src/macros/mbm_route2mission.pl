@@ -1263,7 +1263,7 @@ print "Behavior: gps\n";
 	print MFILE "} \r\n";
 print "Behavior: ascend\n";
 	print MFILE "# \r\n";
-	print MFILE "# Acoustic update - sent status ping after end of survey \r\n";
+	print MFILE "# Acoustic update 1 - sent status ping after end of survey \r\n";
 	print MFILE "# \r\n";
 	print MFILE "behavior acousticUpdate \r\n";
 	print MFILE "{ \r\n";
@@ -1391,12 +1391,12 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 				print MFILE "Log_Mode  = 1; \r\n";
 				print MFILE "duration  = RESON_DURATION; \r\n";
 				print MFILE "MB_Power = $mb_transmitgain; \r\n";
-				if ($subbottom && $mmodes[$i] != 1)
+				if ($subbottom && $mstartstops[$i] == 2)
 					{
 					print MFILE "SBP_Mode = 0; \r\n";
 					print MFILE "SBP_Power = 0.0; \r\n";
 					}
-				elsif ($subbottom && $mmodes[$i] == 1)
+				elsif ($subbottom && $mstartstops[$i] == 1)
 					{
 					print MFILE "SBP_Mode = 1; \r\n";
 					print MFILE "SBP_Power = 100.0; \r\n";
@@ -1415,7 +1415,7 @@ print "Behavior: reson (start, Log_Mode = 1)\n";
 				}
 			if ($camera)
 				{
-				if ($mmodes[$i] == 1)
+				if ($mstartstops[$i] == 1)
 					{
 					$camerarunlength = $cameraenddistance - $mdistances[$i];
 					# $nphotos = int (1.1 * $camerarunlength / 10.0);
@@ -1448,7 +1448,7 @@ printf "Behavior: startCamera (distance:%.2f m, run length:%.2f m, nphotos:%d)\n
 printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i];
 					}
 				}
-			print MFILE "# Acoustic update - sent status ping before resuming logging \r\n";
+			print MFILE "# Acoustic update 2 - sent status ping before resuming logging \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
@@ -1502,7 +1502,7 @@ print "Behavior: gps\n";
 			print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: ascend\n";
-			print MFILE "# Acoustic update - sent status ping before ascent \r\n";
+			print MFILE "# Acoustic update 3 - sent status ping before ascent \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
@@ -1579,13 +1579,13 @@ print "Behavior: reson (startup, Log_Mode = 1)\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";	
-			if ($subbottom && $mmodes[$i] == 2)
+			if ($subbottom && $mstartstops[$i] == 2)
 				{
 				print MFILE "SBP_Mode = 0; \r\n";
 				print MFILE "SBP_Power = 0.0; \r\n";
 print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
 				}
-			elsif ($subbottom && $mmodes[$i] == 1)
+			elsif ($subbottom && $mstartstops[$i] == 1)
 				{
 				print MFILE "SBP_Mode = 1; \r\n";
 				print MFILE "SBP_Power = 100.0; \r\n";
@@ -1666,7 +1666,7 @@ print "Behavior: waypoint\n";
 			print MFILE "} \r\n";
 print "Behavior: startsurvey\n";
 			print MFILE "# \r\n";
-			print MFILE "# Acoustic update - sent status ping at beginning of StartSurvey behavior \r\n";
+			print MFILE "# Acoustic update 4 - sent status ping at beginning of StartSurvey behavior \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
@@ -1696,7 +1696,7 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 print "Behavior: spiral descend\n";
-			print MFILE "# Acoustic update - sent status ping after end of line \r\n";
+			print MFILE "# Acoustic update 5 - sent status ping after end of line \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
@@ -1755,7 +1755,7 @@ print "Behavior: waypoint (during line $iwaypoint) ";
 				{
 				printf MFILE "#   Behavior depth of %f meters set to maximum vehicle depth\r\n", $mmissiondepths[$i];
 				}
-			if ($i > 0 && $mmodes[$i-1] == 2)
+			if ($i > 0 && $mstartstops[$i-1] == 2)
 				{
 				printf MFILE "#   Vehicle transit speed:    %f m/s\r\n", $transit_speed;
 				}
@@ -1828,7 +1828,7 @@ printf " Segment length: %.2f m ",$mlengths[$i];
 				{
 				printf MFILE "#   Behavior depth of %f meters set to maximum vehicle depth\r\n", $mmissiondepths[$i];
 				}
-			if ($i > 0 && $mmodes[$i-1] == 2)
+			if ($i > 0 && $mstartstops[$i-1] == 2)
 				{
 				printf MFILE "#   Vehicle transit speed:    %f m/s\r\n", $transit_speed;
 				}
@@ -1865,7 +1865,7 @@ printf " %.2f",$mmissiondepths[$i];
 				}
 			printf MFILE "finalDepth         = %f; \r\n", $mmissiondepths[$i];
 printf " %.2f m\n",$mmissiondepths[$i];
-			if ($i > 0 && $mmodes[$i-1] == 2)
+			if ($i > 0 && $mstartstops[$i-1] == 2)
 				{
 				print MFILE "speed              = TRANSIT_SPEED; \r\n";
 				}
@@ -1878,10 +1878,10 @@ printf " %.2f m\n",$mmissiondepths[$i];
 			}
 			
 		# insert acoustic update after end of line
-		if ($mmodes[$i-1] == 2 && $gpsmode < 2)
+		if ($mstartstops[$i-1] == 2)
 			{
 			print MFILE "#######################################################\r\n";
-			print MFILE "# Acoustic update - sent status ping after end of line \r\n";
+			print MFILE "# Acoustic update 6 - sent status ping after end of line \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
@@ -1906,21 +1906,21 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";	
-			if ($subbottom && $mmodes[$i-1] == 2 && $gpsmode == 0)
+			if ($subbottom && $mstartstops[$i-1] == 2)
 				{
 				print MFILE "SBP_Mode = 0; \r\n";
 				print MFILE "SBP_Power = 0.0; \r\n";
-print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
 				}
-			elsif ($subbottom && $mmodes[$i-1] == 1)
+			elsif ($subbottom && $mstartstops[$i-1] == 1)
 				{
 				print MFILE "SBP_Mode = 1; \r\n";
 				print MFILE "SBP_Power = 100.0; \r\n";
-print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
 				}
 			elsif ($subbottom)
 				{
-print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1], SBP no change, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP no change, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
 				}
 			if ($subbottom)
 				{
@@ -1961,7 +1961,7 @@ print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) 
 
 		# turn on or off camera
 		print MFILE "# \r\n";
-		if ($camera && $i > 0 && $mmodes[$i-1] == 1)
+		if ($camera && $i > 0 && $mstartstops[$i-1] == 1)
 			{
 			$camerarunlength = $cameraenddistance - $mdistances[$i-1];
 			$nphotos = int (1.1 * $camerarunlength / 10.0);
@@ -1982,7 +1982,7 @@ print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) 
 printf "Behavior: startCamera (distance:%.2f m, run length:%.2f m, nphotos:%d)\n", 
 		$mdistances[$i-1],$camerarunlength,$nphotos;
 			}
-		elsif ($camera && $i > 0 && $mmodes[$i-1] == 2)
+		elsif ($camera && $i > 0 && $mstartstops[$i-1] == 2)
 			{
 			$cameraenddistance = $mdistances[$i-1];
 			print MFILE "#######################################################\r\n";
@@ -1998,9 +1998,9 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i-1];
 			}
 			
 		# insert acoustic update before start of line
-		if ($mmodes[$i-1] == 1)
+		if ($mstartstops[$i-1] == 1)
 			{
-			print MFILE "# Acoustic update - sent status ping before start of line \r\n";
+			print MFILE "# Acoustic update 7 - sent status ping before start of line \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
