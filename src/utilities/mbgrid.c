@@ -2509,7 +2509,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 						    &prx[1], &pry[1], 
 						    &weight, &use_weight, &error);
 
-				       if (use_weight != MBGRID_USE_NO)
+				       if (use_weight != MBGRID_USE_NO && weight > 0.000001)
 					    {
 					    weight *= file_weight;
 					    norm[kgrid] = norm[kgrid] + weight;
@@ -2599,10 +2599,10 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				grid[kgrid] = clipvalue;
 				sigma[kgrid] = 0.0;
 				}
-/* fprintf(outfp,"%d %d %d  %f %f %f   %d %d %f %f\n",
-i,j,kgrid,
-grid[kgrid], wbnd[0] + i*dx, wbnd[2] + j*dy,
-num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
+			/* fprintf(outfp,"%d %d %d  %f %f %f   %d %d %f %f\n",
+			i,j,kgrid,
+			grid[kgrid], wbnd[0] + i*dx, wbnd[2] + j*dy,
+			num[kgrid],cnt[kgrid],norm[kgrid],sigma[kgrid]);*/
 			}
 
 	/***** end of footprint gridding *****/
@@ -4161,6 +4161,8 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], dx, dy, wbnd[0], wbnd[1]);*/
 if (sdata[3*i+2]>2000.0)
 fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 }*/
+		if (clipmode == MBGRID_INTERP_ALL)
+			clip = MAX(gxdim,gydim);
 		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
 			work1,work2,work3,&cay,&clip);
@@ -4176,8 +4178,10 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		/* translate the interpolation into the grid array 
 		    filling only data gaps */
 		zflag = 5.0e34;
+fprintf(stderr,"CLIP:%d CLIPMODE:%d\n",clip,clipmode);
 		if (clipmode == MBGRID_INTERP_GAP)
 			{
+fprintf(stderr,"FILLING GAP\n");
 			for (i=0;i<gxdim;i++)
 			    for (j=0;j<gydim;j++)
 				{
@@ -4299,6 +4303,7 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		    filling by proximity */
 		else if (clipmode == MBGRID_INTERP_NEAR)
 			{
+fprintf(stderr,"FILLING NEAR\n");
 			for (i=0;i<gxdim;i++)
 			    for (j=0;j<gydim;j++)
 				{
@@ -4381,6 +4386,7 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 		    filling all empty bins */
 		else
 			{
+fprintf(stderr,"FILLING EVERYTHING\n");
 			for (i=0;i<gxdim;i++)
 			    for (j=0;j<gydim;j++)
 				{
@@ -4808,7 +4814,9 @@ fprintf(stderr,"%d %f\n",i,sdata[3*i+2]);
 			if (gridkind != MBGRID_ASCII
 				&& gridkind != MBGRID_ARCASCII
 				&& grid[kgrid] >= clipvalue)
+				{
 				output[kout] = outclipvalue;
+				}
 			}
 	if (gridkind == MBGRID_ASCII)
 		{

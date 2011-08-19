@@ -28,7 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.1902       July 15, 2011
+* Version 5.3.1904       August 18, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -179,6 +179,25 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+Added three new macros authored by Christian Ferreira. These are
+mbm_multicopy, mbm_multidatalist, and mbm_multiprocess. All three
+are used to execute tasks on large numbers of swath files by starting
+multiple processes in parallel. The mbm_multicopy macro accomplishes
+copying of files from one format to another. The mbm_multidatalist
+macro accomplishes the creation of ancilliary files. The mbm_multiprocess
+macro accomplishes processing with mbprocess. These all require the
+Parallel-Forkmanager Perl module available from www.cpan.org.
+
+Added flagging by acrosstrack distance to mbclean. Also added esf
+file locking for compatibility with mbedit and mbeditviz, and
+fixed handling of old edits.
+
+Fixed a problem with the footprint algorithm of mbgrid
+that sometimes left holes that could not be filled by interpolation.
+
+Added ability to mix constant altitude and constant depth behaviors
+within a single AUV mission to mbm_route2mission.
+
 Fixes to handling of asynchronous attitude data in format 88 (Reson s7k) 
 and calculation of time lag estimates.
 
