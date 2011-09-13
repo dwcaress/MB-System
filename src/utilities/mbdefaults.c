@@ -121,8 +121,9 @@ int main (int argc, char **argv)
 	char	psdisplay[MB_PATH_MAXLINE];
 	char	imgdisplay[MB_PATH_MAXLINE];
 	char	mbproject[MB_PATH_MAXLINE];
-	char	fbt[MB_PATH_MAXLINE];
+	char	argstring[MB_PATH_MAXLINE];
 	int	fbtversion = 3;
+	int	uselockfiles = 1;
 	char	*HOME = "HOME";
 	char	*getenv();
 
@@ -146,8 +147,11 @@ int main (int argc, char **argv)
 	/* now get current fbtversion value */
 	status = mb_fbtversion(verbose,&fbtversion);
 
+	/* now get current uselockfiles value */
+	status = mb_uselockfiles(verbose,&uselockfiles);
+
 	/* process argument list */
-	while ((c = getopt(argc, argv, "D:d:F:f:HhI:i:L:l:T:t:VvW:w:")) != -1)
+	while ((c = getopt(argc, argv, "D:d:F:f:HhI:i:L:l:T:t:U:u:VvW:w:")) != -1)
 	  switch (c) 
 		{
 		case 'D':
@@ -157,14 +161,14 @@ int main (int argc, char **argv)
 			break;
 		case 'F':
 		case 'f':
-			sscanf (optarg,"%s",fbt);
-			if (strncmp(fbt,"new",3) == 0 || strncmp(fbt,"NEW",3) == 0)
+			sscanf (optarg,"%s",argstring);
+			if (strncmp(argstring,"new",3) == 0 || strncmp(argstring,"NEW",3) == 0)
 				fbtversion = 3;
-			else if (strncmp(fbt,"old",2) == 0 || strncmp(fbt,"OLD",2) == 0)
+			else if (strncmp(argstring,"old",2) == 0 || strncmp(argstring,"OLD",2) == 0)
 				fbtversion = 2;
-			else if (strncmp(fbt,"2",1) == 0)
+			else if (strncmp(argstring,"2",1) == 0)
 				fbtversion = 2;
-			else if (strncmp(fbt,"3",1) == 0)
+			else if (strncmp(argstring,"3",1) == 0)
 				fbtversion = 3;
 			flag++;
 			break;
@@ -185,6 +189,19 @@ int main (int argc, char **argv)
 		case 'T':
 		case 't':
 			sscanf (optarg,"%lf", &timegap);
+			flag++;
+			break;
+		case 'U':
+		case 'u':
+			sscanf (optarg,"%s",argstring);
+			if (strncmp(argstring,"yes",3) == 0 || strncmp(argstring,"YES",3) == 0)
+				uselockfiles = 1;
+			else if (strncmp(argstring,"no",2) == 0 || strncmp(argstring,"NO",2) == 0)
+				uselockfiles = 0;
+			else if (strncmp(argstring,"1",1) == 0)
+				uselockfiles = 1;
+			else if (strncmp(argstring,"0",1) == 0)
+				uselockfiles = 0;
 			flag++;
 			break;
 		case 'V':
@@ -223,35 +240,36 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2  Version %s\n",rcs_id);
 		fprintf(stderr,"dbg2  MB-system Version %s\n",MB_VERSION);
 		fprintf(stderr,"dbg2  Control Parameters:\n");
-		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
-		fprintf(stderr,"dbg2       help:       %d\n",help);
-		fprintf(stderr,"dbg2       format:     %d\n",format);
-		fprintf(stderr,"dbg2       pings:      %d\n",pings);
-		fprintf(stderr,"dbg2       lonflip:    %d\n",lonflip);
-		fprintf(stderr,"dbg2       bounds[0]:  %f\n",bounds[0]);
-		fprintf(stderr,"dbg2       bounds[1]:  %f\n",bounds[1]);
-		fprintf(stderr,"dbg2       bounds[2]:  %f\n",bounds[2]);
-		fprintf(stderr,"dbg2       bounds[3]:  %f\n",bounds[3]);
-		fprintf(stderr,"dbg2       btime_i[0]: %d\n",btime_i[0]);
-		fprintf(stderr,"dbg2       btime_i[1]: %d\n",btime_i[1]);
-		fprintf(stderr,"dbg2       btime_i[2]: %d\n",btime_i[2]);
-		fprintf(stderr,"dbg2       btime_i[3]: %d\n",btime_i[3]);
-		fprintf(stderr,"dbg2       btime_i[4]: %d\n",btime_i[4]);
-		fprintf(stderr,"dbg2       btime_i[5]: %d\n",btime_i[5]);
-		fprintf(stderr,"dbg2       btime_i[6]: %d\n",btime_i[6]);
-		fprintf(stderr,"dbg2       etime_i[0]: %d\n",etime_i[0]);
-		fprintf(stderr,"dbg2       etime_i[1]: %d\n",etime_i[1]);
-		fprintf(stderr,"dbg2       etime_i[2]: %d\n",etime_i[2]);
-		fprintf(stderr,"dbg2       etime_i[3]: %d\n",etime_i[3]);
-		fprintf(stderr,"dbg2       etime_i[4]: %d\n",etime_i[4]);
-		fprintf(stderr,"dbg2       etime_i[5]: %d\n",etime_i[5]);
-		fprintf(stderr,"dbg2       etime_i[6]: %d\n",etime_i[6]);
-		fprintf(stderr,"dbg2       speedmin:   %f\n",speedmin);
-		fprintf(stderr,"dbg2       timegap:    %f\n",timegap);
-		fprintf(stderr,"dbg2       psdisplay:  %s\n",psdisplay);
-		fprintf(stderr,"dbg2       imgdisplay: %s\n",imgdisplay);
-		fprintf(stderr,"dbg2       mbproject:  %s\n",mbproject);
-		fprintf(stderr,"dbg2       fbtversion: %d\n",fbtversion);
+		fprintf(stderr,"dbg2       verbose:     %d\n",verbose);
+		fprintf(stderr,"dbg2       help:        %d\n",help);
+		fprintf(stderr,"dbg2       format:      %d\n",format);
+		fprintf(stderr,"dbg2       pings:       %d\n",pings);
+		fprintf(stderr,"dbg2       lonflip:     %d\n",lonflip);
+		fprintf(stderr,"dbg2       bounds[0]:   %f\n",bounds[0]);
+		fprintf(stderr,"dbg2       bounds[1]:   %f\n",bounds[1]);
+		fprintf(stderr,"dbg2       bounds[2]:    %f\n",bounds[2]);
+		fprintf(stderr,"dbg2       bounds[3]:    %f\n",bounds[3]);
+		fprintf(stderr,"dbg2       btime_i[0]:   %d\n",btime_i[0]);
+		fprintf(stderr,"dbg2       btime_i[1]:   %d\n",btime_i[1]);
+		fprintf(stderr,"dbg2       btime_i[2]:   %d\n",btime_i[2]);
+		fprintf(stderr,"dbg2       btime_i[3]:   %d\n",btime_i[3]);
+		fprintf(stderr,"dbg2       btime_i[4]:   %d\n",btime_i[4]);
+		fprintf(stderr,"dbg2       btime_i[5]:   %d\n",btime_i[5]);
+		fprintf(stderr,"dbg2       btime_i[6]:   %d\n",btime_i[6]);
+		fprintf(stderr,"dbg2       etime_i[0]:   %d\n",etime_i[0]);
+		fprintf(stderr,"dbg2       etime_i[1]:   %d\n",etime_i[1]);
+		fprintf(stderr,"dbg2       etime_i[2]:   %d\n",etime_i[2]);
+		fprintf(stderr,"dbg2       etime_i[3]:   %d\n",etime_i[3]);
+		fprintf(stderr,"dbg2       etime_i[4]:   %d\n",etime_i[4]);
+		fprintf(stderr,"dbg2       etime_i[5]:   %d\n",etime_i[5]);
+		fprintf(stderr,"dbg2       etime_i[6]:   %d\n",etime_i[6]);
+		fprintf(stderr,"dbg2       speedmin:     %f\n",speedmin);
+		fprintf(stderr,"dbg2       timegap:      %f\n",timegap);
+		fprintf(stderr,"dbg2       psdisplay:    %s\n",psdisplay);
+		fprintf(stderr,"dbg2       imgdisplay:   %s\n",imgdisplay);
+		fprintf(stderr,"dbg2       mbproject:    %s\n",mbproject);
+		fprintf(stderr,"dbg2       fbtversion:   %d\n",fbtversion);
+		fprintf(stderr,"dbg2       uselockfiles: %d\n",uselockfiles);
 		}
 
 	/* if help desired then print it and exit */
@@ -280,6 +298,7 @@ int main (int argc, char **argv)
 		fprintf(fp,"img viewer: %s\n",imgdisplay);
 		fprintf(fp,"project:    %s\n",mbproject);
 		fprintf(fp,"fbtversion: %d\n",fbtversion);
+		fprintf(fp,"uselockfiles:%d\n",uselockfiles);
 		fclose(fp);
 
 		printf("\nNew MBIO Default Control Parameters:\n");
@@ -294,6 +313,7 @@ int main (int argc, char **argv)
 			printf("fbtversion: 3 (new)\n");
 		else
 			printf("fbtversion: %d\n",fbtversion);
+		printf("uselockfiles: %d\n",uselockfiles);
 		}
 
 	/* else just list the current defaults */
@@ -311,6 +331,7 @@ int main (int argc, char **argv)
 			printf("fbtversion: 3 (new)\n");
 		else
 			printf("fbtversion: %d\n",fbtversion);
+		printf("uselockfiles: %d\n",uselockfiles);
 		}
 
 	/* print output debug statements */

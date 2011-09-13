@@ -442,6 +442,7 @@ and mbedit edit save files.\n";
 	char	str_outofdate_overridden[] = "up to date but overridden";
 	char	str_outofdate_no[] = "up to date";
 	char	str_locked_yes[] = "locked";
+	char	str_locked_ignored[] = "locked but lock ignored";
 	char	str_locked_fail[] = "unlocked but set lock failed";
 	char	str_locked_no[] = "unlocked";
  	int	format = 0;
@@ -508,6 +509,7 @@ and mbedit edit save files.\n";
 	double	ssv;
 	
 	/* swath file locking variables */
+	int	uselockfiles;
 	int	lock_status;
 	int	lock_error;
 	int	locked;
@@ -593,6 +595,7 @@ and mbedit edit save files.\n";
 	/* get current default values */
 	status = mb_defaults(verbose,&mbp_format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
+	status = mb_uselockfiles(verbose,&uselockfiles);
 
 	/* reset all defaults */
 	pings = 1;
@@ -980,23 +983,34 @@ and mbedit edit save files.\n";
 		if (testonly == MB_NO)
 		    {
 		    /* want to process, now try to set a lock of the file to be processed */
-		    lock_status = mb_pr_lockswathfile(verbose, process.mbp_ifile, 
-					    MBP_LOCK_PROCESS, program_name, &lock_error);
-		    if (lock_status == MB_SUCCESS)
-			{
+		    if (uselockfiles == MB_YES)
+		    	{
+			lock_status = mb_pr_lockswathfile(verbose, process.mbp_ifile, 
+						MBP_LOCK_PROCESS, program_name, &lock_error);
+			if (lock_status == MB_SUCCESS)
+			    {
+			    proceedprocess = MB_YES;
+			    locked = MB_NO;
+			    }
+			else if (lock_error == MB_ERROR_FILE_LOCKED)
+			    {
+			    proceedprocess = MB_NO;
+			    lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked,
+							    &lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &lock_error);
+			    }
+			else if (lock_error == MB_ERROR_OPEN_FAIL)
+			    {
+			    proceedprocess = MB_NO;
+			    locked = MB_NO;
+			    }
+			}
+
+		    /* want to process, but lock files are disabled */
+		    else
+		    	{
+		        lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked,
+						&lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &lock_error);
 			proceedprocess = MB_YES;
-			locked = MB_NO;
-			}
-		    else if (lock_error == MB_ERROR_FILE_LOCKED)
-			{
-			proceedprocess = MB_NO;
-			lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked,
-							&lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &lock_error);
-			}
-		    else if (lock_error == MB_ERROR_OPEN_FAIL)
-			{
-			proceedprocess = MB_NO;
-			locked = MB_NO;
 			}
 		    }
 
@@ -1006,7 +1020,7 @@ and mbedit edit save files.\n";
 		    /* want to process, check lock status of the file to be processed */
 		    lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked,
 						&lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &lock_error);
-		    if (locked == MB_NO)
+		    if (locked == MB_NO || uselockfiles == MB_NO)
 			{
 			proceedprocess = MB_YES;
 			}
@@ -1044,7 +1058,9 @@ and mbedit edit save files.\n";
 		string2 = str_outofdate_overridden;
 	    else
 		string2 = str_outofdate_no;
-	    if (locked == MB_YES)
+	    if (locked == MB_YES && uselockfiles == MB_NO)
+		string3 = str_locked_ignored;
+	    else if (locked == MB_YES)
 		string3 = str_locked_yes;
 	    else if (locked == MB_NO && lock_error == MB_ERROR_OPEN_FAIL)
 		string3 = str_locked_fail;
@@ -6621,7 +6637,8 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 	status = mb_close(verbose,&ombio_ptr,&error);
 	
 	/* unlock the raw swath file */
-	lock_status = mb_pr_unlockswathfile(verbose, process.mbp_ifile, 
+	if (uselockfiles == MB_YES)
+		lock_status = mb_pr_unlockswathfile(verbose, process.mbp_ifile, 
 						MBP_LOCK_PROCESS, program_name, &lock_error);
 	    
 	/* deallocate arrays for amplitude correction tables */

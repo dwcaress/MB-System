@@ -1,4 +1,4 @@
-.TH mbdefaults 1 "10 June 2011" "MB-System 5.0" "MB-System 5.0"
+.TH mbdefaults 1 "12 September 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbdefaults\fP - Set or list default mbio parameters for 
 reading and writing swath sonar data
@@ -8,7 +8,8 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbdefaults\fP [\fB-D\fP\fIpsdisplay\fP \fB-I\fP\fIimagedisplay\fP 
-\fB-L\fP\fIlonflip\fP \fB-T\fP\fItimegap\fP \fB-W\fP\fIproject\fP \fB-V -H\fP]
+\fB-L\fP\fIlonflip\fP \fB-T\fP\fItimegap\fP \fB-U\fP\fIuselockfiles\fP 
+\fB-W\fP\fIproject\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbdefaults\fP is a utility for setting or listing the default read
@@ -93,6 +94,16 @@ Default: \fIlonflip\fP = 0.
 Sets the maximum time gap in minutes between adjacent pings allowed before
 the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .TP
+.B \-U
+\fIuselockfiles\fP
+.br
+Sets whether \fBMB-System\fP uses the file locking mechanism to insure that
+a swath file is only processed or edited by a single program at a time.
+To revert to pre-lockfile behavior for \fbmbedit\fP, \fBmbeditviz\fP, 
+\fBmbclean\fP, \fBmbareaclean\fP, \fBmbnavedit\fP, and \fBmbprocess\fP,
+use \fB-U\fP\fI0\fP or  \fB-U\fP\fIno\fP. To reinstate use of lock files,
+use \fB-U\fP\fI1\fP or  \fB-U\fP\fIyes\fP.
+.TP
 .B \-V
 Normally, \fBmbdefaults\fP outputs only a list of the default values 
 to the stdout stream.  If the
@@ -122,6 +133,7 @@ The output will be:
  img viewer: xv
  project:    none
  fbtversion: 3 (new)
+ uselockfiles: 1
 
 Suppose that one just wishes to see what the current default
 parameters are.  The following will suffice:
@@ -136,6 +148,7 @@ The output will be
  img viewer: xv
  project:    none
  fbtversion: 3 (new)
+ uselockfiles: 1
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbcontour\fP(l), 

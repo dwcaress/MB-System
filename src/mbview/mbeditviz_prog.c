@@ -110,6 +110,7 @@ double	mbdef_btime_d;
 double	mbdef_etime_d;
 double	mbdef_speedmin;
 double	mbdef_timegap;
+int	mbdef_uselockfiles;
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_init(int argc,char **argv)
@@ -198,6 +199,7 @@ int mbeditviz_init(int argc,char **argv)
 
 	/* set mbio default values */
 	mb_lonflip(mbev_verbose,&mbdef_lonflip);
+	mb_uselockfiles(mbev_verbose,&mbdef_uselockfiles);
 	mbdef_pings = 1;
 	mbdef_format = 0;
 	mbdef_bounds[0] = -360.;
@@ -628,8 +630,27 @@ int mbeditviz_load_file(int ifile)
 		file = &(mbev_files[ifile]);
 
 		/* try to lock file */
-		mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path, 
+		if (mbdef_uselockfiles == MB_YES)
+			{
+			mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path, 
 					MBP_LOCK_EDITBATHY, program_name, &mbev_error);
+			}
+		else
+			{
+			mbev_status = mb_pr_lockinfo(mbev_verbose, file->path, &locked,
+					&lock_purpose, lock_program, lock_user, lock_cpu, 
+					lock_date, &mbev_error);
+
+			/* if locked get lock info */
+			if (mbev_error == MB_ERROR_FILE_LOCKED)
+				{
+				fprintf(stderr, "\nFile %s locked but lock ignored\n", file->path);
+				fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
+				fprintf(stderr, "on cpu <%s> at <%s>\n", lock_cpu, lock_date);
+				mbev_error = MB_ERROR_NO_ERROR;
+				mbev_status = MB_SUCCESS;
+				}
+			}
 		
 		/* if locked let the user know file can't be opened */
 		if (mbev_status == MB_FAILURE)
@@ -2023,7 +2044,8 @@ int mbeditviz_unload_file(int ifile)
 		mbev_num_files_loaded--;
 		
 		/* unlock the file */
-		lock_status = mb_pr_unlockswathfile(mbev_verbose, file->path, 
+		if (mbdef_uselockfiles == MB_YES)
+			lock_status = mb_pr_unlockswathfile(mbev_verbose, file->path, 
 						MBP_LOCK_EDITBATHY, program_name, &lock_error);
 		
 		}

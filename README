@@ -28,7 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.1904       August 18, 2011
+* Version 5.3.1905       September 13, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -179,6 +179,15 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+Added ability to disable file locking using the program mbdefaults
+and the .mbio_defaults file in the user's home directory.
+If a user disables file locking by running
+     mbdefaults -U0
+then the programs mbedit, mbeditviz, mbnavedit, mbclean, and
+mbprocess will not set new file locks and will ignore any existing
+file locks. In short, a user can disable the entire file locking
+mechanism in MB-System.
+
 Added three new macros authored by Christian Ferreira. These are
 mbm_multicopy, mbm_multidatalist, and mbm_multiprocess. All three
 are used to execute tasks on large numbers of swath files by starting
