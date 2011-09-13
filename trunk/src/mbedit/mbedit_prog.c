@@ -463,6 +463,7 @@ static void	*imbio_ptr = NULL;
 static int	output_mode = MBEDIT_OUTPUT_EDIT;
 static int	run_mbprocess = MB_NO;
 static int	gui_mode = MB_NO;
+static int	uselockfiles = MB_YES;
 
 /* mbio read and write values */
 static void	*store_ptr = NULL;
@@ -606,6 +607,7 @@ int mbedit_init(int argc, char ** argv, int *startup_file)
 	/* set default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
+	status = mb_uselockfiles(verbose,&uselockfiles);
 	format = 0;
 	pings = 1;
 	lonflip = 0;
@@ -4874,8 +4876,26 @@ int mbedit_open_file(char *file, int form, int savemode)
 	format = form;
 
 	/* try to lock file */
-	status = mb_pr_lockswathfile(verbose, ifile, 
+	if (uselockfiles == MB_YES)
+		{
+		status = mb_pr_lockswathfile(verbose, ifile, 
 				MBP_LOCK_EDITBATHY, program_name, &error);
+		}
+	else
+		{
+		lock_status = mb_pr_lockinfo(verbose, ifile, &locked,
+				&lock_purpose, lock_program, lock_user, lock_cpu, 
+				lock_date, &error);
+
+		/* if locked get lock info */
+		if (error == MB_ERROR_FILE_LOCKED)
+			{
+			fprintf(stderr, "\nFile %s locked but lock ignored\n", ifile);
+			fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
+			fprintf(stderr, "on cpu <%s> at <%s>\n", lock_cpu, lock_date);
+			error = MB_ERROR_NO_ERROR;
+			}
+		}
 		
 	/* if locked let the user know file can't be opened */
 	if (status == MB_FAILURE)
@@ -4915,7 +4935,7 @@ int mbedit_open_file(char *file, int form, int savemode)
 		do_error_dialog(error1,error2, error3);
 		}
 		
-	/* if successfully locked proceed */
+	/* if successfully locked (or lock ignored) proceed */
 	if (status == MB_SUCCESS)
 		{
 		/* initialize reading the input multibeam file */
@@ -5137,7 +5157,8 @@ int mbedit_close_file()
 	    }
 	
 	/* unlock the raw swath file */
-	status = mb_pr_unlockswathfile(verbose, ifile, 
+	if (uselockfiles == MB_YES)
+		status = mb_pr_unlockswathfile(verbose, ifile, 
 						MBP_LOCK_EDITBATHY, program_name, &error);
 						
 	/* set mbprocess parameters */

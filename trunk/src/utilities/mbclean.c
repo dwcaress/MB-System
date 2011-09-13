@@ -23,8 +23,8 @@
  * "rails" where outer beams have  smaller  acrosstrack distances than 
  * more inner beams (-Q option).  Low and high bounds on acceptable depth
  * values can be set; depth values outside  the  acceptable  range  will  be
- * flagged.  The acceptable depth ranges can either be absolute (-B option), rela­
- * tive to the local median depth (-A option) or defined by low and high fractions
+ * flagged.  The acceptable depth ranges can either be absolute (-B option), relative
+ * to the local median depth (-A option) or defined by low and high fractions
  * of the local median depth (-G option).  A set number of outer beams can also be
  * flagged.
 
@@ -274,6 +274,7 @@ int main (int argc, char **argv)
 	char	*message = NULL;
 	
 	/* swath file locking variables */
+	int	uselockfiles;
 	int	lock_status;
 	int	locked;
 	int	lock_purpose;
@@ -433,6 +434,7 @@ int main (int argc, char **argv)
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
+	status = mb_uselockfiles(verbose,&uselockfiles);
 
 	/* reset all defaults but the format and lonflip */
 	pings = 1;
@@ -754,8 +756,23 @@ int main (int argc, char **argv)
 			}
 
 		/* try to lock file */
-		status = mb_pr_lockswathfile(verbose, swathfile, 
+		if (uselockfiles == MB_YES)
+			status = mb_pr_lockswathfile(verbose, swathfile, 
 					MBP_LOCK_EDITBATHY, program_name, &error);
+		else
+		    	{
+			lock_status = mb_pr_lockinfo(verbose, swathfile, &locked,
+					&lock_purpose, lock_program, lock_user, lock_cpu, lock_date, &error);
+
+			/* if locked get lock info */
+			if (error == MB_ERROR_FILE_LOCKED)
+				{
+				fprintf(stderr, "\nFile %s locked but lock ignored\n", swathfile);
+				fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
+				fprintf(stderr, "on cpu <%s> at <%s>\n", lock_cpu, lock_date);
+				error = MB_ERROR_NO_ERROR;
+				}
+			}
 
 		/* if locked let the user know file can't be opened */
 		if (status == MB_FAILURE)
@@ -2076,7 +2093,8 @@ i,esf.edit_time_d[i],esf.edit_beam[i],esf.edit_action[i],esf.edit_use[i]);
 			    }
 			    
 			/* unlock the raw swath file */
-			status = mb_pr_unlockswathfile(verbose, swathfile, 
+			if (uselockfiles == MB_YES)
+				status = mb_pr_unlockswathfile(verbose, swathfile, 
 						MBP_LOCK_EDITBATHY, program_name, &error);
 
 			/* check memory */
