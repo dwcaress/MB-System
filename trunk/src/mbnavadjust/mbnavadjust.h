@@ -310,6 +310,8 @@ EXTERNAL int	mbna_verbose;
 EXTERNAL int	mbna_status;
 EXTERNAL int	mbna_view_list;
 EXTERNAL int	mbna_view_mode;
+EXTERNAL int	mbna_color_foreground;
+EXTERNAL int	mbna_color_background;
 EXTERNAL int	mbna_survey_select;
 EXTERNAL int	mbna_file_select;
 EXTERNAL int	mbna_section_select;

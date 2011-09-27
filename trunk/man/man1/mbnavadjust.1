@@ -1,4 +1,4 @@
-.TH mbnavadjust 1 "24 June 2010" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjust 1 "24 September 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjust\fP - Package that solves for optimal navigation by
 matching bathymetry of overlapping swaths.
@@ -7,7 +7,7 @@ matching bathymetry of overlapping swaths.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavadjust\fP [\fB-V -H\fP] 
+\fBmbnavadjust\fP [\fB-V -H -D -R\fP] 
 
 .SH DESCRIPTION
 \fBMBnavadjust\fP is an interactive graphical program used to
@@ -106,6 +106,17 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .B \-H
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
+.TP
+.B \-D
+Normally, \fBmbnavadjust\fP uses a white background for the
+interactive plots. This option causes the program to use a
+black background for the plots.
+.TP
+.B \-R
+This option causes \fBmbnavadjust\fP to discard all navigation ties,
+set all crossings to "unanalyzed" status, and to save the project
+in this pristine state. Only use this option if you really, really
+want to start over.
 .TP
 .B \-V
 Normally, \fBmbnavadjust\fP outputs nothing to the stderr stream.

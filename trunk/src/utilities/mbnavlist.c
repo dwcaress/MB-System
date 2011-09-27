@@ -119,7 +119,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mbnavlist";
 	char help_message[] =  "mbnavlist prints the specified contents of navigation records\nin a swath sonar data file to stdout. The form of the \noutput is quite flexible; mbnavlist is tailored to produce \nascii files in spreadsheet style with data columns separated by tabs.";
-	char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
+	char usage_message[] = "mbnavlist [-Byr/mo/da/hr/mn/sc -Ddecimate -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Kkind -Llonflip \n-Ooptions -Rw/e/s/n -Sspeed \n-Ttimegap -V -Zsegment]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -160,6 +160,7 @@ int main (int argc, char **argv)
 	int	vru_source;
 	int	svp_source;
 	int	aux_nav_channel = -1;
+	int	data_kind = -1;
 
 	/* output format list controls */
 	char	list[MAX_OPTIONS];
@@ -257,7 +258,7 @@ int main (int argc, char **argv)
 	decimate = 1;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:G:g:I:i:L:l:N:n:O:o:R:r:S:s:T:t:Z:z:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:G:g:I:i:K:k:L:l:N:n:O:o:R:r:S:s:T:t:Z:z:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -307,6 +308,11 @@ int main (int argc, char **argv)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", read_file);
+			flag++;
+			break;
+		case 'K':
+		case 'k':
+			sscanf (optarg,"%d", &data_kind);
 			flag++;
 			break;
 		case 'L':
@@ -402,6 +408,8 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
+		fprintf(stderr,"dbg2       aux_nav_channel:%d\n",aux_nav_channel);
+		fprintf(stderr,"dbg2       data_kind:      %d\n",data_kind);
 		fprintf(stderr,"dbg2       ascii:          %d\n",ascii);
 		fprintf(stderr,"dbg2       segment:        %d\n",segment);
 		fprintf(stderr,"dbg2       segment_tag:    %s\n",segment_tag);
@@ -472,7 +480,8 @@ int main (int argc, char **argv)
 		exit(error);
 		}
 		
-	/* set auxilliary nav source if requested */
+	/* set auxilliary nav source if requested 
+		- note this is superceded by data_kind if the -K option is used */
 	if (aux_nav_channel > 0)
 		{
 		if (aux_nav_channel == 1)
@@ -566,7 +575,25 @@ int main (int argc, char **argv)
 			}
 			
 		/* check for appropriate navigation record */
+		
+		/* if the -K option is used look for a particular
+			sort of data record */
 		if (error <= MB_ERROR_NO_ERROR
+			&& data_kind > 0)
+			{
+			if (error <= MB_ERROR_NO_ERROR
+				&& kind == data_kind)
+				{
+				error = MB_ERROR_NO_ERROR;
+				status = MB_SUCCESS;
+				}
+			else
+				{
+				error = MB_ERROR_IGNORE;
+				status = MB_FAILURE;
+				}
+			}
+		else if (error <= MB_ERROR_NO_ERROR
 			&& kind != nav_source)
 			{
 			error = MB_ERROR_IGNORE;

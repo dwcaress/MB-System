@@ -1301,6 +1301,8 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->pressure_depth),error);
 	if (ctd->sound_velocity != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->sound_velocity),error);
+	if (ctd->absorption != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(ctd->absorption),error);
 
 	/* Survey Line (record 1014) */
 	surveyline = &store->surveyline;
@@ -1321,10 +1323,10 @@ int mbsys_reson7k_deall(int verbose, void *mbio_ptr, void **store_ptr,
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(attitude->pitch),error);
 	if (attitude->roll != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(attitude->roll),error);
-	if (attitude->heading != NULL)
-		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(attitude->heading),error);
 	if (attitude->heave != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(attitude->heave),error);
+	if (attitude->heading != NULL)
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&(attitude->heading),error);
 
 	/* Edgetech FS-DW low frequency sidescan (record 3000) */
 	fsdwsslo = &store->fsdwsslo;
@@ -6946,8 +6948,10 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		else
 			{
 			if (mb_io_ptr->nattitude > 0)
+				{
 				mb_attint_interp(verbose, mbio_ptr, store->time_d,  
 				   	heave, roll, pitch, error);
+				}
 			}
 
 		/* done translating values */
@@ -6978,8 +6982,10 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get roll pitch and heave */
 		if (mb_io_ptr->nattitude > 0)
+			{
 			mb_attint_interp(verbose, mbio_ptr, *time_d,  
 				    heave, roll, pitch, error);
+			}
 
 		/* get draft  */
 		if (mb_io_ptr->nsonardepth > 0)
@@ -7134,8 +7140,10 @@ int mbsys_reson7k_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*heave = 0.0;
 
 		if (mb_io_ptr->nattitude > 0)
+			{
 			mb_attint_interp(verbose, mbio_ptr, store->time_d,  
 				    heave, roll, pitch, error);
+			}
 
 		/* get draft  */
 		*draft = reference->water_z;
@@ -7561,6 +7569,9 @@ int mbsys_reson7k_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* set status */
 		*error = MB_ERROR_OTHER;
 		status = MB_FAILURE;
+
+		/* get number of available navigation values */
+		*n = 1;
 
 		/* get time */
 		for (i=0;i<7;i++)
