@@ -608,6 +608,9 @@ int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error);
+int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr,
+		int id, int *kind, 
+		int *error);
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr,
 		int id, void **store_ptr, 
 		int *error);

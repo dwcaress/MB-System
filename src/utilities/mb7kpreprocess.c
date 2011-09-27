@@ -3105,6 +3105,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		{
 		/* apply filtering to sonardepth data 
 			read from asynchronous records in 7k files */
+fprintf(stderr,"Applying filtering to %d sonardepth data\n", ndat_sonardepth);
 		for (i=0;i<ndat_sonardepth;i++)
 			{
 			dat_sonardepth_sonardepthfilter[i] = 0.0;
@@ -3134,6 +3135,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			}
 
 		/* filter sonardepth data from separate file */
+fprintf(stderr,"Applying filtering to %d sonardepth nav data\n", nsonardepth);
 		for (i=0;i<nsonardepth;i++)
 			{
 			sonardepth_sonardepthfilter[i] = 0.0;
@@ -3163,11 +3165,12 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			}
 
 		/* filter sonardepth data from separate INS file */
+fprintf(stderr,"Applying filtering to %d INS nav data\n", nins);
 		for (i=0;i<nins;i++)
 			{
 			ins_sonardepthfilter[i] = 0.0;
 			sonardepth_filterweight = 0.0;
-			for (j=0;j<nsonardepth;j++)
+			for (j=0;j<nins;j++)
 				{
 				dtol = (ins_time_d[j] - ins_time_d[i]) / sonardepthfilterlength;
 				if (fabs(dtol) < 4.0)
@@ -3180,7 +3183,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			if (sonardepth_filterweight > 0.0)
 				ins_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
-		for (i=0;i<nsonardepth;i++)
+		for (i=0;i<nins;i++)
 			{
 			if (ins_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 				factor = 1.0;
@@ -3192,11 +3195,12 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			}
 
 		/* filter sonardepth data from separate WHOI DSL file */
+fprintf(stderr,"Applying filtering to %d DSL nav data\n", ndsl);
 		for (i=0;i<ndsl;i++)
 			{
 			dsl_sonardepthfilter[i] = 0.0;
 			sonardepth_filterweight = 0.0;
-			for (j=0;j<nsonardepth;j++)
+			for (j=0;j<ndsl;j++)
 				{
 				dtol = (dsl_time_d[j] - dsl_time_d[i]) / sonardepthfilterlength;
 				if (fabs(dtol) < 4.0)
@@ -3209,7 +3213,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			if (sonardepth_filterweight > 0.0)
 				dsl_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
-		for (i=0;i<nsonardepth;i++)
+		for (i=0;i<ndsl;i++)
 			{
 			if (dsl_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 				factor = 1.0;
@@ -3221,11 +3225,12 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			}
 
 		/* filter sonardepth data from separate Steve Rock file */
+fprintf(stderr,"Applying filtering to %d Rock nav data\n", nrock);
 		for (i=0;i<nrock;i++)
 			{
 			rock_sonardepthfilter[i] = 0.0;
 			sonardepth_filterweight = 0.0;
-			for (j=0;j<nsonardepth;j++)
+			for (j=0;j<nrock;j++)
 				{
 				dtol = (rock_time_d[j] - rock_time_d[i]) / sonardepthfilterlength;
 				if (fabs(dtol) < 4.0)
@@ -3238,7 +3243,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			if (sonardepth_filterweight > 0.0)
 				rock_sonardepthfilter[i] /= sonardepth_filterweight;
 			}
-		for (i=0;i<nsonardepth;i++)
+		for (i=0;i<nrock;i++)
 			{
 			if (rock_sonardepth[i] < 2.0 * sonardepthfilterdepth)
 				factor = 1.0;
@@ -3253,6 +3258,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	/* calculate sonardepth change rate for variable lag correction - asynchronous data only */
 	if (sonardepthlagfix == MB_YES && ndat_sonardepth > 1)
 		{
+fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", ndat_sonardepth);
 		for (i=0;i<ndat_sonardepth;i++)
 			{
 			if (i == 0)

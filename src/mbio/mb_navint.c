@@ -78,7 +78,6 @@
 #include "../../include/mb_status.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
-
 /*  #define MB_NAVINT_DEBUG 1
     #define MB_ATTINT_DEBUG 1
     #define MB_HEDINT_DEBUG 1
@@ -430,8 +429,8 @@ int mb_attint_add(int verbose, void *mbio_ptr,
 		mb_io_ptr->attitude_pitch[mb_io_ptr->nattitude] = pitch;
 		mb_io_ptr->nattitude++;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_add:    Attitude fix %d %f %f %f added\n", 
-				mb_io_ptr->nattitude, roll, pitch, heave);
+	fprintf(stderr, "mb_attint_add:    Attitude fix %d time_d:%f roll:%f pitch:%f heave:%f added\n", 
+				mb_io_ptr->nattitude, time_d, roll, pitch, heave);
 #endif
 
 		/* print debug statements */
@@ -527,8 +526,8 @@ int mb_attint_nadd(int verbose, void *mbio_ptr,
 		mb_io_ptr->attitude_roll[mb_io_ptr->nattitude] = roll[i];
 		mb_io_ptr->attitude_pitch[mb_io_ptr->nattitude] = pitch[i];
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_add:    Attitude fix %d of %d: %f %f %f added\n", 
-				i, mb_io_ptr->nattitude, roll[i], pitch[i], heave[i]);
+	fprintf(stderr, "mb_attint_add:    Attitude fix %d of %d: time:%f roll:%f pitch:%f heave:%f added\n", 
+				i, mb_io_ptr->nattitude, time_d[i], roll[i], pitch[i], heave[i]);
 #endif
 		mb_io_ptr->nattitude++;
 
@@ -622,8 +621,8 @@ int mb_attint_interp(int verbose, void *mbio_ptr,
 			+ factor*(mb_io_ptr->attitude_pitch[ifix] - mb_io_ptr->attitude_pitch[ifix-1]);
 		status = MB_SUCCESS;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_interp: Attitude %f %f %f interpolated at fix %d of %d with factor:%f\n", 
-		*roll, *pitch, *heave, ifix, mb_io_ptr->nattitude, factor);
+	fprintf(stderr, "mb_attint_interp: Attitude time_d:%f roll:%f pitch:%f heave:%f interpolated at fix %d of %d with factor:%f\n", 
+		time_d, *roll, *pitch, *heave, ifix, mb_io_ptr->nattitude, factor);
 #endif
 		}
 		
@@ -638,8 +637,8 @@ int mb_attint_interp(int verbose, void *mbio_ptr,
 		*pitch = mb_io_ptr->attitude_pitch[mb_io_ptr->nattitude-1];
 		status = MB_SUCCESS;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_interp: Attitude %f %f %f extrapolated from last fix of %d\n", 
-		*roll, *pitch, *heave, mb_io_ptr->nattitude);
+	fprintf(stderr, "mb_attint_interp: Attitude time_d:%f roll:%f pitch:%f heave:%f extrapolated from last fix of %d\n", 
+		time_d, *roll, *pitch, *heave, mb_io_ptr->nattitude);
 #endif
 		}
 		
@@ -651,8 +650,8 @@ int mb_attint_interp(int verbose, void *mbio_ptr,
 		*pitch = mb_io_ptr->attitude_pitch[0];
 		status = MB_SUCCESS;
 #ifdef MB_ATTINT_DEBUG
-	fprintf(stderr, "mb_attint_interp: Attitude %f %f %f extrapolated from first fix of %d\n", 
-		*roll, *pitch, *heave, mb_io_ptr->nattitude);
+	fprintf(stderr, "mb_attint_interp: Attitude time_d:%f roll:%f pitch:%f heave:%f extrapolated from first fix of %d\n", 
+		time_d, *roll, *pitch, *heave, mb_io_ptr->nattitude);
 #endif
 		}
 

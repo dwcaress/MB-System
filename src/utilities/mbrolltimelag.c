@@ -121,6 +121,7 @@ int main (int argc, char **argv)
 	
 	/* cross correlation parameters */
 	int	navchannel = MB_DATA_DATA;
+	int	kind = MB_DATA_NONE;
 	int	npings = 100;
 	int	nlag = 41;
 	double	lagmin = -2.0;
@@ -182,7 +183,7 @@ int main (int argc, char **argv)
 	strcpy(swathdata, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:O:o:N:n:S:s:T:t:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:I:i:K:k:O:o:N:n:S:s:T:t:")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -201,6 +202,11 @@ int main (int argc, char **argv)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", swathdata);
+			flag++;
+			break;
+		case 'K':
+		case 'k':
+			sscanf (optarg,"%d", &kind);
 			flag++;
 			break;
 		case 'N':
@@ -262,6 +268,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       lagmin:          %f\n",lagmin);
 		fprintf(stderr,"dbg2       lagmax:          %f\n",lagmax);
 		fprintf(stderr,"dbg2       navchannel:      %d\n",navchannel);
+		fprintf(stderr,"dbg2       kind:            %d\n",kind);
 		}
 
 	/* if help desired then print it and exit */
@@ -302,7 +309,10 @@ int main (int argc, char **argv)
 		}
 		
 	/* first get roll data from the entire swathdata (which can be a datalist ) */
-	sprintf(cmdfile, "mbnavlist -I%s -F%d -N%d -OMR", swathdata, format, navchannel);
+	if (kind > MB_DATA_NONE)
+		sprintf(cmdfile, "mbnavlist -I%s -F%d -K%d -OMR", swathdata, format, kind);
+	else
+		sprintf(cmdfile, "mbnavlist -I%s -F%d -N%d -OMR", swathdata, format, navchannel);
 	fprintf(stderr,"\nRunning %s...\n",cmdfile);
 	fp = popen(cmdfile, "r");
 	while ((nscan = fscanf(fp, "%lf %lf", &time_d, &roll)) == 2)

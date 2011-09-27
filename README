@@ -28,7 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.1905       September 13, 2011
+* Version 5.3.1906       September 28, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
   Version 5.1.3beta1874  November 7, 2010
@@ -179,6 +179,28 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+Program mbnavadjust:
+Added -D option to invert foreground (normally black) and background
+(normally white) colors in the interactive plots
+
+Format 88 MBF_RESON7KR (Reson 7k multibeam data):
+Fixed deallocation of MBF_RESON7KR data structures.
+
+Program mb7kpreprocess:
+Fixed some filtering code in mb7kpreprocess.
+
+Program mbrolltimelag:
+Added -K option to mbrolltimelag - this duplicates the new -K option
+in mbnavlist and is used when mbrolltimelag calls mbnavlist to extract
+the roll time series.
+
+Program mbnavlist:
+Augmented mbnavlist to allow extraction of data keyed to data records
+other than navigation or survey data. A new -Kkind option allows
+users to specify output at the times of attitude, heading, or other
+record types.
+
+Programs mbedit, mbeditviz, mbnavedit, mbclean, mbprocess:
 Added ability to disable file locking using the program mbdefaults
 and the .mbio_defaults file in the user's home directory.
 If a user disables file locking by running
@@ -188,6 +210,7 @@ mbprocess will not set new file locks and will ignore any existing
 file locks. In short, a user can disable the entire file locking
 mechanism in MB-System.
 
+New macros mbm_multicopy, mbm_multidatalist, mbm_multiprocess:
 Added three new macros authored by Christian Ferreira. These are
 mbm_multicopy, mbm_multidatalist, and mbm_multiprocess. All three
 are used to execute tasks on large numbers of swath files by starting
@@ -197,35 +220,45 @@ macro accomplishes the creation of ancilliary files. The mbm_multiprocess
 macro accomplishes processing with mbprocess. These all require the
 Parallel-Forkmanager Perl module available from www.cpan.org.
 
+Program mbclean:
 Added flagging by acrosstrack distance to mbclean. Also added esf
 file locking for compatibility with mbedit and mbeditviz, and
 fixed handling of old edits.
 
+Program mbgrid:
 Fixed a problem with the footprint algorithm of mbgrid
 that sometimes left holes that could not be filled by interpolation.
 
+Macro mbm_route2mission:
 Added ability to mix constant altitude and constant depth behaviors
 within a single AUV mission to mbm_route2mission.
 
+Format 88 MBF_RESON7KR (Reson 7k multibeam data):
 Fixes to handling of asynchronous attitude data in format 88 (Reson s7k) 
 and calculation of time lag estimates.
 
+Program mbextractsegy:
 Adjustments to the default plots of segy data by mbextractsegy.
 
+Macro mbm_route2mission:
 Fixes to generation of MBARI AUV missions by mbm_route2mission.
 
+Format 88 MBF_RESON7KR (Reson 7k multibeam data):
 Fixed extraction of raw, asynchronous attitude data from Reson 7k 
 data using rollpitchheave records (e.g. from the MARUM AUV), which in
 turn fixes the calculation of attitude time lag estimates using
 mbrolltimelag.
 
+Program mb7kpreprocess:
 Fixed application of time lag model by mb7kpreprocess for the case
 of Reson 7k data using rollpitchheave records (e.g. from the MARUM AUV).
 
+Program mblist:
 Added -UN option to mblist that ignores output of lines 
 associated with zero longitude or latitude values. This option
 will be used by mbdatalist to create *.fnv files.
 
+Format 71 MBF_LDEOIH (generic swath):
 Provided a means to continue using the old definition of 
 swath format MBF_LDEOIH (format 71) for fbt files.
 Users can now use mbdefaults to set the format 71 version that
@@ -239,6 +272,7 @@ take advantage of the Fledermaus capability for editing bathymetry
 in MB-System processing environments. This involved changes to mbcopy
 as well as to the MBF_LDEOIH i/o module.
 
+Program mbnavadjust:
 Changed the swath data import code so that sections will be created even
 when all beams have been flagged as bad. This is to allow surveys
 to remain intact, with no breaks, because the concept of a continuous
@@ -246,6 +280,7 @@ survey is increasingly important in MBnavadjust. Also altered the
 status displays and listings to show survey id along with file and
 section id's.
 
+Format 71 MBF_LDEOIH (generic swath):
 Updated the definition of swath format MBF_LDEOIH (format 71),
 which is used for the "fast bathymetry" or *.fbt files in MB-System
 processing environments. The previous form of *.fbt files had a
@@ -259,35 +294,46 @@ IMPORTANT: In order to avoid compatibility issues, all users
 operating on the same projects should upgrade to this version or
 higher once one user upgrades.
 
+Format 88 MBF_RESON7KR (Reson 7k multibeam data):
 Updated support for Reson 7k data to include the "1022" record.
 We still don't know what this is, but the code now reads and 
 writes it without complaint.
 
+Program mbinfo:
 Fixed mbinfo handling of swath files with no good data
 (Thanks Suzanne O'Hara)
 
+MBIO function mb_get_format():
 Changed mb_get_format() function in mb_format.c so that formats
 are inferred from parameter files if they exist.
 
+Program mbnavadjust:
 Supplemented informational output to stdout from MBnavadjust.
 
+Format 71 MBF_LDEOIH (generic swath):
 Started development of new version of format 71 (mbf_ldeoih).
 
+Program mb7kpreprocess:
 Fixed translation of beam quality values into MB-System beam flags
 by mb7kpreprocess.
 
+Program mbextractsegy:
 Fixed calculation of line breaks by mbextractsegy.
 
+MBIO function mb_get_format():
 Augmented mb_get_format() in mb_format.c to look for the format id
 value in mbprocess parameter files before trying to make sense of
 file suffixes.
 
+Program mbedit:
 Fixed MBedit's handling of files not conforming to the MB-System
 filename suffix convention.
 
+Macro mbm_xyplot:
 Allow users of mbm_xyplot to specify both axis annotation with the
 -B option and axis labeling with the -L option.
 
+Program mbeditviz:
 Implemented workaround for MBeditviz crash problem on Poseidon Linux.
 MBeditviz would shut down whenever a second map view was requested with
 an Xserver error named GLXBadContextTag. Previously, the OpenGL rendering
@@ -297,20 +343,25 @@ allow direct rendering through hardware when that is possible. For reasons
 I do not understand, this change results in MBeditviz no longer crashing
 on my Poseidon Linux test machine.
 
+Programs mbedit, mbnavedit, mbeditviz:
 Fixed font issue for MBedit, MBnavedit, and MBeditviz by using courier
 rather than monaco as a fixed-width font for the available file list
 widgets.
 
+Program mbprocess:
 Added support for the "Rolling Deck to Repository" (R2R) navigation format
 as both an MB-System format (format id 172) and an mbprocess navigation
 merging format (NAVFORMAT=10)
 
+Macros mbm_grdplot and mbm_grdtiff:
 Modified mbm_grdplot and mbm_grdtiff so that the -Y option strictly enforces
 the colormap min max bounds set with the -Z option.
 
+Formats 132 MBF_EDGJSTAR and 133 MBF_EDGJSTR2 (Edgetech Jstar):
 Fixed support for Edgetech Jstar files (formats 132 and 133) so that the
 output of mb7k2jstar and mbprocess are compatible with Edgetech programs.
 
+Programs mbedit, mbeditviz, and mbnavedit:
 Added file locking to mbedit, mbeditviz, and mbnavedit. All three programs
 can now load datalists and display lists of files available for editing.
 These lists show whether the file has been previously edited and if the
@@ -319,9 +370,11 @@ also locks files during processing and skips files that are locked by
 other programs. The program mbdatalist can be used to detect (-S) and remove
 (-Y) orphan file locks in files referenced by datalist structures.
 
+Program mbprocess:
 Fixed bug in mbprocess.c involving parsing of NMEA GGA strings when
 reading in navigation for merging with survey data.
 
+Program mbnavadjust:
 Changed MBnavadjust to allow more file modes, in turn allowing
 more control over which data has the most influence over the navigation
 solutions. In addition to the previously existing modes (Fixed, Good, Poor),
@@ -335,28 +388,37 @@ MBARI data to mode FixedZ, we were able to force the solution to adjust
 the ABE navigation to match the Mapping AUV vertical reference, while still
 allowing lateral (XY) adjustments of all the AUV navigation.
 
+Program mbnavadjust:
 Changed MBnavadjust to output user, cpu, and time of changes to
 project files and as comments to the adjusted navigation files. Also changed
 mbprocess to handle comments in adjusted navigation files.
 
+Program mbm_copy:
 Fixed -C option of mbm_copy.
 
+Format 192 MBF_IMAGEMBA (Imagenex DeltaT):
 Fixed i/o module for extended format Imagenex DeltaT data (format 192) by removing code
 that recalculated bathymetry unnecessarily.
 
+Program mbdatalist:
 Added -Y option to mbdatalist to remove any leftover lock files.
 
+Parsing *.inf files:
 Fixed bug in parsing file start and end times in *.inf files.
 
+MBIO functions mb_defaults(), mb_env(), and mb_lonflip():
 Changed mb_defaults(), mb_env(), and mb_lonflip() functions to always return
 MB_SUCCESS status even when ~/.mbio_defaults file does not exist. Working with 
 system defaults hould not be an error.
 
+Program mbeditviz:
 Changed mbeditviz_import_file() function in mbeditviz_prog.c to reset global
 status to MB_SUCCESS on entry.
 
+Program mbclean:
 Incomplete implementation of Dana Yoerger's changes to mbclean. Not yet tested.
 
+Program mbnavedit:
 Increased verbosity of mbnavedit for -X option.
 
 MB-SYSTEM VERSION 5.2 RELEASE NOTES:

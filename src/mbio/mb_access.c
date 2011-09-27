@@ -881,6 +881,42 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		*error = MB_ERROR_BAD_SYSTEM;
 		}
 		
+	/* if call was made for an unsupported record type ("kind") then try to get the
+		values out of the asynchronous data interpolation buffers */
+	if (status == MB_FAILURE && *error == MB_ERROR_OTHER && *time_d > 0.0)
+		{
+		/* reset status */
+		status = MB_SUCCESS;
+		*error = MB_ERROR_NO_ERROR;
+		
+		/* get number of available navigation values */
+		*n = 1;
+
+		/* get heading */
+		status = mb_hedint_interp(verbose, mbio_ptr, *time_d, heading, error);
+
+		/* get longitude, latitude, and speed */
+		*speed = 0.0;
+		if (status == MB_SUCCESS)
+		status = mb_navint_interp(verbose, mbio_ptr, *time_d, *heading, *speed, 
+				   navlon, navlat, speed, error);
+
+		/* get roll pitch and heave */
+		if (status == MB_SUCCESS)
+		status = mb_attint_interp(verbose, mbio_ptr, *time_d,  
+				    &(heave[0]), &(roll[0]), &(pitch[0]), error);
+
+		/* get draft  */
+		if (status == MB_SUCCESS)
+		status = mb_depint_interp(verbose, mbio_ptr, *time_d,  
+				    draft, error);
+
+		/* get roll pitch and heave */
+		if (status == MB_SUCCESS)
+		status = mb_attint_interp(verbose, mbio_ptr, *time_d,  
+				    heave, roll, pitch, error);
+		}
+		
 	/* apply projection and lonflip if necessary */
 	if (status == MB_SUCCESS)
 		{
