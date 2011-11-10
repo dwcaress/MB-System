@@ -384,6 +384,14 @@ if ($sensorarg =~ /\S*B\S*/)
 	$mappingsonar = 1;
 	$beamdata = 1;
 	}
+if ($mappingsonar && $beamdata)
+	{
+	$logmode = 3;
+	}
+elsif ($mappingsonar)
+	{
+	$logmode = 1;
+	}
 if ($sensor && !$sensorarg)
 	{
 	$mappingsonar = 1;
@@ -1388,7 +1396,7 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 				print MFILE "# Turn on power to sonars and restart logging on the PLC \r\n";
 				print MFILE "behavior reson \r\n";
 				print MFILE "{ \r\n";
-				print MFILE "Log_Mode  = 1; \r\n";
+				print MFILE "Log_Mode  = $logmode; \r\n";
 				print MFILE "duration  = RESON_DURATION; \r\n";
 				print MFILE "MB_Power = $mb_transmitgain; \r\n";
 				if ($subbottom && $mstartstops[$i] == 2)
@@ -1411,7 +1419,7 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 					}
 				print MFILE "} \r\n";
 				print MFILE "#######################################################\r\n";
-print "Behavior: reson (start, Log_Mode = 1)\n";
+print "Behavior: reson (start, Log_Mode = $logmode)\n";
 				}
 			if ($camera)
 				{
@@ -1566,9 +1574,9 @@ print "mappingsonar:$mappingsonar i:$i mwaypoints[$i]:$mwaypoints[$i] iwaypoint:
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
-			print MFILE "Log_Mode  = 1; \r\n";
+			print MFILE "Log_Mode  = $logmode; \r\n";
 			print MFILE "} \r\n";
-print "Behavior: reson (startup, Log_Mode = 1)\n";
+print "Behavior: reson (startup, Log_Mode = $logmode)\n";
 			print MFILE "# Set sonar parameters \r\n";
 			print MFILE "#   Waypoint type:            $mwaypoints[$i]\n";
 			print MFILE "#   Commanded altitude:       $sonaraltitude\n";
@@ -1910,17 +1918,17 @@ print "Behavior: acousticUpdate\n";
 				{
 				print MFILE "SBP_Mode = 0; \r\n";
 				print MFILE "SBP_Power = 0.0; \r\n";
-print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
 				}
 			elsif ($subbottom && $mstartstops[$i-1] == 1)
 				{
 				print MFILE "SBP_Mode = 1; \r\n";
 				print MFILE "SBP_Power = 100.0; \r\n";
-print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
 				}
 			elsif ($subbottom)
 				{
-print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP no change, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP no change, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
 				}
 			if ($subbottom)
 				{

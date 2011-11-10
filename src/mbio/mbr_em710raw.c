@@ -267,6 +267,7 @@ int mbr_register_em710raw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_pingnumber = &mbsys_simrad3_pingnumber; 
 	mb_io_ptr->mb_io_extract = &mbsys_simrad3_extract; 
 	mb_io_ptr->mb_io_insert = &mbsys_simrad3_insert; 
+	mb_io_ptr->mb_io_extract_nnav = &mbsys_simrad3_extract_nnav; 
 	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad3_extract_nav; 
 	mb_io_ptr->mb_io_insert_nav = &mbsys_simrad3_insert_nav; 
 	mb_io_ptr->mb_io_extract_altitude = &mbsys_simrad3_extract_altitude; 
@@ -531,7 +532,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_simrad3_ssv_struct *ssv;
 	struct mbsys_simrad3_ping_struct *ping;
 	int	time_i[7];
-	double	ntime_d, ptime_d, atime_d;
+	double	ntime_d, ptime_d, atime_d, btime_d;
 	double	bath_time_d, ss_time_d;
 	double	rawspeed, pheading;
 	double	plon, plat, pspeed, roll, pitch, heave;
@@ -552,9 +553,9 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	receive_time_d, receive_heading, receive_heave, receive_roll, receive_pitch;
 	double	*svpdepth = NULL;
 	double	*svpvel = NULL;
-	double	xx, zz, dx, dz, dr, dt;
+	double	xx, zz, dx, dz, dt;
 	double	xxx, yyy;
-	double	xxcalc, zzcalc, tt, ttt, tt_use, xxcalc_old, zzcalc_old;
+	double	xxcalc, zzcalc, tt, ttt, xxcalc_old, zzcalc_old;
 	double	depth_offset_use, static_shift, svpdepthstart;
 	double	weight;
 	double	lever_x, lever_y, lever_z;
@@ -620,7 +621,13 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				error);
 		}
 
-	/* save attitude if attitude data */
+	/* save attitude if "active" attitude data 
+		- note that an attitude record only get set as
+			kind MB_DATA_ATTITUDE if the roll pitch and heave
+			values have been actively used for realtime processing
+		- attitude records from inactive sensors are
+			set at kinds MB_DATA_ATTITUDE1, MB_DATA_ATTITUDE2, 
+			or MB_DATA_ATTITUDE3. */
 	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_ATTITUDE
 		&& store->type == EM3_ATTITUDE)
@@ -649,7 +656,13 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				error);
 		}
 
-	/* save attitude if network attitude data */
+	/* save netattitude if "active" attitude data 
+		- note that an attitude record only get set as
+			kind MB_DATA_ATTITUDE if the roll pitch and heave
+			values have been actively used for realtime processing
+		- attitude records from inactive sensors are
+			set at kinds MB_DATA_ATTITUDE1, MB_DATA_ATTITUDE2, 
+			or MB_DATA_ATTITUDE3. */
 	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_ATTITUDE
 		&& store->type == EM3_NETATTITUDE)
@@ -675,6 +688,23 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			}
 		mb_attint_nadd(verbose, mbio_ptr,
 				netattitude->nat_ndata,att_time_d,att_heave,att_roll,att_pitch,
+				error);
+		}
+		
+	/* save sonar depth value if survey data */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_DATA)
+		{
+		time_i[0] = ping->png_date / 10000;
+		time_i[1] = (ping->png_date % 10000) / 100;
+		time_i[2] = ping->png_date % 100;
+		time_i[3] = ping->png_msec / 3600000;
+		time_i[4] = (ping->png_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_msec % 60000) / 1000;
+		time_i[6] = (ping->png_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &btime_d);
+		mb_depint_add(verbose, mbio_ptr,
+				btime_d,(double)ping->png_xducer_depth,
 				error);
 		}
 
@@ -4113,8 +4143,8 @@ int mbr_em710raw_rd_attitude(int verbose, FILE *mbfp, int swap,
 	/* get  storage structure */
 	attitude = (struct mbsys_simrad3_attitude_struct *) store->attitude;
 		
-	/* set kind and type values */
-	store->kind = MB_DATA_ATTITUDE;
+	/* set type values 
+		- kind has to wait for the sensor descriptor value at the end of the record */
 	store->type = EM3_ATTITUDE;
 	store->sonar = sonar;
 
@@ -4182,7 +4212,7 @@ int mbr_em710raw_rd_attitude(int verbose, FILE *mbfp, int swap,
 		if (read_len == 4)
 			{
 			status = MB_SUCCESS;
-			attitude->att_heading_status = (mb_u_char) line[0];
+			attitude->att_sensordescriptor = (mb_u_char) line[0];
 			}
 		else
 			{
@@ -4201,11 +4231,27 @@ int mbr_em710raw_rd_attitude(int verbose, FILE *mbfp, int swap,
 		line[3], line[3]);
 #endif
 		}
+		
+	/* check sensor desciptor to find out if this is the "active" attitude
+		sensor - if it is set kind = MB_DATA_ATTITUDE, otherwise
+		set kind = MB_DATA_ATTITUDE1, MB_DATA_ATTITUDE2, or MB_DATA_ATTITUDE3 */
+	if (status == MB_SUCCESS)
+		{
+		if ((attitude->att_sensordescriptor & 14) == 0)
+			store->kind = MB_DATA_ATTITUDE;
+		else if ((attitude->att_sensordescriptor & 48) == 0)
+			store->kind = MB_DATA_ATTITUDE1;
+		else if ((attitude->att_sensordescriptor & 48) == 16)
+			store->kind = MB_DATA_ATTITUDE2;
+		else if ((attitude->att_sensordescriptor & 48) == 32)
+			store->kind = MB_DATA_ATTITUDE3;
+		}
 
 	/* print debug statements */
 	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       kind:            %d\n",store->kind);
 		fprintf(stderr,"dbg5       type:            %d\n",store->type);
 		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:            %d\n",store->date);
@@ -4222,7 +4268,7 @@ int mbr_em710raw_rd_attitude(int verbose, FILE *mbfp, int swap,
 				i, attitude->att_time[i], attitude->att_roll[i], 
 				attitude->att_pitch[i], attitude->att_heave[i], 
 				attitude->att_heading[i]);
-		fprintf(stderr,"dbg5       att_heading_status: %d\n",attitude->att_heading_status);
+		fprintf(stderr,"dbg5       att_sensordescriptor: %d\n",attitude->att_sensordescriptor);
 		}
 
 	/* print output debug statements */
@@ -4250,7 +4296,6 @@ int mbr_em710raw_rd_netattitude(int verbose, FILE *mbfp, int swap,
 	char	line[MBSYS_SIMRAD3_BUFFER_SIZE];
 	short	short_val;
 	int	read_len;
-	int	readcount;
 	int	i, j;
 
 	/* print input debug statements */
@@ -4272,8 +4317,7 @@ int mbr_em710raw_rd_netattitude(int verbose, FILE *mbfp, int swap,
 	/* get  storage structure */
 	netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
 		
-	/* set kind and type values */
-	store->kind = MB_DATA_ATTITUDE;
+	/* set type values */
 	store->type = EM3_NETATTITUDE;
 	store->sonar = sonar;
 
@@ -4302,11 +4346,25 @@ int mbr_em710raw_rd_netattitude(int verbose, FILE *mbfp, int swap,
 		    netattitude->nat_ndata = (int) ((unsigned short) short_val);
 		netattitude->nat_sensordescriptor = line[14];
 		}
+		
+	/* check sensor desciptor to find out if this is the "active" attitude
+		sensor - if it is set kind = MB_DATA_ATTITUDE, otherwise
+		set kind = MB_DATA_ATTITUDE1, MB_DATA_ATTITUDE2, or MB_DATA_ATTITUDE3 */
+	if (status == MB_SUCCESS)
+		{
+		if ((netattitude->nat_sensordescriptor & 14) == 0)
+			store->kind = MB_DATA_ATTITUDE;
+		else if ((netattitude->nat_sensordescriptor & 48) == 0)
+			store->kind = MB_DATA_ATTITUDE1;
+		else if ((netattitude->nat_sensordescriptor & 48) == 16)
+			store->kind = MB_DATA_ATTITUDE2;
+		else if ((netattitude->nat_sensordescriptor & 48) == 32)
+			store->kind = MB_DATA_ATTITUDE3;
+		}
 
 	/* read binary netattitude values */
 	if (status == MB_SUCCESS)
 	    {
-	    readcount = 16;
 	    for (i=0;i<netattitude->nat_ndata && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_NETATTITUDE_SLICE_SIZE,mbfp);
@@ -4385,11 +4443,27 @@ int mbr_em710raw_rd_netattitude(int verbose, FILE *mbfp, int swap,
 		line[3], line[3]);
 #endif
 		}
+		
+	/* check sensor desciptor to find out if this is the "active" attitude
+		sensor - if it is set kind = MB_DATA_ATTITUDE, otherwise
+		set kind = MB_DATA_ATTITUDE1, MB_DATA_ATTITUDE2, or MB_DATA_ATTITUDE3 */
+	if (status == MB_SUCCESS)
+		{
+		if ((netattitude->nat_sensordescriptor & 14) == 0)
+			store->kind = MB_DATA_ATTITUDE;
+		else if ((netattitude->nat_sensordescriptor & 48) == 0)
+			store->kind = MB_DATA_ATTITUDE1;
+		else if ((netattitude->nat_sensordescriptor & 48) == 16)
+			store->kind = MB_DATA_ATTITUDE2;
+		else if ((netattitude->nat_sensordescriptor & 48) == 32)
+			store->kind = MB_DATA_ATTITUDE3;
+		}
 
 	/* print debug statements */
 	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       kind:                 %d\n",store->kind);
 		fprintf(stderr,"dbg5       type:                 %d\n",store->type);
 		fprintf(stderr,"dbg5       sonar:                %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:                 %d\n",store->date);
@@ -7930,7 +8004,7 @@ int mbr_em710raw_wr_attitude(int verbose, FILE *mbfp, int swap,
 				i, attitude->att_time[i], attitude->att_roll[i], 
 				attitude->att_pitch[i], attitude->att_heave[i], 
 				attitude->att_heading[i]);
-		fprintf(stderr,"dbg5       att_heading_status: %d\n",attitude->att_heading_status);
+		fprintf(stderr,"dbg5       att_sensordescriptor: %d\n",attitude->att_sensordescriptor);
 		}
 		
 	/* zero checksum */
@@ -8046,7 +8120,7 @@ int mbr_em710raw_wr_attitude(int verbose, FILE *mbfp, int swap,
 	/* output end of record */
 	if (status == MB_SUCCESS)
 		{
-		line[0] = (mb_u_char) attitude->att_heading_status;
+		line[0] = (mb_u_char) attitude->att_sensordescriptor;
 		line[1] = 0x03;
 		
 		/* compute checksum */

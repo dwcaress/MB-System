@@ -166,6 +166,8 @@ int mbsys_sb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
+int mbsys_sb_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_sb_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
 			double *ttimes, double *angles, 

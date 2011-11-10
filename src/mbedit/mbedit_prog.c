@@ -5408,6 +5408,7 @@ int mbedit_load_data(int buffer_size,
 			else
 				ping[nbuff].distance = ping[nbuff-1].distance 
 							+ ping[nbuff].speed * ping[nbuff].time_interval / 3.6;
+			nbeams = ping[nbuff].beams_bath;
 			detect_status = mb_detects(verbose,imbio_ptr,store_ptr,
 						&kind,&nbeams,detect,&detect_error);
 			if (detect_status != MB_SUCCESS)

@@ -417,6 +417,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	ctd->temperature = NULL;
 	ctd->pressure_depth = NULL;
 	ctd->sound_velocity = NULL;
+	ctd->absorption = NULL;
 	
 	/* Geodesy (record 1011) */
 	geodesy = &store->geodesy;
@@ -9111,6 +9112,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 	copy->ctd.temperature = ctd->temperature;
 	copy->ctd.pressure_depth = ctd->pressure_depth;
 	copy->ctd.sound_velocity = ctd->sound_velocity;
+	copy->ctd.absorption = ctd->absorption;
 	if (status == MB_SUCCESS
 		&& copy->ctd.nalloc < copy->ctd.n * sizeof(float))
 		{
@@ -9127,6 +9129,9 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 		if (status == MB_SUCCESS)
 		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->ctd.nalloc,
 					(void **)&(copy->ctd.sound_velocity), error);
+		if (status == MB_SUCCESS)
+		status = mb_reallocd(verbose, __FILE__, __LINE__, copy->ctd.nalloc,
+					(void **)&(copy->ctd.absorption), error);
 		if (status != MB_SUCCESS)
 			{
 			copy->ctd.n = 0;
@@ -9141,6 +9146,7 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 			copy->ctd.temperature[i] = store->ctd.temperature[i];
 			copy->ctd.pressure_depth[i] = store->ctd.pressure_depth[i];
 			copy->ctd.sound_velocity[i] = store->ctd.sound_velocity[i];
+			copy->ctd.absorption[i] = store->ctd.absorption[i];
 			}
 		}
 	
