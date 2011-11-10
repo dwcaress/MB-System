@@ -28,6 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+* Version 5.3.1907       November 9, 2011
 * Version 5.3.1906       September 28, 2011
 * Version 5.2.1880       December 30, 2010
   Version 5.1.3beta1875  November 23, 2010
@@ -179,6 +180,45 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+
+-----> 5.3.1907
+
+Program mblist:
+Added output of beam bottom detection algorithm (amplitude or phase) 
+to mblist. One can now use Q and q as valid output values that can 
+be included in the arguments to the -O option.
+
+Program mbnavlist:
+Added ability to output navigation data keyed to primary or 
+ancilliary attitude data. For instance, use of the -K18 option will
+cause the mbnavlist output to occur for all attitude samples in the
+primary attitude data stream. The timestamps will be those of the
+attitude records, and any position, speed, or sonar depth values 
+requested will be interpolated onto the attitude timestamps.
+
+Program mbm_route2mission:
+Enabled the generation of AUV missions in which multibeam beamformed
+data ("water column") are recorded in addition to bathymetry and
+backscatter.
+
+Program mb7kpreprocess:
+Fixed integration of MBARI AUV INS log data into the processing of
+Reson 7k data.
+
+Program mbrolltimelag:
+Fixed a bug that rarely produced a failure of time lag correlation
+calculation.
+
+Third generation Kongsberg data (formats 58 & 59:
+Fixed handling of different attitude records, in that the code
+now recognizes multiple sources of roll, pitch, and heave when
+they appear in a datastream. The data records identified as the
+primary attitude source are identified as type MB_DATA_ATTITUDE (18)
+while ancilliary records will be identified as MB_DATA_ATTITUDE1 (55),
+MB_DATA_ATTITUDE2 (56), or MB_DATA_ATTITUDE3(57).
+
+-----> 5.3.1906
+
 Program mbnavadjust:
 Added -D option to invert foreground (normally black) and background
 (normally white) colors in the interactive plots

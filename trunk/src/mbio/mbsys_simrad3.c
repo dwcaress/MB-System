@@ -935,7 +935,7 @@ int mbsys_simrad3_attitude_alloc(int verbose,
 		    attitude->att_heading[i] = 0;
 				/* heading (0.01 degree) */
 		    }
-		attitude->att_heading_status = 0;
+		attitude->att_sensordescriptor = 0;
 				/* heading status (0=inactive) */
 		}
 
@@ -2704,6 +2704,301 @@ int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
+			int nmax, int *kind, int *n,
+			int *time_i, double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft, 
+			double *roll, double *pitch, double *heave, 
+			int *error)
+{
+	char	*function_name = "mbsys_simrad3_extract_nnav";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad3_struct *store;
+	struct mbsys_simrad3_ping_struct *ping;
+	struct mbsys_simrad3_attitude_struct *attitude;
+	struct mbsys_simrad3_netattitude_struct *netattitude;
+	double	atime_d;
+	int	atime_i[7];
+	int	i, inav;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       nmax:       %d\n",nmax);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad3_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from ping structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get survey data structure */
+		ping = (struct mbsys_simrad3_ping_struct *) store->ping;
+
+		/* just one navigation value */
+		*n = 1;
+
+		/* get time */
+		time_i[0] = ping->png_date / 10000;
+		time_i[1] = (ping->png_date % 10000) / 100;
+		time_i[2] = ping->png_date % 100;
+		time_i[3] = ping->png_msec / 3600000;
+		time_i[4] = (ping->png_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_msec % 60000) / 1000;
+		time_i[6] = (ping->png_msec % 1000) * 1000;
+		mb_get_time(verbose,time_i,time_d);
+
+		/* get navigation */
+		if (ping->png_longitude != EM3_INVALID_INT)
+		    *navlon = 0.0000001 * ping->png_longitude;
+		else
+		    *navlon = 0.0;
+		if (ping->png_latitude != EM3_INVALID_INT)
+		    *navlat = 0.00000005 * ping->png_latitude;
+		else
+		    *navlat = 0.0;
+
+		/* get heading */
+		*heading = 0.01 * ping->png_heading;
+
+		/* get speed  */
+		if (ping->png_speed != EM3_INVALID_SHORT)
+			*speed = 0.036 * ping->png_speed;
+		else
+			*speed = 0.0;
+
+		/* get draft  */
+		*draft = ping->png_xducer_depth;
+
+		/* get roll pitch and heave */
+		*roll = 0.01 * ping->png_roll;
+		*pitch = 0.01 * ping->png_pitch;
+		*heave = 0.01 * ping->png_heave;
+
+		/* done translating values */
+
+		}
+
+	/* extract data from nav structure */
+	else if (*kind == MB_DATA_NAV
+		|| *kind == MB_DATA_NAV1
+		|| *kind == MB_DATA_NAV2
+		|| *kind == MB_DATA_NAV3)
+		{
+                /* get survey data structure */
+		if (store->ping != NULL)
+                	ping = (struct mbsys_simrad3_ping_struct *) store->ping;
+
+		/* just one navigation value */
+		*n = 1;
+
+		/* get time */
+		time_i[0] = store->pos_date / 10000;
+		time_i[1] = (store->pos_date % 10000) / 100;
+		time_i[2] = store->pos_date % 100;
+		time_i[3] = store->pos_msec / 3600000;
+		time_i[4] = (store->pos_msec % 3600000) / 60000;
+		time_i[5] = (store->pos_msec % 60000) / 1000;
+		time_i[6] = (store->pos_msec % 1000) * 1000;
+		mb_get_time(verbose,time_i,time_d);
+
+		/* get navigation */
+		if (store->pos_longitude != EM3_INVALID_INT)
+		    *navlon = 0.0000001 * store->pos_longitude;
+		else
+		    *navlon = 0.0;
+		if (store->pos_latitude != EM3_INVALID_INT)
+		    *navlat = 0.00000005 * store->pos_latitude;
+		else
+		    *navlat = 0.0;
+
+		/* get heading */
+		if (store->pos_heading != EM3_INVALID_SHORT)
+			*heading = 0.01 * store->pos_heading;
+		else
+			*heading = 0.0;
+
+		/* get speed  */
+		if (store->pos_speed != EM3_INVALID_SHORT)
+			*speed = 0.036 * store->pos_speed;
+		else
+			*speed = 0.0;
+
+		/* get draft  */
+		if (store->ping != NULL)
+			*draft = ping->png_xducer_depth;
+		else
+			*draft = 0.0;
+
+		/* get roll pitch and heave */
+		*roll = 0.01 * store->pos_roll;
+		*pitch = 0.01 * store->pos_pitch;
+		*heave = 0.01 * store->pos_heave;
+
+		/* done translating values */
+
+		}
+
+	/* extract data from attitude structure */
+	else if (store->type == EM3_ATTITUDE
+		&& store->attitude != NULL)
+		{
+                /* get attitude data structure */
+		attitude = (struct mbsys_simrad3_attitude_struct *) store->attitude;
+
+		/* get n */
+		*n = MIN(attitude->att_ndata, MB_ASYNCH_SAVE_MAX);
+
+		/* get attitude time */
+		atime_i[0] = attitude->att_date / 10000;
+		atime_i[1] = (attitude->att_date % 10000) / 100;
+		atime_i[2] = attitude->att_date % 100;
+		atime_i[3] = attitude->att_msec / 3600000;
+		atime_i[4] = (attitude->att_msec % 3600000) / 60000;
+		atime_i[5] = (attitude->att_msec % 60000) / 1000;
+		atime_i[6] = (attitude->att_msec % 1000) * 1000;
+		mb_get_time(verbose, atime_i, &atime_d);
+
+		/* loop over the data */
+		for (i=0;i<*n;i++)
+			{
+			/* get time from the data record */
+			time_d[i] = (double)(atime_d + 0.001 * attitude->att_time[i]);
+			mb_get_date(verbose,time_d[i],&(time_i[7*i]));
+
+			/* get attitude from the data record */
+			heave[i] = (double)(0.01 * attitude->att_heave[i]);
+			roll[i] = (double)(0.01 * attitude->att_roll[i]);
+			pitch[i] = (double)(0.01 * attitude->att_pitch[i]);
+			
+			/* interpolate the heading */
+			mb_hedint_interp(verbose, mbio_ptr, time_d[i],  
+				    		&heading[i], error);
+						
+			/* interpolate the navigation */
+			mb_navint_interp(verbose, mbio_ptr, time_d[i], heading[i], 0.0, 
+						&navlon[i], &navlat[i], &speed[i], error);
+						
+			/* interpolate the sonar depth */
+			mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], error);
+			}
+
+		/* done translating values */
+
+		}
+
+	/* extract data from attitude structure */
+	else if (store->type == EM3_NETATTITUDE
+		&& store->attitude != NULL)
+		{
+                /* get attitude data structure */
+		netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
+
+		/* get n */
+		*n = MIN(netattitude->nat_ndata, MB_ASYNCH_SAVE_MAX);
+
+		/* get attitude time */
+		atime_i[0] = netattitude->nat_date / 10000;
+		atime_i[1] = (netattitude->nat_date % 10000) / 100;
+		atime_i[2] = netattitude->nat_date % 100;
+		atime_i[3] = netattitude->nat_msec / 3600000;
+		atime_i[4] = (netattitude->nat_msec % 3600000) / 60000;
+		atime_i[5] = (netattitude->nat_msec % 60000) / 1000;
+		atime_i[6] = (netattitude->nat_msec % 1000) * 1000;
+		mb_get_time(verbose, atime_i, &atime_d);
+
+		/* loop over the data */
+		for (i=0;i<*n;i++)
+			{
+			/* get time from the data record */
+			time_d[i] = (double)(atime_d + 0.001 * netattitude->nat_time[i]);
+			mb_get_date(verbose,time_d[i],&(time_i[7*i]));
+
+			/* get attitude from the data record */
+			heave[i] = (double)(0.01 * netattitude->nat_heave[i]);
+			roll[i] = (double)(0.01 * netattitude->nat_roll[i]);
+			pitch[i] = (double)(0.01 * netattitude->nat_pitch[i]);
+			
+			/* interpolate the heading */
+			mb_hedint_interp(verbose, mbio_ptr, time_d[i],  
+				    		&heading[i], error);
+						
+			/* interpolate the navigation */
+			mb_navint_interp(verbose, mbio_ptr, time_d[i], heading[i], 0.0, 
+						&navlon[i], &navlat[i], &speed[i], error);
+						
+			/* interpolate the sonar depth */
+			mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], error);
+			}
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*n = 0;
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*n = 0;
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		fprintf(stderr,"dbg2       n:          %d\n",*n);
+		for (inav=0;inav<*n;inav++)
+			{
+			for (i=0;i<7;i++)
+				fprintf(stderr,"dbg2       %d time_i[%d]:     %d\n",inav,i,time_i[inav * 7 + i]);
+			fprintf(stderr,"dbg2       %d time_d:        %f\n",inav,time_d[inav]);
+			fprintf(stderr,"dbg2       %d longitude:     %f\n",inav,navlon[inav]);
+			fprintf(stderr,"dbg2       %d latitude:      %f\n",inav,navlat[inav]);
+			fprintf(stderr,"dbg2       %d speed:         %f\n",inav,speed[inav]);
+			fprintf(stderr,"dbg2       %d heading:       %f\n",inav,heading[inav]);
+			fprintf(stderr,"dbg2       %d draft:         %f\n",inav,draft[inav]);
+			fprintf(stderr,"dbg2       %d roll:          %f\n",inav,roll[inav]);
+			fprintf(stderr,"dbg2       %d pitch:         %f\n",inav,pitch[inav]);
+			fprintf(stderr,"dbg2       %d heave:         %f\n",inav,heave[inav]);
+			}
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
 int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -2780,50 +3075,6 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*pitch = 0.01 * ping->png_pitch;
 		*heave = 0.01 * ping->png_heave;
 
-		/* print debug statements */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  Extracted values:\n");
-			fprintf(stderr,"dbg4       kind:       %d\n",
-				*kind);
-			fprintf(stderr,"dbg4       error:      %d\n",
-				*error);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-				time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-				time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-				time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-				time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-				time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-				time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-				time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
-				*time_d);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				*navlon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				*navlat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				*speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				*heading);
-			fprintf(stderr,"dbg4       draft:      %f\n",
-				*draft);
-			fprintf(stderr,"dbg4       roll:       %f\n",
-				*roll);
-			fprintf(stderr,"dbg4       pitch:      %f\n",
-				*pitch);
-			fprintf(stderr,"dbg4       heave:      %f\n",
-				*heave);
-			}
-
 		/* done translating values */
 
 		}
@@ -2880,50 +3131,6 @@ int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		*roll = 0.01 * store->pos_roll;
 		*pitch = 0.01 * store->pos_pitch;
 		*heave = 0.01 * store->pos_heave;
-
-		/* print debug statements */
-		if (verbose >= 5)
-			{
-			fprintf(stderr,"\ndbg4  Data extracted by MBIO function <%s>\n",
-				function_name);
-			fprintf(stderr,"dbg4  Extracted values:\n");
-			fprintf(stderr,"dbg4       kind:       %d\n",
-				*kind);
-			fprintf(stderr,"dbg4       error:      %d\n",
-				*error);
-			fprintf(stderr,"dbg4       time_i[0]:  %d\n",
-				time_i[0]);
-			fprintf(stderr,"dbg4       time_i[1]:  %d\n",
-				time_i[1]);
-			fprintf(stderr,"dbg4       time_i[2]:  %d\n",
-				time_i[2]);
-			fprintf(stderr,"dbg4       time_i[3]:  %d\n",
-				time_i[3]);
-			fprintf(stderr,"dbg4       time_i[4]:  %d\n",
-				time_i[4]);
-			fprintf(stderr,"dbg4       time_i[5]:  %d\n",
-				time_i[5]);
-			fprintf(stderr,"dbg4       time_i[6]:  %d\n",
-				time_i[6]);
-			fprintf(stderr,"dbg4       time_d:     %f\n",
-				*time_d);
-			fprintf(stderr,"dbg4       longitude:  %f\n",
-				*navlon);
-			fprintf(stderr,"dbg4       latitude:   %f\n",
-				*navlat);
-			fprintf(stderr,"dbg4       speed:      %f\n",
-				*speed);
-			fprintf(stderr,"dbg4       heading:    %f\n",
-				*heading);
-			fprintf(stderr,"dbg4       draft:      %f\n",
-				*draft);
-			fprintf(stderr,"dbg4       roll:       %f\n",
-				*roll);
-			fprintf(stderr,"dbg4       pitch:      %f\n",
-				*pitch);
-			fprintf(stderr,"dbg4       heave:      %f\n",
-				*heave);
-			}
 
 		/* done translating values */
 

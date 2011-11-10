@@ -882,7 +882,8 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 		
 	/* if call was made for an unsupported record type ("kind") then try to get the
-		values out of the asynchronous data interpolation buffers */
+		values out of the asynchronous data interpolation buffers 
+		The time stamp must be sensible for this to work. */
 	if (status == MB_FAILURE && *error == MB_ERROR_OTHER && *time_d > 0.0)
 		{
 		/* reset status */
@@ -1564,8 +1565,8 @@ int mb_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 	else
 		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
+		for (i=0;i<*nbeams;i++)
+			detects[i] = MB_DETECT_UNKNOWN;
 		}
 
 	/* print output debug statements */

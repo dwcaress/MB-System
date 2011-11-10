@@ -1027,7 +1027,7 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		else
 			detect = MB_DETECT_AMPLITUDE;
 			
-		/* get travel times */
+		/* get detects */
 		*nbeams = store->tt_beam_cnt;
 		for (i=0;i<store->tt_beam_cnt;i++)
 			{

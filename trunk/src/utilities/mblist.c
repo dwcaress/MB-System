@@ -443,6 +443,7 @@ int main (int argc, char **argv)
 	int	use_attitude = MB_NO;
 	int	use_nav = MB_NO;
 	int	use_gains = MB_NO;
+	int	use_detects = MB_YES;
 	int	check_values = MBLIST_CHECK_ON;
 	int	check_nav = MB_NO;
 	int	check_bath = MB_NO;
@@ -483,6 +484,7 @@ int main (int argc, char **argv)
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
+	int	*detect = NULL;
 	double	*amp = NULL;
 	double	*ss = NULL;
 	double	*ssacrosstrack = NULL;
@@ -566,6 +568,7 @@ int main (int argc, char **argv)
 	double	receive_gain;
 
 	int	read_data;
+	int	nbeams;
 	int	i, j, k, m;
 
 	/* output files */
@@ -1486,6 +1489,18 @@ int main (int argc, char **argv)
 		    invert_next_value = MB_NO;
 		    break;
 
+		  case 'q': /* bottom detect type */
+		  case 'Q': /* bottom detect type */
+		    strcpy(variable, "bottom_detect_type");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tlong %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Bottom detect type\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    fprintf(outfile, "0=unknown,1=amplitude,2=phase\";\n");
+		    break;
+
 		  case 'R': /* roll */
 		    strcpy(variable, "roll");
 		    if (signflip_next_value == MB_YES)
@@ -2294,7 +2309,8 @@ int main (int argc, char **argv)
 		    if (raw_next_value == MB_NO) 
 		        {
 			if (list[i] == 'Z' || list[i] == 'z'
-				|| list[i] == 'A' || list[i] == 'a')
+				|| list[i] == 'A' || list[i] == 'a'
+				|| list[i] == 'Q' || list[i] == 'q')
 				use_bath = MB_YES;
 			if (list[i] == 'B')
 				use_amp = MB_YES;
@@ -2312,6 +2328,8 @@ int main (int argc, char **argv)
 			if (list[i] == 'P' || list[i] == 'p' 
 				|| list[i] == 'R' || list[i] == 'r')
 				use_attitude = MB_YES;
+			if (list[i] == 'Q' || list[i] == 'q')
+				use_detects = MB_YES;
 			if (list[i] == 'X' || list[i] == 'x' 
 				|| list[i] == 'Y' || list[i] == 'y')
 				use_nav = MB_YES;
@@ -2385,6 +2403,9 @@ int main (int argc, char **argv)
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						2 * sizeof(double), (void **)&slopeacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						2 * sizeof(int), (void **)&detect, &error);
 	if (use_raw == MB_YES)
 		{
 		if (error == MB_ERROR_NO_ERROR)
@@ -2433,7 +2454,7 @@ int main (int argc, char **argv)
 		error = MB_ERROR_NO_ERROR;
 		
 		/* read a ping of data */
-		if (pings == 1 || use_attitude == MB_YES)
+		if (pings == 1 || use_attitude == MB_YES || use_detects == MB_YES)
 		    {
 		    /* read next data record */
 		    status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
@@ -2458,6 +2479,13 @@ int main (int argc, char **argv)
 			status = mb_extract_nav(verbose,mbio_ptr,store_ptr,&kind,
 					time_i,&time_d,&navlon,&navlat,
 					&speed,&heading,&draft,&roll,&pitch,&heave,&error);
+
+		    /* if survey data extract detects */
+		    if (error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA
+			&& use_detects)
+			status = mb_detects(verbose,mbio_ptr,store_ptr,&kind,
+					&nbeams,detect,&error);
 		    }
 		else
 		    {
@@ -3071,6 +3099,45 @@ int main (int argc, char **argv)
 					printsimplevalue(verbose, output[i], draft, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
+					break;
+				case 'q': /* bottom detection type */
+					if (ascii == MB_YES)
+					    {
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+						
+					    fprintf(output[i],"%d",detect[k]);
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    }
+					else
+					    {
+					    b = detect[k];
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					break;
+				case 'Q': /* bottom detection type */
+					if (ascii == MB_YES)
+					    {
+					    if (netcdf == MB_YES)
+					    	{
+						fprintf(output[i], "\"");
+						fprintf(output[i],"%d",detect[k]);
+					    	fprintf(output[i], "\"");
+						}
+					    else
+					    	{
+						if (detect[k] == MB_DETECT_AMPLITUDE)
+						    fprintf(output[i],"A");
+						else if (detect[k] == MB_DETECT_PHASE)
+						    fprintf(output[i],"P");
+						else
+						    fprintf(output[i],"U");
+						}
+					    }
+					else
+					    {
+					    b = detect[k];
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
 					break;
 				case 'R': /* roll */
 					printsimplevalue(verbose, output[i], roll, 6, 3, ascii, 
@@ -3893,6 +3960,20 @@ int main (int argc, char **argv)
 					printsimplevalue(verbose, output[i], draft, 5, 2, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
+					break;
+				case 'Q': /* bottom detection type */
+					if (ascii == MB_YES)
+					    {
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+						
+					    fprintf(output[i],"%d",MB_DETECT_UNKNOWN);
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    }
+					else
+					    {
+					    b = MB_DETECT_UNKNOWN;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
 					break;
 				case 'R': /* roll */
 					printsimplevalue(verbose, output[i], roll, 6, 3, ascii, 

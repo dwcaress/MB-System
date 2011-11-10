@@ -515,15 +515,18 @@ int main (int argc, char **argv)
 	int	foundstart, foundend;
 	int	start, end;
 	int	nscan, startdata;
-	int	ins_time_d_index;
-	int	ins_lon_index;
-	int	ins_lat_index;
-	int	ins_roll_index;
-	int	ins_pitch_index;
-	int	ins_heading_index;
-	int	ins_sonardepth_index;
-	int	ins_altitude_index;
-	int	ins_speed_index;
+	int	ins_time_d_index = -1;
+	int	ins_lon_index = -1;
+	int	ins_lat_index = -1;
+	int	ins_roll_index = -1;
+	int	ins_pitch_index = -1;
+	int	ins_heading_index = -1;
+	int	ins_sonardepth_index = -1;
+	int	ins_altitude_index = -1;
+	int	ins_speed_index = -1;
+	int	ins_velocityx_index = -1;
+	int	ins_velocityy_index = -1;
+	int	ins_velocityz_index = -1;
 	int	ins_len;
 	int	sonardepth_time_d_index;
 	int	sonardepth_sonardepth_index;
@@ -531,6 +534,7 @@ int main (int argc, char **argv)
 	double	sonardepth_filterweight;
 	double	dtol, weight;
 	double	factor;
+	double	velocityx, velocityy;
 	int	type_save, kind_save;
 	char	type[MB_PATH_MAXLINE], value[MB_PATH_MAXLINE];
 	int	year, month, day, hour, minute;
@@ -821,6 +825,10 @@ int main (int argc, char **argv)
 				{
 				if (strcmp(value, "time") == 0)
 					ins_time_d_index = ins_len;
+				if (strcmp(value, "mLonK") == 0)
+					ins_lon_index = ins_len;
+				if (strcmp(value, "mLatK") == 0)
+					ins_lat_index = ins_len;
 				if (strcmp(value, "longitude") == 0)
 					ins_lon_index = ins_len;
 				if (strcmp(value, "latitude") == 0)
@@ -833,10 +841,24 @@ int main (int argc, char **argv)
 					ins_heading_index = ins_len;
 				if (strcmp(value, "mDepth") == 0)
 					ins_sonardepth_index = ins_len;
+				if (strcmp(value, "mDepthK") == 0)
+					ins_sonardepth_index = ins_len;
+				if (strcmp(value, "mRollK") == 0)
+					ins_roll_index = ins_len;
+				if (strcmp(value, "mPitchK") == 0)
+					ins_pitch_index = ins_len;
+				if (strcmp(value, "mHeadK") == 0)
+					ins_heading_index = ins_len;
 				if (strcmp(value, "mAltitude") == 0)
 					ins_altitude_index = ins_len;
 				if (strcmp(value, "mWaterSpeed") == 0)
 					ins_speed_index = ins_len;
+				if (strcmp(value, "mVbodyxK") == 0)
+					ins_velocityx_index = ins_len;
+				if (strcmp(value, "mVbodyyK") == 0)
+					ins_velocityy_index = ins_len;
+				if (strcmp(value, "mVbodyzK") == 0)
+					ins_velocityz_index = ins_len;
 
 				if (strcmp(type, "double") == 0)
 					ins_len += 8;
@@ -909,32 +931,58 @@ int main (int argc, char **argv)
 		nins_speed = 0;
 		while (fread(buffer, ins_len, 1, tfp) == 1)
 			{
-			mb_get_binary_double(MB_YES, &buffer[ins_time_d_index], &(ins_time_d[nins]));	
-			mb_get_binary_double(MB_YES, &buffer[ins_lon_index], &(ins_lon[nins])); 
-				ins_lon[nins] *= RTD;
-			mb_get_binary_double(MB_YES, &buffer[ins_lat_index], &(ins_lat[nins])); 
-				ins_lat[nins] *= RTD;
-			mb_get_binary_double(MB_YES, &buffer[ins_roll_index], &(ins_roll[nins])); 
-				ins_roll[nins] *= RTD;
-			mb_get_binary_double(MB_YES, &buffer[ins_pitch_index], &(ins_pitch[nins])); 
-				ins_pitch[nins] *= RTD;
-			mb_get_binary_double(MB_YES, &buffer[ins_heading_index], &(ins_heading[nins])); 
-				ins_heading[nins] *= RTD;
-			mb_get_binary_double(MB_YES, &buffer[ins_sonardepth_index], &(ins_sonardepth[nins]));
+			if (ins_time_d_index >= 0)
+				mb_get_binary_double(MB_YES, &buffer[ins_time_d_index], &(ins_time_d[nins]));
+				
+			if (ins_lon_index >= 0)
+				mb_get_binary_double(MB_YES, &buffer[ins_lon_index], &(ins_lon[nins])); 
+			ins_lon[nins] *= RTD;
+			
+			if (ins_lat_index >= 0)
+				mb_get_binary_double(MB_YES, &buffer[ins_lat_index], &(ins_lat[nins])); 
+			ins_lat[nins] *= RTD;
+			
+			if (ins_roll_index >= 0)
+				mb_get_binary_double(MB_YES, &buffer[ins_roll_index], &(ins_roll[nins])); 
+			ins_roll[nins] *= RTD;
+			
+			if (ins_pitch_index >= 0)
+				mb_get_binary_double(MB_YES, &buffer[ins_pitch_index], &(ins_pitch[nins])); 
+			ins_pitch[nins] *= RTD;
+			
+			if (ins_heading_index >= 0)
+				mb_get_binary_double(MB_YES, &buffer[ins_heading_index], &(ins_heading[nins])); 
+			ins_heading[nins] *= RTD;
+
+			if (ins_sonardepth_index >= 0)
+				mb_get_binary_double(MB_YES, &buffer[ins_sonardepth_index], &(ins_sonardepth[nins]));
 			ins_sonardepth[nins] += sonardepthoffset;
-			mb_get_binary_double(MB_YES, &buffer[ins_altitude_index], &(ins_altitude[nins_altitude]));
-				ins_altitude_time_d[nins_altitude] = ins_time_d[nins];
-			mb_get_binary_double(MB_YES, &buffer[ins_speed_index], &(ins_speed[nins_speed]));
+			
+			if (ins_altitude_index >= 0)
+				mb_get_binary_double(MB_YES, &buffer[ins_altitude_index], &(ins_altitude[nins_altitude]));
+			ins_altitude_time_d[nins_altitude] = ins_time_d[nins];
+			
+			if (ins_speed_index >= 0)
+				mb_get_binary_double(MB_YES, &buffer[ins_speed_index], &(ins_speed[nins_speed]));
+			ins_speed_time_d[nins_speed] = ins_time_d[nins];
+			
+			if (ins_velocityx_index >= 0 && ins_velocityy_index >= 0)
+				{
+				mb_get_binary_double(MB_YES, &buffer[ins_velocityx_index], &velocityx);
+				mb_get_binary_double(MB_YES, &buffer[ins_velocityy_index], &velocityy);
+				ins_speed[nins_speed] = sqrt(velocityx * velocityx + velocityy * velocityy);
 				ins_speed_time_d[nins_speed] = ins_time_d[nins];
-/*fprintf(stderr,"INS DATA: %f %f %f %f %f %f %f %f\n", 
+				}
+/*fprintf(stderr,"INS DATA: %f %f %f %f %f %f %f %f %f\n", 
 ins_time_d[nins],
-RTD * ins_lon[nins],
-RTD * ins_lat[nins],
+ins_lon[nins],
+ins_lat[nins],
 ins_roll[nins],
 ins_pitch[nins],
-RTD * ins_heading[nins],
+ins_heading[nins],
 ins_sonardepth[nins],
-ins_altitude[nins]);*/
+ins_altitude[nins],
+ins_speed[nins]);*/
 			nins++;
 			if (ins_altitude[nins_altitude] < 1000.0) 
 				nins_altitude++;
@@ -3335,9 +3383,9 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 		for (i=0;i<nins;i++)
 			{
 			fprintf(stdout, "  INS: %12d %17.6f %11.6f %10.6f %8.3f %7.3f %6.3f %6.3f %6.3f %6.3f\n", 
-				i, ins_time_d[i], RTD * ins_lon[i], RTD * ins_lat[i], RTD * ins_heading[i],
+				i, ins_time_d[i], ins_lon[i], ins_lat[i], ins_heading[i],
 				ins_sonardepth[i], ins_altitude[i], ins_speed[i],
-				RTD * ins_roll[i], RTD * ins_pitch[i]);
+				ins_roll[i], ins_pitch[i]);
 			}
 		fprintf(stdout, "\nTotal INS altitude data read: %d\n", nins_altitude);
 		for (i=0;i<nins_altitude;i++)
@@ -5667,8 +5715,6 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					/*fprintf(stderr,"i:%d time: %f ins:%f\n",i,time_d,ins_time_d[i]);*/
 					}
 				ins_output_index = MAX(0,i-1);
-				fprintf(stderr,"ins_output_index:%d ins_time_d:%f\n", 
-					ins_output_index, ins_time_d[ins_output_index]);
 				}
 				
 			/* output bluefin record with 25 samples if survey record has a time later than that

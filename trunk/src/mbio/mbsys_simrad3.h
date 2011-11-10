@@ -609,7 +609,7 @@ struct mbsys_simrad3_ping_struct
 	short	png_ssalongtrack[MBSYS_SIMRAD3_MAXPIXELS]; 	/* the processed sidescan alongtrack distances (0.01 m) */
 	};
 
-/* internal data structure for attitude data */
+/* internal data structure for water column time series */
 struct mbsys_simrad3_wcbeam_struct
 	{
 	int	wtc_rxpointangle;	/* Beam pointing angles in 0.01 degree,
@@ -624,7 +624,7 @@ struct mbsys_simrad3_wcbeam_struct
 	mb_s_char wtc_amp[MBSYS_SIMRAD3_MAXRAWPIXELS]; /* water column amplitude (dB) */
 	};
 	
-/* internal data structure for attitude data */
+/* internal data structure for water column data */
 struct mbsys_simrad3_watercolumn_struct
 	{
 	int	wtc_date;	/* date = year*10000 + month*100 + day
@@ -673,8 +673,18 @@ struct mbsys_simrad3_attitude_struct
 				/* heave (cm) */
 	int	att_heading[MBSYS_SIMRAD3_MAXATTITUDE];
 				/* heading (0.01 degree) */
-	int	att_heading_status;
-				/* heading status (0=inactive) */
+	int	att_sensordescriptor;
+				/* sensor system descriptor - indicates
+				   which motion sensor is source of these
+				   data, and which values have been
+				   used in realtime processing:
+				   	xx00 xxxx - motion sensor number 1
+				   	xx01 xxxx - motion sensor number 2
+				   	xx10 xxxx - motion sensor number 3 (in netattitude record)
+				   	xxxx xxx1 - heading from this system is active
+				   	xxxx xx0x - roll from this system is active
+				   	xxxx x0xx - pitch from this system is active
+				   	xxxx 0xxx - heading from this system is active */
 	};
 
 /* internal data structure for network attitude data */
@@ -1126,6 +1136,13 @@ int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr,
 			double *receive_gain, int *error);
 int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
+			int *error);
+int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
+			int nmax, int *kind, int *n,
+			int *time_i, double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft, 
+			double *roll, double *pitch, double *heave, 
 			int *error);
 int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,

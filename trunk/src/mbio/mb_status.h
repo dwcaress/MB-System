@@ -412,8 +412,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.3.1906"
-#define	MB_BUILD_DATE	"28 September 2011"
+#define	MB_VERSION	"5.3.1907"
+#define	MB_BUILD_DATE	"9 November 2011"
 #define	MB_SVN		"$Id$"
 
 /* MBIO function boolean convention */
@@ -421,7 +421,7 @@
 #define	MB_NO	0
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			54
+#define	MB_DATA_KINDS			58
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -477,6 +477,9 @@
 #define	MB_DATA_NMEA_GLL		52	/* NMEA */
 #define	MB_DATA_NMEA_GGA		53	/* NMEA */
 #define	MB_DATA_SURVEY_LINE		54	/* Reson 7k */
+#define	MB_DATA_ATTITUDE1		55	/* ancillary attitude system 1 */
+#define	MB_DATA_ATTITUDE2		56      /* ancillary attitude system 2 */
+#define	MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1
@@ -659,6 +662,9 @@ static char *notice_msg[] =
 	"MB_DATA_NMEA_GLL (ID=52): NMEA GLL record", 
 	"MB_DATA_NMEA_GGA (ID=53): NMEA GGA record", 
 	"MB_DATA_SURVEY_LINE (ID=54): Survey line record", 
+	"MB_DATA_ATTITUDE1 (55): ancillary attitude system 1",
+	"MB_DATA_ATTITUDE2 (56): ancillary attitude system 2",
+	"MB_DATA_ATTITUDE3 (57): ancillary attitude system 3",
 	
 	/* notices for nonfatal error messages */
 	"MB_ERROR_TIME_GAP (ID=-1): Time gap in data",

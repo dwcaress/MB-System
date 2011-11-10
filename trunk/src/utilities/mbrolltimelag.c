@@ -652,6 +652,7 @@ int main (int argc, char **argv)
 		peakk = 0;
 		peakkmax = 0;
 		peakksum = 0;
+		timelag = 0.0;
 		for (k=0;k<nlag;k++)
 			{
 			if (timelaghistogram[k] > peakkmax)
@@ -671,8 +672,12 @@ int main (int argc, char **argv)
 				time_d_avg, timelag, nslope, peakksum, peakkmax);
 			}
 		else
+			{
+			if (peakkmax > 0)
+				timelag = -lagmax + peakk * lagstep;
 			fprintf(stderr,"Time lag model point: %f %f | nslope:%d peakksum:%d peakkmax:%d | REJECTED\n",
 				time_d_avg, timelag, nslope, peakksum, peakkmax);
+			}
 
 		/* figure out whether and what to read next */
         	if (read_datalist == MB_YES)
