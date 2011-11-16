@@ -2714,6 +2714,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 {
 	char	*function_name = "mbsys_simrad3_extract_nnav";
 	int	status = MB_SUCCESS;
+	int	interp_error = MB_ERROR_NO_ERROR;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
 	struct mbsys_simrad3_ping_struct *ping;
@@ -2888,14 +2889,14 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 			
 			/* interpolate the heading */
 			mb_hedint_interp(verbose, mbio_ptr, time_d[i],  
-				    		&heading[i], error);
+				    		&heading[i], &interp_error);
 						
 			/* interpolate the navigation */
 			mb_navint_interp(verbose, mbio_ptr, time_d[i], heading[i], 0.0, 
-						&navlon[i], &navlat[i], &speed[i], error);
+						&navlon[i], &navlat[i], &speed[i], &interp_error);
 						
 			/* interpolate the sonar depth */
-			mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], error);
+			mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], &interp_error);
 			}
 
 		/* done translating values */
@@ -2936,14 +2937,14 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 			
 			/* interpolate the heading */
 			mb_hedint_interp(verbose, mbio_ptr, time_d[i],  
-				    		&heading[i], error);
+				    		&heading[i], &interp_error);
 						
 			/* interpolate the navigation */
 			mb_navint_interp(verbose, mbio_ptr, time_d[i], heading[i], 0.0, 
-						&navlon[i], &navlat[i], &speed[i], error);
+						&navlon[i], &navlat[i], &speed[i], &interp_error);
 						
 			/* interpolate the sonar depth */
-			mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], error);
+			mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], &interp_error);
 			}
 
 		/* done translating values */
