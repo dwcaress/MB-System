@@ -702,6 +702,7 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 	# find shallowest point in look ahead distance
 	$topomax = $mtopos[$i];
 	$topomin = $mtopos[$i];
+print "TOPO $i $mtopos[$i]\n";
 	if ($forwarddist)
 		{
 		for ($j = 0; $j < $npoints; $j++)
@@ -728,6 +729,7 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 		}
 	push(@mtopomaxs, $topomax);
 	push(@mtopomins, $topomin);
+print "topo $topomin $topomax\n";
 
 	# if optimal depth profile is available get value
 	if ($ndppoints > 0)

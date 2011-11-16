@@ -20,7 +20,7 @@
  * the roll and the slope minus roll for a specified set of time lags.
  * The suite of cross correlation calculations are made for each
  * successive npings pings (default = 100) in each swath file. The
- * results are output to files, and cross correlation plots are 
+ * results are output to files, and cross correlation plots are
  * generated.
  *
  * Author:	D. W. Caress
@@ -118,17 +118,19 @@ int main (int argc, char **argv)
 	void	*datalist;
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
-	
+
 	/* cross correlation parameters */
 	int	navchannel = MB_DATA_DATA;
 	int	kind = MB_DATA_NONE;
 	int	npings = 100;
+	double	rthreshold = 0.9;
 	int	nlag = 41;
-	double	lagmin = -2.0;
-	double	lagmax = 2.0;
+	double	lagstart = -2.0;
+	double	lagend = 2.0;
+	double	lagmax;
 	double	lagstep = 0.05;
 	double	*rr = NULL;
-	
+
 	/* slope data */
 	int	nslope = 0;
 	int	nslopetot = 0;
@@ -140,10 +142,10 @@ int main (int argc, char **argv)
 	int	nroll_alloc = 0;
 	double	*roll_time_d = NULL;
 	double	*roll_roll = NULL;
-	
+
 	/* timelag histogram array */
 	int	*timelaghistogram = NULL;
-	
+
 	double	time_d;
 	double	roll;
 	double	slope;
@@ -156,11 +158,11 @@ int main (int argc, char **argv)
 	double	r;
 	double	sum_x, sum_y, sum_xy, sum_x2, sum_y2;
 	double	mmm, bbb;
-	
+
 	int	nrollmean;
 	double	rollmean;
 	double	slopemean;
-	
+
 	double	maxtimelag;
 	double	maxr;
 	double	peaktimelag;
@@ -171,20 +173,20 @@ int main (int argc, char **argv)
 	double	time_d_avg;
 	int	nestimate = 0;
 	int	nmodel = 0;
-	
+
 	int	nr;
-	double	rollint;	
+	double	rollint;
 	int	found;
 	int	nscan;
 	int	j0, j1;
 	int	i, j, k, l;
-	
+
 	/* set default input */
 	strcpy(swathdata, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:K:k:O:o:N:n:S:s:T:t:")) != -1)
-	  switch (c) 
+	while ((c = getopt(argc, argv, "VvHhC:c:F:f:I:i:K:k:O:o:N:n:S:s:T:t:")) != -1)
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -193,6 +195,11 @@ int main (int argc, char **argv)
 		case 'V':
 		case 'v':
 			verbose++;
+			break;
+		case 'C':
+		case 'c':
+			sscanf (optarg,"%lf", &rthreshold);
+			flag++;
 			break;
 		case 'F':
 		case 'f':
@@ -227,7 +234,8 @@ int main (int argc, char **argv)
 			break;
 		case 'T':
 		case 't':
-			sscanf (optarg,"%d/%lf/%lf", &nlag, &lagmin, &lagmax);
+			sscanf (optarg,"%d/%lf/%lf", &nlag, &lagstart, &lagend);
+			lagmax = MAX(fabs(lagstart), fabs(lagend));
 			flag++;
 			break;
 		case '?':
@@ -262,10 +270,12 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       help:            %d\n",help);
 		fprintf(stderr,"dbg2       format:          %d\n",format);
+		fprintf(stderr,"dbg2       rthreshold:      %f\n",rthreshold);
 		fprintf(stderr,"dbg2       swathdata:       %s\n",swathdata);
 		fprintf(stderr,"dbg2       npings:          %d\n",npings);
 		fprintf(stderr,"dbg2       nlag:            %d\n",nlag);
-		fprintf(stderr,"dbg2       lagmin:          %f\n",lagmin);
+		fprintf(stderr,"dbg2       lagstart:        %f\n",lagstart);
+		fprintf(stderr,"dbg2       lagend:          %f\n",lagend);
 		fprintf(stderr,"dbg2       lagmax:          %f\n",lagmax);
 		fprintf(stderr,"dbg2       navchannel:      %d\n",navchannel);
 		fprintf(stderr,"dbg2       kind:            %d\n",kind);
@@ -289,12 +299,12 @@ int main (int argc, char **argv)
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
 		read_datalist = MB_YES;
-		
+
 	/* get time lag step */
-	lagstep = (lagmax - lagmin) / (nlag - 1);
+	lagstep = 2 * lagmax / (nlag - 1);
 	status = mb_reallocd(verbose,__FILE__,__LINE__, nlag * sizeof(double), (void **)&rr, &error);
 	status = mb_reallocd(verbose,__FILE__,__LINE__, nlag * sizeof(int), (void **)&timelaghistogram, &error);
-		
+
 	/* print out some helpful information */
 	if (verbose > 0)
 		{
@@ -303,11 +313,12 @@ int main (int argc, char **argv)
 		fprintf(stderr, "  Format:                          %d\n", format);
 		fprintf(stderr, "  Number of pings per estimate:    %d\n", npings);
 		fprintf(stderr, "  Number of time lag calculations: %d\n", nlag);
-		fprintf(stderr, "  Minimum time lag:                %f\n", lagmin);
+		fprintf(stderr, "  Start time lag reported:         %f\n", lagstart);
+		fprintf(stderr, "  End time lag reported:           %f\n", lagend);
 		fprintf(stderr, "  Maximum time lag:                %f\n", lagmax);
 		fprintf(stderr, "  Time lag step:                   %f\n", lagstep);
 		}
-		
+
 	/* first get roll data from the entire swathdata (which can be a datalist ) */
 	if (kind > MB_DATA_NONE)
 		sprintf(cmdfile, "mbnavlist -I%s -F%d -K%d -OMR", swathdata, format, kind);
@@ -332,7 +343,7 @@ int main (int argc, char **argv)
 		}
 	pclose(fp);
 	fprintf(stderr,"%d roll data read from %s\n", nroll, swathdata);
-	
+
 	/* open total cross correlation file */
 	if (read_datalist == MB_YES)
 		{
@@ -347,7 +358,7 @@ int main (int argc, char **argv)
 			exit(error);
 			}
 		}
-	
+
 	/* open time lag estimate file */
 	sprintf(estimatefile, "%s_timelagest.txt", outroot);
 	if ((fpe = fopen(estimatefile, "w")) == NULL)
@@ -359,7 +370,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	
+
 	/* open time lag histogram file */
 	sprintf(histfile, "%s_timelaghist.txt", outroot);
 	if ((fph = fopen(histfile, "w")) == NULL)
@@ -371,7 +382,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-	
+
 	/* open time lag model file */
 	sprintf(modelfile, "%s_timelagmodel.txt", outroot);
 	if ((fpm = fopen(modelfile, "w")) == NULL)
@@ -443,7 +454,7 @@ int main (int argc, char **argv)
 		if (nslope > 0)
 			time_d_avg /= nslope;
 		fprintf(stderr,"%d slope data read from %s\n", nslope, swathfile);
-	
+
 		/* open time lag histogram file */
 		sprintf(fhistfile, "%s_timelaghist.txt", swathfile);
 		if ((fpf = fopen(fhistfile, "w")) == NULL)
@@ -455,7 +466,7 @@ int main (int argc, char **argv)
 				program_name);
 			exit(error);
 			}
-	
+
 		/* open cross correlation file */
 		sprintf(xcorfile, "%s_xcorr.txt", swathfile);
 		if ((fpx = fopen(xcorfile, "w")) == NULL)
@@ -467,20 +478,20 @@ int main (int argc, char **argv)
 				program_name);
 			exit(error);
 			}
-			
+
 		/* initialize time lag histogram */
 		for (k=0;k<nlag;k++)
 			{
 			timelaghistogram[k] = 0;
 			}
-		
+
 		/* now do cross correlation calculations */
 		for (i=0;i<nslope/npings;i++)
 			{
 			/* get ping range in this chunk */
 			j0 = i * npings;
 			j1 = j0 + npings - 1;
-	
+
 			/* get mean slope in this chunk */
 			slopemean = 0.0;
 			for (j = j0; j <= j1; j++)
@@ -488,7 +499,7 @@ int main (int argc, char **argv)
 				slopemean += slope_slope[j];
 				}
 			slopemean /= npings;
-	
+
 			/* get mean roll in this chunk */
 			rollmean = 0.0;
 			nrollmean = 0;
@@ -505,7 +516,7 @@ int main (int argc, char **argv)
 				{
 				rollmean /= nrollmean;
 				}
-	
+
 			/* calculate cross correlation for the specified time lags */
 			if (nrollmean > 0)
 				{
@@ -527,7 +538,7 @@ int main (int argc, char **argv)
 						time_d = slope_time_d[j] + timelag;
 						for (l = nr; l < nroll - 1 && found == MB_NO; l++)
 							{
-							if (time_d >= roll_time_d[l] 
+							if (time_d >= roll_time_d[l]
 								&& time_d <= roll_time_d[l+1])
 								{
 								nr = l;
@@ -559,7 +570,7 @@ int main (int argc, char **argv)
 
 					r = sumsloperoll / sqrt(sumslopesq) / sqrt(sumrollsq);
 					rr[k] = r;
-					
+
 					/* output results */
 					fprintf(fpx, "%5.3f %5.3f \n", timelag, r);
 					if (fpt != NULL)
@@ -573,46 +584,49 @@ int main (int argc, char **argv)
 				for (k = 0; k < nlag; k++)
 					{
 					timelag = -lagmax + k * lagstep;
-					if (rr[k] > maxr)
+					if (timelag >= lagstart && timelag <= lagend)
 						{
-						maxr = rr[k];
-						maxtimelag = timelag;
-						}
-					if (k == 0)
-						{
-						peakk = k;
-						peakr = rr[k];
-						peaktimelag = timelag;
-						}
-					else if (k < nlag - 1
-						&& rr[k] > 0.0
-						&& rr[k] > rr[k-1]
-						&& rr[k] > rr[k+1]
-						&& abs(timelag) < abs(peaktimelag))
-						{
-						peakk = k;
-						peakr = rr[k];
-						peaktimelag = timelag;
-						}
-					else if (k == nlag - 1
-						&& peaktimelag == -lagmax
-						&& rr[k] > peakr)
-						{
-						peakk = k;
-						peakr = rr[k];
-						peaktimelag = timelag;
+						if (rr[k] > maxr)
+							{
+							maxr = rr[k];
+							maxtimelag = timelag;
+							}
+						if (k == 0)
+							{
+							peakk = k;
+							peakr = rr[k];
+							peaktimelag = timelag;
+							}
+						else if (k < nlag - 1
+							&& rr[k] > 0.0
+							&& rr[k] > rr[k-1]
+							&& rr[k] > rr[k+1]
+							&& fabs(timelag) < fabs(peaktimelag))
+							{
+							peakk = k;
+							peakr = rr[k];
+							peaktimelag = timelag;
+							}
+						else if (k == nlag - 1
+							&& peaktimelag == -lagmax
+							&& rr[k] > peakr)
+							{
+							peakk = k;
+							peakr = rr[k];
+							peaktimelag = timelag;
+							}
 						}
 					}
 				}
 
 			/* print out best correlated time lag estimates */
-			if (peakr > 0.90)
+			if (peakr > rthreshold)
 				{
 				timelaghistogram[peakk]++;
 				}
 
 			/* augment histogram */
-			if (peakr > 0.90)
+			if (peakr > rthreshold)
 				{
 				fprintf(fpe, "%10.3f %6.3f\n", slope_time_d[(j0+j1)/2], peaktimelag);
 				fprintf(fpf, "%6.3f\n", peaktimelag);
@@ -632,22 +646,22 @@ int main (int argc, char **argv)
 				j0, j1, maxtimelag, maxr, peaktimelag, peakr);
 				}
 			}
-			
+
 		/* close cross correlation and histogram files */
 		fclose(fpx);
 		fclose(fpf);
-		
+
 		/* generate plot shellscript for cross correlation file */
 		sprintf(cmdfile, "mbm_xyplot -I%s -N", xcorfile);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		system(cmdfile);
 
 		/* generate plot shellscript for time lag histogram */
-		sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"", 
+		sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"",
 				fhistfile, lagstep, swathfile);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		system(cmdfile);
-		
+
 		/* output peak time lag */
 		peakk = 0;
 		peakkmax = 0;
@@ -698,20 +712,20 @@ int main (int argc, char **argv)
 		}
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
-			
+
 	/* close cross correlation file */
 	if (read_datalist == MB_YES)
 		fclose(fpt);
-			
+
 	/* close estimate file */
 	fclose(fpe);
-			
+
 	/* close histogram file */
 	fclose(fph);
-			
+
 	/* close time lag model file */
 	fclose(fpm);
-		
+
 	/* generate plot shellscript for cross correlation file */
 	if (read_datalist == MB_YES)
 		{
@@ -719,20 +733,20 @@ int main (int argc, char **argv)
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		system(cmdfile);
 		}
-		
+
 	/* generate plot shellscript for time lag histogram */
-	sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"", 
+	sprintf(cmdfile, "mbm_histplot -I%s -C%g -L\"Frequency Histogram of %s:Time Lag (sec):Frequency:\"",
 			histfile, lagstep, swathdata);
 	fprintf(stderr, "Running: %s...\n", cmdfile);
 	system(cmdfile);
-		
+
 	/* generate plot shellscript for time lag model if it exists */
 	if (nmodel > 1 || nestimate > 1)
 		{
 		mmm = (nestimate * sum_xy - sum_x * sum_y) / (nestimate * sum_x2 - sum_x * sum_x);
 		bbb = (sum_y - mmm * sum_x) / nestimate;
-		
-		sprintf(cmdfile, "mbm_xyplot -I%s -ISc0.05:%s -I%s -ISc0.1:%s -L\"Time lag model of %s:Time (sec):Time Lag (sec):\"", 
+
+		sprintf(cmdfile, "mbm_xyplot -I%s -ISc0.05:%s -I%s -ISc0.1:%s -L\"Time lag model of %s:Time (sec):Time Lag (sec):\"",
 				modelfile, estimatefile, modelfile, modelfile, swathdata);
 		fprintf(stderr, "Running: %s...\n", cmdfile);
 		system(cmdfile);

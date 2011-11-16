@@ -2904,7 +2904,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* extract data from attitude structure */
 	else if (store->type == EM3_NETATTITUDE
-		&& store->attitude != NULL)
+		&& store->netattitude != NULL)
 		{
                 /* get attitude data structure */
 		netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;

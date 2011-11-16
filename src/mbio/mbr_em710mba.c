@@ -5626,14 +5626,22 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 		status = mbr_em710mba_wr_tilt(verbose,mbfp,swap,store,error);
 		}
-	else if (store->kind == MB_DATA_ATTITUDE && store->type == EM3_ATTITUDE)
+	else if ((store->kind == MB_DATA_ATTITUDE
+			|| store->kind == MB_DATA_ATTITUDE1
+			|| store->kind == MB_DATA_ATTITUDE2
+			|| store->kind == MB_DATA_ATTITUDE3)
+		 && store->type == EM3_ATTITUDE)
 		{
 #ifdef MBR_EM710MBA_DEBUG
 	fprintf(stderr,"call mbr_em710mba_wr_attitude kind:%d type %x\n",store->kind,store->type);
 #endif
 		status = mbr_em710mba_wr_attitude(verbose,mbfp,swap,store,error);
 		}
-	else if (store->kind == MB_DATA_ATTITUDE && store->type == EM3_NETATTITUDE)
+	else if ((store->kind == MB_DATA_ATTITUDE
+			|| store->kind == MB_DATA_ATTITUDE1
+			|| store->kind == MB_DATA_ATTITUDE2
+			|| store->kind == MB_DATA_ATTITUDE3)
+		 && store->type == EM3_NETATTITUDE)
 		{
 #ifdef MBR_EM710MBA_DEBUG
 	fprintf(stderr,"call mbr_em710mba_wr_netattitude kind:%d type %x\n",store->kind,store->type);
