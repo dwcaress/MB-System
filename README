@@ -182,6 +182,12 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+-----> 5.3.1911
+
+Formats 58 and 59 (third generation Kongsberg multibeam data):
+Fixes to the handling of attitude records, particularly with regard
+to writing the records.
+
 -----> 5.3.1909
 
 Program mbnavlist:

@@ -496,15 +496,10 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_simrad3_ssv_struct *ssv;
 	struct mbsys_simrad3_ping_struct *ping;
 	int	time_i[7];
-	double	ntime_d, atime_d, btime_d;
+	double	ntime_d, btime_d;
 	double	bath_time_d, ss_time_d;
 	double	roll, pitch, heave;
 	double	*pixel_size, *swath_width;
-	double	att_time_d[MBSYS_SIMRAD3_MAXATTITUDE];
-	double	att_roll[MBSYS_SIMRAD3_MAXATTITUDE];
-	double	att_pitch[MBSYS_SIMRAD3_MAXATTITUDE];
-	double	att_heave[MBSYS_SIMRAD3_MAXATTITUDE];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -533,92 +528,11 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	pixel_size = (double *) &mb_io_ptr->saved1;
 	swath_width = (double *) &mb_io_ptr->saved2;
 
-	/* save fix if nav data */
-	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_NAV)
-		{
-		/* get nav time */
-		time_i[0] = store->pos_date / 10000;
-		time_i[1] = (store->pos_date % 10000) / 100;
-		time_i[2] = store->pos_date % 100;
-		time_i[3] = store->pos_msec / 3600000;
-		time_i[4] = (store->pos_msec % 3600000) / 60000;
-		time_i[5] = (store->pos_msec % 60000) / 1000;
-		time_i[6] = (store->pos_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &ntime_d);
-
-		/* add latest fix */
-		if (store->pos_longitude != EM3_INVALID_INT
-			&& store->pos_latitude != EM3_INVALID_INT)
-			mb_navint_add(verbose, mbio_ptr,
-				ntime_d,
-				(double)(0.0000001 * store->pos_longitude),
-				(double)(0.00000005 * store->pos_latitude),
-				error);
-		}
-
-	/* save attitude if attitude data */
-	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_ATTITUDE
-		&& store->type == EM3_ATTITUDE)
-		{
-		/* get attitude time */
-		time_i[0] = attitude->att_date / 10000;
-		time_i[1] = (attitude->att_date % 10000) / 100;
-		time_i[2] = attitude->att_date % 100;
-		time_i[3] = attitude->att_msec / 3600000;
-		time_i[4] = (attitude->att_msec % 3600000) / 60000;
-		time_i[5] = (attitude->att_msec % 60000) / 1000;
-		time_i[6] = (attitude->att_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &atime_d);
-
-		/* add latest attitude samples */
-		attitude->att_ndata = MIN(attitude->att_ndata,MBSYS_SIMRAD3_MAXATTITUDE);
-		for (i=0;i<attitude->att_ndata;i++)
-			{
-			att_time_d[i] = (double)(atime_d + 0.001 * attitude->att_time[i]);
-			att_heave[i] = (double)(0.01 * attitude->att_heave[i]);
-			att_roll[i] = (double)(0.01 * attitude->att_roll[i]);
-			att_pitch[i] = (double)(0.01 * attitude->att_pitch[i]);
-			}
-		mb_attint_nadd(verbose, mbio_ptr,
-				attitude->att_ndata,att_time_d,att_heave,att_roll,att_pitch,
-				error);
-		}
-
-	/* save attitude if network attitude data */
-	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_ATTITUDE
-		&& store->type == EM3_NETATTITUDE)
-		{
-		/* get attitude time */
-		time_i[0] = netattitude->nat_date / 10000;
-		time_i[1] = (netattitude->nat_date % 10000) / 100;
-		time_i[2] = netattitude->nat_date % 100;
-		time_i[3] = netattitude->nat_msec / 3600000;
-		time_i[4] = (netattitude->nat_msec % 3600000) / 60000;
-		time_i[5] = (netattitude->nat_msec % 60000) / 1000;
-		time_i[6] = (netattitude->nat_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &atime_d);
-
-		/* add latest attitude samples */
-		netattitude->nat_ndata = MIN(netattitude->nat_ndata,MBSYS_SIMRAD3_MAXATTITUDE);
-		for (i=0;i<netattitude->nat_ndata;i++)
-			{
-			att_time_d[i] = (double)(atime_d + 0.001 * netattitude->nat_time[i]);
-			att_heave[i] = (double)(0.01 * netattitude->nat_heave[i]);
-			att_roll[i] = (double)(0.01 * netattitude->nat_roll[i]);
-			att_pitch[i] = (double)(0.01 * netattitude->nat_pitch[i]);
-			}
-		mb_attint_nadd(verbose, mbio_ptr,
-				netattitude->nat_ndata,att_time_d,att_heave,att_roll,att_pitch,
-				error);
-		}
-
-	/* save sonar depth value if survey data */
+	/* save position, heading, attitude, sonar depth if survey data */
 	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA)
 		{
+		/* get ping time */
 		time_i[0] = ping->png_date / 10000;
 		time_i[1] = (ping->png_date % 10000) / 100;
 		time_i[2] = ping->png_date % 100;
@@ -627,9 +541,25 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		time_i[5] = (ping->png_msec % 60000) / 1000;
 		time_i[6] = (ping->png_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &btime_d);
+		
+		if (ping->png_longitude != EM3_INVALID_INT
+			&& ping->png_latitude != EM3_INVALID_INT)
+			mb_navint_add(verbose, mbio_ptr,
+				btime_d,
+				(double)(0.0000001 * ping->png_longitude),
+				(double)(0.00000005 * ping->png_latitude),
+				error);
+		mb_hedint_add(verbose, mbio_ptr,
+				btime_d, 0.01 * ping->png_heading,
+				error);
+		mb_attint_add(verbose, mbio_ptr,
+				btime_d, 0.01 * ping->png_heave, 
+				0.01 * ping->png_roll, 0.01 * ping->png_pitch,
+				error);
 		mb_depint_add(verbose, mbio_ptr,
 				btime_d,(double)ping->png_xducer_depth,
 				error);
+
 		}
 
 	/* interpolate attitude data into navigation records */
@@ -3422,20 +3352,15 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 		line[3], line[3]);
 #endif
 		}
-
-	/* check sensor desciptor to find out if this is the "active" attitude
-		sensor - if it is set kind = MB_DATA_ATTITUDE, otherwise
-		set kind = MB_DATA_ATTITUDE1, MB_DATA_ATTITUDE2, or MB_DATA_ATTITUDE3 */
+		
+	/* Set data kind */
 	if (status == MB_SUCCESS)
 		{
-		if ((attitude->att_sensordescriptor & 14) == 0)
+		/* set data kind */
+		if ((attitude->att_sensordescriptor & 48) == 0)
 			store->kind = MB_DATA_ATTITUDE;
-		else if ((attitude->att_sensordescriptor & 48) == 0)
-			store->kind = MB_DATA_ATTITUDE1;
 		else if ((attitude->att_sensordescriptor & 48) == 16)
-			store->kind = MB_DATA_ATTITUDE2;
-		else if ((attitude->att_sensordescriptor & 48) == 32)
-			store->kind = MB_DATA_ATTITUDE3;
+			store->kind = MB_DATA_ATTITUDE1;
 		}
 
 	/* print debug statements */
@@ -3538,6 +3463,13 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 		    netattitude->nat_ndata = (int) ((unsigned short) short_val);
 		netattitude->nat_sensordescriptor = line[14];
 		}
+		
+	/* Set data kind */
+	if (status == MB_SUCCESS)
+		{
+		/* set data kind */
+		store->kind = MB_DATA_ATTITUDE2;
+		}
 
 	/* read binary netattitude values */
 	if (status == MB_SUCCESS)
@@ -3620,21 +3552,6 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 		line[2], line[2],
 		line[3], line[3]);
 #endif
-		}
-
-	/* check sensor desciptor to find out if this is the "active" attitude
-		sensor - if it is set kind = MB_DATA_ATTITUDE, otherwise
-		set kind = MB_DATA_ATTITUDE1, MB_DATA_ATTITUDE2, or MB_DATA_ATTITUDE3 */
-	if (status == MB_SUCCESS)
-		{
-		if ((netattitude->nat_sensordescriptor & 14) == 0)
-			store->kind = MB_DATA_ATTITUDE;
-		else if ((netattitude->nat_sensordescriptor & 48) == 0)
-			store->kind = MB_DATA_ATTITUDE1;
-		else if ((netattitude->nat_sensordescriptor & 48) == 16)
-			store->kind = MB_DATA_ATTITUDE2;
-		else if ((netattitude->nat_sensordescriptor & 48) == 32)
-			store->kind = MB_DATA_ATTITUDE3;
 		}
 
 	/* print debug statements */
@@ -5627,9 +5544,7 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		status = mbr_em710mba_wr_tilt(verbose,mbfp,swap,store,error);
 		}
 	else if ((store->kind == MB_DATA_ATTITUDE
-			|| store->kind == MB_DATA_ATTITUDE1
-			|| store->kind == MB_DATA_ATTITUDE2
-			|| store->kind == MB_DATA_ATTITUDE3)
+			|| store->kind == MB_DATA_ATTITUDE1)
 		 && store->type == EM3_ATTITUDE)
 		{
 #ifdef MBR_EM710MBA_DEBUG
@@ -5637,10 +5552,7 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 		status = mbr_em710mba_wr_attitude(verbose,mbfp,swap,store,error);
 		}
-	else if ((store->kind == MB_DATA_ATTITUDE
-			|| store->kind == MB_DATA_ATTITUDE1
-			|| store->kind == MB_DATA_ATTITUDE2
-			|| store->kind == MB_DATA_ATTITUDE3)
+	else if (store->kind == MB_DATA_ATTITUDE2
 		 && store->type == EM3_NETATTITUDE)
 		{
 #ifdef MBR_EM710MBA_DEBUG
