@@ -873,7 +873,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    {
 		    if (beamflag[i] != MB_FLAG_NULL)
 			{
-			depthmax = MAX(depthmax, (bath[i] - transducer_depth));
+			depthmax = MAX(depthmax, fabs(bath[i] - transducer_depth));
 			distmax = MAX(distmax, fabs(bathacrosstrack[i]));
 			distmax = MAX(distmax, fabs(bathalongtrack[i]));
 			}
