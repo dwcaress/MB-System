@@ -636,6 +636,10 @@ int mb_format_register(int verbose,
 		{
 		status = mbr_register_hir2rnav(verbose, mbio_ptr, error);
 		}
+	else if (*format == MBF_HYSWEEP1)
+		{
+		status = mbr_register_hysweep1(verbose, mbio_ptr, error);
+		}
 	else
 		{
 		status = MB_FAILURE;
@@ -1523,6 +1527,17 @@ int mb_format_info(int verbose,
 			error);
 		}
 	else if (*format == MBF_HIR2RNAV)
+		{
+		status = mbr_info_hir2rnav(verbose, system, 
+			beams_bath_max, beams_amp_max, pixels_ss_max, 
+			format_name, system_name, format_description, 
+			numfile, filetype, 
+			variable_beams, traveltime, beam_flagging, 
+			nav_source, heading_source, vru_source, svp_source, 
+			beamwidth_xtrack, beamwidth_ltrack, 
+			error);
+		}
+	else if (*format == MBF_HYSWEEP1)
 		{
 		status = mbr_info_hir2rnav(verbose, system, 
 			beams_bath_max, beams_amp_max, pixels_ss_max, 
@@ -3339,6 +3354,31 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		    fileroot[strlen(filename)-suffix_len] = '\0';
 		    }
 		*format = MBF_HIR2RNAV;
+		found = MB_YES;
+		}
+	    }
+
+	/* look for a HYSWEEP *.HSX file format convention*/
+	if (found == MB_NO)
+	    {
+	    if (strlen(filename) >= 5)
+		i = strlen(filename) - 4;
+	    else
+		i = 0;
+	    if ((suffix = strstr(&filename[i],".hsx")) != NULL)
+		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".HSX")) != NULL)
+		suffix_len = 4;
+	    else
+		suffix_len = 0;
+	    if (suffix_len == 4)
+		{
+		if (fileroot != NULL)
+		    {
+		    strncpy(fileroot, filename, strlen(filename)-suffix_len);
+		    fileroot[strlen(filename)-suffix_len] = '\0';
+		    }
+		*format = MBF_HYSWEEP1;
 		found = MB_YES;
 		}
 	    }

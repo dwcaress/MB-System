@@ -571,6 +571,13 @@ int mbview_reset_shared(int mode)
 		    	    = shared.shareddata.navpick.xpoints[2*j+i];
 		}
 	    }
+
+	/* vector data */
+	shared.shareddata.vector_mode = MBV_VECTOR_OFF;
+	shared.shareddata.nvector = 0;
+	shared.shareddata.vector_selected = MBV_SELECT_NONE;
+	shared.shareddata.vector_point_selected = MBV_SELECT_NONE;
+	shared.shareddata.vectors = NULL;
 		
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -868,6 +875,9 @@ int mbview_reset(size_t instance)
 		/* nav data */
 		data->nav_view_mode = MBV_VIEW_OFF;
 		data->navdrape_view_mode = MBV_VIEW_OFF;
+
+		/* vector data */
+		data->vector_view_mode = MBV_VIEW_OFF;
 
 		/* profile data */
 		data->profile_view_mode = MBV_VIEW_OFF;
@@ -1266,6 +1276,35 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[0]);
 				}
 			}
+																	  		  
+		/* vector data */
+		fprintf(stderr,"dbg2       vector_view_mode:          %d\n",data->vector_view_mode);
+		fprintf(stderr,"dbg2       vector_mode:               %d\n",shared.shareddata.vector_mode);
+		fprintf(stderr,"dbg2       nvector:                   %d\n",shared.shareddata.nvector);
+		fprintf(stderr,"dbg2       nvector_alloc:             %d\n",shared.shareddata.nvector_alloc);
+		fprintf(stderr,"dbg2       vector_selected:           %lu\n",(size_t)shared.shareddata.vector_selected);
+		fprintf(stderr,"dbg2       vector_point_selected:     %lu\n",(size_t)shared.shareddata.vector_point_selected);
+		for (i=0;i<shared.shareddata.nvector;i++)
+			{
+			fprintf(stderr,"dbg2       vector %d color:         %d\n",i,shared.shareddata.vectors[i].color);
+			fprintf(stderr,"dbg2       vector %d size:          %d\n",i,shared.shareddata.vectors[i].size);
+			fprintf(stderr,"dbg2       vector %d name:          %s\n",i,shared.shareddata.vectors[i].name);
+			fprintf(stderr,"dbg2       vector %d format:        %d\n",i,shared.shareddata.vectors[i].format);
+			fprintf(stderr,"dbg2       vector %d npoints:       %d\n",i,shared.shareddata.vectors[i].npoints);
+			fprintf(stderr,"dbg2       vector %d npoints_alloc: %d\n",i,shared.shareddata.vectors[i].npoints_alloc);
+			fprintf(stderr,"dbg2       vector %d nselected:     %d\n",i,shared.shareddata.vectors[i].nselected);
+			for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				{
+				fprintf(stderr,"dbg2       vector %d %d xgrid:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xgrid[0]);
+				fprintf(stderr,"dbg2       vector %d %d ygrid:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ygrid[0]);
+				fprintf(stderr,"dbg2       vector %d %d xlon:     %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xlon);
+				fprintf(stderr,"dbg2       vector %d %d ylat:     %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ylat);
+				fprintf(stderr,"dbg2       vector %d %d zdata:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.zdata);
+				fprintf(stderr,"dbg2       vector %d %d xdisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xdisplay[0]);
+				fprintf(stderr,"dbg2       vector %d %d ydisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ydisplay[0]);
+				fprintf(stderr,"dbg2       vector %d %d zdisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.zdisplay[0]);
+				}
+			}
 		
 		/* profile data */
 		fprintf(stderr,"dbg2       profile_view_mode:         %d\n",data->profile_view_mode);
@@ -1430,6 +1469,34 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 				fprintf(stderr,"dbg2       nav %d %d stbd xdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.xdisplay[0]);
 				fprintf(stderr,"dbg2       nav %d %d stbd ydisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.ydisplay[0]);
 				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[0]);
+				}
+			}
+																	  		  
+		/* vector data */
+		fprintf(stderr,"dbg2       vector_mode:               %d\n",shared.shareddata.vector_mode);
+		fprintf(stderr,"dbg2       nvector:                   %d\n",shared.shareddata.nvector);
+		fprintf(stderr,"dbg2       nvector_alloc:             %d\n",shared.shareddata.nvector_alloc);
+		fprintf(stderr,"dbg2       vector_selected:           %lu\n",(size_t)shared.shareddata.vector_selected);
+		fprintf(stderr,"dbg2       vector_point_selected:     %lu\n",(size_t)shared.shareddata.vector_point_selected);
+		for (i=0;i<shared.shareddata.nvector;i++)
+			{
+			fprintf(stderr,"dbg2       vector %d color:         %d\n",i,shared.shareddata.vectors[i].color);
+			fprintf(stderr,"dbg2       vector %d size:          %d\n",i,shared.shareddata.vectors[i].size);
+			fprintf(stderr,"dbg2       vector %d name:          %s\n",i,shared.shareddata.vectors[i].name);
+			fprintf(stderr,"dbg2       vector %d format:        %d\n",i,shared.shareddata.vectors[i].format);
+			fprintf(stderr,"dbg2       vector %d npoints:       %d\n",i,shared.shareddata.vectors[i].npoints);
+			fprintf(stderr,"dbg2       vector %d npoints_alloc: %d\n",i,shared.shareddata.vectors[i].npoints_alloc);
+			fprintf(stderr,"dbg2       vector %d nselected:     %d\n",i,shared.shareddata.vectors[i].nselected);
+			for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				{
+				fprintf(stderr,"dbg2       vector %d %d xgrid:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xgrid[0]);
+				fprintf(stderr,"dbg2       vector %d %d ygrid:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ygrid[0]);
+				fprintf(stderr,"dbg2       vector %d %d xlon:     %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xlon);
+				fprintf(stderr,"dbg2       vector %d %d ylat:     %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ylat);
+				fprintf(stderr,"dbg2       vector %d %d zdata:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.zdata);
+				fprintf(stderr,"dbg2       vector %d %d xdisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xdisplay[0]);
+				fprintf(stderr,"dbg2       vector %d %d ydisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ydisplay[0]);
+				fprintf(stderr,"dbg2       vector %d %d zdisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.zdisplay[0]);
 				}
 			}
 

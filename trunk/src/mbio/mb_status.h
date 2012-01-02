@@ -421,7 +421,7 @@
 #define	MB_NO	0
 
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			58
+#define	MB_DATA_KINDS			60
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -480,6 +480,8 @@
 #define	MB_DATA_ATTITUDE1		55	/* ancillary attitude system 1 */
 #define	MB_DATA_ATTITUDE2		56      /* ancillary attitude system 2 */
 #define	MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
+#define	MB_DATA_SONARDEPTH		58	/* HYSWEEP dynamic draft */
+#define	MB_DATA_ALTITUDE		59	/* HYSWEEP single beam echosounder */
 
 /* MBIO function status convention */
 #define	MB_SUCCESS			1

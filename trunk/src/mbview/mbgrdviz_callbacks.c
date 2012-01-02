@@ -66,16 +66,17 @@ extern int isnanf(float x);
 /* fileSelectionBox modes */
 #define MBGRDVIZ_OPENGRID		0
 #define MBGRDVIZ_OPENOVERLAY		1
-#define MBGRDVIZ_OPENROUTE		2
-#define MBGRDVIZ_OPENSITE		3
-#define MBGRDVIZ_OPENNAV		4
-#define MBGRDVIZ_OPENSWATH		5
-#define MBGRDVIZ_SAVEROUTE		6
-#define MBGRDVIZ_SAVEWINFROGPTS		7
-#define MBGRDVIZ_SAVEWINFROGWPT		8
-#define MBGRDVIZ_SAVESITE		9
-#define MBGRDVIZ_SAVEPROFILE		10
-#define MBGRDVIZ_REALTIME		11
+#define MBGRDVIZ_OPENSITE		2
+#define MBGRDVIZ_OPENROUTE		3
+#define MBGRDVIZ_OPENVECTOR		4
+#define MBGRDVIZ_OPENNAV		5
+#define MBGRDVIZ_OPENSWATH		6
+#define MBGRDVIZ_SAVEROUTE		7
+#define MBGRDVIZ_SAVEWINFROGPTS		8
+#define MBGRDVIZ_SAVEWINFROGWPT		9
+#define MBGRDVIZ_SAVESITE		10
+#define MBGRDVIZ_SAVEPROFILE		11
+#define MBGRDVIZ_REALTIME		12
 
 /* Projection defines */
 #define ModelTypeProjected	     1
@@ -141,6 +142,7 @@ int do_mbgrdviz_dismiss_notify(size_t instance);
 void do_mbgrdviz_fileSelectionBox( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbgrdviz_fileSelectionBox_openvector( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_opennav( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPointer call_data);
@@ -154,6 +156,7 @@ int do_mbgrdviz_opensite(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_savesite(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_openroute(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_saveroute(size_t instance, char *output_file_ptr);
+int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr);
 int do_mbgrdviz_savewinfrogpts(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr);
 int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr);
@@ -814,6 +817,50 @@ do_mbgrdviz_fileSelectionBox_openoverlay( Widget w, XtPointer client_data, XtPoi
 }
 /*---------------------------------------------------------------------------------------*/
 void
+do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	char function_name[] = "do_mbgrdviz_fileSelectionBox_opensite";
+        Cardinal ac = 0;
+        Arg      args[256];
+	size_t	instance;
+	int	actionid;
+        XmString	tmp0;
+	Boolean	argok;
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct*)call_data;
+    
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
+		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
+		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		}
+
+    	/* get instance */
+	instance = (size_t) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Open Site File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.ste", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
 do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPointer call_data)
 {
 	char function_name[] = "do_mbgrdviz_fileSelectionBox_openroute";
@@ -858,9 +905,9 @@ do_mbgrdviz_fileSelectionBox_openroute( Widget w, XtPointer client_data, XtPoint
 }
 /*---------------------------------------------------------------------------------------*/
 void
-do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointer call_data)
+do_mbgrdviz_fileSelectionBox_openvector( Widget w, XtPointer client_data, XtPointer call_data)
 {
-	char function_name[] = "do_mbgrdviz_fileSelectionBox_opensite";
+	char function_name[] = "do_mbgrdviz_fileSelectionBox_openvector";
         Cardinal ac = 0;
         Arg      args[256];
 	size_t	instance;
@@ -885,16 +932,16 @@ do_mbgrdviz_fileSelectionBox_opensite( Widget w, XtPointer client_data, XtPointe
 	
 	/* set title to open file dialog  */
 	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Open Site File"); ac++;
+	XtSetArg(args[ac], XmNtitle, "Open Vector File"); ac++;
 	XtSetValues(dialogShell_open, args, ac);
 	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
 
 	/* set fileSelectionBox parameters */
 	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.ste", 
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*.vec", 
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
-	actionid = MBGRDVIZ_OPENSITE * MBV_MAX_WINDOWS + instance;
+	actionid = MBGRDVIZ_OPENVECTOR * MBV_MAX_WINDOWS + instance;
 	XtSetArg(args[ac], XmNuserData, actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
@@ -983,6 +1030,50 @@ do_mbgrdviz_fileSelectionBox_openswath( Widget w, XtPointer client_data, XtPoint
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_OPENSWATH * MBV_MAX_WINDOWS + instance;
+	XtSetArg(args[ac], XmNuserData, actionid); ac++;
+	XtSetValues(fileSelectionBox, args, ac);
+        XmStringFree((XmString)tmp0);
+    
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	char function_name[] = "do_mbgrdviz_fileSelectionBox_savesite";
+        Cardinal ac = 0;
+        Arg      args[256];
+	size_t	instance;
+	int	actionid;
+        XmString	tmp0;
+	Boolean	argok;
+	XmAnyCallbackStruct *acs;
+	acs = (XmAnyCallbackStruct*)call_data;
+    
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
+		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
+		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
+		}
+    
+    	/* get instance */
+	instance = (size_t) client_data;
+	
+	/* set title to open file dialog  */
+	ac = 0;
+	XtSetArg(args[ac], XmNtitle, "Save Site File"); ac++;
+	XtSetValues(dialogShell_open, args, ac);
+	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
+
+	/* set fileSelectionBox parameters */
+	ac = 0;
+	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
+                				XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
+	actionid = MBGRDVIZ_SAVESITE * MBV_MAX_WINDOWS + instance;
 	XtSetArg(args[ac], XmNuserData, actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
@@ -1115,50 +1206,6 @@ do_mbgrdviz_fileSelectionBox_savewinfrogwpt( Widget w, XtPointer client_data, Xt
                 				XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNpattern, tmp0); ac++;
 	actionid = MBGRDVIZ_SAVEWINFROGWPT * MBV_MAX_WINDOWS + instance;
-	XtSetArg(args[ac], XmNuserData, actionid); ac++;
-	XtSetValues(fileSelectionBox, args, ac);
-        XmStringFree((XmString)tmp0);
-    
-}
-/*---------------------------------------------------------------------------------------*/
-void
-do_mbgrdviz_fileSelectionBox_savesite( Widget w, XtPointer client_data, XtPointer call_data)
-{
-	char function_name[] = "do_mbgrdviz_fileSelectionBox_savesite";
-        Cardinal ac = 0;
-        Arg      args[256];
-	size_t	instance;
-	int	actionid;
-        XmString	tmp0;
-	Boolean	argok;
-	XmAnyCallbackStruct *acs;
-	acs = (XmAnyCallbackStruct*)call_data;
-    
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       w:           %lu\n",(size_t)w);
-		fprintf(stderr,"dbg2       client_data: %lu\n",(size_t)client_data);
-		fprintf(stderr,"dbg2       call_data:   %lu\n",(size_t)call_data);
-		}
-    
-    	/* get instance */
-	instance = (size_t) client_data;
-	
-	/* set title to open file dialog  */
-	ac = 0;
-	XtSetArg(args[ac], XmNtitle, "Save Site File"); ac++;
-	XtSetValues(dialogShell_open, args, ac);
-	BxManageCB(w, (XtPointer)"fileSelectionBox", call_data);
-
-	/* set fileSelectionBox parameters */
-	ac = 0;
-	tmp0 = (XmString) BX_CONVERT(dialogShell_open, "*", 
-                				XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNpattern, tmp0); ac++;
-	actionid = MBGRDVIZ_SAVESITE * MBV_MAX_WINDOWS + instance;
 	XtSetArg(args[ac], XmNuserData, actionid); ac++;
 	XtSetValues(fileSelectionBox, args, ac);
         XmStringFree((XmString)tmp0);
@@ -1395,6 +1442,14 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		status = do_mbgrdviz_openoverlay(instance, file_ptr);
 		}
 	
+	/* else open site data */
+	else if (mode == MBGRDVIZ_OPENSITE)
+		{
+		/* read site file and update mbview window */
+		do_mbview_message_on("Reading site data...", instance);
+		status = do_mbgrdviz_opensite(instance, file_ptr);
+		}
+	
 	/* else open route data */
 	else if (mode == MBGRDVIZ_OPENROUTE)
 		{
@@ -1403,12 +1458,12 @@ do_mbgrdviz_openfile( Widget w, XtPointer client_data, XtPointer call_data)
 		status = do_mbgrdviz_openroute(instance, file_ptr);
 		}
 	
-	/* else open site data */
-	else if (mode == MBGRDVIZ_OPENSITE)
+	/* else open vector data */
+	else if (mode == MBGRDVIZ_OPENVECTOR)
 		{
-		/* read site file and update mbview window */
-		do_mbview_message_on("Reading site data...", instance);
-		status = do_mbgrdviz_opensite(instance, file_ptr);
+		/* read vector file and update mbview window */
+		do_mbview_message_on("Reading vector data...", instance);
+		status = do_mbgrdviz_openvector(instance, file_ptr);
 		}
 	
 	/* else open nav data */
@@ -1869,6 +1924,10 @@ int do_mbgrdviz_openprimary(char *input_file_ptr)
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_openroute,
 					"Open Route File", 
+					MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_openvector,
+					"Open Vector File", 
 					MBV_PICKMASK_NONE, &error);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_opennav,
@@ -3090,6 +3149,176 @@ int do_mbgrdviz_savewinfrogwpt(size_t instance, char *output_file_ptr)
 }
 /*---------------------------------------------------------------------------------------*/
 
+int do_mbgrdviz_openvector(size_t instance, char *input_file_ptr)
+{
+	char function_name[] = "do_mbgrdviz_openvector";
+	int	status = MB_SUCCESS;
+	FILE	*sfp;
+	char	buffer[MB_PATH_MAXLINE];
+	int	npoint = 0;
+	int	npointalloc = 0;
+	double	*vectorlon = NULL;
+	double	*vectorlat = NULL;
+	double	*vectorz = NULL;
+	double	*vectordata = NULL;
+	double	lon, lat, z, data;
+	int	vectorcolor;
+	int	vectorsize;
+	mb_path	vectorname;
+	int	ivector;
+	int	rawvectorfile = MB_YES;
+	char	*result;
+	int	nget;
+	int	point_ok;
+    
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       instance:        %ld\n",instance);
+		fprintf(stderr,"dbg2       input_file_ptr:  %s\n",input_file_ptr);
+		}
+
+	/* read data for valid instance */
+	if (instance >= 0)
+	    {
+	    /* initialize vector values */
+	    vectorcolor = MBV_COLOR_BLUE;
+	    vectorsize = 1;
+	    vectorname[0] = '\0';
+	    rawvectorfile = MB_YES;
+	    npoint = 0;
+	    npointalloc = 0;
+	    
+	    /* open the input file */
+	    if ((sfp = fopen(input_file_ptr, "r")) == NULL) 
+		    {
+		    error = MB_ERROR_OPEN_FAIL;
+		    status = MB_FAILURE;
+		    fprintf(stderr,"\nUnable to open vector file <%s> for reading\n",input_file_ptr);
+		    XBell((Display *) XtDisplay(mainWindow),100);
+		    }
+
+	    /* loop over reading */
+	    if (status == MB_SUCCESS)
+	    	{
+		while ((result = fgets(buffer,MB_PATH_MAXLINE,sfp)) == buffer)
+		    {
+		    /* deal with comments */
+		    if (buffer[0] == '#')
+		    	{
+			if (rawvectorfile == MB_YES
+				&& strncmp(buffer,"## Vector File Version", 21) == 0)
+				{
+				rawvectorfile = MB_NO;
+				}
+			else if (strncmp(buffer,"## VECTORNAME", 12) == 0)
+				{
+				sscanf(buffer,"## VECTORNAME %s", vectorname);
+				}
+			else if (strncmp(buffer,"## VECTORCOLOR", 13) == 0)
+				{
+				sscanf(buffer,"## ROUTECOLOR %d", &vectorcolor);
+				}
+			else if (strncmp(buffer,"## ROUTESIZE", 12) == 0)
+				{
+				sscanf(buffer,"## ROUTESIZE %d", &vectorsize);
+				}
+			}
+		
+		    /* deal with vector segment marker */
+		    else if (buffer[0] == '>')
+		    	{
+			/* if data accumulated call mbview_addvector() */
+			if (npoint > 0)
+			    {
+			    /* status = mbview_addvector(verbose, instance,
+			    				npoint, vectorlon, vectorlat, vectorz, vectordata,
+							vectorcolor, vectorsize, vectorname,
+							&ivector, &error); */
+			    npoint = 0;
+			    }
+			}
+			
+		    /* deal with data */
+		    else
+		        {
+			/* read the data from the buffer */
+			nget = sscanf(buffer,"%lf %lf %lf %lf",
+			    		&lon, &lat, &z, &data);
+		    	if (nget == 4)
+			    point_ok = MB_YES;
+			else
+			    point_ok = MB_NO;
+			    
+			/* if good data check for need to allocate more space */
+			if (point_ok == MB_YES
+				&& npoint + 1 > npointalloc)
+			    {
+			    npointalloc += MBV_ALLOC_NUM;
+			    /* status = mbview_allocvectorarrays(verbose, 
+						    npointalloc,
+						    &vectorlon,
+						    &vectorlat,
+						    &vectorz,
+						    &vectordata,
+						    &error); */
+			    if (status != MB_SUCCESS)
+				    {
+				    npointalloc = 0;
+				    }
+			    }
+			    
+			/* add good point to vector */
+			if (point_ok == MB_YES && npointalloc > npoint)
+			    {
+			    vectorlon[npoint] = lon;
+			    vectorlat[npoint] = lat;
+			    vectorz[npoint] = z;
+			    vectordata[npoint] = data;
+			    npoint++;
+			    }
+			}
+		    }
+		    
+		/* add last vector if not already handled */
+		if (npoint > 0)
+		    {
+		    /* status = mbview_addvector(verbose, instance,
+			    			npoint, vectorlon, vectorlat, vectorz, vectordata,
+						vectorcolor, vectorsize, vectorname,
+						&ivector, &error); */
+		    npoint = 0;
+		    }
+		    
+		/* free the memory */
+		/* if (npointalloc > 0)
+		status = mbview_freevectorarrays(verbose, 
+						    &vectorlon,
+						    &vectorlat,
+						    &vectorz,
+						    &vectordata,
+						    &error); */
+
+		/* close the input file */
+		fclose(sfp);
+		}
+
+	    /* update widgets */
+	    if (status == MB_SUCCESS)
+	    status = mbview_update(verbose, instance, &error);
+	    }
+			
+	    
+	/* set sensitivity of widgets that require an mbview instance to be active */
+	do_mbgrdviz_sensitivity( );
+	
+	/* all done */
+	return(status);
+}
+/*---------------------------------------------------------------------------------------*/
+
 int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
 {
 	char function_name[] = "do_mbgrdviz_saveprofile";
@@ -3246,7 +3475,7 @@ int do_mbgrdviz_saveprofile(size_t instance, char *output_file_ptr)
 		 /* deallocate arrays */
 		 if (npointalloc > 0)
 	    	    {
-		    status = mbview_freeroutearrays(verbose, 
+		    status = mbview_freeprofilearrays(verbose, 
 					    &prdistance,
 					    &prtopo,
 					    &prboundary,
@@ -4560,6 +4789,10 @@ void do_mbgrdviz_open_region( Widget w, XtPointer client_data, XtPointer call_da
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_openroute,
 					"Open Route File", 
+					MBV_PICKMASK_NONE, &error);
+				mbview_addaction(verbose, instance,
+					do_mbgrdviz_fileSelectionBox_openvector,
+					"Open Vector File", 
 					MBV_PICKMASK_NONE, &error);
 				mbview_addaction(verbose, instance,
 					do_mbgrdviz_fileSelectionBox_opennav,
