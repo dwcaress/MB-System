@@ -224,6 +224,7 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbsys_reson8k.h \
 	$(INCDIR)/mbsys_netcdf.h $(INCDIR)/mbsys_navnetcdf.h \
 	$(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h \
+	$(INCDIR)/mbsys_image83p.h $(INCDIR)/mbsys_hysweep.h \
 	$(INCDIR)/mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiocen.h \
 	$(INCDIR)/mbf_sbsiolsi.h $(INCDIR)/mbf_sburicen.h \
 	$(INCDIR)/mbf_sbifremr.h $(INCDIR)/mbf_hsatlraw.h \
@@ -279,7 +280,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_surf.o mbsys_reson8k.o \
 		mbsys_netcdf.o mbsys_navnetcdf.o  \
 		mbsys_reson7k.o mbsys_jstar.o \
-		mbsys_image83p.o \
+		mbsys_image83p.o mbsys_hysweep.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -313,7 +314,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_samesurf.o mbr_reson7kr.o \
 		mbr_edgjstar.o mbr_segysegy.o \
 		mbr_image83p.o mbr_imagemba.o \
-		mbr_hir2rnav.o
+		mbr_hir2rnav.o mbr_hysweep1.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
@@ -343,7 +344,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_surf.o mbsys_reson8k.o \
 		mbsys_netcdf.o mbsys_navnetcdf.o \
 		mbsys_reson7k.o mbsys_jstar.o \
-		mbsys_image83p.o \
+		mbsys_image83p.o mbsys_hysweep.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -377,7 +378,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_samesurf.o mbr_reson7kr.o \
 		mbr_edgjstar.o mbr_segysegy.o \
 		mbr_image83p.o mbr_imagemba.o \
-		mbr_hir2rnav.o
+		mbr_hir2rnav.o mbr_hysweep1.o
 	ranlib $(LIBDIR)/libmbio.a
 	
 ### compile the source files
@@ -504,6 +505,8 @@ mbsys_jstar.o:	mbsys_jstar.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDI
 	$(CC) -c $(CFLAGS) mbsys_jstar.c
 mbsys_image83p.o:	mbsys_image83p.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_image83p.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) mbsys_image83p.c
+mbsys_hysweep.o:	mbsys_hysweep.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hysweep.h $(INCDIR)/mb_segy.h
+	$(CC) -c $(CFLAGS) mbsys_hysweep.c
 mbr_sbsiomrg.o:	mbr_sbsiomrg.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiomrg.h
 	$(CC) -c $(CFLAGS) mbr_sbsiomrg.c
 mbr_sbsiocen.o: mbr_sbsiocen.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiocen.h
@@ -632,6 +635,8 @@ mbr_imagemba.o: mbr_imagemba.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_imagemba.c
 mbr_hir2rnav.o: mbr_hir2rnav.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_singlebeam.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_hir2rnav.c
+mbr_hysweep1.o: mbr_hysweep1.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_hysweep.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_hysweep1.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_format.h:	mb_format.h
@@ -751,6 +756,9 @@ $(INCDIR)/mbsys_jstar.h:	mbsys_jstar.h
 $(INCDIR)/mbsys_image83p.h:	mbsys_image83p.h
 	cp mbsys_image83p.h $(INCDIR)/mbsys_image83p.h
 	chmod 664 $(INCDIR)/mbsys_image83p.h
+$(INCDIR)/mbsys_hysweep.h:	mbsys_hysweep.h
+	cp mbsys_hysweep.h $(INCDIR)/mbsys_hysweep.h
+	chmod 664 $(INCDIR)/mbsys_hysweep.h
 $(INCDIR)/mbf_sbsiomrg.h:	mbf_sbsiomrg.h
 	cp mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiomrg.h
 	chmod 664 $(INCDIR)/mbf_sbsiomrg.h

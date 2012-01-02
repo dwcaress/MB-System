@@ -484,7 +484,7 @@ static int	*editcount = NULL;
 static char	comment[MB_COMMENT_MAXLINE];
 
 /* buffer control variables */
-#define	MBEDIT_BUFFER_SIZE	25000
+#define	MBEDIT_BUFFER_SIZE	30000
 static int	file_open = MB_NO;
 static int	buff_size = MBEDIT_BUFFER_SIZE;
 static int	buff_size_max = MBEDIT_BUFFER_SIZE;
@@ -5362,6 +5362,7 @@ int mbedit_load_data(int buffer_size,
 	/* load data */
 	do
 		{
+		error = MB_ERROR_NO_ERROR;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
 				ping[nbuff].time_i,
 				&ping[nbuff].time_d,
