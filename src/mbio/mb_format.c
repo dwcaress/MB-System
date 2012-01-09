@@ -1539,7 +1539,7 @@ int mb_format_info(int verbose,
 		}
 	else if (*format == MBF_HYSWEEP1)
 		{
-		status = mbr_info_hir2rnav(verbose, system, 
+		status = mbr_info_hysweep1(verbose, system, 
 			beams_bath_max, beams_amp_max, pixels_ss_max, 
 			format_name, system_name, format_description, 
 			numfile, filetype, 

@@ -472,6 +472,8 @@ int mb_lever(int verbose,
 	    {
 	    /* get initial angles */
 	    roll = RTD * acos(xx / r );
+	    if (zz < 0.0)
+	    	roll = -roll;
 	    if (sin(DTR * roll) != 0.0)
 		pitch = RTD * asin(yy / (r * sin(DTR * roll)));
 	    else
