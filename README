@@ -28,6 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+* Version 5.3.1916       January 10, 2012
 * Version 5.3.1912       November 19, 2011
 * Version 5.3.1909       November 16, 2011
 * Version 5.3.1907       November 9, 2011
@@ -182,6 +183,13 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+-----> 5.3.1916
+
+Added preliminary support for HYSWEEP HSX format as MBIO format 201. Added program mbhysweeppreprocess to preprocess the HSX data.
+
+Fixed bug in mb_lever() function in mb_angle.c.
+
+GSF 3.03 update.
 
 -----> 5.3.1912
 
