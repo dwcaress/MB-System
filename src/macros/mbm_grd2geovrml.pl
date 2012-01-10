@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:     mbm_grd2geovrml.perl              11/7/2001
 $ver = '$Id$';
 #
-#    Copyright (c) 2003-2011 by
+#    Copyright (c) 2003-2012 by
 #    Mike McCann (mccann@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA

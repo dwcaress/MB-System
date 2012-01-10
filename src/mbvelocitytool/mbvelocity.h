@@ -2,7 +2,7 @@
  *    The MB-system:	mbvelocity.h	10/15/2009
  *    $Id$
  *
- *    Copyright (c); 2009-2011 by
+ *    Copyright (c); 2009-2012 by
  *    David W. Caress (caress@mbari.org);
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system: mbm_xbt.perl   6/18/93
 #    $Id$
 #
-#    Copyright (c) 1993-2011 by 
+#    Copyright (c) 1993-2012 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA

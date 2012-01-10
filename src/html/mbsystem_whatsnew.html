@@ -81,10 +81,17 @@ processing environments. </LI>
   <LI>Each MBprocess instance will parse through the datalist structure and attempt to process each swath file in turn.</LI>
   <LI>Swath files will be skipped if they are up-to-date, or if they are locked.</LI>
   <LI>The MBprocess instances can be on different computers, as long as the same filesystems are mounted.</LI>
-  <LI>The benefit of this pseudo-parallel processing tends to be limited by the network throughput. For instance, at MBARI the swath data are served on CIFS or Samba filesystems over Gigabet ethernet. We find that processing runs go faster with up to six MBprocess instances running on up to three different computers, but that adding more  than six processes causes the entire run to take longer.</LI>
+  <LI>The benefit of this pseudo-parallel processing tends to be limited by the network throughput. For instance, at MBARI the swath data are served on CIFS or Samba filesystems over Gigabet ethernet. We find that processing runs go faster with up to six MBprocess instances running on up to three different computers, but that adding more  than six processes causes the entire run to take longer.    </LI>
   </UL>
 </UL>
 
+<UL>
+  <li>New data formats:
+    <ul>
+      <li>HYSWEEP HSX multibeam data format (format id 201)</li>
+    </ul>
+  </li>
+</UL>
 <H1 ALIGN=CENTER>What Was New in MB-System Versions 5.1 and 5.2</H1>
 
 <P>The version 5.1.x and 5.2.z releases of MB-System included a number of changes and

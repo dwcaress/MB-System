@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_navnetcdf.c	4/11/2002
  *	$Id$
  *
- *    Copyright (c) 2002-2011 by
+ *    Copyright (c) 2002-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
