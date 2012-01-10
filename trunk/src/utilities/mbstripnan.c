@@ -2,7 +2,7 @@
  *    The MB-system:    mbstripNaN.c        8/8/02
  *    $Id$
  *
- *    Copyright (c) 2002-2011 by
+ *    Copyright (c) 2002-2012 by
  *    Mike McCann (mccann@mbari.org)
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute

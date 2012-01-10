@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_makedatalist.perl	27/1/2006
 #    $Id$
 #
-#    Copyright (c) 2006-2011 by
+#    Copyright (c) 2006-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA

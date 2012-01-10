@@ -2,7 +2,7 @@
  *    The MB-system:	mbhistogram.c	12/28/94
  *    $Id$
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

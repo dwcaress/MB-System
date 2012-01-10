@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
 #    $Id$
 #
-#    Copyright (c) 2001-2011 by
+#    Copyright (c) 2001-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA

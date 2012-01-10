@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system: mbm_route2mission.perl   7/18/2004
 #    $Id$
 #
-#    Copyright (c) 2004-2011 by 
+#    Copyright (c) 2004-2012 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA

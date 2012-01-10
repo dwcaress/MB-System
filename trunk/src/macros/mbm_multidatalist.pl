@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_multidatalist.perl	7/18/2011
 #   $Id: mbm_multidatalisz.pl 19XX 2011-07-18 15:40:00Z ferreira $
 #
-#    Copyright (c) 2011 by 
+#    Copyright (c) 2011-2012 by 
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA

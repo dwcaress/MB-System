@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsmdaraw.c	2/11/93
  *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdaraw.c,v 5.8 2005/11/05 00:48:04 caress Exp $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

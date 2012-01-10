@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavadjust.h	6/24/95
  *    $Id$
  *
- *    Copyright (c) 2000-2011 by
+ *    Copyright (c) 2000-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
