@@ -1,0 +1,33 @@
+INCLUDES = -I.. -I../mbio @CDF_INC_DIR@ @GMT_INC_DIR@
+
+if BUILD_MOTIF
+  XGRINC = mb_xgraphics.h
+endif
+include_HEADERS = mb_aux.h $(XGRINC)
+
+#LIBS = @CDF_LIB_DIR@ @GMT_LIB_DIR@
+if BUILD_MOTIF
+  XGRLIB = libmbxgr.la
+endif
+lib_LTLIBRARIES = libmbps.la libmbaux.la $(XGRLIB)
+
+libmbps_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libmbps_la_SOURCES = mb_pslibface.c
+libmbps_la_LIBADD = @CDF_LIB_DIR@ @GMT_LIB_DIR@ -lpsl -lgmtps
+#Need -lgmtps in linux but remove for WIN32?
+
+libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
+libmbaux_la_SOURCES = \
+		      mb_spline.c mb_zgrid.c mb_surface.c mb_cheb.c \
+		      mb_delaun.c mb_track.c mb_truecont.c mb_readgrd.c
+libmbaux_la_LIBADD = @CDF_LIB_DIR@ @GMT_LIB_DIR@ -lpsl libmbps.la \
+		     -L../mbio -lmbio
+
+if BUILD_MOTIF
+ libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0
+ libmbxgr_la_SOURCES = mb_xgraphics.c
+endif
+
+
+
+

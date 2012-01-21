@@ -1,0 +1,13 @@
+-----------------------------------------------------
+January 18, 2012
+First pass as creating autocnfig for MB-System
+Support options for Netcdf, GMT, FFTW3, Motif, and OpenGL 
+lib and include arguments. By default will build static 
+and shared libs. 
+Still need to add package checks for Motif and OpenGL. Need to improve
+checks with checking on more systems. 
+Need to add flags to disable features, such as motif to NOT build Motif 
+programs. Probably need flags to turn off non-GNU features. Need flag 
+to disable GSF if already installed.
+**Definitely more testing
+-----------------------------------------------------

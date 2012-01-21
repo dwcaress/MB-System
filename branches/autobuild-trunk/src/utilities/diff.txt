@@ -1,0 +1,422 @@
+3c3
+<  *    $Id: mbclean.c 1846 2010-04-14 17:45:34Z caress $
+---
+>  *    $Id: mbclean.c 1814 2009-12-28 09:44:16Z caress $
+255c255
+< static char rcs_id[] = "$Id: mbclean.c 1846 2010-04-14 17:45:34Z caress $";
+---
+> static char rcs_id[] = "$Id: mbclean.c 1814 2009-12-28 09:44:16Z caress $";
+323a324
+> 	int     nlong_acrosstot=0; //2010/03/07 DY
+338a340,342
+> 	int     nlong_across=0; //2010/03/07 DY
+> 	int     nmax_heading_rate=0; //2010/04/27 DY
+> 	int     nmax_heading_ratetot=0; //2010/04/27 DY
+359a364,365
+> 	int     zap_long_across = MB_NO;  //2010/03/07 DY
+> 	int     zap_max_heading_rate = MB_NO;  //2010/04/27 DY
+379,380c385,394
+< 	int	lowdist;
+< 	int	highdist;
+---
+> 	double	lowdist; //2010/03/07 DY changed these to doubles
+> 	double	highdist;
+> 	double  backup_dist = 0; //2010/04/27 DY
+> 
+> 	/* max acrosstrack filter variable  2010/03/07 DY */
+> 	double max_acrosstrack=120;
+> 	/* max heading_rate variable  2010/04/27 DY */
+> 	double max_heading_rate;
+> 	double last_heading=0.0;
+> 	double last_time=0.0;
+434,435c448,451
+< 	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:G:g:F:f:L:l:I:i:M:m:QqS:s:U:u:X:x:")) != -1)
+< 	  switch (c) 
+---
+> 	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:L:l:I:i:M:m:Q:q:R:r:S:s:U:u:X:x:")) != -1)
+> 	  {
+> 	    printf("checking %c\n",c);
+> 	    switch (c) 
+453a470
+> 			printf("depth_low: %f depth_high: %f\n",depth_low,depth_high);
+472a490,496
+> 		case 'E':                   //2010/03/07 DY added the max acrosstrack filter
+> 		case 'e':
+> 			sscanf (optarg,"%lf", &max_acrosstrack);
+> 			printf("max across track is: %f\n",max_acrosstrack);
+> 			//zap_long_across = MB_YES;
+> 			flag++;
+> 			break;
+483c507
+< 			break;
+---
+> 		break;
+501a526,535
+> 			backup_dist=0;
+> 			sscanf (optarg,"%lf", &backup_dist);
+> 			printf("backup dist is: %f\n",backup_dist);
+> 			flag++;
+> 			break;
+> 		case 'R':
+> 		case 'r':
+> 			zap_max_heading_rate = MB_YES;
+> 			sscanf (optarg,"%lf", &max_heading_rate);
+> 			printf("max heading rate is: %f\n",max_heading_rate);
+528a563,564
+> 	  }
+> 	  printf("processed %d flags\n",flag);
+594a631
+> 		fprintf(stderr,"dbg2       backup_dist:    %f\n",backup_dist);
+610a648
+> 		fprintf(stderr,"dbg2       max_acrosstrack:%f\n",max_acrosstrack);
+677c715
+< 		fprintf(stderr,"\nMBIO format %d does not allow flagging of bad data (specified by cleaning mode %d).\n",format,mode);
+---
+> 		fprintf(stderr,"\nMBIO format %d does not allow flagging of bad data \nas negative numbers (specified by cleaning mode %d).\n",format,mode);
+709a748
+> 	nlong_across=0; //2010/03/07 DY
+856a896
+> 		fprintf(stderr,"dbg2    nlong_across:      %d\n",nlong_across);
+874c914,919
+< 		
+---
+> 			/* DY make all beams good */
+> 		for (i=0;i<ping[nrec].beams_bath;i++)
+> 		    {
+> 		    ping[nrec].beamflag[i] = 0;
+> 		    }
+> 	    
+880c925
+< 		    
+---
+> 	
+1022,1024c1067,1074
+< 			if (mb_beam_ok(ping[irec].beamflag[i])
+< 				&& (ping[irec].bath[i] < depth_low
+< 				|| ping[irec].bath[i] > depth_high))
+---
+> 			  //if (mb_beam_ok(ping[irec].beamflag[i])
+> 			  //	&& (ping[irec].bath[i] < depth_low
+> 			  //	|| ping[irec].bath[i] > depth_high || fabs(ping[irec].bathacrosstrack[i]) > max_acrosstrack))
+> 			  // DY 2010/08/06 KLUGE!! chop out short returns directly below the vehicle
+> 			if (ping[irec].bath[i] < depth_low ||
+> 			    ping[irec].bath[i] > depth_high || 
+> 			    fabs(ping[irec].bathacrosstrack[i]) > max_acrosstrack ||
+> 			    (( i > 256-20) && (i < 256+20) && (ping[irec].bath[i] - sonardepth < 5)))
+1025a1076,1086
+> 			      /*
+> 				if(ping[irec].bath[i] - sonardepth < 5)
+> 				printf("i: %d bath: %.1f sonardepth: %.1f\n",i,ping[irec].bath[i] - sonardepth);
+> 			      */
+> 			      
+> 			      /*
+> 			      printf("depth: %f depth_low: %f depth_high: %f acrosstrack: %f max_acrosstrack: %f\n",
+> 				     ping[irec].bath[i], depth_low, depth_high, 
+> 				     ping[irec].bathacrosstrack[i],max_acrosstrack);
+> 			      */
+> 
+1036a1098
+> 			    //printf("3 writing %d %d\n",irec,i); 
+1038,1040c1100,1101
+< 				{
+< 				ping[irec].beamflag[i] 
+< 					    = MB_FLAG_FLAG + MB_FLAG_FILTER;
+---
+> 			      {
+> 				ping[irec].beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+1042a1104
+> 
+1059,1061c1121,1122
+< 
+< 		/* zap rails if requested */
+< 		if (zap_rails == MB_YES)
+---
+> 	/* check for max heading rate if requested */
+> 		if (zap_max_heading_rate == MB_YES)
+1063,1070c1124,1132
+< 		    /* find limits of good data */
+< 		    lowok = MB_YES;
+< 		    highok = MB_YES;
+< 		    lowbeam = center;
+< 		    highbeam = center;
+< 		    lowdist = 0;
+< 		    highdist = 0;
+< 		    for (j=center+1;j<ping[irec].beams_bath;j++)
+---
+> 		      double dh, heading_rate;
+> 		      dh = (ping[irec].heading-last_heading);
+> 		      if(dh > 180)dh -=360;
+> 		      if(dh < -180)dh +=360;
+> 		      heading_rate = dh/(ping[irec].time_d-last_time);
+> 
+> 		      last_time = ping[irec].time_d;
+> 		      last_heading = ping[irec].heading;
+> 		      for (i=0;i<ping[irec].beams_bath;i++)
+1072,1073c1134
+< 			k = center - (j - center);
+< 			if (highok == MB_YES && mb_beam_ok(ping[irec].beamflag[j]))
+---
+> 			  if (fabs(heading_rate) > max_heading_rate)
+1075,1089c1136,1158
+< 			    if (ping[irec].bathacrosstrack[j] <= highdist)
+< 				    {
+< 				    highok = MB_NO;
+< 				    highbeam = j;
+< 				    }
+< 			    else
+< 				    highdist = ping[irec].bathacrosstrack[j];
+< 			    }
+< 			if (lowok == MB_YES && mb_beam_ok(ping[irec].beamflag[k]))
+< 			    {
+< 			    if (ping[irec].bathacrosstrack[k] >= lowdist)
+< 				    {
+< 				    lowok = MB_NO;
+< 				    lowbeam = k;
+< 				    }
+---
+> 			      if(i==0)printf("heading rate is: %f\n",heading_rate);
+> 			      if (verbose >= 1)
+> 				fprintf(stderr,"d: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n",
+> 				    ping[irec].time_i[0],
+> 				    ping[irec].time_i[1],
+> 				    ping[irec].time_i[2],
+> 				    ping[irec].time_i[3],
+> 				    ping[irec].time_i[4],
+> 				    ping[irec].time_i[5],
+> 				    ping[irec].time_i[6],
+> 				    i,ping[irec].bath[i]);
+> 			    find_bad = MB_YES;
+> 			    //printf("3 writing %d %d\n",irec,i); 
+> 			    if (mode <= 2)
+> 			      {
+> 				ping[irec].beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+> 				nmax_heading_rate++;
+> 				nflag++;
+> 
+> 				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+> 						i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+> 						MBP_EDIT_FILTER, &error);
+> 				}
+1091c1160,1167
+< 				    lowdist = ping[irec].bathacrosstrack[k];
+---
+> 				{
+> 				ping[irec].beamflag[i] = MB_FLAG_NULL;
+> 				nmax_heading_rate++;
+> 				nzero++;
+> 				mb_ess_save(verbose, &esf, ping[irec].time_d, 
+> 						i + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+> 						MBP_EDIT_ZERO, &error);
+> 				}
+1093a1170
+> 		    }
+1095,1115c1172,1190
+< 
+< 		    /* get rid of bad data */
+< 		    if (highok == MB_NO)
+< 			{
+< 			find_bad = MB_YES;
+< 			for (j=highbeam;j<ping[irec].beams_bath;j++)
+< 			    {
+< 			    if (verbose >= 1)
+< 			    fprintf(stderr,"r: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n",
+< 					    ping[irec].time_i[0],
+< 					    ping[irec].time_i[1],
+< 					    ping[irec].time_i[2],
+< 					    ping[irec].time_i[3],
+< 					    ping[irec].time_i[4],
+< 					    ping[irec].time_i[5],
+< 					    ping[irec].time_i[6],
+< 					    j,ping[irec].bath[j]);
+< 			    if (mode <= 2)
+< 				{
+< 				if (mb_beam_ok(ping[irec].beamflag[j]))
+< 				    {
+---
+> 		/* zap rails if requested */
+> 		if (zap_rails == MB_YES)
+> 		  {
+> 		    /* declare all beams with acrosstrack distance less than the maximum out to that beam */
+> 		    lowdist = 0.0;
+> 		    highdist = 0.0;
+> 
+> 		    for (j=center;j<ping[irec].beams_bath;j++)
+> 		      {
+> 			k = center - (j - center) -1;
+> 			//if (mb_beam_ok(ping[irec].beamflag[j]))
+> 			if(1)
+> 			  {
+> 			    if (ping[irec].bathacrosstrack[j] <= highdist-backup_dist)
+> 			      {
+> 				find_bad = MB_YES;
+> 				//printf("1 writing %d %d\n",irec,j); 
+> 				if (mode <= 2)
+> 				  {
+1120c1195
+< 				    		j + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+---
+> 						j + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+1122,1127c1197,1199
+< 				    }
+< 				}
+< 			    else
+< 				{
+< 				if (mb_beam_ok(ping[irec].beamflag[j]))
+< 				    {
+---
+> 				  }
+> 				else
+> 				  {
+1132c1204
+< 				    		j + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+---
+> 						j + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+1134,1156c1206,1224
+< 				    }
+< 				}
+< 			    }
+< 			}
+< 		    if (lowok == MB_NO)
+< 			{
+< 			find_bad = MB_YES;
+< 			for (k=0;k<=lowbeam;k++)
+< 			    {
+< 			    if (verbose >= 1)
+< 			    fprintf(stderr,"r: %4d %2d %2d %2.2d:%2.2d:%2.2d.%6.6d  %4d %8.2f\n",
+< 					    ping[irec].time_i[0],
+< 					    ping[irec].time_i[1],
+< 					    ping[irec].time_i[2],
+< 					    ping[irec].time_i[3],
+< 					    ping[irec].time_i[4],
+< 					    ping[irec].time_i[5],
+< 					    ping[irec].time_i[6],
+< 					    k,ping[irec].bath[k]);
+< 			    if (mode <= 2)
+< 				{
+< 				if (mb_beam_ok(ping[irec].beamflag[k]))
+< 				    {
+---
+> 				  }
+> 				
+> 			      }
+> 			    else
+> 			      highdist = ping[irec].bathacrosstrack[j];
+> 			    
+> 			  }
+> 			//printf("%d %d xtrack: %.2f highdist=%.2lf %d\n",irec,j,ping[irec].bathacrosstrack[j],
+> 			// highdist,ping[irec].beamflag[j]);		    
+> 
+> 			//if (mb_beam_ok(ping[irec].beamflag[k]))
+> 			if(1)
+> 			  {
+> 			    if (ping[irec].bathacrosstrack[k] >= lowdist+backup_dist)
+> 			      {
+> 				find_bad = MB_YES;
+> 				//printf("2 writing %d %d\n",irec,k); 
+> 				if (mode <= 2)
+> 				  {
+1159a1228
+> 
+1161c1230
+< 				    		k + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+---
+> 						k + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+1163,1168c1232,1234
+< 				    }
+< 				}
+< 			    else
+< 				{
+< 				if (mb_beam_ok(ping[irec].beamflag[k]))
+< 				    {
+---
+> 				  }
+> 				else
+> 				  {
+1173,1179c1239,1250
+< 				    		k + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+< 						MBP_EDIT_FILTER, &error);
+< 				    }
+< 				}
+< 			    }
+< 			}
+< 		    }
+---
+> 						k + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+> 						MBP_EDIT_ZERO, &error);
+> 				  }
+> 				
+> 			      }
+> 			    else
+> 			      lowdist = ping[irec].bathacrosstrack[k];
+> 			  }
+> 
+> 
+> 			//	printf("%d %d xtrack: %.2f lowdist=%.2lf %d\n",irec,k,ping[irec].bathacrosstrack[k],
+> 			//lowdist,ping[irec].beamflag[k]);		    
+1180a1252,1289
+> 		      }
+> 		    
+> 		  }  // if zap_rails==yes
+> 		/* zap long acrosstrack if requested */
+> 		if (zap_long_across == MB_YES)
+> 		  {
+> 		    //		    for (j=0;j<ping[irec].beams_bath;j++)
+> 		    for (j=0;j<512;j++)
+> 		      {
+> 			//if (mb_beam_ok(ping[irec].beamflag[j]))
+> 			//{
+> 			    if (fabs(ping[irec].bathacrosstrack[j]) > max_acrosstrack)
+> 			      {
+> 				find_bad = MB_YES;
+> 				if (mode <= 2)
+> 				  {
+> 				    ping[irec].beamflag[j] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+> 				    nlong_across++;
+> 				    nflag++;
+> 				    mb_ess_save(verbose, &esf, ping[irec].time_d, 
+> 						j + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR, 
+> 						MBP_EDIT_FILTER, &error);
+> 				  }
+> 				else
+> 				  {
+> 				    ping[irec].beamflag[j] = MB_FLAG_NULL;
+> 				    nlong_across++;
+> 				    nzero++;
+> 				    mb_ess_save(verbose, &esf, ping[irec].time_d, 
+> 						j + ping[irec].multiplicity * MB_ESF_MULTIPLICITY_FACTOR,
+> 						MBP_EDIT_ZERO, &error);
+> 				  }
+> 				
+> 			      }
+> 			    //}
+> 		      }
+> 		  }
+> 		
+1807,1811c1916,1923
+< 			ping[j].beamflag[i] = ping[j+1].beamflag[i];
+< 			ping[j].beamflagorg[i] = ping[j+1].beamflagorg[i];
+< 			ping[j].bath[i] = ping[j+1].bath[i];
+< 			ping[j].bathacrosstrack[i] = ping[j+1].bathacrosstrack[i];
+< 			ping[j].bathalongtrack[i] = ping[j+1].bathalongtrack[i];
+---
+> 			ping[j].beamflag[i] = 
+> 				ping[j+1].beamflag[i];
+> 			ping[j].bath[i] = 
+> 				ping[j+1].bath[i];
+> 			ping[j].bathacrosstrack[i] = 
+> 				ping[j+1].bathacrosstrack[i];
+> 			ping[j].bathalongtrack[i] = 
+> 				ping[j+1].bathalongtrack[i];
+1865a1978,1979
+> 	nlong_acrosstot += nlong_across; 
+> 	nmax_heading_ratetot += nmax_heading_rate; 
+1888a2003,2004
+> 		fprintf(stderr,"%d long acrosstrack beams identified\n",nlong_across);
+> 		fprintf(stderr,"%d max heading rate pings identified\n",nmax_heading_rate);
+1931a2048,2049
+> 		fprintf(stderr,"%d total long acrosstrack beams identified\n",nlong_acrosstot);
+> 		fprintf(stderr,"%d total max heading rate beams identified\n",nmax_heading_ratetot);
+1971c2089
+< 		fprintf(stderr,"dbg2       sofp:            %lu\n",(size_t)sofp);
+---
+> 		fprintf(stderr,"dbg2       sofp:            %ld\n",(size_t)sofp);
