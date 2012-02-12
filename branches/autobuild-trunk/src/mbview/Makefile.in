@@ -291,7 +291,7 @@ libmbview_la_SOURCES = \
 	mbview_route.c mbview_nav.c mb_glwdrawa.c Mb3dsdg.c \
 	mb3dsoundings_callbacks.c MBpedit.c mbpingedit_callbacks.c
 
-libmbview_la_LIBADD = @MOTIF_LIB_DIR@ @GL_LIB_DIR@
+libmbview_la_LIBADD = @MOTIF_LIB_DIR@ @GL_LIB_DIR@ @MOTIF_LIB@ @GL_LIB@
 all: all-am
 
 .SUFFIXES:

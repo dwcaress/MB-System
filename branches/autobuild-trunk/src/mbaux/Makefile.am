@@ -26,6 +26,7 @@ libmbaux_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} -lpsl libmbps.la -lmbio
 if BUILD_MOTIF
  libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0
  libmbxgr_la_SOURCES = mb_xgraphics.c
+ libmbxgr_la_LIBADD = @MOTIF_LIB_DIR@ @MOTIF_LIB@
 endif
 
 

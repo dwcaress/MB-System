@@ -88,7 +88,7 @@ libmbps_la_OBJECTS = $(am_libmbps_la_OBJECTS)
 libmbps_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libmbps_la_LDFLAGS) $(LDFLAGS) -o $@
-libmbxgr_la_LIBADD =
+libmbxgr_la_DEPENDENCIES =
 am__libmbxgr_la_SOURCES_DIST = mb_xgraphics.c
 @BUILD_MOTIF_TRUE@am_libmbxgr_la_OBJECTS = mb_xgraphics.lo
 libmbxgr_la_OBJECTS = $(am_libmbxgr_la_OBJECTS)
@@ -281,6 +281,7 @@ libmbaux_la_CFLAGS = -L../mbio
 libmbaux_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} -lpsl libmbps.la -lmbio
 @BUILD_MOTIF_TRUE@libmbxgr_la_LDFLAGS = -no-undefined -version-info 0:0:0
 @BUILD_MOTIF_TRUE@libmbxgr_la_SOURCES = mb_xgraphics.c
+@BUILD_MOTIF_TRUE@libmbxgr_la_LIBADD = @MOTIF_LIB_DIR@ @MOTIF_LIB@
 all: all-am
 
 .SUFFIXES:
