@@ -520,7 +520,16 @@ mbtime_LDADD = -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi
 @BUILD_FFTW_TRUE@mbsegypsd_LDADD = ${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi \
 @BUILD_FFTW_TRUE@	-lmbaux ${libfftw_LIBS}
 
-all: all-am
+
+#mbprofilepsd_SOURCES = mbprofilepsd.c
+#mbprofilepsd_LDADD = -L../mbaux \
+#		     ${libgmt_LIBS} @FFTW_LIB_DIR@ -lmbio -lmbproj -lmbgsf -lmbmr1pr \
+#		     -lmbsapi -lmbaux @FFTW_LIB@
+BUILT_SOURCES = levitus.h
+CLEANFILES = levitus.h
+DISTCLEANFILES = levitus.h
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -909,13 +918,15 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS) $(HEADERS)
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -932,14 +943,17 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
@@ -1010,7 +1024,7 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
 	clean-generic clean-libtool ctags distclean distclean-compile \
@@ -1028,10 +1042,8 @@ uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS
 	uninstall-includeHEADERS
 
 
-#mbprofilepsd_SOURCES = mbprofilepsd.c
-#mbprofilepsd_LDADD = -L../mbaux \
-#		     ${libgmt_LIBS} @FFTW_LIB_DIR@ -lmbio -lmbproj -lmbgsf -lmbmr1pr \
-#		     -lmbsapi -lmbaux @FFTW_LIB@
+levitus.h: Makefile
+	echo 'char *ifile = "$(mbsystemdatadir)/LevitusAnnual82.dat";' >$@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

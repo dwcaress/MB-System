@@ -159,3 +159,10 @@ mbsegypsd_LDADD = ${libgmt_LIBS} -lmbio -lmbproj -lmbgsf -lmbmr1pr -lmbsapi \
 #		     -lmbsapi -lmbaux @FFTW_LIB@
 endif
 
+BUILT_SOURCES = levitus.h
+CLEANFILES = levitus.h
+DISTCLEANFILES = levitus.h
+
+levitus.h: Makefile
+	echo 'char *ifile = "$(mbsystemdatadir)/LevitusAnnual82.dat";' >$@
+
