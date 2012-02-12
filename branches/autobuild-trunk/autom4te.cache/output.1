@@ -762,10 +762,10 @@ BUILD_MOTIF_TRUE
 MOTIF_INC_DIR
 MOTIF_LIB
 MOTIF_LIB_DIR
-FFTW_INC_DIR
-fftw_app
 BUILD_FFTW_FALSE
 BUILD_FFTW_TRUE
+FFTW_INC_DIR
+fftw_app
 libfftw_LIBS
 libfftw_CFLAGS
 GMT_INC_DIR
@@ -777,6 +777,8 @@ libnetcdf_CFLAGS
 PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
+INSTALL_LEVITUS_FALSE
+INSTALL_LEVITUS_TRUE
 OTPS_DIR
 XDR_LIB
 DLLTOOL
@@ -11625,6 +11627,15 @@ _ACEOF
 esac
 
 
+ac_fn_c_check_header_mongrel "$LINENO" "malloc.h" "ac_cv_header_malloc_h" "$ac_includes_default"
+if test "x$ac_cv_header_malloc_h" = xyes; then :
+  
+$as_echo "@%:@define HAVE_MALLOC_H 1" >>confdefs.h
+
+fi
+
+
+
 case "${target_os}" in
 	solaris*|sonos*) CFLAGS="${CFLAGS} -DSUN" ;;
 	*) echo "Build does not require -DSUN CFLAG" ;;
@@ -11668,162 +11679,6 @@ fi
 
 done
 
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -luuid" >&5
-$as_echo_n "checking for main in -luuid... " >&6; }
-if ${ac_cv_lib_uuid_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-luuid  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_uuid_main=yes
-else
-  ac_cv_lib_uuid_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_uuid_main" >&5
-$as_echo "$ac_cv_lib_uuid_main" >&6; }
-if test "x$ac_cv_lib_uuid_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-@%:@define HAVE_LIBUUID 1
-_ACEOF
-
-  LIBS="-luuid $LIBS"
-
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lole32" >&5
-$as_echo_n "checking for main in -lole32... " >&6; }
-if ${ac_cv_lib_ole32_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lole32  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_ole32_main=yes
-else
-  ac_cv_lib_ole32_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_ole32_main" >&5
-$as_echo "$ac_cv_lib_ole32_main" >&6; }
-if test "x$ac_cv_lib_ole32_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-@%:@define HAVE_LIBOLE32 1
-_ACEOF
-
-  LIBS="-lole32 $LIBS"
-
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lgw32c" >&5
-$as_echo_n "checking for main in -lgw32c... " >&6; }
-if ${ac_cv_lib_gw32c_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lgw32c  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_gw32c_main=yes
-else
-  ac_cv_lib_gw32c_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gw32c_main" >&5
-$as_echo "$ac_cv_lib_gw32c_main" >&6; }
-if test "x$ac_cv_lib_gw32c_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-@%:@define HAVE_LIBGW32C 1
-_ACEOF
-
-  LIBS="-lgw32c $LIBS"
-
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lwsock32" >&5
-$as_echo_n "checking for main in -lwsock32... " >&6; }
-if ${ac_cv_lib_wsock32_main+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lwsock32  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-int
-main ()
-{
-return main ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_wsock32_main=yes
-else
-  ac_cv_lib_wsock32_main=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_wsock32_main" >&5
-$as_echo "$ac_cv_lib_wsock32_main" >&6; }
-if test "x$ac_cv_lib_wsock32_main" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-@%:@define HAVE_LIBWSOCK32 1
-_ACEOF
-
-  LIBS="-lwsock32 $LIBS"
-
-fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lws2_32" >&5
 $as_echo_n "checking for main in -lws2_32... " >&6; }
@@ -12093,6 +11948,27 @@ if test "${with_otps_dir+set}" = set; then :
   withval=$with_otps_dir; OTPS_DIR=${withval}
 fi
 
+
+
+GOT_LEVITUS=no
+echo "Checking for Levitus datbase"
+if test -f "$srcdir/share/LevitusAnnual82.dat" ; then
+	GOT_LEVITUS=yes
+else
+	GOT_LEVITUS=no
+fi
+if test "$GOT_LEVITUS" = "yes" ; then
+	echo "Found Levitus datbase"
+else
+	echo "Did not find Levitus datbase"
+fi
+ if test "$GOT_LEVITUS" = yes; then
+  INSTALL_LEVITUS_TRUE=
+  INSTALL_LEVITUS_FALSE='#'
+else
+  INSTALL_LEVITUS_TRUE='#'
+  INSTALL_LEVITUS_FALSE=
+fi
 
 
 echo "Check for NetCDF"
@@ -12909,6 +12785,7 @@ fi
 fi
 
 
+if test "$GOT_FFTW" = "yes" ; then
 GOT_FFTW=no
 FFTW_SETTING=no
 
@@ -12961,6 +12838,14 @@ fi
     fi
  fi
 
+if test "$GOT_FFTW" = "yes" ; then
+	fftw_app=$USE_FFTW
+
+	FFTW_INC_DIR=$FFTW_INC_DIR
+
+fi
+fi
+
  if test "$GOT_FFTW" = yes; then
   BUILD_FFTW_TRUE=
   BUILD_FFTW_FALSE='#'
@@ -12969,13 +12854,6 @@ else
   BUILD_FFTW_FALSE=
 fi
 
-
-if test "$GOT_FFTW" = "yes" ; then
-	fftw_app=$USE_FFTW
-
-	FFTW_INC_DIR=$FFTW_INC_DIR
-
-fi
 
 
 GOT_MOTIF=no
@@ -13285,6 +13163,7 @@ if test "$GOT_MOTIF" = "yes" ; then
 
 fi
 
+if test "$GOT_MOTIF" = "yes" ; then
 GOT_MOTIF=no
 MOTIF_SETTING=no
 
@@ -13343,6 +13222,8 @@ if test "$GOT_MOTIF" = "yes" ; then
 $as_echo "@%:@define GOT_MOTIF 1" >>confdefs.h
 
 fi
+fi
+
  if test "$GOT_MOTIF" = yes; then
   BUILD_MOTIF_TRUE=
   BUILD_MOTIF_FALSE='#'
@@ -13354,7 +13235,9 @@ fi
 
 
 GOT_GL=no
+
 if test "$GOT_MOTIF" = "yes" ; then
+
 GL_SETTING=no
 GL_LIB="-lGL -lGLU"
 GL_LIB_DIR=
@@ -13550,6 +13433,7 @@ if test "$GOT_GL" = "yes" ; then
 fi
 
 
+if test "$GOT_GL" = "yes" ; then
 GOT_GL=no
 GL_SETTING=no
 
@@ -13625,6 +13509,8 @@ fi
 
 fi
 
+fi
+
  if test "$GOT_GL" = yes; then
   BUILD_GL_TRUE=
   BUILD_GL_FALSE='#'
@@ -13632,6 +13518,7 @@ else
   BUILD_GL_TRUE='#'
   BUILD_GL_FALSE=
 fi
+
 
 
 mbsystemdatadir="$datadir/$PACKAGE"
@@ -13686,6 +13573,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCCAS_TRUE}" && test -z "${am__fastdepCCAS_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCCAS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${INSTALL_LEVITUS_TRUE}" && test -z "${INSTALL_LEVITUS_FALSE}"; then
+  as_fn_error $? "conditional \"INSTALL_LEVITUS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_FFTW_TRUE}" && test -z "${BUILD_FFTW_FALSE}"; then
@@ -15957,8 +15848,21 @@ fi
 echo ""
 echo ""
 echo "Configure Summary for ${host}"
-echo "See config.log for details"
-echo "------------------------------------"
+echo "See config.log for configure details"
+echo "See INSTALL for build instructions and hints"
+echo "---------------------------------------------"
+echo "MB-System will be installed in: ${prefix}"
+echo ""
+if test "x$enable_static" = xyes ; then
+	echo "Building Static Libs: Yes"
+else
+	echo "Building Static Libs: No"
+fi
+if test "x$enable_shared" = xyes ; then
+	echo "Building Shared Libs: Yes"
+else
+	echo "Building Shared Libs: No"
+fi
 if test $BYTESWAP = "yes" ; then
 	echo "Byteswapping: Enabled"
 else
@@ -15978,6 +15882,15 @@ if test "$GOT_GL" = "yes" ; then
 	echo "OpenGL Support: Enabled"
 else
 	echo "OpenGL Support: Disabled"
+fi
+if test "$GOT_LEVITUS" = "yes" ; then
+	echo "Installing Levitus database in ${prefix}/share/mbsystem"
+else
+	echo ""
+	echo "Did not find Levitus database in ./share/"
+	echo "Levitus programs will still be built"
+	echo "Consider installing Levitus in ${prefix}/share/mbsystem to use support programs"
+	echo ""
 fi
 
 echo "Using $OTPS_DIR for OSU Tidal Prediction Software"
