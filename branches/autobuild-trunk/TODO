@@ -1,4 +1,13 @@
 -----------------------------------------------------
+Ferbruary 11, 2012
+Add malloc.h check for DARWIN -- now handled by config.
+Added check for levitus database file and will install it
+with make install (if available). This also builds levitus.h
+in src/utilities. Need to add configure flag to specify levitus
+db file name.
+Improved checks for Motif and OpenGL.
+
+-----------------------------------------------------
 January 18, 2012
 First pass as creating autocnfig for MB-System
 Support options for Netcdf, GMT, FFTW3, Motif, and OpenGL 
