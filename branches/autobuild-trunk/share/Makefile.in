@@ -216,8 +216,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 projdatadir = $(mbsystemdatadir)
+levitusdatadir = $(mbsystemdatadir)
 projdata_DATA = Projections.dat
-EXTRA_DIST = $(projdata_DATA)
+EXTRA_DIST = $(projdata_DATA) $(levitusidata_DATA)
 all: all-am
 
 .SUFFIXES:
@@ -426,6 +427,7 @@ uninstall-am: uninstall-projdataDATA
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	uninstall uninstall-am uninstall-projdataDATA
 
+@INSTALL_LEVITUS_TRUE@	levitusdata_DATA = LevitusAnnual82.dat
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
