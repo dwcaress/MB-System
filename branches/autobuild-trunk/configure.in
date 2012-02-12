@@ -28,7 +28,7 @@ AC_PROG_MAKE_SET
 LT_INIT
 AC_SUBST([LIBTOOL_DEPS])
 AC_LIBTOOL_WIN32_DLL
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 
 dnl Check Endian size
 BYTESWAP=no
@@ -50,6 +50,9 @@ AC_CHECK_LIB(m,exp,,,)
 
 dnl check for signed char
 AC_TYPE_INT8_T
+
+dnl check for malloc header
+AC_CHECK_HEADER(malloc.h, AC_DEFINE(HAVE_MALLOC_H, 1, [Have malloc.h]))
 
 dnl Parse target_os from CANONICAL and deterimine 
 dnl if solaris flag required
@@ -99,6 +102,24 @@ OTPS_DIR="/usr/local/OTPSnc"
 dnl check for command line option and reset
 AC_ARG_WITH(otps_dir, [  --with-otps_dir=DIR        Location of OSU Tidal Prediction Software], [OTPS_DIR=${withval}])
 AC_SUBST(OTPS_DIR)
+
+dnl Check for Levitus database
+GOT_LEVITUS=no
+echo "Checking for Levitus datbase"
+dnl Tried AC_CHECK_FILE but did not work??
+dnl Use if test instead
+dnl TODO: add levitus-file option to configure to specify name
+if test -f "$srcdir/share/LevitusAnnual82.dat" ; then
+	GOT_LEVITUS=yes
+else
+	GOT_LEVITUS=no
+fi
+if test "$GOT_LEVITUS" = "yes" ; then
+	echo "Found Levitus datbase"
+else
+	echo "Did not find Levitus datbase"
+fi
+AM_CONDITIONAL([INSTALL_LEVITUS], [test "$GOT_LEVITUS" = yes])
 
 dnl Check for NetCDF lib
 echo "Check for NetCDF"
@@ -311,6 +332,8 @@ dnl done with FFTW lib
 
 
 dnl Now check FFTW headers
+dnl Only check for headers if lib check pass
+if test "$GOT_FFTW" = "yes" ; then
 GOT_FFTW=no
 FFTW_SETTING=no
 dnl add command line option
@@ -345,13 +368,14 @@ fi
     fi
  fi
 
-AM_CONDITIONAL([BUILD_FFTW], [test "$GOT_FFTW" = yes])
-
 if test "$GOT_FFTW" = "yes" ; then
 	AC_SUBST([fftw_app], [$USE_FFTW])
 	AC_SUBST([FFTW_INC_DIR], [$FFTW_INC_DIR])
 fi
 dnl done with FFTW headers
+fi
+
+AM_CONDITIONAL([BUILD_FFTW], [test "$GOT_FFTW" = yes])
 
 
 dnl Deal with Motif for GUI
@@ -413,7 +437,8 @@ if test "$GOT_MOTIF" = "yes" ; then
 fi
 dnl done with Motif libs
 
-dnl Now check Motif headers
+dnl Now check Motif headers only if lib check passed
+if test "$GOT_MOTIF" = "yes" ; then
 GOT_MOTIF=no
 MOTIF_SETTING=no
 dnl add command line option
@@ -452,13 +477,18 @@ if test "$GOT_MOTIF" = "yes" ; then
 	AC_DEFINE(GOT_MOTIF, 1, [Turned on Motif define in config])
 fi
 dnl done with Motif headers
+fi
+
 AM_CONDITIONAL([BUILD_MOTIF], [test "$GOT_MOTIF" = yes])
 
 
 dnl OpenGL Check
 dnl Libs GL and GLU
 GOT_GL=no
+
+dnl Only check for GL if Motif Passed
 if test "$GOT_MOTIF" = "yes" ; then
+
 GL_SETTING=no
 GL_LIB="-lGL -lGLU"
 GL_LIB_DIR=
@@ -511,6 +541,8 @@ dnl done with GL libs
 
 
 dnl Now check OpenGL headers
+dnl Only check for headers if lib passed
+if test "$GOT_GL" = "yes" ; then
 GOT_GL=no
 GL_SETTING=no
 dnl add command line option
@@ -551,9 +583,13 @@ fi
 dnl done with OpenGL headers
 
 fi
+dnl done check for GL lib pass
+
+fi
 dnl Close Motif check for OpenGL
 
 AM_CONDITIONAL([BUILD_GL], [test "$GOT_GL" = yes])
+
 
 dnl variables for shared data
 mbsystemdatadir="$datadir/$PACKAGE"
@@ -572,8 +608,21 @@ dnl Summary Report
 echo ""
 echo ""
 echo "Configure Summary for ${host}"
-echo "See config.log for details"
-echo "------------------------------------"
+echo "See config.log for configure details"
+echo "See INSTALL for build instructions and hints"
+echo "---------------------------------------------"
+echo "MB-System will be installed in: ${prefix}"
+echo ""
+if test "x$enable_static" = xyes ; then
+	echo "Building Static Libs: Yes"
+else
+	echo "Building Static Libs: No"
+fi
+if test "x$enable_shared" = xyes ; then
+	echo "Building Shared Libs: Yes"
+else
+	echo "Building Shared Libs: No"
+fi
 if test $BYTESWAP = "yes" ; then
 	echo "Byteswapping: Enabled"
 else
@@ -593,6 +642,15 @@ if test "$GOT_GL" = "yes" ; then
 	echo "OpenGL Support: Enabled"
 else
 	echo "OpenGL Support: Disabled"
+fi
+if test "$GOT_LEVITUS" = "yes" ; then
+	echo "Installing Levitus database in ${prefix}/share/mbsystem"
+else
+	echo ""
+	echo "Did not find Levitus database in ./share/"
+	echo "Levitus programs will still be built"
+	echo "Consider installing Levitus in ${prefix}/share/mbsystem to use support programs"
+	echo ""
 fi
 
 echo "Using $OTPS_DIR for OSU Tidal Prediction Software"
