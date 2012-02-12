@@ -27,23 +27,14 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the `gw32c' library (-lgw32c). */
-#undef HAVE_LIBGW32C
-
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
-
-/* Define to 1 if you have the `ole32' library (-lole32). */
-#undef HAVE_LIBOLE32
-
-/* Define to 1 if you have the `uuid' library (-luuid). */
-#undef HAVE_LIBUUID
 
 /* Define to 1 if you have the `ws2_32' library (-lws2_32). */
 #undef HAVE_LIBWS2_32
 
-/* Define to 1 if you have the `wsock32' library (-lwsock32). */
-#undef HAVE_LIBWSOCK32
+/* Have malloc.h */
+#undef HAVE_MALLOC_H
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
