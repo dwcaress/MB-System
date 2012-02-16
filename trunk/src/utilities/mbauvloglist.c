@@ -94,6 +94,7 @@ int main (int argc, char **argv)
 		char	format[MB_PATH_MAXLINE];
 		char	description[MB_PATH_MAXLINE];
 		char	units[MB_PATH_MAXLINE];
+		double	scale;
 		};
 	struct	printfield
 		{
@@ -109,6 +110,7 @@ int main (int argc, char **argv)
 	int	nrecord;
 	int	recordsize;
 	int	printheader = MB_NO;
+	int	angles_in_degrees = MB_NO;
 	
 	char	buffer[MB_PATH_MAXLINE];
 	char	type[MB_PATH_MAXLINE];
@@ -129,7 +131,7 @@ int main (int argc, char **argv)
 	printformat[0] = '\0';
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "F:f:I:i:L:l:O:o:PpVvWwHh")) != -1)
+	while ((c = getopt(argc, argv, "F:f:I:i:L:l:O:o:PpSsVvWwHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -175,6 +177,11 @@ int main (int argc, char **argv)
 		case 'P':
 		case 'p':
 			printheader = MB_YES;
+			flag++;
+			break;
+		case 'S':
+		case 's':
+			angles_in_degrees = MB_YES;
 			flag++;
 			break;
 		case '?':
@@ -231,6 +238,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
 		fprintf(stderr,"dbg2       file:           %s\n",file);
 		fprintf(stderr,"dbg2       printheader:    %d\n",printheader);
+		fprintf(stderr,"dbg2       angles_in_degrees:%d\n",angles_in_degrees);
 		fprintf(stderr,"dbg2       nprintfields:   %d\n",nprintfields);
 		for (i=0;i<nprintfields;i++)
 			fprintf(stderr,"dbg2         printfields[%d]:      %s %d %s\n",
@@ -288,18 +296,30 @@ int main (int argc, char **argv)
 				{
 				fields[nfields].type = TYPE_DOUBLE;
 				fields[nfields].size = 8;
+				if (angles_in_degrees == MB_YES
+					&&(strcmp(fields[nfields].name, "mLatK") == 0
+						|| strcmp(fields[nfields].name, "mLonK") == 0
+						|| strcmp(fields[nfields].name, "mLonK") == 0
+						|| strcmp(fields[nfields].name, "mRollK") == 0
+						|| strcmp(fields[nfields].name, "mPitchK") == 0
+						|| strcmp(fields[nfields].name, "mHeadK") == 0))
+					fields[nfields].scale = RTD;
+				else
+					fields[nfields].scale = 1.0;
 				recordsize += 8;
 				}
 			else if (strcmp(type, "integer") == 0)
 				{
 				fields[nfields].type = TYPE_INTEGER;
 				fields[nfields].size = 4;
+				fields[nfields].scale = 1.0;
 				recordsize += 4;
 				}
 			else if (strcmp(type, "timeTag") == 0)
 				{
 				fields[nfields].type = TYPE_TIMETAG;
 				fields[nfields].size = 8;
+				fields[nfields].scale = 1.0;
 				recordsize += 8;
 				}
 			nfields++;
@@ -362,6 +382,7 @@ int main (int argc, char **argv)
 			if (fields[index].type == TYPE_DOUBLE)
 				{
 				mb_get_binary_double(MB_YES, &buffer[fields[index].index], &dvalue);	
+				dvalue *= fields[index].scale;
 				fprintf(stdout, printfields[i].format, dvalue);
 				}
 			else if (fields[index].type == TYPE_INTEGER)
