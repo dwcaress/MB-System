@@ -2965,11 +2965,12 @@ beams_bath,beams_amp,pixels_ss);*/
 					    }
 					depthscale = MAX(0.001, depthmax / 32000);
 					distscale = MAX(0.001, distmax / 32000);
-					ostore->depth_scale = 1000 * depthscale + 1;
-					depthscale = 0.001 * ostore->depth_scale;
-					ostore->distance_scale = 1000 * distscale + 1;
-					distscale = 0.001 * ostore->distance_scale;
-					ostore->transducer_depth = draft / depthscale;
+					ostore->depth_scale = depthscale;
+					ostore->distance_scale = distscale;
+					ostore->sonardepth = draft - heave;
+					ostore->roll = roll;
+					ostore->pitch = pitch;
+					ostore->heave = heave;
 					
 					/* write out data */
 					status = mb_put_all(mbna_verbose,ombio_ptr,ostore_ptr,
@@ -8569,6 +8570,7 @@ mbnavadjust_invertnav()
 	double	block_offset_avg_z;
 	int	navg;
 	int	use;
+	int	ok_to_invert;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -8577,11 +8579,64 @@ mbnavadjust_invertnav()
 			function_name);
 		}
 
-	/* invert if there is a project and all crossings have been analyzed */
+	/* check if it is ok to invert 
+		- if there is a project 
+		- enough crossings have been analyzed 
+		- no problems with offsets and offset uncertainties */
     	if (project.open == MB_YES
     		&& project.num_crossings > 0
 		&& (project.num_crossings_analyzed >= 10
 			|| project.num_truecrossings_analyzed == project.num_truecrossings))
+			
+    		{
+		/* check that all uncertainty magnitudes are nonzero */
+		ok_to_invert = MB_YES;
+		for (icrossing=0;icrossing<project.num_crossings;icrossing++)
+		    {
+		    crossing = &project.crossings[icrossing];
+		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
+		    	{
+			for (j=0;j<crossing->num_ties;j++)
+				{
+				tie = (struct mbna_tie *) &crossing->ties[j];
+				if (tie->sigmar1 <= 0.0
+					|| tie->sigmar2 <= 0.0
+					|| tie->sigmar3 <= 0.0)
+					{
+					ok_to_invert = MB_NO;
+					fprintf(stderr,"PROBLEM WITH TIE: %4d %2d %2.2d:%3.3d:%3.3d:%2.2d %2.2d:%3.3d:%3.3d:%2.2d %8.2f %8.2f %8.2f | %8.2f %8.2f %8.2f\n",
+						    icrossing, j,
+						    project.files[crossing->file_id_1].block,
+						    crossing->file_id_1,
+						    crossing->section_1,
+						    tie->snav_1,
+						    project.files[crossing->file_id_2].block,
+						    crossing->file_id_2,
+						    crossing->section_2,
+						    tie->snav_2,
+						    tie->offset_x_m,
+						    tie->offset_y_m,
+						    tie->offset_z_m,
+						    tie->sigmar1,
+						    tie->sigmar2,
+						    tie->sigmar3);
+					}
+				}
+			}
+		    }
+		
+		/* print out warning */
+		fprintf(stderr,"\nThe inversion was not performed because there are one or more zero offset uncertainty values.\n");
+		fprintf(stderr,"Please fix the ties with problems noted above before trying again.\n");
+		}
+		
+
+	/* invert if there is a project and all crossings have been analyzed */
+    	if (project.open == MB_YES
+    		&& project.num_crossings > 0
+		&& (project.num_crossings_analyzed >= 10
+			|| project.num_truecrossings_analyzed == project.num_truecrossings)
+		&& ok_to_invert == MB_YES)
 			
     		{
 		/* set message dialog on */
@@ -10576,6 +10631,7 @@ isnav,k,x[3*k+2],xa[3*k+2],section->snav_lat_offset[isnav]); */
     		&& project.num_crossings > 0
 		&& (project.num_crossings_analyzed >= 10
 			|| project.num_truecrossings_analyzed == project.num_truecrossings)
+		&& ok_to_invert == MB_YES
 		&& error == MB_ERROR_NO_ERROR)
     		{
 		/* now output inverse solution */
