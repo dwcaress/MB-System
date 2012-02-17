@@ -1064,6 +1064,11 @@ if (!$ps_viewer)
 
 # see if data file is a grd file or a list of grdfiles
 @grdinfo = `grdinfo $file_data 2>&1`;
+if ($? != 0) 
+	{
+	print "ERROR: 'grdinfo $file_data' failed.\n$program_name aborted\n";
+	exit 1;
+	}
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;

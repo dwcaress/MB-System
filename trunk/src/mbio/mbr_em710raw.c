@@ -561,6 +561,7 @@ int mbr_rt_em710raw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	lever_x, lever_y, lever_z;
 	double	offset_x, offset_y, offset_z;
 	int	ray_stat, iterx, iterz;
+	int	done;
 	int	i;
 
 	/* print input debug statements */
@@ -1128,8 +1129,8 @@ fprintf(stderr,"DEPTHOFFSET: xducerdepth:%f bheave:%f depth_offset_use:%f\n",pin
 			dz = zz;
 			zzcalc = zz;
 			zzcalc_old = 0.0;
-			while (iterx < 3 || (fabs(dx) > MBR_EM710RAW_BATH_RECALC_PRECISION 
-				&& iterx < MBR_EM710RAW_BATH_RECALC_NCALCMAX))
+			done = MB_NO;
+			while (iterx < 3 || done == MB_NO)
 				{
 				theta_old = theta_x;
 				xxcalc_old = xxcalc;
@@ -1171,6 +1172,12 @@ fprintf(stderr,"DEPTHOFFSET: xducerdepth:%f bheave:%f depth_offset_use:%f\n",pin
 				else if (fabs(dx) < MBR_EM710RAW_BATH_RECALC_PRECISION)
 					{
 					dtheta = 0.0;
+					done = MB_YES;
+					}
+				else if (fabs(xxcalc - xxcalc_old) < MBR_EM710RAW_BATH_RECALC_PRECISION)
+					{
+					dtheta = 0.0;
+					done = MB_YES;
 					}
 				else
 					{
@@ -1182,6 +1189,8 @@ fprintf(stderr,"     MATCH X0:%d iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f 
 inadir,iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetamin,thetamax);
 #endif
 				iterx++;
+				if (iterx >= MBR_EM710RAW_BATH_RECALC_NCALCMAX)
+					done = MB_YES;
 				}
 				
 			/* set the heave offset that will be added to all beams */
@@ -1272,8 +1281,8 @@ fprintf(stderr,"HEADING: %d transmit:%f receive:%f\n",i,transmit_heading,receive
 					dz = zz;
 					zzcalc = zz;
 					zzcalc_old = 0.0;
-					while (iterx < 3 || (fabs(dx) > MBR_EM710RAW_BATH_RECALC_PRECISION 
-						&& iterx < MBR_EM710RAW_BATH_RECALC_NCALCMAX))
+					done = MB_NO;
+					while (iterx < 3 || done == MB_NO)
 						{
 						theta_old = theta_x;
 						xxcalc_old = xxcalc;
@@ -1315,6 +1324,12 @@ fprintf(stderr,"HEADING: %d transmit:%f receive:%f\n",i,transmit_heading,receive
 						else if (fabs(dx) < MBR_EM710RAW_BATH_RECALC_PRECISION)
 							{
 							dtheta = 0.0;
+							done = MB_YES;
+							}
+						else if (fabs(xxcalc - xxcalc_old) < MBR_EM710RAW_BATH_RECALC_PRECISION)
+							{
+							dtheta = 0.0;
+							done = MB_YES;
 							}
 						else
 							{
@@ -1326,6 +1341,8 @@ fprintf(stderr,"     MATCH X1: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   
 iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetamin,thetamax);
 #endif
 						iterx++;
+						if (iterx >= MBR_EM710RAW_BATH_RECALC_NCALCMAX)
+							done = MB_YES;
 						}
 
 #ifdef MBR_EM710RAW_BATH_RECALC_TWEAK_ANGLE_RANGE
@@ -1344,8 +1361,8 @@ iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetam
 					dz = zz;
 					zzcalc = zz;
 					zzcalc_old = 0.0;
-					while (iterx < 3 || (fabs(dx) > MBR_EM710RAW_BATH_RECALC_PRECISION 
-						&& iterx < MBR_EM710RAW_BATH_RECALC_NCALCMAX))
+					done = MB_NO;
+					while (iterx < 3 || done == MB_NO)
 						{
 						theta_old = theta_x;
 						xxcalc_old = xxcalc;
@@ -1387,6 +1404,12 @@ iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetam
 						else if (fabs(dx) < MBR_EM710RAW_BATH_RECALC_PRECISION)
 							{
 							dtheta = 0.0;
+							done = MB_YES;
+							}
+						else if (fabs(xxcalc - xxcalc_old) < MBR_EM710RAW_BATH_RECALC_PRECISION)
+							{
+							dtheta = 0.0;
+							done = MB_YES;
 							}
 						else
 							{
@@ -1398,6 +1421,8 @@ fprintf(stderr,"     MATCH X2: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   
 iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetamin,thetamax);
 #endif
 						iterx++;
+						if (iterx >= MBR_EM710RAW_BATH_RECALC_NCALCMAX)
+							done = MB_YES;
 						}
 #ifdef MBR_EM710RAW_DEBUG2
 fprintf(stderr,"     MATCH X2: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  dr:%f dt:%f  theta_x:%f theta_old:%f dtheta:%f min:%f max:%f\n",
@@ -1419,8 +1444,8 @@ iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,dr,dt,theta_x,theta_old,dtheta,
 					dz = zz;
 					zzcalc = zz;
 					zzcalc_old = 0.0;
-					while (iterx < 3 || (fabs(dx) > MBR_EM710RAW_BATH_RECALC_PRECISION 
-						&& iterx < MBR_EM710RAW_BATH_RECALC_NCALCMAX))
+					done = MB_NO;
+					while (iterx < 3 || done == MB_NO)
 						{
 						theta_old = theta_x;
 						xxcalc_old = xxcalc;
@@ -1462,6 +1487,12 @@ iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,dr,dt,theta_x,theta_old,dtheta,
 						else if (fabs(dx) < MBR_EM710RAW_BATH_RECALC_PRECISION)
 							{
 							dtheta = 0.0;
+							done = MB_YES;
+							}
+						else if (fabs(xxcalc - xxcalc_old) < MBR_EM710RAW_BATH_RECALC_PRECISION)
+							{
+							dtheta = 0.0;
+							done = MB_YES;
 							}
 						else
 							{
@@ -1473,6 +1504,8 @@ fprintf(stderr,"     MATCH X3: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   
 iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_x,theta_old,dtheta,thetamin,thetamax);
 #endif
 						iterx++;
+						if (iterx >= MBR_EM710RAW_BATH_RECALC_NCALCMAX)
+							done = MB_YES;
 						}
 #ifdef MBR_EM710RAW_DEBUG2
 fprintf(stderr,"     MATCH X3: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   zzcalc:%f zz:%f dz:%f  dr:%f dt:%f  theta_x:%f theta_old:%f dtheta:%f min:%f max:%f\n",
@@ -1499,8 +1532,8 @@ iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,dr,dt,theta_x,theta_old,dtheta,
 					dz = zz;
 					zzcalc = zz;
 					zzcalc_old = 0.0;
-					while (iterz < 3 || (fabs(dz) > MBR_EM710RAW_BATH_RECALC_PRECISION 
-						&& iterz < MBR_EM710RAW_BATH_RECALC_NCALCMAX))
+					done = MB_NO;
+					while (iterz < 3 || done == MB_NO)
 						{
 						theta_old = theta_z;
 						xxcalc_old = xxcalc;
@@ -1542,6 +1575,12 @@ iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,dr,dt,theta_x,theta_old,dtheta,
 						else if (fabs(dz) < MBR_EM710RAW_BATH_RECALC_PRECISION)
 							{
 							dtheta = 0.0;
+							done = MB_YES;
+							}
+						else if (fabs(zzcalc - zzcalc_old) < MBR_EM710RAW_BATH_RECALC_PRECISION)
+							{
+							dtheta = 0.0;
+							done = MB_YES;
 							}
 						else
 							{
@@ -1553,6 +1592,8 @@ fprintf(stderr,"     MATCH Z1: iterx:%d depth_offset:%f xxcalc:%f xx:%f dx:%f   
 iterx,depth_offset_use,xxcalc,xx,dx,zzcalc,zz,dz,theta_z,theta_old,dtheta,thetamin,thetamax);
 #endif
 						iterz++;
+						if (iterz >= MBR_EM710RAW_BATH_RECALC_NCALCMAX)
+							done = MB_YES;
 						}
 
 					weight = cos(DTR * theta) * cos (DTR * theta);
