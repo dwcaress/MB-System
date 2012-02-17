@@ -1116,6 +1116,7 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	s7kr_backscatter	*backscatter;
 	s7kr_beam		*beam;
 	s7kr_image		*image;
+	s7kr_beamgeometry	*beamgeometry;
 	double	*edgetech_time_d;
 	double	*edgetech_dt;
 	double	*last_7k_time_d;
@@ -1787,6 +1788,11 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_ti
 				status = mbr_reson7kr_rd_beamgeometry(verbose, buffer, store_ptr, error);
 				store->read_beamgeometry = MB_YES;
 				done = MB_NO;
+				
+				/* set beam widths */
+				beamgeometry = &(store->beamgeometry);
+				mb_io_ptr->beamwidth_xtrack = RTD * beamgeometry->beamwidth_acrosstrack[beamgeometry->number_beams/2];
+				mb_io_ptr->beamwidth_ltrack = RTD * beamgeometry->beamwidth_alongtrack[beamgeometry->number_beams/2];
 				}
 			else if (*recordid == R7KRECID_7kCalibrationData)
 				{
