@@ -1218,6 +1218,12 @@ tag,type,count,value_offset);*/
 			altitude = range_tot;
 			}
 		    }
+		if (altitude != range_tot)   
+			{
+			/* There's either no amplitude data or the bottom, VES */
+			/* threshold is too high. Set a default value */
+			altitude = range_delay;
+			}
 		}
 	    
 	    /* increment reading counter */
