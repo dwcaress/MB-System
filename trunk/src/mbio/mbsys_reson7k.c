@@ -3455,7 +3455,7 @@ int mbsys_reson7k_print_beamgeometry(int verbose,
 	fprintf(stderr,"%s     serial_number:              %llu\n",first,beamgeometry->serial_number);
 	fprintf(stderr,"%s     number_beams:               %u\n",first,beamgeometry->number_beams);
 	for (i=0;i<beamgeometry->number_beams;i++)
-	fprintf(stderr,"%s     beam[%d]:  angle_x:%f angle_y:%f beamwidth_x:%f beamwidth_y:%f\n",
+	fprintf(stderr,"%s     beam[%d]:  angle_alongtrack:%f angle_acrosstrack:%f beamwidth_alongtrack:%f beamwidth_acrosstrack:%f\n",
 			first,i,beamgeometry->angle_alongtrack[i],beamgeometry->angle_acrosstrack[i],
 			beamgeometry->beamwidth_alongtrack[i],beamgeometry->beamwidth_acrosstrack[i]);
 		
@@ -5357,7 +5357,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
 	s7kr_bluefin *bluefin;
-	s7kr_volatilesettings *volatilesettings;
+	s7kr_beamgeometry *beamgeometry;
 	s7kr_bathymetry *bathymetry;
 	s7kr_backscatter *backscatter;
 	s7kr_beam *beam;
@@ -5389,7 +5389,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	/* get data structure pointer */
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	bluefin = (s7kr_bluefin *) &store->bluefin;
-	volatilesettings = (s7kr_volatilesettings *) &store->volatilesettings;
+	beamgeometry = (s7kr_beamgeometry *) &(store->beamgeometry);
 	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
 	backscatter = (s7kr_backscatter *) &store->backscatter;
 	beam = (s7kr_beam *) &store->beam;
@@ -5430,11 +5430,13 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			*navlon = RTD * bathymetry->longitude;
 			*navlat = RTD * bathymetry->latitude;
+/* fprintf(stderr,"mbsys_reson7k_extract: radians lon lat: %.10f %.10f  degrees lon lat: %.10f %.10f\n",
+bathymetry->longitude,bathymetry->latitude,*navlon,*navlat); */
 			}
 			
 		/* set beamwidths in mb_io structure */
-		mb_io_ptr->beamwidth_xtrack = 2.0 * volatilesettings->beamwidth_horizontal;
-		mb_io_ptr->beamwidth_ltrack = 2.0 * volatilesettings->beamwidth_vertical;
+		mb_io_ptr->beamwidth_xtrack = RTD * beamgeometry->beamwidth_acrosstrack[beamgeometry->number_beams/2];
+		mb_io_ptr->beamwidth_ltrack = RTD * beamgeometry->beamwidth_alongtrack[beamgeometry->number_beams/2];
 
 		/* read distance and depth values into storage arrays */
 		*nbath = bathymetry->number_beams;
