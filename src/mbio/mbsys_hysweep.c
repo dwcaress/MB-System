@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hysweep.c	3.00	12/23/2011
- *	$Id: mbsys_hysweep.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id$
  *
  *    Copyright (c) 2011-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -41,7 +41,7 @@
 /* turn on debug statements here */
 /* #define MSYS_HYSWEEP_DEBUG 1 */
 
-static char rcs_id[]="$Id: $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

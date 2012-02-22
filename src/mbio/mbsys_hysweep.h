@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hysweep.h	12/23/2011
- *	$Id: mbsys_hysweep.h 1907 2011-11-10 04:33:03Z caress $
+ *	$Id$
  *
  *    Copyright (c) 2011-2012 by
  *    David W. Caress (caress@mbari.org)

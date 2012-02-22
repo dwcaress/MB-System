@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_multiprocess.perl	7/01/2011
-#   $Id: mbm_multiprocess.pl 19XX 2011-07-23 12:51:00Z ferreira $
+#   $Id$
 #
 #    Copyright (c) 2011-2012 by 
 #    D. W. Caress (caress@mbari.org)
@@ -34,7 +34,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   July 01, 2011
 #
 # Version:
-#   $Id: mbm_multiprocess.pl 19XX 2011-07-01 22:20:00Z ferreira $
+#   $Id$
 #
 # Revisions:
 #
