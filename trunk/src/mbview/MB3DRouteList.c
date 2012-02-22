@@ -108,7 +108,7 @@ MB3DRouteListCreate ( MB3DRouteListDataPtr class_in, Widget parent, String name,
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
     XtSetArg(args[ac], XmNx, 72); ac++;
-    XtSetArg(args[ac], XmNy, 502); ac++;
+    XtSetArg(args[ac], XmNy, 524); ac++;
     XtSetArg(args[ac], XmNwidth, 415); ac++;
     XtSetArg(args[ac], XmNheight, 239); ac++;
     class_in->MB3DRouteList = XmCreateForm(parent,

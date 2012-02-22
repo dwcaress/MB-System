@@ -1599,6 +1599,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
 			int	route_view_mode,
 			int	nav_view_mode,
 			int	navdrape_view_mode,
+			int	vector_view_mode,
 			double	exageration,
 			double	modelelevation3d,
 			double	modelazimuth3d,
@@ -1647,6 +1648,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
 		fprintf(stderr,"dbg2       route_view_mode:           %d\n", route_view_mode);
 		fprintf(stderr,"dbg2       nav_view_mode:             %d\n", nav_view_mode);
 		fprintf(stderr,"dbg2       navdrape_view_mode:        %d\n", navdrape_view_mode);
+		fprintf(stderr,"dbg2       vector_view_mode:          %d\n", vector_view_mode);
 		fprintf(stderr,"dbg2       exageration:               %f\n", exageration);
 		fprintf(stderr,"dbg2       modelelevation3d:          %f\n", modelelevation3d);
 		fprintf(stderr,"dbg2       modelazimuth3d:            %f\n", modelazimuth3d);
@@ -1683,6 +1685,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
         data->route_view_mode = route_view_mode;
         data->nav_view_mode = nav_view_mode;
         data->navdrape_view_mode = navdrape_view_mode;
+        data->vector_view_mode = vector_view_mode;
         data->exageration = exageration;
         data->modelelevation3d = modelelevation3d;
         data->modelazimuth3d = modelazimuth3d;
@@ -1911,6 +1914,7 @@ int mbview_open(int verbose, size_t instance, int *error)
 		/* nav data */
 		fprintf(stderr,"dbg2       nav_view_mode:         %d\n",data->nav_view_mode);
 		fprintf(stderr,"dbg2       navdrape_view_mode:    %d\n",data->navdrape_view_mode);
+		fprintf(stderr,"dbg2       vector_view_mode:      %d\n",data->vector_view_mode);
 		fprintf(stderr,"dbg2       nav_mode:              %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                  %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:            %d\n",shared.shareddata.nnav_alloc);
@@ -2677,6 +2681,17 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error)
 	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnav, "Pick Nav");
 	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_navfile, "Pick Nav File");
 	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnavfile, "Pick Nav File");
+
+	ac = 0;
+	if (shared.shareddata.vector_mode == MBV_VECTOR_OFF)
+		{
+		XtSetArg(args[ac], XmNsensitive, False); ac++;
+		}
+	else
+		{
+		XtSetArg(args[ac], XmNsensitive, True); ac++;
+		}
+	XtSetValues(view->mb3dview.mbview_toggleButton_vector, args, ac);
 	
 	/* now set action buttons according to current pick states */
 	mbview_action_sensitivity(instance);
@@ -2931,6 +2946,7 @@ int mbview_set_widgets(int verbose, size_t instance, int *error)
 	set_mbview_route_view_mode(instance, data->route_view_mode);
 	set_mbview_nav_view_mode(instance, data->nav_view_mode);
 	set_mbview_navdrape_view_mode(instance, data->navdrape_view_mode);
+	set_mbview_vector_view_mode(instance, data->vector_view_mode);
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 		{
 		set_mbview_colortable(instance, data->primary_colortable);
@@ -6156,6 +6172,52 @@ if (mbv_verbose >= 2)
 fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_navdrape\n");
     mbview_plotlowhigh(instance);
 }
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_vector( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    size_t	instance;
+    Boolean	value;
+    struct mbview_world_struct *view;
+    struct mbview_struct *data;
+
+    /* get instance */
+    ac = 0;
+    XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+    XtGetValues(w, args, ac);
+	    
+    /* get view */
+    view = &(mbviews[instance]);
+    data = &(view->data);
+
+    /* get mode value */
+    value = XmToggleButtonGetState(w);
+    if (value == True)
+	data->vector_view_mode = MBV_VIEW_ON;
+    else
+   	{
+	data->vector_view_mode = MBV_VIEW_OFF;
+ 	if (data->nav_view_mode == MBV_VIEW_OFF
+		&& (data->mouse_mode == MBV_MOUSE_NAV 
+			|| data->mouse_mode == MBV_MOUSE_NAVFILE))
+		{
+		data->mouse_mode = MBV_MOUSE_MOVE;
+		set_mbview_mouse_mode(instance, data->mouse_mode);
+		}
+	}
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_vector instance:%ld mode:%d\n", 
+instance, data->vector_view_mode);
+    
+    /* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_vector\n");
+    mbview_plotlowhigh(instance);
+}
 
 /*------------------------------------------------------------------------------*/
 
@@ -7134,6 +7196,32 @@ fprintf(stderr,"do_mbview_nav_view_mode: instance:%ld mode:%d\n", instance, mode
 	else
 		value = False;
 	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_navdrape, 
+				    value, False);
+
+}
+
+/*------------------------------------------------------------------------------*/
+void
+set_mbview_vector_view_mode(size_t instance, int mode)
+{
+    Boolean	value;
+    struct mbview_world_struct *view;
+    struct mbview_struct *data;
+    MB3DViewData	*mb3dviewptr;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_vector_view_mode: instance:%ld mode:%d\n", instance, mode);
+	    
+    /* get view */
+    view = &(mbviews[instance]);
+    data = &(view->data);
+
+    mb3dviewptr = &(view->mb3dview);
+	if (mode == MBV_VIEW_ON)
+		value = True;
+	else
+		value = False;
+	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_vector, 
 				    value, False);
 
 }
@@ -9824,3 +9912,4 @@ view->colordonecount,data->primary_nxy);*/
 }
 
 /*------------------------------------------------------------------------------*/
+

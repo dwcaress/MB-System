@@ -604,6 +604,9 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		
 	/* draw nav */
 	mbview_drawnav(instance, rez);
+		
+	/* draw vectors */
+	mbview_drawvector(instance, rez);
 
 	/* make sure depth test is off */
 	glDisable(GL_DEPTH_TEST);

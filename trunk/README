@@ -183,6 +183,46 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+
+Changed the resolution of navigation in fbt (format 71) files and
+fnv files to be 1e-9 degrees, equivalent to about 0.1 mm. Similarly change
+the navigation resolution in the output of mbinfo, and thus in inf files.
+This affects mbr_mbldeoih.c, mbsys_ldeoih.c mbsys_ldeoih.h in src/mbio,
+and mbinfo.c and mblist.c in src/utilities.
+
+Add importing and display of "vector" data in mbview and mbgrdviz. The
+vector files are GMT-style segmented files of lon, lat, topography value triples. 
+T
+
+Changed mbgrid so that any background (option -K) is calculated first,
+before significant memory is allocated. This avoids crashes due to
+attempted forks that overrun available memory.
+
+Fixed beamwidth calculation for Reson 7k data. Fix in mbr_reson7kr.c
+and mbsys_reson7k.c.
+
+Fixed overflow during iterative search for beam angle values in
+mbr_em710raw.c
+
+Added capability to mbauvloglist to output angle values in degrees rather
+than radians.
+
+Added code to mbnavadjust to detect when the uncertainty ellipsoid of one
+or more ties contains a zero value that will cause the inversion to fail.
+In this case, the program prints out which ties are problematic, and declines
+to calculate the inversion.
+
+Fixed beamwidth values stored in fbt files.
+
+Added JSON output option to mbinfo. This addition provided by Suzanne O'Hara of
+LDEO/IEDA.
+
+Added graceful exit to mbm_grdplot when a call to grdinfo fails. Fix provided by
+Hamish Bowman of the University of Otago.
+
+Bug fixes to mbr_mstiffss.c related to reading Marine Sonics sidescan data. This fix
+provided by Val Schmidt of CCOM/JHC at University of New Hampshire.
+ 
 -----> 5.3.1917
 
 Added preliminary support for HYSWEEP HSX format as MBIO format 201. Added program mbhysweeppreprocess to preprocess the HSX data.

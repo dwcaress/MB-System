@@ -3262,7 +3262,7 @@ int main (int argc, char **argv)
 							*bathacrosstrack[k]
 						    + headingx*mtodeglon
 							*bathalongtrack[k];
-					printsimplevalue(verbose, output[i], dlon, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlon, 14, 9, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -3285,7 +3285,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %8.5f%c",
+					    fprintf(output[i],"%3d %9.6f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -3305,7 +3305,7 @@ int main (int argc, char **argv)
 							*bathacrosstrack[k]
 						    + headingy*mtodeglat
 							*bathalongtrack[k];
-					printsimplevalue(verbose, output[i], dlat, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlat, 14, 9, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -3328,7 +3328,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %8.5f%c",
+					    fprintf(output[i],"%3d %9.6f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -3726,7 +3726,7 @@ int main (int argc, char **argv)
 			    && beamflag[beam_vertical] == MB_FLAG_NULL)
 				pixel_status = MB_FAILURE;
 			}
-		  if (check_ss == MB_YES && ss[k] <= 0)
+		  if (check_ss == MB_YES && ss[j] <= 0)
 			pixel_status = MB_FAILURE;
 		  if (use_time_interval == MB_YES && first == MB_YES)
 			pixel_status = MB_FAILURE;
@@ -4097,7 +4097,7 @@ int main (int argc, char **argv)
 							*ssacrosstrack[k]
 						    + headingx*mtodeglon
 							*ssalongtrack[k];
-					printsimplevalue(verbose, output[i], dlon, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlon, 14, 9, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -4120,7 +4120,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %8.5f%c",
+					    fprintf(output[i],"%3d %9.6f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -4140,7 +4140,7 @@ int main (int argc, char **argv)
 							*ssacrosstrack[k]
 						    + headingy*mtodeglat
 							*ssalongtrack[k];
-					printsimplevalue(verbose, output[i], dlat, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlat, 14, 9, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -4163,7 +4163,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %8.5f%c",
+					    fprintf(output[i],"%3d %9.6f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }

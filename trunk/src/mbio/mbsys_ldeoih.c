@@ -186,35 +186,34 @@ int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* initialize values in structure */
 	store->kind = MB_DATA_NONE;
-	store->lon2u = 0;
-	store->lon2b = 0;
-	store->lat2u = 0;
-	store->lat2b = 0;
-	store->year = 0;
-	store->day = 0;
-	store->min = 0;
-	store->sec = 0;
-	store->msec = 0;
-	store->heading = 0;
-	store->speed = 0;
+	store->time_d = 0.0;
+	store->longitude = 0.0;
+	store->latitude = 0.0;
+	store->sonardepth = 0.0;
+	store->altitude = 0.0;
+	store->heading = 0.0;
+	store->speed = 0.0;
+	store->roll = 0.0;
+	store->pitch = 0.0;
+	store->heave = 0.0;
+	store->beam_xwidth = 0.0;
+	store->beam_lwidth = 0.0;
 	store->beams_bath = 0;
 	store->beams_amp = 0;
 	store->pixels_ss = 0;
-	store->depth_scale = 0;
-	store->distance_scale = 0;
-	store->transducer_depth = 0;
-	store->altitude = 0;
-	store->beam_xwidth = 0;
-	store->beam_lwidth = 0;
-	store->ss_type = 0;
+	store->spare1 = 0;		
 	store->beams_bath_alloc = 0;
 	store->beams_amp_alloc = 0;
 	store->pixels_ss_alloc = 0;
+	store->depth_scale = 0.0;
+	store->distance_scale = 0.0;
+	store->ss_type = 0;
+	store->spare2 = 0;		
 	store->beamflag = NULL;
 	store->bath = NULL;
+	store->amp = NULL;
 	store->bath_acrosstrack = NULL;
 	store->bath_alongtrack = NULL;
-	store->amp = NULL;
 	store->ss = NULL;
 	store->ss_acrosstrack = NULL;
 	store->ss_alongtrack = NULL;
@@ -402,10 +401,6 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
-	int	time_j[5];
-	double	depthscale;
-	double	distscale;
-	double	transducer_depth;
 	int	i;
 
 	/* print input debug statements */
@@ -432,33 +427,26 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		time_j[0] = store->year;
-		time_j[1] = store->day;
-		time_j[2] = store->min;
-		time_j[3] = store->sec;
-		time_j[4] = 1000 * store->msec;
-		mb_get_itime(verbose,time_j,time_i);
-		mb_get_time(verbose,time_i,time_d);
+		*time_d = store->time_d;
+		mb_get_date(verbose,*time_d,time_i);
 
 		/* get navigation */
-		*navlon = ((double) store->lon2u)/60. 
-			+ ((double) store->lon2b)/600000.;
-		*navlat = ((double) store->lat2u)/60. 
-			+ ((double) store->lat2b)/600000. - 90.;
+		*navlon = store->longitude;
+		*navlat = store->latitude;
 
-		/* get heading (360 degrees = 65536) */
-		*heading = store->heading*0.0054932;
+		/* get heading */
+		*heading = store->heading;
 
-		/* set speed to zero */
-		*speed = 0.01 * store->speed;
+		/* get speed */
+		*speed = store->speed;
 			
 		/* set beamwidths in mb_io structure */
 		if (store->beam_xwidth > 0)
-		    mb_io_ptr->beamwidth_ltrack = 0.01 * store->beam_xwidth;
+		    mb_io_ptr->beamwidth_ltrack = store->beam_xwidth;
 		else
 		    mb_io_ptr->beamwidth_ltrack = 2.0;
 		if (store->beam_lwidth > 0)
-		    mb_io_ptr->beamwidth_xtrack = 0.01 * store->beam_lwidth;
+		    mb_io_ptr->beamwidth_xtrack = store->beam_lwidth;
 		else
 		    mb_io_ptr->beamwidth_xtrack = 2.0;
 
@@ -467,17 +455,14 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*nbath = store->beams_bath;
 		*namp = store->beams_amp;
 		*nss = store->pixels_ss;
-		depthscale = 0.001 * store->depth_scale;
-		distscale = 0.001 * store->distance_scale;
-		transducer_depth = 0.001 * store->transducer_depth;
 		for (i=0;i<*nbath;i++)
 			{
 			beamflag[i] = store->beamflag[i];
 			if (beamflag[i] != MB_FLAG_NULL)
 				{
-				bath[i] = depthscale * store->bath[i] + transducer_depth;
-				bathacrosstrack[i] = distscale * store->bath_acrosstrack[i];
-				bathalongtrack[i] = distscale * store->bath_alongtrack[i];
+				bath[i] = store->depth_scale * store->bath[i] + store->sonardepth;
+				bathacrosstrack[i] = store->distance_scale * store->bath_acrosstrack[i];
+				bathalongtrack[i] = store->distance_scale * store->bath_alongtrack[i];
 				}
 			else
 				{
@@ -496,8 +481,8 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				ss[i] = store->ss[i];
 			else
 				ss[i] = MB_SIDESCAN_NULL;
-			ssacrosstrack[i] = distscale * store->ss_acrosstrack[i];
-			ssalongtrack[i] = distscale * store->ss_alongtrack[i];
+			ssacrosstrack[i] = store->distance_scale * store->ss_acrosstrack[i];
+			ssalongtrack[i] = store->distance_scale * store->ss_alongtrack[i];
 			}
 
 		/* print debug statements */
@@ -648,10 +633,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
-	int	time_j[5];
-	double	altitude, transducer_depth;
-	double	depthscale, depthmax;
-	double	distscale, distmax;
+	double	depthmax, distmax;
 	int	i;
 
 	/* print input debug statements */
@@ -719,25 +701,15 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		mb_get_jtime(verbose,time_i,time_j);
-		store->year = time_j[0];
-		store->day = time_j[1];
-		store->min = time_j[2];
-		store->sec = time_j[3];
-		store->msec = (short int)(((double)time_j[4] / 1000.0) + 0.5);
+		store->time_d = time_d;
 
 		/* get navigation */
-		if (navlon < 0.0) navlon = navlon + 360.0;
-		store->lon2u = (short int) 60.0*navlon;
-		store->lon2b = (short int) (600000.0*(navlon 
-			- ((double) store->lon2u)/60.0));
-		navlat = navlat + 90.0;
-		store->lat2u = (short int) 60.0*navlat;
-		store->lat2b = (short int) (600000.0*(navlat 
-			- ((double) store->lat2u)/60.0));
+		store->longitude = navlon;
+		store->latitude = navlat;
 
-		/* get heading (360 degrees = 65536) */
-		store->heading = 182.044444*heading;
+		/* get heading */
+		store->heading = heading;
+		store->speed = speed;
 
 		/* if needed reset numbers of beams and allocate 
 		   memory for store arrays */
@@ -858,22 +830,15 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    }
 			}
 		    }
-		    
-		/* save existing altitude and transducer_depth values */
-		depthscale = 0.001 * store->depth_scale;
-		transducer_depth = 0.001 * store->transducer_depth;
-		altitude = 0.001 * store->altitude;
 
 		/* get scaling */
-		store->depth_scale = 1000;
-		store->distance_scale = 1000;
 		depthmax = 0.0;
 		distmax = 0.0;
 		for (i=0;i<nbath;i++)
 		    {
 		    if (beamflag[i] != MB_FLAG_NULL)
 			{
-			depthmax = MAX(depthmax, fabs(bath[i] - transducer_depth));
+			depthmax = MAX(depthmax, fabs(bath[i] - store->sonardepth));
 			distmax = MAX(distmax, fabs(bathacrosstrack[i]));
 			distmax = MAX(distmax, fabs(bathalongtrack[i]));
 			}
@@ -887,29 +852,25 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		    }
 		if (depthmax > 0.0)
-		    store->depth_scale = MAX((int) (1 + depthmax / 30.0), 1);
+		    store->depth_scale = 0.001 * (float)(MAX((int) (1 + depthmax / 30.0), 1));
 		if (distmax > 0.0)
-		    store->distance_scale = MAX((int) (1 + distmax / 30.0), 1);
+		    store->distance_scale = 0.001 * (float)(MAX((int) (1 + distmax / 30.0), 1));
 
 		/* set beam widths */
-		if (store->beam_xwidth == 0)
-		    store->beam_xwidth = 100 * mb_io_ptr->beamwidth_xtrack;
-		if (store->beam_lwidth == 0)
-		    store->beam_lwidth = 100 * mb_io_ptr->beamwidth_ltrack;
+		if (store->beam_xwidth == 0.0)
+		    store->beam_xwidth = mb_io_ptr->beamwidth_xtrack;
+		if (store->beam_lwidth == 0.0)
+		    store->beam_lwidth = mb_io_ptr->beamwidth_ltrack;
 
 		/* put distance, depth, and backscatter values 
 			into data structure */
-		depthscale = 0.001 * store->depth_scale;
-		distscale = 0.001 * store->distance_scale;
 		store->beams_bath = nbath;
 		for (i=0;i<nbath;i++)
 			{
 			store->beamflag[i] = beamflag[i];
-			store->bath[i] = (bath[i] - transducer_depth) / depthscale;
-			store->bath_acrosstrack[i] = bathacrosstrack[i]
-							/ distscale;
-			store->bath_alongtrack[i] = bathalongtrack[i]
-							/distscale;
+			store->bath[i] = (bath[i] - store->sonardepth) / store->depth_scale;
+			store->bath_acrosstrack[i] = bathacrosstrack[i] / store->distance_scale;
+			store->bath_alongtrack[i] = bathalongtrack[i] / store->distance_scale;
 			}
 		store->beams_amp = namp;
 		for (i=0;i<namp;i++)
@@ -923,10 +884,8 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				store->ss[i] = ss[i];
 			else
 				store->ss[i] = 0;
-			store->ss_acrosstrack[i] = ssacrosstrack[i]
-							/ distscale;
-			store->ss_alongtrack[i] = ssalongtrack[i]
-							/ distscale;
+			store->ss_acrosstrack[i] = ssacrosstrack[i] / store->distance_scale;
+			store->ss_alongtrack[i] = ssalongtrack[i] / store->distance_scale;
 			}
 		}
 
@@ -1164,8 +1123,6 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
-	double	depthscale;
-	double	distscale;
 	double	bath_best;
 	double	xtrack_min;
 	int	i;
@@ -1193,24 +1150,22 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
-		depthscale = 0.001 * store->depth_scale;
-		distscale = 0.001 * store->distance_scale;
-		*transducer_depth = 0.001 * store->transducer_depth;
-		if (store->altitude <= 0 && store->beams_bath > 0)
+		*transducer_depth = store->sonardepth;
+		if (store->altitude <= 0.0 && store->beams_bath > 0)
 		    {		
 		    bath_best = 0.0;
 		    if (store->bath[store->beams_bath/2] > 0.0)
-			bath_best = depthscale * store->bath[store->beams_bath/2] + (*transducer_depth);
+			bath_best = store->depth_scale * store->bath[store->beams_bath/2] + (*transducer_depth);
 		    else
 			{
 			xtrack_min = 99999999.9;
 			for (i=0;i<store->beams_bath;i++)
 			    {
-			    if (store->bath[i] > 0.0
-				&& fabs(distscale * store->bath_acrosstrack[i]) < xtrack_min)
+			    if (store->bath[i] > 0
+				&& fabs(store->distance_scale * store->bath_acrosstrack[i]) < xtrack_min)
 				{
-				xtrack_min = fabs(distscale * store->bath_acrosstrack[i]);
-				bath_best = depthscale * store->bath[i] + (*transducer_depth);
+				xtrack_min = fabs(store->distance_scale * store->bath_acrosstrack[i]);
+				bath_best = store->depth_scale * store->bath[i] + (*transducer_depth);
 				}
 			    }		
 			}
@@ -1220,17 +1175,17 @@ int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			for (i=0;i<store->beams_bath;i++)
 			    {
 			    if (store->bath[i] < 0.0
-				&& fabs(distscale * store->bath_acrosstrack[i]) < xtrack_min)
+				&& fabs(store->distance_scale * store->bath_acrosstrack[i]) < xtrack_min)
 				{
-				xtrack_min = fabs(distscale * store->bath_acrosstrack[i]);
-				bath_best = -depthscale * store->bath[i] + (*transducer_depth);
+				xtrack_min = fabs(store->distance_scale * store->bath_acrosstrack[i]);
+				bath_best = -store->depth_scale * store->bath[i] + (*transducer_depth);
 				}
 			    }		
 			}
 		    *altitude = bath_best - *transducer_depth;
 		    }
 		else
-		    *altitude = 0.001 * store->altitude;
+		    *altitude = store->altitude;
 		}
 
 	/* deal with comment */
@@ -1297,8 +1252,8 @@ int mbsys_ldeoih_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	/* insert data into structure */
 	if (store->kind == MB_DATA_DATA)
 		{
-		store->transducer_depth = 1000 * transducer_depth;
-		store->altitude = 1000 * altitude;
+		store->sonardepth = transducer_depth;
+		store->altitude = altitude;
 		}
 
 	/* deal with comment */
@@ -1342,7 +1297,6 @@ int mbsys_ldeoih_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
-	int	time_j[5];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1367,34 +1321,27 @@ int mbsys_ldeoih_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	/* extract data from structure */
 	if (*kind == MB_DATA_DATA)
 		{
-		/* get time */
-		time_j[0] = store->year;
-		time_j[1] = store->day;
-		time_j[2] = store->min;
-		time_j[3] = store->sec;
-		time_j[4] = 1000 * store->msec;
-		mb_get_itime(verbose,time_j,time_i);
-		mb_get_time(verbose,time_i,time_d);
+		/* get time */;
+		*time_d = store->time_d;
+		mb_get_date(verbose, *time_d, time_i);
 
 		/* get navigation */
-		*navlon = ((double) store->lon2u)/60. 
-			+ ((double) store->lon2b)/600000.;
-		*navlat = ((double) store->lat2u)/60. 
-			+ ((double) store->lat2b)/600000. - 90.;
+		*navlon = store->longitude;
+		*navlat = store->latitude;
 
-		/* get heading (360 degrees = 65536) */
-		*heading = store->heading*0.0054932;
+		/* get heading */
+		*heading = store->heading;
 
-		/* set speed to zero */
-		*speed = 0.01 * store->speed;
+		/* set speed */
+		*speed = store->speed;
 
-		/* set draft to zero */
-		*draft = 0.001 * store->transducer_depth;
+		/* set draft */
+		*draft = store->sonardepth + store->heave;
 
 		/* get roll pitch and heave */
-		*roll = 0.0;
-		*pitch = 0.0;
-		*heave = 0.0;
+		*roll = store->roll;
+		*pitch = store->pitch;
+		*heave = store->heave;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1509,7 +1456,6 @@ int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
-	int	time_j[5];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1548,33 +1494,23 @@ int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (store->kind == MB_DATA_DATA)
 		{
 		/* get time */
-		mb_get_jtime(verbose,time_i,time_j);
-		store->year = time_j[0];
-		store->day = time_j[1];
-		store->min = time_j[2];
-		store->sec = time_j[3];
-		store->msec = time_j[4] / 1000;
+		store->time_d = time_d;
 
 		/* get navigation */
-		if (navlon < 0.0) navlon = navlon + 360.0;
-		store->lon2u = (short int) 60.0*navlon;
-		store->lon2b = (short int) (600000.0*(navlon 
-			- ((double) store->lon2u)/60.0));
-		navlat = navlat + 90.0;
-		store->lat2u = (short int) 60.0*navlat;
-		store->lat2b = (short int) (600000.0*(navlat 
-			- ((double) store->lat2u)/60.0));
+		store->longitude = navlon;
+		store->latitude = navlat;
 
-		/* get heading (360 degrees = 65536) */
-		store->heading = 182.044444*heading;
-
-		/* get speed */
-		store->speed = 100 * speed;
+		/* get heading */
+		store->heading = heading;
+		store->speed = speed;
 
 		/* get draft */
-		store->transducer_depth = 1000 * draft;
+		store->sonardepth = draft - heave;
 
 		/* get roll pitch and heave */
+		store->roll = roll;
+		store->pitch = pitch;
+		store->heave = heave;
 		}
 
 	/* print output debug statements */
@@ -1682,24 +1618,26 @@ int mbsys_ldeoih_copy(int verbose, void *mbio_ptr,
 	if (status == MB_SUCCESS)
 	    {
 	    copy->kind = store->kind;
-	    copy->lon2u = store->lon2u;
-	    copy->lon2b = store->lon2b;
-	    copy->lat2u = store->lat2u;
-	    copy->lat2b = store->lat2b;
-	    copy->year = store->year;
-	    copy->day = store->day;
-	    copy->min = store->min;
-	    copy->sec = store->sec;
-	    copy->msec = store->msec;
+	    copy->time_d = store->time_d;
+	    copy->longitude = store->longitude;
+	    copy->latitude = store->latitude;
+	    copy->sonardepth = store->sonardepth;
+	    copy->altitude = store->altitude;
 	    copy->heading = store->heading;
 	    copy->speed = store->speed;
+	    copy->roll = store->roll;
+	    copy->pitch = store->pitch;
+	    copy->heave = store->heave;
+	    copy->beam_xwidth = store->beam_xwidth;
+	    copy->beam_lwidth = store->beam_lwidth;
 	    copy->beams_bath = store->beams_bath;
 	    copy->beams_amp = store->beams_amp;
 	    copy->pixels_ss = store->pixels_ss;
+	    copy->spare1 = store->spare1;
 	    copy->depth_scale = store->depth_scale;
 	    copy->distance_scale = store->distance_scale;
-	    copy->altitude = store->altitude;
-	    copy->transducer_depth = store->transducer_depth;
+	    copy->ss_type = store->ss_type;
+	    copy->spare2 = store->spare2;
 	    for (i=0;i<copy->beams_bath;i++)
 		    {
 		    copy->beamflag[i] = store->beamflag[i];
