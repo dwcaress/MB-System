@@ -78,6 +78,7 @@ EXTERNAL Widget   pushButton_opensite;
 EXTERNAL Widget   pushButton_openroute;
 EXTERNAL Widget   pushButton_opennav;
 EXTERNAL Widget   pushButton_openswath;
+EXTERNAL Widget   pushButton_openvector;
 EXTERNAL Widget   pushButton_savesite;
 EXTERNAL Widget   pushButton_saveroute;
 EXTERNAL Widget   pushButton_realtime_setup;

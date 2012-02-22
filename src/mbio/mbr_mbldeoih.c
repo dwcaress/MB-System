@@ -228,11 +228,13 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 #define	MBF_MBLDEOIH_V1HEADERSIZE	38
 #define	MBF_MBLDEOIH_V2HEADERSIZE	44
 #define	MBF_MBLDEOIH_V3HEADERSIZE	48
+#define	MBF_MBLDEOIH_V4HEADERSIZE	90
 #define	MBF_MBLDEOIH_ID_COMMENT1	8995	/* ## */
 #define	MBF_MBLDEOIH_ID_COMMENT2	25443	/* cc */
 #define	MBF_MBLDEOIH_ID_DATA1		25700	/* dd */
 #define	MBF_MBLDEOIH_ID_DATA2		28270	/* nn */
 #define	MBF_MBLDEOIH_ID_DATA3		17476	/* DD */
+#define	MBF_MBLDEOIH_ID_DATA4		13398	/* V4 */
 
 static char rcs_id[]="$Id$";
 
@@ -524,16 +526,18 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
+	struct mbsys_ldeoih_old_struct oldstore;
 	int	read_size;
 	short	*flag;
 	short	short_transducer_depth;
 	short	short_altitude;
 	int	header_length;
-	char	buffer[MBF_MBLDEOIH_V3HEADERSIZE];
-	int	version;
+	char	buffer[MBF_MBLDEOIH_V4HEADERSIZE];
 	int	index;
-	double	depthscale, newdepthscale;
-	double	depthmax, transducer_depth;
+	double	newdepthscale;
+	double	depthmax;
+	int	time_i[7], time_j[6];
+	int	version;
 	int	i;
 
 	/* print input debug statements */
@@ -581,6 +585,12 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			store->kind = MB_DATA_COMMENT;
 			header_length = 2;
+			}
+		else if (*flag == MBF_MBLDEOIH_ID_DATA4)
+			{
+			store->kind = MB_DATA_DATA;
+			header_length = MBF_MBLDEOIH_V4HEADERSIZE;
+			version = 4;
 			}
 		else if (*flag == MBF_MBLDEOIH_ID_DATA3)
 			{
@@ -631,51 +641,131 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA)
 		{
-		index = 2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->year); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->day); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->min); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->sec); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->msec); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->lon2u); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->lon2b); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->lat2u); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->lat2b); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->heading); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->speed); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beams_bath); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beams_amp); index +=2;
-		mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->pixels_ss); index +=2;
-		if (header_length == MBF_MBLDEOIH_V1HEADERSIZE)
+		if (version == 4)
 			{
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_transducer_depth); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_altitude); index +=2;
-			store->transducer_depth = (int) (store->depth_scale * short_transducer_depth);
-			store->altitude = (int) (store->depth_scale * short_altitude);
-			}
-		else if (header_length == MBF_MBLDEOIH_V2HEADERSIZE)
-			{
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_transducer_depth); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_altitude); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_xwidth); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_lwidth); index +=2;
+			index = 2;
+			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->time_d); index +=8;
+			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->longitude); index +=8;
+			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->latitude); index +=8;
+			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->sonardepth); index +=8;
+			mb_get_binary_double(MB_NO, (void *)  &buffer[index], &store->altitude); index +=8;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->heading); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->speed); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->roll); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->pitch); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->heave); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->beam_xwidth); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->beam_lwidth); index +=4;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beams_bath); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beams_amp); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->pixels_ss); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->spare1); index +=2;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=4;
+			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=4;
 			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->ss_type); index +=2;
-			store->transducer_depth = (int) (store->depth_scale * short_transducer_depth);
-			store->altitude = (int) (store->depth_scale * short_altitude);
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->spare2); index +=2;
 			}
-		else if (header_length == MBF_MBLDEOIH_V3HEADERSIZE)
+		else
 			{
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=2;
-			mb_get_binary_int(MB_NO, (void *)  &buffer[index], &store->transducer_depth); index +=4;
-			mb_get_binary_int(MB_NO, (void *)  &buffer[index], &store->altitude); index +=4;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_xwidth); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->beam_lwidth); index +=2;
-			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->ss_type); index +=2;
+			index = 2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.year); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.day); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.min); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.sec); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.msec); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.lon2u); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.lon2b); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.lat2u); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.lat2b); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.heading); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.speed); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.beams_bath); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.beams_amp); index +=2;
+			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.pixels_ss); index +=2;
+			if (version == 1)
+				{
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.depth_scale); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.distance_scale); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_transducer_depth); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_altitude); index +=2;
+				oldstore.transducer_depth = (int) (oldstore.depth_scale * short_transducer_depth);
+				oldstore.altitude = (int) (oldstore.depth_scale * short_altitude);
+				}
+			else if (version == 2)
+				{
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.depth_scale); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.distance_scale); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_transducer_depth); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &short_altitude); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.beam_xwidth); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.beam_lwidth); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.ss_type); index +=2;
+				oldstore.transducer_depth = (int) (oldstore.depth_scale * short_transducer_depth);
+				oldstore.altitude = (int) (oldstore.depth_scale * short_altitude);
+				}
+			else if (version == 3)
+				{
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.depth_scale); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.distance_scale); index +=2;
+				mb_get_binary_int(MB_NO, (void *)  &buffer[index], &oldstore.transducer_depth); index +=4;
+				mb_get_binary_int(MB_NO, (void *)  &buffer[index], &oldstore.altitude); index +=4;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.beam_xwidth); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.beam_lwidth); index +=2;
+				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.ss_type); index +=2;
+				}
+				
+			/* translate old data to current */
+
+			/* get time */
+			time_j[0] = oldstore.year;
+			time_j[1] = oldstore.day;
+			time_j[2] = oldstore.min;
+			time_j[3] = oldstore.sec;
+			time_j[4] = 1000 * oldstore.msec;
+			mb_get_itime(verbose,time_j,time_i);
+			mb_get_time(verbose,time_i,&store->time_d);
+
+			/* get navigation */
+			store->longitude = ((double) oldstore.lon2u)/60. 
+						+ ((double) oldstore.lon2b)/600000.;
+			store->latitude = ((double) oldstore.lat2u)/60. 
+						+ ((double) oldstore.lat2b)/600000. - 90.;
+
+			/* get sonardepth and altitude */
+			store->sonardepth = 0.001 * oldstore.transducer_depth;
+		    	store->altitude = 0.001 * oldstore.altitude;
+
+			/* get heading (360 degrees = 65536) and speed */
+			store->heading = (float) (0.0054932 * oldstore.heading);
+			store->speed = (float)(0.01 * oldstore.speed);
+
+			/* set roll and pitch to zero */
+			store->roll = 0.0;
+			store->pitch = 0.0;
+
+			/* set beamwidths in mb_io structure */
+			if (oldstore.beam_xwidth > 0)
+			    store->beam_xwidth = 0.01 * oldstore.beam_xwidth;
+			else
+			    store->beam_xwidth = 2.0;
+			if (oldstore.beam_lwidth > 0)
+			    store->beam_lwidth = 0.01 * oldstore.beam_lwidth;
+			else
+			    store->beam_lwidth = 2.0;
+
+			/* get beams_bath, beams_amp, pixels_ss */
+			store->beams_bath = oldstore.beams_bath;
+			store->beams_amp = oldstore.beams_amp;
+			store->pixels_ss = oldstore.pixels_ss;
+			store->spare1 = 0;
+
+			/* get scaling */
+			store->depth_scale = 0.001 * oldstore.depth_scale;
+			store->distance_scale = 0.001 * oldstore.distance_scale;
+
+			/* get sidescan type */
+			store->ss_type = oldstore.ss_type;
+			store->spare2 = 0;
 			}
 		}
 
@@ -689,32 +779,57 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"\ndbg5  New header read in function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       flag:       %d\n",*flag);
 		}
+	if (verbose >= 5 && store->kind == MB_DATA_DATA && version < 4)
+		{
+		fprintf(stderr,"\ndbg5  Old version header read in function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       version:          %d\n",version);
+		fprintf(stderr,"dbg5       year:             %d\n",oldstore.year);
+		fprintf(stderr,"dbg5       day:              %d\n",oldstore.day);
+		fprintf(stderr,"dbg5       minute:           %d\n",oldstore.min);
+		fprintf(stderr,"dbg5       second:           %d\n",oldstore.sec);
+		fprintf(stderr,"dbg5       msec:             %d\n",oldstore.msec);
+		fprintf(stderr,"dbg5       lonu:             %d\n",oldstore.lon2u);
+		fprintf(stderr,"dbg5       lonb:             %d\n",oldstore.lon2b);
+		fprintf(stderr,"dbg5       latu:             %d\n",oldstore.lat2u);
+		fprintf(stderr,"dbg5       latb:             %d\n",oldstore.lat2b);
+		fprintf(stderr,"dbg5       heading:          %d\n",oldstore.heading);
+		fprintf(stderr,"dbg5       speed:            %d\n",oldstore.speed);
+		fprintf(stderr,"dbg5       beams bath:       %d\n",oldstore.beams_bath);
+		fprintf(stderr,"dbg5       beams amp:        %d\n",oldstore.beams_amp);
+		fprintf(stderr,"dbg5       pixels ss:        %d\n",oldstore.pixels_ss);
+		fprintf(stderr,"dbg5       depth scale:      %d\n",oldstore.depth_scale);
+		fprintf(stderr,"dbg5       dist scale:       %d\n",oldstore.distance_scale);
+		fprintf(stderr,"dbg5       transducer_depth: %d\n",oldstore.transducer_depth);
+		fprintf(stderr,"dbg5       altitude:         %d\n",oldstore.altitude);
+		fprintf(stderr,"dbg5       beam_xwidth:      %d\n",oldstore.beam_xwidth);
+		fprintf(stderr,"dbg5       beam_lwidth:      %d\n",oldstore.beam_lwidth);
+		fprintf(stderr,"dbg5       ss_type:          %d\n",oldstore.ss_type);
+		fprintf(stderr,"dbg5       status:           %d\n",status);
+		fprintf(stderr,"dbg5       error:            %d\n",*error);
+		}
 	if (verbose >= 5 && store->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"dbg5       year:             %d\n",store->year);
-		fprintf(stderr,"dbg5       day:              %d\n",store->day);
-		fprintf(stderr,"dbg5       minute:           %d\n",store->min);
-		fprintf(stderr,"dbg5       second:           %d\n",store->sec);
-		fprintf(stderr,"dbg5       msec:             %d\n",store->msec);
-		fprintf(stderr,"dbg5       lonu:             %d\n",store->lon2u);
-		fprintf(stderr,"dbg5       lonb:             %d\n",store->lon2b);
-		fprintf(stderr,"dbg5       latu:             %d\n",store->lat2u);
-		fprintf(stderr,"dbg5       latb:             %d\n",store->lat2b);
-		fprintf(stderr,"dbg5       heading:          %d\n",store->heading);
-		fprintf(stderr,"dbg5       speed:            %d\n",store->speed);
-		fprintf(stderr,"dbg5       beams bath:       %d\n",
-			store->beams_bath);
-		fprintf(stderr,"dbg5       beams amp:        %d\n",
-			store->beams_amp);
-		fprintf(stderr,"dbg5       pixels ss:        %d\n",
-			store->pixels_ss);
-		fprintf(stderr,"dbg5       depth scale:      %d\n",store->depth_scale);
-		fprintf(stderr,"dbg5       dist scale:       %d\n",store->distance_scale);
-		fprintf(stderr,"dbg5       transducer_depth: %d\n",store->transducer_depth);
-		fprintf(stderr,"dbg5       altitude:         %d\n",store->altitude);
-		fprintf(stderr,"dbg5       beam_xwidth:      %d\n",store->beam_xwidth);
-		fprintf(stderr,"dbg5       beam_lwidth:      %d\n",store->beam_lwidth);
+		fprintf(stderr,"\ndbg5  Current version header values in function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       time_d:           %f\n",store->time_d);
+		fprintf(stderr,"dbg5       longitude:        %f\n",store->longitude);
+		fprintf(stderr,"dbg5       latitude:         %f\n",store->latitude);
+		fprintf(stderr,"dbg5       sonardepth:       %f\n",store->sonardepth);
+		fprintf(stderr,"dbg5       altitude:         %f\n",store->altitude);
+		fprintf(stderr,"dbg5       heading:          %f\n",store->heading);
+		fprintf(stderr,"dbg5       speed:            %f\n",store->speed);
+		fprintf(stderr,"dbg5       roll:             %f\n",store->roll);
+		fprintf(stderr,"dbg5       pitch:            %f\n",store->pitch);
+		fprintf(stderr,"dbg5       heave:            %f\n",store->heave);
+		fprintf(stderr,"dbg5       beam_xwidth:      %f\n",store->beam_xwidth);
+		fprintf(stderr,"dbg5       beam_lwidth:      %f\n",store->beam_lwidth);
+		fprintf(stderr,"dbg5       beams_bath:       %d\n",store->beams_bath);
+		fprintf(stderr,"dbg5       beams_amp:        %d\n",store->beams_amp);
+		fprintf(stderr,"dbg5       pixels_ss:        %d\n",store->pixels_ss);
+		fprintf(stderr,"dbg5       spare1:           %d\n",store->spare1);
+		fprintf(stderr,"dbg5       depth_scale:      %f\n",store->depth_scale);
+		fprintf(stderr,"dbg5       distance_scale:   %f\n",store->distance_scale);
 		fprintf(stderr,"dbg5       ss_type:          %d\n",store->ss_type);
+		fprintf(stderr,"dbg5       spare2:           %d\n",store->spare2);
 		fprintf(stderr,"dbg5       status:           %d\n",status);
 		fprintf(stderr,"dbg5       error:            %d\n",*error);
 		}
@@ -912,20 +1027,18 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			1 or 2 data has been read */
 		if (version < 3)
 			{
-			depthscale = 0.001 * store->depth_scale;
-			transducer_depth = 0.001 * store->transducer_depth;
 			depthmax = 0.0;
 			for (i=0;i<store->beams_bath;i++)
 				{
-				depthmax = MAX(depthmax, (depthscale * store->bath[i] - transducer_depth));
+				depthmax = MAX(depthmax, (store->depth_scale * store->bath[i] - store->sonardepth));
 				}
 			if (depthmax > 0.0)
-				store->depth_scale = MAX((int) (1 + depthmax / 30.0), 1);
-			newdepthscale = 0.001 * store->depth_scale;
+				newdepthscale = 0.001 * (double)(MAX((int) (1 + depthmax / 30.0), 1));
 			for (i=0;i<store->beams_bath;i++)
 				{
-				store->bath[i] = (depthscale * store->bath[i] - transducer_depth) / newdepthscale;
+				store->bath[i] = (short)((store->depth_scale * store->bath[i] - store->sonardepth) / newdepthscale);
 				}
+			store->depth_scale = newdepthscale;
 			}
 			
 		/* check for end of file */
@@ -985,15 +1098,19 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
+	struct mbsys_ldeoih_old_struct oldstore;
 	int	write_size;
 	short	*flag;
 	int	header_length;
-	char	buffer[MBF_MBLDEOIH_V3HEADERSIZE];
+	char	buffer[MBF_MBLDEOIH_V4HEADERSIZE];
 	int	index;
 	double	depthscale, newdepthscale;
 	double	depthmax, transducer_depth;
+	double	navlon, navlat;
 	short	short_transducer_depth;
 	short	short_altitude;
+	int	*version;
+	int	time_j[5], time_i[7];
 	int	i;
 
 	/* print input debug statements */
@@ -1011,25 +1128,70 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store = (struct mbsys_ldeoih_struct *) store_ptr;
 
-	/* set data flag 
-		(data: flag='DD'=17476 = MBF_MBLDEOIH_ID_DATA3 
+	/* set data flag pointer
+		(data: flag='DD'=13398 = MBF_MBLDEOIH_ID_DATA4
 			or comment:flag='cc'=25443 = MBF_MBLDEOIH_ID_COMMENT2) */
 	flag = (short *) buffer;
+	
+	/* set version pointer */
+	version = &(mb_io_ptr->save1);
 
 	/* if set, write old format - this should only happen for writing fbt files
 		when the user has set fbtversion = old in the .mbio_defaults file
 		using mbdefaults */
-	if (store->kind == MB_DATA_DATA && mb_io_ptr->save1 == 2)
+	if (store->kind == MB_DATA_DATA && *version == 2)
 		{
 		*flag = MBF_MBLDEOIH_ID_DATA2;
 		header_length = MBF_MBLDEOIH_V2HEADERSIZE;
+		
+		/* translate data to old format */
+
+		/* get time */
+		mb_get_date(verbose, store->time_d, time_i);
+		mb_get_jtime(verbose,time_i,time_j);
+		oldstore.year = time_j[0];
+		oldstore.day = time_j[1];
+		oldstore.min = time_j[2];
+		oldstore.sec = time_j[3];
+		oldstore.msec = (short int)(((double)time_j[4] / 1000.0) + 0.5);
+
+		/* get navigation */
+		navlon = store->longitude;
+		if (navlon < 0.0) 
+			navlon = navlon + 360.0;
+		oldstore.lon2u = (short int) 60.0 * navlon;
+		oldstore.lon2b = (short int) (600000.0 * 
+					(navlon - ((double) oldstore.lon2u)/60.0));
+		navlat = store->latitude + 90.0;
+		oldstore.lat2u = (short int) 60.0 * navlat;
+		oldstore.lat2b = (short int) (600000.0 * (navlat - ((double) oldstore.lat2u)/60.0));
+
+		/* get heading (360 degrees = 65536) */
+		oldstore.heading = 182.044444 * store->heading;
+		oldstore.speed = 0.01 * store->speed;
+
+		/* get beams_bath, beams_amp, pixels_ss */
+		oldstore.beams_bath = store->beams_bath;
+		oldstore.beams_amp = store->beams_amp;
+		oldstore.pixels_ss = store->pixels_ss;
+
+		/* set beamwidths */
+		oldstore.beam_xwidth = 100 *store->beam_xwidth;
+		oldstore.beam_lwidth = 100 *store->beam_lwidth;
+
+		/* get scaling */
+		oldstore.depth_scale = 1000 * store->depth_scale;
+		oldstore.distance_scale = 1000 * store->distance_scale;
+
+		/* get sidescan type */
+		oldstore.ss_type = store->ss_type;
 		}
 
 	/* otherwise write curent version data */
 	else if (store->kind == MB_DATA_DATA)
 		{
-		*flag = MBF_MBLDEOIH_ID_DATA3;
-		header_length = MBF_MBLDEOIH_V3HEADERSIZE;
+		*flag = MBF_MBLDEOIH_ID_DATA4;
+		header_length = MBF_MBLDEOIH_V4HEADERSIZE;
 		}
 
 	/* otherwise write comment */
@@ -1047,27 +1209,54 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	if (verbose >= 5 && store->kind == MB_DATA_DATA)
 		{
-		fprintf(stderr,"dbg5       year:             %d\n",store->year);
-		fprintf(stderr,"dbg5       day:              %d\n",store->day);
-		fprintf(stderr,"dbg5       minute:           %d\n",store->min);
-		fprintf(stderr,"dbg5       second:           %d\n",store->sec);
-		fprintf(stderr,"dbg5       msec:             %d\n",store->msec);
-		fprintf(stderr,"dbg5       lonu:             %d\n",store->lon2u);
-		fprintf(stderr,"dbg5       lonb:             %d\n",store->lon2b);
-		fprintf(stderr,"dbg5       latu:             %d\n",store->lat2u);
-		fprintf(stderr,"dbg5       latb:             %d\n",store->lat2b);
-		fprintf(stderr,"dbg5       heading:          %d\n",store->heading);
-		fprintf(stderr,"dbg5       speed:            %d\n",store->speed);
-		fprintf(stderr,"dbg5       beams bath:       %d\n",store->beams_bath);
-		fprintf(stderr,"dbg5       beams amp:        %d\n",store->beams_amp);
-		fprintf(stderr,"dbg5       pixels ss:        %d\n",store->pixels_ss);
-		fprintf(stderr,"dbg5       depth scale:      %d\n",store->depth_scale);
-		fprintf(stderr,"dbg5       dist scale:       %d\n",store->distance_scale);
-		fprintf(stderr,"dbg5       transducer_depth: %d\n",store->transducer_depth);
-		fprintf(stderr,"dbg5       altitude:         %d\n",store->altitude);
-		fprintf(stderr,"dbg5       beam_xwidth:      %d\n",store->beam_xwidth);
-		fprintf(stderr,"dbg5       beam_lwidth:      %d\n",store->beam_lwidth);
+		fprintf(stderr,"\ndbg5  Current version header values in function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       time_d:           %f\n",store->time_d);
+		fprintf(stderr,"dbg5       longitude:        %f\n",store->longitude);
+		fprintf(stderr,"dbg5       latitude:         %f\n",store->latitude);
+		fprintf(stderr,"dbg5       sonardepth:       %f\n",store->sonardepth);
+		fprintf(stderr,"dbg5       altitude:         %f\n",store->altitude);
+		fprintf(stderr,"dbg5       heading:          %f\n",store->heading);
+		fprintf(stderr,"dbg5       speed:            %f\n",store->speed);
+		fprintf(stderr,"dbg5       roll:             %f\n",store->roll);
+		fprintf(stderr,"dbg5       pitch:            %f\n",store->pitch);
+		fprintf(stderr,"dbg5       heave:            %f\n",store->heave);
+		fprintf(stderr,"dbg5       beam_xwidth:      %f\n",store->beam_xwidth);
+		fprintf(stderr,"dbg5       beam_lwidth:      %f\n",store->beam_lwidth);
+		fprintf(stderr,"dbg5       beams_bath:       %d\n",store->beams_bath);
+		fprintf(stderr,"dbg5       beams_amp:        %d\n",store->beams_amp);
+		fprintf(stderr,"dbg5       pixels_ss:        %d\n",store->pixels_ss);
+		fprintf(stderr,"dbg5       spare1:           %d\n",store->spare1);
+		fprintf(stderr,"dbg5       depth_scale:      %f\n",store->depth_scale);
+		fprintf(stderr,"dbg5       distance_scale:   %f\n",store->distance_scale);
 		fprintf(stderr,"dbg5       ss_type:          %d\n",store->ss_type);
+		fprintf(stderr,"dbg5       spare2:           %d\n",store->spare2);
+		fprintf(stderr,"dbg5       status:           %d\n",status);
+		fprintf(stderr,"dbg5       error:            %d\n",*error);
+		}
+	if (verbose >= 5 && store->kind == MB_DATA_DATA && *version == 2)
+		{
+		fprintf(stderr,"\ndbg5  Old version header values in function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       year:             %d\n",oldstore.year);
+		fprintf(stderr,"dbg5       day:              %d\n",oldstore.day);
+		fprintf(stderr,"dbg5       minute:           %d\n",oldstore.min);
+		fprintf(stderr,"dbg5       second:           %d\n",oldstore.sec);
+		fprintf(stderr,"dbg5       msec:             %d\n",oldstore.msec);
+		fprintf(stderr,"dbg5       lonu:             %d\n",oldstore.lon2u);
+		fprintf(stderr,"dbg5       lonb:             %d\n",oldstore.lon2b);
+		fprintf(stderr,"dbg5       latu:             %d\n",oldstore.lat2u);
+		fprintf(stderr,"dbg5       latb:             %d\n",oldstore.lat2b);
+		fprintf(stderr,"dbg5       heading:          %d\n",oldstore.heading);
+		fprintf(stderr,"dbg5       speed:            %d\n",oldstore.speed);
+		fprintf(stderr,"dbg5       beams bath:       %d\n",oldstore.beams_bath);
+		fprintf(stderr,"dbg5       beams amp:        %d\n",oldstore.beams_amp);
+		fprintf(stderr,"dbg5       pixels ss:        %d\n",oldstore.pixels_ss);
+		fprintf(stderr,"dbg5       depth scale:      %d\n",oldstore.depth_scale);
+		fprintf(stderr,"dbg5       dist scale:       %d\n",oldstore.distance_scale);
+		fprintf(stderr,"dbg5       transducer_depth: %d\n",oldstore.transducer_depth);
+		fprintf(stderr,"dbg5       altitude:         %d\n",oldstore.altitude);
+		fprintf(stderr,"dbg5       beam_xwidth:      %d\n",oldstore.beam_xwidth);
+		fprintf(stderr,"dbg5       beam_lwidth:      %d\n",oldstore.beam_lwidth);
+		fprintf(stderr,"dbg5       ss_type:          %d\n",oldstore.ss_type);
 		fprintf(stderr,"dbg5       status:           %d\n",status);
 		fprintf(stderr,"dbg5       error:            %d\n",*error);
 		}
@@ -1083,72 +1272,73 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				just bathymetry relative to the sonar  
 				- to convert to old format add transducer depth to the bathymetry 
 				and reset the scaling */
-			depthscale = 0.001 * store->depth_scale;
-			transducer_depth = 0.001 * store->transducer_depth;
+			depthscale = 0.001 * oldstore.depth_scale;
+			transducer_depth = 0.001 * oldstore.transducer_depth;
 			depthmax = 0.0;
-			for (i=0;i<store->beams_bath;i++)
+			for (i=0;i<oldstore.beams_bath;i++)
 				{
-				depthmax = MAX(depthmax, (depthscale * store->bath[i] + transducer_depth));
+				depthmax = MAX(depthmax, (depthscale * oldstore.bath[i] + transducer_depth));
 				}
 			if (depthmax > 0.0)
-				store->depth_scale = MAX((int) (1 + depthmax / 30.0), 1);
-			newdepthscale = 0.001 * store->depth_scale;
-			for (i=0;i<store->beams_bath;i++)
+				oldstore.depth_scale = MAX((int) (1 + depthmax / 30.0), 1);
+			newdepthscale = 0.001 * oldstore.depth_scale;
+			for (i=0;i<oldstore.beams_bath;i++)
 				{
-				store->bath[i] = (depthscale * store->bath[i] + transducer_depth) / newdepthscale;
+				oldstore.bath[i] = (depthscale * oldstore.bath[i] + transducer_depth) / newdepthscale;
 				}
 
-			short_transducer_depth = (short)(store->transducer_depth / store->depth_scale);
-			short_altitude = (short)(store->altitude / store->depth_scale);
+			short_transducer_depth = (short)(oldstore.transducer_depth / oldstore.depth_scale);
+			short_altitude = (short)(oldstore.altitude / oldstore.depth_scale);
 
+			/* write old version header */
 			index = 2;
-			mb_put_binary_short(MB_NO, store->year, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->day, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->min, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->sec, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->msec, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->lon2u, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->lon2b, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->lat2u, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->lat2b, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->heading, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->speed, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->beams_bath, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->beams_amp, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->pixels_ss, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.year, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.day, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.min, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.sec, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.msec, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.lon2u, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.lon2b, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.lat2u, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.lat2b, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.heading, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.speed, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.beams_bath, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.beams_amp, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.pixels_ss, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.depth_scale, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.distance_scale, (void *)  &buffer[index]); index +=2;
 			mb_put_binary_short(MB_NO, short_transducer_depth, (void *)  &buffer[index]); index +=2;
 			mb_put_binary_short(MB_NO, short_altitude, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->ss_type, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.beam_xwidth, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.beam_lwidth, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, oldstore.ss_type, (void *)  &buffer[index]); index +=2;
 			}
 		/* otherwise write curent version file */
 		else
 			{
+			/* write current version header */
 			index = 2;
-			mb_put_binary_short(MB_NO, store->year, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->day, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->min, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->sec, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->msec, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->lon2u, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->lon2b, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->lat2u, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->lat2b, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->heading, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->speed, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_double(MB_NO, store->time_d, (void *)  &buffer[index]); index +=8;
+			mb_put_binary_double(MB_NO, store->longitude, (void *)  &buffer[index]); index +=8;
+			mb_put_binary_double(MB_NO, store->latitude, (void *)  &buffer[index]); index +=8;
+			mb_put_binary_double(MB_NO, store->sonardepth, (void *)  &buffer[index]); index +=8;
+			mb_put_binary_double(MB_NO, store->altitude, (void *)  &buffer[index]); index +=8;
+			mb_put_binary_float(MB_NO, store->heading, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->speed, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->roll, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->pitch, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->heave, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=4;
 			mb_put_binary_short(MB_NO, store->beams_bath, (void *)  &buffer[index]); index +=2;
 			mb_put_binary_short(MB_NO, store->beams_amp, (void *)  &buffer[index]); index +=2;
 			mb_put_binary_short(MB_NO, store->pixels_ss, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_int(MB_NO, store->transducer_depth, (void *)  &buffer[index]); index +=4;
-			mb_put_binary_int(MB_NO, store->altitude, (void *)  &buffer[index]); index +=4;
-			mb_put_binary_short(MB_NO, store->beam_xwidth, (void *)  &buffer[index]); index +=2;
-			mb_put_binary_short(MB_NO, store->beam_lwidth, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->spare1, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_float(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=4;
+			mb_put_binary_float(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=4;
 			mb_put_binary_short(MB_NO, store->ss_type, (void *)  &buffer[index]); index +=2;
+			mb_put_binary_short(MB_NO, store->spare2, (void *)  &buffer[index]); index +=2;
 			}
 		}
 

@@ -3031,8 +3031,8 @@ int mbcopy_any_to_mbldeoih(int verbose,
 	if (ostore != NULL)
 		{		
 		/* set beam widths */
-		ostore->beam_xwidth = 100 * beamwidth_xtrack;
-		ostore->beam_lwidth = 100 * beamwidth_ltrack;
+		ostore->beam_xwidth = beamwidth_xtrack;
+		ostore->beam_lwidth = beamwidth_ltrack;
 		ostore->kind = kind;
 
 		/* insert data */
@@ -3055,7 +3055,6 @@ int mbcopy_any_to_mbldeoih(int verbose,
 				bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment, error);
-		  
 		}
 
 	/* print output debug statements */

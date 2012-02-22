@@ -990,6 +990,19 @@ ins_speed[nins]);*/
 				nins_speed++;
 			}
 		fclose(tfp);
+		
+		/* output info */
+		if (nins > 0)
+			{
+			mb_get_date(verbose, ins_time_d[0], btime_i);
+			mb_get_date(verbose, ins_time_d[nins-1], etime_i);
+			fprintf(stderr, "%d INS data records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  End:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					nins, insfile, 
+					btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
+					etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
+			}
+		else
+			fprintf(stderr, "No INS data read from %s....\n",insfile);
 		}
 		
 	/* read navigation and attitude data from rock file if specified */
@@ -1072,6 +1085,19 @@ rock_heading[nrock]);*/
 				}
 			}
 		fclose(tfp);
+		
+		/* output info */
+		if (nrock > 0)
+			{
+			mb_get_date(verbose, rock_time_d[0], btime_i);
+			mb_get_date(verbose, rock_time_d[nrock-1], etime_i);
+			fprintf(stderr, "%d Rock format nav records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  End:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					nrock, rockfile, 
+					btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
+					etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
+			}
+		else
+			fprintf(stderr, "No Rock format nav data read from %s....\n",rockfile);
 		}
 		
 	/* read navigation and attitude data from dsl file if specified */
@@ -1169,6 +1195,19 @@ dsl_heading[ndsl]);*/
 			    }
 			}
 		fclose(tfp);
+		
+		/* output info */
+		if (ndsl > 0)
+			{
+			mb_get_date(verbose, dsl_time_d[0], btime_i);
+			mb_get_date(verbose, dsl_time_d[ndsl-1], etime_i);
+			fprintf(stderr, "%d DLS format nav records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  End:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					ndsl, dslfile, 
+					btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
+					etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
+			}
+		else
+			fprintf(stderr, "No DSL format nav data read from %s....\n",dslfile);
 		}
 
 	/* read sonardepth data from AUV log file if specified */
@@ -1257,6 +1296,19 @@ sonardepth_sonardepth[nsonardepth]);*/
 			nsonardepth++;
 			}
 		fclose(tfp);
+		
+		/* output info */
+		if (nsonardepth > 0)
+			{
+			mb_get_date(verbose, sonardepth_time_d[0], btime_i);
+			mb_get_date(verbose, sonardepth_time_d[nsonardepth-1], etime_i);
+			fprintf(stderr, "%d sonardepth records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  End:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					nsonardepth, sonardepthfile, 
+					btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
+					etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
+			}
+		else
+			fprintf(stderr, "No sonardepth data read from %s....\n",sonardepthfile);
 		}
 		
 	/* get time lag model if specified */
@@ -1315,6 +1367,19 @@ sonardepth_sonardepth[nsonardepth]);*/
 			}
 		    }
 		fclose(tfp);
+		
+		/* output info */
+		if (ntimelag > 0)
+			{
+			mb_get_date(verbose, timelag_time_d[0], btime_i);
+			mb_get_date(verbose, timelag_time_d[ntimelag-1], etime_i);
+			fprintf(stderr, "%d timelag records read from %s  Start:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d  End:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+					ntimelag, timelagfile, 
+					btime_i[0], btime_i[1], btime_i[2], btime_i[3], btime_i[4], btime_i[5], btime_i[6],
+					etime_i[0], etime_i[1], etime_i[2], etime_i[3], etime_i[4], etime_i[5], etime_i[6]);
+			}
+		else
+			fprintf(stderr, "No timelag data read from %s....\n",timelagfile);
 		}
 		
 	/* null tfp - allows detection of whether time delay file was opened, which only happens for MBARI AUV
@@ -3402,7 +3467,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 		}
 		
 	/* output auv sonardepth data */
-	if (nsonardepth > 0 && (verbose >= 0 || mode == MB7KPREPROCESS_TIMESTAMPLIST))
+	if (nsonardepth > 0 && (verbose > 0 || mode == MB7KPREPROCESS_TIMESTAMPLIST))
 		{
 		fprintf(stdout, "\nTotal auv sonardepth data read: %d\n", nsonardepth);
 		for (i=0;i<nins;i++)

@@ -126,6 +126,7 @@
 #define MBV_MOUSE_ROUTE		6
 #define MBV_MOUSE_NAV		7
 #define MBV_MOUSE_NAVFILE	8
+#define MBV_MOUSE_VECTOR	9
 
 /* projection mode */
 #define	MBV_PROJECTION_GEOGRAPHIC	0
@@ -200,6 +201,7 @@
 #define MBV_PICK_SITE			5
 #define MBV_PICK_ROUTE			6
 #define MBV_PICK_NAV			7
+#define MBV_PICK_VECTOR			8
 
 /* region defines */
 #define MBV_REGION_REPICKWIDTH		2
@@ -477,6 +479,8 @@ struct mbview_vector_struct {
 	int	npoints;
 	int	npoints_alloc;
 	int	nselected;
+	double	datamin;
+	double	datamax;
 	struct mbview_vectorpointw_struct *vectorpts;
 	struct mbview_linesegmentw_struct *segments;
 	};
@@ -540,6 +544,7 @@ struct mbview_struct {
 	void (*mbview_picksite_notify)(size_t id);
 	void (*mbview_pickroute_notify)(size_t id);
 	void (*mbview_picknav_notify)(size_t id);
+	void (*mbview_pickvector_notify)(size_t id);
 	void (*mbview_sensitivity_notify)();
 	
 	/* active flag */
@@ -772,6 +777,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
 			int	route_view_mode,
 			int	nav_view_mode,
 			int	navdrape_view_mode,
+			int	vector_view_mode,
 			double	exageration,
 			double	modelelevation3d,
 			double	modelazimuth3d,
@@ -1017,6 +1023,47 @@ int mbview_addnav(int verbose, size_t instance,
 			int *error);
 int mbview_enableviewnavs(int verbose, size_t instance,
 			int *error);
+
+/* mbview_vector.c function prototypes */
+int mbview_getvectorcount(int verbose, size_t instance,
+			int *nvec,
+			int *error);
+int mbview_getvectorpointcount(int verbose, size_t instance,
+			int	vec,
+			int	*npoint,
+			int	*nintpoint,
+			int *error);
+int mbview_allocvectorarrays(int verbose, 
+			int	npointtotal,
+			double	**veclon,
+			double	**veclat,
+			double	**vecz,
+			double	**vecdata,
+			int 	*error);
+int mbview_freevectorarrays(int verbose,
+			double	**veclon,
+			double	**veclat,
+			double	**vecz,
+			double	**vecdata,
+			int *error);
+int mbview_addvector(int verbose, size_t instance,
+			int	npoint,
+			double	*veclon,
+			double	*veclat,
+			double	*vecz,
+			double	*vecdata,
+			int	veccolor,
+			int	vecsize,
+			mb_path	vecname,
+			double	vecdatamin,
+			double	vecdatamax,
+			int *error);
+int mbview_enableviewvectors(int verbose, size_t instance,
+			int *error);
+int mbview_pick_vec_select(size_t instance, int select, int which, int xpixel, int ypixel);
+int mbview_vector_delete(size_t instance, int ivec);
+int mbview_drawvectorpick(size_t instance);
+int mbview_drawvector(size_t instance, int rez);
 
 /* mbview_route.c function prototypes */
 int mbview_getroutecount(int verbose, size_t instance,

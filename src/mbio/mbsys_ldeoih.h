@@ -98,6 +98,74 @@ struct mbsys_ldeoih_struct
 	{
 	/* type of data record */
 	int	kind;
+	
+	/* time stamp */
+	double	time_d;		/* decimal seconds since start of 1970 */
+
+	/* position */
+	double	longitude;	/* longitude (degrees 0-360) */
+	double	latitude;	/* latitude (degrees 0-360) */
+	
+	/* sonar depth and altitude */
+	double	sonardepth;	/* meters (sonar depth for bathymetry calculation,
+					already corrected for heave if needed,
+						sonardepth = transducer_depth
+						bath = altitude + sonardepth
+						sonardepth = draft - heave
+						draft = sonardepth + heave */
+	double	altitude;	/* meters */
+
+	/* heading and speed */
+	float	heading;	/* heading (degrees 0-360) */
+	float	speed;		/* km/hour */
+	
+	/* attitude */
+	float	roll;		/* degrees */
+	float	pitch;		/* degrees */
+	float	heave;		/* meters */
+	
+	/* beam widths */
+	float	beam_xwidth;	/* degrees */
+	float	beam_lwidth;	/* degrees */
+
+	/* numbers of beams */
+	short	beams_bath;	/* number of depth values */
+	short	beams_amp;	/* number of amplitude values */
+	short	pixels_ss;	/* number of sidescan pixels */
+	short	spare1;		
+	short	beams_bath_alloc;	/* number of depth values allocated */
+	short	beams_amp_alloc;	/* number of amplitude values allocated */
+	short	pixels_ss_alloc;	/* number of sidescan pixels allocated */
+	
+	/* scaling */
+	float	depth_scale;	/* depth[i] = (bath[i] * depth_scale) + transducer_depth */
+	float	distance_scale;	/* acrosstrackdistance[i] = acrosstrack[i] * distance_scale 
+					alongtrackdistance[i] = alongtrack[i] * distance_scale */
+
+	/* sidescan type */
+	short	ss_type;	/* indicates if sidescan values are logarithmic or linear
+					ss_type = 0: logarithmic (dB)
+					ss_type = 1: linear (voltage) */
+	short	spare2;		
+
+	/* pointers to arrays */
+	unsigned char *beamflag;
+	short	*bath;
+	short	*amp;
+	short	*bath_acrosstrack;
+	short	*bath_alongtrack;
+	short	*ss;
+	short	*ss_acrosstrack;
+	short	*ss_alongtrack;
+
+	/* comment */
+	char	comment[MBSYS_LDEOIH_MAXLINE];
+	};
+
+struct mbsys_ldeoih_old_struct
+	{
+	/* type of data record */
+	int	kind;
 
 	/* time stamp */
 	short	year;		/* year (4 digits) */
