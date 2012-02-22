@@ -192,7 +192,8 @@ and mbinfo.c and mblist.c in src/utilities.
 
 Add importing and display of "vector" data in mbview and mbgrdviz. The
 vector files are GMT-style segmented files of lon, lat, topography value triples. 
-T
+These are displayed as lines colored according to the value. Controls for 
+setting the color tables still have to be added.
 
 Changed mbgrid so that any background (option -K) is calculated first,
 before significant memory is allocated. This avoids crashes due to
