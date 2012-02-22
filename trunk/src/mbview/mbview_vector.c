@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_vector.c	1/11/2012
- *    $Id:  $
+ *    $Id$
  *
  *    Copyright (c) 2012 by
  *    David W. Caress (caress@mbari.org)
@@ -67,7 +67,7 @@
 /* local variables */
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_vector.c 1917 2012-01-10 19:25:33Z caress $";
+static char rcs_id[]="$Id$";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getvectorcount(int verbose, size_t instance,

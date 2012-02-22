@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbf_elmk2xse.h	6/6/97
- *	$Id: mbf_elmk2xse.h,v 5.0 2006-08-04 16:46:49 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)

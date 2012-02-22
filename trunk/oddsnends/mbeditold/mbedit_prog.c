@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c,v 5.7 2009-03-02 18:59:05 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993, 1994, 1995, 1997, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -270,7 +270,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c,v 5.7 2009-03-02 18:59:05 caress Exp $";
+static char rcs_id[] = "$Id$";
 static char program_name[] = "MBeditold";
 static char help_message[] =  
 "MBeditold is an interactive editor used to identify and flag\n\

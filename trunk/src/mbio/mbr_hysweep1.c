@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hysweep1.c	12/23/2011
- *	$Id: $
+ *	$Id$
  *
  *    Copyright (c) 2011-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -82,7 +82,7 @@ int mbr_hysweep1_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 int mbr_hysweep1_rd_line(int verbose, FILE *mbfp, char *line, int *error);
 int mbr_hysweep1_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_hysweep1.c 1901 2011-07-15 08:26:03Z caress $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hysweep1(int verbose, void *mbio_ptr, int *error)

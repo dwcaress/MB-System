@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbhysweeppreprocess.c	1/1/2012
- *    $Id: mbhysweeppreprocess.c 1907 2011-11-10 04:33:03Z caress $
+ *    $Id$
  *
  *    Copyright (c) 2012 by
  *    David W. Caress (caress@mbari.org)
@@ -60,7 +60,7 @@
 #define MBHYSWEEPPREPROCESS_NAVFORMAT_NONE	0
 #define MBHYSWEEPPREPROCESS_NAVFORMAT_OFG	1
 
-static char rcs_id[] = "$Id: mbhysweeppreprocess.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
