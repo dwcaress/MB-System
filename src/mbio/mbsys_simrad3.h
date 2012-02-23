@@ -812,12 +812,12 @@ struct mbsys_simrad3_struct
 	int	sts_gain;		/* fixed gain (dB) */
 	int	sts_dno;		/* depth to normal incidence (m) */
 	int	sts_rno;		/* range to normal incidence (m) */
-	int	sts_port;		/* port coverange (deg) */
-	int	sts_stbd;		/* starboard coverange (deg) */
+	int	sts_port;		/* port coverage (deg) */
+	int	sts_stbd;		/* starboard coverage (deg) */
 	int	sts_ssp;		/* sound speed at transducer from profile (0.1 m/s) */
 	int	sts_yaw;		/* yaw stabilization (0.01 deg) */
-	int	sts_port2;		/* port coverange for second em3002 head (deg) */
-	int	sts_stbd2;		/* starboard coverange for second em3002 head (deg) */
+	int	sts_port2;		/* port coverage for second em3002 head (deg) */
+	int	sts_stbd2;		/* starboard coverage for second em3002 head (deg) */
 	int	sts_spare2;		/* spare */
 
 	/* installation parameter values */
