@@ -185,6 +185,11 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
  
+-----> 5.3.1939
+
+Added output of raw values from current generation Kongsberg data (formats 58 and 59)
+to mblist.
+ 
 -----> 5.3.1937
 
 Changed the resolution of navigation in fbt (format 71) files and

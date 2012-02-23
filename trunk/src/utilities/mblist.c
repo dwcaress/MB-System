@@ -269,6 +269,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
 #include "../../include/mbsys_simrad2.h"
+#include "../../include/mbsys_simrad3.h"
 
 /* GMT include files */
 #include "gmt_nan.h"
@@ -348,6 +349,30 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		double *ss_pixels,
 		int *error);
 int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
+		int *mode,
+		int *ipulse_length,
+		int *png_count,
+		int *sample_rate,
+		double *absorption,
+		int *max_range,
+		int *r_zero,
+		int *r_zero_corr,
+		int *tvg_start,
+		int *tvg_stop,
+		double *bsn,
+		double *bso,
+		int *tx,
+		int *tvg_crossover,
+		int *nbeams_ss,
+		int *npixels,
+		int *beam_samples,
+		int *start_sample,
+		int *range,
+		double *depression,
+		double *bs,
+		double *ss_pixels,
+		int *error);
+int mb_get_raw_simrad3(int verbose, void *mbio_ptr, 
 		int *mode,
 		int *ipulse_length,
 		int *png_count,
@@ -5219,6 +5244,34 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 				error);
 
 	    break;
+	  case MBF_EM710MBA:
+	  case MBF_EM710RAW:
+	    mb_get_raw_simrad3(verbose, mbio_ptr, 
+				mode,
+				ipulse_length,
+				png_count,
+				sample_rate,
+				absorption,
+				max_range,
+				r_zero,
+				r_zero_corr,
+				tvg_start,
+				tvg_stop,
+				bsn,
+				bso,
+				tx,
+				tvg_crossover,
+				nbeams_ss,
+				npixels,
+				beam_samples,
+				start_sample,
+				range,
+				depression,
+				bs,
+				ss_pixels,
+				error);
+
+	    break;
 	  }
 
 	/* print output debug statements */
@@ -5347,6 +5400,136 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 	      {
 		beam_samples[ping_ptr->png_beam_index[i]] = ping_ptr->png_beam_samples[i];
 		start_sample[ping_ptr->png_beam_index[i]] = ping_ptr->png_start_sample[i];
+	      }
+	    for (i = 0; i < ping_ptr->png_npixels; i++)
+	      ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
+	  }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       mode:            %d\n",*mode);
+		fprintf(stderr,"dbg2       ipulse_length:   %d\n",*ipulse_length);
+		fprintf(stderr,"dbg2       png_count:       %d\n",*png_count);
+		fprintf(stderr,"dbg2       sample_rate:     %d\n",*sample_rate);
+		fprintf(stderr,"dbg2       absorption:      %f\n",*absorption);
+		fprintf(stderr,"dbg2       max_range:       %d\n",*max_range);
+		fprintf(stderr,"dbg2       r_zero:          %d\n",*r_zero);
+		fprintf(stderr,"dbg2       r_zero_corr:     %d\n",*r_zero_corr);
+		fprintf(stderr,"dbg2       tvg_start:       %d\n",*tvg_start);
+		fprintf(stderr,"dbg2       tvg_stop:        %d\n",*tvg_stop);
+		fprintf(stderr,"dbg2       bsn:             %f\n",*bsn);
+		fprintf(stderr,"dbg2       bso:             %f\n",*bso);
+		fprintf(stderr,"dbg2       tx:              %d\n",*tx);
+		fprintf(stderr,"dbg2       tvg_crossover:   %d\n",*tvg_crossover);
+		fprintf(stderr,"dbg2       nbeams_ss:       %d\n",*nbeams_ss);
+		fprintf(stderr,"dbg2       npixels:         %d\n",*npixels);
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
+			{
+			fprintf(stderr,"dbg2       beam:%d range:%d depression:%f bs:%f\n",
+				i,range[i],depression[i],bs[i]);
+			}
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
+			{
+			fprintf(stderr,"dbg2       beam:%d samples:%d start:%d\n",
+				i,beam_samples[i],start_sample[i]);
+			}
+		for (i = 0; i < *npixels; i++)
+			{
+			fprintf(stderr,"dbg2       pixel:%d ss:%f\n",
+				i,ss_pixels[i]);
+			}
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	return status;
+}
+/*--------------------------------------------------------------------*/
+/*
+Method to get fields from simrad3 raw data.
+*/
+
+int mb_get_raw_simrad3(int verbose, void *mbio_ptr, 
+			int	*mode,
+			int	*ipulse_length,
+			int	*png_count,
+			int	*sample_rate,
+			double	*absorption,
+			int 	*max_range,
+			int 	*r_zero,
+			int 	*r_zero_corr,
+			int 	*tvg_start,
+			int 	*tvg_stop,
+			double 	*bsn,
+			double 	*bso,
+			int 	*tx,
+			int 	*tvg_crossover,
+			int 	*nbeams_ss,
+			int 	*npixels,
+			int 	*beam_samples,
+			int	*start_sample,
+			int 	*range,
+			double	*depression,
+			double 	*bs,
+			double	*ss_pixels,
+			int 	*error)
+{
+	char	*function_name = "mb_get_raw_simrad3";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad3_struct *store_ptr;
+	struct mbsys_simrad3_ping_struct *ping_ptr;
+  	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:        %lu\n",(size_t)mbio_ptr);
+		}
+
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	store_ptr = (struct mbsys_simrad3_struct *) mb_io_ptr->store_data;
+	ping_ptr = store_ptr->ping;
+
+	if (store_ptr->kind == MB_DATA_DATA)
+	  {
+	    *mode = store_ptr->run_mode;
+	    *ipulse_length = store_ptr->run_tran_pulse;
+	    *png_count = ping_ptr->png_count;
+	    *sample_rate =  ping_ptr->png_sample_rate;
+	    *absorption = store_ptr->run_absorption * 0.01;
+	    *max_range = 0;
+	    *r_zero = ping_ptr->png_r_zero;
+	    *r_zero_corr = 0;
+	    *tvg_start = 0;
+	    *tvg_stop = 0;
+	    *bsn = ping_ptr->png_bsn * 0.1;
+	    *bso = ping_ptr->png_bso * 0.1;
+	    *tx = ping_ptr->png_tx * 0.1;
+	    *tvg_crossover = ping_ptr->png_tvg_crossover;
+	    *nbeams_ss = ping_ptr->png_nbeams_ss;
+	    *npixels = ping_ptr->png_npixels;
+	    
+	    
+	    for (i = 0; i < ping_ptr->png_nbeams; i++)
+	      {
+		range[i] = ping_ptr->png_range[i];
+		depression[i] = ping_ptr->png_depression[i] * .01;
+		bs[i] = ping_ptr->png_amp[i] * 0.5;
+	      }
+	    for (i = 0; i < ping_ptr->png_nbeams_ss; i++) 
+	      {
+		beam_samples[i] = ping_ptr->png_beam_samples[i];
+		start_sample[i] = ping_ptr->png_start_sample[i];
 	      }
 	    for (i = 0; i < ping_ptr->png_npixels; i++)
 	      ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
