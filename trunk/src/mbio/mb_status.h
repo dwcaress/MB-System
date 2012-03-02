@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbio_status.h defines version, status and error codes used 
+ * mbio_status.h defines version, status and error codes used
  * by MBIO functions and programs
  *
  * Author:	D. W. Caress
@@ -412,8 +412,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.3.1939
-#define	MB_BUILD_DATE	"23 February 2012"
+#define	MB_VERSION	"5.3.1940"
+#define	MB_BUILD_DATE	"2 March 2012"
 #define	MB_SVN		"$Id$"
 
 /* MBIO function boolean convention */
@@ -553,7 +553,7 @@
 
 /* MBIO function error messages */
 #ifdef DEFINE_MB_MESSAGES
-static char *fatal_error_msg[] = 
+static char *fatal_error_msg[] =
 	{
 	"No error",
 	"Unable to allocate memory, initialization failed",
@@ -569,7 +569,7 @@ static char *fatal_error_msg[] =
 	"Invalid data record type specified for writing",
 	"Invalid control parameter specified by user",
 	"Invalid buffer id",
-	"Invalid system id - this should not happen!", 
+	"Invalid system id - this should not happen!",
 	"This data file is not in the specified format!"
 	};
 static char *nonfatal_error_msg[] =
@@ -590,14 +590,14 @@ static char *nonfatal_error_msg[] =
 	"No data was loaded into the buffer",
 	"Data buffer is empty",
 	"No data was dumped from the buffer",
-	"No more survey data records in buffer", 
+	"No more survey data records in buffer",
 	"Data inconsistencies prevented inserting data into storage structure",
 	"UTM projection initialization failed",
-	"Projection database cannot be read", 
-	"Missing navigation and/or attitude data", 
-	"Not enough data available to perform operation", 
-	"Requested file not found", 
-	"Requested file locked", 
+	"Projection database cannot be read",
+	"Missing navigation and/or attitude data",
+	"Not enough data available to perform operation",
+	"Requested file not found",
+	"Requested file locked",
 	};
 static char *unknown_error_msg[] =
 	{
@@ -605,69 +605,69 @@ static char *unknown_error_msg[] =
 	};
 
 /* MBIO function notice messages */
-static char *notice_msg[] = 
+static char *notice_msg[] =
 	{
-	"Unknown notice identifier junk", 
+	"Unknown notice identifier junk",
 
 	/* notices for data record types */
-	"MB_DATA_DATA (ID=1): survey data", 
-	"MB_DATA_COMMENT (ID=2): comment", 
-	"MB_DATA_HEADER (ID=3): general header", 
-	"MB_DATA_CALIBRATE (ID=4): Hydrosweep DS calibration ping", 
-	"MB_DATA_MEAN_VELOCITY (ID=5): Hydrosweep DS mean sound speed", 
-	"MB_DATA_VELOCITY_PROFILE (ID=6): SVP", 
-	"MB_DATA_STANDBY (ID=7): Hydrosweep DS standby record", 
-	"MB_DATA_NAV_SOURCE (ID=8): Hydrosweep DS nav source record", 
-	"MB_DATA_PARAMETER (ID=9): Parameter record", 
-	"MB_DATA_START (ID=10): Simrad start datagram", 
-	"MB_DATA_STOP (ID=11): Simrad stop datagram", 
-	"MB_DATA_NAV (ID=12): Navigation record", 
-	"MB_DATA_RUN_PARAMETER (ID=13): Simrad runtime parameter datagram", 
-	"MB_DATA_CLOCK (ID=14): Simrad clock datagram", 
-	"MB_DATA_TIDE (ID=15): Tide record", 
-	"MB_DATA_HEIGHT (ID=16): Simrad height datagram", 
-	"MB_DATA_HEADING (ID=17): Heading record", 
-	"MB_DATA_ATTITUDE (ID=18): Attitude record", 
-	"MB_DATA_SSV (ID=19): Surface sound speed record", 
-	"MB_DATA_ANGLE (ID=20): Beam angle record", 
-	"MB_DATA_EVENT (ID=21): Hydrosweep MD event record", 
-	"MB_DATA_HISTORY (ID=22): GSF history record", 
-	"MB_DATA_SUMMARY (ID=23): GSF summary record", 
-	"MB_DATA_PROCESSING_PARAMETERS (ID=24): GSF processing parameters record", 
-	"MB_DATA_SENSOR_PARAMETERS (ID=25): GSF sensor parameter record", 
-	"MB_DATA_NAVIGATION_ERROR (ID=26): GSF navigation error record", 
-	"MB_DATA_RAW_LINE (ID=27): uninterpretable ASCII line", 
-	"MB_DATA_NAV1 (ID=28): Auxilliary nav system 1", 
-	"MB_DATA_NAV2 (ID=29): Auxilliary nav system 2", 
-	"MB_DATA_NAV3 (ID=30): Auxilliary nav system 3", 
-	"MB_DATA_TILT (ID=31): Mechanical tilt record", 
-	"MB_DATA_MOTION (ID=32): Motion (DVL) sensor record", 
-	"MB_DATA_CTD (ID=33): CTD record", 
-	"MB_DATA_SUBBOTTOM_MCS (ID=34): MCS subbottom record", 
-	"MB_DATA_SUBBOTTOM_CNTRBEAM (ID=35): Centerbeam subbottom record", 
-	"MB_DATA_SUBBOTTOM_SUBBOTTOM (ID=36): Subbottom record", 
-	"MB_DATA_SIDESCAN2 (ID=37): Secondary sidescan record", 
-	"MB_DATA_SIDESCAN3 (ID=38): Tertiary sidescan record", 
-	"MB_DATA_IMAGE (ID=39): Sonar image record", 
-	"MB_DATA_ROLL (ID=40): Roll record", 
-	"MB_DATA_PITCH (ID=41): Pitch record", 
-	"MB_DATA_ABSORPTIONLOSS (ID=42): Absorption loss record", 
-	"MB_DATA_SPREADINGLOSS (ID=43): Spreading loss record", 
-	"MB_DATA_INSTALLATION (ID=44): Installation parameter record", 
-	"MB_DATA_WATER_COLUMN (ID=45): Water column record", 
-	"MB_DATA_STATUS (ID=46): Status record", 
-	"MB_DATA_DVL (ID=47): DVL record", 
-	"MB_DATA_NMEA_RMC (ID=48): NMEA RMC record", 
-	"MB_DATA_NMEA_DBT (ID=49): NMEA DBT record", 
-	"MB_DATA_NMEA_DPT (ID=50): NMEA DPT record", 
-	"MB_DATA_NMEA_ZDA (ID=51): NMEA ZDA record", 
-	"MB_DATA_NMEA_GLL (ID=52): NMEA GLL record", 
-	"MB_DATA_NMEA_GGA (ID=53): NMEA GGA record", 
-	"MB_DATA_SURVEY_LINE (ID=54): Survey line record", 
+	"MB_DATA_DATA (ID=1): survey data",
+	"MB_DATA_COMMENT (ID=2): comment",
+	"MB_DATA_HEADER (ID=3): general header",
+	"MB_DATA_CALIBRATE (ID=4): Hydrosweep DS calibration ping",
+	"MB_DATA_MEAN_VELOCITY (ID=5): Hydrosweep DS mean sound speed",
+	"MB_DATA_VELOCITY_PROFILE (ID=6): SVP",
+	"MB_DATA_STANDBY (ID=7): Hydrosweep DS standby record",
+	"MB_DATA_NAV_SOURCE (ID=8): Hydrosweep DS nav source record",
+	"MB_DATA_PARAMETER (ID=9): Parameter record",
+	"MB_DATA_START (ID=10): Simrad start datagram",
+	"MB_DATA_STOP (ID=11): Simrad stop datagram",
+	"MB_DATA_NAV (ID=12): Navigation record",
+	"MB_DATA_RUN_PARAMETER (ID=13): Simrad runtime parameter datagram",
+	"MB_DATA_CLOCK (ID=14): Simrad clock datagram",
+	"MB_DATA_TIDE (ID=15): Tide record",
+	"MB_DATA_HEIGHT (ID=16): Simrad height datagram",
+	"MB_DATA_HEADING (ID=17): Heading record",
+	"MB_DATA_ATTITUDE (ID=18): Attitude record",
+	"MB_DATA_SSV (ID=19): Surface sound speed record",
+	"MB_DATA_ANGLE (ID=20): Beam angle record",
+	"MB_DATA_EVENT (ID=21): Hydrosweep MD event record",
+	"MB_DATA_HISTORY (ID=22): GSF history record",
+	"MB_DATA_SUMMARY (ID=23): GSF summary record",
+	"MB_DATA_PROCESSING_PARAMETERS (ID=24): GSF processing parameters record",
+	"MB_DATA_SENSOR_PARAMETERS (ID=25): GSF sensor parameter record",
+	"MB_DATA_NAVIGATION_ERROR (ID=26): GSF navigation error record",
+	"MB_DATA_RAW_LINE (ID=27): uninterpretable ASCII line",
+	"MB_DATA_NAV1 (ID=28): Auxilliary nav system 1",
+	"MB_DATA_NAV2 (ID=29): Auxilliary nav system 2",
+	"MB_DATA_NAV3 (ID=30): Auxilliary nav system 3",
+	"MB_DATA_TILT (ID=31): Mechanical tilt record",
+	"MB_DATA_MOTION (ID=32): Motion (DVL) sensor record",
+	"MB_DATA_CTD (ID=33): CTD record",
+	"MB_DATA_SUBBOTTOM_MCS (ID=34): MCS subbottom record",
+	"MB_DATA_SUBBOTTOM_CNTRBEAM (ID=35): Centerbeam subbottom record",
+	"MB_DATA_SUBBOTTOM_SUBBOTTOM (ID=36): Subbottom record",
+	"MB_DATA_SIDESCAN2 (ID=37): Secondary sidescan record",
+	"MB_DATA_SIDESCAN3 (ID=38): Tertiary sidescan record",
+	"MB_DATA_IMAGE (ID=39): Sonar image record",
+	"MB_DATA_ROLL (ID=40): Roll record",
+	"MB_DATA_PITCH (ID=41): Pitch record",
+	"MB_DATA_ABSORPTIONLOSS (ID=42): Absorption loss record",
+	"MB_DATA_SPREADINGLOSS (ID=43): Spreading loss record",
+	"MB_DATA_INSTALLATION (ID=44): Installation parameter record",
+	"MB_DATA_WATER_COLUMN (ID=45): Water column record",
+	"MB_DATA_STATUS (ID=46): Status record",
+	"MB_DATA_DVL (ID=47): DVL record",
+	"MB_DATA_NMEA_RMC (ID=48): NMEA RMC record",
+	"MB_DATA_NMEA_DBT (ID=49): NMEA DBT record",
+	"MB_DATA_NMEA_DPT (ID=50): NMEA DPT record",
+	"MB_DATA_NMEA_ZDA (ID=51): NMEA ZDA record",
+	"MB_DATA_NMEA_GLL (ID=52): NMEA GLL record",
+	"MB_DATA_NMEA_GGA (ID=53): NMEA GGA record",
+	"MB_DATA_SURVEY_LINE (ID=54): Survey line record",
 	"MB_DATA_ATTITUDE1 (55): ancillary attitude system 1",
 	"MB_DATA_ATTITUDE2 (56): ancillary attitude system 2",
 	"MB_DATA_ATTITUDE3 (57): ancillary attitude system 3",
-	
+
 	/* notices for nonfatal error messages */
 	"MB_ERROR_TIME_GAP (ID=-1): Time gap in data",
 	"MB_ERROR_OUT_BOUNDS (ID=-2): Data outside specified location bounds",
@@ -684,15 +684,15 @@ static char *notice_msg[] =
 	"MB_ERROR_NO_DATA_LOADED (ID=-13): No data was loaded into the buffer",
 	"MB_ERROR_BUFFER_EMPTY (ID=-14): Data buffer is empty",
 	"MB_ERROR_NO_DATA_DUMPED (ID=-15): No data was dumped from the buffer",
-	"MB_ERROR_NO_MORE_DATA (ID=-16): No more survey data records in buffer", 
-	"MB_ERROR_DATA_NOT_INSERTED (ID=-17): Data inconsistencies prevented inserting data into storage structure", 
-	"MB_ERROR_BAD_PROJECTION (ID=-18): UTM projection initialization failed", 
-	"MB_ERROR_MISSING_PROJECTIONS (ID=-19): Projection database cannot be read", 
+	"MB_ERROR_NO_MORE_DATA (ID=-16): No more survey data records in buffer",
+	"MB_ERROR_DATA_NOT_INSERTED (ID=-17): Data inconsistencies prevented inserting data into storage structure",
+	"MB_ERROR_BAD_PROJECTION (ID=-18): UTM projection initialization failed",
+	"MB_ERROR_MISSING_PROJECTIONS (ID=-19): Projection database cannot be read",
 	"MB_ERROR_MISSING_NAVATTITUDE (ID=-20): Attitude data are missing for this ping",
 	"MB_ERROR_NOT_ENOUGH_DATA (ID=-21): Not enough data to perform spline interpolation",
 	"MB_ERROR_FILE_NOT_FOUND (ID=-22): Required file cannot be found",
 	"MB_ERROR_FILE_LOCKED (ID=-23): Required file locked",
-	
+
 	/* problem notices */
 	"DATA PROBLEM (ID=1): No survey data found",
 	"DATA PROBLEM (ID=2): Zero longitude or latitude in survey data",
@@ -706,8 +706,8 @@ static char *unknown_notice_msg[] =
 	"Unknown notice identifier detritus"
 	};
 #endif
-	
-/* MBIO sidescan types 
+
+/* MBIO sidescan types
 	- sidescan values can be logarithmic (dB) or linear (usually voltage) */
 #define MB_SIDESCAN_LOGARITHMIC 0
 #define MB_SIDESCAN_LINEAR	1
@@ -715,32 +715,32 @@ static char *unknown_notice_msg[] =
 /* MBIO null sidescan:
 	- value used to flag sidescan values as undefined */
 #define MB_SIDESCAN_NULL -1000000000.0
-	
+
 /* MBIO unknown time flag:
 	- time_d value used to flag unknown time tag
 	- e.g. for xyz soundings */
 #define MB_TIME_D_UNKNOWN -2209075200.000000
 
 /*
- * The following defines the values used to flag or 
+ * The following defines the values used to flag or
  * select individual bathymetry values (soundings). This scheme
- * is very similar to the convention used in the HMPS 
- * hydrographic data processing package and the SAIC Hydrobat 
- * package. The values passed in MBIO functions are single 
+ * is very similar to the convention used in the HMPS
+ * hydrographic data processing package and the SAIC Hydrobat
+ * package. The values passed in MBIO functions are single
  * byte characters.
- * 
+ *
  * Macros used to identify the flags are also defined here.
- * 
+ *
  * The flagging scheme is as follows:
- * 
+ *
  * Beams cannot be both flagged and selected. However, more than
  * one "reason bit" can be set for either flagging or selection.
- * 
+ *
  * The flag and select bits:
  *   xxxxxx00 => This beam is neither flagged nor selected.
  *   xxxxxx01 => This beam is flagged as bad and should be ignored.
  *   xxxxxx10 => This beam has been selected.
- * 
+ *
  * Flagging modes:
  *   00000001 => Flagged because no detection was made by the sonar.
  *   xxxxx101 => Flagged by manual editing.
@@ -749,7 +749,7 @@ static char *unknown_notice_msg[] =
  *   xx1xxx01 => Flagged because uncertainty exceeds 2 X IHO standard.
  *   x1xxxx01 => Flagged because footprint is too large
  *   1xxxxx01 => Flagged by sonar as unreliable.
- * 
+ *
  * Selection modes:
  *   00000010 => Selected, no reason specified.
  *   xxxxx110 => Selected as least depth.
