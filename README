@@ -28,7 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-  Version 5.3.1940       March 2, 2012
+  Version 5.3.1941       March 6, 2012
 * Version 5.3.1917       January 10, 2012
 * Version 5.3.1912       November 19, 2011
 * Version 5.3.1909       November 16, 2011
@@ -185,7 +185,15 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
------> 5.3.1940
+-----> 5.3.1941
+
+Fixed sidescan filtering with mbfilter. The filtered sidescan output in
+format 71 files had incorrect acrosstrack locations.
+
+Fixed problems with sidescan generation for current generation
+Kongsberg data (formats 58 and 59). The code previously tended to choose too
+small of a pixel size, resulting in a sidescan swath narrower than the real
+swath width.
 
 Fixed swath contouring and track plotting by mbcontour and mbm_plot. Subtle changes
 in the GMT pslib resulted in contours and tracks only partly plotting in some
