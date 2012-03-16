@@ -441,12 +441,12 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*speed = store->speed;
 
 		/* set beamwidths in mb_io structure */
-		if (store->beam_xwidth > 0)
-		    mb_io_ptr->beamwidth_ltrack = store->beam_xwidth;
+		if (store->beam_lwidth > 0)
+		    mb_io_ptr->beamwidth_ltrack = store->beam_lwidth;
 		else
 		    mb_io_ptr->beamwidth_ltrack = 2.0;
-		if (store->beam_lwidth > 0)
-		    mb_io_ptr->beamwidth_xtrack = store->beam_lwidth;
+		if (store->beam_xwidth > 0)
+		    mb_io_ptr->beamwidth_xtrack = store->beam_xwidth;
 		else
 		    mb_io_ptr->beamwidth_xtrack = 2.0;
 

@@ -13,8 +13,8 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_segy.h defines the SEG-Y trace header used by MB-System when 
- * extracting seismic reflection or subbottom profiler data from 
+ * mb_segy.h defines the SEG-Y trace header used by MB-System when
+ * extracting seismic reflection or subbottom profiler data from
  * swath mapping data files. The SIOSEIS implementation of the
  * trace header is used because it incorporates a deep water delay
  * value not found in most other implementations.See the SIOSEIS
@@ -110,8 +110,8 @@ struct mb_segyfileheader_struct
 	short	num_ext_headers;
 	char	extra[338];
 	};
-struct mb_segytraceheader_struct 
-	{ 
+struct mb_segytraceheader_struct
+	{
         int            	seq_num;        /* bytes 0-3, trace sequence number in the line */
         int            	seq_reel;       /* bytes 4-7, trace sequence number in the reel */
         int            	shot_num;       /* bytes 8-11, shot number or stacked trace number
@@ -188,10 +188,10 @@ struct mb_segytraceheader_struct
         float   	dummy2; 	/* bytes 208-211 */
         float   	dummy3; 	/* bytes 212-215 */
         float   	dummy4; 	/* bytes 216-219 */
-        float   	dummy5; 	/* bytes 220-223 */
-        float   	dummy6; 	/* bytes 224-227 */
-        float   	dummy7; 	/* bytes 228-231 */
-        float   	dummy8; 	/* bytes 232-235 */
+        float   	soundspeed; 	/* bytes 220-223, water sound speed in m/sec (MB-System only) */
+        float   	distance; 	/* bytes 224-227, distance from previous shot along track in meters (MB-System only) */
+        float   	roll; 	        /* bytes 228-231, roll in degrees (MB-System only) */
+        float   	pitch; 	        /* bytes 232-235, pitch in degrees (MB-System only) */
         float   	heading; 	/* bytes 236-239, heading in degrees (MB-System only) */
 };
 struct mb_segyio_struct
@@ -210,22 +210,22 @@ struct mb_segyio_struct
 	};
 
 /* function prototypes */
-int mb_segy_read_init(int verbose, char *segyfile, 
+int mb_segy_read_init(int verbose, char *segyfile,
 		void **mbsegyio_ptr,
 		struct mb_segyasciiheader_struct *segyasciiheader,
 		struct mb_segyfileheader_struct *segyfileheader,
 		int *error);
-int mb_segy_write_init(int verbose, char *segyfile, 
+int mb_segy_write_init(int verbose, char *segyfile,
 		struct mb_segyasciiheader_struct *asciiheader,
 		struct mb_segyfileheader_struct *fileheader,
 		void **mbsegyio_ptr,
 		int *error);
 int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error);
-int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, 
+int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		struct mb_segytraceheader_struct *traceheaderptr,
 		float **traceptr,
 		int *error);
-int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, 
+int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		struct mb_segytraceheader_struct *traceheader,
 		float *trace,
 		int *error);
