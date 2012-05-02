@@ -14,8 +14,8 @@
  *--------------------------------------------------------------------*/
 /*
  * MBCONTOUR is a GMT compatible utility which creates a color postscript
- * contour map of multibeam swath bathymetry. 
- * Complete maps are made by using MBCONTOUR in conjunction with the 
+ * contour map of multibeam swath bathymetry.
+ * Complete maps are made by using MBCONTOUR in conjunction with the
  * usual GMT programs.  The contour levels and colors can be controlled
  * directly or set implicitly using contour and color change intervals.
  * Contours can also be set to have ticks pointing downhill.
@@ -220,7 +220,7 @@ static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
 
-int main (int argc, char **argv) 
+int main (int argc, char **argv)
 {
 #ifdef MBCONTOURFILTER
 	char program_name[] = "MBCONTOURFILTER";
@@ -443,14 +443,14 @@ int main (int argc, char **argv)
 			  argv_gmt[argc_gmt] = argv[i];
 			  argc_gmt++;
 			  break;
-			  }    
+			  }
 		}
 	    }
 	  }
 
 	/* deal with mb options */
 	while ((c = getopt(argc, argv, "VvHhA:a:B:b:C:c:D:d:E:e:F:f:G:g:I:i:J:j:KkL:l:M:m:N:n:OoPp:QqR:r:S:s:T:t:UuWwX:x:Y:y:Z:z:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'A':
 		case 'a':
@@ -617,18 +617,18 @@ int main (int argc, char **argv)
 		nplot = 50;
 
 	/* if nothing set to be plotted, plot contours and track */
-	if (plot_contours == MB_NO && plot_triangles == MB_NO 
+	if (plot_contours == MB_NO && plot_triangles == MB_NO
 		&& plot_track == MB_NO && plot_pingnumber == MB_NO)
 		{
 		plot_contours = MB_YES;
 		plot_track = MB_YES;
 		}
-	if (plot_name == MB_YES && plot_track == MB_NO 
+	if (plot_name == MB_YES && plot_track == MB_NO
 		&& plot_pingnumber == MB_NO)
 		{
 		plot_track = MB_YES;
 		}
-	if (plot_track == MB_NO 
+	if (plot_track == MB_NO
 		&& plot_pingnumber == MB_YES)
 		{
 		plot_track = MB_YES;
@@ -851,7 +851,7 @@ int main (int argc, char **argv)
 	mb_bounds[1] = bounds[1] + 0.25*(bounds[1] - bounds[0]);
 	mb_bounds[2] = bounds[2] - 0.25*(bounds[3] - bounds[2]);
 	mb_bounds[3] = bounds[3] + 0.25*(bounds[3] - bounds[2]);
-	
+
 	/* set lonflip if possible */
 	if (lonflip_set == MB_NO)
 		{
@@ -897,12 +897,12 @@ int main (int argc, char **argv)
 	    }
 
 	/* loop over files in file list */
-	if (verbose == 1) 
+	if (verbose == 1)
 		fprintf(stderr,"\n");
 	while (read_data == MB_YES)
 	    {
 	    /* check for mbinfo file - get file bounds if possible */
-	    status = mb_check_info(verbose, file, lonflip, bounds, 
+	    status = mb_check_info(verbose, file, lonflip, bounds,
 			    &file_in_bounds, &error);
 	    if (status == MB_FAILURE)
 		    {
@@ -925,7 +925,7 @@ int main (int argc, char **argv)
 		    {
 		    mb_get_fnv(verbose, file, &format, &error);
 		    }
-	    
+
 		/* call mb_read_init() */
 		if ((status = mb_read_init(
 		    verbose,file,format,pings,lonflip,mb_bounds,
@@ -958,15 +958,15 @@ int main (int argc, char **argv)
 		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						    sizeof(double), (void **)&bathlat, &error);
 		if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						    sizeof(double), (void **)&ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						    sizeof(double), (void **)&sslon, &error);
 		if (error == MB_ERROR_NO_ERROR)
-		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						    sizeof(double), (void **)&sslat, &error);
-	
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -976,7 +976,7 @@ int main (int argc, char **argv)
 			    program_name);
 		    exit(error);
 		    }
-    
+
 		/* initialize contour controls */
 		status = mb_contour_init(verbose,&swath_plot,nplot,beams_bath,
 				    contour_algorithm,
@@ -1001,13 +1001,13 @@ int main (int argc, char **argv)
 			    program_name);
 		    exit(error);
 		    }
-    
+
 		/* print message */
-		if (verbose >= 2) 
+		if (verbose >= 2)
 		    fprintf(stderr,"\n");
 		if (verbose >= 1)
 		    fprintf(stderr,"processing data in %s...\n",file);
-    
+
 		/* loop over reading */
 		npings = &swath_plot->npings;
 		*npings = 0;
@@ -1025,18 +1025,18 @@ int main (int argc, char **argv)
 			    beamflag,bath,amp,bathlon,bathlat,
 			    ss,sslon,sslat,
 			    comment,&error);
-			    
+
 		    /* get pingnumber */
 		    if (status == MB_SUCCESS)
 		    	{
 		    	status = mb_pingnumber(verbose,mbio_ptr,&pingnumber,&error);
 			}
-			    
+
 		    /* copy data to swath_plot */
-		    if (status == MB_SUCCESS)
+		    if (status == MB_SUCCESS || error == MB_ERROR_TIME_GAP)
 		    	{
 		        pingcur = &swath_plot->pings[*npings];
-			
+
 			/* make sure enough memory is allocated */
 			if (pingcur->beams_bath_alloc < beams_bath)
 				{
@@ -1048,9 +1048,13 @@ int main (int argc, char **argv)
 						(void **)&(pingcur->bathlon),&error);
 				status = mb_reallocd(verbose, __FILE__, __LINE__, beams_bath*sizeof(double),
 						(void **)&(pingcur->bathlat),&error);
+                                status = mb_reallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),
+                                                (void **)&(pingcur->bflag[0]),&error);
+                                status = mb_reallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(int),
+                                                (void **)&(pingcur->bflag[1]),&error);
 				pingcur->beams_bath_alloc = beams_bath;
 				}
-			
+
 			/* insert the data */
 			for (i=0;i<7;i++)
 				pingcur->time_i[i] = time_i[i];
@@ -1066,6 +1070,8 @@ int main (int argc, char **argv)
 				pingcur->bath[i] = bath[i];
 				pingcur->bathlon[i] = bathlon[i];
 				pingcur->bathlat[i] = bathlat[i];
+                                pingcur->bflag[0][i] = 0;
+                                pingcur->bflag[1][i] = 0;
 				}
 			}
 
@@ -1073,7 +1079,7 @@ int main (int argc, char **argv)
 			variable numbers of beams */
 		    for (i=beams_bath;i<swath_plot->beams_bath;i++)
 			    beamflag[i] = MB_FLAG_NULL;
-    
+
 		    /* print debug statements */
 		    if (verbose >= 2)
 			    {
@@ -1099,7 +1105,7 @@ int main (int argc, char **argv)
 			    fprintf(stderr,"dbg2       status:         %d\n",
 				    status);
 			    }
-    
+
 		    /* scale bathymetry if necessary */
 		    if (error == MB_ERROR_NO_ERROR
 			    && bathy_in_feet == MB_YES)
@@ -1109,15 +1115,15 @@ int main (int argc, char **argv)
 				    bath[i] = 3.2808399 * bath[i];
 				    }
 			    }
-    
+
 		    /* update bookkeeping */
 		    if (error == MB_ERROR_NO_ERROR)
 			    {
-			    /*if (*npings == 0 || 
-				    (*npings > 0 
+			    /*if (*npings == 0 ||
+				    (*npings > 0
 				    && contour_algorithm == MB_CONTOUR_TRIANGLES)
-				    || (*npings > 0 
-				    && (navlon != navlon_old 
+				    || (*npings > 0
+				    && (navlon != navlon_old
 				    || navlat != navlat_old)))*/
 				    {
 				    nping_read += pings_read;
@@ -1126,14 +1132,14 @@ int main (int argc, char **argv)
 				    navlat_old = navlat;
 				    }
 			    }
-    
-		    /* decide whether to plot, whether to 
+
+		    /* decide whether to plot, whether to
 			    save the new ping, and if done */
-		    plot = MB_NO; 
+		    plot = MB_NO;
 		    flush = MB_NO;
 		    if (*npings >= nplot)
 			    plot = MB_YES;
-		    if (*npings > 0 
+		    if (*npings > 0
 			    && (error > MB_ERROR_NO_ERROR
 			    || error == MB_ERROR_TIME_GAP
 			    || error == MB_ERROR_OUT_BOUNDS
@@ -1148,11 +1154,11 @@ int main (int argc, char **argv)
 			    save_new = MB_YES;
 		    if (error > MB_ERROR_NO_ERROR)
 			    done = MB_YES;
-    
+
 		    /* if enough pings read in, plot them */
 		    if (plot == MB_YES)
 			    {
-    
+
 			    /* print debug statements */
 			    if (verbose >= 2)
 				    {
@@ -1171,28 +1177,28 @@ int main (int argc, char **argv)
 						    pingcur->time_i[6]);
 					    }
 				    }
-    
+
 			    /* plot data */
 			    if (plot_contours == MB_YES
 				    || plot_triangles == MB_YES)
 				    mb_contour(verbose,swath_plot,&error);
-    
+
 			    /* plot nav track */
 			    if (plot_track == MB_YES)
 				    mb_track(verbose,swath_plot,&error);
-    
+
 			    /* annotate pingnumber */
 			    if (plot_pingnumber == MB_YES)
 			    	    {
 				    mb_trackpingnumber(verbose,swath_plot,&error);
 				    }
-   
-			    if (plot_name == MB_YES && plotted_name == MB_NO) 
+
+			    if (plot_name == MB_YES && plotted_name == MB_NO)
 			    	    {
 				    mb_trackname(verbose,name_perp,swath_plot,file,&error);
 				    plotted_name = MB_YES;
 				    }
-			      
+
 			    /* reorganize data */
 			    if (flush == MB_YES && save_new == MB_YES)
 				    {
@@ -1210,15 +1216,15 @@ int main (int argc, char **argv)
 						    swath_plot,&error);
 				    *npings = 1;
 				    }
-    
+
 			    }
 		    }
 		status = mb_close(verbose,&mbio_ptr,&error);
-    
+
 		/* deallocate memory for data arrays */
 		status = mb_contour_deall(verbose,swath_plot,&error);
 		} /* end if file in bounds */
-    
+
 	    /* figure out whether and what to read next */
 	    if (read_datalist == MB_YES)
                 {
@@ -1293,23 +1299,54 @@ int ping_copy(int verbose, int one, int two, struct swath *swath, int *error)
 		fprintf(stderr,"dbg2       two:        %d\n",two);
 		fprintf(stderr,"dbg2       swath:      %lu\n",(size_t)swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
+                fprintf(stderr,"dbg2       time_i[two]:%4d  %4d %2d %2d %2d %2d %2d %6.6d\n",
+                                                two,swath->pings[two].time_i[0],
+                                                swath->pings[two].time_i[1],
+                                                swath->pings[two].time_i[2],
+                                                swath->pings[two].time_i[3],
+                                                swath->pings[two].time_i[4],
+                                                swath->pings[two].time_i[5],
+                                                swath->pings[two].time_i[6]);
 		}
 
-	/* copy things */
+	/* get ping structures */
 	ping1 = &swath->pings[one];
 	ping2 = &swath->pings[two];
+
+	/* make sure enough memory is allocated */
+        if (ping1->beams_bath_alloc < ping2->beams_bath)
+                {
+                status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath*sizeof(char),
+                                (void **)&(ping1->beamflag),error);
+                status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath*sizeof(double),
+                                (void **)&(ping1->bath),error);
+                status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath*sizeof(double),
+                                (void **)&(ping1->bathlon),error);
+                status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath*sizeof(double),
+                                (void **)&(ping1->bathlat),error);
+                status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath*sizeof(int),
+                                (void **)&(ping1->bflag[0]),error);
+                status = mb_reallocd(verbose, __FILE__, __LINE__, ping2->beams_bath*sizeof(int),
+                                (void **)&(ping1->bflag[1]),error);
+                ping1->beams_bath_alloc = ping2->beams_bath;
+                }
+
+	/* copy things */
 	for (i=0;i<7;i++)
 		ping1->time_i[i] = ping2->time_i[i];
 	ping1->time_d = ping2->time_d;
 	ping1->navlon = ping2->navlon;
 	ping1->navlat = ping2->navlat;
 	ping1->heading = ping2->heading;
-	for (i=0;i<swath->beams_bath;i++)
+        ping1->pingnumber = ping2->pingnumber;
+        ping1->beams_bath = ping2->beams_bath;
+	for (i=0;i<ping2->beams_bath;i++)
 		{
 		ping1->beamflag[i] = ping2->beamflag[i];
 		ping1->bath[i] = ping2->bath[i];
 		ping1->bathlon[i] = ping2->bathlon[i];
 		ping1->bathlat[i] = ping2->bathlat[i];
+                ping1->bflag[0][i] = ping2->bflag[1][i];
 		}
 
 	/* assume success */

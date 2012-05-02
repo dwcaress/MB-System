@@ -355,7 +355,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 	    XtFree((char *)(valueList[i]));
 	    return;
 	}
-	
+
 	/*
 	 * Next, get the resource name to set.
 	 */
@@ -377,7 +377,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
         {
             rsc++;
         }
-	
+
         ptr = rsc + strlen(rsc) - 1;
         while( ptr && *ptr )
         {
@@ -395,7 +395,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
         {
             *ptr = '\0';
         }
-	
+
 	/*
 	 * Lastly, get the string value to which to set the resource.
 	 */
@@ -413,7 +413,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 	    XtFree((char *)(valueList[i]));
 	    return;
 	}
-	
+
         ptr = start + strlen(start) - 1;
         while( ptr && *ptr )
         {
@@ -431,7 +431,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
         {
             *ptr = '\0';
         }
-	
+
 	/*
 	 * Now convert the widget name to a Widget ID
 	 */
@@ -441,7 +441,7 @@ Syntax Error - specify BxSetValuesCB data as\n\t\
 	    XtFree((char *)(valueList[i]));
 	    continue;
         }
-	
+
 	/*
 	 * If the widget name conversion succeeded, we now need to get the
 	 * resource list for the widget so that we can do a resource conversion
@@ -531,7 +531,7 @@ void
 do_mbnavadjust_init(int argc, char **argv)
 {
     int	    i,j;
-    String translations = 
+    String translations =
 	    "<Btn1Down>:	DrawingAreaInput() ManagerGadgetArm() \n\
 	     <Btn1Up>:		DrawingAreaInput() ManagerGadgetActivate() \n\
 	     <Btn1Motion>:	DrawingAreaInput() ManagerGadgetButtonMotion() \n\
@@ -554,18 +554,18 @@ do_mbnavadjust_init(int argc, char **argv)
     XtAddCallback(fileSelectionBox_list,
 	    XmNbrowseSelectionCallback,
 	    do_fileselection_list, NULL);
-	
+
     XtUnmanageChild(
 	    (Widget) XmFileSelectionBoxGetChild(
 				    fileSelectionBox,
 				    XmDIALOG_HELP_BUTTON));
     ac = 0;
-    tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh", 
+    tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh",
                                           XmRXmString, 0, &argok);
     XtSetArg(args[ac], XmNpattern, tmp0); ac++;
     XtSetValues(fileSelectionBox, args, ac);
     XmStringFree((XmString)tmp0);
-				    
+
     /* reset translation table for drawingArea widgets */
     XtVaSetValues(drawingArea_naverr_cont,
 			XmNtranslations, XtParseTranslationTable(translations),
@@ -581,16 +581,16 @@ do_mbnavadjust_init(int argc, char **argv)
 			NULL);
 
     /* add resize event handler to modelplot */
-    XtAddEventHandler(bulletinBoard_modelplot, 
-			StructureNotifyMask, 
-			False, 
-			do_modelplot_resize, 
+    XtAddEventHandler(bulletinBoard_modelplot,
+			StructureNotifyMask,
+			False,
+			do_modelplot_resize,
 			(XtPointer)0);
-				
+
     /* Setup the entire screen. */
     display = XtDisplay(form_mbnavadjust);
     colormap = DefaultColormap(display,XDefaultScreen(display));
-    
+
     /* Load the colors that will be used in this program. */
     status = XLookupColor(display,colormap, "white",&db_color,&colors[0]);
     if ((status = XAllocColor(display,colormap,&colors[0])) == 0)
@@ -617,7 +617,8 @@ do_mbnavadjust_init(int argc, char **argv)
     for (i=0;i<16;i++)
     	    {
     	    colors[j+i].red = 65535;
-    	    colors[j+i].green = i * 4096;
+    	    /* colors[j+i].green = i * 4096; */
+    	    colors[j+i].green = i * 2048;
     	    colors[j+i].blue = 0;
 	    status = XAllocColor(display,colormap,&colors[j+i]);
             if (status == 0)
@@ -632,7 +633,8 @@ do_mbnavadjust_init(int argc, char **argv)
     for (i=0;i<16;i++)
     	    {
     	    colors[j+i].red = 65535 - i * 4096;
-    	    colors[j+i].green = 65535;
+    	    /* colors[j+i].green = 65535; */
+    	    colors[j+i].green = 32767 + i * 2048;
     	    colors[j+i].blue = 0;
 	    status = XAllocColor(display,colormap,&colors[j+i]);
             if (status == 0)
@@ -709,9 +711,9 @@ do_mbnavadjust_init(int argc, char **argv)
 
     /* set verbose */
     mbna_verbose = 0;
-	    
+
     /* put up info text */
-    sprintf(string, "Program MBnavadjust initialized.\nMB-System Release %s %s\n", 
+    sprintf(string, "Program MBnavadjust initialized.\nMB-System Release %s %s\n",
 		MB_VERSION, MB_BUILD_DATE);
     do_info_add(string, MB_YES);
 
@@ -727,7 +729,7 @@ do_mbnavadjust_init(int argc, char **argv)
 void do_set_controls()
 {
 	char	value_text[128];
-				
+
 	/* set about version label */
 	sprintf(value_text, ":::t\"MB-System Release %s\":t\"%s\"",
 		MB_VERSION, MB_BUILD_DATE);
@@ -740,12 +742,12 @@ void do_set_controls()
 	/* set model view style togglebuttons */
 	if (project.modelplot_style == MBNA_MODELPLOT_SEQUENTIAL)
 	    {
-	    XmToggleButtonSetState(toggleButton_modelplot_sequential, 
+	    XmToggleButtonSetState(toggleButton_modelplot_sequential,
 			TRUE, TRUE);
 	    }
 	else
 	    {
-	    XmToggleButtonSetState(toggleButton_modelplot_block, 
+	    XmToggleButtonSetState(toggleButton_modelplot_block,
 			TRUE, TRUE);
 	    }
 
@@ -799,8 +801,8 @@ void do_update_status()
 		{
         	sprintf(string,"Project:                                       %s\nNumber of Files:                           %d\nNumber of Crossings Found:         %d\nNumber of Crossings Analyzed:     %d\nNumber of True Crossings:        %d\nNumber of True Crossings Analyzed:%d\nNumber of Ties Set:                     %d\n",
                 	project.name,project.num_files,
-			project.num_crossings,project.num_crossings_analyzed, 
-			project.num_truecrossings,project.num_truecrossings_analyzed, 
+			project.num_crossings,project.num_crossings_analyzed,
+			project.num_truecrossings,project.num_truecrossings_analyzed,
 			project.num_ties);
         	if (project.inversion == MBNA_INVERSION_CURRENT)
         		strcat(string,"Inversion Performed:                    Current\n");
@@ -843,7 +845,7 @@ void do_update_status()
 			for (i=0;i<project.num_files;i++)
 				{
 				file = &(project.files[i]);
-				
+
 				if (i == 0)
 					{
 					btime_d = file->sections[0].btime_d;
@@ -862,7 +864,7 @@ void do_update_status()
 							num_files++;
 							}
 						}
-						
+
 					/* make survey list item */
 					if (file->status == MBNA_FILE_POORNAV)
 					    filestatus = filestatus_poor;
@@ -886,7 +888,7 @@ void do_update_status()
     					xstr[num_surveys] = XmStringCreateLocalized(string);
 					if (mbna_verbose > 0)
 						fprintf(stderr,"%s\n",string);
-					
+
 					/* increment counter */
 					num_surveys++;
 					}
@@ -1106,22 +1108,22 @@ void do_update_status()
 				{
 				crossing = &(project.crossings[i]);
 				if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-						&& mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+						&& mbna_survey_select == project.files[crossing->file_id_1].block
 						&& mbna_survey_select == project.files[crossing->file_id_2].block)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block
 							|| mbna_survey_select == project.files[crossing->file_id_2].block))
 					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 						&& (mbna_file_select == crossing->file_id_1
 							|| mbna_file_select == crossing->file_id_2))
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2))
 					num_crossings++;
@@ -1135,22 +1137,22 @@ void do_update_status()
 				{
 				crossing = &(project.crossings[i]);
 				if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-						&& mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+						&& mbna_survey_select == project.files[crossing->file_id_1].block
 						&& mbna_survey_select == project.files[crossing->file_id_2].block)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block
 							|| mbna_survey_select == project.files[crossing->file_id_2].block))
 					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 						&& (mbna_file_select == crossing->file_id_1
 							|| mbna_file_select == crossing->file_id_2))
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2))
 					{
@@ -1224,22 +1226,22 @@ void do_update_status()
 				crossing = &(project.crossings[i]);
 				if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD
 					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-							&& mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+							&& mbna_survey_select == project.files[crossing->file_id_1].block
 							&& mbna_survey_select == project.files[crossing->file_id_2].block)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block
 								|| mbna_survey_select == project.files[crossing->file_id_2].block))
 						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 							&& (mbna_file_select == crossing->file_id_1
 								|| mbna_file_select == crossing->file_id_2))
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					num_crossings++;
@@ -1254,22 +1256,22 @@ void do_update_status()
 				crossing = &(project.crossings[i]);
 				if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD
 					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-							&& mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+							&& mbna_survey_select == project.files[crossing->file_id_1].block
 							&& mbna_survey_select == project.files[crossing->file_id_2].block)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block
 								|| mbna_survey_select == project.files[crossing->file_id_2].block))
 						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 							&& (mbna_file_select == crossing->file_id_1
 								|| mbna_file_select == crossing->file_id_2))
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					{
@@ -1343,22 +1345,22 @@ void do_update_status()
 				crossing = &(project.crossings[i]);
 				if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD
 					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-							&& mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+							&& mbna_survey_select == project.files[crossing->file_id_1].block
 							&& mbna_survey_select == project.files[crossing->file_id_2].block)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block
 								|| mbna_survey_select == project.files[crossing->file_id_2].block))
 						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 							&& (mbna_file_select == crossing->file_id_1
 								|| mbna_file_select == crossing->file_id_2))
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					num_crossings++;
@@ -1373,22 +1375,22 @@ void do_update_status()
 				crossing = &(project.crossings[i]);
 				if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD
 					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-							&& mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+							&& mbna_survey_select == project.files[crossing->file_id_1].block
 							&& mbna_survey_select == project.files[crossing->file_id_2].block)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block
 								|| mbna_survey_select == project.files[crossing->file_id_2].block))
 						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 							&& (mbna_file_select == crossing->file_id_1
 								|| mbna_file_select == crossing->file_id_2))
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					{
@@ -1462,22 +1464,22 @@ void do_update_status()
 				crossing = &(project.crossings[i]);
 				if (crossing->truecrossing == MB_YES
 					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-							&& mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+							&& mbna_survey_select == project.files[crossing->file_id_1].block
 							&& mbna_survey_select == project.files[crossing->file_id_2].block)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block
 								|| mbna_survey_select == project.files[crossing->file_id_2].block))
 						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 							&& (mbna_file_select == crossing->file_id_1
 								|| mbna_file_select == crossing->file_id_2))
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					num_crossings++;
@@ -1492,22 +1494,22 @@ void do_update_status()
 				crossing = &(project.crossings[i]);
 				if (crossing->truecrossing == MB_YES
 					&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-							&& mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+							&& mbna_survey_select == project.files[crossing->file_id_1].block
 							&& mbna_survey_select == project.files[crossing->file_id_2].block)
 						|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_file_select == crossing->file_id_2)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-							&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+							&& (mbna_survey_select == project.files[crossing->file_id_1].block
 								|| mbna_survey_select == project.files[crossing->file_id_2].block))
 						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 							&& (mbna_file_select == crossing->file_id_1
 								|| mbna_file_select == crossing->file_id_2))
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_1
 							&& mbna_section_select == crossing->section_1)
-						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+						|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 							&& mbna_file_select == crossing->file_id_2
 							&& mbna_section_select == crossing->section_2)))
 					{
@@ -1579,22 +1581,22 @@ void do_update_status()
 				{
 				crossing = &(project.crossings[i]);
 				if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-						&& mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+						&& mbna_survey_select == project.files[crossing->file_id_1].block
 						&& mbna_survey_select == project.files[crossing->file_id_2].block)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block
 							|| mbna_survey_select == project.files[crossing->file_id_2].block))
 					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 						&& (mbna_file_select == crossing->file_id_1
 							|| mbna_file_select == crossing->file_id_2))
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& (mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1))
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2))
 					{
@@ -1611,22 +1613,22 @@ void do_update_status()
 				{
 				crossing = &(project.crossings[i]);
 				if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-						&& mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+						&& mbna_survey_select == project.files[crossing->file_id_1].block
 						&& mbna_survey_select == project.files[crossing->file_id_2].block)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block
 							|| mbna_survey_select == project.files[crossing->file_id_2].block))
 					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 						&& (mbna_file_select == crossing->file_id_1
 							|| mbna_file_select == crossing->file_id_2))
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2))
 					{
@@ -1756,37 +1758,37 @@ void do_update_status()
 	XtVaSetValues(toggleButton_showselectedsection,
 		XmNsensitive, True,
 		NULL);
-	XmToggleButtonSetState(toggleButton_showallsurveys, 
+	XmToggleButtonSetState(toggleButton_showallsurveys,
 		FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_showselectedsurvey, 
+	XmToggleButtonSetState(toggleButton_showselectedsurvey,
 		FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_showselectedfile, 
+	XmToggleButtonSetState(toggleButton_showselectedfile,
 		FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_showwithselectedsurvey, 
+	XmToggleButtonSetState(toggleButton_showwithselectedsurvey,
 		FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_showwithselectedfile, 
+	XmToggleButtonSetState(toggleButton_showwithselectedfile,
 		FALSE, FALSE);
-	XmToggleButtonSetState(toggleButton_showselectedsection, 
+	XmToggleButtonSetState(toggleButton_showselectedsection,
 		FALSE, FALSE);
 	if (mbna_view_mode == MBNA_VIEW_MODE_ALL)
-		XmToggleButtonSetState(toggleButton_showallsurveys, 
+		XmToggleButtonSetState(toggleButton_showallsurveys,
 			TRUE, FALSE);
 	else if (mbna_view_mode == MBNA_VIEW_MODE_SURVEY)
-		XmToggleButtonSetState(toggleButton_showselectedsurvey, 
+		XmToggleButtonSetState(toggleButton_showselectedsurvey,
 			TRUE, FALSE);
 	else if (mbna_view_mode == MBNA_VIEW_MODE_FILE)
-		XmToggleButtonSetState(toggleButton_showselectedfile, 
+		XmToggleButtonSetState(toggleButton_showselectedfile,
 			TRUE, FALSE);
 	else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY)
-		XmToggleButtonSetState(toggleButton_showwithselectedsurvey, 
+		XmToggleButtonSetState(toggleButton_showwithselectedsurvey,
 			TRUE, FALSE);
 	else if (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE)
-		XmToggleButtonSetState(toggleButton_showwithselectedfile, 
+		XmToggleButtonSetState(toggleButton_showwithselectedfile,
 			TRUE, FALSE);
 	else if (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION)
-		XmToggleButtonSetState(toggleButton_showselectedsection, 
-			TRUE, FALSE);		
-	
+		XmToggleButtonSetState(toggleButton_showselectedsection,
+			TRUE, FALSE);
+
 	if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS
 		&& project.num_files > 0
 		&& mbna_survey_select != MBNA_SELECT_NONE)
@@ -1905,7 +1907,7 @@ void do_update_status()
 			XmNsensitive, False,
 			NULL);
 		}
-	
+
 	if (mbna_view_list == MBNA_VIEW_LIST_TIES
 		&& project.num_files > 0
 		&& mbna_tie_select != MBNA_SELECT_NONE
@@ -1963,9 +1965,9 @@ void do_update_status()
 			XmNsensitive, False,
 			NULL);
 		}
-   	
+
 	if (mbna_status != MBNA_STATUS_GUI)
-		{ 	
+		{
 		XtVaSetValues(pushButton_new,
 			XmNsensitive, False,
 			NULL);
@@ -1977,7 +1979,7 @@ void do_update_status()
 			NULL);
 		}
 	else if (project.open == MB_YES)
-		{ 	
+		{
 		XtVaSetValues(pushButton_new,
 			XmNsensitive, False,
 			NULL);
@@ -2013,7 +2015,7 @@ void do_update_status()
 		XtVaSetValues(pushButton_importdata,
 			XmNsensitive, False,
 			NULL);
-		}		
+		}
 	if (project.open == MB_YES && project.num_files > 0)
 		{
 		if (mbna_view_list == MBNA_VIEW_LIST_SURVEYS)
@@ -2373,7 +2375,7 @@ void do_update_status()
 			XmNsensitive, False,
 			NULL);
 		}
-		
+
 	if (mbna_status == MBNA_STATUS_GUI
 		&& project.open == MB_YES
 		&& project.num_files > 0)
@@ -2464,24 +2466,24 @@ void do_update_status()
 		}
 
 	/* set values of decimation slider */
-	XtVaSetValues(scale_controls_decimation, 
-			XmNvalue, project.decimation, 
+	XtVaSetValues(scale_controls_decimation,
+			XmNvalue, project.decimation,
 			NULL);
 
 	/* set values of section length slider */
 	ivalue = (int) (100 * project.section_length);
 	imax = (int) (100 * 50.0);
-	XtVaSetValues(scale_controls_sectionlength, 
-			XmNminimum, 1, 
-			XmNmaximum, imax, 
-			XmNdecimalPoints, 2, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_sectionlength,
+			XmNminimum, 1,
+			XmNmaximum, imax,
+			XmNdecimalPoints, 2,
+			XmNvalue, ivalue,
 			NULL);
 
 	/* set values of section soundings slider */
 	ivalue = project.section_soundings;
-	XtVaSetValues(scale_controls_sectionsoundings, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_sectionsoundings,
+			XmNvalue, ivalue,
 			NULL);
 
 	/* set values of contour interval slider */
@@ -2490,11 +2492,11 @@ void do_update_status()
 	    imax = (int) (100 * 400.0);
 	else
 	    imax = (int) (100 * 50.0);
-	XtVaSetValues(scale_controls_contourinterval, 
-			XmNminimum, 1, 
-			XmNmaximum, imax, 
-			XmNdecimalPoints, 2, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_contourinterval,
+			XmNminimum, 1,
+			XmNmaximum, imax,
+			XmNdecimalPoints, 2,
+			XmNvalue, ivalue,
 			NULL);
 
 	/* set values of color interval slider */
@@ -2503,11 +2505,11 @@ void do_update_status()
 	    imax = (int) (100 * 400.0);
 	else
 	    imax = (int) (100 * 50.0);
-	XtVaSetValues(scale_controls_colorinterval, 
-			XmNminimum, 1, 
-			XmNmaximum, imax, 
-			XmNdecimalPoints, 2, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_colorinterval,
+			XmNminimum, 1,
+			XmNmaximum, imax,
+			XmNdecimalPoints, 2,
+			XmNvalue, ivalue,
 			NULL);
 
 	/* set values of tick interval slider */
@@ -2516,41 +2518,41 @@ void do_update_status()
 	    imax = (int) (100 * 400.0);
 	else
 	    imax = (int) (100 * 50.0);
-	XtVaSetValues(scale_controls_tickinterval, 
-			XmNminimum, 1, 
-			XmNmaximum, imax, 
-			XmNdecimalPoints, 2, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_tickinterval,
+			XmNminimum, 1,
+			XmNmaximum, imax,
+			XmNdecimalPoints, 2,
+			XmNvalue, ivalue,
 			NULL);
 
 	/* set values of inversion smoothing weight slider */
 	ivalue = (int) (100 * project.smoothing);
 	imax = (int) (100 * 10.0);
-	XtVaSetValues(scale_controls_smoothing, 
-			XmNminimum, 1, 
-			XmNmaximum, imax, 
-			XmNdecimalPoints, 2, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_smoothing,
+			XmNminimum, 1,
+			XmNmaximum, imax,
+			XmNdecimalPoints, 2,
+			XmNvalue, ivalue,
 			NULL);
 
 	/* set values of z offset width slider */
 	ivalue = (int) (project.zoffsetwidth);
-	XtVaSetValues(scale_controls_zoffset, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_zoffset,
+			XmNvalue, ivalue,
 			NULL);
 
 	/* set misfit offset center toggles */
 	if (mbna_misfit_center == MBNA_MISFIT_ZEROCENTER)
 	    {
-	    XmToggleButtonSetState(toggleButton_misfitcenter_zero, 
+	    XmToggleButtonSetState(toggleButton_misfitcenter_zero,
 			TRUE, TRUE);
 	    }
 	else
 	    {
-	    XmToggleButtonSetState(toggleButton_misfitcenter_auto, 
+	    XmToggleButtonSetState(toggleButton_misfitcenter_auto,
 			TRUE, TRUE);
 	    }
-	    
+
 	/* deal with modelplot */
 	if (project.modelplot == MB_YES)
 	    {
@@ -2592,10 +2594,10 @@ void do_update_status()
 
 void
 do_naverr_init()
-{    
+{
     /* manage naverr */
     XtManageChild(bulletinBoard_naverr);
-    
+
     /* Setup just the "canvas" part of the screen. */
     cont_xid = XtWindow(drawingArea_naverr_cont);
     corr_xid = XtWindow(drawingArea_naverr_corr);
@@ -2629,7 +2631,7 @@ do_naverr_init()
     xg_init(display, corr_xid, corr_borders, xgfont, &corr_xgid);
     xg_init(display, zoff_xid, zoff_borders, xgfont, &zoff_xgid);
     status = mbnavadjust_set_graphics(cont_xgid, corr_xgid, zoff_xgid);
-		
+
     /* set status flag */
     mbna_status = MBNA_STATUS_NAVERR;
 
@@ -2640,7 +2642,7 @@ do_naverr_init()
     	mbnavadjust_naverr_nextunset();
     else
     	mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
-		
+
     /* update naverr labels */
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
@@ -2675,7 +2677,7 @@ do_update_naverr()
     			/ mbna_mtodeglon;
     	misfit_width = (mbna_plot_lon_max - mbna_plot_lon_min)
     			/ mbna_mtodeglon;
-			
+
 	/* get time difference */
     	timediff = (project.files[mbna_file_id_2].sections[mbna_section_2].btime_d
 		- project.files[mbna_file_id_1].sections[mbna_section_1].btime_d) / 86400.0;
@@ -2840,7 +2842,7 @@ do_update_naverr()
 			XmNsensitive, True,
 			NULL);
 		}
-    	
+
     	do_naverr_offsetlabel();
     	}
 }
@@ -2942,7 +2944,7 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		mbna_section_select = 0;
 		mbna_file_select = 0;
 		mbna_survey_select = position_list[0] - 1;
-		
+
 		/* get selected file from list */
 		for (i=0;i<project.num_files;i++)
 			{
@@ -2956,7 +2958,7 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 	else if (mbna_view_list == MBNA_VIEW_LIST_FILES)
 		{
 		num_files = 0;
-		
+
 		/* get selected file from list */
 		for (i=0;i<project.num_files;i++)
 			{
@@ -3013,22 +3015,22 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 			{
 			crossing = &(project.crossings[i]);
 			if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-					&& mbna_survey_select == project.files[crossing->file_id_1].block 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+					&& mbna_survey_select == project.files[crossing->file_id_1].block
 					&& mbna_survey_select == project.files[crossing->file_id_2].block)
 				|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 					&& mbna_file_select == crossing->file_id_1
 					&& mbna_file_select == crossing->file_id_2)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-					&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+					&& (mbna_survey_select == project.files[crossing->file_id_1].block
 						|| mbna_survey_select == project.files[crossing->file_id_2].block))
 				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 					&& (mbna_file_select == crossing->file_id_1
 						|| mbna_file_select == crossing->file_id_2))
-				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 					&& mbna_file_select == crossing->file_id_1
 					&& mbna_section_select == crossing->section_1)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 					&& mbna_file_select == crossing->file_id_2
 					&& mbna_section_select == crossing->section_2))
 				{
@@ -3040,13 +3042,13 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 				num_crossings++;
 				}
 			}
-		
+
 		/* bring up naverr window if required */
 		if (mbna_naverr_load == MB_NO)
 		    {
 		    do_naverr_init();
 		    }
-		    
+
 		/* else if naverr window is up, load selected crossing */
 		else
 		    {
@@ -3067,22 +3069,22 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 			crossing = &(project.crossings[i]);
 			if (crossing->overlap >= MBNA_OVERLAP_THRESHOLD
 				&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-						&& mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+						&& mbna_survey_select == project.files[crossing->file_id_1].block
 						&& mbna_survey_select == project.files[crossing->file_id_2].block)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block
 							|| mbna_survey_select == project.files[crossing->file_id_2].block))
 					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 						&& (mbna_file_select == crossing->file_id_1
 							|| mbna_file_select == crossing->file_id_2))
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2)))
 				{
@@ -3094,13 +3096,13 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 				num_crossings++;
 				}
 			}
-		
+
 		/* bring up naverr window if required */
 		if (mbna_naverr_load == MB_NO)
 		    {
 		    do_naverr_init();
 		    }
-		    
+
 		/* else if naverr window is up, load selected crossing */
 		else
 		    {
@@ -3121,22 +3123,22 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 			crossing = &(project.crossings[i]);
 			if (crossing->overlap >= 2 * MBNA_OVERLAP_THRESHOLD
 				&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-						&& mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+						&& mbna_survey_select == project.files[crossing->file_id_1].block
 						&& mbna_survey_select == project.files[crossing->file_id_2].block)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block
 							|| mbna_survey_select == project.files[crossing->file_id_2].block))
 					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 						&& (mbna_file_select == crossing->file_id_1
 							|| mbna_file_select == crossing->file_id_2))
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2)))
 				{
@@ -3148,13 +3150,13 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 				num_crossings++;
 				}
 			}
-		
+
 		/* bring up naverr window if required */
 		if (mbna_naverr_load == MB_NO)
 		    {
 		    do_naverr_init();
 		    }
-		    
+
 		/* else if naverr window is up, load selected crossing */
 		else
 		    {
@@ -3175,22 +3177,22 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 			crossing = &(project.crossings[i]);
 			if (crossing->truecrossing == MB_YES
 				&& ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-						&& mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+						&& mbna_survey_select == project.files[crossing->file_id_1].block
 						&& mbna_survey_select == project.files[crossing->file_id_2].block)
 					|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_file_select == crossing->file_id_2)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-						&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+						&& (mbna_survey_select == project.files[crossing->file_id_1].block
 							|| mbna_survey_select == project.files[crossing->file_id_2].block))
 					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 						&& (mbna_file_select == crossing->file_id_1
 							|| mbna_file_select == crossing->file_id_2))
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_1
 						&& mbna_section_select == crossing->section_1)
-					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+					|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 						&& mbna_file_select == crossing->file_id_2
 						&& mbna_section_select == crossing->section_2)))
 				{
@@ -3202,13 +3204,13 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 				num_crossings++;
 				}
 			}
-		
+
 		/* bring up naverr window if required */
 		if (mbna_naverr_load == MB_NO)
 		    {
 		    do_naverr_init();
 		    }
-		    
+
 		/* else if naverr window is up, load selected crossing */
 		else
 		    {
@@ -3229,22 +3231,22 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 			{
 			crossing = &(project.crossings[i]);
 			if ((mbna_view_mode == MBNA_VIEW_MODE_ALL)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY 
-					&& mbna_survey_select == project.files[crossing->file_id_1].block 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_SURVEY
+					&& mbna_survey_select == project.files[crossing->file_id_1].block
 					&& mbna_survey_select == project.files[crossing->file_id_2].block)
 				|| (mbna_view_mode == MBNA_VIEW_MODE_FILE
 					&& mbna_file_select == crossing->file_id_1
 					&& mbna_file_select == crossing->file_id_2)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY 
-					&& (mbna_survey_select == project.files[crossing->file_id_1].block 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSURVEY
+					&& (mbna_survey_select == project.files[crossing->file_id_1].block
 						|| mbna_survey_select == project.files[crossing->file_id_2].block))
 				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHFILE
 					&& (mbna_file_select == crossing->file_id_1
 						|| mbna_file_select == crossing->file_id_2))
-				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 					&& mbna_file_select == crossing->file_id_1
 					&& mbna_section_select == crossing->section_1)
-				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION 
+				|| (mbna_view_mode == MBNA_VIEW_MODE_WITHSECTION
 					&& mbna_file_select == crossing->file_id_2
 					&& mbna_section_select == crossing->section_2))
 				{
@@ -3259,13 +3261,13 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 					}
 				}
 			}
-		
+
 		/* bring up naverr window if required */
 		if (mbna_naverr_load == MB_NO)
 		    {
 		    do_naverr_init();
 		    }
-		    
+
 		/* else if naverr window is up, load selected crossing */
 		else
 		    {
@@ -3279,9 +3281,9 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		}
      	free(position_list);
       	}
-	
+
     /* else user selected same list item, deselecting it  - don't change anything
-    	- bring up naverr if needed - and let do_update_status redraw list with 
+    	- bring up naverr if needed - and let do_update_status redraw list with
 	previous item selected */
     else
     	{
@@ -3371,7 +3373,7 @@ do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data)
     acs = (XmAnyCallbackStruct*)call_data;
     XEvent  *event = acs->event;
     double	x1, x2, y1, y2;
-    
+
     /* If there is input in the drawing area */
     if (acs->reason == XmCR_INPUT)
     {
@@ -3387,7 +3389,7 @@ do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbna_offset_x_old = mbna_offset_x;
 		    mbna_offset_y_old = mbna_offset_y;
 		    mbna_offset_z_old = mbna_offset_z;
-		
+
 		    /* reset offset label */
 		    mbnavadjust_naverr_checkoksettie();
 		    do_naverr_offsetlabel();
@@ -3402,7 +3404,7 @@ do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbna_zoom_y1 = event->xbutton.y;
 		    mbna_zoom_x2 = event->xbutton.x;
 		    mbna_zoom_y2 = event->xbutton.y;
-	    	
+
 		    /* replot contours */
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_ZOOMFIRST);
 		    } /* end of middle button events */
@@ -3411,14 +3413,14 @@ do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data)
 	    if (event->xbutton.button == 3)
 		    {
 		    button3down = MB_YES;
-		
+
 		    /* get new snav points */
 		    mbnavadjust_naverr_snavpoints(event->xbutton.x, event->xbutton.y);
-	    	
+
 		    /* replot contours */
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
    		    do_update_naverr();
- 		    } /* end of right button events */	
+ 		    } /* end of right button events */
       } /* end of button press events */
 
       /* Check for mouse released. */
@@ -3433,22 +3435,22 @@ do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data)
 	    	button2down = MB_NO;
 	    	mbna_zoom_x2 = event->xbutton.x;
 	    	mbna_zoom_y2 = event->xbutton.y;
-	    	
+
 	    	x1 = mbna_zoom_x1 / mbna_plotx_scale +  mbna_plot_lon_min;
 	    	y1 = (cont_borders[3] - mbna_zoom_y1) / mbna_ploty_scale +  mbna_plot_lat_min;
 	    	x2 = mbna_zoom_x2 / mbna_plotx_scale +  mbna_plot_lon_min;
 	    	y2 = (cont_borders[3] - mbna_zoom_y2) / mbna_ploty_scale +  mbna_plot_lat_min;
-	    	
+
 	    	/* get new plot bounds */
 	    	mbna_plot_lon_min = MIN(x1,x2);
 	    	mbna_plot_lon_max = MAX(x1,x2);
 	    	mbna_plot_lat_min = MIN(y1,y2);
 	    	mbna_plot_lat_max = MAX(y1,y2);
-	    	
+
 		/* replot contours and misfit */
 		mbnavadjust_get_misfit();
 		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-		do_update_naverr();	    	
+		do_update_naverr();
 		}
 	  if (event->xbutton.button == 3)
 	    	{
@@ -3463,15 +3465,15 @@ do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data)
 	  if (button1down == MB_YES)
 		{
 		/* move offset */
-		mbna_offset_x = mbna_offset_x_old 
+		mbna_offset_x = mbna_offset_x_old
 		    + (event->xmotion.x - loc_x) / mbna_plotx_scale;
-		mbna_offset_y = mbna_offset_y_old 
+		mbna_offset_y = mbna_offset_y_old
 		    - (event->xmotion.y - loc_y) / mbna_ploty_scale;
-		
+
 		/* replot contours */
 		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_MOVE);
 		do_naverr_offsetlabel();
-		
+
 		/* reset old position */
 		loc_x = event->xmotion.x;
 		loc_y = event->xmotion.y;
@@ -3482,7 +3484,7 @@ do_naverr_cont_input( Widget w, XtPointer client_data, XtPointer call_data)
 		{
 	    	mbna_zoom_x2 = event->xmotion.x;
 		mbna_zoom_y2 = event->xmotion.y;
-		
+
 		/* replot contours */
 		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_ZOOM);
 	    	}
@@ -3514,7 +3516,7 @@ do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbna_offset_x_old = mbna_offset_x;
 		    mbna_offset_y_old = mbna_offset_y;
 		    mbna_offset_z_old = mbna_offset_z;
-		    mbna_offset_x = mbna_misfit_offset_x 
+		    mbna_offset_x = mbna_misfit_offset_x
 				    + (event->xbutton.x
 		    			- (corr_borders[0] + corr_borders[1]) / 2)
 		    			/ mbna_misfit_xscale;
@@ -3522,7 +3524,7 @@ do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data)
 				    - (event->xbutton.y
 		    			- (corr_borders[3] + corr_borders[2]) / 2)
 		    			/ mbna_misfit_yscale;
-	    	
+
 		    /* replot contours */
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_MOVE);
    		    do_update_naverr();
@@ -3546,7 +3548,7 @@ do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data)
 	  if (button1down == MB_YES)
 		{
 		/* move offset */
-		mbna_offset_x = mbna_misfit_offset_x 
+		mbna_offset_x = mbna_misfit_offset_x
 				+ (event->xmotion.x
 		    			- (corr_borders[0] + corr_borders[1]) / 2)
 		    			/ mbna_misfit_xscale;
@@ -3554,12 +3556,12 @@ do_naverr_corr_input( Widget w, XtPointer client_data, XtPointer call_data)
 				- (event->xmotion.y
 		    			- (corr_borders[3] + corr_borders[2]) / 2)
 		    			/ mbna_misfit_yscale;
-		
+
 		/* replot contours */
 		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_MOVE);
    		do_update_naverr();
 		do_naverr_offsetlabel();
-		
+
 		/* reset old position */
 		mbna_offset_x_old = mbna_offset_x;
 		mbna_offset_y_old = mbna_offset_y;
@@ -3591,11 +3593,11 @@ do_naverr_zcorr_input( Widget w, XtPointer client_data, XtPointer call_data)
 		mbna_offset_x_old = mbna_offset_x;
 		mbna_offset_y_old = mbna_offset_y;
 		mbna_offset_z_old = mbna_offset_z;
-		mbna_offset_z = ((event->xbutton.x - zoff_borders[0]) 
-		    			/ mbna_zoff_scale_x) 
+		mbna_offset_z = ((event->xbutton.x - zoff_borders[0])
+		    			/ mbna_zoff_scale_x)
 					+ mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
 /* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
-	
+
 		/* recalculate minimum misfit at current z offset */
 		mbnavadjust_get_misfitxy();
 
@@ -3625,22 +3627,22 @@ do_naverr_zcorr_input( Widget w, XtPointer client_data, XtPointer call_data)
 	  if (button1down == MB_YES)
 		{
 		/* move offset */
-		mbna_offset_z = ((event->xbutton.x - zoff_borders[0]) 
-		    			/ mbna_zoff_scale_x) 
+		mbna_offset_z = ((event->xbutton.x - zoff_borders[0])
+		    			/ mbna_zoff_scale_x)
 					+ mbna_misfit_offset_z - 0.5 * project.zoffsetwidth;
 /* fprintf(stderr,"buttonx:%d %f  mbna_misfit_offset_z:%f project.zoffsetwidth:%f  mbna_offset_z:%f\n",
 event->xbutton.x,((event->xbutton.x - zoff_borders[0])/mbna_zoff_scale_x), mbna_misfit_offset_z,
 project.zoffsetwidth, mbna_offset_z);
 fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
-	
+
 		/* recalculate minimum misfit at current z offset */
 		mbnavadjust_get_misfitxy();
-		
+
 		/* replot contours */
 		mbnavadjust_naverr_plot(MBNA_PLOT_MODE_MOVE);
    		do_update_naverr();
 		do_naverr_offsetlabel();
-		
+
 		/* reset old position */
 		mbna_offset_x_old = mbna_offset_x;
 		mbna_offset_y_old = mbna_offset_y;
@@ -3819,7 +3821,7 @@ do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-		
+
     /* unload loaded crossing */
     if (mbna_naverr_load == MB_YES)
 	    {
@@ -3845,7 +3847,7 @@ do_naverr_fullsize( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     /* reset the plot bounds */
     mbna_plot_lon_min = mbna_lon_min;
     mbna_plot_lon_max = mbna_lon_max;
@@ -3863,7 +3865,7 @@ do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-		
+
 	/* move offset */
 	mbna_offset_x = 0.0;
 	mbna_offset_y = 0.0;
@@ -3872,7 +3874,7 @@ do_naverr_zerooffset( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* recalculate minimum misfit at current z offset */
 	mbnavadjust_get_misfitxy();
-		
+
 	/* replot contours */
 	mbnavadjust_crossing_replot();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3885,14 +3887,14 @@ do_naverr_zerozoffset( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-		
+
 	/* move offset */
 	mbna_offset_z = 0.0;
 /* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
-	
+
 	/* recalculate minimum misfit at current z offset */
 	mbnavadjust_get_misfitxy();
-		
+
 	/* replot contours */
 	mbnavadjust_crossing_replot();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3905,10 +3907,10 @@ do_naverr_applyzoffset( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-	
+
 	/* recalculate minimum misfit at current z offset */
 	mbnavadjust_get_misfitxy();
-		
+
 	/* replot contours */
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 	do_naverr_offsetlabel();
@@ -3929,10 +3931,10 @@ do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data)
 	mbna_offset_y = mbna_minmisfit_y;
 	mbna_offset_z = mbna_minmisfit_z;
 /* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
-	
+
 	/* recalculate minimum misfit at current z offset */
 	mbnavadjust_get_misfitxy();
-		
+
 	/* replot contours */
 	mbnavadjust_crossing_replot();
    	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3955,7 +3957,7 @@ do_naverr_minxymisfit( Widget w, XtPointer client_data, XtPointer call_data)
 	mbna_offset_y = mbna_minmisfit_yh;
 	mbna_offset_z = mbna_minmisfit_zh;
 /* fprintf(stderr,"%s %d: mbna_offset_z:%f\n",__FILE__,__LINE__,mbna_offset_z); */
-		
+
 	/* replot contours */
 	mbnavadjust_crossing_replot();
    	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -3975,11 +3977,11 @@ do_naverr_misfitcenter( Widget w, XtPointer client_data, XtPointer call_data)
 	    mbna_misfit_center = MBNA_MISFIT_ZEROCENTER;
 	else
 	    mbna_misfit_center = MBNA_MISFIT_AUTOCENTER;
-		    
+
 	/* replot contours and misfit */
 	mbnavadjust_get_misfit();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
-	do_update_naverr();	    	
+	do_update_naverr();
 }
 
 /*--------------------------------------------------------------------*/
@@ -3993,28 +3995,28 @@ do_biases_apply( Widget w, XtPointer client_data, XtPointer call_data)
     	struct mbna_file *file2;
 	int	ivalue;
 	int	isection;
-	
+
 	/* get file structures */
 	file1 = &(project.files[mbna_file_id_1]);
 	file2 = &(project.files[mbna_file_id_2]);
 
-	XtVaGetValues(scale_biases_heading1, 
-			XmNvalue, &ivalue, 
+	XtVaGetValues(scale_biases_heading1,
+			XmNvalue, &ivalue,
 			NULL);
 	file1->heading_bias = 0.1 * ivalue;
 
-	XtVaGetValues(scale_biases_roll1, 
-			XmNvalue, &ivalue, 
+	XtVaGetValues(scale_biases_roll1,
+			XmNvalue, &ivalue,
 			NULL);
 	file1->roll_bias = 0.1 * ivalue;
 
-	XtVaGetValues(scale_biases_heading2, 
-			XmNvalue, &ivalue, 
+	XtVaGetValues(scale_biases_heading2,
+			XmNvalue, &ivalue,
 			NULL);
 	file2->heading_bias = 0.1 * ivalue;
 
-	XtVaGetValues(scale_biases_roll2, 
-			XmNvalue, &ivalue, 
+	XtVaGetValues(scale_biases_roll2,
+			XmNvalue, &ivalue,
 			NULL);
 	file2->roll_bias = 0.1 * ivalue;
 
@@ -4045,14 +4047,14 @@ do_biases_applyall( Widget w, XtPointer client_data, XtPointer call_data)
     	struct mbna_file *file;
 	int	ivalue;
 	int	ifile, isection;
-	
+
 	/* get bias values */
-	XtVaGetValues(scale_biases_heading1, 
-			XmNvalue, &ivalue, 
+	XtVaGetValues(scale_biases_heading1,
+			XmNvalue, &ivalue,
 			NULL);
 	heading_bias = 0.1 * ivalue;
-	XtVaGetValues(scale_biases_roll1, 
-			XmNvalue, &ivalue, 
+	XtVaGetValues(scale_biases_roll1,
+			XmNvalue, &ivalue,
 			NULL);
 	roll_bias = 0.1 * ivalue;
 
@@ -4062,7 +4064,7 @@ do_biases_applyall( Widget w, XtPointer client_data, XtPointer call_data)
 		file = &(project.files[ifile]);
 		file->heading_bias = heading_bias;
 		file->roll_bias = roll_bias;
-				
+
 		/* set contours out of date */
 		for (isection=0;isection<file->num_sections;isection++)
 			{
@@ -4085,64 +4087,64 @@ do_biases_init( Widget w, XtPointer client_data, XtPointer call_data)
     	struct mbna_file *file1;
     	struct mbna_file *file2;
 	char	value_text[128];
-	
+
 	/* get file structures */
 	file1 = &(project.files[mbna_file_id_1]);
 	file2 = &(project.files[mbna_file_id_2]);
 
 	/* set biases label */
 	sprintf(value_text, ":::t\"Section ID\'s (file:section):\":t\"  Section 1: %4.4d:%4.4d\"\"  Section 2: %4.4d:%4.4d\"",
-		mbna_file_id_1, mbna_section_1, 
+		mbna_file_id_1, mbna_section_1,
 		mbna_file_id_2, mbna_section_2);
 	set_label_multiline_string(label_biases_files, value_text);
-	
+
 	/* set biases radiobox */
 	if (file1->heading_bias == file2->heading_bias
 	    && file1->roll_bias == file2->roll_bias)
 	    {
 	    mbna_bias_mode = MBNA_BIAS_SAME;
-	    XmToggleButtonSetState(toggleButton_biases_together, 
+	    XmToggleButtonSetState(toggleButton_biases_together,
 			TRUE, TRUE);
 	    }
 	else
 	    {
 	    mbna_bias_mode = MBNA_BIAS_DIFFERENT;
-	    XmToggleButtonSetState(toggleButton_biases_separate, 
+	    XmToggleButtonSetState(toggleButton_biases_separate,
 			TRUE, TRUE);
 	    }
 
 	/* set values of bias sliders */
-	XtVaSetValues(scale_biases_heading1, 
-			XmNvalue, (int) (10 * file1->heading_bias), 
+	XtVaSetValues(scale_biases_heading1,
+			XmNvalue, (int) (10 * file1->heading_bias),
 			NULL);
-	XtVaSetValues(scale_biases_roll1, 
-			XmNvalue, (int) (10 * file1->roll_bias), 
+	XtVaSetValues(scale_biases_roll1,
+			XmNvalue, (int) (10 * file1->roll_bias),
 			NULL);
 	if (mbna_bias_mode == MBNA_BIAS_DIFFERENT)
 		{
-		XtVaSetValues(scale_biases_heading2, 
-			XmNvalue, (int) (10 * file2->heading_bias), 
+		XtVaSetValues(scale_biases_heading2,
+			XmNvalue, (int) (10 * file2->heading_bias),
 			XmNsensitive, True,
 			NULL);
-		XtVaSetValues(scale_biases_roll2, 
-			XmNvalue, (int) (10 * file2->roll_bias), 
+		XtVaSetValues(scale_biases_roll2,
+			XmNvalue, (int) (10 * file2->roll_bias),
 			XmNsensitive, True,
 			NULL);
-		XtVaSetValues(pushButton_biases_applyall, 
+		XtVaSetValues(pushButton_biases_applyall,
 			XmNsensitive, False,
 			NULL);
 		}
 	else
 		{
-		XtVaSetValues(scale_biases_heading2, 
-			XmNvalue, (int) (10 * file2->heading_bias), 
+		XtVaSetValues(scale_biases_heading2,
+			XmNvalue, (int) (10 * file2->heading_bias),
 			XmNsensitive, False,
 			NULL);
-		XtVaSetValues(scale_biases_roll2, 
-			XmNvalue, (int) (10 * file2->roll_bias), 
+		XtVaSetValues(scale_biases_roll2,
+			XmNvalue, (int) (10 * file2->roll_bias),
 			XmNsensitive, False,
 			NULL);
-		XtVaSetValues(pushButton_biases_applyall, 
+		XtVaSetValues(pushButton_biases_applyall,
 			XmNsensitive, True,
 			NULL);
 		}
@@ -4162,21 +4164,21 @@ do_biases_toggle( Widget w, XtPointer client_data, XtPointer call_data)
 	    if (mbna_bias_mode == MBNA_BIAS_DIFFERENT)
 		{
 		mbna_bias_mode = MBNA_BIAS_SAME;
-		XtVaGetValues(scale_biases_heading1, 
-				XmNvalue, &ivalue, 
+		XtVaGetValues(scale_biases_heading1,
+				XmNvalue, &ivalue,
 				NULL);
-		XtVaSetValues(scale_biases_heading2, 
-				XmNvalue, ivalue, 
+		XtVaSetValues(scale_biases_heading2,
+				XmNvalue, ivalue,
 				XmNsensitive, False,
 				NULL);
-		XtVaGetValues(scale_biases_roll1, 
-				XmNvalue, &ivalue, 
+		XtVaGetValues(scale_biases_roll1,
+				XmNvalue, &ivalue,
 				NULL);
-		XtVaSetValues(scale_biases_roll2, 
-				XmNvalue, ivalue, 
+		XtVaSetValues(scale_biases_roll2,
+				XmNvalue, ivalue,
 				XmNsensitive, False,
 				NULL);
-		XtVaSetValues(pushButton_biases_applyall, 
+		XtVaSetValues(pushButton_biases_applyall,
 				XmNsensitive, True,
 				NULL);
 		}
@@ -4186,13 +4188,13 @@ do_biases_toggle( Widget w, XtPointer client_data, XtPointer call_data)
 	    if (mbna_bias_mode == MBNA_BIAS_SAME)
 		{
 		mbna_bias_mode = MBNA_BIAS_DIFFERENT;
-		XtVaSetValues(scale_biases_heading2, 
+		XtVaSetValues(scale_biases_heading2,
 				XmNsensitive, True,
 				NULL);
-		XtVaSetValues(scale_biases_roll2, 
+		XtVaSetValues(scale_biases_roll2,
 				XmNsensitive, True,
 				NULL);
-		XtVaSetValues(pushButton_biases_applyall, 
+		XtVaSetValues(pushButton_biases_applyall,
 				XmNsensitive, False,
 				NULL);
 		}
@@ -4211,11 +4213,11 @@ do_biases_heading( Widget w, XtPointer client_data, XtPointer call_data)
 
 	if (mbna_bias_mode == MBNA_BIAS_SAME)
 	    {
-	    XtVaGetValues(scale_biases_heading1, 
-			    XmNvalue, &ivalue, 
+	    XtVaGetValues(scale_biases_heading1,
+			    XmNvalue, &ivalue,
 			    NULL);
-	    XtVaSetValues(scale_biases_heading2, 
-			    XmNvalue, ivalue, 
+	    XtVaSetValues(scale_biases_heading2,
+			    XmNvalue, ivalue,
 			    XmNsensitive, False,
 			    NULL);
 	    }
@@ -4232,11 +4234,11 @@ do_biases_roll( Widget w, XtPointer client_data, XtPointer call_data)
 
 	if (mbna_bias_mode == MBNA_BIAS_SAME)
 	    {
-	    XtVaGetValues(scale_biases_roll1, 
-			    XmNvalue, &ivalue, 
+	    XtVaGetValues(scale_biases_roll1,
+			    XmNvalue, &ivalue,
 			    NULL);
-	    XtVaSetValues(scale_biases_roll2, 
-			    XmNvalue, ivalue, 
+	    XtVaSetValues(scale_biases_roll2,
+			    XmNvalue, ivalue,
 			    XmNsensitive, False,
 			    NULL);
 	    }
@@ -4252,52 +4254,52 @@ do_controls_apply( Widget w, XtPointer client_data, XtPointer call_data)
     int	ivalue;
 
     /* get value of decimation slider */
-    XtVaGetValues(scale_controls_decimation, 
-		XmNvalue, &project.decimation, 
+    XtVaGetValues(scale_controls_decimation,
+		XmNvalue, &project.decimation,
 		NULL);
 
     /* get values of section length slider */
-    XtVaGetValues(scale_controls_sectionlength, 
-		XmNvalue, &ivalue, 
+    XtVaGetValues(scale_controls_sectionlength,
+		XmNvalue, &ivalue,
 		NULL);
     project.section_length = ((double) ivalue) / 100.0;
 
     /* get values of section soundings slider */
-    XtVaGetValues(scale_controls_sectionsoundings, 
-		XmNvalue, &ivalue, 
+    XtVaGetValues(scale_controls_sectionsoundings,
+		XmNvalue, &ivalue,
 		NULL);
     project.section_soundings = ivalue;
 
     /* get values of contour interval slider */
-    XtVaGetValues(scale_controls_contourinterval, 
-		XmNvalue, &ivalue, 
+    XtVaGetValues(scale_controls_contourinterval,
+		XmNvalue, &ivalue,
 		NULL);
     project.cont_int = ((double) ivalue) / 100.0;
 
     /* get values of color interval slider */
-    XtVaGetValues(scale_controls_colorinterval, 
-		XmNvalue, &ivalue, 
+    XtVaGetValues(scale_controls_colorinterval,
+		XmNvalue, &ivalue,
 		NULL);
     project.col_int = ((double) ivalue) / 100.0;
 
     /* get values of tick interval slider */
-    XtVaGetValues(scale_controls_tickinterval, 
-		XmNvalue, &ivalue, 
+    XtVaGetValues(scale_controls_tickinterval,
+		XmNvalue, &ivalue,
 		NULL);
     project.tick_int = ((double) ivalue) / 100.0;
- 
+
     /* get values of inversion smoothing slider */
-    XtVaGetValues(scale_controls_smoothing, 
-		XmNvalue, &ivalue, 
+    XtVaGetValues(scale_controls_smoothing,
+		XmNvalue, &ivalue,
 		NULL);
     project.smoothing = ((double) ivalue) / 100.0;
- 
+
     /* get values of z offset width slider */
-    XtVaGetValues(scale_controls_zoffset, 
-		XmNvalue, &ivalue, 
+    XtVaGetValues(scale_controls_zoffset,
+		XmNvalue, &ivalue,
 		NULL);
     project.zoffsetwidth = ((double) ivalue);
-   
+
     if (mbna_file_id_1 >= 0 && mbna_section_1 >= 0)
    	 project.files[mbna_file_id_1].sections[mbna_section_1].contoursuptodate = MB_NO;
     if (mbna_file_id_2 >= 0 && mbna_section_2 >= 0)
@@ -4330,12 +4332,12 @@ do_scale_controls_sectionsoundings( Widget w, XtPointer client_data, XtPointer c
     int	    imin, imax;
 
 	/* get values of section soundings slider */
-	XtVaGetValues(scale_controls_sectionsoundings, 
-		    XmNvalue, &ivalue, 
-		    XmNminimum, &imin, 
-		    XmNmaximum, &imax, 
+	XtVaGetValues(scale_controls_sectionsoundings,
+		    XmNvalue, &ivalue,
+		    XmNminimum, &imin,
+		    XmNmaximum, &imax,
 		    NULL);
-		    
+
 	/* recalculate max value if needed */
 	if (ivalue == imin)
 	    {
@@ -4345,11 +4347,11 @@ do_scale_controls_sectionsoundings( Widget w, XtPointer client_data, XtPointer c
 	    {
 	    imax = 2 * imax;
 	    }
-    
+
 	/* reset values of section soundings slider */
-	XtVaSetValues(scale_controls_sectionsoundings, 
-			XmNmaximum, imax, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_sectionsoundings,
+			XmNmaximum, imax,
+			XmNvalue, ivalue,
 			NULL);
 }
 
@@ -4371,11 +4373,11 @@ do_scale_contourinterval( Widget w, XtPointer client_data, XtPointer call_data)
     int	    imax;
 
 	/* get values of contour interval slider */
-	XtVaGetValues(scale_controls_contourinterval, 
-		    XmNvalue, &ivalue, 
-		    XmNmaximum, &imax, 
+	XtVaGetValues(scale_controls_contourinterval,
+		    XmNvalue, &ivalue,
+		    XmNmaximum, &imax,
 		    NULL);
-    
+
 	/* reset values of contour interval slider to round numbers */
 	if (ivalue > 2500)
 	    ivalue = ((ivalue + 500) / 1000) * 1000;
@@ -4393,11 +4395,11 @@ do_scale_contourinterval( Widget w, XtPointer client_data, XtPointer call_data)
 	    imax = 500;
 	if (ivalue == imax && imax <= 500)
 	    imax = 40000;
-	XtVaSetValues(scale_controls_contourinterval, 
-			XmNminimum, 1, 
-			XmNmaximum, imax, 
-			XmNdecimalPoints, 2, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_contourinterval,
+			XmNminimum, 1,
+			XmNmaximum, imax,
+			XmNdecimalPoints, 2,
+			XmNvalue, ivalue,
 			NULL);
 
 }
@@ -4412,11 +4414,11 @@ do_scale_controls_tickinterval( Widget w, XtPointer client_data, XtPointer call_
     int	    imax;
 
 	/* get values of tick interval slider */
-	XtVaGetValues(scale_controls_tickinterval, 
-		    XmNvalue, &ivalue, 
-		    XmNmaximum, &imax, 
+	XtVaGetValues(scale_controls_tickinterval,
+		    XmNvalue, &ivalue,
+		    XmNmaximum, &imax,
 		    NULL);
-    
+
 	/* reset values of tick interval slider to round numbers */
 	if (ivalue > 2500)
 	    ivalue = ((ivalue + 500) / 1000) * 1000;
@@ -4434,11 +4436,11 @@ do_scale_controls_tickinterval( Widget w, XtPointer client_data, XtPointer call_
 	    imax = 500;
 	if (ivalue == imax && imax <= 500)
 	    imax = 40000;
-	XtVaSetValues(scale_controls_tickinterval, 
-			XmNminimum, 1, 
-			XmNmaximum, imax, 
-			XmNdecimalPoints, 2, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_tickinterval,
+			XmNminimum, 1,
+			XmNmaximum, imax,
+			XmNdecimalPoints, 2,
+			XmNvalue, ivalue,
 			NULL);
 }
 
@@ -4452,11 +4454,11 @@ do_controls_scale_colorinterval( Widget w, XtPointer client_data, XtPointer call
     int	    imax;
 
 	/* get values of color interval slider */
-	XtVaGetValues(scale_controls_colorinterval, 
-		    XmNvalue, &ivalue, 
-		    XmNmaximum, &imax, 
+	XtVaGetValues(scale_controls_colorinterval,
+		    XmNvalue, &ivalue,
+		    XmNmaximum, &imax,
 		    NULL);
-    
+
 	/* reset values of color interval slider to round numbers */
 	if (ivalue > 2500)
 	    ivalue = ((ivalue + 500) / 1000) * 1000;
@@ -4474,11 +4476,11 @@ do_controls_scale_colorinterval( Widget w, XtPointer client_data, XtPointer call
 	    imax = 500;
 	if (ivalue == imax && imax <= 500)
 	    imax = 40000;
-	XtVaSetValues(scale_controls_colorinterval, 
-			XmNminimum, 1, 
-			XmNmaximum, imax, 
-			XmNdecimalPoints, 2, 
-			XmNvalue, ivalue, 
+	XtVaSetValues(scale_controls_colorinterval,
+			XmNminimum, 1,
+			XmNmaximum, imax,
+			XmNdecimalPoints, 2,
+			XmNvalue, ivalue,
 			NULL);
 }
 /*--------------------------------------------------------------------*/
@@ -4542,12 +4544,12 @@ do_quit( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-		
+
     /* unload loaded crossing */
     if (mbna_naverr_load == MB_YES)
 	    {
 	    status = mbnavadjust_crossing_unload();
-	
+
 	    /* deallocate graphics */
 	    mbna_status = MBNA_STATUS_GUI;
 	    XFreeGC(display,cont_gc);
@@ -4572,22 +4574,22 @@ do_fileselection_mode( Widget w, XtPointer client_data, XtPointer call_data)
     /* desl with selection */
     if (file_mode == FILE_MODE_NEW)
     	{
-	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh", 
+	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh",
                                           XmRXmString, 0, &argok);
     	}
     else if (file_mode == FILE_MODE_OPEN)
     	{
-	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh", 
+	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh",
                                           XmRXmString, 0, &argok);
     	}
     else if (file_mode == FILE_MODE_IMPORT)
     	{
-	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.mb-1", 
+	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.mb-1",
                                           XmRXmString, 0, &argok);
     	}
     else
     	{
-	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh", 
+	tmp0 = (XmString) BX_CONVERT(fileSelectionBox, "*.nvh",
                                           XmRXmString, 0, &argok);
     	}
 
@@ -4645,7 +4647,7 @@ do_view_showallsurveys( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     mbna_view_mode = MBNA_VIEW_MODE_ALL;
     do_update_status();
 }
@@ -4657,7 +4659,7 @@ do_view_showselectedsurveys( Widget w, XtPointer client_data, XtPointer call_dat
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     mbna_view_mode = MBNA_VIEW_MODE_SURVEY;
     do_update_status();
 }
@@ -4669,7 +4671,7 @@ do_view_showselectedfile( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     mbna_view_mode = MBNA_VIEW_MODE_FILE;
     do_update_status();
 }
@@ -4681,7 +4683,7 @@ do_view_showwithselectedsurveys( Widget w, XtPointer client_data, XtPointer call
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     mbna_view_mode = MBNA_VIEW_MODE_WITHSURVEY;
     do_update_status();
 }
@@ -4693,7 +4695,7 @@ do_view_showwithselectedfile( Widget w, XtPointer client_data, XtPointer call_da
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     mbna_view_mode = MBNA_VIEW_MODE_WITHFILE;
     do_update_status();
 }
@@ -4705,7 +4707,7 @@ do_view_showselectedsection( Widget w, XtPointer client_data, XtPointer call_dat
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     mbna_view_mode = MBNA_VIEW_MODE_WITHSECTION;
     do_update_status();
 }
@@ -4896,14 +4898,14 @@ do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     /* make sure that contours are generated for all of the existing crossings */
-		
+
     mbna_status = MBNA_STATUS_MAKECONTOUR;
     mbnavadjust_autopick(MB_YES);
     mbna_status = MBNA_STATUS_GUI;
     do_update_status();
-    
+
 }
 /*--------------------------------------------------------------------*/
 
@@ -4912,14 +4914,14 @@ do_action_autopickhorizontal( Widget w, XtPointer client_data, XtPointer call_da
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     /* make sure that contours are generated for all of the existing crossings */
-		
+
     mbna_status = MBNA_STATUS_MAKECONTOUR;
     mbnavadjust_autopick(MB_NO);
     mbna_status = MBNA_STATUS_GUI;
     do_update_status();
-    
+
 }
 
 /*--------------------------------------------------------------------*/
@@ -4952,7 +4954,7 @@ do_zerozoffsets( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
-    
+
     mbnavadjust_zerozoffsets();
     if (project.modelplot == MB_YES)
 	mbnavadjust_modelplot_plot();
@@ -4995,11 +4997,11 @@ do_modelplot_show( Widget w, XtPointer client_data, XtPointer call_data)
     acs = (XmAnyCallbackStruct*)call_data;
     Window	modp_xid;
     Dimension	width, height;
-    
+
     /* get drawingArea size */
-    XtVaGetValues(drawingArea_modelplot, 
-	XmNwidth, &width, 
-	XmNheight, &height, 
+    XtVaGetValues(drawingArea_modelplot,
+	XmNwidth, &width,
+	XmNheight, &height,
 	NULL);
     mbna_modelplot_width = width;
     mbna_modelplot_height = height;
@@ -5007,7 +5009,7 @@ do_modelplot_show( Widget w, XtPointer client_data, XtPointer call_data)
     modp_borders[1] = mbna_modelplot_width - 1;
     modp_borders[2] = 0;
     modp_borders[3] = mbna_modelplot_height - 1;
-    
+
     /* Setup just the "canvas" part of the screen. */
     modp_xid = XtWindow(drawingArea_modelplot);
 
@@ -5041,7 +5043,7 @@ do_modelplot_show( Widget w, XtPointer client_data, XtPointer call_data)
     mbna_modelplot_pickfile = MBNA_SELECT_NONE;
     mbna_modelplot_picksection = MBNA_SELECT_NONE;
     mbna_modelplot_picksnav = MBNA_SELECT_NONE;
-    
+
     /* plot the model */
     mbnavadjust_modelplot_plot();
 
@@ -5062,20 +5064,20 @@ do_modelplot_dismiss( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*------------------------------------------------------------------------------*/
-void 
+void
 do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *unused)
 {
     Window	modp_xid;
 	XConfigureEvent *cevent = (XConfigureEvent *) event;
 	Dimension	width, height;
-	
+
 	/* do this only if a resize event happens */
 	if (cevent->type == ConfigureNotify)
 	    {
 	    /* get new shell size */
-	    XtVaGetValues(bulletinBoard_modelplot, 
-	    	XmNwidth, &width, 
-	    	XmNheight, &height, 
+	    XtVaGetValues(bulletinBoard_modelplot,
+	    	XmNwidth, &width,
+	    	XmNheight, &height,
 	   	NULL);
 
 	    /* do this only if the shell was REALLY resized and not just moved */
@@ -5156,7 +5158,7 @@ do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
     XEvent  *event = acs->event;
-    
+
     /* If there is input in the drawing area */
     if (acs->reason == XmCR_INPUT)
     {
@@ -5182,10 +5184,10 @@ do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
 		    button3down = MB_YES;
 		    mbna_modelplot_zoom_x1 = event->xbutton.x;
 		    mbna_modelplot_zoom_x2 = event->xbutton.x;
-	    	
+
 		    /* replot model */
 		    mbnavadjust_modelplot_plot();
-		    } /* end of right button events */	
+		    } /* end of right button events */
       } /* end of button press events */
 
       /* Check for mouse released. */
@@ -5195,7 +5197,7 @@ do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
 	    if (event->xbutton.button == 1)
 	    	  {
 	    	  button1down = MB_NO;
-		  
+
 		  /* pick nearest tie point */
 		  mbnavadjust_modelplot_pick(event->xbutton.x, event->xbutton.y);
 
@@ -5207,7 +5209,7 @@ do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
 	    if (event->xbutton.button == 2)
 	    	  {
 	    	  button2down = MB_NO;
-		  
+
 		  /* pick nearest tie point */
 		  mbnavadjust_modelplot_middlepick(event->xbutton.x, event->xbutton.y);
 
@@ -5237,7 +5239,7 @@ do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
 	    if (button3down == MB_YES)
 		{
 	    	 mbna_modelplot_zoom_x2 = event->xbutton.x;
-	    	
+
 		 /* replot model */
 		 mbnavadjust_modelplot_plot();
 	    	}
@@ -5308,7 +5310,7 @@ do_modelplot_clearblock( Widget w, XtPointer client_data, XtPointer call_data)
 /* fprintf(stderr,"Called do_modelplot_clearblock\n"); */
 
 	mbnavadjust_modelplot_clearblock();
-	
+
         if (mbna_naverr_load == MB_YES)
 	    {
 	    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
@@ -5339,7 +5341,7 @@ do_fileselection_list(Widget w, XtPointer client, XtPointer call)
 	/* get output file */
 	if((int)strlen(string) > 0)
 		{
-		status = mb_get_format(mbna_verbose, string, fileroot, 
+		status = mb_get_format(mbna_verbose, string, fileroot,
 					    &form, &error);
 		if (status == MB_SUCCESS)
 			{
@@ -5370,12 +5372,12 @@ do_wait_until_viewed(XtAppContext app)
 	    !XtIsTopLevelShell(topshell);
 	    topshell = XtParent(topshell))
 	;
-	
+
     /* keep processing events until it is viewed */
     if (XtIsRealized(topshell))
 	{
 	topwindow = XtWindow(topshell);
-	
+
 	/* wait for the window to be mapped */
 	while (XGetWindowAttributes(
 			XtDisplay(form_mbnavadjust),
@@ -5386,9 +5388,9 @@ do_wait_until_viewed(XtAppContext app)
 	    XtDispatchEvent(&event);
 	    }
 	}
-	
+
     XmUpdateDisplay(topshell);
-		
+
     return(MB_SUCCESS);
 }
 
@@ -5401,7 +5403,7 @@ do_message_on(char *message)
     Window  diawindow, topwindow;
     XWindowAttributes	xwa;
     XEvent  event;
-    
+
     if (mbna_verbose >= 1)
     	fprintf(stderr,"%s\n",message);
 
@@ -5421,7 +5423,7 @@ do_message_on(char *message)
 	{
 	diawindow = XtWindow(diashell);
 	topwindow = XtWindow(topshell);
-	
+
 	/* wait for the dialog to be mapped */
 	while (XGetWindowAttributes(XtDisplay(bulletinBoard_message), diawindow, &xwa)
 		&& xwa.map_state != IsViewable)
@@ -5429,28 +5431,28 @@ do_message_on(char *message)
 	    if (XGetWindowAttributes(XtDisplay(bulletinBoard_message), topwindow, &xwa)
 		    && xwa.map_state != IsViewable)
 		break;
-		
+
 	    XtAppNextEvent(app_context, &event);
 	    XtDispatchEvent(&event);
 	    }
 	}
-	
+
     XmUpdateDisplay(topshell);
-		
+
     return(MB_SUCCESS);
 }
 /*--------------------------------------------------------------------*/
 
 int
 do_message_update(char *message)
-{    
+{
     if (mbna_verbose >= 1)
     	fprintf(stderr,"%s\n",message);
 
     set_label_string(label_message, message);
     XSync(XtDisplay(bulletinBoard_message), 0);
     XmUpdateDisplay(bulletinBoard_message);
-		
+
     return(MB_SUCCESS);
 }
 
@@ -5462,7 +5464,7 @@ do_message_off()
     XtUnmanageChild(bulletinBoard_message);
     XSync(XtDisplay(bulletinBoard_message), 0);
     XmUpdateDisplay(bulletinBoard_message);
-		
+
     return(MB_SUCCESS);
 }
 
@@ -5477,11 +5479,11 @@ do_info_add(char *info, int timetag)
     char	date[25], user[128], *user_ptr, host[128];
     char	*ctime();
     char	*getenv();
-    
+
     /* reposition to end of text */
     pos = XmTextGetLastPosition(text_messages);
     XmTextSetInsertionPosition(text_messages, pos);
-    
+
     /* add text */
     if (timetag == MB_YES)
         XmTextInsert(text_messages, pos, info);
@@ -5489,7 +5491,7 @@ do_info_add(char *info, int timetag)
 	fputs(info, project.logfp);
     if (mbna_verbose > 0)
 	fputs(info, stderr);
-    
+
     /* put time tag in if requested */
     if (timetag == MB_YES)
 	{
@@ -5513,7 +5515,7 @@ do_info_add(char *info, int timetag)
 	if (mbna_verbose > 0)
 	    fputs(tag, stderr);
 	}
-    
+
     /* reposition to end of text */
     if (timetag == MB_YES)
         {
@@ -5521,7 +5523,7 @@ do_info_add(char *info, int timetag)
         XmTextShowPosition(text_messages, pos);
         XmTextSetInsertionPosition(text_messages, pos);
 	}
-		
+
     return(MB_SUCCESS);
 }
 
@@ -5535,7 +5537,7 @@ do_error_dialog(char *s1, char *s2, char *s3)
     set_label_string(label_error_three, s3);
     XtManageChild(bulletinBoard_error);
     XBell(XtDisplay(form_mbnavadjust),100);
-		
+
     return(MB_SUCCESS);
 }
 
@@ -5605,4 +5607,3 @@ do_make_grid( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 }
-

@@ -171,7 +171,7 @@ $setpointtime = 30;
 
 # behavior descend
 $descendpitch = -35;
-$descendrudder = 3;
+$descendrudder = 2;
 $descentdepth = 3.0;
 $initialdescendtime = 300;
 

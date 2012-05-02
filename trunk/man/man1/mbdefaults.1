@@ -1,19 +1,19 @@
-.TH mbdefaults 1 "12 September 2011" "MB-System 5.0" "MB-System 5.0"
+.TH mbdefaults 1 "31 March 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbdefaults\fP - Set or list default mbio parameters for 
+\fBmbdefaults\fP - Set or list default mbio parameters for
 reading and writing swath sonar data
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbdefaults\fP [\fB-D\fP\fIpsdisplay\fP \fB-I\fP\fIimagedisplay\fP 
-\fB-L\fP\fIlonflip\fP \fB-T\fP\fItimegap\fP \fB-U\fP\fIuselockfiles\fP 
+\fBmbdefaults\fP [\fB-D\fP\fIpsdisplay\fP \fB-F\fP\fIfbtversion\fP  \fB-I\fP\fIimagedisplay\fP
+\fB-L\fP\fIlonflip\fP \fB-T\fP\fItimegap\fP \fB-U\fP\fIuselockfiles\fP
 \fB-W\fP\fIproject\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbdefaults\fP is a utility for setting or listing the default read
-parameters used by some \fBMBIO\fP utilities such as \fBMBCOPY\fP.  
+parameters used by some \fBMBIO\fP utilities such as \fBMBCOPY\fP.
 If a user wishes to set default
 parameters different from those set by the \fBMBIO\fP library, then
 these specialized default values must be stored
@@ -49,14 +49,14 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 Sets the program used for displaying Postscript graphics files
 on a screen; this facility is used by shellscripts created through
 macros like \fBmbm_plot\fP. The default Postscript display
-utility is \fBghostview\fP. Another common Postscript display utilities
-is \fBgv\fP; past postscript viewers included \fBpageview\fP 
+utility is \fBgv\fP. Another common Postscript display utilities
+is \fBghostview\fP; past postscript viewers included \fBpageview\fP
 (for Sun workstations) and \fBxpsview\fP (for Silicon Graphics workstations).
 .TP
 .B \-F
 \fIfbtversion\fP
 .br
-Set the version of fbt files created by \fBmbdatalist\fP and \fBmbprocess\fP. 
+Set the version of fbt files created by \fBmbdatalist\fP and \fBmbprocess\fP.
 If \fIfbtversion\fP = 2, "old", or "OLD", then the pre-5.3.1897 version of
 format 71 will be used to write the "fast bathymetry" or "*.fbt" files.
 If \fIfbtversion\fP = 3, "new", or "NEW", then the new, 5.3.1897-or-later version of
@@ -81,9 +81,9 @@ are \fBgimp\fP (GNU image processing) and \fBgqview\fP.
 .br
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If \fIlonflip\fP=0 
+the range from -360 to 0 degrees. If \fIlonflip\fP=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If \fIlonflip\fP=1 
+the range from -180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
@@ -99,13 +99,13 @@ the data is considered to have a gap. Default: \fItimegap\fP = 1.
 .br
 Sets whether \fBMB-System\fP uses the file locking mechanism to insure that
 a swath file is only processed or edited by a single program at a time.
-To revert to pre-lockfile behavior for \fBmbedit\fP, \fBmbeditviz\fP, 
+To revert to pre-lockfile behavior for \fBmbedit\fP, \fBmbeditviz\fP,
 \fBmbclean\fP, \fBmbareaclean\fP, \fBmbnavedit\fP, and \fBmbprocess\fP,
 use \fB-U\fP\fI0\fP or  \fB-U\fP\fIno\fP. To reinstate use of lock files,
 use \fB-U\fP\fI1\fP or  \fB-U\fP\fIyes\fP.
 .TP
 .B \-V
-Normally, \fBmbdefaults\fP outputs only a list of the default values 
+Normally, \fBmbdefaults\fP outputs only a list of the default values
 to the stdout stream.  If the
 \fB-V\fP flag is given, then \fBmbdefaults\fP works in a "verbose" mode and
 also outputs the program version being used.
@@ -119,7 +119,7 @@ Default: \fIproject\fP = "none".
 
 .SH EXAMPLES
 Suppose that one wishes the default Postscript viewer to
-be xpsview rather than ghostview. 
+be xpsview rather than gv.
 The following will suffice to create (or rewrite)
 a .mbio_defaults file in the users home directory:
 	mbdefaults -Dxpsview
@@ -151,9 +151,9 @@ The output will be
  uselockfiles: 1
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbcontour\fP(l), 
-\fBmbswath\fP(l), \fBmbgrdtiff\fP(l), 
-\fBmbm_plot\fP(l), \fBmbm_grdplot\fP(l), 
+\fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbcontour\fP(l),
+\fBmbswath\fP(l), \fBmbgrdtiff\fP(l),
+\fBmbm_plot\fP(l), \fBmbm_grdplot\fP(l),
 \fBmbm_grd3dplot\fP(l), \fBmbm_xyplot\fP(l), \fBmbm_grdtiff\fP(l)
 
 .SH BUGS
