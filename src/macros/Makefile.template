@@ -118,8 +118,9 @@ all:	$(BINDIR)/mbm_xbt \
 	$(BINDIR)/mbm_histplot \
 	$(BINDIR)/mbm_multiprocess \
 	$(BINDIR)/mbm_multidatalist \
-	$(BINDIR)/mbm_multicopy
-	
+	$(BINDIR)/mbm_multicopy \
+	$(BINDIR)/mbm_bpr
+
 
 ### make clean does nothing
 clean:
@@ -188,3 +189,6 @@ $(BINDIR)/mbm_multidatalist:	mbm_multidatalist.pl
 $(BINDIR)/mbm_multicopy:	mbm_multicopy.pl
 	cp mbm_multicopy.pl $(BINDIR)/mbm_multicopy
 	chmod 775 $(BINDIR)/mbm_multicopy
+$(BINDIR)/mbm_bpr:	mbm_bpr.pl
+	cp mbm_bpr.pl $(BINDIR)/mbm_bpr
+	chmod 775 $(BINDIR)/mbm_bpr

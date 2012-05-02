@@ -95,7 +95,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mbsvplist";
 	char help_message[] =  "mbsvplist lists all water sound velocity\nprofiles (SVPs) within swath data files. Swath bathymetry is\ncalculated from raw angles and travel times by raytracing\nthrough a model of the speed of sound in water. Many swath\ndata formats allow SVPs to be embedded in the data, and\noften the SVPs used to calculate the data will be included.\nBy default, all unique SVPs encountered are listed to\nstdout. The SVPs may instead be written to individual files\nwith names FILE_XXX.svp, where FILE is the swath data\nfilename and XXX is the SVP count within the file.  The -D\noption causes duplicate SVPs to be output.";
-	char usage_message[] = "mbsvplist [-D -Fformat -H -Ifile -O -P -V -Z]";
+	char usage_message[] = "mbsvplist [-C -D -Fformat -H -Ifile -O -P -V -Z]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -177,11 +177,13 @@ int main (int argc, char **argv)
 	FILE	*svp_fp;
 	int	svp_read, svp_read_tot;
 	int	svp_written, svp_written_tot;
+	int	unique_svp_found=0;
 	int	svp_depthzero_reset;
 	double	svp_depthzero;
+	int	output_counts=MB_NO;
 
 	/* ttimes values */
-	int	ssv_output;
+	int	ssv_output = MB_NO;
 	int	nbeams;
 	double	*ttimes = NULL;
 	double	*angles = NULL;
@@ -218,7 +220,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "DdF:f:I:i:OoPpZzVvHh")) != -1)
+	while ((c = getopt(argc, argv, "CcDdF:f:I:i:OoPpZzVvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -232,6 +234,11 @@ int main (int argc, char **argv)
 		case 'D':
 		case 'd':
 			svp_duplicate = MB_YES;
+			break;
+		case 'C':
+		case 'c':
+			output_counts=MB_YES;
+			ssv_output = MB_NO;
 			break;
 		case 'F':
 		case 'f':
@@ -590,6 +597,8 @@ int main (int argc, char **argv)
 				/* open the file */
 				svp_fp = fopen(svp_file, "w");
 				}
+			else if (output_counts == MB_YES) /* output counts of svps only */
+				svp_fp = NULL;
 			else
 				svp_fp = stdout;
 			
@@ -646,6 +655,7 @@ int main (int argc, char **argv)
 				svp_written++;
 				svp_written_tot++;
 				}
+				unique_svp_found++;
 				
 			/* close the svp file */
 			if (svp_file_output == MB_YES
@@ -702,9 +712,11 @@ int main (int argc, char **argv)
 	if (verbose >= 1)
 		{
 		fprintf(stderr, "\nTotal %d SVP records read\n", svp_read_tot);
+		fprintf(stderr, "Total %d SVP unique records found\n", unique_svp_found);
 		fprintf(stderr, "Total %d SVP records written\n", svp_written_tot);
 		}
-
+	if (output_counts == MB_YES)
+		fprintf(stderr, "%d\n", unique_svp_found);
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose,&error);

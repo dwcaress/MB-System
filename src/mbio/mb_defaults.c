@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mb_defaults.c contains two functions - mb_defaults() and mb_env().
- * mb_defaults() returns the default MBIO control parameters and 
+ * mb_defaults() returns the default MBIO control parameters and
  * mb_env() returns the default MB-System environment variables - all
  * values are read from ~/.mbio_defaults providing this file exists.
  * The return values are MB_SUCCESS if the file exists and MB_FAILURE
@@ -22,7 +22,7 @@
  *
  * Author:	D. W. Caress
  * Date:	January 23, 1993
- * 
+ *
  * $Log: mb_defaults.c,v $
  * Revision 5.9  2008/12/31 08:47:38  caress
  * Updates towards release 5.1.1
@@ -121,7 +121,7 @@ static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mb_defaults(int verbose, int *format, int *pings,
-		int *lonflip, double bounds[4], 
+		int *lonflip, double bounds[4],
 		int *btime_i, int *etime_i,
 		double *speedmin, double *timegap)
 {
@@ -233,7 +233,7 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 	char	*function_name = "mbenv";
 	int	status;
 	FILE	*fp;
-	char	file[MB_PATH_MAXLINE]; 
+	char	file[MB_PATH_MAXLINE];
 	char	string[MB_PATH_MAXLINE];
 	char	*HOME = "HOME";
 	char	*home_ptr;
@@ -262,11 +262,11 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 	strcpy(imgdisplay, "xv");
 #endif
 #ifdef LYNX
-	strcpy(psdisplay, "ghostview");
+	strcpy(psdisplay, "gv");
 	strcpy(imgdisplay, "xv");
 #endif
 #ifdef LINUX
-	strcpy(psdisplay, "ghostview");
+	strcpy(psdisplay, "gv");
 	strcpy(imgdisplay, "gimp");
 #endif
 #ifdef SUN
@@ -274,7 +274,7 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 	strcpy(imgdisplay, "xv");
 #endif
 #ifdef HPUX
-	strcpy(psdisplay, "ghostview");
+	strcpy(psdisplay, "gv");
 	strcpy(imgdisplay, "xv");
 #endif
 #ifdef DARWIN
@@ -282,17 +282,17 @@ int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject)
 	strcpy(imgdisplay, "display");
 #endif
 #ifdef CYGWIN
-	strcpy(psdisplay, "ghostview");
+	strcpy(psdisplay, "gv");
 	strcpy(imgdisplay, "xv");
 #endif
 #ifdef OTHER
-	strcpy(psdisplay, "ghostview");
+	strcpy(psdisplay, "gv");
 	strcpy(imgdisplay, "xv");
 #endif
 
 	/* successful no matter what happens */
 	status = MB_SUCCESS;
-	
+
 	/* set system default project name */
 	strcpy(mbproject, "none");
 

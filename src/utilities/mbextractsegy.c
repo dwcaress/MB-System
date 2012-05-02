@@ -109,6 +109,8 @@
 #define MBES_ROUTE_WAYPOINT_ENDLINE	4
 #define MBES_ONLINE_THRESHOLD		15.0
 #define MBES_ONLINE_COUNT		30
+#define MBES_NUM_PLOT_MAX		50
+#define MBES_MAX_SWEEP			1.0
 
 static char rcs_id[] = "$Id$";
 
@@ -223,8 +225,11 @@ int main (int argc, char **argv)
 	/* auto plotting */
 	FILE	*sfp = NULL;
 	mb_path	scriptfile;
+	int	recalculatesweep;
 	double	seafloordepthmin = -1.0;
 	double	seafloordepthmax = -1.0;
+	double	seafloordepthminplot[MBES_NUM_PLOT_MAX];
+	double	seafloordepthmaxplot[MBES_NUM_PLOT_MAX];
 	double	sweep;
 	double	delay;
 	double	startlon;
@@ -558,6 +563,12 @@ int main (int argc, char **argv)
 		rangelast = 1000 * rangethreshold;
 		seafloordepthmin = -1.0;
 		seafloordepthmax = -1.0;
+		nplot = 0;
+		for (i=0;i<MBES_NUM_PLOT_MAX;i++)
+			{
+			seafloordepthminplot[i] = -1;
+			seafloordepthmaxplot[i] = -1;
+			}
 		oktowrite = 0;
 		rangeok = MB_NO;
 
@@ -655,6 +666,12 @@ int main (int argc, char **argv)
 		rangelast = 1000 * rangethreshold;
 		seafloordepthmin = -1.0;
 		seafloordepthmax = -1.0;
+		nplot = 0;
+		for (i=0;i<MBES_NUM_PLOT_MAX;i++)
+			{
+			seafloordepthminplot[i] = -1;
+			seafloordepthmaxplot[i] = -1;
+			}
 		oktowrite = 0;
 		rangeok = MB_NO;
 
@@ -905,13 +922,21 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				    /* The maximum useful plot length is about nshotmax shots, so
 		    			we break longer files up into multiple plots */
 				    nshot = endshot - startshot + 1;
-				    nplot = nshot / nshotmax;
+				    nplot = nwrite / nshotmax;
 				    if (nwrite % nshotmax > 0)
 		    			nplot++;
+
+				    /* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
+				      then make section plots using only the sweep needed for each section alone */
 				    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;
 				    sweep = (1 + (int)(sweep / 0.05)) * 0.05;
 				    delay = seafloordepthmin / 750.0;
 				    delay = ((int)(delay / 0.05)) * 0.05;
+				    if (sweep > MBES_MAX_SWEEP)
+				        recalculatesweep = MB_YES;
+				    else
+				        recalculatesweep = MB_NO;
+
 				    fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
 				    fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
 				    fprintf(sfp, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
@@ -924,6 +949,14 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				    fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
 				    for (i=0;i<nplot;i++)
 		    			{
+					if (recalculatesweep == MB_YES)
+						{
+						sweep = (seafloordepthmaxplot[i] - seafloordepthminplot[i]) / 750.0 + 0.1;
+						sweep = (1 + (int)(sweep / 0.05)) * 0.05;
+						delay = seafloordepthminplot[i] / 750.0;
+						delay = ((int)(delay / 0.05)) * 0.05;
+						}
+
 		        		sprintf(command, "#   Section plot %d of %d\n", i + 1, nplot);
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
@@ -946,6 +979,11 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 							lineroot, linenumber, i + 1);
 					fprintf(stderr, "%s", command);
 					fprintf(sfp, "%s", command);
+
+					sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -quality 75 %s_%4.4d_%2.2d_sectionplot.jpg\n\n",
+							lineroot, linenumber, i + 1, lineroot, linenumber, i + 1);
+					fprintf(stderr, "%s", command);
+					fprintf(sfp, "%s", command);
 					fflush(sfp);
 					}
 				    }
@@ -964,6 +1002,12 @@ dx,dy,range,activewaypoint,time_d,routetime_d[activewaypoint]); */
 				rangelast = 1000 * rangethreshold;
 				seafloordepthmin = -1.0;
 				seafloordepthmax = -1.0;
+				nplot = 0;
+				for (i=0;i<MBES_NUM_PLOT_MAX;i++)
+					{
+					seafloordepthminplot[i] = -1;
+					seafloordepthmaxplot[i] = -1;
+					}
 				oktowrite = 0;
 				rangeok = MB_NO;
 				}
@@ -1146,6 +1190,10 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				linetracemax = MAX(tracemax,linetracemax);
 				}
 
+			/* check for new section plot */
+			if (nwrite > 0 && (nwrite % nshotmax) == 0)
+				nplot++;
+
 			/* get seafloor depth min and max */
 			if (segytraceheader.src_wbd > 0)
 				{
@@ -1158,6 +1206,16 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					{
 					seafloordepthmin = MIN(seafloordepthmin, 0.01 * ((double) segytraceheader.src_wbd));
 					seafloordepthmax = MAX(seafloordepthmax, 0.01 * ((double) segytraceheader.src_wbd));
+					}
+				if (seafloordepthminplot[nplot] < 0.0)
+					{
+					seafloordepthminplot[nplot] = 0.01 * ((double) segytraceheader.src_wbd);
+					seafloordepthmaxplot[nplot] = 0.01 * ((double) segytraceheader.src_wbd);
+					}
+				else
+					{
+					seafloordepthminplot[nplot] = MIN(seafloordepthminplot[nplot], 0.01 * ((double) segytraceheader.src_wbd));
+					seafloordepthmaxplot[nplot] = MAX(seafloordepthmaxplot[nplot], 0.01 * ((double) segytraceheader.src_wbd));
 					}
 				}
 			/* output info */
@@ -1426,14 +1484,22 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		    /* The maximum useful plot length is about nshotmax shots, so
 		    	we break longer files up into multiple plots */
 		    nshot = endshot - startshot + 1;
-		    nplot = nshot / nshotmax;
+		    nplot = nwrite / nshotmax;
 		    if (nwrite % nshotmax > 0)
 		    	nplot++;
 /*fprintf(stderr,"seafloordepthmin:%f seafloordepthmax:%f\n", seafloordepthmin, seafloordepthmax);*/
+
+		    /* calculate sweep needed for all of the data in the line - if this is more than 1.0 seconds,
+		      then make section plots using only the sweep needed for each section alone */
 		    sweep = (seafloordepthmax - seafloordepthmin) / 750.0 + 0.1;
 		    sweep = (1 + (int)(sweep / 0.05)) * 0.05;
 		    delay = seafloordepthmin / 750.0;
 		    delay = ((int)(delay / 0.05)) * 0.05;
+		    if (sweep > MBES_MAX_SWEEP)
+			recalculatesweep = MB_YES;
+		    else
+			recalculatesweep = MB_NO;
+
 		    fprintf(sfp, "# Generate %d section plot(s) of segy file: %s\n", nplot, output_file);
 		    fprintf(sfp, "#   Section Start Position: %.6f %.6f\n", startlon, startlat);
 		    fprintf(sfp, "#   Section End Position:   %.6f %.6f\n", endlon, endlat);
@@ -1446,6 +1512,14 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 		    fprintf(stderr, "#   Section bearing: %f degrees\n", linebearing);
 		    for (i=0;i<nplot;i++)
 		    	{
+			if (recalculatesweep == MB_YES)
+				{
+				sweep = (seafloordepthmaxplot[i] - seafloordepthminplot[i]) / 750.0 + 0.1;
+				sweep = (1 + (int)(sweep / 0.05)) * 0.05;
+				delay = seafloordepthminplot[i] / 750.0;
+				delay = ((int)(delay / 0.05)) * 0.05;
+				}
+
 		        sprintf(command, "#   Section plot %d of %d\n", i + 1, nplot);
 			fprintf(stderr, "%s", command);
 			fprintf(sfp, "%s", command);
@@ -1466,6 +1540,11 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 
 			sprintf(command, "%s_%4.4d_%2.2d_sectionplot.cmd\n\n",
 					lineroot, linenumber, i + 1);
+			fprintf(stderr, "%s", command);
+			fprintf(sfp, "%s", command);
+
+			sprintf(command, "convert -density 100 %s_%4.4d_%2.2d_sectionplot.ps -quality 75 %s_%4.4d_%2.2d_sectionplot.jpg\n\n",
+					lineroot, linenumber, i + 1, lineroot, linenumber, i + 1);
 			fprintf(stderr, "%s", command);
 			fprintf(sfp, "%s", command);
 			fflush(sfp);

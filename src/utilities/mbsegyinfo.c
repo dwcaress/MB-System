@@ -184,7 +184,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "I:i:L:l:OoVvWwHh")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -279,7 +279,7 @@ int main (int argc, char **argv)
 		}
 
 	/* initialize reading the segy file */
-	if (mb_segy_read_init(verbose, read_file, 
+	if (mb_segy_read_init(verbose, read_file,
 		&mbsegyioptr, &asciiheader, &fileheader, &error) != MB_SUCCESS)
 		{
 		mb_error(verbose,error,&message);
@@ -289,7 +289,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-		
+
 	/* Open output file if requested */
 	if (output_usefile == MB_YES)
 	    {
@@ -310,21 +310,21 @@ int main (int argc, char **argv)
 		{
 		/* reset error */
 		error = MB_ERROR_NO_ERROR;
-		
+
 		/* read a trace */
-		status = mb_segy_read_trace(verbose, mbsegyioptr, 
+		status = mb_segy_read_trace(verbose, mbsegyioptr,
 				&traceheader, &trace, &error);
 /*fprintf(stderr,"read_file:%s record:%d shot:%d  %4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d\n",
 	read_file,nread,traceheader.shot_num,
 	traceheader.year,traceheader.day_of_yr,
 	traceheader.hour,traceheader.min,traceheader.sec,traceheader.mils,
 	traceheader.nsamps,traceheader.si_micros);*/
-				
+
 		/* deal with success */
 		if (status == MB_SUCCESS)
 			{
 			nread++;
-			
+
 			/* get needed values */
 			time_j[0] = traceheader.year;
 			time_j[1] = traceheader.day_of_yr;
@@ -365,21 +365,21 @@ int main (int argc, char **argv)
 				navlat  = factor * ((float)traceheader.grp_lat);
 			if (lonflip < 0)
 				{
-				if (navlon > 0.) 
+				if (navlon > 0.)
 					navlon = navlon - 360.;
 				else if (navlon < -360.)
 					navlon = navlon + 360.;
 				}
 			else if (lonflip == 0)
 				{
-				if (navlon > 180.) 
+				if (navlon > 180.)
 					navlon = navlon - 360.;
 				else if (navlon < -180.)
 					navlon = navlon + 360.;
 				}
 			else
 				{
-				if (navlon > 360.) 
+				if (navlon > 360.)
 					navlon = navlon - 360.;
 				else if (navlon < 0.)
 					navlon = navlon + 360.;
@@ -437,7 +437,7 @@ int main (int argc, char **argv)
 					timbeg_i[i] = time_i[i];
 					timend_i[i] = time_i[i];
 					}
-				for (i=0;i<7;i++)
+				for (i=0;i<5;i++)
 					{
 					timbeg_j[i] = time_j[i];
 					timend_j[i] = time_j[i];
@@ -446,7 +446,7 @@ int main (int argc, char **argv)
 				}
 
 			/* get min max values */
-			else 
+			else
 				{
 				shotmin = MIN(shotmin, traceheader.shot_num);
 				shotmax = MAX(shotmax, traceheader.shot_num);
@@ -458,10 +458,13 @@ int main (int argc, char **argv)
 				rptracemax = MAX(rptracemax, traceheader.rp_tr);
 				delaymin = MIN(delaymin, delay);
 				delaymax = MAX(delaymax, delay);
-				lonmin = MIN(lonmin, navlon);
-				lonmax = MAX(lonmax, navlon);
-				latmin = MIN(latmin, navlat);
-				latmax = MAX(latmax, navlat);
+				if (navlon != 0.0 && navlat != 0.0)
+					{
+					lonmin = MIN(lonmin, navlon);
+					lonmax = MAX(lonmax, navlon);
+					latmin = MIN(latmin, navlat);
+					latmax = MAX(latmax, navlat);
+					}
 				lonend = navlon;
 				latend = navlat;
 				timend = time_d;
@@ -469,7 +472,7 @@ int main (int argc, char **argv)
 					{
 					timend_i[i] = time_i[i];
 					}
-				for (i=0;i<7;i++)
+				for (i=0;i<5;i++)
 					{
 					timend_j[i] = time_j[i];
 					}
@@ -486,7 +489,7 @@ int main (int argc, char **argv)
 				receiverwaterdepthmin = MIN(receiverwaterdepthmin, receiverwaterdepth);
 				receiverwaterdepthmax = MAX(receiverwaterdepthmax, receiverwaterdepth);
 				}
-			
+
 			}
 
 		/* reset first flag */
@@ -499,7 +502,7 @@ int main (int argc, char **argv)
 
 	/* close the swath file */
 	status = mb_segy_close(verbose,&mbsegyioptr,&error);
-	
+
 	/* output the information */
 	tracelength = 0.000001 * (double)(fileheader.sample_interval * fileheader.number_samples);
 	fprintf(output,"\nSEGY Data File:      %s\n",read_file);
@@ -529,42 +532,42 @@ int main (int argc, char **argv)
 	fprintf(output,"\nData Totals:\n");
 	fprintf(output,"  Number of Traces:           %8d\n",nread);
 	fprintf(output,"  Min Max Delta:\n");
-	fprintf(output,"    Shot number:              %8d %8d %8d\n", 
+	fprintf(output,"    Shot number:              %8d %8d %8d\n",
 		shotmin, shotmax, shotmax - shotmin + 1);
-	fprintf(output,"    Shot trace:               %8d %8d %8d\n", 
+	fprintf(output,"    Shot trace:               %8d %8d %8d\n",
 		shottracemin, shottracemax, shottracemax - shottracemin + 1);
-	fprintf(output,"    RP number:                %8d %8d %8d\n", 
+	fprintf(output,"    RP number:                %8d %8d %8d\n",
 		rpmin, rpmax, rpmax - rpmin + 1);
-	fprintf(output,"    RP trace:                 %8d %8d %8d\n", 
+	fprintf(output,"    RP trace:                 %8d %8d %8d\n",
 		rptracemin, rptracemax, rptracemax - rptracemin + 1);
-	fprintf(output,"    Delay (sec):              %8f %8f %8f\n", 
+	fprintf(output,"    Delay (sec):              %8f %8f %8f\n",
 		delaymin, delaymax, delaymax - delaymin);
-	fprintf(output,"    Range (m):                %8f %8f %8f\n", 
+	fprintf(output,"    Range (m):                %8f %8f %8f\n",
 		rangemin, rangemax, rangemax - rangemin);
-	fprintf(output,"    Receiver Elevation (m):   %8f %8f %8f\n", 
+	fprintf(output,"    Receiver Elevation (m):   %8f %8f %8f\n",
 		receiverelevationmin, receiverelevationmax, receiverelevationmax - receiverelevationmin);
-	fprintf(output,"    Source Elevation (m):     %8f %8f %8f\n", 
+	fprintf(output,"    Source Elevation (m):     %8f %8f %8f\n",
 		sourceelevationmin, sourceelevationmax, sourceelevationmax - sourceelevationmin);
-	fprintf(output,"    Source Depth (m):         %8f %8f %8f\n", 
+	fprintf(output,"    Source Depth (m):         %8f %8f %8f\n",
 		sourcedepthmin, sourcedepthmax, sourcedepthmax - sourcedepthmin);
-	fprintf(output,"    Receiver Water Depth (m): %8f %8f %8f\n", 
+	fprintf(output,"    Receiver Water Depth (m): %8f %8f %8f\n",
 		receiverwaterdepthmin, receiverwaterdepthmax, receiverwaterdepthmax - receiverwaterdepthmin);
-	fprintf(output,"    Source Water Depth (m):   %8f %8f %8f\n", 
+	fprintf(output,"    Source Water Depth (m):   %8f %8f %8f\n",
 		sourcewaterdepthmin, sourcewaterdepthmax, sourcewaterdepthmax - sourcewaterdepthmin);
 	fprintf(output,"\nNavigation Totals:\n");
 	fprintf(output,"\n  Start of Data:\n");
-	fprintf(output,"    Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
+	fprintf(output,"    Start Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
 		timbeg_i[1],timbeg_i[2],timbeg_i[0],timbeg_i[3],
 		timbeg_i[4],timbeg_i[5],timbeg_i[6],timbeg_j[1]);
-	fprintf(output,"    Lon: %9.4f     Lat: %9.4f\n", lonbeg,latbeg);
+	fprintf(output,"    Start Position: Lon: %14.9f     Lat: %14.9f\n", lonbeg,latbeg);
 	fprintf(output,"\n  End of Data:\n");
-	fprintf(output,"    Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
+	fprintf(output,"    End Time:    %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
 		timend_i[1],timend_i[2],timend_i[0],timend_i[3],
 		timend_i[4],timend_i[5],timend_i[6],timend_j[1]);
-	fprintf(output,"    Lon: %9.4f     Lat: %9.4f \n", lonend,latend);
+	fprintf(output,"    End Position:   Lon: %14.9f     Lat: %14.9f \n", lonend,latend);
 	fprintf(output,"\nLimits:\n");
-	fprintf(output,"  Minimum Longitude:   %10.4f   Maximum Longitude:   %10.4f\n",lonmin,lonmax);
-	fprintf(output,"  Minimum Latitude:    %10.4f   Maximum Latitude:    %10.4f\n",latmin,latmax);
+	fprintf(output,"  Minimum Longitude:   %14.9f   Maximum Longitude:   %14.9f\n",lonmin,lonmax);
+	fprintf(output,"  Minimum Latitude:    %14.9f   Maximum Latitude:    %14.9f\n",latmin,latmax);
 
 	/* check memory */
 	if (verbose >= 4)

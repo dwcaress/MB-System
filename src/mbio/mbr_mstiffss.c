@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_mstiffss.c contains the functions for reading
- * sidescan data in the MSTIFFSS format.  
+ * sidescan data in the MSTIFFSS format.
  * These functions include:
  *   mbr_alm_mstiffss	- allocate read/write memory
  *   mbr_dem_mstiffss	- deallocate read/write memory
@@ -89,27 +89,27 @@
 #include "../../include/mbf_mstiffss.h"
 
 /* essential function prototypes */
-int mbr_register_mstiffss(int verbose, void *mbio_ptr, 
+int mbr_register_mstiffss(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_mstiffss(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_mstiffss(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_mstiffss(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_mstiffss(int verbose, void *mbio_ptr, int *error);
@@ -138,54 +138,54 @@ int mbr_register_mstiffss(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mstiffss(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_mstiffss(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_mstiffss;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_mstiffss; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_mstiff_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_mstiff_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_mstiffss; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_mstiffss; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_mstiff_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_mstiff_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_mstiff_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_mstiff_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_mstiff_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_mstiff_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_mstiff_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_mstiff_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_mstiff_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_mstiffss;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_mstiff_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_mstiff_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_mstiffss;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_mstiffss;
+	mb_io_ptr->mb_io_dimensions = &mbsys_mstiff_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_mstiff_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_mstiff_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_mstiff_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_mstiff_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_mstiff_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_mstiff_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_mstiff_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_mstiff_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -233,25 +233,25 @@ int mbr_register_mstiffss(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_mstiffss(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_mstiffss(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_mstiffss";
@@ -292,7 +292,7 @@ int mbr_info_mstiffss(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -504,7 +504,7 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	nav_info_tag = &(mb_io_ptr->save10);
 	ref_windows_time = &(mb_io_ptr->save11);
 	corr_time_d = &(mb_io_ptr->saved1);
-	
+
 	/* if first time through, read file header and
 	    offsets, setting up for later reads */
 	if (*n_read <= 0)
@@ -512,50 +512,50 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    /* set defaults */
 	    *bits_per_pixel = 8;
 	    /* check for proper file tag */
-	    if ((status = fread(buffer, 4 * sizeof(char), 
+	    if ((status = fread(buffer, 4 * sizeof(char),
 			    1, mb_io_ptr->mbfp)) != 1)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
 	    else if (strncmp(buffer, "MSTL", 4) != 0)
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_DATA;		    
+		*error = MB_ERROR_BAD_DATA;
 		}
-	    else 
+	    else
 		{
 		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;		    
+		*error = MB_ERROR_NO_ERROR;
 		}
-		
+
 	    /* now get the image file directory offset */
-	    if ((status = fread(buffer, 
+	    if ((status = fread(buffer,
 			    sizeof(int), 1, mb_io_ptr->mbfp)) == 1)
 		{
 		mb_get_binary_int(MB_YES, buffer, &ifd_offset);
 		status = MB_SUCCESS;
-		*error = MB_ERROR_NO_ERROR;		    
+		*error = MB_ERROR_NO_ERROR;
 		}
 	    else
 		{
 		status = MB_FAILURE;
-		*error = MB_ERROR_EOF;		    
+		*error = MB_ERROR_EOF;
 		}
-		
+
 	    /* now parse through the image file directory
 		and grab the important values */
 	    if (status == MB_SUCCESS)
 		{
 		status = fseek(mb_io_ptr->mbfp, (size_t) ifd_offset, SEEK_SET);
 		status = ftell(mb_io_ptr->mbfp);
-		if ((status = fread(buffer, sizeof(short), 
+		if ((status = fread(buffer, sizeof(short),
 			1, mb_io_ptr->mbfp)) == 1)
 		    {
 		    mb_get_binary_short(MB_YES, buffer, &nentry);
-		    
+
 		    /* loop over all entries in the directory */
-		    if ((status = status = fread(buffer, 
+		    if ((status = status = fread(buffer,
 		    	6 * nentry * sizeof(short), 1, mb_io_ptr->mbfp)) == 1)
 			{
 			index = 0;
@@ -573,45 +573,45 @@ int mbr_rt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 tag,type,count,value_offset);*/
 
 			    /* set values for important entries */
-			    
+
 			    /* BitsPerBin */
 			    if (tag == BitsPerBin)
 				{
 				*bits_per_pixel = value_offset;
 				}
-				
+
 			    /* SonarLines */
 			    else if (tag == SonarLines)
 				{
 				*n_ping_file = value_offset;
 				}
-				
+
 			    /* BinsPerChannel */
 			    else if (tag == BinsPerChannel)
 				{
 				*n_pixel_channel = value_offset;
 				}
-				
+
 			    /* TimeCorrelation */
 			    else if (tag == TimeCorrelation)
 				{
 				timecorr_tag = tag;
 				timecorr_offset = value_offset;
 				}
-				
+
 			    /* Y2KTimeCorrelation */
 			    else if (tag == Y2KTimeCorrelation)
 				{
 				timecorr_tag = tag;
 				timecorr_offset = value_offset;
 				}
-				
+
 			    /* LeftChannel */
 			    else if (tag == LeftChannel)
 				{
 				*left_channel_offset = value_offset;
 				}
-				
+
 			    /* LeftChannel2 */
 			    else if (tag == LeftChannel2)
 				{
@@ -623,7 +623,7 @@ tag,type,count,value_offset);*/
 				{
 				*right_channel_offset = value_offset;
 				}
-				
+
 			    /* RightChannel2 */
 			    else if (tag == RightChannel2)
 				{
@@ -656,42 +656,42 @@ tag,type,count,value_offset);*/
 				{
 				*n_nav = value_offset;
 				}
-				
+
 			    /* NavInfo */
 			    else if (tag == NavInfo)
 				{
 				*nav_info_offset = value_offset;
 				*nav_info_tag = tag;
 				}
-				
+
 			    /* NavInfo2 */
 			    else if (tag == NavInfo2)
 				{
 				*nav_info_offset = value_offset;
 				*nav_info_tag = tag;
 				}
-				
+
 			    /* NavInfo3 */
 			    else if (tag == NavInfo3)
 				{
 				*nav_info_offset = value_offset;
 				*nav_info_tag = tag;
 				}
-				
+
 			    /* NavInfo4 */
 			    else if (tag == NavInfo4)
 				{
 				*nav_info_offset = value_offset;
 				*nav_info_tag = tag;
 				}
-				
+
 			    /* NavInfo5 */
 			    else if (tag == NavInfo5)
 				{
 				*nav_info_offset = value_offset;
 				*nav_info_tag = tag;
 				}
-				
+
 			    /* NavInfo6 */
 			    else if (tag == NavInfo6)
 				{
@@ -703,16 +703,16 @@ tag,type,count,value_offset);*/
 		    else
 			{
 			status = MB_FAILURE;
-			*error = MB_ERROR_EOF;		    				
+			*error = MB_ERROR_EOF;
 			}
-		    }			
+		    }
 		else
 		    {
 		    status = MB_FAILURE;
-		    *error = MB_ERROR_EOF;		    				
+		    *error = MB_ERROR_EOF;
 		    }
 		}
-			
+
 	    /* set the time correlation */
 	    if (status == MB_SUCCESS)
 		{
@@ -721,7 +721,7 @@ tag,type,count,value_offset);*/
 		    {
 		    /* get time correlation values */
 		    fseek(mb_io_ptr->mbfp, timecorr_offset, SEEK_SET);
-		    if ((status = fread(buffer, sizeof(int) + 9 * sizeof(short), 
+		    if ((status = fread(buffer, sizeof(int) + 9 * sizeof(short),
 			    1, mb_io_ptr->mbfp)) == 1)
 			{
 			index = 0;
@@ -729,7 +729,7 @@ tag,type,count,value_offset);*/
 			index += sizeof(int);
 			for (i=0;i<9;i++)
 			    {
-		    	    mb_get_binary_short(MB_YES, &(buffer[index]), 
+		    	    mb_get_binary_short(MB_YES, &(buffer[index]),
 			    			&(corr_time[i]));
 			    index += sizeof(short);
 			    }
@@ -743,7 +743,7 @@ tag,type,count,value_offset);*/
 			corr_time_i[6] = 0;
 			mb_get_time(verbose,corr_time_i,
 				corr_time_d);
-			    
+
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
 			}
@@ -759,7 +759,7 @@ tag,type,count,value_offset);*/
 		    {
 		    /* get time correlation values */
 		    fseek(mb_io_ptr->mbfp, timecorr_offset, SEEK_SET);
-		    if ((status = fread(buffer, 3 * sizeof(int), 
+		    if ((status = fread(buffer, 3 * sizeof(int),
 			    1, mb_io_ptr->mbfp)) == 1)
 			{
 			index = 0;
@@ -775,7 +775,7 @@ tag,type,count,value_offset);*/
 				    	    - corr_time_i[1] * 100);
 			corr_time_i[3] = (time / 3600);
 			corr_time_i[4] = (time - corr_time_i[3] * 3600) / 60;
-			corr_time_i[5] = (time - corr_time_i[3] * 3600 
+			corr_time_i[5] = (time - corr_time_i[3] * 3600
 				    	    - corr_time_i[4] * 60);
 			corr_time_i[6] = 0;
 			mb_get_time(verbose,corr_time_i,
@@ -792,7 +792,7 @@ tag,type,count,value_offset);*/
 		else
 		    {
 		    status = MB_FAILURE;
-		    *error = MB_ERROR_EOF;		    
+		    *error = MB_ERROR_EOF;
 		    }
 		}
 	    }
@@ -803,18 +803,18 @@ tag,type,count,value_offset);*/
 	    status = MB_FAILURE;
 	    *error = MB_ERROR_EOF;
 	    }
-	    
+
 	/* else read next ping */
 	else if (status == MB_SUCCESS)
 	    {
 	    /* get sonar data info */
 	    if (*sonar_data_info_tag == SonarDataInfo)
 	    	{
-		fseek(mb_io_ptr->mbfp, 
-			*sonar_data_info_offset 
-			    + (*n_read) * (sizeof(int) + 3 * sizeof(short)), 
+		fseek(mb_io_ptr->mbfp,
+			*sonar_data_info_offset
+			    + (*n_read) * (sizeof(int) + 3 * sizeof(short)),
 			SEEK_SET);
-		if ((status = fread(buffer, sizeof(int) + 3 * sizeof(short),  
+		if ((status = fread(buffer, sizeof(int) + 3 * sizeof(short),
 				1, mb_io_ptr->mbfp)) == 1)
 		    {
 		    index = 0;
@@ -842,11 +842,11 @@ tag,type,count,value_offset);*/
 	    /* get sonar data info */
 	    else if (*sonar_data_info_tag == SonarDataInfo2)
 	    	{
-		fseek(mb_io_ptr->mbfp, 
-			*sonar_data_info_offset 
-			    + (*n_read) * (sizeof(int) + 4 * sizeof(short)), 
+		fseek(mb_io_ptr->mbfp,
+			*sonar_data_info_offset
+			    + (*n_read) * (sizeof(int) + 4 * sizeof(short)),
 			SEEK_SET);
-		if ((status = fread(buffer, sizeof(int) + 4 * sizeof(short),  
+		if ((status = fread(buffer, sizeof(int) + 4 * sizeof(short),
 				1, mb_io_ptr->mbfp)) == 1)
 		    {
 		    index = 0;
@@ -873,15 +873,15 @@ tag,type,count,value_offset);*/
 		    *error = MB_ERROR_EOF;
 		    }
 		}
-		
+
 	    /* get sonar data info */
 	    else if (*sonar_data_info_tag == SonarDataInfo3)
 	    	{
-		fseek(mb_io_ptr->mbfp, 
-			*sonar_data_info_offset 
-			    + (*n_read) * (sizeof(int) + 20 * sizeof(short)), 
+		fseek(mb_io_ptr->mbfp,
+			*sonar_data_info_offset
+			    + (*n_read) * (sizeof(int) + 20 * sizeof(short)),
 			SEEK_SET);
-		if ((status = fread(buffer, sizeof(int) + 20 * sizeof(short),  
+		if ((status = fread(buffer, sizeof(int) + 20 * sizeof(short),
 				1, mb_io_ptr->mbfp)) == 1)
 		    {
 		    index = 0;
@@ -909,7 +909,7 @@ tag,type,count,value_offset);*/
 		    *error = MB_ERROR_EOF;
 		    }
 		}
-		
+
 	    /* make sense of sonar data info */
 	    if (status == MB_SUCCESS)
 		{
@@ -1006,10 +1006,10 @@ tag,type,count,value_offset);*/
 
 		/* read first nav point starting with last
 		   nav used */
-		fseek(mb_io_ptr->mbfp, 
-		    *nav_info_offset + (*n_nav_use) 
+		fseek(mb_io_ptr->mbfp,
+		    *nav_info_offset + (*n_nav_use)
 			* navsize, SEEK_SET);
-		if ((status = fread(buffer, navsize,  
+		if ((status = fread(buffer, navsize,
 				1, mb_io_ptr->mbfp)) == 1)
 		    {
 		    index = 0;
@@ -1044,10 +1044,10 @@ tag,type,count,value_offset);*/
 
 		/* read second nav point starting with last
 		   nav used */
-		fseek(mb_io_ptr->mbfp, 
-		    *nav_info_offset + (*n_nav_use+1) 
+		fseek(mb_io_ptr->mbfp,
+		    *nav_info_offset + (*n_nav_use+1)
 			* navsize, SEEK_SET);
-		if ((status = fread(buffer, navsize,  
+		if ((status = fread(buffer, navsize,
 				1, mb_io_ptr->mbfp)) == 1)
 		    {
 		    index = 0;
@@ -1094,10 +1094,10 @@ tag,type,count,value_offset);*/
 
 		    /* read second nav point starting with last
 		       nav used */
-		    fseek(mb_io_ptr->mbfp, 
-			*nav_info_offset + (*n_nav_use+2) 
+		    fseek(mb_io_ptr->mbfp,
+			*nav_info_offset + (*n_nav_use+2)
 			    * navsize, SEEK_SET);
-		    if ((status = fread(buffer, navsize,  
+		    if ((status = fread(buffer, navsize,
 				    1, mb_io_ptr->mbfp)) == 1)
 			{
 			index = 0;
@@ -1132,9 +1132,9 @@ tag,type,count,value_offset);*/
 			}
 
 		    }
-		    
+
 		/* now interpolate nav */
-		factor = ((double)(pingtime - navtime1)) 
+		factor = ((double)(pingtime - navtime1))
 			    / ((double)(navtime2 - navtime1));
 		lon = lon1 + factor * (lon2 - lon1);
 		lat = lat1 + factor * (lat2 - lat1);
@@ -1164,14 +1164,14 @@ tag,type,count,value_offset);*/
 			heading = heading1 + factor * (heading2 - heading1);
 			}
 		}
-		
+
 	    /* now get left channel sonar data */
 	    if (status == MB_SUCCESS)
 		{
-		fseek(mb_io_ptr->mbfp, 
+		fseek(mb_io_ptr->mbfp,
 		    *left_channel_offset + (*n_read) * (*n_pixel_channel), SEEK_SET);
-		if ((status= fread(left_channel, sizeof(unsigned char), 
-		    *n_pixel_channel, mb_io_ptr->mbfp)) 
+		if ((status= fread(left_channel, sizeof(unsigned char),
+		    *n_pixel_channel, mb_io_ptr->mbfp))
 		    == *n_pixel_channel)
 		    {
 		    status = MB_SUCCESS;
@@ -1183,14 +1183,14 @@ tag,type,count,value_offset);*/
 		    *error = MB_ERROR_EOF;
 		    }
 		}
-		
+
 	    /* now get right channel sonar data */
 	    if (status == MB_SUCCESS)
 		{
-		fseek(mb_io_ptr->mbfp, 
+		fseek(mb_io_ptr->mbfp,
 		    *right_channel_offset + (*n_read) * (*n_pixel_channel), SEEK_SET);
-		if ((status= fread(right_channel, sizeof(unsigned char), 
-		    *n_pixel_channel, mb_io_ptr->mbfp)) 
+		if ((status= fread(right_channel, sizeof(unsigned char),
+		    *n_pixel_channel, mb_io_ptr->mbfp))
 		    == *n_pixel_channel)
 		    {
 		    status = MB_SUCCESS;
@@ -1202,7 +1202,7 @@ tag,type,count,value_offset);*/
 		    *error = MB_ERROR_EOF;
 		    }
 		}
-		
+
 	    /* if no altitude do bottom detect */
 	    if (status == MB_SUCCESS && altitude <= 0.0)
 		{
@@ -1218,22 +1218,22 @@ tag,type,count,value_offset);*/
 			altitude = range_tot;
 			}
 		    }
-		if (altitude != range_tot)   
+		if (altitude != range_tot)
 			{
 			/* There's either no amplitude data or the bottom, VES */
 			/* threshold is too high. Set a default value */
 			altitude = range_delay;
 			}
 		}
-	    
+
 	    /* increment reading counter */
 	    if (status == MB_SUCCESS)
 		(*n_read)++;
-	    
+
 	    /* copy to proper storage, doing slant range correction */
 	    if (status == MB_SUCCESS)
 		{
-		data->time_d = *corr_time_d 
+		data->time_d = *corr_time_d
 				+ 0.001 * (pingtime - *ref_windows_time);
 		data->lon = lon;
 		data->lat = lat;
@@ -1248,88 +1248,88 @@ tag,type,count,value_offset);*/
 		data->frequency = frequency;
 		data->pixels_ss = 2 * (*n_pixel_channel);
 		istart = (altitude - range_delay) / range_per_bin + 1;
-		
+
 		/* port and starboard channels */
 		if (channel_mode == 0)
 		    {
 		    for (i=0;i<istart; i++)
 			{
 			j = (*n_pixel_channel) - 1 - i;
-			data->ss[j] = left_channel[i] & 63;
+			data->ss[j] = left_channel[i];
 			data->ssacrosstrack[j] = 0.0;
 			j = (*n_pixel_channel) + i;
-			data->ss[j] = right_channel[i] & 63;
+			data->ss[j] = right_channel[i];
 			data->ssacrosstrack[j] = 0.0;
 			}
 		    for (i=istart;i<*n_pixel_channel; i++)
 			{
 			range_tot = range_delay + i * range_per_bin;
 			j = (*n_pixel_channel) - 1 - i;
-			data->ss[j] = left_channel[i] & 63;
-			data->ssacrosstrack[j] 
+			data->ss[j] = left_channel[i];
+			data->ssacrosstrack[j]
 			    = -sqrt(range_tot * range_tot
 				    - altitude * altitude);
 			j = (*n_pixel_channel) + i;
-			data->ss[j] = right_channel[i] & 63;
-			data->ssacrosstrack[j] 
+			data->ss[j] = right_channel[i];
+			data->ssacrosstrack[j]
 			    = sqrt(range_tot * range_tot
 				    - altitude * altitude);
 			}
 		    }
-		    
+
 		/* port channel only */
 		else if (channel_mode == 1)
 		    {
 		    for (i=0;i<istart; i++)
 			{
 			j = 2 * (*n_pixel_channel) - 1 - 2 * i;
-			data->ss[j] = left_channel[i] & 63;
+			data->ss[j] = left_channel[i];
 			data->ssacrosstrack[j] = 0.0;
 			j = 2 * (*n_pixel_channel) - 2 - 2 * i;
-			data->ss[j] = right_channel[i] & 63;
+			data->ss[j] = right_channel[i];
 			data->ssacrosstrack[j] = 0.0;
 			}
 		    for (i=istart;i<*n_pixel_channel; i++)
 			{
 			range_tot = range_delay + (i - 0.5) * range_per_bin;
 			j = 2 * (*n_pixel_channel) - 1 - 2 * i;
-			data->ss[j] = left_channel[i] & 63;
-			data->ssacrosstrack[j] 
+			data->ss[j] = left_channel[i];
+			data->ssacrosstrack[j]
 			    = -sqrt(range_tot * range_tot
 				    - altitude * altitude);
 			range_tot = range_delay + i * range_per_bin;
 			j = 2 * (*n_pixel_channel) - 2 - 2 * i;
-			data->ss[j] = right_channel[i] & 63;
-			data->ssacrosstrack[j] 
+			data->ss[j] = right_channel[i];
+			data->ssacrosstrack[j]
 			    = -sqrt(range_tot * range_tot
 				    - altitude * altitude);
 			}
 		    }
-		    
+
 		/* starboard channel only */
 		else if (channel_mode == 2)
 		    {
 		    for (i=0;i<istart; i++)
 			{
 			j = 2 * i;
-			data->ss[j] = right_channel[i] & 63;
+			data->ss[j] = right_channel[i];
 			data->ssacrosstrack[j] = 0.0;
 			j = 2 * i + 1;
-			data->ss[j] = left_channel[i] & 63;
+			data->ss[j] = left_channel[i];
 			data->ssacrosstrack[j] = 0.0;
 			}
 		    for (i=istart;i<*n_pixel_channel; i++)
 			{
 			range_tot = range_delay + (i - 0.5) * range_per_bin;
 			j = 2 * i;
-			data->ss[j] = right_channel[i] & 63;
-			data->ssacrosstrack[j] 
+			data->ss[j] = right_channel[i];
+			data->ssacrosstrack[j]
 			    = sqrt(range_tot * range_tot
 				    - altitude * altitude);
 			range_tot = range_delay + i * range_per_bin;
 			j = 2 * i + 1;
-			data->ss[j] = left_channel[i] & 63;
-			data->ssacrosstrack[j] 
+			data->ss[j] = left_channel[i];
+			data->ssacrosstrack[j]
 			    = sqrt(range_tot * range_tot
 				    - altitude * altitude);
 			}
@@ -1357,7 +1357,7 @@ tag,type,count,value_offset);*/
 		fprintf(stderr,"dbg5       range_delay_bin:  %d\n", range_delay_bin);
 		fprintf(stderr,"dbg5       range_delay:      %f\n", range_delay);
 		fprintf(stderr,"dbg5       altitude_bin:     %d\n", altitude_bin);
-		fprintf(stderr,"dbg5       altitude:         %f\n", altitude);		
+		fprintf(stderr,"dbg5       altitude:         %f\n", altitude);
 		for (i=0;i<*n_pixel_channel;i++)
 		    fprintf(stderr,"dbg5       %4d  ss_left: %d  ss_right: %d\n",
 			    i, left_channel[i], right_channel[i]);
@@ -1399,7 +1399,7 @@ tag,type,count,value_offset);*/
 		store->sample_interval = data->sample_interval;
 		store->sonar_depth = data->sonar_depth;
 		store->frequency = data->frequency;
-		
+
 		/* sidescan data */
 		store->pixels_ss = data->pixels_ss;
 		for (i=0;i<data->pixels_ss;i++)
@@ -1448,7 +1448,7 @@ int mbr_wt_mstiffss(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* get pointer to raw data structure */
 	data = (struct mbf_mstiffss_struct *) mb_io_ptr->raw_data;
 	store = (struct mbsys_mstiff_struct *) store_ptr;
-	
+
 	/* set error as this is a read only format */
 	status = MB_FAILURE;
 	*error = MB_ERROR_WRITE_FAIL;

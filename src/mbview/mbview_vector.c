@@ -98,7 +98,7 @@ int mbview_getvectorcount(int verbose, size_t instance,
 
 	/* get number of vecs */
 	*nvector = shared.shareddata.nvector;
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -158,7 +158,7 @@ int mbview_getvectorpointcount(int verbose, size_t instance,
 				*nintpoint += shared.shareddata.vectors[vec].segments[i].nls - 2;
 			}
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -178,7 +178,7 @@ int mbview_getvectorpointcount(int verbose, size_t instance,
 }
 
 /*------------------------------------------------------------------------------*/
-int mbview_allocvectorarrays(int verbose, 
+int mbview_allocvectorarrays(int verbose,
 			int	npointtotal,
 			double	**veclon,
 			double	**veclat,
@@ -323,7 +323,7 @@ int mbview_addvector(int verbose, size_t instance,
 		fprintf(stderr,"dbg2       npoint:                    %d\n", npoint);
 		for (i=0;i<npoint;i++)
 			{
-			fprintf(stderr,"dbg2       point:%d lon:%f lat:%f z:%f data:%f\n", 
+			fprintf(stderr,"dbg2       point:%d lon:%f lat:%f z:%f data:%f\n",
 					i, veclon[i], veclat[i], vecz[i], vecdata[i]);
 			}
 		fprintf(stderr,"dbg2       veccolor:                  %d\n", veccolor);
@@ -340,15 +340,15 @@ int mbview_addvector(int verbose, size_t instance,
 	/* make sure no vec is selected */
 	shared.shareddata.vector_selected = MBV_SELECT_NONE;
 	shared.shareddata.vector_point_selected = MBV_SELECT_NONE;
-	
+
 	/* set vec id so that new vec is created */
 	ivec = shared.shareddata.nvector;
-	
+
 	/* allocate memory for a new vec if required */
 	if (shared.shareddata.nvector_alloc < shared.shareddata.nvector + 1)
 		{
 		shared.shareddata.nvector_alloc = shared.shareddata.nvector + 1;
-		status = mb_realloc(mbv_verbose, 
+		status = mb_realloc(mbv_verbose,
 			    	shared.shareddata.nvector_alloc * sizeof(struct mbview_vector_struct),
 			    	(void **)&(shared.shareddata.vectors), error);
 		if (status == MB_FAILURE)
@@ -370,7 +370,7 @@ int mbview_addvector(int verbose, size_t instance,
 				}
 			}
 		}
-		
+
 	/* allocate memory to for vec arrays */
 	if (shared.shareddata.vectors[ivec].npoints_alloc < npoint)
 		{
@@ -390,7 +390,7 @@ int mbview_addvector(int verbose, size_t instance,
 			shared.shareddata.vectors[ivec].segments[j].endpoints[1] = shared.shareddata.vectors[ivec].vectorpts[j+1].point;
 			}
 		}
-		
+
 	/* add the new vec */
 	if (status == MB_SUCCESS)
 		{
@@ -412,10 +412,10 @@ int mbview_addvector(int verbose, size_t instance,
 			{
 			/* set status values */
 			shared.shareddata.vectors[ivec].vectorpts[i].selected = MB_NO;
-			
+
 			/* set data */
 			shared.shareddata.vectors[ivec].vectorpts[i].data = vecdata[i];
-			
+
 			/* get min max of data if necessary */
 			if (recalculate_minmax == MB_YES)
 				{
@@ -430,46 +430,46 @@ int mbview_addvector(int verbose, size_t instance,
 					shared.shareddata.vectors[ivec].datamax = MAX(vecdata[i], shared.shareddata.vectors[ivec].datamax);
 					}
 				}
-			
+
 			/* ************************************************* */
 			/* get vec positions in grid and display coordinates */
 			shared.shareddata.vectors[ivec].vectorpts[i].point.xlon = veclon[i];
 			shared.shareddata.vectors[ivec].vectorpts[i].point.ylat = veclat[i];
 			shared.shareddata.vectors[ivec].vectorpts[i].point.zdata = vecz[i];
 			status = mbview_projectfromlonlat(instance,
-					shared.shareddata.vectors[ivec].vectorpts[i].point.xlon, 
-					shared.shareddata.vectors[ivec].vectorpts[i].point.ylat, 
-					shared.shareddata.vectors[ivec].vectorpts[i].point.zdata, 
-					&(shared.shareddata.vectors[ivec].vectorpts[i].point.xgrid[instance]), 
+					shared.shareddata.vectors[ivec].vectorpts[i].point.xlon,
+					shared.shareddata.vectors[ivec].vectorpts[i].point.ylat,
+					shared.shareddata.vectors[ivec].vectorpts[i].point.zdata,
+					&(shared.shareddata.vectors[ivec].vectorpts[i].point.xgrid[instance]),
 					&(shared.shareddata.vectors[ivec].vectorpts[i].point.ygrid[instance]),
-					&(shared.shareddata.vectors[ivec].vectorpts[i].point.xdisplay[instance]), 
-					&(shared.shareddata.vectors[ivec].vectorpts[i].point.ydisplay[instance]), 
+					&(shared.shareddata.vectors[ivec].vectorpts[i].point.xdisplay[instance]),
+					&(shared.shareddata.vectors[ivec].vectorpts[i].point.ydisplay[instance]),
 					&(shared.shareddata.vectors[ivec].vectorpts[i].point.zdisplay[instance]));
 			mbview_updatepointw(instance, &(shared.shareddata.vectors[ivec].vectorpts[i].point));
 
 /*fprintf(stderr,"Depth: llz:%f %f %f   grid:%f %f   dpy:%f %f %f\n",
-shared.shareddata.vectors[ivec].vectorpts[i].point.xlon, 
-shared.shareddata.vectors[ivec].vectorpts[i].point.ylat, 
-shared.shareddata.vectors[ivec].vectorpts[i].point.zdata, 
-shared.shareddata.vectors[ivec].vectorpts[i].point.xgrid[instance], 
+shared.shareddata.vectors[ivec].vectorpts[i].point.xlon,
+shared.shareddata.vectors[ivec].vectorpts[i].point.ylat,
+shared.shareddata.vectors[ivec].vectorpts[i].point.zdata,
+shared.shareddata.vectors[ivec].vectorpts[i].point.xgrid[instance],
 shared.shareddata.vectors[ivec].vectorpts[i].point.ygrid[instance],
-shared.shareddata.vectors[ivec].vectorpts[i].point.xdisplay[instance], 
-shared.shareddata.vectors[ivec].vectorpts[i].point.ydisplay[instance], 
+shared.shareddata.vectors[ivec].vectorpts[i].point.xdisplay[instance],
+shared.shareddata.vectors[ivec].vectorpts[i].point.ydisplay[instance],
 shared.shareddata.vectors[ivec].vectorpts[i].point.zdisplay[instance]);*/
 
 			/* ************************************************* */
 			}
 
 		/* make vecs viewable */
-		data->vector_view_mode = MBV_VIEW_ON;		
-		
+		data->vector_view_mode = MBV_VIEW_ON;
+
 		/* some info to terminal */
 		fprintf(stderr,"Added %d point vector with data bounds: min:%f max:%f\n",
 			shared.shareddata.vectors[ivec].npoints,
-			shared.shareddata.vectors[ivec].datamin, 
+			shared.shareddata.vectors[ivec].datamin,
 			shared.shareddata.vectors[ivec].datamax);
 		}
-	
+
 	/* print vec debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -513,7 +513,7 @@ shared.shareddata.vectors[ivec].vectorpts[i].point.zdisplay[instance]);*/
 				}
 			}
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -555,19 +555,19 @@ int mbview_enableviewvectors(int verbose, size_t instance,
 
 	/* set values */
         shared.shareddata.vector_mode = MBV_VECTOR_VIEW;
-		
+
 	/* set widget sensitivity on all active instances */
 	for (instance=0;instance<MBV_MAX_WINDOWS;instance++)
 		{
 		/* get view */
 		view = &(mbviews[instance]);
 		data = &(view->data);
-		
+
 		/* if instance active reset action sensitivity */
 		if (data->active == MB_YES)
 			mbview_update_sensitivity(verbose, instance, error);
 		}
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -613,11 +613,11 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 		fprintf(stderr,"dbg2       xpixel:           %d\n",xpixel);
 		fprintf(stderr,"dbg2       ypixel:           %d\n",ypixel);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* only select one vector point if enabled and not in move mode */
 	if (shared.shareddata.vector_mode != MBV_VECTOR_OFF
 		&& shared.shareddata.nvector > 0
@@ -625,8 +625,8 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 			|| shared.shareddata.vector_selected == MBV_SELECT_NONE))
 		{
 		/* look for point */
-		mbview_findpoint(instance, xpixel, ypixel, 
-				&found, 
+		mbview_findpoint(instance, xpixel, ypixel,
+				&found,
 				&xgrid, &ygrid,
 				&xlon, &ylat, &zdata,
 				&xdisplay, &ydisplay, &zdisplay);
@@ -678,7 +678,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 				}
 			}
 		}
-		
+
 	/* set what kind of pick to annotate */
 	if (shared.shareddata.vector_selected != MBV_SELECT_NONE)
 		{
@@ -688,17 +688,17 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 		{
 		data->pickinfo_mode = data->pick_type;
 		}
-	
+
 	/* set pick annotation */
 	mbview_pick_text(instance);
-	
+
 	/* call pick notify if defined */
 	if (which == MBV_PICK_UP && shared.shareddata.vector_selected != MBV_SELECT_NONE
 		&& data->mbview_pickvector_notify != NULL)
 		{
 		(data->mbview_pickvector_notify)(instance);
 		}
-	
+
 	/* print vec debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -743,7 +743,7 @@ int mbview_pick_vector_select(size_t instance, int select, int which, int xpixel
 				}
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -780,7 +780,7 @@ int mbview_vector_delete(size_t instance, int ivec)
 		fprintf(stderr,"dbg2       ivec:            %d\n",ivec);
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
@@ -799,7 +799,7 @@ int mbview_vector_delete(size_t instance, int ivec)
 			{
 			shared.shareddata.vectors[i] = shared.shareddata.vectors[i+1];
 			}
-			
+
 		/* rest last vec */
 		shared.shareddata.vectors[shared.shareddata.nvector-1].color = MBV_COLOR_RED;
 		shared.shareddata.vectors[shared.shareddata.nvector-1].size = 4;
@@ -819,7 +819,7 @@ int mbview_vector_delete(size_t instance, int ivec)
 		{
 		status = MB_FAILURE;
 		}
-	
+
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
 		{
@@ -863,11 +863,11 @@ int mbview_drawvector(size_t instance, int rez)
 		fprintf(stderr,"dbg2       instance:         %ld\n",instance);
 		fprintf(stderr,"dbg2       rez:              %d\n",rez);
 		}
-		
+
 	/* get view */
 	view = &(mbviews[instance]);
 	data = &(view->data);
-	
+
 	/* set decimation */
 	if (rez == MBV_REZ_FULL)
 	    stride = 1;
@@ -875,7 +875,7 @@ int mbview_drawvector(size_t instance, int rez)
 	    stride = data->hirez_navdecimate;
 	else
 	    stride = data->lorez_navdecimate;
-		
+
 	/* draw vectors */
 	if (shared.shareddata.vector_mode != MBV_VECTOR_OFF
 		&& data->vector_view_mode == MBV_VIEW_ON
@@ -903,18 +903,17 @@ int mbview_drawvector(size_t instance, int rez)
 			/* plot lines */
 			/* glLineWidth((float)(shared.shareddata.vectors[ivec].size));
 			glBegin(GL_LINE_STRIP); */
-			
+
 			/* plot balls */
-			
 			for (jpoint=0;jpoint<shared.shareddata.vectors[ivec].npoints;jpoint+=stride)
 				{
 				/* set color */
-				mbview_getcolor(shared.shareddata.vectors[ivec].vectorpts[jpoint].data, 
-						shared.shareddata.vectors[ivec].datamax, 
-						shared.shareddata.vectors[ivec].datamin, 
-						MBV_COLORTABLE_NORMAL, 
-	    				    (float) 0.0, (float) 0.0, (float) 1.0, 
-	    				    (float) 0.0, (float) 0.0, (float) 0.0, 
+				mbview_getcolor(shared.shareddata.vectors[ivec].vectorpts[jpoint].data,
+						shared.shareddata.vectors[ivec].datamax,
+						shared.shareddata.vectors[ivec].datamin,
+						MBV_COLORTABLE_NORMAL,
+	    				    (float) 0.0, (float) 0.0, (float) 1.0,
+	    				    (float) 0.0, (float) 0.0, (float) 0.0,
 					    colortable_bright_red,
 					    colortable_bright_green,
 					    colortable_bright_blue,
@@ -923,33 +922,33 @@ int mbview_drawvector(size_t instance, int rez)
 					|| (jpoint < shared.shareddata.vectors[ivec].npoints - 1
 						&& shared.shareddata.vectors[ivec].vectorpts[jpoint+1].selected == MB_YES))
 					{
-					glColor3f(colortable_object_red[MBV_COLOR_RED], 
-						colortable_object_green[MBV_COLOR_RED], 
+					glColor3f(colortable_object_red[MBV_COLOR_RED],
+						colortable_object_green[MBV_COLOR_RED],
 						colortable_object_blue[MBV_COLOR_RED]);
 					}
 				else
 					{
 					glColor3f(red, green, blue);
 					}
-					
+
 				/* draw points in line */
-				/* glVertex3f((float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]), 
-						(float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]), 
+				/* glVertex3f((float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
+						(float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
 						(float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance])); */
-						
+
 				/* draw points as balls */
-				glTranslatef((float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]), 
-						(float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]), 
+				glTranslatef((float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
+						(float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
 						(float)(shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance]));
 	    			glCallList((GLuint)MBV_GLLIST_VECTORBALL);
-				glTranslatef((float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]), 
-						(float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]), 
+				glTranslatef((float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.xdisplay[instance]),
+						(float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.ydisplay[instance]),
 						(float)(-shared.shareddata.vectors[ivec].vectorpts[jpoint].point.zdisplay[instance]));
 				}
 			/* glEnd();*/
 			}
 		}
-		
+
 #ifdef MBV_GETERRORS
 mbview_glerrorcheck(instance, 1, function_name);
 #endif

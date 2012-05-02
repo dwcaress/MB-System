@@ -99,6 +99,8 @@
 /* local options */
 #define MBSEGYGRID_USESHOT		0
 #define MBSEGYGRID_USECMP		1
+#define MBSEGYGRID_PLOTBYTRACENUMBER	0
+#define MBSEGYGRID_PLOTBYDISTANCE	1
 #define MBSEGYGRID_WINDOW_OFF		0
 #define MBSEGYGRID_WINDOW_ON		1
 #define MBSEGYGRID_WINDOW_SEAFLOOR	2
@@ -129,6 +131,10 @@ int get_segy_limits(int verbose,
 		int	*chanend,
 		double	*timesweep,
 		double	*timedelay,
+		double	*startlon,
+		double	*startlat,
+		double	*endlon,
+		double	*endlat,
 		int *error);
 char	*ctime();
 char	*getenv();
@@ -143,7 +149,7 @@ static char rcs_id[] = "$Id$";
 char program_name[] = "MBsegygrid";
 char help_message[] =  "MBsegygrid grids trace data from segy data files.";
 char usage_message[] = "MBsegygrid -Ifile -Oroot [-Ashotscale/timescale \n\
-          -Ddecimatex/decimatey -Gmode/gain[/window] -R \n\
+          -Ddecimatex/decimatey -Gmode/gain[/window] -Rdistancebin[]/startlon/startlat/endlon/endlat]\n\
           -Smode[/start/end[/schan/echan]] -Tsweep[/delay] \n\
           -Wmode/start/end -H -V]";
 
@@ -163,6 +169,16 @@ int main (int argc, char **argv)
 	int	error = MB_ERROR_NO_ERROR;
 	char	*message;
 
+	/* MBIO read control parameters */
+	int	format;
+	int	pings;
+	int	lonflip;
+	double	bounds[4];
+	int	btime_i[7];
+	int	etime_i[7];
+	double	speedmin;
+	double	timegap;
+
 	/* segy data */
 	char	segyfile[MB_PATH_MAXLINE];
 	void	*mbsegyioptr;
@@ -177,6 +193,12 @@ int main (int argc, char **argv)
 	char	gridfile[MB_PATH_MAXLINE];
 	int	decimatex = 1;
 	int	decimatey = 1;
+	int	plotmode = MBSEGYGRID_PLOTBYTRACENUMBER;
+	double	distancebin = 1.0;
+	double	startlon = 0.0;
+	double	startlat = 0.0;
+	double	endlon = 0.0;
+	double	endlat = 0.0;
 	int	tracemode = MBSEGYGRID_USESHOT;
 	int	tracestart = 0;
 	int	traceend = 0;
@@ -226,6 +248,10 @@ int main (int argc, char **argv)
 	int	sinfchanend = -1;
 	double	sinftimesweep = 0.0;
 	double	sinftimedelay = 0.0;
+	double	sinfstartlon = 0.0;
+	double	sinfstartlat = 0.0;
+	double	sinfendlon = 0.0;
+	double	sinfendlat = 0.0;
 
 	int	nread;
 	int	tracecount, tracenum, channum, traceok;
@@ -238,11 +264,18 @@ int main (int argc, char **argv)
 	double	btimesave = 0.0;
 	double	stimesave = 0.0;
 	double	dtimesave = 0.0;
+	double	mtodeglon, mtodeglat;
+	double	navlon, navlat;
+	double	line_distance, line_dx, line_dy, trace_x;
 	int	plot_status;
 	int	worktrace_alloc;
 	int	iagchalfwindow;
 	int	ixc, iyc;
 	int	i, j, k, n;
+
+	/* get current default values */
+	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
+		btime_i,etime_i,&speedmin,&timegap);
 
 	/* set file to null */
 	segyfile[0] = '\0';
@@ -251,7 +284,7 @@ int main (int argc, char **argv)
 	GMT_make_fnan(NaN);
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:G:g:I:i:O:o:S:s:T:t:VvW:w:Hh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:G:g:I:i:O:o:R:r:S:s:T:t:VvW:w:Hh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -306,6 +339,23 @@ int main (int argc, char **argv)
 		case 'O':
 		case 'o':
 			sscanf (optarg,"%s", fileroot);
+			flag++;
+			break;
+		case 'R':
+		case 'r':
+			n = sscanf (optarg,"%lf/%lf/%lf/%lf/%lf", &distancebin, &startlon, &endlon, &startlat, &endlat);
+			plotmode = MBSEGYGRID_PLOTBYDISTANCE;
+			if (n < 1)
+				{
+				distancebin = 1.0;
+				}
+			if (n < 25)
+				{
+				startlon = 0.0;
+				startlat = 0.0;
+				endlon = 0.0;
+				endlat = 0.0;
+				}
 			flag++;
 			break;
 		case 'S':
@@ -368,7 +418,7 @@ int main (int argc, char **argv)
 		}
 
 	/* print starting debug statements */
-	if (verbose >= 2)
+	if (verbose >= 0)
 		{
 		fprintf(outfp,"\ndbg2  Program <%s>\n",program_name);
 		fprintf(outfp,"dbg2  Version %s\n",rcs_id);
@@ -380,6 +430,12 @@ int main (int argc, char **argv)
 		fprintf(outfp,"dbg2       fileroot:       %s\n",fileroot);
 		fprintf(outfp,"dbg2       decimatex:      %d\n",decimatex);
 		fprintf(outfp,"dbg2       decimatey:      %d\n",decimatey);
+		fprintf(outfp,"dbg2       plotmode:       %d\n",plotmode);
+		fprintf(outfp,"dbg2       distancebin:    %f\n",distancebin);
+		fprintf(outfp,"dbg2       startlon:       %f\n",startlon);
+		fprintf(outfp,"dbg2       startlat:       %f\n",startlat);
+		fprintf(outfp,"dbg2       endlon:         %f\n",endlon);
+		fprintf(outfp,"dbg2       endlat:         %f\n",endlat);
 		fprintf(outfp,"dbg2       tracemode:      %d\n",tracemode);
 		fprintf(outfp,"dbg2       tracestart:     %d\n",tracestart);
 		fprintf(outfp,"dbg2       traceend:       %d\n",traceend);
@@ -415,9 +471,10 @@ int main (int argc, char **argv)
 		}
 
 	/* get segy limits if required */
-	if (traceend < 1 || traceend < tracestart || timesweep <= 0.0)
+	if (traceend < 1 || traceend < tracestart || timesweep <= 0.0
+		|| (plotmode == MBSEGYGRID_PLOTBYDISTANCE && startlon == 0.0))
 		{
-		get_segy_limits(verbose,
+		get_segy_limits(5,
 				segyfile,
 				&sinftracemode,
 				&sinftracestart,
@@ -426,6 +483,10 @@ int main (int argc, char **argv)
 				&sinfchanend,
 				&sinftimesweep,
 				&sinftimedelay,
+				&sinfstartlon,
+				&sinfstartlat,
+				&sinfendlon,
+				&sinfendlat,
 				&error);
 		if (traceend < 1 || traceend < tracestart)
 			{
@@ -442,6 +503,13 @@ int main (int argc, char **argv)
 			{
 			timesweep = sinftimesweep;
 			timedelay = sinftimedelay;
+			}
+		if (sinfstartlon != sinfendlon && sinfstartlat != sinfendlat)
+			{
+			startlon = sinfstartlon;
+			startlat = sinfstartlat;
+			endlon = sinfendlon;
+			endlat = sinfendlat;
 			}
 		}
 
@@ -478,15 +546,42 @@ int main (int argc, char **argv)
 		ntraces = (traceend - tracestart + 1) * (chanend - chanstart + 1);
 	else
 		ntraces = traceend - tracestart + 1;
-	ngridx = ntraces / decimatex;
-	sampleinterval = 0.000001 * (double) (fileheader.sample_interval);
-	ngridy = timesweep / sampleinterval / decimatey + 1;
-	ngridxy = ngridx * ngridy;
-	xmin = (double) tracestart - 0.5;
-	xmax = (double) traceend + 0.5;
-	ymax = -(timedelay - 0.5 * sampleinterval / decimatey);
-	ymin = ymax - ngridy * sampleinterval * decimatey;
-	/*ymax = timedelay + timesweep + 0.5 * sampleinterval / decimatey;*/
+
+	/* set up plotting trace by trace */
+	if (plotmode == MBSEGYGRID_PLOTBYTRACENUMBER)
+		{
+		ngridx = ntraces / decimatex;
+		sampleinterval = 0.000001 * (double) (fileheader.sample_interval);
+		ngridy = timesweep / sampleinterval / decimatey + 1;
+		ngridxy = ngridx * ngridy;
+		xmin = (double) tracestart - 0.5;
+		xmax = (double) traceend + 0.5;
+		ymax = -(timedelay - 0.5 * sampleinterval / decimatey);
+		ymin = ymax - ngridy * sampleinterval * decimatey;
+		/*ymax = timedelay + timesweep + 0.5 * sampleinterval / decimatey;*/
+		}
+
+	/* set up plotting trace by distance along a line */
+	else if (plotmode == MBSEGYGRID_PLOTBYDISTANCE)
+		{
+		/* get distance scaling */
+		mb_coor_scale(verbose,0.5*(startlat + endlat),&mtodeglon,&mtodeglat);
+		dx = (endlon - startlon) / mtodeglon;
+		dy = (endlat - startlat) / mtodeglat;
+		line_distance = sqrt(dx * dx + dy * dy);
+		line_dx = dx / line_distance;
+		line_dy = dy / line_distance;
+
+		ngridx = (int)(line_distance / distancebin / decimatex);
+		sampleinterval = 0.000001 * (double) (fileheader.sample_interval);
+		ngridy = timesweep / sampleinterval / decimatey + 1;
+		ngridxy = ngridx * ngridy;
+		xmin = -0.5 * distancebin;
+		xmax = line_distance + 0.5 * distancebin;
+		ymax = -(timedelay - 0.5 * sampleinterval / decimatey);
+		ymin = ymax - ngridy * sampleinterval * decimatey;
+		/*ymax = timedelay + timesweep + 0.5 * sampleinterval / decimatey;*/
+		}
 
 	/* get start and end samples */
 	if (windowmode == MBSEGYGRID_WINDOW_OFF)
@@ -511,11 +606,16 @@ int main (int argc, char **argv)
 		fprintf(outfp,"Input segy file:         %s\n",segyfile);
 		fprintf(outfp,"Output fileroot:         %s\n",fileroot);
 		fprintf(outfp,"Input Parameters:\n");
+		fprintf(outfp,"     plot mode:          %d\n",plotmode);
 		fprintf(outfp,"     trace mode:         %d\n",tracemode);
 		fprintf(outfp,"     trace start:        %d\n",tracestart);
 		fprintf(outfp,"     trace end:          %d\n",traceend);
 		fprintf(outfp,"     channel start:      %d\n",chanstart);
 		fprintf(outfp,"     channel end:        %d\n",chanend);
+		fprintf(outfp,"     start longitude:    %f\n",startlon);
+		fprintf(outfp,"     start latitude:     %f\n",startlat);
+		fprintf(outfp,"     end longitude:      %f\n",endlon);
+		fprintf(outfp,"     end latitude:       %f\n",endlat);
 		fprintf(outfp,"     trace decimation:   %d\n",decimatex);
 		fprintf(outfp,"     time sweep:         %f seconds\n",timesweep);
 		fprintf(outfp,"     time delay:         %f seconds\n",timedelay);
@@ -577,27 +677,88 @@ int main (int argc, char **argv)
 			/* now process the trace */
 			if (status == MB_SUCCESS)
 				{
-				/* figure out where this trace is in the grid */
-				if (tracemode == MBSEGYGRID_USESHOT)
+				/* figure out where this trace is in the grid laterally */
+				if (plotmode == MBSEGYGRID_PLOTBYTRACENUMBER)
 					{
-					tracenum = traceheader.shot_num;
-					channum = traceheader.shot_tr;
+					if (tracemode == MBSEGYGRID_USESHOT)
+						{
+						tracenum = traceheader.shot_num;
+						channum = traceheader.shot_tr;
+						}
+					else if (tracemode == MBSEGYGRID_USECMP)
+						{
+						tracenum = traceheader.rp_num;
+						channum = traceheader.rp_tr;
+						}
+					if (chanend >= chanstart)
+						{
+						tracecount = (tracenum - tracestart) * (chanend - chanstart + 1)
+								+ (channum - chanstart);
+						}
+					else
+						{
+						tracecount = tracenum - tracestart;
+						}
+					ix = tracecount / decimatex;
+
+					/* now check if this is a trace of interest */
+					traceok = MB_YES;
+					if (tracenum < tracestart
+						|| tracenum > traceend)
+						traceok = MB_NO;
+					else if (chanend >= chanstart
+							&& (channum < chanstart
+								|| channum > chanend))
+						traceok = MB_NO;
+					else if (tracecount % decimatex != 0)
+						traceok = MB_NO;
 					}
-				else
+				else if (plotmode == MBSEGYGRID_PLOTBYDISTANCE)
 					{
-					tracenum = traceheader.rp_num;
-					channum = traceheader.rp_tr;
+					if (traceheader.coord_scalar < 0)
+						factor = 1.0 / ((float) (-traceheader.coord_scalar)) / 3600.0;
+					else
+						factor = (float) traceheader.coord_scalar / 3600.0;
+					if (traceheader.src_long != 0)
+						navlon  = factor * ((float)traceheader.src_long);
+					else
+						navlon  = factor * ((float)traceheader.grp_long);
+					if (traceheader.src_lat != 0)
+						navlat  = factor * ((float)traceheader.src_lat);
+					else
+						navlat  = factor * ((float)traceheader.grp_lat);
+					if (lonflip < 0)
+						{
+						if (navlon > 0.)
+							navlon = navlon - 360.;
+						else if (navlon < -360.)
+							navlon = navlon + 360.;
+						}
+					else if (lonflip == 0)
+						{
+						if (navlon > 180.)
+							navlon = navlon - 360.;
+						else if (navlon < -180.)
+							navlon = navlon + 360.;
+						}
+					else
+						{
+						if (navlon > 360.)
+							navlon = navlon - 360.;
+						else if (navlon < 0.)
+							navlon = navlon + 360.;
+						}
+					dx = (navlon - startlon) / mtodeglon;
+					dy = (navlat - startlat) / mtodeglat;
+					trace_x = dx * line_dx + dy * line_dy;
+					ix = ((int)((trace_x - 0.5 * distancebin) / distancebin)) / decimatex;
+					if (ix >= 0 && ix < ngridx)
+						traceok = MB_YES;
+					else
+						traceok = MB_NO;
 					}
-				if (chanend >= chanstart)
-					{
-					tracecount = (tracenum - tracestart) * (chanend - chanstart + 1)
-							+ (channum - chanstart);
-					}
-				else
-					{
-					tracecount = tracenum - tracestart;
-					}
-				ix = tracecount / decimatex;
+
+				/* figure out where this trace is in the grid vertically */
 				if (traceheader.elev_scalar < 0)
 					factor = 1.0 / ((float) (-traceheader.elev_scalar));
 				else
@@ -632,18 +793,6 @@ int main (int argc, char **argv)
 					}
 				iys = (btime - timedelay) / sampleinterval;
 
-				/* now check if this is a trace of interest */
-				traceok = MB_YES;
-				if (tracenum < tracestart
-					|| tracenum > traceend)
-					traceok = MB_NO;
-				else if (chanend >= chanstart
-						&& (channum < chanstart
-							|| channum > chanend))
-					traceok = MB_NO;
-				else if (tracecount % decimatex != 0)
-					traceok = MB_NO;
-
 				/* get trace min and max */
 				tracemin = trace[0];
 				tracemax = trace[0];
@@ -665,6 +814,8 @@ int main (int argc, char **argv)
 					else
 						fprintf(outfp,"read:%d position:%d rp:%d channel:%d ",
 							nread,tracecount,tracenum,channum);
+					if (plotmode == MBSEGYGRID_PLOTBYDISTANCE)
+						fprintf(outfp,"distance:%.3f ", trace_x);
 					fprintf(outfp,"%4.4d/%3.3d %2.2d:%2.2d:%2.2d.%3.3d samples:%d interval:%d usec minmax: %f %f\n",
 					traceheader.year,traceheader.day_of_yr,
 					traceheader.hour,traceheader.min,traceheader.sec,traceheader.mils,
@@ -956,6 +1107,10 @@ int get_segy_limits(int verbose,
 		int	*chanend,
 		double	*timesweep,
 		double	*timedelay,
+		double	*startlon,
+		double	*startlat,
+		double	*endlon,
+		double	*endlat,
 		int *error)
 {
 	char	*function_name = "get_segy_limits";
@@ -1043,6 +1198,14 @@ int get_segy_limits(int verbose,
 			{
 			nscan = sscanf(line, "    RP trace: %d %d %d", &rptrace0, &rptrace1, &rptracedel);
 			}
+		    else if (strncmp(line, "    Start Position:", 19) == 0)
+			{
+			nscan = sscanf(line, "    Start Position: Lon: %lf     Lat:   %lf", startlon, startlat);
+			}
+		    else if (strncmp(line, "    End Position:", 17) == 0)
+			{
+			nscan = sscanf(line, "    End Position:   Lon: %lf     Lat:   %lf", endlon, endlat);
+			}
 		    }
 		fclose(sfp);
 		}
@@ -1085,6 +1248,10 @@ int get_segy_limits(int verbose,
 		fprintf(outfp,"dbg2       chanend:    %d\n",*chanend);
 		fprintf(outfp,"dbg2       timesweep:  %f\n",*timesweep);
 		fprintf(outfp,"dbg2       timedelay:  %f\n",*timedelay);
+		fprintf(outfp,"dbg2       startlon:   %f\n",*startlon);
+		fprintf(outfp,"dbg2       startlat:   %f\n",*startlat);
+		fprintf(outfp,"dbg2       endlon:     %f\n",*endlon);
+		fprintf(outfp,"dbg2       endlat:     %f\n",*endlat);
 		fprintf(outfp,"dbg2       error:      %d\n",*error);
 		fprintf(outfp,"dbg2  Return status:\n");
 		fprintf(outfp,"dbg2       status:     %d\n",status);
