@@ -185,6 +185,11 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+Added code for a new i/o module reading (but not yet writing) Benthos 1624 sidescan
+data in the XTF format. This read-only i/o module has a format id of 211. This code
+has been contributed by Jens Renken (MARUM/University of Bremen). The intent is to
+complete the i/o module to allow full processing of the Benthos 1624 data.
+
 Changed default Postscript viewer for Linux or Mac to be gv rather than Ghostview.
 
 Added option to mbinfo (-X1) to generate output in the json format. If the -O option
@@ -223,6 +228,10 @@ Added capability to mbsegygrid to grid and plot subbottom sections based on dist
 the end points of a survey line. This approach to plotting subbottom sections removes the
 impact of speed variations and deemphasizes data where the sonar platform moved slowly
 or stopped.
+
+Added a new macro, mbm_bpr,  to translate pressure data from a Seabird SBE53 pressure sensor
+used as a Bottom Pressure Recorder (BPR) into tidal data that can be used to correct swath
+bathymetry data.
 
 -----> 5.3.1941
 
