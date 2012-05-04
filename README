@@ -28,6 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.3.1948       May 3, 2012
   Version 5.3.1941       March 6, 2012
 * Version 5.3.1917       January 10, 2012
 * Version 5.3.1912       November 19, 2011
@@ -184,6 +185,8 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+
+-----> 5.3.1948
 
 Added code for a new i/o module reading (but not yet writing) Benthos 1624 sidescan
 data in the XTF format. This read-only i/o module has a format id of 211. This code
