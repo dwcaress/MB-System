@@ -1687,8 +1687,8 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 				/* set some values */
 				ostore->depth_scale = 0;
 				ostore->distance_scale = 0;
-				ostore->beam_xwidth = 60;
-				ostore->beam_lwidth = 60;
+				ostore->beam_xwidth = 0.6;
+				ostore->beam_lwidth = 0.6;
 				ostore->kind = MB_DATA_DATA;
 				ostore->ss_type = MB_SIDESCAN_LINEAR;	/* sets sidescan to be scaled linear */
 				opixels_ss = MB7K2SS_SSDIMENSION;
@@ -1855,7 +1855,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 							found = MB_YES;
 							done = MB_YES;
 							}
-							
+
 						/* bin the value and position */
 						if (found == MB_YES)
 							{

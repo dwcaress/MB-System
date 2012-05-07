@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_mbldeoih.c contains the functions for reading and writing
- * multibeam data in the MBF_MBLDEOIH format.  
+ * multibeam data in the MBF_MBLDEOIH format.
  * These functions include:
  *   mbr_alm_mbldeoih	- allocate read/write memory
  *   mbr_dem_mbldeoih	- deallocate read/write memory
@@ -130,9 +130,9 @@
  * Notes on the MBF_MBLDEOIH data format:
  *   1. This data format is used to store swath bathymetry
  *      and/or backscatter data with arbitrary numbers of beams
- *      and pixels. This format was created by the 
- *      Lamont-Doherty Earth Observatory and the Monterey Bay  
- *      Aquarium Research Institute to serve as general  
+ *      and pixels. This format was created by the
+ *      Lamont-Doherty Earth Observatory and the Monterey Bay
+ *      Aquarium Research Institute to serve as general
  *      purpose archive formats for processed swath data.
  *   2. The format stores bathymetry, amplitude, and sidescan data.
  *   3. Each data record has a header section and a data section.
@@ -152,13 +152,13 @@
  *      from the numbers of beams and pixels. In the case of comment
  *      records, the header contains no information other than the
  *      identifier whether it is old (30 byte) or new (2 byte). The
- *      data section of the comment record is always 128 bytes. 
+ *      data section of the comment record is always 128 bytes.
  *   4. The data headers changed for version 2, including beam angle
- *      widths to allow beam footprint calculation. Older data 
+ *      widths to allow beam footprint calculation. Older data
  *      are read without complaint, and the beam widths are passed
  *      as zero.
  *   5. The data headers changed again for version 3. Previously the
- *      bathymetry values were absolute depths. For version 3 the 
+ *      bathymetry values were absolute depths. For version 3 the
  *      stored bathymetry are in depths relative to the sonar, and the
  *      transducer depth must be added to calculate absolute depths.
  *      Older data are read without complaint, and converted to version
@@ -193,27 +193,27 @@
 #endif
 
 /* essential function prototypes */
-int mbr_register_mbldeoih(int verbose, void *mbio_ptr, 
+int mbr_register_mbldeoih(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_mbldeoih(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_mbldeoih(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_mbldeoih(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_mbldeoih(int verbose, void *mbio_ptr, int *error);
@@ -258,55 +258,55 @@ int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_mbldeoih(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_mbldeoih(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_mbldeoih;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_mbldeoih; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_ldeoih_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_ldeoih_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_mbldeoih; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_mbldeoih; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_ldeoih_dimensions; 
-	mb_io_ptr->mb_io_sidescantype = &mbsys_ldeoih_sidescantype; 
-	mb_io_ptr->mb_io_extract = &mbsys_ldeoih_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_ldeoih_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_ldeoih_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_ldeoih_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_ldeoih_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = &mbsys_ldeoih_insert_altitude; 
-	mb_io_ptr->mb_io_extract_svp = NULL; 
-	mb_io_ptr->mb_io_insert_svp = NULL; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_ldeoih_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_ldeoih_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_ldeoih_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_mbldeoih;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_ldeoih_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_ldeoih_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_mbldeoih;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_mbldeoih;
+	mb_io_ptr->mb_io_dimensions = &mbsys_ldeoih_dimensions;
+	mb_io_ptr->mb_io_sidescantype = &mbsys_ldeoih_sidescantype;
+	mb_io_ptr->mb_io_extract = &mbsys_ldeoih_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_ldeoih_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_ldeoih_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_ldeoih_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_ldeoih_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = &mbsys_ldeoih_insert_altitude;
+	mb_io_ptr->mb_io_extract_svp = NULL;
+	mb_io_ptr->mb_io_insert_svp = NULL;
+	mb_io_ptr->mb_io_ttimes = &mbsys_ldeoih_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_ldeoih_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_ldeoih_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -356,25 +356,25 @@ int mbr_register_mbldeoih(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_mbldeoih(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_mbldeoih(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_mbldeoih";
@@ -415,7 +415,7 @@ int mbr_info_mbldeoih(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -554,12 +554,12 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* get pointer to mbio descriptor and data structure */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	store = (struct mbsys_ldeoih_struct *) store_ptr;
-	
+
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next header id from file */
-	if ((status = fread(buffer,1,2,mb_io_ptr->mbfp)) == 2) 
+	if ((status = fread(buffer,1,2,mb_io_ptr->mbfp)) == 2)
 		{
 		mb_io_ptr->file_bytes += status;
 		status = MB_SUCCESS;
@@ -713,7 +713,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.beam_lwidth); index +=2;
 				mb_get_binary_short(MB_NO, (void *)  &buffer[index], &oldstore.ss_type); index +=2;
 				}
-				
+
 			/* translate old data to current */
 
 			/* get time */
@@ -726,9 +726,9 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_get_time(verbose,time_i,&store->time_d);
 
 			/* get navigation */
-			store->longitude = ((double) oldstore.lon2u)/60. 
+			store->longitude = ((double) oldstore.lon2u)/60.
 						+ ((double) oldstore.lon2b)/600000.;
-			store->latitude = ((double) oldstore.lat2u)/60. 
+			store->latitude = ((double) oldstore.lat2u)/60.
 						+ ((double) oldstore.lat2b)/600000. - 90.;
 
 			/* get sonardepth and altitude */
@@ -835,12 +835,12 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 
 	/* read next chunk of the data */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_COMMENT)
 		{
 		read_size = 128;
 		if ((status = fread(store->comment,1,read_size,mb_io_ptr->mbfp))
-			== read_size) 
+			== read_size)
 			{
 			mb_io_ptr->file_bytes += status;
 			status = MB_SUCCESS;
@@ -860,10 +860,10 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"dbg5       comment: %s\n",store->comment);
 			}
 		}
-	else if (status == MB_SUCCESS 
+	else if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA)
 		{
-		/* if needed reset numbers of beams and allocate 
+		/* if needed reset numbers of beams and allocate
 		   memory for store arrays */
 		if (store->beams_bath > store->beams_bath_alloc)
 		    {
@@ -876,16 +876,16 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->bath_acrosstrack, error);
 		    if (store->bath_alongtrack != NULL)
 			status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->bath_alongtrack, error);
-		    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				store->beams_bath_alloc * sizeof(char),
 				(void **)&store->beamflag,error);
-		    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				store->beams_bath_alloc * sizeof(short),
 				(void **)&store->bath,error);
-		    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				store->beams_bath_alloc * sizeof(short),
 				(void **)&store->bath_acrosstrack,error);
-		    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				store->beams_bath_alloc * sizeof(short),
 				(void **)&store->bath_alongtrack,error);
 
@@ -914,7 +914,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    store->beams_amp_alloc = store->beams_amp;
 		    if (store->amp != NULL)
 			status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->amp, error);
-		    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				store->beams_amp_alloc * sizeof(short),
 				(void **)&store->amp,error);
 
@@ -944,13 +944,13 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->ss_acrosstrack, error);
 		    if (store->ss_alongtrack != NULL)
 			status = mb_freed(verbose,__FILE__, __LINE__, (void **) &store->ss_alongtrack, error);
-		    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				store->pixels_ss_alloc * sizeof(short),
 				(void **)&store->ss,error);
-		    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				store->pixels_ss_alloc * sizeof(short),
 				(void **)&store->ss_acrosstrack,error);
-		    status = mb_mallocd(verbose,__FILE__,__LINE__, 
+		    status = mb_mallocd(verbose,__FILE__,__LINE__,
 				store->pixels_ss_alloc * sizeof(short),
 				(void **)&store->ss_alongtrack,error);
 
@@ -1004,9 +1004,9 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<store->beams_bath;i++)
 			{
 			store->bath[i] = mb_swap_short(store->bath[i]);
-			store->bath_acrosstrack[i] 
+			store->bath_acrosstrack[i]
 				= mb_swap_short(store->bath_acrosstrack[i]);
-			store->bath_alongtrack[i] 
+			store->bath_alongtrack[i]
 				= mb_swap_short(store->bath_alongtrack[i]);
 			}
 		for (i=0;i<store->beams_amp;i++)
@@ -1016,9 +1016,9 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<store->pixels_ss;i++)
 			{
 			store->ss[i] = mb_swap_short(store->ss[i]);
-			store->ss_acrosstrack[i] 
+			store->ss_acrosstrack[i]
 				= mb_swap_short(store->ss_acrosstrack[i]);
-			store->ss_alongtrack[i] 
+			store->ss_alongtrack[i]
 				= mb_swap_short(store->ss_alongtrack[i]);
 			}
 #endif
@@ -1040,9 +1040,9 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				}
 			store->depth_scale = newdepthscale;
 			}
-			
+
 		/* check for end of file */
-		if (status == read_size) 
+		if (status == read_size)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1132,7 +1132,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		(data: flag='DD'=13398 = MBF_MBLDEOIH_ID_DATA4
 			or comment:flag='cc'=25443 = MBF_MBLDEOIH_ID_COMMENT2) */
 	flag = (short *) buffer;
-	
+
 	/* set version pointer */
 	version = &(mb_io_ptr->save1);
 
@@ -1143,7 +1143,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		*flag = MBF_MBLDEOIH_ID_DATA2;
 		header_length = MBF_MBLDEOIH_V2HEADERSIZE;
-		
+
 		/* translate data to old format */
 
 		/* get time */
@@ -1157,10 +1157,10 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 		/* get navigation */
 		navlon = store->longitude;
-		if (navlon < 0.0) 
+		if (navlon < 0.0)
 			navlon = navlon + 360.0;
 		oldstore.lon2u = (short int) 60.0 * navlon;
-		oldstore.lon2b = (short int) (600000.0 * 
+		oldstore.lon2b = (short int) (600000.0 *
 					(navlon - ((double) oldstore.lon2u)/60.0));
 		navlat = store->latitude + 90.0;
 		oldstore.lat2u = (short int) 60.0 * navlat;
@@ -1269,8 +1269,8 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		if (mb_io_ptr->save1 == 2)
 			{
 			/* recalculate depth scaling so that it encompasses full bathymetry values, not
-				just bathymetry relative to the sonar  
-				- to convert to old format add transducer depth to the bathymetry 
+				just bathymetry relative to the sonar
+				- to convert to old format add transducer depth to the bathymetry
 				and reset the scaling */
 			depthscale = 0.001 * oldstore.depth_scale;
 			transducer_depth = 0.001 * oldstore.transducer_depth;
@@ -1344,7 +1344,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* write next header to file */
 	if ((status = fwrite(buffer,1,header_length,
-			mb_io_ptr->mbfp)) == header_length) 
+			mb_io_ptr->mbfp)) == header_length)
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
@@ -1394,7 +1394,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		write_size = 128;
 		if ((status = fwrite(store->comment,1,write_size,mb_io_ptr->mbfp))
-			== write_size) 
+			== write_size)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
@@ -1412,9 +1412,9 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<store->beams_bath;i++)
 			{
 			store->bath[i] = mb_swap_short(store->bath[i]);
-			store->bath_acrosstrack[i] 
+			store->bath_acrosstrack[i]
 				= mb_swap_short(store->bath_acrosstrack[i]);
-			store->bath_alongtrack[i] 
+			store->bath_alongtrack[i]
 				= mb_swap_short(store->bath_alongtrack[i]);
 			}
 		for (i=0;i<store->beams_amp;i++)
@@ -1424,9 +1424,9 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		for (i=0;i<store->pixels_ss;i++)
 			{
 			store->ss[i] = mb_swap_short(store->ss[i]);
-			store->ss_acrosstrack[i] 
+			store->ss_acrosstrack[i]
 				= mb_swap_short(store->ss_acrosstrack[i]);
-			store->ss_alongtrack[i] 
+			store->ss_alongtrack[i]
 				= mb_swap_short(store->ss_alongtrack[i]);
 			}
 #endif
@@ -1450,7 +1450,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		status = fwrite(store->ss_alongtrack,1,write_size,mb_io_ptr->mbfp);
 
 		/* check for error */
-		if (status == write_size) 
+		if (status == write_size)
 			{
 			status = MB_SUCCESS;
 			*error = MB_ERROR_NO_ERROR;
