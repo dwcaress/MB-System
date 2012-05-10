@@ -17,6 +17,11 @@ vm[] = {
 };
 	double
 dmstor(const char *is, char **rs) {
+	return dmstor_ctx( pj_get_default_ctx(), is, rs );
+}
+
+	double
+dmstor_ctx(projCtx ctx, const char *is, char **rs) {
 	int sign, n, nl;
 	char *p, *s, work[MAX_WORK];
 	double v, tv;
@@ -24,12 +29,7 @@ dmstor(const char *is, char **rs) {
 	if (rs)
 		*rs = (char *)is;
 	/* copy sting into work space */
-	sign = *is;
-	while (isspace(sign)) 
-		{
-		++is;
-		sign = *is;
-		}
+	while (isspace(sign = *is)) ++is;
 	for (n = MAX_WORK, s = work, p = (char *)is; isgraph(*p) && --n ; )
 		*s++ = *p++;
 	*s = '\0';
@@ -51,7 +51,7 @@ dmstor(const char *is, char **rs) {
 			n = 2; break;
 		case 'r': case 'R':
 			if (nl) {
-				pj_errno = -16;
+				pj_ctx_set_errno( ctx, -16 );
 				return HUGE_VAL;
 			}
 			++s;
@@ -63,7 +63,7 @@ dmstor(const char *is, char **rs) {
 			continue;
 		}
 		if (n < nl) {
-			pj_errno = -16;
+			pj_ctx_set_errno( ctx, -16 );
 			return HUGE_VAL;
 		}
 		v += tv * vm[n];
