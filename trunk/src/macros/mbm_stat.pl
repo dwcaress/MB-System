@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_stat.perl	8/14/93
 #    $Id$
 #
-#    Copyright (c) 1993-2012 by 
+#    Copyright (c) 1993-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -115,7 +115,7 @@ while (<F1>)
 			if ( $done == 0 ) {
 				$beams = $1;
 				}
-			}	
+			}
 
 		elsif (/^  Number of Zero Beams:(.*)/) {
 			if ( $done == 0)
@@ -132,16 +132,16 @@ while (<F1>)
 			}
 		elsif (/^Total Time: (.*)/) {
 				$duration = $1;
-				printf("%s\t%7.4f\t%6.2f\t%6.2f\n", $file, 
-				$duration, $zeros/$beams*100., 
+				printf("%s\t%7.4f\t%6.2f\t%6.2f\n", $file,
+				$duration, $zeros/$beams*100.,
 				$flags/$beams*100.);
-			}	
+			}
 
 #	if ($done == 1) {
-#		printf("%s\t%7.4f\t%6.2f\t%6.2f\n", $file, $duration, 
+#		printf("%s\t%7.4f\t%6.2f\t%6.2f\n", $file, $duration,
 #			$zeros/$beams*100., $flags/$beams*100.);
 #	$done = 0;
-#	}	
+#	}
 
 	if ( $verbose )
 		{
@@ -172,7 +172,6 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {

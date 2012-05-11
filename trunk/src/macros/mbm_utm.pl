@@ -21,9 +21,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 # Purpose:
 #   MB-System macro to perform forward and inverse UTM projections
-#   of ASCII data triples using the GMT program mapproject. 
-#   Forward projections translate from geographic data 
-#   (lon, lat, value) to UTM eastings and northings (x, y, value). 
+#   of ASCII data triples using the GMT program mapproject.
+#   Forward projections translate from geographic data
+#   (lon, lat, value) to UTM eastings and northings (x, y, value).
 #   Inverse projections translate from (x, y, z) to (lon, lat, z).
 #
 # Basic Usage:
@@ -109,7 +109,7 @@ if (!$file_out)
 # get projection
 $projection = "u" . "$zone" . "/1:1000000";
 
-# now set the other projection parameters 
+# now set the other projection parameters
 $org_lon = -183.0 + $zone * 6.0;
 $org_lat = 0.0;
 $org_lon_plus1 = $org_lon + 1.0;
@@ -119,8 +119,8 @@ $org_x_m = 500000.0;
 $org_y_ft = 0.0;
 $org_y_m = 0.0;
 
-$bounds = "$org_lon" . "/" . "$org_lat" 
-		. "/" . "$org_lon_plus1" 
+$bounds = "$org_lon" . "/" . "$org_lat"
+		. "/" . "$org_lon_plus1"
 		. "/" . "$org_lat_plus1" . "r";
 
 # set gmt defaults
@@ -128,11 +128,11 @@ $bounds = "$org_lon" . "/" . "$org_lat"
 ($ellipsoid) = `gmtdefaults -L | grep ELLIPSOID` =~ /\S+\s+\S+\s+(\S+)/;
 ($measure_unit) = `gmtdefaults -L | grep MEASURE_UNIT` =~ /\S+\s+\S+\s+(\S+)/;
 if ($ellipsoid eq "Clarke-1866")
-	{ 
+	{
 	`gmtset D_FORMAT %.10lg ELLIPSOID Clarke-1866 MEASURE_UNIT inch`;
 	}
 else
-	{ 
+	{
 	`gmtset D_FORMAT %.10lg ELLIPSOID WGS-84 MEASURE_UNIT inch`;
 	}
 
@@ -167,7 +167,7 @@ if (!$inverse)
 
 		# replace any commas with tabs
 		$line =~ s/,/\t/g;
-		
+
 		if ($line =~ /[^\s\d\-\.]/)
 			{
 			}
@@ -186,7 +186,7 @@ if (!$inverse)
 		# only use good lines
 		if ($ok == 1)
 			{
-			# print out result 
+			# print out result
 			print OUT1 "$xx\t$yy\t$val\n";
 
 			$ndata = $ndata + 1;
@@ -236,7 +236,7 @@ if (!$inverse)
 			$val = "";
 			}
 
-		# get projected values in desired units 
+		# get projected values in desired units
 		if ($usefeet)
 			{
 			$xx = 1000000 * $xx / 12.0 + $org_x_ft;
@@ -248,7 +248,7 @@ if (!$inverse)
 			$yy = 1000000 * 0.0254 * $yy + $org_y_m;
 			}
 
-		# print out result 
+		# print out result
 		print OUT2 "$xx\t$yy\t$val\n";
 
 		$ndata = $ndata + 1;
@@ -260,7 +260,7 @@ if (!$inverse)
 
 	# close temporary file
 	close INP2;
-	
+
 	# close output file
 	close OUT2;
 	}
@@ -292,7 +292,7 @@ else
 
 		# replace any commas with tabs
 		$line =~ s/,/\t/g;
-		
+
 		if ($line =~ /[^\s\d\-\.]/)
 			{
 			}
@@ -311,7 +311,7 @@ else
 		# only use good lines
 		if ($ok == 1)
 			{
-			# get projected values in desired units 
+			# get projected values in desired units
 			if ($usefeet)
 				{
 				$xx = 12.0 / 1000000 *($xx - $org_x_ft);
@@ -323,7 +323,7 @@ else
 				$yy = ($yy - $org_y_m) / (0.0254 * 1000000);
 				}
 
-			# print out result 
+			# print out result
 			print OUT1 "$xx\t$yy\t$val\n";
 
 			$ndata = $ndata + 1;
@@ -342,7 +342,7 @@ else
 		print "Doing inverse projection using mapproject...\n";
 		}
 	`mapproject $filetmpa -J$projection -I -R$bounds > $filetmpb`;
-	
+
 	# open temporary file
 	if (!open(INP2,"<$filetmpb"))
 		{
@@ -408,7 +408,7 @@ else
 				}
 			}
 
-		# print out result 
+		# print out result
 		print OUT2 "$xx\t$yy\t$val\n";
 
 		$ndata = $ndata + 1;
@@ -420,7 +420,7 @@ else
 
 	# close temporary file
 	close INP2;
-	
+
 	# close output file
 	close OUT2;
 	}
@@ -443,7 +443,7 @@ exit 0;
 # the same arg.
 #
 # Usage:
-#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
 #			    # -c does not take arg. Sets opt_* as a
 #                           # side effect.
 
@@ -451,7 +451,6 @@ sub MBGetopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
@@ -474,7 +473,7 @@ sub MBGetopts {
 		    $rest = shift(@ARGV);
 		}
 		if (eval "\$opt_$first") {
-		    eval "\$opt_$first = \$opt_$first 
+		    eval "\$opt_$first = \$opt_$first
 				. \":\" . \$rest;";
 		}
 		else {
