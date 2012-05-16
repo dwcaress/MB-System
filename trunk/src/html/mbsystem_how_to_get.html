@@ -92,7 +92,7 @@ The MB-System source code is archived and managed using  <a href="http://subvers
 </center>
 <center><a name="MB-dist"></a><b><font size="+2">Packaged MB-System Distributions</font></b></dd>
 </center>
- <p>The <a href="http://www.sio.ucsd.edu/">Scripps Institution of Oceanography</a>'s <a href="http://sts.ucsd.edu/t/sts/">Shipboard Technical Support</a> group maintains a repository of open source software RPM distributions for Red Hat Enterprise Linux and CentOS Linux. This repository includes both source and binary distributions of MB-System, GMT, and netCDF that can be accessed using the yum utility. The MB-System RPMs require the GMT and netCDF RPMs, but have no other external dependencies. 
+ <p>The <a href="http://www.sio.ucsd.edu/">Scripps Institution of Oceanography</a>'s <a href="http://sts.ucsd.edu/t/sts/">Shipboard Technical Support</a> group maintains a repository of open source software RPM distributions for Red Hat Enterprise Linux and CentOS Linux. This repository includes both source and binary distributions of MB-System, GMT, and netCDF that can be accessed using the yum utility. The MB-System RPMs require the GMT and netCDF RPMs, but have no other external dependencies.
   This repository can be found at:
 <ul>
     <a href="http://sts.ucsd.edu/repos/centos-5/local">http://sts.ucsd.edu/repos/centos-5/local</a>
@@ -138,21 +138,21 @@ library</a>.</li>
 documented
 scripting language used widely in the Linux/Unix world. MB-System contains a
 number of perl scripts used both for installation and to ease common
-tasks. Most of the current Unix operating systems include perl. If 
-you need to obtain the perl source code, first check with your local 
-system administrator - you will probably find perl already available 
-locally. The perl source code can be obtained from the 
+tasks. Most of the current Unix operating systems include perl. If
+you need to obtain the perl source code, first check with your local
+system administrator - you will probably find perl already available
+locally. The perl source code can be obtained from the
 <a href="http://www.gnu.org/directory">GNU
 software archives</a> of the <a href="http://www.gnu.org">Free
-Software Foundation</a>.</li>  
-  <li><b>Perl</b> Parallel-Forkmanager module: this Perl module is required for the 
+Software Foundation</a>.</li>
+  <li><b>Perl</b> Parallel-Forkmanager module: this Perl module is required for the
   parallel processing macros mbm_multicopy, mbm_multidatalist, and mbm_multiprocess
-  to work. An easily installed package is available from from www.cpan.org.</li>  
+  to work. An easily installed package is available from from www.cpan.org.</li>
   <li><b>X11</b>: The interactive graphical utilities in MB-System (MBedit, MBnavedit, MBvelocitytool, MBgrdviz, MBeditviz) use and require the X11 windowing system. </li>
   <li><b>Motif</b>: The interactive graphical utilities in MB-System (MBedit, MBnavedit, MBvelocitytool, MBgrdviz, MBeditviz) use version 2 of the Motif widget set, and Motif libraries
     are required for these utilities to be built and to run.
     Most current Unix/Linux operating systems include the required Motif
-    libraries, either in the original proprietary form (Motif), or the not-quite-open-source form (OpenMotif). If you do not have these libraries, the OpenMotif 2 source is available through 
+    libraries, either in the original proprietary form (Motif), or the not-quite-open-source form (OpenMotif). If you do not have these libraries, the OpenMotif 2 source is available through
     <a href="http://www.openmotif.org/">Motifzone</a>. An old alternative open source Motif-compatible
     distribution called <a href="http://www.lesstif.org">LessTif </a>does not work with the new OpenGL based MB-System programs (MBgrdviz, MBeditviz) and should be avoided. </li>
   <li><b>Levitus Database</b>: The MB-System program mblevitus depends
@@ -207,9 +207,9 @@ file and then running tar:</p>
 <ul>
   <pre>% tar xvzf MB-System.tar.gz</pre>
 </ul>
-<p>This will create a directory called (for the 5.3.1906 distribution): </p>
+<p>This will create a directory called (for the 5.3.1955 distribution): </p>
 <ul>
-  <pre>mbsystem-5.3.1906</pre>
+  <pre>mbsystem-5.3.1955</pre>
 </ul>
 <p>In order to
 configure your installation, you must edit the perl script
@@ -271,7 +271,7 @@ directories and create makefiles with the correct dependencies, compile flags, a
   execute
   install_makefiles, do the following:</p>
 <ul>
-  <pre>% cd mbsystem-5.3.1906 </pre>
+  <pre>% cd mbsystem-5.3.1955 </pre>
   <pre>% install_makefiles</pre>
 </ul>
 <p>Because install_makefiles is a perl script, the executable perl must

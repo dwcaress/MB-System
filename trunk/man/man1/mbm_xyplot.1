@@ -7,18 +7,18 @@ a GMT plot of xy data.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_xyplot\fP \fB-I\fP\fI[filepars:]file\fP 
-[\fB-I\fP\fI[filepars:]file\fP \fB-G\fP\fIfill\fP \fB-H\fP 
+\fBmbm_xyplot\fP \fB-I\fP\fI[filepars:]file\fP
+[\fB-I\fP\fI[filepars:]file\fP \fB-G\fP\fIfill\fP \fB-H\fP
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize\fP
 \fB-S\fP\fIsymbol/size\fP
-\fB-U\fP\fIorientation\fP \fB-V\fP 
+\fB-U\fP\fIorientation\fP \fB-V\fP
 \fB-W\fP\fIpen\fP ]
 
 Additional Options:
 .br
 [\fB-B\fP\fItickinfo\fP \fP
 \fB-J\fP\fIprojection\fP[\fI/scale | width\fP]
-\fB-L\fP\fItitle\fP[\fI:xlabel:ylabel\fP] \fB-M\fP\fImisc\fP 
+\fB-L\fP\fItitle\fP[\fI:xlabel:ylabel\fP] \fB-M\fP\fImisc\fP
 \fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Z\fP]
 
 Miscellaneous Options:
@@ -29,16 +29,16 @@ Miscellaneous Options:
 \fB-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP] ]
 
 .SH DESCRIPTION
-\fBmbm_xyplot\fP is a macro to generate a shellscript of GMT commands which, 
+\fBmbm_xyplot\fP is a macro to generate a shellscript of GMT commands which,
 when executed, will generate a Postscript plot of xy data.
-Axes may be linear, log,  or any of several geographic 
+Axes may be linear, log,  or any of several geographic
 projections. Data may be plotted as symbols or lines.
-The plot will be scaled to fit on the specified page size 
-or, if the scale is user defined, the page size will be 
-chosen in accordance with the plot size. The primary purpose 
+The plot will be scaled to fit on the specified page size
+or, if the scale is user defined, the page size will be
+chosen in accordance with the plot size. The primary purpose
 of this macro is to allow the simple, semi-automated
 production of nice looking plots with a few command line
-arguments. 
+arguments.
 
 By default \fBmbm_xyplot\fP expects the input data files to have
 values organized in columns separated by white space. However, users
@@ -47,7 +47,7 @@ file. Input data files can have an arbitrary number of columns. When
 two or more columns exist the one may specify which two columns to
 plot (the first vs second is the default). In addition, users may
 optionally specify a single column to be plotted versus
-data-point-number.  
+data-point-number.
 
 The standard syntax with which one selects columns to plot may also be
 embedded into a larger Perl expression, which will be evaluated for
@@ -67,8 +67,8 @@ purposes.
 
 For users seeking more control over the plot
 appearance, a number of additional optional arguments are
-provided. Truly ambitious users may edit the plot shellscript 
-to take advantage of GMT capabilites not supported by this 
+provided. Truly ambitious users may edit the plot shellscript
+to take advantage of GMT capabilites not supported by this
 macro.
 
 .SH AUTHORSHIP
@@ -87,20 +87,20 @@ Suzanne H. O'Hara (sohara@ldeo.columbia.edu)
 .SH SIMPLE DESCRIPTION OF BASIC OPTIONS
 .TP
 .B \-G
-\fIfill\fP 
+\fIfill\fP
 .br
-Select filling of symbols for xy plotting.  
-Set the shade (0\-255) or color 
+Select filling of symbols for xy plotting.
+Set the shade (0\-255) or color
 (r/g/b) [Default is no fill]. To reset no fill,
 use \fIfill\fP = "N".
-For polygons, you may optionally specify 
-\fB-Gp\fP\fIicon_size/pattern\fP, where 
+For polygons, you may optionally specify
+\fB-Gp\fP\fIicon_size/pattern\fP, where
 \fIpattern\fP gives the number of the
-image pattern (1-32) OR the name of a 
-icon-format file.  \fIicon_size\fP sets 
+image pattern (1-32) OR the name of a
+icon-format file.  \fIicon_size\fP sets
 the unit size in inch.
-To invert black and white pixels, use 
-\fB\-GP\fP instead of \fB\-Gp\fP.  See 
+To invert black and white pixels, use
+\fB\-GP\fP instead of \fB\-Gp\fP.  See
 \fBGMTs\fP Cookbook & Technical Reference
 Appendix E for information on individual patterns.
 .TP
@@ -125,16 +125,16 @@ Default parameters are whitespace [ D(\\s+) ], column 1 vs column 2
 [ Cc[1]_c[2] ], black lines without symbols [ SN ], [ GN ], [ W1 ], and no
 multiple segments (omitted M flag).
 
-Please see the "Complete Description of Options" below for details. 
+Please see the "Complete Description of Options" below for details.
 .TP
 .B \-O
 \fIroot\fP
 .br
 Sets the root used to construct the filename of the output shellscript
-(\fIroot\fP.cmd) and names of files created when the shellscript is 
-run.  Normally the 
-name of the input grid file or grid file list is 
-used as the \fIroot\fP. 
+(\fIroot\fP.cmd) and names of files created when the shellscript is
+run.  Normally the
+name of the input grid file or grid file list is
+used as the \fIroot\fP.
 .TP
 .B \-P
 \fIpagesize\fP
@@ -146,12 +146,12 @@ sets the plot scale such that the plot will not fit on the
 designated page, a larger page will be used.
 The supported page sizes include ANSI A, B, C, D, E,
 F, and E1, as well as most metric page sizes. See the
-COMPLETE DESCRIPTION OF OPTIONS section 
-below for a complete list of 
+COMPLETE DESCRIPTION OF OPTIONS section
+below for a complete list of
 the supported page sizes. The default page size is A.
 .TP
 .B \-S
-\fIsymbol/size\fP 
+\fIsymbol/size\fP
 .br
 Selects symbol to be used for plotting the next xy data
 file. Setting \fIsymbol\fP = "N" causes line plotting.
@@ -168,7 +168,7 @@ The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
 .B \-V
-Causes \fBmbm_grdplot\fP to operate in "verbose" mode 
+Causes \fBmbm_grdplot\fP to operate in "verbose" mode
 so that it outputs
 more information than usual.
 .TP
@@ -176,9 +176,9 @@ more information than usual.
 \fIpen\fP
 .br
 Set pen attributes for xy plotting. See chapter 4.12 in the
-GMT Technical reference for a discussion of GMT pen values.  
-[Defaults: width = 1, color = 0/0/0, 
-texture = solid]. 
+GMT Technical reference for a discussion of GMT pen values.
+[Defaults: width = 1, color = 0/0/0,
+texture = solid].
 
 .SH COMPLETE DESCRIPTION OF OPTIONS
 .TP
@@ -190,20 +190,20 @@ manual page for details. By default the program chooses
 basemap annotations based on the map boundaries.
 .TP
 .B \-G
-\fIfill\fP 
+\fIfill\fP
 .br
-Select filling of symbols for xy plotting.  
-Set the shade (0\-255) or color 
+Select filling of symbols for xy plotting.
+Set the shade (0\-255) or color
 (r/g/b) [Default is no fill]. To reset no fill,
 use \fIfill\fP = "N".
-For polygons, you may optionally specify 
-\fB\-Gp\fP\fIicon_size/pattern\fP, where 
+For polygons, you may optionally specify
+\fB\-Gp\fP\fIicon_size/pattern\fP, where
 \fIpattern\fP gives the number of the
-image pattern (1-32) OR the name of a 
-icon-format file.  \fIicon_size\fP sets 
+image pattern (1-32) OR the name of a
+icon-format file.  \fIicon_size\fP sets
 the unit size in inch.
-To invert black and white pixels, use 
-\fB\-GP\fP instead of \fB\-Gp\fP.  See 
+To invert black and white pixels, use
+\fB\-GP\fP instead of \fB\-Gp\fP.  See
 \fBGMTs\fP Cookbook & Technical Reference
 Appendix E for information on individual patterns.
 .TP
@@ -231,7 +231,7 @@ follows corresponding flag.:
 \fB -I\fP\fBD\fP\fIdelimiter\fP:\fBC\fP\fIcolumnsexpression\fP:\fBG\fP\fIcolor\fP:\fBS\fP\fIsymbol\fP:\fBW\fP\fIweight\fP:\fBM\fP:\fBxyfile\fR
 
 The delimiter may be any character string. The default delimiter is
-whitespace. 
+whitespace.
 
 By default, \fBmbm_xyplot\fP uses the first column as the x value and
 the second column as the y value for the plot. However, the \fBC\fP
@@ -254,7 +254,7 @@ Other valid Perl expressions may be substituted for either column
 expression as well. For example, to plot in kilometers, a file whose
 columns contain x and y coordinates in meters, one would specify
 
-\fBC\fP \fIc[0]/1000_c[1]/1000\fP 
+\fBC\fP \fIc[0]/1000_c[1]/1000\fP
 
 The line and symbol characteristics are set using the \fBG\fP,
 \fBS\fP, and \fBW\fP options.  For example, the command
@@ -273,7 +273,7 @@ Finally, note that there are two ways in which one may plot multiple
 data sets on the same plot. One may specify multiple sets of file arguments
 [i.e. \fB-I\fP\fI[filepars:]xy_file\fP], one for each file to be
 plotted. This allows the most flexibility, including different
-one-the-fly manipulations and colors for each xy series. 
+one-the-fly manipulations and colors for each xy series.
 
 An alternative is to utilize the "multiple segments" feature of
 \fBpsxy\fP. Specify the \fBM\fP flag in the file argument list to
@@ -334,7 +334,7 @@ size will be chosen.
 .br
 \fB\-Ju\fP\fIzone/scale\fP (UTM - Universal Transverse Mercator)
 .br
-\fB\-Jy\fP\fIlon0/lats/scale\fP (Basic Cylindrical Projection) 
+\fB\-Jy\fP\fIlon0/lats/scale\fP (Basic Cylindrical Projection)
 .br
 .sp
 \fBAZIMUTHAL PROJECTIONS:\fP
@@ -398,7 +398,7 @@ given as \fB-M\fP followed by a two character identifier, followed
 by any other parameters associated with that option.
 The \fB-M\fP options may be strung together separated by
 colons, e.g. "-MGQ100:GU:CA200/10", which is equivalent to
-"-MGQ -MGU -MCA200/10". 
+"-MGQ -MGU -MCA200/10".
 .TP
 .B \-MGD
 \fIgmtdef/value\fP
@@ -406,25 +406,25 @@ colons, e.g. "-MGQ100:GU:CA200/10", which is equivalent to
 Allows the user to set the \fBGMT\fP default values used as
 the plot is constructed. This command may be given repeatedly
 to set as many \fBGMT\fP defaults as required. For example, to
-set the basemap annotation font to Courier, use 
+set the basemap annotation font to Courier, use
 "-MGDANOT_FONT/Courier".
 .TP
 .B \-MGT
 \fIx/y/size/angle/font/just/text\fP
 .br
 Causes a text label to plotted on the map.
-\fIsize\fP is text size in points, \fIangle\fP is 
-measured in degrees counter-clockwise from horizontal, 
-\fIfontno\fP sets the font type, \fIjustify\fP sets the alignment. 
-If \fIfontno\fP starts with a leading hyphen, then 
-the remainder of \fIfontno\fP is taken to be a 
-textstring with the desired fontname.  See the 
-\fBgmtdefaults\fP man page for names and numbers of available fonts 
-(or run \fBpstext \-L\fP).  The alignment 
-number refers to the part of the textstring that will be mapped 
-onto the (\fIx,y\fP) point: 1 = Lower Left corner, 
-2 = Lower Center, 3 = Lower Right, 5 = Mid Left, 6 = Mid Center, 
-7 = Mid Right, 9 = Upper Left, 10 = Upper Center, 
+\fIsize\fP is text size in points, \fIangle\fP is
+measured in degrees counter-clockwise from horizontal,
+\fIfontno\fP sets the font type, \fIjustify\fP sets the alignment.
+If \fIfontno\fP starts with a leading hyphen, then
+the remainder of \fIfontno\fP is taken to be a
+textstring with the desired fontname.  See the
+\fBgmtdefaults\fP man page for names and numbers of available fonts
+(or run \fBpstext \-L\fP).  The alignment
+number refers to the part of the textstring that will be mapped
+onto the (\fIx,y\fP) point: 1 = Lower Left corner,
+2 = Lower Center, 3 = Lower Right, 5 = Mid Left, 6 = Mid Center,
+7 = Mid Right, 9 = Upper Left, 10 = Upper Center,
 11 = Upper Right. This option may be given as many times as
 needed.
 .TP
@@ -439,10 +439,10 @@ append a label, or \fBc\fP (which will plot the command string.)
 \fIroot\fP
 .br
 Sets the root used to construct the filename of the output shellscript
-(\fIroot\fP.cmd) and names of files created when the shellscript is 
-run.  Normally the 
-name of the input grid file or grid file list is 
-used as the \fIroot\fP. 
+(\fIroot\fP.cmd) and names of files created when the shellscript is
+run.  Normally the
+name of the input grid file or grid file list is
+used as the \fIroot\fP.
 .TP
 .B \-P
 \fIpagesize\fP
@@ -503,24 +503,24 @@ The supported page sizes are:
           m1  1371.6 x 1828.8 mm  (54.00 x 72.00 in.)
           m2  1371.6 x 2133.6 mm  (54.00 x 84.00 in.)
           m3  1371.6 x 2438.4 mm  (54.00 x 96.00 in.)
-          m4  1524.0 x 1828.8 mm  (54.00 x 72.00 in.)
-          m5  1524.0 x 2133.6 mm  (54.00 x 84.00 in.)
-          m6  1524.0 x 2438.4 mm  (54.00 x 96.00 in.)
+          m4  1524.0 x 1828.8 mm  (60.00 x 72.00 in.)
+          m5  1524.0 x 2133.6 mm  (60.00 x 84.00 in.)
+          m6  1524.0 x 2438.4 mm  (60.00 x 96.00 in.)
 
 The default page size is A.
 .TP
 .B \-Q
-Normally, the output plot generation shellscript 
+Normally, the output plot generation shellscript
 includes lines which execute
-a program to display the Postscript image on the screen.  
+a program to display the Postscript image on the screen.
 This option causes those lines to be commented out so
 that executing the shellscript produces a Postscript plot
 but does not attempt to display it on the screen.
 The program
-to be used to display the Postscript is set 
+to be used to display the Postscript is set
 using \fBmbdefaults\fP;
 the default value can be overridden by setting the environment
-variable $MB_PS_VIEWER. 
+variable $MB_PS_VIEWER.
 .TP
 .B \-R
 \fIwest/east/south/north\fP
@@ -533,7 +533,7 @@ A smaller region than specified in the grdfile will result in a subset of the gr
 region given by the grdfile].
 .TP
 .B \-S
-\fIsymbol/size\fP 
+\fIsymbol/size\fP
 .br
 Selects symbol to be used for plotting the next xy data
 file. Setting \fIsymbol\fP = "N" causes line plotting.
@@ -607,7 +607,7 @@ The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
 .B \-V
-Causes \fBmbm_xyplot\fP to operate in "verbose" mode 
+Causes \fBmbm_xyplot\fP to operate in "verbose" mode
 so that it outputs
 more information than usual.
 .TP
@@ -615,9 +615,9 @@ more information than usual.
 \fIpen\fP
 .br
 Set pen attributes for xy plotting. See chapter 4.12 in the
-GMT Technical reference for a discussion of GMT pen values.  
-[Defaults: width = 1, color = 0/0/0, 
-texture = solid]. 
+GMT Technical reference for a discussion of GMT pen values.
+[Defaults: width = 1, color = 0/0/0,
+texture = solid].
 .TP
 .B \-X
 Normally, \fBmbm_xyplot\fP creates an executable shellscript and
@@ -637,35 +637,35 @@ sb2112_example.mb41 collected using a SeaBeam 2112 sonar.
 In order to obtain an xy plot of the center beam depth
 versus time, we first extract the time-depth xy doubles
 from the swath sonar file using \fBmblist\fP:
- 
+
  	mblist -F41 -Isb2112_example.mb41 -OmZ > mz.dat
- 
+
 Here time is in seconds from the start of the file and the
 depths are in meters, positive upward (topography rather
 than bathymetry).
 Now, we use \fBmbm_xyplot\fP to generate
-shellscripts which in turn generate plots when executed. 
+shellscripts which in turn generate plots when executed.
 First, we generate a simple black line plot:
- 
- 	mbm_xyplot -Imz.dat -Omz 
- 
+
+ 	mbm_xyplot -Imz.dat -Omz
+
 The above command generates an executable shellscript
 mz_line.cmd; executing this shellscript will generate a
 Postscript plot and display it on the screen.
- 
-Suppose we also have a sparse set of depth estimates 
+
+Suppose we also have a sparse set of depth estimates
 in a file called sr.dat obtained
 by picking the seafloor on a seismic reflection record, and
 we wish to compare the two sets of depths. We can plot the
 swath sonar derived depths as a black line and the seismic
 derived depths as red stars as follows:
- 
+
  	mbm_xyplot -Omz_sr -Imz.dat \\
  		-IG255/0/0:Sa/0.1:sr.dat
- 
-As an example, the contents of the plotting shellscript 
+
+As an example, the contents of the plotting shellscript
 "mz.cmd" are:
- 
+
  #
  # Shellscript to create Postscript plot of data in grd file
  # Created by macro mbm_xyplot
@@ -708,7 +708,7 @@ As an example, the contents of the plotting shellscript
  #
  # Delete surplus files
  echo Deleting surplus files...
- rm -f 
+ rm -f
  #
  # Reset GMT default fonts
  echo Resetting GMT fonts...
@@ -755,14 +755,10 @@ inadvertently interpreted by the shell.
 
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbcontour\fP(l), 
-\fBmbswath\fP(l), \fBmbdefaults\fP(l), 
+\fBmbsystem\fP(l), \fBmbcontour\fP(l),
+\fBmbswath\fP(l), \fBmbdefaults\fP(l),
 \fBmbm_grdplot\fP(l), \fBmbm_grd3dplot\fP(l),
 \fBmbm_plot\fP(l)
 
 .SH BUGS
 Please let us know.
-
-
-
-

@@ -17323,7 +17323,7 @@ no_defs <>
 	no_defs <>
 # Gauss Krueger Grid for Germany
 #
-# The first figure of the easting is lon_0 devided by 3
+# The first figure of the easting is lon_0 divided by 3
 # ( 2 for 6d0E, 3 for 9d0E, 4 for 12d0E)
 # For translations you have to remove this first figure
 # and convert northings and eastings from km to meter .
@@ -17359,3 +17359,19 @@ no_defs <>
 #
 #
 ##########################################################
+#
+# MBARI Project Specific Projections
+#
+# Oblique Mercator for Alarcon Rise Survey
+# <AlarconRiseObliqueMercator>
+# 	proj=omerc ellps=WGS84
+# 	lon_1=-108.621333 lat_1=23.278767
+# 	lon_2=-108.384467 lat_2=23.606533
+# 	units=m
+# 	x_0=-1550000 y_0=-2600000
+# 	no_defs <>
+<AlarconRiseObliqueMercator>
+	proj=omerc ellps=WGS84
+	lonc=-108.500000 lat_0=23.440000 gamma=33.0
+	units=m
+	no_defs <>
