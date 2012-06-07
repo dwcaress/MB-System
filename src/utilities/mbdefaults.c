@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBDEFAULTS sets and retrieves the default MBIO control parameters 
+ * MBDEFAULTS sets and retrieves the default MBIO control parameters
  * stored in the file ~/.mbio_defaults.  Only the parameters specified
  * by command line arguments will be changed; if no ~/.mbio_defaults
  * file exists one will be created.
@@ -124,6 +124,7 @@ int main (int argc, char **argv)
 	char	argstring[MB_PATH_MAXLINE];
 	int	fbtversion = 3;
 	int	uselockfiles = 1;
+	int	fileiobuffer = 0;
 	char	*HOME = "HOME";
 	char	*getenv();
 
@@ -150,10 +151,18 @@ int main (int argc, char **argv)
 	/* now get current uselockfiles value */
 	status = mb_uselockfiles(verbose,&uselockfiles);
 
+	/* now get current fileio buffering values */
+	status = mb_fileiobuffer(verbose,&fileiobuffer);
+
 	/* process argument list */
-	while ((c = getopt(argc, argv, "D:d:F:f:HhI:i:L:l:T:t:U:u:VvW:w:")) != -1)
-	  switch (c) 
+	while ((c = getopt(argc, argv, "B:b:D:d:F:f:HhI:i:L:l:T:t:U:u:VvW:w:")) != -1)
+	  switch (c)
 		{
+		case 'B':
+		case 'b':
+			sscanf (optarg,"%d",&fileiobuffer);
+			flag++;
+			break;
 		case 'D':
 		case 'd':
 			sscanf (optarg,"%s",psdisplay);
@@ -270,6 +279,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       mbproject:    %s\n",mbproject);
 		fprintf(stderr,"dbg2       fbtversion:   %d\n",fbtversion);
 		fprintf(stderr,"dbg2       uselockfiles: %d\n",uselockfiles);
+		fprintf(stderr,"dbg2       fileiobuffer: %d\n",fileiobuffer);
 		}
 
 	/* if help desired then print it and exit */
@@ -299,6 +309,7 @@ int main (int argc, char **argv)
 		fprintf(fp,"project:    %s\n",mbproject);
 		fprintf(fp,"fbtversion: %d\n",fbtversion);
 		fprintf(fp,"uselockfiles:%d\n",uselockfiles);
+		fprintf(fp,"fileiobuffer:%d\n",fileiobuffer);
 		fclose(fp);
 
 		printf("\nNew MBIO Default Control Parameters:\n");
@@ -314,6 +325,12 @@ int main (int argc, char **argv)
 		else
 			printf("fbtversion: %d\n",fbtversion);
 		printf("uselockfiles: %d\n",uselockfiles);
+		if (fileiobuffer == 0)
+			printf("fileiobuffer: %d (use standard fread() & fwrite() buffering)\n",fileiobuffer);
+		else if (fileiobuffer > 0)
+			printf("fileiobuffer: %d (use %d kB buffer for fread() & fwrite())\n",fileiobuffer,fileiobuffer);
+		else
+			printf("fileiobuffer: %d (use mmap for file i/o)\n",fileiobuffer);
 		}
 
 	/* else just list the current defaults */
@@ -332,6 +349,12 @@ int main (int argc, char **argv)
 		else
 			printf("fbtversion: %d\n",fbtversion);
 		printf("uselockfiles: %d\n",uselockfiles);
+		if (fileiobuffer == 0)
+			printf("fileiobuffer: %d (use standard fread() & fwrite() buffering)\n",fileiobuffer);
+		else if (fileiobuffer > 0)
+			printf("fileiobuffer: %d (use %d kB buffer for fread() & fwrite())\n",fileiobuffer,fileiobuffer);
+		else
+			printf("fileiobuffer: %d (use mmap for file i/o)\n",fileiobuffer);
 		}
 
 	/* print output debug statements */

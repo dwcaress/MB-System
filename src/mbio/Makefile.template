@@ -256,7 +256,7 @@ clean:
 $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
-		mb_mem.o \
+		mb_fileio.o mb_mem.o \
 		mb_coor_scale.o mb_check_info.o \
 		mb_time.o mb_angle.o \
 		mb_absorption.o mb_proj.o \
@@ -322,7 +322,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
-		mb_mem.o \
+		mb_fileio.o mb_mem.o \
 		mb_coor_scale.o mb_check_info.o\
 		mb_time.o mb_angle.o \
 		mb_absorption.o mb_proj.o \
@@ -403,6 +403,8 @@ mb_write_init.o:	mb_write_init.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(I
 	$(CC) -c $(CFLAGS) -I$(GSFINCDIR) -I$(NETCDFINCDIR) mb_write_init.c
 mb_close.o:	mb_close.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GSFINCDIR) -I$(NETCDFINCDIR) mb_close.c
+mb_fileio.o:	mb_fileio.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mb_fileio.c
 mb_mem.o:	mb_mem.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_mem.c
 mb_coor_scale.o:	mb_coor_scale.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h

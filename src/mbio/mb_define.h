@@ -161,11 +161,11 @@
  *
  *
  */
- 
+
 /* include this code only once */
 #ifndef MB_DEFINE_DEF
 #define MB_DEFINE_DEF
- 
+
 /* declare buffer maximum */
 #define	MB_BUFFER_MAX	5000
 
@@ -194,11 +194,12 @@
 
 /* types of  files used by swath sonar data formats */
 #define	MB_FILETYPE_NORMAL	1
-#define	MB_FILETYPE_XDR		2
-#define	MB_FILETYPE_GSF		3
-#define	MB_FILETYPE_NETCDF	4
-#define MB_FILETYPE_SURF	5
-#define MB_FILETYPE_SEGY	6
+#define	MB_FILETYPE_SINGLE	2
+#define	MB_FILETYPE_XDR		3
+#define	MB_FILETYPE_GSF		4
+#define	MB_FILETYPE_NETCDF	5
+#define MB_FILETYPE_SURF	6
+#define MB_FILETYPE_SEGY	7
 
 /* settings for recursive datalist reading functions */
 #define MB_DATALIST_LOOK_UNSET		0
@@ -280,47 +281,48 @@ typedef char mb_name[MB_NAME_LENGTH];
 /* position projection flag (0 = longitude latitude, 1 = projected eastings northings) */
 #define	MB_PROJECTION_GEOGRAPHIC	0
 #define	MB_PROJECTION_PROJECTED		1
-	
+
 /* MBIO core function prototypes */
 int mb_defaults(int verbose, int *format, int *pings,
-		int *lonflip, double bounds[4], 
+		int *lonflip, double bounds[4],
 		int *btime_i, int *etime_i,
 		double *speedmin, double *timegap);
 int mb_env(int verbose, char *psdisplay, char *imgdisplay, char *mbproject);
 int mb_lonflip(int verbose, int *lonflip);
 int mb_fbtversion(int verbose, int *fbtversion);
 int mb_uselockfiles(int verbose, int *uselockfiles);
+int mb_fileiobuffer(int verbose, int *fileiobuffer);
 int mb_format_register(int verbose, int *format, void *mbio_ptr, int *error);
-int mb_format_info(int verbose, int *format, int *system, 
-		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
-		char *format_name, char *system_name, char *format_description, 
-		int *numfile, int *filetype, int *variable_beams, 
-		int *traveltime, int *beam_flagging, 
-		int *nav_source, int *heading_source, int *vru_source, int *svp_source, 
-		double *beamwidth_xtrack, double *beamwidth_ltrack, 
+int mb_format_info(int verbose, int *format, int *system,
+		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max,
+		char *format_name, char *system_name, char *format_description,
+		int *numfile, int *filetype, int *variable_beams,
+		int *traveltime, int *beam_flagging,
+		int *nav_source, int *heading_source, int *vru_source, int *svp_source,
+		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error);
 int mb_format(int verbose, int *format, int *error);
 int mb_format_system(int verbose, int *format, int *system, int *error);
-int mb_format_description(int verbose, int *format, 
+int mb_format_description(int verbose, int *format,
 		char *description, int *error);
-int mb_format_dimensions(int verbose, int *format, 
-		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max, 
+int mb_format_dimensions(int verbose, int *format,
+		int *beams_bath_max, int *beams_amp_max, int *pixels_ss_max,
 		int *error);
-int mb_format_flags(int verbose, int *format, 
-		int *variable_beams, int *traveltime, int *beam_flagging, 
+int mb_format_flags(int verbose, int *format,
+		int *variable_beams, int *traveltime, int *beam_flagging,
 		int *error);
-int mb_format_source(int verbose, int *format, 
-		int *nav_source, int *heading_source, 
-		int *vru_source, int *svp_source, 
+int mb_format_source(int verbose, int *format,
+		int *nav_source, int *heading_source,
+		int *vru_source, int *svp_source,
 		int *error);
-int mb_format_beamwidth(int verbose, int *format, 
+int mb_format_beamwidth(int verbose, int *format,
 		double *beamwidth_xtrack, double *beamwidth_ltrack,
 		int *error);
-int mb_get_format(int verbose, char *filename, char *fileroot, 
+int mb_get_format(int verbose, char *filename, char *fileroot,
 		    int *format, int *error);
 int mb_datalist_open(int verbose,
 		void **datalist,
-		char *path, 
+		char *path,
 		int look_processed,
 		int *error);
 int mb_datalist_read(int verbose,
@@ -343,7 +345,7 @@ int mb_get_shortest_path(int verbose,
 int mb_get_basename(int verbose,
 		char *path,
 		int *error);
-int mb_check_info(int verbose, char *file, int lonflip, 
+int mb_check_info(int verbose, char *file, int lonflip,
 		    double bounds[4], int *file_in_bounds,
 		    int *error);
 int mb_make_info(int verbose, int force,
@@ -353,9 +355,9 @@ int mb_get_fnv(int verbose, char *file, int *format, int *error);
 int mb_get_ffa(int verbose, char *file, int *format, int *error);
 int mb_get_ffs(int verbose, char *file, int *format, int *error);
 int mb_swathbounds(int verbose, int checkgood,
-		double navlon, double navlat, double heading, 
+		double navlon, double navlat, double heading,
 		int nbath, int nss,
-		char *beamflag, double *bath, 
+		char *beamflag, double *bath,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		int *ibeamport,
@@ -365,117 +367,121 @@ int mb_swathbounds(int verbose, int checkgood,
 		int *ipixelcntr,
 		int *ipixelstbd,
 		int *error);
-int mb_read_init(int verbose, char *file, 
+int mb_read_init(int verbose, char *file,
 		int format, int pings, int lonflip, double bounds[4],
-		int btime_i[7], int etime_i[7], 
+		int btime_i[7], int etime_i[7],
 		double speedmin, double timegap,
 		void **mbio_ptr, double *btime_d, double *etime_d,
-		int *beams_bath, int *beams_amp, int *pixels_ss, 
+		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error);
-int mb_write_init(int verbose, 
-		char *file, int format, void **mbio_ptr, 
+int mb_write_init(int verbose,
+		char *file, int format, void **mbio_ptr,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error);
 int mb_close(int verbose, void **mbio_ptr, int *error);
-int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_read_ping(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *error);
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
-		double *speed, double *heading, 
-		double *distance, double *altitude, double *sonardepth, 
+		double *navlon, double *navlat,
+		double *speed, double *heading,
+		double *distance, double *altitude, double *sonardepth,
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error);
-int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings, 
+int mb_get(int verbose, void *mbio_ptr, int *kind, int *pings,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
-		double *speed, double *heading, 
-		double *distance, double *altitude, double *sonardepth, 
+		double *navlon, double *navlat,
+		double *speed, double *heading,
+		double *distance, double *altitude, double *sonardepth,
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error);
 int mb_read(int verbose, void *mbio_ptr,
-		int *kind, int *pings, 
+		int *kind, int *pings,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
-		double *speed, double *heading, 
-		double *distance, double *altitude, double *sonardepth, 
+		double *navlon, double *navlat,
+		double *speed, double *heading,
+		double *distance, double *altitude, double *sonardepth,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathlon, double *bathlat,
 		double *ss, double *sslon, double *sslat,
 		char *comment, int *error);
-int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr,
 		int *error);
 int mb_put_all(int verbose, void *mbio_ptr, void *store_ptr,
-		int usevalues, int kind, 
+		int usevalues, int kind,
 		int time_i[7], double time_d,
-		double navlon, double navlat, 
+		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error);
-int mb_put_comment(int verbose, void *mbio_ptr, char *comment, 
+int mb_put_comment(int verbose, void *mbio_ptr, char *comment,
 		int *error);
+int mb_fileio_open(int verbose, void *mbio_ptr, int *error);
+int mb_fileio_close(int verbose, void *mbio_ptr, int *error);
+int mb_fileio_get(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error);
+int mb_fileio_put(int verbose, void *mbio_ptr, char *buffer, size_t *size, int *error);
 int mb_alloc(int verbose, void *mbio_ptr,
 		void **store_ptr, int *error);
 int mb_deall(int verbose, void *mbio_ptr,
 		void **store_ptr, int *error);
 int mb_get_store(int verbose, void *mbio_ptr,
 		    void **store_ptr, int *error);
-int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error);
-int mb_pingnumber(int verbose, void *mbio_ptr, 
+int mb_pingnumber(int verbose, void *mbio_ptr,
 		int *pingnumber, int *error);
-int mb_segynumber(int verbose, void *mbio_ptr, 
+int mb_segynumber(int verbose, void *mbio_ptr,
 		int *line, int *shot, int *cdp, int *error);
-int mb_beamwidths(int verbose, void *mbio_ptr, 
+int mb_beamwidths(int verbose, void *mbio_ptr,
 		double *beamwidth_xtrack, double *beamwidth_ltrack, int *error);
-int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
-int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error);
-int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error);
 int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
-		int time_i[7], double *time_d, 
+		int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error);
-int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		int nmax, int *kind, int *n,
-		int *time_i, double *time_d, 
+		int *time_i, double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error);
 int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-		int time_i[7], double time_d, 
+		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
-		double roll, double pitch, double heave, 
+		double speed, double heading, double draft,
+		double roll, double pitch, double heave,
 		int *error);
 int mb_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
@@ -495,59 +501,59 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		int *error);
 int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbeams,
-		double *ttimes, double	*angles, 
+		double *ttimes, double	*angles,
 		double *angles_forward, double *angles_null,
-		double *heave, double *alongtrack_offset, 
+		double *heave, double *alongtrack_offset,
 		double *draft, double *ssv, int *error);
 int mb_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbeams, int *detects, int *error);
 int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbeams, int *pulses, int *error);
 int mb_gains(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, double *transmit_gain, double *pulse_length, 
+		int *kind, double *transmit_gain, double *pulse_length,
 		double *receive_gain, int *error);
 int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		int *nrawss,
-		double *rawss, 
-		double *rawssacrosstrack, 
-		double *rawssalongtrack, 
+		double *rawss,
+		double *rawssacrosstrack,
+		double *rawssalongtrack,
 		int *error);
 int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		int nrawss,
-		double *rawss, 
-		double *rawssacrosstrack, 
-		double *rawssalongtrack, 
+		double *rawss,
+		double *rawssacrosstrack,
+		double *rawssalongtrack,
 		int *error);
 int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
-		void *segytraceheader_ptr, 
+		void *segytraceheader_ptr,
 		int *error);
 int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sampleformat,
 		int *kind,
-		void *segyheader_ptr, 
-		float *segydata, 
+		void *segyheader_ptr,
+		float *segydata,
 		int *error);
 int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind,
-		void *segyheader_ptr, 
-		float *segydata, 
+		void *segyheader_ptr,
+		float *segydata,
 		int *error);
 int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, int *nctd, double *time_d, 
-		double *conductivity, double *temperature, 
+		int *kind, int *nctd, double *time_d,
+		double *conductivity, double *temperature,
 		double *depth, double *salinity, double *soundspeed, int *error);
 int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, int *nsensor, double *time_d, 
-		double *sensor1, double *sensor2, double *sensor3, 
-		double *sensor4, double *sensor5, double *sensor6, 
+		int *kind, int *nsensor, double *time_d,
+		double *sensor1, double *sensor2, double *sensor3,
+		double *sensor4, double *sensor5, double *sensor6,
 		double *sensor7, double *sensor8, int *error);
 int mb_copyrecord(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);
 
 int mb_buffer_init(int verbose, void **buff_ptr, int *error);
-int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr, 
+int mb_buffer_close(int verbose, void **buff_ptr, void *mbio_ptr,
 		int *error);
 int mb_buffer_load(int verbose, void *buff_ptr,void *mbio_ptr,
 		int nwant, int *nload, int *nbuff, int *error);
@@ -560,7 +566,7 @@ int mb_buffer_info(int verbose, void *buff_ptr, void *mbio_ptr,
 int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr,
 		int start, int *id,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
+		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
@@ -570,52 +576,52 @@ int mb_buffer_get_next_data(int verbose, void *buff_ptr, void *mbio_ptr,
 int mb_buffer_get_next_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		int start, int *id,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
-		double *speed, double *heading, double *draft, 
+		double *navlon, double *navlat,
+		double *speed, double *heading, double *draft,
 		double *roll, double *pitch, double *heave,
 		int *error);
 int mb_buffer_extract(int verbose, void *buff_ptr, void *mbio_ptr,
-		int id, int *kind, 
+		int id, int *kind,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
+		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, 
+		char *comment,
 		int *error);
 int mb_buffer_extract_nav(int verbose, void *buff_ptr, void *mbio_ptr,
-		int id, int *kind, 
+		int id, int *kind,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
+		double *navlon, double *navlat,
 		double *speed, double *heading, double *draft,
 		double *roll, double *pitch, double *heave,
 		int *error);
 int mb_buffer_insert(int verbose, void *buff_ptr, void *mbio_ptr,
 		int id, int time_i[7], double time_d,
-		double navlon, double navlat, 
+		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
 		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, 
+		char *comment,
 		int *error);
 int mb_buffer_insert_nav(int verbose, void *buff_ptr, void *mbio_ptr,
 		int id, int time_i[7], double time_d,
-		double navlon, double navlat, 
+		double navlon, double navlat,
 		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error);
 int mb_buffer_get_kind(int verbose, void *buff_ptr, void *mbio_ptr,
-		int id, int *kind, 
+		int id, int *kind,
 		int *error);
 int mb_buffer_get_ptr(int verbose, void *buff_ptr, void *mbio_ptr,
-		int id, void **store_ptr, 
+		int id, void **store_ptr,
 		int *error);
 
-int mb_coor_scale(int verbose, double latitude, 
+int mb_coor_scale(int verbose, double latitude,
 		double *mtodeglon, double *mtodeglat);
 int mb_apply_lonflip(int verbose, int lonflip, double *longitude);
 
@@ -625,38 +631,38 @@ int mb_notice_log_error(int verbose, void *mbio_ptr, int error_id);
 int mb_notice_log_problem(int verbose, void *mbio_ptr, int problem_id);
 int mb_notice_get_list(int verbose, void *mbio_ptr, int *notice_list);
 int mb_notice_message(int verbose, int notice, char **message);
-int mb_navint_add(int verbose, void *mbio_ptr, 
+int mb_navint_add(int verbose, void *mbio_ptr,
 		double time_d, double lon, double lat, int *error);
-int mb_navint_interp(int verbose, void *mbio_ptr, 
-		double time_d, double heading, double rawspeed, 
-		double *lon, double *lat, double *speed, 
+int mb_navint_interp(int verbose, void *mbio_ptr,
+		double time_d, double heading, double rawspeed,
+		double *lon, double *lat, double *speed,
 		int *error);
-int mb_attint_add(int verbose, void *mbio_ptr, 
-		double time_d, double heave, 
+int mb_attint_add(int verbose, void *mbio_ptr,
+		double time_d, double heave,
 		double roll, double pitch, int *error);
-int mb_attint_nadd(int verbose, void *mbio_ptr, 
-		int nsamples, double *time_d, double *heave, 
+int mb_attint_nadd(int verbose, void *mbio_ptr,
+		int nsamples, double *time_d, double *heave,
 		double *roll, double *pitch, int *error);
-int mb_attint_interp(int verbose, void *mbio_ptr, 
-		double time_d, double *heave, 
-		double *roll, double *pitch, 
+int mb_attint_interp(int verbose, void *mbio_ptr,
+		double time_d, double *heave,
+		double *roll, double *pitch,
 		int *error);
-int mb_hedint_add(int verbose, void *mbio_ptr, 
+int mb_hedint_add(int verbose, void *mbio_ptr,
 		double time_d, double heading, int *error);
-int mb_hedint_nadd(int verbose, void *mbio_ptr, 
+int mb_hedint_nadd(int verbose, void *mbio_ptr,
 		int nsamples, double *time_d, double *heading, int *error);
-int mb_hedint_interp(int verbose, void *mbio_ptr, 
-		double time_d, double *heading, 
+int mb_hedint_interp(int verbose, void *mbio_ptr,
+		double time_d, double *heading,
 		int *error);
 int mb_depint_add(int verbose, void *mbio_ptr, double time_d, double sonardepth, int *error);
-int mb_depint_interp(int verbose, void *mbio_ptr, 
-		double time_d, double *sonardepth, 
+int mb_depint_interp(int verbose, void *mbio_ptr,
+		double time_d, double *sonardepth,
 		int *error);
 int mb_altint_add(int verbose, void *mbio_ptr, double time_d, double altitude, int *error);
-int mb_altint_interp(int verbose, void *mbio_ptr, 
-		double time_d, double *altitude, 
+int mb_altint_interp(int verbose, void *mbio_ptr,
+		double time_d, double *altitude,
 		int *error);
-		
+
 int mb_swap_check();
 int mb_get_double(double *, char *, int);
 int mb_get_int(int *, char *, int);
@@ -708,10 +714,10 @@ void hilbert(int n, double delta[], double kappa[]);
 void hilbert2(int n, double data[]);
 
 int mb_absorption(int verbose,
-		double frequency, double temperature,double salinity, 
-		double depth, double ph, double soundspeed, 
+		double frequency, double temperature,double salinity,
+		double depth, double ph, double soundspeed,
 		double *absorption, int *error);
-		
+
 int mb_mem_debug_on(int verbose, int *error);
 int mb_mem_debug_off(int verbose, int *error);
 int mb_malloc(int verbose, size_t size, void **ptr, int *error);
@@ -721,14 +727,14 @@ int mb_mallocd(int verbose, char *sourcefile, int sourceline, size_t size, void 
 int mb_reallocd(int verbose, char *sourcefile, int sourceline, size_t size, void **ptr, int *error);
 int mb_freed(int verbose, char *sourcefile, int sourceline, void **ptr, int *error);
 int mb_memory_clear(int verbose, int *error);
-int mb_memory_status(int verbose, int *nalloc, int *nallocmax, 
+int mb_memory_status(int verbose, int *nalloc, int *nallocmax,
 			int *overflow, size_t *allocsize, int *error);
 int mb_memory_list(int verbose, int *error);
-int mb_register_array(int verbose, void *mbio_ptr, 
+int mb_register_array(int verbose, void *mbio_ptr,
 		int type, size_t size, void **handle, int *error);
-int mb_update_arrays(int verbose, void *mbio_ptr, 
+int mb_update_arrays(int verbose, void *mbio_ptr,
 		int nbath, int namp, int nss, int *error);
-int mb_update_arrayptr(int verbose, void *mbio_ptr, 
+int mb_update_arrayptr(int verbose, void *mbio_ptr,
 		void **handle, int *error);
 int mb_list_arrays(int verbose, void *mbio_ptr, int *error);
 int mb_deall_ioarrays(int verbose, void *mbio_ptr, int *error);
@@ -765,14 +771,14 @@ int mb_swap_double(double *a);
 int mb_swap_long(mb_s_long *a);
 
 /* mb_rt function prototypes */
-int mb_rt_init(int verbose, int number_node, 
-		double *depth, double *velocity, 
+int mb_rt_init(int verbose, int number_node,
+		double *depth, double *velocity,
 		void **modelptr, int *error);
 int mb_rt_deall(int verbose, void **modelptr, int *error);
-int mb_rt(int verbose, void *modelptr, 
-	double source_depth, double source_angle, double end_time, 
-	int ssv_mode, double surface_vel, double null_angle, 
-	int nplot_max, int *nplot, double *xplot, double *zplot, 
+int mb_rt(int verbose, void *modelptr,
+	double source_depth, double source_angle, double end_time,
+	int ssv_mode, double surface_vel, double null_angle,
+	int nplot_max, int *nplot, double *xplot, double *zplot,
 	double *x, double *z, double *travel_time, int *ray_stat, int *error);
 
 /* end conditional include */

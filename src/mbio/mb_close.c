@@ -18,7 +18,7 @@
  *
  * Author:	D. W. Caress
  * Date:	January 25, 1993
- *	
+ *
  * $Log: mb_close.c,v $
  * Revision 5.13  2008/07/10 06:43:40  caress
  * Preparing for 5.1.1beta20
@@ -227,13 +227,19 @@ int mb_close(int verbose, void **mbio_ptr, int *error)
 	    if (mb_io_ptr->mbfp3 != NULL)
 		    fclose(mb_io_ptr->mbfp3);
 	    }
-	
+
+	/* else handle single normal files to be closed with mb_fileio_close() */
+	else if (mb_io_ptr->filetype == MB_FILETYPE_SINGLE)
+	    {
+	    status = mb_fileio_close(verbose, *mbio_ptr, error);
+	    }
+
 	/* else if gsf then use gsfClose */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF)
 	    {
 	    gsfClose((int) mb_io_ptr->gsfid);
 	    }
-	
+
 	/* else if netcdf then use nc_close */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF)
 	    {

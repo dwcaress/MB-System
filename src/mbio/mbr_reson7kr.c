@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_reson7kr.c contains the functions for reading and writing
- * multibeam data in the RESON7KR format.  
+ * multibeam data in the RESON7KR format.
  * These functions include:
  *   mbr_alm_reson7kr	- allocate read/write memory
  *   mbr_dem_reson7kr	- deallocate read/write memory
@@ -109,46 +109,46 @@
 
 /* include for byte swapping */
 #include "../../include/mb_swap.h"
-	
+
 /* turn on debug statements here */
 /* #define MBR_RESON7KR_DEBUG 1 */
 /* #define MBR_RESON7KR_DEBUG2 1 */
-	
+
 /* essential function prototypes */
-int mbr_register_reson7kr(int verbose, void *mbio_ptr, 
+int mbr_register_reson7kr(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_reson7kr(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_reson7kr(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_reson7kr(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer, 
+int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 				int *recordid,  int *deviceid, unsigned short *enumerator, int *size);
 int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_reson7kr_chk_label(int verbose, void *mbio_ptr, short type);
-int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, 
+int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer,
 				int *ping_number);
-int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, 
+int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index,
 				s7k_header *header, int *error);
 
 int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *error);
@@ -288,62 +288,62 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_reson7kr(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_reson7kr(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_reson7kr;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_reson7kr; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_reson7k_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_reson7k_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_reson7kr; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_reson7kr; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_reson7k_dimensions; 
-	mb_io_ptr->mb_io_pingnumber = &mbsys_reson7k_pingnumber; 
-	mb_io_ptr->mb_io_extract = &mbsys_reson7k_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_reson7k_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_reson7k_extract_nav; 
-	mb_io_ptr->mb_io_extract_nnav = &mbsys_reson7k_extract_nnav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_reson7k_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_reson7k_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_reson7k_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_reson7k_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_reson7k_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_reson7k_detects; 
-	mb_io_ptr->mb_io_gains = &mbsys_reson7k_gains; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_reson7k_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
-	mb_io_ptr->mb_io_extract_segytraceheader = &mbsys_reson7k_extract_segytraceheader; 
-	mb_io_ptr->mb_io_extract_segy = &mbsys_reson7k_extract_segy; 
-	mb_io_ptr->mb_io_insert_segy = &mbsys_reson7k_insert_segy; 
-	mb_io_ptr->mb_io_ctd = &mbsys_reson7k_ctd; 
-	mb_io_ptr->mb_io_ancilliarysensor = &mbsys_reson7k_ancilliarysensor; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_reson7kr;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_reson7k_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_reson7k_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_reson7kr;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_reson7kr;
+	mb_io_ptr->mb_io_dimensions = &mbsys_reson7k_dimensions;
+	mb_io_ptr->mb_io_pingnumber = &mbsys_reson7k_pingnumber;
+	mb_io_ptr->mb_io_extract = &mbsys_reson7k_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_reson7k_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_reson7k_extract_nav;
+	mb_io_ptr->mb_io_extract_nnav = &mbsys_reson7k_extract_nnav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_reson7k_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_reson7k_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_reson7k_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_reson7k_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_reson7k_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_reson7k_detects;
+	mb_io_ptr->mb_io_gains = &mbsys_reson7k_gains;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_reson7k_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
+	mb_io_ptr->mb_io_extract_segytraceheader = &mbsys_reson7k_extract_segytraceheader;
+	mb_io_ptr->mb_io_extract_segy = &mbsys_reson7k_extract_segy;
+	mb_io_ptr->mb_io_insert_segy = &mbsys_reson7k_insert_segy;
+	mb_io_ptr->mb_io_ctd = &mbsys_reson7k_ctd;
+	mb_io_ptr->mb_io_ancilliarysensor = &mbsys_reson7k_ancilliarysensor;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -394,25 +394,25 @@ int mbr_register_reson7kr(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_reson7kr(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_reson7kr(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_reson7kr";
@@ -438,7 +438,7 @@ int mbr_info_reson7kr(int verbose,
 	strncpy(system_name, "RESON7K", MB_NAME_LENGTH);
 	strncpy(format_description, "Format name:          MBF_RESON7KR\nInformal Description: Reson 7K multibeam vendor format\nAttributes:           Reson 7K series multibeam sonars, \n                      bathymetry, amplitude, three channels sidescan, and subbottom\n                      up to 254 beams, variable pixels, binary, Reson.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
-	*filetype = MB_FILETYPE_NORMAL;
+	*filetype = MB_FILETYPE_SINGLE;
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
@@ -453,7 +453,7 @@ int mbr_info_reson7kr(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -557,7 +557,7 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 	*fileheaders = 0;
 	*pixel_size = 0.0;
 	*swath_width = 0.0;
-	
+
 	/* allocate memory if necessary */
 	if (status == MB_SUCCESS)
 		{
@@ -569,7 +569,7 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 		if (status == MB_SUCCESS)
 			*bufferalloc = MBSYS_RESON7K_BUFFER_STARTSIZE;
 		}
-			
+
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -715,10 +715,10 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		{
 		/* add latest fix */
 		position = &(store->position);
-		mb_navint_add(verbose, mbio_ptr, 
-				store->time_d, 
-				(double)(RTD * position->longitude), 
-				(double)(RTD * position->latitude), 
+		mb_navint_add(verbose, mbio_ptr,
+				store->time_d,
+				(double)(RTD * position->longitude),
+				(double)(RTD * position->latitude),
 				error);
 		}
 
@@ -732,38 +732,38 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 /* if (bluefin->nav[i].timedelay != 0)
 fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->nav[i].timedelay);*/
-			mb_navint_add(verbose, mbio_ptr, 
-					(double)(bluefin->nav[i].position_time), 
-					(double)(RTD * bluefin->nav[i].longitude), 
-					(double)(RTD * bluefin->nav[i].latitude), 
+			mb_navint_add(verbose, mbio_ptr,
+					(double)(bluefin->nav[i].position_time),
+					(double)(RTD * bluefin->nav[i].longitude),
+					(double)(RTD * bluefin->nav[i].latitude),
 					error);
 			mb_attint_add(verbose, mbio_ptr,
-					(double)(bluefin->nav[i].position_time), 
-					(double)(0.0), 
-					(double)(RTD * bluefin->nav[i].roll), 
-					(double)(RTD * bluefin->nav[i].pitch), 
+					(double)(bluefin->nav[i].position_time),
+					(double)(0.0),
+					(double)(RTD * bluefin->nav[i].roll),
+					(double)(RTD * bluefin->nav[i].pitch),
 					error);
 			mb_hedint_add(verbose, mbio_ptr,
-					(double)(bluefin->nav[i].position_time), 
-					(double)(RTD * bluefin->nav[i].yaw), 
+					(double)(bluefin->nav[i].position_time),
+					(double)(RTD * bluefin->nav[i].yaw),
 					error);
 			if (mb_io_ptr->nsonardepth == 0
-				|| (bluefin->nav[i].depth 
+				|| (bluefin->nav[i].depth
 					!= mb_io_ptr->sonardepth_sonardepth[mb_io_ptr->nsonardepth-1]))
 				{
 				if (bluefin->nav[i].depth_time <= 0.0)
 					bluefin->nav[i].depth_time = bluefin->nav[i].position_time;
 				mb_depint_add(verbose, mbio_ptr,
-						(double)(bluefin->nav[i].depth_time), 
-						(double)(bluefin->nav[i].depth), 
+						(double)(bluefin->nav[i].depth_time),
+						(double)(bluefin->nav[i].depth),
 						error);
 				}
 			if (bluefin->nav[i].altitude > 0.0 && bluefin->nav[i].altitude < 250.0
 				&& (i == 0 || bluefin->nav[i].altitude != bluefin->nav[i-1].altitude))
 				{
 				mb_altint_add(verbose, mbio_ptr,
-						(double)(bluefin->nav[i].position_time), 
-						(double)(bluefin->nav[i].altitude), 
+						(double)(bluefin->nav[i].position_time),
+						(double)(bluefin->nav[i].altitude),
 						error);
 				}
 			}
@@ -775,14 +775,14 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		{
 		/* add latest fix */
 		navigation = &(store->navigation);
-		mb_navint_add(verbose, mbio_ptr, 
-				store->time_d, 
-				(double)(RTD * navigation->longitude), 
-				(double)(RTD * navigation->latitude), 
+		mb_navint_add(verbose, mbio_ptr,
+				store->time_d,
+				(double)(RTD * navigation->longitude),
+				(double)(RTD * navigation->latitude),
 				error);
 		mb_hedint_add(verbose, mbio_ptr,
-				store->time_d, 
-				(double)(RTD * navigation->heading), 
+				store->time_d,
+				(double)(RTD * navigation->heading),
 				error);
 		}
 
@@ -793,7 +793,7 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		{
 		/* get attitude structure */
 		attitude = &(store->attitude);
-		
+
 		/* add latest attitude samples */
 		for (i=0;i<attitude->n;i++)
 			{
@@ -817,7 +817,7 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		{
 		/* get attitude structure */
 		rollpitchheave = &(store->rollpitchheave);
-		
+
 		/* add latest attitude samples */
 		mb_attint_add(verbose, mbio_ptr,
 				(double)(store->time_d),
@@ -834,7 +834,7 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		{
 		/* get attitude structure */
 		customattitude = &(store->customattitude);
-		
+
 		/* add latest attitude samples */
 		for (i=0;i<customattitude->n;i++)
 			{
@@ -858,7 +858,7 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		{
 		/* get attitude structure */
 		dheading = &(store->heading);
-		
+
 		/* add latest heading sample */
 		mb_hedint_add(verbose, mbio_ptr,
 				(double)(store->time_d),
@@ -873,7 +873,7 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		{
 		/* get attitude structure */
 		altitude = &(store->altitude);
-		
+
 		/* add latest heading sample */
 		mb_altint_add(verbose, mbio_ptr,
 				(double)(store->time_d),
@@ -888,7 +888,7 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		{
 		/* get attitude structure */
 		depth = &(store->depth);
-		
+
 		/* add latest depth sample if sensor depth, not water depth */
 		if (depth->descriptor == 0 && depth->depth != 0.0)
 			mb_depint_add(verbose, mbio_ptr,
@@ -904,7 +904,7 @@ fprintf(stderr,"NAV TIME DIFF: %f %d\n", bluefin->nav[i].position_time,bluefin->
 		{
 		/* get attitude structure */
 		verticaldepth = &(store->verticaldepth);
-		
+
 		/* add latest depth sample if sensor depth, not water depth */
 		if (verticaldepth->vertical_depth != 0.0)
 			mb_depint_add(verbose, mbio_ptr,
@@ -945,15 +945,15 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		{
 		/* get navigation */
 		speed = 0.0;
-		interp_status = mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+		interp_status = mb_hedint_interp(verbose, mbio_ptr, store->time_d,
 				    &heading, &interp_error);
 		if (interp_status == MB_SUCCESS)
-		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed, 
+		interp_status = mb_navint_interp(verbose, mbio_ptr, store->time_d, heading, speed,
 				    &longitude, &latitude, &speed, &interp_error);
 		if (interp_status == MB_SUCCESS)
-		interp_status = mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+		interp_status = mb_depint_interp(verbose, mbio_ptr, store->time_d,
 				    &sonar_depth, &interp_error);
-				    
+
 		/* if the optional data are not all available, this ping
 			is not useful. Just use null values here and catch
 			this condition with mb7kpreprocess */
@@ -966,7 +966,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			} */
 
 		/* get altitude */
-		interp_status = mb_altint_interp(verbose, mbio_ptr, store->time_d,  
+		interp_status = mb_altint_interp(verbose, mbio_ptr, store->time_d,
 				    &sonar_altitude, &interp_error);
 		if (interp_status == MB_FAILURE)
 			{
@@ -975,7 +975,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			}
 
 		/* get attitude */
-		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d,  
+		interp_status = mb_attint_interp(verbose, mbio_ptr, store->time_d,
 				    &heave, &roll, &pitch, &interp_error);
 		if (interp_status == MB_FAILURE)
 			{
@@ -984,7 +984,7 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			pitch = 0.0;
 			heave = 0.0;
 			}
-			
+
 		/* calculate the optional values in the bathymetry record */
 		bathymetry->longitude = DTR * longitude;
 		bathymetry->latitude = DTR * latitude;
@@ -1010,9 +1010,9 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 				alpha = RTD * (beamgeometry->angle_alongtrack[i] + bathymetry->pitch);
 				beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - bathymetry->roll);
 				mb_rollpitch_to_takeoff(
-					verbose, 
-					alpha, beta, 
-					&theta, &phi, 
+					verbose,
+					alpha, beta,
+					&theta, &phi,
 					error);
 				rr = 0.5 * soundspeed * bathymetry->range[i];
 				xx = rr * sin(DTR * theta);
@@ -1035,8 +1035,8 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 
 		/* set flag */
 		bathymetry->optionaldata = MB_YES;
-		bathymetry->header.OffsetToOptionalData 
-				= MBSYS_RESON7K_RECORDHEADER_SIZE 
+		bathymetry->header.OffsetToOptionalData
+				= MBSYS_RESON7K_RECORDHEADER_SIZE
 					+ R7KHDRSIZE_7kBathymetricData
 					+ bathymetry->number_beams * 9;
 
@@ -1121,6 +1121,7 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	double	*edgetech_dt;
 	double	*last_7k_time_d;
 	FILE	*mbfp;
+	size_t	read_len;
 	int	done;
 	int	*current_ping;
 	int	*last_ping;
@@ -1138,7 +1139,6 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char	*buffersave;
 	int	*size;
 	int	*nbadrec;
-	int	read_len;
 	int	skip;
 	int	ping_record;
 	int	time_j[5], time_i[7];
@@ -1162,7 +1162,7 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get pointer to raw data structure */
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	mbfp = mb_io_ptr->mbfp;
-	
+
 	/* get saved values */
 	save_flag = (int *) &mb_io_ptr->save_flag;
 	current_ping = (int *) &mb_io_ptr->save14;
@@ -1196,39 +1196,30 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		if (*save_flag == MB_NO)
 			{
 			/* read next record header into buffer */
-			if ((read_len = fread(buffer,
-						1,MBSYS_RESON7K_VERSIONSYNCSIZE,
-						mb_io_ptr->mbfp)) 
-					!= MBSYS_RESON7K_VERSIONSYNCSIZE)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-				}
-			
-			/* check header - if not a good header read a byte 
+			read_len = (size_t)MBSYS_RESON7K_VERSIONSYNCSIZE;
+			status = mb_fileio_get(verbose, mbio_ptr, buffer, &read_len, error);
+
+			/* check header - if not a good header read a byte
 				at a time until a good header is found */
 			skip = 0;
 			while (status == MB_SUCCESS
-				&& mbr_reson7kr_chk_header(verbose, mbio_ptr, buffer, 
+				&& mbr_reson7kr_chk_header(verbose, mbio_ptr, buffer,
 				recordid, deviceid, enumerator, size) != MB_SUCCESS)
 			    {
 			    /* get next byte */
 			    for (i=0;i<MBSYS_RESON7K_VERSIONSYNCSIZE-1;i++)
 				buffer[i] = buffer[i+1];
-			    if ((read_len = fread(&buffer[MBSYS_RESON7K_VERSIONSYNCSIZE-1],
-				    1,1,mb_io_ptr->mbfp)) != 1)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
-				}
+			    read_len = (size_t)1;
+			    status = mb_fileio_get(verbose, mbio_ptr, &buffer[MBSYS_RESON7K_VERSIONSYNCSIZE-1],
+					       &read_len, error);
 			    skip++;
 			    }
-			    
+
 			/* report problem */
 			if (skip > 0 && verbose >= 0)
 			    {
 			    if (*nbadrec == 0)
-			    	fprintf(stderr, 
+			    	fprintf(stderr,
 "\nThe MBF_RESON7KR module skipped data between identified\n\
 data records. Something is broken, most probably the data...\n\
 However, the data may include a data record type that we\n\
@@ -1245,7 +1236,7 @@ Have a nice day...\n");
 			    }
 			*recordidlast = *recordid;
 			store->type = *recordid;
-			
+
 			/* allocate memory to read rest of record if necessary */
 			if (*bufferalloc < *size)
 				{
@@ -1266,33 +1257,30 @@ Have a nice day...\n");
 					buffersave = (char *) *buffersaveptr;
 					}
 				}
-			
+
 			/* read the rest of the record */
-			if (status == MB_SUCCESS
-				&& (read_len = fread(&(buffer[MBSYS_RESON7K_VERSIONSYNCSIZE]),
-						1, (*size - MBSYS_RESON7K_VERSIONSYNCSIZE),
-						mb_io_ptr->mbfp)) 
-					!= (*size - MBSYS_RESON7K_VERSIONSYNCSIZE))
+			if (status == MB_SUCCESS)
 				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_EOF;
+				read_len = (size_t)(*size - MBSYS_RESON7K_VERSIONSYNCSIZE);
+				status = mb_fileio_get(verbose, mbio_ptr, &buffer[MBSYS_RESON7K_VERSIONSYNCSIZE],
+					       &read_len, error);
 				}
-			
+
 #ifndef MBR_RESON7KR_DEBUG
 if (skip > 0)
 fprintf(stderr,"RESON7KR record:skip:%d recordid:%x %d deviceid:%x %d enumerator:%x %d size:%d done:%d\n",
-skip, *recordid, *recordid, 
-*deviceid, *deviceid, 
-*enumerator, *enumerator, 
+skip, *recordid, *recordid,
+*deviceid, *deviceid,
+*enumerator, *enumerator,
 *size, done);
 #endif
 			}
-		
+
 		/* else use saved record */
 		else
 			{
 			*save_flag = MB_NO;
-			mbr_reson7kr_chk_header(verbose, mbio_ptr, buffersave, 
+			mbr_reson7kr_chk_header(verbose, mbio_ptr, buffersave,
 						recordid, deviceid, enumerator, size);
 			for (i=0;i<*size;i++)
 				buffer[i] = buffersave[i];
@@ -1303,20 +1291,20 @@ skip, *recordid, *recordid,
 		ping_record = MB_NO;
 		if (status == MB_SUCCESS)
 			{
-			if (*recordid == R7KRECID_7kVolatileSonarSettings 
-				|| *recordid == R7KRECID_7kMatchFilter 
-				|| *recordid == R7KRECID_7kBeamGeometry 
-				|| *recordid == R7KRECID_7kRemoteControlSonarSettings 
-				|| *recordid == R7KRECID_7kBathymetricData 
-				|| *recordid == R7KRECID_7kBackscatterImageData 
-				|| *recordid == R7KRECID_7kBeamData 
-				|| *recordid == R7KRECID_7kVerticalDepth 
-				|| *recordid == R7KRECID_7kImageData 
-				|| *recordid == R7KRECID_7kV2PingMotion 
-				|| *recordid == R7KRECID_7kV2DetectionSetup 
-				|| *recordid == R7KRECID_7kV2BeamformedData 
-				|| *recordid == R7KRECID_7kV2Detection 
-				|| *recordid == R7KRECID_7kV2RawDetection 
+			if (*recordid == R7KRECID_7kVolatileSonarSettings
+				|| *recordid == R7KRECID_7kMatchFilter
+				|| *recordid == R7KRECID_7kBeamGeometry
+				|| *recordid == R7KRECID_7kRemoteControlSonarSettings
+				|| *recordid == R7KRECID_7kBathymetricData
+				|| *recordid == R7KRECID_7kBackscatterImageData
+				|| *recordid == R7KRECID_7kBeamData
+				|| *recordid == R7KRECID_7kVerticalDepth
+				|| *recordid == R7KRECID_7kImageData
+				|| *recordid == R7KRECID_7kV2PingMotion
+				|| *recordid == R7KRECID_7kV2DetectionSetup
+				|| *recordid == R7KRECID_7kV2BeamformedData
+				|| *recordid == R7KRECID_7kV2Detection
+				|| *recordid == R7KRECID_7kV2RawDetection
 				|| *recordid == R7KRECID_7kV2SnippetData)
 				{
 				/* check for ping number */
@@ -1343,7 +1331,7 @@ fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %
 	store->read_v2rawdetection,
 	store->read_v2snippet);
 #endif
-				
+
 				/* fix lack of ping number for backscatter and beam geometry records */
 				if (*recordid == R7KRECID_7kBackscatterImageData
 					&& *new_ping <= 0)
@@ -1351,7 +1339,7 @@ fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %
 				else if (*recordid == R7KRECID_7kBeamGeometry
 					&& *new_ping <= 0)
 					*new_ping = *last_ping;
-					
+
 				/* determine if record is continuation of the last ping
 					or a new ping - if new ping and last ping not yet
 					output then save the new record and output the
@@ -1381,7 +1369,7 @@ fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %
 						mb_get_itime(verbose, time_j, store->time_i);
 						mb_get_time(verbose, store->time_i, &(store->time_d));
 						}
-					
+
 					/* not a complete record unless there is bathymetry, drop the partial ping */
 					else
 						{
@@ -1424,7 +1412,7 @@ fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %
 			}
 /* fprintf(stderr,"ping_record:%d last_ping:%d new_ping:%d current_ping:%d done:%d status:%d error:%d\n",
 ping_record,*last_ping,*new_ping,*current_ping,done,status,*error); */
-			
+
 		/* check for ping data already read in read error case */
 		if (status == MB_FAILURE && *last_ping >= 0)
 			{
@@ -1441,7 +1429,7 @@ ping_record,*last_ping,*new_ping,*current_ping,done,status,*error); */
 #ifdef MBR_RESON7KR_DEBUG
 if (status == MB_SUCCESS && done == MB_NO && *save_flag == MB_NO)
 {
-fprintf(stderr, "Reading record id: %4.4hX  %4.4d | %4.4hX  %4.4d | %4.4hX  %4.4d |", 
+fprintf(stderr, "Reading record id: %4.4hX  %4.4d | %4.4hX  %4.4d | %4.4hX  %4.4d |",
 *recordid, *recordid, *deviceid, *deviceid, *enumerator, *enumerator);
 if (*recordid == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferencePoint %d\n",*recordid);
 if (*recordid == R7KRECID_UncalibratedSensorOffset) fprintf(stderr," R7KRECID_UncalibratedSensorOffset %d\n",*recordid);
@@ -1528,18 +1516,18 @@ if (*recordid == R7KRECID_8100SonarData) fprintf(stderr," R7KRECID_8100SonarData
 
 /* kluge to set bogus background navigation */
 /*klugelon = -121.0;
-klugelat = 36.0;		
-mb_navint_add(verbose, mbio_ptr, 
-		store->time_d, 
-		klugelon, 
-		klugelat, 
+klugelat = 36.0;
+mb_navint_add(verbose, mbio_ptr,
+		store->time_d,
+		klugelon,
+		klugelat,
 		error);
 klugelon = -121.0;
 klugelat = 37.168;
-mb_navint_add(verbose, mbio_ptr, 
-		store->time_d + 86400.0, 
-		klugelon, 
-		klugelat, 
+mb_navint_add(verbose, mbio_ptr,
+		store->time_d + 86400.0,
+		klugelon,
+		klugelat,
 		error);*/
 				}
 			else if (*recordid == R7KRECID_ReferencePoint)
@@ -1638,7 +1626,7 @@ mb_navint_add(verbose, mbio_ptr,
 				{
 				status = mbr_reson7kr_rd_fsdwsslo(verbose, buffer, store_ptr, error);
 				done = MB_YES;
-				
+
 				/* store the Edgetech timestamp for possible use in fixing 7k time */
 				fsdwsslo = &(store->fsdwsslo);
 				header = &(fsdwsslo->header);
@@ -1647,7 +1635,7 @@ mb_navint_add(verbose, mbio_ptr,
 				time_j[1] = fsdwssheader->day;
 				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
 				time_j[3] = fsdwssheader->second;
-				time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+				time_j[4] = 1000 * (fsdwssheader->millisecondsToday
 							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
@@ -1663,7 +1651,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_tim
 				{
 				status = mbr_reson7kr_rd_fsdwsslo(verbose, buffer, store_ptr, error);
 				done = MB_YES;
-				
+
 				/* store the Edgetech timestamp for possible use in fixing 7k time */
 				fsdwsslo = &(store->fsdwsslo);
 				header = &(fsdwsslo->header);
@@ -1672,7 +1660,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_tim
 				time_j[1] = fsdwssheader->day;
 				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
 				time_j[3] = fsdwssheader->second;
-				time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+				time_j[4] = 1000 * (fsdwssheader->millisecondsToday
 							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
@@ -1689,7 +1677,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_tim
 				{
 				status = mbr_reson7kr_rd_fsdwsshi(verbose, buffer, store_ptr, error);
 				done = MB_YES;
-				
+
 				/* store the Edgetech timestamp for possible use in fixing 7k time */
 				fsdwsshi = &(store->fsdwsshi);
 				header = &(fsdwsshi->header);
@@ -1698,7 +1686,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_tim
 				time_j[1] = fsdwssheader->day;
 				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
 				time_j[3] = fsdwssheader->second;
-				time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+				time_j[4] = 1000 * (fsdwssheader->millisecondsToday
 							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
@@ -1714,7 +1702,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_tim
 				{
 				status = mbr_reson7kr_rd_fsdwsshi(verbose, buffer, store_ptr, error);
 				done = MB_YES;
-				
+
 				/* store the Edgetech timestamp for possible use in fixing 7k time */
 				fsdwsshi = &(store->fsdwsshi);
 				header = &(fsdwsshi->header);
@@ -1723,7 +1711,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_tim
 				time_j[1] = fsdwssheader->day;
 				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
 				time_j[3] = fsdwssheader->second;
-				time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+				time_j[4] = 1000 * (fsdwssheader->millisecondsToday
 							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
@@ -1738,7 +1726,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_tim
 				{
 				status = mbr_reson7kr_rd_fsdwsb(verbose, buffer, store_ptr, error);
 				done = MB_YES;
-				
+
 				/* store the Edgetech timestamp for possible use in fixing 7k time */
 				/*fsdwsb = &(store->fsdwsb);
 				header = &(fsdwsb->header);
@@ -1747,7 +1735,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_tim
 				time_j[1] = fsdwsegyheader->day;
 				time_j[2] = 60 * fsdwsegyheader->hour + fsdwsegyheader->minute;
 				time_j[3] = fsdwsegyheader->second;
-				time_j[4] = 1000 * (fsdwsegyheader->millisecondsToday 
+				time_j[4] = 1000 * (fsdwsegyheader->millisecondsToday
 							- 1000 * ((int)(0.001 * fsdwsegyheader->millisecondsToday)));
 				mb_get_itime(verbose, time_j, time_i);
 				mb_get_time(verbose, time_i, &time_d);
@@ -1788,7 +1776,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_ti
 				status = mbr_reson7kr_rd_beamgeometry(verbose, buffer, store_ptr, error);
 				store->read_beamgeometry = MB_YES;
 				done = MB_NO;
-				
+
 				/* set beam widths */
 				beamgeometry = &(store->beamgeometry);
 				mb_io_ptr->beamwidth_xtrack = RTD * beamgeometry->beamwidth_acrosstrack[beamgeometry->number_beams/2];
@@ -1803,7 +1791,7 @@ fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_ti
 				{
 				status = mbr_reson7kr_rd_bathymetry(verbose, buffer, store_ptr, error);
 				store->read_bathymetry = MB_YES;
-				
+
 				/* if needed use most recent Edgetech timestamp to fix 7k time */
 				bathymetry = &(store->bathymetry);
 				header = &(bathymetry->header);
@@ -1843,7 +1831,7 @@ header->RecordNumber,bathymetry->ping_number);
 				{
 				status = mbr_reson7kr_rd_backscatter(verbose, buffer, store_ptr, error);
 				store->read_backscatter = MB_YES;
-				
+
 				/* if needed use most recent Edgetech timestamp to fix 7k time */
 				backscatter = &(store->backscatter);
 				header = &(backscatter->header);
@@ -1880,7 +1868,7 @@ header->RecordNumber,backscatter->ping_number);
 				{
 				status = mbr_reson7kr_rd_beam(verbose, buffer, store_ptr, error);
 				store->read_beam = MB_YES;
-				
+
 				/* if needed use most recent Edgetech timestamp to fix 7k time */
 				beam = &(store->beam);
 				header = &(beam->header);
@@ -1922,7 +1910,7 @@ header->RecordNumber,beam->ping_number);
 				{
 				status = mbr_reson7kr_rd_image(verbose, buffer, store_ptr, error);
 				store->read_image = MB_YES;
-				
+
 				/* if needed use most recent Edgetech timestamp to fix 7k time */
 				image = &(store->image);
 				header = &(image->header);
@@ -2048,19 +2036,19 @@ header->RecordNumber,image->ping_number);
 				}
 			else
 				{
-				
+
 #ifdef MBR_RESON7KR_DEBUG
 				fprintf(stderr,"Record type %d - recognized but not supported.\n",*recordid);
 #endif
 				done = MB_NO;
 				}
-				
+
 			/* check if ping record is known to be done */
 			if (status == MB_SUCCESS
 				&& ping_record == MB_YES
 				&& store->read_v2detectionsetup == MB_YES)
 				{
-				if (status == MB_SUCCESS 
+				if (status == MB_SUCCESS
 					&& ping_record == MB_YES
 					&& store->read_volatilesettings == MB_YES
 					&& store->read_matchfilter == MB_YES
@@ -2087,7 +2075,7 @@ header->RecordNumber,image->ping_number);
 				&& ping_record == MB_YES
 				&& store->read_matchfilter == MB_YES)
 				{
-				if (status == MB_SUCCESS 
+				if (status == MB_SUCCESS
 					&& ping_record == MB_YES
 					&& store->read_volatilesettings == MB_YES
 					&& store->read_matchfilter == MB_YES
@@ -2104,7 +2092,7 @@ header->RecordNumber,image->ping_number);
 					*last_ping = -1;
 					}
 				}
-			else if (status == MB_SUCCESS 
+			else if (status == MB_SUCCESS
 				&& ping_record == MB_YES
 				&& store->read_volatilesettings == MB_YES
 				&& store->read_beamgeometry == MB_YES
@@ -2123,7 +2111,7 @@ header->RecordNumber,image->ping_number);
 #ifdef MBR_RESON7KR_DEBUG
 if (verbose >= 0)
 {
-fprintf(stderr,"done:%d kind:%d recordid:%x size:%d status:%d error:%d\n", 
+fprintf(stderr,"done:%d kind:%d recordid:%x size:%d status:%d error:%d\n",
 	done, store->kind, *recordid, *size, status, *error);
 fprintf(stderr,"end of mbr_reson7kr_rd_data loop:\n\n");
 }
@@ -2142,10 +2130,10 @@ store->read_beam,store->read_verticaldepth,store->read_image);
 		}
 #ifdef MBR_RESON7KR_DEBUG
 	if (status == MB_SUCCESS)
-		fprintf(stderr,"RESON7KR DATA READ: type:%d status:%d error:%d\n\n", 
+		fprintf(stderr,"RESON7KR DATA READ: type:%d status:%d error:%d\n\n",
 			store->kind, status, *error);
 #endif
-		
+
 	/* get file position */
 	if (*save_flag == MB_YES)
 		mb_io_ptr->file_bytes = ftell(mbfp) - *size;
@@ -2166,7 +2154,7 @@ store->read_beam,store->read_verticaldepth,store->read_image);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer, 
+int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 				int *recordid,  int *deviceid, unsigned short *enumerator, int *size)
 {
 	char	*function_name = "mbr_reson7kr_chk_label";
@@ -2189,16 +2177,16 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 
 	/* get pointer to mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* get values to check */
-	mb_get_binary_short(MB_YES, &buffer[0], &version); 
-	mb_get_binary_short(MB_YES, &buffer[2], &offset); 
-	mb_get_binary_int(MB_YES, &buffer[4], &sync); 
-	mb_get_binary_int(MB_YES, &buffer[8], size); 
-	mb_get_binary_int(MB_YES, &buffer[32], recordid); 
-	mb_get_binary_int(MB_YES, &buffer[36], deviceid); 
-	mb_get_binary_short(MB_YES, &buffer[40], &reserved); 
-	mb_get_binary_short(MB_YES, &buffer[42], enumerator); 
+	mb_get_binary_short(MB_YES, &buffer[0], &version);
+	mb_get_binary_short(MB_YES, &buffer[2], &offset);
+	mb_get_binary_int(MB_YES, &buffer[4], &sync);
+	mb_get_binary_int(MB_YES, &buffer[8], size);
+	mb_get_binary_int(MB_YES, &buffer[32], recordid);
+	mb_get_binary_int(MB_YES, &buffer[36], deviceid);
+	mb_get_binary_short(MB_YES, &buffer[40], &reserved);
+	mb_get_binary_short(MB_YES, &buffer[42], enumerator);
 #ifdef MBR_RESON7KR_DEBUG2
 	fprintf(stderr, "\nChecking header in mbr_reson7kr_chk_header:\n");
 	fprintf(stderr, "Version:      %4.4hX | %d\n", version, version);
@@ -2214,13 +2202,13 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	/* reset enumerator if version 2 */
 	if (version == 2)
 		*enumerator = reserved;
-	
+
 	/* check sync */
 	if (sync != 0x0000FFFF)
 		{
 		status = MB_FAILURE;
 		}
-		
+
 	/* check recordid */
 	else if (*recordid != R7KRECID_ReferencePoint
 			&& *recordid != R7KRECID_UncalibratedSensorOffset
@@ -2276,7 +2264,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 			&& *recordid != R7KRECID_7kRemoteControlNotAcknowledge
 			&& *recordid != R7KRECID_7kRemoteControlSonarSettings
 			&& *recordid != R7KRECID_7kReserved
-			&& *recordid != R7KRECID_7kRoll	
+			&& *recordid != R7KRECID_7kRoll
 			&& *recordid != R7KRECID_7kPitch
 			&& *recordid != R7KRECID_7kSoundVelocity
 			&& *recordid != R7KRECID_7kAbsorptionLoss
@@ -2374,7 +2362,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer, 
+int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer,
 				int *ping_number)
 {
 	char	*function_name = "mbr_reson7kr_chk_pingnumber";
@@ -2501,7 +2489,7 @@ int mbr_reson7kr_chk_pingnumber(int verbose, int recordid, char *buffer,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index, 
+int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index,
 		s7k_header *header, int *error)
 {
 	char	*function_name = "mbr_reson7kr_rd_header";
@@ -2519,7 +2507,7 @@ int mbr_reson7kr_rd_header(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       header:     %lu\n",(size_t)header);
 		}
-	
+
 	/* extract the header */
 	mb_get_binary_short(MB_YES, &buffer[*index], &(header->Version)); *index +=2;
 	mb_get_binary_short(MB_YES, &buffer[*index], &(header->Offset)); *index +=2;
@@ -2605,25 +2593,25 @@ int mbr_reson7kr_rd_reference(int verbose, char *buffer, void *store_ptr, int *e
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	reference = &(store->reference);
 	header = &(reference->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(reference->offset_x)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(reference->offset_y)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(reference->offset_z)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(reference->water_z)); index += 4;
-		
+
 	/* set kind */
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
 		store->kind = MB_DATA_PARAMETER;
 		store->type = R7KRECID_ReferencePoint;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -2650,7 +2638,7 @@ header->RecordNumber,header->Size,index);
 #else
 	if (verbose >= 2)
 #endif
-	mbsys_reson7k_print_reference(verbose, reference, error);	
+	mbsys_reson7k_print_reference(verbose, reference, error);
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -2691,11 +2679,11 @@ int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int 
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	sensoruncal = &(store->sensoruncal);
 	header = &(sensoruncal->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(sensoruncal->offset_x)); index += 4;
@@ -2704,14 +2692,14 @@ int mbr_reson7kr_rd_sensoruncal(int verbose, char *buffer, void *store_ptr, int 
 	mb_get_binary_float(MB_YES, &buffer[index], &(sensoruncal->offset_roll)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(sensoruncal->offset_pitch)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(sensoruncal->offset_yaw)); index += 4;
-		
+
 	/* set kind */
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
 		store->kind = MB_DATA_PARAMETER;
 		store->type = R7KRECID_UncalibratedSensorOffset;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -2779,11 +2767,11 @@ int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *e
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	sensorcal = &(store->sensorcal);
 	header = &(sensorcal->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(sensorcal->offset_x)); index += 4;
@@ -2792,14 +2780,14 @@ int mbr_reson7kr_rd_sensorcal(int verbose, char *buffer, void *store_ptr, int *e
 	mb_get_binary_float(MB_YES, &buffer[index], &(sensorcal->offset_roll)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(sensorcal->offset_pitch)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(sensorcal->offset_yaw)); index += 4;
-		
+
 	/* set kind */
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
 		store->kind = MB_DATA_PARAMETER;
 		store->type = R7KRECID_CalibratedSensorOffset;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -2867,11 +2855,11 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	position = &(store->position);
 	header = &(position->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(position->datum)); index += 4;
@@ -2890,7 +2878,7 @@ int mbr_reson7kr_rd_position(int verbose, char *buffer, void *store_ptr, int *er
 		/* set kind */
 		store->kind = MB_DATA_NAV1;
 		store->type = R7KRECID_Position;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -2960,18 +2948,18 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	customattitude = &(store->customattitude);
 	header = &(customattitude->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	customattitude->bitfield = (mb_u_char) buffer[index]; index++;
 	customattitude->reserved = (mb_u_char) buffer[index]; index++;
 	mb_get_binary_short(MB_YES, &buffer[index], &(customattitude->n)); index += 2;
 	mb_get_binary_float(MB_YES, &buffer[index], &(customattitude->frequency)); index += 4;
-		
+
 	/* make sure enough memory is allocated for channel data */
 	if (customattitude->nalloc < customattitude->n)
 		{
@@ -3049,7 +3037,7 @@ int mbr_reson7kr_rd_customattitude(int verbose, char *buffer, void *store_ptr, i
 		/* set kind */
 		store->kind = MB_DATA_ATTITUDE;
 		store->type = R7KRECID_CustomAttitude;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -3117,11 +3105,11 @@ int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error)
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	tide = &(store->tide);
 	header = &(tide->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(tide->tide)); index += 4;
@@ -3142,7 +3130,7 @@ int mbr_reson7kr_rd_tide(int verbose, char *buffer, void *store_ptr, int *error)
 		/* set kind */
 		store->kind = MB_DATA_TIDE;
 		store->type = R7KRECID_Tide;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -3210,11 +3198,11 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	altitude = &(store->altitude);
 	header = &(altitude->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(altitude->altitude)); index += 4;
@@ -3225,7 +3213,7 @@ int mbr_reson7kr_rd_altitude(int verbose, char *buffer, void *store_ptr, int *er
 		/* set kind */
 		store->kind = MB_DATA_HEIGHT;
 		store->type = R7KRECID_Altitude;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -3295,18 +3283,18 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	motion = &(store->motion);
 	header = &(motion->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	motion->bitfield = (mb_u_char) buffer[index]; index++;
 	motion->reserved = (mb_u_char) buffer[index]; index++;
 	mb_get_binary_short(MB_YES, &buffer[index], &(motion->n)); index += 2;
 	mb_get_binary_float(MB_YES, &buffer[index], &(motion->frequency)); index += 4;
-		
+
 	/* make sure enough memory is allocated for channel data */
 	if (motion->nalloc < motion->n)
 		{
@@ -3370,7 +3358,7 @@ int mbr_reson7kr_rd_motion(int verbose, char *buffer, void *store_ptr, int *erro
 		/* set kind */
 		store->kind = MB_DATA_MOTION;
 		store->type = R7KRECID_MotionOverGround;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -3438,11 +3426,11 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	depth = &(store->depth);
 	header = &(depth->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	depth->descriptor = (mb_u_char) buffer[index]; index++;
@@ -3456,7 +3444,7 @@ int mbr_reson7kr_rd_depth(int verbose, char *buffer, void *store_ptr, int *error
 		/* set kind */
 		store->kind = MB_DATA_HEIGHT;
 		store->type = R7KRECID_Depth;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -3526,11 +3514,11 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error)
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	svp = &(store->svp);
 	header = &(svp->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	svp->position_flag = (mb_u_char) buffer[index]; index++;
@@ -3539,7 +3527,7 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error)
 	mb_get_binary_double(MB_YES, &buffer[index], &(svp->latitude)); index += 8;
 	mb_get_binary_double(MB_YES, &buffer[index], &(svp->longitude)); index += 8;
 	mb_get_binary_int(MB_YES, &buffer[index], &(svp->n)); index += 4;
-		
+
 	/* make sure enough memory is allocated for channel data */
 	if (svp->nalloc < svp->n)
 		{
@@ -3570,7 +3558,7 @@ int mbr_reson7kr_rd_svp(int verbose, char *buffer, void *store_ptr, int *error)
 		/* set kind */
 		store->kind = MB_DATA_VELOCITY_PROFILE;
 		store->type = R7KRECID_SoundVelocityProfile;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -3640,11 +3628,11 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error)
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	ctd = &(store->ctd);
 	header = &(ctd->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(ctd->frequency)); index += 4;
@@ -3659,7 +3647,7 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error)
 	mb_get_binary_double(MB_YES, &buffer[index], &(ctd->longitude)); index += 8;
 	mb_get_binary_float(MB_YES, &buffer[index], &(ctd->sample_rate)); index += 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(ctd->n)); index += 4;
-		
+
 	/* make sure enough memory is allocated for channel data */
 	if (ctd->nalloc < ctd->n)
 		{
@@ -3699,7 +3687,7 @@ int mbr_reson7kr_rd_ctd(int verbose, char *buffer, void *store_ptr, int *error)
 		/* set kind */
 		store->kind = MB_DATA_CTD;
 		store->type = R7KRECID_CTD;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -3768,11 +3756,11 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	geodesy = &(store->geodesy);
 	header = &(geodesy->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	for (i=0;i<32;i++)
@@ -3825,7 +3813,7 @@ int mbr_reson7kr_rd_geodesy(int verbose, char *buffer, void *store_ptr, int *err
 		/* set kind */
 		store->kind = MB_DATA_PARAMETER;
 		store->type = R7KRECID_Geodesy;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -3893,11 +3881,11 @@ int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, i
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	rollpitchheave = &(store->rollpitchheave);
 	header = &(rollpitchheave->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(rollpitchheave->roll)); index += 4;
@@ -3910,7 +3898,7 @@ int mbr_reson7kr_rd_rollpitchheave(int verbose, char *buffer, void *store_ptr, i
 		/* set kind */
 		store->kind = MB_DATA_ATTITUDE;
 		store->type = R7KRECID_RollPitchHeave;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -3978,11 +3966,11 @@ int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *err
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	heading = &(store->heading);
 	header = &(heading->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(heading->heading)); index += 4;
@@ -3993,7 +3981,7 @@ int mbr_reson7kr_rd_heading(int verbose, char *buffer, void *store_ptr, int *err
 		/* set kind */
 		store->kind = MB_DATA_HEADING;
 		store->type = R7KRECID_Heading;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -4063,11 +4051,11 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	surveyline = &(store->surveyline);
 	header = &(surveyline->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_short(MB_YES, &buffer[index], &(surveyline->n)); index += 2;
@@ -4077,7 +4065,7 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
 		{
 		surveyline->name[i] = (char) buffer[index]; index++;
 		}
-		
+
 	/* make sure enough memory is allocated for channel data */
 	if (surveyline->nalloc < surveyline->n)
 		{
@@ -4108,7 +4096,7 @@ int mbr_reson7kr_rd_surveyline(int verbose, char *buffer, void *store_ptr, int *
 		/* set kind */
 		store->kind = MB_DATA_SURVEY_LINE;
 		store->type = R7KRECID_SurveyLine;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -4176,11 +4164,11 @@ int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	navigation = &(store->navigation);
 	header = &(navigation->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	navigation->vertical_reference = (mb_u_char) buffer[index]; index++;
@@ -4199,7 +4187,7 @@ int mbr_reson7kr_rd_navigation(int verbose, char *buffer, void *store_ptr, int *
 		/* set kind */
 		store->kind = MB_DATA_NAV3;
 		store->type = R7KRECID_Navigation;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -4269,15 +4257,15 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	attitude = &(store->attitude);
 	header = &(attitude->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	attitude->n = (mb_u_char) buffer[index]; index++;
-		
+
 	/* make sure enough memory is allocated for channel data */
 	if (attitude->nalloc < attitude->n)
 		{
@@ -4318,7 +4306,7 @@ int mbr_reson7kr_rd_attitude(int verbose, char *buffer, void *store_ptr, int *er
 		/* set kind */
 		store->kind = MB_DATA_ATTITUDE;
 		store->type = R7KRECID_Attitude;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -4387,11 +4375,11 @@ int mbr_reson7kr_rd_rec1022(int verbose, char *buffer, void *store_ptr, int *err
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	rec1022 = &(store->rec1022);
 	header = &(rec1022->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	for (i=0;i<R7KHDRSIZE_Rec1022;i++)
@@ -4405,7 +4393,7 @@ int mbr_reson7kr_rd_rec1022(int verbose, char *buffer, void *store_ptr, int *err
 		/* set kind */
 		store->kind = MB_DATA_RAW_LINE;
 		store->type = R7KRECID_Rec1022;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -4448,7 +4436,7 @@ header->RecordNumber,header->Size,index);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int *index, 
+int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int *index,
 		s7k_fsdwchannel *fsdwchannel, int *error)
 {
 	char	*function_name = "mbr_reson7kr_rd_fsdwchannel";
@@ -4469,7 +4457,7 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       fsdwchannel:%lu\n",(size_t)fsdwchannel);
 		}
-	
+
 	/* extract the channel header */
 	fsdwchannel->number = (mb_u_char) buffer[*index]; (*index)++;
 	fsdwchannel->type = (mb_u_char) buffer[*index]; (*index)++;
@@ -4493,7 +4481,7 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
 		{
 		fsdwchannel->reserved2[i] = buffer[*index]; (*index)++;
 		}
-		
+
 	/* make sure enough memory is allocated for channel data */
 	data_size = fsdwchannel->bytespersample * fsdwchannel->number_samples;
 	if (fsdwchannel->data_alloc < data_size)
@@ -4504,7 +4492,7 @@ int mbr_reson7kr_rd_fsdwchannel(int verbose, int data_format, char *buffer, int 
 		else
 			fsdwchannel->data_alloc = data_size;
 		}
-			
+
 	/* copy over the data */
 	if (status == MB_SUCCESS)
 		{
@@ -4551,7 +4539,7 @@ fprintf(stderr,"    REAL: raw:%6d %6d   swapped:%6d %6d\n",
 				}
 			}
 		}
-	
+
 	/* print out the results */
 	/*mbsys_reson7k_print_fsdwchannel(verbose, data_format, fsdwchannel, error);*/
 
@@ -4570,7 +4558,7 @@ fprintf(stderr,"    REAL: raw:%6d %6d   swapped:%6d %6d\n",
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index, 
+int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index,
 		s7k_fsdwssheader *fsdwssheader, int *error)
 {
 	char	*function_name = "mbr_reson7kr_rd_fsdwssheader";
@@ -4588,7 +4576,7 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
 		fprintf(stderr,"dbg2       fsdwssheader:   %lu\n",(size_t)fsdwssheader);
 		}
-	
+
 	/* extract the Edgetech sidescan header */
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->subsystem)); *index += 2;
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->channelNum)); *index += 2;
@@ -4611,7 +4599,7 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index,
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->day)); *index += 2;
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->hour)); *index += 2;
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->minute)); *index += 2;
-	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->second)); *index += 2;   
+	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->second)); *index += 2;
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->heading)); *index += 2;
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->pitch)); *index += 2;
 	mb_get_binary_short(MB_YES, &buffer[*index], &(fsdwssheader->roll)); *index += 2;
@@ -4623,7 +4611,7 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index,
 		{
 		fsdwssheader->reserved2[i] = buffer[*index]; (*index)++;
 		}
-	
+
 	/* print out the results */
 	/*mbsys_reson7k_print_fsdwssheader(verbose, fsdwssheader, error);*/
 
@@ -4642,7 +4630,7 @@ int mbr_reson7kr_rd_fsdwssheader(int verbose, char *buffer, int *index,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index, 
+int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index,
 		s7k_fsdwsegyheader *fsdwsegyheader, int *error)
 {
 	char	*function_name = "mbr_reson7kr_rd_fsdwsegyheader";
@@ -4660,7 +4648,7 @@ int mbr_reson7kr_rd_fsdwsegyheader(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
 		fprintf(stderr,"dbg2       fsdwsegyheader: %lu\n",(size_t)fsdwsegyheader);
 		}
-	
+
 	/* extract the Edgetech segy header */
 	mb_get_binary_int(MB_YES, &buffer[*index], &(fsdwsegyheader->sequenceNumber)); *index += 4;
 	mb_get_binary_int(MB_YES, &buffer[*index], &(fsdwsegyheader->startDepth)); *index += 4;
@@ -4799,11 +4787,11 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 	header = &(fsdwsslo->header);
 	bathymetry = &(store->bathymetry);
 	bluefin = &(store->bluefin);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-	
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(fsdwsslo->msec_timestamp)); index += 4;
@@ -4817,7 +4805,7 @@ int mbr_reson7kr_rd_fsdwsslo(int verbose, char *buffer, void *store_ptr, int *er
 		fsdwchannel = &(fsdwsslo->channel[i]);
 		mbr_reson7kr_rd_fsdwchannel(verbose, fsdwsslo->data_format, buffer, &index, fsdwchannel, error);
 		}
-/*fprintf(stderr,"In mbr_reson7kr_rd_fsdwsslo: index:%d OffsetToOptionalData:%d\n", 
+/*fprintf(stderr,"In mbr_reson7kr_rd_fsdwsslo: index:%d OffsetToOptionalData:%d\n",
 index, header->OffsetToOptionalData);
 	index = header->OffsetToOptionalData;*/
 	for (i=0;i<2;i++)
@@ -4833,17 +4821,17 @@ index, header->OffsetToOptionalData);
 		store->kind = MB_DATA_SIDESCAN2;
 		store->type = R7KRECID_FSDWsidescan;
 		store->sstype = R7KRECID_FSDWsidescanLo;
-		
+
 		/* get the time from the original Edgetech header */
 		time_j[0] = fsdwssheader->year;
 		time_j[1] = fsdwssheader->day;
 		time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
 		time_j[3] = fsdwssheader->second;
-		time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+		time_j[4] = 1000 * (fsdwssheader->millisecondsToday
 					- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
 		mb_get_itime(verbose, time_j, time_i);
 		mb_get_time(verbose, time_i, &(edgetech_time_d));
-		
+
 		/* get the time from the 6046 datalogger header */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -4871,7 +4859,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 		/* Use the Edgetech timestamp */
 		store->time_d = edgetech_time_d;
 		mb_get_date(verbose, store->time_d, store->time_i);
-		
+
 		/* use Edgetech time for early MBARI SBP missions with
 			bad time synching, otherwise use 7K timestamp */
 		/*if (header->s7kTime.Year == 2004)
@@ -4881,7 +4869,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 			time_j[1] = fsdwssheader->day;
 			time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
 			time_j[3] = fsdwssheader->second;
-			time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+			time_j[4] = 1000 * (fsdwssheader->millisecondsToday
 						- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
 			}
 
@@ -5026,7 +5014,7 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 				value = (double) ushortptr[j];
 			tracemax = MAX(tracemax, value);
 			range = half_sound_speed * j * 0.000001 * fsdwchannel->sample_interval;
-			xtrack = sign * sqrt(fabs(range * range 
+			xtrack = sign * sqrt(fabs(range * range
 						- survey->sonar_altitude * survey->sonar_altitude));
 			k = (xtrack / pixelsize) + 512;
 			if (k < 0) k = 0;
@@ -5063,7 +5051,7 @@ fprintf(stderr," %10.0f",value);
 if (j == bottompick) fprintf(stderr," BOTTOMPICK");
 fprintf(stderr,"\n");
 }*/
-	
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -5109,11 +5097,11 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 	fsdwsshi = &(store->fsdwsshi);
 	header = &(fsdwsshi->header);
 	bathymetry = &(store->bathymetry);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-	
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(fsdwsshi->msec_timestamp)); index += 4;
@@ -5127,7 +5115,7 @@ int mbr_reson7kr_rd_fsdwsshi(int verbose, char *buffer, void *store_ptr, int *er
 		fsdwchannel = &(fsdwsshi->channel[i]);
 		mbr_reson7kr_rd_fsdwchannel(verbose, fsdwsshi->data_format, buffer, &index, fsdwchannel, error);
 		}
-/*fprintf(stderr,"In mbr_reson7kr_rd_fsdwsshi: index:%d OffsetToOptionalData:%d\n", 
+/*fprintf(stderr,"In mbr_reson7kr_rd_fsdwsshi: index:%d OffsetToOptionalData:%d\n",
 index, header->OffsetToOptionalData);
 	index = header->OffsetToOptionalData;*/
 	for (i=0;i<2;i++)
@@ -5143,17 +5131,17 @@ index, header->OffsetToOptionalData);
 		store->kind = MB_DATA_SIDESCAN3;
 		store->type = R7KRECID_FSDWsidescan;
 		store->sstype = R7KRECID_FSDWsidescanHi;
-		
+
 		/* get the time from the original Edgetech header */
 		time_j[0] = fsdwssheader->year;
 		time_j[1] = fsdwssheader->day;
 		time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
 		time_j[3] = fsdwssheader->second;
-		time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+		time_j[4] = 1000 * (fsdwssheader->millisecondsToday
 					- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
 		mb_get_itime(verbose, time_j, time_i);
 		mb_get_time(verbose, time_i, &(edgetech_time_d));
-		
+
 		/* get the time from the 6046 datalogger header */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -5162,7 +5150,7 @@ index, header->OffsetToOptionalData);
 		time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
 		mb_get_itime(verbose, time_j, time_i);
 		mb_get_time(verbose, time_i, &(s7k_time_d));
-		
+
 		/* get the time from the last bathymetry record */
 		time_j[0] = bathymetry->header.s7kTime.Year;
 		time_j[1] = bathymetry->header.s7kTime.Day;
@@ -5177,11 +5165,11 @@ index, header->OffsetToOptionalData);
 fprintf(stderr,"%s: 7k time offset: %f    7ktime:%f Edgetech:%f Bathymetry:%f\n",
 function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bathy_time_d);
 #endif
-		
+
 		/* use Edgetech time */
 		store->time_d = edgetech_time_d;
 		mb_get_date(verbose, edgetech_time_d, store->time_i);
-		
+
 		/* use Edgetech time for early MBARI SBP missions with
 			bad time synching, otherwise use 7K timestamp */
 		/*if (header->s7kTime.Year == 2004)
@@ -5191,7 +5179,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 			time_j[1] = fsdwssheader->day;
 			time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
 			time_j[3] = fsdwssheader->second;
-			time_j[4] = 1000 * (fsdwssheader->millisecondsToday 
+			time_j[4] = 1000 * (fsdwssheader->millisecondsToday
 						- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
 			}
 
@@ -5284,11 +5272,11 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 	fsdwsb = &(store->fsdwsb);
 	header = &(fsdwsb->header);
 	bathymetry = &store->bathymetry;
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(fsdwsb->msec_timestamp)); index += 4;
@@ -5309,17 +5297,17 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 		/* set kind */
 		store->kind = MB_DATA_SUBBOTTOM_SUBBOTTOM;
 		store->type = R7KRECID_FSDWsubbottom;
-		
+
 		/* get the time from the original Edgetech header */
 		time_j[0] = fsdwsegyheader->year;
 		time_j[1] = fsdwsegyheader->day;
 		time_j[2] = 60 * fsdwsegyheader->hour + fsdwsegyheader->minute;
 		time_j[3] = fsdwsegyheader->second;
-		time_j[4] = 1000 * (fsdwsegyheader->millisecondsToday 
+		time_j[4] = 1000 * (fsdwsegyheader->millisecondsToday
 					- 1000 * ((int)(0.001 * fsdwsegyheader->millisecondsToday)));
 		mb_get_itime(verbose, time_j, time_i);
 		mb_get_time(verbose, time_i, &(edgetech_time_d));
-		
+
 		/* get the time from the 6046 datalogger header */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -5328,7 +5316,7 @@ int mbr_reson7kr_rd_fsdwsb(int verbose, char *buffer, void *store_ptr, int *erro
 		time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
 		mb_get_itime(verbose, time_j, time_i);
 		mb_get_time(verbose, time_i, &(s7k_time_d));
-		
+
 		/* get the time from the last bathymetry record */
 		time_j[0] = bathymetry->header.s7kTime.Year;
 		time_j[1] = bathymetry->header.s7kTime.Day;
@@ -5347,7 +5335,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 		/* Use the Edgetech timestamp */
 		store->time_d = edgetech_time_d;
 		mb_get_date(verbose, store->time_d, store->time_i);
-		
+
 		/* use Edgetech time */
 		store->time_d = edgetech_time_d;
 		mb_get_date(verbose, edgetech_time_d, store->time_i);
@@ -5361,7 +5349,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 			time_j[1] = fsdwsegyheader->day;
 			time_j[2] = 60 * fsdwsegyheader->hour + fsdwsegyheader->minute;
 			time_j[3] = fsdwsegyheader->second;
-			time_j[4] = 1000 * (fsdwsegyheader->millisecondsToday 
+			time_j[4] = 1000 * (fsdwsegyheader->millisecondsToday
 						- 1000 * ((int)(0.001 * fsdwsegyheader->millisecondsToday)));
 			}
 
@@ -5382,7 +5370,7 @@ function_name, edgetech_time_d - bathy_time_d, s7k_time_d, edgetech_time_d, bath
 		{
 		store->kind = MB_DATA_NONE;
 		}
-		
+
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
 	if (verbose > 0)
@@ -5406,7 +5394,7 @@ fsdwchannel->number,fsdwsegyheader->channelNum,
 fsdwchannel->sample_interval,fsdwsegyheader->sampleInterval);
 }
 #endif
-		
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -5451,7 +5439,7 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	bluefin = &(store->bluefin);
 	header = &(bluefin->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
@@ -5464,7 +5452,7 @@ int mbr_reson7kr_rd_bluefin(int verbose, char *buffer, void *store_ptr, int *err
 	time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
 	mb_get_itime(verbose, time_j, store->time_i);
 	mb_get_time(verbose, store->time_i, &(store->time_d));
-		
+
 	/* extract the start of the data */
 	index = header->Offset + 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(bluefin->msec_timestamp)); index += 4;
@@ -5489,7 +5477,7 @@ store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,header->Size,index);
 #endif
-		
+
 	/* extract the nav or environmental data */
 	if (bluefin->data_format == R7KRECID_BluefinNav)
 		{
@@ -5572,7 +5560,7 @@ time_i[3],time_i[4],time_i[5],time_i[6],
 bluefin->nav[i].position_time);
 #endif
 			}
-			
+
 		/* The Reson 6046 datalogger has been placing the same time tag in each of the frames
 			- check if this is the case, if it is kluge new time tags spread over a one second interval */
 		if (bluefin->number_frames > 1)
@@ -5585,7 +5573,7 @@ bluefin->nav[i].position_time);
 					timeproblem = MB_YES;
 				}
 			timeproblem = MB_NO;
-			
+
 			/* figure out if the time changes anywhere */
 			if (timeproblem == MB_YES)
 				{
@@ -5674,7 +5662,7 @@ bluefin->environmental[i].sensor_time_sec,
 bluefin->environmental[i].sensor_time_nsec);
 #endif
 			}
-			
+
 		/* The Reson 6046 datalogger has been placing the same time tag in each of the frames
 			- check if this is the case, if it is kluge new time tags spread over a one second interval */
 		if (bluefin->number_frames > 1)
@@ -5688,7 +5676,7 @@ bluefin->environmental[i].sensor_time_nsec);
 					timeproblem = MB_YES;
 				}
 			timeproblem = MB_NO;
-			
+
 			/* figure out if the time changes anywhere */
 			if (timeproblem == MB_YES)
 				{
@@ -5726,7 +5714,7 @@ time_d);
 			{
 			store->kind = MB_DATA_NAV2;
 			store->type = R7KRECID_Bluefin;
-		
+
 			/* get the time from the 6046 datalogger header */
 			time_j[0] = bluefin->nav[0].s7kTime.Year;
 			time_j[1] = bluefin->nav[0].s7kTime.Day;
@@ -5740,7 +5728,7 @@ time_d);
 			{
 			store->kind = MB_DATA_SSV;
 			store->type = R7KRECID_Bluefin;
-		
+
 			/* get the time from the 6046 datalogger header */
 			time_j[0] = bluefin->environmental[0].s7kTime.Year;
 			time_j[1] = bluefin->environmental[0].s7kTime.Day;
@@ -5821,11 +5809,11 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	volatilesettings = &(store->volatilesettings);
 	header = &(volatilesettings->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(volatilesettings->serial_number)); index += 8;
@@ -5874,7 +5862,7 @@ int mbr_reson7kr_rd_volatilesonarsettings(int verbose, char *buffer, void *store
 		/* set kind */
 		store->kind = MB_DATA_PARAMETER;
 		store->type = R7KRECID_7kVolatileSonarSettings;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -5945,16 +5933,16 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	configuration = &(store->configuration);
 	header = &(configuration->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(configuration->serial_number)); index += 8;
 	mb_get_binary_int(MB_YES, &buffer[index], &(configuration->number_devices)); index += 4;
-	
+
 	/* extract the data for each device */
 	for (i=0;i<configuration->number_devices;i++)
 		{
@@ -5982,7 +5970,7 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
 				device->info_length = 0;
 				}
 			}
-			
+
 		for (j=0;j<device->info_length;j++)
 			{
 			device->info[j] = buffer[index]; index++;
@@ -5995,7 +5983,7 @@ int mbr_reson7kr_rd_configuration(int verbose, char *buffer, void *store_ptr, in
 		/* set kind */
 		store->kind = MB_DATA_PARAMETER;
 		store->type = R7KRECID_7kConfiguration;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -6063,11 +6051,11 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	matchfilter = &(store->matchfilter);
 	header = &(matchfilter->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(matchfilter->serial_number)); index += 8;
@@ -6082,7 +6070,7 @@ int mbr_reson7kr_rd_matchfilter(int verbose, char *buffer, void *store_ptr, int 
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kMatchFilter;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -6152,11 +6140,11 @@ int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, v
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2firmwarehardwareconfiguration = &(store->v2firmwarehardwareconfiguration);
 	header = &(v2firmwarehardwareconfiguration->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(v2firmwarehardwareconfiguration->device_count)); index += 4;
@@ -6189,7 +6177,7 @@ int mbr_reson7kr_rd_v2firmwarehardwareconfiguration(int verbose, char *buffer, v
 		/* set kind */
 		store->kind = MB_DATA_PARAMETER;
 		store->type = R7KRECID_7kV2FirmwareHardwareConfiguration;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -6258,16 +6246,16 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	beamgeometry = &(store->beamgeometry);
 	header = &(beamgeometry->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(beamgeometry->serial_number)); index += 8;
 	mb_get_binary_int(MB_YES, &buffer[index], &(beamgeometry->number_beams)); index += 4;
-	
+
 	/* extract the data */
 	for (i=0;i<beamgeometry->number_beams;i++)
 		{
@@ -6292,7 +6280,7 @@ int mbr_reson7kr_rd_beamgeometry(int verbose, char *buffer, void *store_ptr, int
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kBeamGeometry;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -6361,16 +6349,16 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	calibration = &(store->calibration);
 	header = &(calibration->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(calibration->serial_number)); index += 8;
 	mb_get_binary_short(MB_YES, &buffer[index], &(calibration->number_channels)); index += 2;
-	
+
 	/* extract the data */
 	for (i=0;i<calibration->number_channels;i++)
 		{
@@ -6387,7 +6375,7 @@ int mbr_reson7kr_rd_calibration(int verbose, char *buffer, void *store_ptr, int 
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kCalibrationData;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -6456,18 +6444,18 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	bathymetry = &(store->bathymetry);
 	header = &(bathymetry->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(bathymetry->serial_number)); index += 8;
 	mb_get_binary_int(MB_YES, &buffer[index], &(bathymetry->ping_number)); index += 4;
 	mb_get_binary_short(MB_YES, &buffer[index], &(bathymetry->multi_ping)); index += 2;
 	mb_get_binary_int(MB_YES, &buffer[index], &(bathymetry->number_beams)); index += 4;
-	
+
 	/* deal with version 5 records */
 	if (header->Version >= 5)
 		{
@@ -6481,7 +6469,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 		bathymetry->sound_vel_flag = 0;
 		bathymetry->sound_velocity = 0.0;
 		}
-	
+
 	/* extract the data */
 	for (i=0;i<bathymetry->number_beams;i++)
 		{
@@ -6495,7 +6483,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 		{
 		mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->intensity[i])); index += 4;
 		}
-		
+
 	/* extract the optional data */
 	if (header->OffsetToOptionalData > 0)
 		{
@@ -6549,7 +6537,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kBathymetricData;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -6621,11 +6609,11 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	backscatter = &(store->backscatter);
 	header = &(backscatter->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(backscatter->serial_number)); index += 8;
@@ -6646,7 +6634,7 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 	mb_get_binary_short(MB_YES, &buffer[index], &(backscatter->current_beam)); index += 2;
 	backscatter->sample_size = buffer[index]; index++;
 	backscatter->data_type = buffer[index]; index++;
-	
+
 	/* allocate memory if required */
 	data_size = backscatter->number_samples * backscatter->sample_size;
 	if (backscatter->nalloc < data_size)
@@ -6664,7 +6652,7 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 			backscatter->number_samples = 0;
 			}
 		}
-	
+
 	/* extract backscatter data */
 	if (backscatter->sample_size == 1)
 		{
@@ -6703,7 +6691,7 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 			mb_get_binary_int(MB_YES, &buffer[index], &(int_ptr[i])); index += 4;
 			}
 		}
-		
+
 	/* extract the optional data */
 	if (header->OffsetToOptionalData > 0)
 		{
@@ -6731,7 +6719,7 @@ int mbr_reson7kr_rd_backscatter(int verbose, char *buffer, void *store_ptr, int 
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kBackscatterImageData;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -6814,11 +6802,11 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	beam = &(store->beam);
 	header = &(beam->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(beam->serial_number)); index += 8;
@@ -6841,7 +6829,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 		mb_get_binary_int(MB_YES, &buffer[index], &(snippet->begin_sample)); index += 4;
 		mb_get_binary_int(MB_YES, &buffer[index], &(snippet->end_sample)); index += 4;
 		}
-	
+
 	for (i=0;i<beam->number_beams;i++)
 		{
 		/* allocate memory for snippet if needed */
@@ -6943,7 +6931,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 				}
 			}
 		}
-		
+
 	/* extract the optional data */
 	if (header->OffsetToOptionalData > 0)
 		{
@@ -6975,7 +6963,7 @@ int mbr_reson7kr_rd_beam(int verbose, char *buffer, void *store_ptr, int *error)
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kBeamData;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -7043,11 +7031,11 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	verticaldepth = &(store->verticaldepth);
 	header = &(verticaldepth->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(verticaldepth->frequency)); index += 4;
@@ -7066,7 +7054,7 @@ int mbr_reson7kr_rd_verticaldepth(int verbose, char *buffer, void *store_ptr, in
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kVerticalDepth;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -7139,11 +7127,11 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	image = &(store->image);
 	header = &(image->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_int(MB_YES, &buffer[index], &(image->ping_number)); index += 4;
@@ -7153,7 +7141,7 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 	mb_get_binary_short(MB_YES, &buffer[index], &(image->color_depth)); index += 2;
 	mb_get_binary_short(MB_YES, &buffer[index], &(image->width_height_flag)); index += 2;
 	mb_get_binary_short(MB_YES, &buffer[index], &(image->compression)); index += 2;
-	
+
 	/* allocate memory for image if needed */
 	nalloc = image->width * image->height * image->color_depth;
 	if (status == MB_SUCCESS
@@ -7170,7 +7158,7 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 			image->height = 0;
 			}
 		}
-	
+
 	/* extract image data */
 	if (image->color_depth == 1)
 		{
@@ -7203,7 +7191,7 @@ int mbr_reson7kr_rd_image(int verbose, char *buffer, void *store_ptr, int *error
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kImageData;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -7272,11 +7260,11 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2pingmotion = &(store->v2pingmotion);
 	header = &(v2pingmotion->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(v2pingmotion->serial_number)); index += 8;
@@ -7290,7 +7278,7 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
 		{
 		mb_get_binary_float(MB_YES, &buffer[index], &(v2pingmotion->pitch)); index += 4;
 		}
-	
+
 	/* allocate memory for v2pingmotion if needed */
 	if (status == MB_SUCCESS
 		&& v2pingmotion->nalloc < v2pingmotion->n)
@@ -7318,7 +7306,7 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
 			v2pingmotion->nalloc = 0;
 			}
 		}
-	
+
 	/* extract v2pingmotion data */
 	if (v2pingmotion->flags & 2)
 		{
@@ -7369,7 +7357,7 @@ int mbr_reson7kr_rd_v2pingmotion(int verbose, char *buffer, void *store_ptr, int
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kV2PingMotion;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -7438,11 +7426,11 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2detectionsetup = &(store->v2detectionsetup);
 	header = &(v2detectionsetup->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(v2detectionsetup->serial_number)); index += 8;
@@ -7463,7 +7451,7 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
 		{
 		v2detectionsetup->reserved[i] = buffer[index]; index++;
 		}
-	
+
 	/* extract v2detectionsetup data */
 	for (i=0;i<v2detectionsetup->number_beams;i++)
 		{
@@ -7498,7 +7486,7 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kV2DetectionSetup;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -7568,11 +7556,11 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2beamformed = &(store->v2beamformed);
 	header = &(v2beamformed->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(v2beamformed->serial_number)); index += 8;
@@ -7584,12 +7572,12 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
 		{
 		v2beamformed->reserved[i] = buffer[index]; index++;
 		}
-		
+
 	/* loop over all beams */
 	for (i=0;i<v2beamformed->number_beams;i++)
 		{
 		v2amplitudephase = &(v2beamformed->amplitudephase[i]);
-		
+
 		/* allocate memory for v2beamformed if needed */
 		if (status == MB_SUCCESS
 			&& v2amplitudephase->nalloc < sizeof(short) * v2beamformed->number_samples)
@@ -7627,7 +7615,7 @@ int mbr_reson7kr_rd_v2beamformed(int verbose, char *buffer, void *store_ptr, int
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kV2BeamformedData;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -7699,14 +7687,14 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2bite = &(store->v2bite);
 	header = &(v2bite->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
-	mb_get_binary_short(MB_YES, &buffer[index], &(v2bite->number_reports)); index += 2;	
+	mb_get_binary_short(MB_YES, &buffer[index], &(v2bite->number_reports)); index += 2;
 
 	/* allocate memory for v2bite->reports if needed */
 	if (status == MB_SUCCESS
@@ -7721,7 +7709,7 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
 			v2bite->nalloc = 0;
 			}
 		}
-		
+
 	/* loop over all bite reports */
 	for (i=0;i<v2bite->number_reports;i++)
 		{
@@ -7762,7 +7750,7 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
 			{
 			report->bite_status[j] = buffer[index]; index++;
 			}
-		
+
 		/* loop over all bite fields */
 		for (j=0;j<report->number_bite;j++)
 			{
@@ -7786,7 +7774,7 @@ int mbr_reson7kr_rd_v2bite(int verbose, char *buffer, void *store_ptr, int *erro
 		/* set kind */
 		store->kind = MB_DATA_PARAMETER;
 		store->type = R7KRECID_7kV2BITEData;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -7855,11 +7843,11 @@ int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v27kcenterversion = &(store->v27kcenterversion);
 	header = &(v27kcenterversion->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	for (i=0;i<32;i++)
@@ -7873,7 +7861,7 @@ int mbr_reson7kr_rd_v27kcenterversion(int verbose, char *buffer, void *store_ptr
 		/* set kind */
 		store->kind = MB_DATA_PARAMETER;
 		store->type = R7KRECID_7kV27kCenterVersion;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -7942,11 +7930,11 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v28kwetendversion = &(store->v28kwetendversion);
 	header = &(v28kwetendversion->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	for (i=0;i<32;i++)
@@ -7960,7 +7948,7 @@ int mbr_reson7kr_rd_v28kwetendversion(int verbose, char *buffer, void *store_ptr
 		/* set kind */
 		store->kind = MB_DATA_PARAMETER;
 		store->type = R7KRECID_7kV28kWetEndVersion;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -8029,11 +8017,11 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2detection = &(store->v2detection);
 	header = &(v2detection->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(v2detection->serial_number)); index += 8;
@@ -8048,7 +8036,7 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
 		{
 		v2detection->reserved[i] = buffer[index]; index++;
 		}
-	
+
 	/* extract the data */
 	for (i=0;i<v2detection->number_beams;i++)
 		{
@@ -8058,7 +8046,7 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
 		mb_get_binary_float(MB_YES, &buffer[index], &(v2detection->range_error[i])); index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(v2detection->angle_x_error[i])); index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(v2detection->angle_y_error[i])); index += 4;
-		
+
 		/* skip extra data if it exists */
 		if (v2detection->data_field_size > 24)
 			index += v2detection->data_field_size - 24;
@@ -8070,7 +8058,7 @@ int mbr_reson7kr_rd_v2detection(int verbose, char *buffer, void *store_ptr, int 
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kV2Detection;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -8139,11 +8127,11 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2rawdetection = &(store->v2rawdetection);
 	header = &(v2rawdetection->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(v2rawdetection->serial_number)); index += 8;
@@ -8159,7 +8147,7 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 		{
 		v2rawdetection->reserved[i] = buffer[index]; index++;
 		}
-	
+
 	/* extract the data */
 	for (i=0;i<v2rawdetection->number_beams;i++)
 		{
@@ -8169,7 +8157,7 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 		mb_get_binary_int(MB_YES, &buffer[index], &(v2rawdetection->flags[i])); index += 4;
 		mb_get_binary_int(MB_YES, &buffer[index], &(v2rawdetection->quality[i])); index += 4;
 		mb_get_binary_float(MB_YES, &buffer[index], &(v2rawdetection->uncertainty[i])); index += 4;
-		
+
 		/* skip extra data if it exists */
 		if (v2rawdetection->data_field_size > 22)
 			index += v2rawdetection->data_field_size - 22;
@@ -8181,7 +8169,7 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kV2RawDetection;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -8251,11 +8239,11 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2snippet = &(store->v2snippet);
 	header = &(v2snippet->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(v2snippet->serial_number)); index += 8;
@@ -8268,7 +8256,7 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 		{
 		v2snippet->reserved[i] = buffer[index]; index++;
 		}
-		
+
 	/* loop over all beams to get snippet parameters */
 	for (i=0;i<v2snippet->number_beams;i++)
 		{
@@ -8282,7 +8270,7 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 
 		/* allocate memory for snippettimeseries if needed */
 		if (status == MB_SUCCESS
-			&& snippettimeseries->nalloc 
+			&& snippettimeseries->nalloc
 				< 2 * (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1))
 			{
 			snippettimeseries->nalloc = 2 * (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1);
@@ -8295,7 +8283,7 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 				}
 			}
 		}
-		
+
 	/* loop over all beams to get snippet data */
 	if (status == MB_SUCCESS)
 	for (i=0;i<v2snippet->number_beams;i++)
@@ -8313,7 +8301,7 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kV2SnippetData;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -8382,11 +8370,11 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	installation = &(store->installation);
 	header = &(installation->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(installation->frequency)); index += 4;
@@ -8441,7 +8429,7 @@ int mbr_reson7kr_rd_installation(int verbose, char *buffer, void *store_ptr, int
 		/* set kind */
 		store->kind = MB_DATA_INSTALLATION;
 		store->type = R7KRECID_7kInstallationParameters;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -8511,11 +8499,11 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	fileheader = &(store->fileheader);
 	header = &(fileheader->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	for (i=0;i<16;i++)
@@ -8554,14 +8542,14 @@ int mbr_reson7kr_rd_fileheader(int verbose, char *buffer, void *store_ptr, int *
 			mb_get_binary_short(MB_YES, &buffer[index], &(subsystem->system_enumerator)); index += 2;
 		mb_get_binary_short(MB_YES, &buffer[index], &(subsystem->system_enumerator)); index += 2;
 		}
-		
+
 	/* set kind */
 	if (status == MB_SUCCESS)
 		{
 		/* set kind */
 		store->kind = MB_DATA_HEADER;
 		store->type = R7KRECID_7kFileHeader;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -8631,18 +8619,18 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	systemeventmessage = &(store->systemeventmessage);
 	header = &(systemeventmessage->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(systemeventmessage->serial_number)); index += 8;
 	mb_get_binary_short(MB_YES, &buffer[index], &(systemeventmessage->event_id)); index += 2;
 	mb_get_binary_short(MB_YES, &buffer[index], &(systemeventmessage->message_length)); index += 2;
 	mb_get_binary_short(MB_YES, &buffer[index], &(systemeventmessage->event_identifier)); index += 2;
-		
+
 	/* make sure enough memory is allocated for channel data */
 	if (systemeventmessage->message_alloc < systemeventmessage->message_length)
 		{
@@ -8671,7 +8659,7 @@ int mbr_reson7kr_rd_systemeventmessage(int verbose, char *buffer, void *store_pt
 		/* set kind */
 		store->kind = MB_DATA_COMMENT;
 		store->type = R7KRECID_7kSystemEventMessage;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -8734,11 +8722,11 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	remotecontrolsettings = &(store->remotecontrolsettings);
 	header = &(remotecontrolsettings->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_long(MB_YES, &buffer[index], &(remotecontrolsettings->serial_number)); index += 8;
@@ -8778,7 +8766,7 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 	mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->sound_velocity)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->spreading)); index += 4;
 	mb_get_binary_short(MB_YES, &buffer[index], &(remotecontrolsettings->reserved)); index += 2;
-	if (header->Size >= MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE 
+	if (header->Size >= MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE
 			+ R7KHDRSIZE_7kRemoteControlSonarSettings)
 		{
 		mb_get_binary_float(MB_YES, &buffer[index], &(remotecontrolsettings->tx_offset_x)); index += 4;
@@ -8806,7 +8794,7 @@ int mbr_reson7kr_rd_remotecontrolsettings(int verbose, char *buffer, void *store
 		/* set kind */
 		store->kind = MB_DATA_DATA;
 		store->type = R7KRECID_7kRemoteControlSonarSettings;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -8875,11 +8863,11 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	reserved = &(store->reserved);
 	header = &(reserved->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	for (i=0;i<R7KHDRSIZE_7kReserved;i++)
@@ -8893,7 +8881,7 @@ int mbr_reson7kr_rd_reserved(int verbose, char *buffer, void *store_ptr, int *er
 		/* set kind */
 		store->kind = MB_DATA_RAW_LINE;
 		store->type = R7KRECID_7kReserved;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -8961,11 +8949,11 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	roll = &(store->roll);
 	header = &(roll->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(roll->roll)); index += 4;
@@ -8976,7 +8964,7 @@ int mbr_reson7kr_rd_roll(int verbose, char *buffer, void *store_ptr, int *error)
 		/* set kind */
 		store->kind = MB_DATA_ROLL;
 		store->type = R7KRECID_7kRoll;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -9038,11 +9026,11 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	pitch = &(store->pitch);
 	header = &(pitch->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(pitch->pitch)); index += 4;
@@ -9053,7 +9041,7 @@ int mbr_reson7kr_rd_pitch(int verbose, char *buffer, void *store_ptr, int *error
 		/* set kind */
 		store->kind = MB_DATA_PITCH;
 		store->type = R7KRECID_7kPitch;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -9115,11 +9103,11 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	soundvelocity = &(store->soundvelocity);
 	header = &(soundvelocity->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(soundvelocity->soundvelocity)); index += 4;
@@ -9130,7 +9118,7 @@ int mbr_reson7kr_rd_soundvelocity(int verbose, char *buffer, void *store_ptr, in
 		/* set kind */
 		store->kind = MB_DATA_SSV;
 		store->type = R7KRECID_7kSoundVelocity;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -9192,11 +9180,11 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	absorptionloss = &(store->absorptionloss);
 	header = &(absorptionloss->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(absorptionloss->absorptionloss)); index += 4;
@@ -9207,7 +9195,7 @@ int mbr_reson7kr_rd_absorptionloss(int verbose, char *buffer, void *store_ptr, i
 		/* set kind */
 		store->kind = MB_DATA_ABSORPTIONLOSS;
 		store->type = R7KRECID_7kAbsorptionLoss;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -9269,11 +9257,11 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	spreadingloss = &(store->spreadingloss);
 	header = &(spreadingloss->header);
-	
+
 	/* extract the header */
 	index = 0;
 	status = mbr_reson7kr_rd_header(verbose, buffer, &index, header, error);
-		
+
 	/* extract the data */
 	index = header->Offset + 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(spreadingloss->spreadingloss)); index += 4;
@@ -9284,7 +9272,7 @@ int mbr_reson7kr_rd_spreadingloss(int verbose, char *buffer, void *store_ptr, in
 		/* set kind */
 		store->kind = MB_DATA_SPREADINGLOSS;
 		store->type = R7KRECID_7kSpreadingLoss;
-		
+
 		/* get the time */
 		time_j[0] = header->s7kTime.Year;
 		time_j[1] = header->s7kTime.Day;
@@ -9332,7 +9320,8 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	char	*buffer;
 	int	*bufferalloc;
 	int	*fileheaders;
-	int	size, write_len;
+	int	size;
+	size_t	write_len;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -9351,7 +9340,7 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	/* get pointer to raw data structure */
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	mbfp = mb_io_ptr->mbfp;
-	
+
 	/* get saved values */
 	bufferptr = (char **) &mb_io_ptr->saveptr1;
 	buffer = (char *) *bufferptr;
@@ -9359,7 +9348,7 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	fileheaders = (int *) &mb_io_ptr->save12;
 
 	/* write fileheader if needed */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& (store->type == R7KRECID_7kFileHeader || *fileheaders == 0))
 		{
 #ifdef MBR_RESON7KR_DEBUG
@@ -9368,20 +9357,16 @@ fprintf(stderr," R7KRECID_7kFileHeader\n");
 #endif
 		status = mbr_reson7kr_wr_fileheader(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 		(*fileheaders)++;
-			
+
 		/* write the record to the output file */
 		if (status == MB_SUCCESS)
 			{
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
 		}
-			
+
 	/* call appropriate writing routines for ping data */
 	if (status == MB_SUCCESS && store->kind == MB_DATA_DATA)
 		{
@@ -9395,12 +9380,8 @@ fprintf(stderr," R7KRECID_7kVolatileSonarSettings\n");
 #endif
 			status = mbr_reson7kr_wr_volatilesonarsettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
 		/* Reson 7k match filter (record 7002) */
 		if (status == MB_SUCCESS && store->read_matchfilter == MB_YES)
@@ -9412,14 +9393,10 @@ fprintf(stderr," R7KRECID_7kMatchFilter\n");
 #endif
 			status = mbr_reson7kr_wr_matchfilter(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k beam geometry (record 7004) */
 		if (status == MB_SUCCESS && store->read_beamgeometry == MB_YES)
 			{
@@ -9430,14 +9407,10 @@ fprintf(stderr," R7KRECID_7kBeamGeometry\n");
 #endif
 			status = mbr_reson7kr_wr_beamgeometry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k remote control settings (record 7503) */
 		if (status == MB_SUCCESS && store->read_remotecontrolsettings == MB_YES)
 			{
@@ -9448,14 +9421,10 @@ fprintf(stderr," R7KRECID_7kRemoteControlSonarSettings\n");
 #endif
 			status = mbr_reson7kr_wr_remotecontrolsettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k bathymetry (record 7006) */
 		if (status == MB_SUCCESS && store->read_bathymetry == MB_YES)
 			{
@@ -9467,16 +9436,12 @@ fprintf(stderr," R7KRECID_7kBathymetricData\n");
 
 /*mbsys_reson7k_print_bathymetry(verbose, &(store->bathymetry), error);*/
 
-				status = mbr_reson7kr_wr_bathymetry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
-				buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-				if (write_len != size)
-					{
-					status = MB_FAILURE;
-					*error = MB_ERROR_WRITE_FAIL;
-					}
+			status = mbr_reson7kr_wr_bathymetry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
+			buffer = (char *) *bufferptr;
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k backscatter imagery data (record 7007) */
 		if (status == MB_SUCCESS && store->read_backscatter == MB_YES)
 			{
@@ -9487,14 +9452,10 @@ fprintf(stderr," R7KRECID_7kBackscatterImageData\n");
 #endif
 			status = mbr_reson7kr_wr_backscatter(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k beam data (record 7008) */
 		if (status == MB_SUCCESS && store->read_beam == MB_YES)
 			{
@@ -9505,14 +9466,10 @@ fprintf(stderr," R7KRECID_7kBeamData\n");
 #endif
 			status = mbr_reson7kr_wr_beam(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k vertical depth (record 7009) */
 		if (status == MB_SUCCESS && store->read_verticaldepth == MB_YES)
 			{
@@ -9523,14 +9480,10 @@ fprintf(stderr," R7KRECID_7kVerticalDepth\n");
 #endif
 			status = mbr_reson7kr_wr_verticaldepth(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k image data (record 7011) */
 		if (status == MB_SUCCESS && store->read_image == MB_YES)
 			{
@@ -9541,14 +9494,10 @@ fprintf(stderr," R7KRECID_7kImageData\n");
 #endif
 			status = mbr_reson7kr_wr_image(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k Ping motion (record 7012) */
 		if (status == MB_SUCCESS && store->read_v2pingmotion == MB_YES)
 			{
@@ -9559,14 +9508,10 @@ fprintf(stderr," R7KRECID_7kV2PingMotion\n");
 #endif
 			status = mbr_reson7kr_wr_v2pingmotion(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k detection setup (record 7017) */
 		if (status == MB_SUCCESS && store->read_v2detectionsetup == MB_YES)
 			{
@@ -9577,14 +9522,10 @@ fprintf(stderr," R7KRECID_7kV2DetectionSetup\n");
 #endif
 			status = mbr_reson7kr_wr_v2detectionsetup(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k beamformed magnitude and phase data (record 7018) */
 		if (status == MB_SUCCESS && store->read_v2beamformed == MB_YES)
 			{
@@ -9595,14 +9536,10 @@ fprintf(stderr," R7KRECID_7kV2BeamformedData\n");
 #endif
 			status = mbr_reson7kr_wr_v2beamformed(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k version 2 detection (record 7026) */
 		if (status == MB_SUCCESS && store->read_v2detection == MB_YES)
 			{
@@ -9613,14 +9550,10 @@ fprintf(stderr," R7KRECID_7kV2Detection\n");
 #endif
 			status = mbr_reson7kr_wr_v2detection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k version 2 raw detection (record 7027) */
 		if (status == MB_SUCCESS && store->read_v2rawdetection == MB_YES)
 			{
@@ -9631,14 +9564,10 @@ fprintf(stderr," R7KRECID_7kV2RawDetection\n");
 #endif
 			status = mbr_reson7kr_wr_v2rawdetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
-			
+
 		/* Reson 7k version 2 snippet (record 7028) */
 		if (status == MB_SUCCESS && store->read_v2snippet == MB_YES)
 			{
@@ -9649,15 +9578,11 @@ fprintf(stderr," R7KRECID_7kV2SnippetData\n");
 #endif
 			status = mbr_reson7kr_wr_v2snippet(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
 		}
-			
+
 	/* call appropriate writing routine for other records */
 	else if (status == MB_SUCCESS && store->type != R7KRECID_7kFileHeader)
 		{
@@ -9890,22 +9815,18 @@ if (store->type == R7KRECID_8100SonarData) fprintf(stderr," R7KRECID_8100SonarDa
 			status = MB_FAILURE;
 			*error = MB_ERROR_BAD_KIND;
 			}
-			
+
 		/* finally write the record to the output file */
 		if (status == MB_SUCCESS)
 			{
 			buffer = (char *) *bufferptr;
-			write_len = fwrite(buffer,1,size,mb_io_ptr->mbfp);
-			if (write_len != size)
-				{
-				status = MB_FAILURE;
-				*error = MB_ERROR_WRITE_FAIL;
-				}
+			write_len = (size_t)size;
+			status = mb_fileio_put(verbose, mbio_ptr, buffer, &write_len, error);
 			}
 		}
 
 #ifdef MBR_RESON7KR_DEBUG
-	fprintf(stderr,"RESON7KR DATA WRITTEN: type:%d status:%d error:%d\n\n", 
+	fprintf(stderr,"RESON7KR DATA WRITTEN: type:%d status:%d error:%d\n\n",
 	store->kind, status, *error);
 #endif
 
@@ -9923,7 +9844,7 @@ if (store->type == R7KRECID_8100SonarData) fprintf(stderr," R7KRECID_8100SonarDa
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index, 
+int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index,
 		s7k_header *header, int *error)
 {
 	char	*function_name = "mbr_reson7kr_wr_header";
@@ -9941,7 +9862,7 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       header:     %lu\n",(size_t)header);
 		}
-	
+
 	/* set some important values */
 	header->Version = 5;
 	header->Offset = 60;
@@ -9954,7 +9875,7 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index,
 		}
 	header->Flags = 0;
 	header->Reserved2 = 0;
-	
+
 	/* print out the data to be output */
 #ifdef MBR_RESON7KR_DEBUG
 	if (verbose > 0)
@@ -9962,7 +9883,7 @@ int mbr_reson7kr_wr_header(int verbose, char *buffer, int *index,
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_header(verbose, header, error);
-  
+
 	/* insert the header */
 	mb_put_binary_short(MB_YES, header->Version, &buffer[*index]); *index +=2;
 	mb_put_binary_short(MB_YES, header->Offset, &buffer[*index]); *index +=2;
@@ -10035,7 +9956,7 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_reference(verbose, reference, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_ReferencePoint;
@@ -10054,7 +9975,7 @@ int mbr_reson7kr_wr_reference(int verbose, int *bufferalloc, char **bufferptr, v
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -10142,11 +10063,11 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_sensoruncal(verbose, sensoruncal, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_UncalibratedSensorOffset;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -10161,7 +10082,7 @@ int mbr_reson7kr_wr_sensoruncal(int verbose, int *bufferalloc, char **bufferptr,
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -10252,11 +10173,11 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_sensorcal(verbose, sensorcal, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_CalibratedSensorOffset;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -10271,7 +10192,7 @@ int mbr_reson7kr_wr_sensorcal(int verbose, int *bufferalloc, char **bufferptr, v
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -10362,11 +10283,11 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_position(verbose, position, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_Position;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -10381,7 +10302,7 @@ int mbr_reson7kr_wr_position(int verbose, int *bufferalloc, char **bufferptr, vo
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -10475,7 +10396,7 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_customattitude(verbose, customattitude, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_CustomAttitude;
@@ -10495,7 +10416,7 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 		*size += customattitude->n * sizeof(float);
 	if (customattitude->bitfield & 128)
 		*size += customattitude->n * sizeof(float);
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -10510,7 +10431,7 @@ int mbr_reson7kr_wr_customattitude(int verbose, int *bufferalloc, char **bufferp
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -10640,11 +10561,11 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_tide(verbose, tide, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_Tide;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -10659,7 +10580,7 @@ int mbr_reson7kr_wr_tide(int verbose, int *bufferalloc, char **bufferptr, void *
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -10755,11 +10676,11 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_altitude(verbose, altitude, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_Altitude;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -10774,7 +10695,7 @@ int mbr_reson7kr_wr_altitude(int verbose, int *bufferalloc, char **bufferptr, vo
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -10860,7 +10781,7 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_motion(verbose, motion, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_MotionOverGround;
@@ -10868,7 +10789,7 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 		*size += 3 * motion->n * sizeof(float);
 	if (motion->bitfield & 2)
 		*size += 3 * motion->n * sizeof(float);
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -10883,7 +10804,7 @@ int mbr_reson7kr_wr_motion(int verbose, int *bufferalloc, char **bufferptr, void
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -11003,11 +10924,11 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_depth(verbose, depth, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_Depth;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -11022,7 +10943,7 @@ int mbr_reson7kr_wr_depth(int verbose, int *bufferalloc, char **bufferptr, void 
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -11111,12 +11032,12 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_svp(verbose, svp, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_SoundVelocityProfile;
 	*size += R7KRDTSIZE_SoundVelocityProfile * svp->n;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -11131,7 +11052,7 @@ int mbr_reson7kr_wr_svp(int verbose, int *bufferalloc, char **bufferptr, void *s
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -11228,12 +11149,12 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_ctd(verbose, ctd, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_CTD;
 	*size += ctd->n * R7KRDTSIZE_CTD;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -11248,7 +11169,7 @@ int mbr_reson7kr_wr_ctd(int verbose, int *bufferalloc, char **bufferptr, void *s
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -11354,11 +11275,11 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_geodesy(verbose, geodesy, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_Geodesy;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -11373,7 +11294,7 @@ int mbr_reson7kr_wr_geodesy(int verbose, int *bufferalloc, char **bufferptr, voi
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -11499,11 +11420,11 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_rollpitchheave(verbose, rollpitchheave, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_RollPitchHeave;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -11518,7 +11439,7 @@ int mbr_reson7kr_wr_rollpitchheave(int verbose, int *bufferalloc, char **bufferp
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -11604,11 +11525,11 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_heading(verbose, heading, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_Heading;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -11623,7 +11544,7 @@ int mbr_reson7kr_wr_heading(int verbose, int *bufferalloc, char **bufferptr, voi
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -11707,12 +11628,12 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_surveyline(verbose, surveyline, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_SurveyLine;
 	*size += surveyline->n * R7KRDTSIZE_SurveyLine;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -11727,7 +11648,7 @@ int mbr_reson7kr_wr_surveyline(int verbose, int *bufferalloc, char **bufferptr, 
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -11822,11 +11743,11 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_navigation(verbose, navigation, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_Navigation;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -11841,7 +11762,7 @@ int mbr_reson7kr_wr_navigation(int verbose, int *bufferalloc, char **bufferptr, 
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -11933,12 +11854,12 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_attitude(verbose, attitude, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_Attitude;
 	*size += attitude->n * R7KRDTSIZE_Attitude;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -11953,7 +11874,7 @@ int mbr_reson7kr_wr_attitude(int verbose, int *bufferalloc, char **bufferptr, vo
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -12045,11 +11966,11 @@ int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, voi
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_rec1022(verbose, rec1022, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_Rec1022;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -12064,7 +11985,7 @@ int mbr_reson7kr_wr_rec1022(int verbose, int *bufferalloc, char **bufferptr, voi
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -12115,7 +12036,7 @@ fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int *index, 
+int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int *index,
 		s7k_fsdwchannel *fsdwchannel, int *error)
 {
 	char	*function_name = "mbr_reson7kr_wr_fsdwchannel";
@@ -12134,10 +12055,10 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
 		fprintf(stderr,"dbg2       index:      %d\n",*index);
 		fprintf(stderr,"dbg2       fsdwchannel:%lu\n",(size_t)fsdwchannel);
 		}
-	
+
 	/* print out the data to be output */
 	/*mbsys_reson7k_print_fsdwchannel(verbose, data_format, fsdwchannel, error);*/
-	
+
 	/* extract the channel header */
 	buffer[*index] = fsdwchannel->number; (*index)++;
 	buffer[*index] = fsdwchannel->type; (*index)++;
@@ -12161,7 +12082,7 @@ int mbr_reson7kr_wr_fsdwchannel(int verbose, int data_format, char *buffer, int 
 		{
 		buffer[*index] = fsdwchannel->reserved2[i]; (*index)++;
 		}
-			
+
 	/* copy over the data */
 	if (status == MB_SUCCESS)
 		{
@@ -12224,7 +12145,7 @@ fprintf(stderr,"    REAL: raw:%6d %6d   swapped:%6d %6d\n",
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index, 
+int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index,
 		s7k_fsdwssheader *fsdwssheader, int *error)
 {
 	char	*function_name = "mbr_reson7kr_wr_fsdwssheader";
@@ -12242,10 +12163,10 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
 		fprintf(stderr,"dbg2       fsdwssheader:   %lu\n",(size_t)fsdwssheader);
 		}
-	
+
 	/* print out the data to be output */
 	/*mbsys_reson7k_print_fsdwssheader(verbose, fsdwssheader, error);*/
-	
+
 	/* extract the Edgetech sidescan header */
 	mb_put_binary_short(MB_YES, fsdwssheader->subsystem, &buffer[*index]); *index += 2;
 	mb_put_binary_short(MB_YES, fsdwssheader->channelNum, &buffer[*index]); *index += 2;
@@ -12268,7 +12189,7 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index,
 	mb_put_binary_short(MB_YES, fsdwssheader->day, &buffer[*index]); *index += 2;
 	mb_put_binary_short(MB_YES, fsdwssheader->hour, &buffer[*index]); *index += 2;
 	mb_put_binary_short(MB_YES, fsdwssheader->minute, &buffer[*index]); *index += 2;
-	mb_put_binary_short(MB_YES, fsdwssheader->second, &buffer[*index]); *index += 2;   
+	mb_put_binary_short(MB_YES, fsdwssheader->second, &buffer[*index]); *index += 2;
 	mb_put_binary_short(MB_YES, fsdwssheader->heading, &buffer[*index]); *index += 2;
 	mb_put_binary_short(MB_YES, fsdwssheader->pitch, &buffer[*index]); *index += 2;
 	mb_put_binary_short(MB_YES, fsdwssheader->roll, &buffer[*index]); *index += 2;
@@ -12296,7 +12217,7 @@ int mbr_reson7kr_wr_fsdwssheader(int verbose, char *buffer, int *index,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index, 
+int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index,
 		s7k_fsdwsegyheader *fsdwsegyheader, int *error)
 {
 	char	*function_name = "mbr_reson7kr_wr_fsdwsegyheader";
@@ -12314,10 +12235,10 @@ int mbr_reson7kr_wr_fsdwsegyheader(int verbose, char *buffer, int *index,
 		fprintf(stderr,"dbg2       index:          %d\n",*index);
 		fprintf(stderr,"dbg2       fsdwsegyheader: %lu\n",(size_t)fsdwsegyheader);
 		}
-	
+
 	/* print out the data to be output */
 	/*mbsys_reson7k_print_fsdwsegyheader(verbose, fsdwsegyheader, error);*/
-	
+
 	/* extract the Edgetech segy header */
 	mb_put_binary_int(MB_YES, fsdwsegyheader->sequenceNumber, &buffer[*index]); *index += 4;
 	mb_put_binary_int(MB_YES, fsdwsegyheader->startDepth, &buffer[*index]); *index += 4;
@@ -12477,7 +12398,7 @@ fsdwchannel->number,fsdwssheader->channelNum,
 fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 }
 #endif
-		
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_FSDWsidescan;
@@ -12488,7 +12409,7 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 		fsdwchannel = &(fsdwsslo->channel[i]);
 		*size += fsdwchannel->bytespersample * fsdwchannel->number_samples;
 		}
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -12503,7 +12424,7 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -12527,7 +12448,7 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 			fsdwchannel = &(fsdwsslo->channel[i]);
 			mbr_reson7kr_wr_fsdwchannel(verbose, fsdwsslo->data_format, buffer, &index, fsdwchannel, error);
 			}
-	/*fprintf(stderr,"In mbr_reson7kr_wr_fsdwsslo: index:%d OffsetToOptionalData:%d\n", 
+	/*fprintf(stderr,"In mbr_reson7kr_wr_fsdwsslo: index:%d OffsetToOptionalData:%d\n",
 	index, header->OffsetToOptionalData);
 		index = header->OffsetToOptionalData;*/
 		for (i=0;i<2;i++)
@@ -12554,7 +12475,7 @@ fprintf(stderr,"Bad size comparison: file:%s line:%d size:%d index:%d\n", __FILE
 			*size = 0;
 			}
 		}
-	
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -12624,7 +12545,7 @@ fsdwchannel->number,fsdwssheader->channelNum,
 fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 }
 #endif
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_FSDWsidescan;
@@ -12635,7 +12556,7 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 		fsdwchannel = &(fsdwsshi->channel[i]);
 		*size += fsdwchannel->bytespersample * fsdwchannel->number_samples;
 		}
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -12650,7 +12571,7 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -12674,7 +12595,7 @@ fsdwchannel->sample_interval,fsdwssheader->sampleInterval);
 			fsdwchannel = &(fsdwsshi->channel[i]);
 			mbr_reson7kr_wr_fsdwchannel(verbose, fsdwsshi->data_format, buffer, &index, fsdwchannel, error);
 			}
-	/*fprintf(stderr,"In mbr_reson7kr_wr_fsdwsshi: index:%d OffsetToOptionalData:%d\n", 
+	/*fprintf(stderr,"In mbr_reson7kr_wr_fsdwsshi: index:%d OffsetToOptionalData:%d\n",
 	index, header->OffsetToOptionalData);
 		index = header->OffsetToOptionalData;*/
 		for (i=0;i<2;i++)
@@ -12771,11 +12692,11 @@ fsdwchannel->number,fsdwsegyheader->channelNum,
 fsdwchannel->sample_interval,fsdwsegyheader->sampleInterval);
 }
 #endif
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_FSDWsubbottom;
-		
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_FSDWsubbottom;
@@ -12786,7 +12707,7 @@ fsdwchannel->sample_interval,fsdwsegyheader->sampleInterval);
 		fsdwchannel = &(fsdwsb->channel);
 		*size += fsdwchannel->bytespersample * fsdwchannel->number_samples;
 		}
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -12801,7 +12722,7 @@ fsdwchannel->sample_interval,fsdwsegyheader->sampleInterval);
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -12897,12 +12818,12 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_bluefin(verbose, bluefin, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_BluefinDataFrame;
 	*size += bluefin->number_frames * bluefin->frame_size;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -12917,7 +12838,7 @@ int mbr_reson7kr_wr_bluefin(int verbose, int *bufferalloc, char **bufferptr, voi
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -13091,11 +13012,11 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_volatilesettings(verbose, volatilesettings, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kVolatileSonarSettings;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -13110,7 +13031,7 @@ int mbr_reson7kr_wr_volatilesonarsettings(int verbose, int *bufferalloc, char **
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -13235,7 +13156,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_configuration(verbose, configuration, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kConfiguration;
@@ -13245,7 +13166,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 		device = &(configuration->device[i]);
 		*size += device->info_length;
 		}
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -13260,7 +13181,7 @@ int mbr_reson7kr_wr_configuration(int verbose, int *bufferalloc, char **bufferpt
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -13365,11 +13286,11 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_matchfilter(verbose, matchfilter, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kMatchFilter;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -13384,7 +13305,7 @@ int mbr_reson7kr_wr_matchfilter(int verbose, int *bufferalloc, char **bufferptr,
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -13474,12 +13395,12 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_v2firmwarehardwareconfiguration(verbose, v2firmwarehardwareconfiguration, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kV2FirmwareHardwareConfiguration;
 	*size += v2firmwarehardwareconfiguration->info_length;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -13494,7 +13415,7 @@ int mbr_reson7kr_wr_v2firmwarehardwareconfiguration(int verbose, int *bufferallo
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -13587,12 +13508,12 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_beamgeometry(verbose, beamgeometry, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kBeamGeometry;
 	*size += beamgeometry->number_beams * 16;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -13607,7 +13528,7 @@ int mbr_reson7kr_wr_beamgeometry(int verbose, int *bufferalloc, char **bufferptr
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -13712,12 +13633,12 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_calibration(verbose, calibration, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kCalibrationData;
 	*size += calibration->number_channels * 8;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -13732,7 +13653,7 @@ int mbr_reson7kr_wr_calibration(int verbose, int *bufferalloc, char **bufferptr,
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -13821,7 +13742,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	bathymetry = &(store->bathymetry);
 	header = &(bathymetry->header);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kBathymetricData;
@@ -13829,7 +13750,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 	if (bathymetry->optionaldata == MB_YES)
 		{
 		*size += 45 + bathymetry->number_beams * 20;
-		header->OffsetToOptionalData = MBSYS_RESON7K_RECORDHEADER_SIZE 
+		header->OffsetToOptionalData = MBSYS_RESON7K_RECORDHEADER_SIZE
 								+ R7KHDRSIZE_7kBathymetricData
 								+ bathymetry->number_beams * 9;
 		}
@@ -13844,7 +13765,7 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_bathymetry(verbose, bathymetry, error);
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -13859,17 +13780,17 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
 		/* get buffer for writing */
 		buffer = (char *) *bufferptr;
-		
+
 		/* make sure the version number is right */
 		if (header->Version < 5)
 			header->Version = 5;
-		
+
 		/* insert the header */
 		index = 0;
 		status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
@@ -13995,7 +13916,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_backscatter(verbose, backscatter, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kBackscatterImageData;
@@ -14004,7 +13925,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 		{
 		*size += 28;
 		}
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -14019,7 +13940,7 @@ int mbr_reson7kr_wr_backscatter(int verbose, int *bufferalloc, char **bufferptr,
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -14213,7 +14134,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_beam(verbose, beam, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kBeamData;
@@ -14246,7 +14167,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 		{
 		*size += 24 + beam->number_beams * 12;
 		}
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -14261,7 +14182,7 @@ int mbr_reson7kr_wr_beam(int verbose, int *bufferalloc, char **bufferptr, void *
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -14444,11 +14365,11 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_verticaldepth(verbose, verticaldepth, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kVerticalDepth;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -14463,7 +14384,7 @@ int mbr_reson7kr_wr_verticaldepth(int verbose, int *bufferalloc, char **bufferpt
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -14561,12 +14482,12 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_image(verbose, image, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kImageData;
 	*size += image->width * image->height * image->color_depth;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -14581,7 +14502,7 @@ int mbr_reson7kr_wr_image(int verbose, int *bufferalloc, char **bufferptr, void 
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -14716,7 +14637,7 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_v2pingmotion(verbose, v2pingmotion, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kV2PingMotion;
@@ -14728,7 +14649,7 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
 		*size += sizeof(float) * v2pingmotion->n;
 	if (v2pingmotion->flags & 8)
 		*size += sizeof(float) * v2pingmotion->n;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -14743,7 +14664,7 @@ int mbr_reson7kr_wr_v2pingmotion(int verbose, int *bufferalloc, char **bufferptr
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -14858,12 +14779,12 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_v2detectionsetup(verbose, v2detectionsetup, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kV2DetectionSetup;
 	*size += v2detectionsetup->number_beams * v2detectionsetup->data_field_size;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -14878,7 +14799,7 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -15006,12 +14927,12 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_v2beamformed(verbose, v2beamformed, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kV2BeamformedData;
 	*size += 2 * sizeof(short) * v2beamformed->number_beams * v2beamformed->number_samples;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -15026,7 +14947,7 @@ int mbr_reson7kr_wr_v2beamformed(int verbose, int *bufferalloc, char **bufferptr
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -15132,7 +15053,7 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_v2bite(verbose, v2bite, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kV2BITEData;
@@ -15141,7 +15062,7 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
 		report = &(v2bite->reports[i]);
 		*size += R7KRDTSIZE_7kV2BITERecordData + report->number_bite * R7KRDTSIZE_7kV2BITEFieldData;
 		}
-	
+
 	/* allocate memory to store rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -15156,7 +15077,7 @@ int mbr_reson7kr_wr_v2bite(int verbose, int *bufferalloc, char **bufferptr, void
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -15296,11 +15217,11 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_v27kcenterversion(verbose, v27kcenterversion, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kV27kCenterVersion;
-	
+
 	/* allocate memory to store rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -15315,7 +15236,7 @@ int mbr_reson7kr_wr_v27kcenterversion(int verbose, int *bufferalloc, char **buff
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -15402,11 +15323,11 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_v28kwetendversion(verbose, v28kwetendversion, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kV28kWetEndVersion;
-	
+
 	/* allocate memory to store rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -15421,7 +15342,7 @@ int mbr_reson7kr_wr_v28kwetendversion(int verbose, int *bufferalloc, char **buff
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -15500,7 +15421,7 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2detection = &(store->v2detection);
 	header = &(v2detection->header);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kV2Detection;
@@ -15515,7 +15436,7 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_v2detection(verbose, v2detection, error);
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -15530,13 +15451,13 @@ int mbr_reson7kr_wr_v2detection(int verbose, int *bufferalloc, char **bufferptr,
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
 		/* get buffer for writing */
 		buffer = (char *) *bufferptr;
-		
+
 		/* insert the header */
 		index = 0;
 		status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
@@ -15635,7 +15556,7 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2rawdetection = &(store->v2rawdetection);
 	header = &(v2rawdetection->header);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kV2RawDetection;
@@ -15650,7 +15571,7 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_v2rawdetection(verbose, v2rawdetection, error);
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -15665,13 +15586,13 @@ int mbr_reson7kr_wr_v2rawdetection(int verbose, int *bufferalloc, char **bufferp
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
 		/* get buffer for writing */
 		buffer = (char *) *bufferptr;
-		
+
 		/* insert the header */
 		index = 0;
 		status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
@@ -15772,15 +15693,15 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2snippet = &(store->v2snippet);
 	header = &(v2snippet->header);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kV2SnippetData;
 	for (i=0;i<v2snippet->number_beams;i++)
 		{
 		snippettimeseries = &(v2snippet->snippettimeseries[i]);
-		
-		*size += R7KRDTSIZE_7kV2SnippetTimeseries 
+
+		*size += R7KRDTSIZE_7kV2SnippetTimeseries
 			+ sizeof(short) * (snippettimeseries->end_sample - snippettimeseries->begin_sample + 1);
 		}
 	header->OffsetToOptionalData = 0;
@@ -15793,7 +15714,7 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_v2snippet(verbose, v2snippet, error);
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -15808,13 +15729,13 @@ int mbr_reson7kr_wr_v2snippet(int verbose, int *bufferalloc, char **bufferptr, v
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
 		/* get buffer for writing */
 		buffer = (char *) *bufferptr;
-		
+
 		/* insert the header */
 		index = 0;
 		status = mbr_reson7kr_wr_header(verbose, buffer, &index, header, error);
@@ -15925,11 +15846,11 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_installation(verbose, installation, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kInstallationParameters;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -15944,7 +15865,7 @@ int mbr_reson7kr_wr_installation(int verbose, int *bufferalloc, char **bufferptr
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -16067,7 +15988,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	fileheader = &(store->fileheader);
 	header = &(fileheader->header);
-		
+
 	/* make sure data are defined properly */
 	if (status == MB_SUCCESS && header->RecordType != R7KRECID_7kFileHeader)
 		{
@@ -16109,13 +16030,13 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_fileheader(verbose, fileheader, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kFileHeader + R7KRDTSIZE_7kFileHeader;
 	for (i=0;i<fileheader->number_subsystems;i++)
 		*size += 6;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -16130,7 +16051,7 @@ int mbr_reson7kr_wr_fileheader(int verbose, int *bufferalloc, char **bufferptr, 
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -16249,12 +16170,12 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_systemeventmessage(verbose, systemeventmessage, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kSystemEventMessage;
 	*size += systemeventmessage->message_length;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -16269,7 +16190,7 @@ int mbr_reson7kr_wr_systemeventmessage(int verbose, int *bufferalloc, char **buf
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -16364,11 +16285,11 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_remotecontrolsettings(verbose, remotecontrolsettings, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kRemoteControlSonarSettings;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -16383,7 +16304,7 @@ int mbr_reson7kr_wr_remotecontrolsettings(int verbose, int *bufferalloc, char **
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -16522,11 +16443,11 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_reserved(verbose, reserved, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kReserved;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -16541,7 +16462,7 @@ int mbr_reson7kr_wr_reserved(int verbose, int *bufferalloc, char **bufferptr, vo
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -16630,11 +16551,11 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_roll(verbose, roll, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kRoll;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -16649,7 +16570,7 @@ int mbr_reson7kr_wr_roll(int verbose, int *bufferalloc, char **bufferptr, void *
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -16735,11 +16656,11 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_pitch(verbose, pitch, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kPitch;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -16754,7 +16675,7 @@ int mbr_reson7kr_wr_pitch(int verbose, int *bufferalloc, char **bufferptr, void 
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -16840,11 +16761,11 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_soundvelocity(verbose, soundvelocity, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kSoundVelocity;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -16859,7 +16780,7 @@ int mbr_reson7kr_wr_soundvelocity(int verbose, int *bufferalloc, char **bufferpt
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -16945,11 +16866,11 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_absorptionloss(verbose, absorptionloss, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kAbsorptionLoss;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -16964,7 +16885,7 @@ int mbr_reson7kr_wr_absorptionloss(int verbose, int *bufferalloc, char **bufferp
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
@@ -17050,11 +16971,11 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 	if (verbose >= 2)
 #endif
 	mbsys_reson7k_print_spreadingloss(verbose, spreadingloss, error);
-	
+
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kSpreadingLoss;
-	
+
 	/* allocate memory to write rest of record if necessary */
 	if (*bufferalloc < *size)
 		{
@@ -17069,7 +16990,7 @@ int mbr_reson7kr_wr_spreadingloss(int verbose, int *bufferalloc, char **bufferpt
 			*bufferalloc = *size;
 			}
 		}
-		
+
 	/* proceed to write if buffer allocated */
 	if (status == MB_SUCCESS)
 		{
