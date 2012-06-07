@@ -17363,15 +17363,8 @@ no_defs <>
 # MBARI Project Specific Projections
 #
 # Oblique Mercator for Alarcon Rise Survey
-# <AlarconRiseObliqueMercator>
-# 	proj=omerc ellps=WGS84
-# 	lon_1=-108.621333 lat_1=23.278767
-# 	lon_2=-108.384467 lat_2=23.606533
-# 	units=m
-# 	x_0=-1550000 y_0=-2600000
-# 	no_defs <>
 <AlarconRiseObliqueMercator>
 	proj=omerc ellps=WGS84
-	lonc=-108.500000 lat_0=23.440000 gamma=33.0
-	units=m
-	no_defs <>
+	lonc=-108.4969525 lat_0=23.4353813
+	alpha=31.0 k_0=1.0 units=m no_rot
+	x_0=-2972140.26 y_0=0 no_defs <>

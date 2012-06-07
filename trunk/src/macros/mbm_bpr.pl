@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_bpr.perl	5/13/2002
-#    $Id: mbm_bpr.pl 1917 2012-01-10 19:25:33Z caress $
+#    $Id$
 #
 #    Copyright (c) 2012-2012 by
 #    D. W. Caress (caress@mbari.org)
@@ -33,7 +33,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 13, 2002
 #
 # Version:
-#   $Id: mbm_bpr.pl 1917 2012-01-10 19:25:33Z caress $
+#   $Id$
 #
 # Revisions:
 #   $Log: mbm_bpr.perl,v $
@@ -69,7 +69,7 @@ my $verbose  = ($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$ProgramName:\n";
-	print "\nVersion: $Id: mbm_bpr.pl 1917 2012-01-10 19:25:33Z caress $\n";
+	print "\nVersion: $Id$\n";
 	print "\nMB-System macro to process data from a Seabird SBE53 pressure\n";
 	print "sensor into a tidal model for use by mbprocess\n";
 	print "\nUsage: \n";

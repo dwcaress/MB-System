@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_benthos.c	3.00	3/29/2011
- *	$Id: $
+ *	$Id$
  *
  *    Copyright (c) 2012-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -41,7 +41,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_benthos.h"
 
-static char rcs_id[]="$Id: $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbsys_benthos_alloc(int verbose, void *mbio_ptr, void **store_ptr,

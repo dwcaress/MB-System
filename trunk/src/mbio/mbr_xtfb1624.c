@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_xtfb1624.c	3/29/2011
- *	$Id: $
+ *	$Id$
  *
  *    Copyright (c) 2012-2012 by
  *    David W. Caress (caress@mbari.org)
@@ -412,7 +412,7 @@ int mbr_rt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_xtfb1624(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_xtfb1624_rd_data(int verbose, void *mbio_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_xtfb1624.c 1889 2011-03-29 02:53:39Z jrenken $";
+static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_xtfb1624(int verbose, void *mbio_ptr, int *error)

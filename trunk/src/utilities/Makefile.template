@@ -203,9 +203,9 @@ FFTWINCDIR = /usr/local/fftw/include
 #
 # Location of Levitus annual database file
 LEVITUS = /usr/local/mbsystem/share/Levitus82.dat
-# 
-# Compilers 
-CC = cc 
+#
+# Compilers
+CC = cc
 #
 # Compile and load flags:
 CFLAGS = -O2
@@ -263,7 +263,7 @@ all:	$(BINDIR)/mbformat \
 	$(BINDIR)/mbfilter \
 	$(BINDIR)/mbroutetime \
 	$(BINDIR)/mbhysweeppreprocess \
-	$(BINDIR)/mbsm20002gsf
+	$(BINDIR)/mbkongsbergpreprocess
 
 ### make clean removes the object files
 clean:
@@ -323,7 +323,7 @@ $(BINDIR)/mbstripnan:	mbstripnan.o
 $(BINDIR)/mbhistogram:	mbhistogram.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a
 	$(CC) $(CFLAGS) mbhistogram.o $(LIBDIR)/libmbio.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a $(LIBDIR)/libmbaux.a \
 		$(LFLAGS) -o $(BINDIR)/mbhistogram
-$(BINDIR)/mbbackangle:	mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a 
+$(BINDIR)/mbbackangle:	mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbbackangle.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(GMTLIBDIR)/libgmt.a $(GMTLIBDIR)/libpsl.a \
 		$(LFLAGS) -o $(BINDIR)/mbbackangle
@@ -390,9 +390,9 @@ $(BINDIR)/mbfilter:	mbfilter.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLI
 $(BINDIR)/mbroutetime:	mbroutetime.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbroutetime.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbroutetime
-$(BINDIR)/mbsm20002gsf:	mbsm20002gsf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
-	$(CC) $(CFLAGS) mbsm20002gsf.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
-		$(LFLAGS) -o $(BINDIR)/mbsm20002gsf
+$(BINDIR)/mbkongsbergpreprocess:	mbkongsbergpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
+	$(CC) $(CFLAGS) mbkongsbergpreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
+		$(LFLAGS) -o $(BINDIR)/mbkongsbergpreprocess
 $(BINDIR)/mbhysweeppreprocess:	mbhysweeppreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a
 	$(CC) $(CFLAGS) mbhysweeppreprocess.o $(LIBDIR)/libmbio.a $(LIBDIR)/libmbaux.a $(PROJLIB) $(GSFLIB) $(LIBDIR)/libmr1pr.a $(LIBDIR)/libsapi.a \
 		$(LFLAGS) -o $(BINDIR)/mbhysweeppreprocess
@@ -437,7 +437,7 @@ mbneptune2esf.o:	mbneptune2esf.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(I
 	$(CC) -c $(CFLAGS) mbneptune2esf.c
 mbps.o:	mbps.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mbps.c
-mbstripnan.o:	mbstripnan.c 
+mbstripnan.o:	mbstripnan.c
 	$(CC) -c $(CFLAGS) mbstripnan.c
 mbhistogram.o:	mbhistogram.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) mbhistogram.c
@@ -483,8 +483,8 @@ mbfilter.o:	mbfilter.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_
 	$(CC) -c $(CFLAGS) mbfilter.c
 mbroutetime.o:	mbroutetime.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbroutetime.c
-mbsm20002gsf.o:	mbsm20002gsf.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
-	$(CC) -c $(CFLAGS) mbsm20002gsf.c
+mbkongsbergpreprocess.o:	mbkongsbergpreprocess.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mbkongsbergpreprocess.c
 mbhysweeppreprocess.o:	mbhysweeppreprocess.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mbhysweeppreprocess.c
 mbsegypsd.o:	mbsegypsd.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h

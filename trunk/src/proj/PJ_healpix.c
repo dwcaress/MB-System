@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: PJ_healpix.c 1504 2011-10-18 14:58:57Z landcare $
+ * $Id$
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the healpix projection.
