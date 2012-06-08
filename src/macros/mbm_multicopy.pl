@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_multicopy.perl	7/17/2011
 #   $Id: mbm_multi7kprocess.pl 19XX 2011-07-17 15:15:00Z ferreira $
 #
-#    Copyright (c) 2011-2012 by 
+#    Copyright (c) 2011-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -22,9 +22,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Purpose:
 #   Macro to apply mbcopy to all files referenced through
 #   a datalist, using the MB-System file suffix convention
-#   to name the output files. 
+#   to name the output files.
 #
-# Basic Usage: 
+# Basic Usage:
 #   mbm_multicopy -Foutputformat -Idatalist [-H -V -C -T]
 #
 # Authors:
@@ -87,7 +87,7 @@ elsif (! -e $datalist)
 	}
 
 # tell the world we got started
-if ($verbose) 
+if ($verbose)
 	{
 	print "\nRunning $program_name...\n";
 	}
@@ -103,7 +103,7 @@ while (@mbdatalist)
 	$line = shift @mbdatalist;
 	if ($line =~ /(\S+)\s+(\S+)/)
 		{
-		($file_mb,$format_mb) = 
+		($file_mb,$format_mb) =
 			$line =~ /(\S+)\s+(\S+)/;
 		push(@files_data, $file_mb);
 		push(@formats, $format_mb);
@@ -124,7 +124,7 @@ $cnt = 0;
 foreach $file_mb (@files_data)
 	{
 	my $pid = $pm->start and next;
-	
+
 	# get file root
 	$line = `mbformat -K -I$file_mb`;
 	($root,$format_mb) = $line =~ /(\S+)\s+(\S+)/;
@@ -143,7 +143,7 @@ foreach $file_mb (@files_data)
 		$root = $root . "c";
 		$ofile_mb = "$root.mb$oformat";
 		}
-	
+
 	# copy to output format using mbcopy
 	if (!$check || !(-e $ofile_mb))
 		{
@@ -158,7 +158,7 @@ foreach $file_mb (@files_data)
 			print "Testing: $mbcopy\n";
 			}
 		}
-		
+
 	# increment counter
 	$cnt++;
 	$pm->finish;
@@ -177,7 +177,7 @@ exit 0;
 # the same arg.
 #
 # Usage:
-#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
 #			    # -c does not take arg. Sets opt_* as a
 #                           # side effect.
 
@@ -185,7 +185,6 @@ sub MBGetopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
@@ -208,7 +207,7 @@ sub MBGetopts {
 		    $rest = shift(@ARGV);
 		}
 		if (eval "\$opt_$first") {
-		    eval "\$opt_$first = \$opt_$first 
+		    eval "\$opt_$first = \$opt_$first
 				. \":\" . \$rest;";
 		}
 		else {

@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_multidatalist.perl	7/18/2011
 #   $Id: mbm_multidatalisz.pl 19XX 2011-07-18 15:40:00Z ferreira $
 #
-#    Copyright (c) 2011-2012 by 
+#    Copyright (c) 2011-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -20,7 +20,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   mbm_multidatalist
 #
 # Purpose:
-#   Perl shellscript to generate standard ancilliary files using 
+#   Perl shellscript to generate standard ancilliary files using
 #   parallel mbdatalist -O processes
 #
 # Usage:
@@ -66,18 +66,18 @@ if ($help)
 	}
 
 # tell the world we got started
-if ($verbose) 
+if ($verbose)
 	{
 	print "\nRunning $program_name...\n";
 	}
 
 # exiting if CPU number is lower than 1
-if ($cpu < 1) 
+if ($cpu < 1)
 	{
 	print "\nExiting $program_name, CPU(s) number(s) should be\n equal or bigger than one...\n\n";
 	exit 0;
 	}
-	
+
 # set the mbdatalist control option
 if ($regenerate)
 	{
@@ -95,7 +95,7 @@ while (@mbdatalist)
 	$line = shift @mbdatalist;
 	if ($line =~ /(\S+)\s+(\S+)/)
 		{
-		($file_mb,$format_mb) = 
+		($file_mb,$format_mb) =
 			$line =~ /(\S+)\s+(\S+)/;
 		push(@files_data, $file_mb);
 		push(@formats, $format_mb);
@@ -106,11 +106,11 @@ while (@mbdatalist)
 use Parallel::ForkManager;
 use LWP::Simple;
 my $pm=new Parallel::ForkManager($cpu);
-  
+
 foreach $file_mb (@files_data)
 	{
 	my $pid = $pm->start and next;
-	if ($verbose) 
+	if ($verbose)
 		{
 		$command = "mbdatalist -I$file_mb $option -V";
 		print "Executing $command\n";
@@ -141,7 +141,6 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
