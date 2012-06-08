@@ -186,6 +186,24 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+Removed local($[) = 0 initializations from all perl macros for compatibility with the
+current version of perl (some macros were missed when this was done before 5.3.1955).
+
+Added new utility for preprocessing Kongsberg multibeam data.
+
+Fixed problem with mbprocess in which merged roll and pitch data were not applied
+to the bathymetry unless the bathymetry was being recalculated by raytracing.
+
+Added ability to change the read and write buffers for file i/o, initially just
+for Reson 7k and Kongsberg current generation data. This allows one to tune for
+the highest throughput file i/o for a given situation (e.g. 10 MB buffers achieve
+5-10% faster throughput on the MBARI network).
+
+Altered i/o module mbr_image83p.c for Imagenex DeltaT data so that if no roll or
+pitch data are stored, the sonar is treated as if it is pointed down rather than
+horizontal. Also fixed the module so that the profile tile angle parameter is
+used correctly.
+
 -----> 5.3.1955
 
 Removed ($[) = 0 initializations from all perl macros for compatibility with the

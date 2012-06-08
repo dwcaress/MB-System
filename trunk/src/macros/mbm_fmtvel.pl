@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_fmtvel.perl	6/18/93
 #    $Id$
 #
-#    Copyright (c) 1993-2012 by 
+#    Copyright (c) 1993-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -20,7 +20,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   mbm_fmtvel
 #
 # Purpose:
-#   Perl shellscript to generate a list of the cmean (mean water 
+#   Perl shellscript to generate a list of the cmean (mean water
 #   velocity) and ckeel (surface water velocity) used by Hydrosweep
 #   in its internal processing.  This macro executes the program
 #   hsdump and then scans the output for the desired values.
@@ -114,7 +114,7 @@ if (!$file)
 	{
 	die "No input file specified - $program_name aborted\n";
 	}
-if (!$format) 
+if (!$format)
 	{
 	$format = "24";
 	}
@@ -135,27 +135,27 @@ while (@hsdump)
 	{
 	$line = shift @hsdump;
 	if ($line =~ /^  Time: (.*)/)
-		{ 
+		{
 		@result = split(' ',$line);
 		print  @result[1],"\t", @result[2],"\t" ;
 		}
 	if ($line =~ /Longitude: (.*)/)
-		{ 
+		{
 		@result = split(' ',$line);
 		print  @result[1],"\t";
 		}
 	if ($line =~ /Latitude: (.*)/)
-		{ 
+		{
 		@result = split(' ',$line);
 		print  @result[1],"\t";
 		}
 	if ($line =~ /Mean velocity: (.*)/)
-		{ 
+		{
 		@result = split(' ',$line);
 		printf  "%6.1f\t", @result[2];
 		}
 	if ($line =~ /Keel velocity: (.*)/)
-		{ 
+		{
 		@result = split(' ',$line);
 		printf  "%6.1f\n", @result[2];
 		}
@@ -178,7 +178,6 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
