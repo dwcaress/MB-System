@@ -2,7 +2,7 @@
  *    The MB-system:	mb_process.h	9/11/00
  *    $Id$
  *
- *    Copyright (c) 2000-2009 by
+ *    Copyright (c) 2000-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

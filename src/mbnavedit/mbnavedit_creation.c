@@ -25,32 +25,34 @@
 #include <Xm/MwmUtil.h>
 #include <Xm/Form.h>
 #include <Xm/PushB.h>
-#include <Xm/TextF.h>
 #include <Xm/Label.h>
+#include <Xm/RowColumn.h>
+#include <Xm/ToggleB.h>
+#include <Xm/ScrolledW.h>
+#include <Xm/List.h>
+#include <Xm/TextF.h>
 #include <Xm/BulletinB.h>
 #include <Xm/Scale.h>
 #include <Xm/Separator.h>
-#include <Xm/RowColumn.h>
-#include <Xm/ToggleB.h>
 #include <Xm/FileSB.h>
 #include <Xm/CascadeB.h>
-#include <Xm/ScrolledW.h>
 #include <Xm/DrawingA.h>
 #include <Xm/MainW.h>
 #include <Xm/DialogS.h>
 #include <Xm/MwmUtil.h>
 #include <Xm/Form.h>
 #include <Xm/PushB.h>
-#include <Xm/TextF.h>
 #include <Xm/Label.h>
+#include <Xm/RowColumn.h>
+#include <Xm/ToggleB.h>
+#include <Xm/ScrolledW.h>
+#include <Xm/List.h>
+#include <Xm/TextF.h>
 #include <Xm/BulletinB.h>
 #include <Xm/Scale.h>
 #include <Xm/Separator.h>
-#include <Xm/RowColumn.h>
-#include <Xm/ToggleB.h>
 #include <Xm/FileSB.h>
 #include <Xm/CascadeB.h>
-#include <Xm/ScrolledW.h>
 #include <Xm/DrawingA.h>
 
 /*
@@ -86,7 +88,11 @@ extern void BX_SET_BACKGROUND_COLOR(Widget, ArgList, Cardinal *, Pixel);
  * Declarations for callbacks and handlers.
  */
 extern void BxExitCB(Widget, XtPointer, XtPointer);
+extern void do_filelist_remove(Widget, XtPointer, XtPointer);
+extern void do_editlistselection(Widget, XtPointer, XtPointer);
 extern void BxUnmanageCB(Widget, XtPointer, XtPointer);
+extern void do_toggle_output_on_filelist(Widget, XtPointer, XtPointer);
+extern void do_toggle_output_off_filelist(Widget, XtPointer, XtPointer);
 extern void do_offset_apply(Widget, XtPointer, XtPointer);
 extern void do_deletebadtimetag_apply(Widget, XtPointer, XtPointer);
 extern void do_timeinterpolation_apply(Widget, XtPointer, XtPointer);
@@ -105,6 +111,8 @@ extern void do_fileselection_cancel(Widget, XtPointer, XtPointer);
 extern void do_fileselection_filter(Widget, XtPointer, XtPointer);
 extern void do_toggle_output_on(Widget, XtPointer, XtPointer);
 extern void do_toggle_output_off(Widget, XtPointer, XtPointer);
+extern void do_end(Widget, XtPointer, XtPointer);
+extern void do_start(Widget, XtPointer, XtPointer);
 extern void do_interpolationrepeats(Widget, XtPointer, XtPointer);
 extern void do_unflag(Widget, XtPointer, XtPointer);
 extern void do_flag(Widget, XtPointer, XtPointer);
@@ -115,12 +123,11 @@ extern void do_toggle_dr_lat(Widget, XtPointer, XtPointer);
 extern void do_toggle_dr_lon(Widget, XtPointer, XtPointer);
 extern void do_toggle_org_time(Widget, XtPointer, XtPointer);
 extern void do_toggle_time(Widget, XtPointer, XtPointer);
-extern void BxManageCB(Widget, XtPointer, XtPointer);
-extern void BxSetValuesCB(Widget, XtPointer, XtPointer);
 extern void do_nextbuffer(Widget, XtPointer, XtPointer);
 extern void do_done(Widget, XtPointer, XtPointer);
 extern void do_forward(Widget, XtPointer, XtPointer);
 extern void do_reverse(Widget, XtPointer, XtPointer);
+extern void BxManageCB(Widget, XtPointer, XtPointer);
 extern void do_toggle_vru(Widget, XtPointer, XtPointer);
 extern void do_set_interval(Widget, XtPointer, XtPointer);
 extern void do_showall(Widget, XtPointer, XtPointer);
@@ -138,6 +145,7 @@ extern void do_toggle_speed(Widget, XtPointer, XtPointer);
 extern void do_toggle_heading(Widget, XtPointer, XtPointer);
 extern void do_toggle_lat(Widget, XtPointer, XtPointer);
 extern void do_toggle_lon(Widget, XtPointer, XtPointer);
+extern void BxSetValuesCB(Widget, XtPointer, XtPointer);
 extern void do_toggle_pick(Widget, XtPointer, XtPointer);
 extern void do_toggle_select(Widget, XtPointer, XtPointer);
 extern void do_toggle_deselect(Widget, XtPointer, XtPointer);
@@ -155,8 +163,17 @@ CreatemainWindow(Widget parent)
 {
     Cardinal ac = 0;
     Arg      args[256];
+    Cardinal cdc = 0;
     Boolean  argok = False;
     Widget   mainWindow;
+    Widget   dialogShell_filelist;
+    Widget   form_filelist;
+    Widget   pushButton_filelist_remove;
+    Widget   pushButton_filelist_edit;
+    Widget   setting_output_label_filelist;
+    Widget   setting_output_filelist;
+    Widget   pushButton_filelist_dismiss;
+    Widget   scrolledWindow_filelist;
     Widget   xmDialogShell_offset;
     Widget   form_offset;
     Widget   label_offset_lat;
@@ -208,6 +225,10 @@ CreatemainWindow(Widget parent)
     Widget   separator;
     Widget   label_about_function;
     Widget   label_about_mbedit;
+    Widget   menuBar_file;
+    Widget   cascadeButton_file;
+    Widget   pulldownMenu_file;
+    Widget   pushButton_filelist;
     Widget   menuBar_controls;
     Widget   cascadeButton_controls;
     Widget   pulldownMenu_controls;
@@ -215,9 +236,6 @@ CreatemainWindow(Widget parent)
     Widget   pushButton_controls_modeling;
     Widget   pushButton_controls_offset;
     Widget   pushButton_nextbuffer;
-    Widget   pushButton_done;
-    Widget   pushButton_forward;
-    Widget   pushButton_reverse;
     Widget   pushButton_quit;
     Widget   pushButton_about;
     Widget   pushButton_set_interval;
@@ -231,26 +249,28 @@ CreatemainWindow(Widget parent)
     XtInitializeWidgetClass((WidgetClass)xmDialogShellWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmFormWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmPushButtonWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmLabelWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmListWidgetClass);
+    XtInitializeWidgetClass((WidgetClass)xmTextFieldWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmScaleWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmSeparatorWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmToggleButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmFileSelectionBoxWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmBulletinBoardWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmCascadeButtonWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmRowColumnWidgetClass);
-    XtInitializeWidgetClass((WidgetClass)xmScrolledWindowWidgetClass);
     XtInitializeWidgetClass((WidgetClass)xmDrawingAreaWidgetClass);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 89); ac++;
-    XtSetArg(args[ac], XmNy, 127); ac++;
-    XtSetArg(args[ac], XmNwidth, 1018); ac++;
-    XtSetArg(args[ac], XmNheight, 695); ac++;
+    XtSetArg(args[ac], XmNx, 964); ac++;
+    XtSetArg(args[ac], XmNy, 300); ac++;
+    XtSetArg(args[ac], XmNwidth, 1024); ac++;
+    XtSetArg(args[ac], XmNheight, 683); ac++;
     mainWindow = XmCreateMainWindow(parent,
         (char *)"mainWindow",
         args, 
@@ -258,13 +278,170 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNwidth, 1018); ac++;
-    XtSetArg(args[ac], XmNheight, 695); ac++;
+    XtSetArg(args[ac], XmNwidth, 1024); ac++;
+    XtSetArg(args[ac], XmNheight, 683); ac++;
     bulletinBoard = XmCreateBulletinBoard(mainWindow,
         (char *)"bulletinBoard",
         args, 
         ac);
     XtManageChild(bulletinBoard);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard, (char *)"End", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 390); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 70); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        pushButton_end = XmCreatePushButton(bulletinBoard,
+            (char *)"pushButton_end",
+            args, 
+            ac);
+        XtManageChild(pushButton_end);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_end, XmNactivateCallback, do_end, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(bulletinBoard, (char *)"Start", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 180); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNwidth, 70); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        pushButton_start = XmCreatePushButton(bulletinBoard,
+            (char *)"pushButton_start",
+            args, 
+            ac);
+        XtManageChild(pushButton_start);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_start, XmNactivateCallback, do_start, (XtPointer)0);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 10); ac++;
+    XtSetArg(args[ac], XmNy, 10); ac++;
+    XtSetArg(args[ac], XmNwidth, 51); ac++;
+    XtSetArg(args[ac], XmNheight, 34); ac++;
+    menuBar_file = XmCreateMenuBar(bulletinBoard,
+        (char *)"menuBar_file",
+        args, 
+        ac);
+    XtManageChild(menuBar_file);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(menuBar_file, (char *)"File", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNx, 5); ac++;
+        XtSetArg(args[ac], XmNy, 5); ac++;
+        XtSetArg(args[ac], XmNwidth, 41); ac++;
+        XtSetArg(args[ac], XmNheight, 24); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(menuBar_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        cascadeButton_file = XmCreateCascadeButton(menuBar_file,
+            (char *)"cascadeButton_file",
+            args, 
+            ac);
+        XtManageChild(cascadeButton_file);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 0); ac++;
+    XtSetArg(args[ac], XmNwidth, 135); ac++;
+    XtSetArg(args[ac], XmNheight, 52); ac++;
+    pulldownMenu_file = XmCreatePulldownMenu(XtParent(cascadeButton_file),
+        (char *)"pulldownMenu_file",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, (char *)"Open", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_file = XmCreatePushButton(pulldownMenu_file,
+            (char *)"pushButton_file",
+            args, 
+            ac);
+        XtManageChild(pushButton_file);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_file, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_fileselection");
+    XtAddCallback(pushButton_file, XmNactivateCallback, BxSetValuesCB, (XtPointer)"label_format.labelString=MBIO Format ID:");
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(pulldownMenu_file, (char *)"File Selection List", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(pulldownMenu_file, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_filelist = XmCreatePushButton(pulldownMenu_file,
+            (char *)"pushButton_filelist",
+            args, 
+            ac);
+        XtManageChild(pushButton_filelist);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_filelist, XmNactivateCallback, BxManageCB, (XtPointer)"form_filelist");
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNsubMenuId, pulldownMenu_file); ac++;
+    XtSetValues(cascadeButton_file, args, ac);
     
     ac = 0;
     {
@@ -352,7 +529,7 @@ CreatemainWindow(Widget parent)
     XtAddCallback(pushButton_flag, XmNactivateCallback, do_flag, (XtPointer)0);
     
     ac = 0;
-    XtSetArg(args[ac], XmNx, 120); ac++;
+    XtSetArg(args[ac], XmNx, 80); ac++;
     XtSetArg(args[ac], XmNy, 10); ac++;
     XtSetArg(args[ac], XmNwidth, 87); ac++;
     XtSetArg(args[ac], XmNheight, 34); ac++;
@@ -741,45 +918,16 @@ CreatemainWindow(Widget parent)
     {
         XmString    tmp0;
         
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard, (char *)"File", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 10); ac++;
-        XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        pushButton_file = XmCreatePushButton(bulletinBoard,
-            (char *)"pushButton_file",
-            args, 
-            ac);
-        XtManageChild(pushButton_file);
-        
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
-    XtAddCallback(pushButton_file, XmNactivateCallback, BxManageCB, (XtPointer)"bulletinBoard_fileselection");
-    XtAddCallback(pushButton_file, XmNactivateCallback, BxSetValuesCB, (XtPointer)"label_format.labelString=MBIO Format ID:");
-    
-    ac = 0;
-    {
-        XmString    tmp0;
-        
         tmp0 = (XmString) BX_CONVERT(bulletinBoard, (char *)"Next Buffer", 
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 250); ac++;
+        XtSetArg(args[ac], XmNx, 480); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNwidth, 88); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
         pushButton_nextbuffer = XmCreatePushButton(bulletinBoard,
             (char *)"pushButton_nextbuffer",
             args, 
@@ -802,12 +950,12 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 740); ac++;
+        XtSetArg(args[ac], XmNx, 760); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNwidth, 70); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
         pushButton_done = XmCreatePushButton(bulletinBoard,
             (char *)"pushButton_done",
             args, 
@@ -830,12 +978,12 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 350); ac++;
+        XtSetArg(args[ac], XmNx, 320); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNwidth, 69); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
         pushButton_forward = XmCreatePushButton(bulletinBoard,
             (char *)"pushButton_forward",
             args, 
@@ -858,12 +1006,12 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 450); ac++;
+        XtSetArg(args[ac], XmNx, 250); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNwidth, 69); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
         pushButton_reverse = XmCreatePushButton(bulletinBoard,
             (char *)"pushButton_reverse",
             args, 
@@ -886,12 +1034,12 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNx, 830); ac++;
+        XtSetArg(args[ac], XmNx, 840); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 29); ac++;
+        XtSetArg(args[ac], XmNwidth, 70); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
         pushButton_quit = XmCreatePushButton(bulletinBoard,
             (char *)"pushButton_quit",
             args, 
@@ -914,12 +1062,12 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1", 
+            BX_CONVERT(bulletinBoard, (char *)"-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNx, 920); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
-        XtSetArg(args[ac], XmNwidth, 90); ac++;
-        XtSetArg(args[ac], XmNheight, 29); ac++;
+        XtSetArg(args[ac], XmNwidth, 80); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
         pushButton_about = XmCreatePushButton(bulletinBoard,
             (char *)"pushButton_about",
             args, 
@@ -974,7 +1122,7 @@ CreatemainWindow(Widget parent)
             BX_CONVERT(bulletinBoard, (char *)"-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 640); ac++;
+        XtSetArg(args[ac], XmNx, 670); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
@@ -1003,7 +1151,7 @@ CreatemainWindow(Widget parent)
             BX_CONVERT(bulletinBoard, (char *)"-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1", 
             XmRFontList, 0, &argok)); if (argok) ac++;
         XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 550); ac++;
+        XtSetArg(args[ac], XmNx, 580); ac++;
         XtSetArg(args[ac], XmNy, 10); ac++;
         XtSetArg(args[ac], XmNwidth, 80); ac++;
         XtSetArg(args[ac], XmNheight, 30); ac++;
@@ -1655,8 +1803,8 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 176); ac++;
-    XtSetArg(args[ac], XmNy, 542); ac++;
+    XtSetArg(args[ac], XmNx, 1040); ac++;
+    XtSetArg(args[ac], XmNy, 1104); ac++;
     XtSetArg(args[ac], XmNwidth, 481); ac++;
     XtSetArg(args[ac], XmNheight, 466); ac++;
     bulletinBoard_about = XtCreateWidget((char *)"bulletinBoard_about",
@@ -2027,8 +2175,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_FULL_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 1030); ac++;
+    XtSetArg(args[ac], XmNx, 1091); ac++;
+    XtSetArg(args[ac], XmNy, 1294); ac++;
     XtSetArg(args[ac], XmNwidth, 379); ac++;
     XtSetArg(args[ac], XmNheight, 86); ac++;
     bulletinBoard_message = XtCreateWidget((char *)"bulletinBoard_message",
@@ -2106,8 +2254,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNdialogStyle, XmDIALOG_APPLICATION_MODAL); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 992); ac++;
+    XtSetArg(args[ac], XmNx, 1125); ac++;
+    XtSetArg(args[ac], XmNy, 1256); ac++;
     XtSetArg(args[ac], XmNwidth, 311); ac++;
     XtSetArg(args[ac], XmNheight, 161); ac++;
     bulletinBoard_error = XtCreateWidget((char *)"bulletinBoard_error",
@@ -2230,8 +2378,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "Select Input Data File"); ac++;
     XtSetArg(args[ac], XmNallowShellResize, False); ac++;
-    XtSetArg(args[ac], XmNwidth, 614); ac++;
-    XtSetArg(args[ac], XmNheight, 606); ac++;
+    XtSetArg(args[ac], XmNwidth, 606); ac++;
+    XtSetArg(args[ac], XmNheight, 557); ac++;
     xmDialogShell_fileselection = XmCreateDialogShell(mainWindow,
         (char *)"xmDialogShell_fileselection",
         args, 
@@ -2239,58 +2387,15 @@ CreatemainWindow(Widget parent)
     
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_NONE); ac++;
-    XtSetArg(args[ac], XmNx, 110); ac++;
-    XtSetArg(args[ac], XmNy, 425); ac++;
-    XtSetArg(args[ac], XmNwidth, 614); ac++;
-    XtSetArg(args[ac], XmNheight, 606); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 1058); ac++;
+    XtSetArg(args[ac], XmNwidth, 606); ac++;
+    XtSetArg(args[ac], XmNheight, 557); ac++;
     bulletinBoard_fileselection = XtCreateWidget((char *)"bulletinBoard_fileselection",
         xmBulletinBoardWidgetClass,
         xmDialogShell_fileselection,
         args, 
         ac);
-    
-    ac = 0;
-    XtSetArg(args[ac], XmNfontList, 
-        BX_CONVERT(bulletinBoard_fileselection, (char *)"-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1", 
-        XmRFontList, 0, &argok)); if (argok) ac++;
-    XtSetArg(args[ac], XmNx, 20); ac++;
-    XtSetArg(args[ac], XmNy, 550); ac++;
-    XtSetArg(args[ac], XmNwidth, 570); ac++;
-    XtSetArg(args[ac], XmNheight, 40); ac++;
-    textField_output_file = XmCreateTextField(bulletinBoard_fileselection,
-        (char *)"textField_output_file",
-        args, 
-        ac);
-    XtManageChild(textField_output_file);
-    
-    ac = 0;
-    {
-        XmString    tmp0;
-        
-        tmp0 = (XmString) BX_CONVERT(bulletinBoard_fileselection, (char *)"Output File Name:", 
-                XmRXmString, 0, &argok);
-        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
-        XtSetArg(args[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-        XtSetArg(args[ac], XmNfontList, 
-            BX_CONVERT(bulletinBoard_fileselection, (char *)"-adobe-helvetica-bold-r-normal--14-140-75-75-p-82-iso8859-1", 
-            XmRFontList, 0, &argok)); if (argok) ac++;
-        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
-        XtSetArg(args[ac], XmNx, 20); ac++;
-        XtSetArg(args[ac], XmNy, 520); ac++;
-        XtSetArg(args[ac], XmNwidth, 150); ac++;
-        XtSetArg(args[ac], XmNheight, 30); ac++;
-        label_filename = XmCreateLabel(bulletinBoard_fileselection,
-            (char *)"label_filename",
-            args, 
-            ac);
-        XtManageChild(label_filename);
-        
-        /**
-         * Free any memory allocated for resources.
-         */
-        XmStringFree((XmString)tmp0);
-    }
-    
     
     ac = 0;
     {
@@ -2489,8 +2594,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 975); ac++;
+        XtSetArg(args[ac], XmNx, 1035); ac++;
+        XtSetArg(args[ac], XmNy, 1239); ac++;
         XtSetArg(args[ac], XmNwidth, 491); ac++;
         XtSetArg(args[ac], XmNheight, 195); ac++;
         bulletinBoard_timestepping = XtCreateWidget((char *)"bulletinBoard_timestepping",
@@ -2714,8 +2819,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 1090); ac++;
-        XtSetArg(args[ac], XmNy, 507); ac++;
+        XtSetArg(args[ac], XmNx, 1035); ac++;
+        XtSetArg(args[ac], XmNy, 1063); ac++;
         XtSetArg(args[ac], XmNwidth, 492); ac++;
         XtSetArg(args[ac], XmNheight, 548); ac++;
         bulletinBoard_modeling = XtCreateWidget((char *)"bulletinBoard_modeling",
@@ -3210,8 +3315,8 @@ CreatemainWindow(Widget parent)
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNautoUnmanage, True); ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 1010); ac++;
+        XtSetArg(args[ac], XmNx, 1029); ac++;
+        XtSetArg(args[ac], XmNy, 1274); ac++;
         XtSetArg(args[ac], XmNwidth, 503); ac++;
         XtSetArg(args[ac], XmNheight, 126); ac++;
         bulletinBoard_useprevious = XtCreateWidget((char *)"bulletinBoard_useprevious",
@@ -3322,8 +3427,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 998); ac++;
+    XtSetArg(args[ac], XmNx, 1127); ac++;
+    XtSetArg(args[ac], XmNy, 1262); ac++;
     XtSetArg(args[ac], XmNwidth, 307); ac++;
     XtSetArg(args[ac], XmNheight, 149); ac++;
     bulletinBoard_timeinterpolation = XtCreateWidget((char *)"bulletinBoard_timeinterpolation",
@@ -3428,8 +3533,8 @@ CreatemainWindow(Widget parent)
     ac = 0;
     XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-    XtSetArg(args[ac], XmNx, 0); ac++;
-    XtSetArg(args[ac], XmNy, 998); ac++;
+    XtSetArg(args[ac], XmNx, 1126); ac++;
+    XtSetArg(args[ac], XmNy, 1262); ac++;
     XtSetArg(args[ac], XmNwidth, 310); ac++;
     XtSetArg(args[ac], XmNheight, 149); ac++;
     bulletinBoard_deletebadtimetag = XtCreateWidget((char *)"bulletinBoard_deletebadtimetag",
@@ -3538,8 +3643,8 @@ CreatemainWindow(Widget parent)
                 XmRXmString, 0, &argok);
         XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
         XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
-        XtSetArg(args[ac], XmNx, 0); ac++;
-        XtSetArg(args[ac], XmNy, 986); ac++;
+        XtSetArg(args[ac], XmNx, 1080); ac++;
+        XtSetArg(args[ac], XmNy, 1250); ac++;
         XtSetArg(args[ac], XmNwidth, 401); ac++;
         XtSetArg(args[ac], XmNheight, 174); ac++;
         form_offset = XtCreateWidget((char *)"form_offset",
@@ -3693,6 +3798,304 @@ CreatemainWindow(Widget parent)
          */
         XmStringFree((XmString)tmp0);
     }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNwidth, 343); ac++;
+    XtSetArg(args[ac], XmNheight, 580); ac++;
+    dialogShell_filelist = XmCreateDialogShell(mainWindow,
+        (char *)"dialogShell_filelist",
+        args, 
+        ac);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(dialogShell_filelist, (char *)"Files Available for Editing", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNdialogTitle, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNautoUnmanage, False); ac++;
+        XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
+        XtSetArg(args[ac], XmNx, 1109); ac++;
+        XtSetArg(args[ac], XmNy, 1047); ac++;
+        XtSetArg(args[ac], XmNwidth, 343); ac++;
+        XtSetArg(args[ac], XmNheight, 580); ac++;
+        form_filelist = XtCreateWidget((char *)"form_filelist",
+            xmFormWidgetClass,
+            dialogShell_filelist,
+            args, 
+            ac);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_filelist, (char *)":::t\"Remove\":t\"Selected\"\"File\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
+        XtSetArg(args[ac], XmNx, 110); ac++;
+        XtSetArg(args[ac], XmNy, 510); ac++;
+        XtSetArg(args[ac], XmNwidth, 104); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_filelist, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_filelist_remove = XmCreatePushButton(form_filelist,
+            (char *)"pushButton_filelist_remove",
+            args, 
+            ac);
+        XtManageChild(pushButton_filelist_remove);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_filelist_remove, XmNactivateCallback, do_filelist_remove, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_filelist, (char *)":::t\"Edit\":t\"Selected\"\"File\"", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 510); ac++;
+        XtSetArg(args[ac], XmNwidth, 90); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_filelist, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_filelist_edit = XmCreatePushButton(form_filelist,
+            (char *)"pushButton_filelist_edit",
+            args, 
+            ac);
+        XtManageChild(pushButton_filelist_edit);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_filelist_edit, XmNactivateCallback, do_editlistselection, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_filelist, (char *)"Output Mode:", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNmarginWidth, 0); ac++;
+        XtSetArg(args[ac], XmNx, 10); ac++;
+        XtSetArg(args[ac], XmNy, 10); ac++;
+        XtSetArg(args[ac], XmNheight, 30); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_filelist, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        setting_output_label_filelist = XmCreateLabel(form_filelist,
+            (char *)"setting_output_label_filelist",
+            args, 
+            ac);
+        XtManageChild(setting_output_label_filelist);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNnumColumns, 1); ac++;
+    XtSetArg(args[ac], XmNpacking, XmPACK_COLUMN); ac++;
+    XtSetArg(args[ac], XmNradioBehavior, True); ac++;
+    XtSetArg(args[ac], XmNspacing, 0); ac++;
+    XtSetArg(args[ac], XmNorientation, XmHORIZONTAL); ac++;
+    XtSetArg(args[ac], XmNx, 110); ac++;
+    XtSetArg(args[ac], XmNy, 10); ac++;
+    XtSetArg(args[ac], XmNwidth, 238); ac++;
+    XtSetArg(args[ac], XmNheight, 34); ac++;
+    setting_output_filelist = XmCreateRowColumn(form_filelist,
+        (char *)"setting_output_filelist",
+        args, 
+        ac);
+    XtManageChild(setting_output_filelist);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(setting_output_filelist, (char *)"Output Edits", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 116); ac++;
+        XtSetArg(args[ac], XmNheight, 28); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(setting_output_filelist, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_output_on_filelist = XmCreateToggleButton(setting_output_filelist,
+            (char *)"toggleButton_output_on_filelist",
+            args, 
+            ac);
+        XtManageChild(toggleButton_output_on_filelist);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_output_on_filelist, XmNvalueChangedCallback, do_toggle_output_on_filelist, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(setting_output_filelist, (char *)"Browse Only", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNwidth, 116); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(setting_output_filelist, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        toggleButton_output_off_filelist = XmCreateToggleButton(setting_output_filelist,
+            (char *)"toggleButton_output_off_filelist",
+            args, 
+            ac);
+        XtManageChild(toggleButton_output_off_filelist);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(toggleButton_output_off_filelist, XmNvalueChangedCallback, do_toggle_output_off_filelist, (XtPointer)0);
+    
+    ac = 0;
+    {
+        XmString    tmp0;
+        
+        tmp0 = (XmString) BX_CONVERT(form_filelist, (char *)"Dismiss", 
+                XmRXmString, 0, &argok);
+        XtSetArg(args[ac], XmNlabelString, tmp0); if (argok) ac++;
+        XtSetArg(args[ac], XmNrecomputeSize, False); ac++;
+        XtSetArg(args[ac], XmNx, 250); ac++;
+        XtSetArg(args[ac], XmNy, 510); ac++;
+        XtSetArg(args[ac], XmNwidth, 80); ac++;
+        XtSetArg(args[ac], XmNheight, 60); ac++;
+        XtSetArg(args[ac], XmNfontList, 
+            BX_CONVERT(form_filelist, (char *)"-*-helvetica-bold-r-*-*-*-140-75-75-*-*-iso8859-1", 
+            XmRFontList, 0, &argok)); if (argok) ac++;
+        pushButton_filelist_dismiss = XmCreatePushButton(form_filelist,
+            (char *)"pushButton_filelist_dismiss",
+            args, 
+            ac);
+        XtManageChild(pushButton_filelist_dismiss);
+        
+        /**
+         * Free any memory allocated for resources.
+         */
+        XmStringFree((XmString)tmp0);
+    }
+    
+    XtAddCallback(pushButton_filelist_dismiss, XmNactivateCallback, BxUnmanageCB, (XtPointer)"form_filelist");
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNscrollingPolicy, XmAPPLICATION_DEFINED); ac++;
+    XtSetArg(args[ac], XmNx, 0); ac++;
+    XtSetArg(args[ac], XmNy, 50); ac++;
+    XtSetArg(args[ac], XmNwidth, 339); ac++;
+    XtSetArg(args[ac], XmNheight, 450); ac++;
+    scrolledWindow_filelist = XmCreateScrolledWindow(form_filelist,
+        (char *)"scrolledWindow_filelist",
+        args, 
+        ac);
+    XtManageChild(scrolledWindow_filelist);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNfontList, 
+        BX_CONVERT(scrolledWindow_filelist, (char *)"-*-courier-*-r-*-*-*-90-*-*-*-*-iso8859-1", 
+        XmRFontList, 0, &argok)); if (argok) ac++;
+    XtSetArg(args[ac], XmNselectionPolicy, XmSINGLE_SELECT); ac++;
+    XtSetArg(args[ac], XmNwidth, 339); ac++;
+    XtSetArg(args[ac], XmNheight, 450); ac++;
+    list_filelist = XmCreateList(scrolledWindow_filelist,
+        (char *)"list_filelist",
+        args, 
+        ac);
+    XtManageChild(list_filelist);
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 10); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNleftWidget, pushButton_filelist_edit); ac++;
+    XtSetValues(pushButton_filelist_remove, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 10); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetValues(pushButton_filelist_edit, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 10); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetValues(setting_output_label_filelist, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 0); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 3); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 10); ac++;
+    XtSetArg(args[ac], XmNleftWidget, setting_output_label_filelist); ac++;
+    XtSetValues(setting_output_filelist, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_NONE); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 10); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 13); ac++;
+    XtSetValues(pushButton_filelist_dismiss, args, ac);
+    
+    ac = 0;
+    XtSetArg(args[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+    XtSetArg(args[ac], XmNbottomAttachment, XmATTACH_WIDGET); ac++;
+    XtSetArg(args[ac], XmNbottomOffset, 10); ac++;
+    XtSetArg(args[ac], XmNbottomWidget, pushButton_filelist_remove); ac++;
+    XtSetArg(args[ac], XmNleftOffset, 0); ac++;
+    XtSetArg(args[ac], XmNrightOffset, 4); ac++;
+    XtSetArg(args[ac], XmNtopOffset, 6); ac++;
+    XtSetArg(args[ac], XmNtopWidget, setting_output_filelist); ac++;
+    XtSetValues(scrolledWindow_filelist, args, ac);
     
     ac = 0;
     XtSetArg(args[ac], XmNtopAttachment, XmATTACH_NONE); ac++;

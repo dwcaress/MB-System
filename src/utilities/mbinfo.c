@@ -2,7 +2,7 @@
  *    The MB-system:	mbinfo.c	2/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -15,10 +15,10 @@
 /*
  * MBINFO reads a swath sonar data file and outputs
  * some basic statistics.  If pings are averaged (pings > 2)
- * MBINFO estimates the variance for each of the swath 
- * bathymetry beams by reading a set number of pings (>2) and then finding 
+ * MBINFO estimates the variance for each of the swath
+ * bathymetry beams by reading a set number of pings (>2) and then finding
  * the variance of the detrended values for each beam. The variances
- * for the amplitude beams and sidescan values are 
+ * for the amplitude beams and sidescan values are
  * calculated without detrending.
  * The results are dumped to stdout.
  *
@@ -243,6 +243,11 @@ struct ping
 	double	*sslat;
 	};
 
+/* output formats */
+#define FREE_TEXT 	0
+#define JSON 		1
+#define MAX_OUTPUT_FORMAT 1
+
 static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -258,7 +263,7 @@ int main (int argc, char **argv)
 		"The results are dumped to stdout.";
 	char usage_message[] = "mbinfo [-Byr/mo/da/hr/mn/sc -C "
 		"-Eyr/mo/da/hr/mn/sc -Fformat -G -Ifile -Llonflip -Mnx/ny "
-		"-N -O -Ppings -Rw/e/s/n -Sspeed -W -V -H]";
+		"-N -O -Ppings -Rw/e/s/n -Sspeed -W -V -H -XinfFormat]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -291,15 +296,15 @@ int main (int argc, char **argv)
 	char	file[MB_PATH_MAXLINE];
 	int	pings_get = 1;
 	int	pings_read = 1;
-	int	beams_bath_alloc;
-	int	beams_amp_alloc;
-	int	pixels_ss_alloc;
+	int	beams_bath_alloc = 0;
+	int	beams_amp_alloc = 0;
+	int	pixels_ss_alloc = 0;
 	int	beams_bath_max = 0;
 	int	beams_amp_max = 0;
 	int	pixels_ss_max = 0;
-	int	beams_bath;
-	int	beams_amp;
-	int	pixels_ss;
+	int	beams_bath = 0;
+	int	beams_amp = 0;
+	int	pixels_ss = 0;
 
 	/* MBIO read values */
 	void	*mbio_ptr = NULL;
@@ -326,7 +331,7 @@ int main (int argc, char **argv)
 	double	*sslat = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
 	int	icomment = 0;
-	
+
 	/* metadata controls */
 	int	imetadata = 0;
 	int	meta_vessel = 0;
@@ -447,7 +452,7 @@ int main (int argc, char **argv)
 	int	*nampvar = NULL;
 	double	*ssmean = NULL;
 	double	*ssvar = NULL;
-	int	*nssvar = NULL;	
+	int	*nssvar = NULL;
 	int	nbathtot_alloc = 0;
 	int	namptot_alloc = 0;
 	int	nsstot_alloc = 0;
@@ -460,7 +465,7 @@ int main (int argc, char **argv)
 	double	*ssmeantot = NULL;
 	double	*ssvartot = NULL;
 	int	*nssvartot = NULL;
-	
+
 	/* coverage mask variables */
 	int	coverage_mask = MB_NO;
 	int	pass;
@@ -470,11 +475,12 @@ int main (int argc, char **argv)
 	double	mask_dx = 0.0;
 	double	mask_dy = 0.0;
 	int	*mask = NULL;
-	
+
 	/* notice variables */
 	int	print_notices = MB_NO;
 	int	notice_list[MB_NOTICE_MAX];
 	int	notice_list_tot[MB_NOTICE_MAX];
+	int	notice_total;
 	char	*notice_msg;
 
 	/* output stream for basic stuff (stdout if verbose <= 1,
@@ -484,6 +490,9 @@ int main (int argc, char **argv)
 	int	output_usefile = MB_NO;
 	char	output_file[MB_PATH_MAXLINE];
 	char	*fileprint;
+	int output_format = FREE_TEXT;
+	int len1,len2;
+	char    string[500];
 
 	int	read_data;
 	double	speed_apparent, time_d_last;
@@ -491,6 +500,7 @@ int main (int argc, char **argv)
 	double	val_double;
 	int	ix, iy;
 	int	i, j, k;
+	double	sigma;
 
 	char	*getenv();
 
@@ -504,8 +514,8 @@ int main (int argc, char **argv)
 		{
 		notice_list[i] = 0;
 		notice_list_tot[i] = 0;
-		}		
-		
+		}
+
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings_get,&lonflip,bounds,
 		btime_i,etime_i,&speedmin,&timegap);
@@ -514,8 +524,8 @@ int main (int argc, char **argv)
 	strcpy (read_file, "stdin");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:Ww")) != -1)
-	  switch (c) 
+	  while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:WwX:x:")) != -1)
+	  switch (c)
 		{
 		case 'B':
 		case 'b':
@@ -585,7 +595,7 @@ int main (int argc, char **argv)
 			sscanf (optarg,"%d", &pings_read);
 			if (pings_read < 1)
 				pings_read = 1;
-			if (pings_read > MBINFO_MAXPINGS) 
+			if (pings_read > MBINFO_MAXPINGS)
 				pings_read = MBINFO_MAXPINGS;
 			flag++;
 			break;
@@ -611,6 +621,16 @@ int main (int argc, char **argv)
 		case 'W':
 		case 'w':
 			bathy_in_feet = MB_YES;
+			break;
+		case 'X':
+		case 'x':
+			sscanf (optarg,"%d",&output_format);
+			if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT)
+			{
+				errflg++;
+				fprintf(stream,"Invalid output format for inf file");
+			}
+			flag++;
 			break;
 		case '?':
 			errflg++;
@@ -711,12 +731,22 @@ int main (int argc, char **argv)
 		are disabled */
 	if (read_datalist == MB_YES)
 		pings_read = 1;
-		
+
 	/* Open output file if requested */
 	if (output_usefile == MB_YES)
 	    {
 	    strcpy(output_file, read_file);
-	    strcat(output_file, ".inf");
+		switch (output_format)
+		{
+			case FREE_TEXT:
+				strcat(output_file, ".inf");
+				break;
+			case JSON:
+				strcat(output_file,"_inf.json");
+				break;
+			case '?':
+				break;
+		}
 	    if ((output = fopen(output_file, "w")) == NULL)
 		output = stream;
 	    }
@@ -724,7 +754,16 @@ int main (int argc, char **argv)
 	    {
 	    output = stream;
 	    }
-		
+	switch (output_format)
+    {
+		case FREE_TEXT:
+			break;
+		case JSON:
+			fprintf(output,"{\n");
+			break;
+		case '?':
+			break;
+	}
 	/* read only once unless coverage mask requested */
 	pass = 0;
 	done = MB_NO;
@@ -813,13 +852,13 @@ int main (int argc, char **argv)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							sizeof(double), (void **)&datacur->bathlat, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&datacur->ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&datacur->sslon, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&datacur->sslat, &error);
 		}
 	if (pings_read > 1 && pass == 0)
@@ -843,16 +882,16 @@ int main (int argc, char **argv)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_AMPLITUDE,
 							sizeof(int), (void **)&nampvar, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&ssmean, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&ssvar, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(int), (void **)&nssvar, &error);
 		}
-		
+
 	/* if coverage mask requested get cell sizes */
 	if (pass == 1 && coverage_mask == MB_YES)
 	    {
@@ -923,7 +962,7 @@ int main (int argc, char **argv)
 		for (i=0;i<mask_nx*mask_ny;i++)
 		    mask[i] = MB_NO;
 		}
-		
+
 	/* initialize metadata counters */
 	meta_vessel = 0;
 	meta_institution = 0;
@@ -952,9 +991,38 @@ int main (int argc, char **argv)
 		else
 		    fileprint = strrchr(file, '/') + 1;
 		mb_format_description(verbose,&format,format_description,&error);
-		fprintf(output,"\nSwath Data File:      %s\n",fileprint);
-		fprintf(output,"MBIO Data Format ID:  %d\n",format);
-		fprintf(output,"%s",format_description);
+		switch (output_format)
+			{
+			case FREE_TEXT:
+				fprintf(output,"\nSwath Data File:      %s\n",fileprint);
+				fprintf(output,"MBIO Data Format ID:  %d\n",format);
+				fprintf(output,"%s",format_description);
+				break;
+			case JSON:
+				fprintf(output,"\"file_info\":{\n");
+				fprintf(output,"\"swath_data_file\":\"%s\",\n",fileprint);
+				fprintf(output,"\"mbio_data_format_id\":\"%d\",\n",format);
+				len1=strspn(format_description,"Formatname: ");
+				len2=strcspn(&format_description[len1],"\n");
+				strncpy(string,&format_description[len1],len2);
+				fprintf(output,"\"format_name\": \"%s\",\n",string);
+				len1+=len2+1;
+				len1+=strspn(&format_description[len1],"InformalDescription: ");
+				len2=strcspn(&format_description[len1],"\n");
+				strncpy(string,&format_description[len1],len2);
+				fprintf(output,"\"informal_description\": \"%s\",\n",string);
+				len1+=len2+1;
+				len1+=strspn(&format_description[len1],"Attributes: ");
+				len2=strlen(format_description);
+				format_description[strlen(format_description)-1]='\0';
+				for (len2=len1;len2<=strlen(format_description);len2++)
+					if (format_description[len2]==10)format_description[len2]=';';
+				fprintf(output,"\"attributes\": \"%s\"\n",&format_description[len1]);
+				fprintf(output,"},\n");
+				break;
+			case '?':
+				errflg++;
+			}
 		}
 
 	/* read and process data */
@@ -991,8 +1059,8 @@ int main (int argc, char **argv)
 			sslat = datacur->sslat;
 
 			/* increment counters */
-			if (pass == 0 
-				&& (error == MB_ERROR_NO_ERROR 
+			if (pass == 0
+				&& (error == MB_ERROR_NO_ERROR
 				    || error == MB_ERROR_TIME_GAP))
 				{
 				irec++;
@@ -1001,176 +1069,347 @@ int main (int argc, char **argv)
 				}
 
 			/* print comment records */
-			if (pass == 0 
-				&& error == MB_ERROR_COMMENT 
+			if (pass == 0
+				&& error == MB_ERROR_COMMENT
 				&& comments == MB_YES)
 				{
 				if (strncmp(comment,"META",4) != 0)
 					{
 					if (icomment == 0)
 						{
-						fprintf(output,"\nComments in file %s:\n",file);
-						icomment++;
+						switch (output_format)
+					    	{
+							case FREE_TEXT:
+								fprintf(output,"\nComments in file %s:\n",file);
+								icomment++;
+								break;
+							case '?':
+								break;
+							}
 						}
-					fprintf(output,"  %s\n",comment);
+						switch (output_format)
+							{
+							case FREE_TEXT:
+								fprintf(output,"  %s\n",comment);
+								break;
+							case JSON:
+								fprintf(output,"\"comment\":\"%s\",\n",comment);
+								break;
+							case '?':
+								break;
+						}
 					}
 				}
-			
+
 			/* print metadata */
 			if (pass == 0
 				&& error == MB_ERROR_COMMENT
 				&& strncmp(comment,"META",4) == 0)
 				{
-				if (imetadata == 0)
+					switch (output_format)
 					{
-					fprintf(output,"\nMetadata:\n");
-					imetadata++;
+						case FREE_TEXT:
+							if (imetadata == 0)
+								{
+								fprintf(output,"\nMetadata:\n");
+								imetadata++;
+								}
+							if (strncmp(comment, "METAVESSEL:", 11) == 0)
+								{
+								if (meta_vessel == 0)
+					    			fprintf(output,"Vessel:                 %s\n", &comment[11]);
+								meta_vessel++;
+								}
+							else if (strncmp(comment, "METAINSTITUTION:", 16) == 0)
+								{
+								if (meta_institution == 0)
+					    			fprintf(output,"Institution:            %s\n", &comment[16]);
+								meta_institution++;
+								}
+							else if (strncmp(comment, "METAPLATFORM:", 13) == 0)
+								{
+								if (meta_platform == 0)
+					    			fprintf(output,"Platform:               %s\n", &comment[13]);
+								meta_platform++;
+								}
+							else if (strncmp(comment, "METASONARVERSION:", 17) == 0)
+								{
+								if (meta_sonarversion == 0)
+					    			fprintf(output,"Sonar Version:          %s\n", &comment[17]);
+								meta_sonarversion++;
+								}
+							else if (strncmp(comment, "METASONAR:", 10) == 0)
+								{
+								if (meta_sonar == 0)
+					    			fprintf(output,"Sonar:                  %s\n", &comment[10]);
+								meta_sonar++;
+								}
+							else if (strncmp(comment, "METACRUISEID:", 13) == 0)
+								{
+								if (meta_cruiseid == 0)
+					    			fprintf(output,"Cruise ID:              %s\n", &comment[13]);
+								meta_cruiseid++;
+								}
+							else if (strncmp(comment, "METACRUISENAME:", 15) == 0)
+								{
+								if (meta_cruisename == 0)
+					    			fprintf(output,"Cruise Name:            %s\n", &comment[15]);
+								meta_cruisename++;
+								}
+							else if (strncmp(comment, "METAPI:", 7) == 0)
+								{
+								if (meta_pi == 0)
+					    			fprintf(output,"PI:                     %s\n", &comment[7]);
+								meta_pi++;
+								}
+							else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0)
+								{
+								if (meta_piinstitution == 0)
+					    			fprintf(output,"PI Institution:         %s\n", &comment[18]);
+								meta_piinstitution++;
+								}
+							else if (strncmp(comment, "METACLIENT:", 11) == 0)
+								{
+								if (meta_client == 0)
+					    			fprintf(output,"Client:                 %s\n", &comment[11]);
+								meta_client++;
+								}
+							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0)
+								{
+								if (meta_svcorrected == 0)
+					    			{
+					    			sscanf(comment, "METASVCORRECTED:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"Corrected Depths:       YES\n");
+					    			else
+									fprintf(output,"Corrected Depths:       NO\n");
+					    			}
+								meta_svcorrected++;
+								}
+							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0)
+								{
+								if (meta_tidecorrected == 0)
+					    			{
+					    			sscanf(comment, "METATIDECORRECTED:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"Tide Corrected:         YES\n");
+					    			else
+									fprintf(output,"Tide Corrected:         NO\n");
+					    			}
+								meta_tidecorrected++;
+								}
+							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0)
+								{
+								if (meta_batheditmanual == 0)
+					    			{
+					    			sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"Depths Manually Edited: YES\n");
+					    			else
+									fprintf(output,"Depths Manually Edited: NO\n");
+					    			}
+								meta_batheditmanual++;
+								}
+							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0)
+								{
+								if (meta_batheditauto == 0)
+					    			{
+					    			sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"Depths Auto-Edited:     YES\n");
+					    			else
+									fprintf(output,"Depths Auto-Edited:     NO\n");
+					    			}
+								meta_batheditauto++;
+								}
+							else if (strncmp(comment, "METAROLLBIAS:", 13) == 0)
+								{
+								if (meta_rollbias == 0)
+					    			{
+					    			sscanf(comment, "METAROLLBIAS:%lf", &val_double);
+					    			fprintf(output,"Roll Bias:              %f degrees\n", val_double);
+					    			}
+								meta_rollbias++;
+								}
+							else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0)
+								{
+								if (meta_pitchbias == 0)
+					    			{
+					    			sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
+					    			fprintf(output,"Pitch Bias:             %f degrees\n", val_double);
+					    			}
+								meta_pitchbias++;
+								}
+							else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0)
+								{
+								if (meta_headingbias == 0)
+					    			{
+					    			sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
+					    			fprintf(output,"Heading Bias:           %f degrees\n", val_double);
+					    			}
+								meta_headingbias++;
+								}
+							else if (strncmp(comment, "METADRAFT:", 10) == 0)
+								{
+								if (meta_draft == 0)
+					    			{
+					    			sscanf(comment, "METADRAFT:%lf", &val_double);
+					    			fprintf(output,"Draft:                  %f m\n", val_double);
+					    			}
+								meta_draft++;
+								}
+							break;
+						case JSON:
+							if (strncmp(comment, "METAVESSEL:", 11) == 0)
+								{
+								if (meta_vessel == 0)
+					    			fprintf(output,"\"vessel\":\"%s\",\n", &comment[11]);
+								meta_vessel++;
+								}
+							else if (strncmp(comment, "METAINSTITUTION:", 16) == 0)
+								{
+								if (meta_institution == 0)
+					    			fprintf(output,"\"institution\":\"%s\",\n", &comment[16]);
+								meta_institution++;
+								}
+							else if (strncmp(comment, "METAPLATFORM:", 13) == 0)
+								{
+								if (meta_platform == 0)
+					    			fprintf(output,"\"platform\": \"%s \",\n", &comment[13]);
+								meta_platform++;
+								}
+							else if (strncmp(comment, "METASONARVERSION:", 17) == 0)
+								{
+								if (meta_sonarversion == 0)
+					    			fprintf(output,"\"sonar_version\": \"%s\",\n", &comment[17]);
+								meta_sonarversion++;
+								}
+							else if (strncmp(comment, "METASONAR:", 10) == 0)
+								{
+								if (meta_sonar == 0)
+					    			fprintf(output,"\"sonar\": \"%s\",\n", &comment[10]);
+								meta_sonar++;
+								}
+							else if (strncmp(comment, "METACRUISEID:", 13) == 0)
+								{
+								if (meta_cruiseid == 0)
+					    			fprintf(output,"\"cruise_id\": \"%s\",\n", &comment[13]);
+								meta_cruiseid++;
+								}
+							else if (strncmp(comment, "METACRUISENAME:", 15) == 0)
+								{
+								if (meta_cruisename == 0)
+					    			fprintf(output,"\"cruise_name\": \"%s\",\n", &comment[15]);
+								meta_cruisename++;
+								}
+							else if (strncmp(comment, "METAPI:", 7) == 0)
+								{
+								if (meta_pi == 0)
+					    			fprintf(output,"\"pi\": \"%s\",\n", &comment[7]);
+								meta_pi++;
+								}
+							else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0)
+								{
+								if (meta_piinstitution == 0)
+					    			fprintf(output,"\"pi_institution\": \"%s\",\n", &comment[18]);
+								meta_piinstitution++;
+								}
+							else if (strncmp(comment, "METACLIENT:", 11) == 0)
+								{
+								if (meta_client == 0)
+					    			fprintf(output,"\"client\": \"%s\",\n", &comment[11]);
+								meta_client++;
+								}
+							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0)
+								{
+								if (meta_svcorrected == 0)
+					    			{
+					    			sscanf(comment, "METASVCORRECTED:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"\"corrected_depths\": \"YES\",\n");
+					    			else
+									fprintf(output,"\"corrected_depths\": \"NO\",\n");
+					    			}
+								meta_svcorrected++;
+								}
+							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0)
+								{
+								if (meta_tidecorrected == 0)
+					    			{
+					    			sscanf(comment, "METATIDECORRECTED:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"\"tide_corrected\": \"YES\",\n");
+					    			else
+									fprintf(output,"\"tide_corrected\": \"NO\",\n");
+					    			}
+								meta_tidecorrected++;
+								}
+							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0)
+								{
+								if (meta_batheditmanual == 0)
+					    			{
+					    			sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"\"depths_manually_edited\": \"YES\",\n");
+					    			else
+									fprintf(output,"\"depths_manually_edited\": \"NO\",\n");
+					    			}
+								meta_batheditmanual++;
+								}
+							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0)
+								{
+								if (meta_batheditauto == 0)
+					    			{
+					    			sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"\"depths_auto-edited\": \"YES\",\n");
+					    			else
+									fprintf(output,"\"depths_auto-edited\": \"NO\",\n");
+					    			}
+								meta_batheditauto++;
+								}
+							else if (strncmp(comment, "METAROLLBIAS:", 13) == 0)
+								{
+								if (meta_rollbias == 0)
+					    			{
+					    			sscanf(comment, "METAROLLBIAS:%lf", &val_double);
+					    			fprintf(output,"\"roll_bias\": \"%f\",\n", val_double);
+					    			}
+								meta_rollbias++;
+								}
+							else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0)
+								{
+								if (meta_pitchbias == 0)
+					    			{
+					    			sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
+					    			fprintf(output,"\"pitch_bias\": \"%f\",\n", val_double);
+					    			}
+								meta_pitchbias++;
+								}
+							else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0)
+								{
+								if (meta_headingbias == 0)
+					    			{
+					    			sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
+					    			fprintf(output,"\"heading_bias\": \"%f\",\n", val_double);
+					    			}
+								meta_headingbias++;
+								}
+							else if (strncmp(comment, "METADRAFT:", 10) == 0)
+								{
+								if (meta_draft == 0)
+					    			{
+					    			sscanf(comment, "METADRAFT:%lf", &val_double);
+					    			fprintf(output,"\"draft\": \"%f\",\n", val_double);
+					    			}
+								meta_draft++;
+								}
+							break;
+								break;
+							case '?':
+								break;
+						}
 					}
-				if (strncmp(comment, "METAVESSEL:", 11) == 0)
-					{
-					if (meta_vessel == 0)
-					    fprintf(output,"Vessel:                 %s\n", &comment[11]);
-					meta_vessel++;
-					}
-				else if (strncmp(comment, "METAINSTITUTION:", 16) == 0)
-					{
-					if (meta_institution == 0)
-					    fprintf(output,"Institution:            %s\n", &comment[16]);
-					meta_institution++;
-					}
-				else if (strncmp(comment, "METAPLATFORM:", 13) == 0)
-					{
-					if (meta_platform == 0)
-					    fprintf(output,"Platform:               %s\n", &comment[13]);
-					meta_platform++;
-					}
-				else if (strncmp(comment, "METASONARVERSION:", 17) == 0)
-					{
-					if (meta_sonarversion == 0)
-					    fprintf(output,"Sonar Version:          %s\n", &comment[17]);
-					meta_sonarversion++;
-					}
-				else if (strncmp(comment, "METASONAR:", 10) == 0)
-					{
-					if (meta_sonar == 0)
-					    fprintf(output,"Sonar:                  %s\n", &comment[10]);
-					meta_sonar++;
-					}
-				else if (strncmp(comment, "METACRUISEID:", 13) == 0)
-					{
-					if (meta_cruiseid == 0)
-					    fprintf(output,"Cruise ID:              %s\n", &comment[13]);
-					meta_cruiseid++;
-					}
-				else if (strncmp(comment, "METACRUISENAME:", 15) == 0)
-					{
-					if (meta_cruisename == 0)
-					    fprintf(output,"Cruise Name:            %s\n", &comment[15]);
-					meta_cruisename++;
-					}
-				else if (strncmp(comment, "METAPI:", 7) == 0)
-					{
-					if (meta_pi == 0)
-					    fprintf(output,"PI:                     %s\n", &comment[7]);
-					meta_pi++;
-					}
-				else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0)
-					{
-					if (meta_piinstitution == 0)
-					    fprintf(output,"PI Institution:         %s\n", &comment[18]);
-					meta_piinstitution++;
-					}
-				else if (strncmp(comment, "METACLIENT:", 11) == 0)
-					{
-					if (meta_client == 0)
-					    fprintf(output,"Client:                 %s\n", &comment[11]);
-					meta_client++;
-					}
-				else if (strncmp(comment, "METASVCORRECTED:", 16) == 0)
-					{
-					if (meta_svcorrected == 0)
-					    {
-					    sscanf(comment, "METASVCORRECTED:%d", &val_int);
-					    if (val_int == MB_YES)
-						fprintf(output,"Corrected Depths:       YES\n");
-					    else
-						fprintf(output,"Corrected Depths:       NO\n");
-					    }
-					meta_svcorrected++;
-					}
-				else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0)
-					{
-					if (meta_tidecorrected == 0)
-					    {
-					    sscanf(comment, "METATIDECORRECTED:%d", &val_int);
-					    if (val_int == MB_YES)
-						fprintf(output,"Tide Corrected:         YES\n");
-					    else
-						fprintf(output,"Tide Corrected:         NO\n");
-					    }
-					meta_tidecorrected++;
-					}
-				else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0)
-					{
-					if (meta_batheditmanual == 0)
-					    {
-					    sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
-					    if (val_int == MB_YES)
-						fprintf(output,"Depths Manually Edited: YES\n");
-					    else
-						fprintf(output,"Depths Manually Edited: NO\n");
-					    }
-					meta_batheditmanual++;
-					}
-				else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0)
-					{
-					if (meta_batheditauto == 0)
-					    {
-					    sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
-					    if (val_int == MB_YES)
-						fprintf(output,"Depths Auto-Edited:     YES\n");
-					    else
-						fprintf(output,"Depths Auto-Edited:     NO\n");
-					    }
-					meta_batheditauto++;
-					}
-				else if (strncmp(comment, "METAROLLBIAS:", 13) == 0)
-					{
-					if (meta_rollbias == 0)
-					    {
-					    sscanf(comment, "METAROLLBIAS:%lf", &val_double);
-					    fprintf(output,"Roll Bias:              %f degrees\n", val_double);
-					    }
-					meta_rollbias++;
-					}
-				else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0)
-					{
-					if (meta_pitchbias == 0)
-					    {
-					    sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
-					    fprintf(output,"Pitch Bias:             %f degrees\n", val_double);
-					    }
-					meta_pitchbias++;
-					}
-				else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0)
-					{
-					if (meta_headingbias == 0)
-					    {
-					    sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
-					    fprintf(output,"Heading Bias:           %f degrees\n", val_double);
-					    }
-					meta_headingbias++;
-					}
-				else if (strncmp(comment, "METADRAFT:", 10) == 0)
-					{
-					if (meta_draft == 0)
-					    {
-					    sscanf(comment, "METADRAFT:%lf", &val_double);
-					    fprintf(output,"Draft:                  %f m\n", val_double);
-					    }
-					meta_draft++;
-					}
-				}
 
 			/* output error messages */
 			if (pass != 0 || error == MB_ERROR_COMMENT)
@@ -1199,7 +1438,7 @@ int main (int argc, char **argv)
 					message);
 				fprintf(stream,"Number of good records so far: %d\n",irecfile);
 				}
-			else if (verbose >= 1 && error > MB_ERROR_NO_ERROR 
+			else if (verbose >= 1 && error > MB_ERROR_NO_ERROR
 				&& error != MB_ERROR_EOF)
 				{
 				mb_error(verbose,error,&message);
@@ -1213,20 +1452,20 @@ int main (int argc, char **argv)
 
 			/* take note of min and maxes */
 			if (pass == 0
-				&& (error == MB_ERROR_NO_ERROR 
+				&& (error == MB_ERROR_NO_ERROR
 				    || error == MB_ERROR_TIME_GAP))
 				{
 				/* update data counts */
-				beams_bath_max 
+				beams_bath_max
 				    = MAX(beams_bath_max, beams_bath);
-				beams_amp_max 
+				beams_amp_max
 				    = MAX(beams_amp_max, beams_amp);
-				pixels_ss_max 
+				pixels_ss_max
 				    = MAX(pixels_ss_max, pixels_ss);
 				ntdbeams += beams_bath;
 				ntabeams += beams_amp;
 				ntsbeams += pixels_ss;
-				
+
 				/* set lonflip if needed */
 				if (lonflip_set == MB_NO
 				    && (navlon != 0.0 || navlat != 0.0))
@@ -1242,7 +1481,7 @@ int main (int argc, char **argv)
 					lonflip_use = 1;
 				    else if (navlon >= 270.0)
 					lonflip_use = 0;
-				    
+
 				    /* change and apply lonflip if needed */
 				    if (lonflip_use != lonflip)
 					{
@@ -1250,7 +1489,7 @@ int main (int argc, char **argv)
 					mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 					mb_io_ptr->lonflip = lonflip_use;
 					lonflip = lonflip_use;
-					
+
 					/* apply lonflip to data already read */
 					if (lonflip_use == -1)
 					    {
@@ -1305,7 +1544,7 @@ int main (int argc, char **argv)
 					    }
 					}
 				    }
-				
+
 				/* get beginning values */
 				if (irec == 1)
 					{
@@ -1389,7 +1628,7 @@ int main (int argc, char **argv)
 
 				/* get total distance */
 				if (good_nav_only == MB_NO ||
-					(good_nav == MB_YES 
+					(good_nav == MB_YES
 					&& speed_apparent < speed_threshold))
 					{
 					distot+= distance;
@@ -1397,7 +1636,7 @@ int main (int argc, char **argv)
 					}
 
 				/* get starting mins and maxs */
-				if (beginnav == MB_NO && good_nav == MB_YES) 
+				if (beginnav == MB_NO && good_nav == MB_YES)
 					{
 					lonmin = navlon;
 					lonmax = navlon;
@@ -1405,13 +1644,13 @@ int main (int argc, char **argv)
 					latmax = navlat;
 					beginnav = MB_YES;
 					}
-				if (beginsdp == MB_NO && sonardepth > 0.0) 
+				if (beginsdp == MB_NO && sonardepth > 0.0)
 					{
 					sdpmin = sonardepth;
 					sdpmax = sonardepth;
 					beginsdp = MB_YES;
 					}
-				if (beginalt == MB_NO && altitude > 0.0) 
+				if (beginalt == MB_NO && altitude > 0.0)
 					{
 					altmin = altitude;
 					altmax = altitude;
@@ -1520,7 +1759,7 @@ int main (int argc, char **argv)
 
 			/* update coverage mask */
 			if (pass == 1 && coverage_mask == MB_YES
-				&& (error == MB_ERROR_NO_ERROR 
+				&& (error == MB_ERROR_NO_ERROR
 				    || error == MB_ERROR_TIME_GAP))
 			    {
 			    ix = (int)((navlon - lonmin) / mask_dx);
@@ -1560,7 +1799,7 @@ int main (int argc, char **argv)
 
 			/* look for problems */
 			if (pass == 0
-				&& (error == MB_ERROR_NO_ERROR 
+				&& (error == MB_ERROR_NO_ERROR
 				    || error == MB_ERROR_TIME_GAP))
 			    {
 			    if (navlon == 0.0 || navlat == 0.0)
@@ -1573,7 +1812,7 @@ int main (int argc, char **argv)
 				if (mb_beam_ok(beamflag[i]))
 				    {
 				    if (bath[i] > 11000.0)
-					mb_notice_log_problem(verbose, mbio_ptr, 
+					mb_notice_log_problem(verbose, mbio_ptr,
 						MB_PROBLEM_TOO_DEEP);
 				    }
 				}
@@ -1593,9 +1832,9 @@ int main (int argc, char **argv)
 
 		/* process the pings */
 		if (pass == 0
-			&& pings_read > 2 
+			&& pings_read > 2
 			&& nread == pings_read
-			&& (error == MB_ERROR_NO_ERROR 
+			&& (error == MB_ERROR_NO_ERROR
 			|| error == MB_ERROR_TIME_GAP))
 			{
 
@@ -1720,7 +1959,6 @@ int main (int argc, char **argv)
 					nssvar[i] = nssvar[i] + nss;
 					}
 				}
-
 			}
 
 		/* print debug statements */
@@ -1747,12 +1985,12 @@ int main (int argc, char **argv)
 	/* get notices if desired */
 	if (print_notices == MB_YES && pass == 0)
 		{
-		status = mb_notice_get_list(verbose, mbio_ptr, 
+		status = mb_notice_get_list(verbose, mbio_ptr,
 					    notice_list);
 		for (i=0;i<MB_NOTICE_MAX;i++)
 			notice_list_tot[i] += notice_list[i];
 		}
-		
+
 	/* deal with statistics */
 	if (pings_read > 2)
 		{
@@ -1773,7 +2011,17 @@ int main (int argc, char **argv)
 				fprintf(stream,"\nProgram <%s> Terminated\n",
 					program_name);
 				exit(error);
-				}				
+				}
+			else
+				{
+				for (i=nbathtot_alloc;i<beams_bath_max;i++)
+					{
+					bathmeantot[i] = 0.0;
+					bathvartot[i] = 0.0;
+					nbathvartot[i] = 0;
+					}
+				nbathtot_alloc = beams_bath_max;
+				}
 			}
 		if (namptot_alloc < beams_amp_max)
 			{
@@ -1791,7 +2039,17 @@ int main (int argc, char **argv)
 				fprintf(stream,"\nProgram <%s> Terminated\n",
 					program_name);
 				exit(error);
-				}				
+				}
+			else
+				{
+				for (i=namptot_alloc;i<beams_amp_max;i++)
+					{
+					ampmeantot[i] = 0.0;
+					ampvartot[i] = 0.0;
+					nampvartot[i] = 0;
+					}
+				namptot_alloc = beams_amp_max;
+				}
 			}
 		if (nsstot_alloc < pixels_ss_max)
 			{
@@ -1809,7 +2067,17 @@ int main (int argc, char **argv)
 				fprintf(stream,"\nProgram <%s> Terminated\n",
 					program_name);
 				exit(error);
-				}				
+				}
+			else
+				{
+				for (i=nsstot_alloc;i<pixels_ss_max;i++)
+					{
+					ssmeantot[i] = 0.0;
+					ssvartot[i] = 0.0;
+					nssvartot[i] = 0;
+					}
+				nsstot_alloc = pixels_ss_max;
+				}
 			}
 
 		/* copy statistics to total statistics */
@@ -1855,31 +2123,31 @@ int main (int argc, char **argv)
 	}
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
-		
+
 	/* figure out if done */
 	if (pass > 0 || coverage_mask == MB_NO)
 	    done = MB_YES;
 	pass++;
-		
+
 	/* end loop over reading passes */
 	}
 
 	/* calculate final variances */
 	if (pings_read > 2)
 		{
-		for (i=0;i<beams_bath_alloc;i++)
+		for (i=0;i<nbathtot_alloc;i++)
 			if (nbathvartot[i] > 0)
 				{
 				bathmeantot[i] = bathmeantot[i]/nbathvartot[i];
 				bathvartot[i] = bathvartot[i]/nbathvartot[i];
 				}
-		for (i=0;i<beams_amp_alloc;i++)
+		for (i=0;i<namptot_alloc;i++)
 			if (nampvartot[i] > 0)
 				{
 				ampmeantot[i] = ampmeantot[i]/nampvartot[i];
 				ampvartot[i] = ampvartot[i]/nampvartot[i];
 				}
-		for (i=0;i<pixels_ss_alloc;i++)
+		for (i=0;i<nsstot_alloc;i++)
 			if (nssvartot[i] > 0)
 				{
 				ssmeantot[i] = ssmeantot[i]/nssvartot[i];
@@ -1931,181 +2199,443 @@ int main (int argc, char **argv)
 		spdavg = distot/timtot;
 	mb_get_jtime(verbose,timbeg_i,timbeg_j);
 	mb_get_jtime(verbose,timend_i,timend_j);
-	fprintf(output,"\nData Totals:\n");
-	fprintf(output,"Number of Records:                    %8d\n",irec);
-	isbtmrec = notice_list_tot[MB_DATA_SUBBOTTOM_MCS]
-			+ notice_list_tot[MB_DATA_SUBBOTTOM_CNTRBEAM]
-			+ notice_list_tot[MB_DATA_SUBBOTTOM_SUBBOTTOM];
-	if (isbtmrec > 0)
-		fprintf(output,"Number of Subbottom Records:          %8d\n",isbtmrec);
-	if (notice_list_tot[MB_DATA_SIDESCAN2] > 0)
-		fprintf(output,"Number of Secondary Sidescan Records: %8d\n",notice_list_tot[MB_DATA_SIDESCAN2]);
-	if (notice_list_tot[MB_DATA_SIDESCAN3] > 0)
-		fprintf(output,"Number of Tertiary Sidescan Records:  %8d\n",notice_list_tot[MB_DATA_SIDESCAN3]);
-	if (notice_list_tot[MB_DATA_WATER_COLUMN] > 0)
-		fprintf(output,"Number of Water Column Records:       %8d\n",notice_list_tot[MB_DATA_WATER_COLUMN]);
-	fprintf(output,"Bathymetry Data (%d beams):\n",beams_bath_max);
-	fprintf(output,"  Number of Beams:         %8d\n",
-		ntdbeams);
-	fprintf(output,"  Number of Good Beams:    %8d     %5.2f%%\n",
-		ngdbeams, ngd_percent);
-	fprintf(output,"  Number of Zero Beams:    %8d     %5.2f%%\n",
-		nzdbeams, nzd_percent);
-	fprintf(output,"  Number of Flagged Beams: %8d     %5.2f%%\n",
-		nfdbeams, nfd_percent);
-	fprintf(output,"Amplitude Data (%d beams):\n",beams_amp_max);
-	fprintf(output,"  Number of Beams:         %8d\n",
-		ntabeams);
-	fprintf(output,"  Number of Good Beams:    %8d     %5.2f%%\n",
-		ngabeams, nga_percent);
-	fprintf(output,"  Number of Zero Beams:    %8d     %5.2f%%\n",
-		nzabeams, nza_percent);
-	fprintf(output,"  Number of Flagged Beams: %8d     %5.2f%%\n",
-		nfabeams, nfa_percent);
-	fprintf(output,"Sidescan Data (%d pixels):\n",pixels_ss_max);
-	fprintf(output,"  Number of Pixels:        %8d\n",
-		ntsbeams);
-	fprintf(output,"  Number of Good Pixels:   %8d     %5.2f%%\n",
-		ngsbeams, ngs_percent);
-	fprintf(output,"  Number of Zero Pixels:   %8d     %5.2f%%\n",
-		nzsbeams, nzs_percent);
-	fprintf(output,"  Number of Flagged Pixels:%8d     %5.2f%%\n",
-		nfsbeams, nfs_percent);
-	fprintf(output,"\nNavigation Totals:\n");
-	fprintf(output,"Total Time:         %10.4f hours\n",timtot);
-	fprintf(output,"Total Track Length: %10.4f km\n",distot);
-	fprintf(output,"Average Speed:      %10.4f km/hr (%7.4f knots)\n",
-		spdavg,spdavg/1.85);
-	fprintf(output,"\nStart of Data:\n");
-	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
-		timbeg_i[1],timbeg_i[2],timbeg_i[0],timbeg_i[3],
-		timbeg_i[4],timbeg_i[5],timbeg_i[6],timbeg_j[1]);
-	if (bathy_in_feet == MB_NO)
-		fprintf(output,"Lon: %9.4f     Lat: %9.4f     Depth: %10.4f meters\n",
-			lonbeg,latbeg,bathbeg);
-	else
-		fprintf(output,"Lon: %9.4f     Lat: %9.4f     Depth: %10.4f feet\n",
-			lonbeg,latbeg,bathy_scale*bathbeg);
-	fprintf(output,"Speed: %7.4f km/hr (%7.4f knots)  Heading:%9.4f degrees\n",
-		spdbeg,spdbeg/1.85,hdgbeg);
-	fprintf(output,"Sonar Depth:%10.4f m  Sonar Altitude:%10.4f m\n",
-		sdpbeg,altbeg);
-	fprintf(output,"\nEnd of Data:\n");
-	fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\n",
-		timend_i[1],timend_i[2],timend_i[0],timend_i[3],
-		timend_i[4],timend_i[5],timend_i[6],timend_j[1]);
-	if (bathy_in_feet == MB_NO)
-		fprintf(output,"Lon: %9.4f     Lat: %9.4f     Depth: %10.4f meters\n",
-			lonend,latend,bathend);
-	else
-		fprintf(output,"Lon: %9.4f     Lat: %9.4f     Depth: %10.4f feet\n",
-			lonend,latend,bathy_scale*bathend);
-	fprintf(output,"Speed: %7.4f km/hr (%7.4f knots)  Heading:%9.4f degrees\n",
-		spdend,spdend/1.85,hdgend);
-	fprintf(output,"Sonar Depth:%10.4f m  Sonar Altitude:%10.4f m\n",
-		sdpend,altend);
-	fprintf(output,"\nLimits:\n");
-	fprintf(output,"Minimum Longitude:   %10.4f   Maximum Longitude:   %10.4f\n",lonmin,lonmax);
-	fprintf(output,"Minimum Latitude:    %10.4f   Maximum Latitude:    %10.4f\n",latmin,latmax);
-	fprintf(output,"Minimum Sonar Depth: %10.4f   Maximum Sonar Depth: %10.4f\n",sdpmin,sdpmax);
-	fprintf(output,"Minimum Altitude:    %10.4f   Maximum Altitude:    %10.4f\n",altmin,altmax);
-	if (ngdbeams > 0 || verbose >= 1)
-		fprintf(output,"Minimum Depth:       %10.4f   Maximum Depth:       %10.4f\n",
-			bathy_scale*bathmin,bathy_scale*bathmax);
-	if (ngabeams > 0 || verbose >= 1)
-		fprintf(output,"Minimum Amplitude:   %10.4f   Maximum Amplitude:   %10.4f\n",
-			ampmin,ampmax);
-	if (ngsbeams > 0 || verbose >= 1)
-		fprintf(output,"Minimum Sidescan:    %10.4f   Maximum Sidescan:    %10.4f\n",
-			ssmin,ssmax);
-	if (pings_read > 2 && beams_bath_max > 0 
+
+	switch (output_format)
+	{
+		case FREE_TEXT:
+			fprintf(output,"\nData Totals:\n");
+			fprintf(output,"Number of Records:                    %8d\n",irec);
+			isbtmrec = notice_list_tot[MB_DATA_SUBBOTTOM_MCS]
+					+ notice_list_tot[MB_DATA_SUBBOTTOM_CNTRBEAM]
+					+ notice_list_tot[MB_DATA_SUBBOTTOM_SUBBOTTOM];
+			if (isbtmrec > 0)
+				fprintf(output,"Number of Subbottom Records:          %8d\n",isbtmrec);
+			if (notice_list_tot[MB_DATA_SIDESCAN2] > 0)
+				fprintf(output,"Number of Secondary Sidescan Records: %8d\n",notice_list_tot[MB_DATA_SIDESCAN2]);
+			if (notice_list_tot[MB_DATA_SIDESCAN3] > 0)
+				fprintf(output,"Number of Tertiary Sidescan Records:  %8d\n",notice_list_tot[MB_DATA_SIDESCAN3]);
+			if (notice_list_tot[MB_DATA_WATER_COLUMN] > 0)
+				fprintf(output,"Number of Water Column Records:       %8d\n",notice_list_tot[MB_DATA_WATER_COLUMN]);
+			fprintf(output,"Bathymetry Data (%d beams):\n",beams_bath_max);
+			fprintf(output,"  Number of Beams:         %8d\n",
+				ntdbeams);
+			fprintf(output,"  Number of Good Beams:    %8d     %5.2f%%\n",
+				ngdbeams, ngd_percent);
+			fprintf(output,"  Number of Zero Beams:    %8d     %5.2f%%\n",
+				nzdbeams, nzd_percent);
+			fprintf(output,"  Number of Flagged Beams: %8d     %5.2f%%\n",
+				nfdbeams, nfd_percent);
+			fprintf(output,"Amplitude Data (%d beams):\n",beams_amp_max);
+			fprintf(output,"  Number of Beams:         %8d\n",
+				ntabeams);
+			fprintf(output,"  Number of Good Beams:    %8d     %5.2f%%\n",
+				ngabeams, nga_percent);
+			fprintf(output,"  Number of Zero Beams:    %8d     %5.2f%%\n",
+				nzabeams, nza_percent);
+			fprintf(output,"  Number of Flagged Beams: %8d     %5.2f%%\n",
+				nfabeams, nfa_percent);
+			fprintf(output,"Sidescan Data (%d pixels):\n",pixels_ss_max);
+			fprintf(output,"  Number of Pixels:        %8d\n",
+				ntsbeams);
+			fprintf(output,"  Number of Good Pixels:   %8d     %5.2f%%\n",
+				ngsbeams, ngs_percent);
+			fprintf(output,"  Number of Zero Pixels:   %8d     %5.2f%%\n",
+				nzsbeams, nzs_percent);
+			fprintf(output,"  Number of Flagged Pixels:%8d     %5.2f%%\n",
+				nfsbeams, nfs_percent);
+			fprintf(output,"\nNavigation Totals:\n");
+			fprintf(output,"Total Time:         %10.4f hours\n",timtot);
+			fprintf(output,"Total Track Length: %10.4f km\n",distot);
+			fprintf(output,"Average Speed:      %10.4f km/hr (%7.4f knots)\n",
+				spdavg,spdavg/1.85);
+			fprintf(output,"\nStart of Data:\n");
+			fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d (%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d)\n",
+				timbeg_i[1],timbeg_i[2],timbeg_i[0],timbeg_i[3],
+				timbeg_i[4],timbeg_i[5],timbeg_i[6],timbeg_j[1],
+				timbeg_i[0],timbeg_i[1],timbeg_i[2],timbeg_i[3],timbeg_i[4],timbeg_i[5],timbeg_i[6]);
+			if (bathy_in_feet == MB_NO)
+				fprintf(output,"Lon: %15.9f     Lat: %15.9f     Depth: %10.4f meters\n",
+					lonbeg,latbeg,bathbeg);
+			else
+				fprintf(output,"Lon: %15.9f     Lat: %15.9f     Depth: %10.4f feet\n",
+					lonbeg,latbeg,bathy_scale*bathbeg);
+			fprintf(output,"Speed: %7.4f km/hr (%7.4f knots)  Heading:%9.4f degrees\n",
+				spdbeg,spdbeg/1.85,hdgbeg);
+			fprintf(output,"Sonar Depth:%10.4f m  Sonar Altitude:%10.4f m\n",
+				sdpbeg,altbeg);
+			fprintf(output,"\nEnd of Data:\n");
+			fprintf(output,"Time:  %2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d (%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d)\n",
+				timend_i[1],timend_i[2],timend_i[0],timend_i[3],
+				timend_i[4],timend_i[5],timend_i[6],timend_j[1],
+				timend_i[0],timend_i[1],timend_i[2],timend_i[3],timend_i[4],timend_i[5],timend_i[6]);
+			if (bathy_in_feet == MB_NO)
+				fprintf(output,"Lon: %15.9f     Lat: %15.9f     Depth: %10.4f meters\n",
+					lonend,latend,bathend);
+			else
+				fprintf(output,"Lon: %15.9f     Lat: %15.9f     Depth: %10.4f feet\n",
+					lonend,latend,bathy_scale*bathend);
+			fprintf(output,"Speed: %7.4f km/hr (%7.4f knots)  Heading:%9.4f degrees\n",
+				spdend,spdend/1.85,hdgend);
+			fprintf(output,"Sonar Depth:%10.4f m  Sonar Altitude:%10.4f m\n",
+				sdpend,altend);
+			fprintf(output,"\nLimits:\n");
+			fprintf(output,"Minimum Longitude:   %15.9f   Maximum Longitude:   %15.9f\n",lonmin,lonmax);
+			fprintf(output,"Minimum Latitude:    %15.9f   Maximum Latitude:    %15.9f\n",latmin,latmax);
+			fprintf(output,"Minimum Sonar Depth: %10.4f   Maximum Sonar Depth: %10.4f\n",sdpmin,sdpmax);
+			fprintf(output,"Minimum Altitude:    %10.4f   Maximum Altitude:    %10.4f\n",altmin,altmax);
+			if (ngdbeams > 0 || verbose >= 1)
+				fprintf(output,"Minimum Depth:       %10.4f   Maximum Depth:       %10.4f\n",
+					bathy_scale*bathmin,bathy_scale*bathmax);
+			if (ngabeams > 0 || verbose >= 1)
+				fprintf(output,"Minimum Amplitude:   %10.4f   Maximum Amplitude:   %10.4f\n",
+					ampmin,ampmax);
+			if (ngsbeams > 0 || verbose >= 1)
+				fprintf(output,"Minimum Sidescan:    %10.4f   Maximum Sidescan:    %10.4f\n",
+					ssmin,ssmax);
+			break;
+		case JSON:
+			fprintf(output,"\"data_totals\": {\n");
+			fprintf(output,"\"number_of_records\":\"%d\"",irec);
+			isbtmrec = notice_list_tot[MB_DATA_SUBBOTTOM_MCS]
+					+ notice_list_tot[MB_DATA_SUBBOTTOM_CNTRBEAM]
+					+ notice_list_tot[MB_DATA_SUBBOTTOM_SUBBOTTOM];
+			if (isbtmrec > 0)
+				fprintf(output,",\n\"number_of_subbottom_records\":\"%d\"\n",isbtmrec);
+			if (notice_list_tot[MB_DATA_SIDESCAN2] > 0)
+				fprintf(output,",\n\"number_of_secondary_sidescan_records\": \"%d\"",notice_list_tot[MB_DATA_SIDESCAN2]);
+			if (notice_list_tot[MB_DATA_SIDESCAN3] > 0)
+				fprintf(output,",\n\"number_of_tertiary_sidescan_records\": \"%d\"",notice_list_tot[MB_DATA_SIDESCAN3]);
+			if (notice_list_tot[MB_DATA_WATER_COLUMN] > 0)
+				fprintf(output,",\n\"number_of_water_column_records\": \"%d\"",notice_list_tot[MB_DATA_WATER_COLUMN]);
+			fprintf(output,"\n},\n");
+
+			fprintf(output,"\"bathymetry_data\": {\n\"max_beams_per_ping\": \"%d\",\n",beams_bath_max);
+			fprintf(output,"\"number_beams\": \"%d\",\n", ntdbeams);
+			fprintf(output,"\"number_good_beams\": \"%d\",\n\"percent_good_beams\": \"%5.2f\",\n",
+				ngdbeams, ngd_percent);
+			fprintf(output,"\"number_zero_beams\": \"%d\",\n\"percent_zero_beams\": \"%5.2f\",\n",
+				nzdbeams, nzd_percent);
+			fprintf(output,"\"number_flagged_beams\": \"%d\",\n\"percent_flagged_beams\": \"%5.2f\"\n",
+				nfdbeams, nfd_percent);
+			fprintf(output,"},\n");
+
+			fprintf(output,"\"amplitude_data\": {\n\"max_beams_per_ping\": \"%d\",\n",beams_amp_max);
+			fprintf(output,"\"number_beams\": \"%d\",\n", ntabeams);
+			fprintf(output,"\"number_good_beams\": \"%d\",\n\"percent_good_beams\": \" %5.2f\",\n",
+				ngabeams, nga_percent);
+			fprintf(output,"\"number_zero_beams\": \"%d\",\n\"percent_zero_beams\": \"%5.2f\",\n",
+				nzabeams, nza_percent);
+			fprintf(output,"\"number_flagged_beams\": \"%d\",\n\"percent_flagged_beams\": \"%5.2f\"\n",
+				nfabeams, nfa_percent);
+			fprintf(output,"},\n");
+
+			fprintf(output,"\"sidescan_data\": {\n\"max_pixels_per_ping\": \"%d\",\n",pixels_ss_max);
+			fprintf(output,"\"number_of_pixels\": \"%d\",\n", ntsbeams);
+			fprintf(output,"\"number_good_pixels\": \"%d\",\n\"percent_good_pixels\": \"%5.2f\",\n",
+				ngsbeams, ngs_percent);
+			fprintf(output,"\"number_zero_pixels\": \"%d\",\n\"percent_good_pixels\": \"%5.2f\",\n",
+				nzsbeams, nzs_percent);
+			fprintf(output,"\"number_flagged_pixels\": \"%d\",\n\"percent_flagged_pixels\": \"%5.2f\"\n",
+				nfsbeams, nfs_percent);
+			fprintf(output,"},\n");
+
+			fprintf(output,"\"navigation_totals\": {\n");
+			fprintf(output,"\"total_time_hours\": \"%.4f\",\n",timtot);
+			fprintf(output,"\"total_track_length_km\": \"%.4f\",\n",distot);
+			fprintf(output,"\"average_speed_km_per_hr\": \"%.4f\",\n\"average_speed_knots\": \"%.4f\"\n",
+				spdavg,spdavg/1.85);
+			fprintf(output,"},\n");
+
+			fprintf(output,"\"start_of_data\": {\n");
+			fprintf(output,"\"time\": \"%2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\",\n",
+				timbeg_i[1],timbeg_i[2],timbeg_i[0],timbeg_i[3],
+				timbeg_i[4],timbeg_i[5],timbeg_i[6],timbeg_j[1]);
+			fprintf(output,"\"time_iso\": \"%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d\",\n",
+				timbeg_i[0],timbeg_i[1],timbeg_i[2],timbeg_i[3],timbeg_i[4],timbeg_i[5],timbeg_i[6]);
+			if (bathy_in_feet == MB_NO)
+				fprintf(output,"\"longitude\": \"%.9f\",\n\"latitude\": \"%.9f\",\n\"depth_meters\": \"%.4f\",\n",
+					lonbeg,latbeg,bathbeg);
+			else
+				fprintf(output,"\"longitude\": \"%.9f\",\n\"latitude\": \"%.9f\",\n\"depth_feet\": \"%.4f\",\n",
+					lonbeg,latbeg,bathy_scale*bathbeg);
+			fprintf(output,"\"speed_km_per_hour\": \"%.4f\",\n\"speed_knots\": \"%.4f\",\n\"heading_degrees\": \"%.4f\",\n",
+				spdbeg,spdbeg/1.85,hdgbeg);
+			fprintf(output,"\"sonar_depth_meters\": \"%.4f\",\n\"sonar_altitude_meters\": \"%.4f\"\n",
+				sdpbeg,altbeg);
+			fprintf(output,"},\n");
+
+			fprintf(output,"\"end_of_data\": {\n");
+			fprintf(output,"\"time\": \"%2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d\",\n",
+				timend_i[1],timend_i[2],timend_i[0],timend_i[3],
+				timend_i[4],timend_i[5],timend_i[6],timend_j[1]);
+			fprintf(output,"\"time_iso\": \"%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d\",\n",
+				timend_i[0],timend_i[1],timend_i[2],timend_i[3],timend_i[4],timend_i[5],timend_i[6]);
+			if (bathy_in_feet == MB_NO)
+				fprintf(output,"\"longitude\": \"%.9f\",\n\"latitude\": \"%.9f\",\n\"depth_meters\": \"%.4f\",\n",
+					lonend,latend,bathend);
+			else
+				fprintf(output,"\"longitude\": \"%.9f\",\n\"latitude\": \"%.9f\",\n\"depth_feet\": \"%.4f\",\n",
+					lonend,latend,bathy_scale*bathend);
+			fprintf(output,"\"speed_km_per_hour\": \"%.4f\",\n\"speed_knots\": \"%.4f\",\n\"heading_degrees\": \"%.4f\",\n",
+				spdend,spdend/1.85,hdgend);
+			fprintf(output,"\"sonar_depth_meters\": \"%.4f\",\n\"sonar_altitude_meters\": \"%.4f\"\n",
+				sdpend,altend);
+			fprintf(output,"},\n");
+
+			fprintf(output,"\"limits\": {\n");
+			fprintf(output,"\"minimum_longitude\": \"%.9f\",\n\"maximum_longitude\": \"%.9f\",\n",lonmin,lonmax);
+			fprintf(output,"\"minimum_latitude\": \"%.9f\",\n\"maximum_latitude\": \"%.9f\",\n",latmin,latmax);
+			fprintf(output,"\"minimum_sonar_depth\": \"%.4f\",\n\"maximum_sonar_depth\": \"%.4f\",\n",sdpmin,sdpmax);
+			fprintf(output,"\"minimum_altitude\": \"%.4f\",\n\"maximum_altitude\": \"%.4f\"",altmin,altmax);
+			if (ngdbeams > 0 || verbose >= 1)
+				fprintf(output,",\n\"minimum_depth\": \"%.4f\",\n\"maximum_depth\": \"%.4f\"",
+					bathy_scale*bathmin,bathy_scale*bathmax);
+			if (ngabeams > 0 || verbose >= 1)
+				fprintf(output,",\n\"minimum_amplitude\": \"%.4f\",\n\"maximum_amplitude\": \"%.4f\"",
+					ampmin,ampmax);
+			if (ngsbeams > 0 || verbose >= 1)
+				fprintf(output,",\n\"minimum_sidescan\": \"%.4f\",\n\"maximum_sidescan\": \"%.4f\"",
+					ssmin,ssmax);
+			fprintf(output,"\n}");
+			break;
+		case '?':
+			break;
+	}
+	if (pings_read > 2 && beams_bath_max > 0
 		&& (ngdbeams > 0 || verbose >= 1))
 		{
-		fprintf(output,"\nBeam Bathymetry Variances:\n");
-		fprintf(output,"Pings Averaged: %d\n",pings_read);
-		fprintf(output," Beam     N      Mean     Variance    Sigma\n");
-		fprintf(output," ----     -      ----     --------    -----\n");
-		for (i=0;i<beams_bath_max;i++)
-			fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
-				i,nbathvartot[i],bathy_scale*bathmeantot[i],
-				bathy_scale*bathy_scale*bathvartot[i],
-				bathy_scale*sqrt(bathvartot[i]));
-		fprintf(output,"\n");
+		switch (output_format)
+			{
+			case FREE_TEXT:
+				fprintf(output,"\nBeam Bathymetry Variances:\n");
+				fprintf(output,"Pings Averaged: %d\n",pings_read);
+				fprintf(output," Beam     N      Mean     Variance    Sigma\n");
+				fprintf(output," ----     -      ----     --------    -----\n");
+				for (i=0;i<beams_bath_max;i++)
+					fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
+						i,nbathvartot[i],bathy_scale*bathmeantot[i],
+						bathy_scale*bathy_scale*bathvartot[i],
+						bathy_scale*sqrt(bathvartot[i]));
+				fprintf(output,"\n");
+				break;
+			case JSON:
+				fprintf(output,",\n\"beam_bathymetry_variances\":{\n");
+				fprintf(output,"\"pings_averaged\": \"%d\",\n",pings_read);
+				fprintf(output,"\"columns\" : \"#beam,N,mean,variance,sigma\",\n");
+				fprintf(output,"\"values\": [\n");
+				for (i=0;i<beams_bath_max;i++)
+				{
+					if(i>0) fprintf(output,",\n");
+					sigma=bathy_scale*sqrt(bathvartot[i]);
+					if (isnan(sigma)) sigma=0;
+					fprintf(output,"{\"row\":\"%d,%d,%.2f,%.2f,%.2f\"}",
+						i,nbathvartot[i],bathy_scale*bathmeantot[i],
+						bathy_scale*bathy_scale*bathvartot[i], sigma);
+				}
+				fprintf(output,"]}");
+				break;
+			case '?':
+				break;
+			}
 		}
-	if (pings_read > 2 && beams_amp_max > 0 
+	if (pings_read > 2 && beams_amp_max > 0
 		&& (ngabeams > 0 || verbose >= 1))
 		{
-		fprintf(output,"\nBeam Amplitude Variances:\n");
-		fprintf(output,"Pings Averaged: %d\n",pings_read);
-		fprintf(output," Beam     N      Mean     Variance    Sigma\n");
-		fprintf(output," ----     -      ----     --------    -----\n");
-		for (i=0;i<beams_amp_max;i++)
-			fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
-				i,nampvartot[i],ampmeantot[i],
-				ampvartot[i],sqrt(ampvartot[i]));
-		fprintf(output,"\n");
+		switch (output_format)
+			{
+			case FREE_TEXT:
+				fprintf(output,"\nBeam Amplitude Variances:\n");
+				fprintf(output,"Pings Averaged: %d\n",pings_read);
+				fprintf(output," Beam     N      Mean     Variance    Sigma\n");
+				fprintf(output," ----     -      ----     --------    -----\n");
+				for (i=0;i<beams_amp_max;i++)
+					fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
+						i,nampvartot[i],ampmeantot[i],
+						ampvartot[i],sqrt(ampvartot[i]));
+				fprintf(output,"\n");
+				break;
+			case JSON:
+				fprintf(output,",\n\"beam_amplitude_variances\":{\n");
+				fprintf(output,"\"pings_averaged\": \"%d\",\n",pings_read);
+				fprintf(output,"\"columns\":\"beam,N,mean,variance,sigma\",\n");
+				fprintf(output,"\"values\": [\n");
+				for (i=0;i<beams_amp_max;i++)
+				{
+					if(i>0) fprintf(output,",\n");
+					sigma=sqrt(ampvartot[i]);
+					if (isnan(sigma)) sigma=0;
+					fprintf(output,"{\"row\" : \"%d,%d,%.2f,%.2f,%.2f\"}",
+						i,nampvartot[i],ampmeantot[i],
+						ampvartot[i],sigma);
+				}
+				fprintf(output,"\n]}");
+				break;
+			case '?':
+				break;
+			}
 		}
-	if (pings_read > 2 && pixels_ss_max > 0 
+	if (pings_read > 2 && pixels_ss_max > 0
 		&& (ngsbeams > 0 || verbose >= 1))
 		{
-		fprintf(output,"\nPixel Sidescan Variances:\n");
-		fprintf(output,"Pings Averaged: %d\n",pings_read);
-		fprintf(output," Beam     N      Mean     Variance    Sigma\n");
-		fprintf(output," ----     -      ----     --------    -----\n");
-		for (i=0;i<pixels_ss_max;i++)
-			fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
-				i,nssvartot[i],ssmeantot[i],
-				ssvartot[i],sqrt(ssvartot[i]));
-		fprintf(output,"\n");
+		switch (output_format)
+			{
+			case FREE_TEXT:
+				fprintf(output,"\nPixel Sidescan Variances:\n");
+				fprintf(output,"Pings Averaged: %d\n",pings_read);
+				fprintf(output," Beam     N      Mean     Variance    Sigma\n");
+				fprintf(output," ----     -      ----     --------    -----\n");
+				for (i=0;i<pixels_ss_max;i++)
+					fprintf(output,"%4d  %5d   %8.2f   %8.2f  %8.2f\n",
+						i,nssvartot[i],ssmeantot[i],
+						ssvartot[i],sqrt(ssvartot[i]));
+				fprintf(output,"\n");
+				break;
+			case JSON:
+				fprintf(output,",\n\"pixel_sidescan_variances\":{\n");
+				fprintf(output,"\"pings_averaged\": \"%d\",\n",pings_read);
+                fprintf(output,"\"columns\":\"pixel,N,mean,variance,sigma\",\n");
+				fprintf(output,"\"values\": [\n");
+				for (i=0;i<pixels_ss_max;i++)
+				{
+					if(i>0) fprintf(output,",\n");
+					sigma=sqrt(ssvartot[i]);
+					if(isnan(sigma)) sigma=0;
+                    fprintf(output,"{\"row\":\"%d,%d,%.2f,%.2f,%.2f\"}",
+						i,nssvartot[i],ssmeantot[i],
+						ssvartot[i],sigma);
+				}
+				fprintf(output,"\n]\n}");
+				break;
+			case '?':
+				break;
+			}
 		}
 	if (print_notices == MB_YES)
 		{
-		fprintf(output,"\nData Record Type Notices:\n");
-		for (i=0;i<=MB_DATA_KINDS;i++)
+		switch (output_format)
 			{
-			if (notice_list_tot[i] > 0)
-				{
-				mb_notice_message(verbose, i, &notice_msg);
-				fprintf(output, "DN: %d %s\n", 
-					notice_list_tot[i], notice_msg);
-				}
-			}
-		fprintf(output,"\nNonfatal Error Notices:\n");
-		for (i=MB_DATA_KINDS+1;i<=MB_DATA_KINDS-(MB_ERROR_MIN);i++)
-			{
-			if (notice_list_tot[i] > 0)
-				{
-				mb_notice_message(verbose, i, &notice_msg);
-				fprintf(output, "EN: %d %s\n", 
-					notice_list_tot[i], notice_msg);
-				}
-			}
-		fprintf(output,"\nProblem Notices:\n");
-		for (i=MB_DATA_KINDS-(MB_ERROR_MIN)+1;i<MB_NOTICE_MAX;i++)
-			{
-			if (notice_list_tot[i] > 0)
-				{
-				mb_notice_message(verbose, i, &notice_msg);
-				fprintf(output, "PN: %d %s\n", 
-					notice_list_tot[i], notice_msg);
-				}
+			case FREE_TEXT:
+				fprintf(output,"\nData Record Type Notices:\n");
+				for (i=0;i<=MB_DATA_KINDS;i++)
+					{
+					if (notice_list_tot[i] > 0)
+						{
+						mb_notice_message(verbose, i, &notice_msg);
+						fprintf(output, "DN: %d %s\n",
+							notice_list_tot[i], notice_msg);
+						}
+					}
+				fprintf(output,"\nNonfatal Error Notices:\n");
+				for (i=MB_DATA_KINDS+1;i<=MB_DATA_KINDS-(MB_ERROR_MIN);i++)
+					{
+					if (notice_list_tot[i] > 0)
+						{
+						mb_notice_message(verbose, i, &notice_msg);
+						fprintf(output, "EN: %d %s\n",
+							notice_list_tot[i], notice_msg);
+						}
+					}
+				fprintf(output,"\nProblem Notices:\n");
+				for (i=MB_DATA_KINDS-(MB_ERROR_MIN)+1;i<MB_NOTICE_MAX;i++)
+					{
+					if (notice_list_tot[i] > 0)
+						{
+						mb_notice_message(verbose, i, &notice_msg);
+						fprintf(output, "PN: %d %s\n",
+							notice_list_tot[i], notice_msg);
+						}
+					}
+				break;
+			case JSON:
+				fprintf(output,",\n\"notices\": {\n");
+				notice_total=0;
+				fprintf(output,"\"data_record_type_notices\": {\n");
+				for (i=0;i<=MB_DATA_KINDS;i++)
+					{
+					if (notice_list_tot[i] > 0)
+						{
+						mb_notice_message(verbose, i, &notice_msg);
+						if(notice_total>0) fprintf(output,",\n");
+						fprintf(output, "\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\":\"%s\"\n}",
+							notice_list_tot[i], notice_msg);
+						notice_total++;
+						}
+					}
+				if (notice_total>0) fprintf(output,"\n");
+				fprintf(output,"}");
+				notice_total=0;
+				fprintf(output,",\n\"nonfatal_error_notices\": {\n");
+				for (i=MB_DATA_KINDS+1;i<=MB_DATA_KINDS-(MB_ERROR_MIN);i++)
+					{
+					if (notice_list_tot[i] > 0)
+						{
+						mb_notice_message(verbose, i, &notice_msg);
+						if(notice_total>0) fprintf(output,",\n");
+						fprintf(output, "\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\":\"%s\"\n}",
+							notice_list_tot[i], notice_msg);
+						notice_total++;
+						}
+					}
+				if (notice_total>0) fprintf(output,"\n");
+				fprintf(output,"}");
+				notice_total=0;
+				fprintf(output,",\n\"problem_notices\": {\n");
+				for (i=MB_DATA_KINDS-(MB_ERROR_MIN)+1;i<MB_NOTICE_MAX;i++)
+					{
+					if (notice_list_tot[i] > 0)
+						{
+						mb_notice_message(verbose, i, &notice_msg);
+						if(notice_total>0) fprintf(output,",\n");
+						fprintf(output, "\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\":\"%s\"\n}",
+							notice_list_tot[i], notice_msg);
+						notice_total++;
+						}
+					}
+				if (notice_total>0) fprintf(output,"\n");
+				fprintf(output,"}\n");
+				fprintf(output,"}");
+				break;
+			case '?':
+				break;
 			}
 		}
-	if (coverage_mask == MB_YES)
+		if (coverage_mask == MB_YES)
 		{
-		fprintf(output,"\nCoverage Mask:\nCM dimensions: %d %d\n", mask_nx, mask_ny);
-		for (j=mask_ny-1;j>=0;j--)
-		    {
-		    fprintf(output, "CM:  ");
-		    for (i=0;i<mask_nx;i++)
+			switch (output_format)
 			{
-			k = i + j * mask_nx;
-			fprintf(output, " %1d", mask[k]);
+				case FREE_TEXT:
+					fprintf(output,"\nCoverage Mask:\nCM dimensions: %d %d\n", mask_nx, mask_ny);
+					for (j=mask_ny-1;j>=0;j--)
+		    			{
+		    			fprintf(output, "CM:  ");
+		    			for (i=0;i<mask_nx;i++)
+						{
+						k = i + j * mask_nx;
+						fprintf(output, " %1d", mask[k]);
+						}
+		    			fprintf(output, "\n");
+		    			}
+					break;
+				case JSON:
+					fprintf(output,",\n\"coverage_mask\": {\n");
+					fprintf(output,"\"dimensions_nx\": \"%d\",\n\"dimensions_ny\": \"%d\",\n", mask_nx, mask_ny);
+		    			fprintf(output, "\"mask\": \" ");
+					for (j=mask_ny-1;j>=0;j--)
+		    			{
+		    			for (i=0;i<mask_nx;i++)
+						{
+						k = i + j * mask_nx;
+						if (i>0) fprintf(output,",");
+						fprintf(output, "%1d", mask[k]);
+						}
+						fprintf(output,"\n");
+		    			}
+		    			fprintf(output, "\"}");
+					break;
+				case '?':
+					break;
 			}
-		    fprintf(output, "\n");
-		    }
 		}
-
 	/* close output file */
 	if (output_usefile == MB_YES
 	    && output != NULL)
@@ -2141,6 +2671,7 @@ int main (int argc, char **argv)
 		fprintf(stream,"dbg2       status:  %d\n",status);
 		}
 
+	if (output_format == JSON) fprintf(output,"}\n");
 	/* end it all */
 	exit(error);
 }

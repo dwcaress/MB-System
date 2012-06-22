@@ -1,4 +1,4 @@
-.TH mbnavlist 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavlist 1 "9 November 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavlist\fP - List navigation data in swath sonar data files.
 
@@ -8,7 +8,7 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbnavlist\fP [\fB-B\fP\fIyr/mo/da/hr/mn/sc\fP \fB-D\fP\fIdecimate\fP
 \fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP 
-\fB-G\fP\fIdelimeter\fP \fB-H\fP \fB-I\fP\fIfile \fP
+\fB-G\fP\fIdelimeter\fP \fB-H\fP \fB-I\fP\fIfile\fP \fB-K\fP\fIkind\fP
 \fB-L\fP\fIlonflip\fP \fB-N\fP\fInavchannel\fP
 \fB-O\fP\fIoutput_format\fP \fB-R\fP\fIwest/east/south/north\fP 
 \fB-S\fP\fIspeed\fP \fB-T\fP\fItimegap\fP \fB-V\fP \fB-Z\fP\fIsegment\fP]
@@ -26,6 +26,7 @@ be decimated using the \fB-D\fP option. The output of
 option \fB-O\fP\fIoutput_format\fP can be 
 used to control the data types that
 are sent to stdout. 
+
 By default, \fBmbnavlist\fP extracts navigation from the 
 data record type listed as the "navigation source" for a particular
 data format. Swath data formats may contain synchronous navigation
@@ -49,6 +50,28 @@ navigation channels, then \fBmbnavlist\fP will output nothing. To
 determine if a datafile contains asynchronous navigation and/or auxilliary
 navigation, run \fBmbinfo\fP using its \fB-N\fP option to get counts
 of all data record types in the file.
+
+Just to make things more complicated, many data formats formats pass 
+heading and attitude data in records separate from position, and often
+with different timestamps and sampling rates. If, for instance, the
+attitude data are sampled at 10 Hz but position is only sampled at
+1 Hz, extracting roll using \fBmbnavlist\fP will, by default, either
+output roll values only at the sonar ping times (if the navigation source
+is the survey data) or at the position record times (if the navigation
+source is the asynchronous position data, but not at the attitude data
+times. Moreover, the attitude data will be interpolated onto the times
+of sonar pings or position fixes. In order to extract the full attitude
+data stream, the \fB-K\fP\fIkind\fP option may be used, where \fIkind\fP
+is the identifier for the record type to be used as the trigger for output.
+Any desired values not contained in the selected record will be interpolated
+onto the times of the selected record. In order to identify the records
+available in a particular data file, use \fBmbinfo\fP with the \fB-N\fP
+option. This will show if a data file contains records of type MB_DATA_ATTITUDE,
+which has a record type identifier of 18, A list of the record type
+identifiers used within \fBMB-System\fP is given below, although not
+all of the record types have time stamps or can be used to define
+\fBmbnavlist\fP output. For example, requesting \fBmbnavlist\fP output
+associated with comment records will yield nonuseful results.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -145,6 +168,47 @@ currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. 
 Default: \fIfile\fP = "datalist.mb-1".
 .TP
+.B \-K
+\fIkind\fP
+.br
+This option sets the type of data record used as the trigger for
+output. By default, data are output when the record type listed as
+the "navigation source" for a particular data format is encountered.
+The \fB-K\fP option causes output to be keyed to data records of
+type \fIkind\fP, where \fIkind\fP may be integer values such as:
+     MB_DATA_DATA			1	/* general survey data */
+     MB_DATA_CALIBRATE		4	/* Hydrosweep DS */
+     MB_DATA_MEAN_VELOCITY		5	/* Hydrosweep DS */
+     MB_DATA_VELOCITY_PROFILE	6	/* general */
+     MB_DATA_NAV			12	/* Simrad, Reson 7k */
+     MB_DATA_HEADING			17	/* Simrad, Hypack */
+     MB_DATA_ATTITUDE		18	/* Simrad, Hypack, Reson 7k */
+     MB_DATA_SSV			19	/* Simrad */
+     MB_DATA_NAV1			28	/* ancillary nav system 1 */
+     MB_DATA_NAV2			29	/* ancillary nav system 2 */
+     MB_DATA_NAV3			30	/* ancillary nav system 3 */
+     MB_DATA_MOTION			32	/* Reson 7k */
+     MB_DATA_SIDESCAN2		37	/* Reson 7k, XTF */
+     MB_DATA_SIDESCAN3		38	/* Reson 7k, XTF */
+     MB_DATA_ROLL			40	/* Reson 7k */
+     MB_DATA_PITCH			41	/* Reson 7k */
+     MB_DATA_NMEA_RMC		48	/* NMEA */
+     MB_DATA_NMEA_DBT		49	/* NMEA */
+     MB_DATA_NMEA_DPT		50	/* NMEA */
+     MB_DATA_NMEA_ZDA		51	/* NMEA */
+     MB_DATA_NMEA_GLL		52	/* NMEA */
+     MB_DATA_NMEA_GGA		53	/* NMEA */
+     MB_DATA_ATTITUDE1		55	/* ancillary attitude system 1 */
+     MB_DATA_ATTITUDE2		56      /* ancillary attitude system 2 */
+     MB_DATA_ATTITUDE3		57	/* ancillary attitude system 3 */
+.br
+For example, using \fB-K\fP\fI18\fP will cause \fBmbnavlist\fP to output
+at the times of attitude data records. One consequence will be that
+any roll, pitch, or heave values specified with the \fB-O\fP option will
+be output without modification, whereas other values (e.g. position) will
+be interpolated onto the time of the attitude record.
+This option supercedes the \fB-N\fP option.
+.TP
 .B \-L
 \fIlonflip\fP
 .br
@@ -180,7 +244,8 @@ does not contain asynchronous navigation or the specified auxilliary
 navigation channels, then \fBmbnavlist\fP will output nothing. To
 determine if a datafile contains asynchronous navigation and/or auxilliary
 navigation, run \fBmbinfo\fP using its \fB-N\fP option to get counts
-of all data record types in the file.
+of all data record types in the file. This option is superceded by the
+\fB-K\fP option.
 .TP
 .B \-O
 \fIoutput_format\fP
@@ -277,6 +342,72 @@ The output will be as follows:
  	889125113.571000        -155.899204       19.979591
  	889125114.921000        -155.899479       19.979485
  	.....
+.SH MB-SYSTEM DATA RECORD TYPES
+This list gives the data record types and numerical identifiers
+used within \fBMB-System\fP. Users can specify that \fBmbnavlist\fP
+output be keyed to the time stamps of particular record types by
+using the \fB-K\fP\fIkind\fP option where \fIkind\fP corresponds
+to the desired record type identifier from this table.
+
+     MB_DATA_KINDS			54
+     MB_DATA_NONE			0
+     MB_DATA_DATA			1	general survey data
+     MB_DATA_COMMENT			2	general comment
+     MB_DATA_HEADER			3	general header
+     MB_DATA_CALIBRATE		4	Hydrosweep DS
+     MB_DATA_MEAN_VELOCITY		5	Hydrosweep DS
+     MB_DATA_VELOCITY_PROFILE	6	general
+     MB_DATA_STANDBY			7	Hydrosweep DS
+     MB_DATA_NAV_SOURCE		8	Hydrosweep DS
+     MB_DATA_PARAMETER		9	general
+     MB_DATA_START			10	Simrad
+     MB_DATA_STOP			11	Simrad
+     MB_DATA_NAV			12	Simrad, Reson 7k
+     MB_DATA_RUN_PARAMETER		13	Simrad
+     MB_DATA_CLOCK			14	Simrad
+     MB_DATA_TIDE			15	Simrad, Reson 7k
+     MB_DATA_HEIGHT			16	Simrad
+     MB_DATA_HEADING			17	Simrad, Hypack
+     MB_DATA_ATTITUDE		18	Simrad, Hypack, Reson 7k
+     MB_DATA_SSV			19	Simrad
+     MB_DATA_ANGLE			20	HSMD
+     MB_DATA_EVENT			21	HSMD
+     MB_DATA_HISTORY			22	GSF
+     MB_DATA_SUMMARY			23	GSF
+     MB_DATA_PROCESSING_PARAMETERS	24	GSF
+     MB_DATA_SENSOR_PARAMETERS	25	GSF
+     MB_DATA_NAVIGATION_ERROR	26	GSF
+     MB_DATA_RAW_LINE		27	uninterpretable line for ascii formats
+     MB_DATA_NAV1			28	ancillary nav system 1
+     MB_DATA_NAV2			29	ancillary nav system 2
+     MB_DATA_NAV3			30	ancillary nav system 3
+     MB_DATA_TILT			31	Simrad
+     MB_DATA_MOTION			32	Reson 7k
+     MB_DATA_CTD			33	Reson 7k
+     MB_DATA_SUBBOTTOM_MCS		34	Reson 7k
+     MB_DATA_SUBBOTTOM_CNTRBEAM	35	Simrad
+     MB_DATA_SUBBOTTOM_SUBBOTTOM	36	Reson 7k, XTF
+     MB_DATA_SIDESCAN2		37	Reson 7k, XTF
+     MB_DATA_SIDESCAN3		38	Reson 7k, XTF
+     MB_DATA_IMAGE			39	Reson 7k
+     MB_DATA_ROLL			40	Reson 7k
+     MB_DATA_PITCH			41	Reson 7k
+     MB_DATA_ABSORPTIONLOSS		42	Reson 7k
+     MB_DATA_SPREADINGLOSS		43	Reson 7k
+     MB_DATA_INSTALLATION		44	Reson 7k
+     MB_DATA_WATER_COLUMN		45	Simrad
+     MB_DATA_STATUS			46	Simrad, XTF
+     MB_DATA_DVL			47	JSTAR
+     MB_DATA_NMEA_RMC		48	NMEA
+     MB_DATA_NMEA_DBT		49	NMEA
+     MB_DATA_NMEA_DPT		50	NMEA
+     MB_DATA_NMEA_ZDA		51	NMEA
+     MB_DATA_NMEA_GLL		52	NMEA
+     MB_DATA_NMEA_GGA		53	NMEA
+     MB_DATA_SURVEY_LINE		54	Reson 7k
+     MB_DATA_ATTITUDE1		55	ancillary attitude system 1
+     MB_DATA_ATTITUDE2		56      ancillary attitude system 2
+     MB_DATA_ATTITUDE3		57	ancillary attitude system 3
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbinfo\fP(l)

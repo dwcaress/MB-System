@@ -7,70 +7,70 @@ a GMT plot of swath sonar swath data.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_plot\fP \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP 
-[\fB-A\fP[\fImagnitude\fP[\fI/azimuth\fP] 
+\fBmbm_plot\fP \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP
+[\fB-A\fP[\fImagnitude\fP[\fI/azimuth\fP]
 \fB-C\fP\fI[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]\fP
 \fB-D\fP[\fIflipcolor/flipshade\fP]
 \fB-G\fP\fIcolor_mode[F]\fP \fB-H\fP
 \fB-N\fP\fI[time_tick/time_annot/date_annot/time_tick_len[/name_hgt] | F | FP]\fP
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize \fP
 \fB-S\fP\fI[color/shade]\fP \fB-T\fP
-\fB-U\fP\fIorientation\fP \fB-V\fP 
+\fB-U\fP\fIorientation\fP \fB-V\fP
 \fB-W\fP\fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | \fIcptfile]\fP ]
 
 Additional Options:
 .br
 [\fB-B\fP\fItickinfo\fP
 \fB-J\fP\fIprojection\fP[\fI/scale | width\fP]
-\fB-L\fP\fItitle\fP[\fI:scale_label\fP] \fB-M\fP\fImisc\fP 
-\fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Y\fP 
+\fB-L\fP\fItitle\fP[\fI:scale_label\fP] \fB-M\fP\fImisc\fP
+\fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Y\fP
 \fB-Z\fP\fImin/max\fP ]
 
 Miscellaneous Options:
 .br
-[\fB-MGD\fP\fIgmtdef/value\fP 
+[\fB-MGD\fP\fIgmtdef/value\fP
 \fB-MGF\fP\fIscale_loc\fP
 \fB-MGL\fP[\fIf\fP][\fIx\fP]\fIlon0/lat0/slat/length\fP[\fIm\fP]
-\fB-MGQ\fP\fIdpi\fP 
+\fB-MGQ\fP\fIdpi\fP
 \fB-MGT\fP\fIx/y/size/angle/font/just/text\fP
-\fB-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP] 
+\fB-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP]
 \fB-MMA\fP\fIfactor/mode/depth\fP
 \fB-MMB\fP\fIyr/mo/da/hr/mn/sc\fP
 \fB-MMD\fP\fImode/scale[/min/max]\fP
 \fB-MME\fP\fIyr/mo/da/hr/mn/sc\fP
 \fB-MML\fP\fIlonflip\fP
 \fB-MMN\fP\fInplot\fP \fB-MMP\fP\fIpings \fP
-\fB-MMS\fP\fIspeedmin\fP 
+\fB-MMS\fP\fIspeedmin\fP
 \fB-MMT\fP\fItimegap\fP \fB-MMZ\fP\fIalgorithm\fP
 \fB-MNA\fP\fI[name_hgt[/P] | P]\fP
 \fB-MNP\fP\fI[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\fP
-\fB-MTC\fP\fIfill\fP \fB-MTD\fP\fIresolution\fP 
-\fB-MTG\fP\fIfill\fP \fB-MTI\fP\fIriver[/pen]\fP 
-\fB-MTN\fP\fIborder[/pen]\fP \fB-MTS\fP\fIfill\fP 
+\fB-MTC\fP\fIfill\fP \fB-MTD\fP\fIresolution\fP
+\fB-MTG\fP\fIfill\fP \fB-MTI\fP\fIriver[/pen]\fP
+\fB-MTN\fP\fIborder[/pen]\fP \fB-MTS\fP\fIfill\fP
 \fB-MTW\fP\fIpen\fP
 \fB-MXG\fP\fIfill\fP \fB-MXI\fP\fIxy_file \fP
 \fB-MXM\fP
 \fB-MXS\fP\fIsymbol/size\fP \fB-MXW\fP\fIpen\fP]
 
 .SH DESCRIPTION
-\fBmbm_plot\fP is a macro to generate a shellscript of MB-System and GMT commands 
-which, when executed, will generate a Postscript plot of the 
-specified swath sonar data. The plot may include bathymetry color 
-fill (\fB-G\fP\fI1\fP), bathymetry color shaded relief (\fB-G\fP\fI2\fP), bathymetry 
-shaded with amplitudes (\fB-G\fP\fI3\fP), greyshade fill amplitude (\fB-G\fP\fI4\fP), 
+\fBmbm_plot\fP is a macro to generate a shellscript of MB-System and GMT commands
+which, when executed, will generate a Postscript plot of the
+specified swath sonar data. The plot may include bathymetry color
+fill (\fB-G\fP\fI1\fP), bathymetry color shaded relief (\fB-G\fP\fI2\fP), bathymetry
+shaded with amplitudes (\fB-G\fP\fI3\fP), greyshade fill amplitude (\fB-G\fP\fI4\fP),
 greyshade fill sidescan (\fB-G\fP\fI5\fP), contoured bathymetry (\fB-C\fP),
 or annotated navigation. The plot may also include navigation tracks, text
-labels, xy data in lines or symbols, and coastlines. 
-Five different color 
-schemes are included. The plot will be scaled to fit on 
-the specified page size or, if the scale is user defined, 
-the page size will be chosen in accordance with the plot 
-size. The primary purpose of this macro is to allow the 
-simple, semi-automated production of nice looking maps with 
-a few command line arguments. For users seeking more control 
-over the plot appearance, a number of additional optional 
-arguments are provided. Truly ambitious users may edit the 
-plot shellscript to take advantage of MB-System and GMT 
+labels, xy data in lines or symbols, and coastlines.
+Five different color
+schemes are included. The plot will be scaled to fit on
+the specified page size or, if the scale is user defined,
+the page size will be chosen in accordance with the plot
+size. The primary purpose of this macro is to allow the
+simple, semi-automated production of nice looking maps with
+a few command line arguments. For users seeking more control
+over the plot appearance, a number of additional optional
+arguments are provided. Truly ambitious users may edit the
+plot shellscript to take advantage of MB-System and GMT
 capabilites not supported by this macro.
 
 .SH AUTHORSHIP
@@ -102,14 +102,14 @@ is the azimuth from which the bathymetry is illuminated.
 If \fImode\fP is set to 3 (bathymetry shaded using amplitudes) using the
 \fB-G\fP option, then the value \fImagnitude\fP
 modulates the intensity of the shading; the value \fImedian\fP sets the
-amplitude value which serves as the zero or neutral level.  
+amplitude value which serves as the zero or neutral level.
 .TP
 .B \-C
 Given by itself, the \fB-C\fP option produces a contour plot
 of the bathymetry data with a contour interval chosen according
-to the data in the file or files. If the \fB-G\fP option is used, 
+to the data in the file or files. If the \fB-G\fP option is used,
 the default contours will be drawn in black; otherwise, the
-default contours will be drawn in four colors (black, red, 
+default contours will be drawn in four colors (black, red,
 green, and blue) with color changes, annotations, and tickmarks
 every fourth contour interval. Additional optional parameters are
 described in the COMPLETE DESCRIPTION OF OPTIONS section below.
@@ -121,15 +121,15 @@ This option flips the color and shading conventions used by
 \fBmbm_plot\fP.
 Normally, the color or grayscale tables used for color bathymetry
 maps run from
-cool colors (or dark grays) for large depth values 
+cool colors (or dark grays) for large depth values
 to hot colors (or light grays) for small depth values.
 In contrast, sidescan and beam amplitude data is normally plotted
 using light grays (or hot colors) for small amplitudes and
-dark grays (or cool colors) for large amplitudes. 
-If \fB-D\fP is given alone or with \fIflipcolor\fP = 1, 
+dark grays (or cool colors) for large amplitudes.
+If \fB-D\fP is given alone or with \fIflipcolor\fP = 1,
 it applies to the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP) 
+is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
 or by overlaying amplitude data (\fB-G\fP\fI3\fP option), then
 setting \fIflipshade\fP = 1 will cause the shading convention
 to be reversed (e.g. high amplitudes overlaid as light shading).
@@ -139,10 +139,10 @@ but leave the default color convention.
 .B \-F
 \fIformat\fP
 .br
-Sets the data format for the input data. 
+Sets the data format for the input data.
 If \fIformat\fP < 0, then the input file specified
 with the \fB-I\fP option will actually contain a list of input swath sonar
-data files. This program uses the \fBMBIO\fP library 
+data files. This program uses the \fBMBIO\fP library
 and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
@@ -159,7 +159,7 @@ Turns on color fill swath plot and sets the style of the plot.
  	\fImode\fP = 5:	Grayscale fill of sidescan data.
 .br
 If "F" is appended to \fImode\fP, then \fBmbm_plot\fP will attempt
-to plot amplitude or sidescan data that have been filtered with \fBmbfilter\fP. 
+to plot amplitude or sidescan data that have been filtered with \fBmbfilter\fP.
 If the desired filtered data files do not exist, then the plotting script
 generated by \fBmbm_plot\fP will fail when
 \fBmbswath\fP exits with an error message. Filtered amplitude
@@ -174,12 +174,12 @@ of its operation and then exit immediately.
 .B \-I
 \fIfilename\fP
 .br
-Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP 
-is read and processed. If \fIformat\fP < 0 (the default), 
+Sets the input filename. If \fIformat\fP > 0 (set with the
+\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP
+is read and processed. If \fIformat\fP < 0 (the default),
 then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
-data files to be processed and their formats.  The program will read 
+data files to be processed and their formats.  The program will read
 the data in each one of these files.
 In the \fIinfile\fP file, each
 data file should be followed by a data format identifier, e.g.:
@@ -201,9 +201,9 @@ described in the COMPLETE DESCRIPTION OF OPTIONS section below.
 \fIroot\fP
 .br
 Sets the root used to construct the filename of the output shellscript
-(\fIroot\fP.cmd) and names of files created when the shellscript is 
-run.  By default, the 
-name of the input data file or list file is used as the \fIroot\fP. 
+(\fIroot\fP.cmd) and names of files created when the shellscript is
+run.  By default, the
+name of the input data file or list file is used as the \fIroot\fP.
 .TP
 .B \-P
 \fIpagesize\fP
@@ -215,8 +215,8 @@ sets the plot scale such that the plot will not fit on the
 designated page, a larger page will be used.
 The supported page sizes include ANSI A, B, C, D, E,
 F, and E1, as well as most metric page sizes. See the
-COMPLETE DESCRIPTION OF OPTIONS section 
-below for a complete list of 
+COMPLETE DESCRIPTION OF OPTIONS section
+below for a complete list of
 the supported page sizes. The default page size is A.
 .TP
 .B \-S
@@ -230,11 +230,11 @@ the boundaries in the tables encompass equal fractions of
 the datapoints. This serves to focus color or shading contrasts
 in value ranges corresponding to the bulk of the data values,
 and is particularly useful for
-enhancing the contrast of sidescan and beam amplitude plots. 
+enhancing the contrast of sidescan and beam amplitude plots.
 If \fB-S\fP is given alone or with \fIcolor\fP = 1,
 it enables equalization of the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP) 
+is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
 or by overlaying amplitude data (\fB-G\fP\fI3\fP option), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB-S\fP\fI0/1\fP will equalize the shading without
@@ -244,8 +244,8 @@ equalizing the color table.
 If \fB-T\fP is given, it causes a coastline to be drawn
 on the map. The default is to draw the coastline and shade
 all dry land a uniform gray. To exercise greater control of
-the coastline plotting, use the 
-\fB-MTC\fP, \fB-MTD\fP, \fB-MTG\fP, \fB-MTI\fP, 
+the coastline plotting, use the
+\fB-MTC\fP, \fB-MTD\fP, \fB-MTG\fP, \fB-MTI\fP,
 \fB-MTN\fP, \fB-MTS\fP, and \fB-MTW\fP options described in the
 COMPLETE DESCRIPTION OF OPTIONS section below.
 .TP
@@ -259,7 +259,7 @@ The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
 .B \-V
-Causes \fBmbm_plot\fP to operate in "verbose" mode 
+Causes \fBmbm_plot\fP to operate in "verbose" mode
 so that it outputs
 more information than usual.
 .TP
@@ -267,7 +267,7 @@ more information than usual.
 \fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. 
+fill plots.
 
 If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
@@ -283,13 +283,13 @@ are available:
 .br
 A complete description of the color pallettes is given
 in the COMPLETE DESCRIPTION OF OPTIONS section below.
- 
+
 The \fIncolors\fP parameter sets the number of color
-values used in plotting, whether the colors are 
+values used in plotting, whether the colors are
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
 
-If the option argument is the path to an existing \fBGMT\fP 
+If the option argument is the path to an existing \fBGMT\fP
 color pallette (CPT) file, then that CPT file and its
 color scheme will be used for the plot
 
@@ -309,7 +309,7 @@ is the azimuth from which the bathymetry is illuminated.
 If \fImode\fP is set to 3 (bathymetry shaded using amplitudes) using the
 \fB-G\fP option, then the value \fImagnitude\fP
 modulates the intensity of the shading; the value \fImedian\fP sets the
-amplitude value which serves as the zero or neutral level.  
+amplitude value which serves as the zero or neutral level.
 .TP
 .B \-B
 \fItickinfo\fP
@@ -323,9 +323,9 @@ basemap annotations based on the map boundaries.
 .br
 Given by itself, the \fB-C\fP option produces a contour plot
 of the bathymetry data with a contour interval chosen according
-to the data in the file or files. If the \fB-G\fP option is used, 
+to the data in the file or files. If the \fB-G\fP option is used,
 the default contours will be drawn in black; otherwise, the
-default contours will be drawn in four colors (black, red, 
+default contours will be drawn in four colors (black, red,
 green, and blue) with color changes, annotations, and tickmarks
 every fourth contour interval.  If any of the optional
 parameters are appended, these values will control the contour interval
@@ -334,7 +334,7 @@ Contours will be
 generated at invervals of \fIcont_int\fP meters.  Color changes
 will occur at intervals of \fIcol_int\fP meters.  Contours will have
 downhill facing tickmarks \fItic_len\fP inches long every \fItic_int\fP
-meters. Contours will have annotations 
+meters. Contours will have annotations
 \fIlab_hgt\fP inches high every \fIlab_int\fP meters.
 .TP
 .B \-D
@@ -344,15 +344,15 @@ This option flips the color and shading conventions used by
 \fBmbm_plot\fP.
 Normally, the color or grayscale tables used for color bathymetry
 maps run from
-cool colors (or dark grays) for large depth values 
+cool colors (or dark grays) for large depth values
 to hot colors (or light grays) for small depth values.
 In contrast, sidescan and beam amplitude data is normally plotted
 using (light grays (or hot colors) for small amplitudes and
-dark grays (or cool colors) for large amplitudes. 
-If \fB-D\fP is given alone or with \fIflipcolor\fP = 1, 
+dark grays (or cool colors) for large amplitudes.
+If \fB-D\fP is given alone or with \fIflipcolor\fP = 1,
 it applies to the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP) 
+is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
 or by overlaying amplitude data (\fB-G\fP\fI3\fP option), then
 setting \fIflipshade\fP = 1 will cause the shading convention
 to be reversed (e.g. high amplitudes overlaid as light shading).
@@ -362,10 +362,10 @@ but leave the default color convention.
 .B \-F
 \fIformat\fP
 .br
-Sets the data format for the input data. 
+Sets the data format for the input data.
 If \fIformat\fP < 0, then the input file specified
 with the \fB-I\fP option will actually contain a list of input swath sonar
-data files. This program uses the \fBMBIO\fP library 
+data files. This program uses the \fBMBIO\fP library
 and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
@@ -388,12 +388,12 @@ of its operation and then exit immediately.
 .B \-I
 \fIfilename\fP
 .br
-Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP 
-is read and processed. If \fIformat\fP < 0 (the default), 
+Sets the input filename. If \fIformat\fP > 0 (set with the
+\fB-f\fP option) then the swath sonar data contained in \fIinfile\fP
+is read and processed. If \fIformat\fP < 0 (the default),
 then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
-data files to be processed and their formats.  The program will read 
+data files to be processed and their formats.  The program will read
 the data in each one of these files.
 In the \fIinfile\fP file, each
 data file should be followed by a data format identifier, e.g.:
@@ -442,7 +442,7 @@ size will be chosen.
 .br
 \fB\-Ju\fP\fIzone/scale\fP (UTM - Universal Transverse Mercator)
 .br
-\fB\-Jy\fP\fIlon0/lats/scale\fP (Basic Cylindrical Projection) 
+\fB\-Jy\fP\fIlon0/lats/scale\fP (Basic Cylindrical Projection)
 .br
 .sp
 \fBAZIMUTHAL PROJECTIONS:\fP
@@ -508,7 +508,7 @@ given as \fB-M\fP followed by a two character identifier, followed
 by any other parameters associated with that option.
 The \fB-M\fP options may be strung together separated by
 colons, e.g. "-MGQ100:GU", which is equivalent to
-"-MGQ -MGU". 
+"-MGQ -MGU".
 .TP
 .B \-MGD
 \fIgmtdef/value\fP
@@ -516,7 +516,7 @@ colons, e.g. "-MGQ100:GU", which is equivalent to
 Allows the user to set the \fBGMT\fP default values used as
 the plot is constructed. This command may be given repeatedly
 to set as many \fBGMT\fP defaults as required. For example, to
-set the basemap annotation font to Courier, use 
+set the basemap annotation font to Courier, use
 "-MGDANOT_FONT/Courier".
 .TP
 .B \-MGF
@@ -549,18 +549,18 @@ Postscript plot files. [Default is 100].
 \fIx/y/size/angle/font/just/text\fP
 .br
 Causes a text label to plotted on the map.
-\fIsize\fP is text size in points, \fIangle\fP is 
-measured in degrees counter-clockwise from horizontal, 
-\fIfontno\fP sets the font type, \fIjustify\fP sets the alignment. 
-If \fIfontno\fP starts with a leading hyphen, then 
-the remainder of \fIfontno\fP is taken to be a 
-textstring with the desired fontname.  See the 
-\fBgmtdefaults\fP man page for names and numbers of available fonts 
-(or run \fBpstext \-L\fP).  The alignment 
-number refers to the part of the textstring that will be mapped 
-onto the (\fIx,y\fP) point: 1 = Lower Left corner, 
-2 = Lower Center, 3 = Lower Right, 5 = Mid Left, 6 = Mid Center, 
-7 = Mid Right, 9 = Upper Left, 10 = Upper Center, 
+\fIsize\fP is text size in points, \fIangle\fP is
+measured in degrees counter-clockwise from horizontal,
+\fIfontno\fP sets the font type, \fIjustify\fP sets the alignment.
+If \fIfontno\fP starts with a leading hyphen, then
+the remainder of \fIfontno\fP is taken to be a
+textstring with the desired fontname.  See the
+\fBgmtdefaults\fP man page for names and numbers of available fonts
+(or run \fBpstext \-L\fP).  The alignment
+number refers to the part of the textstring that will be mapped
+onto the (\fIx,y\fP) point: 1 = Lower Left corner,
+2 = Lower Center, 3 = Lower Right, 5 = Mid Left, 6 = Mid Center,
+7 = Mid Right, 9 = Upper Left, 10 = Upper Center,
 11 = Upper Right. This option may be given as many times as
 needed.
 .TP
@@ -589,12 +589,12 @@ or pixel footprints is just the along-track distance between
 pings multiplied by the \fIfactor\fP value.
 If mode = 3, then each data point is
 plotted as a point, and the factor and depth parameters
-are ignored. 
+are ignored.
 Default: \fIfactor\fP = 1.0, \fImode\fP = 1, \fIdepth\fP = 3000.0.
 .TP
 \fB-MMB\fP\fIyr/mo/da/hr/mn/sc\fP
 Sets the starting time for data allowed in the input data; pings
-with times before the starting time will be ignored. 
+with times before the starting time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .TP
 \fB-MMD\fP\fImode/scale[/min/max]\fP
@@ -615,7 +615,7 @@ multiplication by \fIscale\fP. Default: \fImode\fP = 1, \fIscale\fP = 1.0,
 .TP
 \fB-MME\fP\fIyr/mo/da/hr/mn/sc\fP
 Sets the ending time for data allowed in the input data; pings
-with times after the ending time will be ignored. 
+with times after the ending time will be ignored.
 Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .TP
 \fB-MML\fP\fIlonflip\fP
@@ -643,14 +643,14 @@ no ping averaging is performed. If \fIpings\fP > 0, then
 that number of input pings will be averaged to produce one output
 ping.  If \fIpings\fP = 0, then the ping averaging will automatically
 be done so that the along-track ping spacing is equal to the across-track
-beam spacing. 
+beam spacing.
 Default: \fIpings\fP = 1 (no ping averaging).
 .TP
 \fB-MMS\fP\fIspeedmin\fP
-Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 processed. Default: \fIspeed\fP = 0.
-.TP 
+.TP
 .B \-MMT
 \fItimegap\fP
 .br
@@ -675,36 +675,36 @@ of beams to be contoured; thus it is sensible to keep the number
 of pings contoured at a time small (e.g. use \fB-N\fP\fI5\fP).
 The time required for the "ping to ping" algorithm varies linearly
 with the number of pings contoured; thus larger numbers of pings
-may be reasonably contoured at a time (e.g. use \fB-N\fP\fI50\fP). 
+may be reasonably contoured at a time (e.g. use \fB-N\fP\fI50\fP).
 Default: \fIalgorithm\fP = 0 unless \fIformat\fP = 41.
 .TP
 .B \-MNA
 \fI[name_hgt[/P] | P]\fP
 .br
 Turns on filename annotation of navigation tracks. If \fB-MNA\fP is given
-without specifying any controlling parameters, then the lettering height 
-\fIname_hgt\fP is 0.15 and the filenames are plotted parallel to the 
+without specifying any controlling parameters, then the lettering height
+\fIname_hgt\fP is 0.15 and the filenames are plotted parallel to the
 navigation track from the start of the track. The lettering height can be
 specified using either \fB-MNA\fP\fIname_hgt\fP or \fB-MNA\fP\fIname_hgt/P\fP.
-If \fB-MNA\fP\fIP\fP or \fB-MNA\fP\fIname_hgt/P\fP is specified, 
+If \fB-MNA\fP\fIP\fP or \fB-MNA\fP\fIname_hgt/P\fP is specified,
 the filename will be plotted perpendicular to the navigation track.
 Filename annotation can also be specified using the \fB-N\fP option.
-Defaults: Filename annotation off. 
+Defaults: Filename annotation off.
 .TP
 .B \-MNP
 \fI[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]\fP
 .br
 Turns on ping number (or shot number) annotation of navigation tracks.
 Tick marks are made along the shiptrack at \fIpingnumber_tick\fP intervals; these
-are \fItime_tick_len\fP inches long. Longer tick marks are made along the 
-shiptrack at \fIpingnumber_annot\fP intervals; these are 1.5 times \fItime_tick_len\fP 
+are \fItime_tick_len\fP inches long. Longer tick marks are made along the
+shiptrack at \fIpingnumber_annot\fP intervals; these are 1.5 times \fItime_tick_len\fP
 inches long.
 Defaults: Pingnumber annotation off. If the \fB-MNP\fP option is given without
-specifying the controlling parameters, then \fIpingnumber_tick\fP = 50, 
+specifying the controlling parameters, then \fIpingnumber_tick\fP = 50,
 \fIpingnumber_annot\fP = 100, and \fIpingnumber_tick_len\fP = 0.1.
 .TP
 .B \-MTC
-\fIfill\fP 
+\fIfill\fP
 .br
 Coastline plotting option.
 Set the shade (0-255), color (r/g/b), or pattern
@@ -712,7 +712,7 @@ Set the shade (0-255), color (r/g/b), or pattern
 fill chosen for "wet" areas (-S)].
 .TP
 .B \-MTD
-\fIresolution\fP 
+\fIresolution\fP
 .br
 Coastline plotting option.
 Selects the resolution of the coastline data set to use ((f)ull,
@@ -721,7 +721,7 @@ resolution drops off by 80% between data sets. [Default
 is l].
 .TP
 .B \-MTG
-\fIfill\fP 
+\fIfill\fP
 .br
 Coastline plotting option.
 Select painting or clipping of "dry" areas.  Append a
@@ -734,7 +734,7 @@ Cookbook & Technical Reference Appendix E for
 information on individual patterns.
 .TP
 .B \-MTI
-\fIriver[/pen]\fP 
+\fIriver[/pen]\fP
 .br
 Coastline plotting option.
 Draw rivers.  Specify the type of rivers and
@@ -758,7 +758,7 @@ as often as necessary.
      c = All canals (8-10)
 .TP
 .B \-MTN
-\fIborder[/pen]\fP 
+\fIborder[/pen]\fP
 .br
 Coastline plotting option.
 Draw political boundaries.  Specify the type of
@@ -772,7 +772,7 @@ Repeat option \fB-MTN\fP as often as necessary.
      a = All boundaries (1-3)
 .TP
 .B \-MTS
-\fIfill\fP 
+\fIfill\fP
 .br
 Coastline plotting option.
 Select painting or clipping of "wet" areas.  Append the
@@ -780,27 +780,27 @@ shade (0-255), color (r/g/b), pattern (see \fB-MTG\fP), or c
 for clipping.
 .TP
 .B \-MTW
-\fIpen\fP 
+\fIpen\fP
 .br
 Coastline plotting option.
 Append pen attributes  [Defaults:  width = 1, color = 0/0/0,
 texture = solid].
 .TP
 .B \-MXG
-\fIfill\fP 
+\fIfill\fP
 .br
-Select filling of symbols for xy plotting.  
-Set the shade (0\-255) or color 
+Select filling of symbols for xy plotting.
+Set the shade (0\-255) or color
 (r/g/b) [Default is no fill]. To reset no fill,
 use \fIfill\fP = "N".
-For polygons, you may optionally specify 
-\fB\-Gp\fP\fIicon_size/pattern\fP, where 
+For polygons, you may optionally specify
+\fB\-Gp\fP\fIicon_size/pattern\fP, where
 \fIpattern\fP gives the number of the
-image pattern (1-32) OR the name of a 
-icon-format file.  \fIicon_size\fP sets 
+image pattern (1-32) OR the name of a
+icon-format file.  \fIicon_size\fP sets
 the unit size in inch.
-To invert black and white pixels, use 
-\fB\-GP\fP instead of \fB\-Gp\fP.  See 
+To invert black and white pixels, use
+\fB\-GP\fP instead of \fB\-Gp\fP.  See
 \fBGMTs\fP Cookbook & Technical Reference
 Appendix E for information on individual patterns.
 .TP
@@ -819,15 +819,15 @@ using different line or symbol characteristics.
 .B \-MXM
 .br
 Toggles expectation for xy data files having multiple
-segments, in which each segment is to be plotted 
+segments, in which each segment is to be plotted
 separately. Segments are separated by a
-record whose first character is '>'. By default, 
+record whose first character is '>'. By default,
 unsegmented files are expected. Users may give this
 command multiple times, allowing some input files to
 be handled as segmented and others not.
 .TP
 .B \-MXS
-\fIsymbol/size\fP 
+\fIsymbol/size\fP
 .br
 Selects symbol to be used for plotting the next xy data
 file. Setting \fIsymbol\fP = "N" causes line plotting.
@@ -895,49 +895,49 @@ cross.  Give length in inch.
 \fIpen\fP
 .br
 Set pen attributes for xy plotting. See chapter 4.12 in the
-GMT Technical reference for a discussion of GMT pen values.  
-[Defaults: width = 1, color = 0/0/0, 
-texture = solid]. 
+GMT Technical reference for a discussion of GMT pen values.
+[Defaults: width = 1, color = 0/0/0,
+texture = solid].
 .TP
 .B \-N
 \fI[time_tick/time_annot/date_annot/time_tick_len[/name_hgt/name_perp]] | F | FP]\fP
 .br
-This option causes a navigation track plot to be generated, and 
-can also set the start of each swath file to be annotated with the 
-filename. If the \fB-N\fP option is given alone, then the 
-navigation track will be plotted without any annotation,  The optional 
-parameters allow users to control the details of the navigation 
-track annotation. Time marks are made with "X" marks along the 
-shiptrack; annotated time marks show the time in HH:MM format 
-next to the time mark and annotated date marks show the time 
+This option causes a navigation track plot to be generated, and
+can also set the start of each swath file to be annotated with the
+filename. If the \fB-N\fP option is given alone, then the
+navigation track will be plotted without any annotation,  The optional
+parameters allow users to control the details of the navigation
+track annotation. Time marks are made with "X" marks along the
+shiptrack; annotated time marks show the time in HH:MM format
+next to the time mark and annotated date marks show the time
 and julian day in HH:MM/DDD format.  The "X" marks are
-\fItime_tick_len\fP inches high for normal time marks and 
+\fItime_tick_len\fP inches high for normal time marks and
 1.5 times \fItime_tick_len\fP inches high for annotated time or date
-marks.  The interval of time ticks, annotated time ticks, and 
-annotated date ticks are given in hours by \fItime_tick\fP, 
+marks.  The interval of time ticks, annotated time ticks, and
+annotated date ticks are given in hours by \fItime_tick\fP,
 \fItime_annot\fP, and \fIdate_annot\fP, respectively.
 If the \fIname_hgt\fP parameter is not given when the other parameters
 are specified, then no filename annotation will be done. If given,
 \fIname_hgt\fP sets the height in inches of the filename annotation
-and turns that annotation on. If given as 1, \fIname_perp\fP causes 
-the filename annotation to be perpendicular to the shiptrack rather 
-than parallel (the default). If the \fB-N\fP\fIF\fP is given, then 
-a navigation track will be generated using the default parameters 
-and also with filename annotation along the shiptrack. If the 
-\fB-N\fP\fIFP\fP is given, then a navigation track will be generated 
-with the default parameters and also with filename annotation 
+and turns that annotation on. If given as 1, \fIname_perp\fP causes
+the filename annotation to be perpendicular to the shiptrack rather
+than parallel (the default). If the \fB-N\fP\fIF\fP is given, then
+a navigation track will be generated using the default parameters
+and also with filename annotation along the shiptrack. If the
+\fB-N\fP\fIFP\fP is given, then a navigation track will be generated
+with the default parameters and also with filename annotation
 perpendicular to the shiptrack.
-Defaults if annotation is enabled: \fItime_tick\fP = 0.25; 
-\fItime_annot\fP = 1.0; \fIdate_annot\fP = 4.0; 
+Defaults if annotation is enabled: \fItime_tick\fP = 0.25;
+\fItime_annot\fP = 1.0; \fIdate_annot\fP = 4.0;
 \fItime_tick_len\fP = 0.1; \fIname_hgt\fP = 0.1; \fIname_perp\fP = 0.
 .TP
 .B \-O
 \fIroot\fP
 .br
 Sets the root used to construct the filename of the output shellscript
-(\fIroot\fP.cmd) and names of files created when the shellscript is 
-run.  By default, the 
-name of the input data file or list file is used as the \fIroot\fP. 
+(\fIroot\fP.cmd) and names of files created when the shellscript is
+run.  By default, the
+name of the input data file or list file is used as the \fIroot\fP.
 .TP
 .B \-P
 \fIpagesize\fP
@@ -998,31 +998,31 @@ The supported page sizes are:
           m1  1371.6 x 1828.8 mm  (54.00 x 72.00 in.)
           m2  1371.6 x 2133.6 mm  (54.00 x 84.00 in.)
           m3  1371.6 x 2438.4 mm  (54.00 x 96.00 in.)
-          m4  1524.0 x 1828.8 mm  (54.00 x 72.00 in.)
-          m5  1524.0 x 2133.6 mm  (54.00 x 84.00 in.)
-          m6  1524.0 x 2438.4 mm  (54.00 x 96.00 in.)
+          m4  1524.0 x 1828.8 mm  (60.00 x 72.00 in.)
+          m5  1524.0 x 2133.6 mm  (60.00 x 84.00 in.)
+          m6  1524.0 x 2438.4 mm  (60.00 x 96.00 in.)
 
 The default page size is A.
 .TP
 .B \-Q
-Normally, the output plot generation shellscript 
+Normally, the output plot generation shellscript
 includes lines which execute
-a program to display the Postscript image on the screen.  
+a program to display the Postscript image on the screen.
 This option causes those lines to be commented out so
 that executing the shellscript produces a Postscript plot
 but does not attempt to display it on the screen.
 The program
-to be used to display the Postscript is set 
+to be used to display the Postscript is set
 using \fBmbdefaults\fP;
 the default value can be overridden by setting the environment
-variable $MB_PS_VIEWER. 
+variable $MB_PS_VIEWER.
 .TP
 .B \-R
 \fIwest/east/south/north\fP
 .br
-Sets the longitude and latitude bounds within which swath sonar 
+Sets the longitude and latitude bounds within which swath sonar
 data will be read. Normally the bounds are automatically chosen
-to include all of the input data. 
+to include all of the input data.
 .TP
 .B \-S
 \fI[color/shade]\fP
@@ -1035,11 +1035,11 @@ the boundaries in the tables encompass equal fractions of
 the datapoints. This serves to focus color or shading contrasts
 in value ranges corresponding to the bulk of the data values,
 and is particularly useful for
-enhancing the contrast of sidescan and beam amplitude plots. 
+enhancing the contrast of sidescan and beam amplitude plots.
 If \fB-S\fP is given alone or with \fIcolor\fP = 1,
 it enables equalization of the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP) 
+is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
 or by overlaying amplitude data (\fB-G\fP\fI3\fP option), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB-S\fP\fI0/1\fP will equalize the shading without
@@ -1049,8 +1049,8 @@ equalizing the color table.
 If \fB-T\fP is given, it causes a coastline to be drawn
 on the map. The default is to draw the coastline and shade
 all dry land a uniform gray. To exercise greater control of
-the coastline plotting, use the 
-\fB-MTC\fP, \fB-MTD\fP, \fB-MTG\fP, \fB-MTI\fP, 
+the coastline plotting, use the
+\fB-MTC\fP, \fB-MTD\fP, \fB-MTG\fP, \fB-MTI\fP,
 \fB-MTN\fP, \fB-MTS\fP, and \fB-MTW\fP options described in the
 .TP
 .B \-U
@@ -1063,14 +1063,14 @@ The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
 .B \-V
-Causes \fBmbm_plot\fP to operate in "verbose" mode so that it 
+Causes \fBmbm_plot\fP to operate in "verbose" mode so that it
 outputs more information than usual.
 .TP
 .B \-W
 \fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. 
+fill plots.
 
 If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
@@ -1122,7 +1122,7 @@ color pallette 7 - Uniform White
   red:   255 255 255 255 255 255 255 255 255 255 255
   green: 255 255 255 255 255 255 255 255 255 255 255
   blue:  255 255 255 255 255 255 255 255 255 255 255
- 
+
 The Haxby colors have been adapted from a pallette
 developed by Dr. William Haxby of the Lamont-Doherty
 Earth Observatory; this pallette is pleasing to the
@@ -1136,13 +1136,13 @@ The grayscale pallette runs linearly from white to
 black and is commonly used for plots of sidescan and amplitude
 data. The uniform grayscale is useful for non-color
 shaded relief plots.
- 
+
 The \fIncolors\fP parameter sets the number of color
-values used in plotting, whether the colors are 
+values used in plotting, whether the colors are
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
 
-If the option argument is the path to an existing \fBGMT\fP 
+If the option argument is the path to an existing \fBGMT\fP
 color pallette (CPT) file, then that CPT file and its
 color scheme will be used for the plot
 .TP
@@ -1176,7 +1176,7 @@ data in the file, we use \fBmbm_plot\fP to generate
 shellscripts which in turn generate plots when executed.
 The following five commands generate plotting shellscripts
 for color fill bathymetry overlaid with contours, color shaded
-relief bathymetry, color fill bathymetry overlaid with 
+relief bathymetry, color fill bathymetry overlaid with
 amplitudes, grayscale amplitudes, and grayscale sidescan,
 respectively:
 
@@ -1190,27 +1190,27 @@ respectively:
  		-N -V -Oamp
  	mbm_plot -F41 -I sb2112_example.mb41 -G5 -S    \\
  		-N -V -Oss
- 
-When the following shellscripts are executed, each will 
+
+When the following shellscripts are executed, each will
 generate a postscript plot file and then display the plot
 on the screen:
- 
+
  	bathcont.cmd
  	bathshade.cmd
  	bathamp.cmd
  	amp.cmd
  	ss.cmd
- 
-Note that we use the \fB-S\fP option to apply histogram 
+
+Note that we use the \fB-S\fP option to apply histogram
 equalization to the amplitude and sidescan data, but not
 the bathymetry data. Also note that by specifying \fB-N\fP
 we obtain a track plot of the ship's navigation overlaid
 on the color or grayscale file plots.
- 
+
 Now suppose we have a set of SeaBeam 2112 data files
 comprising a short survey and that we want a plot
 of all the data together.  We create an ASCII text file which has
-a list of the filenames, each followed by the appropriate \fBMBIO\fP 
+a list of the filenames, each followed by the appropriate \fBMBIO\fP
 format id number, e.g.:
 
  	sb2112_example_1.mb41 41
@@ -1228,13 +1228,13 @@ thus we use \fB-W\fP\fI2/2\fP. We also choose to use the
 \fB-X\fP option, which causes \fBmbm_plot\fP to execute
 the shellscript it creates in the background before
 exiting. The \fBmbm_plot\fP command is:
- 
+
  	mbm_plot -F-1 -Idatalist -G1 -C25 -N \\
  			-X -V -Obathtest
- 
-As an example, the contents of the plotting shellscript 
+
+As an example, the contents of the plotting shellscript
 "bathtest.cmd" are:
- 
+
  #
  # Shellscript to create Postscript plot of swath sonar data
  # Created by macro mbm_plot
@@ -1324,12 +1324,10 @@ As an example, the contents of the plotting shellscript
  echo All done!
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbcontour\fP(l), 
-\fBmbswath\fP(l), \fBmbdefaults\fP(l), 
+\fBmbsystem\fP(l), \fBmbcontour\fP(l),
+\fBmbswath\fP(l), \fBmbdefaults\fP(l),
 \fBmbm_grdplot\fP(l), \fBmbm_grd3dplot\fP(l), \fBmbfilter\fP(l)
 
 .SH BUGS
 By making this macro more useful, we have also made it
-more complex. 
-
-
+more complex.

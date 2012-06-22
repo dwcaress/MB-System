@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system: mbm_route2mission.perl   7/18/2004
 #    $Id$
 #
-#    Copyright (c) 2004-2009 by 
+#    Copyright (c) 2004-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -19,18 +19,18 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Command:
 #   mbm_route2mission
 #
-# Purpose: 
-#   Perl shellscript to translate survey route file derived from 
+# Purpose:
+#   Perl shellscript to translate survey route file derived from
 #   MBgrdviz into an MBARI AUV mission script. Developed for use
 #   in survey planning for the MBARI Mapping AUV.
 #
 # Usage:
-#   mbm_route2mission -Iroutefile [-Aaltitudemin/altitudeabort[/altitudedesired] 
+#   mbm_route2mission -Iroutefile [-Aaltitudemin/altitudeabort[/altitudedesired]
 #                     -Bbehavior -Ddepthmax/depthabort[/depthdescent]
-#                     -Fforwarddistance -Ggpsmode -M[sensors] -Omissionfile 
+#                     -Fforwarddistance -Ggpsmode -M[sensors] -Omissionfile
 #                     -P[startdistance | startlon/startlat] -Sspeed -Tstarttime -Wwaypointspacing -V -H]
 #
-# 
+#
 # Author:
 #   David W. Caress
 #      Monterey Bay Aquarium Research Institute
@@ -117,6 +117,12 @@ $program_name = "mbm_route2mission";
 #     2 = TRANSIT
 #     3 = STARTLINE
 #     4 = ENDLINE
+#     5 = STARTLINE2
+#     6 = ENDLINE2
+#     7 = STARTLINE3
+#     8 = ENDLINE3
+#     9 = STARTLINE4
+#     10 = ENDLINE4
 
 # Definition of gps modes:
 #     0 = Do GPS fix at surface at start and end of missions only
@@ -139,11 +145,21 @@ $safetymargin = 1800;
 # route name
 $routename = "Survey";
 
-# mission
-$altitudemin = 18.0;
-$altitudeabort = 10.0;
+# altitude controls
+$altitudemin = 50.0;
+$altitudeabort = 25.0;
 $altitudedesired = $altitudemin;
-$mission_speed = 1.5;
+$altitudedesired2 = $altitudemin;
+$deltadepthrestart = $altitudemin - $altitudeabort;
+
+# constant depth controls
+$depthconstant = 50.0;
+$depthconstant2 = 50.0;
+
+# speed
+$ascentdescent_speed = 1.5;
+$survey_speed = 1.5;
+$transit_speed = 1.5;
 
 # behavior gps
 $gpsminhits = 10; # used to be 30, but vehicle started to time out and abort 3/20/2008
@@ -154,8 +170,8 @@ $gpsmode = 0;
 $setpointtime = 30;
 
 # behavior descend
-$descendpitch = -30;
-$descendrudder = 3;
+$descendpitch = -35;
+$descendrudder = 2;
 $descentdepth = 3.0;
 $initialdescendtime = 300;
 
@@ -167,23 +183,24 @@ $ascendenddepth = 2;
 # behavior reson
 $resonduration = 6;
 $sonaraltitudemax = 100.0;
-$mb_pingrate = 2.0;
+$mb_pingrate = 3.0;
 $mb_transmitgain = 220.0;
 $mb_receivegain = 75.0;
 $mb_minrangefraction = 0.2;
-$mb_pulsewidth = 0.000030;
+$mb_pulsewidth = 0.000060;
 $resongainsetcount = 0;
+$mb_snippetmode = 1;
 
 # behavior waypoint and waypoint_depth
 $behaviorWaypointID = 0;
 $behaviorWaypointDepthID = 1;
 $depthmax = 5900.0;
 $depthabort = 6000.0;
-$maxcrosstrackerror = 30.0;
 $maxclimbslope = 0.5734;
 
 # default waypoint behavior to use
-$behavior = $behaviorWaypointDepthID;
+$behavior = $behaviorWaypointID;
+$behaviorarg = -1;
 
 # spiral descent approach depth
 $approachdepth = 50.0;
@@ -201,7 +218,7 @@ $maxslope = sin($DTR * $maxslopedeg) / cos($DTR * $maxslopedeg);
 # Deal with command line arguments
 &MBGetopts('A:a:B:b:C:c:D:d:F:f:G:g:HhI:i:J:j:L%l%M%mN%n%O:o:P:p:R:r:S:s:T:t:W:w:V*v*Zz');
 $altitudearg =		($opt_A || $opt_a);
-$behavior =		($opt_B || $opt_b | $behavior);
+$behaviorarg =		($opt_B || $opt_b);
 $aborttime = 		($opt_C || $opt_c);
 $deptharg =		($opt_D || $opt_d);
 $forwarddist =		($opt_F || $opt_f);
@@ -211,13 +228,13 @@ $routefile =		($opt_I || $opt_i);
 $depthprofilefile =	($opt_J || $opt_j);
 $approachdepth =	($opt_L || $opt_l || $approachdepth);
 $sensor =		($flg_M || $flg_m);
-$sensorarg =	($opt_M || $opt_m);
+$sensorarg =		($opt_M || $opt_m);
 $spiraldescent =	($flg_N || $flg_n);
 $spiraldescentarg =	($opt_N || $opt_n);
 $missionfile =		($opt_O || $opt_o);
 $startposition =	($opt_P || $opt_p);
 $multibeamsettings =	($opt_R || $opt_r);
-$mission_speed =	($opt_S || $opt_s || $mission_speed);
+$speedarg =		($opt_S || $opt_s);
 $starttime =		($opt_T || $opt_t);
 $waypointdist =		($opt_W || $opt_w || $waypointdist);
 $verbose =		($opt_V || $opt_v);
@@ -225,14 +242,14 @@ $outputoff =		($opt_Z || $opt_z);
 
 # print out help message if required
 if ($help) {
-    print "\r\n$program_name:\r\n";    
+    print "\r\n$program_name:\r\n";
     print "\nVersion: $Id$\n";
     print "\r\nPerl shellscript to translate survey route file derived from \r\n";
     print "MBgrdviz into an MBARI AUV mission script. Developed for use\r\n";
     print "in survey planning for the MBARI Mapping AUV.\r\n";
     print "Usage: mbm_route2mission -Iroutefile \r\n";
     print "\t\t[-Aaltitudemin/altitudeabort[/altitudedesired] -Abehavior -Caborttime \r\n";
-    print "-Ddepthmax/depthabort[/depthdescent] -Fforwarddistance -Ggpsmode \r\n";
+    print "-Ddepthconstant[/depthconstant2] -Fforwarddistance -Ggpsmode \r\n";
     print "\t\t-Jdepthprofilefile -Lapproachdepth -M[sonarlist] -N \r\n";
     print "-Omissionfile \r\n\t\t-P[startlon/startlat | startdistance] \r\n";
     print "\t\t-Rtransmitpower/receivegain[/rangeminfraction] \r\n";
@@ -255,45 +272,94 @@ chop $date;
 chop $host;
 
 # deal with command line values
+if ($behaviorarg != -1)
+	{
+	if ($behaviorarg =~ /^\S+/)
+		{
+		($behavior) = $behaviorarg =~ /^(\S+)/;
+		}
+	}
 if ($altitudearg)
 	{
-	if ($altitudearg =~ /^\S+\/\S+\/\S+/)
+	if ($altitudearg =~ /^\S+\/\S+\/\S+\/\S+/)
 		{
-		($altitudemin, $altitudeabort, $altitudedesired) 
+		($altitudemin, $altitudeabort, $altitudedesired, $altitudedesired2)
+			= $altitudearg =~ /^(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+		$deltadepthrestart = $altitudemin - $altitudeabort;
+		}
+	elsif ($altitudearg =~ /^\S+\/\S+\/\S+/)
+		{
+		($altitudemin, $altitudeabort, $altitudedesired)
 			= $altitudearg =~ /^(\S+)\/(\S+)\/(\S+)/;
+		$deltadepthrestart = $altitudemin - $altitudeabort;
+		$altitudedesired2 = $altitudedesired;
+		}
+	elsif ($altitudearg =~ /^\S+\/\S+/)
+		{
+		($altitudemin, $altitudeabort)
+			= $altitudearg =~ /^(\S+)\/(\S+)/;
+		$altitudedesired = $altitudemin;
+		$deltadepthrestart = $altitudemin - $altitudeabort;
+		$altitudedesired2 = $altitudedesired;
 		}
 	else
 		{
-		($altitudemin, $altitudeabort) 
-			= $altitudearg =~ /^(\S+)\/(\S+)/;
+		($altitudemin)
+			= $altitudearg =~ /^(\S+)/;
+		$altitudeabort = $altitudemin / 2;
 		$altitudedesired = $altitudemin;
+		$deltadepthrestart = $altitudemin - $altitudeabort;
+		$altitudedesired2 = $altitudedesired;
 		}
 	}
-# IGNORE depth args now 
-# 3/29/08 R/V Zephyr, off Mission Bay, San Diego, DWC
-#if ($deptharg
-#	&& $deptharg =~ /^(\S+)\/(\S+)\/(\S+)/)
-##	{
-#	($depthmax, $depthabort, $descentdepth) 
-#		= $deptharg =~ /^(\S+)\/(\S+)\/(\S+)/;
-#	}
-#elsif ($deptharg
-#	&& $deptharg =~ /^(\S+)\/(\S+)/)
-#	{
-#	($depthmax, $depthabort) 
-#		= $deptharg =~ /^(\S+)\/(\S+)/;
-#	}
+if ($speedarg)
+	{
+	if ($speedarg =~ /^\S+\/\S+\/\S+/)
+		{
+		($survey_speed, $ascentdescent_speed, $transit_speed)
+			= $speedarg =~ /^(\S+)\/(\S+)\/(\S+)/;
+		}
+	elsif ($speedarg =~ /^\S+\/\S+/)
+		{
+		($survey_speed, $ascentdescent_speed)
+			= $speedarg =~ /^(\S+)\/(\S+)/;
+		}
+	else
+		{
+		($survey_speed)
+			= $speedarg =~ /^(\S+)/;
+		}
+	}
+
+if ($deptharg)
+	{
+	if ($deptharg =~ /^(\S+)\/(\S+)/)
+		{
+		($depthconstant, $depthconstant2)
+			= $deptharg =~ /^(\S+)\/(\S+)/;
+		}
+	elsif ($deptharg =~ /^(\S+)/)
+		{
+		($depthconstant)
+			= $deptharg =~ /^(\S+)/;
+		}
+	}
+
 if ($startposition && $startposition =~ /^(\S+)\/(\S+)/)
 	{
-	($startlon, $startlat) 
+	($startlon, $startlat)
 		= $startposition =~ /^(\S+)\/(\S+)/;
 	}
 elsif ($startposition)
 	{
 	($startdistance) = $startposition;
 	}
-	
+
 # Set mapping sonar status
+if ($sensorarg =~ /\S*M\S*/)
+	{
+	$mappingsonar = 1;
+	}
 if ($sensorarg =~ /\S*S\S*/)
 	{
 	$mappingsonar = 1;
@@ -312,6 +378,19 @@ if ($sensorarg =~ /\S*H\S*/)
 if ($sensorarg =~ /\S*C\S*/)
 	{
 	$camera = 1;
+	}
+if ($sensorarg =~ /\S*B\S*/)
+	{
+	$mappingsonar = 1;
+	$beamdata = 1;
+	}
+if ($mappingsonar && $beamdata)
+	{
+	$logmode = 3;
+	}
+elsif ($mappingsonar)
+	{
+	$logmode = 1;
 	}
 if ($sensor && !$sensorarg)
 	{
@@ -337,7 +416,11 @@ elsif ($multibeamsettings =~ /\S+\/\S+/)
 	($mb_transmitgain,$mb_receivegain) = $multibeamsettings =~ /(\S+)\/(\S+)/;
 	$mb_minrangefraction = 0.2;
 	}
-	
+if ($mappingsonar && $beamdata)
+	{
+	$mb_snippetmode = 0;
+	}
+
 # Open the input file
 open(RFILE,"$routefile") || die "Cannot open input route file: $routefile\r\n$program_name aborted.\r\n";
 if ($routefile =~ /\S+.rte/)
@@ -356,11 +439,11 @@ $waypointfile = "$root" . "_wpt.ste";
 
 # Read in the initial route data
 $cnt = 0;
-while ($line = <RFILE>) 
+while ($line = <RFILE>)
 	{
 	if ($line =~ /^## ROUTENAME/)
 		{
-		($routename) = $line 
+		($routename) = $line
 			=~ /^## ROUTENAME\s+(\S+)/;
 		}
 	elsif ($line =~ /^## /)
@@ -378,8 +461,8 @@ while ($line = <RFILE>)
 	elsif ($line =~ /(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/)
 		{
 		#extract route data
-		($lon, $lat, $topo, $waypoint, $bearing, $distance, $distonbottom, $slope) 
-			= $line 
+		($lon, $lat, $topo, $waypoint, $bearing, $distance, $distonbottom, $slope)
+			= $line
 			=~ /(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/;
 		$output = 0;
 		$length = 0;
@@ -400,14 +483,14 @@ while ($line = <RFILE>)
 	}
 $npoints = $cnt;
 close(RFILE);
-	
+
 # Count waypoints and gps events
 $cnt = 0;
 $nwaypoints = 0;
 $ngpsevents = 0;
 foreach $lon (@lons)
 	{
-		
+
 	# count waypoints
 	if ($waypoints[$cnt] != 0)
 		{
@@ -426,7 +509,7 @@ foreach $lon (@lons)
 	# increment counter
 	$cnt++;
 	}
-	
+
 # Write out the input route data
 if ($debug)
 	{
@@ -440,13 +523,13 @@ if ($debug)
 		$cnt++;
 		}
 	}
-	
+
 # calculate the spiral descent depth from first waypoint and desired altitude if needed
 if ($spiraldescent)
 	{
 	$spiraldescentdepth = -$topos[0] - $spiraldescentaltitude - 10.0;
 	}
-	
+
 # Process the route data to generate AUV waypoints that have
 # the desired spacing.
 $distancelastmpoint = 0.0;
@@ -459,8 +542,8 @@ for ($i = 0; $i < $npoints; $i++)
 		{
 		$outputs[$i] = 1;
 		$lengths[$i] = $distances[$i] - $distancelastmpoint;
-		
-		if ($i > 0 && $waypoints[$ilast] == 0 
+
+		if ($i > 0 && $waypoints[$ilast] == 0
 			&& ($distances[$i] - $distancelastmpoint) < 0.75 * $waypointdist)
 			{
 			$outputs[$ilast] = 0;
@@ -473,7 +556,7 @@ for ($i = 0; $i < $npoints; $i++)
 		$outputs[$i] = 1;
 		$lengths[$i] = $distances[$i] - $distancelastmpoint;
 		}
-		
+
 	# process points of interest
 	if ($outputs[$i] == 1)
 		{
@@ -483,7 +566,7 @@ for ($i = 0; $i < $npoints; $i++)
 		$ilast = $i;
 		}
 	}
-	
+
 # Write out the intermediate waypoint data
 if ($debug)
 	{
@@ -505,11 +588,12 @@ if ($debug)
 			print "\n";
 			}
 		}
-	}	
+	}
 
-# Process the route data to generate AUV waypoints that keep the 
+# Process the route data to generate AUV waypoints that keep the
 # vehicle a safe distance above the bottom.
 $nmissionpoints = 0;
+$lastmode = 0;
 for ($i = 0; $i < $npoints; $i++)
 	{
 	# process points of interest
@@ -518,6 +602,36 @@ for ($i = 0; $i < $npoints; $i++)
 		# insert points into arrays so they can be printed out last to first
 		# to follow the MBARI AUV mission file convention
 		push(@mwaypoints, $waypoints[$i]);
+		if ($waypoints[$i] == 3 || $waypoints[$i] == 5 || $waypoints[$i] == 7 || $waypoints[$i] == 9)
+			{
+			push(@mstartstops, 1);
+			}
+		elsif ($waypoints[$i] == 4 || $waypoints[$i] == 6 || $waypoints[$i] == 8 || $waypoints[$i] == 10)
+			{
+			push(@mstartstops, 2);
+			}
+		else
+			{
+			push(@mstartstops, 0);
+			}
+		if ($waypoints[$i] == 3 || $waypoints[$i] == 4)
+			{
+			$lastmode = 1;
+			}
+		elsif ($waypoints[$i] == 5 || $waypoints[$i] == 6)
+			{
+			$lastmode = 2;
+			}
+		elsif ($waypoints[$i] == 7 || $waypoints[$i] == 8)
+			{
+			$lastmode = 3;
+			}
+		elsif ($waypoints[$i] == 9 || $waypoints[$i] == 10)
+			{
+			$lastmode = 4;
+			}
+		push(@mmodes, $lastmode);
+
 		push(@mlons, $lons[$i]);
 		push(@mlats, $lats[$i]);
 		push(@mtopos, $topos[$i]);
@@ -525,11 +639,11 @@ for ($i = 0; $i < $npoints; $i++)
 		push(@mdistances, $distances[$i]);
 		push(@mlengths, $lengths[$i]);
 		$nmissionpoints++;
-		
+
 		# print it out
 		if ($debug)
 			{
-			print "$i $waypoints[$i] $lons[$i] $lats[$i] $topos[$i] $distances[$i] $bearings[$i]\r\n";
+			print "$i $waypoints[$i] $mstartstops[$i] $mmodes[$i] $lons[$i] $lats[$i] $topos[$i] $distances[$i] $bearings[$i]\r\n";
 			}
 #print "$nmissionpoints $waypoints[$i] $lons[$i] $lats[$i] $topos[$i] $distances[$i] $bearings[$i]\r\n";
 		}
@@ -545,10 +659,10 @@ $C6 = 1.175;
 $C7 = 0.0023;
 $DTR = 3.14159265358979323846 / 180.0;
 $radlat = $mlats[0] * DTR;
-$mtodeglat = 1./abs($C4 + $C5*cos(2*$radlat) 
+$mtodeglat = 1./abs($C4 + $C5*cos(2*$radlat)
 			+ $C6*cos(4*$radlat) + $C7*cos(6*$radlat));
-$mtodeglon = 1./abs($C1*cos($radlat) + $C2*cos(3*$radlat) 
-			+ $C3*cos(5*$radlat));				
+$mtodeglon = 1./abs($C1*cos($radlat) + $C2*cos(3*$radlat)
+			+ $C3*cos(5*$radlat));
 
 # read depth profile data if specified
 $ndppoints = 0;
@@ -560,13 +674,13 @@ if ($depthprofilefile)
 	# Read in the depth profile data
 	$line = <RFILE>;
 	$line = <RFILE>;
-	while ($line = <RFILE>) 
+	while ($line = <RFILE>)
 		{
 		if ($line =~ /(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/)
 			{
 			#extract route data
-			($depth, $altitude, $lon, $lat, $distance) 
-				= $line 
+			($depth, $altitude, $lon, $lat, $distance)
+				= $line
 				=~ /(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/;
 			push(@dpdeps, $depth);
 			push(@dpalts, $altitude);
@@ -581,13 +695,14 @@ if ($depthprofilefile)
 		}
 	close(RFILE);
 	}
-	
+
 # get safe depth for each mission segment
 for ($i = 0; $i < $nmissionpoints; $i++)
 	{
 	# find shallowest point in look ahead distance
 	$topomax = $mtopos[$i];
 	$topomin = $mtopos[$i];
+print "TOPO $i $mtopos[$i]\n";
 	if ($forwarddist)
 		{
 		for ($j = 0; $j < $npoints; $j++)
@@ -598,7 +713,7 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 				$ii = 0;
 				}
 			$ddist = $distances[$j] - $mdistances[$ii];
-			if ($ddist > 0.0 
+			if ($ddist > 0.0
 				&& $ddist <= $forwarddist)
 				{
 				if ($topos[$j] > $topomax)
@@ -614,6 +729,7 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 		}
 	push(@mtopomaxs, $topomax);
 	push(@mtopomins, $topomin);
+print "topo $topomin $topomax\n";
 
 	# if optimal depth profile is available get value
 	if ($ndppoints > 0)
@@ -654,13 +770,13 @@ if ($startlon && $startlat)
 	}
 elsif ($starttime)
 	{
-	$startdistance = $starttime * $mission_speed;
+	$startdistance = $starttime * $ascentdescent_speed;
 	}
 else
 	{
 	$startdistance = 500.0;
 	}
-	
+
 # calculate first cut depths and abort depth
 $depthabort = 0.0;
 for ($i = 0; $i < $nmissionpoints; $i++)
@@ -670,10 +786,30 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 		$mmissiondepths[$i] = $moptimaldepths[$i];
 #printf "DEPTHS optimal:%f regular:%f\n", $moptimaldepths[$i], -$mtopomaxs[$i] - $altitudedesired;
 		}
+	elsif ($mmodes[$i] == 1)
+		{
+		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired;
+#printf "DEPTHS 1 %f\n", $mmissiondepths[$i];
+		}
+	elsif ($mmodes[$i] == 2)
+		{
+		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired2;
+#printf "DEPTHS 2 %f\n", $mmissiondepths[$i];
+		}
+	elsif ($mmodes[$i] == 3)
+		{
+		$mmissiondepths[$i] = $depthconstant;
+#printf "DEPTHS 3 %f\n", $mmissiondepths[$i];
+		}
+	elsif ($mmodes[$i] == 4)
+		{
+		$mmissiondepths[$i] = $depthconstant2;
+#printf "DEPTHS 4 %f\n", $mmissiondepths[$i];
+		}
 	else
 		{
 		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired;
-#printf "DEPTHS %f\n", $mmissiondepths[$i];
+#printf "DEPTHS 0 %f\n", $mmissiondepths[$i];
 		}
 	if ($mmissiondepths[$i] < $descentdepth)
 		{
@@ -690,7 +826,7 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 	}
 $depthabort = $depthabort + $altitudedesired;
 $depthmax = $depthabort - 0.5 * $altitudemin;
-	
+
 # calculate slopes
 for ($i = $nmissionpoints-1; $i > 0; $i--)
 	{
@@ -717,14 +853,14 @@ print "$mmissiondepths[$i-1]\n";
 $missiontime = 0.0;
 
 # time from running lines
-$missiontime += $distancelastmpoint / $mission_speed;
+$missiontime += $distancelastmpoint / $survey_speed;
 #printf "MISSIONTIME: distance:%f speed:%f time:%f  tottime:%f\n",
-#$distancelastmpoint,$mission_speed,$distancelastmpoint / $mission_speed, $missiontime;
+#$distancelastmpoint,$survey_speed,$distancelastmpoint / $survey_speed, $missiontime;
 
 # add time to get to first waypoint
-$missiontime += $startdistance / $mission_speed;
+$missiontime += $startdistance / $ascentdescent_speed;
 #printf "MISSIONTIME: first waypoint distance:%f speed:%f time:%f  tottime:%f\n",
-#$startdistance,$mission_speed,$startdistance / $mission_speed, $missiontime;
+#$startdistance,$ascentdescent_speed,$startdistance / $ascentdescent_speed, $missiontime;
 
 # add time for initial gps and descent
 #$missiontime += $gpsduration + $initialdescendtime;
@@ -733,28 +869,28 @@ $missiontime += $startdistance / $mission_speed;
 # add time for each ascent, gps, descent event
 for ($i = 1; $i < $nmissionpoints - 1; $i++)
 	{
-	if (($gpsmode == 1 && $mwaypoints[$i] == 3) 
-			|| ($gpsmode == 2 && $mwaypoints[$i] == 4) 
-			|| ($gpsmode == 3 && $mwaypoints[$i] >= 3))
+	if (($gpsmode == 1 && ($mstartstops[$i] == 1))
+			|| ($gpsmode == 2 && ($mstartstops[$i] == 2))
+			|| ($gpsmode == 3 && $mstartstops[$i] > 0))
 		{
-		$missiontime += (-$mmissiondepths[$i] / $ascendrate) 
-				+ (-$mmissiondepths[$i] / $descendrate) 
+		$missiontime += (-$mmissiondepths[$i] / $ascendrate)
+				+ (-$mmissiondepths[$i] / $descendrate)
 				+ $gpsduration + $initialdescendtime;
 		}
 	}
 
 # add time for final ascent and gps
-$missiontime += ($mmissiondepths[$nmissionpoints - 1] / $ascendrate) 
+$missiontime += ($mmissiondepths[$nmissionpoints - 1] / $ascendrate)
 		+ $gpsduration;
 #printf "MISSIONTIME: ascent time:%f  tottime:%f\n",
 #($mmissiondepths[$nmissionpoints - 1] / $ascendrate)+ $gpsduration, $missiontime;
-		
+
 # if not specified calculate abort time using safety factor of $durationfactormission
 if (!$aborttime)
 	{
 	$aborttime = $durationfactormission * $missiontime;
 	}
-	
+
 # shorten abort time if unsafe
 $ascendtime = $ascendtimes[$nmissionpoints - 1];
 if ($aborttime > $batterylife - $safetymargin - $ascendtime)
@@ -812,6 +948,10 @@ elsif ($verbose)
 		printf "                                 Multibeam receive gain:           $mb_receivegain\r\n";
 		printf "                                 Multibeam transmit gain:          $mb_transmitgain\r\n";
 		printf "                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
+		if ($beamdata)
+			{
+			printf "                                 Multibeam beam data collection enabled (100 m range)\r\n";
+			}
 		if ($subbottom)
 			{
 			printf "                               Subbottom enabled\r\n";
@@ -851,13 +991,19 @@ elsif ($verbose)
 		}
 	printf "\r\n";
 	printf "Mission Parameters:\r\n";
-	printf "    Vehicle Speed:            %f (m/s) %f (knots)\r\n", $mission_speed, 1.943846 * $mission_speed;
-	printf "    Desired Vehicle Altitude: $altitudedesired (m)\r\n";
-	printf "    Minimum Vehicle Altitude: $altitudemin (m)\r\n";
-	printf "    Abort Vehicle Altitude:   $altitudeabort (m)\r\n";
-	printf "    Maximum Vehicle Depth:    $depthmax (m)\r\n";
-	printf "    Abort Vehicle Depth:      $depthabort (m)\r\n";
-	printf "    Descent Vehicle Depth:    $descentdepth (m)\r\n";
+	printf "    Vehicle Survey Speed:       %f (m/s) %f (knots)\r\n", $survey_speed, 1.943846 * $survey_speed;
+	printf "    Vehicle Ascent Speed:       %f (m/s) %f (knots)\r\n", $ascentdescent_speed, 1.943846 * $ascentdescent_speed;
+	printf "    Vehicle Transit Speed:      %f (m/s) %f (knots)\r\n", $transit_speed, 1.943846 * $transit_speed;
+	printf "    Desired Vehicle Altitude 1: $altitudedesired (m)\r\n";
+	printf "    Minimum Vehicle Altitude 1: $altitudemin (m)\r\n";
+	printf "    Abort Vehicle Altitude 1:   $altitudeabort (m)\r\n";
+	printf "    Delta Depth Restart 1:      $deltadepthrestart (m)\r\n";
+	printf "    Desired Vehicle Altitude 2: $altitudedesired2 (m)\r\n";
+	printf "    Constant Vehicle Depth 1:   $depthconstant (m)\r\n";
+	printf "    Constant Vehicle Depth 2:   $depthconstant2 (m)\r\n";
+	printf "    Maximum Vehicle Depth:      $depthmax (m)\r\n";
+	printf "    Abort Vehicle Depth:        $depthabort (m)\r\n";
+	printf "    Descent Vehicle Depth:      $descentdepth (m)\r\n";
 	if ($spiraldescent)
 		{
 		printf "    Spiral descent depth:     $spiraldescentdepth m\r\n";
@@ -914,7 +1060,7 @@ else
 # output mission file unless outputoff option selected
 if (!$outputoff)
 	{
-	# open the output file 
+	# open the output file
 	open(MFILE,">$missionfile") || die "Cannot open output mission file: $missionfile\r\n$program_name aborted.\r\n";
 	open(WFILE,">$waypointfile") || die "Cannot open output waypoint file: $waypointfile\r\n$program_name aborted.\r\n";
 
@@ -957,6 +1103,10 @@ if (!$outputoff)
 		printf MFILE "#                                 Multibeam receive gain:           $mb_receivegain\r\n";
 		printf MFILE "#                                 Multibeam transmit gain:          $mb_transmitgain\r\n";
 		printf MFILE "#                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
+		if ($beamdata)
+			{
+			printf MFILE "#                                 Multibeam beam data collection enabled (100 m range)\r\n";
+			}
 		if ($subbottom)
 			{
 			printf MFILE "#                               Subbottom enabled\r\n";
@@ -996,37 +1146,43 @@ if (!$outputoff)
 		}
 	printf MFILE "# \r\n";
 	printf MFILE "# Mission Parameters:\r\n";
-	printf MFILE "#     Vehicle Speed:            %f (m/s) %f (knots)\r\n", $mission_speed, 1.943846 * $mission_speed;
-	printf MFILE "#     Desired Vehicle Altitude: $altitudedesired (m)\r\n";
-	printf MFILE "#     Minimum Vehicle Altitude: $altitudemin (m)\r\n";
-	printf MFILE "#     Abort Vehicle Altitude:   $altitudeabort (m)\r\n";
-	printf MFILE "#     Maximum Vehicle Depth:    $depthmax (m)\r\n";
-	printf MFILE "#     Abort Vehicle Depth:      $depthabort (m)\r\n";
-	printf MFILE "#     Descent Vehicle Depth:    $descentdepth (m)\r\n";
+	printf MFILE "#     Vehicle Survey Speed:       %f (m/s) %f (knots)\r\n", $survey_speed, 1.943846 * $survey_speed;
+	printf MFILE "#     Vehicle Ascent Speed:       %f (m/s) %f (knots)\r\n", $ascentdescent_speed, 1.943846 * $ascentdescent_speed;
+	printf MFILE "#     Vehicle Transit Speed:      %f (m/s) %f (knots)\r\n", $transit_speed, 1.943846 * $transit_speed;
+	printf MFILE "#     Desired Vehicle Altitude 1: $altitudedesired (m)\r\n";
+	printf MFILE "#     Minimum Vehicle Altitude 1: $altitudemin (m)\r\n";
+	printf MFILE "#     Abort Vehicle Altitude 1:   $altitudeabort (m)\r\n";
+	printf MFILE "#     Delta Depth Restart 1:      $deltadepthrestart (m)\r\n";
+	printf MFILE "#     Desired Vehicle Altitude 2: $altitudedesired2 (m)\r\n";
+	printf MFILE "#     Constant Vehicle Depth 1:   $depthconstant (m)\r\n";
+	printf MFILE "#     Constant Vehicle Depth 2:   $depthconstant2 (m)\r\n";
+	printf MFILE "#     Maximum Vehicle Depth:      $depthmax (m)\r\n";
+	printf MFILE "#     Abort Vehicle Depth:        $depthabort (m)\r\n";
+	printf MFILE "#     Descent Vehicle Depth:      $descentdepth (m)\r\n";
 	if ($spiraldescent)
 		{
-		printf MFILE "#     Spiral descent depth:     $spiraldescentdepth m\r\n";
-		printf MFILE "#     Spiral descent altitude:  $spiraldescentaltitude m\r\n";
+		printf MFILE "#     Spiral descent depth:       $spiraldescentdepth m\r\n";
+		printf MFILE "#     Spiral descent altitude:    $spiraldescentaltitude m\r\n";
 		}
 	if ($forwarddist)
 		{
-		printf MFILE "#     Forward Looking Distance: $forwarddist (m)\r\n";
+		printf MFILE "#     Forward Looking Distance:   $forwarddist (m)\r\n";
 		}
-	printf MFILE "#     Waypoint Spacing:         $waypointdist (m)\r\n";
+	printf MFILE "#     Waypoint Spacing:           $waypointdist (m)\r\n";
 	if ($starttime)
 		{
-		printf MFILE "#     Time to First Waypoint:   %d (s)\r\n", $starttime;
+		printf MFILE "#     Time to First Waypoint:     %d (s)\r\n", $starttime;
 		}
 	if ($startposition)
 		{
-		printf MFILE "#     Start Longitude:          $startlon (deg)\r\n";
-		printf MFILE "#     Start Latitude:           $startlat (deg)\r\n";
+		printf MFILE "#     Start Longitude:            $startlon (deg)\r\n";
+		printf MFILE "#     Start Latitude:             $startlat (deg)\r\n";
 		}
-	printf MFILE "#     GPS Duration:             %d (s)\r\n", $gpsduration;
-	printf MFILE "#     Descend Rate:             $descendrate (m/s)\r\n";
-	printf MFILE "#     Ascend Rate:              $ascendrate (m/s)\r\n";
-	printf MFILE "#     Initial descend Duration: %d (s)\r\n", $initialdescendtime;
-	printf MFILE "#     Setpoint Duration:        %d (s)\r\n", $setpointtime;
+	printf MFILE "#     GPS Duration:               %d (s)\r\n", $gpsduration;
+	printf MFILE "#     Descend Rate:               $descendrate (m/s)\r\n";
+	printf MFILE "#     Ascend Rate:                $ascendrate (m/s)\r\n";
+	printf MFILE "#     Initial descend Duration:   %d (s)\r\n", $initialdescendtime;
+	printf MFILE "#     Setpoint Duration:          %d (s)\r\n", $setpointtime;
 	printf MFILE "# \r\n";
 	printf MFILE "# The primary waypoints from the route file are:\r\n";
 	printf MFILE "#   <number> <longitude (deg)> <latitude (deg)> <topography (m)> <distance (m)> <type>\r\n";
@@ -1043,29 +1199,34 @@ if (!$outputoff)
 	printf MFILE "# A total of %d mission points have been defined.\r\n", $nmissionpoints;
 	printf MFILE "# \r\n";
 	printf MFILE "# Define Mission parameters:\r\n";
-	printf MFILE "#define MISSION_SPEED      %f\r\n", $mission_speed;
-	printf MFILE "#define MISSION_DISTANCE   %f\r\n", $distancelastmpoint;
-	printf MFILE "#define MISSION_TIME       %d\r\n", $missiontime;
-	printf MFILE "#define MISSION_TIMEOUT    %d\r\n", $aborttime;
-	printf MFILE "#define DEPTH_MAX          %f\r\n", $depthmax;
-	printf MFILE "#define DEPTH_ABORT        %f\r\n", $depthabort;
-	printf MFILE "#define ALTITUDE_DESIRED   %f\r\n", $altitudedesired;
-	printf MFILE "#define ALTITUDE_MIN       %f\r\n", $altitudemin;
-	printf MFILE "#define ALTITUDE_ABORT     %f\r\n", $altitudeabort;
-	printf MFILE "#define GPS_DURATION       %d\r\n", $gpsduration;
-	printf MFILE "#define DESCENT_DEPTH      %f\r\n", $descentdepth;
-	printf MFILE "#define SPIRAL_DESCENT_DEPTH      %f\r\n", $spiraldescentdepth;
-	printf MFILE "#define SPIRAL_DESCENT_ALTITUDE   %f\r\n", $spiraldescentaltitude;
-	printf MFILE "#define DESCEND_DURATION   %d\r\n", $initialdescendtime;
-	printf MFILE "#define SETPOINT_DURATION  %d\r\n", $setpointtime;
-	printf MFILE "#define GPSMINHITS         %d\r\n", $gpsminhits;
-	printf MFILE "#define ASCENDRUDDER       %f\r\n", $ascendrudder;
-	printf MFILE "#define ASCENDPITCH        %f\r\n", $ascendpitch;
-	printf MFILE "#define ASCENDENDDEPTH     %f\r\n", $ascendenddepth;
-	printf MFILE "#define DESCENDRUDDER      %f\r\n", $descendrudder;
-	printf MFILE "#define DESCENDPITCH       %f\r\n", $descendpitch;
-	printf MFILE "#define MAXCROSSTRACKERROR %d\r\n", $maxcrosstrackerror;
-	printf MFILE "#define RESON_DURATION     %d\r\n", $resonduration;
+	printf MFILE "#define SURVEY_SPEED               %f\r\n", $survey_speed;
+	printf MFILE "#define ASCENTDESCENT_SPEED        %f\r\n", $ascentdescent_speed;
+	printf MFILE "#define TRANSIT_SPEED              %f\r\n", $transit_speed;
+	printf MFILE "#define MISSION_DISTANCE           %f\r\n", $distancelastmpoint;
+	printf MFILE "#define MISSION_TIME               %d\r\n", $missiontime;
+	printf MFILE "#define MISSION_TIMEOUT            %d\r\n", $aborttime;
+	printf MFILE "#define DEPTH_MAX                  %f\r\n", $depthmax;
+	printf MFILE "#define DEPTH_ABORT                %f\r\n", $depthabort;
+	printf MFILE "#define ALTITUDE_DESIRED           %f\r\n", $altitudedesired;
+	printf MFILE "#define ALTITUDE_MIN               %f\r\n", $altitudemin;
+	printf MFILE "#define ALTITUDE_ABORT             %f\r\n", $altitudeabort;
+	printf MFILE "#define DELTA_DEPTH_RESTART        %f\r\n", $deltadepthrestart;
+	printf MFILE "#define ALTITUDE_DESIRED2          %f\r\n", $altitudedesired2;
+	printf MFILE "#define DEPTH_CONSTANT             %f\r\n", $depthconstant;
+	printf MFILE "#define DEPTH_CONSTANT2            %f\r\n", $depthconstant2;
+	printf MFILE "#define GPS_DURATION               %d\r\n", $gpsduration;
+	printf MFILE "#define DESCENT_DEPTH              %f\r\n", $descentdepth;
+	printf MFILE "#define SPIRAL_DESCENT_DEPTH       %f\r\n", $spiraldescentdepth;
+	printf MFILE "#define SPIRAL_DESCENT_ALTITUDE    %f\r\n", $spiraldescentaltitude;
+	printf MFILE "#define DESCEND_DURATION           %d\r\n", $initialdescendtime;
+	printf MFILE "#define SETPOINT_DURATION          %d\r\n", $setpointtime;
+	printf MFILE "#define GPSMINHITS                 %d\r\n", $gpsminhits;
+	printf MFILE "#define ASCENDRUDDER               %f\r\n", $ascendrudder;
+	printf MFILE "#define ASCENDPITCH                %f\r\n", $ascendpitch;
+	printf MFILE "#define ASCENDENDDEPTH             %f\r\n", $ascendenddepth;
+	printf MFILE "#define DESCENDRUDDER              %f\r\n", $descendrudder;
+	printf MFILE "#define DESCENDPITCH               %f\r\n", $descendpitch;
+	printf MFILE "#define RESON_DURATION             %d\r\n", $resonduration;
 	print MFILE "# \r\n";
 	print MFILE "#######################################################\r\n";
 	print MFILE "# Set Mission Behaviors\r\n";
@@ -1079,11 +1240,12 @@ if (!$outputoff)
 	print MFILE "# depth envelope\r\n";
 	print MFILE "behavior depthEnvelope \r\n";
 	print MFILE "{\r\n";
-	print MFILE "minDepth = 0;\r\n";
-	print MFILE "maxDepth     = DEPTH_MAX;\r\n";
-	print MFILE "abortDepth   = DEPTH_ABORT;\r\n";
-	print MFILE "minAltitude  = ALTITUDE_MIN;\r\n";
+	print MFILE "minDepth      = 0;\r\n";
+	print MFILE "maxDepth      = DEPTH_MAX;\r\n";
+	print MFILE "abortDepth    = DEPTH_ABORT;\r\n";
+	print MFILE "minAltitude   = ALTITUDE_MIN;\r\n";
 	print MFILE "abortAltitude = ALTITUDE_ABORT;\r\n";
+	print MFILE "deltaDepthRestart = DELTA_DEPTH_RESTART;\r\n";
 	print MFILE "}\r\n";
 	print MFILE "#######################################################\r\n";
 	print MFILE "# Set End-of-Mission Behaviors\r\n";
@@ -1106,17 +1268,17 @@ print "Behavior: gps\n";
 	print MFILE "horizontalMode   = rudder; \r\n";
 	print MFILE "horizontal       = ASCENDRUDDER; \r\n";
 	print MFILE "pitch            = ASCENDPITCH; \r\n";
-	print MFILE "speed            = MISSION_SPEED; \r\n";
+	print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
 	print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
 	print MFILE "} \r\n";
 print "Behavior: ascend\n";
 	print MFILE "# \r\n";
-	print MFILE "# Acoustic update - sent status ping after end of survey \r\n";
+	print MFILE "# Acoustic update 1 - sent status ping after end of survey \r\n";
 	print MFILE "# \r\n";
 	print MFILE "behavior acousticUpdate \r\n";
 	print MFILE "{ \r\n";
-	print MFILE "duration  = 2; \r\n";	
-	print MFILE "dummy  = 1; \r\n";	
+	print MFILE "duration  = 2; \r\n";
+	print MFILE "dummy  = 1; \r\n";
 	print MFILE "} \r\n";
 	print MFILE "# \r\n";
 print "Behavior: acousticUpdate\n";
@@ -1140,10 +1302,10 @@ print "Behavior: reson (stop, Log_Mode = 0)\n";
 		$cameraenddistance = $mdistances[$nmissionpoints-1];
 		print MFILE "# Turn off camera imaging \r\n";
 		print MFILE "#   Distance along survey: $mdistances[$nmissionpoints-1]\r\n";
-		print MFILE "#behavior stopCamera \r\n";
-		print MFILE "#{ \r\n";
-		print MFILE "#duration  = 1; \r\n";
-		print MFILE "#} \r\n";
+		print MFILE "behavior stopCamera \r\n";
+		print MFILE "{ \r\n";
+		print MFILE "duration  = 1; \r\n";
+		print MFILE "} \r\n";
 printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 		}
 
@@ -1175,7 +1337,7 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 			$mmissiondepths[$i] = $descentdepth;
 			$maxdepthapplied = 0;
 			}
-			
+
 		# get altitude for mapping sonar parameters
 		$sonaraltitude = -$mmissiondepths[$i] - $mtopos[$i];
 		if ($i < $nmissionpoints - 1
@@ -1195,29 +1357,38 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 			{
 			$sonaraltitudeuse = $sonaraltitude;
 			}
-		
-		# sonar range allows for 1.2 * 120 degree swath
-		$mb_range = 4.0 * $sonaraltitudeuse;
-		if ($mb_range > 350.0)
+
+		# sonar range allows for 150 degree swath on flat bottom
+		# sonar range cut off at 100 m for recorded full beamformed data
+		$mb_range = 3.5 * $sonaraltitudeuse;
+		if ($mb_range > 200.0)
 			{
-			$mb_range = 350.0;
+			$mb_range = 200.0;
+			}
+		if ($beamdata && $mb_range > 100.0)
+			{
+			$mb_range = 100.0;
 			}
 		$mb_minrange = $mb_minrangefraction * $sonaraltitudeuse;
 		$mb_maxrange = $mb_range;
 		$mb_mindepth = 0.0;
 		$mb_maxdepth = $mb_range;
 		$sslo_range = 0.9 * 750.0 / $mb_pingrate;
-		#if ($sslo_range > 200.0)
-		#	{
-		#	$sslo_range = 200.0;
-		#	}
+		if ($sslo_range > 200.0)
+			{
+			$sslo_range = 200.0;
+			}
 		$sbp_duration = 1000.0 * 0.9 / $mb_pingrate;
+		if ($sbp_duration > 300.0)
+			{
+			$sbp_duration = 300.0;
+			}
 
 		# do ascend, gps, descend at line starts and ends if specified
-		if (($iwaypoint != $nwaypoints - 1) 
-			&& (($gpsmode == 1 && $mwaypoints[$i] == 3) 
-				|| ($gpsmode == 2 && $mwaypoints[$i] == 4) 
-				|| ($gpsmode == 3 && $mwaypoints[$i] >= 3)))
+		if (($iwaypoint != $nwaypoints - 1)
+			&& (($gpsmode == 1 && ($mstartstops[$i] == 1))
+				|| ($gpsmode == 2 && ($mstartstops[$i] == 2))
+				|| ($gpsmode == 3 && ($mstartstops[$i] > 0))))
 			{
 			print MFILE "# \r\n";
 			printf MFILE "# Ascend, gps, descend after reaching waypoint %d at end of line %d\r\n", $iwaypoint, $iwaypoint;
@@ -1227,15 +1398,15 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 				print MFILE "# Turn on power to sonars and restart logging on the PLC \r\n";
 				print MFILE "behavior reson \r\n";
 				print MFILE "{ \r\n";
-				print MFILE "Log_Mode  = 1; \r\n";
+				print MFILE "Log_Mode  = $logmode; \r\n";
 				print MFILE "duration  = RESON_DURATION; \r\n";
 				print MFILE "MB_Power = $mb_transmitgain; \r\n";
-				if ($subbottom && $mwaypoints[$i] != 3)
+				if ($subbottom && $mstartstops[$i] == 2)
 					{
-					print MFILE "SBP_Mode = 0; \r\n";
-					print MFILE "SBP_Power = 0.0; \r\n";
+					print MFILE "SBP_Mode = 1; \r\n";
+					print MFILE "SBP_Power = 100.0; \r\n";
 					}
-				elsif ($subbottom && $mwaypoints[$i] == 3)
+				elsif ($subbottom && $mstartstops[$i] == 1)
 					{
 					print MFILE "SBP_Mode = 1; \r\n";
 					print MFILE "SBP_Power = 100.0; \r\n";
@@ -1250,14 +1421,15 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 					}
 				print MFILE "} \r\n";
 				print MFILE "#######################################################\r\n";
-print "Behavior: reson (start, Log_Mode = 1)\n";
+print "Behavior: reson (start, Log_Mode = $logmode)\n";
 				}
 			if ($camera)
 				{
-				if ($mwaypoints[$i] == 3)
+				if ($mstartstops[$i] == 1)
 					{
 					$camerarunlength = $cameraenddistance - $mdistances[$i];
-					$nphotos = int (1.1 * $camerarunlength / 10.0);
+					# $nphotos = int (1.1 * $camerarunlength / 10.0);
+					$nphotos = 0;
 					print MFILE "#######################################################\r\n";
 					print MFILE "# Start taking pictures with camera.\r\n";
 					print MFILE "#   Distance along survey: $mdistances[$i-1]\r\n";
@@ -1267,11 +1439,11 @@ print "Behavior: reson (start, Log_Mode = 1)\n";
 					print MFILE "{ \r\n";
 					print MFILE "duration  = 1; \r\n";
 					print MFILE "nPhotos = $nphotos; \r\n";
-					print MFILE "nSamplePeriods = 50; \r\n";
+					print MFILE "nSamplePeriods = 9; \r\n";
 					print MFILE "} \r\n";
 					print MFILE "# \r\n";
 					print MFILE "#######################################################\r\n";
-printf "Behavior: startCamera (distance:%.2f m, run length:%.2f m, nphotos:%d)\n", 
+printf "Behavior: startCamera (distance:%.2f m, run length:%.2f m, nphotos:%d)\n",
 		$mdistances[$i],$camerarunlength,$nphotos;
 					}
 				else
@@ -1279,19 +1451,19 @@ printf "Behavior: startCamera (distance:%.2f m, run length:%.2f m, nphotos:%d)\n
 					$cameraenddistance = $mdistances[$i];
 					print MFILE "# Turn off camera imaging \r\n";
 					print MFILE "#   Distance along survey: $mdistances[$i]\r\n";
-					print MFILE "#behavior stopCamera \r\n";
-					print MFILE "#{ \r\n";
-					print MFILE "#duration  = 1; \r\n";
-					print MFILE "#} \r\n";
+					print MFILE "behavior stopCamera \r\n";
+					print MFILE "{ \r\n";
+					print MFILE "duration  = 1; \r\n";
+					print MFILE "} \r\n";
 printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i];
 					}
 				}
-			print MFILE "# Acoustic update - sent status ping before resuming logging \r\n";
+			print MFILE "# Acoustic update 2 - sent status ping before resuming logging \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";	
-			print MFILE "dummy  = 1; \r\n";	
+			print MFILE "duration  = 2; \r\n";
+			print MFILE "dummy  = 1; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 print "Behavior: acousticUpdate\n";
@@ -1299,24 +1471,24 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "# Descend behavior \r\n";
 			print MFILE "behavior descend  \r\n";
 			print MFILE "{ \r\n";
-			print MFILE "horizontalMode   = heading; \r\n";
-			printf MFILE "horizontal   = %f; \r\n", $mbearings[$i];
-			print MFILE "pitch        = DESCENDPITCH; \r\n";
-			print MFILE "speed        = MISSION_SPEED; \r\n";
-			print MFILE "maxDepth     = DESCENT_DEPTH; \r\n";
-			print MFILE "minAltitude  = ALTITUDE_MIN; \r\n";
-			print MFILE "duration     = DESCEND_DURATION; \r\n";
+			print MFILE "horizontalMode = heading; \r\n";
+			printf MFILE "horizontal      = %f; \r\n", $mbearings[$i];
+			print MFILE "pitch           = DESCENDPITCH; \r\n";
+			print MFILE "speed           = ASCENTDESCENT_SPEED; \r\n";
+			print MFILE "maxDepth        = DESCENT_DEPTH; \r\n";
+			print MFILE "minAltitude     = ALTITUDE_MIN; \r\n";
+			print MFILE "duration        = DESCEND_DURATION; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: descend\n";
 			print MFILE "# \r\n";
 			print MFILE "# setpoint on surface to gather momentum \r\n";
 			print MFILE "behavior setpoint \r\n";
 			print MFILE "{ \r\n";
-			print MFILE "duration     = SETPOINT_DURATION; \r\n";
-			printf MFILE "heading      = %f; \r\n", $mbearings[$i];
-			print MFILE "speed        = MISSION_SPEED; \r\n";
-			print MFILE "verticalMode = pitch; \r\n";
-			print MFILE "pitch        = 0; \r\n";
+			print MFILE "duration        = SETPOINT_DURATION; \r\n";
+			printf MFILE "heading         = %f; \r\n", $mbearings[$i];
+			print MFILE "speed           = ASCENTDESCENT_SPEED; \r\n";
+			print MFILE "verticalMode    = pitch; \r\n";
+			print MFILE "pitch           = 0; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: setpoint\n";
 			print MFILE "# \r\n";
@@ -1336,16 +1508,16 @@ print "Behavior: gps\n";
 			print MFILE "horizontalMode   = rudder; \r\n";
 			print MFILE "horizontal       = ASCENDRUDDER; \r\n";
 			print MFILE "pitch            = ASCENDPITCH; \r\n";
-			print MFILE "speed            = MISSION_SPEED; \r\n";
+			print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "endDepth         = ASCENDENDDEPTH; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: ascend\n";
-			print MFILE "# Acoustic update - sent status ping before ascent \r\n";
+			print MFILE "# Acoustic update 3 - sent status ping before ascent \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";	
-			print MFILE "dummy  = 1; \r\n";	
+			print MFILE "duration  = 2; \r\n";
+			print MFILE "dummy  = 1; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 print "Behavior: acousticUpdate\n";
@@ -1382,10 +1554,10 @@ print "Behavior: reson (stop, Log_Mode = 0)\n";
 				$cameraenddistance = $mdistances[$i];
 				print MFILE "# Turn off camera imaging \r\n";
 				print MFILE "#   Distance along survey: $mdistances[$i]\r\n";
-				print MFILE "#behavior stopCamera \r\n";
-				print MFILE "#{ \r\n";
-				print MFILE "#duration  = 1; \r\n";
-				print MFILE "#} \r\n";
+				print MFILE "behavior stopCamera \r\n";
+				print MFILE "{ \r\n";
+				print MFILE "duration  = 1; \r\n";
+				print MFILE "} \r\n";
 printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i];
 				}
 			}
@@ -1404,9 +1576,9 @@ print "mappingsonar:$mappingsonar i:$i mwaypoints[$i]:$mwaypoints[$i] iwaypoint:
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = RESON_DURATION; \r\n";
-			print MFILE "Log_Mode  = 1; \r\n";
+			print MFILE "Log_Mode  = $logmode; \r\n";
 			print MFILE "} \r\n";
-print "Behavior: reson (startup, Log_Mode = 1)\n";
+print "Behavior: reson (startup, Log_Mode = $logmode)\n";
 			print MFILE "# Set sonar parameters \r\n";
 			print MFILE "#   Waypoint type:            $mwaypoints[$i]\n";
 			print MFILE "#   Commanded altitude:       $sonaraltitude\n";
@@ -1416,14 +1588,14 @@ print "Behavior: reson (startup, Log_Mode = 1)\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
-			print MFILE "duration  = RESON_DURATION; \r\n";	
-			if ($subbottom && $mwaypoints[$i] != 3)
+			print MFILE "duration  = RESON_DURATION; \r\n";
+			if ($subbottom && $mstartstops[$i] == 2)
 				{
-				print MFILE "SBP_Mode = 0; \r\n";
-				print MFILE "SBP_Power = 0.0; \r\n";
+				print MFILE "SBP_Mode = 1; \r\n";
+				print MFILE "SBP_Power = 100.0; \r\n";
 print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) type = $mwaypoints[$i], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
 				}
-			elsif ($subbottom && $mwaypoints[$i] == 3)
+			elsif ($subbottom && $mstartstops[$i] == 1)
 				{
 				print MFILE "SBP_Mode = 1; \r\n";
 				print MFILE "SBP_Power = 100.0; \r\n";
@@ -1442,8 +1614,8 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 				}
 			if ($sidescanhi)
 				{
-				print MFILE "HiSS_Mode = 0; \r\n";
-				print MFILE "HiSS_Power = 0.0; \r\n";
+				print MFILE "HiSS_Mode = 1; \r\n";
+				print MFILE "HiSS_Power = 100.0; \r\n";
 				print MFILE "HiSS_Range = $sslo_range; \r\n";
 				}
 			print MFILE "MB_Power = $mb_transmitgain; \r\n";
@@ -1458,7 +1630,7 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 			printf MFILE "MB_Bottom_Detect_Filter_Max_Depth = %.2f; \r\n", $mb_maxdepth;
 			print MFILE "MB_Bottom_Detect_Range_Mode = 1; \r\n";
 			print MFILE "MB_Bottom_Detect_Depth_Mode = 0; \r\n";
-			print MFILE "Snippet_Mode = 1; \r\n";
+			print MFILE "Snippet_Mode = $mb_snippetmode; \r\n";
 			print MFILE "Window_Size = 200; \r\n";
 			print MFILE "Log_Mode = 0; \r\n";
 			print MFILE "} \r\n";
@@ -1467,8 +1639,8 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 #			print MFILE "# \r\n";
 #			print MFILE "behavior acousticUpdate \r\n";
 #			print MFILE "{ \r\n";
-#			print MFILE "duration  = 2; \r\n";	
-#			print MFILE "dummy  = 1; \r\n";	
+#			print MFILE "duration  = 2; \r\n";
+#			print MFILE "dummy  = 1; \r\n";
 #			print MFILE "} \r\n";
 #			print MFILE "# \r\n";
 #print "Behavior: acousticUpdate\n";
@@ -1490,10 +1662,9 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 			print MFILE "{ \r\n";
 			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
-			print MFILE "captureRadius = 10; \r\n";
-			printf MFILE "duration     = %d; \r\n", ($durationfactorwaypoint * (0.25 * $mmissiondepths[$i]) / $mission_speed);
+			printf MFILE "duration     = %d; \r\n", ($durationfactorwaypoint * (0.5 * $mmissiondepths[$i]) / $ascentdescent_speed);
 			printf MFILE "depth        = %f; \r\n", $mmissiondepths[$i];
-			print MFILE "speed        = MISSION_SPEED; \r\n";
+			print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: waypoint\n";
 			print MFILE "# \r\n";
@@ -1505,12 +1676,12 @@ print "Behavior: waypoint\n";
 			print MFILE "} \r\n";
 print "Behavior: startsurvey\n";
 			print MFILE "# \r\n";
-			print MFILE "# Acoustic update - sent status ping at beginning of StartSurvey behavior \r\n";
+			print MFILE "# Acoustic update 4 - sent status ping at beginning of StartSurvey behavior \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";	
-			print MFILE "dummy  = 1; \r\n";	
+			print MFILE "duration  = 2; \r\n";
+			print MFILE "dummy  = 1; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
@@ -1525,22 +1696,22 @@ print "Behavior: acousticUpdate\n";
 				}
 			print MFILE "behavior descend  \r\n";
 			print MFILE "{ \r\n";
-			printf MFILE "duration  = %d; \r\n", $descendtimes[$i];
+			printf MFILE "duration        = %d; \r\n", $descendtimes[$i];
 			print MFILE "horizontalMode   = rudder; \r\n";
 			print MFILE "horizontal       = DESCENDRUDDER; \r\n";
 			print MFILE "pitch            = DESCENDPITCH; \r\n";
-			print MFILE "speed            = MISSION_SPEED; \r\n";
+			print MFILE "speed            = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "maxDepth         = SPIRAL_DESCENT_DEPTH; \r\n";
 			print MFILE "minAltitude      = SPIRAL_DESCENT_ALTITUDE; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 print "Behavior: spiral descend\n";
-			print MFILE "# Acoustic update - sent status ping after end of line \r\n";
+			print MFILE "# Acoustic update 5 - sent status ping after end of line \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";	
-			print MFILE "dummy  = 1; \r\n";	
+			print MFILE "duration  = 2; \r\n";
+			print MFILE "dummy  = 1; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
@@ -1553,15 +1724,14 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "{ \r\n";
 			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
-			print MFILE "captureRadius = 10; \r\n";
-			printf MFILE "duration     = %d; \r\n", ($durationfactorwaypoint * 500 / $mission_speed);
+			printf MFILE "duration     = %d; \r\n", ($durationfactorwaypoint * 500 / $ascentdescent_speed);
 			printf MFILE "depth        = %f; \r\n", $approachdepth;
-			print MFILE "speed        = MISSION_SPEED; \r\n";
+			print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 			print MFILE "} \r\n";
 print "Behavior: waypoint\n";
 			print WFILE "$mlons[$i] $mlats[$i]\n";
 			}
-			
+
 		# output $behaviorWaypointID mission point behavior
 		elsif ($behavior == $behaviorWaypointID)
 			{
@@ -1595,19 +1765,44 @@ print "Behavior: waypoint (during line $iwaypoint) ";
 				{
 				printf MFILE "#   Behavior depth of %f meters set to maximum vehicle depth\r\n", $mmissiondepths[$i];
 				}
+			if ($i > 0 && $mstartstops[$i-1] == 2)
+				{
+				printf MFILE "#   Vehicle transit speed:    %f m/s\r\n", $transit_speed;
+				}
+			else
+				{
+				printf MFILE "#   Vehicle survey speed:     %f m/s\r\n", $survey_speed;
+				}
 			print MFILE "behavior waypoint  \r\n";
 			print MFILE "{ \r\n";
 			printf MFILE "latitude     = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude    = %f; \r\n", $mlons[$i];
-			print MFILE "captureRadius = 10; \r\n";
-			printf MFILE "duration     = %d; \r\n", ($durationfactorwaypoint * $mlengths[$i] / $mission_speed);
+			if ($mwaypoints[$i] != 0 && $iwaypoint == 0)
+				{
+				printf MFILE "duration           = %d; \r\n", 600;
+				}
+			else
+				{
+				printf MFILE "duration           = %d; \r\n", ($durationfactorwaypoint * $mlengths[$i] / $survey_speed);
+				}
+			if ($mwaypoints[$i] != 0 && $iwaypoint != 0)
+				{
+				printf MFILE "# abortOnTimeout    = True; \r\n";
+				}
 			printf MFILE "depth        = %f; \r\n", $mmissiondepths[$i];
-			print MFILE "speed        = MISSION_SPEED; \r\n";
+			if ($i > 0 && $mmodels[$i-1] == 2)
+				{
+				print MFILE "speed              = TRANSIT_SPEED; \r\n";
+				}
+			else
+				{
+				print MFILE "speed              = SURVEY_SPEED; \r\n";
+				}
 			print MFILE "} \r\n";
 print " Depth: $mmissiondepths[$i]\n";
 			print WFILE "$mlons[$i] $mlats[$i]\n";
 			}
-			
+
 
 		# output $behaviorWaypointDepthID mission point behavior
 		elsif ($behavior == $behaviorWaypointDepthID)
@@ -1643,18 +1838,25 @@ printf " Segment length: %.2f m ",$mlengths[$i];
 				{
 				printf MFILE "#   Behavior depth of %f meters set to maximum vehicle depth\r\n", $mmissiondepths[$i];
 				}
+			if ($i > 0 && $mstartstops[$i-1] == 2)
+				{
+				printf MFILE "#   Vehicle transit speed:    %f m/s\r\n", $transit_speed;
+				}
+			else
+				{
+				printf MFILE "#   Vehicle survey speed:     %f m/s\r\n", $survey_speed;
+				}
 			print MFILE "behavior waypoint_depth  \r\n";
 			print MFILE "{ \r\n";
 			printf MFILE "latitude           = %f; \r\n", $mlats[$i];
 			printf MFILE "longitude          = %f; \r\n", $mlons[$i];
-			print MFILE "captureRadius      = 10; \r\n";
 			if ($mwaypoints[$i] != 0 && $iwaypoint == 0)
 				{
 				printf MFILE "duration           = %d; \r\n", 600;
 				}
 			else
 				{
-				printf MFILE "duration           = %d; \r\n", ($durationfactorwaypoint * $mlengths[$i] / $mission_speed);
+				printf MFILE "duration           = %d; \r\n", ($durationfactorwaypoint * $mlengths[$i] / $survey_speed);
 				}
 			if ($mwaypoints[$i] != 0 && $iwaypoint != 0)
 				{
@@ -1673,22 +1875,28 @@ printf " %.2f",$mmissiondepths[$i];
 				}
 			printf MFILE "finalDepth         = %f; \r\n", $mmissiondepths[$i];
 printf " %.2f m\n",$mmissiondepths[$i];
-			print MFILE "maxCrossTrackError = MAXCROSSTRACKERROR; \r\n";
-			print MFILE "speed              = MISSION_SPEED; \r\n";
+			if ($i > 0 && $mstartstops[$i-1] == 2)
+				{
+				print MFILE "speed              = TRANSIT_SPEED; \r\n";
+				}
+			else
+				{
+				print MFILE "speed              = SURVEY_SPEED; \r\n";
+				}
 			print MFILE "} \r\n";
 			print WFILE "$mlons[$i] $mlats[$i]\n";
 			}
-			
+
 		# insert acoustic update after end of line
-		if ($mwaypoints[$i-1] == 4 && $gpsmode < 2)
+		if ($mstartstops[$i-1] == 2)
 			{
 			print MFILE "#######################################################\r\n";
-			print MFILE "# Acoustic update - sent status ping after end of line \r\n";
+			print MFILE "# Acoustic update 6 - sent status ping after end of line \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";	
-			print MFILE "dummy  = 1; \r\n";	
+			print MFILE "duration  = 2; \r\n";
+			print MFILE "dummy  = 1; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 print "Behavior: acousticUpdate\n";
@@ -1707,22 +1915,22 @@ print "Behavior: acousticUpdate\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior reson \r\n";
 			print MFILE "{ \r\n";
-			print MFILE "duration  = RESON_DURATION; \r\n";	
-			if ($subbottom && $mwaypoints[$i-1] == 4 && $gpsmode == 0)
-				{
-				print MFILE "SBP_Mode = 0; \r\n";
-				print MFILE "SBP_Power = 0.0; \r\n";
-print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
-				}
-			elsif ($subbottom && $mwaypoints[$i-1] == 3)
+			print MFILE "duration  = RESON_DURATION; \r\n";
+			if ($subbottom && $mstartstops[$i-1] == 2)
 				{
 				print MFILE "SBP_Mode = 1; \r\n";
 				print MFILE "SBP_Power = 100.0; \r\n";
-print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP off, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+				}
+			elsif ($subbottom && $mstartstops[$i-1] == 1)
+				{
+				print MFILE "SBP_Mode = 1; \r\n";
+				print MFILE "SBP_Power = 100.0; \r\n";
+print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP on, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
 				}
 			elsif ($subbottom)
 				{
-print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1], SBP no change, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
+print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint($i-1) type = $mwaypoints[$i-1] mstartstops = $mstartstops[$i-1], SBP no change, MBrange:$mb_range MBaltitude:$sonaraltitudeuse)\n";
 				}
 			if ($subbottom)
 				{
@@ -1739,14 +1947,14 @@ print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) 
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 			print MFILE "MB_Rate = $mb_pingrate; \r\n";
 
-# hack to provide a gain sweep for testing	
+# hack to provide a gain sweep for testing
 # $mb_receivegain = 83 - int($resongainsetcount / 4);
 # if ($mb_receivegain < 40)
 # {
 # $mb_receivegain = 60;
 # }
 # $resongainsetcount++;
-			
+
 			print MFILE "MB_Gain = $mb_receivegain; \r\n";
 			print MFILE "MB_Sound_Velocity = 0.0; \r\n";
 			printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
@@ -1763,10 +1971,11 @@ print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) 
 
 		# turn on or off camera
 		print MFILE "# \r\n";
-		if ($camera && $i > 0 && $mwaypoints[$i-1] == 3)
+		if ($camera && $i > 0 && $mstartstops[$i-1] == 1)
 			{
 			$camerarunlength = $cameraenddistance - $mdistances[$i-1];
 			$nphotos = int (1.1 * $camerarunlength / 10.0);
+			# $nphotos = 0;
 			print MFILE "#######################################################\r\n";
 			print MFILE "# Start taking pictures with camera.\r\n";
 			print MFILE "#   Distance along survey: $mdistances[$i-1]\r\n";
@@ -1775,38 +1984,38 @@ print "Behavior: reson (reset, Log_Mode = 1, line  = $iwaypoint, waypoint($i-1) 
 			print MFILE "behavior startCamera \r\n";
 			print MFILE "{ \r\n";
 			print MFILE "duration  = 1; \r\n";
-			print MFILE "nPhotos = $nphotos; \r\n";
-			print MFILE "nSamplePeriods = 50; \r\n";
+			#print MFILE "nPhotos = $nphotos; \r\n";
+			print MFILE "nSamplePeriods = 9; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";
-printf "Behavior: startCamera (distance:%.2f m, run length:%.2f m, nphotos:%d)\n", 
+printf "Behavior: startCamera (distance:%.2f m, run length:%.2f m, nphotos:%d)\n",
 		$mdistances[$i-1],$camerarunlength,$nphotos;
 			}
-		elsif ($camera && $i > 0 && $mwaypoints[$i-1] == 4)
+		elsif ($camera && $i > 0 && $mstartstops[$i-1] == 2)
 			{
 			$cameraenddistance = $mdistances[$i-1];
 			print MFILE "#######################################################\r\n";
 			print MFILE "# Stop taking pictures with camera.\r\n";
 			print MFILE "#   Distance along survey: $mdistances[$i-1]\r\n";
-			print MFILE "#behavior stopCamera \r\n";
-			print MFILE "#{ \r\n";
-			print MFILE "#duration  = 1; \r\n";
-			print MFILE "#} \r\n";
+			print MFILE "behavior stopCamera \r\n";
+			print MFILE "{ \r\n";
+			print MFILE "duration  = 1; \r\n";
+			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";
 printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i-1];
 			}
-			
+
 		# insert acoustic update before start of line
-		if ($mwaypoints[$i-1] == 3)
+		if ($mstartstops[$i-1] == 1)
 			{
-			print MFILE "# Acoustic update - sent status ping before start of line \r\n";
+			print MFILE "# Acoustic update 7 - sent status ping before start of line \r\n";
 			print MFILE "# \r\n";
 			print MFILE "behavior acousticUpdate \r\n";
 			print MFILE "{ \r\n";
-			print MFILE "duration  = 2; \r\n";	
-			print MFILE "dummy  = 1; \r\n";	
+			print MFILE "duration  = 2; \r\n";
+			print MFILE "dummy  = 1; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";
@@ -1828,8 +2037,8 @@ print "Behavior: acousticUpdate\n";
 #	print MFILE "# \r\n";
 #	print MFILE "behavior acousticUpdate \r\n";
 #	print MFILE "{ \r\n";
-#	print MFILE "duration  = 2; \r\n";	
-#	print MFILE "dummy  = 1; \r\n";	
+#	print MFILE "duration  = 2; \r\n";
+#	print MFILE "dummy  = 1; \r\n";
 #	print MFILE "} \r\n";
 #print "Behavior: acousticUpdate\n";
 	print MFILE "# \r\n";
@@ -1839,7 +2048,7 @@ print "Behavior: acousticUpdate\n";
 	print MFILE "horizontalMode   = heading; \r\n";
 	printf MFILE "horizontal   = %f; \r\n", $mbearings[0];
 	print MFILE "pitch        = DESCENDPITCH; \r\n";
-	print MFILE "speed        = MISSION_SPEED; \r\n";
+	print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 	print MFILE "maxDepth     = DESCENT_DEPTH; \r\n";
 	print MFILE "minAltitude  = ALTITUDE_MIN; \r\n";
 	print MFILE "duration     = DESCEND_DURATION; \r\n";
@@ -1851,7 +2060,7 @@ print "Behavior: descend\n";
 	print MFILE "{ \r\n";
 	print MFILE "duration     = SETPOINT_DURATION; \r\n";
 	printf MFILE "heading      = %f; \r\n", $mbearings[0];
-	print MFILE "speed        = MISSION_SPEED; \r\n";
+	print MFILE "speed        = ASCENTDESCENT_SPEED; \r\n";
 	print MFILE "verticalMode = pitch; \r\n";
 	print MFILE "pitch        = 0; \r\n";
 	print MFILE "} \r\n";
@@ -1870,31 +2079,31 @@ print "Behavior: gps\n";
 	if ($mappingsonar)
 		{
 		# get starting sonar parameters assuming $altitudedesired altitude
+		#  $sslo_range & $sbp_duration calculated near start of program
+		# from ping rate
 		$sonaraltitudeuse = $altitudedesired;
 		$mb_range = 4.0 * $sonaraltitudeuse;
 		if ($mb_range > 350.0)
 			{
 			$mb_range = 350.0;
 			}
+		if ($beamdata && $mb_range > 100.0)
+			{
+			$mb_range = 100.0;
+			}
 		$mb_minrange = $mb_minrangefraction * $sonaraltitudeuse;
 		$mb_maxrange = $mb_range;
 		$mb_mindepth = 0.0;
 		$mb_maxdepth = $mb_range;
-		$sslo_range = 0.9 * 750.0 / $mb_pingrate;
-		if ($sslo_range > 200.0)
-			{
-			$sslo_range = 200.0;
-			}
-		$sbp_duration = 1000.0 * 0.9 / $mb_pingrate;
 
 		print MFILE "#######################################################\r\n";
 		print MFILE "# Set sonar parameters, turn pinging on, power zero and logging off \r\n";
 		print MFILE "# \r\n";
 		print MFILE "behavior reson \r\n";
 		print MFILE "{ \r\n";
-		print MFILE "duration  = RESON_DURATION; \r\n";	
-		print MFILE "MB_Mode  = 1; \r\n";	
-		print MFILE "Log_Mode  = 0; \r\n";	
+		print MFILE "duration  = RESON_DURATION; \r\n";
+		print MFILE "MB_Mode  = 1; \r\n";
+		print MFILE "Log_Mode  = 0; \r\n";
 		print MFILE "SBP_Mode = 0; \r\n";
 		print MFILE "SBP_Power = 0.0; \r\n";
 		print MFILE "SBP_Gain = 128.0; \r\n";
@@ -1917,7 +2126,7 @@ print "Behavior: gps\n";
 		printf MFILE "MB_Bottom_Detect_Filter_Max_Depth = %.2f; \r\n", $mb_maxdepth;
 		print MFILE "MB_Bottom_Detect_Range_Mode = 1; \r\n";
 		print MFILE "MB_Bottom_Detect_Depth_Mode = 0; \r\n";
-		print MFILE "Snippet_Mode = 1; \r\n";
+		print MFILE "Snippet_Mode = $mb_snippetmode; \r\n";
 		print MFILE "Window_Size = 200; \r\n";
 		print MFILE "} \r\n";
 		print MFILE "# \r\n";
@@ -1945,51 +2154,51 @@ print "Behavior: reson (start, reset, Log_Mode = 0)\n";
  		}
 	close(WFILE);
 
-	# output Capn Voyager WPL waypoint file unless outputoff option selected
-	$winfrogfile = "$root" . "_capnwpt.rut";
-	open(WFILE,">$winfrogfile") || die "Cannot open output Capn Voyager file: $winfrogfile\r\n$program_name aborted.\r\n";
-	$cnt = 0;
-	for ($i = 0; $i < $npoints; $i++)
- 		{
-		if ($waypoints[$i] != 0)
-			{
-			$cnt++;
-			if ($lats[$i] > 0.0)
-				{
-				$NorS = "N";
-				$latdeg = int($lats[$i]);
-				$latmin = ($lats[$i] - $latdeg) * 60.0;
-				$latminb = int($latmin);
-				$latmins = int(($latmin - $latminb) * 1000 + 0.5);
-				}
-			else
-				{
-				$NorS = 'S';
-				$latdeg = int(-$lats[$i]);
-				$latmin = (-$lats[$i] - $latdeg) * 60.0;
-				$latminb = int($latmin);
-				$latmins = int(($latmin - $latminb) * 1000 + 0.5);
-				}
-			if ($lons[$i] > 0.0)
-				{
-				$EorW = "E";
-				$londeg = int($lons[$i]);
-				$lonmin = ($lons[$i] - $londeg) * 60.0;
-				$lonminb = int($lonmin);
-				$lonmins = int(($lonmin - $lonminb) * 1000 + 0.5);
-				}
-			else
-				{
-				$EorW = 'W';
-				$londeg = int(-$lons[$i]);
-				$lonmin = (-$lons[$i] - $londeg) * 60.0;
-				$lonminb = int($lonmin);
-				$lonmins = int(($lonmin - $lonminb) * 1000 + 0.5);
-				}
- 			printf WFILE "\$IIWPL,%2.2d%2.2d.%3.3d,%s,%3.3d%2.2d.%3.3d,%s,AUV %d\r\n", $latdeg, $latminb, $latmins, $NorS,, $londeg, $lonminb, $lonmins, $EorW, $cnt;
-			}
- 		}
-	close(WFILE);
+# 	# output Capn Voyager WPL waypoint file unless outputoff option selected
+# 	$winfrogfile = "$root" . "_capnwpt.rut";
+# 	open(WFILE,">$winfrogfile") || die "Cannot open output Capn Voyager file: $winfrogfile\r\n$program_name aborted.\r\n";
+# 	$cnt = 0;
+# 	for ($i = 0; $i < $npoints; $i++)
+#  		{
+# 		if ($waypoints[$i] != 0)
+# 			{
+# 			$cnt++;
+# 			if ($lats[$i] > 0.0)
+# 				{
+# 				$NorS = "N";
+# 				$latdeg = int($lats[$i]);
+# 				$latmin = ($lats[$i] - $latdeg) * 60.0;
+# 				$latminb = int($latmin);
+# 				$latmins = int(($latmin - $latminb) * 1000 + 0.5);
+# 				}
+# 			else
+# 				{
+# 				$NorS = 'S';
+# 				$latdeg = int(-$lats[$i]);
+# 				$latmin = (-$lats[$i] - $latdeg) * 60.0;
+# 				$latminb = int($latmin);
+# 				$latmins = int(($latmin - $latminb) * 1000 + 0.5);
+# 				}
+# 			if ($lons[$i] > 0.0)
+# 				{
+# 				$EorW = "E";
+# 				$londeg = int($lons[$i]);
+# 				$lonmin = ($lons[$i] - $londeg) * 60.0;
+# 				$lonminb = int($lonmin);
+# 				$lonmins = int(($lonmin - $lonminb) * 1000 + 0.5);
+# 				}
+# 			else
+# 				{
+# 				$EorW = 'W';
+# 				$londeg = int(-$lons[$i]);
+# 				$lonmin = (-$lons[$i] - $londeg) * 60.0;
+# 				$lonminb = int($lonmin);
+# 				$lonmins = int(($lonmin - $lonminb) * 1000 + 0.5);
+# 				}
+#  			printf WFILE "\$IIWPL,%2.2d%2.2d.%3.3d,%s,%3.3d%2.2d.%3.3d,%s,AUV %d\r\n", $latdeg, $latminb, $latmins, $NorS,, $londeg, $lonminb, $lonmins, $EorW, $cnt;
+# 			}
+#  		}
+# 	close(WFILE);
 
 	# generate data for plots
 	$topodatafile = "$root" . "_topo.xy";
@@ -2087,7 +2296,7 @@ sub Getopts {
 # the same arg.
 #
 # Usage:
-#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
 #			    # -c does not take arg. Sets opt_* as a
 #                           # side effect.
 
@@ -2095,7 +2304,6 @@ sub MBGetopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
@@ -2118,7 +2326,7 @@ sub MBGetopts {
 		    $rest = shift(@ARGV);
 		}
 		if (eval "\$opt_$first") {
-		    eval "\$opt_$first = \$opt_$first 
+		    eval "\$opt_$first = \$opt_$first
 				. \":\" . \$rest;";
 		}
 		else {

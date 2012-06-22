@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_process.c	9/25/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2009 by
+ *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -915,6 +915,39 @@ fprintf(stderr,"mbview_projectglobaldata: %ld\n", instance);
 			    }
 			}
 
+		/* handle vectors */
+		if (shared.shareddata.nvector > 0)
+			{
+			for (i=0;i<shared.shareddata.nvector;i++)
+			    {
+			    for (j=0;j<shared.shareddata.vectors[i].npoints;j++)
+				{
+				pointw = &(shared.shareddata.vectors[i].vectorpts[j].point);
+				status = mbview_projectfromlonlat(instance,
+						pointw->xlon, pointw->ylat, pointw->zdata, 
+						&(pointw->xgrid[instance]), 
+						&(pointw->ygrid[instance]),
+						&(pointw->xdisplay[instance]), 
+						&(pointw->ydisplay[instance]), 
+						&(pointw->zdisplay[instance]));
+				}
+			    for (j=0;j<shared.shareddata.navs[i].npoints-1;j++)
+				{
+				for (k=0;k<shared.shareddata.navs[i].segments[j].nls;k++)
+					{
+					pointw = &(shared.shareddata.navs[i].segments[j].lspoints[k]);
+					status = mbview_projectfromlonlat(instance,
+							pointw->xlon, pointw->ylat, pointw->zdata, 
+							&(pointw->xgrid[instance]), 
+							&(pointw->ygrid[instance]),
+							&(pointw->xdisplay[instance]), 
+							&(pointw->ydisplay[instance]), 
+							&(pointw->zdisplay[instance]));
+					}
+				}
+			    }
+			}
+
 		/* set globalprojected flag */
 		view->globalprojected = MB_YES;
 		}
@@ -1459,6 +1492,25 @@ fprintf(stderr,"mbview_zscale: %ld\n", instance);
 			}
 		    }
 		}
+		
+	/* handle vector */
+	if (shared.shareddata.nvector > 0)
+		{
+		for (i=0;i<shared.shareddata.nvector;i++)
+		    {
+		    for (j=0;j<shared.shareddata.vectors[i].npoints;j++)
+			{
+			mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.vectors[i].vectorpts[j].point));
+			}
+		    for (j=0;j<shared.shareddata.vectors[i].npoints-1;j++)
+			{
+			for (k=0;k<shared.shareddata.vectors[i].segments[j].nls;k++)
+				{
+				mbview_zscalepointw(instance, globalview, offset_factor, &(shared.shareddata.vectors[i].segments[j].lspoints[k]));
+				}
+			}
+		    }
+		}
 	
 	/* set rez flags only if plotting not done */
 	if (view->plot_done == MB_NO)
@@ -1951,6 +2003,8 @@ int mbview_projectll2display(size_t instance,
 				&yy,
 				&error);
 		zz = data->exageration * zdata;
+/* fprintf(stderr,"pos: %f %f %f   raw: %f %f %f ",
+xlon, ylat, zdata, xx, yy, zz); */
 		}
 	else if (data->display_projection_mode == MBV_PROJECTION_GEOGRAPHIC)
 		{
@@ -1963,22 +2017,22 @@ int mbview_projectll2display(size_t instance,
 		mbview_sphere_forward(instance, xlon, ylat, &xx, &yy, &zz);
 		effective_topography = data->exageration * (zdata - 0.5 * (data->primary_min + data->primary_max))
 					+ 0.5 * (data->primary_min + data->primary_max);
-/*fprintf(stderr,"pos: %f %f %f   raw: %f %f %f  topo:%f ",
-xlon, ylat, zdata, xx, yy, zz, effective_topography);*/
+/* fprintf(stderr,"pos: %f %f %f   raw: %f %f %f  topo:%f ",
+xlon, ylat, zdata, xx, yy, zz, effective_topography); */
 
 		xx += (effective_topography * xx / MBV_SPHEROID_RADIUS) - view->sphere_refx;
 		yy += (effective_topography * yy / MBV_SPHEROID_RADIUS) - view->sphere_refy;
 		zz += (effective_topography * zz / MBV_SPHEROID_RADIUS) - view->sphere_refz;
-/*fprintf(stderr,"unscaled: %f %f %f",
-xx, yy, zz);*/
+/* fprintf(stderr,"unscaled: %f %f %f",
+xx, yy, zz); */
 		}
 
 	/* get final positions in display coordinates */
 	*xdisplay = view->scale * (xx - view->xorigin);
 	*ydisplay = view->scale * (yy - view->yorigin);
 	*zdisplay = view->scale * (zz - view->zorigin);
-/*fprintf(stderr,"   scale:%f   scaled: %f %f %f\n",
-view->scale, *xdisplay, *ydisplay, *zdisplay);*/
+/* fprintf(stderr,"   scale:%f   scaled: %f %f %f\n",
+view->scale, *xdisplay, *ydisplay, *zdisplay); */
 
 	/* print output debug statements */
 	if (mbv_verbose >= 2)

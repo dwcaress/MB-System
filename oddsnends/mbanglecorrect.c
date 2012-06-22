@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbanglecorrect.c	8/13/95
- *    $Id: mbanglecorrect.c,v 5.8 2009-03-02 18:54:40 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1995, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -191,7 +191,7 @@ struct mbanglecorrect_ping_struct
 
 main (int argc, char **argv)
 {
-	static char rcs_id[] = "$Id: mbanglecorrect.c,v 5.8 2009-03-02 18:54:40 caress Exp $";
+	static char rcs_id[] = "$Id$";
 	static char program_name[] = "MBANGLECORRECT";
 	static char help_message[] =  
 "mbanglecorrect is a tool for processing sidescan data.  This program\n\t\

@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsimradmakess.c	11/29/98
  *
- *    $Id: mbsimradmakess.c,v 5.7 2008-09-13 06:08:09 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1998, 2000, 2003 by
  *    David W. Caress (caress@mbari.org)
@@ -118,7 +118,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbsimradmakess.c,v 5.7 2008-09-13 06:08:09 caress Exp $";
+	static char rcs_id[] = "$Id$";
 	static char program_name[] = "MBSIMRADMAKESS";
 	static char help_message[] =  "MBSIMRADMAKESS is an utility for regenerating sidescan imagery from the raw amplitude samples contained in data from  Simrad \nEM300 and EM3000 multibeam sonars. This program ignores amplitude \ndata associated with flagged (bad) bathymetry data, thus removing \none important source of noise in the sidescan data. The default \ninput and output streams are stdin and stdout.";
 	static char usage_message[] = "mbsimradmakess [-Fformat -V -H  -Iinfile -Ooutfile -Ppixel_size -Sswath_width -Tpixel_int]";

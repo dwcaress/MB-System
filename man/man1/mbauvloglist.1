@@ -1,4 +1,4 @@
-.TH mbauvloglist 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbauvloglist 1 "11 January 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbauvloglist\fP - Lists table data from an MBARI AUV mission log file.
 
@@ -7,7 +7,7 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbauvloglist\fP \fB-I\fP\fIfile\fP [\fB-L\fP\fIlonflip\fP
-\fB-O\fP\fIlist\fP \fB-P\fP \fB-V -H\fP ]
+\fB-O\fP\fIlist\fP \fB-P -S\fP \fB-V -H\fP ]
 
 .SH DESCRIPTION
 MBauvloglist reads an MBARI AUV mission log file and lists specified
@@ -309,6 +309,10 @@ given multiple times, and the values will be output in the order specified.
 .B \-P
 .br
 Prints out the log file header.
+.TP
+.B \-S
+.br
+Scales angular values to be in degrees instead of radians.
 .TP
 .B \-V
 The \fB-V\fP option causes the program to be verbose.

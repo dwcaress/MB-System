@@ -2,7 +2,7 @@
  *    The MB-system:	mb3dsoundings_callbacks.c		5/25/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2009 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1079,11 +1079,22 @@ int mb3dsoundings_reset_glx()
 	ac = 0;
 	XtSetArg(args[ac], mbGLwNvisualInfo, &(mb3dsoundings.vi)); ac++;
 	XtGetValues(mb3dsoundings.glwmda, args, ac);
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s glXCreateContext(%lu,%lu)\n",
+__FILE__,__LINE__,function_name,(size_t)mb3dsoundings.dpy,(size_t)mb3dsoundings.vi);
+#endif
 	mb3dsoundings.glx_context = glXCreateContext(mb3dsoundings.dpy, mb3dsoundings.vi,
-                	     NULL, GL_FALSE);
+                	     NULL, GL_TRUE);
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,(size_t)XtDisplay(mb3dsoundings.glwmda),(size_t)XtWindow(mb3dsoundings.glwmda),(size_t)mb3dsoundings.glx_context);
+#endif
 	glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda),
 			XtWindow(mb3dsoundings.glwmda),
 			mb3dsoundings.glx_context);
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(0, __FILE__, __LINE__, function_name);
+#endif
         glViewport(0, 0, mb3dsoundings.gl_width, mb3dsoundings.gl_height);
 	mb3dsoundings.aspect_ratio = ((float)mb3dsoundings.gl_width) / ((float)mb3dsoundings.gl_height);
 	mb3dsoundings.glx_init = MB_YES;
@@ -1093,6 +1104,9 @@ int mb3dsoundings_reset_glx()
 	XDefineCursor(XtDisplay(mb3dsoundings.mb3dsdg.Mb3dsdg), 
 			XtWindow(mb3dsoundings.mb3dsdg.drawingArea), 
 			mb3dsoundings.TargetBlackCursor);
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(0, __FILE__, __LINE__, function_name);
+#endif
 
 	/* print output debug statements */
 	if (mbs_verbose >= 2)
@@ -1106,8 +1120,6 @@ int mb3dsoundings_reset_glx()
 	/* return */
 	return(mbs_status);
 }
-
-		
 
 /*------------------------------------------------------------------------------*/
 
@@ -2717,6 +2729,9 @@ mb3dsoundings_setzscale(int verbose, int *error)
 int
 mb3dsoundings_plot(int verbose, int *error)
 {
+	/* local variables */
+	char	*function_name = "mb3dsoundings_plot";
+
     struct mb3dsoundings_struct *soundingdata;
     struct mb3dsoundings_sounding_struct *sounding;
     struct mb3dsoundings_sounding_struct *sounding2;
@@ -2734,9 +2749,17 @@ mb3dsoundings_plot(int verbose, int *error)
 soundingdata->num_soundings); */
 	
 	/* make correct window current for OpenGL */
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,(size_t)XtDisplay(mb3dsoundings.glwmda),(size_t)XtWindow(mb3dsoundings.glwmda),(size_t)mb3dsoundings.glx_context);
+#endif
 	glXMakeCurrent(XtDisplay(mb3dsoundings.glwmda),
 			XtWindow(mb3dsoundings.glwmda),
 			mb3dsoundings.glx_context);
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(0, __FILE__, __LINE__, function_name);
+#endif
 
 	/* set background color */
 	glClearColor(1.0, 1.0, 1.0, 0.0);
@@ -3034,6 +3057,10 @@ sounding->glx, sounding->gly, sounding->glz, sounding->beamflag);*/
 	/* swap opengl buffers */
 	glXSwapBuffers (XtDisplay(mb3dsoundings.glwmda), 
 			XtWindow(mb3dsoundings.glwmda));
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(0, __FILE__, __LINE__, function_name);
+#endif
 
 	/* return */
 	return(mbs_status);
@@ -3088,6 +3115,7 @@ do_mb3dsdg_rollbias( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+	mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
 		
 	/* replot the data */
 	mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -3134,6 +3162,7 @@ do_mb3dsdg_pitchbias( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+	mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
 		
 	/* replot the data */
 	mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -3180,6 +3209,7 @@ do_mb3dsdg_headingbias( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+	mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
 
 	/* replot the data */
 	mb3dsoundings_plot(mbs_verbose, &mbs_error);
@@ -3226,6 +3256,7 @@ do_mb3dsdg_timelag( Widget w, XtPointer client_data, XtPointer call_data)
 
 	/* rescale data to the gl coordinates */
 	mb3dsoundings_scale(mbs_verbose, &mbs_error);
+	mb3dsoundings_setzscale(mbs_verbose, &mbs_error);
 
 	/* replot the data */
 	mb3dsoundings_plot(mbs_verbose, &mbs_error);

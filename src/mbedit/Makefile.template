@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  8/2/94
 #	$Id$
 #
-#     Copyright (c) 1993-2009 by
+#     Copyright (c) 1993-2011 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -101,6 +101,7 @@ all: $(BINDIR)/mbedit
 ### link the executable
 $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \
@@ -111,6 +112,7 @@ $(BINDIR)/mbedit: mbedit.o mbedit_prog.o \
 		mbedit_creation.o mbedit_bxutils.o
 	$(CC) $(CFLAGS) mbedit.o mbedit_prog.o \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \

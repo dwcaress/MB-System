@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_omghdcsj.c	3/10/99
  *	$Id$
  *
- *    Copyright (c) 1999-2009 by
+ *    Copyright (c) 1999-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -134,6 +134,8 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
 static char rcs_id[]="$Id$";
 
+int profile_cnt = 0;
+
 /*--------------------------------------------------------------------*/
 int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 {
@@ -192,6 +194,7 @@ int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_svp = NULL; 
 	mb_io_ptr->mb_io_insert_svp = NULL; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_hdcs_ttimes; 
+	mb_io_ptr->mb_io_detects = &mbsys_hdcs_detects; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_hdcs_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
@@ -234,6 +237,7 @@ int mbr_register_omghdcsj(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
 		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
 		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
@@ -295,9 +299,9 @@ int mbr_info_omghdcsj(int verbose,
 	*variable_beams = MB_YES;
 	*traveltime = MB_YES;
 	*beam_flagging = MB_YES;
-	*nav_source = MB_DATA_NAV;
+	*nav_source = MB_DATA_DATA;
 	*heading_source = MB_DATA_DATA;
-	*vru_source = MB_DATA_ATTITUDE;
+	*vru_source = MB_DATA_DATA;
 	*svp_source = MB_DATA_NONE;
 	*beamwidth_xtrack = 0.0;
 	*beamwidth_ltrack = 0.0;
@@ -401,8 +405,9 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	    pixel_size = (double *) &mb_io_ptr->saved1;
 	    dataplus->buffer = NULL;
 	    dataplus->kind = MB_DATA_NONE;
-	    status = mb_mallocd(verbose,__FILE__,__LINE__,MBF_OMGHDCSJ_SUMMARY_SIZE,
-				    (void **)&dataplus->buffer,error);
+	    status = mb_mallocd(verbose,__FILE__,__LINE__,
+			MBF_OMGHDCSJ_SUMMARY_SIZE+MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE,
+			(void **)&dataplus->buffer,error);
 	    
 	    /* initialize saved values */
 	    *read_summary = MB_NO;
@@ -439,6 +444,15 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	    summary->minProcDepth = 0;
 	    summary->maxProcDepth = 0;
 	    summary->status = 0;
+
+	    /* V4 */
+	    summary->totalProfileBytes = 0;
+	    for (i = 0; i< 20; i++)
+		summary->Profile_BitsDefining[i] = 0;
+	    summary->totalBeamBytes = 0;
+	    for (i = 0; i< 20; i++)
+		summary->Beam_BitsDefining[i] = 0;
+
 	    
 	    /* initialize profile */
 	    profile->status = 0;		/* status is either OK (0) 
@@ -486,7 +500,89 @@ int mbr_alm_omghdcsj(int verbose, void *mbio_ptr, int *error)
 	    profile->beam_spacing = 0;
 	    profile->coverage_sector = 0;
 	    profile->yaw_stab_mode = 0;
-    
+
+	    /* V4 */
+	    profile->params[0].txBeamIndex = 0;
+	    profile->params[0].txLevel = 0;
+	    profile->params[0].txBeamAngle = 0;
+	    profile->params[0].txPulseLength = 0;
+	    profile->params[0].ss_offset = 0;
+	    profile->params[0].no_skipped_ss = 0;
+	    profile->params[0].no_acquired_ss = 0;
+	    profile->params[0].ss_sample_interval = 0;
+	    profile->params[0].bscatClass = 0;
+	    profile->params[0].nrActualGainSets = 0;
+	    profile->params[0].rxGup = 0;
+	    profile->params[0].rxGain = 0;
+	    profile->params[0].ar = 0;
+	    for (i = 0; i < 20; i++)
+	    	profile->params[0].rxtime[i] = 0;
+	    for (i = 0; i < 20; i++)
+	    	profile->params[0].rxgain[i] = 0;
+
+	    profile->params[1].txBeamIndex = 0;
+	    profile->params[1].txLevel = 0;
+	    profile->params[1].txBeamAngle = 0;
+	    profile->params[1].txPulseLength = 0;
+	    profile->params[1].ss_offset = 0;
+	    profile->params[1].no_skipped_ss = 0;
+	    profile->params[1].no_acquired_ss = 0;
+	    profile->params[1].ss_sample_interval = 0;
+	    profile->params[1].bscatClass = 0;
+	    profile->params[1].nrActualGainSets = 0;
+	    profile->params[1].rxGup = 0;
+	    profile->params[1].rxGain = 0;
+	    profile->params[1].ar = 0;
+	    for (i = 0; i < 20; i++)
+	    	profile->params[1].rxtime[i] = 0;
+	    for (i = 0; i < 20; i++)
+	    	profile->params[1].rxgain[i] = 0;
+
+	    profile->transducerDepth = 0;
+    	    profile->transducerPitch = 0;
+	    profile->transducerRoll = 0;
+    	    profile->transducerHeading = 0;
+	    profile->transducerLatOffset = 0;
+    	    profile->transducerLongOffset = 0;
+	    profile->transducerSlantRange = 0;
+    	    profile->transducerAcross = 0;
+	    profile->transducerAlong = 0;
+    	    profile->transducerBearing = 0;
+	    profile->longperiod_heaveCorrection = 0;
+    	    profile->dynamic_draftCorrection = 0;
+	    profile->deepdraftoffset_in_metres = 0;
+    	    profile->draft_at_Tx = 0;
+    	    profile->alternateRoll = 0;
+    	    profile->alternatePitch = 0;
+    	    profile->alternateHeave = 0;
+    	    profile->alternateHeading = 0;
+    	    profile->standaloneHeading = 0;
+    	    profile->RTK_at_RP = 0;
+    	    profile->Lowpass_RTK_at_RP = 0;
+    	    profile->WLZ = 0;
+    	    profile->samp_rate_SecondHead = 0;
+    	    profile->clock_drift_millis = 0;
+    	    profile->watercol_offset = 0;
+    	    profile->watercol_size = 0;
+   	    profile->watercol_offset_2nd = 0;
+   	    profile->watercol_size_2nd = 0;
+   	    profile->range_to_normal_incidence = 0;
+   	    profile->laser_timestampRef = 0;
+  	    profile->tx_sector_offset = 0;
+  	    profile->num_tx_sectors = 0;
+  	    profile->sonar_settings_offset = 0;
+  	    profile->ping_number = 0;
+  	    profile->multi_ping_sequence = 0;
+  	    profile->num_beams = 0;
+  	    profile->layer_compensation_flag = 0;
+  	    profile->bs_beam_position = 0.0;
+  	    profile->bs_control_flags = 0;
+ 	    profile->bs_num_beams_per_side = 0;
+ 	    profile->bs_current_beam_number = 0;
+ 	    profile->bs_sample_descriptor = 0;
+ 	    profile->snippet_sample_descriptor = 0;
+ 	    
+
 	    /* initialize data structure */
 	    data->beams = NULL;
 	    data->ss_raw = NULL;
@@ -592,6 +688,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	buff_size;
 	short	*short_ptr;
 	int	*int_ptr;
+	float	*float_ptr;
 	mb_u_char   scaling_factor;
 	int	ScaleFactor;
 	int	offset, offset_start, sample_count;
@@ -637,7 +734,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	data_size = (int *) &mb_io_ptr->save7;
 	image_size = (int *) &mb_io_ptr->save8;
 	pixel_size = (double *) &mb_io_ptr->saved1;
-
+	
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 	mb_io_ptr->file2_pos = mb_io_ptr->file2_bytes;
@@ -781,9 +878,55 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		int_ptr = (int *) &buffer[offset];
 		summary->maxProcDepth = *int_ptr; offset +=4;
 		int_ptr = (int *) &buffer[offset];
-		summary->status = *int_ptr;
+		summary->status = *int_ptr; 
 #endif
+		/* V4 */
+		if (summary->fileVersion == 4)
+		{
+			if ((read_size = fread(&buffer[MBF_OMGHDCSJ_SUMMARY_SIZE],1,
+				MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE, mb_io_ptr->mbfp))
+				!= MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE)
+			{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;		    
+			} else {
+			offset +=4;
+#ifdef BYTESWAPPED
+			int_ptr = (int *) &buffer[offset];
+			summary->totalProfileBytes = mb_swap_int(*int_ptr); offset +=4;
+			for (i = 0; i< 20; i++)
+			{
+				int_ptr = (int *) &buffer[offset];
+				summary->Profile_BitsDefining[i] = mb_swap_int(*int_ptr); offset +=4;
+			}
+			int_ptr = (int *) &buffer[offset];
+			summary->totalBeamBytes = mb_swap_int(*int_ptr); offset +=4;
+						
+			for (i = 0; i< 20; i++)
+			{
+				int_ptr = (int *) &buffer[offset];
+				summary->Beam_BitsDefining[i] = mb_swap_int(*int_ptr); offset +=4;
+			}
+#else
+			int_ptr = (int *) &buffer[offset];
+			summary->totalProfileBytes = *int_ptr; offset +=4;
+			for (i = 0; i< 20; i++)
+			{
+				int_ptr = (int *) &buffer[offset];
+				summary->Profile_BitsDefining[i] = *int_ptr; offset +=4;
+			}
+			int_ptr = (int *) &buffer[offset];
+			summary->totalBeamBytes = *int_ptr; offset +=4;
+			for (i = 0; i< 20; i++)
+			{
+				int_ptr = (int *) &buffer[offset];
+				summary->Beam_BitsDefining[i] = *int_ptr; offset +=4;
+			}
 
+#endif
+			}
+		}
+		
 		/* set values to saved including data record sizes */
 		*read_summary = MB_YES;
 		*fileVersion = summary->fileVersion;
@@ -804,7 +947,7 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    *data_size = (*num_beam) * (*beam_size);
 		    *image_size = mbf_omghdcsj_tooldefs2[*toolType][MBF_OMGHDCSJ_IMAGE_LENGTH];
 		    }
-		else
+		else if (*fileVersion == 3)
 		    {
 		    *profile_size = mbf_omghdcsj_tooldefs3[*toolType][MBF_OMGHDCSJ_PROFILE_LENGTH];
 		    *num_beam = mbf_omghdcsj_tooldefs3[*toolType][MBF_OMGHDCSJ_MAX_NO_BEAMS];
@@ -812,11 +955,25 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    *data_size = (*num_beam) * (*beam_size);
 		    *image_size = mbf_omghdcsj_tooldefs3[*toolType][MBF_OMGHDCSJ_IMAGE_LENGTH];
 		    }
+		else if (*fileVersion == 4)
+		    {
+		    *profile_size = summary->totalProfileBytes;
+		    *num_beam = summary->numDepths;
+		    *beam_size = summary->totalBeamBytes;
+		    *data_size = (*num_beam) * (*beam_size);
+		    *image_size = mbf_omghdcsj_tooldefs3[*toolType][MBF_OMGHDCSJ_IMAGE_LENGTH];
+		    }
 		    
+		    		    
 		/* allocate buffer at required size */
 		if (dataplus->buffer != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&dataplus->buffer,error);
-		buff_size = MAX(*profile_size, MBF_OMGHDCSJ_SUMMARY_SIZE);
+		if (*fileVersion == 4)
+			/* buff_size = MAX(*profile_size, MBF_OMGHDCSJ_SUMMARY_SIZE+MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE);
+			*/
+			buff_size = *profile_size;
+		else
+			buff_size = MAX(*profile_size, MBF_OMGHDCSJ_SUMMARY_SIZE);
 		buff_size = MAX(buff_size, *image_size);
 		buff_size = MAX(buff_size, *data_size);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,buff_size, (void **)&dataplus->buffer,error);
@@ -853,9 +1010,9 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    && dataplus->kind == MB_DATA_DATA)
 	    {
 	    /* read profile */
-	    if ((read_size = fread(&buffer[4],1,
+      if ((read_size = fread(&buffer[4],1,
 		*profile_size-4,mb_io_ptr->mbfp))
-		!= *profile_size-4)
+		!= *profile_size-4)	
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;		    
@@ -1173,7 +1330,1351 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    profile->lengthImageDataField = 0;
 		    profile->pingNo = 0;
 		    profile->Q_factor = 0;
-		    }		
+
+		    } 
+		    else if (*fileVersion == 4)
+		    {
+#ifdef BYTESWAPPED
+		    if (summary->Profile_BitsDefining[0])
+		    {
+			if (summary->Profile_BitsDefining[0] & PROF_ui_status)
+			{
+			     profile->status = buffer[offset]; offset+=1;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_numDepths)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    profile->numDepths = (short)mb_swap_short(*short_ptr); offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_timeOffset)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    profile->timeOffset = mb_swap_int(*int_ptr); offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselLatOffset)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    profile->vesselLatOffset = mb_swap_int(*int_ptr); offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselLongOffset)
+			{	
+			    int_ptr = (int *) &buffer[offset];
+			    profile->vesselLongOffset = mb_swap_int(*int_ptr); offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselHeading)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    profile->vesselHeading = (int) ((short)mb_swap_short(*short_ptr)* 1000); offset +=2;   
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselHeave)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    profile->vesselHeave = (short)mb_swap_short(*short_ptr); offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselPitch)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    profile->vesselPitch = (int) ((short)mb_swap_short(*short_ptr) * 1000); offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselRoll)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    profile->vesselRoll = (int) ((short)mb_swap_short(*short_ptr) * 1000); offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_tide)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    profile->tide = mb_swap_int(*int_ptr); offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselVelocity)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    profile->vesselVelocity = mb_swap_int(*int_ptr); offset +=4;
+			}
+		    }
+		    if (summary->Profile_BitsDefining[1])
+		    {
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_power)
+		    {
+		    profile->power = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_TVG)
+		    {
+		    profile->TVG = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_attenuation)
+		    {
+		    profile->attenuation = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_edflag)
+		    {
+		    profile->edflag = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_soundVelocity)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->soundVelocity = (short)mb_swap_short(*short_ptr); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_lengthImageDataField)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->lengthImageDataField = (short)mb_swap_short(*short_ptr); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_pingNo)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->pingNo = (short)mb_swap_short(*short_ptr); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_mode)
+		    {
+		    profile->mode = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_Q_factor)
+		    {
+		    profile->Q_factor = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_pulseLength)
+		    {
+		    profile->pulseLength = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_unassigned)
+		    {
+		    profile->unassigned = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_us_td_sound_speed)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->td_sound_speed = (short)mb_swap_short(*short_ptr); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_us_samp_rate)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->samp_rate = (short)mb_swap_short(*short_ptr); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_z_res_cm)
+		    {
+		    profile->z_res_cm = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_xy_res_cm)
+		    {
+		    profile->xy_res_cm = buffer[offset]; offset +=1;
+		    }
+		    }
+		    
+		if (summary->Profile_BitsDefining[2])
+		{
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_ssp_source)
+		    {
+		    profile->ssp_source = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_filter_ID)
+		    {
+		    profile->filter_ID = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_absorp_coeff)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->absorp_coeff = (short)mb_swap_short(*short_ptr); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_tx_pulse_len)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->tx_pulse_len = (short)mb_swap_short(*short_ptr); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_tx_beam_width)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->tx_beam_width = (short)mb_swap_short(*short_ptr); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_max_swath_width)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->max_swath_width = (short)mb_swap_short(*short_ptr); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_tx_power_reduction)
+		    {
+		    profile->tx_power_reduction = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_beam_width)
+		    {
+		    profile->rx_beam_width = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_bandwidth)
+		    {
+		    profile->rx_bandwidth = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_gain_reduction)
+		    {
+		    profile->rx_gain_reduction = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_tvg_crossover)
+		    {
+		    profile->tvg_crossover = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_beam_spacing)
+		    {
+		    profile->beam_spacing = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_coverage_sector)
+		    {
+		    profile->coverage_sector = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_yaw_stab_mode)
+		    {
+		    profile->yaw_stab_mode = buffer[offset]; offset +=1;
+		    }
+		 }
+		 
+		  if (summary->Profile_BitsDefining[3])
+		    {
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_longperiod_heaveCorrection)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->longperiod_heaveCorrection = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_dynamic_draftCorrection)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->dynamic_draftCorrection = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_deepdraftoffset_in_metres)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->deepdraftoffset_in_metres = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_draft_at_Tx)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->draft_at_Tx = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternateRoll)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->alternateRoll = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternatePitch)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->alternatePitch = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternateHeave)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->alternateHeave = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_alternateHeading)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->alternateHeading = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_standaloneHeading)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->standaloneHeading = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_RTK_at_RP)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->RTK_at_RP = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_Lowpass_RTK_at_RP)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->Lowpass_RTK_at_RP = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_WLZ)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->WLZ = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_samp_rate_SecondHead)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->samp_rate_SecondHead = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_si_clock_drift_millis)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->clock_drift_millis = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->watercol_offset = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_size)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->watercol_size = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_offset_2nd)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->watercol_offset_2nd = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_size_2nd)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->watercol_size_2nd = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] &
+			  PROF_us_range_to_normal_incidence)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->range_to_normal_incidence = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_laser_timestampRef)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->laser_timestampRef = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_tx_sector_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->tx_sector_offset = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_num_tx_sectors)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->num_tx_sectors = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		    }
+		    
+		  if (summary->Profile_BitsDefining[4])
+		    {
+		      if (summary->Profile_BitsDefining[4] & PROF_st_params_PORT)
+			{
+
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txBeamIndex)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].txBeamIndex = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txLevel)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].txLevel = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_txBeamAngle)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].txBeamAngle = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txPulseLength)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].txPulseLength = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ui_ss_offset)
+			    {
+			      int_ptr = (int *) &buffer[offset];
+			      profile->params[0].ss_offset = (int)mb_swap_int(*int_ptr);
+			      offset += 4;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_skipped_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].no_skipped_ss = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_acquired_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].no_acquired_ss = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_ss_sample_interval)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].ss_sample_interval = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_bscatClass)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].bscatClass = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_nrActualGainSets)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].nrActualGainSets = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGup)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].rxGup = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGain)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].rxGain = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_ar)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].ar = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  /* hard wired, that if present, there are 20 of them irrespective */
+			  if (summary->Profile_BitsDefining[4] & PROF_us_rxtimeARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  profile->params[0].rxtime[i] = (short)mb_swap_short(*short_ptr);
+				  offset += 2;
+				}
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxgainARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  profile->params[0].rxgain[i] = (short)mb_swap_short(*short_ptr);
+				  offset += 2;
+				}
+			    }
+			} /* if port is present */
+
+		      if (summary->Profile_BitsDefining[4] & PROF_st_params_STBD)
+			{
+
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txBeamIndex)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].txBeamIndex = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txLevel)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].txLevel = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_txBeamAngle)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].txBeamAngle = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txPulseLength)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].txPulseLength = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ui_ss_offset)
+			    {
+			      int_ptr = (int *) &buffer[offset];
+			      profile->params[1].ss_offset = (int)mb_swap_int(*int_ptr);
+			      offset += 4;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_skipped_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].no_skipped_ss = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_acquired_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].no_acquired_ss = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_ss_sample_interval)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].ss_sample_interval = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_bscatClass)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].bscatClass = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_nrActualGainSets)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].nrActualGainSets = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGup)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].rxGup = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGain)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].rxGain = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_ar)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].ar = (short)mb_swap_short(*short_ptr);
+			      offset += 2;
+			    }
+			  /* hard wired, that if present, there are 20 of them irrespective */
+			  if (summary->Profile_BitsDefining[4] & PROF_us_rxtimeARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  profile->params[1].rxtime[i] = (short)mb_swap_short(*short_ptr);
+				  offset += 2;
+				}
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxgainARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  profile->params[1].rxgain[i] = (short)mb_swap_short(*short_ptr);
+				  offset += 2;
+				}
+			    }
+
+			} /* if stbd is present */
+		    }	
+		    
+		  if (summary->Profile_BitsDefining[5])
+		    {
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerDepth)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerPitch)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerRoll)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerHeading)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerLatOffset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerLongOffset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerSlantRange)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerAcross)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerAlong)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerBearing)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		    }
+		    
+		  if (summary->Profile_BitsDefining[6])
+		    {
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_sonar_settings_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->sonar_settings_offset = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_ping_number)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->ping_number = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_multi_ping_sequence)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->multi_ping_sequence = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_num_beams)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->num_beams = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_uc_layer_compensation_flag)
+			{
+			  profile->layer_compensation_flag = buffer[offset];
+			  offset += 1;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_f_bs_beam_position)
+			{
+			  float_ptr = (float *) &buffer[offset];
+			  mb_swap_float(float_ptr);
+			  profile->bs_beam_position = *float_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_bs_control_flags)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->bs_control_flags = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_bs_num_beams_per_side)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->bs_num_beams_per_side = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_bs_current_beam_number)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->bs_current_beam_number = (short)mb_swap_short(*short_ptr);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_uc_bs_sample_descriptor)
+			{
+			  profile->bs_sample_descriptor = buffer[offset];
+			  offset += 1;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_snippet_sample_descriptor)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->snippet_sample_descriptor = (int)mb_swap_int(*int_ptr);
+			  offset += 4;
+			}
+		    }
+
+#else
+
+		    if (summary->Profile_BitsDefining[0])
+		    {
+			if (summary->Profile_BitsDefining[0] & PROF_ui_status)
+			{
+			     profile->status = buffer[offset]; offset+=1;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_numDepths)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    profile->numDepths = *short_ptr; offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_timeOffset)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    profile->timeOffset = *int_ptr; offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselLatOffset)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    profile->vesselLatOffset = *int_ptr; offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselLongOffset)
+			{	
+			    int_ptr = (int *) &buffer[offset];
+			    profile->vesselLongOffset = *int_ptr; offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselHeading)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    profile->vesselHeading = (int) (*short_ptr* 1000); offset +=2;   
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselHeave)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    profile->vesselHeave = *short_ptr; offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselPitch)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    profile->vesselPitch = (int) (*short_ptr * 1000); offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselRoll)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    profile->vesselRoll = (int) (*short_ptr * 1000); offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_tide)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    profile->tide = *int_ptr; offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselVelocity)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    profile->vesselVelocity = *int_ptr; offset +=4;
+			}
+		    }
+		    if (summary->Profile_BitsDefining[1])
+		    {
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_power)
+		    {
+		    profile->power = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_TVG)
+		    {
+		    profile->TVG = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_attenuation)
+		    {
+		    profile->attenuation = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_edflag)
+		    {
+		    profile->edflag = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_soundVelocity)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->soundVelocity = *short_ptr; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_lengthImageDataField)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->lengthImageDataField = *short_ptr; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_pingNo)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->pingNo = *short_ptr; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_mode)
+		    {
+		    profile->mode = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_Q_factor)
+		    {
+		    profile->Q_factor = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_pulseLength)
+		    {
+		    profile->pulseLength = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_unassigned)
+		    {
+		    profile->unassigned = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_us_td_sound_speed)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->td_sound_speed = *short_ptr; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_us_samp_rate)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->samp_rate = *short_ptr; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_z_res_cm)
+		    {
+		    profile->z_res_cm = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_xy_res_cm)
+		    {
+		    profile->xy_res_cm = buffer[offset]; offset +=1;
+		    }
+		    }
+		    
+		if (summary->Profile_BitsDefining[2])
+		{
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_ssp_source)
+		    {
+		    profile->ssp_source = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_filter_ID)
+		    {
+		    profile->filter_ID = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_absorp_coeff)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->absorp_coeff = *short_ptr; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_tx_pulse_len)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->tx_pulse_len = *short_ptr; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_tx_beam_width)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->tx_beam_width = *short_ptr; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_max_swath_width)
+		    {
+		    short_ptr = (short *) &buffer[offset];
+		    profile->max_swath_width = *short_ptr; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_tx_power_reduction)
+		    {
+		    profile->tx_power_reduction = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_beam_width)
+		    {
+		    profile->rx_beam_width = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_bandwidth)
+		    {
+		    profile->rx_bandwidth = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_gain_reduction)
+		    {
+		    profile->rx_gain_reduction = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_tvg_crossover)
+		    {
+		    profile->tvg_crossover = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_beam_spacing)
+		    {
+		    profile->beam_spacing = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_coverage_sector)
+		    {
+		    profile->coverage_sector = buffer[offset]; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_yaw_stab_mode)
+		    {
+		    profile->yaw_stab_mode = buffer[offset]; offset +=1;
+		    }
+		 }
+		 
+		  if (summary->Profile_BitsDefining[3])
+		    {
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_longperiod_heaveCorrection)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->longperiod_heaveCorrection = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_dynamic_draftCorrection)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->dynamic_draftCorrection = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_deepdraftoffset_in_metres)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->deepdraftoffset_in_metres = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_draft_at_Tx)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->draft_at_Tx = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternateRoll)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->alternateRoll = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternatePitch)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->alternatePitch = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternateHeave)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->alternateHeave = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_alternateHeading)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->alternateHeading = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_standaloneHeading)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->standaloneHeading = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_RTK_at_RP)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->RTK_at_RP = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_Lowpass_RTK_at_RP)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->Lowpass_RTK_at_RP = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_WLZ)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->WLZ = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_samp_rate_SecondHead)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->samp_rate_SecondHead = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_si_clock_drift_millis)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->clock_drift_millis = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->watercol_offset = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_size)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->watercol_size = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_offset_2nd)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->watercol_offset_2nd = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_size_2nd)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->watercol_size_2nd = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] &
+			  PROF_us_range_to_normal_incidence)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->range_to_normal_incidence = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_laser_timestampRef)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->laser_timestampRef = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_tx_sector_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->tx_sector_offset = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_num_tx_sectors)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->num_tx_sectors = *short_ptr;
+			  offset += 2;
+			}
+		    }
+		    
+		  if (summary->Profile_BitsDefining[4])
+		    {
+		      if (summary->Profile_BitsDefining[4] & PROF_st_params_PORT)
+			{
+
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txBeamIndex)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].txBeamIndex = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txLevel)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].txLevel = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_txBeamAngle)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].txBeamAngle = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txPulseLength)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].txPulseLength = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ui_ss_offset)
+			    {
+			      int_ptr = (int *) &buffer[offset];
+			      profile->params[0].ss_offset = *int_ptr;
+			      offset += 4;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_skipped_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].no_skipped_ss = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_acquired_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].no_acquired_ss = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_ss_sample_interval)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].ss_sample_interval = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_bscatClass)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].bscatClass = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_nrActualGainSets)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].nrActualGainSets = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGup)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].rxGup = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGain)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].rxGain = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_ar)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[0].ar = *short_ptr;
+			      offset += 2;
+			    }
+			  /* hard wired, that if present, there are 20 of them irrespective */
+			  if (summary->Profile_BitsDefining[4] & PROF_us_rxtimeARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  profile->params[0].rxtime[i] = *short_ptr;
+				  offset += 2;
+				}
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxgainARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  profile->params[0].rxgain[i] = *short_ptr;
+				  offset += 2;
+				}
+			    }
+			} /* if port is present */
+
+		      if (summary->Profile_BitsDefining[4] & PROF_st_params_STBD)
+			{
+
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txBeamIndex)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].txBeamIndex = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txLevel)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].txLevel = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_txBeamAngle)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].txBeamAngle = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txPulseLength)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].txPulseLength = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ui_ss_offset)
+			    {
+			      int_ptr = (int *) &buffer[offset];
+			      profile->params[1].ss_offset = *int_ptr;
+			      offset += 4;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_skipped_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].no_skipped_ss = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_acquired_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].no_acquired_ss = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_ss_sample_interval)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].ss_sample_interval = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_bscatClass)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].bscatClass = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_nrActualGainSets)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].nrActualGainSets = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGup)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].rxGup = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGain)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].rxGain = *short_ptr;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_ar)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      profile->params[1].ar = *short_ptr;
+			      offset += 2;
+			    }
+			  /* hard wired, that if present, there are 20 of them irrespective */
+			  if (summary->Profile_BitsDefining[4] & PROF_us_rxtimeARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  profile->params[1].rxtime[i] = *short_ptr;
+				  offset += 2;
+				}
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxgainARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  profile->params[1].rxgain[i] = *short_ptr;
+				  offset += 2;
+				}
+			    }
+
+			} /* if stbd is present */
+		    }	
+		    
+		  if (summary->Profile_BitsDefining[5])
+		    {
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerDepth)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerPitch)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerRoll)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerHeading)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerLatOffset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerLongOffset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerSlantRange)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerAcross)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerAlong)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerBearing)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->transducerDepth = *int_ptr;
+			  offset += 4;
+			}
+		    }
+		    
+		  if (summary->Profile_BitsDefining[6])
+		    {
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_sonar_settings_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->sonar_settings_offset = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_ping_number)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->ping_number = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_multi_ping_sequence)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->multi_ping_sequence = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_num_beams)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->num_beams = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_uc_layer_compensation_flag)
+			{
+			  profile->layer_compensation_flag = buffer[offset];
+			  offset += 1;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_f_bs_beam_position)
+			{
+			  float_ptr = (float *) &buffer[offset];
+			  profile->bs_beam_position = *float_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_bs_control_flags)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->bs_control_flags = *int_ptr;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_bs_num_beams_per_side)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->bs_num_beams_per_side = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_bs_current_beam_number)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  profile->bs_current_beam_number = *short_ptr;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_uc_bs_sample_descriptor)
+			{
+			  profile->bs_sample_descriptor = buffer[offset];
+			  offset += 1;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_snippet_sample_descriptor)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  profile->snippet_sample_descriptor = *int_ptr;
+			  offset += 4;
+			}
+		    }
+
+#endif
+		    } /* Done V4 */
+    
 		}
 
 	    /* now read next data */
@@ -1188,8 +2689,10 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    }
 		else
 		    mb_io_ptr->file_bytes += read_size;
+ 
+	    		    
 		}
-	    
+   
 	    /* now parse data */
 	    if (status == MB_SUCCESS)
 		{
@@ -1306,6 +2809,31 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			beam->samp_win_length = 0;
 			beam->beam_depress_angle = 0;
 			beam->beam_heading_angle = 0;
+			beam->other_range = 0;
+			beam->Tx_steer = 0;
+			beam->Rc_steer = 0;
+			beam->TxSector = 0;
+			beam->timestampOffset = 0;
+			beam->no_RAMAN = 0; 
+			beam->no_IR = 0; 
+			beam->no_GAPD = 0; 
+			beam->no_PMT = 0;
+			beam->prim_depth_conf = 0; 
+			beam->seco_depth_conf = 0; 
+			beam->scan_azimuth = 0;
+			beam->nadir_angle = 0;
+			beam->secondaryDepth = 0;
+			beam->wave_height = 0;
+			beam->opaqueDepth_PMT = 0;
+			beam->extinctionDepth_PMT = 0;
+			beam->pimDepth_PMT = 0;
+			beam->opaqueDepth_GAPD = 0;
+			beam->extinctionDepth_GAPD = 0;
+			beam->pimDepth_GAPD = 0;
+			beam->twtt = 0.0;
+			beam->snippet_first_sample = 0;
+			beam->snippet_last_sample = 0;
+			beam->intensity = 0.0;
 			}
 		    else if (*fileVersion == 2)
 			{
@@ -1396,6 +2924,32 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			beam->samp_win_length = 0;
 			beam->beam_depress_angle = 0;
 			beam->beam_heading_angle = 0;
+			beam->other_range = 0;
+			beam->Tx_steer = 0;
+			beam->Rc_steer = 0;
+			beam->TxSector = 0;
+			beam->timestampOffset = 0;
+			beam->no_RAMAN = 0; 
+			beam->no_IR = 0; 
+			beam->no_GAPD = 0; 
+			beam->no_PMT = 0;
+			beam->prim_depth_conf = 0; 
+			beam->seco_depth_conf = 0; 
+			beam->scan_azimuth = 0;
+			beam->nadir_angle = 0;
+			beam->secondaryDepth = 0;
+			beam->wave_height = 0;
+			beam->opaqueDepth_PMT = 0;
+			beam->extinctionDepth_PMT = 0;
+			beam->pimDepth_PMT = 0;
+			beam->opaqueDepth_GAPD = 0;
+			beam->extinctionDepth_GAPD = 0;
+			beam->pimDepth_GAPD = 0;
+			beam->twtt = 0.0;
+			beam->snippet_first_sample = 0;
+			beam->snippet_last_sample = 0;
+			beam->intensity = 0.0;
+			
 			if(beam->alongTrack < -13000) 
 			    {
 			    ScaleFactor = 1;
@@ -1528,7 +3082,32 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			beam->sample_interval = 0;
 			beam->dummy[0] = 0;
 			beam->dummy[1] = 0;
-			
+			beam->other_range = 0;
+			beam->Tx_steer = 0;
+			beam->Rc_steer = 0;
+			beam->TxSector = 0;
+			beam->timestampOffset = 0;
+			beam->no_RAMAN = 0; 
+			beam->no_IR = 0; 
+			beam->no_GAPD = 0; 
+			beam->no_PMT = 0;
+			beam->prim_depth_conf = 0; 
+			beam->seco_depth_conf = 0; 
+			beam->scan_azimuth = 0;
+			beam->nadir_angle = 0;
+			beam->secondaryDepth = 0;
+			beam->wave_height = 0;
+			beam->opaqueDepth_PMT = 0;
+			beam->extinctionDepth_PMT = 0;
+			beam->pimDepth_PMT = 0;
+			beam->opaqueDepth_GAPD = 0;
+			beam->extinctionDepth_GAPD = 0;
+			beam->pimDepth_GAPD = 0;
+			beam->twtt = 0.0;
+			beam->snippet_first_sample = 0;
+			beam->snippet_last_sample = 0;
+			beam->intensity = 0.0;
+
 			/* get scaling factor
 			    - if maximum of abs(acrossTrack) and abs(observedDepth)
 				    less than     32m, 1mm res,
@@ -1539,9 +3118,647 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			ScaleFactor = pow(2.0,(double)scaling_factor);
 			beam->observedDepth = beam->observedDepth * ScaleFactor;	
 			beam->acrossTrack = beam->acrossTrack * ScaleFactor;	
-			beam->alongTrack = beam->alongTrack * ScaleFactor;	
+			beam->alongTrack = beam->alongTrack * ScaleFactor;
+	
 			}
+			  /* V4 */			
+			  else if (*fileVersion == 4)
+			{
+#ifdef BYTESWAPPED
+			
+			if (summary->Beam_BitsDefining[0])
+			{
+			if (summary->Profile_BitsDefining[0] & BEAM_ui_status)
+			{
+				beam->status = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_uc_scaling_factor)
+			{
+				beam->scaling_factor = buffer[offset]; offset+=1;
+			}
+			/* Scale Factor for depth / distance, etc */
+			ScaleFactor = pow(2.0,(double)beam->scaling_factor);
+			
+			if (summary->Beam_BitsDefining[0] & BEAM_si_observedDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->observedDepth = ScaleFactor*(short)mb_swap_short(*short_ptr);
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_acrossTrack)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->acrossTrack = ScaleFactor*(short)mb_swap_short(*short_ptr);
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_alongTrack)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->alongTrack = (int)ScaleFactor*(short)mb_swap_short(*short_ptr);
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_latOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->latOffset = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_longOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->longOffset = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_processedDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->processedDepth = ScaleFactor*(short)mb_swap_short(*short_ptr);
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_timeOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->timeOffset = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_depthAccuracy)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->depthAccuracy = ScaleFactor*(short)mb_swap_short(*short_ptr);
+				offset+=2;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[1])
+			{
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_reflectivity)
+			{
+				beam->reflectivity = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_sc_Q_factor)
+			{
+				beam->Q_factor = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_beam_no)
+			{
+				beam->beam_no = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_freq)
+			{
+				beam->freq = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_calibratedBackscatter)
+			{
+				beam->calibratedBackscatter = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_mindB)
+			{
+				beam->mindB = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_maxdB)
+			{
+				beam->maxdB = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_pseudoAngleIndependentBackscatter)
+			{
+			beam->pseudoAngleIndependentBackscatter = buffer[offset]; offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[2])
+			{
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_range)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->range = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_no_samples)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->no_samples = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_offset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->offset = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_si_centre_no)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->centre_no = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_sample_unit)
+			{
+				beam->sample_unit = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_sample_interval)
+			{	
+				beam->sample_interval = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_dummy0)
+			{
+			beam->dummy[0] = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_dummy1)
+			{
+			beam->dummy[1] = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_samp_win_length)
+			{
+			beam->samp_win_length = buffer[offset]; offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[3])
+			{
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_beam_depress_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->beam_depress_angle = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_us_beam_heading_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->beam_heading_angle = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_us_other_range)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->other_range = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_Tx_steer)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->Tx_steer = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_Rc_steer)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->Rc_steer = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_uc_TxSector)
+			{
+				beam->TxSector = buffer[offset]; offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[4])
+			{
+			if (summary->Beam_BitsDefining[4] & BEAM_ui_timestampOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->timestampOffset = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_RAMAN)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->no_RAMAN = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_IR)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->no_IR = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_GAPD)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->no_GAPD = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_PMT)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->no_PMT = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_uc_prim_depth_conf)
+			{	
+				beam->prim_depth_conf = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_uc_seco_depth_conf)
+			{
+				beam->seco_depth_conf = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_ss_scan_azimuth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->scan_azimuth = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_nadir_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->nadir_angle = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_secondaryDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->secondaryDepth = ScaleFactor*mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_ss_wave_height)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->wave_height = (short)mb_swap_short(*short_ptr); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_opaqueDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->opaqueDepth_PMT = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_extinctionDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->extinctionDepth_PMT = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_pimDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->pimDepth_PMT = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_opaqueDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->opaqueDepth_GAPD = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_extinctionDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->extinctionDepth_GAPD = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_pimDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->pimDepth_GAPD = mb_swap_int(*int_ptr); offset+=4;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[5])
+			{
+			if (summary->Beam_BitsDefining[5] & BEAM_f_twtt)
+			{
+				float_ptr = (float *)&buffer[offset];
+				mb_swap_float(float_ptr);
+				beam->twtt =*float_ptr; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_ui_snippet_first_sample)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->snippet_first_sample = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_ui_snippet_last_sample)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->snippet_last_sample = mb_swap_int(*int_ptr); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_f_intensity)
+			{
+				float_ptr = (float *) &buffer[offset];
+				mb_swap_float(float_ptr);
+				beam->intensity = *float_ptr;  offset+=4;
+			}
+			}
+#else
+			if (summary->Beam_BitsDefining[0])
+			{
+			if (summary->Profile_BitsDefining[0] & BEAM_ui_status)
+			{
+				beam->status = buffer[offset]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_uc_scaling_factor)
+			{
+				scaling_factor = buffer[offset]; offset+=1;
+			}
+			/* Scale Factor for depth / distance, etc */
+			ScaleFactor = pow(2.0,(double)scaling_factor);
+			
+			if (summary->Beam_BitsDefining[0] & BEAM_si_observedDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->observedDepth = *short_ptr;
+				beam->observedDepth *= ScaleFactor;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_acrossTrack)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->acrossTrack = *short_ptr;
+				beam->acrossTrack *= ScaleFactor;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_alongTrack)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->alongTrack = *short_ptr;
+				beam->alongTrack *= ScaleFactor;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_latOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->latOffset = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_longOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->longOffset = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_processedDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->processedDepth = *short_ptr;
+				beam->processedDepth *= ScaleFactor;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_timeOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->timeOffset = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_depthAccuracy)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->depthAccuracy = *short_ptr;
+				beam->depthAccuracy *= ScaleFactor;
+				offset+=2;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[1])
+			{
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_reflectivity)
+			{
+				beam->reflectivity = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_sc_Q_factor)
+			{
+				beam->Q_factor = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_beam_no)
+			{
+				beam->beam_no = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_freq)
+			{
+				beam->freq = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_calibratedBackscatter)
+			{
+				beam->calibratedBackscatter = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_mindB)
+			{
+				beam->mindB = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_maxdB)
+			{
+				beam->maxdB = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_pseudoAngleIndependentBackscatter)
+			{
+				beam->pseudoAngleIndependentBackscatter = buffer[offset];
+				offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[2])
+			{
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_range)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->range = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_no_samples)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->no_samples = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_offset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->offset = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_si_centre_no)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->centre_no = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_sample_unit)
+			{
+				beam->sample_unit = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_sample_interval)
+			{	
+				beam->sample_interval = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_dummy0)
+			{
+				beam->dummy[0] = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_dummy1)
+			{
+				beam->dummy[1] = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_samp_win_length)
+			{
+				beam->samp_win_length = buffer[offset]; 
+				offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[3])
+			{
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_beam_depress_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->beam_depress_angle = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_us_beam_heading_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->beam_heading_angle = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_us_other_range)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->other_range = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_Tx_steer)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->Tx_steer = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_Rc_steer)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->Rc_steer = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_uc_TxSector)
+			{
+				beam->TxSector = buffer[offset];
+				offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[4])
+			{
+			if (summary->Beam_BitsDefining[4] & BEAM_ui_timestampOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->timestampOffset = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_RAMAN)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->no_RAMAN = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_IR)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->no_IR = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_GAPD)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->no_GAPD = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_PMT)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->no_PMT = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_uc_prim_depth_conf)
+			{	
+				beam->prim_depth_conf = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_uc_seco_depth_conf)
+			{
+				beam->seco_depth_conf = buffer[offset];
+				offset+=1;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_ss_scan_azimuth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->scan_azimuth = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_nadir_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->nadir_angle = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_secondaryDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->secondaryDepth = *short_ptr;
+				beam->secondaryDepth *= ScaleFactor;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_ss_wave_height)
+			{
+				short_ptr = (short *) &buffer[offset];
+				beam->wave_height = *short_ptr;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_opaqueDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->opaqueDepth_PMT = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_extinctionDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->extinctionDepth_PMT = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_pimDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->pimDepth_PMT = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_opaqueDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->opaqueDepth_GAPD = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_extinctionDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->extinctionDepth_GAPD = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_pimDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->pimDepth_GAPD = *int_ptr;
+				offset+=4;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[5])
+			{
+			if (summary->Beam_BitsDefining[5] & BEAM_f_twtt)
+			{
+				float_ptr = (float *)&buffer[offset];
+				beam->twtt = *float_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_ui_snippet_first_sample)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->snippet_first_sample = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_ui_snippet_last_sample)
+			{
+				int_ptr = (int *) &buffer[offset];
+				beam->snippet_last_sample = *int_ptr;
+				offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_f_intensity)
+			{
+				float_ptr = (float *) &buffer[offset];
+				beam->intensity = *float_ptr;
+				offset+=4;
+			}
+			}
+
+#endif
+/*
+		fprintf(stdout, "BOB -- Beam=%d Scale=%d Obs.Depth=%d Proc.Depth=%d Acrosstrack Distance=%d\n", 
+				i, ScaleFactor, beam->observedDepth, beam->processedDepth, 
+				beam->acrossTrack);
+*/
+			}
+
 		    }
+		profile_cnt++;
 		}
 
 	    /* now deal with sidescan in parallel file */
@@ -1556,6 +3773,8 @@ int mbr_rt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    || summary->toolType == MBSYS_HDCS_EM121A
 		    || summary->toolType == MBSYS_HDCS_EM1002
 		    || summary->toolType == MBSYS_HDCS_EM120
+		    || summary->toolType == MBSYS_HDCS_EM122
+	            || summary->toolType == MBSYS_HDCS_EM302 
 		    || summary->toolType == MBSYS_HDCS_SeaBat_8125
 		    || summary->toolType == MBSYS_HDCS_SeaBat_8111
 		    || summary->toolType == MBSYS_HDCS_SeaBat_8150
@@ -2030,6 +4249,13 @@ sample_count, beam->offset, offset_start);
 		store->minProcDepth = summary->minProcDepth;
 		store->maxProcDepth = summary->maxProcDepth;
 		store->status_sum = summary->status;
+		/* V4 */
+		store->totalProfileBytes = summary->totalProfileBytes;
+		for (i = 0; i < 20; i++)
+			store->Profile_BitsDefining[i] = summary->Profile_BitsDefining[i];
+		store->totalBeamBytes = summary->totalBeamBytes;
+		for (i = 0; i < 20; i++)
+			store->Beam_BitsDefining[i] = summary->Beam_BitsDefining[i];
 		}
    	    
 	    if (dataplus->kind == MB_DATA_DATA)
@@ -2076,6 +4302,71 @@ sample_count, beam->offset, offset_start);
 		store->coverage_sector = profile->coverage_sector;
 		store->yaw_stab_mode = profile->yaw_stab_mode;
 		
+		/* V4 */
+		for( i = 0 ; i < 2; i++)
+		{
+			store->params[i].txBeamIndex = profile->params[i].txBeamIndex;
+			store->params[i].txLevel = profile->params[i].txLevel;
+			store->params[i].txBeamAngle = profile->params[i].txBeamAngle;
+			store->params[i].txPulseLength = profile->params[i].txPulseLength;
+			store->params[i].ss_offset = profile->params[i].ss_offset;
+			store->params[i].no_skipped_ss = profile->params[i].no_skipped_ss;
+			store->params[i].no_acquired_ss = profile->params[i].no_acquired_ss;
+			store->params[i].ss_sample_interval = profile->params[i].ss_sample_interval;
+			store->params[i].bscatClass = profile->params[i].bscatClass;
+			store->params[i].nrActualGainSets = profile->params[i].nrActualGainSets;
+			store->params[i].rxGup = profile->params[i].rxGup;
+			store->params[i].rxGain = profile->params[i].rxGain;
+			store->params[i].ar = profile->params[i].ar;
+			for (k = 0; k < 20; k++)
+				store->params[i].rxtime[k] = profile->params[i].rxtime[k];
+			for (k = 0; k < 20; k++)
+				store->params[i].rxgain[k] = profile->params[i].rxgain[k];
+		}
+		store->transducerDepth = profile->transducerDepth;
+		store->transducerPitch = profile->transducerPitch;
+		store->transducerRoll = profile->transducerRoll;
+		store->transducerHeading = profile->transducerHeading;
+		store->transducerLatOffset = profile->transducerLatOffset;
+		store->transducerLongOffset = profile->transducerLongOffset;
+		store->transducerSlantRange = profile->transducerSlantRange;
+		store->transducerAcross = profile->transducerAcross;
+		store->transducerAlong = profile->transducerAlong;
+		store->transducerBearing = profile->transducerBearing;
+		store->longperiod_heaveCorrection = profile->longperiod_heaveCorrection;
+		store->dynamic_draftCorrection = profile->dynamic_draftCorrection;
+		store->deepdraftoffset_in_metres = profile->deepdraftoffset_in_metres;
+		store->draft_at_Tx = profile->draft_at_Tx;
+		store->alternateRoll = profile->alternateRoll; 
+		store->alternatePitch = profile->alternatePitch;
+		store->alternateHeave = profile->alternateHeave;
+		store->standaloneHeading = profile->standaloneHeading;
+		store->RTK_at_RP = profile->RTK_at_RP;
+		store->Lowpass_RTK_at_RP = profile->Lowpass_RTK_at_RP;
+		store->WLZ = profile->WLZ;
+		store->samp_rate_SecondHead = profile->samp_rate_SecondHead;
+		store->clock_drift_millis = profile->clock_drift_millis;
+		store->watercol_offset = profile->watercol_offset;
+		store->watercol_size = profile->watercol_size;
+		store->watercol_offset_2nd = profile->watercol_offset_2nd;
+		store->watercol_size_2nd = profile->watercol_size_2nd;
+		store->range_to_normal_incidence = profile->range_to_normal_incidence;
+		store->laser_timestampRef = profile->laser_timestampRef;
+		store->tx_sector_offset = profile->tx_sector_offset;
+		store->num_tx_sectors = profile->num_tx_sectors;
+		store->sonar_settings_offset = profile->sonar_settings_offset;
+		store->ping_number = profile->ping_number;
+		store->multi_ping_sequence = profile->multi_ping_sequence;
+		store->num_beams = profile->num_beams;
+		store->layer_compensation_flag = profile->layer_compensation_flag;
+		store->bs_beam_position = profile->bs_beam_position;
+		store->bs_control_flags = profile->bs_control_flags;
+		store->bs_num_beams_per_side = profile->bs_num_beams_per_side;
+		store->bs_current_beam_number = profile->bs_current_beam_number;
+		store->bs_sample_descriptor = profile->bs_sample_descriptor;
+		store->snippet_sample_descriptor = profile->snippet_sample_descriptor;
+ 
+		
 		/* beams */
 		if (store->beams != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&store->beams,error);
@@ -2090,6 +4381,7 @@ sample_count, beam->offset, offset_start);
 			sbeam = &store->beams[i];
 			
 			sbeam->status = beam->status;
+			sbeam->scaling_factor = beam->scaling_factor;
 			sbeam->observedDepth = beam->observedDepth;
 			sbeam->acrossTrack = beam->acrossTrack;
 			sbeam->alongTrack = beam->alongTrack;
@@ -2117,6 +4409,32 @@ sample_count, beam->offset, offset_start);
 			sbeam->samp_win_length = beam->samp_win_length;
 			sbeam->beam_depress_angle = beam->beam_depress_angle;
 			sbeam->beam_heading_angle = beam->beam_heading_angle;
+			/* V4 */
+			sbeam->other_range = beam->other_range;
+			sbeam->Tx_steer = beam->Tx_steer;
+			sbeam->Rc_steer = beam->Rc_steer;
+			sbeam->TxSector = beam->TxSector;
+			sbeam->timestampOffset = beam->timestampOffset;
+			sbeam->no_RAMAN = beam->no_RAMAN;
+			sbeam->no_IR = beam->no_IR;
+			sbeam->no_GAPD = beam->no_GAPD;
+			sbeam->no_PMT = beam->no_PMT;
+			sbeam->prim_depth_conf = beam->prim_depth_conf;
+			sbeam->seco_depth_conf = beam->seco_depth_conf;
+			sbeam->scan_azimuth = beam->scan_azimuth;
+			sbeam->nadir_angle = beam->nadir_angle;
+			sbeam->secondaryDepth = beam->secondaryDepth;
+			sbeam->wave_height = beam->wave_height;
+			sbeam->opaqueDepth_PMT = beam->opaqueDepth_PMT;
+			sbeam->extinctionDepth_PMT = beam->extinctionDepth_PMT;
+			sbeam->pimDepth_PMT = beam->pimDepth_PMT;
+			sbeam->opaqueDepth_GAPD = beam->opaqueDepth_GAPD;
+			sbeam->extinctionDepth_GAPD = beam->extinctionDepth_GAPD;
+			sbeam->pimDepth_GAPD = beam->pimDepth_GAPD;
+			sbeam->twtt = beam->twtt;
+			sbeam->snippet_first_sample = beam->snippet_first_sample;
+			sbeam->snippet_last_sample = beam->snippet_last_sample;
+			sbeam->intensity = beam->intensity;
 			}
 		    }
 		
@@ -2209,11 +4527,12 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	buff_size;
 	short	*short_ptr;
 	int	*int_ptr;
+	float	*float_ptr;
 	mb_u_char   scaling_factor;
 	int	ScaleFactor;
 	int	MaxVal;
 	int	offset, offset_start;
-	int	i;
+	int	i, k;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2292,6 +4611,12 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		summary->minProcDepth = store->minProcDepth;
 		summary->maxProcDepth = store->maxProcDepth;
 		summary->status = store->status_sum;
+		summary->totalProfileBytes = store->totalProfileBytes;
+		for (i = 0; i < 20; i++)
+			summary->Profile_BitsDefining[i] = store->Profile_BitsDefining[i];
+		summary->totalBeamBytes = store->totalBeamBytes;
+		for (i = 0; i < 20; i++)
+			summary->Beam_BitsDefining[i] = store->Beam_BitsDefining[i];
 		}
 	    
 	    if (dataplus->kind == MB_DATA_SUMMARY)
@@ -2316,7 +4641,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    *data_size = (*num_beam) * (*beam_size);
 		    *image_size = mbf_omghdcsj_tooldefs2[*toolType][MBF_OMGHDCSJ_IMAGE_LENGTH];
 		    }
-		else
+		else if (*fileVersion == 3)
 		    {
 		    *profile_size = mbf_omghdcsj_tooldefs3[*toolType][MBF_OMGHDCSJ_PROFILE_LENGTH];
 		    *num_beam = mbf_omghdcsj_tooldefs3[*toolType][MBF_OMGHDCSJ_MAX_NO_BEAMS];
@@ -2324,11 +4649,24 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    *data_size = (*num_beam) * (*beam_size);
 		    *image_size = mbf_omghdcsj_tooldefs3[*toolType][MBF_OMGHDCSJ_IMAGE_LENGTH];
 		    }
+		else if (*fileVersion == 4)
+		    {
+		    *profile_size = summary->totalProfileBytes;
+		    *num_beam = summary->numDepths;
+		    *beam_size = summary->totalBeamBytes;
+		    *data_size = (*num_beam) * (*beam_size);
+		    *image_size = mbf_omghdcsj_tooldefs3[*toolType][MBF_OMGHDCSJ_IMAGE_LENGTH];
+		    }
 		    
 		/* allocate buffer at required size */
 		if (dataplus->buffer != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&dataplus->buffer,error);
-		buff_size = MAX(*profile_size, MBF_OMGHDCSJ_SUMMARY_SIZE);
+		    
+		if (*fileVersion == 4)
+			buff_size = *profile_size;
+		else
+			buff_size = MAX(*profile_size, MBF_OMGHDCSJ_SUMMARY_SIZE);
+		    
 		buff_size = MAX(buff_size, *image_size);
 		buff_size = MAX(buff_size, *data_size);
 		status = mb_mallocd(verbose,__FILE__,__LINE__,buff_size, (void **)&dataplus->buffer,error);
@@ -2388,6 +4726,72 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		profile->coverage_sector = store->coverage_sector;
 		profile->yaw_stab_mode = store->yaw_stab_mode;
 		
+		/* V4 */
+		for( i = 0 ; i < 2; i++)
+		{
+			profile->params[i].txBeamIndex = store->params[i].txBeamIndex;
+			profile->params[i].txLevel = store->params[i].txLevel;
+			profile->params[i].txBeamAngle = store->params[i].txBeamAngle;
+			profile->params[i].txPulseLength = store->params[i].txPulseLength;
+			profile->params[i].ss_offset = store->params[i].ss_offset;
+			profile->params[i].no_skipped_ss = store->params[i].no_skipped_ss;
+			profile->params[i].no_acquired_ss = store->params[i].no_acquired_ss;
+			profile->params[i].ss_sample_interval = store->params[i].ss_sample_interval;
+			profile->params[i].bscatClass = store->params[i].bscatClass;
+			profile->params[i].nrActualGainSets = store->params[i].nrActualGainSets;
+			profile->params[i].rxGup = store->params[i].rxGup;
+			profile->params[i].rxGain = store->params[i].rxGain;
+			profile->params[i].ar = store->params[i].ar;
+			for (k = 0; k < 20; k++)
+				profile->params[i].rxtime[k] = store->params[i].rxtime[k];
+			for (k = 0; k < 20; k++)
+				profile->params[i].rxgain[k] = store->params[i].rxgain[k];
+		}
+		profile->transducerDepth = store->transducerDepth;
+		profile->transducerPitch = store->transducerPitch;
+		profile->transducerRoll = store->transducerRoll;
+		profile->transducerHeading = store->transducerHeading;
+		profile->transducerLatOffset = store->transducerLatOffset;
+		profile->transducerLongOffset = store->transducerLongOffset;
+		profile->transducerSlantRange = store->transducerSlantRange;
+		profile->transducerAcross = store->transducerAcross;
+		profile->transducerAlong = store->transducerAlong;
+		profile->transducerBearing = store->transducerBearing;
+		profile->longperiod_heaveCorrection = store->longperiod_heaveCorrection;
+		profile->dynamic_draftCorrection = store->dynamic_draftCorrection;
+		profile->deepdraftoffset_in_metres = store->deepdraftoffset_in_metres;
+		profile->draft_at_Tx = store->draft_at_Tx;
+		profile->alternateRoll = store->alternateRoll; 
+		profile->alternatePitch = store->alternatePitch;
+		profile->alternateHeave = store->alternateHeave;
+		profile->standaloneHeading = store->standaloneHeading;
+		profile->RTK_at_RP = store->RTK_at_RP;
+		profile->Lowpass_RTK_at_RP = store->Lowpass_RTK_at_RP;
+		profile->WLZ = store->WLZ;
+		profile->samp_rate_SecondHead = store->samp_rate_SecondHead;
+		profile->clock_drift_millis = store->clock_drift_millis;
+		profile->watercol_offset = store->watercol_offset;
+		profile->watercol_size = store->watercol_size;
+		profile->watercol_offset_2nd = store->watercol_offset_2nd;
+		profile->watercol_size_2nd = store->watercol_size_2nd;
+		profile->range_to_normal_incidence = store->range_to_normal_incidence;
+		profile->laser_timestampRef = store->laser_timestampRef;
+		profile->tx_sector_offset = store->tx_sector_offset;
+		profile->num_tx_sectors = store->num_tx_sectors;
+		profile->sonar_settings_offset = store->sonar_settings_offset;
+		profile->ping_number = store->ping_number;
+		profile->multi_ping_sequence = store->multi_ping_sequence;
+		profile->num_beams = store->num_beams;
+		profile->layer_compensation_flag = store->layer_compensation_flag;
+		profile->bs_beam_position = store->bs_beam_position;
+		profile->bs_control_flags = store->bs_control_flags;
+		profile->bs_num_beams_per_side = store->bs_num_beams_per_side;
+		profile->bs_current_beam_number = store->bs_current_beam_number;
+		profile->bs_sample_descriptor = store->bs_sample_descriptor;
+		profile->snippet_sample_descriptor = store->snippet_sample_descriptor;
+		
+		
+		
 		/* beams */
 		if (data->beams == NULL)
 		    {
@@ -2397,12 +4801,14 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    }
 		if (status == MB_SUCCESS)
 		    {
-		    for (i=0;i<store->numDepths_pro;i++)
+		     for (i=0;i<store->numDepths_pro;i++)
+		    	
 			{
 			beam = &data->beams[i];
 			sbeam = &store->beams[i];
 			
 			beam->status = sbeam->status;
+			beam->scaling_factor = sbeam->scaling_factor;
 			beam->observedDepth = sbeam->observedDepth;
 			beam->acrossTrack = sbeam->acrossTrack;
 			beam->alongTrack = sbeam->alongTrack;
@@ -2437,6 +4843,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			sbeam = &store->beams[i];
 			
 			beam->status = 0;
+			beam->scaling_factor = 0;
 			beam->observedDepth = 0;
 			beam->acrossTrack = 0;
 			beam->alongTrack = 0;
@@ -2727,7 +5134,27 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    int_ptr = (int *) &buffer[offset];
 	    *int_ptr = mb_swap_int(summary->maxProcDepth); offset +=4;
 	    int_ptr = (int *) &buffer[offset];
-	    *int_ptr = mb_swap_int(summary->status);
+	    *int_ptr = mb_swap_int(summary->status); offset +=4;
+	    /* V4 */
+	    int_ptr = (int *) &buffer[offset];
+	    *int_ptr = mb_swap_int(summary->totalProfileBytes); offset +=4;
+	    
+	    for (k = 0; k < 20; k++)
+	    {
+	    	int_ptr = (int *) &buffer[offset];
+	    	*int_ptr = mb_swap_int(summary->Profile_BitsDefining[k]); offset +=4;
+	    	/* if (k < 19) offset +=4; */
+	    }
+	    
+	    int_ptr = (int *) &buffer[offset];
+	    *int_ptr = mb_swap_int(summary->totalBeamBytes); offset +=4;
+	    
+	    for (k = 0; k < 20; k++)
+	    {
+	    	int_ptr = (int *) &buffer[offset];
+	    	*int_ptr = mb_swap_int(summary->Beam_BitsDefining[k]); offset +=4;
+	    	/* if (k < 19) offset +=4; */
+	    }
 #else
 	    int_ptr = (int *) &buffer[offset];
 	    *int_ptr = summary->sensorNumber; offset +=4;
@@ -2774,12 +5201,33 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	    int_ptr = (int *) &buffer[offset];
 	    *int_ptr = summary->maxProcDepth; offset +=4;
 	    int_ptr = (int *) &buffer[offset];
-	    *int_ptr = summary->status;
+	    *int_ptr = summary->status; offset +=4;
+	    /* V4 */
+	    int_ptr = (int *) &buffer[offset];
+	    *int_ptr = summary->totalProfileBytes; offset +=4;
+	    for (k = 0; k < 20; k++)
+	    {
+	    	int_ptr = (int *) &buffer[offset];
+	    	*int_ptr = summary->Profile_BitsDefining[k]; offset +=4;
+	    }
+	    int_ptr = (int *) &buffer[offset];
+	    *int_ptr = summary->totalBeamBytes; offset +=4;
+	    for (k = 0; k < 20; k++)
+	    {
+	    	int_ptr = (int *) &buffer[offset];
+	    	*int_ptr = summary->Beam_BitsDefining[k];
+	    	if ( k < 19) offset +=4; /* do not go too far */
+	    }
+	    
 #endif
     
 	    /* write summary to file */
-	    if ((write_size = fwrite(buffer,1,MBF_OMGHDCSJ_SUMMARY_SIZE,
-			    mb_io_ptr->mbfp)) == MBF_OMGHDCSJ_SUMMARY_SIZE) 
+	    int sum_size = MBF_OMGHDCSJ_SUMMARY_SIZE;
+	    if (*fileVersion == 4)
+	    	sum_size += MBF_OMGHDCSJ_SUMMARY_V4EXTRA_SIZE;
+	    	
+	    if ((write_size = fwrite(buffer,1,sum_size,
+			    mb_io_ptr->mbfp)) == sum_size) 
 		{
 		mb_io_ptr->file_bytes += write_size;
 		status = MB_SUCCESS;
@@ -3057,6 +5505,1348 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    buffer[offset] = profile->yaw_stab_mode; offset +=1;
 		    }
 #endif
+		}
+	    else if (*fileVersion == 4)
+		{
+#ifdef BYTESWAPPED
+		    if (summary->Profile_BitsDefining[0])
+		    {
+			if (summary->Profile_BitsDefining[0] & PROF_ui_status)
+			{
+			     /* write as char */
+			     buffer[offset] = profile->status; offset +=1;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_numDepths)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)mb_swap_short((short)profile->numDepths); offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_timeOffset)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = mb_swap_int(profile->timeOffset); offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselLatOffset)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = mb_swap_int(profile->vesselLatOffset); offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselLongOffset)
+			{	
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = mb_swap_int(profile->vesselLongOffset); offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselHeading)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)mb_swap_short((short)(profile->vesselHeading / 1000)); offset +=2;
+			 }   
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselHeave)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)mb_swap_short((short)(profile->vesselHeave)); offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselPitch)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)mb_swap_short((short)(profile->vesselPitch / 1000)); offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselRoll)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)mb_swap_short((short)(profile->vesselRoll / 1000)); offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_tide)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = mb_swap_int(profile->tide); offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselVelocity)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = mb_swap_int(profile->vesselVelocity); offset +=4;
+			}
+		    }
+		    if (summary->Profile_BitsDefining[1])
+		    {
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_power)
+		    {
+		    	buffer[offset] = profile->power; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_TVG)
+		    {
+		    	buffer[offset] = profile->TVG; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_attenuation)
+		    {
+		    	buffer[offset] = profile->attenuation; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_edflag)
+		    {
+		    	buffer[offset] = profile->edflag; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_soundVelocity)
+		    {
+		    	short_ptr = (short *) &buffer[offset];
+		    	*short_ptr = (short)mb_swap_short((short)profile->soundVelocity); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_lengthImageDataField)
+		    {
+		    	short_ptr = (short *) &buffer[offset];
+		    	*short_ptr = (short)mb_swap_short((short)profile->lengthImageDataField); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_pingNo)
+		    {
+		    	short_ptr = (short *) &buffer[offset];
+		    	*short_ptr = (short)mb_swap_short((short)profile->pingNo); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_mode)
+		    {
+		    	buffer[offset] = profile->mode; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_Q_factor)
+		    {
+		    	buffer[offset] = profile->Q_factor; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_pulseLength)
+		    {
+		    buffer[offset] = profile->pulseLength; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_unassigned)
+		    {
+		    	buffer[offset] = profile->unassigned; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_us_td_sound_speed)
+		    {
+		    	short_ptr = (short *) &buffer[offset];
+		    	*short_ptr = (short)mb_swap_short((short)profile->td_sound_speed); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_us_samp_rate)
+		    {
+		    	short_ptr = (short *) &buffer[offset];
+		    	*short_ptr = (short)mb_swap_short((short)profile->samp_rate); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_z_res_cm)
+		    {
+		    	buffer[offset] = profile->z_res_cm; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_xy_res_cm)
+		    {
+		    	buffer[offset] = profile->xy_res_cm; offset +=1;
+		    }
+		    }
+		    
+		if (summary->Profile_BitsDefining[2])
+		{
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_ssp_source)
+		    {
+		    	buffer[offset] = profile->ssp_source; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_filter_ID)
+		    {
+		    	buffer[offset] = profile->filter_ID; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_absorp_coeff)
+		    {
+		    	short_ptr = (short *) &buffer[offset];
+		    	*short_ptr = (short)mb_swap_short((short)profile->absorp_coeff); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_tx_pulse_len)
+		    {
+		    	short_ptr = (short *) &buffer[offset];
+		    	*short_ptr = (short)mb_swap_short((short)profile->tx_pulse_len); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_tx_beam_width)
+		    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)mb_swap_short((short)profile->tx_beam_width); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_max_swath_width)
+		    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)mb_swap_short((short)profile->max_swath_width); offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_tx_power_reduction)
+		    {
+		    	buffer[offset] = profile->tx_power_reduction; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_beam_width)
+		    {
+		    	buffer[offset] = profile->rx_beam_width; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_bandwidth)
+		    {
+		    	buffer[offset] = profile->rx_bandwidth; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_gain_reduction)
+		    {
+		    	buffer[offset] = profile->rx_gain_reduction; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_tvg_crossover)
+		    {
+		    	buffer[offset] = profile->tvg_crossover; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_beam_spacing)
+		    {
+		    	buffer[offset] = profile->beam_spacing; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_coverage_sector)
+		    {
+		    	buffer[offset] = profile->coverage_sector; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_yaw_stab_mode)
+		    {
+		   	buffer[offset] = profile->yaw_stab_mode; offset +=1;
+		    }
+		 }
+		 
+		  if (summary->Profile_BitsDefining[3])
+		    {
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_longperiod_heaveCorrection)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->longperiod_heaveCorrection); offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_dynamic_draftCorrection)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->dynamic_draftCorrection);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_deepdraftoffset_in_metres)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->deepdraftoffset_in_metres);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_draft_at_Tx)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->draft_at_Tx);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternateRoll)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->alternateRoll);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternatePitch)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->alternatePitch);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternateHeave)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->alternateHeave);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_alternateHeading)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->alternateHeading);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_standaloneHeading)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->standaloneHeading);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_RTK_at_RP)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->RTK_at_RP);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_Lowpass_RTK_at_RP)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->Lowpass_RTK_at_RP);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_WLZ)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->WLZ);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_samp_rate_SecondHead)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->samp_rate_SecondHead);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_si_clock_drift_millis)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->clock_drift_millis);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->watercol_offset);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_size)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->watercol_size);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_offset_2nd)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->watercol_offset_2nd);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_size_2nd)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->watercol_size_2nd);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] &
+			  PROF_us_range_to_normal_incidence)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->range_to_normal_incidence);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_laser_timestampRef)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->laser_timestampRef);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_tx_sector_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->tx_sector_offset);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_num_tx_sectors)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->num_tx_sectors);
+			  offset += 2;
+			}
+		    }
+		    
+		  if (summary->Profile_BitsDefining[4])
+		    {
+		      if (summary->Profile_BitsDefining[4] & PROF_st_params_PORT)
+			{
+
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txBeamIndex)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].txBeamIndex);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txLevel)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].txLevel);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_txBeamAngle)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].txBeamAngle);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txPulseLength)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].txPulseLength);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ui_ss_offset)
+			    {
+			      int_ptr = (int *) &buffer[offset];
+			      *int_ptr = mb_swap_int(profile->params[0].ss_offset);
+			      offset += 4;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_skipped_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].no_skipped_ss);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_acquired_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].no_acquired_ss);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_ss_sample_interval)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].ss_sample_interval);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_bscatClass)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].bscatClass);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_nrActualGainSets)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].nrActualGainSets);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGup)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].rxGup);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGain)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].rxGain);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_ar)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[0].ar);
+			      offset += 2;
+			    }
+			  /* hard wired, that if present, there are 20 of them irrespective */
+			  if (summary->Profile_BitsDefining[4] & PROF_us_rxtimeARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  *short_ptr = (short)mb_swap_short((short)profile->params[0].rxtime[i]);
+				  offset += 2;
+				}
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxgainARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  *short_ptr = (short)mb_swap_short((short)profile->params[0].rxgain[i]);
+				  offset += 2;
+				}
+			    }
+			} /* if port is present */
+
+		      if (summary->Profile_BitsDefining[4] & PROF_st_params_STBD)
+			{
+
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txBeamIndex)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].txBeamIndex);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txLevel)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].txLevel);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_txBeamAngle)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].txBeamAngle);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txPulseLength)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].txPulseLength);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ui_ss_offset)
+			    {
+			      int_ptr = (int *) &buffer[offset];
+			      *int_ptr = mb_swap_int(profile->params[1].ss_offset);
+			      offset += 4;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_skipped_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].no_skipped_ss);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_acquired_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].no_acquired_ss);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_ss_sample_interval)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].ss_sample_interval);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_bscatClass)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].bscatClass);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_nrActualGainSets)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].nrActualGainSets);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGup)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].rxGup);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGain)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].rxGain);
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_ar)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)mb_swap_short((short)profile->params[1].ar);
+			      offset += 2;
+			    }
+			  /* hard wired, that if present, there are 20 of them irrespective */
+			  if (summary->Profile_BitsDefining[4] & PROF_us_rxtimeARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  *short_ptr = (short)mb_swap_short((short)profile->params[1].rxtime[i]);
+				  offset += 2;
+				}
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxgainARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  *short_ptr = (short)mb_swap_short((short)profile->params[1].rxgain[i]);
+				  offset += 2;
+				}
+			    }
+
+			} /* if stbd is present */
+		    }	
+		    
+		  if (summary->Profile_BitsDefining[5])
+		    {
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerDepth)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->transducerDepth);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerPitch)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->transducerDepth);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerRoll)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->transducerDepth);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerHeading)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->transducerDepth);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerLatOffset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->transducerDepth);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerLongOffset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->transducerDepth);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerSlantRange)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->transducerDepth);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerAcross)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->transducerDepth);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerAlong)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->transducerDepth);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerBearing)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->transducerDepth);
+			  offset += 4;
+			}
+		    }
+		    
+		  if (summary->Profile_BitsDefining[6])
+		    {
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_sonar_settings_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->sonar_settings_offset);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_ping_number)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->ping_number);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_multi_ping_sequence)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->multi_ping_sequence);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_num_beams)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->num_beams);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_uc_layer_compensation_flag)
+			{
+			  buffer[offset]= profile->layer_compensation_flag;
+			  offset += 1;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_f_bs_beam_position)
+			{
+			  float_ptr = (float *) &buffer[offset];
+			  mb_swap_float(&profile->bs_beam_position);
+			  *float_ptr = profile->bs_beam_position;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_bs_control_flags)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->bs_control_flags);
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_bs_num_beams_per_side)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->bs_num_beams_per_side);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_bs_current_beam_number)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)mb_swap_short((short)profile->bs_current_beam_number);
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_uc_bs_sample_descriptor)
+			{
+			  buffer[offset] = profile->bs_sample_descriptor;
+			  offset += 1;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_snippet_sample_descriptor)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = mb_swap_int(profile->snippet_sample_descriptor);
+			  offset += 4;
+			}
+		    }
+#else
+		    if (summary->Profile_BitsDefining[0])
+		    {
+			if (summary->Profile_BitsDefining[0] & PROF_ui_status)
+			{
+			     buffer[offset] = profile->status; 
+			     offset +1;
+  
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_numDepths)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = profile->numDepths; offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_timeOffset)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = profile->timeOffset; offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselLatOffset)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = profile->vesselLatOffset; offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselLongOffset)
+			{	
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = profile->vesselLongOffset; offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselHeading)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = profile->vesselHeading / 1000; offset +=2;
+			 }   
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselHeave)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = profile->vesselHeave; offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselPitch)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = profile->vesselPitch / 1000; offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_vesselRoll)
+			{
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = profile->vesselRoll / 1000; offset +=2;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_si_tide)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = profile->tide; offset +=4;
+			}
+			if (summary->Profile_BitsDefining[0] & PROF_ui_vesselVelocity)
+			{
+			    int_ptr = (int *) &buffer[offset];
+			    *int_ptr = profile->vesselVelocity; offset +=4;
+			}
+		    }
+		    if (summary->Profile_BitsDefining[1])
+		    {
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_power)
+		    {
+		    	buffer[offset] = profile->power; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_TVG)
+		    {
+		    	buffer[offset] = profile->TVG; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_attenuation)
+		    {
+		    	buffer[offset] = profile->attenuation; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_edflag)
+		    {
+		    	buffer[offset] = profile->edflag; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_soundVelocity)
+		    {
+		    	short_ptr = (short *) &buffer[offset];
+		    	*short_ptr = profile->soundVelocity; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_lengthImageDataField)
+		    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = profile->lengthImageDataField; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_ui_pingNo)
+		    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = profile->pingNo; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_mode)
+		    {
+		    	buffer[offset] = profile->mode; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_Q_factor)
+		    {
+		   	buffer[offset] = profile->Q_factor; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_pulseLength)
+		    {
+		    	buffer[offset] = profile->pulseLength; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_unassigned)
+		    {
+		    buffer[offset] = profile->unassigned; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_us_td_sound_speed)
+		    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)profile->td_sound_speed; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_us_samp_rate)
+		    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)profile->samp_rate; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_z_res_cm)
+		    {
+		    	buffer[offset] = profile->z_res_cm; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[1] & PROF_uc_xy_res_cm)
+		    {
+		    	buffer[offset] = profile->xy_res_cm; offset +=1;
+		    }
+		    }
+		    
+		if (summary->Profile_BitsDefining[2])
+		{
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_ssp_source)
+		    {
+		    	buffer[offset] = profile->ssp_source; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_filter_ID)
+		    {
+		    	buffer[offset] = profile->filter_ID; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_absorp_coeff)
+		    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)profile->absorp_coeff; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_tx_pulse_len)
+		    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)profile->tx_pulse_len; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_tx_beam_width)
+		    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)profile->tx_beam_width; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_us_max_swath_width)
+		    {
+			    short_ptr = (short *) &buffer[offset];
+			    *short_ptr = (short)profile->max_swath_width; offset +=2;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_tx_power_reduction)
+		    {
+		    	buffer[offset] = profile->tx_power_reduction; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_beam_width)
+		    {
+		    	buffer[offset] = profile->rx_beam_width; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_bandwidth)
+		    {
+		    	buffer[offset] = profile->rx_bandwidth; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_rx_gain_reduction)
+		    {
+		   	buffer[offset] = profile->rx_gain_reduction; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_tvg_crossover)
+		    {
+		    	buffer[offset] = profile->tvg_crossover; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_beam_spacing)
+		    {
+		    	buffer[offset] = profile->beam_spacing; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_coverage_sector)
+		    {
+		    	buffer[offset] = profile->coverage_sector; offset +=1;
+		    }
+		    if (summary->Profile_BitsDefining[2] & PROF_uc_yaw_stab_mode)
+		    {
+		    	buffer[offset] = profile->yaw_stab_mode; offset +=1;
+		    }
+		 }
+		 
+		  if (summary->Profile_BitsDefining[3])
+		    {
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_longperiod_heaveCorrection)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->longperiod_heaveCorrection; offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_dynamic_draftCorrection)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->dynamic_draftCorrection;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_deepdraftoffset_in_metres)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->deepdraftoffset_in_metres;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_draft_at_Tx)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->draft_at_Tx;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternateRoll)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->alternateRoll;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternatePitch)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->alternatePitch;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_alternateHeave)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->alternateHeave;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_alternateHeading)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->alternateHeading;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_standaloneHeading)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->standaloneHeading;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_RTK_at_RP)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->RTK_at_RP;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_Lowpass_RTK_at_RP)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->Lowpass_RTK_at_RP;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ss_WLZ)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->WLZ;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_samp_rate_SecondHead)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->samp_rate_SecondHead;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_si_clock_drift_millis)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->clock_drift_millis;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->watercol_offset;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_size)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->watercol_size;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_offset_2nd)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->watercol_offset_2nd;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_watercol_size_2nd)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->watercol_size_2nd;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] &
+			  PROF_us_range_to_normal_incidence)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->range_to_normal_incidence;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_laser_timestampRef)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->laser_timestampRef;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_ui_tx_sector_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->tx_sector_offset;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[3] & PROF_us_num_tx_sectors)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->num_tx_sectors;
+			  offset += 2;
+			}
+		    }
+		    
+		  if (summary->Profile_BitsDefining[4])
+		    {
+		      if (summary->Profile_BitsDefining[4] & PROF_st_params_PORT)
+			{
+
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txBeamIndex)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].txBeamIndex;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txLevel)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].txLevel;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_txBeamAngle)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].txBeamAngle;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txPulseLength)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].txPulseLength;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ui_ss_offset)
+			    {
+			      int_ptr = (int *) &buffer[offset];
+			      *int_ptr = profile->params[0].ss_offset;
+			      offset += 4;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_skipped_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].no_skipped_ss;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_acquired_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].no_acquired_ss;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_ss_sample_interval)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].ss_sample_interval;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_bscatClass)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].bscatClass;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_nrActualGainSets)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = profile->params[0].nrActualGainSets;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGup)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].rxGup;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGain)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].rxGain;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_ar)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[0].ar;
+			      offset += 2;
+			    }
+			  /* hard wired, that if present, there are 20 of them irrespective */
+			  if (summary->Profile_BitsDefining[4] & PROF_us_rxtimeARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  *short_ptr = (short)profile->params[0].rxtime[i];
+				  offset += 2;
+				}
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxgainARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  *short_ptr = (short)profile->params[0].rxgain[i];
+				  offset += 2;
+				}
+			    }
+			} /* if port is present */
+
+		      if (summary->Profile_BitsDefining[4] & PROF_st_params_STBD)
+			{
+
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txBeamIndex)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].txBeamIndex;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txLevel)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].txLevel;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_txBeamAngle)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].txBeamAngle;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_txPulseLength)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].txPulseLength;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ui_ss_offset)
+			    {
+			      int_ptr = (int *) &buffer[offset];
+			      *int_ptr = profile->params[1].ss_offset;
+			      offset += 4;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_skipped_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].no_skipped_ss;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_no_acquired_ss)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].no_acquired_ss;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_ss_sample_interval)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].ss_sample_interval;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_bscatClass)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].bscatClass;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_us_nrActualGainSets)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].nrActualGainSets;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGup)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].rxGup;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxGain)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].rxGain;
+			      offset += 2;
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_ar)
+			    {
+			      short_ptr = (short *) &buffer[offset];
+			      *short_ptr = (short)profile->params[1].ar;
+			      offset += 2;
+			    }
+			  /* hard wired, that if present, there are 20 of them irrespective */
+			  if (summary->Profile_BitsDefining[4] & PROF_us_rxtimeARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  *short_ptr = (short)profile->params[1].rxtime[i];
+				  offset += 2;
+				}
+			    }
+			  if (summary->Profile_BitsDefining[4] & PROF_ss_rxgainARRAY)
+			    {
+			      for (i = 0; i < 20; i++)
+				{
+				  short_ptr = (short *) &buffer[offset];
+				  *short_ptr = (short)profile->params[1].rxgain[i];
+				  offset += 2;
+				}
+			    }
+
+			} /* if stbd is present */
+		    }	
+		    
+		  if (summary->Profile_BitsDefining[5])
+		    {
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerDepth)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->transducerDepth;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerPitch)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->transducerDepth;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerRoll)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->transducerDepth;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerHeading)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->transducerDepth;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerLatOffset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->transducerDepth;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerLongOffset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->transducerDepth;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerSlantRange)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->transducerDepth;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerAcross)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->transducerDepth;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_si_transducerAlong)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->transducerDepth;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[5] & PROF_ui_transducerBearing)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->transducerDepth;
+			  offset += 4;
+			}
+		    }
+		    
+		  if (summary->Profile_BitsDefining[6])
+		    {
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_sonar_settings_offset)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->sonar_settings_offset;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_ping_number)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->ping_number;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_multi_ping_sequence)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->multi_ping_sequence;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_num_beams)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->num_beams;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_uc_layer_compensation_flag)
+			{
+			  buffer[offset]= profile->layer_compensation_flag;
+			  offset += 1;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_f_bs_beam_position)
+			{
+			  float_ptr = (float *) &buffer[offset];
+			  *float_ptr = profile->bs_beam_position;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_bs_control_flags)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->bs_control_flags;
+			  offset += 4;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_bs_num_beams_per_side)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->bs_num_beams_per_side;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_us_bs_current_beam_number)
+			{
+			  short_ptr = (short *) &buffer[offset];
+			  *short_ptr = (short)profile->bs_current_beam_number;
+			  offset += 2;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_uc_bs_sample_descriptor)
+			{
+			  buffer[offset] = profile->bs_sample_descriptor;
+			  offset += 1;
+			}
+		      if (summary->Profile_BitsDefining[6] & PROF_ui_snippet_sample_descriptor)
+			{
+			  int_ptr = (int *) &buffer[offset];
+			  *int_ptr = profile->snippet_sample_descriptor;
+			  offset += 4;
+			}
+		    }
+#endif
+/* Done V4 Profile */
 		}		
     
 	    /* write profile to file */
@@ -3430,6 +7220,591 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    }
 #endif
 			}
+/* V4 */			
+			  else if (*fileVersion == 4)
+			{
+			
+#ifdef BYTESWAPPED
+			if (summary->Beam_BitsDefining[0])
+			{
+			if (summary->Profile_BitsDefining[0] & BEAM_ui_status)
+			{
+				buffer[offset] = beam->status; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_uc_scaling_factor)
+			{
+				buffer[offset] = beam->scaling_factor; offset+=1;
+			}
+			
+			/* Scale Factor for depth / distance, etc */
+			ScaleFactor = pow(2.0,(double)beam->scaling_factor);
+			beam->observedDepth = beam->observedDepth / ScaleFactor;
+			beam->acrossTrack = beam->acrossTrack / ScaleFactor;
+			beam->alongTrack = beam->alongTrack / ScaleFactor;
+			beam->processedDepth = beam->processedDepth / ScaleFactor;
+			beam->depthAccuracy = beam->depthAccuracy / ScaleFactor;
+															
+			if (summary->Beam_BitsDefining[0] & BEAM_si_observedDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->observedDepth);
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_acrossTrack)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->acrossTrack);
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_alongTrack)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->alongTrack);
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_latOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->latOffset); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_longOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->longOffset); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_processedDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->processedDepth);
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_timeOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->timeOffset); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_depthAccuracy)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->depthAccuracy);
+				offset+=2;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[1])
+			{
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_reflectivity)
+			{
+				buffer[offset] = beam->reflectivity; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_sc_Q_factor)
+			{
+				buffer[offset] = beam->Q_factor; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_beam_no)
+			{
+				buffer[offset] = beam->beam_no; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_freq)
+			{
+				buffer[offset] = beam->freq; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_calibratedBackscatter)
+			{
+				buffer[offset] = beam->calibratedBackscatter; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_mindB)
+			{
+				buffer[offset] = beam->mindB; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_maxdB)
+			{
+				buffer[offset] = beam->maxdB; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_pseudoAngleIndependentBackscatter)
+			{
+				buffer[offset] = beam->pseudoAngleIndependentBackscatter; offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[2])
+			{
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_range)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->range); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_no_samples)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->no_samples); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_offset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->offset); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_si_centre_no)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->centre_no); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_sample_unit)
+			{
+				buffer[offset] = beam->sample_unit; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_sample_interval)
+			{	
+				buffer[offset] = beam->sample_interval; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_dummy0)
+			{
+				buffer[offset] = beam->dummy[0]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_dummy1)
+			{
+				buffer[offset] = beam->dummy[1]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_samp_win_length)
+			{
+				buffer[offset] = beam->samp_win_length; offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[3])
+			{
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_beam_depress_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->beam_depress_angle); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_us_beam_heading_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->beam_heading_angle); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_us_other_range)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->other_range); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_Tx_steer)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->Tx_steer); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_Rc_steer)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->Rc_steer); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_uc_TxSector)
+			{
+				buffer[offset] = beam->TxSector; offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[4])
+			{
+			if (summary->Beam_BitsDefining[4] & BEAM_ui_timestampOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->timestampOffset); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_RAMAN)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->no_RAMAN); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_IR)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->no_IR); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_GAPD)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->no_GAPD); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_PMT)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->no_PMT); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_uc_prim_depth_conf)
+			{	
+				buffer[offset] = beam->prim_depth_conf; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_uc_seco_depth_conf)
+			{
+				buffer[offset] = beam->seco_depth_conf; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_ss_scan_azimuth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->scan_azimuth); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_nadir_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->nadir_angle); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_secondaryDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->secondaryDepth); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_ss_wave_height)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)mb_swap_short((short)beam->wave_height); offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_opaqueDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->opaqueDepth_PMT); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_extinctionDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->extinctionDepth_PMT); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_pimDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->pimDepth_PMT); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_opaqueDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->opaqueDepth_GAPD); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_extinctionDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->extinctionDepth_GAPD); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_pimDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->pimDepth_GAPD); offset+=4;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[5])
+			{
+			if (summary->Beam_BitsDefining[5] & BEAM_f_twtt)
+			{
+				float_ptr = (float *)&buffer[offset];
+				mb_swap_float(float_ptr);
+				*float_ptr = beam->twtt; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_ui_snippet_first_sample)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->snippet_first_sample); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_ui_snippet_last_sample)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = mb_swap_int(beam->snippet_last_sample); offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_f_intensity)
+			{
+				float_ptr = (float *) &buffer[offset];
+				mb_swap_float(float_ptr);
+				*float_ptr = beam->intensity;  offset+=4;
+			}
+			}
+			
+#else
+			if (summary->Beam_BitsDefining[0])
+			{
+			if (summary->Profile_BitsDefining[0] & BEAM_ui_status)
+			{
+				buffer[offset] = beam->status; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_uc_scaling_factor)
+			{
+				buffer[offset] = scaling_factor; offset+=1;
+			}
+			/* Scale Factor for depth / distance, etc */
+			ScaleFactor = pow(2.0,(double)scaling_factor);
+			
+			if (summary->Beam_BitsDefining[0] & BEAM_si_observedDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->observedDepth;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_acrossTrack)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)(beam->acrossTrack / ScaleFactor);
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_alongTrack)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->alongTrack;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_latOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->latOffset; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_longOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->longOffset; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_processedDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->processedDepth;
+				offset+=2;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_timeOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->timeOffset; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[0] & BEAM_si_depthAccuracy)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->depthAccuracy;
+				offset+=2;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[1])
+			{
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_reflectivity)
+			{
+				buffer[offset] = beam->reflectivity; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_sc_Q_factor)
+			{
+				buffer[offset] = beam->Q_factor; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_beam_no)
+			{
+				buffer[offset] = beam->beam_no; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_freq)
+			{
+				buffer[offset] = beam->freq; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_calibratedBackscatter)
+			{
+				buffer[offset] = beam->calibratedBackscatter; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_mindB)
+			{
+				buffer[offset] = beam->mindB; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_maxdB)
+			{
+				buffer[offset] = beam->maxdB; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[1] & BEAM_uc_pseudoAngleIndependentBackscatter)
+			{
+				buffer[offset] = beam->pseudoAngleIndependentBackscatter; offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[2])
+			{
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_range)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->range; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_no_samples)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->no_samples; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_ui_offset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->offset; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_si_centre_no)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->centre_no; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_sample_unit)
+			{
+				buffer[offset] = beam->sample_unit; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_sample_interval)
+			{	
+				buffer[offset] = beam->sample_interval; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_dummy0)
+			{
+				buffer[offset] = beam->dummy[0]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_dummy1)
+			{
+				buffer[offset] = beam->dummy[1]; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[2] & BEAM_uc_samp_win_length)
+			{
+				buffer[offset] = beam->samp_win_length; offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[3])
+			{
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_beam_depress_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->beam_depress_angle; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_us_beam_heading_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->beam_heading_angle; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_us_other_range)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->other_range; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_Tx_steer)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->Tx_steer; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_ss_Rc_steer)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->Rc_steer; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[3] & BEAM_uc_TxSector)
+			{
+				buffer[offset] = beam->TxSector; offset+=1;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[4])
+			{
+			if (summary->Beam_BitsDefining[4] & BEAM_ui_timestampOffset)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->timestampOffset; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_RAMAN)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->no_RAMAN; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_IR)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->no_IR; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_GAPD)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->no_GAPD; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_no_PMT)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->no_PMT; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_uc_prim_depth_conf)
+			{	
+				buffer[offset] = beam->prim_depth_conf; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_uc_seco_depth_conf)
+			{
+				buffer[offset] = beam->seco_depth_conf; offset+=1;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_ss_scan_azimuth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->scan_azimuth; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_us_nadir_angle)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->nadir_angle; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_secondaryDepth)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->secondaryDepth; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_ss_wave_height)
+			{
+				short_ptr = (short *) &buffer[offset];
+				*short_ptr = (short)beam->wave_height; offset+=2;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_opaqueDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->opaqueDepth_PMT; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_extinctionDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->extinctionDepth_PMT; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_pimDepth_PMT)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->pimDepth_PMT; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_opaqueDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->opaqueDepth_GAPD; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_extinctionDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->extinctionDepth_GAPD; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[4] & BEAM_si_pimDepth_GAPD)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->pimDepth_GAPD; offset+=4;
+			}
+			}
+
+			if (summary->Beam_BitsDefining[5])
+			{
+			if (summary->Beam_BitsDefining[5] & BEAM_f_twtt)
+			{
+				float_ptr = (float *)&buffer[offset];
+				*float_ptr = beam->twtt; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_ui_snippet_first_sample)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->snippet_first_sample; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_ui_snippet_last_sample)
+			{
+				int_ptr = (int *) &buffer[offset];
+				*int_ptr = beam->snippet_last_sample; offset+=4;
+			}
+			if (summary->Beam_BitsDefining[5] & BEAM_f_intensity)
+			{
+				float_ptr = (float *) &buffer[offset];
+				*float_ptr = beam->intensity;  offset+=4;
+			}
+			}
+
+#endif
+/* End V4 Beam */
+			}
 		    }
 		}
     
@@ -3447,7 +7822,7 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		*error = MB_ERROR_WRITE_FAIL;
 		}
 
-	    /* now deal with sidescan in parallel file */
+       /* now deal with sidescan in parallel file */
 	    if (status == MB_SUCCESS 
 		&& mb_io_ptr->mbfp2 != NULL
 		&& (summary->toolType == MBSYS_HDCS_EM1000
@@ -3459,6 +7834,8 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    || summary->toolType == MBSYS_HDCS_EM121A
 		    || summary->toolType == MBSYS_HDCS_EM1002
 		    || summary->toolType == MBSYS_HDCS_EM120
+		    || summary->toolType == MBSYS_HDCS_EM122
+	            || summary->toolType == MBSYS_HDCS_EM302
 		    || summary->toolType == MBSYS_HDCS_SeaBat_8125
 		    || summary->toolType == MBSYS_HDCS_SeaBat_8111
 		    || summary->toolType == MBSYS_HDCS_SeaBat_8150
@@ -3540,3 +7917,4 @@ int mbr_wt_omghdcsj(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+

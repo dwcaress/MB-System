@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_plot.perl	6/18/93
 #    $Id$
 #
-#    Copyright (c) 1993-2009 by 
+#    Copyright (c) 1993-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -20,50 +20,50 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   mbm_plot
 #
 # Purpose:
-#   Macro to generate a shellscript of MB-System and GMT commands 
-#   which, when executed, will generate a Postscript plot of the 
-#   specified swath sonar data. The plot may include bathymetry color 
-#   fill (-G1), bathymetry color shaded relief (-G2), bathymetry 
-#   shaded with amplitudes (-G3), greyshade fill amplitude (-G4), 
+#   Macro to generate a shellscript of MB-System and GMT commands
+#   which, when executed, will generate a Postscript plot of the
+#   specified swath sonar data. The plot may include bathymetry color
+#   fill (-G1), bathymetry color shaded relief (-G2), bathymetry
+#   shaded with amplitudes (-G3), greyshade fill amplitude (-G4),
 #   greyshade fill sidescan (-G5), contoured bathymetry (-C),
 #   or annotated navigation. The plot may also include text
-#   labels and xy data in lines or symbols. Five different color 
-#   schemes are included. The plot will be scaled to fit on 
-#   the specified page size or, if the scale is user defined, 
-#   the page size will be chosen in accordance with the plot 
-#   size. The primary purpose of this macro is to allow the 
-#   simple, semi-automated production of nice looking maps with 
-#   a few command line arguments. For users seeking more control 
-#   over the plot appearance, a number of additional optional 
-#   arguments are provided. Truly ambitious users may edit the 
-#   plot shellscript to take advantage of MB-System and GMT 
+#   labels and xy data in lines or symbols. Five different color
+#   schemes are included. The plot will be scaled to fit on
+#   the specified page size or, if the scale is user defined,
+#   the page size will be chosen in accordance with the plot
+#   size. The primary purpose of this macro is to allow the
+#   simple, semi-automated production of nice looking maps with
+#   a few command line arguments. For users seeking more control
+#   over the plot appearance, a number of additional optional
+#   arguments are provided. Truly ambitious users may edit the
+#   plot shellscript to take advantage of MB-System and GMT
 #   capabilites not supported by this macro.
 #
-# Basic Usage: 
-#   mbm_plot -Fformat -Ifile [-Amagnitude[/azimuth | zero_level] 
-#            -C[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt] 
-#            -Gcolor_mode -H 
+# Basic Usage:
+#   mbm_plot -Fformat -Ifile [-Amagnitude[/azimuth | zero_level]
+#            -C[cont_int/col_int/tic_int/lab_int/tic_len/lab_hgt]
+#            -Gcolor_mode -H
 #            -N[time_tick/time_annot/date_annot/time_tick_len[/name_hgt]  |  F | FP]
-#            -Oroot -Ppagesize -S[color/shade] -T -Uorientation -V 
+#            -Oroot -Ppagesize -S[color/shade] -T -Uorientation -V
 #            -Wcolor_style[/pallette] ]
 #
 # Additional Options:
-#            [-Btickinfo -Dflipcolor/flipshade 
-#            -Jprojection[/scale | width] -Ltitle[:scale_label] 
+#            [-Btickinfo -Dflipcolor/flipshade
+#            -Jprojection[/scale | width] -Ltitle[:scale_label]
 #            -Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max\]n
 #
 # Miscellaneous Options:
-#            [-MGDgmtdef/value -MGFscale_loc 
+#            [-MGDgmtdef/value -MGFscale_loc
 #            -MGL[f][x]lon0/lat0/slat/length[m]
 #            -MGTx/y/size/angle/font/just/text
 #            -MGQdpi -MGU[/dx/dy/][label]
-#            -MMAfactor/mode/depth -MMByr/mo/da/hr/mn/sc 
-#            -MMDmode/scale[/min/max] -MMEyr/mo/da/hr/mn/sc 
-#            -MMNnplot -MMPpings -MMSspeedmin 
-#            -MMTtimegap -MMZalgorithm 
+#            -MMAfactor/mode/depth -MMByr/mo/da/hr/mn/sc
+#            -MMDmode/scale[/min/max] -MMEyr/mo/da/hr/mn/sc
+#            -MMNnplot -MMPpings -MMSspeedmin
+#            -MMTtimegap -MMZalgorithm
 #            -MNA[name_hgt[/P] | P]
 #            -MNP[pingnumber_tick/pingnumber_annot/pingnumber_tick_len]
-#            -MTCfill -MTDresolution -MTGfill -MTIriver[/pen] 
+#            -MTCfill -MTDresolution -MTGfill -MTIriver[/pen]
 #            -MTNborder[/pen] -MTSfill -MTWpen
 #            -MXGfill -MXIxy_file -MXSsymbol/size -MXWpen]
 #
@@ -310,14 +310,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 $program_name = "mbm_plot";
 
 # set page size database
-@page_size_names = (  
+@page_size_names = (
 	"a", "b", "c", "d", "e", "f", "e1",
-	"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", 
-	"b0", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", 
+	"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10",
+	"b0", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10",
 	"c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7",
 	"m1", "m2", "m3", "m4", "m5", "m6");
-%page_width_in = (  
-	"a",     8.50,   "b",    11.00,   "c",    17.00,   "d",    22.00, 
+%page_width_in = (
+	"a",     8.50,   "b",    11.00,   "c",    17.00,   "d",    22.00,
 	"e",    34.00,   "f",    28.00,   "e1",   44.00,   "a0",   33.11,
 	"a1",   23.39,   "a2",   16.54,   "a3",   11.69,   "a4",    8.27,
 	"a5",    5.83,   "a6",    4.13,   "a7",    2.91,   "a8",    2.05,
@@ -328,8 +328,8 @@ $program_name = "mbm_plot";
 	"c3",   12.80,   "c4",    9.00,   "c5",    6.40,   "c6",    4.50,
 	"c7",    3.20,   "m1",   54.00,   "m2",   54.00,   "m3",   54.00,
 	"m4",   60.00,   "m5",   60.00,   "m6",   60.00);
-%page_height_in = ( 
-	"a",    11.00,   "b",    17.00,   "c",    22.00,   "d",    34.00, 
+%page_height_in = (
+	"a",    11.00,   "b",    17.00,   "c",    22.00,   "d",    34.00,
 	"e",    44.00,   "f",    40.00,   "e1",   68.00,   "a0",   46.81,
 	"a1",   33.11,   "a2",   23.39,   "a3",   16.54,   "a4",   11.69,
 	"a5",    8.27,   "a6",    5.83,   "a7",    4.13,   "a8",    2.91,
@@ -340,7 +340,7 @@ $program_name = "mbm_plot";
 	"c3",   18.00,   "c4",   12.80,   "c5",    9.00,   "c6",    6.40,
 	"c7",    4.50,   "m1",   72.00,   "m2",   84.00,   "m3",   96.00,
 	"m4",   72.00,   "m5",   84.00,   "m6",   96.00);
-%page_anot_font = ( 
+%page_anot_font = (
 	"a",     8,   "b",    12,   "c",    16,   "d",    24,
 	"e",    24,   "f",    24,   "e1",   24,   "a0",   24,
 	"a1",   24,   "a2",   16,   "a3",   12,   "a4",    8,
@@ -365,7 +365,7 @@ $program_name = "mbm_plot";
 	"c7",    8,   "m1",   30,   "m2",   30,   "m3",   30,
 	"m4",   30,   "m5",   30,   "m6",   30);
 %page_gmt_name =     (
-	"a",     "archA",   "b",     "archB",   "c",     "archC",   "d",     "archD", 
+	"a",     "archA",   "b",     "archB",   "c",     "archC",   "d",     "archD",
 	"e",     "archE",   "f",     "B0",      "e1",    "B0",      "a0",    "A0",
 	"a1",    "A1",      "a2",    "A2",      "a3",    "A3",      "a4",    "A4",
 	"a5",    "A5",      "a6",    "A6",      "a7",    "A7",      "a8",    "A8",
@@ -374,11 +374,11 @@ $program_name = "mbm_plot";
 	"b6",    "A6",      "b7",    "A7",      "b8",    "A8",      "b9",    "A9",
 	"b10",   "A10",     "c0",    "B0",      "c1",    "B1",      "c2",    "B2",
 	"c3",    "B3",      "c4",    "B4",      "c5",    "B5",      "c6",    "B6",
-	"c7",    "B7",      "m1", "Custom_4241x5655",    "m2",   "Custom_4241x6578",   
-	"m3",   "Custom_4241x7540",  "m4",   "Custom_4712x5655",   
+	"c7",    "B7",      "m1", "Custom_4241x5655",    "m2",   "Custom_4241x6578",
+	"m3",   "Custom_4241x7540",  "m4",   "Custom_4712x5655",
 	"m5",   "Custom_4712x6578",  "m6",   "Custom_4712x7540");
 %xpsview_mem =     (
-	"a",     "4m",   "b",     "6m",   "c",     "8m",   "d",    "12m", 
+	"a",     "4m",   "b",     "6m",   "c",     "8m",   "d",    "12m",
 	"e",    "16m",   "f",    "16m",   "e1",   "16m",   "a0",   "16m",
 	"a1",   "12m",   "a2",    "8m",   "a3",    "6m",   "a4",    "4m",
 	"a5",    "4m",   "a6",    "4m",   "a7",    "4m",   "a8",    "4m",
@@ -395,10 +395,10 @@ $ncpt = 11;
 
 # define color pallettes
 
-@color_pallette_names = (   "Haxby Colors", 
-			    "High Intensity Colors", 
-			    "Low Intensity Colors", 
-			    "Grayscale", 
+@color_pallette_names = (   "Haxby Colors",
+			    "High Intensity Colors",
+			    "Low Intensity Colors",
+			    "Grayscale",
 			    "Uniform Gray",
 			    "Uniform Black",
 			    "Uniform White");
@@ -450,10 +450,10 @@ $ncpt = 11;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
-	if ($line =~ 
+	if ($line =~
 		/^grdinfo\s+(\S+)\s+\S+/)
 		{
-		($gmt_version) = $line =~ 
+		($gmt_version) = $line =~
 			/^grdinfo\s+(\S+)\s+\S+/;
 		}
 	}
@@ -558,7 +558,7 @@ elsif (! -e $file_data)
 	}
 
 # tell the world we got started
-if ($verbose) 
+if ($verbose)
 	{
 	print "\nRunning $program_name...\n";
 	}
@@ -606,7 +606,7 @@ if ($misc)
 		# set GMT default values
 		if ($cmd =~ /^[Gg][Dd]./)
 			{
-			($gmt_def) = $cmd =~ 
+			($gmt_def) = $cmd =~
 				/^[Gg][Dd](\S+)/;
 			push(@gmt_defs, $gmt_def);
 			}
@@ -614,14 +614,14 @@ if ($misc)
 		# set color scale location
 		if ($cmd =~ /^[Gg][Ff]./)
 			{
-			($scale_loc) = $cmd =~ 
+			($scale_loc) = $cmd =~
 				/^[Gg][Ff](\S+)/;
 			}
 
 		# set map scale
 		if ($cmd =~ /^[Gg][Ll]./)
 			{
-			($length_scale) = $cmd =~ 
+			($length_scale) = $cmd =~
 				/^[Gg][Ll](\S+)/;
 			}
 
@@ -634,12 +634,12 @@ if ($misc)
 		# set text labels
 		if ($cmd =~ /^[Gg][Tt]./)
 			{
-			($tx, $ty, $tsize, $tangle, $font, $just, $txt) 
+			($tx, $ty, $tsize, $tangle, $font, $just, $txt)
 			    = $cmd
 			    =~ /^[Gg][Tt](\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(.+)/;
 			if ($txt)
 			    {
-			    ($text_info) = $cmd =~ 
+			    ($text_info) = $cmd =~
 				/^[Gg][Tt](.*)/;
 			    push(@text, $text_info);
 			    }
@@ -759,12 +759,12 @@ if ($misc)
 			$pingnumber_mode = 1;
 			if ($pingnumber_control =~ /\S+\/\S+\/\S+/)
 				{
-				($pingnumber_tick, $pingnumber_annot, $pingnumber_tick_len) 
+				($pingnumber_tick, $pingnumber_annot, $pingnumber_tick_len)
 						= $pingnumber_control =~  /(\S+)\/(\S+)\/(\S+)/;
 				}
 			elsif ($pingnumber_control =~ /\S+\/\S+/)
 				{
-				($pingnumber_tick, $pingnumber_annot) 
+				($pingnumber_tick, $pingnumber_annot)
 						= $pingnumber_control =~  /(\S+)\/(\S+)/;
 				$pingnumber_tick_len = 0.10;
 				}
@@ -879,11 +879,11 @@ if ($misc)
 				{
 				$xysegment = "Y";
 				}
-			elsif ($xysegment ne "N") 
+			elsif ($xysegment ne "N")
 				{
 				$xysegment = "N";
 				}
-			else 
+			else
 				{
 				$xysegment = "Y";
 				}
@@ -910,7 +910,7 @@ if (!$root)
 	}
 
 # get format if needed
-if (!$format) 
+if (!$format)
 	{
 	$line = `mbformat -I $file_data -L`;
 	($format) = $line =~ /(\S+)/;
@@ -941,9 +941,9 @@ if ($color_control)
 		}
 	elsif ($color_control =~ /\S+\/\S+\/\S+/)
 		{
-		($color_style, $color_pallette, $ncolors) 
+		($color_style, $color_pallette, $ncolors)
 			= $color_control =~  /(\S+)\/(\S+)\/(\S+)/;
-		if ($color_pallette < 1 
+		if ($color_pallette < 1
 			|| $color_pallette > 7)
 			{
 			$color_pallette = 1;
@@ -957,7 +957,7 @@ if ($color_control)
 		{
 		($color_style, $color_pallette) = $color_control
 			=~  /(\S+)\/(\S+)/;
-		if ($color_pallette < 1 
+		if ($color_pallette < 1
 			|| $color_pallette > 7)
 			{
 			$color_pallette = 1;
@@ -988,7 +988,7 @@ if ($navigation_control && $navigation_control =~ /\S+\/\S+\/\S+\/\S+/)
 	{
 	$navigation_mode = 1;
 	}
-elsif ($navigation_control && ($navigation_control =~ /FP/ 
+elsif ($navigation_control && ($navigation_control =~ /FP/
 				|| $navigation_control =~ /fp/))
 	{
 	$navigation_mode = 1;
@@ -997,7 +997,7 @@ elsif ($navigation_control && ($navigation_control =~ /FP/
 	$navigation_control = "0.25/1/4/0.15";
 	$nav_name_hgt = "0.15";
 	}
-elsif ($navigation_control && ($navigation_control =~ /F/ 
+elsif ($navigation_control && ($navigation_control =~ /F/
 				|| $navigation_control =~ /f/))
 	{
 	$navigation_mode = 1;
@@ -1012,8 +1012,8 @@ elsif ($navigation_control)
 		{
 		$navigation_mode = 1;
 		$name_mode = 1;
-		($nav_time_tick, $nav_time_annot, 
-				$nav_date_annot, $nav_tick_size, $nav_name_hgt, $name_perp) 
+		($nav_time_tick, $nav_time_annot,
+				$nav_date_annot, $nav_tick_size, $nav_name_hgt, $name_perp)
 				= $navigation_control =~  /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 		}
 	elsif ($navigation_control =~ /\S+\/\S+\/\S+\/\S+\/\S+/)
@@ -1021,20 +1021,20 @@ elsif ($navigation_control)
 		$navigation_mode = 1;
 		$name_mode = 1;
 		$name_perp = 0;
-		($nav_time_tick, $nav_time_annot, 
-				$nav_date_annot, $nav_tick_size, $nav_name_hgt) 
+		($nav_time_tick, $nav_time_annot,
+				$nav_date_annot, $nav_tick_size, $nav_name_hgt)
 				= $navigation_control =~  /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 		}
 	elsif ($navigation_control =~ /\S+\/\S+\/\S+/)
 		{
-		($nav_time_tick, $nav_time_annot, 
-			$nav_date_annot) 
+		($nav_time_tick, $nav_time_annot,
+			$nav_date_annot)
 			= $navigation_control =~  /(\S+)\/(\S+)\/(\S+)/;
 		$nav_tick_size = 0.15;
 		}
 	elsif ($navigation_control =~ /\S+\/\S+/)
 		{
-		($nav_time_tick, $nav_time_annot) 
+		($nav_time_tick, $nav_time_annot)
 			= $navigation_control =~  /(\S+)\/(\S+)/;
 		$nav_date_annot = 100000;
 		$nav_tick_size = 0.15;
@@ -1047,7 +1047,7 @@ elsif ($navigation_control)
 		$nav_tick_size = 0.15;
 		}
 	$navigation_mode = 1;
-	$navigation_control = "$nav_time_tick" 
+	$navigation_control = "$nav_time_tick"
 			. "/" . "$nav_time_annot"
 			. "/" . "$nav_date_annot"
 			. "/" . "$nav_tick_size";
@@ -1058,7 +1058,7 @@ elsif ($navigation_mode)
 	}
 if ($pingnumber_mode)
 	{
-	$pingnumber_control = "$pingnumber_tick" 
+	$pingnumber_control = "$pingnumber_tick"
 			. "/" . "$pingnumber_annot"
 			. "/" . "$pingnumber_tick_len";
 	}
@@ -1128,7 +1128,7 @@ if ($ENV{"MB_PS_VIEWER"})
 	{
 	$ps_viewer = $ENV{"MB_PS_VIEWER"};
 	}
-	
+
 # check for .mbio_defaults file
 $home = $ENV{"HOME"};
 $mbdef = "$home/.mbio_defaults";
@@ -1194,7 +1194,7 @@ else
 		$line = shift @mbdatalist;
 		if ($line =~ /(\S+)\s+(\S+)/)
 			{
-			($file_mb,$format_mb) = 
+			($file_mb,$format_mb) =
 				$line =~ /(\S+)\s+(\S+)/;
 			push(@files_data, $file_mb);
 			push(@formats, $format_mb);
@@ -1210,7 +1210,7 @@ foreach $file_mb (@files_data)
 	$file_inf = $file_mb . ".inf";
 	if (-r $file_inf && !$mb_btime && !$mb_etime)
 		{
-		if ($verbose) 
+		if ($verbose)
 			{
 			print "Reading mbinfo output from file $file_inf...\n";
 			}
@@ -1221,17 +1221,17 @@ foreach $file_mb (@files_data)
 				push(@mbinfo, $line);
 				if ($line =~ /^Number of Records:\s+(\S+)/)
 					{
-					($nrec_f) = 
+					($nrec_f) =
 						$line =~ /^Number of Records:\s+(\S+)/;
 					}
 				if ($line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
 					{
-					($xmin_f,$xmax_f) = 
+					($xmin_f,$xmax_f) =
 						$line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
 					}
 				if ($line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
 					{
-					($ymin_f,$ymax_f) = 
+					($ymin_f,$ymax_f) =
 						$line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
 					}
 				}
@@ -1256,9 +1256,9 @@ foreach $file_mb (@files_data)
 			    $use_inf = 1;
 			    }
 			elsif ($nrec_f > 0 &&
-			    ($xmin_f < $xmin 
+			    ($xmin_f < $xmin
 				|| $xmax_f > $xmax
-				|| $ymin_f < $ymin 
+				|| $ymin_f < $ymin
 				|| $ymax_f > $ymax)
 			    && $color_mode)
 			    {
@@ -1271,10 +1271,10 @@ foreach $file_mb (@files_data)
 			}
 		}
 
-	# if .inf file not accessible or suitable run mbinfo directly 
+	# if .inf file not accessible or suitable run mbinfo directly
 	if (!$use_inf)
 		{
-		if ($verbose) 
+		if ($verbose)
 			{
 			print "Running mbinfo on file $file_mb...\n";
 			}
@@ -1289,43 +1289,43 @@ foreach $file_mb (@files_data)
 		@mbinfo = `mbinfo -F$formats[$cnt] -I$file_mb $time_info $bounds_info -G`;
 		}
 
-	# now parse the mbinfo input 
+	# now parse the mbinfo input
 	$nrec_f = 0;
 	while (@mbinfo)
 		{
 		$line = shift @mbinfo;
 		if ($line =~ /^Number of Records:\s+(\S+)/)
 			{
-			($nrec_f) = 
+			($nrec_f) =
 				$line =~ /^Number of Records:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
 			{
-			($xmin_f,$xmax_f) = 
+			($xmin_f,$xmax_f) =
 				$line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
 			{
-			($ymin_f,$ymax_f) = 
+			($ymin_f,$ymax_f) =
 				$line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/)
 			{
-			($zmin_f,$zmax_f) = 
+			($zmin_f,$zmax_f) =
 			$line =~ /^Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/)
 			{
-			($amin_f,$amax_f) = 
+			($amin_f,$amax_f) =
 			$line =~ /^Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/)
 			{
-			($smin_f,$smax_f) = 
+			($smin_f,$smax_f) =
 			$line =~ /^Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/;
 			}
 		}
-			
+
 	# reset longitude min max if they conflict with $lonflip
 	if ($lonflip == 0
 		&& (($xmin_f < -180.0 && $xmax_f > -180.0)
@@ -1335,13 +1335,13 @@ foreach $file_mb (@files_data)
 		$xmax_f = 180.0;
 		}
 	elsif ($lonflip == 0
-		&& $xmin_f < -180.0) 
+		&& $xmin_f < -180.0)
 		{
 		$xmin_f = $xmin_f + 360.0;
 		$xmax_f = $xmax_f + 360.0;
 		}
 	elsif ($lonflip == 0
-		&& $xmax_f > 180.0) 
+		&& $xmax_f > 180.0)
 		{
 		$xmin_f = $xmin_f - 360.0;
 		$xmax_f = $xmax_f - 360.0;
@@ -1359,13 +1359,13 @@ foreach $file_mb (@files_data)
 		$xmax_f = $xmax_f - 360.0;
 		}
 	elsif ($lonflip == 1
-		&& $xmin_f < 0.0 && $xmax_f > 0.0) 
+		&& $xmin_f < 0.0 && $xmax_f > 0.0)
 		{
 		$xmin_f = 0.0;
 		$xmax_f = 360.0;
 		}
 	elsif ($lonflip == 1
-		&& $xmin_f < 0.0) 
+		&& $xmin_f < 0.0)
 		{
 		$xmin_f = $xmin_f + 360.0;
 		$xmax_f = $xmax_f + 360.0;
@@ -1446,7 +1446,7 @@ if ($bounds)
 	{
 	if ($bounds =~ /^\S+\/\S+\/\S+\/\S+r$/)
 		{
-		($xmin_raw,$ymin_raw,$xmax_raw,$ymax_raw) = $bounds =~ 
+		($xmin_raw,$ymin_raw,$xmax_raw,$ymax_raw) = $bounds =~
 			/^(\S+)\/(\S+)\/(\S+)\/(\S+)r$/;
 		$xmin = &GetDecimalDegrees($xmin_raw);
 		$xmax = &GetDecimalDegrees($xmax_raw);
@@ -1457,7 +1457,7 @@ if ($bounds)
 		}
 	elsif ($bounds =~ /^\S+\/\S+\/\S+\/\S+$/)
 		{
-		($xmin_raw,$xmax_raw,$ymin_raw,$ymax_raw) = $bounds =~ 
+		($xmin_raw,$xmax_raw,$ymin_raw,$ymax_raw) = $bounds =~
 			/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 		$xmin = &GetDecimalDegrees($xmin_raw);
 		$xmax = &GetDecimalDegrees($xmax_raw);
@@ -1499,7 +1499,7 @@ else
 		{
 		$ymax = 89.0;
 		}
-	
+
 	# get aspect ratio in approximate real distances
 	$C1 = 111412.84;
 	$C2 = -93.5;
@@ -1510,13 +1510,13 @@ else
 	$C7 = 0.0023;
 	$DTR = 3.14159265358979323846 / 180.0;
 	$radlat = 0.5 * ($ymax + $ymin) * $DTR;
-	$mtodeglat = 1./abs($C4 + $C5*cos(2*$radlat) 
+	$mtodeglat = 1./abs($C4 + $C5*cos(2*$radlat)
 				+ $C6*cos(4*$radlat) + $C7*cos(6*$radlat));
-	$mtodeglon = 1./abs($C1*cos($radlat) + $C2*cos(3*$radlat) 
+	$mtodeglon = 1./abs($C1*cos($radlat) + $C2*cos(3*$radlat)
 				+ $C3*cos(5*$radlat));
 	$dx = ($xmax - $xmin) / $mtodeglon;
 	$dy = ($ymax - $ymin) / $mtodeglat;
-	
+
 	if ($dy/$dx > 2.0)
 		{
 		$delx = (0.5 * (0.5 * $dy - $dx)) * $mtodeglon;
@@ -1544,7 +1544,7 @@ else
 # set the relevent page width and height
 &GetPageSize;
 
-# get user constraints on map scale 
+# get user constraints on map scale
 if ($map_scale)
 	{
 	# sets $plot_scale or $plot_width if possible
@@ -1677,8 +1677,8 @@ if (($use_scale && $plot_scale) || ($use_width && $plot_width))
 				$width_max = $width_max_landscape;
 				$height_max = $height_max_landscape;
 				}
-			if (!$good_page && 
-				$plot_width <= $width_max 
+			if (!$good_page &&
+				$plot_width <= $width_max
 				&& $plot_height <= $height_max)
 				{
 				$good_page = 1;
@@ -1834,9 +1834,9 @@ elsif ($use_width)
 	}
 
 # place the origin so plot is more or less centered
-$xoffset = ($width - $plot_width 
+$xoffset = ($width - $plot_width
 	- $space_left - $space_right) / 2 + $space_left;
-$yoffset = ($height - $plot_height 
+$yoffset = ($height - $plot_height
 	- $space_bottom - $space_top) / 2 + $space_bottom;
 
 # get plot degree annotation for geographic maps
@@ -1881,7 +1881,7 @@ elsif ($scale_loc eq "r")
 	{
 	$colorscale_length = $plot_height;
 	$colorscale_thick = 0.013636364 * $page_height_in{$pagesize};
-	$colorscale_offx = $plot_width 
+	$colorscale_offx = $plot_width
 		+ 0.0909 * $page_height_in{$pagesize};
 	$colorscale_offy = 0.5*$plot_height;
 	$colorscale_vh = "v";
@@ -1907,7 +1907,7 @@ else
 # figure out reasonable bathymetry contour intervals
 $dmin = $zmin;
 $dmax = $zmax;
-$dd = ($dmax - $dmin); 
+$dd = ($dmax - $dmin);
 $contour_int = 0.0;
 if ($dd > 0)
 	{
@@ -1939,7 +1939,7 @@ elsif ($color_mode == 5)
 	$dmin = $smin_data;
 	$dmax = $smax_data;
 	}
-$dd = ($dmax - $dmin); 
+$dd = ($dmax - $dmin);
 $color_int = 0.0;
 if ($dd > 0)
 	{
@@ -1967,7 +1967,7 @@ if ($color_mode && !$no_nice_color_int && $dd > 0)
 	$start_int = $color_int / 2;
 	$multiplier = int($dd / ($ncolors_use - 1) / $start_int) + 1;
 	$color_int = $multiplier * $start_int;
-	if (($color_int * int($dmin / $color_int) 
+	if (($color_int * int($dmin / $color_int)
 		+ $color_int * ($ncolors_use - 1))
 		< $zmax)
 		{
@@ -1998,13 +1998,13 @@ if ($color_mode)
 		$xx = ($ncpt - 1) * $i / ($ncolors - 1);
 		$i1 = int($xx);
 		$i2 = $i1 + 1;
-		$red = $cptbr[$i1] 
+		$red = $cptbr[$i1]
 			+ ($cptbr[$i2] - $cptbr[$i1])
 			* ($xx - $i1) / ($i2 - $i1);
-		$green = $cptbg[$i1] 
+		$green = $cptbg[$i1]
 			+ ($cptbg[$i2] - $cptbg[$i1])
 			* ($xx - $i1) / ($i2 - $i1);
-		$blue = $cptbb[$i1] 
+		$blue = $cptbb[$i1]
 			+ ($cptbb[$i2] - $cptbb[$i1])
 			* ($xx - $i1) / ($i2 - $i1);
 		push (@cptr, $red);
@@ -2036,33 +2036,33 @@ if (!$contour_control && $contour_mode)
 	}
 elsif ($contour_control =~ /\S+\/\S+\/\S+\/\S+\/\S+\/\S+/)
 	{
-	($contour_int, $contour_color_int, $contour_tick_int, 
-		$contour_label_int, $contour_tick_len, 
-		$contour_label_hgt) 
+	($contour_int, $contour_color_int, $contour_tick_int,
+		$contour_label_int, $contour_tick_len,
+		$contour_label_hgt)
 		= $contour_control
 		=~ /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 	$contour_label_hgt = 0.1;
 	}
 elsif ($contour_control =~ /\S+\/\S+\/\S+\/\S+\/\S+/)
 	{
-	($contour_int, $contour_color_int, $contour_tick_int, 
-		$contour_label_int, $contour_tick_len) 
+	($contour_int, $contour_color_int, $contour_tick_int,
+		$contour_label_int, $contour_tick_len)
 		= $contour_control
 		=~ /(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 	$contour_label_hgt = 0.1;
 	}
 elsif ($contour_control =~ /\S+\/\S+\/\S+\/\S+/)
 	{
-	($contour_int, $contour_color_int, $contour_tick_int, 
-		$contour_label_int) 
-		= $contour_control 
+	($contour_int, $contour_color_int, $contour_tick_int,
+		$contour_label_int)
+		= $contour_control
 		=~ /(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 	$contour_tick_len = 0.01;
 	$contour_label_hgt = 0.1;
 	}
 elsif ($contour_control =~ /\S+\/\S+\/\S+/)
 	{
-	($contour_int, $contour_color_int, $contour_tick_int) 
+	($contour_int, $contour_color_int, $contour_tick_int)
 		= $contour_control =~ /(\S+)\/(\S+)\/(\S+)/;
 	$contour_label_int = $contour_color_int;
 	$contour_tick_len = 0.01;
@@ -2070,7 +2070,7 @@ elsif ($contour_control =~ /\S+\/\S+\/\S+/)
 	}
 elsif ($contour_control =~ /\S+\/\S+/)
 	{
-	($contour_int, $contour_color_int) 
+	($contour_int, $contour_color_int)
 		 = $contour_control =~ /(\S+)\/(\S+)/;
 	$contour_tick_int = $contour_color_int;
 	$contour_label_int = $contour_color_int;
@@ -2318,11 +2318,11 @@ if ($color_mode && $file_cpt)
 	}
 elsif ($color_mode)
 	{
-	# break data distribution up into equal size 
+	# break data distribution up into equal size
 	# regions using mbhistogram
 	if ($stretch_color)
 		{
-		if ($verbose) 
+		if ($verbose)
 			{
 			print "Running mbhistogram...\n";
 			}
@@ -2465,9 +2465,9 @@ elsif ($color_mode)
 # generate cpt file for amplitude shading
 if ($color_mode == 3 && $stretch_shade)
 	{
-	# break data distribution up into equal size 
+	# break data distribution up into equal size
 	# regions of Gaussian distribution using mbhistogram
-	if ($verbose) 
+	if ($verbose)
 		{
 		print "Running mbhistogram...\n";
 		}
@@ -2604,7 +2604,7 @@ if ($contour_mode || $navigation_mode)
 		{
 		printf FCMD "-Z$contour_algorithm \\\n\t";
 		}
-	elsif ($contour_mode && 
+	elsif ($contour_mode &&
 		($format == 41 || $format == 101
 		|| $format == 102))
 		{
@@ -2667,7 +2667,7 @@ if ($contour_mode || $navigation_mode)
 	}
 
 # do coastline plots
-if ($coast_control) 
+if ($coast_control)
 	{
 	printf FCMD "#\n# Make coastline data plot\n";
 	printf FCMD "echo Running pscoast...\n";
@@ -2690,7 +2690,7 @@ if ($coast_control)
 		{
 		printf FCMD "-I$coast_river \\\n\t";
 		}
-	for ($i = 0; $i < scalar(@coast_boundaries); $i++) 
+	for ($i = 0; $i < scalar(@coast_boundaries); $i++)
 		{
 		printf FCMD "-N$coast_boundaries[$i] \\\n\t";
 		}
@@ -2718,7 +2718,7 @@ if ($coast_control)
 	}
 
 # do xy plots
-for ($i = 0; $i < scalar(@xyfiles); $i++) 
+for ($i = 0; $i < scalar(@xyfiles); $i++)
 	{
 	printf FCMD "#\n# Make xy data plot\n";
 	printf FCMD "echo Running psxy...\n";
@@ -2762,9 +2762,9 @@ if ($color_mode && $color_pallette < 5)
 	printf FCMD "#\n# Make color scale\n";
 	printf FCMD "echo Running psscale...\n";
 	printf FCMD "psscale -C\$CPT_FILE \\\n\t";
-	printf FCMD "-D%.4f/%.4f/%.4f/%.4f%s \\\n\t", 
+	printf FCMD "-D%.4f/%.4f/%.4f/%.4f%s \\\n\t",
 		$colorscale_offx,$colorscale_offy,
-		$colorscale_length,$colorscale_thick, 
+		$colorscale_length,$colorscale_thick,
 		$colorscale_vh;
 	print FCMD "-B\":$slabel:\" \\\n\t";
 	if ($stretch_color)
@@ -2873,11 +2873,21 @@ elsif ($ps_viewer eq "gv")
 	{
 	if ($portrait)
 		{
-		$view_pageflag = "--orientation=portrait --media=BBox";
+		$pagescale = 11.0 / $page_height_in{$pagesize};
+		if ($pagescale > 1.0)
+			{
+			$pagescale = 1.0;
+			}
+		$view_pageflag = "--orientation=portrait --media=BBox -scale=$pagescale";
 		}
 	elsif ($landscape)
 		{
-		$view_pageflag = "--orientation=landscape --media=BBox";
+		$pagescale = 11.0 / $page_width_in{$pagesize};
+		if ($pagescale > 1.0)
+			{
+			$pagescale = 1.0;
+			}
+		$view_pageflag = "--orientation=landscape --media=BBox -scale=$pagescale";
 		}
 	}
 elsif ($ps_viewer eq "ggv")
@@ -2971,11 +2981,11 @@ if ($verbose)
 		if ($colorscale_vh eq "v")
 			{
 			print "    Vertical Color Scale\n";
-			} 
+			}
 		else
 			{
 			print "    Horizontal Color Scale\n";
-			} 
+			}
 		}
 	if (@text)
 		{
@@ -3022,9 +3032,9 @@ if ($verbose)
 	print "    Page width:               $width\n";
 	print "    Page height:              $height\n";
 	print "    Projection:               -J$projection$projection_pars\n";
-	printf "    Longitude min max:        %9.4f  %9.4f\n", 
+	printf "    Longitude min max:        %9.4f  %9.4f\n",
 		$xmin, $xmax;
-	printf "    Latitude min max:         %9.4f  %9.4f\n", 
+	printf "    Latitude min max:         %9.4f  %9.4f\n",
 		$ymin, $ymax;
 	print "    Axes annotation:          $axes\n";
 	if ($portrait)
@@ -3038,7 +3048,7 @@ if ($verbose)
 	if ($color_mode)
 		{
 		print "    Number of colors:         $ncolors\n";
-		print "    Color pallette:           ", 
+		print "    Color pallette:           ",
 			"@color_pallette_names[$color_pallette - 1]\n";
 		if ($color_style == 1)
 			{
@@ -3066,15 +3076,15 @@ if ($verbose)
 		{
 		print "    Data scale factor:        $data_scale\n";
 		}
-	printf "    Longitude min max:        %9.4f  %9.4f\n", 
+	printf "    Longitude min max:        %9.4f  %9.4f\n",
 		$xmin_data, $xmax_data;
-	printf "    Latitude min max:         %9.4f  %9.4f\n", 
+	printf "    Latitude min max:         %9.4f  %9.4f\n",
 		$ymin_data, $ymax_data;
-	printf "    Bathymetry min max:       %9.4g  %9.4g\n", 
+	printf "    Bathymetry min max:       %9.4g  %9.4g\n",
 		$zmin_data, $zmax_data;
-	printf "    Amplitude min max:        %9.4g  %9.4g\n", 
+	printf "    Amplitude min max:        %9.4g  %9.4g\n",
 		$amin_data, $amax_data;
-	printf "    Sidescan min max:         %9.4g  %9.4g\n", 
+	printf "    Sidescan min max:         %9.4g  %9.4g\n",
 		$smin_data, $smax_data;
 	print "\n  Primary Plotting Controls:\n";
 	if ($contour_mode)
@@ -3132,7 +3142,7 @@ if ($verbose)
 		{
 		printf "    Histogram stretch applied to amplitude shading\n";
 		}
-	if ($mb_btime || $mb_etime 
+	if ($mb_btime || $mb_etime
 		|| $mb_pings != 1 || $mb_speedmin
 		|| $mb_timegap)
 		{
@@ -3158,7 +3168,7 @@ if ($verbose)
 		{
 		print "    Time gap:                 $mb_timegap\n";
 		}
-	if ($swath_footprint || $swath_scale 
+	if ($swath_footprint || $swath_scale
 		|| $contour_nplot || $contour_algorithm)
 		{
 		print "\n  Miscellaneous Plotting Controls:\n";
@@ -3214,7 +3224,7 @@ if ($verbose)
 
 	if ($coast_control && $coast_boundaries)
 		{
-		for ($i = 0; $i < scalar(@coast_boundaries); $i++) 
+		for ($i = 0; $i < scalar(@coast_boundaries); $i++)
 			{
 			printf "    National Boundaries:      $coast_boundaries[$i]\n";
 			}
@@ -3224,15 +3234,15 @@ if ($verbose)
 		print "\n  Primary XY Plotting Controls:\n";
 		printf "    symbol     pen        fill      segment      file\n";
 		printf "    ------     ---        ----      -------      ----\n";
-		for ($i = 0; $i < scalar(@xyfiles); $i++) 
+		for ($i = 0; $i < scalar(@xyfiles); $i++)
 			{
-			printf "    %-10s %-10s %-10s %-10s %s\n", 
-				$xysymbols[$i], $xypens[$i], 
-				$xyfills[$i], $xysegments[$i], 
+			printf "    %-10s %-10s %-10s %-10s %s\n",
+				$xysymbols[$i], $xypens[$i],
+				$xyfills[$i], $xysegments[$i],
 				$xyfiles[$i];
 			}
 		}
-	if ($length_scale || $contour_anot_int 
+	if ($length_scale || $contour_anot_int
 		|| $contour_anot_int || $contour_cut
 		|| $contour_gap || $contour_tick
 		|| $contour_pen)
@@ -3285,7 +3295,7 @@ sub min {
 
 	# make local variables
 	local ($min);
-	
+
 	# get the minimum of the arguments
 	if ($_[0] < $_[1])
 		{
@@ -3302,7 +3312,7 @@ sub max {
 
 	# make local variables
 	local ($max);
-	
+
 	# get the minimum of the arguments
 	if ($_[0] > $_[1])
 		{
@@ -3340,7 +3350,7 @@ sub MBparsedatalist {
         	close FILEDATA;
         	}
 
-	# loop over datalists 
+	# loop over datalists
 	foreach $datalist (@datalists)
 		{
 		MBparsedatalist($datalist);
@@ -3356,25 +3366,25 @@ sub GetDecimalDegrees {
 	# deal with dd:mm:ss format
 	if ($_[0] =~ /^\S+:\S+:\S+$/)
 		{
-		($degrees, $minutes, $seconds) 
+		($degrees, $minutes, $seconds)
 			= $_[0] =~ /^(\S+):(\S+):(\S+)$/;
 		if ($degrees =~ /^-\S+/)
 			{
-			$dec_degrees = $degrees 
-				- $minutes / 60.0 
+			$dec_degrees = $degrees
+				- $minutes / 60.0
 				- $seconds / 3600.0;
 			}
 		else
 			{
-			$dec_degrees = $degrees 
-				+ $minutes / 60.0 
+			$dec_degrees = $degrees
+				+ $minutes / 60.0
 				+ $seconds / 3600.0;
 			}
 		}
 	# deal with dd:mm format
 	elsif ($_[0] =~ /^\S+:\S+$/)
 		{
-		($degrees, $minutes) 
+		($degrees, $minutes)
 			= $_[0] =~ /^(\S+):(\S+)$/;
 		if ($degrees =~ /^-\S+/)
 			{
@@ -3401,46 +3411,46 @@ sub GetPageSize {
 # deal with location of color scale
 if ($scale_loc eq "l")
 	{
-	$space_top =    1.50 * $page_height_in{$pagesize} 
+	$space_top =    1.50 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_bottom = 0.75 * $page_height_in{$pagesize} 
+	$space_bottom = 0.75 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_left =   2.50 * $page_height_in{$pagesize} 
+	$space_left =   2.50 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_right =  1.00 * $page_height_in{$pagesize} 
+	$space_right =  1.00 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
 	}
 elsif ($scale_loc eq "r")
 	{
-	$space_top =    1.50 * $page_height_in{$pagesize} 
+	$space_top =    1.50 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_bottom = 0.75 * $page_height_in{$pagesize} 
+	$space_bottom = 0.75 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_left =   1.00 * $page_height_in{$pagesize} 
+	$space_left =   1.00 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_right =  2.50 * $page_height_in{$pagesize} 
+	$space_right =  2.50 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
 	}
 elsif ($scale_loc eq "t")
 	{
-	$space_top =    2.75 * $page_height_in{$pagesize} 
+	$space_top =    2.75 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_bottom = 0.75 * $page_height_in{$pagesize} 
+	$space_bottom = 0.75 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_left =   1.00 * $page_height_in{$pagesize} 
+	$space_left =   1.00 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_right =  1.00 * $page_height_in{$pagesize} 
+	$space_right =  1.00 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
 	}
 else
 	{
-	$space_top =    1.50 * $page_height_in{$pagesize} 
+	$space_top =    1.50 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_bottom = 2.00 * $page_height_in{$pagesize} 
+	$space_bottom = 2.00 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_left =   1.00 * $page_height_in{$pagesize} 
+	$space_left =   1.00 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_right =  1.00 * $page_height_in{$pagesize} 
+	$space_right =  1.00 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
 	}
 
@@ -3471,7 +3481,7 @@ sub GetProjection {
 	($projection) = $map_scale =~ /^(\w)/;
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
 
-	# see if plot scale or plot width defined 
+	# see if plot scale or plot width defined
 	$use_scale = 0;
 	$use_width = 0;
 	$separator = "/";
@@ -3480,25 +3490,25 @@ sub GetProjection {
 	# Cassini Projection
 	if ($projection eq "c")
 		{
-		($plot_scale) = $map_scale =~ /^c\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^c\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "C")
 		{
-		($plot_width) = $map_scale =~ /^C\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^C\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Mercator Projection
 	elsif ($projection eq "m")
 		{
-		($plot_scale) = $map_scale =~ /^m(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^m(\S+)$/;
 		$use_scale = 1;
 		$separator = "";
 		}
 	elsif ($projection eq "M")
 		{
-		($plot_width) = $map_scale =~ /^M(\S+)$/; 
+		($plot_width) = $map_scale =~ /^M(\S+)$/;
 		$use_width = 1;
 		$separator = "";
 		}
@@ -3540,213 +3550,213 @@ sub GetProjection {
 	# Equidistant Cylindrical Projection
 	elsif ($projection eq "q")
 		{
-		($plot_scale) = $map_scale =~ /^q\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^q\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "Q")
 		{
-		($plot_width) = $map_scale =~ /^Q\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^Q\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Transverse Mercator Projection
 	elsif ($projection eq "t")
 		{
-		($plot_scale) = $map_scale =~ /^t\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^t\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "T")
 		{
-		($plot_width) = $map_scale =~ /^T\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^T\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Universal Transverse Mercator Projection
 	elsif ($projection eq "u")
 		{
-		($plot_scale) = $map_scale =~ /^u\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^u\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "U")
 		{
-		($plot_width) = $map_scale =~ /^U\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^U\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Basic Cylindrical Projection
 	elsif ($projection eq "y")
 		{
-		($plot_scale) = $map_scale =~ /^y\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^y\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "Y")
 		{
-		($plot_width) = $map_scale =~ /^Y\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^Y\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Lambert Azimuthal Projection
 	elsif ($projection eq "a")
 		{
-		($plot_scale) = $map_scale =~ /^a\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^a\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		$trial_value = "1:1";
 		$use_ratio = 1;
 		}
 	elsif ($projection eq "A")
 		{
-		($plot_width) = $map_scale =~ /^A\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^A\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Equidistant Projection
 	elsif ($projection eq "e")
 		{
-		($plot_scale) = $map_scale =~ /^e\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^e\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		$trial_value = "1:1";
 		$use_ratio = 1;
 		}
 	elsif ($projection eq "E")
 		{
-		($plot_width) = $map_scale =~ /^E\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^E\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Orthographic Projection
 	elsif ($projection eq "g")
 		{
-		($plot_scale) = $map_scale =~ /^g\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^g\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		$trial_value = "1:1";
 		$use_ratio = 1;
 		}
 	elsif ($projection eq "G")
 		{
-		($plot_width) = $map_scale =~ /^G\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^G\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# General Sterographic Projection
 	elsif ($projection eq "s")
 		{
-		($plot_scale) = $map_scale =~ /^s\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^s\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		$trial_value = "1:1";
 		$use_ratio = 1;
 		}
 	elsif ($projection eq "S")
 		{
-		($plot_width) = $map_scale =~ /^S\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^S\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Albers Projection
 	elsif ($projection eq "b")
 		{
-		($plot_scale) = $map_scale =~ /^b\S+\/\S+\/\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^b\S+\/\S+\/\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "B")
 		{
-		($plot_width) = $map_scale =~ /^B\S+\/\S+\/\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^B\S+\/\S+\/\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Lambert Conic Projection
 	elsif ($projection eq "l")
 		{
-		($plot_scale) = $map_scale =~ /^l\S+\/\S+\/\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^l\S+\/\S+\/\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "L")
 		{
-		($plot_width) = $map_scale =~ /^L\S+\/\S+\/\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^L\S+\/\S+\/\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Hammer Projection
 	elsif ($projection eq "h")
 		{
-		($plot_scale) = $map_scale =~ /^h\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^h\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "H")
 		{
-		($plot_width) = $map_scale =~ /^H\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^H\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Sinusoidal Projection
 	elsif ($projection eq "i")
 		{
-		($plot_scale) = $map_scale =~ /^i\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^i\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "I")
 		{
-		($plot_width) = $map_scale =~ /^I\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^I\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Eckert VI Projection
 	elsif ($projection eq "k")
 		{
-		($plot_scale) = $map_scale =~ /^k\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^k\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "K")
 		{
-		($plot_width) = $map_scale =~ /^K\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^K\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Robinson Projection
 	elsif ($projection eq "n")
 		{
-		($plot_scale) = $map_scale =~ /^n\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^n\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "N")
 		{
-		($plot_width) = $map_scale =~ /^N\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^N\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Winkel Tripel Projection
 	elsif ($projection eq "r")
 		{
-		($plot_scale) = $map_scale =~ /^r\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^r\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "R")
 		{
-		($plot_width) = $map_scale =~ /^R\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^R\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Mollweide Projection
 	elsif ($projection eq "w")
 		{
-		($plot_scale) = $map_scale =~ /^w\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^w\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "W")
 		{
-		($plot_width) = $map_scale =~ /^W\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^W\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Linear Polar Projection
 	elsif ($projection eq "p")
 		{
-		($plot_scale) = $map_scale =~ /^p(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^p(\S+)$/;
 		$use_scale = 1;
 		$separator = "";
 		}
 	elsif ($projection eq "P")
 		{
-		($plot_width) = $map_scale =~ /^P(\S+)$/; 
+		($plot_width) = $map_scale =~ /^P(\S+)$/;
 		$use_width = 1;
 		$separator = "";
 		}
@@ -3761,7 +3771,7 @@ sub GetProjection {
 			}
 		else
 			{
-			($plot_scale) = $map_scale =~ /^x(\S+)$/; 
+			($plot_scale) = $map_scale =~ /^x(\S+)$/;
 			}
 		$use_scale = 1;
 		$separator = "";
@@ -3775,7 +3785,7 @@ sub GetProjection {
 			}
 		else
 			{
-			($plot_width) = $map_scale =~ /^X(\S+)$/; 
+			($plot_width) = $map_scale =~ /^X(\S+)$/;
 			}
 		$use_width = 1;
 		$separator = "";
@@ -3879,7 +3889,7 @@ sub GetBaseTick {
 # the same arg.
 #
 # Usage:
-#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
 #			    # -c does not take arg. Sets opt_* as a
 #                           # side effect.
 
@@ -3887,7 +3897,6 @@ sub MBGetopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
@@ -3910,7 +3919,7 @@ sub MBGetopts {
 		    $rest = shift(@ARGV);
 		}
 		if (eval "\$opt_$first") {
-		    eval "\$opt_$first = \$opt_$first 
+		    eval "\$opt_$first = \$opt_$first
 				. \":\" . \$rest;";
 		}
 		else {

@@ -2,8 +2,7 @@
  *    The MB-system:	mbview_site.c	9/25/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2009(void **)&(shared.shareddata.routes[inew].disttopo), &error);
-		status = mb_reall by
+ *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

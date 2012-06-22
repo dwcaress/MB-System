@@ -2,7 +2,7 @@
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2009 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -383,6 +383,10 @@ fprintf(stderr,"do_mbeditviz_init\n");
 	    
 	/* set sensitivity of widgets that require an mbview instance to be active */
 	do_mbeditviz_update_gui( );
+		
+	/* set timer for function to keep updating the filelist */
+	timer_function_set = MB_NO;
+	do_mbeditviz_settimer();
 	
 if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_init status:%d\n", mbev_status);
@@ -587,6 +591,8 @@ do_mbeditviz_quit( Widget w, XtPointer client_data, XtPointer call_data)
 	char function_name[] = "do_mbeditviz_quit";
 	XmAnyCallbackStruct *acs;
 	acs = (XmAnyCallbackStruct*)call_data;
+	struct mbev_file_struct *file;
+	int	ifile;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -600,6 +606,7 @@ do_mbeditviz_quit( Widget w, XtPointer client_data, XtPointer call_data)
     
 if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_quit\n");
+	do_mbeditviz_message_on("Shutting down...");
 	
 	/* destroy any mbview window */
 	if (mbev_grid.status == MBEV_GRID_VIEWED)
@@ -615,9 +622,20 @@ fprintf(stderr,"do_mbeditviz_quit\n");
 	/* destroy the grid */
 	if (mbev_grid.status != MBEV_GRID_NONE)
 		mbeditviz_destroy_grid();
+		
+	/* loop over all files to be sure all files are unloaded */
+	for (ifile=0;ifile<mbev_num_files;ifile++)
+		{
+		file = &(mbev_files[ifile]);
+		if (file->load_status == MB_YES)
+			{
+			mbeditviz_unload_file(ifile);
+			}
+		}
 	
 	/* reset the gui */
 	do_mbeditviz_update_gui();
+	do_mbeditviz_message_off();		
 
 if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_quit status:%d\n", mbev_status);
@@ -1084,6 +1102,7 @@ do_mbeditviz_viewgrid()
 	int	mbv_route_view_mode;
 	int	mbv_nav_view_mode;
 	int	mbv_navdrape_view_mode;
+	int	mbv_vector_view_mode;
 	int	mbv_primary_colortable;
 	int	mbv_primary_colortable_mode;
 	double	mbv_primary_colortable_min;
@@ -1161,6 +1180,7 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 		mbv_route_view_mode = MBV_VIEW_OFF;
 		mbv_nav_view_mode = MBV_VIEW_OFF;
 		mbv_navdrape_view_mode = MBV_VIEW_OFF;
+		mbv_vector_view_mode = MBV_VIEW_OFF;
 		mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
 		mbv_primary_colortable_mode = MBV_COLORTABLE_NORMAL;
 		mbv_primary_colortable_min = mbev_grid.min;
@@ -1224,6 +1244,7 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 					mbv_route_view_mode,
 					mbv_nav_view_mode,
 					mbv_navdrape_view_mode,
+					mbv_vector_view_mode,
 					mbv_exageration,
 					mbv_modelelevation3d,
 					mbv_modelazimuth3d,
@@ -1656,7 +1677,7 @@ int do_mbeditviz_opendata(char *input_file_ptr, int format)
 	
 if (mbev_verbose > 0)
 fprintf(stderr,"do_mbeditviz_opendata:%s %d\n", input_file_ptr, format);
-	do_mbeditviz_message_on("Reading datalist...");
+	do_mbeditviz_message_on("Reading datalismbeditviz_unload_filet...");
 	
 	mbeditviz_open_data(input_file_ptr, format);
 	
@@ -1675,11 +1696,6 @@ do_mbeditviz_update_gui( )
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	char	string[MB_PATH_MAXLINE];
-	char	loadchar;
-	char	athchar;
-	char	atschar;
-	char	atachar;
-    	XmString *xstr;
 	int	i, j, k;
 
 	/* print input debug statements */
@@ -1722,44 +1738,10 @@ fprintf(stderr,"do_mbeditviz_update_gui status:%d\n", mbev_status);
 		mbev_grid.bounds[0],mbev_grid.bounds[1],mbev_grid.bounds[2],mbev_grid.bounds[3],
 		mbev_grid.dx,mbev_grid.nx,mbev_grid.ny);
 	set_label_multiline_string(label_mbeditviz_status, (String) string);
-	
+
 	/* build available file list */
-	XmListDeleteAllItems(list_filelist);
-	if (mbev_num_files > 0)
-		{
-		xstr = (XmString *) malloc(mbev_num_files * sizeof(XmString));
-		for (i=0;i<mbev_num_files;i++)
-			{
-			file = &(mbev_files[i]);
-			if (file->load_status == MB_YES)
-				loadchar = '*';
-			else
-				loadchar = ' ';
-			if (file->n_async_heading > 0)
-				athchar = 'H';
-			else
-				athchar = ' ';
-			if (file->n_async_sonardepth > 0)
-				atschar = 'S';
-			else
-				atschar = ' ';
-			if (file->n_async_attitude > 0)
-				atachar = 'A';
-			else
-				atachar = ' ';
-			sprintf(string,"%c%c%c%c %s", 
-				loadchar, athchar, atschar, atachar, 
-				mbev_files[i].name);
-   			xstr[i] = XmStringCreateLocalized(string);
- 			}
-    		XmListAddItems(list_filelist,xstr,mbev_num_files,0);
-		for (i=0;i<mbev_num_files;i++)
-			{
-    			XmStringFree(xstr[i]);
-    			}
-    		free(xstr);
-		}
-	
+	do_mbeditviz_update_filelist();
+		
 	/*set sensitivity */
 	if (mbev_grid.status == MBEV_GRID_NONE)
 		{
@@ -1818,6 +1800,183 @@ fprintf(stderr,"do_mbeditviz_update_gui status:%d\n", mbev_status);
 
 if (mbev_verbose > 0)
 fprintf(stderr,"return do_mbeditviz_update_gui status:%d\n", mbev_status);
+}
+/*---------------------------------------------------------------------------------------*/
+void
+do_mbeditviz_update_filelist( )
+{
+	char function_name[] = "do_mbeditviz_update_filelist";
+	struct mbev_file_struct *file;
+	int	update_filelist;
+	
+	char	string[MB_PATH_MAXLINE];
+	Cardinal ac;
+	Arg      args[256];
+	int	item_count;
+	int	*position_list = NULL;
+	int	position_list_save[MB_PATH_MAXLINE];
+	int	position_count = 0;
+	char	athchar;
+	char	atschar;
+	char	atachar;
+    	XmString *xstr;
+	char	*lockstrptr;
+	char	*lockedstr   = "<Locked>";
+	char	*unlockedstr = "        ";
+	char	*loadedstr   = "<loaded>";
+	char	*esfstrptr;
+	char	*esfyesstr   = "<esf>";
+	char	*esfnostr    = "     ";
+	int	i;
+	
+	/* swath file locking variables */
+	int	lock_status;
+	int	lock_error = MB_ERROR_NO_ERROR;
+	int	locked;
+	int	lock_purpose;
+	mb_path	lock_program;
+	mb_path lock_cpu;
+	mb_path lock_user;
+	char	lock_date[25];
+	
+	/* esf file checking variables */
+	int	esf_exists;
+	struct stat file_status;
+	int	fstat;
+	char    save_file[MB_PATH_MAXLINE];
+
+	/* print input debug statements */
+	if (mbev_verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		}
+    
+if (mbev_verbose > 0)
+fprintf(stderr,"do_mbeditviz_update_filelist status:%d\n", mbev_status);
+
+	/* check to see if anything has changed */
+	update_filelist = MB_NO;
+	
+	/* check for change in number of files */
+	ac = 0;
+	XtSetArg(args[ac], XmNitemCount, (XtPointer) &item_count); ac++;
+	XtGetValues(list_filelist, args, ac);
+	if (item_count != mbev_num_files)
+		update_filelist = MB_YES;
+	
+	/* check for change in load status, lock status, or esf status */
+	for (i=0;i<mbev_num_files;i++)
+		{
+		file = &(mbev_files[i]);
+		
+		/* check load status */
+		if (file->load_status != file->load_status_shown)
+			{
+			file->load_status_shown = file->load_status;
+			update_filelist = MB_YES;
+			}
+
+		/* check for locks */
+		lock_status = mb_pr_lockinfo(mbev_verbose, mbev_files[i].path, &locked,
+				&lock_purpose, lock_program, lock_user, lock_cpu, 
+				lock_date, &lock_error);
+		if (locked != file->locked)
+			{
+			file->locked = locked;
+			update_filelist = MB_YES;
+			}
+
+		/* check for edit save file */
+		sprintf(save_file, "%s.esf", mbev_files[i].path);
+		fstat = stat(save_file, &file_status);
+		if (fstat == 0 
+		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+			esf_exists = MB_YES;
+		else
+			esf_exists = MB_NO;
+		if (esf_exists != file->esf_exists)
+			{
+			file->esf_exists = esf_exists;
+			update_filelist = MB_YES;
+			}
+		}
+	
+	/* only update the filelist if necessary */
+	if (update_filelist == MB_YES)
+		{
+		/* get the current selection, if any, from the list */
+		ac = 0;
+		XtSetArg(args[ac], XmNitemCount, (XtPointer) &item_count); ac++;
+		XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
+		XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
+		XtGetValues(list_filelist, args, ac);
+		if (position_count > MB_PATH_MAXLINE)
+			position_count = MB_PATH_MAXLINE;
+		for (i=0;i<position_count;i++)
+			{
+			position_list_save[i] = position_list[i];
+			}
+
+		/* delete existing file list */
+		XmListDeleteAllItems(list_filelist);
+
+		/* build available file list */
+		if (mbev_num_files > 0)
+			{
+			xstr = (XmString *) malloc(mbev_num_files * sizeof(XmString));
+			for (i=0;i<mbev_num_files;i++)
+				{
+				file = &(mbev_files[i]);
+
+				/* set label strings */
+				if (file->load_status == MB_YES)
+					lockstrptr = loadedstr;
+				else if (file->locked == MB_YES)
+					lockstrptr = lockedstr;
+				else
+					lockstrptr = unlockedstr;
+				if (file->esf_exists == MB_YES)
+					esfstrptr = esfyesstr;
+				else
+					esfstrptr = esfnostr;
+				if (file->n_async_heading > 0)
+					athchar = 'H';
+				else
+					athchar = ' ';
+				if (file->n_async_sonardepth > 0)
+					atschar = 'S';
+				else
+					atschar = ' ';
+				if (file->n_async_attitude > 0)
+					atachar = 'A';
+				else
+					atachar = ' ';
+				sprintf(string,"%s %s %c%c%c %s %d", 
+					lockstrptr, esfstrptr, 
+					athchar, atschar, atachar, 
+					mbev_files[i].name,mbev_files[i].format);
+   				xstr[i] = XmStringCreateLocalized(string);
+ 				}
+    			XmListAddItems(list_filelist,xstr,mbev_num_files,0);
+			for (i=0;i<mbev_num_files;i++)
+				{
+    				XmStringFree(xstr[i]);
+    				}
+    			free(xstr);
+
+			/* reinstate selection if the number of items is the same as before */
+			if (item_count == mbev_num_files && position_count > 0)
+				{
+				ac = 0;
+				XtSetArg(args[ac], XmNselectedPositionCount, position_count); ac++;
+				XtSetArg(args[ac], XmNselectedPositions, (XtPointer) position_list_save); ac++;
+				XtSetValues(list_filelist, args, ac);
+ 				}
+			}
+		}
+
+if (mbev_verbose > 0)
+fprintf(stderr,"return do_mbeditviz_update_filelist status:%d\n", mbev_status);
 }
 /*---------------------------------------------------------------------------------------*/
 void do_mbeditviz_pickonepoint_notify(size_t instance)
@@ -2111,6 +2270,21 @@ do_mbeditviz_message_off()
    
     	return(1);
 }
+/*--------------------------------------------------------------------*/
+
+int
+do_error_dialog(char *s1, char *s2, char *s3)
+{
+    set_label_string(label_error_one, s1);
+    set_label_string(label_error_two, s2);
+    set_label_string(label_error_three, s3);
+    XtManageChild(bulletinBoard_error);
+    XBell(XtDisplay(bulletinBoard_error),100);
+/* fprintf(stderr,"do_error_dialog:\n\t%s\n\t%s\n\t%s\n",s1,s2,s3); */
+	
+    return(1);
+}
+
 
 /*--------------------------------------------------------------------*/
 /* Change label string cleanly, no memory leak */
@@ -2197,6 +2371,53 @@ do_wait_until_viewed()
     XmUpdateDisplay(topshell);
 		
     return(MB_SUCCESS);
+}
+
+/*------------------------------------------------------------------------------*/
+
+int do_mbeditviz_settimer()
+{
+	int	status = MB_SUCCESS;
+	int	timer_timeout_time = 1000;
+	int	id;
+	    
+	/* set timer function if none set for this instance */
+	if (timer_function_set == MB_NO)
+		{
+		id =  XtAppAddTimeOut(app, 
+				(unsigned long) timer_timeout_time,
+				(XtTimerCallbackProc)do_mbeditviz_workfunction, 
+				(XtPointer) -1);
+		if (id > 0)
+			timer_function_set = MB_YES;
+		else
+			status = MB_FAILURE;
+		}
+
+/* else
+fprintf(stderr,"do_mbeditviz_settimer: FUNCTION ALREADY SET!!\n"); */
+
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+
+int do_mbeditviz_workfunction(XtPointer client_data)
+{
+	int	status = MB_SUCCESS;
+
+	timer_function_set = MB_NO;
+	    
+	/* reset filelist */
+	if (mbev_num_files > 0)
+		{
+		do_mbeditviz_update_filelist();
+		}
+		
+	/* reset the timer function */
+	do_mbeditviz_settimer();
+		
+	return(status);
 }
 
 /*--------------------------------------------------------------------*/

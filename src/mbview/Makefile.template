@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  7/27/2003
 #	$Id$
 #
-#     Copyright (c) 2003-2009 by
+#     Copyright (c) 2003-2011 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -115,6 +115,7 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 		mbview_site.o \
 		mbview_route.o\
 		mbview_nav.o \
+		mbview_vector.o \
 		mb_glwdrawa.o \
 		Mb3dsdg.o \
 		mb3dsoundings_callbacks.o \
@@ -135,6 +136,7 @@ $(LIBDIR)/libmbview.a:	MB3DView.o \
 		mbview_site.o \
 		mbview_route.o\
 		mbview_nav.o \
+		mbview_vector.o \
 		mb_glwdrawa.o \
 		Mb3dsdg.o \
 		mb3dsoundings_callbacks.o \
@@ -149,6 +151,7 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		mbgrdviz_creation.o \
 		$(LIBDIR)/libmbview.a \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \
@@ -162,6 +165,7 @@ $(BINDIR)/mbgrdviz: mbgrdviz_main.o \
 		mbgrdviz_creation.o \
 		$(LIBDIR)/libmbview.a \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(LIBDIR)/libsapi.a \
 		$(LIBDIR)/libmr1pr.a  \
@@ -232,6 +236,8 @@ mbview_route.o: mbview_route.c mbview.h mbviewprivate.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_route.c
 mbview_nav.o: mbview_nav.c mbview.h mbviewprivate.h
 	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_nav.c
+mbview_vector.o: mbview_vector.c mbview.h mbviewprivate.h
+	$(CC) $(CFLAGS) -DMBVIEW_LIBRARY -I$(INCDIR) -I$(MOTIFINCDIR) -c mbview_vector.c
 mb_glwdrawa.o: mb_glwdrawa.c mb_glwdrawa.h mb_glwdrawap.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mb_glwdrawa.c
 mbgrdviz_bxutils.o: mbgrdviz_bxutils.c
@@ -254,11 +260,11 @@ mbeditviz_bxutils.o: mbeditviz_bxutils.c
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_bxutils.c
 mbeditviz_creation.o: mbeditviz_creation.c mbeditviz_creation.h 
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_creation.c
-mbeditviz_main.o: mbeditviz_main.c $(INCDIR)/mbview.h
+mbeditviz_main.o: mbeditviz_main.c mbeditviz.h $(INCDIR)/mbview.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -c mbeditviz_main.c
-mbeditviz_callbacks.o: mbeditviz_callbacks.c $(INCDIR)/mbview.h
+mbeditviz_callbacks.o: mbeditviz_callbacks.c mbeditviz.h $(INCDIR)/mbview.h
 	$(CC) $(CFLAGS) -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbeditviz_callbacks.c
-mbeditviz_prog.o: mbeditviz_prog.c $(INCDIR)/mbview.h
+mbeditviz_prog.o: mbeditviz_prog.c mbeditviz.h $(INCDIR)/mbview.h
 	$(CC) $(CFLAGS)  -DMBEDITVIZ_DECLARE_GLOBALS -I$(INCDIR) -I$(MOTIFINCDIR) -I$(NETCDFINCDIR) -I$(GMTINCDIR) -c mbeditviz_prog.c
 
 ## copy the include files to the include file directory

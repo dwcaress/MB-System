@@ -1,9 +1,9 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsm20002gsf.c	5/15/2009
  *
- *    $Id$
+ *    $Id: mbsm20002gsf.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2009-2009 by
+ *    Copyright (c) 2009-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -89,7 +89,7 @@ struct sm2000_ping_struct
 	struct sm2000_return_struct returns[SM2000_NUM_RETURNS];
 	};
 
-static char rcs_id[] = "$Id$";
+static char rcs_id[] = "$Id: mbsm20002gsf.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 

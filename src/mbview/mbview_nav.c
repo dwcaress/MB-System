@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_nav.c	10/28/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2009 by
+ *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -673,7 +673,7 @@ int mbview_addnav(int verbose, size_t instance,
 					&(shared.shareddata.navs[inav].navpts[i].point.zdisplay[instance]));
 			mbview_updatepointw(instance, &(shared.shareddata.navs[inav].navpts[i].point));
 
-/*fprintf(stderr,"Depth: llz:%f %f %f   grid:%f %f   dpy:%f %f %f\n",
+/* fprintf(stderr,"Depth: llz:%.10f %.10f %.10f   grid:%.10f %.10f   dpy:%.10f %.10f %.10f\n",
 shared.shareddata.navs[inav].navpts[i].point.xlon, 
 shared.shareddata.navs[inav].navpts[i].point.ylat, 
 shared.shareddata.navs[inav].navpts[i].point.zdata, 
@@ -681,7 +681,7 @@ shared.shareddata.navs[inav].navpts[i].point.xgrid[instance],
 shared.shareddata.navs[inav].navpts[i].point.ygrid[instance],
 shared.shareddata.navs[inav].navpts[i].point.xdisplay[instance], 
 shared.shareddata.navs[inav].navpts[i].point.ydisplay[instance], 
-shared.shareddata.navs[inav].navpts[i].point.zdisplay[instance]);*/
+shared.shareddata.navs[inav].navpts[i].point.zdisplay[instance]); */
 
 			/* ************************************************* */
 			/* get center on-bottom nav positions in grid coordinates */

@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_vrefcheck.perl	6/18/93
 #    $Id$
 #
-#    Copyright (c) 1993-2009 by 
+#    Copyright (c) 1993-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -90,7 +90,7 @@ $xmin = ($opt_A || $opt_a);
 $xmax = ($opt_B || $opt_b);
 
 # get format if needed
-if (!$format) 
+if (!$format)
 	{
 	$line = `mbformat -I $file -L`;
 	($format) = $line =~ /(\S+)/;
@@ -101,7 +101,7 @@ if (!$format)
 	}
 
 # if needed set defaults
-if (!$xscale) 
+if (!$xscale)
 	{
 	$xscale = "1.2";
 	}
@@ -122,7 +122,7 @@ print "Running mblist...\n";
 print "Running filter1d...\n";
 `filter1d $datfile -Fm5 -E -V > $fltfile`;
 
-# Read the data and filtered data files, 
+# Read the data and filtered data files,
 # subtracting to get the high-passed signal.
 print "Processing raw and filtered data to get residual...\n";
 open(F1,"$datfile");
@@ -149,7 +149,7 @@ if (!$xmin || !$xmax)
 	{
 	print "Running minmax...\n";
 	$minmax = `minmax $resfile`;
-	($resfile, $n, $xmin, $xmax, $ymin, $ymax) = $minmax 
+	($resfile, $n, $xmin, $xmax, $ymin, $ymax) = $minmax
 		=~ /(\S+): N = (\S+)\s<(\S+)\/(\S+)>\s<(\S+)\/(\S+)>/;
 	}
 if (!$xaxis)
@@ -211,7 +211,6 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {

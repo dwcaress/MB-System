@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_imagemba.c	7/18/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2009 by
+ *    Copyright (c) 2008-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -156,6 +156,7 @@ int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_svp = NULL; 
 	mb_io_ptr->mb_io_insert_svp = NULL; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_image83p_ttimes; 
+	mb_io_ptr->mb_io_detects = &mbsys_image83p_detects; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_image83p_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
@@ -198,6 +199,7 @@ int mbr_register_imagemba(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
 		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
 		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
@@ -675,6 +677,7 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_get_binary_float(swap, &buffer[index], &(store->heave)); index += 4;
 		    
 		/* get beams */
+		store->num_proc_beams = store->num_beams;
 		for (i=0;i<store->num_beams;i++)
 			{
 			mb_get_binary_short(swap, &buffer[index], &short_val); index += 2;
@@ -727,9 +730,11 @@ int mbr_rt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"dbg4       range[%d]:            %d\n",i,store->range[i]);
 		fprintf(stderr,"dbg4       sonar_depth:        %f\n",store->sonar_depth);
 		fprintf(stderr,"dbg4       heave:              %f\n",store->heave);
-		for (i=0;i<store->num_beams;i++)
-			fprintf(stderr,"dbg4       bath[%d]:    %f %f %f %d\n",
-				i,store->bath[i],store->bathacrosstrack[i],
+		fprintf(stderr,"dbg4       num_proc_beams:     %d\n",store->num_proc_beams);
+		for (i=0;i<store->num_proc_beams;i++)
+			fprintf(stderr,"dbg4       tt[%d]: %f angles:%f %f   bath: %f %f %f %d\n",
+				i,store->beamrange[i],store->angles[i],store->angles_forward[i],
+				store->bath[i],store->bathacrosstrack[i],
 				store->bathalongtrack[i],store->beamflag[i]);
 		}
 
@@ -833,9 +838,11 @@ int mbr_wt_imagemba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			fprintf(stderr,"dbg4       range[%d]:            %d\n",i,store->range[i]);
 		fprintf(stderr,"dbg4       sonar_depth:        %f\n",store->sonar_depth);
 		fprintf(stderr,"dbg4       heave:              %f\n",store->heave);
-		for (i=0;i<store->num_beams;i++)
-			fprintf(stderr,"dbg4       bath[%d]:    %f %f %f %d\n",
-				i,store->bath[i],store->bathacrosstrack[i],
+		fprintf(stderr,"dbg4       num_proc_beams:     %d\n",store->num_proc_beams);
+		for (i=0;i<store->num_proc_beams;i++)
+			fprintf(stderr,"dbg4       tt[%d]: %f angles:%f %f   bath: %f %f %f %d\n",
+				i,store->beamrange[i],store->angles[i],store->angles_forward[i],
+				store->bath[i],store->bathacrosstrack[i],
 				store->bathalongtrack[i],store->beamflag[i]);
 		}
 

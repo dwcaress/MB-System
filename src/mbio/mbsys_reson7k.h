@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_reson7k.h	3/3/2004
  *	$Id$
  *
- *    Copyright (c) 2004-2009 by
+ *    Copyright (c) 2004-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -149,6 +149,7 @@
 #define R7KRECID_SurveyLine				1014
 #define R7KRECID_Navigation				1015
 #define R7KRECID_Attitude				1016
+#define R7KRECID_Rec1022				1022
 #define R7KRECID_GenericSensorCalibration		1050
 #define R7KRECID_GenericSidescan			1200
 
@@ -168,6 +169,7 @@
 #define R7KRECID_7kVolatileSonarSettings		7000
 #define R7KRECID_7kConfiguration			7001
 #define R7KRECID_7kMatchFilter				7002
+#define R7KRECID_7kV2FirmwareHardwareConfiguration	7003
 #define R7KRECID_7kBeamGeometry				7004
 #define R7KRECID_7kCalibrationData			7005
 #define R7KRECID_7kBathymetricData			7006
@@ -175,6 +177,15 @@
 #define R7KRECID_7kBeamData				7008
 #define R7KRECID_7kVerticalDepth			7009
 #define R7KRECID_7kImageData				7011
+#define R7KRECID_7kV2PingMotion				7012
+#define R7KRECID_7kV2DetectionSetup			7017
+#define R7KRECID_7kV2BeamformedData			7018
+#define R7KRECID_7kV2BITEData				7021
+#define R7KRECID_7kV27kCenterVersion			7022
+#define R7KRECID_7kV28kWetEndVersion			7023
+#define R7KRECID_7kV2Detection				7026
+#define R7KRECID_7kV2RawDetection			7027
+#define R7KRECID_7kV2SnippetData			7028
 #define R7KRECID_7kInstallationParameters		7030
 #define R7KRECID_7kSystemEvents				7050
 #define R7KRECID_7kSystemEventMessage			7051
@@ -189,6 +200,7 @@
 #define R7KRECID_7kRemoteControlAcknowledge		7501
 #define R7KRECID_7kRemoteControlNotAcknowledge		7502
 #define R7KRECID_7kRemoteControlSonarSettings		7503
+#define R7KRECID_7kReserved				7504
 #define R7KRECID_7kRoll					7600
 #define R7KRECID_7kPitch				7601
 #define R7KRECID_7kSoundVelocity			7610
@@ -234,6 +246,7 @@
 #define R7KHDRSIZE_Navigation					41
 #define R7KHDRSIZE_Attitude					1
 #define R7KRDTSIZE_Attitude					18
+#define R7KHDRSIZE_Rec1022					40
 
 /* 2000-2999 reserved for user defined records */
 
@@ -249,6 +262,7 @@
 #define R7KHDRSIZE_7kVolatileSonarSettings			156
 #define R7KHDRSIZE_7kConfiguration				12
 #define R7KHDRSIZE_7kMatchFilter				24
+#define R7KHDRSIZE_7kV2FirmwareHardwareConfiguration		8
 #define R7KHDRSIZE_7kBeamGeometry				12
 #define R7KHDRSIZE_7kCalibrationData				10
 #define R7KHDRSIZE_7kBathymetricData_v4				18
@@ -257,6 +271,19 @@
 #define R7KHDRSIZE_7kBeamData					30
 #define R7KHDRSIZE_7kVerticalDepth				42
 #define R7KHDRSIZE_7kImageData					20
+#define R7KHDRSIZE_7kV2PingMotion				28
+#define R7KHDRSIZE_7kV2DetectionSetup				116
+#define R7KRDTSIZE_7kV2DetectionSetup				30
+#define R7KHDRSIZE_7kV2BeamformedData				52
+#define R7KHDRSIZE_7kV2BITEData					2
+#define R7KRDTSIZE_7kV2BITERecordData				136
+#define R7KRDTSIZE_7kV2BITEFieldData				79
+#define R7KHDRSIZE_7kV27kCenterVersion				32
+#define R7KHDRSIZE_7kV28kWetEndVersion				32
+#define R7KHDRSIZE_7kV2Detection				99
+#define R7KHDRSIZE_7kV2RawDetection				99
+#define R7KHDRSIZE_7kV2SnippetData				46
+#define R7KRDTSIZE_7kV2SnippetTimeseries			14
 #define R7KHDRSIZE_7kInstallationParameters			616
 #define R7KHDRSIZE_7kSystemEvents				22
 #define R7KHDRSIZE_7kSystemEventMessage				14
@@ -271,7 +298,8 @@
 #define R7KHDRSIZE_7kRemoteControl				20
 #define R7KHDRSIZE_7kRemoteControlAcknowledge			20
 #define R7KHDRSIZE_7kRemoteControlNotAcknowledge		24
-#define R7KHDRSIZE_7kRemoteControlSonarSettings			150
+#define R7KHDRSIZE_7kRemoteControlSonarSettings			260
+#define R7KHDRSIZE_7kReserved					543
 #define R7KHDRSIZE_7kRoll					4
 #define R7KHDRSIZE_7kPitch					4
 #define R7KHDRSIZE_7kSoundVelocity				4
@@ -789,6 +817,14 @@ typedef struct s7kr_attitude_struct
 	float		*heading;		/* Heading (radians) */
 }
 s7kr_attitude;
+	
+/* Unknown record 1022 (record 1022) */
+typedef struct s7kr_rec1022_struct
+{	
+	s7k_header	header;
+	mb_u_char	data[R7KHDRSIZE_Rec1022];/* raw bytes in unknown record */
+}
+s7kr_rec1022;
 
 /* Edgetech sidescan or subbottom channel header data */
 typedef struct s7k_fsdwchannel_struct
@@ -1214,6 +1250,17 @@ typedef struct s7kr_matchfilter_struct
 }
 s7kr_matchfilter;
 
+/* Reson 7k firmware and hardware configuration (record 7003) */
+typedef struct s7kr_v2firmwarehardwareconfiguration_struct
+{
+	s7k_header	header;
+	unsigned int	device_count;		/* Hardware device count */
+	unsigned int	info_length;		/* Info length (bytes) */
+	unsigned int	info_alloc;		/* Memory allocated for data (bytes) */
+	char		*info;			/* Device specific data */
+}
+s7kr_v2firmwarehardwareconfiguration;
+
 /* Reson 7k beam geometry (record 7004) */
 typedef struct s7kr_beamgeometry_struct
 {
@@ -1373,7 +1420,8 @@ typedef struct s7kr_snippet_struct
 	unsigned short	beam_number;		/* Beam or element number */
 	unsigned int	begin_sample;		/* First sample number in beam from transmitter and outward. */
 	unsigned int	end_sample;		/* Last sample number in beam from transmitter and outward. */
-	unsigned int	nalloc;			/* Bytes allocated to hold time series */
+	unsigned int	nalloc_amp;		/* Bytes allocated to hold amplitude time series */
+	unsigned int	nalloc_phase;		/* Bytes allocated to hold phase time series */
 	void		*amplitude;		/* Amplitude or I time series as defined by sample_type */
 	void		*phase;			/* Phase or Q time series as defined by sample_type */
 }
@@ -1415,8 +1463,8 @@ typedef struct s7kr_beam_struct
 								3 = Phase (32 bits)
 							8-11: I and Q
 								0 = No I and Q
-								1 = Signed 16 but I and signed 16 bit Q
-								2 = Signed 32 but I and signed 32 bit Q
+								1 = Signed 16 bit I and signed 16 bit Q
+								2 = Signed 32 bit I and signed 32 bit Q
 							12-14: Beam forming flag:
 								0 = Beam formed data
 								1 = Element data */
@@ -1488,6 +1536,379 @@ typedef struct s7kr_image_struct
 	void		*image;			/* Array of image data */
 }
 s7kr_image;
+	
+/* Reson 7k ping motion (record 7012) */
+typedef struct s7kr_v2pingmotion_struct
+{	
+	s7k_header	header;
+	mb_u_long	serial_number;		/* Sonar serial number */
+	unsigned int	ping_number;		/* Sequential number */
+	unsigned short	multi_ping;		/* Flag to indicate multi-ping mode
+							0 = no multi-ping
+							>0 = sequence number of ping
+								in the multi-ping
+								sequence */
+	unsigned int	n;			/* number of samples */
+	unsigned short	flags;			/* Bit field: 
+							Bit 0:
+								1 = Pitch stabilization applied 
+									/ pitch field present
+							Bit 1:
+								1 = Roll stabilization applied
+									/ roll field present
+							Bit 2: Yaw stabilization applied
+									/ yaw field present
+							Bit 3: Heave stabilization applied
+									/ heave field present
+							Bit 4-15: Reserved */
+	unsigned int	error_flags;		/* Bit field: 
+							Bit 0:
+								PHINS referecne 0 = invalid, 1 = valid
+							Bit 1-3:
+								Reserved for PHINS
+							Bit 4: Roll angle > 15 degrees
+							Bit 5: Pitch angle > 35 degrees
+							Bit 6: Roll rate > 10 degrees
+							Bit 7-15: Reserved */
+	float		frequency;		/* sampling frequency (Hz) */
+	float		pitch;			/* Pitch value at the ping time (radians) */
+	int		nalloc;			/* number of samples allocated */
+	float		*roll;			/* Roll (radians) */
+	float		*heading;		/* Heading (radians) */
+	float		*heave;			/* Heave (m) */
+}
+s7kr_v2pingmotion;
+	
+/* Reson 7k detection setup (record 7017) */
+typedef struct s7kr_v2detectionsetup_struct
+{	
+	s7k_header	header;
+	mb_u_long	serial_number;		/* Sonar serial number */
+	unsigned int	ping_number;		/* Sequential number */
+	unsigned short	multi_ping;		/* Flag to indicate multi-ping mode
+							0 = no multi-ping
+							>0 = sequence number of ping
+								in the multi-ping
+								sequence */
+	unsigned int	number_beams;		/* Number of detection points */
+	unsigned int	data_field_size;	/* Size of detection information block in bytes */
+	mb_u_char	detection_algorithm;	/* Detection algorithm:
+							0 = G1_Simple
+							1 = G1_BlendFilt
+							2 = G2
+							3-255: Reserved for future use */
+	unsigned int	detection_flags;		/* Bit field: 
+							Bit 0: 1 = User-defined depth filter enabled
+							Bit 1: 1 = User-defined range filter enabled
+							Bit 2: 1 = Automatic filter enabled
+							Bit 3: 1 = Nadir search limits enabled
+							Bit 4: 1 = Automatic window limits enabled
+							Bits 5-31: Reserved for future use */
+	float		minimum_depth;		/* Minimum depth for user-defined filter (meters) */
+	float		maximum_depth;		/* Maximum depth for user-defined filter (meters) */
+	float		minimum_range;		/* Minimum range for user-defined filter (meters) */
+	float		maximum_range;		/* Maximum range for user-defined filter (meters) */
+	float		minimum_nadir_search;	/* Minimum depth for automatic filter nadir search (meters) */
+	float		maximum_nadir_search;	/* Maximum depth for automatic filter nadir search (meters) */
+	mb_u_char	automatic_filter_window;/* Automatic filter window size (percent altitude) */
+	mb_u_char	reserved[64];		/* Reserved for future use */
+	unsigned short	beam_descriptor[MBSYS_RESON7K_MAX_BEAMS];
+						/* Beam number the detection is taken from */
+	float		detection_point[MBSYS_RESON7K_MAX_BEAMS]; 
+						/* Beam steering angle with reference to receiver's acoustic
+							center in the sonar reference frame, at the detection 
+							point (radians) */
+	unsigned int	flags[MBSYS_RESON7K_MAX_BEAMS];
+						/* Bit field:
+							Bit 0: 1 = automatic limits valid
+							Bit 1: 1 = User-defined limits valid
+							Bit 2-8: Quality type, defines the type of the 
+									quality field
+								0: Quality not available / not used
+								1: Quality used
+							Bit 9: 1 = Quality passes user-defined criteria 
+									or no user-defined criteria was
+									specified 
+							Bit 10-31: Reserved for future use */
+	unsigned int	auto_limits_min_sample[MBSYS_RESON7K_MAX_BEAMS];
+						/* Minimum sample number for automatic limits */
+	unsigned int	auto_limits_max_sample[MBSYS_RESON7K_MAX_BEAMS];
+						/* Maximum sample number for automatic limits */
+	unsigned int	user_limits_min_sample[MBSYS_RESON7K_MAX_BEAMS];
+						/* Minimum sample number for user-defined limits */
+	unsigned int	user_limits_max_sample[MBSYS_RESON7K_MAX_BEAMS];
+						/* Maximum sample number for user-defined limits */
+	unsigned int	quality[MBSYS_RESON7K_MAX_BEAMS];		/* Bit field:
+							Bit 0: 1 = Brightness filter passed
+							Bit 1: 1 = Colinearity filter passed
+							Bit 2-31: Reserved for future use */
+	unsigned int	reserved2[MBSYS_RESON7K_MAX_BEAMS];
+}
+s7kr_v2detectionsetup;
+
+/* Reson 7k amplitude and phase data (part of record 7018) */
+typedef struct s7kr_v2amplitudephase_struct
+{
+	unsigned short	beam_number;		/* Beam or element number */
+	unsigned int	number_samples;		/* Number of samples */
+	unsigned int	nalloc;			/* Number of samples allocated */
+	unsigned short 	*amplitude;		/* Amplitude time series  */
+	short		*phase;			/* Phase time series (radians scaled by 10430) */
+}
+s7kr_v2amplitudephase;
+
+/* Reson 7k beamformed magnitude and phase data (record 7018) */
+typedef struct s7kr_v2beamformed_struct
+{
+	s7k_header	header;
+	mb_u_long	serial_number;		/* Sonar serial number */
+	unsigned int	ping_number;		/* Sequential number */
+	unsigned short	multi_ping;		/* Flag to indicate multi-ping mode
+							0 = no multi-ping
+							>0 = sequence number of ping
+								in the multi-ping
+								sequence */
+	unsigned short	number_beams;		/* Total number of beams or elements in record */
+	unsigned int	number_samples;		/* Number of samples in each beam in this record */
+	mb_u_char	reserved[32];		/* Reserved for future use */
+	s7kr_v2amplitudephase	amplitudephase[MBSYS_RESON7K_MAX_BEAMS]; 
+						/* amplitude and phase data for each beam */
+}
+s7kr_v2beamformed;
+
+/* Reson 7k BITE field (part of record 7021) */
+typedef struct s7kr_v2bitefield_struct
+{
+	unsigned short	reserved;		/* Reserved */
+	char		name[64];		/* Name - null terminated ASCII string */
+	mb_u_char	device_type;		/* Device type:
+							1 = Error count
+							2 = FPGA die temperature
+							3 = Humidity
+							4 = Serial 8-channel ADC
+							5 = Firmware version
+							6 = Head Temp,_8K WetEnd
+							7 = Leak V,_8K WetEnd
+							8 = 5 Volt,_8K WetEnd
+							9 = 12 Volt,_8K WetEnd
+							10 = DipSwitch,_8K WetEnd */
+	float		minimum;		/* Minimum value */
+	float		maximum;		/* Maximum value */
+	float		value;			/* Current value */
+}
+s7kr_v2bitefield;
+
+/* Reson 7k BITE (part of record 7021) */
+typedef struct s7kr_v2bitereport_struct
+{
+	char		source_name[64];	/* source name - null terminated string */
+	mb_u_char	source_address;		/* source address */
+	float		frequency;		/* frequency for transmitter or 0 */
+	unsigned short	enumerator;		/* Enumerator for transmitter or 0 */
+	s7k_time	downlink_time;		/* Downlink time sent */
+	s7k_time	uplink_time;		/* Uplink time received */
+	s7k_time	bite_time;		/* BITE time received */
+	mb_u_char	status;			/* Bit field:
+							Bit 0:
+								0 = Uplink ok
+								1 = Uplink error
+							Bit 1:
+								0 = Downlink ok
+								1 = Downlink error
+							Bit 2:
+								0 = BITE ok
+								1 = BITE error */
+	unsigned short	number_bite;		/* Number of valid BITE fields for this board */
+	mb_u_char	bite_status[32];		/* Each bit delineates status of one BITE channel up to 256:
+							0 = BITE field within range
+							1 = BITE field out of range */
+	s7kr_v2bitefield	bitefield[256];	/* Array of BITE field data */
+}
+s7kr_v2bitereport;
+
+/* Reson 7k BITE (record 7021) */
+typedef struct s7kr_v2bite_struct
+{
+	s7k_header	header;
+	unsigned short	number_reports;		/* Number of Built In Test Environment reports */
+	unsigned int	nalloc;
+	s7kr_v2bitereport *reports;
+}
+s7kr_v2bite;
+
+/* Reson 7k center version (record 7022) */
+typedef struct s7kr_v27kcenterversion_struct
+{
+	s7k_header	header;
+	char		version[32];		/* Null terminated ASCII string */
+}
+s7kr_v27kcenterversion;
+
+/* Reson 7k 8k wet end version (record 7023) */
+typedef struct s7kr_v28kwetendversion_struct
+{
+	s7k_header	header;
+	char		version[32];		/* Null terminated ASCII string */
+}
+s7kr_v28kwetendversion;
+
+/* Reson 7k version 2 detection (record 7026) */
+typedef struct s7kr_v2detection_struct
+{
+	s7k_header	header;
+	mb_u_long	serial_number;		/* Sonar serial number */
+	unsigned int	ping_number;		/* Sequential number */
+	unsigned short	multi_ping;		/* Flag to indicate multi-ping mode
+							0 = no multi-ping
+							>0 = sequence number of ping
+								in the multi-ping
+								sequence */
+	unsigned int	number_beams;		/* Number of detection points */
+	unsigned int	data_field_size;	/* Size of detection information block in bytes */
+	mb_u_long 	corrections;		/* Corrections/Methods bit field:
+							Bit 0: 
+								1 = Geometrical corrections for 
+									cylindrical arrays applied
+							Bit 1-2:
+								0 = Manually entered surface sound velocity used
+								1 = Measured surface sound velocity used
+								2,3 = reserved for future use
+							Bit 3:
+								1 = Roll stabilization applied
+							Bit 4:
+								1 = Pitch stablization applied
+							Bits 5-63:
+								Reserved for future use */
+	mb_u_char	detection_algorithm;	/* Detection algorithm:
+							0 = G1_Simple
+							1 = G1_BlendFilt
+							2 = G2
+							3-255: Reserved for future use */
+	unsigned int	flags;			/* Bit field: 
+							Bit 0:
+								1 = Quality filter applied. Only detections
+									that pass user-defined criteria
+									are generated.
+							Bit 1:
+								1 = Motion error(s) detected. Data may not
+									be accurate
+							Bit 2-3: Reference frame
+								0 = Sonar
+								1 = Vessel
+								2-3 = Reserved */
+	mb_u_char	reserved[64];		/* Reserved for future use */
+	
+	float		range[MBSYS_RESON7K_MAX_BEAMS]; 
+						/* Two-way travel time to the bottom/target (seconds) */
+	float		angle_x[MBSYS_RESON7K_MAX_BEAMS];
+						/* Across-track angle to detection point (radians) */
+	float		angle_y[MBSYS_RESON7K_MAX_BEAMS];
+						/* Along-track angle to detection point (radians) */
+	float		range_error[MBSYS_RESON7K_MAX_BEAMS]; 
+						/* Measurement error (seconds) */
+	float		angle_x_error[MBSYS_RESON7K_MAX_BEAMS];
+						/* Measurement error (radians) */
+	float		angle_y_error[MBSYS_RESON7K_MAX_BEAMS];
+						/* Measurement error (radians) */
+}
+s7kr_v2detection;
+
+/* Reson 7k version 2 raw detection (record 7027) */
+typedef struct s7kr_v2rawdetection_struct
+{
+	s7k_header	header;
+	mb_u_long	serial_number;		/* Sonar serial number */
+	unsigned int	ping_number;		/* Sequential number */
+	unsigned short	multi_ping;		/* Flag to indicate multi-ping mode
+							0 = no multi-ping
+							>0 = sequence number of ping
+								in the multi-ping
+								sequence */
+	unsigned int	number_beams;		/* Number of detection points */
+	unsigned int	data_field_size;	/* Size of detection information block in bytes */
+	mb_u_char	detection_algorithm;	/* Detection algorithm:
+							0 = G1_Simple
+							1 = G1_BlendFilt
+							2 = G2
+							3-255: Reserved for future use */
+	unsigned int	detection_flags;	/* Bit field: Bits 0-31: Reserved for future use */
+	float		sampling_rate;		/* Sonar's sampling frequency in Hz */
+	float		tx_angle;		/* Applied transmitter steering angle, in radians */
+	mb_u_char	reserved[64];		/* Reserved for future use */
+	
+	unsigned short	beam_descriptor[MBSYS_RESON7K_MAX_BEAMS];
+						/* Beam number the detection is taken from */
+	float		detection_point[MBSYS_RESON7K_MAX_BEAMS]; 
+						/* Non-corrected fractional sample number with 
+							the reference to the receiver's 
+							acoustic center with the zero sample
+							at the transmit time */
+	float		rx_angle[MBSYS_RESON7K_MAX_BEAMS];
+						/* Beam steering angle with reference to
+							receiver's acoustic center in the 
+							sonar reference frame, at the detection
+							point, in radians */
+	unsigned int	flags[MBSYS_RESON7K_MAX_BEAMS];
+						/* Bit fields:
+							Bit 0: 1 = Magnitude based detection
+							Bit 1: 1 = Phase based detection
+							Bits 2-8: Quality type, defines the type
+								of the quality field below
+								0: Quality not available / not used
+								1: Quality available
+								2-31: Reserved for future use
+							Bit 9: Uncertainty information is available
+							Bits 10-31: Reserved for future use */
+	unsigned int	quality[MBSYS_RESON7K_MAX_BEAMS];
+						/* Detection quality:
+							Bit 0: 1 = Brightness filter passed
+							Bit 1: 1 = Co-linearity filter passed */
+	float		uncertainty[MBSYS_RESON7K_MAX_BEAMS];
+						/* Detection uncertainty represented as an error
+							normalized to the detection point */
+}
+s7kr_v2rawdetection;
+
+/* Reson 7k version 2 snippet data (part of record 7028) */
+typedef struct s7kr_v2snippettimeseries_struct
+{
+	unsigned short	beam_number;		/* Beam or element number */
+	unsigned int	begin_sample;		/* First sample included in snippet */
+	unsigned int	detect_sample;		/* Detection point */
+	unsigned int	end_sample;		/* Last sample included in snippet */
+	unsigned int	nalloc;			/* Bytes allocated to hold amplitude time series */
+	unsigned short	*amplitude;		/* Amplitude time series */
+}
+s7kr_v2snippettimeseries;
+
+/* Reson 7k version 2 snippet (record 7028) */
+typedef struct s7kr_v2snippet_struct
+{
+	s7k_header	header;
+	mb_u_long	serial_number;		/* Sonar serial number */
+	unsigned int	ping_number;		/* Sequential number */
+	unsigned short	multi_ping;		/* Flag to indicate multi-ping mode
+							0 = no multi-ping
+							>0 = sequence number of ping
+								in the multi-ping
+								sequence */
+	unsigned short	number_beams;		/* Number of detection points */
+	mb_u_char	error_flag;		/* If set, record will not contain any data
+							Flag itself will indicate an error:
+							0 = Ok
+							6 = Bottom detection failed
+							Other = reserved */
+	mb_u_char	control_flags;		/* Control settings from RC 1118 command:
+							Bit 0: Automatic snippet window is used
+							Bit 1: Quality filter enabled
+							Bit 2: Minimum window size is required
+							Bit 3: Maximum window size is required
+							Bit 4-7: Reserved */
+	mb_u_char	reserved[28];		/* Reserved for future use */
+	s7kr_v2snippettimeseries	snippettimeseries[MBSYS_RESON7K_MAX_BEAMS];
+						/* Snippet time series for each beam */
+}
+s7kr_v2snippet;
 
 /* Reson 7k sonar installation parameters (record 7030) */
 typedef struct s7kr_installation_struct
@@ -1644,8 +2065,50 @@ typedef struct s7kr_remotecontrolsettings_struct
 	float		sound_velocity;		/* Sound velocity (meters/second) */
 	float		spreading;		/* Spreading loss (dB) */
 	unsigned short	reserved;		/* reserved for future pulse shape description */
+	
+	/* parameters added by version 1.0 */
+	float		tx_offset_x;		/* Offset of the transducer array in m, relative
+							to the receiver array on the x axis, positive
+							value is to the right, if the receiver faces
+							forward. */
+	float		tx_offset_y;		/* Offset of the transducer array in m, relative
+							to the receiver array on the y axis, positive
+							value is forward, if the receiver faces
+							forward. */
+	float		tx_offset_z;		/* Offset of the transducer array in m, relative
+							to the receiver array on the z axis, positive
+							value is up, if the receiver faces forward. */
+	float		head_tilt_x;		/* Head tilt x (radians) */
+	float		head_tilt_y;		/* Head tilt y (radians) */
+	float		head_tilt_z;		/* Head tilt z (radians) */
+	unsigned short	ping_on_off;		/* Ping on/off state:
+							0 = pinging disabled
+							1 = pinging enabled */
+	mb_u_char	data_sample_types;	/* */
+	mb_u_char	projector_orientation;	/* Projector orientation:
+							0: down
+							1: up */
+	unsigned short	beam_angle_mode;	/* Beam angle spacing mode:
+							1: equiangle
+							2: eqidistant */
+	unsigned short	r7kcenter_mode;		/* 7kCenter mode:
+							0: normal
+							1: autopilot
+							2: calibration (IQ)
+							3+: reserved */
+	float		gate_depth_min;		/* Adaptive gate minimum depth */
+	float		gate_depth_max;		/* Adaptive gate maximum depth */
+	unsigned short	reserved2[35];
 }
 s7kr_remotecontrolsettings;
+
+/* Reson 7k Reserved (well, unknown really...) (record 7504) */
+typedef struct s7kr_reserved_struct
+{	
+	s7k_header	header;
+	mb_u_char	reserved[R7KHDRSIZE_7kReserved];	/* raw bytes of unknown record */
+}
+s7kr_reserved;
 
 /* Reson 7k Roll (record 7600) */
 typedef struct s7kr_roll_struct
@@ -1708,6 +2171,12 @@ struct mbsys_reson7k_struct
 	int		read_beam;
 	int		read_verticaldepth;
 	int		read_image;
+	int		read_v2pingmotion;
+	int		read_v2detectionsetup;
+	int		read_v2beamformed;
+	int		read_v2detection;
+	int		read_v2rawdetection;
+	int		read_v2snippet;
 
 	/* MB-System time stamp */
 	double		time_d;	
@@ -1765,6 +2234,9 @@ struct mbsys_reson7k_struct
 	/* Attitude (record 1016) */
 	s7kr_attitude	attitude;
 	
+	/* Unknown record 1022 (record 1022) */
+	s7kr_rec1022	rec1022;
+	
 	/* Edgetech FS-DW low frequency sidescan (record 3000) */
 	s7kr_fsdwss	fsdwsslo;
 	
@@ -1786,6 +2258,9 @@ struct mbsys_reson7k_struct
 	/* Reson 7k match filter (record 7002) */
 	s7kr_matchfilter	matchfilter;
 
+	/* Reson 7k firmware and hardware configuration (record 7003) */
+	s7kr_v2firmwarehardwareconfiguration	v2firmwarehardwareconfiguration;
+
 	/* Reson 7k beam geometry (record 7004) */
 	s7kr_beamgeometry	beamgeometry;
 
@@ -1806,6 +2281,33 @@ struct mbsys_reson7k_struct
 
 	/* Reson 7k image data (record 7011) */
 	s7kr_image		image;
+	
+	/* Ping motion (record 7012) */
+	s7kr_v2pingmotion	v2pingmotion;
+	
+	/* Detection setup (record 7017) */
+	s7kr_v2detectionsetup	v2detectionsetup;
+
+	/* Reson 7k beamformed magnitude and phase data (record 7018) */
+	s7kr_v2beamformed	v2beamformed;
+
+	/* Reson 7k BITE (record 7021) */
+	s7kr_v2bite	v2bite;
+
+	/* Reson 7k center version (record 7022) */
+	s7kr_v27kcenterversion	v27kcenterversion;
+
+	/* Reson 7k 8k wet end version (record 7023) */
+	s7kr_v28kwetendversion	v28kwetendversion;
+
+	/* Reson 7k version 2 detection (record 7026) */
+	s7kr_v2detection	v2detection;
+
+	/* Reson 7k version 2 raw detection (record 7027) */
+	s7kr_v2rawdetection	v2rawdetection;
+
+	/* Reson 7k version 2 snippet (record 7028) */
+	s7kr_v2snippet	v2snippet;
 
 	/* Reson 7k sonar installation parameters (record 7030) */
 	s7kr_installation	installation;
@@ -1818,6 +2320,9 @@ struct mbsys_reson7k_struct
 
 	/* Reson 7k remote control sonar settings (record 7503) */
 	s7kr_remotecontrolsettings	remotecontrolsettings;
+
+	/* Reson 7k Reserved (well, unknown really...) (record 7504) */
+	s7kr_reserved		reserved;
 
 	/* Reson 7k Roll (record 7600) */
 	s7kr_roll		roll;
@@ -2015,6 +2520,9 @@ int mbsys_reson7k_print_navigation(int verbose,
 int mbsys_reson7k_print_attitude(int verbose, 
 			s7kr_attitude *attitude,
 			int *error);
+int mbsys_reson7k_print_rec1022(int verbose, 
+			s7kr_rec1022 *rec1022,
+			int *error);
 int mbsys_reson7k_print_fsdwchannel(int verbose, int data_format,
 			s7k_fsdwchannel *fsdwchannel,
 			int *error);
@@ -2045,6 +2553,9 @@ int mbsys_reson7k_print_configuration(int verbose,
 int mbsys_reson7k_print_matchfilter(int verbose, 
 			s7kr_matchfilter *matchfilter,
 			int *error);
+int mbsys_reson7k_print_v2firmwarehardwareconfiguration(int verbose, 
+			s7kr_v2firmwarehardwareconfiguration *v2firmwarehardwareconfiguration,
+			int *error);
 int mbsys_reson7k_print_beamgeometry(int verbose, 
 			s7kr_beamgeometry *beamgeometry,
 			int *error);
@@ -2066,6 +2577,33 @@ int mbsys_reson7k_print_verticaldepth(int verbose,
 int mbsys_reson7k_print_image(int verbose, 
 			s7kr_image *image,
 			int *error);
+int mbsys_reson7k_print_v2pingmotion(int verbose, 
+			s7kr_v2pingmotion *v2pingmotion,
+			int *error);
+int mbsys_reson7k_print_v2detectionsetup(int verbose, 
+			s7kr_v2detectionsetup *v2detectionsetup,
+			int *error);
+int mbsys_reson7k_print_v2beamformed(int verbose, 
+			s7kr_v2beamformed *v2beamformed,
+			int *error);
+int mbsys_reson7k_print_v2bite(int verbose, 
+			s7kr_v2bite *v2bite,
+			int *error);
+int mbsys_reson7k_print_v27kcenterversion(int verbose, 
+			s7kr_v27kcenterversion *v27kcenterversion,
+			int *error);
+int mbsys_reson7k_print_v28kwetendversion(int verbose, 
+			s7kr_v28kwetendversion *v28kwetendversion,
+			int *error);
+int mbsys_reson7k_print_v2detection(int verbose, 
+			s7kr_v2detection *v2detection,
+			int *error);
+int mbsys_reson7k_print_v2rawdetection(int verbose, 
+			s7kr_v2rawdetection *v2rawdetection,
+			int *error);
+int mbsys_reson7k_print_v2snippet(int verbose, 
+			s7kr_v2snippet *v2snippet,
+			int *error);
 int mbsys_reson7k_print_installation(int verbose, 
 			s7kr_installation *installation,
 			int *error);
@@ -2080,6 +2618,9 @@ int mbsys_reson7k_print_fileheader(int verbose,
 			int *error);
 int mbsys_reson7k_print_remotecontrolsettings(int verbose, 
 			s7kr_remotecontrolsettings *remotecontrolsettings,
+			int *error);
+int mbsys_reson7k_print_reserved(int verbose, 
+			s7kr_reserved *reserved,
 			int *error);
 int mbsys_reson7k_print_roll(int verbose, 
 			s7kr_roll *roll,

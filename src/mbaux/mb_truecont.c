@@ -2,7 +2,7 @@
  *    The MB-system:	mb_truecont.c	4/21/94
  *    $Id$
  *
- *    Copyright (c) 1994-2009 by
+ *    Copyright (c) 1994-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -33,14 +33,15 @@
 #include "../../include/mb_aux.h"
 
 /* global defines */
-#define IUP 3
-#define IDN 2
-#define IOR -3
+#define IMOVE 	3
+#define IDRAW 	2
+#define ISTROKE	-2
+#define IOR 	-3
 #define EPS 0.0001
 
 /* function prototypes */
 int mb_contour_init(
-		int	verbose, 
+		int	verbose,
 		struct swath **data,
 		int	npings_max,
 		int	beams_bath,
@@ -72,56 +73,56 @@ int mb_contour_init(
 		double	pingnumber_tick_len,
 		int	*error);
 int mb_contour_deall(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error);
 int mb_contour(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error);
 int mb_tcontour(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error);
 int get_start_tri(
-		struct swath *data, 
-		int	*itri, 
-		int	*iside1, 
-		int	*iside2, 
+		struct swath *data,
+		int	*itri,
+		int	*iside1,
+		int	*iside2,
 		int	*closed);
 int get_next_tri(
-		struct swath *data, 
-		int	*itri, 
-		int	*iside1, 
-		int	*iside2, 
-		int	*closed, 
-		int	*itristart, 
+		struct swath *data,
+		int	*itri,
+		int	*iside1,
+		int	*iside2,
+		int	*closed,
+		int	*itristart,
 		int	*isidestart);
 int get_pos_tri(
-		struct swath *data, 
-		double	eps, 
-		int	itri, 
-		int	iside, 
-		double	value, 
-		double	*x, 
+		struct swath *data,
+		double	eps,
+		int	itri,
+		int	iside,
+		double	value,
+		double	*x,
 		double	*y);
 int get_azimuth_tri(
-		struct swath *data, 
-		int	itri, 
-		int	iside, 
+		struct swath *data,
+		int	itri,
+		int	iside,
 		double	*angle);
-int check_label(struct swath *data, 
+int check_label(struct swath *data,
 		int	nlab);
 int dump_contour(struct swath *data, double value);
 int mb_ocontour(int verbose, struct swath *data, int *error);
-int get_start_old(struct swath *data, 
+int get_start_old(struct swath *data,
 		int *k, int *i, int *j, int *d, int *closed);
 int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd,
-		int k, int i, int j, int d, 
+		int k, int i, int j, int d,
 		int kbeg, int ibeg, int jbeg, int dbeg, int *closed);
 int get_pos_old(struct swath *data, double eps, double *x, double *y,
 		int k, int i, int j, double value);
-int get_hand_old(struct swath *data, int *hand, 
+int get_hand_old(struct swath *data, int *hand,
 		int k, int i, int j, int d);
 int get_azimuth_old(struct swath *data, int iping, double *angle);
 
@@ -129,12 +130,12 @@ static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour_init initializes the memory required to
-	contour multibeam bathymetry data. 
+	contour multibeam bathymetry data.
 	if mbio_ptr is null, the arrays are allocated using mb_malloc. If
 	mbio_ptr is a valid mbio structure, then the arrays tied to
 	beams_bath will be registered using mb_register_array */
 int mb_contour_init(
-		int	verbose, 
+		int	verbose,
 		struct swath **data,
 		int	npings_max,
 		int	beams_bath,
@@ -437,8 +438,8 @@ int mb_contour_init(
 /* 	function mb_contour_deall deallocates the memory required to
 	contour multibeam bathymetry data. */
 int mb_contour_deall(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error)
 {
 	char	*function_name = "mb_contour_deall";
@@ -529,8 +530,8 @@ int mb_contour_deall(
 /*--------------------------------------------------------------------------*/
 /* 	function mb_contour calls the appropriate contouring routine. */
 int mb_contour(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error)
 {
 	char	*function_name = "mb_contour";
@@ -569,8 +570,8 @@ int mb_contour(
 /*--------------------------------------------------------------------------*/
 /* 	function mb_tcontour contours multibeam data. */
 int mb_tcontour(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error)
 {
 	char	*function_name = "mb_tcontour";
@@ -643,7 +644,7 @@ int mb_tcontour(
 				}
 			}
 		}
-		
+
 	/* count number of points and verify that enough memory is allocated */
 	npt_cnt = 0;
 	for (i=0;i<data->npings;i++)
@@ -760,7 +761,7 @@ int mb_tcontour(
 	for (i=0;i<data->npts;i++)
 		for (j=data->npts-1;j>i;j--)
 			{
-			if (data->x[i] == data->x[j] 
+			if (data->x[i] == data->x[j]
 				&& data->y[i] == data->y[j])
 				{
 				data->z[i] = 0.5*(data->z[i] + data->z[j]);
@@ -819,12 +820,12 @@ int mb_tcontour(
 			{
 			k = nci + i;
 			data->level_list[i] = k*data->contour_int;
-			data->color_list[i] = 
+			data->color_list[i] =
 				(int)(data->level_list[i]/data->color_int)
 					%data->ncolor;
 			if (data->tick_int <= 0.0)
 				data->tick_list[i] = 0;
-				
+
 			else
 				{
 				ratio = data->level_list[i] / data->tick_int;
@@ -907,13 +908,13 @@ int mb_tcontour(
 	  for (itri=0;itri<data->ntri;itri++)
 		{
 		plot(data->x[data->iv[0][itri]],
-			data->y[data->iv[0][itri]],IUP);
+			data->y[data->iv[0][itri]],IMOVE);
 		plot(data->x[data->iv[1][itri]],
-			data->y[data->iv[1][itri]],IDN);
+			data->y[data->iv[1][itri]],IDRAW);
 		plot(data->x[data->iv[2][itri]],
-			data->y[data->iv[2][itri]],IDN);
+			data->y[data->iv[2][itri]],IDRAW);
 		plot(data->x[data->iv[0][itri]],
-			data->y[data->iv[0][itri]],IDN);
+			data->y[data->iv[0][itri]],ISTROKE);
 		}
 	  }
 
@@ -945,9 +946,9 @@ int mb_tcontour(
 				{
 				jj = j + 1;
 				if (jj == 3) jj = 0;
-				if ((data->z[data->iv[j][itri]] > value 
+				if ((data->z[data->iv[j][itri]] > value
 					&& data->z[data->iv[jj][itri]] < value)
-					|| (data->z[data->iv[jj][itri]] > value 
+					|| (data->z[data->iv[jj][itri]] > value
 					&& data->z[data->iv[j][itri]] < value))
 					data->flag[j][itri] = 1;
 				else
@@ -990,31 +991,31 @@ int mb_tcontour(
 				/* deal with tick as needed */
 				if (tick && tick_last == MB_NO)
 					{
-					if (data->z[data->iv[iside1][itri]] > 
+					if (data->z[data->iv[iside1][itri]] >
 						data->z[data->iv[iside2][itri]])
 						hand = -1;
 					else
 						hand = 1;
-					data->xsave[data->nsave] =  
+					data->xsave[data->nsave] =
 					  0.5*(x + data->xsave[data->nsave-1]);
-					data->ysave[data->nsave] =  
+					data->ysave[data->nsave] =
 					  0.5*(y + data->ysave[data->nsave-1]);
-					magdis = sqrt(pow((x - 
+					magdis = sqrt(pow((x -
 					  data->xsave[data->nsave-1]),2.0)
 					  + pow((y - data->ysave[data->nsave-1]),2.0));
-					data->xsave[data->nsave+1] = 
-					  data->xsave[data->nsave] 
+					data->xsave[data->nsave+1] =
+					  data->xsave[data->nsave]
 					  - hand*data->tick_len*
 					  (y - data->ysave[data->nsave-1])
 					  /magdis;
-					data->ysave[data->nsave+1] = 
-					  data->ysave[data->nsave] 
+					data->ysave[data->nsave+1] =
+					  data->ysave[data->nsave]
 					  + hand*data->tick_len*
 					  (x - data->xsave[data->nsave-1])
 					  /magdis;
-					data->xsave[data->nsave+2] = 
+					data->xsave[data->nsave+2] =
 						data->xsave[data->nsave];
-					data->ysave[data->nsave+2] = 
+					data->ysave[data->nsave+2] =
 						data->ysave[data->nsave];
 					data->xsave[data->nsave+3] = x;
 					data->ysave[data->nsave+3] = y;
@@ -1039,7 +1040,7 @@ int mb_tcontour(
 				}
 
 			/* set label if needed */
-			if (label && !closed 
+			if (label && !closed
 				&& data->ed[isidestart][itristart] != 0)
 				{
 				data->xlabel[data->nlabel] = data->xsave[0];
@@ -1053,12 +1054,12 @@ int mb_tcontour(
 				if (check_label(data,data->nlabel))
 					data->nlabel++;
 				}
-			if (label && !closed 
+			if (label && !closed
 				&& data->ed[isideend][itriend] != 0)
 				{
-				data->xlabel[data->nlabel] 
+				data->xlabel[data->nlabel]
 					= data->xsave[data->nsave-1];
-				data->ylabel[data->nlabel] 
+				data->ylabel[data->nlabel]
 					= data->ysave[data->nsave-1];
 				get_azimuth_tri(data,itriend,isideend,
 					&data->angle[data->nlabel]);
@@ -1093,10 +1094,10 @@ int mb_tcontour(
 /*--------------------------------------------------------------------------*/
 /* 	function get_start_tri finds next contour starting point. */
 int get_start_tri(
-		struct swath *data, 
-		int	*itri, 
-		int	*iside1, 
-		int	*iside2, 
+		struct swath *data,
+		int	*itri,
+		int	*iside1,
+		int	*iside2,
 		int	*closed)
 {
 	int	isave;
@@ -1149,12 +1150,12 @@ int get_start_tri(
 /*--------------------------------------------------------------------------*/
 /* 	function get_next_tri finds next contour component if it exists */
 int get_next_tri(
-		struct swath *data, 
-		int	*itri, 
-		int	*iside1, 
-		int	*iside2, 
-		int	*closed, 
-		int	*itristart, 
+		struct swath *data,
+		int	*itri,
+		int	*iside1,
+		int	*iside2,
+		int	*closed,
+		int	*itristart,
 		int	*isidestart)
 {
 	double	xs, ys;
@@ -1162,7 +1163,7 @@ int get_next_tri(
 	int	i, j;
 
 	/* check if contour ends where it began */
-	if (*closed && data->ct[*iside2][*itri] == *itristart 
+	if (*closed && data->ct[*iside2][*itri] == *itristart
 		&& data->cs[*iside2][*itri] == *isidestart)
 		return(MB_NO);
 
@@ -1186,7 +1187,7 @@ int get_next_tri(
 		return(MB_YES);
 		}
 
-	/* else if contour ends but closed set true then 
+	/* else if contour ends but closed set true then
 		turn contour around and continue in other direction */
 	else if (*closed)
 		{
@@ -1227,12 +1228,12 @@ int get_next_tri(
 /*--------------------------------------------------------------------------*/
 /* 	function get_pos_tri finds position of contour crossing point */
 int get_pos_tri(
-		struct swath *data, 
-		double	eps, 
-		int	itri, 
-		int	iside, 
-		double	value, 
-		double	*x, 
+		struct swath *data,
+		double	eps,
+		int	itri,
+		int	iside,
+		double	value,
+		double	*x,
 		double	*y)
 {
 	double	factor;
@@ -1252,14 +1253,14 @@ int get_pos_tri(
 	*y = data->y[pt1] + factor*(data->y[pt2] - data->y[pt1]);
 
 	return(MB_YES);
-	
+
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_azimuth_tri gets azimuth across track for a label */
 int get_azimuth_tri(
-		struct swath *data, 
-		int	itri, 
-		int	iside, 
+		struct swath *data,
+		int	itri,
+		int	iside,
 		double	*angle)
 {
 	*angle = -data->pings[data->pingid[data->iv[iside][itri]]].heading;
@@ -1273,7 +1274,7 @@ int get_azimuth_tri(
 /*--------------------------------------------------------------------------*/
 /* 	function check_label checks if new label will overwrite any recent
  *	labels. */
-int check_label(struct swath *data, 
+int check_label(struct swath *data,
 		int	nlab)
 {
 #define	MAXHIS 30
@@ -1298,7 +1299,7 @@ int check_label(struct swath *data,
 	if (good)
 		{
 		nlabel_his++;
-		if (nlabel_his >= MAXHIS) 
+		if (nlabel_his >= MAXHIS)
 			nlabel_his = MAXHIS - 1;
 		for (i=nlabel_his;i>0;i--)
 			{
@@ -1323,9 +1324,10 @@ int dump_contour(struct swath *data, double value)
 
 	/* plot the contours */
 	if (data->nsave < 2) return(MB_NO);
-	plot(data->xsave[0],data->ysave[0],IUP);
-	for (i=1;i<data->nsave;i++)
-		plot(data->xsave[i],data->ysave[i],IDN);
+	plot(data->xsave[0],data->ysave[0],IMOVE);
+	for (i=1;i<data->nsave-1;i++)
+		plot(data->xsave[i],data->ysave[i],IDRAW);
+	plot(data->xsave[data->nsave-1],data->ysave[data->nsave-1],ISTROKE);
 	data->nsave = 0;
 
 	/* plot the labels */
@@ -1432,7 +1434,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 				}
 			}
 		}
-		
+
 	/* count number of points and verify that enough memory is allocated */
 	npt_cnt = 0;
 	for (i=0;i<data->npings;i++)
@@ -1518,7 +1520,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 			{
 			k = nci + i;
 			data->level_list[i] = k*data->contour_int;
-			data->color_list[i] = 
+			data->color_list[i] =
 				(int)(data->level_list[i]/data->color_int)
 					%data->ncolor;
 			if (data->tick_int <= 0.0)
@@ -1594,7 +1596,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 			beamflag1 = data->pings[i].beamflag;
 			bath1 = data->pings[i].bath;
 			beams_bath_use = data->pings[i].beams_bath;
-			if (i<data->npings-1) 
+			if (i<data->npings-1)
 			    {
 			    beamflag2 = data->pings[i+1].beamflag;
 			    bath2 = data->pings[i+1].bath;
@@ -1604,15 +1606,15 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 				{
 				/* check for across track intersection */
 				if (j < beams_bath_use-1)
-					if ((mb_beam_ok(beamflag1[j]) && mb_beam_ok(beamflag1[j+1])) 
+					if ((mb_beam_ok(beamflag1[j]) && mb_beam_ok(beamflag1[j+1]))
 					&& ((bath1[j]<value && bath1[j+1]>value)
 					|| (bath1[j]>value && bath1[j+1]<value)))
 						data->pings[i].bflag[0][j] = 1;
 
 				/* check for along track intersection */
 				if (i < data->npings-1)
-					if ((mb_beam_ok(beamflag1[j]) && mb_beam_ok(beamflag2[j])) 
-					&& ((bath1[j]<value && bath2[j]>value) 
+					if ((mb_beam_ok(beamflag1[j]) && mb_beam_ok(beamflag2[j]))
+					&& ((bath1[j]<value && bath2[j]>value)
 					|| (bath1[j]>value && bath2[j]<value)))
 						data->pings[i].bflag[1][j] = 1;
 				}
@@ -1649,37 +1651,37 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 				get_hand_old(data,&hand,k,i,j,d);
 				if (tick && tick_last == MB_NO)
 					{
-					data->xsave[data->nsave] = 
-						0.5*(x + 
+					data->xsave[data->nsave] =
+						0.5*(x +
 						data->xsave[data->nsave-1]);
-					data->ysave[data->nsave] = 
-						0.5*(y + 
+					data->ysave[data->nsave] =
+						0.5*(y +
 						data->ysave[data->nsave-1]);
-					magdis = sqrt(pow((x 
-						- data->xsave[data->nsave-1]),2.0) 
-						+ pow((y 
+					magdis = sqrt(pow((x
+						- data->xsave[data->nsave-1]),2.0)
+						+ pow((y
 						- data->ysave[data->nsave-1]),2.0));
 					if (magdis > 0.0)
 					    {
-					    data->xsave[data->nsave+1] = 
-						    data->xsave[data->nsave] 
-						    - hand*data->tick_len*(y 
+					    data->xsave[data->nsave+1] =
+						    data->xsave[data->nsave]
+						    - hand*data->tick_len*(y
 						    - data->ysave[data->nsave-1])/magdis;
-					    data->ysave[data->nsave+1] = 
-						    data->ysave[data->nsave] 
-						    + hand*data->tick_len*(x 
+					    data->ysave[data->nsave+1] =
+						    data->ysave[data->nsave]
+						    + hand*data->tick_len*(x
 						    - data->xsave[data->nsave-1])/magdis;
 					    }
 					else
 					    {
-					    data->xsave[data->nsave+1] = 
+					    data->xsave[data->nsave+1] =
 						    data->xsave[data->nsave];
-					    data->ysave[data->nsave+1] = 
+					    data->ysave[data->nsave+1] =
 						    data->ysave[data->nsave];
 					    }
-					data->xsave[data->nsave+2] = 
+					data->xsave[data->nsave+2] =
 						data->xsave[data->nsave];
-					data->ysave[data->nsave+2] = 
+					data->ysave[data->nsave+2] =
 						data->ysave[data->nsave];
 					data->xsave[data->nsave+3] = x;
 					data->ysave[data->nsave+3] = y;
@@ -1731,7 +1733,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 						if (jj > right) right = jj;
 						}
 					}
-				if (data->jsave[0] == left 
+				if (data->jsave[0] == left
 					|| data->jsave[0] == left+1)
 					{
 					data->xlabel[data->nlabel] = data->xsave[0];
@@ -1739,10 +1741,10 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 					get_azimuth_old(data,data->isave[0],
 						&data->angle[data->nlabel]);
 					data->justify[data->nlabel] = 1;
-					if (check_label(data,data->nlabel)) 
+					if (check_label(data,data->nlabel))
 						data->nlabel++;
 					}
-				else if (data->jsave[0] == right 
+				else if (data->jsave[0] == right
 					|| data->jsave[0] == right-1)
 					{
 					data->xlabel[data->nlabel] = data->xsave[0];
@@ -1750,7 +1752,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 					get_azimuth_old(data,data->isave[0],
 						&data->angle[data->nlabel]);
 					data->justify[data->nlabel] = 0;
-					if (check_label(data,data->nlabel)) 
+					if (check_label(data,data->nlabel))
 						data->nlabel++;
 					}
 
@@ -1765,35 +1767,35 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 						if (jj > right) right = jj;
 						}
 					}
-				if ((data->nlabel == 0 || data->nsave > 10) 
-					&& (data->jsave[data->nsave-1] == left 
-						|| data->jsave[data->nsave-1] 
+				if ((data->nlabel == 0 || data->nsave > 10)
+					&& (data->jsave[data->nsave-1] == left
+						|| data->jsave[data->nsave-1]
 							== left+1))
 					{
-					data->xlabel[data->nlabel] 
+					data->xlabel[data->nlabel]
 						= data->xsave[data->nsave-1];
-					data->ylabel[data->nlabel] 
+					data->ylabel[data->nlabel]
 						= data->ysave[data->nsave-1];
 					get_azimuth_old(data,data->isave[data->nsave-1],
 						&data->angle[data->nlabel]);
 					data->justify[data->nlabel] = 1;
-					if (check_label(data,data->nlabel)) 
+					if (check_label(data,data->nlabel))
 						data->nlabel++;
 					}
-				else if ((data->nlabel == 0 || data->nsave > 10) 
-					&& (data->jsave[data->nsave-1] == right 
-						|| data->jsave[data->nsave-1] 
+				else if ((data->nlabel == 0 || data->nsave > 10)
+					&& (data->jsave[data->nsave-1] == right
+						|| data->jsave[data->nsave-1]
 							== right-1))
 					{
-					data->xlabel[data->nlabel] 
+					data->xlabel[data->nlabel]
 						= data->xsave[data->nsave-1];
-					data->ylabel[data->nlabel] 
+					data->ylabel[data->nlabel]
 						= data->ysave[data->nsave-1];
 					get_azimuth_old(data,
 						data->isave[data->nsave-1],
 						&data->angle[data->nlabel]);
 					data->justify[data->nlabel] = 0;
-					if (check_label(data,data->nlabel)) 
+					if (check_label(data,data->nlabel))
 						data->nlabel++;
 					}
 				}
@@ -1820,7 +1822,7 @@ int mb_ocontour(int verbose, struct swath *data, int *error)
 /*--------------------------------------------------------------------------*/
 /* 	function get_start_old finds next contour starting point.
  *	the borders are searched first and then the interior */
-int get_start_old(struct swath *data, 
+int get_start_old(struct swath *data,
 		int *k, int *i, int *j, int *d, int *closed)
 {
 	int	ii, jj;
@@ -1901,7 +1903,7 @@ int get_start_old(struct swath *data,
 /*--------------------------------------------------------------------------*/
 /* 	function get_next_old finds next contour component if it exists */
 int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd,
-		int k, int i, int j, int d, 
+		int k, int i, int j, int d,
 		int kbeg, int ibeg, int jbeg, int dbeg, int *closed)
 {
 	static int ioff[3][2][2] =
@@ -1941,11 +1943,11 @@ int get_next_old(struct swath *data, int *nk, int *ni, int *nj, int *nd,
 		it[edge] = i + ioff[edge][k][d];
 		jt[edge] = j + joff[edge][k][d];
 		dt[edge] = doff[edge][k][d];
-		if (it[edge] < 0 || it[edge] >= data->npings 
+		if (it[edge] < 0 || it[edge] >= data->npings
 			|| jt[edge] < 0 || jt[edge] >= data->pings[i].beams_bath)
 			ifedge[edge] = 0;
 		else
-			ifedge[edge] = 
+			ifedge[edge] =
 				data->pings[it[edge]].bflag[kt[edge]][jt[edge]];
 		}
 
@@ -2050,7 +2052,7 @@ int get_pos_old(struct swath *data, double eps, double *x, double *y,
 }
 /*--------------------------------------------------------------------------*/
 /* 	function get_hand_old finds handedness of contour */
-int get_hand_old(struct swath *data, int *hand, 
+int get_hand_old(struct swath *data, int *hand,
 		int k, int i, int j, int d)
 {
 	if (k == 0 && d == 0)

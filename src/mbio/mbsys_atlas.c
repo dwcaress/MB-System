@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_atlas.c	3.00	6/25/01
  *	$Id$
  *
- *    Copyright (c) 2001-2009 by
+ *    Copyright (c) 2001-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1027,7 +1027,7 @@ int mbsys_atlas_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		else
 			detect = MB_DETECT_AMPLITUDE;
 			
-		/* get travel times */
+		/* get detects */
 		*nbeams = store->tt_beam_cnt;
 		for (i=0;i<store->tt_beam_cnt;i++)
 			{

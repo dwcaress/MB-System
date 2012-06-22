@@ -77,6 +77,7 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
+    Boolean      argok=False;
     Widget   topLevelShell;
     Widget   mainWindow;
     
@@ -131,10 +132,10 @@ int main( int argc, char **argv)
     XtSetArg(args[ac], XmNtitle, "MBnavedit"); ac++;
     XtSetArg(args[ac], XmNiconName, "MBnavedit"); ac++;
     XtSetArg(args[ac], XmNallowShellResize, True); ac++;
-    XtSetArg(args[ac], XmNx, 89); ac++;
-    XtSetArg(args[ac], XmNy, 127); ac++;
-    XtSetArg(args[ac], XmNwidth, 1018); ac++;
-    XtSetArg(args[ac], XmNheight, 695); ac++;
+    XtSetArg(args[ac], XmNx, 964); ac++;
+    XtSetArg(args[ac], XmNy, 300); ac++;
+    XtSetArg(args[ac], XmNwidth, 1024); ac++;
+    XtSetArg(args[ac], XmNheight, 683); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",
         topLevelShellWidgetClass,
         parent,

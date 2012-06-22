@@ -1,4 +1,4 @@
-.TH mbbackangle 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbbackangle 1 "7 June 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbbackangle\fP - Generates tables of the average amplitude or 
 sidescan values in swath sonar data as a function of 
@@ -13,7 +13,8 @@ Version 5.0
 \fB-G\fIkind/angle/max/nx/ny\fP
 \fB-I\fIfile\fP \fB-K\fIsmooth\fP  
 \fB-N\fInangle/anglemax\fP \fB-P\fIpings\fP \fB-Q\fP
-\fBR\fIrefangle\fP \fB-X\fIacross/along\fP \fB-Z\fIaltitude\fP \fB-V -H\fP]
+\fB-R\fIrefangle\fP \fB-T\fItopogridfile\fP 
+\fB-X\fIacross/along\fP \fB-Z\fIaltitude\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 The program \fBmbbackangle\fP reads a swath sonar data file 
@@ -53,6 +54,10 @@ sample is also interpolated using the samples apparent grazing angle.
 The grazing angle is calculated using a flat bottom assumption 
 by default but, if the \fB-Q\fP option is used, will instead be 
 calculated using the acrosstrack slope in the bathymetry (if available) .
+If the \fB-T\fP option is used to specify a topography grid of the area
+of interest, then the grazing angle is calculated using that grid rather
+than any bathymetry data within the file being processed.
+
 If the values are in dB, and therefore log scaled, then the corrections 
 are subtracted from the raw values and then the value of the correction 
 table at the reference angle (specified with the \fB-R\fP option) is 
@@ -191,8 +196,7 @@ By default, \fBmbbackangle\fP does not use seafloor slopes in
 calculating the grazing angles for each amplitude beam and sidescan
 pixel. This option causes the program to calculate acrosstrack slopes
 from swath bathymetry, if available, and to factor these slopes
-into the grazing angle calculation for each data point. In general,
-this option does not work well.
+into the grazing angle calculation for each data point.
 .TP
 .B \-R
 \fIrefangle\fP
@@ -201,10 +205,12 @@ applying the amplitude and/or sidescan correction tables generated
 by \fBmbbackangle\fP. Default: \fIrefangle\fP = 30.0 degrees.
 .TP
 .B \-T
-\fIrefangle\fP
-Sets the reference angle that will be used by \fBmbprocess\fP in 
-applying the amplitude and/or sidescan correction tables generated
-by \fBmbbackangle\fP. Default: \fIrefangle\fP = 30.0 degrees.
+\fItopogridfile\fP
+By default, \fBmbbackangle\fP does not use seafloor slopes in
+calculating the grazing angles for each amplitude beam and sidescan
+pixel. This option causes the program to calculate acrosstrack slopes
+using the topography grid \fItopogridfile\fP, and to factor these slopes
+into the grazing angle calculation for each data point.
 .TP
 .B \-V
 Normally, \fBmbbackangle\fP works "silently" without outputting
@@ -395,7 +401,7 @@ in mbari_1998_988_msn.mb57.sga looks like:
  	#
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbanglecorrect\fP(l), \fBmbfilter\fP(l)
+\fBmbsystem\fP(l), \fBmbprocess\fP(l), \fBmbset\fP(l), \fBmbfilter\fP(l)
 
 .SH BUGS
 None worth bragging about.

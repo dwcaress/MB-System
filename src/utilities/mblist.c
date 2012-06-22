@@ -2,7 +2,7 @@
  *    The MB-system:	mblist.c	2/1/93
  *    $Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -269,6 +269,7 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_io.h"
 #include "../../include/mbsys_simrad2.h"
+#include "../../include/mbsys_simrad3.h"
 
 /* GMT include files */
 #include "gmt_nan.h"
@@ -377,6 +378,30 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 		int *center_sample,
 		double *ss_pixels,
 		int *error);
+int mb_get_raw_simrad3(int verbose, void *mbio_ptr, 
+		int *mode,
+		int *ipulse_length,
+		int *png_count,
+		int *sample_rate,
+		double *absorption,
+		int *max_range,
+		int *r_zero,
+		int *r_zero_corr,
+		int *tvg_start,
+		int *tvg_stop,
+		double *bsn,
+		double *bso,
+		int *tx,
+		int *tvg_crossover,
+		int *nbeams_ss,
+		int *npixels,
+		int *beam_samples,
+		int *start_sample,
+		int *range,
+		double *depression,
+		double *bs,
+		double *ss_pixels,
+		int *error);
 
 /* NaN value */
 double	NaN;
@@ -446,9 +471,12 @@ int main (int argc, char **argv)
 	int	use_amp = MB_NO;
 	int	use_ss = MB_NO;
 	int	use_slope = MB_NO;
+	int	use_attitude = MB_NO;
 	int	use_nav = MB_NO;
 	int	use_gains = MB_NO;
+	int	use_detects = MB_YES;
 	int	check_values = MBLIST_CHECK_ON;
+	int	check_nav = MB_NO;
 	int	check_bath = MB_NO;
 	int	check_amp = MB_NO;
 	int	check_ss = MB_NO;
@@ -487,6 +515,7 @@ int main (int argc, char **argv)
 	double	*bath = NULL;
 	double	*bathacrosstrack = NULL;
 	double	*bathalongtrack = NULL;
+	int	*detect = NULL;
 	double	*amp = NULL;
 	double	*ss = NULL;
 	double	*ssacrosstrack = NULL;
@@ -573,6 +602,7 @@ int main (int argc, char **argv)
 	double	receive_gain;
 
 	int	read_data;
+	int	nbeams;
 	int	i, j, k, m;
 
 	/* output files */
@@ -753,10 +783,15 @@ int main (int argc, char **argv)
 			break;
 		case 'U':
 		case 'u':
-			sscanf (optarg,"%d", &check_values);
-			if (check_values < MBLIST_CHECK_ON 
-			    || check_values > MBLIST_CHECK_OFF_FLAGNAN)
-			    check_values = MBLIST_CHECK_ON;
+			if (optarg[0] == 'N')
+				check_nav =MB_YES;
+			else
+			    {
+			    sscanf (optarg,"%d", &check_values);
+			    if (check_values < MBLIST_CHECK_ON 
+			      || check_values > MBLIST_CHECK_OFF_FLAGNAN)
+				check_values = MBLIST_CHECK_ON;
+			    }
 			flag++;
 			break;
 		case 'W':
@@ -844,6 +879,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       pixel_end:      %d\n",pixel_end);
 		fprintf(stderr,"dbg2       dump_mode:      %d\n",dump_mode);
 		fprintf(stderr,"dbg2       check_values:   %d\n",check_values);
+		fprintf(stderr,"dbg2       check_nav:      %d\n",check_nav);
 		fprintf(stderr,"dbg2       n_list:         %d\n",n_list);
 		for (i=0;i<n_list;i++)
 			fprintf(stderr,"dbg2         list[%d]:      %c\n",
@@ -1485,6 +1521,18 @@ int main (int argc, char **argv)
 
 		    signflip_next_value = MB_NO;
 		    invert_next_value = MB_NO;
+		    break;
+
+		  case 'q': /* bottom detect type */
+		  case 'Q': /* bottom detect type */
+		    strcpy(variable, "bottom_detect_type");
+
+		    fprintf(output[i], "\t%s = ", variable);
+
+		    fprintf(outfile, "\tlong %s(data);\n", variable);
+		    fprintf(outfile, "\t\t%s:long_name = \"Bottom detect type\";\n", variable);
+		    fprintf(outfile, "\t\t%s:units = \"", variable);
+		    fprintf(outfile, "0=unknown,1=amplitude,2=phase\";\n");
 		    break;
 
 		  case 'R': /* roll */
@@ -2423,7 +2471,8 @@ int main (int argc, char **argv)
 		    if (raw_next_value == MB_NO) 
 		        {
 			if (list[i] == 'Z' || list[i] == 'z'
-				|| list[i] == 'A' || list[i] == 'a')
+				|| list[i] == 'A' || list[i] == 'a'
+				|| list[i] == 'Q' || list[i] == 'q')
 				use_bath = MB_YES;
 			if (list[i] == 'B')
 				use_amp = MB_YES;
@@ -2440,6 +2489,11 @@ int main (int argc, char **argv)
 				use_slope = MB_YES;
 			if (list[i] == 'P' || list[i] == 'p' 
 				|| list[i] == 'R' || list[i] == 'r')
+				use_attitude = MB_YES;
+			if (list[i] == 'Q' || list[i] == 'q')
+				use_detects = MB_YES;
+			if (list[i] == 'X' || list[i] == 'x' 
+				|| list[i] == 'Y' || list[i] == 'y')
 				use_nav = MB_YES;
 			if (list[i] == '.')
 			  raw_next_value = MB_YES;
@@ -2511,6 +2565,9 @@ int main (int argc, char **argv)
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						2 * sizeof(double), (void **)&slopeacrosstrack, &error);
+	if (error == MB_ERROR_NO_ERROR)
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+						2 * sizeof(int), (void **)&detect, &error);
 	if (use_raw == MB_YES)
 		{
 		if (error == MB_ERROR_NO_ERROR)
@@ -2565,7 +2622,7 @@ int main (int argc, char **argv)
 		error = MB_ERROR_NO_ERROR;
 		
 		/* read a ping of data */
-		if (pings == 1 || use_nav == MB_YES)
+		if (pings == 1 || use_attitude == MB_YES || use_detects == MB_YES)
 		    {
 		    /* read next data record */
 		    status = mb_get_all(verbose,mbio_ptr,&store_ptr,&kind,
@@ -2590,6 +2647,13 @@ int main (int argc, char **argv)
 			status = mb_extract_nav(verbose,mbio_ptr,store_ptr,&kind,
 					time_i,&time_d,&navlon,&navlat,
 					&speed,&heading,&draft,&roll,&pitch,&heave,&error);
+
+		    /* if survey data extract detects */
+		    if (error == MB_ERROR_NO_ERROR
+			&& kind == MB_DATA_DATA
+			&& use_detects)
+			status = mb_detects(verbose,mbio_ptr,store_ptr,&kind,
+					&nbeams,detect,&error);
 		    }
 		else
 		    {
@@ -2885,6 +2949,8 @@ int main (int argc, char **argv)
 				beam_status = MB_FAILURE;
 		  if (use_time_interval == MB_YES && first == MB_YES)
 			beam_status = MB_FAILURE;
+		  if (check_nav == MB_YES && (navlon == 0.0 || navlon == 0.0))
+		  	beam_status = MB_FAILURE;
 
 		  /* print out good beams */
 		  if (beam_status == MB_SUCCESS)
@@ -3205,6 +3271,45 @@ int main (int argc, char **argv)
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
+				case 'q': /* bottom detection type */
+					if (ascii == MB_YES)
+					    {
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+						
+					    fprintf(output[i],"%d",detect[k]);
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    }
+					else
+					    {
+					    b = detect[k];
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					break;
+				case 'Q': /* bottom detection type */
+					if (ascii == MB_YES)
+					    {
+					    if (netcdf == MB_YES)
+					    	{
+						fprintf(output[i], "\"");
+						fprintf(output[i],"%d",detect[k]);
+					    	fprintf(output[i], "\"");
+						}
+					    else
+					    	{
+						if (detect[k] == MB_DETECT_AMPLITUDE)
+						    fprintf(output[i],"A");
+						else if (detect[k] == MB_DETECT_PHASE)
+						    fprintf(output[i],"P");
+						else
+						    fprintf(output[i],"U");
+						}
+					    }
+					else
+					    {
+					    b = detect[k];
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					break;
 				case 'R': /* roll */
 					printsimplevalue(verbose, output[i], roll, 6, 3, ascii, 
 							    &invert_next_value, 
@@ -3328,7 +3433,7 @@ int main (int argc, char **argv)
 							*bathacrosstrack[k]
 						    + headingx*mtodeglon
 							*bathalongtrack[k];
-					printsimplevalue(verbose, output[i], dlon, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlon, 14, 9, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -3351,7 +3456,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %8.5f%c",
+					    fprintf(output[i],"%3d %9.6f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -3371,7 +3476,7 @@ int main (int argc, char **argv)
 							*bathacrosstrack[k]
 						    + headingy*mtodeglat
 							*bathalongtrack[k];
-					printsimplevalue(verbose, output[i], dlat, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlat, 14, 9, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -3394,7 +3499,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %8.5f%c",
+					    fprintf(output[i],"%3d %9.6f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -3850,10 +3955,12 @@ int main (int argc, char **argv)
 			    && beamflag[beam_vertical] == MB_FLAG_NULL)
 				pixel_status = MB_FAILURE;
 			}
-		  if (check_ss == MB_YES && ss[k] <= 0)
+		  if (check_ss == MB_YES && ss[j] <= 0)
 			pixel_status = MB_FAILURE;
 		  if (use_time_interval == MB_YES && first == MB_YES)
 			pixel_status = MB_FAILURE;
+		  if (check_nav == MB_YES && (navlon == 0.0 || navlon == 0.0))
+		  	pixel_status = MB_FAILURE;
 
 		  /* print out good pixels */
 		  if (pixel_status == MB_SUCCESS)
@@ -4083,6 +4190,20 @@ int main (int argc, char **argv)
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
+				case 'Q': /* bottom detection type */
+					if (ascii == MB_YES)
+					    {
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+						
+					    fprintf(output[i],"%d",MB_DETECT_UNKNOWN);
+					    if (netcdf == MB_YES) fprintf(output[i], "\"");
+					    }
+					else
+					    {
+					    b = MB_DETECT_UNKNOWN;
+					    fwrite(&b, sizeof(double), 1, outfile);
+					    }
+					break;
 				case 'R': /* roll */
 					printsimplevalue(verbose, output[i], roll, 6, 3, ascii, 
 							    &invert_next_value, 
@@ -4205,7 +4326,7 @@ int main (int argc, char **argv)
 							*ssacrosstrack[k]
 						    + headingx*mtodeglon
 							*ssalongtrack[k];
-					printsimplevalue(verbose, output[i], dlon, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlon, 14, 9, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -4228,7 +4349,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %8.5f%c",
+					    fprintf(output[i],"%3d %9.6f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -4248,7 +4369,7 @@ int main (int argc, char **argv)
 							*ssacrosstrack[k]
 						    + headingy*mtodeglat
 							*ssalongtrack[k];
-					printsimplevalue(verbose, output[i], dlat, 11, 6, ascii, 
+					printsimplevalue(verbose, output[i], dlat, 14, 9, ascii, 
 							    &invert_next_value, 
 							    &signflip_next_value, &error);
 					break;
@@ -4271,7 +4392,7 @@ int main (int argc, char **argv)
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-					    fprintf(output[i],"%3d %8.5f%c",
+					    fprintf(output[i],"%3d %9.6f%c",
 						degrees, minutes, hemi);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -5394,7 +5515,35 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		    error);
 
 	    break;
-	    }
+	  case MBF_EM710MBA:
+	  case MBF_EM710RAW:
+	    mb_get_raw_simrad3(verbose, mbio_ptr, 
+				mode,
+				ipulse_length,
+				png_count,
+				sample_rate,
+				absorption,
+				max_range,
+				r_zero,
+				r_zero_corr,
+				tvg_start,
+				tvg_stop,
+				bsn,
+				bso,
+				tx,
+				tvg_crossover,
+				nbeams_ss,
+				npixels,
+				beam_samples,
+				start_sample,
+				range,
+				depression,
+				bs,
+				ss_pixels,
+				error);
+
+	    break;
+	  }
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -5532,6 +5681,136 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 	    for (i = 0; i < ping_ptr->png_npixels; i++)
 		ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
 	    }
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> completed\n",
+			function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       mode:            %d\n",*mode);
+		fprintf(stderr,"dbg2       ipulse_length:   %d\n",*ipulse_length);
+		fprintf(stderr,"dbg2       png_count:       %d\n",*png_count);
+		fprintf(stderr,"dbg2       sample_rate:     %d\n",*sample_rate);
+		fprintf(stderr,"dbg2       absorption:      %f\n",*absorption);
+		fprintf(stderr,"dbg2       max_range:       %d\n",*max_range);
+		fprintf(stderr,"dbg2       r_zero:          %d\n",*r_zero);
+		fprintf(stderr,"dbg2       r_zero_corr:     %d\n",*r_zero_corr);
+		fprintf(stderr,"dbg2       tvg_start:       %d\n",*tvg_start);
+		fprintf(stderr,"dbg2       tvg_stop:        %d\n",*tvg_stop);
+		fprintf(stderr,"dbg2       bsn:             %f\n",*bsn);
+		fprintf(stderr,"dbg2       bso:             %f\n",*bso);
+		fprintf(stderr,"dbg2       tx:              %d\n",*tx);
+		fprintf(stderr,"dbg2       tvg_crossover:   %d\n",*tvg_crossover);
+		fprintf(stderr,"dbg2       nbeams_ss:       %d\n",*nbeams_ss);
+		fprintf(stderr,"dbg2       npixels:         %d\n",*npixels);
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
+			{
+			fprintf(stderr,"dbg2       beam:%d range:%d depression:%f bs:%f\n",
+				i,range[i],depression[i],bs[i]);
+			}
+		for (i = 0; i < mb_io_ptr->beams_bath_max; i++)
+			{
+			fprintf(stderr,"dbg2       beam:%d samples:%d start:%d\n",
+				i,beam_samples[i],start_sample[i]);
+			}
+		for (i = 0; i < *npixels; i++)
+			{
+			fprintf(stderr,"dbg2       pixel:%d ss:%f\n",
+				i,ss_pixels[i]);
+			}
+		fprintf(stderr,"dbg2       error:           %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:          %d\n",status);
+		}
+
+	return status;
+}
+/*--------------------------------------------------------------------*/
+/*
+Method to get fields from simrad3 raw data.
+*/
+
+int mb_get_raw_simrad3(int verbose, void *mbio_ptr, 
+			int	*mode,
+			int	*ipulse_length,
+			int	*png_count,
+			int	*sample_rate,
+			double	*absorption,
+			int 	*max_range,
+			int 	*r_zero,
+			int 	*r_zero_corr,
+			int 	*tvg_start,
+			int 	*tvg_stop,
+			double 	*bsn,
+			double 	*bso,
+			int 	*tx,
+			int 	*tvg_crossover,
+			int 	*nbeams_ss,
+			int 	*npixels,
+			int 	*beam_samples,
+			int	*start_sample,
+			int 	*range,
+			double	*depression,
+			double 	*bs,
+			double	*ss_pixels,
+			int 	*error)
+{
+	char	*function_name = "mb_get_raw_simrad3";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad3_struct *store_ptr;
+	struct mbsys_simrad3_ping_struct *ping_ptr;
+  	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBlist function <%s> called\n",
+			function_name);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:        %lu\n",(size_t)mbio_ptr);
+		}
+
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	store_ptr = (struct mbsys_simrad3_struct *) mb_io_ptr->store_data;
+	ping_ptr = store_ptr->ping;
+
+	if (store_ptr->kind == MB_DATA_DATA)
+	  {
+	    *mode = store_ptr->run_mode;
+	    *ipulse_length = store_ptr->run_tran_pulse;
+	    *png_count = ping_ptr->png_count;
+	    *sample_rate =  ping_ptr->png_sample_rate;
+	    *absorption = store_ptr->run_absorption * 0.01;
+	    *max_range = 0;
+	    *r_zero = ping_ptr->png_r_zero;
+	    *r_zero_corr = 0;
+	    *tvg_start = 0;
+	    *tvg_stop = 0;
+	    *bsn = ping_ptr->png_bsn * 0.1;
+	    *bso = ping_ptr->png_bso * 0.1;
+	    *tx = ping_ptr->png_tx * 0.1;
+	    *tvg_crossover = ping_ptr->png_tvg_crossover;
+	    *nbeams_ss = ping_ptr->png_nbeams_ss;
+	    *npixels = ping_ptr->png_npixels;
+	    
+	    
+	    for (i = 0; i < ping_ptr->png_nbeams; i++)
+	      {
+		range[i] = ping_ptr->png_range[i];
+		depression[i] = ping_ptr->png_depression[i] * .01;
+		bs[i] = ping_ptr->png_amp[i] * 0.5;
+	      }
+	    for (i = 0; i < ping_ptr->png_nbeams_ss; i++) 
+	      {
+		beam_samples[i] = ping_ptr->png_beam_samples[i];
+		start_sample[i] = ping_ptr->png_start_sample[i];
+	      }
+	    for (i = 0; i < ping_ptr->png_npixels; i++)
+	      ss_pixels[i] = ping_ptr->png_ssraw[i] * 0.5;
+	  }
 
 	/* print output debug statements */
 	if (verbose >= 2)

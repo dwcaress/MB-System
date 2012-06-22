@@ -1,4 +1,4 @@
-.TH mbclean 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean 1 "16 August 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP - Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -10,8 +10,8 @@ Version 5.0
 \fB-D\fImin/max\fP \fB-F\fIformat\fP 
 \fB-G\fIfraction_low/fraction_high\fP 
 \fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP 
-\fB-M\fImode\fP \fB-Q\fP \fB-S\fIslope/mode/units\fP
-\fB-U\fInmin\fP \fB-X\fIzap_beams\fP \fB-V -H\fP]
+\fB-M\fImode\fP \fB-Q\fIbackup\fP \fB-R\fImaxheadingrate\fP \fB-S\fIslope/mode/units\fP
+\fB-U\fInmin\fP \fB-X\fIbeamsleft/beamsright\fP \fB-Y\fIdistanceleft/distanceright\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBmbclean\fP identifies and flags artifacts in swath sonar bathymetry data.
@@ -35,10 +35,15 @@ A set number of outer beams can also be flagged.
 The order in which the flagging algorithms are applied is
 as follows:
 .br
- 	1. Flag specified number of outer beams 
+ 	1. Flag specified numbers of outer beams 
  		(\fB-X\fP option).
+ 	2. Flag outer beams by acrosstrack distance
+ 		(\fB-Y\fP option).
  	2. Flag soundings outside specified acceptable 
  		depth range (\fB-B\fP option).
+ 	7. Flag pings with excessive heading change rate
+	        (\fB-Q\fP option).
+ 	7. Zap "rails" (\fB-Q\fP option).
  	3. Flag soundings outside acceptable depth range 
  		using fractions of local median depth 
  		(\fB-G\fP option).
@@ -221,12 +226,14 @@ prohibits storage of negative depths, an error message will be output
 and the program will exit. Default: \fImode\fP = 1.
 .TP
 .B \-Q
+\fIbackup\fP
+.br
 This flag causes \fBmbclean\fP to search for bad "rails" in the
 swath sonar swath; the "rails" refer to groups of outer beams which
 have crosstrack distances (and depths) much less than they should 
 have.  These are identified when one or more outer beams lies
-inboard of a more inner beam; all beams outboard of the first
-offending beam are flagged.
+more than \fIbackup\fP meters inboard of a more inner beam; all beams 
+meeting this criteria are flagged.
 .TP
 .B \-S
 \fIslope/mode/unit\fP
@@ -407,7 +414,7 @@ is flagged. Here is an example of the nonverbose output:
  	0 total beams zeroed
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbcleanold\fP(l), \fBmbedit\fP(l), 
+\fBmbsystem\fP(l), \fBmbedit\fP(l), 
 \fBmbinfo\fP(l) \fBmbprocess\fP(l),
 
 .SH BUGS

@@ -7,22 +7,22 @@ a GMT 3D perspective plot of gridded data in a GMT grd file.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_grd3dplot\fP \fB-I\fP\fIfile\fP 
-[\fB-A\fP[\fImagnitude\fP[\fI/azimuth/elevation\fP] 
+\fBmbm_grd3dplot\fP \fB-I\fP\fIfile\fP
+[\fB-A\fP[\fImagnitude\fP[\fI/azimuth/elevation\fP]
 \fB-D\fP[\fIflipcolor/flipshade\fP]
 \fB-E\fP[\fIview_az/view_el\fP] \fB-F\fP\fIexaggeration\fP
 \fB-G\fP\fIcolor_mode\fP \fB-H\fP \fB-K\fP\fIintensity_file \fP
 \fB-N\fP\fIdrape_file\fP
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize \fP
-\fB-S\fP\fI[color/shade]\fP \fB-U\fP\fIorientation\fP \fB-V\fP 
+\fB-S\fP\fI[color/shade]\fP \fB-U\fP\fIorientation\fP \fB-V\fP
 \fB-W\fP[\fIcolor_style\fP[\fI/pallette\fP[\fIncolors\fP]] | \fIcptfile\fP] ]
 
 Additional Options:
 .br
 [\fB-B\fP\fItickinfo\fP
 \fB-J\fP\fIprojection\fP[\fI/scale | width\fP]
-\fB-L\fP\fItitle\fP[\fI:scale_label\fP] \fB-M\fP\fImisc\fP 
-\fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Y\fP 
+\fB-L\fP\fItitle\fP[\fI:scale_label\fP] \fB-M\fP\fImisc\fP
+\fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Y\fP
 \fB-Z\fP\fImin/max\fP ]
 
 Miscellaneous Options:
@@ -31,26 +31,26 @@ Miscellaneous Options:
 \fB-MGL\fP[\fIf\fP][\fIx\fP]\fIlon0/lat0/slat/length\fP[\fIm\fP]
 \fB-MGQ\fP\fIdpi\fP \fB-MGS\fP\fIscalefactor\fP
 \fB-MGT\fP\fIx/y/size/angle/font/just/text\fP
-\fB-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP] 
+\fB-MGU\fP\fP[\fI/dx/dy/\fP][\fIlabel\fP]
 \fB-MVM\fP\fImesh_pen\fP \fB-MVN\fP[\fInull[/r/g/b]\fP] ]
 
 
 .SH DESCRIPTION
-\fBmbm_grd3dplot\fP is a macro to generate a shellscript of GMT commands which, when 
-executed, will generate a 3D perspective Postscript plot of  
-gridded data.  Several styles of plots can be generated, 
-including color fill views, color shaded relief views, mesh  
-plot views, and text labels. Five different color schemes are 
-included. The plot will be scaled to fit on the specified page  
-size or, if the scale is user defined, the page size will be  
+\fBmbm_grd3dplot\fP is a macro to generate a shellscript of GMT commands which, when
+executed, will generate a 3D perspective Postscript plot of
+gridded data.  Several styles of plots can be generated,
+including color fill views, color shaded relief views, mesh
+plot views, and text labels. Five different color schemes are
+included. The plot will be scaled to fit on the specified page
+size or, if the scale is user defined, the page size will be
 chosen in accordance with the plot size. The vertical exaggeration
-may be specified. The primary purpose 
-of this macro is to allow the simple, semi-automated 
-production of nice looking maps with a few command line 
-arguments. For users seeking more control over the plot 
-appearance, a number of additional optional arguments are 
-provided. Truly ambitious users may edit the plot shellscript 
-to take advantage of GMT capabilites not supported by this 
+may be specified. The primary purpose
+of this macro is to allow the simple, semi-automated
+production of nice looking maps with a few command line
+arguments. For users seeking more control over the plot
+appearance, a number of additional optional arguments are
+provided. Truly ambitious users may edit the plot shellscript
+to take advantage of GMT capabilites not supported by this
 macro.
 
 .SH AUTHORSHIP
@@ -71,25 +71,25 @@ Sets the parameters which control the
 synthetic illumination of the gridded data (shaded relief).
 The value \fImagnitude\fP
 is an effective vertical exageration which modulates the intensity of
-the shading; typical values are in the 0.1 to 10 range.  
+the shading; typical values are in the 0.1 to 10 range.
 The value \fIazimuth\fP
 is the azimuth in degrees from north from which the data is illuminated.
-The value \fIelevation\fP is the elevation of the illumination 
+The value \fIelevation\fP is the elevation of the illumination
 in degrees from horizontal.
-Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0; 
+Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0;
 \fIelevation\fP = 30.0;
 .TP
 .B \-D
 \fI[flipcolor/flipshade]\fP
 .br
 Normally, the color or grayscale tables used for color maps run from
-cool colors (or dark grays) for low grid values 
+cool colors (or dark grays) for low grid values
 to hot colors (or light grays) for high grid values.
 This option reverses the color table so that cool colors (dark grays)
 correspond to high values and hot colors (light grays) to low values.
 If \fB-D\fP is given alone, it applies to the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP) 
+is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
 or using an intensity file (\fB-K\fP and \fB-G\fP\fI3\fP options), then
 setting \fIflipshade\fP = 1 will cause the shading convention
 to be reversed (e.g. high intensities overlaid as light shading).
@@ -120,15 +120,15 @@ data are in geographic coordinates (longitude and latitude).
 Turns on color fill plot and sets the style of the plot.
 .br
         \fIcolor_mode\fP = 1: 3D color/gray fill.
-        \fIcolor_mode\fP = 2: 3D color/gray fill shaded by 
+        \fIcolor_mode\fP = 2: 3D color/gray fill shaded by
                         synthetic illumination.
-        \fIcolor_mode\fP = 3: 3D color/gray fill shaded by 
-                        an intensity file. The \fB-K\fP 
+        \fIcolor_mode\fP = 3: 3D color/gray fill shaded by
+                        an intensity file. The \fB-K\fP
                         option must be used to specify
  			the intensity file.
-        \fIcolor_mode\fP = 4: 3D Color/gray fill of slope 
+        \fIcolor_mode\fP = 4: 3D Color/gray fill of slope
  			magnitude.
-        \fIcolor_mode\fP = 5: 3D Color/gray fill shaded by 
+        \fIcolor_mode\fP = 5: 3D Color/gray fill shaded by
                         slope magnitude.
         \fIcolor_mode\fP = 6: 3D mesh plot.
         \fIcolor_mode\fP = 7: 3D mesh plot with contours.
@@ -140,7 +140,7 @@ of its operation and then exit immediately.
 .B \-I
 \fIgrdfile\fP
 .br
-Sets the name of the gridded data file to be plotted.  
+Sets the name of the gridded data file to be plotted.
 Alternatively, \fIgrdfile\fP may be a list of grid files
 (one filename on each line) to be plotted together.
 .TP
@@ -148,7 +148,7 @@ Alternatively, \fIgrdfile\fP may be a list of grid files
 \fIintensity_file\fP
 .br
 Sets the name of the gridded data file containing
-instensity values to be used for shading the map.  
+instensity values to be used for shading the map.
 .TP
 .B \-N
 \fIdrape_file\fP
@@ -156,17 +156,17 @@ instensity values to be used for shading the map.
 Sets the name of the gridded data file to be draped on
 the relief provided by the file specified with the \fB-I\fP
 option. If \fB-N\fP\fIdrape_file\fP is specified, then
-all color control options will apply to the data in 
+all color control options will apply to the data in
 \\fIdrape_file\fP.
 .TP
 .B \-O
 \fIroot\fP
 .br
 Sets the root used to construct the filename of the output shellscript
-(\fIroot\fP.cmd) and names of files created when the shellscript is 
-run.  Normally the 
-name of the input grid file or grid file list is 
-used as the \fIroot\fP. 
+(\fIroot\fP.cmd) and names of files created when the shellscript is
+run.  Normally the
+name of the input grid file or grid file list is
+used as the \fIroot\fP.
 .TP
 .B \-P
 \fIpagesize\fP
@@ -178,8 +178,8 @@ sets the plot scale such that the plot will not fit on the
 designated page, a larger page will be used.
 The supported page sizes include ANSI A, B, C, D, E,
 F, and E1, as well as most metric page sizes. See the
-COMPLETE DESCRIPTION OF OPTIONS section 
-below for a complete list of 
+COMPLETE DESCRIPTION OF OPTIONS section
+below for a complete list of
 the supported page sizes. The default page size is A.
 .TP
 .B \-S
@@ -195,7 +195,7 @@ in value ranges corresponding to the bulk of the data values.
 If \fB-S\fP is given alone or with \fIcolor\fP = 1,
 it enables equalization of the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP) 
+is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
 or using an intensity file (\fB-K\fP and \fB-G\fP\fI3\fP options), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB-S\fP\fI0/1\fP will equalize the shading without
@@ -211,7 +211,7 @@ The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
 .B \-V
-Causes \fBmbm_grd3dplot\fP to operate in "verbose" mode 
+Causes \fBmbm_grd3dplot\fP to operate in "verbose" mode
 so that it outputs
 more information than usual.
 .TP
@@ -219,7 +219,7 @@ more information than usual.
 \fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. 
+fill plots.
 
 If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
@@ -237,11 +237,11 @@ A complete description of the color pallettes is given
 in the COMPLETE DESCRIPTION OF OPTIONS section below.
 .br
 The \fIncolors\fP parameter sets the number of color
-values used in plotting, whether the colors are 
+values used in plotting, whether the colors are
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
 
-If the option argument is the path to an existing \fBGMT\fP 
+If the option argument is the path to an existing \fBGMT\fP
 color pallette (CPT) file, then that CPT file and its
 color scheme will be used for the plot
 
@@ -254,7 +254,7 @@ Sets the parameters which control the
 synthetic illumination of the gridded data (shaded relief).
 The value \fImagnitude\fP
 is an effective vertical exageration which modulates the intensity of
-the shading; typical values are in the 0.1 to 0.5 range.  
+the shading; typical values are in the 0.1 to 0.5 range.
 The value \fIazimuth\fP
 is the azimuth from which the data is illuminated.
 Defaults: \fImagnitude\fP = 0.2; \fIazimuth\fP = 0.0;
@@ -270,13 +270,13 @@ basemap annotations based on the map boundaries.
 \fI[flipcolor/flipshade]\fP
 .br
 Normally, the color or grayscale tables used for color maps run from
-cool colors (or dark grays) for low grid values 
+cool colors (or dark grays) for low grid values
 to hot colors (or light grays) for high grid values.
 This option reverses the color table so that cool colors (dark grays)
 correspond to high values and hot colors (light grays) to low values.
 If \fB-D\fP is given alone, it applies to the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP) 
+is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
 or using an intensity file (\fB-K\fP and \fB-G\fP\fI3\fP options), then
 setting \fIflipshade\fP = 1 will cause the shading convention
 to be reversed (e.g. high intensities overlaid as light shading).
@@ -299,15 +299,15 @@ elevation = 40.
 Turns on color fill plot and sets the style of the plot.
 .br
         \fIcolor_mode\fP = 1: 3D color/gray fill.
-        \fIcolor_mode\fP = 2: 3D color/gray fill shaded by 
+        \fIcolor_mode\fP = 2: 3D color/gray fill shaded by
                         synthetic illumination.
-        \fIcolor_mode\fP = 3: 3D color/gray fill shaded by 
-                        an intensity file. The \fB-K\fP 
+        \fIcolor_mode\fP = 3: 3D color/gray fill shaded by
+                        an intensity file. The \fB-K\fP
                         option must be used to specify
  			the intensity file.
-        \fIcolor_mode\fP = 4: 3D Color/gray fill of slope 
+        \fIcolor_mode\fP = 4: 3D Color/gray fill of slope
  			magnitude.
-        \fIcolor_mode\fP = 5: 3D Color/gray fill shaded by 
+        \fIcolor_mode\fP = 5: 3D Color/gray fill shaded by
                         slope magnitude.
         \fIcolor_mode\fP = 6: 3D mesh plot.
         \fIcolor_mode\fP = 7: 3D mesh plot with contours.
@@ -322,7 +322,7 @@ of its operation and then exit immediately.
 .B \-I
 \fIgrdfile\fP
 .br
-Sets the name of the gridded data file to be plotted.  
+Sets the name of the gridded data file to be plotted.
 The data must be in a form acceptable to \fBGMT\fP version 3
 programs (see the \fBGMT\fP Cookbook & Technical Reference).
 .TP
@@ -363,7 +363,7 @@ size will be chosen.
 .br
 \fB\-Ju\fP\fIzone/scale\fP (UTM - Universal Transverse Mercator)
 .br
-\fB\-Jy\fP\fIlon0/lats/scale\fP (Basic Cylindrical Projection) 
+\fB\-Jy\fP\fIlon0/lats/scale\fP (Basic Cylindrical Projection)
 .br
 .sp
 \fBAZIMUTHAL PROJECTIONS:\fP
@@ -415,7 +415,7 @@ More details can be found in the \fBpsbasemap\fP manpages.
 \fIintensity_file\fP
 .br
 Sets the name of the gridded data file containing
-instensity values to be used for shading the map.  
+instensity values to be used for shading the map.
 .TP
 .B \-L
 \fItitle:scalelabel\fP
@@ -435,7 +435,7 @@ given as \fB-M\fP followed by a two character identifier, followed
 by any other parameters associated with that option.
 The \fB-M\fP options may be strung together separated by
 colons, e.g. "-MGQ100:GU", which is equivalent to
-"-MGQ -MGU". 
+"-MGQ -MGU".
 .TP
 .B \-N
 \fIdrape_file\fP
@@ -443,7 +443,7 @@ colons, e.g. "-MGQ100:GU", which is equivalent to
 Sets the name of the gridded data file to be draped on
 the relief provided by the file specified with the \fB-I\fP
 option. If \fB-N\fP\fIdrape_file\fP is specified, then
-all color control options will apply to the data in 
+all color control options will apply to the data in
 \\fIdrape_file\fP.
 .TP
 .B \-MGD
@@ -452,7 +452,7 @@ all color control options will apply to the data in
 Allows the user to set the \fBGMT\fP default values used as
 the plot is constructed. This command may be given repeatedly
 to set as many \fBGMT\fP defaults as required. For example, to
-set the basemap annotation font to Courier, use 
+set the basemap annotation font to Courier, use
 "-MGDANOT_FONT/Courier".
 .TP
 .B \-MGF
@@ -492,18 +492,18 @@ data (\fIscalefactor\fP = -1). [Default no scaling]
 \fIx/y/size/angle/font/just/text\fP
 .br
 Causes a text label to plotted on the map.
-\fIsize\fP is text size in points, \fIangle\fP is 
-measured in degrees counter-clockwise from horizontal, 
-\fIfontno\fP sets the font type, \fIjustify\fP sets the alignment. 
-If \fIfontno\fP starts with a leading hyphen, then 
-the remainder of \fIfontno\fP is taken to be a 
-textstring with the desired fontname.  See the 
-\fBgmtdefaults\fP man page for names and numbers of available fonts 
-(or run \fBpstext \-L\fP).  The alignment 
-number refers to the part of the textstring that will be mapped 
-onto the (\fIx,y\fP) point: 1 = Lower Left corner, 
-2 = Lower Center, 3 = Lower Right, 5 = Mid Left, 6 = Mid Center, 
-7 = Mid Right, 9 = Upper Left, 10 = Upper Center, 
+\fIsize\fP is text size in points, \fIangle\fP is
+measured in degrees counter-clockwise from horizontal,
+\fIfontno\fP sets the font type, \fIjustify\fP sets the alignment.
+If \fIfontno\fP starts with a leading hyphen, then
+the remainder of \fIfontno\fP is taken to be a
+textstring with the desired fontname.  See the
+\fBgmtdefaults\fP man page for names and numbers of available fonts
+(or run \fBpstext \-L\fP).  The alignment
+number refers to the part of the textstring that will be mapped
+onto the (\fIx,y\fP) point: 1 = Lower Left corner,
+2 = Lower Center, 3 = Lower Right, 5 = Mid Left, 6 = Mid Center,
+7 = Mid Right, 9 = Upper Left, 10 = Upper Center,
 11 = Upper Right. This option may be given as many times as
 needed.
 .TP
@@ -519,9 +519,9 @@ append a label, or \fBc\fP (which will plot the command string.)
 .br
 Set pen attributes for mesh plot.  The mesh plot must be specified
 with the \fB-G\fP option. See chapter 4.12 in the
-GMT Technical reference for a discussion of GMT pen values.  
-[Defaults: width = 1, color = 0/0/0, 
-texture = solid]. 
+GMT Technical reference for a discussion of GMT pen values.
+[Defaults: width = 1, color = 0/0/0,
+texture = solid].
 .TP
 .B \-MVN
 [\fInull[/r/g/b]\fP]
@@ -539,10 +539,10 @@ to be colored a light gray (r=g=b=200).
 \fIroot\fP
 .br
 Sets the root used to construct the filename of the output shellscript
-(\fIroot\fP.cmd) and names of files created when the shellscript is 
-run.  Normally the 
-name of the input grid file or grid file list is 
-used as the \fIroot\fP. 
+(\fIroot\fP.cmd) and names of files created when the shellscript is
+run.  Normally the
+name of the input grid file or grid file list is
+used as the \fIroot\fP.
 .TP
 .B \-P
 \fIpagesize\fP
@@ -603,24 +603,24 @@ The supported page sizes are:
           m1  1371.6 x 1828.8 mm  (54.00 x 72.00 in.)
           m2  1371.6 x 2133.6 mm  (54.00 x 84.00 in.)
           m3  1371.6 x 2438.4 mm  (54.00 x 96.00 in.)
-          m4  1524.0 x 1828.8 mm  (54.00 x 72.00 in.)
-          m5  1524.0 x 2133.6 mm  (54.00 x 84.00 in.)
-          m6  1524.0 x 2438.4 mm  (54.00 x 96.00 in.)
+          m4  1524.0 x 1828.8 mm  (60.00 x 72.00 in.)
+          m5  1524.0 x 2133.6 mm  (60.00 x 84.00 in.)
+          m6  1524.0 x 2438.4 mm  (60.00 x 96.00 in.)
 
 The default page size is A.
 .TP
 .B \-Q
-Normally, the output plot generation shellscript 
+Normally, the output plot generation shellscript
 includes lines which execute
-a program to display the Postscript image on the screen.  
+a program to display the Postscript image on the screen.
 This option causes those lines to be commented out so
 that executing the shellscript produces a Postscript plot
 but does not attempt to display it on the screen.
 The program
-to be used to display the Postscript is set 
+to be used to display the Postscript is set
 using \fBmbdefaults\fP;
 the default value can be overridden by setting the environment
-variable $MB_PS_VIEWER. 
+variable $MB_PS_VIEWER.
 .TP
 .B \-R
 \fIwest/east/south/north\fP
@@ -645,7 +645,7 @@ in value ranges corresponding to the bulk of the data values.
 If \fB-S\fP is given alone or with \fIcolor\fP = 1,
 it enables equalization of the color table used
 for color or gray fill plots,  shaded or unshaded. If the plot
-is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP) 
+is to be shaded,  either by synthetic illumination (\fB-G\fP\fI2\fP)
 or using an intensity file (\fB-K\fP and \fB-G\fP\fI3\fP options), then
 setting \fIshade\fP = 1 will cause the shading to be equalized.
 Using \fB-S\fP\fI0/1\fP will equalize the shading without
@@ -664,7 +664,7 @@ The \fB-U\fP option allows the user to set the plot orientation. If
 \fI[color_style\fP[\fI/pallette\fP[\fIncolors\fP]] | cptfile]
 .br
 This option controls the color scheme used for color
-fill plots. 
+fill plots.
 
 If \fIcolor_style\fP = 1 [default], then
 the color scheme used will be a continuous grading
@@ -706,7 +706,7 @@ color pallette 5 - Uniform Grayscale
   red:   128 128 128 128 128 128 128 128 128 128 128
   green: 128 128 128 128 128 128 128 128 128 128 128
   blue:  128 128 128 128 128 128 128 128 128 128 128
- 
+
 color pallette 6 - Uniform Black
   red:     0   0   0   0   0   0   0   0   0   0   0
   green:   0   0   0   0   0   0   0   0   0   0   0
@@ -730,18 +730,18 @@ The grayscale pallette runs linearly from white to
 black and is commonly used for plots of sidescan and amplitude
 data. The uniform grayscale is useful for non-color
 shaded relief plots.
- 
+
 The \fIncolors\fP parameter sets the number of color
-values used in plotting, whether the colors are 
+values used in plotting, whether the colors are
 represented in a continuous color scale or a
 stepped, discrete color scale [default is 11].
 
-If the option argument is the path to an existing \fBGMT\fP 
+If the option argument is the path to an existing \fBGMT\fP
 color pallette (CPT) file, then that CPT file and its
 color scheme will be used for the plot
 .TP
 .B \-V
-Causes \fBmbm_grd3dplot\fP to operate in "verbose" mode 
+Causes \fBmbm_grd3dplot\fP to operate in "verbose" mode
 so that it outputs
 more information than usual.
 .TP
@@ -771,20 +771,20 @@ Suppose we have obtained two GRD files with dimensions of
 127 by 194, one containing gridded bathymetry
 (grd_sb2112_example_bath) and the other gridded sidescan
 (grd_sb2112_example_ss). In order to generate a shellscript
-which will in turn generate a 3D color shaded relief 
+which will in turn generate a 3D color shaded relief
 view of the bathymetry, we use the \fB-G\fP\fI2\fP option.
 The grid file is in
 bathymetry (positive down) rather in topography (positive
 up), so the bathymetry needs to be rescaled by multiplying
 by -1 (\fB-MGS\fP\fI-1\fP). We choose an illumination magnitude of 0.4
-and an illumination azimuth of 45 degrees (\fB-A\fP\fI0.4/45\fP). We 
-also choose a perspective azimuth of 250 degrees and an 
+and an illumination azimuth of 45 degrees (\fB-A\fP\fI0.4/45\fP). We
+also choose a perspective azimuth of 250 degrees and an
 elevation of 30 degrees (\fB-E\fP\fI240/30\fP):
- 
+
   	mbm_grd3dplot -Igrd_sb2112_example_bath \\
   	    -G2 -A0.4/45 -E250/30 -MGS-1 -X -V \\
   	    -Osb2112_example_bath3d
- 
+
 Now, to generate a 3D perspective view of the gridded
 bathymetry shaded using the gridded sidescan data, we
 use the \fB-G\fP\fI3\fP and \fB-K\fP options.
@@ -792,19 +792,19 @@ We want the sidescan data to
 be histogram equalized, so we use \fB-S\fP\fI0/1\fP. We also want
 the shading to be more prominent than the default
 shading magnitude of 0.2 would produce, so we use \fB-A\fP\fI0.5\fP:
- 
+
   	mbm_grd3dplot -Igrd_sb2112_example_bath \\
   	    -Kgrd_sb2112_example_ss \\
   	    -G3 -A0.5 -E250/30 -D0/1 \\
   	    -S0/1 -MGS-1 -X -V \\
   	    -Osb2112_example_bathss3d
- 
+
 The first example produces and executes a plot generation
 shellscript called sb2112_example_bath3d.cmd and the second
 produces a shellscript called sb2112_example_bathss3d.cmd.
-As an example, the contents of the plotting shellscript 
+As an example, the contents of the plotting shellscript
 "sb2112_example_bathss3d.cmd" are:
- 
+
  #
  # Shellscript to create Postscript plot of data in grd file
  # Created by macro mbm_grd3dplot
@@ -920,14 +920,11 @@ As an example, the contents of the plotting shellscript
  echo All done!
 
 .SH SEE ALSO
-\fBgrdimage\fP(l), \fBgrdcontour\fP(l), 
-\fBmbdefaults\fP(l), \fBmbgrid\fP(l), \fBmbsystem\fP(l), 
+\fBgrdimage\fP(l), \fBgrdcontour\fP(l),
+\fBmbdefaults\fP(l), \fBmbgrid\fP(l), \fBmbsystem\fP(l),
 \fBmbm_grd3dplot\fP(l), \fBmbm_plot\fP(l),
 \fBpsbasemap\fP(l), \fBpstext\fP(l), \fBpsxy\fP(l)
 
 .SH BUGS
 By making this macro more useful, we have also made it
-more complex. 
-
-
-
+more complex.

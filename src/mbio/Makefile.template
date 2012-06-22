@@ -182,15 +182,15 @@ LIBDIR = ../../lib
 INCDIR = ../../include
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
-# 
+#
 # PROJ4 projection definitions
 PROJECTIONS = /usr/local/mbsystem/share/Projections.dat
 #
-# Netcdf include directory 
+# Netcdf include directory
 NETCDFINCDIR = /usr/local/netcdf/include
-# 
-# Compilers 
-CC = cc 
+#
+# Compilers
+CC = cc
 #
 # Compile and load flags:
 CFLAGS = -O2
@@ -224,6 +224,8 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbsys_reson8k.h \
 	$(INCDIR)/mbsys_netcdf.h $(INCDIR)/mbsys_navnetcdf.h \
 	$(INCDIR)/mbsys_reson7k.h $(INCDIR)/mbsys_jstar.h \
+	$(INCDIR)/mbsys_image83p.h $(INCDIR)/mbsys_hysweep.h \
+	$(INCDIR)/mbsys_benthos.h \
 	$(INCDIR)/mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiocen.h \
 	$(INCDIR)/mbf_sbsiolsi.h $(INCDIR)/mbf_sburicen.h \
 	$(INCDIR)/mbf_sbifremr.h $(INCDIR)/mbf_hsatlraw.h \
@@ -232,8 +234,7 @@ all:	$(INCDIR)/mb_format.h $(INCDIR)/mb_status.h \
 	$(INCDIR)/mbf_sb2100rw.h \
 	$(INCDIR)/mbf_em12darw.h $(INCDIR)/mbf_em12ifrm.h \
 	$(INCDIR)/mbf_mr1prhig.h $(INCDIR)/mbf_mr1aldeo.h \
-	$(INCDIR)/mbf_mr1bldeo.h \
-	$(INCDIR)/mbf_mbldeoih.h $(INCDIR)/mbf_cbat9001.h \
+	$(INCDIR)/mbf_mr1bldeo.h $(INCDIR)/mbf_cbat9001.h \
 	$(INCDIR)/mbf_cbat8101.h $(INCDIR)/mbf_hypc8101.h \
 	$(INCDIR)/mbf_bchrtunb.h $(INCDIR)/mbf_elmk2unb.h \
 	$(INCDIR)/mbf_bchrxunb.h \
@@ -255,7 +256,7 @@ clean:
 $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
-		mb_mem.o \
+		mb_fileio.o mb_mem.o \
 		mb_coor_scale.o mb_check_info.o \
 		mb_time.o mb_angle.o \
 		mb_absorption.o mb_proj.o \
@@ -265,7 +266,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_put_all.o mb_put_comment.o \
 		mb_buffer.o \
 		mb_read_ping.o mb_write_ping.o \
-		mb_access.o mb_segy.o\
+		mb_access.o mb_segy.o mb_rt.o\
 		mbsys_sb.o mbsys_hsds.o \
 		mbsys_sb2100.o mbsys_simrad.o \
 		mbsys_simrad2.o mbsys_simrad3.o \
@@ -280,7 +281,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_surf.o mbsys_reson8k.o \
 		mbsys_netcdf.o mbsys_navnetcdf.o  \
 		mbsys_reson7k.o mbsys_jstar.o \
-		mbsys_image83p.o \
+		mbsys_image83p.o mbsys_hysweep.o \
+		mbsys_benthos.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -313,12 +315,14 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
 		mbr_samesurf.o mbr_reson7kr.o \
 		mbr_edgjstar.o mbr_segysegy.o \
-		mbr_image83p.o mbr_imagemba.o
+		mbr_image83p.o mbr_imagemba.o \
+		mbr_hir2rnav.o mbr_hysweep1.o \
+		mbr_xtfb1624.o
 	$(ARCHIVE) $(LIBDIR)/libmbio.a \
 		mb_format.o mb_error.o \
 		mb_swap.o mb_compare.o mb_navint.o \
 		mb_read_init.o mb_write_init.o mb_close.o \
-		mb_mem.o \
+		mb_fileio.o mb_mem.o \
 		mb_coor_scale.o mb_check_info.o\
 		mb_time.o mb_angle.o \
 		mb_absorption.o mb_proj.o \
@@ -328,7 +332,7 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mb_put_all.o mb_put_comment.o \
 		mb_buffer.o \
 		mb_read_ping.o mb_write_ping.o \
-		mb_access.o mb_segy.o \
+		mb_access.o mb_segy.o mb_rt.o \
 		mbsys_sb.o mbsys_hsds.o \
 		mbsys_sb2100.o mbsys_simrad.o \
 		mbsys_simrad2.o mbsys_simrad3.o \
@@ -343,7 +347,8 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbsys_surf.o mbsys_reson8k.o \
 		mbsys_netcdf.o mbsys_navnetcdf.o \
 		mbsys_reson7k.o mbsys_jstar.o \
-		mbsys_image83p.o \
+		mbsys_image83p.o mbsys_hysweep.o \
+		mbsys_benthos.o \
 		mbr_sbsiomrg.o mbr_sbsiocen.o \
 		mbr_sbsiolsi.o mbr_sburicen.o \
 		mbr_sburivax.o mbr_sbifremr.o \
@@ -376,9 +381,11 @@ $(LIBDIR)/libmbio.a:	mb_format.o mb_error.o \
 		mbr_mbnetcdf.o mbr_nvnetcdf.o \
 		mbr_samesurf.o mbr_reson7kr.o \
 		mbr_edgjstar.o mbr_segysegy.o \
-		mbr_image83p.o mbr_imagemba.o
+		mbr_image83p.o mbr_imagemba.o \
+		mbr_hir2rnav.o mbr_hysweep1.o \
+		mbr_xtfb1624.o
 	ranlib $(LIBDIR)/libmbio.a
-	
+
 ### compile the source files
 mb_format.o:	mb_format.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)/mb_io.h
 	$(CC) -c $(CFLAGS) mb_format.c
@@ -396,6 +403,8 @@ mb_write_init.o:	mb_write_init.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(I
 	$(CC) -c $(CFLAGS) -I$(GSFINCDIR) -I$(NETCDFINCDIR) mb_write_init.c
 mb_close.o:	mb_close.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) -I$(GSFINCDIR) -I$(NETCDFINCDIR) mb_close.c
+mb_fileio.o:	mb_fileio.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mb_fileio.c
 mb_mem.o:	mb_mem.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
 	$(CC) -c $(CFLAGS) mb_mem.c
 mb_coor_scale.o:	mb_coor_scale.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h
@@ -439,6 +448,8 @@ mb_access.o:	mb_access.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/m
 	$(CC) -c $(CFLAGS) mb_access.c
 mb_segy.o:	mb_segy.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) mb_segy.c
+mb_rt.o:	mb_rt.c $(INCDIR)/mb_format.h $(INCDIR)/mb_status.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h
+	$(CC) -c $(CFLAGS) mb_rt.c
 mbsys_sb.o:	mbsys_sb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_sb.h
 	$(CC) -c $(CFLAGS) mbsys_sb.c
 mbsys_hsds.o:	mbsys_hsds.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hsds.h
@@ -501,6 +512,10 @@ mbsys_jstar.o:	mbsys_jstar.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDI
 	$(CC) -c $(CFLAGS) mbsys_jstar.c
 mbsys_image83p.o:	mbsys_image83p.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_image83p.h $(INCDIR)/mb_segy.h
 	$(CC) -c $(CFLAGS) mbsys_image83p.c
+mbsys_hysweep.o:	mbsys_hysweep.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_hysweep.h $(INCDIR)/mb_segy.h
+	$(CC) -c $(CFLAGS) mbsys_hysweep.c
+mbsys_benthos.o:	mbsys_benthos.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_benthos.h
+	$(CC) -c $(CFLAGS) mbsys_benthos.c
 mbr_sbsiomrg.o:	mbr_sbsiomrg.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiomrg.h
 	$(CC) -c $(CFLAGS) mbr_sbsiomrg.c
 mbr_sbsiocen.o: mbr_sbsiocen.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_sb.h $(INCDIR)/mbf_sbsiocen.h
@@ -551,7 +566,7 @@ mbr_mr1bldeo.o: mbr_mr1bldeo.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_mr1bldeo.c
 mbr_mr1prvr2.o: mbr_mr1prvr2.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_mr1v2001.h
 	$(CC) -c $(CFLAGS) mbr_mr1prvr2.c
-mbr_mbldeoih.o: mbr_mbldeoih.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mbldeoih.h $(INCDIR)/mbsys_ldeoih.h
+mbr_mbldeoih.o: mbr_mbldeoih.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_ldeoih.h
 	$(CC) -c $(CFLAGS) mbr_mbldeoih.c
 mbr_cbat9001.o: mbr_cbat9001.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_cbat9001.h $(INCDIR)/mbsys_reson.h
 	$(CC) -c $(CFLAGS) mbr_cbat9001.c
@@ -627,6 +642,12 @@ mbr_image83p.o: mbr_image83p.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_image83p.c
 mbr_imagemba.o: mbr_imagemba.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_image83p.h
 	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_imagemba.c
+mbr_hir2rnav.o: mbr_hir2rnav.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_singlebeam.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_hir2rnav.c
+mbr_hysweep1.o: mbr_hysweep1.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_hysweep.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_hysweep1.c
+mbr_xtfb1624.o: mbr_xtfb1624.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbsys_benthos.h
+	$(CC) -c $(CFLAGS) -I$(NETCDFINCDIR) mbr_xtfb1624.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_format.h:	mb_format.h
@@ -746,6 +767,12 @@ $(INCDIR)/mbsys_jstar.h:	mbsys_jstar.h
 $(INCDIR)/mbsys_image83p.h:	mbsys_image83p.h
 	cp mbsys_image83p.h $(INCDIR)/mbsys_image83p.h
 	chmod 664 $(INCDIR)/mbsys_image83p.h
+$(INCDIR)/mbsys_hysweep.h:	mbsys_hysweep.h
+	cp mbsys_hysweep.h $(INCDIR)/mbsys_hysweep.h
+	chmod 664 $(INCDIR)/mbsys_hysweep.h
+$(INCDIR)/mbsys_benthos.h:	mbsys_benthos.h
+	cp mbsys_benthos.h $(INCDIR)/mbsys_benthos.h
+	chmod 664 $(INCDIR)/mbsys_benthos.h
 $(INCDIR)/mbf_sbsiomrg.h:	mbf_sbsiomrg.h
 	cp mbf_sbsiomrg.h $(INCDIR)/mbf_sbsiomrg.h
 	chmod 664 $(INCDIR)/mbf_sbsiomrg.h
@@ -791,9 +818,6 @@ $(INCDIR)/mbf_mr1aldeo.h:	mbf_mr1aldeo.h
 $(INCDIR)/mbf_mr1bldeo.h:	mbf_mr1bldeo.h
 	cp mbf_mr1bldeo.h $(INCDIR)/mbf_mr1bldeo.h
 	chmod 664 $(INCDIR)/mbf_mr1bldeo.h
-$(INCDIR)/mbf_mbldeoih.h:	mbf_mbldeoih.h
-	cp mbf_mbldeoih.h $(INCDIR)/mbf_mbldeoih.h
-	chmod 664 $(INCDIR)/mbf_mbldeoih.h
 $(INCDIR)/mbf_cbat9001.h:	mbf_cbat9001.h
 	cp mbf_cbat9001.h $(INCDIR)/mbf_cbat9001.h
 	chmod 664 $(INCDIR)/mbf_cbat9001.h
@@ -857,4 +881,3 @@ $(INCDIR)/mbf_mbpronav.h:	mbf_mbpronav.h
 $(INCDIR)/mbf_xtfr8101.h:	mbf_xtfr8101.h
 	cp mbf_xtfr8101.h $(INCDIR)/mbf_xtfr8101.h
 	chmod 664 $(INCDIR)/mbf_xtfr8101.h
-

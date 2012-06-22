@@ -2,7 +2,7 @@
  *    The MB-system:	mb_write_init.c	1/25/93
  *    $Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_write_init.c opens and initializes a multibeam data file 
+ * mb_write_init.c opens and initializes a multibeam data file
  * for writing with mb_write or mb_put.
  *
  * Author:	D. W. Caress
@@ -226,8 +226,8 @@
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mb_write_init(int verbose, 
-		char *file, int format, void **mbio_ptr, 
+int mb_write_init(int verbose,
+		char *file, int format, void **mbio_ptr,
 		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error)
 {
@@ -261,17 +261,17 @@ int mb_write_init(int verbose,
 		memset(*mbio_ptr, 0, sizeof(struct mb_io_struct));
 		mb_io_ptr = (struct mb_io_struct *) *mbio_ptr;
 		}
-		
+
 	/* set system byte order flag */
 	if (status == MB_SUCCESS)
 		{
 		mb_io_ptr->byteswapped = mb_swap_check();
 		}
-				
+
 	/* get format information */
 	if (status == MB_SUCCESS)
 		{
-		status = mb_format_register(verbose, &format, 
+		status = mb_format_register(verbose, &format,
 					*mbio_ptr, error);
 		}
 
@@ -337,7 +337,7 @@ int mb_write_init(int verbose,
 	mb_io_ptr->btime_d = 0.0;
 	mb_io_ptr->etime_d = 0.0;
 
-	/* set the number of beams */	
+	/* set the number of beams */
 	*beams_bath = mb_io_ptr->beams_bath_max;
 	*beams_amp = mb_io_ptr->beams_amp_max;
 	*pixels_ss = mb_io_ptr->pixels_ss_max;
@@ -378,15 +378,36 @@ int mb_write_init(int verbose,
 	mb_io_ptr->new_ss = NULL;
 	mb_io_ptr->new_ss_acrosstrack = NULL;
 	mb_io_ptr->new_ss_alongtrack = NULL;
-	
+
 	/* initialize projection parameters */
 	mb_io_ptr->projection_initialized = MB_NO;
 	mb_io_ptr->pjptr = NULL;
-	
+
 	/* initialize ancillary variables used
 		to save information in certain cases */
 	mb_io_ptr->save_flag = MB_NO;
 	mb_io_ptr->save_label_flag = MB_NO;
+	mb_io_ptr->save1 = 0;
+	mb_io_ptr->save2 = 0;
+	mb_io_ptr->save3 = 0;
+	mb_io_ptr->save4 = 0;
+	mb_io_ptr->save5 = 0;
+	mb_io_ptr->save6 = 0;
+	mb_io_ptr->save7 = 0;
+	mb_io_ptr->save8 = 0;
+	mb_io_ptr->save9 = 0;
+	mb_io_ptr->save10 = 0;
+	mb_io_ptr->save11 = 0;
+	mb_io_ptr->save12 = 0;
+	mb_io_ptr->save13 = 0;
+	mb_io_ptr->save14 = 0;
+	mb_io_ptr->saved1 = 0;
+	mb_io_ptr->saved2 = 0;
+	mb_io_ptr->saved3 = 0;
+	mb_io_ptr->saved4 = 0;
+	mb_io_ptr->saved5 = 0;
+	mb_io_ptr->saveptr1 = NULL;
+	mb_io_ptr->saveptr2 = NULL;
 
 	/* allocate arrays */
 	mb_io_ptr->beams_bath_alloc = mb_io_ptr->beams_bath_max;
@@ -476,7 +497,7 @@ int mb_write_init(int verbose,
 		return(status);
 		}
 
-	/* handle normal or xdr files to be opened 
+	/* handle normal or xdr files to be opened
 	   directly with fopen */
 	if (mb_io_ptr->filetype == MB_FILETYPE_NORMAL
 	    || mb_io_ptr->filetype == MB_FILETYPE_XDR)
@@ -485,44 +506,44 @@ int mb_write_init(int verbose,
 	    if (strncmp(file,stdout_string,6) == 0)
 		mb_io_ptr->mbfp = stdout;
 	    else
-		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "wb")) == NULL) 
+		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "wb")) == NULL)
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
 		    }
-   
+
 	    /* open the second file if required */
-	    if (status == MB_SUCCESS 
+	    if (status == MB_SUCCESS
 		&& mb_io_ptr->numfile >= 2)
 		{
-		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "wb")) == NULL) 
+		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "wb")) == NULL)
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
 		    }
 		}
-    
+
 	    /* or open the second file if desired and possible */
-	    else if (status == MB_SUCCESS 
+	    else if (status == MB_SUCCESS
 		&& mb_io_ptr->numfile <= -2)
 		mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "wb");
- 
+
 	    /* open the third file if required */
-	    if (status == MB_SUCCESS 
+	    if (status == MB_SUCCESS
 		&& mb_io_ptr->numfile >= 3)
 		{
-		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "wb")) == NULL) 
+		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "wb")) == NULL)
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
 		    }
 		}
- 
+
 	    /* or open the third file if desired and possible */
-	    else if (status == MB_SUCCESS 
+	    else if (status == MB_SUCCESS
 		&& mb_io_ptr->numfile <= -3)
 		mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "wb");
-    
+
 	    /* if needed, initialize XDR stream */
 	    if (status == MB_SUCCESS && mb_io_ptr->filetype == MB_FILETYPE_XDR)
 		{
@@ -530,7 +551,7 @@ int mb_write_init(int verbose,
 				(void **)&mb_io_ptr->xdrs,error);
 		if (status == MB_SUCCESS)
 		    {
-		    xdrstdio_create((XDR *)mb_io_ptr->xdrs, 
+		    xdrstdio_create((XDR *)mb_io_ptr->xdrs,
 			    mb_io_ptr->mbfp, XDR_ENCODE);
 		    }
 		else
@@ -539,9 +560,9 @@ int mb_write_init(int verbose,
 		    *error = MB_ERROR_MEMORY_FAIL;
 		    }
 		}
-    
+
 	    /* if needed, initialize second XDR stream */
-	    if (status == MB_SUCCESS 
+	    if (status == MB_SUCCESS
 		&& mb_io_ptr->filetype == MB_FILETYPE_XDR
 		&& (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
 		&& mb_io_ptr->mbfp2 != NULL)
@@ -550,7 +571,7 @@ int mb_write_init(int verbose,
 				(void **)&mb_io_ptr->xdrs2,error);
 		if (status == MB_SUCCESS)
 		    {
-		    xdrstdio_create((XDR *)mb_io_ptr->xdrs2, 
+		    xdrstdio_create((XDR *)mb_io_ptr->xdrs2,
 			    mb_io_ptr->mbfp2, XDR_ENCODE);
 		    }
 		else
@@ -559,9 +580,9 @@ int mb_write_init(int verbose,
 		    *error = MB_ERROR_MEMORY_FAIL;
 		    }
 		}
-    
+
 	    /* if needed, initialize third XDR stream */
-	    if (status == MB_SUCCESS 
+	    if (status == MB_SUCCESS
 		&& mb_io_ptr->filetype == MB_FILETYPE_XDR
 		&& (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3)
 		&& mb_io_ptr->mbfp3 != NULL)
@@ -570,7 +591,7 @@ int mb_write_init(int verbose,
 				(void **)&mb_io_ptr->xdrs3,error);
 		if (status == MB_SUCCESS)
 		    {
-		    xdrstdio_create((XDR *)mb_io_ptr->xdrs3, 
+		    xdrstdio_create((XDR *)mb_io_ptr->xdrs3,
 			    mb_io_ptr->mbfp3, XDR_ENCODE);
 		    }
 		else
@@ -580,12 +601,18 @@ int mb_write_init(int verbose,
 		    }
 		}
 	    }
-	    
+
+	/* else handle single normal files to be opened with mb_fileio_open() */
+	else if (mb_io_ptr->filetype == MB_FILETYPE_SINGLE)
+	    {
+	    status = mb_fileio_open(verbose, *mbio_ptr, error);
+	    }
+
 	/* else handle gsf files to be opened with gsflib */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF)
 	    {
-	    status = gsfOpen(mb_io_ptr->file, 
-				GSF_CREATE, 
+	    status = gsfOpen(mb_io_ptr->file,
+				GSF_CREATE,
 				(int *) &(mb_io_ptr->gsfid));
 	    if (status == 0)
 		{
@@ -598,12 +625,12 @@ int mb_write_init(int verbose,
 		*error = MB_ERROR_OPEN_FAIL;
 		}
 	    }
-	    
+
 	/* else handle netcdf files to be opened with libnetcdf */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF)
 	    {
-	    status = nc_create(mb_io_ptr->file, 
-				NC_CLOBBER, 
+	    status = nc_create(mb_io_ptr->file,
+				NC_CLOBBER,
 				(int *) &(mb_io_ptr->ncid));
 	    if (status == 0)
 		{
@@ -616,7 +643,7 @@ int mb_write_init(int verbose,
 		*error = MB_ERROR_OPEN_FAIL;
 		}
 	    }
-	    
+
 	/* else handle surf files to be opened with libsapi */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_SURF)
 	    {
@@ -665,11 +692,11 @@ int mb_write_init(int verbose,
 		*error = MB_ERROR_OPEN_FAIL;
 		}
 	    }
-	    
+
 	/* else handle segy files to be opened with mb_segy */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_SEGY)
 	    {
-	    status = mb_segy_write_init(verbose, mb_io_ptr->file, 
+	    status = mb_segy_write_init(verbose, mb_io_ptr->file,
 		NULL, NULL, (void **)&(mb_io_ptr->mbfp), error);
 	    if (status != MB_SUCCESS)
 		{
@@ -809,7 +836,7 @@ int mb_write_init(int verbose,
 		mb_io_ptr->altitude_time_d[i] = 0.0;
 		mb_io_ptr->altitude_altitude[i] = 0.0;
 		}
-		
+
 	/* initialize notices */
 	for (i=0;i<MB_NOTICE_MAX;i++)
 		mb_io_ptr->notice_list[i] = 0;

@@ -2,7 +2,7 @@
  *    The MB-system:	mb_aux.h	5/16/94
  *    $Id$
  *
- *    Copyright (c); 1993-2009 by
+ *    Copyright (c); 1993-2012 by
  *    David W. Caress (caress@mbari.org);
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -398,14 +398,3 @@ void lspeig(
 	double	*smax,
 	double	*err,
 	double	*sup);
-
-/* mb_rt function prototypes */
-int mb_rt_init(int verbose, int number_node, 
-		double *depth, double *velocity, 
-		char **modelptr, int *error);
-int mb_rt_deall(int verbose, char **modelptr, int *error);
-int mb_rt(int verbose, char *modelptr, 
-	double source_depth, double source_angle, double end_time, 
-	int ssv_mode, double surface_vel, double null_angle, 
-	int nplot_max, int *nplot, double *xplot, double *zplot, 
-	double *x, double *z, double *travel_time, int *ray_stat, int *error);

@@ -2,7 +2,7 @@
  *    The MB-system:	mbviewprivate.h	9/24/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2009 by
+ *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -73,7 +73,8 @@
 /*--------------------------------------------------------------------*/
 
 /* OpenGL Error checking */
-/* #define MBV_GETERRORS 1 */
+/* #define MBV_GET_GLX_ERRORS	1 */
+/* #define MBV_DEBUG_GLX		1 */
 
 /* OpenGL plotting parameters */
 #define LEFT_WIDTH 200
@@ -93,6 +94,7 @@
 #define MBV_GLLIST_SITELARGE  (3 * MBV_MAX_WINDOWS + 1)
 #define MBV_GLLIST_ROUTESMALL (3 * MBV_MAX_WINDOWS + 2)
 #define MBV_GLLIST_ROUTELARGE (3 * MBV_MAX_WINDOWS + 3)
+#define MBV_GLLIST_VECTORBALL (3 * MBV_MAX_WINDOWS + 4)
 
 #define MBV_REZ_NONE 	0
 #define MBV_REZ_LOW 	1
@@ -503,6 +505,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
 			int	route_view_mode,
 			int	nav_view_mode,
 			int	navdrape_view_mode,
+			int	vector_view_mode,
 			double	exageration,
 			double	modelelevation3d,
 			double	modelazimuth3d,
@@ -566,6 +569,7 @@ void do_mbview_site( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_route( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_nav( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_navdrape( Widget w, XtPointer client_data, XtPointer call_data);
+void do_mbview_vector( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_colortable_haxby( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_colortable_bright( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbview_colortable_muted( Widget w, XtPointer client_data, XtPointer call_data);
@@ -583,6 +587,7 @@ void set_mbview_site_view_mode(size_t instance, int mode);
 void set_mbview_route_view_mode(size_t instance, int mode);
 void set_mbview_nav_view_mode(size_t instance, int mode);
 void set_mbview_navdrape_view_mode(size_t instance, int mode);
+void set_mbview_vector_view_mode(size_t instance, int mode);
 void set_mbview_display_mode(size_t instance, int mode);
 void set_mbview_colortable(size_t instance, int mode);
 void set_mbview_colortable_mode(size_t instance, int mode);
@@ -857,7 +862,7 @@ int mbview_drapesegment_grid(size_t instance, struct mbview_linesegment_struct *
 int mbview_drapesegmentw(size_t instance, struct mbview_linesegmentw_struct *seg);
 int mbview_drapesegmentw_gc(size_t instance, struct mbview_linesegmentw_struct *seg);
 int mbview_drapesegmentw_grid(size_t instance, struct mbview_linesegmentw_struct *seg);
-int mbview_glerrorcheck(size_t instance, int id, char *sourcefunction);
+int mbview_glerrorcheck(size_t instance, char *sourcefile, int line, char *sourcefunction);
 
 /* mbview_pick.c function prototypes */
 int mbview_pick(size_t instance, int which, int xpixel, int ypixel);

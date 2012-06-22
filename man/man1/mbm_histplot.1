@@ -7,32 +7,32 @@ a GMT histogram plot of a dataset.
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbm_histplot\fP \fB-I\fP\fIfile\fP 
-[\fB-G\fP\fIfill\fP \fB-H\fP 
+\fBmbm_histplot\fP \fB-I\fP\fIfile\fP
+[\fB-G\fP\fIfill\fP \fB-H\fP
 \fB-O\fP\fIroot\fP \fB-P\fP\fIpagesize\fP
-\fB-U\fP\fIorientation\fP \fB-V\fP 
+\fB-U\fP\fIorientation\fP \fB-V\fP
 \fB-W\fP\fIpen\fP ]
 
 Additional Options:
 .br
 [\fB-B\fP\fItickinfo\fP \fP
 \fB-J\fP\fIprojection\fP[\fI/scale | width\fP]
-\fB-L\fP\fItitle\fP[\fI:xlabel:ylabel\fP] \fB-M\fP\fImisc\fP 
+\fB-L\fP\fItitle\fP[\fI:xlabel:ylabel\fP] \fB-M\fP\fImisc\fP
 \fB-Q\fP \fB-R\fP\fIw/e/s/n\fP \fB-X\fP \fB-Z\fP]
 
 .SH DESCRIPTION
-\fBmbm_histplot\fP is a macro to generate a shellscript of 
-GMT commands which, when executed, will generate a Postscript 
+\fBmbm_histplot\fP is a macro to generate a shellscript of
+GMT commands which, when executed, will generate a Postscript
 histogram plot of a set of data values.
-The plot will be scaled to fit on the specified page size 
-or, if the scale is user defined, the page size will be 
-chosen in accordance with the plot size. The primary purpose 
+The plot will be scaled to fit on the specified page size
+or, if the scale is user defined, the page size will be
+chosen in accordance with the plot size. The primary purpose
 of this macro is to allow the simple, semi-automated
 production of nice looking plots with a few command line
 arguments. For users seeking more control over the plot
 appearance, a number of additional optional arguments are
-provided. Truly ambitious users may edit the plot shellscript 
-to take advantage of GMT capabilites not supported by this 
+provided. Truly ambitious users may edit the plot shellscript
+to take advantage of GMT capabilites not supported by this
 macro.
 
 .SH AUTHORSHIP
@@ -65,20 +65,20 @@ the histogram. The default is use a cell width that is 1/10 the
 data range.
 .TP
 .B \-G
-\fIfill\fP 
+\fIfill\fP
 .br
-Select filling of the histogram.  
-Set the shade (0\-255) or color 
+Select filling of the histogram.
+Set the shade (0\-255) or color
 (r/g/b) [Default is a light gray]. To reset no fill,
 use \fIfill\fP = "N".
-You may optionally specify 
-\fB\-Gp\fP\fIicon_size/pattern\fP, where 
+You may optionally specify
+\fB\-Gp\fP\fIicon_size/pattern\fP, where
 \fIpattern\fP gives the number of the
-image pattern (1-32) OR the name of a 
-icon-format file.  \fIicon_size\fP sets 
+image pattern (1-32) OR the name of a
+icon-format file.  \fIicon_size\fP sets
 the unit size in inch.
-To invert black and white pixels, use 
-\fB\-GP\fP instead of \fB\-Gp\fP.  See 
+To invert black and white pixels, use
+\fB\-GP\fP instead of \fB\-Gp\fP.  See
 \fBGMTs\fP Cookbook & Technical Reference
 Appendix E for information on individual patterns.
 .TP
@@ -113,10 +113,10 @@ alone, no x or y-axis labels will be provided.
 \fIroot\fP
 .br
 Sets the root used to construct the filename of the output shellscript
-(\fIroot\fP.cmd) and names of files created when the shellscript is 
-run.  Normally the 
-name of the input grid file or grid file list is 
-used as the \fIroot\fP. 
+(\fIroot\fP.cmd) and names of files created when the shellscript is
+run.  Normally the
+name of the input grid file or grid file list is
+used as the \fIroot\fP.
 .TP
 .B \-P
 \fIpagesize\fP
@@ -177,24 +177,24 @@ The supported page sizes are:
           m1  1371.6 x 1828.8 mm  (54.00 x 72.00 in.)
           m2  1371.6 x 2133.6 mm  (54.00 x 84.00 in.)
           m3  1371.6 x 2438.4 mm  (54.00 x 96.00 in.)
-          m4  1524.0 x 1828.8 mm  (54.00 x 72.00 in.)
-          m5  1524.0 x 2133.6 mm  (54.00 x 84.00 in.)
-          m6  1524.0 x 2438.4 mm  (54.00 x 96.00 in.)
+          m4  1524.0 x 1828.8 mm  (60.00 x 72.00 in.)
+          m5  1524.0 x 2133.6 mm  (60.00 x 84.00 in.)
+          m6  1524.0 x 2438.4 mm  (60.00 x 96.00 in.)
 
 The default page size is A.
 .TP
 .B \-Q
-Normally, the output plot generation shellscript 
+Normally, the output plot generation shellscript
 includes lines which execute
-a program to display the Postscript image on the screen.  
+a program to display the Postscript image on the screen.
 This option causes those lines to be commented out so
 that executing the shellscript produces a Postscript plot
 but does not attempt to display it on the screen.
 The program
-to be used to display the Postscript is set 
+to be used to display the Postscript is set
 using \fBmbdefaults\fP;
 the default value can be overridden by setting the environment
-variable $MB_PS_VIEWER. 
+variable $MB_PS_VIEWER.
 .TP
 .B \-R
 \fIwest/east/south/north\fP
@@ -212,7 +212,7 @@ The \fB-U\fP option allows the user to set the plot orientation. If
 \fIorientation\fP = 2, a landscape plot will be produced.
 .TP
 .B \-V
-Causes \fBmbm_histplot\fP to operate in "verbose" mode 
+Causes \fBmbm_histplot\fP to operate in "verbose" mode
 so that it outputs
 more information than usual.
 .TP
@@ -220,9 +220,9 @@ more information than usual.
 \fIpen\fP
 .br
 Set pen attributes for plotting. See chapter 4.12 in the
-GMT Technical reference for a discussion of GMT pen values.  
-[Defaults: width = 1, color = 0/0/0, 
-texture = solid]. 
+GMT Technical reference for a discussion of GMT pen values.
+[Defaults: width = 1, color = 0/0/0,
+texture = solid].
 .TP
 .B \-X
 Normally, \fBmbm_histplot\fP creates an executable shellscript and
@@ -236,8 +236,8 @@ simple histogram plot of these data, use:
 .br
 	mbm_histplot -Itimelag.dat -Otimelaghist -JX6/4 -V
 to generate a GMT plot shellscript called timelaghist.cmd.
- 
-As an example, the contents of the plotting shellscript 
+
+As an example, the contents of the plotting shellscript
 "timelaghist.cmd" are:
 
 #! /bin/csh -f
@@ -250,7 +250,7 @@ As an example, the contents of the plotting shellscript
 #
 # Define shell variables used in this script:
 set PS_FILE         = timelaghist.ps
-set CPT_FILE        = 
+set CPT_FILE        =
 set MAP_PROJECTION  = X
 set MAP_SCALE       = 6/4
 set MAP_REGION      = -0.57/0.12/0/50
@@ -306,13 +306,9 @@ gv --orientation=landscape --media=BBox $PS_FILE &
 echo All done!
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbdefaults\fP(l), 
+\fBmbsystem\fP(l), \fBmbdefaults\fP(l),
 \fBmbm_grdplot\fP(l), \fBmbm_grd3dplot\fP(l),
 \fBmbm_plot\fP(l)
 
 .SH BUGS
 Please let us know.
-
-
-
-

@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_simrad3.h	2/22/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2009 by
+ *    Copyright (c) 2008-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,9 +13,9 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_simrad3.h defines the MBIO data structures for handling data from 
+ * mbsys_simrad3.h defines the MBIO data structures for handling data from
  * new (post-2006) Simrad multibeam sonars (e.g. EM710, EM3002, EM302, EM122).
- * The data formats associated with Simrad multibeams 
+ * The data formats associated with Simrad multibeams
  * (both old and new) include:
  *    MBSYS_SIMRAD formats (code in mbsys_simrad.c and mbsys_simrad.h):
  *      MBF_EMOLDRAW : MBIO ID 51 - Vendor EM1000, EM12S, EM12D, EM121
@@ -24,10 +24,10 @@
  *      MBF_EM12DARW : MBIO ID 54 - NERC EM12S
  *                   : MBIO ID 55 - aliased to 51
  *    MBSYS_SIMRAD3 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
- *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120 
+ *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120
  *      MBF_EM300MBA : MBIO ID 57 - MBARI EM3000, EM300, EM120 for processing
  *    MBSYS_SIMRAD3 formats (code in mbsys_simrad3.c and mbsys_simrad3.h):
- *      MBF_EM710RAW : MBIO ID 58 - Vendor EM710 
+ *      MBF_EM710RAW : MBIO ID 58 - Vendor EM710
  *      MBF_EM710MBA : MBIO ID 59 - MBARI EM710 for processing
  *
  *
@@ -55,7 +55,7 @@
  *   2. Simrad multibeam sonars output both bathymetry
  *      and amplitude information for beams and sidescan information
  *      with a higher resolution than the bathymetry and amplitude.
- *   3. This code and formats 58 and 59 support data from the 
+ *   3. This code and formats 58 and 59 support data from the
  *         EM-710 multibeam sonar and later models. Data from older
  *         Simrad multibeams are supported by formats 51, 56, and 57.
   *   4. Each telegram is preceded by a two byte start code 0x02 and
@@ -64,24 +64,25 @@
  *      the data bytes.  MB-System does not check the checksums
  *      on input, but does calculate the checksums for output.
  *   5. The Kongsberg Simrad datagram format manual lists a large number
- *      of datagram types. The complete list of telegram start codes, 
+ *      of datagram types. The complete list of telegram start codes,
  *      types, and sizes is given below. Datagram listings preceded
  *      by an "*" are recognized by MB-System. Unrecognized datagrams
  *      will be skipped on input and not included in output files.
  *        *0x0230: Parameter - Stop                       variable size
  *        *0x0231: Parameter - Data out off               variable size
  *        *0x0232: Parameter - Data out on                variable size
+ *        *0x0233: Extra Parameter                        variable size
  *        *0x0241: Attitude Output                        1222 bytes
  *        *0x0243: Clock Output                           28 bytes
  *        *0x0244: Bathymetry                             48-4092 bytes
  *         0x0245: Single beam echosounder depth          32 bytes
- *        *0x0246: Raw range and beam angle               24-2056 bytes
+ *        *0x0246: Raw range and beam angle "F"           24-2056 bytes
  *        *0x0247: Surface sound speed                    variable size
  *        *0x0248: Heading Output                         422 bytes
  *        *0x0249: Parameter - Start                      variable size
  *        *0x024A: Mechanical transducer tilt             variable size
  *         0x024B: Central beams echogram                 variable size
- *         0x024E: Raw range and beam angle (EM710 and later) variable size
+ *         0x024E: Raw range and beam angle "N" (EM710 and later) variable size
  *        *0x0250: Position                               100-134 bytes
  *        *0x0252: Runtime Parameter                      52 bytes
  *        *0x0253: Sidescan                               48->5K bytes
@@ -92,7 +93,7 @@
  *         0x0258: Bathymetry  (EM710 and later)          variable size
  *         0x0259: Sidescan (EM710 and later)             variable size
  *        *0x0265: Raw range and beam angle               112-1658 bytes
- *        *0x0266: Raw range and beam angle               44-1658 bytes
+ *        *0x0266: Raw range and beam angle "f"           44-1658 bytes
  *        *0x0268: Height Output                          24 bytes
  *        *0x0269: Parameter - Stop                       variable size
  *        *0x026B: Water column                           variable size
@@ -103,7 +104,7 @@
  *        *0x02E2: Sidescan (MBARI format 57)             48->5K bytes
  *        *0x02E3: Bathymetry (MBARI format 59)           48-4092 bytes
  *        *0x02E4: Sidescan (MBARI format 59)             48->5K bytes
- *   6. Simrad systems record navigation fixes using the position 
+ *   6. Simrad systems record navigation fixes using the position
  *      datagram; no navigation is included in the per ping data.  Thus,
  *      it is necessary to extrapolate the navigation for each ping
  *      at read time from the last navigation fix.  The frequency of
@@ -112,17 +113,17 @@
  *      In this format the navigation fix datagrams include copies of
  *      the ASCII data records (typically NMEA 0183) input into the
  *      sonar by the navigation system.
- *   7. The beam depths are give relative to the transmit transducer 
- *      or sonar head depth and the horizontal location of the active 
- *      positioning system's antenna (or reference point). Heave,  
- *      roll, pitch, sound speed at the transducer depth and ray 
- *      bending have been applied. 
+ *   7. The beam depths are give relative to the transmit transducer
+ *      or sonar head depth and the horizontal location of the active
+ *      positioning system's antenna (or reference point). Heave,
+ *      roll, pitch, sound speed at the transducer depth and ray
+ *      bending have been applied.
  *   8. The new Simrad sonars record the heading and attitude sensor
- *      data streams input into the sonar, usually at a sampling 
+ *      data streams input into the sonar, usually at a sampling
  *      frequency of 100 Hz.
-\*   9. The beam angles and travel times are reported in the raw range 
- *      and angle datagrams. The raw times and angles are recorded 
- *      without correction for the vessel motion. The raw ranges are 
+\*   9. The beam angles and travel times are reported in the raw range
+ *      and angle datagrams. The raw times and angles are recorded
+ *      without correction for the vessel motion. The raw ranges are
  *      given as two-way travel times.
  *  10. The sidescan is structured in terms of a certain number of samples
  *      per beam. The range sampling rate for the sidescan is the same as
@@ -133,18 +134,18 @@
  *      rate. The attitude datagrams are given when the number of measurements
  *      is 100, or usually at 1 second intervals. The attitude data timing
  *      is corrected for the sensor time delay entered by the operator. If
- *      roll is input with respect to the horizontal, then the sonar 
+ *      roll is input with respect to the horizontal, then the sonar
  *      recalculates the roll so that the output values are in the plane
  *      defined by the heading and pitch axis. The entered sensor offsets
  *      (roll bias, pitch bias, heading bias). Extra heave at the transducer
  *      due to roll and pitch when the sensor does not give its data at the
  *      transducer position is also included and heave is positive downwards.
- *      The sensor status is copied from the input datagram's two sync bytes 
+ *      The sensor status is copied from the input datagram's two sync bytes
  *      with the second byte always set to 0x90. The first byte is either
  *      zero or in the 0x90-0xAF range. If the latter is true, then 0x90
  *      indicates valid data with full accuracy, 0x91-0x99 indicates valid
  *      data with gradually reduced accuracy, 0x9A-0x9F indicates invalid data
- *      from an operating sensor,  and 0xA0-0xAF indicates invalid data 
+ *      from an operating sensor,  and 0xA0-0xAF indicates invalid data
  *      from a faulty sensor. This interpretation may be dependent on the
  *      attitude sensor type.
  *  12. The heading data is output asynchronously with respect to the
@@ -160,7 +161,7 @@
  *      slightly different bathymetry record.
  *
  */
- 
+
 /* include mb_define.h */
 #ifndef MB_DEFINE_DEF
 #include "mb_define.h"
@@ -169,6 +170,7 @@
 /* sonar models */
 #define	MBSYS_SIMRAD3_UNKNOWN	0
 
+#define	MBSYS_SIMRAD3_EM2040	 2040
 #define	MBSYS_SIMRAD3_EM710	 710
 #define	MBSYS_SIMRAD3_EM302	 302
 #define	MBSYS_SIMRAD3_EM122	 122
@@ -250,6 +252,7 @@
 #define	EM3_SS_MBA		0x02E2
 #define	EM3_BATH2_MBA		0x02E3
 #define	EM3_SS2_MBA		0x02E4
+#define	EM3_BATH3_MBA		0x02E5
 
 /* datagram types */
 #define	EM3_ID_STOP2		0x30
@@ -288,6 +291,7 @@
 #define	EM3_ID_SS_MBA		0xE2
 #define	EM3_ID_BATH2_MBA	0xE3
 #define	EM3_ID_SS2_MBA		0xE4
+#define	EM3_ID_BATH3_MBA	0xE5
 
 /* datagram sizes where constant */
 #define	EM3_STATUS_SIZE			88
@@ -320,6 +324,8 @@
 #define	EM3_RAWBEAM4_HEADER_SIZE	28
 #define	EM3_RAWBEAM4_TX_SIZE		24
 #define	EM3_RAWBEAM4_BEAM_SIZE		16
+#define	EM3_BATH3_MBA_HEADER_SIZE	48
+#define	EM3_BATH3_MBA_BEAM_SIZE		38
 #define	EM3_SS2_HEADER_SIZE		28
 #define	EM3_SS2_BEAM_SIZE		6
 #define	EM3_SS2_MBA_HEADER_SIZE		36
@@ -336,7 +342,7 @@
 #define	EM3_INVALID_SHORT		0xFFFF
 #define EM3_INVALID_U_INT		0xFFFFFFFF
 #define EM3_INVALID_INT			0x7FFFFFFF
-     
+
 /* internal data structure for survey data */
 struct mbsys_simrad3_ping_struct
 	{
@@ -347,10 +353,10 @@ struct mbsys_simrad3_ping_struct
 	int	png_count;	/* sequential counter or input identifier */
 	int	png_serial;	/* system 1 or system 2 serial number */
 	double	png_latitude;	/* latitude in decimal degrees * 20000000
-				    (negative in southern hemisphere) 
+				    (negative in southern hemisphere)
 				    if valid, invalid = 0x7FFFFFFF */
 	double	png_longitude;	/* longitude in decimal degrees * 10000000
-				    (negative in western hemisphere) 
+				    (negative in western hemisphere)
 				    if valid, invalid = 0x7FFFFFFF */
 	int	png_heading;	/* heading (0.01 deg) */
 	int	png_heave;	/* heave from interpolation (0.01 m) */
@@ -359,96 +365,98 @@ struct mbsys_simrad3_ping_struct
 	int	png_speed;	/* speed over ground (cm/sec) if valid,
 				    invalid = 0xFFFF */
 	int	png_ssv;	/* sound speed at transducer (0.1 m/sec) */
-	float	png_xducer_depth;   
-				/* transmit transducer depth (m) 
-					The transmit transducer depth should be 
-					added to the beam depths to derive the 
-					depths re the water line. Note that the 
-					transducer depth will be negative if the 
-					actual heave is large enough to bring the 
-					transmit transducer above the water line. 
-					This may represent a valid situation, but 
-					may also be due to an erroneously set 
-					installation depth of either the transducer 
+	float	png_xducer_depth;
+				/* transmit transducer depth (m)
+					The transmit transducer depth should be
+					added to the beam depths to derive the
+					depths re the water line. Note that the
+					transducer depth will be negative if the
+					actual heave is large enough to bring the
+					transmit transducer above the water line.
+					This may represent a valid situation, but
+					may also be due to an erroneously set
+					installation depth of either the transducer
 					or the water line. */
 
 	int	png_nbeams;	/* maximum number of beams possible */
 	int	png_nbeams_valid;	/* number of valid beams */
 	float	png_sample_rate; /* sampling rate (Hz) */
 	int	png_spare; /* sampling rate (Hz) */
-	float	png_depth[MBSYS_SIMRAD3_MAXBEAMS];	
+	float	png_depth[MBSYS_SIMRAD3_MAXBEAMS];
 				/* depths relative to sonar (m)
-					The beam data are given re the transmit 
-					transducer or sonar head depth and the 
-					horizontal location (x,y) of the active 
-					positioning systemÕs reference point. 
-					Heave, roll, pitch, sound speed at the 
-					transducer depth and ray bending through 
+					The beam data are given re the transmit
+					transducer or sonar head depth and the
+					horizontal location (x,y) of the active
+					positioning systemÕs reference point.
+					Heave, roll, pitch, sound speed at the
+					transducer depth and ray bending through
 					the water column have been applied. */
 	float	png_acrosstrack[MBSYS_SIMRAD3_MAXBEAMS];
 				/* acrosstrack distances (m) */
 	float	png_alongtrack[MBSYS_SIMRAD3_MAXBEAMS];
 				/* alongtrack distances (m) */
-	int	png_window[MBSYS_SIMRAD3_MAXBEAMS];		
+	int	png_window[MBSYS_SIMRAD3_MAXBEAMS];
 				/* samples */
-	int	png_quality[MBSYS_SIMRAD3_MAXBEAMS];	
-				/* 0-254 Scaled standard deviation (sd) of the 
-					range detection divided by 
-					the detected range (dr): 
+	int	png_quality[MBSYS_SIMRAD3_MAXBEAMS];
+				/* 0-254 Scaled standard deviation (sd) of the
+					range detection divided by
+					the detected range (dr):
 					Quality factor = 250*sd/dr. */
-	int	png_iba[MBSYS_SIMRAD3_MAXBEAMS];	
+	int	png_iba[MBSYS_SIMRAD3_MAXBEAMS];
 				/* beam incidence angle adjustment (IBA) (0.1 deg)
-					Due to raybending, the beam incidence angle at the bottom hit 
-					will usually differ from the beam launch angle at the transducer 
-					and also from the angle given by a straight line between the 
-					transducer and the bottom hit. The difference from the latter is 
-					given by the beam incidence angle adjustment (IBA). The beam 
-					incidence angle re the horizontal, corrected for the ray bending, 
-					can be calculated as follows: 
-						BAC = atan( z / abs(y) ) + IBA. 
-					BAC is positive downwards and IBA will be positive when the 
-					beam is bending towards the bottom. This parameter can be 
-					helpful for correcting seabed imagery data and in seabed 
+					Due to raybending, the beam incidence angle at the bottom hit
+					will usually differ from the beam launch angle at the transducer
+					and also from the angle given by a straight line between the
+					transducer and the bottom hit. The difference from the latter is
+					given by the beam incidence angle adjustment (IBA). The beam
+					incidence angle re the horizontal, corrected for the ray bending,
+					can be calculated as follows:
+						BAC = atan( z / abs(y) ) + IBA.
+					BAC is positive downwards and IBA will be positive when the
+					beam is bending towards the bottom. This parameter can be
+					helpful for correcting seabed imagery data and in seabed
 					classification. */
-	int	png_detection[MBSYS_SIMRAD3_MAXBEAMS];	
+	int	png_detection[MBSYS_SIMRAD3_MAXBEAMS];
 				/* Detection info:
-				   This datagram may contain data for beams with and without a 
-				   valid detection. Eight bits (0-7) gives details about the detection: 
-					A) If the most significant bit (bit7) is zero, this beam has a valid 
-						detection. Bit 0-3 is used to specify how the range for this beam 
-						is calculated 
-						0: Amplitude detect 
-						1: Phase detect 
+				   This datagram may contain data for beams with and without a
+				   valid detection. Eight bits (0-7) gives details about the detection:
+					A) If the most significant bit (bit7) is zero, this beam has a valid
+						detection. Bit 0-3 is used to specify how the range for this beam
+						is calculated
+						0: Amplitude detect
+						1: Phase detect
 						2-15: Future use
-					B) If the most significant bit is 1, this beam has an invalid 
-						detection. Bit 4-6 is used to specify how the range (and x,y,z 
-						parameters) for this beam is calculated 
-						0: Normal detection 
-						1: Interpolated or extrapolated from neighbour detections 
-						2: Estimated 
-						3: Rejected candidate 
-						4: No detection data is available for this beam (all parameters 
-							are set to zero) 
-						5-7: Future use 
-					The invalid range has been used to fill in amplitude samples in 
+					B) If the most significant bit is 1, this beam has an invalid
+						detection. Bit 4-6 is used to specify how the range (and x,y,z
+						parameters) for this beam is calculated
+						0: Normal detection
+						1: Interpolated or extrapolated from neighbour detections
+						2: Estimated
+						3: Rejected candidate
+						4: No detection data is available for this beam (all parameters
+							are set to zero)
+						5-7: Future use
+					The invalid range has been used to fill in amplitude samples in
 					the seabed image datagram. */
-	int	png_clean[MBSYS_SIMRAD3_MAXBEAMS];	
+	int	png_clean[MBSYS_SIMRAD3_MAXBEAMS];
 				/* realtime cleaning info:
-					For future use. A real time data cleaning module may flag out 
-					beams. Bit 7 will be set to 1 if the beam is flagged out. Bit 0-6 
+					For future use. A real time data cleaning module may flag out
+					beams. Bit 7 will be set to 1 if the beam is flagged out. Bit 0-6
 					will contain a code telling why the beam is flagged out. */
-	int	png_amp[MBSYS_SIMRAD3_MAXBEAMS];		
+	int	png_amp[MBSYS_SIMRAD3_MAXBEAMS];
 				/* 0.5 dB */
-	char	png_beamflag[MBSYS_SIMRAD3_MAXBEAMS];	
+	char	png_beamflag[MBSYS_SIMRAD3_MAXBEAMS];
 				/* uses standard MB-System beamflags */
 	float	png_depression[MBSYS_SIMRAD3_MAXBEAMS];
 				/* beam depression angles (deg) */
 	float	png_azimuth[MBSYS_SIMRAD3_MAXBEAMS];
 				/* beam azimuth angles (deg) */
 	float	png_range[MBSYS_SIMRAD3_MAXBEAMS];
-				/* Two-way travel times (sec). These values
-					have been corrected for changes in the
-					heave during the ping cycle. */
+				/* Two-way travel times (sec). */
+	float	png_bheave[MBSYS_SIMRAD3_MAXBEAMS];
+				/* Heave correction to the sonar depth for each beam - this is half the difference
+				   between the sonar depth at ping time and the sonar depth at receive time,
+				   as measured by heave  */
 
 	/* raw travel time and angle data version 4 */
 	int	png_raw4_read;	/* flag indicating actual reading of raw beam record */
@@ -473,38 +481,38 @@ struct mbsys_simrad3_ping_struct
 	float	png_raw_txcenter[MBSYS_SIMRAD3_MAXTX];	/* center frequency (Hz) */
 	int	png_raw_txabsorption[MBSYS_SIMRAD3_MAXTX];	/* mean absorption coeff. (0.01 dB/km) */
 
-	int	png_raw_txwaveform[MBSYS_SIMRAD3_MAXTX];	/* signal waveform identifier 
+	int	png_raw_txwaveform[MBSYS_SIMRAD3_MAXTX];	/* signal waveform identifier
 									0 = CW, 1 = FM upsweep, 2 = FM downsweep */
 	int	png_raw_txsector[MBSYS_SIMRAD3_MAXTX];	/* transmit sector number (0-19) */
 	float	png_raw_txbandwidth[MBSYS_SIMRAD3_MAXTX];	/* bandwidth (Hz) */
 
 	int	png_raw_rxpointangle[MBSYS_SIMRAD3_MAXBEAMS];
 				/* Raw beam pointing angles in 0.01 degree,
-					positive to port. 
-					These values are relative to the transducer 
+					positive to port.
+					These values are relative to the transducer
 					array and have not been corrected
 					for vessel motion. */
 	int	png_raw_rxsector[MBSYS_SIMRAD3_MAXBEAMS];	/* transmit sector number (0-19) */
 	int	png_raw_rxdetection[MBSYS_SIMRAD3_MAXBEAMS]; /* Detection info:
-							   This datagram may contain data for beams with and without a 
-							   valid detection. Eight bits (0-7) gives details about the detection: 
-								A) If the most significant bit (bit7) is zero, this beam has a valid 
-									detection. Bit 0-3 is used to specify how the range for this beam 
-									is calculated 
-									0: Amplitude detect 
-									1: Phase detect 
+							   This datagram may contain data for beams with and without a
+							   valid detection. Eight bits (0-7) gives details about the detection:
+								A) If the most significant bit (bit7) is zero, this beam has a valid
+									detection. Bit 0-3 is used to specify how the range for this beam
+									is calculated
+									0: Amplitude detect
+									1: Phase detect
 									2-15: Future use
-								B) If the most significant bit is 1, this beam has an invalid 
-									detection. Bit 4-6 is used to specify how the range (and x,y,z 
-									parameters) for this beam is calculated 
-									0: Normal detection 
-									1: Interpolated or extrapolated from neighbour detections 
-									2: Estimated 
-									3: Rejected candidate 
-									4: No detection data is available for this beam (all parameters 
-										are set to zero) 
-									5-7: Future use 
-								The invalid range has been used to fill in amplitude samples in 
+								B) If the most significant bit is 1, this beam has an invalid
+									detection. Bit 4-6 is used to specify how the range (and x,y,z
+									parameters) for this beam is calculated
+									0: Normal detection
+									1: Interpolated or extrapolated from neighbour detections
+									2: Estimated
+									3: Rejected candidate
+									4: No detection data is available for this beam (all parameters
+										are set to zero)
+									5-7: Future use
+								The invalid range has been used to fill in amplitude samples in
 								the seabed image datagram.
 									bit 7: 0 = good detection
 									bit 7: 1 = bad detection
@@ -517,21 +525,21 @@ struct mbsys_simrad3_ping_struct
 									bits 4-6: 4 = no detection available
 									other bits : future use */
 	int	png_raw_rxwindow[MBSYS_SIMRAD3_MAXBEAMS];	/* length of detection window */
-	int	png_raw_rxquality[MBSYS_SIMRAD3_MAXBEAMS];	/* beam quality flag 
-							   0-254 Scaled standard deviation (sd) of the 
-								range detection divided by 
-								the detected range (dr): 
+	int	png_raw_rxquality[MBSYS_SIMRAD3_MAXBEAMS];	/* beam quality flag
+							   0-254 Scaled standard deviation (sd) of the
+								range detection divided by
+								the detected range (dr):
 								Quality factor = 250*sd/dr. */
 	int	png_raw_rxspare1[MBSYS_SIMRAD3_MAXBEAMS];	/* spare */
 	float	png_raw_rxrange[MBSYS_SIMRAD3_MAXBEAMS];	/* range as two-way travel time (s) */
 	int	png_raw_rxamp[MBSYS_SIMRAD3_MAXBEAMS];		/* 0.5 dB */
 	int	png_raw_rxcleaning[MBSYS_SIMRAD3_MAXBEAMS];	/* Real time cleaning info */
 				/* realtime cleaning info:
-					For future use. A real time data cleaning module may flag out 
-					beams. Bit 7 will be set to 1 if the beam is flagged out. Bit 0-6 
+					For future use. A real time data cleaning module may flag out
+					beams. Bit 7 will be set to 1 if the beam is flagged out. Bit 0-6
 					will contain a code telling why the beam is flagged out. */
 	int	png_raw_rxspare2[MBSYS_SIMRAD3_MAXBEAMS];	/* spare */
-				
+
 
 	/* sidescan */
 	int	png_ss2_read;	/* flag indicating actual reading of sidescan record */
@@ -547,36 +555,36 @@ struct mbsys_simrad3_ping_struct
 	int	png_bsn;	/* normal incidence backscatter (BSN) (0.1 dB) */
 	int	png_bso;	/* oblique incidence backscatter (BSO) (0.1 dB) */
 	int	png_tx;		/* Tx beamwidth (0.1 deg) */
-	int	png_tvg_crossover;	
+	int	png_tvg_crossover;
 				/* TVG law crossover angle (0.1 deg) */
 	int	png_nbeams_ss;	/* number of beams with sidescan */
 	int	png_npixels;	/* number of pixels of sidescan */
-	int	png_sort_direction[MBSYS_SIMRAD3_MAXBEAMS];	
-				/* sorting direction - The first sample in a beam 
-					has lowest range if 1, highest if -- 1. Note 
-					that the ranges in the seabed image datagram 
-					are all two-- way from time of transmit to 
+	int	png_sort_direction[MBSYS_SIMRAD3_MAXBEAMS];
+				/* sorting direction - The first sample in a beam
+					has lowest range if 1, highest if -- 1. Note
+					that the ranges in the seabed image datagram
+					are all two-- way from time of transmit to
 					time of receive. */
 	int	png_ssdetection[MBSYS_SIMRAD3_MAXBEAMS]; /* Detection info:
-							   This datagram may contain data for beams with and without a 
-							   valid detection. Eight bits (0-7) gives details about the detection: 
-								A) If the most significant bit (bit7) is zero, this beam has a valid 
-									detection. Bit 0-3 is used to specify how the range for this beam 
-									is calculated 
-									0: Amplitude detect 
-									1: Phase detect 
+							   This datagram may contain data for beams with and without a
+							   valid detection. Eight bits (0-7) gives details about the detection:
+								A) If the most significant bit (bit7) is zero, this beam has a valid
+									detection. Bit 0-3 is used to specify how the range for this beam
+									is calculated
+									0: Amplitude detect
+									1: Phase detect
 									2-15: Future use
-								B) If the most significant bit is 1, this beam has an invalid 
-									detection. Bit 4-6 is used to specify how the range (and x,y,z 
-									parameters) for this beam is calculated 
-									0: Normal detection 
-									1: Interpolated or extrapolated from neighbour detections 
-									2: Estimated 
-									3: Rejected candidate 
-									4: No detection data is available for this beam (all parameters 
-										are set to zero) 
-									5-7: Future use 
-								The invalid range has been used to fill in amplitude samples in 
+								B) If the most significant bit is 1, this beam has an invalid
+									detection. Bit 4-6 is used to specify how the range (and x,y,z
+									parameters) for this beam is calculated
+									0: Normal detection
+									1: Interpolated or extrapolated from neighbour detections
+									2: Estimated
+									3: Rejected candidate
+									4: No detection data is available for this beam (all parameters
+										are set to zero)
+									5-7: Future use
+								The invalid range has been used to fill in amplitude samples in
 								the seabed image datagram.
 									bit 7: 0 = good detection
 									bit 7: 1 = bad detection
@@ -588,10 +596,10 @@ struct mbsys_simrad3_ping_struct
 									bits 4-6: 3 = rejected
 									bits 4-6: 4 = no detection available
 									other bits : future use */
-	int	png_beam_samples[MBSYS_SIMRAD3_MAXBEAMS];	
+	int	png_beam_samples[MBSYS_SIMRAD3_MAXBEAMS];
 				/* number of sidescan samples derived from
 					each beam */
-	int	png_start_sample[MBSYS_SIMRAD3_MAXBEAMS];	
+	int	png_start_sample[MBSYS_SIMRAD3_MAXBEAMS];
 				/* start sample number */
 	int	png_center_sample[MBSYS_SIMRAD3_MAXBEAMS]; 	/* center sample number */
 	short	png_ssraw[MBSYS_SIMRAD3_MAXRAWPIXELS];		/* the raw sidescan ordered port to starboard */
@@ -601,7 +609,7 @@ struct mbsys_simrad3_ping_struct
 	short	png_ssalongtrack[MBSYS_SIMRAD3_MAXPIXELS]; 	/* the processed sidescan alongtrack distances (0.01 m) */
 	};
 
-/* internal data structure for attitude data */
+/* internal data structure for water column time series */
 struct mbsys_simrad3_wcbeam_struct
 	{
 	int	wtc_rxpointangle;	/* Beam pointing angles in 0.01 degree,
@@ -611,12 +619,12 @@ struct mbsys_simrad3_wcbeam_struct
 						each beam */
 	int	wtc_beam_spare;		/* unknown */
 	int	wtc_sector;		/* transmit sector identifier */
-	int	wtc_beam;  		/* beam 128 is first beam on 
+	int	wtc_beam;  		/* beam 128 is first beam on
 				  	  	second head of EM3000D */
 	mb_s_char wtc_amp[MBSYS_SIMRAD3_MAXRAWPIXELS]; /* water column amplitude (dB) */
 	};
-	
-/* internal data structure for attitude data */
+
+/* internal data structure for water column data */
 struct mbsys_simrad3_watercolumn_struct
 	{
 	int	wtc_date;	/* date = year*10000 + month*100 + day
@@ -625,7 +633,7 @@ struct mbsys_simrad3_watercolumn_struct
 				    08:12:51.234 = 29570234 */
 	int	wtc_count;	/* sequential counter or input identifier */
 	int	wtc_serial;	/* system 1 or system 2 serial number */
-	int	wtc_ndatagrams;	/* number of datagrams used to represent 
+	int	wtc_ndatagrams;	/* number of datagrams used to represent
 						the water column for this ping */
 	int	wtc_datagram;	/* number this datagram */
 	int	wtc_ntx;	/* number of transmit sectors */
@@ -665,8 +673,18 @@ struct mbsys_simrad3_attitude_struct
 				/* heave (cm) */
 	int	att_heading[MBSYS_SIMRAD3_MAXATTITUDE];
 				/* heading (0.01 degree) */
-	int	att_heading_status;
-				/* heading status (0=inactive) */
+	int	att_sensordescriptor;
+				/* sensor system descriptor - indicates
+				   which motion sensor is source of these
+				   data, and which values have been
+				   used in realtime processing:
+				   	xx00 xxxx - motion sensor number 1
+				   	xx01 xxxx - motion sensor number 2
+				   	xx10 xxxx - motion sensor number 3 (in netattitude record)
+				   	xxxx xxx1 - heading from this system is active
+				   	xxxx xx0x - roll from this system is active
+				   	xxxx x0xx - pitch from this system is active
+				   	xxxx 0xxx - heading from this system is active */
 	};
 
 /* internal data structure for network attitude data */
@@ -743,7 +761,7 @@ struct mbsys_simrad3_tilt_struct
 	int	tlt_tilt[MBSYS_SIMRAD3_MAXTILT];
 				/* tilt + forward (0.01 degree) */
 	};
-	
+
 /* internal data structure */
 struct mbsys_simrad3_struct
 	{
@@ -753,7 +771,7 @@ struct mbsys_simrad3_struct
 
 	/* type of sonar */
 	int	sonar;		/* Type of Simrad sonar */
-	
+
 	/* time stamp */
 	int	date;		/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
@@ -780,7 +798,7 @@ struct mbsys_simrad3_struct
 	int	sts_attitude_status;	/* sensor input status, attitude, >0 ok */
 	int	sts_clock_status;	/* sensor input status, clock, >0 ok */
 	int	sts_heading_status;	/* sensor input status, heading, >0 ok */
-	int	sts_pu_status;		/* sensor input status, processing unit 
+	int	sts_pu_status;		/* sensor input status, processing unit
 						(0=off, 1-on, 2=simulator) */
 	int	sts_last_heading;	/* last received heading (0.01 deg) */
 	int	sts_last_roll;		/* last received roll (0.01 deg) */
@@ -794,12 +812,12 @@ struct mbsys_simrad3_struct
 	int	sts_gain;		/* fixed gain (dB) */
 	int	sts_dno;		/* depth to normal incidence (m) */
 	int	sts_rno;		/* range to normal incidence (m) */
-	int	sts_port;		/* port coverange (deg) */
-	int	sts_stbd;		/* starboard coverange (deg) */
+	int	sts_port;		/* port coverage (deg) */
+	int	sts_stbd;		/* starboard coverage (deg) */
 	int	sts_ssp;		/* sound speed at transducer from profile (0.1 m/s) */
 	int	sts_yaw;		/* yaw stabilization (0.01 deg) */
-	int	sts_port2;		/* port coverange for second em3002 head (deg) */
-	int	sts_stbd2;		/* starboard coverange for second em3002 head (deg) */
+	int	sts_port2;		/* port coverage for second em3002 head (deg) */
+	int	sts_stbd2;		/* starboard coverage for second em3002 head (deg) */
 	int	sts_spare2;		/* spare */
 
 	/* installation parameter values */
@@ -839,7 +857,7 @@ struct mbsys_simrad3_struct
 	char	par_dsh[2];	/* depth sensor heave (IN or NI) */
 	int	par_aps;	/* active position system number */
 	int	par_p1m;	/* position system 1 motion compensation (boolean) */
-	int	par_p1t;	/* position system 1 time stamp used 
+	int	par_p1t;	/* position system 1 time stamp used
 				    (0=system time, 1=position input time) */
 	double	par_p1z;	/* position system 1 vertical location (m) */
 	double	par_p1x;	/* position system 1 along location (m) */
@@ -847,7 +865,7 @@ struct mbsys_simrad3_struct
 	double	par_p1d;	/* position system 1 time delay (sec) */
 	char	par_p1g[16];	/* position system 1 geodetic datum */
 	int	par_p2m;	/* position system 2 motion compensation (boolean) */
-	int	par_p2t;	/* position system 2 time stamp used 
+	int	par_p2t;	/* position system 2 time stamp used
 				    (0=system time, 1=position input time) */
 	double	par_p2z;	/* position system 2 vertical location (m) */
 	double	par_p2x;	/* position system 2 along location (m) */
@@ -855,7 +873,7 @@ struct mbsys_simrad3_struct
 	double	par_p2d;	/* position system 2 time delay (sec) */
 	char	par_p2g[16];	/* position system 2 geodetic datum */
 	int	par_p3m;	/* position system 3 motion compensation (boolean) */
-	int	par_p3t;	/* position system 3 time stamp used 
+	int	par_p3t;	/* position system 3 time stamp used
 				    (0=system time, 1=position input time) */
 	double	par_p3z;	/* position system 3 vertical location (m) */
 	double	par_p3x;	/* position system 3 along location (m) */
@@ -872,13 +890,13 @@ struct mbsys_simrad3_struct
 	double	par_msg;	/* motion sensor heading offset (deg) */
 	double	par_gcg;	/* gyro compass heading offset (deg) */
 	char	par_cpr[4];	/* cartographic projection */
-	char	par_rop[MBSYS_SIMRAD3_COMMENT_LENGTH];	
+	char	par_rop[MBSYS_SIMRAD3_COMMENT_LENGTH];
 				/* responsible operator */
-	char	par_sid[MBSYS_SIMRAD3_COMMENT_LENGTH];	
+	char	par_sid[MBSYS_SIMRAD3_COMMENT_LENGTH];
 				/* survey identifier */
-	char	par_pll[MBSYS_SIMRAD3_COMMENT_LENGTH];	
+	char	par_pll[MBSYS_SIMRAD3_COMMENT_LENGTH];
 				/* survey line identifier (planned line number) */
-	char	par_com[MBSYS_SIMRAD3_COMMENT_LENGTH];	
+	char	par_com[MBSYS_SIMRAD3_COMMENT_LENGTH];
 				/* comment */
 
 	/* runtime parameter values */
@@ -900,7 +918,7 @@ struct mbsys_simrad3_struct
 					00 : off
 					01 : weak
 					10 : medium
-					11 : strong 
+					11 : strong
 				    bit 2 is set if the slope filter is on
 				    bit 3 is set if the sidelobe filter is on
 				    bit 4 is set if the range windows are expanded
@@ -953,9 +971,9 @@ struct mbsys_simrad3_struct
 				    08:12:51.234 = 29570234 */
 	int	svp_num;	/* number of svp entries */
 	int	svp_depth_res;	/* depth resolution (cm) */
-	int	svp_depth[MBSYS_SIMRAD3_MAXSVP]; 
+	int	svp_depth[MBSYS_SIMRAD3_MAXSVP];
 				/* depth of svp entries (according to svp_depth_res) */
-	int	svp_vel[MBSYS_SIMRAD3_MAXSVP];	
+	int	svp_vel[MBSYS_SIMRAD3_MAXSVP];
 				/* sound speed of svp entries (0.1 m/sec) */
 
 	/* position */
@@ -966,10 +984,10 @@ struct mbsys_simrad3_struct
 	int	pos_count;	/* sequential counter */
 	int	pos_serial;	/* system 1 serial number */
 	int	pos_latitude;	/* latitude in decimal degrees * 20000000
-				    (negative in southern hemisphere) 
+				    (negative in southern hemisphere)
 				    if valid, invalid = 0x7FFFFFFF */
 	int	pos_longitude;	/* longitude in decimal degrees * 10000000
-				    (negative in western hemisphere) 
+				    (negative in western hemisphere)
 				    if valid, invalid = 0x7FFFFFFF */
 	int	pos_quality;	/* measure of position fix quality (cm) */
 	int	pos_speed;	/* speed over ground (cm/sec) if valid,
@@ -1003,7 +1021,7 @@ struct mbsys_simrad3_struct
 				    zero the height is derived from the GGK datagram
 				    and is the height of the water level re the
 				    vertical datum */
-	
+
 	/* tide */
 	int	tid_date;	/* tide date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
@@ -1015,8 +1033,8 @@ struct mbsys_simrad3_struct
 				    Feb 26, 1995 = 19950226 */
 	int	tid_origin_msec;/* tide input time since midnight in msec
 				    08:12:51.234 = 29570234 */
-	int	tid_tide;	/* tide offset (0.01 m) */	
-	
+	int	tid_tide;	/* tide offset (0.01 m) */
+
 	/* clock */
 	int	clk_date;	/* system date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
@@ -1052,98 +1070,106 @@ struct mbsys_simrad3_struct
 	/* pointer to water column data structure */
 	struct mbsys_simrad3_watercolumn_struct *wc;
 	};
-	
-	
+
+
 /* system specific function prototypes */
-int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_simrad3_survey_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad3_survey_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error);
-int mbsys_simrad3_wc_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad3_wc_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error);
-int mbsys_simrad3_attitude_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad3_attitude_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error);
-int mbsys_simrad3_netattitude_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad3_netattitude_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error);
-int mbsys_simrad3_heading_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad3_heading_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error);
-int mbsys_simrad3_ssv_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad3_ssv_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error);
-int mbsys_simrad3_tilt_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad3_tilt_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error);
-int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_simrad3_zero_ss(int verbose, void *store_ptr, int *error);
-int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad3_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr, 
+int mbsys_simrad3_pingnumber(int verbose, void *mbio_ptr,
 			int *pingnumber, int *error);
-int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad3_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad3_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_simrad3_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_simrad3_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
+int mbsys_simrad3_pulses(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *pulses, int *error);
 int mbsys_simrad3_gains(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transmit_gain, double *pulse_length, 
+			int *kind, double *transmit_gain, double *pulse_length,
 			double *receive_gain, int *error);
 int mbsys_simrad3_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
+			int *error);
+int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
+			int nmax, int *kind, int *n,
+			int *time_i, double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_simrad3_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_simrad3_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
 int mbsys_simrad3_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, 
-			int *nsvp, 
+			int *kind,
+			int *nsvp,
 			double *depth, double *velocity,
 			int *error);
 int mbsys_simrad3_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp, 
+			int nsvp,
 			double *depth, double *velocity,
 			int *error);
-int mbsys_simrad3_copy(int verbose, void *mbio_ptr, 
+int mbsys_simrad3_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
 int mbsys_simrad3_makess(int verbose, void *mbio_ptr, void *store_ptr,
-		int pixel_size_set, double *pixel_size, 
-		int swath_width_set, double *swath_width, 
-		int pixel_int, 
+		int pixel_size_set, double *pixel_size,
+		int swath_width_set, double *swath_width,
+		int pixel_int,
 		int *error);
-

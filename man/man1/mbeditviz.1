@@ -1,4 +1,4 @@
-.TH MBeditviz 1 "4 February 2010" "MB-System 5.0" "MB-System 5.0"
+.TH MBeditviz 1 "29 April 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBMBeditviz\fP - 3D visualization-based editing of swath bathymetry soundings.
 
@@ -25,7 +25,28 @@ on a datalist referencing the relevant files.
 \fIStarting Up\fP
 
 The initial MBeditviz display shows a list of the swath files you have identified by using 
-the "File->Open Swath File" menu item.  You can select some or all of the files in the list. 
+the "File->Open Swath File" menu item. The list has four columns. 
+The first (left-most) column is either blank or shows "<locked>" or "<loaded>".
+If a file is loaded for gridding and editing by this program, it shows as "<loaded>".
+If a file is being edited or processed by another program, it shows as
+"<locked>". Locked files cannot be opened for editing, and any file 
+loaded for editing by \fBMBeditviz\fP will show as "locked" to other
+programs. The second column is either blank or shows "<esf>". This indicates if
+a file has been previously edited so that an edit save file already
+exists. The third column indicates, if the file is loaded, whether asynchronous heading ("H"),
+sonar depth ("S"), and attitude ("A") time series data have been loaded along with the 
+swath bathymetry data. These asynchronous data are required in order to use \fBMBeditviz\fP
+to assess time lag issues, but are not available for all datasets.
+The fourth and fifth columns show the filename and the \fBMBIO\fP
+format id, respectively.
+Users can select one of the files in the available list. If the "Edit Selected File"
+button is clicked, the selected file will be opened for editing (and any
+file already loaded will be closed first). If the "Remove Selected File" 
+button is selected, then the selected file will be removed from the available
+list.
+
+
+You can select some or all of the files in the list. 
 When you click on the "View All Files" or the "View Selected Files", MBeditviz reads the 
 specified files, loading all of the soundings into memory. The program then brings up a 
 "Grid Parameters" dialog which suggests a grid cell size and shows the implied dimensions 
@@ -109,7 +130,7 @@ beams flagged or zeroed.
 .SH KEYBOARD ACTIONS
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbbedit\fP(l), \fBmbprocess\fP(l)
+\fBmbsystem\fP(l), \fBmbedit\fP(l), \fBmbprocess\fP(l) \fBmbset\fP(l)
 
 .SH BUGS
 This program is not done, nor is it adequately documented.

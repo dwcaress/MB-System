@@ -1,4 +1,4 @@
-.TH mb7k2ss 1 "29 March 2010" "MB-System 5.0" "MB-System 5.0"
+.TH mb7k2ss 1 "13 September 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7k2ss\fP - extracts sidescan sonar
 data from Reson 7k format data, bins and lays the sidescan
@@ -198,6 +198,12 @@ Default: \fIrangethreshold\fP = 50 m.
 .B \-V
 This option increases the verbosity of \fBmb7k2ss\fP, causing it
 to print out messages regarding its progress to stdout.
+.TP
+.B \-W
+\fIswathwidth\fP
+This option sets the output sidescan swath width in meters. By default
+\fBmb7k2ss\fP calculates the swath width to use all of the samples available
+in the original data.
 .TP
 .B \-X
 This option switches port and starboard sidescan channels.

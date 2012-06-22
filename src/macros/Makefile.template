@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
 #	$Id$
 #
-#     Copyright (c) 1993-2009 by
+#     Copyright (c) 1993-2011 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -115,7 +115,12 @@ all:	$(BINDIR)/mbm_xbt \
 	$(BINDIR)/mbm_copy \
 	$(BINDIR)/mbm_route2mission \
 	$(BINDIR)/mbm_makedatalist \
-	$(BINDIR)/mbm_histplot	
+	$(BINDIR)/mbm_histplot \
+	$(BINDIR)/mbm_multiprocess \
+	$(BINDIR)/mbm_multidatalist \
+	$(BINDIR)/mbm_multicopy \
+	$(BINDIR)/mbm_bpr
+
 
 ### make clean does nothing
 clean:
@@ -175,3 +180,15 @@ $(BINDIR)/mbm_makedatalist:	mbm_makedatalist.pl
 $(BINDIR)/mbm_histplot:	mbm_histplot.pl
 	cp mbm_histplot.pl $(BINDIR)/mbm_histplot
 	chmod 775 $(BINDIR)/mbm_histplot
+$(BINDIR)/mbm_multiprocess:	mbm_multiprocess.pl
+	cp mbm_multiprocess.pl $(BINDIR)/mbm_multiprocess
+	chmod 775 $(BINDIR)/mbm_multiprocess
+$(BINDIR)/mbm_multidatalist:	mbm_multidatalist.pl
+	cp mbm_multidatalist.pl $(BINDIR)/mbm_multidatalist
+	chmod 775 $(BINDIR)/mbm_multidatalist
+$(BINDIR)/mbm_multicopy:	mbm_multicopy.pl
+	cp mbm_multicopy.pl $(BINDIR)/mbm_multicopy
+	chmod 775 $(BINDIR)/mbm_multicopy
+$(BINDIR)/mbm_bpr:	mbm_bpr.pl
+	cp mbm_bpr.pl $(BINDIR)/mbm_bpr
+	chmod 775 $(BINDIR)/mbm_bpr
