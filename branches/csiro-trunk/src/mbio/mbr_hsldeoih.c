@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
  *	$Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -269,6 +269,7 @@ int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_svp = &mbsys_hsds_extract_svp; 
 	mb_io_ptr->mb_io_insert_svp = &mbsys_hsds_insert_svp; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_hsds_ttimes; 
+	mb_io_ptr->mb_io_detects = &mbsys_hsds_detects; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_hsds_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
@@ -311,6 +312,7 @@ int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
 		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
 		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
@@ -979,8 +981,11 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error)
 	char	*data_ptr;
 	FILE	*mbfp;
 	int	label;
+	char	*labelchar;
+	int	label_test;
 	int	record_size;
 	short int	tmp;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1007,10 +1012,26 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* get next record type */
-	if ((status = fread(&label,1,sizeof(int),mbfp)) == sizeof(int)) 
+	if (fread(&label,1,sizeof(int),mbfp) == sizeof(int))
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
+		
+		labelchar = (char *) &label;
+		label_test = MBF_HSLDEOIH_LABEL;
+#ifdef BYTESWAPPED
+		label_test = mb_swap_int(label_test);
+#endif
+		while (label != label_test && status == MB_SUCCESS)
+			{
+			for (i=0;i<3;i++)
+				labelchar[i] = labelchar[i+1];
+			if (fread(&labelchar[3],1,1,mbfp) != 1)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				}
+			}
 		}
 	else
 		{
@@ -1018,16 +1039,19 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error)
 		*error = MB_ERROR_EOF;
 		}
 
-	/* swap bytes if necessary */
+	/* see if we just encountered a record label */
+	if (status == MB_SUCCESS)
+		{
+		/* swap bytes if necessary */
 #ifdef BYTESWAPPED
-	label = mb_swap_int(label);
+		label = mb_swap_int(label);
 #endif
 
-	/* see if we just encountered a record label */
-	if (status == MB_SUCCESS && label != MBF_HSLDEOIH_LABEL)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
+		if (label != MBF_HSLDEOIH_LABEL)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read what size and kind of record it is */

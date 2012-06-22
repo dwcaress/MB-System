@@ -2,7 +2,7 @@
  *    The MB-system:	mbnavedit.h	6/24/95
  *    $Id$
  *
- *    Copyright (c) 1995-2009 by
+ *    Copyright (c) 1995-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -168,14 +168,21 @@ EXTERNAL int	window_height;
 #define	MODEL_MODE_MEAN		1
 #define	MODEL_MODE_DR		2
 #define	MODEL_MODE_INVERT	3
+#define	NUM_FILES_MAX		100
 
 /*--------------------------------------------------------------------*/
 
 /* function prototypes */
 void do_mbnavedit_init(int argc, char **argv);
+void  do_parse_datalist( char *file, int form);
+void do_editlistselection( Widget w, XtPointer client_data, XtPointer call_data);
+void do_filelist_remove( Widget w, XtPointer client_data, XtPointer call_data);
+void do_load_specific_file(int i_file);
 void do_set_controls();
 void do_nextbuffer( Widget w, XtPointer client_data, XtPointer call_data);
 void do_done( Widget w, XtPointer client_data, XtPointer call_data);
+void do_start( Widget w, XtPointer client_data, XtPointer call_data);
+void do_end( Widget w, XtPointer client_data, XtPointer call_data);
 void do_forward( Widget w, XtPointer client_data, XtPointer call_data);
 void do_reverse( Widget w, XtPointer client_data, XtPointer call_data);
 void do_timespan( Widget w, XtPointer client_data, XtPointer call_data);
@@ -221,7 +228,7 @@ void do_fileselection_ok( Widget w, XtPointer client_data, XtPointer call_data);
 void do_checkuseprevious();
 void do_useprevious_yes( Widget w, XtPointer client_data, XtPointer call_data);
 void do_useprevious_no( Widget w, XtPointer client_data, XtPointer call_data);
-void do_open_file(int useprevious);
+void do_load(int useprevious);
 void do_fileselection_filter( Widget w, XtPointer client_data, XtPointer call_data);
 void do_fileselection_list( Widget w, XtPointer client_data, XtPointer call_data);
 void do_fileselection_nomatch( Widget w, XtPointer client_data, XtPointer call_data);
@@ -248,6 +255,8 @@ void mbnavedit_selectallcursor();
 void mbnavedit_deselectallcursor();
 void mbnavedit_setintervalcursor();
 int do_wait_until_viewed(XtAppContext app);
+int do_mbnavedit_settimer();
+int do_mbnavedit_workfunction(XtPointer client_data);
 int do_message_on(char *message);
 int do_message_off();
 int do_error_dialog(char *s1, char *s2, char *s3);
@@ -256,7 +265,7 @@ void set_label_multiline_string(Widget w, String str);
 void get_text_string(Widget w, String str);
 
 int mbnavedit_init_globals();
-int mbnavedit_init(int argc, char **argv);
+int mbnavedit_init(int argc, char **argv, int *startup_file);
 int mbnavedit_set_graphics(void *xgid, int ncol, unsigned int *pixels);
 int mbnavedit_action_open(int useprevious);
 int mbnavedit_open_file(int useprevious);
@@ -270,6 +279,8 @@ int mbnavedit_action_close();
 int mbnavedit_action_done(int *quit);
 int mbnavedit_action_quit();
 int mbnavedit_action_step(int step);
+int mbnavedit_action_start();
+int mbnavedit_action_end();
 int mbnavedit_action_mouse_pick(int xx, int yy);
 int mbnavedit_action_mouse_select(int xx, int yy);
 int mbnavedit_action_mouse_deselect(int xx, int yy);

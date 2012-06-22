@@ -2,7 +2,7 @@
  *    The MB-system:	mbfilter.c	1/16/95
  *    $Id$
  *
- *    Copyright (c) 1995-2009 by
+ *    Copyright (c) 1995-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -176,7 +176,7 @@
 #define	MBFILTER_BUFFER_DEFAULT	2000
 
 /* ping structure definition */
-struct mbfilter_ping_struct 
+struct mbfilter_ping_struct
 	{
 	int	time_i[7];
 	double	time_d;
@@ -212,7 +212,7 @@ struct mbfilter_ping_struct
 
 /* filter structure definition */
 #define	MBFILTER_NFILTER_MAX	10
-struct mbfilter_filter_struct 
+struct mbfilter_filter_struct
 	{
 	int	mode;
 	int	xdim;
@@ -225,38 +225,38 @@ struct mbfilter_filter_struct
 	};
 
 /* function prototypes */
-int hipass_mean(int verbose, int n, double *val, double *wgt, 
+int hipass_mean(int verbose, int n, double *val, double *wgt,
 		double *hipass, int *error);
-int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, 
+int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 		double *hipass, int *error);
-int hipass_median(int verbose, int n, double *val, double *wgt, 
+int hipass_median(int verbose, int n, double *val, double *wgt,
 		double *hipass, int *error);
-int smooth_mean(int verbose, int n, double *val, double *wgt, 
+int smooth_mean(int verbose, int n, double *val, double *wgt,
 		double *smooth, int *error);
-int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, 
+int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 		double *smooth, int *error);
-int smooth_median(int verbose, double original, 
-		int apply_threshold, double threshold_lo, double threshold_hi, 
-		int n, double *val, double *wgt, 
+int smooth_median(int verbose, double original,
+		int apply_threshold, double threshold_lo, double threshold_hi,
+		int n, double *val, double *wgt,
 		double *smooth, int *error);
-int smooth_gradient(int verbose, int n, double *val, double *wgt, 
+int smooth_gradient(int verbose, int n, double *val, double *wgt,
 		double *smooth, int *error);
-int contrast_edge(int verbose, int n, double *val, double *grad, 
+int contrast_edge(int verbose, int n, double *val, double *grad,
 		double *result, int *error);
-int contrast_gradient(int verbose, int n, double *val, double *wgt, 
+int contrast_gradient(int verbose, int n, double *val, double *wgt,
 		double *result, int *error);
 int mbcopy_any_to_mbldeoih(int verbose, int system,
-		int kind, int *time_i, double time_d, 
-		double navlon, double navlat, double speed, double heading, 
-		double draft, double altitude, 
-		double roll, double pitch, double heave, 
-		double	beamwidth_xtrack, double beamwidth_ltrack, 
+		int kind, int *time_i, double time_d,
+		double navlon, double navlat, double speed, double heading,
+		double draft, double altitude,
+		double roll, double pitch, double heave,
+		double	beamwidth_xtrack, double beamwidth_ltrack,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, 
-		char *ombio_ptr, char *ostore_ptr, 
+		char *comment,
+		char *ombio_ptr, char *ostore_ptr,
 		int *error);
 
 static char rcs_id[] = "$Id$";
@@ -266,7 +266,7 @@ static char rcs_id[] = "$Id$";
 int main (int argc, char **argv)
 {
 	char program_name[] = "MBFILTER";
-	char help_message[] =  
+	char help_message[] =
 "mbfilter applies one or more simple filters to the specified\n\t\
 data (sidescan and/or beam amplitude). The filters\n\t\
 include:\n\t\
@@ -434,7 +434,7 @@ The default input and output streams are stdin and stdout.\n";
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:HhI:i:N:n:R:r:S:s:T:t:Vv")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'A':
 		case 'a':
@@ -454,7 +454,7 @@ The default input and output streams are stdin and stdout.\n";
 		case 'C':
 		case 'c':
 			n = sscanf (optarg,"%d/%d/%d/%d",
-				&contrast_mode, &contrast_xdim, 
+				&contrast_mode, &contrast_xdim,
 				&contrast_ldim, &contrast_iter);
 			if (n >= 3)
 				{
@@ -474,8 +474,8 @@ The default input and output streams are stdin and stdout.\n";
 		case 'D':
 		case 'd':
 			n = sscanf (optarg,"%d/%d/%d/%d/%lf",
-				&hipass_mode, &hipass_xdim, 
-				&hipass_ldim, &hipass_iter, 
+				&hipass_mode, &hipass_xdim,
+				&hipass_ldim, &hipass_iter,
 				&hipass_offset);
 			if (n >= 3)
 				{
@@ -534,7 +534,7 @@ The default input and output streams are stdin and stdout.\n";
 		case 'S':
 		case 's':
 			n = sscanf (optarg,"%d/%d/%d/%d/%lf/%lf",
-				&smooth_mode, &smooth_xdim, 
+				&smooth_mode, &smooth_xdim,
 				&smooth_ldim, &smooth_iter,
 				&threshold_lo, &threshold_hi);
 			if (n >= 3)
@@ -757,7 +757,7 @@ The default input and output streams are stdin and stdout.\n";
 	status = mb_format_system(verbose,&format,&system,&error);
 	status = mb_format_dimensions(verbose,&format,
 			&beams_bath,&beams_amp,&pixels_ss,&error);
-	if (datakind == MBFILTER_BATH 
+	if (datakind == MBFILTER_BATH
 		&& beams_bath <= 0)
 		{
 		fprintf(stderr,"\nProgram <%s> is in bathymetry mode.\n",program_name);
@@ -767,7 +767,7 @@ The default input and output streams are stdin and stdout.\n";
 		error = MB_ERROR_BAD_FORMAT;
 		exit(error);
 		}
-	if (datakind == MBFILTER_SS 
+	if (datakind == MBFILTER_SS
 		&& pixels_ss <= 0)
 		{
 		fprintf(stderr,"\nProgram <%s> is in sidescan mode.\n",program_name);
@@ -777,7 +777,7 @@ The default input and output streams are stdin and stdout.\n";
 		error = MB_ERROR_BAD_FORMAT;
 		exit(error);
 		}
-	if (datakind == MBFILTER_AMP 
+	if (datakind == MBFILTER_AMP
 		&& beams_amp <= 0)
 		{
 		fprintf(stderr,"\nProgram <%s> is in amplitude mode.\n",program_name);
@@ -803,7 +803,7 @@ The default input and output streams are stdin and stdout.\n";
 		exit(error);
 		}
 	imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
-	
+
 	/* initialize writing the output swath sonar file */
 	if (datakind == MBFILTER_BATH)
 		sprintf(ofile, "%s.ffb", file);
@@ -858,16 +858,16 @@ The default input and output streams are stdin and stdout.\n";
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							sizeof(double), (void **)&ping[i].bathalongtrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(char), (void **)&ping[i].pixelflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&ping[i].ss, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&ping[i].ssacrosstrack, &error);
 		if (error == MB_ERROR_NO_ERROR)
-			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							sizeof(double), (void **)&ping[i].ssalongtrack, &error);
 		if (datakind == MBFILTER_BATH)
 		    {
@@ -900,7 +900,7 @@ The default input and output streams are stdin and stdout.\n";
 							sizeof(double), (void **)&ping[i].datasave, &error);
 		    }
 		}
-		
+
 	/* get ideal number of ping records to hold */
 	nhold_ping = 1;
 	nweightmax = 1;
@@ -909,7 +909,7 @@ The default input and output streams are stdin and stdout.\n";
 		nhold_ping = MAX(nhold_ping, filters[i].ldim);
 		nweightmax = MAX(nweightmax, filters[i].xdim * filters[i].ldim);
 		}
-	
+
 	/* allocate memory for weights */
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_mallocd(verbose,__FILE__,__LINE__,nweightmax*sizeof(double),
@@ -1123,21 +1123,21 @@ The default input and output streams are stdin and stdout.\n";
 							ping[ndata].pixelflag[i] = MB_FLAG_NULL;
 						}
 					}
-				status = mb_extract_nav(verbose, imbio_ptr, store_ptr, &kind, 
-						ping[ndata].time_i, 
-						&ping[ndata].time_d, 
-						&ping[ndata].navlon, 
-						&ping[ndata].navlat, 
-						&ping[ndata].speed, 
-						&ping[ndata].heading, 
-						&ping[ndata].sonardepth, 
-						&ping[ndata].roll, 
-						&ping[ndata].pitch, 
-						&ping[ndata].heave, 
+				status = mb_extract_nav(verbose, imbio_ptr, store_ptr, &kind,
+						ping[ndata].time_i,
+						&ping[ndata].time_d,
+						&ping[ndata].navlon,
+						&ping[ndata].navlat,
+						&ping[ndata].speed,
+						&ping[ndata].heading,
+						&ping[ndata].sonardepth,
+						&ping[ndata].roll,
+						&ping[ndata].pitch,
+						&ping[ndata].heave,
 						&error);
-				status = mb_extract_altitude(verbose, imbio_ptr, store_ptr, &kind, 
-						&ping[ndata].sonardepth, 
-						&ping[ndata].altitude, 
+				status = mb_extract_altitude(verbose, imbio_ptr, store_ptr, &kind,
+						&ping[ndata].sonardepth,
+						&ping[ndata].altitude,
 						&error);
 				}
 			if (status == MB_SUCCESS && kind == MB_DATA_DATA)
@@ -1154,14 +1154,14 @@ The default input and output streams are stdin and stdout.\n";
 			error = MB_ERROR_NO_ERROR;
 			done = MB_YES;
 			}
-		
+
 		/* give the statistics */
 		if (verbose >= 1)
 			{
 			fprintf(stderr,"%d records loaded into buffer\n",nload);
 			fprintf(stderr,"%d records held in buffer\n",ndata);
 			}
-		
+
 		/* get start of ping output range */
 		if (first == MB_YES)
 			{
@@ -1193,7 +1193,7 @@ The default input and output streams are stdin and stdout.\n";
 			fprintf(stderr,"%d survey records being processed\n\n",
 				(jend - jbeg + 1));
 			}
-/*fprintf(stderr, "done:%d jbeg:%d jend:%d ndata:%d nhold_ping:%d nhold:%d\n", 
+/*fprintf(stderr, "done:%d jbeg:%d jend:%d ndata:%d nhold_ping:%d nhold:%d\n",
 done, jbeg, jend, ndata, nhold_ping, nhold);*/
 
 		/* loop over all filters */
@@ -1202,11 +1202,11 @@ done, jbeg, jend, ndata, nhold_ping, nhold);*/
 			iteration = 0;
 			ndx = filters[ifilter].xdim / 2;
 			ndl = filters[ifilter].ldim / 2;
-			
+
 			while (iteration < filters[ifilter].iteration)
 				{
 				if (verbose > 0)
-					fprintf(stderr, "Applying filter %d iteration %d of %d...\n", 
+					fprintf(stderr, "Applying filter %d iteration %d of %d...\n",
 							ifilter+1,iteration+1, filters[ifilter].iteration);
 
 				/* set in and out data arrays */
@@ -1272,7 +1272,7 @@ done, jbeg, jend, ndata, nhold_ping, nhold);*/
 		        		  {
 					  dataptr1 = ping[jj].data_i_ptr;
 					  flagptr1 = ping[jj].flag_ptr;
-					  if ((jj != j || ii != i) 
+					  if ((jj != j || ii != i)
 					    && mb_beam_ok(flagptr1[ii]))
 					    {
 					    values[nweight] = dataptr1[ii];
@@ -1291,39 +1291,39 @@ done, jbeg, jend, ndata, nhold_ping, nhold);*/
 				    if (nweight > 0)
 				      {
 				      if (filters[ifilter].mode == MBFILTER_A_HIPASS_MEAN)
-		        		hipass_mean(verbose, nweight, values, 
-						weights, 
+		        		hipass_mean(verbose, nweight, values,
+						weights,
 						&ping[j].data_f_ptr[i], &error);
 				      else if (filters[ifilter].mode == MBFILTER_A_HIPASS_GAUSSIAN)
-		        		hipass_gaussian(verbose, nweight, values, 
-						weights, distances, 
+		        		hipass_gaussian(verbose, nweight, values,
+						weights, distances,
 						&ping[j].data_f_ptr[i], &error);
 				      else if (filters[ifilter].mode == MBFILTER_A_HIPASS_MEDIAN)
-		        		hipass_median(verbose, nweight, values, 
-						weights, 
+		        		hipass_median(verbose, nweight, values,
+						weights,
 						&ping[j].data_f_ptr[i], &error);
 				      else if (filters[ifilter].mode == MBFILTER_A_SMOOTH_MEAN)
-		        		smooth_mean(verbose, nweight, values, weights, 
+		        		smooth_mean(verbose, nweight, values, weights,
 						&ping[j].data_f_ptr[i], &error);
 				      else if (filters[ifilter].mode == MBFILTER_A_SMOOTH_GAUSSIAN)
-		        		smooth_gaussian(verbose, nweight, values, 
-						weights, distances, 
+		        		smooth_gaussian(verbose, nweight, values,
+						weights, distances,
 						&ping[j].data_f_ptr[i], &error);
 				      else if (filters[ifilter].mode == MBFILTER_A_SMOOTH_MEDIAN)
-		        		smooth_median(verbose, dataptr0[i], 
-						filters[ifilter].threshold, 
-						filters[ifilter].threshold_lo, 
+		        		smooth_median(verbose, dataptr0[i],
+						filters[ifilter].threshold,
+						filters[ifilter].threshold_lo,
 						filters[ifilter].threshold_hi,
-						nweight, values, weights, 
+						nweight, values, weights,
 						&ping[j].data_f_ptr[i], &error);
 				      else if (filters[ifilter].mode == MBFILTER_A_SMOOTH_GRADIENT)
-		        		smooth_gradient(verbose, nweight, values, weights, 
+		        		smooth_gradient(verbose, nweight, values, weights,
 						&ping[j].data_f_ptr[i], &error);
 				      else if (filters[ifilter].mode == MBFILTER_A_CONTRAST_EDGE)
-		        		contrast_edge(verbose, nweight, values, weights, 
+		        		contrast_edge(verbose, nweight, values, weights,
 						&ping[j].data_f_ptr[i], &error);
 				      else if (filters[ifilter].mode == MBFILTER_A_CONTRAST_GRADIENT)
-		        		contrast_gradient(verbose, nweight, values, weights, 
+		        		contrast_gradient(verbose, nweight, values, weights,
 						&ping[j].data_f_ptr[i], &error);
 				      }
 				    else
@@ -1334,11 +1334,11 @@ done, jbeg, jend, ndata, nhold_ping, nhold);*/
 
 				  /* print out progress */
 		/*		  if (verbose > 0)
-				    fprintf(stderr, "done with ping %d of %d\n", 
+				    fprintf(stderr, "done with ping %d of %d\n",
 					(j-jbeg+1), (jend-jbeg+1));*/
 				  }
 
-				/* reset initial array and add offset 
+				/* reset initial array and add offset
 				    if done with final iteration */
 				if (iteration == filters[ifilter].iteration-1)
 				  for (j=0;j<ndata;j++)
@@ -1368,16 +1368,16 @@ done, jbeg, jend, ndata, nhold_ping, nhold);*/
 		  {
 		  if (datakind == MBFILTER_BATH)
 			{
-			status = mbcopy_any_to_mbldeoih(verbose, system, 
-				MB_DATA_DATA, ping[j].time_i, ping[j].time_d, 
-				ping[j].navlon, ping[j].navlat, 
-				ping[j].speed, ping[j].heading, 
-				ping[j].sonardepth, ping[j].altitude, 
-				ping[j].roll, ping[j].pitch, ping[j].heave, 
-				imb_io_ptr->beamwidth_xtrack, 
-				imb_io_ptr->beamwidth_ltrack, 
-				ping[j].beams_bath, 
-				0, 
+			status = mbcopy_any_to_mbldeoih(verbose, system,
+				MB_DATA_DATA, ping[j].time_i, ping[j].time_d,
+				ping[j].navlon, ping[j].navlat,
+				ping[j].speed, ping[j].heading,
+				ping[j].sonardepth, ping[j].altitude,
+				ping[j].roll, ping[j].pitch, ping[j].heave,
+				imb_io_ptr->beamwidth_xtrack,
+				imb_io_ptr->beamwidth_ltrack,
+				ping[j].beams_bath,
+				0,
 				0,
 				ping[j].beamflag,
 				ping[j].datasave,
@@ -1387,21 +1387,21 @@ done, jbeg, jend, ndata, nhold_ping, nhold);*/
 				ping[j].ss,
 				ping[j].ssacrosstrack,
 				ping[j].ssalongtrack,
-				comment, 
+				comment,
 				ombio_ptr, omb_io_ptr->store_data, &error);
 			}
 		  else if (datakind == MBFILTER_AMP)
 			{
-			status = mbcopy_any_to_mbldeoih(verbose, system, 
-				MB_DATA_DATA, ping[j].time_i, ping[j].time_d, 
-				ping[j].navlon, ping[j].navlat, 
-				ping[j].speed, ping[j].heading, 
-				ping[j].sonardepth, ping[j].altitude, 
-				ping[j].roll, ping[j].pitch, ping[j].heave, 
-				imb_io_ptr->beamwidth_xtrack, 
-				imb_io_ptr->beamwidth_ltrack, 
-				ping[j].beams_bath, 
-				ping[j].beams_amp, 
+			status = mbcopy_any_to_mbldeoih(verbose, system,
+				MB_DATA_DATA, ping[j].time_i, ping[j].time_d,
+				ping[j].navlon, ping[j].navlat,
+				ping[j].speed, ping[j].heading,
+				ping[j].sonardepth, ping[j].altitude,
+				ping[j].roll, ping[j].pitch, ping[j].heave,
+				imb_io_ptr->beamwidth_xtrack,
+				imb_io_ptr->beamwidth_ltrack,
+				ping[j].beams_bath,
+				ping[j].beams_amp,
 				0,
 				ping[j].beamflag,
 				ping[j].bath,
@@ -1411,22 +1411,22 @@ done, jbeg, jend, ndata, nhold_ping, nhold);*/
 				ping[j].ss,
 				ping[j].ssacrosstrack,
 				ping[j].ssalongtrack,
-				comment, 
+				comment,
 				ombio_ptr, omb_io_ptr->store_data, &error);
 			}
-			      
+
 		  else if (datakind == MBFILTER_SS)
 			{
-			status = mbcopy_any_to_mbldeoih(verbose, system, 
-				MB_DATA_DATA, ping[j].time_i, ping[j].time_d, 
-				ping[j].navlon, ping[j].navlat, 
-				ping[j].speed, ping[j].heading, 
-				ping[j].sonardepth, ping[j].altitude, 
-				ping[j].roll, ping[j].pitch, ping[j].heave, 
-				imb_io_ptr->beamwidth_xtrack, 
-				imb_io_ptr->beamwidth_ltrack, 
-				0, 
-				0, 
+			status = mbcopy_any_to_mbldeoih(verbose, system,
+				MB_DATA_DATA, ping[j].time_i, ping[j].time_d,
+				ping[j].navlon, ping[j].navlat,
+				ping[j].speed, ping[j].heading,
+				ping[j].sonardepth, ping[j].altitude,
+				ping[j].roll, ping[j].pitch, ping[j].heave,
+				imb_io_ptr->beamwidth_xtrack,
+				imb_io_ptr->beamwidth_ltrack,
+				0,
+				0,
 				ping[j].pixels_ss,
 				ping[j].beamflag,
 				ping[j].bath,
@@ -1436,7 +1436,7 @@ done, jbeg, jend, ndata, nhold_ping, nhold);*/
 				ping[j].datasave,
 				ping[j].ssacrosstrack,
 				ping[j].ssalongtrack,
-				comment, 
+				comment,
 				ombio_ptr, omb_io_ptr->store_data, &error);
 			}
 
@@ -1554,13 +1554,13 @@ nunload,nwrite,verbose,error,ombio_ptr,omb_io_ptr->store_data);*/
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int hipass_mean(int verbose, int n, double *val, double *wgt, 
+int hipass_mean(int verbose, int n, double *val, double *wgt,
 		double *hipass, int *error)
 {
 	char	*function_name = "hipass_mean";
 	int	status = MB_SUCCESS;
 	int	i, nn;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1602,7 +1602,7 @@ int hipass_mean(int verbose, int n, double *val, double *wgt,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis, 
+int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 		double *hipass, int *error)
 {
 	char	*function_name = "hipass_gaussian";
@@ -1622,7 +1622,7 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 		fprintf(stderr,"dbg2       wgt:             %lu\n",(size_t)wgt);
 		fprintf(stderr,"dbg2       dis:             %lu\n",(size_t)dis);
 		for (i=0;i<n;i++)
-			fprintf(stderr,"dbg2       val[%d]: %f  dis[%d]: %f\n", 
+			fprintf(stderr,"dbg2       val[%d]: %f  dis[%d]: %f\n",
 				i, val[i], i, dis[i]);
 		}
 
@@ -1661,12 +1661,12 @@ int hipass_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int hipass_median(int verbose, int n, double *val, double *wgt, 
+int hipass_median(int verbose, int n, double *val, double *wgt,
 		double *hipass, int *error)
 {
 	char	*function_name = "hipass_median";
 	int	status = MB_SUCCESS;
-	int	i;	
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1707,13 +1707,13 @@ int hipass_median(int verbose, int n, double *val, double *wgt,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int smooth_mean(int verbose, int n, double *val, double *wgt, 
+int smooth_mean(int verbose, int n, double *val, double *wgt,
 		double *smooth, int *error)
 {
 	char	*function_name = "smooth_mean";
 	int	status = MB_SUCCESS;
 	int	i, nn;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1755,7 +1755,7 @@ int smooth_mean(int verbose, int n, double *val, double *wgt,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis, 
+int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 		double *smooth, int *error)
 {
 	char	*function_name = "smooth_gaussian";
@@ -1775,7 +1775,7 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 		fprintf(stderr,"dbg2       wgt:             %lu\n",(size_t)wgt);
 		fprintf(stderr,"dbg2       dis:             %lu\n",(size_t)dis);
 		for (i=0;i<n;i++)
-			fprintf(stderr,"dbg2       val[%d]: %f  dis[%d]: %f\n", 
+			fprintf(stderr,"dbg2       val[%d]: %f  dis[%d]: %f\n",
 				i, val[i], i, dis[i]);
 		}
 
@@ -1814,15 +1814,15 @@ int smooth_gaussian(int verbose, int n, double *val, double *wgt, double *dis,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int smooth_median(int verbose, double original, 
-		int apply_threshold, double threshold_lo, double threshold_hi, 
-		int n, double *val, double *wgt, 
+int smooth_median(int verbose, double original,
+		int apply_threshold, double threshold_lo, double threshold_hi,
+		int n, double *val, double *wgt,
 		double *smooth, int *error)
 {
 	char	*function_name = "smooth_median";
 	int	status = MB_SUCCESS;
 	double	ratio;
-	int	i;	
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1881,7 +1881,7 @@ ratio, threshold_lo, threshold_hi, original, *smooth);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int smooth_gradient(int verbose, int n, double *val, double *wgt, 
+int smooth_gradient(int verbose, int n, double *val, double *wgt,
 		double *smooth, int *error)
 {
 	char	*function_name = "smooth_gradient";
@@ -1889,7 +1889,7 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt,
 	double	wgtsum;
 	double	diff;
 	int	i, nn;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1943,7 +1943,7 @@ int smooth_gradient(int verbose, int n, double *val, double *wgt,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int contrast_edge(int verbose, int n, double *val, double *grad, 
+int contrast_edge(int verbose, int n, double *val, double *grad,
 		double *result, int *error)
 {
 	char	*function_name = "contrast_edge";
@@ -1952,7 +1952,7 @@ int contrast_edge(int verbose, int n, double *val, double *grad,
 	double	gradsum;
 	double	contrast;
 	int	i, ii;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1990,7 +1990,7 @@ int contrast_edge(int verbose, int n, double *val, double *grad,
 	    *result = edge * (1.0 + contrast) / (1.0 - contrast);
 	else
 	    *result = edge * (1.0 - contrast) / (1.0 + contrast);
-/*fprintf(stderr, "val: %f %f  edge:%f contrast:%f\n", 
+/*fprintf(stderr, "val: %f %f  edge:%f contrast:%f\n",
 val[0], *result, edge, contrast);*/
 
 	/* print output debug statements */
@@ -2008,14 +2008,14 @@ val[0], *result, edge, contrast);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int contrast_gradient(int verbose, int n, double *val, double *wgt, 
+int contrast_gradient(int verbose, int n, double *val, double *wgt,
 		double *result, int *error)
 {
 	char	*function_name = "contrast_gradient";
 	int	status = MB_SUCCESS;
 	double	gradient;
 	int	i, nn;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2059,17 +2059,17 @@ int contrast_gradient(int verbose, int n, double *val, double *wgt,
 }
 /*--------------------------------------------------------------------*/
 int mbcopy_any_to_mbldeoih(int verbose, int system,
-		int kind, int *time_i, double time_d, 
-		double navlon, double navlat, double speed, double heading, 
-		double draft, double altitude, 
-		double roll, double pitch, double heave, 
-		double	beamwidth_xtrack, double beamwidth_ltrack, 
+		int kind, int *time_i, double time_d,
+		double navlon, double navlat, double speed, double heading,
+		double draft, double altitude,
+		double roll, double pitch, double heave,
+		double	beamwidth_xtrack, double beamwidth_ltrack,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
-		char *comment, 
-		char *ombio_ptr, char *ostore_ptr, 
+		char *comment,
+		char *ombio_ptr, char *ostore_ptr,
 		int *error)
 {
 	char	*function_name = "mbcopy_any_to_mbldeoih";
@@ -2118,18 +2118,18 @@ int mbcopy_any_to_mbldeoih(int verbose, int system,
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
 			nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -2142,39 +2142,37 @@ int mbcopy_any_to_mbldeoih(int verbose, int system,
 
 	/* copy the data  */
 	if (ostore != NULL)
-		{		
+		{
 		/* set beam widths */
-		ostore->beam_xwidth = 100 * beamwidth_xtrack;
-		ostore->beam_lwidth = 100 * beamwidth_ltrack;
+		ostore->beam_xwidth = beamwidth_xtrack;
+		ostore->beam_lwidth = beamwidth_ltrack;
 		if (system == MB_SYS_SB2100)
 			ostore->ss_type = MB_SIDESCAN_LINEAR;
 		else
 			ostore->ss_type = MB_SIDESCAN_LOGARITHMIC;
 		ostore->kind = kind;
-		ostore->depth_scale = 0;
-		ostore->distance_scale = 0;
 
 		/* insert data */
 		if (kind == MB_DATA_DATA)
 		        {
-			mb_insert_altitude(verbose, ombio_ptr, (void *)ostore, 
-					draft, altitude, 
+			mb_insert_altitude(verbose, ombio_ptr, (void *)ostore,
+					draft, altitude,
 					error);
-			mb_insert_nav(verbose, ombio_ptr, (void *)ostore, 
-					time_i, time_d, 
-					navlon, navlat, speed, heading, draft, 
-					roll, pitch, heave, 
+			mb_insert_nav(verbose, ombio_ptr, (void *)ostore,
+					time_i, time_d,
+					navlon, navlat, speed, heading, draft,
+					roll, pitch, heave,
 					error);
 			}
 		status = mb_insert(verbose, ombio_ptr, (void *)ostore,
-				kind, time_i, time_d, 
-				navlon, navlat, speed, heading, 
+				kind, time_i, time_d,
+				navlon, navlat, speed, heading,
 				nbath,namp,nss,
 				beamflag,bath,amp,bathacrosstrack,
 				bathalongtrack,
 				ss,ssacrosstrack,ssalongtrack,
 				comment, error);
-		  
+
 		}
 
 	/* print output debug statements */

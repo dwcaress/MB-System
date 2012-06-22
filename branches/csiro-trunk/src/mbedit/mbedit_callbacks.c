@@ -2,7 +2,7 @@
  *    The MB-system:	mbedit_callbacks.c	3/28/97
  *    $Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -162,6 +162,7 @@
 #include <sys/stat.h>
 
 /* X11 includes */
+#include <X11/StringDefs.h>
 #include <X11/cursorfont.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -172,11 +173,13 @@
 #include <Xm/Text.h>
 #include <Xm/TextF.h>
 #include <Xm/ToggleB.h>
+#include <Xm/List.h>
 
 /* mbedit widget includes */
 #include "mbedit_creation.h"
 #include "../../include/mb_define.h"
 #include "../../include/mb_status.h"
+#include "../../include/mb_process.h"
 #include "../../include/mb_xgraphics.h"
 #include "mbedit.h"
 
@@ -231,12 +234,16 @@ Widget	fileSelectionText;
 #define	VIEW_WATERFALL		0
 #define	VIEW_ALONGTRACK		1
 #define	VIEW_ACROSSTRACK	2
+#define	BEAM_MODE_FLAG		0
+#define	BEAM_MODE_DETECT	1
+#define	BEAM_MODE_PULSE		2
 #define	OUTPUT_MODE_OUTPUT	0
 #define	OUTPUT_MODE_EDIT	1
 #define	OUTPUT_MODE_BROWSE	2
 #define GRAB_START		0
 #define GRAB_MOVE		1
 #define GRAB_END		2
+#define	NUM_FILES_MAX		500
 
 /* global variables */
 XtAppContext app_context;
@@ -272,7 +279,7 @@ int	mplot_width;
 int	mx_interval;
 int	my_interval;
 int	mode_pick = MODE_TOGGLE;
-int	mshow_detects = MB_NO;
+int	mshow_beammode = BEAM_MODE_FLAG;
 int	mshow_flagged = MB_NO;
 int	mview_mode = VIEW_WATERFALL;
 int	mshow_time = 1;
@@ -301,7 +308,14 @@ int	status;
 
 /* file opening parameters */
 int	startup_file = 0;
-int	use_save_file = False;
+int	numfiles = 0;
+int	currentfile = -1;
+int	currentfile_shown = -1;
+int	fileformats[NUM_FILES_MAX];
+mb_path	filepaths[NUM_FILES_MAX];
+int	filelocks[NUM_FILES_MAX];
+int	fileesfs[NUM_FILES_MAX];
+int	timer_function_set = MB_NO;
 
 static char	input_file[MB_PATH_MAXLINE];
 int selected = 0; /* indicates an input file is selected */
@@ -473,11 +487,7 @@ Object %s is not a Shell\n", XtName(widgets[i]));
 void
 do_mbedit_init(int argc, char **argv)
 {
-    struct stat file_status;
-    int	    fstat;
-    int	    save_mode;
-    char    save_file[MB_PATH_MAXLINE];
-    int	    i;
+    int	i;
     
     /* make sure expose plots are off */
     expose_plot_ok = False;
@@ -571,52 +581,231 @@ do_mbedit_init(int argc, char **argv)
     /* initialize mbedit proper */
     status = mbedit_init(argc,argv, &startup_file);
     
-    /* get startup parameters if needed */
-    if (startup_file == MB_YES)
-	status = mbedit_get_startup(&save_mode, 
-			    input_file, &mformat);
-    
     /* set up the widgets */
     do_setup_data();
     do_filebutton_on();
     do_nextbutton_off();
+		
+    /* set timer for function to keep updating the filelist */
+    do_mbedit_settimer();
         
-    /* if startup indicated try to open it */
-    if (startup_file == MB_YES)
+    /* if startup indicated by num_files > 0 try to open first file */
+    if (startup_file == MB_YES && numfiles > 0)
 	{
-	/* check for edit save file */
-	sprintf(save_file, "%s.esf", input_file);
-	fstat = stat(save_file, &file_status);
-	if (fstat != 0
-	    || (file_status.st_mode & S_IFMT) == S_IFDIR)
-	    {
-	    sprintf(save_file, "%s.mbesf", input_file);
-	    fstat = stat(save_file, &file_status);
-	    }
-	
-	/* if esf file exists deal with it */
-	if (fstat == 0 
-	    && (file_status.st_mode & S_IFMT) != S_IFDIR)
-	    {
-	    /* if save_mode set load data using esf */
-	    if (save_mode == MB_YES)
-		do_load(MB_YES);
-
-	    /* else bring up dialog asking
-		if esf should be used */
-	    else
-		do_checkuseprevious();
-	    }
-	    
-	/* else just try to load the data without an esf */
-	else
-	    {
-	    (void) do_load(MB_NO);
-	    }
+	do_load_specific_file(0);
 	}
     
     /* finally allow expose plots */
-    expose_plot_ok = False;
+    expose_plot_ok = True;
+}
+
+/*--------------------------------------------------------------------*/
+
+void 
+do_parse_datalist( char *file, int form)
+{
+	void    *datalist;
+	int     done;
+	double  weight;
+	int     filestatus;
+	int     fileformat;
+	char    fileraw[MB_PATH_MAXLINE];
+	char    fileprocessed[MB_PATH_MAXLINE];
+	int     datalist_status = MB_SUCCESS;
+	int	error = MB_ERROR_NO_ERROR;
+	int	format;
+	int     verbose = 0;
+    
+    	/* try to resolve format if necessary */
+	format = form;
+	mbedit_get_format(file, &format);
+    
+	/* read in a single file */
+	if (format > 0 && numfiles < NUM_FILES_MAX)
+		{
+		strcpy(filepaths[numfiles], file);
+		fileformats[numfiles] = format;
+		filelocks[numfiles] = -1;
+		fileesfs[numfiles] = -1;
+		numfiles++;
+		}
+	
+	/* read in datalist if forma = -1 */
+	else if (format == -1)
+		{
+		error = MB_ERROR_NO_ERROR;
+		done = MB_NO;
+		if ((datalist_status = mb_datalist_open(verbose, &datalist,
+						file, MB_DATALIST_LOOK_NO, &error)) == MB_SUCCESS)
+			{
+			while (done == MB_NO)
+				{
+				if ((datalist_status = mb_datalist_read2(verbose, datalist,
+						&filestatus, fileraw, fileprocessed, &fileformat, &weight, &error))
+						== MB_SUCCESS)
+					{
+					if (numfiles < NUM_FILES_MAX)
+						{
+						strcpy(filepaths[numfiles], fileraw);
+						fileformats[numfiles] = fileformat;
+						filelocks[numfiles] = -1;
+						fileesfs[numfiles] = -1;
+						numfiles++;
+						}
+					}
+				else
+					{
+					datalist_status = mb_datalist_close(verbose,&datalist,&error);
+					done = MB_YES;
+					}
+				}
+			}
+		}
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_editlistselection( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	Cardinal ac;
+	Arg      args[256];
+	int	*position_list = NULL;
+	int	position_count = 0;
+	int	quit;
+	int	i;
+
+	/* turn off expose plots */
+	expose_plot_ok = False;
+	
+	/* get the current selection, if any, from the list */
+	ac = 0;
+	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
+	XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
+	XtGetValues(list_filelist, args, ac);
+
+fprintf(stderr,"position_count:%d\n",position_count);
+for(i=0;i<position_count;i++)
+fprintf(stderr,"  %d %d\n",i,position_list[i]);
+	
+
+	/* if the selected file is different than what's already loaded, unload the old file and load the new one */
+	if (position_count > 0 && currentfile != position_list[0] - 1)
+		{
+		currentfile = position_list[0] - 1;
+
+		status = mbedit_action_done(buffer_size,&ndumped,&nloaded,
+			    &nbuffer,&ngood,&icurrent,&quit);
+		if (status == 0) XBell(theDisplay,100);
+
+		if (position_count > 0)
+			currentfile = position_list[0] - 1;
+		if (currentfile < numfiles)
+			{
+			do_load_specific_file(currentfile);
+			}
+		}
+
+	/* turn on expose plots */
+	expose_plot_ok = True;
+	
+	do_setup_data();
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_filelist_remove( Widget w, XtPointer client_data, XtPointer call_data)
+{
+	Cardinal ac;
+	Arg      args[256];
+	int	*position_list = NULL;
+	int	position_count = 0;
+	int	i;
+
+	/* turn off expose plots */
+	expose_plot_ok = False;
+	
+	/* get the current selection, if any, from the list */
+	ac = 0;
+	XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
+	XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
+	XtGetValues(list_filelist, args, ac);
+
+	/* if the selected file is different than what's already loaded, remove it from the list */
+	if (position_count > 0 && currentfile != position_list[0] - 1)
+		{
+		for (i=position_list[0] - 1;i<numfiles-1;i++)
+			{
+			strcpy(filepaths[i], filepaths[i+1]);
+			fileformats[i] = fileformats[i+1];
+			filelocks[i] = filelocks[i+1];
+			fileesfs[i] = fileesfs[i+1];
+			}
+		numfiles--;
+		if (currentfile > position_list[0] - 1)
+			currentfile--;
+		}
+
+	/* turn on expose plots */
+	expose_plot_ok = True;
+	
+	do_setup_data();
+
+	/* replot the data */
+	status = mbedit_action_plot(mplot_width, mexager,
+	    mx_interval, my_interval, 
+	    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
+	    &nbuffer, &ngood, &icurrent, &mnplot);
+	if (status == 0) XBell(theDisplay,100);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
+do_load_specific_file(int i_file)
+{
+	struct stat file_status;
+	int	fstat;
+	int	save_mode;
+	char    save_file[MB_PATH_MAXLINE];
+
+	/* check the specified file is in the list */
+	if (numfiles > 0 && i_file >= 0 && i_file < numfiles)
+		{
+		/* set current_file */
+		currentfile = i_file;
+
+		/* check for edit save file */
+		sprintf(save_file, "%s.esf", filepaths[currentfile]);
+		fstat = stat(save_file, &file_status);
+		if (fstat != 0
+			|| (file_status.st_mode & S_IFMT) == S_IFDIR)
+			{
+			sprintf(save_file, "%s.mbesf", filepaths[currentfile]);
+			fstat = stat(save_file, &file_status);
+			}
+
+		/* if esf file exists deal with it */
+		if (fstat == 0 
+		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+			{
+			/* if save_mode set load data using esf */
+			if (save_mode == MB_YES)
+			do_load(MB_YES);
+
+			/* else bring up dialog asking
+			if esf should be used */
+			else
+			do_checkuseprevious();
+			}
+
+		/* else just try to load the data without an esf */
+		else
+			{
+			(void) do_load(MB_NO);
+			}
+		}
 }
 
 /*--------------------------------------------------------------------*/
@@ -627,7 +816,7 @@ int do_setup_data()
 
 	/* get some default values from mbedit */
 	status = mbedit_get_defaults(&plot_size_max,
-			&mplot_size,&mshow_detects,&mshow_flagged,&mshow_time,
+			&mplot_size,&mshow_beammode,&mshow_flagged,&mshow_time,
 			&buffer_size_max,&buffer_size,
 			&hold_size,&mformat,
 			&mplot_width,&mexager,
@@ -725,10 +914,14 @@ int do_setup_data()
 	    {
 	    XmToggleButtonSetState(setting_output_toggle_edit, 
 			TRUE, TRUE);
+	    XmToggleButtonSetState(setting_output_toggle_edit_filelist, 
+			TRUE, TRUE);
 	    }
 	else
 	    {
 	    XmToggleButtonSetState(setting_output_toggle_browse,  
+			TRUE, TRUE);
+	    XmToggleButtonSetState(setting_output_toggle_browse_filelist,  
 			TRUE, TRUE);
 	    }
 	    
@@ -759,6 +952,9 @@ int do_setup_data()
 	XmToggleButtonSetState(toggleButton_view_waterfall, MB_NO, FALSE);
 	XmToggleButtonSetState(toggleButton_view_alongtrack, MB_NO, FALSE);
 	XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_NO, FALSE);
+	XmToggleButtonSetState(toggleButton_show_flags, FALSE, FALSE);
+	XmToggleButtonSetState(toggleButton_show_detects, FALSE, FALSE);
+	XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
     
 	/* now turn on the current view mode togglebutton */
 	if (mview_mode == 0)
@@ -767,6 +963,12 @@ int do_setup_data()
 		XmToggleButtonSetState(toggleButton_view_alongtrack, MB_YES, FALSE);
 	else if (mview_mode == 2)
 		XmToggleButtonSetState(toggleButton_view_acrosstrack, MB_YES, FALSE);
+	if (mshow_beammode == BEAM_MODE_FLAG)
+		XmToggleButtonSetState(toggleButton_show_flags, TRUE, FALSE);
+	else if (mshow_beammode == BEAM_MODE_DETECT)
+		XmToggleButtonSetState(toggleButton_show_detects, TRUE, FALSE);
+	else if (mshow_beammode == BEAM_MODE_PULSE)
+		XmToggleButtonSetState(toggleButton_show_pulsetypes, TRUE, FALSE);
 
 	/* reset scaling */
 	status = mbedit_set_viewmode(mview_mode);
@@ -817,9 +1019,161 @@ int do_setup_data()
 	/* get filter values and set widgets */
 	do_get_filters();
 	
+	/* build available file list */
+	do_build_filelist();
+	
 	return(1);
 }
 
+/*--------------------------------------------------------------------*/
+
+void
+do_build_filelist()
+{
+	int	update_filelist;
+	Cardinal ac;
+	Arg      args[256];
+	int	item_count;
+	int	*position_list = NULL;
+	int	position_count = 0;
+	int	selection;
+	char value_text[MB_PATH_MAXLINE];
+    	XmString *xstr;
+	char	*lockstrptr;
+	char	*lockedstr   = "<Locked>";
+	char	*unlockedstr = "        ";
+	char	*loadedstr   = "<loaded>";
+	char	*esfstrptr;
+	char	*esfyesstr   = "<esf>";
+	char	*esfnostr    = "     ";
+	int     verbose = 0;
+	int	i;
+	
+	/* swath file locking variables */
+	int	lock_status;
+	int	lock_error = MB_ERROR_NO_ERROR;
+	int	locked;
+	int	lock_purpose;
+	mb_path	lock_program;
+	mb_path lock_cpu;
+	mb_path lock_user;
+	char	lock_date[25];
+	
+	/* esf file checking variables */
+	int	esf_exists;
+	struct stat file_status;
+	int	fstat;
+	char    save_file[MB_PATH_MAXLINE];
+
+	/* check to see if anything has changed */
+	update_filelist = MB_NO;
+	
+	/* check for change in number of files */
+	ac = 0;
+	XtSetArg(args[ac], XmNitemCount, (XtPointer) &item_count); ac++;
+	XtGetValues(list_filelist, args, ac);
+	if (item_count != numfiles)
+		update_filelist = MB_YES;
+
+	/* check current file shown vs loaded */
+	if (currentfile != currentfile_shown)
+		{
+		currentfile_shown = currentfile;
+		update_filelist = MB_YES;
+		}
+	
+	/* check for change in lock status or esf status */
+	for (i=0;i<numfiles;i++)
+		{
+		/* check for locks */
+		lock_status = mb_pr_lockinfo(verbose, filepaths[i], &locked,
+				&lock_purpose, lock_program, lock_user, lock_cpu, 
+				lock_date, &lock_error);
+		if (locked != filelocks[i])
+			{
+			filelocks[i] = locked;
+			update_filelist = MB_YES;
+			}
+
+		/* check for edit save file */
+		sprintf(save_file, "%s.esf", filepaths[i]);
+		fstat = stat(save_file, &file_status);
+		if (fstat == 0 
+		    && (file_status.st_mode & S_IFMT) != S_IFDIR)
+			esf_exists = MB_YES;
+		else
+			esf_exists = MB_NO;
+		if (esf_exists != fileesfs[i])
+			{
+			fileesfs[i] = esf_exists;
+			update_filelist = MB_YES;
+			}
+		}
+
+	/* only rebuild the filelist if necessary */
+	if (update_filelist == MB_YES)
+		{
+		/* get the current selection, if any, from the list */
+		ac = 0;
+		XtSetArg(args[ac], XmNitemCount, (XtPointer) &item_count); ac++;
+		XtSetArg(args[ac], XmNselectedPositionCount, (XtPointer) &position_count); ac++;
+		XtSetArg(args[ac], XmNselectedPositions, (XtPointer) &position_list); ac++;
+		XtGetValues(list_filelist, args, ac);
+		if (position_count > 0)
+			selection = position_list[0];
+
+		/* build available file list */
+		XmListDeleteAllItems(list_filelist);
+		if (numfiles > 0)
+			{	
+
+			/* allocate array of x strings */
+			xstr = (XmString *) malloc(numfiles * sizeof(XmString));
+			for (i=0;i<numfiles;i++)
+				{
+				/* check for locks */
+				if (currentfile == i)
+					lockstrptr = loadedstr;
+				else if (filelocks[i] == MB_YES)
+					lockstrptr = lockedstr;
+				else
+					lockstrptr = unlockedstr;
+
+				/* check for edit save file */
+				if (fileesfs[i] == MB_YES)
+					esfstrptr = esfyesstr;
+				else
+					esfstrptr = esfnostr;
+
+				/* build x string item */
+				sprintf(value_text,"%s %s %s %3d", 
+					lockstrptr, 
+					esfstrptr,
+					filepaths[i], 
+					fileformats[i]);
+   				xstr[i] = XmStringCreateLocalized(value_text);
+
+				/* print out list of files */
+				/* if (currentfile == i)
+					fprintf(stderr," *** %s %d %s %d\n",lockstrptr,i+1,filepaths[i],fileformats[i]);
+				else
+					fprintf(stderr,"     %s %d %s %d\n",lockstrptr,i+1,filepaths[i],fileformats[i]); */
+ 				}
+    			XmListAddItems(list_filelist,xstr,numfiles,0);
+			for (i=0;i<numfiles;i++)
+				{
+    				XmStringFree(xstr[i]);
+    				}
+    			free(xstr);
+
+			/* reinstate selection if the number of items is the same as before */
+			if (item_count == numfiles && position_count > 0)
+				{
+    				XmListSelectPos(list_filelist,selection,False);
+				}
+			}
+		}
+	}
 /*--------------------------------------------------------------------*/
 
 void
@@ -923,7 +1277,7 @@ do_file_selection_cancel( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_detects, mshow_flagged, mshow_time,
+	    mplot_size, mshow_beammode, mshow_flagged, mshow_time,
 	    &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
@@ -939,7 +1293,7 @@ do_expose( Widget w, XtPointer client_data, XtPointer call_data)
     if (expose_plot_ok == True)
 	    status = mbedit_action_plot(mplot_width, mexager,
 		    mx_interval, my_interval, 
-		    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+		    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 		    &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
@@ -1080,7 +1434,7 @@ do_scale_y( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 	
@@ -1154,7 +1508,7 @@ do_scale_x( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 	
@@ -1177,8 +1531,6 @@ int do_reset_scale_x(int pwidth, int maxx, int xntrvl, int yntrvl)
 		}
 	mx_interval = xntrvl;
 	my_interval = yntrvl;
-fprintf(stderr,"Called: do_reset_scale_x: %d %d %d %d\n", 
-	pwidth, maxx, xntrvl, yntrvl);
 	
 	/* set values of plot width slider */
 	XtVaSetValues(slider_scale_x, 
@@ -1214,6 +1566,8 @@ do_output_edit( Widget w, XtPointer client_data, XtPointer call_data)
     if (acs->reason == XmCR_VALUE_CHANGED && acs->set)
 	    {
 	    mode_output = OUTPUT_MODE_EDIT;
+	    XmToggleButtonSetState(setting_output_toggle_edit_filelist, 
+			TRUE, TRUE);
 	    }
 }
 
@@ -1228,6 +1582,42 @@ do_output_browse( Widget w, XtPointer client_data, XtPointer call_data)
     if (acs->reason == XmCR_VALUE_CHANGED && acs->set)
 	    {
 	    mode_output = OUTPUT_MODE_BROWSE;
+	    XmToggleButtonSetState(setting_output_toggle_browse_filelist,  
+			TRUE, TRUE);
+	    }
+}
+
+/*--------------------------------------------------------------------*/
+
+
+void
+do_output_edit_filelist( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
+
+    /* set values if needed */
+    if (acs->reason == XmCR_VALUE_CHANGED && acs->set)
+	    {
+	    mode_output = OUTPUT_MODE_EDIT;
+	    XmToggleButtonSetState(setting_output_toggle_edit, 
+			TRUE, TRUE);
+	    }
+}
+
+/*--------------------------------------------------------------------*/
+
+
+void
+do_output_browse_filelist( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmToggleButtonCallbackStruct *acs=(XmToggleButtonCallbackStruct*)call_data;
+
+    /* set values if needed */
+    if (acs->reason == XmCR_VALUE_CHANGED && acs->set)
+	    {
+	    mode_output = OUTPUT_MODE_BROWSE;
+	    XmToggleButtonSetState(setting_output_toggle_browse,  
+			TRUE, TRUE);
 	    }
 }
 
@@ -1267,7 +1657,7 @@ do_x_interval( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 }
@@ -1308,7 +1698,7 @@ do_y_interval( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 }
@@ -1318,37 +1708,42 @@ do_y_interval( Widget w, XtPointer client_data, XtPointer call_data)
 void
 do_load(int save_mode)
 {    
-    int	    form;
     
     /* turn off expose plots */
     expose_plot_ok = False;
 
-    /* get format, if needed */
-    if (mformat == 0
-	&& (status = mbedit_get_format(input_file, &form)) 
-		== MB_SUCCESS)
-	{
-	mformat = form;
+    /* only load valid file */
+    if (currentfile >= 0)
+    	{
+	/* process input file name */
+	status = mbedit_action_open(filepaths[currentfile], 
+    			fileformats[currentfile],
+			currentfile,
+			numfiles,
+			save_mode, 
+			mode_output,
+			mplot_width, mexager, mx_interval,
+			my_interval, mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
+			&buffer_size, &buffer_size_max, 
+			&hold_size,
+			&ndumped, &nloaded, &nbuffer,
+			&ngood, &icurrent, &mnplot);
+	if (status == MB_FAILURE)
+		{
+		XBell(theDisplay,100);
+		currentfile = -1;
+		}
 	}
 
-    /* process input file name */
-    status = mbedit_action_open(input_file, mformat,
-		    save_mode, 
-		    mode_output,
-		    mplot_width, mexager, mx_interval,
-		    my_interval, mplot_size, mshow_detects, mshow_flagged, mshow_time, 
-		    &buffer_size, &buffer_size_max, 
-		    &hold_size,
-		    &ndumped, &nloaded, &nbuffer,
-		    &ngood, &icurrent, &mnplot);
-    if (status == 0) XBell(theDisplay,100);
-    
     /* display data from chosen file */
-    status = mbedit_action_plot(mplot_width, mexager,
-	    mx_interval, my_interval, 
-	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
-	    &nbuffer, &ngood, &icurrent, &mnplot);
-    if (status == 0) XBell(theDisplay,100);
+    if (status == MB_SUCCESS)
+    	{
+	status = mbedit_action_plot(mplot_width, mexager,
+		mx_interval, my_interval, 
+		mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
+		&nbuffer, &ngood, &icurrent, &mnplot);
+	if (status == 0) XBell(theDisplay,100);
+	}
 
     /* set widget values */
     do_setup_data();
@@ -1357,39 +1752,21 @@ do_load(int save_mode)
     expose_plot_ok = True;
 
 }
-
 /*--------------------------------------------------------------------*/
 
 void
 do_load_ok( Widget w, XtPointer client_data, XtPointer call_data)
 {
-    XmFileSelectionBoxCallbackStruct *acs;
-    acs = (XmFileSelectionBoxCallbackStruct*)call_data;
+    /* load the current file without using edit save file */
+    do_load(MB_NO);
+}
+/*--------------------------------------------------------------------*/
 
-    static  char format_text[40];
-
-    /* if file selected in dialog open it */
-    if (selected > 0)
-	    {
-	    /* read the mbio format number from the screen */
-	    get_text_string(textfield_format, format_text);
-	    sscanf(format_text, "%d", &mformat);
-	    
-	    /* load the data */
-	    do_load(use_save_file);
-	    }
-    
-    /* else if startup file indicated try to open it */
-    else if (startup_file == MB_YES)
-	    {
-	    /* load the data */
-	    do_load(use_save_file);
-	    }
-
-    else
-	    {
-	    fprintf(stderr,"\nNo input multibeam file selected\n");
-	    }
+void
+do_load_ok_with_save( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    /* load the current file using edit save file */
+    do_load(MB_YES);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1399,58 +1776,52 @@ do_load_check( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmFileSelectionBoxCallbackStruct *acs=(XmFileSelectionBoxCallbackStruct*)call_data;
 
-    struct stat file_status;
-    int	fstat;
     char    *input_file_ptr;
-    char    save_file[MB_PATH_MAXLINE];
-    
-    /* set use save file flag to False */
-    use_save_file = False;
+    static  char format_text[40];
+    int		format;
+    int		numfilessave;
+    int		quit;
 
     /* read the input file name */
     if(!XmStringGetLtoR(acs->value,
-	    XmSTRING_DEFAULT_CHARSET, 
-	    &input_file_ptr))
-	    {
-	    selected = 0;
-	    }
+	XmSTRING_DEFAULT_CHARSET, 
+	&input_file_ptr))
+	{
+	fprintf(stderr,"\nno input multibeam file selected\n");
+	}
     else
+	{
+	/* turn off expose plots */
+	expose_plot_ok = False;
+
+	/* close out previously open file */
+	status = mbedit_action_done(buffer_size,&ndumped,&nloaded,
+		    &nbuffer,&ngood,&icurrent,&quit);
+	if (status == 0) XBell(theDisplay,100);
+	currentfile = -1;
+
+	/* read the input file name */
+	numfilessave = numfiles;
+	strncpy(input_file, input_file_ptr, MB_PATH_MAXLINE);
+	XtFree(input_file_ptr);
+
+	/* read the mbio format number from the dialog */
+	get_text_string(textfield_format, format_text);
+	sscanf(format_text, "%d", &format);
+
+	/* try to parse the selection */
+	do_parse_datalist(input_file, format);
+
+	/* load first new file in the list */
+	if (numfiles > 0 && numfilessave < numfiles)
 	    {
-	    selected = 1;
-	    strncpy(input_file, input_file_ptr, 128);
-	    XtFree(input_file_ptr);
+	    currentfile = numfilessave;
+	    do_load_specific_file(numfilessave);
 	    }
 
-    if (selected > 0)
-	    {
-	    /* check for edit save file */
-	    sprintf(save_file, "%s.esf", input_file);
-	    fstat = stat(save_file, &file_status);
-	    if (fstat != 0
-		|| (file_status.st_mode & S_IFMT) == S_IFDIR)
-		{
-		sprintf(save_file, "%s.mbesf", input_file);
-		fstat = stat(save_file, &file_status);
-		}
-	    
-	    /* if save file exists bring up dialog asking
-		if it should be used */
-	    if (fstat == 0 
-		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
-		{
-		do_checkuseprevious();
-		}
-		
-	    /* else just try to load the data */
-	    else
-		{
-		(void) do_load_ok(w, client_data, call_data);
-		}
-	    }
-    else
-	    {
-	    fprintf(stderr,"\nno input multibeam file selected\n");
-	    }
+	/* turn on expose plots */
+	expose_plot_ok = True;
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -1464,41 +1835,37 @@ do_checkuseprevious( )
 /*--------------------------------------------------------------------*/
 
 void
-do_load_ok_with_save( Widget w, XtPointer client_data, XtPointer call_data)
-{
-    XmFileSelectionBoxCallbackStruct *acs;
-    acs = (XmFileSelectionBoxCallbackStruct*)call_data;
-
-    /* set the use save file flag to True */
-    use_save_file = True;
-    
-    /* load the file */
-    (void) do_load_ok(w, client_data, call_data);
-}
-
-/*--------------------------------------------------------------------*/
-
-void
 do_filebutton_on()
 {
-		XtVaSetValues(pushButton_file, 
-			XmNsensitive, True, 
-			NULL);
-		XtVaSetValues(pushButton_done, 
-			XmNsensitive, False, 
-			NULL);
-		XtVaSetValues(pushButton_forward, 
-			XmNsensitive, False, 
-			NULL);
-		XtVaSetValues(pushButton_reverse, 
-			XmNsensitive, False, 
-			NULL);
-		XtVaSetValues(pushButton_start, 
-			XmNsensitive, False, 
-			NULL);
-		XtVaSetValues(pushButton_end, 
-			XmNsensitive, False, 
-			NULL);
+	Boolean  argok = False;
+        XmString    tmp0;
+
+	XtVaSetValues(pushButton_file, 
+		XmNsensitive, True, 
+		NULL);
+
+	XtVaSetValues(pushButton_done, 
+		XmNsensitive, False, 
+		NULL);
+        tmp0 = (XmString) BX_CONVERT(pushButton_done, (char *)"Done", 
+                			XmRXmString, 0, &argok);
+	XtVaSetValues(pushButton_done, 
+		XmNlabelString, tmp0,
+		NULL);
+        XmStringFree((XmString)tmp0);
+
+	XtVaSetValues(pushButton_forward, 
+		XmNsensitive, False, 
+		NULL);
+	XtVaSetValues(pushButton_reverse, 
+		XmNsensitive, False, 
+		NULL);
+	XtVaSetValues(pushButton_start, 
+		XmNsensitive, False, 
+		NULL);
+	XtVaSetValues(pushButton_end, 
+		XmNsensitive, False, 
+		NULL);
 }
 
 /*--------------------------------------------------------------------*/
@@ -1506,24 +1873,45 @@ do_filebutton_on()
 void
 do_filebutton_off()
 {
-		XtVaSetValues(pushButton_file, 
-			XmNsensitive, False, 
-			NULL);
+	Boolean  argok = False;
+        XmString    tmp0;
+
+	XtVaSetValues(pushButton_file, 
+		XmNsensitive, True, 
+		NULL);
+	XtVaSetValues(pushButton_done, 
+		XmNsensitive, True, 
+		NULL);
+	if (numfiles > 0 && currentfile >= 0 && currentfile < numfiles - 1)
+		{
+        	tmp0 = (XmString) BX_CONVERT(pushButton_done, (char *)"Next File", 
+                				XmRXmString, 0, &argok);
 		XtVaSetValues(pushButton_done, 
-			XmNsensitive, True, 
+			XmNlabelString, tmp0,
 			NULL);
-		XtVaSetValues(pushButton_forward, 
-			XmNsensitive, True, 
+        	XmStringFree((XmString)tmp0);
+		}
+	else
+		{
+        	tmp0 = (XmString) BX_CONVERT(pushButton_done, (char *)"Done", 
+                				XmRXmString, 0, &argok);
+		XtVaSetValues(pushButton_done, 
+			XmNlabelString, tmp0,
 			NULL);
-		XtVaSetValues(pushButton_reverse, 
-			XmNsensitive, True, 
-			NULL);
-		XtVaSetValues(pushButton_start, 
-			XmNsensitive, True, 
-			NULL);
-		XtVaSetValues(pushButton_end, 
-			XmNsensitive, True, 
-			NULL);
+        	XmStringFree((XmString)tmp0);
+		}
+	XtVaSetValues(pushButton_forward, 
+		XmNsensitive, True, 
+		NULL);
+	XtVaSetValues(pushButton_reverse, 
+		XmNsensitive, True, 
+		NULL);
+	XtVaSetValues(pushButton_start, 
+		XmNsensitive, True, 
+		NULL);
+	XtVaSetValues(pushButton_end, 
+		XmNsensitive, True, 
+		NULL);
 }
 /*--------------------------------------------------------------------*/
 
@@ -1556,7 +1944,7 @@ fprintf(stderr,"do_end\n");
 
     status = mbedit_action_step(nbuffer-icurrent-1,mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
     if (status == 0) XBell(theDisplay,100);
 
@@ -1574,7 +1962,7 @@ do_forward( Widget w, XtPointer client_data, XtPointer call_data)
 	{
 	status = mbedit_action_step(step,mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
 	}
@@ -1582,7 +1970,7 @@ do_forward( Widget w, XtPointer client_data, XtPointer call_data)
 	{
 	status = mbedit_action_step(nbuffer-icurrent-1,mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
 	}
@@ -1601,7 +1989,7 @@ do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
 	{
 	status = mbedit_action_step(-step,mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
 	}
@@ -1609,7 +1997,7 @@ do_reverse( Widget w, XtPointer client_data, XtPointer call_data)
 	{
 	status = mbedit_action_step(-icurrent,mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 	if (status == 0) XBell(theDisplay,100);
 	}
@@ -1627,7 +2015,7 @@ fprintf(stderr,"do_start\n");
 
     status = mbedit_action_step(-icurrent,mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
     if (status == 0) XBell(theDisplay,100);
 
@@ -1673,7 +2061,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    startup_file = 0;
 	    status = mbedit_action_plot(mplot_width, mexager,
 		    mx_interval, my_interval, 
-		    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+		    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 		    &nbuffer, &ngood, &icurrent, &mnplot);
 	    if (status == 0) XBell(theDisplay,100);
 	    } /* end startup file */
@@ -1685,7 +2073,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
       if (event->xany.type == Expose || event->xany.type == GraphicsExpose)
 		status = mbedit_action_plot(mplot_width, mexager,
 				    mx_interval, my_interval, 
-				    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+				    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 				    &nbuffer, &ngood, &icurrent, &mnplot);
     
       /* Deal with KeyPress events */
@@ -1709,7 +2097,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_bad_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    key_z_down = 1;
 		    key_s_down = 0;
@@ -1723,7 +2111,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_good_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    key_z_down = 0;
 		    key_s_down = 1;
@@ -1738,13 +2126,13 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			status = mbedit_action_left_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    else
 			status = mbedit_action_right_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    key_z_down = 0;
 		    key_s_down = 0;
@@ -1759,13 +2147,13 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			status = mbedit_action_right_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    else
 			status = mbedit_action_left_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    key_z_down = 0;
 		    key_s_down = 0;
@@ -1779,7 +2167,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_flag_view(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    break;
 	    case '>':
@@ -1789,14 +2177,14 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_unflag_view(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    break;
 	    case '!':
 		    status = mbedit_action_zero_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    break;
 	    case 'U':
@@ -1932,7 +2320,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    /* replot the data */
 			    status = mbedit_action_plot(mplot_width, mexager,
 				    mx_interval, my_interval, 
-				    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+				    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 				    &nbuffer, &ngood, &icurrent, &mnplot);
 			    }
 		    break;
@@ -1949,7 +2337,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    /* replot the data */
 			    status = mbedit_action_plot(mplot_width, mexager,
 				    mx_interval, my_interval, 
-				    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+				    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 				    &nbuffer, &ngood, &icurrent, &mnplot);
 			    }
 		    break;
@@ -1966,7 +2354,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    /* replot the data */
 			    status = mbedit_action_plot(mplot_width, mexager,
 				    mx_interval, my_interval, 
-				    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+				    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 				    &nbuffer, &ngood, &icurrent, &mnplot);
 			    }
 		    break;
@@ -2038,28 +2426,28 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		else if (mode_pick == MODE_PICK)
 		    status = mbedit_action_mouse_pick(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		else if (mode_pick == MODE_ERASE) 
 		    status = mbedit_action_mouse_erase(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		else if (mode_pick == MODE_RESTORE) 
 		    status = mbedit_action_mouse_restore(
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		else if (mode_pick == MODE_GRAB) 
 		    {
@@ -2068,7 +2456,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    if (status == MB_SUCCESS)
 		    	grab_mode = GRAB_MOVE;
@@ -2080,7 +2468,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			    x_loc, y_loc,
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		if (status == 0) 
 			XBell(theDisplay,100);
@@ -2089,7 +2477,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_bad_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    }
 		else if (key_s_down)
@@ -2097,7 +2485,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 		    status = mbedit_action_good_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    }
 		else if (key_a_down)
@@ -2106,13 +2494,13 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			status = mbedit_action_left_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    else
 			status = mbedit_action_right_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    }
 		else if (key_d_down)
@@ -2121,13 +2509,13 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 			status = mbedit_action_right_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    else
 			status = mbedit_action_left_ping(
 			    mplot_width,mexager,
 			    mx_interval,my_interval,
-			    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+			    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 			    &nbuffer,&ngood,&icurrent,&mnplot);
 		    }
 
@@ -2169,7 +2557,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 				x_loc, y_loc,
 				mplot_width,mexager,
 				mx_interval,my_interval,
-				mplot_size,mshow_detects, mshow_flagged,mshow_time,
+				mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 				&nbuffer,&ngood,&icurrent,&mnplot);
 			grab_mode = GRAB_START;
 			}
@@ -2184,7 +2572,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    	{
 		    status = mbedit_action_step(-step,mplot_width,mexager,
 				    mx_interval,my_interval,
-				    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+				    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
 				    &nbuffer,&ngood,&icurrent,&mnplot);
 		    if (status == 0) XBell(theDisplay,100);
 		}
@@ -2192,7 +2580,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    	{
 		    status = mbedit_action_step(-icurrent,mplot_width,mexager,
 				    mx_interval,my_interval,
-				    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+				    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
 				    &nbuffer,&ngood,&icurrent,&mnplot);
 		    if (status == 0) XBell(theDisplay,100);
 		}
@@ -2206,7 +2594,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    	{
 		    status = mbedit_action_step(step,mplot_width,mexager,
 				    mx_interval,my_interval,
-				    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+				    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
 				    &nbuffer,&ngood,&icurrent,&mnplot);
 		    if (status == 0) XBell(theDisplay,100);
 		}
@@ -2214,7 +2602,7 @@ do_event( Widget w, XtPointer client_data, XtPointer call_data)
 	    	{
 		    status = mbedit_action_step(nbuffer-icurrent-1,mplot_width,mexager,
 				    mx_interval,my_interval,
-				    mplot_size,mshow_detects,mshow_flagged,mshow_time,
+				    mplot_size,mshow_beammode,mshow_flagged,mshow_time,
 				    &nbuffer,&ngood,&icurrent,&mnplot);
 		    if (status == 0) XBell(theDisplay,100);
 		}
@@ -2234,7 +2622,7 @@ do_flag_view( Widget w, XtPointer client_data, XtPointer call_data)
     status = mbedit_action_flag_view(
 	    mplot_width,mexager,
 	    mx_interval,my_interval,
-	    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+	    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 	    &nbuffer,&ngood,&icurrent,&mnplot);
 }
 
@@ -2249,7 +2637,7 @@ do_unflag_view( Widget w, XtPointer client_data, XtPointer call_data)
     status = mbedit_action_unflag_view(
 	    mplot_width,mexager,
 	    mx_interval,my_interval,
-	    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+	    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 	    &nbuffer,&ngood,&icurrent,&mnplot);
 }
 
@@ -2264,7 +2652,7 @@ do_unflag_all( Widget w, XtPointer client_data, XtPointer call_data)
     status = mbedit_action_unflag_all(
 	    mplot_width,mexager,
 	    mx_interval,my_interval,
-	    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+	    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 	    &nbuffer,&ngood,&icurrent,&mnplot);
 }
 
@@ -2285,7 +2673,7 @@ do_next_buffer( Widget w, XtPointer client_data, XtPointer call_data)
     status = mbedit_action_next_buffer(hold_size,buffer_size,
 		    mplot_width,mexager,
 		    mx_interval,my_interval,
-		    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+		    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 		    &ndumped,&nloaded,&nbuffer,
 		    &ngood,&icurrent,&mnplot,&quit);
     if (status == 0) XBell(theDisplay,100);
@@ -2351,7 +2739,7 @@ do_show_flagged( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
@@ -2387,7 +2775,7 @@ do_view_mode( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
@@ -2453,7 +2841,7 @@ do_show_time( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
 }
 
@@ -2482,19 +2870,63 @@ do_reverse_keys( Widget w, XtPointer client_data, XtPointer call_data)
 /*--------------------------------------------------------------------*/
 
 void
+do_show_flags( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mshow_beammode = BEAM_MODE_FLAG;
+    XmToggleButtonSetState(toggleButton_show_flags, TRUE, FALSE);
+    XmToggleButtonSetState(toggleButton_show_detects, FALSE, FALSE);
+    XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
+
+    /* replot the data */
+    status = mbedit_action_plot(mplot_width, mexager,
+	mx_interval, my_interval, 
+	mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
+	&nbuffer, &ngood, &icurrent, &mnplot);
+}
+
+/*--------------------------------------------------------------------*/
+
+void
 do_show_detects( Widget w, XtPointer client_data, XtPointer call_data)
 {
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 
-    mshow_detects = XmToggleButtonGetState(toggleButton_show_detects);
+    mshow_beammode = BEAM_MODE_DETECT;
+    XmToggleButtonSetState(toggleButton_show_flags, FALSE, FALSE);
+    XmToggleButtonSetState(toggleButton_show_detects, TRUE, FALSE);
+    XmToggleButtonSetState(toggleButton_show_pulsetypes, FALSE, FALSE);
 
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	mx_interval, my_interval, 
-	mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 	&nbuffer, &ngood, &icurrent, &mnplot);
 }
+
+/*--------------------------------------------------------------------*/
+
+void
+do_show_pulsetypes( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mshow_beammode = BEAM_MODE_PULSE;
+    XmToggleButtonSetState(toggleButton_show_flags, FALSE, FALSE);
+    XmToggleButtonSetState(toggleButton_show_detects, FALSE, FALSE);
+    XmToggleButtonSetState(toggleButton_show_pulsetypes, TRUE, FALSE);
+
+    /* replot the data */
+    status = mbedit_action_plot(mplot_width, mexager,
+	mx_interval, my_interval, 
+	mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
+	&nbuffer, &ngood, &icurrent, &mnplot);
+}
+
 
 /*--------------------------------------------------------------------*/
 
@@ -2530,15 +2962,31 @@ do_done( Widget w, XtPointer client_data, XtPointer call_data)
     /* turn off expose plots */
     expose_plot_ok = False;
     
+    /* close the file */
     status = mbedit_action_done(buffer_size,&ndumped,&nloaded,
 		    &nbuffer,&ngood,&icurrent,&quit);
     if (status == 0) XBell(theDisplay,100);
+    
+    /* if there is another file in the list open it */
+    if (currentfile >= 0 && currentfile < numfiles - 1)
+    	{
+	do_load_specific_file(currentfile + 1);
+	}
+	
+    /* else do not open a file */
+    else
+    	{
+	currentfile = -1;
+	}
 	    
     /* turn on expose plots */
     expose_plot_ok = True;
     
     if (quit)
 	    exit(0);
+
+    /* set widget values */
+    do_setup_data();
 }
 
 
@@ -2581,7 +3029,7 @@ do_number_pings( Widget w, XtPointer client_data, XtPointer call_data)
     /* replot the data */
     status = mbedit_action_plot(mplot_width, mexager,
 	    mx_interval, my_interval, 
-	    mplot_size, mshow_detects, mshow_flagged, mshow_time, 
+	    mplot_size, mshow_beammode, mshow_flagged, mshow_time, 
 	    &nbuffer, &ngood, &icurrent, &mnplot);
     if (status == 0) XBell(theDisplay,100);
 }
@@ -2622,7 +3070,7 @@ do_goto_apply( Widget w, XtPointer client_data, XtPointer call_data)
     status = mbedit_action_goto(ttime_i,hold_size,buffer_size,
 		    mplot_width,mexager,
 		    mx_interval,my_interval,
-		    mplot_size,mshow_detects, mshow_flagged,mshow_time,
+		    mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 		    &ndumped,&nloaded,&nbuffer,
 		    &ngood,&icurrent,&mnplot);
     if (status == 0) XBell(theDisplay,100);
@@ -2705,7 +3153,7 @@ do_set_filters( Widget w, XtPointer client_data, XtPointer call_data)
     	status = mbedit_action_filter_all(
 	     	mplot_width,mexager,
 	    	mx_interval,my_interval,
-	    	mplot_size,mshow_detects, mshow_flagged,mshow_time,
+	    	mplot_size,mshow_beammode, mshow_flagged,mshow_time,
 	    	&nbuffer,&ngood,&icurrent,&mnplot);
 }
 
@@ -2758,6 +3206,7 @@ do_check_median_ltrack( Widget w, XtPointer client_data, XtPointer call_data)
 }
 
 /*--------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*/
 
 int
 do_wait_until_viewed(XtAppContext app)
@@ -2797,7 +3246,55 @@ do_wait_until_viewed(XtAppContext app)
     return(1);
     
 }
+/*------------------------------------------------------------------------------*/
 
+int do_mbedit_settimer()
+{
+	int	status = MB_SUCCESS;
+	int	timer_timeout_time = 1000;
+	int	id;
+	    
+	/* set timer function if none set for this instance */
+	if (timer_function_set == MB_NO)
+		{
+		id =  XtAppAddTimeOut(app_context, 
+				(unsigned long) timer_timeout_time,
+				(XtTimerCallbackProc)do_mbedit_workfunction, 
+				(XtPointer) -1);
+		if (id > 0)
+			timer_function_set = MB_YES;
+		else
+			status = MB_FAILURE;
+		}
+
+/* else
+fprintf(stderr,"do_mbedit_settimer: FUNCTION ALREADY SET!!\n"); */
+
+	return(status);
+}
+
+/*------------------------------------------------------------------------------*/
+
+int do_mbedit_workfunction(XtPointer client_data)
+{
+	int	status = MB_SUCCESS;
+
+	timer_function_set = MB_NO;
+	    
+	/* reset filelist */
+	if (numfiles > 0 && expose_plot_ok == True)
+		{
+		do_build_filelist();
+		}
+		
+	/* reset the timer function */
+	do_mbedit_settimer();
+		
+	return(status);
+}
+
+/*--------------------------------------------------------------------*/
+/* Message and error dialogs */
 /*--------------------------------------------------------------------*/
 
 int
@@ -2865,6 +3362,7 @@ do_error_dialog(char *s1, char *s2, char *s3)
     set_label_string(label_error_three, s3);
     XtManageChild(bulletinBoard_error);
     XBell(theDisplay,100);
+/* fprintf(stderr,"do_error_dialog:\n\t%s\n\t%s\n\t%s\n",s1,s2,s3); */
 	
     return(1);
 }

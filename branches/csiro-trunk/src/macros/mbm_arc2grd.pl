@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
 #    $Id$
 #
-#    Copyright (c) 2001-2009 by
+#    Copyright (c) 2001-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -20,9 +20,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   mbm_arc2grd
 #
 # Purpose:
-#   Macro to convert a ArcView ASCII grid to an GMT grid file in the 
+#   Macro to convert a ArcView ASCII grid to an GMT grid file in the
 #   GMT NetCDF grid format. This allows users to import the grid
-#   into GMT. The grid will have the same grid interval in both 
+#   into GMT. The grid will have the same grid interval in both
 #   longitude and latitude.
 #
 # Basic Usage:
@@ -158,7 +158,7 @@ close(INP);
 close(TMP);
 
 # tell the world we got started
-if ($verbose) 
+if ($verbose)
 	{
 	print "\nProgram $program_name status:\n";
 	print "\tInput ArcView ASCII  file: $ifile\n";
@@ -193,7 +193,6 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {

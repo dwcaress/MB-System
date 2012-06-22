@@ -4,7 +4,7 @@
  *    The MB-system:	mbeditviz_main.c		4/27/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2009 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -141,6 +141,7 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
+    Boolean      argok=False;
     Widget   topLevelShell;
     Widget   mainWindow_mbeditviz;
     
@@ -191,8 +192,8 @@ int main( int argc, char **argv)
     
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBeditviz"); ac++;
-    XtSetArg(args[ac], XmNx, 69); ac++;
-    XtSetArg(args[ac], XmNy, 431); ac++;
+    XtSetArg(args[ac], XmNx, 180); ac++;
+    XtSetArg(args[ac], XmNy, 583); ac++;
     XtSetArg(args[ac], XmNwidth, 453); ac++;
     XtSetArg(args[ac], XmNheight, 557); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",

@@ -24,9 +24,7 @@ University.
 This archive file is about 3 megabytes in size and, depending on the
 speed of your internet connection, may take a few minutes to transfer.</p>
 <p>Click<a
- href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/MB-System.tar.gz"> here to ftp</a> the current stable MB-System release as a compressed tar archive.</p>
-<p>Click<a
- href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/MB-SystemBeta.tar.gz"> here to ftp</a> the current unstable (&quot;beta&quot;) MB-System release as a compressed tar archive.</p>
+ href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/MB-System.tar.gz"> here to ftp</a> the current MB-System release as a compressed tar archive.</p>
 <p>Click <a href="ftp://ftp.ldeo.columbia.edu/pub/MB-System/">here to
 get point-and-click ftp access</a> to all of the MB-System related
 files
@@ -67,21 +65,44 @@ succeed by running ftp from a "better connected" server in their
 organization. Otherwise, they will need to contact their internet
 service
 provider or their network/computing support staff.
+
 <center>
 <p></p>
 <hr width="67%">
+<p></p>
 </center>
+<center>
+  <dt><b><font size="+2"><a name="Subversion" id="Subversion"></a>Access MB-System Source Version Control System</font></b></dt>
+</center>
+<dl>
+  <dt>
+The MB-System source code is archived and managed using  <a href="http://subversion.tigris.org/">Subversion</a>, an open source version control system. The MB-System and MB-Cookbook Subversion repositories can be browsed through a web interface at: </dt>
+  <dd><a href="http://svn.ilab.ldeo.columbia.edu/">http://svn.ilab.ldeo.columbia.edu/</a></dd>
+  <dt>&nbsp;</dt>
+  <dt>The MB-System repository is at:</dt>
+  <dd><a href="http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System">http://svn.ilab.ldeo.columbia.edu/listing.php?repname=MB-System</a></dd>
+  <dt>The entire repository, or individual files, can be downloaded through this web interface. Clicking the the link above to bring up the WebSVN interface showing the most recent revision to the MB-System code base, along with a list of paths including &quot;branches&quot;, &quot;tags&quot;, and &quot;trunk&quot;. To download the entire code base, click on the &quot;Download&quot; link to the right of  &quot;trunk&quot;. To browse the structure and download individual files, click on the &quot;trunk&quot; link. Users can build MB-System using this downloaded code base, but should note that the repository stores a number of files that are not included in the MB-System distributions.</dt>
+</dl>
 
+
+<center>
+  <p></p>
+  <hr width="67%">
+  <p></p>
+</center>
 <center><a name="MB-dist"></a><b><font size="+2">Packaged MB-System Distributions</font></b></dd>
 </center>
-<p>MacOs X:</p>
-<blockquote>
+ <p>The <a href="http://www.sio.ucsd.edu/">Scripps Institution of Oceanography</a>'s <a href="http://sts.ucsd.edu/t/sts/">Shipboard Technical Support</a> group maintains a repository of open source software RPM distributions for Red Hat Enterprise Linux and CentOS Linux. This repository includes both source and binary distributions of MB-System, GMT, and netCDF that can be accessed using the yum utility. The MB-System RPMs require the GMT and netCDF RPMs, but have no other external dependencies.
+  This repository can be found at:
+<ul>
+    <a href="http://sts.ucsd.edu/repos/centos-5/local">http://sts.ucsd.edu/repos/centos-5/local</a>
+  </ul>
+  The SIO-STS gpg signing key is
+  <ul>
+    <a href="http://sts.ucsd.edu/repos/centos-5/local/RPM-GPG-KEY-STS">http://sts.ucsd.edu/repos/centos-5/local/RPM-GPG-KEY-STS</a>
+  </ul>
+  <p>MB-System is included in <a href="http://sites.google.com/site/poseidonlinux/">Poseidon Linux</a>, the &quot;Scientific GNU/Linux&quot;. Poseidon is an Ubuntu Linux based distribution including a selection of open source software packages intended to support scientific research. In particular, it offers several specific tools in the areas of GIS, 3D Visualization, Mathematics, Statistics and several other fields of research.</p>
   <p>MB-System has been packaged for MacOS X as part of the <a href="http://www.finkproject.org/">Fink Project</a>. The <a href="http://pdb.finkproject.org/pdb/package.php/mbsystem">MB-System fink package</a> is maintained by <a href="http://vislab-ccom.unh.edu/~schwehr/">Kurt Schwehr</a> of CCOM/JHC UNH.</p>
-</blockquote>
-<p>Poseidon Linux:</p>
-<blockquote>
-  <p>MB-System is included in  <a href="https://sites.google.com/site/poseidonlinux/">Poseidon Linux</a>, an Ubuntu Linux based distribution that is pre-loaded with a number of software packages used for scientific research.</p>
-</blockquote>
 <center>
   <p></p>
   <hr width="67%">
@@ -95,7 +116,7 @@ Suggested Software and Data</font></b></dd>
 <p>MB-System requires a number of other software packages and databases
 to be fully functional. These are:</p>
 <ul>
-  <li><b>GMT</b> version 4.2.0 or later: MB-System makes use of the
+  <li><b>GMT</b> version 4.5 or later: MB-System makes use of the
 Generic
 Mapping Tools (GMT) libraries and programs for much of its graphics.
 GMT
@@ -117,18 +138,21 @@ library</a>.</li>
 documented
 scripting language used widely in the Linux/Unix world. MB-System contains a
 number of perl scripts used both for installation and to ease common
-tasks. Most of the current Unix operating systems include perl. If 
-you need to obtain the perl source code, first check with your local 
-system administrator - you will probably find perl already available 
-locally. The perl source code can be obtained from the 
+tasks. Most of the current Unix operating systems include perl. If
+you need to obtain the perl source code, first check with your local
+system administrator - you will probably find perl already available
+locally. The perl source code can be obtained from the
 <a href="http://www.gnu.org/directory">GNU
 software archives</a> of the <a href="http://www.gnu.org">Free
-Software Foundation</a>.</li>  
+Software Foundation</a>.</li>
+  <li><b>Perl</b> Parallel-Forkmanager module: this Perl module is required for the
+  parallel processing macros mbm_multicopy, mbm_multidatalist, and mbm_multiprocess
+  to work. An easily installed package is available from from www.cpan.org.</li>
   <li><b>X11</b>: The interactive graphical utilities in MB-System (MBedit, MBnavedit, MBvelocitytool, MBgrdviz, MBeditviz) use and require the X11 windowing system. </li>
   <li><b>Motif</b>: The interactive graphical utilities in MB-System (MBedit, MBnavedit, MBvelocitytool, MBgrdviz, MBeditviz) use version 2 of the Motif widget set, and Motif libraries
     are required for these utilities to be built and to run.
     Most current Unix/Linux operating systems include the required Motif
-    libraries, either in the original proprietary form (Motif), or the not-quite-open-source form (OpenMotif). If you do not have these libraries, the OpenMotif 2 source is available through 
+    libraries, either in the original proprietary form (Motif), or the not-quite-open-source form (OpenMotif). If you do not have these libraries, the OpenMotif 2 source is available through
     <a href="http://www.openmotif.org/">Motifzone</a>. An old alternative open source Motif-compatible
     distribution called <a href="http://www.lesstif.org">LessTif </a>does not work with the new OpenGL based MB-System programs (MBgrdviz, MBeditviz) and should be avoided. </li>
   <li><b>Levitus Database</b>: The MB-System program mblevitus depends
@@ -141,7 +165,7 @@ to ftp this file. Be sure to uncompress the file and to set the
 flag in the install_makefiles appropriately, as described below in the
 installation section.</li>
   <li><strong>FFTW</strong>: The &quot;Fastest Fourier Transform in the West&quot; package is used by the sonagram calculation program MBbsegypsd to calculate, well, Fast Fourier Transforms. <a href="http://www.fftw.org/">FFTW</a> is commonly used and thus available on or for most current Unix operating systems.</li>
-  <li><strong>OTPSnc</strong>: The Oregon State Ocean Tide Prediction Software package is required for the tidal modeling program MBotps (which in fact is just a convenient front end for the old-style-batch interface of OTPS). The OTPSnc package can be obtained from the<a href="http://www.oce.orst.edu/research/po/research/tide/"> tidal modeling group</a> at <a href="http://www.oce.orst.edu/">Oregon State University</a> from <a href="http://www.coas.oregonstate.edu/research/po/research/tide/region.html">this page</a>.</li>
+  <li><strong>OTPSnc</strong>: The Oregon State Ocean Tide Prediction Software package is required for the tidal modeling program MBotps (which in fact is just a convenient front end for the old-style-batch interface of OTPS). The OTPSnc package can be obtained from the<a href="http://www.oce.orst.edu/research/po/research/tide/"> tidal modeling group</a> at <a href="http://www.oce.orst.edu/">Oregon State University</a>.</li>
 </ul>
 <p>MB-System produces Postscript based graphics. Most current Unix
 operating
@@ -183,9 +207,9 @@ file and then running tar:</p>
 <ul>
   <pre>% tar xvzf MB-System.tar.gz</pre>
 </ul>
-<p>This will create a directory called (for the 5.1.3 distribution): </p>
+<p>This will create a directory called (for the 5.3.1955 distribution): </p>
 <ul>
-  <pre>mbsystem-5.1.3</pre>
+  <pre>mbsystem-5.3.1955</pre>
 </ul>
 <p>In order to
 configure your installation, you must edit the perl script
@@ -247,7 +271,7 @@ directories and create makefiles with the correct dependencies, compile flags, a
   execute
   install_makefiles, do the following:</p>
 <ul>
-  <pre>% cd mbsystem-5.1.3 </pre>
+  <pre>% cd mbsystem-5.3.1955 </pre>
   <pre>% install_makefiles</pre>
 </ul>
 <p>Because install_makefiles is a perl script, the executable perl must

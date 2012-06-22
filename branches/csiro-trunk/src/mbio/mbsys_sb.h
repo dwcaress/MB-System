@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_sb.h	2/17/93
  *	$Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -166,6 +166,8 @@ int mbsys_sb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
+int mbsys_sb_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_sb_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
 			double *ttimes, double *angles, 

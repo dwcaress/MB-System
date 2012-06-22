@@ -30,6 +30,9 @@
 /**
  * Start Global Widget Declarations.
  */
+EXTERNAL Widget   toggleButton_output_on_filelist;
+EXTERNAL Widget   toggleButton_output_off_filelist;
+EXTERNAL Widget   list_filelist;
 EXTERNAL Widget   pushButton_offset_dismiss;
 EXTERNAL Widget   pushButton_offset_apply;
 EXTERNAL Widget   textField_lat_offset;
@@ -54,8 +57,6 @@ EXTERNAL Widget   scale_timespan;
 EXTERNAL Widget   label_timespan_1;
 EXTERNAL Widget   xmDialogShell_fileselection;
 EXTERNAL Widget   bulletinBoard_fileselection;
-EXTERNAL Widget   textField_output_file;
-EXTERNAL Widget   label_filename;
 EXTERNAL Widget   label_output_mode;
 EXTERNAL Widget   radioBox_output;
 EXTERNAL Widget   toggleButton_output_on;
@@ -71,6 +72,9 @@ EXTERNAL Widget   bulletinBoard_message;
 EXTERNAL Widget   label_message;
 EXTERNAL Widget   label_about_version;
 EXTERNAL Widget   bulletinBoard;
+EXTERNAL Widget   pushButton_end;
+EXTERNAL Widget   pushButton_start;
+EXTERNAL Widget   pushButton_file;
 EXTERNAL Widget   pushButton_interpolaterepeats;
 EXTERNAL Widget   pushButton_unflag;
 EXTERNAL Widget   pushButton_flag;
@@ -83,7 +87,9 @@ EXTERNAL Widget   toggleButton_dr_lat;
 EXTERNAL Widget   toggleButton_dr_lon;
 EXTERNAL Widget   toggleButton_org_time;
 EXTERNAL Widget   toggleButton_time;
-EXTERNAL Widget   pushButton_file;
+EXTERNAL Widget   pushButton_done;
+EXTERNAL Widget   pushButton_forward;
+EXTERNAL Widget   pushButton_reverse;
 EXTERNAL Widget   toggleButton_vru;
 EXTERNAL Widget   pushButton_revert;
 EXTERNAL Widget   pushButton_interpolate;

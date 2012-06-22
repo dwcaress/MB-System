@@ -1,4 +1,4 @@
-.TH mbextractsegy 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbextractsegy 1 "27 July 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbextractsegy\fP - extracts subbottom profiler, center beam reflection,
 or seismic reflection data from swath data supported by MB-System and
@@ -10,9 +10,9 @@ Version 5.0
 .SH SYNOPSIS
 \fBmbextractsegy\fP [\fB-B\fP\fIyr/mo/da/hr/mn/sc\fP \fB-E\fP\fIyr/mo/da/hr/mn/sc\fP 
 \fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-J\fP\fIxscale/yscale/maxwidth\fP 
-\fB-L\fP\fIstartline/lineroot\fP \fB-M -O\fP\fIsegyfile\fP 
+\fB-L\fP\fIstartline/lineroot\fP \fB-M -O\fP\fIsegyfile\fP \fB-Q\fP\fIroutetimefile\fP
 \fB-R\fP\fIroutefile\fP \fB-S\fP\fIsampleformat\fP 
-\fB-T\fP\fItimeshift\fP \fB-U\fP\fIrangethreshold\fP \fB-V -H\fP]
+\fB-T\fP\fItimeshift\fP \fB-U\fP\fIrangethreshold\fP \fB-Z\fP\fIplotmax\fP \fB-V -H\fP]
 
 .SH DESCRIPTION
 \fBMBextractsegy\fP is a utility for reading a swath sonar data file 
@@ -31,15 +31,23 @@ can be extracted are format 88 (Reson 7k format), format 132
 
 The extracted segy data file(s) can be organized three ways. If the \fB-O\fP
 option is used to specify a single segy output file, then all of the 
-segy data will be output to that single file. If the \fB-R\fP option is
-used to specify a survey route file that includes the waypoints covered
-while collecting the data file(s) referenced by \fB-I\fP\fIfile\fP, then
-the output segy data will be broken up by the sequential lines defined by
-the waypoints. In this case each output segy file will be named using the 
-line root name specified by \fB-L\fP\fIstartline/lineroot\fP with a sequential line
-number starting from \fIstartline\fP. If neither the \fB-O\fP or \fB-L\fP 
-options are used, each input swath file will have a corresponding segy output
-file with the ".segy" suffix added to the original filename.
+segy data will be output to that single file. If either the \fB-Q\fP or 
+\fB-R\fP options are used to specify a survey route file that includes 
+the waypoints covered while collecting the data file(s) referenced by 
+\fB-I\fP\fIfile\fP, then the output segy data will be broken up by the 
+sequential lines defined by the waypoints. The \fB-Q\fP option specifies a
+route file that includes the time at which each waypoint is reached in the
+data, and the \fB-R\fP option specifies a route file of the form exported by
+\fBMBgrdviz\fP. In the waypoint-driven case each output segy file will be named 
+using the line root name specified by \fB-L\fP\fIstartline/lineroot\fP with a 
+sequential line number starting from \fIstartline\fP. If neither the \fB-O\fP or 
+\fB-L\fP options are used, each input swath file will have a corresponding 
+segy output file with the ".segy" suffix added to the original filename.
+
+\fBMBextractsegy\fP also generates a "first cut plot" script that will generate
+grayscale section plots in Postscript of each segy file using the programs
+\fBMBsegygrid\fP and \fBmbm_grdplot\fP. The \fB-Z\fP sets the trace value 
+corresponding to the maximum grayscale (black) in the section plots.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -143,6 +151,26 @@ This option sets the output SEGY file path. If neither \fB-O\fP nore \fB-R\fP ar
 the output SEGY filename (or files if a datalist is being processed) will
 be the input swath filename with ".segy" appended. 
 .TP
+.B \-Q
+\fIroutefile\fP
+.br
+This option specifies route file containing the times that the survey reached
+the intended waypoints. This text file consists of lines of the form:
+ 	count waypoint longitude latitude heading time_d
+.br
+where count is just an integer counter starting at 0, waypoint is the waypoint
+number starting at 0, longitude and latitude are the waypoint position in 
+decimal degrees, heading is the heading in decimal degrees, and time_d is 
+the unix or epoch time (time since 00:00:00 January 1, 1970) in decimal 
+seconds that the survey reached this waypoint.
+If \fIroutefile\fP is specified, \fBmbextractsegy\fP
+will output SEGY data in files corresponding to the planned survey lines. 
+The output SEGY file names will be based on \fIlineroot\fP and will include 
+the line number starting with \fIstarline\fP, both of which are specified
+using the \fB-L\fP options.  If neither \fB-O\fP nore \fB-R\fP are invoked,
+the output SEGY filename (or files if a datalist is being processed) will
+be the input swath filename with ".segy" appended.
+.TP
 .B \-R
 \fIroutefile\fP
 .br
@@ -190,6 +218,12 @@ a waypoint along the route has been reached; the program considers the
 next waypoint reached when the range to the waypoint becomes smaller
 than \fIrangethreshold\fP and then ceases to decrease. 
 Default: \fIrangethreshold\fP = 25 m.
+.TP
+.B \-Z
+\fIplotmax\fP
+.br
+Specifies the trace value corresponding to the maximum grayscale (black) 
+in the section plots. Default: \fIplotmax\fP = 50.
 .TP
 .B \-V
 This option increases the verbosity of \fBmbextractsegy\fP, causing it

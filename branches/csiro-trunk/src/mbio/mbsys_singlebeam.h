@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_singlebeam.h	4/13/93
  *	$Id$
  *
- *    Copyright (c) 1999-2009 by
+ *    Copyright (c) 1999-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -123,6 +123,24 @@ struct mbsys_singlebeam_struct
                                  center
                              9 - No identifiable problem
                                  found */
+	int	gps_quality;	/* R2Rnav GPS quality using NMEA-0183 definition:
+					The National Marine Electronics Association 
+					has defined the following indicator:
+						0 = fix not available or invalid 
+						1 = GPS Standard Positioning Service (SPS) mode, fix valid 
+						2 = differential GPS, SPS mode, fix valid 
+						3 = GPS Precise Positioning Service (PPS) mode, fix valid
+							values for the GPS quality
+						4 = Real Time Kinematic (RTK). Satellite system used in 
+							RTK mode with fixed integers 
+						5 = Float RTK. Satellite system used in RTK mode with 
+							floating integers 
+						6 = Estimated (dead reckoning) mode 
+						7 = Manual input mode
+						8 = Simulator mode */
+	int	gps_nsat;	/* R2Rnav GPS height (m) */
+	double	gps_dilution;	/* R2Rnav GPS height (m) */
+	int	gps_height;	/* R2Rnav GPS height (m) */
 				
 	/* motion sensor data */
 	double	roll;
@@ -271,6 +289,8 @@ int mbsys_singlebeam_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
+int mbsys_singlebeam_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_singlebeam_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

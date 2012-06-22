@@ -4,7 +4,7 @@
  *    The MB-system:	mbgrdviz_main.c		10/9/2002
  *    $Id$
  *
- *    Copyright (c) 2002-2009 by
+ *    Copyright (c) 2002-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -241,6 +241,7 @@ int main( int argc, char **argv)
     XtAppContext app;
     Arg          args[256];
     Cardinal     ac;
+    Boolean      argok=False;
     Widget   topLevelShell;
     Widget   mainWindow_mbgrdviz;
     
@@ -354,7 +355,7 @@ int main( int argc, char **argv)
     ac = 0;
     XtSetArg(args[ac], XmNtitle, "MBgrdviz"); ac++;
     XtSetArg(args[ac], XmNx, 108); ac++;
-    XtSetArg(args[ac], XmNy, 219); ac++;
+    XtSetArg(args[ac], XmNy, 241); ac++;
     XtSetArg(args[ac], XmNwidth, 260); ac++;
     XtSetArg(args[ac], XmNheight, 215); ac++;
     topLevelShell = XtCreatePopupShell((char *)"topLevelShell",

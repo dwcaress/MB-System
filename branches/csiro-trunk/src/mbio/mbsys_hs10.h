@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hs10.h	12/4/00
  *	$Id$
  *
- *    Copyright (c) 2000-2009 by
+ *    Copyright (c) 2000-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -225,6 +225,8 @@ int mbsys_hs10_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
+int mbsys_hs10_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_hs10_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

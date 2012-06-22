@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsmdldih.c	9/26/95
  *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbr_hsmdldih.c,v 5.10 2005/11/05 00:48:04 caress Exp $
  *
- *    Copyright (c) 1995-2009 by
+ *    Copyright (c) 1995-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -213,6 +213,7 @@ int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_svp = NULL; 
 	mb_io_ptr->mb_io_insert_svp = NULL; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_hsmd_ttimes; 
+	mb_io_ptr->mb_io_detects = &mbsys_hsmd_detects; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_hsmd_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
@@ -255,6 +256,7 @@ int mbr_register_hsmdldih(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
 		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
 		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);

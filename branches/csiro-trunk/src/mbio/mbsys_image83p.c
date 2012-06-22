@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_image83p.c	5/5/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2009 by
+ *    Copyright (c) 2008-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,13 +14,13 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_image83p.c contains the functions for handling the data structure
- * used by MBIO functions to store data from the 480 Beam Imagenex DeltaT  
+ * used by MBIO functions to store data from the 480 Beam Imagenex DeltaT
  * multibeam sonar systems.
  * The data formats which are commonly used to store Imagenex DeltaT
  * data in files include
  *      MBF_IMAGE83P : MBIO ID 191
  *      MBF_IMAGEMBA : MBIO ID 192
- *     
+ *
  *
  * Author:	Vivek Reddy, Santa Clara University
  *       	D.W. Caress
@@ -54,7 +54,7 @@
  static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_image83p_alloc";
@@ -93,7 +93,7 @@ int mbsys_image83p_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_image83p_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_image83p_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_image83p_deall";
@@ -127,7 +127,7 @@ int mbsys_image83p_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_image83p_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_image83p_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_image83p_dimensions";
@@ -189,12 +189,12 @@ int mbsys_image83p_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -242,13 +242,13 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed (convert knots to km/hr) */
 		*speed = 1.852 * store->nav_speed * 0.1;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 0.75;
 		mb_io_ptr->beamwidth_xtrack = 0.75;
 
 		/* read distance and depth values into storage arrays */
-		*nbath = store->num_beams;
+		*nbath = store->num_proc_beams;
 		*namp = 0;
 		*nss = 0;
 		for (i=0;i<*nbath;i++)
@@ -331,13 +331,13 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -353,7 +353,7 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -362,7 +362,7 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
-	
+
 		}
 	if (verbose >= 2)
 		{
@@ -375,12 +375,12 @@ int mbsys_image83p_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -420,18 +420,18 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -460,7 +460,7 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->time_d = time_d;
 
 		/* get navigation */
-		
+
 		store->nav_long = navlon;
 		store->nav_lat = navlat;
 
@@ -470,9 +470,9 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get speed (convert km/hr to knots) */
 		store->nav_speed = (int) (0.539996 * speed * 10);
 
-		/* put depth values 
+		/* put depth values
 			into data structure */
-		store->num_beams = nbath; 
+		store->num_proc_beams = nbath;
 		for (i=0;i<nbath;i++)
 			{
 			store->beamflag[i] = beamflag[i];
@@ -504,16 +504,15 @@ int mbsys_image83p_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_image83p_ttimes";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_image83p_struct *store;
-	double	alpha, beta, theta, phi;
 	int	i;
 
 	/* print input debug statements */
@@ -546,8 +545,8 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get nbeams */
-		*nbeams = store->num_beams;
-		
+		*nbeams = store->num_proc_beams;
+
 		*draft = store->sonar_depth;
 		if (store->sound_velocity > 13000 && store->sound_velocity < 17000)
 			*ssv = 0.1 * store->sound_velocity;
@@ -555,18 +554,11 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			*ssv = 1500.0;
 
 		/* get travel times, angles */
-		for (i=0;i<store->num_beams;i++)
+		for (i=0;i<store->num_proc_beams;i++)
 			{
-			alpha = 0.1 * (store->pitch - 900);
-			beta = 0.01 * (store->start_angle + i * store->angle_increment) - 180.0 
-				+ 0.1 * (store->roll - 900);
-			mb_rollpitch_to_takeoff(
-				verbose, 
-				alpha, beta, 
-				&theta, &phi, 
-				error);
-			angles[i] = theta;
-			angles_forward[i] = phi;
+			ttimes[i] = store->beamrange[i];
+			angles[i] = store->angles[i];
+			angles_forward[i] = store->angles_forward[i];
 			angles_null[i] = 0.0;
 			alongtrack_offset[i] = 0.0;
 			heave[i] = store->heave;
@@ -625,8 +617,100 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr,
+	int *kind, int *nbeams,
+	int *detects, int *error)
+{
+	char	*function_name = "mbsys_image83p_detects";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_image83p_struct *store;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       detects:    %lu\n",(size_t)detects);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_image83p_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get nbeams */
+		*nbeams = store->num_proc_beams;
+
+		/* get detects */
+		for (i=0;i<*nbeams;i++)
+			{
+			detects[i] = MB_DETECT_PHASE;
+			}
+
+		/* set status */
+		*error = MB_ERROR_NO_ERROR;
+		status = MB_SUCCESS;
+
+		/* done translating values */
+
+		}
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		}
+	if (verbose >= 2 && *error == MB_ERROR_NO_ERROR)
+		{
+		fprintf(stderr,"dbg2       nbeams:     %d\n",*nbeams);
+		for (i=0;i<*nbeams;i++)
+			fprintf(stderr,"dbg2       beam %d: detects:%d\n",
+				i,detects[i]);
+		}
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitudev, 
+	int *kind, double *transducer_depth, double *altitudev,
 	int *error)
 {
 	char	*function_name = "mbsys_image83p_extract_altitude";
@@ -667,7 +751,7 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 		altitude_found = MB_NO;
 		xtrackmin = 999999.9;
 		*altitudev = 0.0;
-		for (i=0;i<store->num_beams;i++)
+		for (i=0;i<store->num_proc_beams;i++)
 			{
 			if (mb_beam_ok(store->beamflag[i])
 				&& fabs(store->bathacrosstrack[i]) < xtrackmin)
@@ -722,8 +806,8 @@ int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr
 int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_image83p_extract_nav";
@@ -775,7 +859,7 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get roll pitch  */
 		*roll = 0.1 * (store->roll - 900.0);
-		*pitch = 0.1 * (store->pitch - 900.0);
+		*pitch = 0.1 * (store->pitch - 900.0) + ((double)store->profile_tilt_angle - 180.0);
 		*heave = store->heave;
 
 		/* print debug statements */
@@ -849,7 +933,7 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -883,7 +967,7 @@ int mbsys_image83p_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -934,7 +1018,7 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->time_d = time_d;
 
 		/* get navigation */
-		
+
 		store->nav_long = navlon;
 		store->nav_lat = navlat;
 
@@ -949,9 +1033,9 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get roll pitch and heave */
 		store->roll = roll * 10 + 900;
-		store->pitch = pitch * 10 + 900;
+		store->pitch = pitch * 10 + 900 - ((double)store->profile_tilt_angle - 180.0);
 		store->heave = heave;
-		
+
 		}
 
 	/* print output debug statements */
@@ -969,7 +1053,7 @@ int mbsys_image83p_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 }
 
 /*--------------------------------------------------------------------*/
-int mbsys_image83p_copy(int verbose, void *mbio_ptr, 
+int mbsys_image83p_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {

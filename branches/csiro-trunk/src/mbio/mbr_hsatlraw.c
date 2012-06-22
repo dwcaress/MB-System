@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_hsatlraw.c	2/11/93
  *	$Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -292,6 +292,7 @@ int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_svp = &mbsys_hsds_extract_svp; 
 	mb_io_ptr->mb_io_insert_svp = &mbsys_hsds_insert_svp; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_hsds_ttimes; 
+	mb_io_ptr->mb_io_detects = &mbsys_hsds_detects; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_hsds_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
@@ -334,6 +335,7 @@ int mbr_register_hsatlraw(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
 		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
 		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
@@ -840,7 +842,7 @@ int mbr_rt_hsatlraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 					zz = store->depth_scale * (fabs((double)store->depth[i]) + store->draught + store->heave);
 					xx = store->depth_scale * store->distance[i];
 					rr = sqrt(xx * xx + zz * zz);
-					tt = rr / store->vel_mean;
+					tt = 2 * rr / store->vel_mean;
 					store->time[i] = tt / store->time_scale;
 					}
 				}

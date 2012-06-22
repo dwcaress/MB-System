@@ -1,7 +1,7 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbcut.c	1/26/95
  *
- *    $Id: mbcut.c,v 5.8 2008-09-13 06:08:09 caress Exp $
+ *    $Id$
  *
  *    Copyright (c) 1993, 1994, 1995, 2000, 2003, 2006 by
  *    David W. Caress (caress@mbari.org)
@@ -117,7 +117,7 @@
 main (int argc, char **argv)
 {
 	/* id variables */
-	static char rcs_id[] = "$Id: mbcut.c,v 5.8 2008-09-13 06:08:09 caress Exp $";
+	static char rcs_id[] = "$Id$";
 	static char program_name[] = "mbcut";
 	static char help_message[] = 
 "MBCUT removes swath data values that lie outside ranges\n\t\

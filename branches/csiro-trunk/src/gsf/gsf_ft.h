@@ -77,7 +77,7 @@ INDEX_DATA;
 typedef struct t_gsfFileTable
 {
     FILE           *fp;                            /* File descriptor */
-    char            file_name[256];                /* The file's name */
+    char            file_name[1024];               /* The file's name */
     int             major_version_number;          /* The gsf library version ID which created this file */
     int             minor_version_number;          /* The gsf library version ID which created this file */
     int             file_size;                     /* The file's size when gsfOpen is called */
@@ -90,6 +90,7 @@ typedef struct t_gsfFileTable
     int             read_write_flag;               /* State variable for last I/O operation (1=read, 2=write) */
     int             scales_read;                   /* Set when scale factors are read in with ping record */
     int             access_mode;                   /* How was the file opened */
+    int             last_record_type;              /* Record type of the last record we successfully read (or wrote) */
     INDEX_DATA      index_data;                    /* Index information used for direct file access */
     gsfRecords      rec;                           /* Our copy of pointers to dynamic memory and scale factors */
 }

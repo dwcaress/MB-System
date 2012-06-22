@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_image83p.h	5/5/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2009 by
+ *    Copyright (c) 2008-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -83,6 +83,10 @@ struct mbsys_image83p_struct
 	/* important values not in vendor format */
 	float	sonar_depth;
 	float	heave;
+	int	num_proc_beams;
+	double	beamrange[MBSYS_IMAGE83P_BEAMS];
+	double	angles[MBSYS_IMAGE83P_BEAMS];
+	double	angles_forward[MBSYS_IMAGE83P_BEAMS];
 	float	bath[MBSYS_IMAGE83P_BEAMS];
 	float	bathacrosstrack[MBSYS_IMAGE83P_BEAMS];
 	float	bathalongtrack[MBSYS_IMAGE83P_BEAMS];
@@ -123,6 +127,8 @@ int mbsys_image83p_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
+int mbsys_image83p_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_image83p_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitudev, 
 			int *error);

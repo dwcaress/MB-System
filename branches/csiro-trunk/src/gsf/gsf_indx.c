@@ -62,6 +62,7 @@
  *                 writing to the index file, as an alternative to the
  *                 DISPLAY_SPINNER printouts.  Replaced references to long types
  *                 with int types, for compilation on 64-bit architectures.
+ * clb  05/27/11   added reference to __MINGW64__
  *
  *
  * Classification : Unclassified
@@ -80,8 +81,11 @@
 #include <string.h>
 #if defined(OS2) || defined(WIN32)
     #include <process.h>
-    #if defined (__MINGW32__)
+    #if defined (__MINGW32__) || defined (__MINGW64__)
         #include <unistd.h>
+    #endif
+    #if defined (__BORLANDC__)
+        #define _getpid getpid
     #endif
 #else
     #include <unistd.h>
@@ -100,6 +104,7 @@ static FILE *open_temp_file(int);
 static void close_temp_file(int, FILE *);
 static int gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft);
 static int gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft);
+static void temp_file_name(int type, char *d_name, char *f_name);
 
 
 
@@ -218,7 +223,7 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     int              ret;
     int              i;
     int              j;
-    char             ndx_file[132];
+    char             ndx_file[1024];
     GSF_INDEX_HEADER index_header;
 
     /*  Clear the contents of the index_header structure */
@@ -521,6 +526,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -552,6 +562,7 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                             temp[0] = open_temp_file(0);
                             if (temp[0] == NULL)
                             {
+                                gsfError = GSF_OPEN_TEMP_FILE_FAILED;
                                 return(-1);
                             }
                             index_header.number_record_types++;
@@ -572,6 +583,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -593,6 +609,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -614,6 +635,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -636,6 +662,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -658,6 +689,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -679,6 +715,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -700,6 +741,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -721,6 +767,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -743,6 +794,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -764,6 +820,11 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1097,7 +1158,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     temp[i] = open_temp_file(i);
                     if (temp[i] == NULL)
                     {
-                        gsfError = GSF_FOPEN_ERROR;
+                        gsfError = GSF_OPEN_TEMP_FILE_FAILED;
                         return(-1);
                     }
                 }
@@ -1153,6 +1214,18 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         err = gsfRead(handle, data_id.recordID, &data_id, &records, NULL, 0);
         if (err < 0)
         {
+            /*  Get rid of the temp files.  */
+            for (i = 0; i < NUM_REC_TYPES; i++)
+            {
+                /*  If the temp file pointer is non-NULL then this record type was
+                 *  encountered.
+                 */
+                if (temp[i] != NULL)
+                {
+                    
+                    close_temp_file(i, temp[i]);
+                }
+            }
             /* gsfError will have been set in gsfRead */
             return(-1);
         }
@@ -1169,6 +1242,18 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         err = gsfRead(handle, data_id.recordID, &data_id, &records, NULL, 0);
         if (err < 0)
         {
+            /*  Get rid of the temp files.  */
+            for (i = 0; i < NUM_REC_TYPES; i++)
+            {
+                /*  If the temp file pointer is non-NULL then this record type was
+                 *  encountered.
+                 */
+                if (temp[i] != NULL)
+                {
+                    
+                    close_temp_file(i, temp[i]);
+                }
+            }
             /* gsfError will have been set in gsfRead */
             return(-1);
         }
@@ -1191,6 +1276,18 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 
         if ((index_rec.addr = ftell(ft->fp)) == -1 )
         {
+            /*  Get rid of the temp files.  */
+            for (i = 0; i < NUM_REC_TYPES; i++)
+            {
+                /*  If the temp file pointer is non-NULL then this record type was
+                 *  encountered.
+                 */
+                if (temp[i] != NULL)
+                {
+                    
+                    close_temp_file(i, temp[i]);
+                }
+            }
             gsfError = GSF_FILE_TELL_ERROR;
             return (-1);
         }
@@ -1198,7 +1295,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         /*  Read the gsf record and check for end of file.  */
 
         if ((err = gsfRead(handle, GSF_NEXT_RECORD, &data_id, &records,
-                    NULL, 0)) != -1)
+                           NULL, 0)) != -1)
         {
 
             /*  Switch based on the record type that was just read.  */
@@ -1219,6 +1316,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1270,6 +1372,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1291,6 +1398,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1312,6 +1424,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1334,6 +1451,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1356,6 +1478,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1377,6 +1504,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1398,6 +1530,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1420,6 +1557,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1441,6 +1583,11 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                     if (temp[id] == NULL)
                     {
                         temp[id] = open_temp_file(id);
+                        if (temp[id] == (FILE *) NULL) 
+                        {
+                            gsfError = GSF_OPEN_TEMP_FILE_FAILED;
+                            return (-1);
+                        }
                         index_header.number_record_types++;
                     }
 
@@ -1464,6 +1611,19 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
             if ((current = ftell(ft->fp)) == -1 )
             {
                 gsfError = GSF_FILE_TELL_ERROR;
+
+                /*  Get rid of the temp files.  */
+                for (i = 0; i < NUM_REC_TYPES; i++)
+                {
+                    /*  If the temp file pointer is non-NULL then this record type was
+                     *  encountered.
+                     */
+                    if (temp[i] != NULL)
+                    {
+                        
+                        close_temp_file(i, temp[i]);
+                    }
+                }
                 return (-1);
             }
             percent = ((double) current  / (double) eof) * 100.0;
@@ -1489,6 +1649,18 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         {
             if (gsfError != GSF_READ_TO_END_OF_FILE)
             {
+                /*  Get rid of the temp files.  */
+                for (i = 0; i < NUM_REC_TYPES; i++)
+                {
+                    /*  If the temp file pointer is non-NULL then this record type was
+                     *  encountered.
+                     */
+                    if (temp[i] != NULL)
+                    {
+                        
+                        close_temp_file(i, temp[i]);
+                    }
+                }
                 return(-1);
             }
         }
@@ -1502,6 +1674,18 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     if ((ft->index_data.fp = fopen(ndx_file, "wb+")) == NULL)
     {
         gsfError = GSF_INDEX_FILE_OPEN_ERROR;
+        /*  Get rid of the temp files.  */
+        for (i = 0; i < NUM_REC_TYPES; i++)
+        {
+            /*  If the temp file pointer is non-NULL then this record type was
+             *  encountered.
+             */
+            if (temp[i] != NULL)
+            {
+                
+                close_temp_file(i, temp[i]);
+            }
+        }
         return(-1);
     }
 
@@ -1681,6 +1865,55 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 
 /********************************************************************
  *
+ * Function Name : temp_file_name
+ *
+ * Description : This function provides a temporary file name to hold the
+ *  temp indexes.  The index file name is constructed from the process ID, 
+ *  the record type, and .ndx.
+ *
+ * Inputs :
+ *  type = record type
+ *
+ * Returns :
+ *  This function returns the file pointer for the temp file.
+ *
+ * Error Conditions : 
+ *
+ ********************************************************************/
+
+static void
+temp_file_name(int type, char *d_name, char *f_name)
+{
+
+#if defined(OS2) || defined(WIN32)
+
+    if ( (getenv ("TEMP") == NULL) && (getenv ("GSFTMPDIR") == NULL) )
+        strcpy (d_name, ".\\");
+    else if (getenv ("GSFTMPDIR") != NULL)
+        strcpy (d_name, getenv ("GSFTMPDIR"));
+    else
+        strcpy (d_name, getenv ("TEMP"));
+
+    sprintf(f_name, "%s\\%05d%02d.ndx", d_name, _getpid(), type);
+
+#else
+
+    if ( (getenv ("TEMP") == NULL) && (getenv ("GSFTMPDIR") == NULL) )
+        strcpy (d_name, "/tmp");
+    else if (getenv ("GSFTMPDIR") != NULL)
+        strcpy (d_name, getenv ("GSFTMPDIR"));
+    else
+        strcpy (d_name, getenv ("TEMP"));
+
+    sprintf(f_name, "%s/%05d%02d.ndx", d_name, getpid(), type);
+
+#endif
+
+    return;
+}
+
+/********************************************************************
+ *
  * Function Name : open_temp_file
  *
  * Description : This function creates a temporary file to hold the
@@ -1700,36 +1933,19 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 static FILE           *
 open_temp_file(int type)
 {
-    char            file[132];
-    char            dir[132];
+    char            file[1024];
+    char            dir[1024];
     FILE           *fp;
 
     memset (&dir, 0, sizeof (dir));
+    memset (&file, 0, sizeof(file));
 
-#if defined(OS2) || defined(WIN32)
-    if ( (getenv ("TEMP") == NULL) && (getenv ("GSFTMPDIR") == NULL) )
-        strcpy (dir, "\\tmp");
-    else if (getenv ("GSFTMPDIR") != NULL)
-        strcpy (dir, getenv ("GSFTMPDIR"));
-    else
-        strcpy (dir, getenv ("TEMP"));
-
-    sprintf(file, "%s\\%05d%02d.ndx", dir, _getpid(), type);
-#else
-    if ( (getenv ("TEMP") == NULL) && (getenv ("GSFTMPDIR") == NULL) )
-        strcpy (dir, "/tmp");
-    else if (getenv ("GSFTMPDIR") != NULL)
-        strcpy (dir, getenv ("GSFTMPDIR"));
-    else
-        strcpy (dir, getenv ("TEMP"));
-
-    sprintf(file, "%s/%05d%02d.ndx", dir, getpid(), type);
-#endif
+    temp_file_name(type, dir, file);
 
     if ((fp = fopen(file, "wb+")) == NULL)
     {
         perror(file);
-        exit(-1);
+        return((FILE *) NULL);
     }
 
     return (fp);
@@ -1756,17 +1972,15 @@ open_temp_file(int type)
 static void
 close_temp_file(int type, FILE * fp)
 {
-    char            file[132];
-    char            dir[132];
+    char            file[1024];
+    char            dir[1024];
 
     fclose(fp);
     memset (&dir, 0, sizeof(dir));
-    if (getenv ("GSFTMPDIR") == NULL)
-        strcpy (dir, "/tmp");
-    else
-        strcpy (dir, getenv ("GSFTMPDIR"));
+    memset (&file, 0, sizeof(file));
 
-    sprintf(file, "%s/%05d%02d.ndx", dir, getpid(), type);
+    temp_file_name(type, dir, file);
+
     unlink(file);
 
     return;

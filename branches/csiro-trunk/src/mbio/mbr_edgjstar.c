@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_edgjstar.c	5/2/2005
  *	$Id$
  *
- *    Copyright (c) 2005-2009 by
+ *    Copyright (c) 2005-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -171,6 +171,7 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->mb_io_extract_svp = NULL; 
 	mb_io_ptr->mb_io_insert_svp = NULL; 
 	mb_io_ptr->mb_io_ttimes = &mbsys_jstar_ttimes; 
+	mb_io_ptr->mb_io_detects = &mbsys_jstar_detects; 
 	mb_io_ptr->mb_io_copyrecord = &mbsys_jstar_copy; 
 	mb_io_ptr->mb_io_extract_rawss = NULL; 
 	mb_io_ptr->mb_io_insert_rawss = NULL; 
@@ -216,6 +217,7 @@ int mbr_register_edgjstar(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       extract_svp:        %lu\n",(size_t)mb_io_ptr->mb_io_extract_svp);
 		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
+		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
 		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       extract_segytraceheader: %lu\n",(size_t)mb_io_ptr->mb_io_extract_segytraceheader);
@@ -1257,7 +1259,7 @@ dvl->depth,dvl->pitch,dvl->roll,dvl->heading,dvl->soundspeed);
 				/* break up NMEA string into arguments */
 				nargc = 0;
 				string = (char *) nmeastring;
-				for (nap = nargv; (*nap = strsep(&string, ",*")) != NULL;)
+				for (nap = nargv; (*nap = strtok(string, ",*")) != NULL;)
 					{
 					if (++nap >= &nargv[25]) 
 						break;
@@ -1901,6 +1903,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	int	index;
 	int	write_len;
 	int	shortspersample;
+	int	trace_size;
 	int	i;
 
 	/* print input debug statements */
@@ -2446,7 +2449,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			shortspersample = 2;
 		else
 			shortspersample = 1;
-		sbp->message.size = shortspersample * sbp->samples * sizeof(short);
+		sbp->message.size = shortspersample * sbp->samples * sizeof(short) + MBSYS_JSTAR_SBPHEADER_SIZE;
 		mb_put_binary_short(MB_YES, sbp->message.start_marker, &buffer[index]); index += 2;
 		buffer[index] = sbp->message.version; index++;
 		buffer[index] = sbp->message.session; index++;
@@ -2575,8 +2578,9 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 #endif
 
 		/* write the trace */
-		if ((write_len = fwrite(sbp->trace,1,sbp->message.size,mb_io_ptr->mbfp))
-			!= sbp->message.size)
+		trace_size = shortspersample * sbp->samples * sizeof(short);
+		if ((write_len = fwrite(sbp->trace,1,trace_size,mb_io_ptr->mbfp))
+			!= trace_size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -2595,7 +2599,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			shortspersample = 2;
 		else
 			shortspersample = 1;
-		ss->message.size = shortspersample * ss->samples * sizeof(short);
+		ss->message.size = shortspersample * ss->samples * sizeof(short) + MBSYS_JSTAR_SSHEADER_SIZE;
 		mb_put_binary_short(MB_YES, ss->message.start_marker, &buffer[index]); index += 2;
 		buffer[index] = ss->message.version; index++;
 		buffer[index] = ss->message.session; index++;
@@ -2724,8 +2728,9 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 #endif
 
 		/* write the trace */
-		if ((write_len = fwrite(ss->trace,1,ss->message.size,mb_io_ptr->mbfp))
-			!= ss->message.size)
+		trace_size = shortspersample * ss->samples * sizeof(short);
+		if ((write_len = fwrite(ss->trace,1,trace_size,mb_io_ptr->mbfp))
+			!= trace_size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -2740,7 +2745,7 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			shortspersample = 2;
 		else
 			shortspersample = 1;
-		ss->message.size = shortspersample * ss->samples * sizeof(short);
+		ss->message.size = shortspersample * ss->samples * sizeof(short) + MBSYS_JSTAR_SSHEADER_SIZE;
 		mb_put_binary_short(MB_YES, ss->message.start_marker, &buffer[index]); index += 2;
 		buffer[index] = ss->message.version; index++;
 		buffer[index] = ss->message.session; index++;
@@ -2869,8 +2874,9 @@ int mbr_wt_edgjstar(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 #endif
 
 		/* write the trace */
-		if ((write_len = fwrite(ss->trace,1,ss->message.size,mb_io_ptr->mbfp))
-			!= ss->message.size)
+		trace_size = shortspersample * ss->samples * sizeof(short);
+		if ((write_len = fwrite(ss->trace,1,trace_size,mb_io_ptr->mbfp))
+			!= trace_size)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;

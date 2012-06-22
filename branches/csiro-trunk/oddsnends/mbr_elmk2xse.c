@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_elmk2xse.c	3/27/99
- *	$Id: mbr_elmk2xse.c,v 5.0 2006-08-04 16:46:49 caress Exp $
+ *	$Id$
  *
  *    Copyright (c) 1999, 2000 by
  *    David W. Caress (caress@mbari.org)
@@ -117,7 +117,7 @@ int mbr_wt_elmk2xse(int verbose, char *mbio_ptr, char *store_ptr, int *error);
 /*--------------------------------------------------------------------*/
 int mbr_register_elmk2xse(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.0 2006-08-04 16:46:49 caress Exp $";
+	static char res_id[]="$Id$";
 	char	*function_name = "mbr_register_elmk2xse";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
@@ -248,7 +248,7 @@ int mbr_info_elmk2xse(int verbose,
 			double *beamwidth_ltrack, 
 			int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.0 2006-08-04 16:46:49 caress Exp $";
+	static char res_id[]="$Id$";
 	char	*function_name = "mbr_info_elmk2xse";
 	int	status = MB_SUCCESS;
 
@@ -317,7 +317,7 @@ int mbr_info_elmk2xse(int verbose,
 /*--------------------------------------------------------------------*/
 int mbr_alm_elmk2xse(int verbose, char *mbio_ptr, int *error)
 {
-	static char res_id[]="$Id: mbr_elmk2xse.c,v 5.0 2006-08-04 16:46:49 caress Exp $";
+	static char res_id[]="$Id$";
 	char	*function_name = "mbr_alm_elmk2xse";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;

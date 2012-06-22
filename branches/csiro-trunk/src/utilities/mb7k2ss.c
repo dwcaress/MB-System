@@ -2,7 +2,7 @@
  *    The MB-system:	mb7k2ss.c		8/15/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2009 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mb7k2ss extracts Edgetech sidescan data
- * from Reson 7k format data, lays the sidescan on the bottom, 
+ * from Reson 7k format data, lays the sidescan on the bottom,
  * and outputs in format 71 mbldeoih.
  *
  * Author:	D. W. Caress
@@ -108,7 +108,7 @@ extern int isnanf(float x);
 #define	MB7K2SS_NUM_ANGLES			171
 #define	MB7K2SS_ANGLE_MAX			85.0
 
-struct mb7k2ss_grid_struct 
+struct mb7k2ss_grid_struct
 	{
 	mb_path	file;
         mb_path projectionname;
@@ -129,16 +129,16 @@ struct mb7k2ss_grid_struct
 	float	*data;
 	};
 
-int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, 
+int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max,
 					double navlon, double navlat, double altitude, double pitch,
-					double *table_xtrack, double *table_ltrack, 
+					double *table_xtrack, double *table_ltrack,
 					double *table_altitude, double *table_range,
 					int *error);
-int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double angle_max, 
+int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double angle_max,
 					double navlon, double navlat, double heading,
 					double altitude, double sonardepth, double pitch,
 					struct mb7k2ss_grid_struct *grid,
-					double *table_xtrack, double *table_ltrack, 
+					double *table_xtrack, double *table_ltrack,
 					double *table_altitude, double *table_range,
 					int *error);
 int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double altitude, double sonardepth,
@@ -236,16 +236,16 @@ int main (int argc, char **argv)
 	double	draft;
 	double	ssv;
 	double	ssv_use = 1500.0;
-	
+
 	char	comment[MB_COMMENT_MAXLINE];
 	int	icomment = 0;
-	
+
 	/* sidescan data data */
 	s7k_fsdwchannel	*sschannelport;		/* Port hannel header and data */
 	s7k_fsdwssheader *ssheaderport;		/* Port Edgetech sidescan header */
 	s7k_fsdwchannel	*sschannelstbd;		/* Starboard channel header and data */
 	s7k_fsdwssheader *ssheaderstbd;		/* Starboard Edgetech sidescan header */
-	
+
 	/* output sidescan data */
 	int	obeams_bath;
 	int	obeams_amp;
@@ -254,30 +254,31 @@ int main (int argc, char **argv)
 	double	ossacrosstrack[MB7K2SS_SSDIMENSION];
 	double	ossalongtrack[MB7K2SS_SSDIMENSION];
 	int	ossbincount[MB7K2SS_SSDIMENSION];
-	double	swath_width;
+	int	swath_width_set = MB_NO;
+	double	swath_width = -1.0;
 	double	pixel_width;
-	
+
 	/* extract modes */
 	int	extract_type = MB7K2SS_SSLOW;
 	int	target_kind = MB_DATA_SIDESCAN2;
 	int	print_comments = MB_NO;
-	
+
 	/* bottompick mode */
 	int	bottompickmode = MB7K2SS_BOTTOMPICK_ALTITUDE;
 	double	bottompickthreshold = 0.4;
-	
+
 	/* sidescan layout mode */
 	int	sslayoutmode = MB7K2SS_SS_FLAT_BOTTOM;
 	double	ss_altitude;
-	
+
 	/* sidescan gain mode */
 	int	gainmode = MB7K2SS_SSGAIN_OFF;
 	double	gainfactor = 1.0;
 	int	ssflip = MB_NO;
-	
+
 	/* sidescan interpolation scale */
 	int	interpbins = 0;
-	
+
 	/* route and auto-line data */
 	mb_path	route_file;
 	int	route_file_set = MB_NO;
@@ -301,7 +302,7 @@ int main (int argc, char **argv)
 	int	activewaypoint = 0;
 	int	startline = 1;
 	int	linenumber;
-	
+
 	/* bottom layout parameters */
 	int	nangle = MB7K2SS_NUM_ANGLES;
 	double	angle_min = -MB7K2SS_ANGLE_MAX;
@@ -310,7 +311,7 @@ int main (int argc, char **argv)
 	double	table_ltrack[MB7K2SS_NUM_ANGLES];
 	double	table_altitude[MB7K2SS_NUM_ANGLES];
 	double	table_range[MB7K2SS_NUM_ANGLES];
-	
+
 	/* counting variables */
 	int	nreaddata = 0;
 	int	nreadheader = 0;
@@ -330,7 +331,7 @@ int main (int argc, char **argv)
 	int	nreadsshitot = 0;
 	int	nwritesslotot = 0;
 	int	nwritesshitot = 0;
-		
+
 	/* auto plotting */
 	FILE	*sfp = NULL;
 	char	scriptfile[MB_PATH_MAXLINE];
@@ -362,18 +363,18 @@ int main (int argc, char **argv)
 	int	oktowrite;
 	double	dx, dy;
 	int	kangle, kstart;
-	double	xtrack, ltrack, rr;
+	double	xtrack, ltrack, rr, rangemin;
 	FILE	*fp = NULL;
 	char	*result;
 	int	nget;
 	int	point_ok;
 	int	previous, jj, interpable;
 	double	dss, dssl, fraction;
-	
+
 	int	read_data;
 	int	found, done;
 	int	i, j, n;
-	
+
 	startline = 1;
 	strcpy(lineroot, "jstar");
 
@@ -385,8 +386,8 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:F:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:U:u:XxVvHh")) != -1)
-	  switch (c) 
+	while ((c = getopt(argc, argv, "A:a:B:b:CcD:d:F:f:G:g:I:i:L:l:MmO:o:R:r:S:s:T:t:U:u:W:w:XxVvHh")) != -1)
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -496,6 +497,13 @@ int main (int argc, char **argv)
 			sscanf (optarg,"%lf", &rangethreshold);
 			flag++;
 			break;
+		case 'W':
+		case 'w':
+			sscanf (optarg,"%lf", &swath_width);
+			if (swath_width > 0.0)
+				swath_width_set = MB_YES;
+			flag++;
+			break;
 		case 'X':
 		case 'x':
 			ssflip = MB_YES;
@@ -558,6 +566,8 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       bottompickmode:      %d\n",bottompickmode);
 		fprintf(stderr,"dbg2       bottompickthreshold: %f\n",bottompickthreshold);
 		fprintf(stderr,"dbg2       smooth:              %d\n",smooth);
+		fprintf(stderr,"dbg2       swath_width_set:     %d\n",swath_width_set);
+		fprintf(stderr,"dbg2       swath_width:         %f\n",swath_width);
 		fprintf(stderr,"dbg2       interpbins:          %d\n",interpbins);
 		fprintf(stderr,"dbg2       gainmode:            %d\n",gainmode);
 		fprintf(stderr,"dbg2       gainfactor:          %f\n",gainfactor);
@@ -581,7 +591,60 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(status);
 		}
-	
+
+	/* print starting debug statements */
+	if (verbose == 1)
+		{
+		fprintf(stderr,"\nProgram <%s>\n",program_name);
+		fprintf(stderr,"Version %s\n",rcs_id);
+		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
+		fprintf(stderr,"Control Parameters:\n");
+		if (bottompickmode == MB7K2SS_BOTTOMPICK_BATHYMETRY)
+			fprintf(stderr,"     bottompickmode:      Bathymetry\n");
+		else if (bottompickmode == MB7K2SS_BOTTOMPICK_ALTITUDE)
+			fprintf(stderr,"     bottompickmode:      Altitude\n");
+		else if (bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
+			{
+			fprintf(stderr,"     bottompickmode:      Sidescan first arrival\n");
+			fprintf(stderr,"     bottompickthreshold: %f\n",bottompickthreshold);
+			}
+		else if (bottompickmode == MB7K2SS_BOTTOMPICK_3DBATHY)
+			{
+			fprintf(stderr,"     bottompickmode:      3D Bathymetry\n");
+			fprintf(stderr,"     grid.file:           %s\n",grid.file);
+			}
+		fprintf(stderr,"     bottompickthreshold: %f\n",bottompickthreshold);
+		fprintf(stderr,"     smooth:              %d\n",smooth);
+		if (swath_width_set == MB_YES)
+			fprintf(stderr,"     swath_width:         %f\n",swath_width);
+		else
+			fprintf(stderr,"     swath_width:         Maximum available\n");
+		if (gainmode == MB7K2SS_SSGAIN_OFF)
+			fprintf(stderr,"     gainmode:            Off\n");
+		else
+			{
+			fprintf(stderr,"     gainmode:            TVG applied as gainfactor/R\n");
+			fprintf(stderr,"     gainfactor:          %f\n",gainfactor);
+			}
+		if (sslayoutmode == MB7K2SS_SS_FLAT_BOTTOM)
+			fprintf(stderr,"     sslayoutmode:        Flat bottom\n");
+		else if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM)
+			{
+			fprintf(stderr,"     sslayoutmode:        3D bottom\n");
+			fprintf(stderr,"     grid.file:           %s\n",grid.file);
+			}
+		fprintf(stderr,"     interpolation bins:  %d\n",interpbins);
+		fprintf(stderr,"     file:                %s\n",file);
+		if (route_file_set == MB_YES)
+			fprintf(stderr,"     route_file:          %s\n",route_file);
+		fprintf(stderr,"     checkroutebearing:   %d\n",checkroutebearing);
+		if (output_file_set == MB_YES)
+			fprintf(stderr,"     output_file:         %s\n",output_file);
+		fprintf(stderr,"     lineroot:            %s\n",lineroot);
+		fprintf(stderr,"     extract_type:        %d\n",extract_type);
+		fprintf(stderr,"     print_comments:      %d\n",print_comments);
+		}
+
 	/* output output types */
 	fprintf(stdout, "\nData records to extract:\n");
 	if (extract_type == MB7K2SS_SSLOW)
@@ -590,7 +653,7 @@ int main (int argc, char **argv)
 		fprintf(stdout, "     High Sidescan\n");
 	if (ssflip == MB_YES)
 		fprintf(stdout, "     Sidescan port and starboard exchanged\n");
-		
+
 	/* set starting line number and output file if route read */
 	if (route_file_set == MB_YES)
 		{
@@ -600,15 +663,15 @@ int main (int argc, char **argv)
 		else if (extract_type == MB7K2SS_SSHIGH)
 			sprintf(output_file, "%s_%4.4d_sshi.mb71", lineroot, linenumber);
 		}
-	
+
 	/* new output file obviously needed */
 	new_output_file = MB_YES;
 
 	/* if specified read route file */
 	if (route_file_set == MB_YES)
-		{	    
+		{
 		/* open the input file */
-		if ((fp = fopen(route_file, "r")) == NULL) 
+		if ((fp = fopen(route_file, "r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			status = MB_FAILURE;
@@ -642,7 +705,7 @@ int main (int argc, char **argv)
 					point_ok = MB_YES;
 				else
 					point_ok = MB_NO;
-			    
+
 				/* if good data check for need to allocate more space */
 				if (point_ok == MB_YES
 					&& nroutepoint + 1 > nroutepointalloc)
@@ -682,7 +745,7 @@ int main (int argc, char **argv)
 		/* close the file */
 		fclose(fp);
 		fp = NULL;
-		
+
 		/* set starting values */
 		activewaypoint = 1;
 		mb_coor_scale(verbose,routelat[activewaypoint], &mtodeglon, &mtodeglat);
@@ -698,7 +761,7 @@ int main (int argc, char **argv)
 				nroutepoint, route_file);
 			}
 		}
-		
+
 	/* read topography grid if 3D bottom correction specified */
 	if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM)
 		{
@@ -707,7 +770,7 @@ int main (int argc, char **argv)
 					&grid.nxy, &grid.nx, &grid.ny, &grid.min, &grid.max,
 					&grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
 					&grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
-		if (status == MB_FAILURE) 
+		if (status == MB_FAILURE)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr,"\nUnable to read grd file: %s\n",
@@ -795,7 +858,7 @@ int main (int argc, char **argv)
 	    strcpy(file, read_file);
 	    read_data = MB_YES;
 	    }
-	    
+
 	/* set up plotting script file */
 	if (route_file_set == MB_YES && nroutepoint > 1)
 		{
@@ -809,14 +872,14 @@ int main (int argc, char **argv)
 		{
 		sprintf(scriptfile, "%s_ssswathplot.cmd", file);
 		}
-	if ((sfp = fopen(scriptfile, "w")) == NULL) 
+	if ((sfp = fopen(scriptfile, "w")) == NULL)
 		{
 		error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		fprintf(stderr,"\nUnable to open plotting script file <%s> \n",scriptfile);
 		exit(status);
 		}
-	
+
 	/* loop over all files to be read */
 	while (read_data == MB_YES && format == MBF_RESON7KR)
 	{
@@ -868,13 +931,13 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -905,7 +968,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-		
+
 	/* set up output file name if needed */
 	if (error == MB_ERROR_NO_ERROR)
 		{
@@ -914,11 +977,11 @@ int main (int argc, char **argv)
 			/* set flag to open new output file */
 			new_output_file = MB_YES;
 			}
-			
+
 		else if (output_file_set == MB_NO && route_file_set == MB_NO)
 			{
 			new_output_file = MB_YES;
-			format_status = mb_get_format(verbose, file, output_file, 
+			format_status = mb_get_format(verbose, file, output_file,
 		    				&format_guess, &error);
 			if (format_status != MB_SUCCESS || format_guess != format)
 				{
@@ -955,7 +1018,7 @@ int main (int argc, char **argv)
 		{
 		/* reset error */
 		error = MB_ERROR_NO_ERROR;
-		
+
 		/* read next data record */
 		status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
 				    time_i,&time_d,&navlon,&navlat,
@@ -990,17 +1053,17 @@ imb_io_ptr->fix_lon[i],
 imb_io_ptr->fix_lat[i]);*/
 			mb_get_jtime(verbose, istore->time_i, time_j);
 			speed = 0.0;
-			mb_hedint_interp(verbose, imbio_ptr, time_d,  
+			mb_hedint_interp(verbose, imbio_ptr, time_d,
 					&heading, &error);
-			mb_navint_interp(verbose, imbio_ptr, time_d, heading, speed, 
+			mb_navint_interp(verbose, imbio_ptr, time_d, heading, speed,
 					&navlon, &navlat, &speed, &error);
 /*fprintf(stderr,"time:%4d/%2d/%2d-%2d:%2d:%2d.%6d navlon:%f navlat:%f\n",
 time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],navlon,navlat);*/
-			mb_depint_interp(verbose, imbio_ptr, time_d,  
+			mb_depint_interp(verbose, imbio_ptr, time_d,
 					&sonardepth, &error);
-			mb_altint_interp(verbose, imbio_ptr, time_d,  
+			mb_altint_interp(verbose, imbio_ptr, time_d,
 					&altitude, &error);
-			mb_attint_interp(verbose, imbio_ptr, time_d,  
+			mb_attint_interp(verbose, imbio_ptr, time_d,
 					&heave, &roll, &pitch, &error);
 			}
 
@@ -1014,12 +1077,12 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],navlon,nav
 			if (heading != 0.0)
 				lastheading = heading;
 			}
-		    
+
 		/* check survey data position against waypoints */
 /*fprintf(stderr,"status:%d error:%d | kind:%d %d | route_file_set:%d nroutepoint:%d navlon:%f navlat:%f\n",
 status,error,kind,target_kind,route_file_set,nroutepoint,navlon,navlat);*/
 		if (status == MB_SUCCESS && kind == target_kind
-			&& route_file_set == MB_YES && nroutepoint > 1 
+			&& route_file_set == MB_YES && nroutepoint > 1
 			&& navlon != 0.0 && navlat != 0.0)
 			{
 			dx = (navlon - routelon[activewaypoint]) / mtodeglon;
@@ -1029,8 +1092,8 @@ status,error,kind,target_kind,route_file_set,nroutepoint,navlon,navlat);*/
 activewaypoint, range, rangelast, navlon, routelon[activewaypoint], navlat, routelat[activewaypoint]);*/
 			if (range < rangethreshold)
 				rangeok = MB_YES;
-			if (rangeok == MB_YES 
-				&& (activewaypoint == 0 || range > rangelast) 
+			if (rangeok == MB_YES
+				&& (activewaypoint == 0 || range > rangelast)
 				&& activewaypoint < nroutepoint - 1)
 				{
 /*fprintf(stderr,"New output by range to routepoint: %f\n",range);*/
@@ -1039,14 +1102,14 @@ activewaypoint, range, rangelast, navlon, routelon[activewaypoint], navlat, rout
 				    {
 				    /* increment line number */
 				    linenumber++;
-				    
+
 				    /* set output file name */
 				    if (extract_type == MB7K2SS_SSLOW)
 					    sprintf(output_file, "%s_%4.4d_sslo.mb71", lineroot, linenumber);
 				    else if (extract_type == MB7K2SS_SSHIGH)
 					    sprintf(output_file, "%s_%4.4d_sshi.mb71", lineroot, linenumber);
 			   	    format_output = MBF_MBLDEOIH;
-				    
+
 				    /* set to open new output file */
 				    new_output_file = MB_YES;
 				    }
@@ -1060,12 +1123,12 @@ activewaypoint, range, rangelast, navlon, routelon[activewaypoint], navlat, rout
 				}
 			else
 				rangelast = range;
-/*fprintf(stderr,"> activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
-activewaypoint,linenumber,range, navlon, 
+/*fprintf(stderr,"> activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n",
+activewaypoint,linenumber,range, navlon,
 routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 			}
-				
-		if (kind == MB_DATA_DATA 
+
+		if (kind == MB_DATA_DATA
 			&& error <= MB_ERROR_NO_ERROR)
 			{
 			/* extract travel times */
@@ -1075,11 +1138,11 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				angles_forward,angles_null,
 				bheave,alongtrack_offset,
 				&draft,&ssv,&error);
-				
+
 			/* check surface sound velocity */
 			if (ssv > 0.0)
 				ssv_use = ssv;
-				
+
 			/* get bottom arrival time, if possible */
 			ttime_min = 0.0;
 			found = MB_NO;
@@ -1102,21 +1165,21 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				ttime_min_ok = MB_YES;
 				}
 			}
-		    
+
 		/* nonfatal errors do not matter */
 		if (error < MB_ERROR_NO_ERROR)
 			{
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
-			
+
 		/* if needed open new output file */
 		if (status == MB_SUCCESS
 			&& new_output_file == MB_YES
 			&& (((extract_type == MB7K2SS_SSLOW && kind == MB_DATA_SIDESCAN2)
 				|| (extract_type == MB7K2SS_SSHIGH && kind == MB_DATA_SIDESCAN3))))
 			{
-				
+
 			/* close any old output file unless a single file has been specified */
 			if (ombio_ptr != NULL)
 				{
@@ -1126,26 +1189,26 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				/* generate inf file */
 				if (status == MB_SUCCESS)
 					{
-					status = mb_make_info(verbose, MB_YES, 
-								current_output_file, 
-								format_output, 
+					status = mb_make_info(verbose, MB_YES,
+								current_output_file,
+								format_output,
 								&error);
 					}
-					
+
 				/* output counts */
 				fprintf(stdout, "\nData records written to: %s\n", current_output_file);
 				fprintf(stdout, "     Low Sidescan:  %d\n", nwritesslo);
 				fprintf(stdout, "     High Sidescan: %d\n", nwritesshi);
 				nwritesslotot += nwritesslo;
 				nwritesshitot += nwritesshi;
-				    
+
 				/* output commands to first cut plotting script file */
 				fprintf(sfp, "# Generate swath plot of sidescan file: %s\n", current_output_file);
-				fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n", 
+				fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n",
 					current_output_file, current_output_file);
 				fprintf(sfp, "%s_ssrawplot.cmd\n\n", current_output_file);
 				}
-				
+
 			/* open the new file */
 			nwritesslo = 0;
 			nwritesshi = 0;
@@ -1160,7 +1223,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					program_name);
 				exit(error);
 				}
-				
+
 			/* save current_output_file */
 			strcpy(current_output_file, output_file);
 
@@ -1168,15 +1231,15 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 			omb_io_ptr = (struct mb_io_struct *) ombio_ptr;
 			ostore_ptr = omb_io_ptr->store_data;
 			ostore = (struct mbsys_ldeoih_struct *) ostore_ptr;
-			
+
 			/* reset new_output_file */
 			new_output_file = MB_NO;
 			}
-			
-		/* if following a route check that the vehicle has come on line 
+
+		/* if following a route check that the vehicle has come on line
 		    	(within MB7K2SS_ONLINE_THRESHOLD degrees)
 		    	before writing any data */
-		if (checkroutebearing == MB_YES 
+		if (checkroutebearing == MB_YES
 		    	&& nroutepoint > 1 && activewaypoint > 0)
 		    	{
 			headingdiff = fabs(routeheading[activewaypoint-1] - heading);
@@ -1186,57 +1249,57 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				oktowrite++;
 			else
 				oktowrite = 0;
-/* fprintf(stderr,"heading: %f %f %f oktowrite:%d\n", 
+/* fprintf(stderr,"heading: %f %f %f oktowrite:%d\n",
 routeheading[activewaypoint-1],heading,headingdiff,oktowrite);*/
 			}
 		else
 		    	oktowrite = MB7K2SS_ONLINE_COUNT;
 /* if (status == MB_SUCCESS)
-fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n", 
-activewaypoint,linenumber,range, navlon, 
+fprintf(stderr,"activewaypoint:%d linenumber:%d range:%f   lon: %f %f   lat: %f %f oktowrite:%d\n",
+activewaypoint,linenumber,range, navlon,
 routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
-			
+
 	   	/* handle multibeam data */
-		if (status == MB_SUCCESS && kind == MB_DATA_DATA) 
+		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 /*fprintf(stderr,"MB_DATA_DATA: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreaddata++;
 			}
-			
+
 	   	/* handle file header data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_HEADER) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_HEADER)
 			{
 /*fprintf(stderr,"MB_DATA_HEADER: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadheader++;
 			}
-			
+
 	   	/* handle bluefin ctd data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SSV) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_SSV)
 			{
 /*fprintf(stderr,"MB_DATA_SSV: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadssv++;
 			}
-			
+
 	   	/* handle bluefin nav data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_NAV2) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_NAV2)
 			{
 /*fprintf(stderr,"MB_DATA_NAV1: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadnav1++;
 			}
-			
+
 	   	/* handle subbottom data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_SUBBOTTOM_SUBBOTTOM)
 			{
 /*fprintf(stderr,"MB_DATA_SUBBOTTOM_SUBBOTTOM: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadsbp++;
 			}
-			
+
 	   	/* handle low frequency sidescan data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2)
 			{
 /*fprintf(stderr,"MB_DATA_SIDESCAN2: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadsslo++;
-			
+
 			/* output data if desired */
 			if (extract_type == MB7K2SS_SSLOW && nreadnav1 > 0 && oktowrite >= MB7K2SS_ONLINE_COUNT)
 				{
@@ -1259,12 +1322,12 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				/* set some values */
 				ostore->depth_scale = 0;
 				ostore->distance_scale = 0;
-				ostore->beam_xwidth = 90;
-				ostore->beam_lwidth = 90;
+				ostore->beam_xwidth = 0.9;
+				ostore->beam_lwidth = 0.9;
 				ostore->kind = MB_DATA_DATA;
 				ostore->ss_type = MB_SIDESCAN_LINEAR;	/* sets sidescan to be scaled linear */
 				opixels_ss = MB7K2SS_SSDIMENSION;
-				
+
 				/* reset the sonar altitude using the specified mode */
 				if (bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
 					{
@@ -1274,7 +1337,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					for (i=0;i<ssheaderport->samples;i++)
 						{
 						if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+							value = sqrt((double) (datashort[2*i] * datashort[2*i]
 								+ datashort[2*i+1] * datashort[2*i+1]));
 						else
 							value = (double)(datashort[i]);
@@ -1285,7 +1348,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					for (i=0;i<ssheaderport->samples && portchannelpick == 0;i++)
 						{
 						if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+							value = sqrt((double) (datashort[2*i] * datashort[2*i]
 								+ datashort[2*i+1] * datashort[2*i+1]));
 						else
 							value = (double)(datashort[i]);
@@ -1299,7 +1362,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					for (i=0;i<ssheaderstbd->samples;i++)
 						{
 						if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+							value = sqrt((double) (datashort[2*i] * datashort[2*i]
 								+ datashort[2*i+1] * datashort[2*i+1]));
 						else
 							value = (double)(datashort[i]);
@@ -1310,14 +1373,14 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					for (i=0;i<ssheaderstbd->samples && stbdchannelpick == 0;i++)
 						{
 						if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+							value = sqrt((double) (datashort[2*i] * datashort[2*i]
 								+ datashort[2*i+1] * datashort[2*i+1]));
 						else
 							value = (double)(datashort[i]);
 						if (value >= threshold)
 							stbdchannelpick = i;
 						}
-						
+
 					/* set sonar altitude */
 					ttime = 0.0000000005 * ((portchannelpick + stbdchannelpick) * ssheaderport->sampleInterval);
 					ss_altitude = 0.5 * ssv_use * ttime;
@@ -1334,24 +1397,25 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					{
 					ss_altitude = altitude;
 					}
-				
+
 				/* get flat bottom layout table */
 				if (sslayoutmode == MB7K2SS_SS_FLAT_BOTTOM)
-					mb7k2ss_get_flatbottom_table(verbose, nangle, angle_min, angle_max, 
-									navlon, navlat, ss_altitude, pitch,
-									table_xtrack, table_ltrack, table_altitude, 
+					mb7k2ss_get_flatbottom_table(verbose, nangle, angle_min, angle_max,
+									navlon, navlat, ss_altitude, 0.0,
+									table_xtrack, table_ltrack, table_altitude,
 									table_range, &error);
 				/* else get 3D bottom layout table */
 				else
-					mb7k2ss_get_3Dbottom_table(verbose, nangle, angle_min, angle_max, 
-									navlon, navlat, heading, 
+					mb7k2ss_get_3Dbottom_table(verbose, nangle, angle_min, angle_max,
+									navlon, navlat, heading,
 									ss_altitude, sonardepth, pitch, &grid,
-									table_xtrack, table_ltrack, 
+									table_xtrack, table_ltrack,
 									table_altitude, table_range, &error);
-					
+
 				/* get swath width and pixel size */
 				rr = 0.0000000005 * ssv_use *(ssheaderport->samples * ssheaderport->sampleInterval);
-				swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
+				if (swath_width_set == MB_NO)
+					swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
 				pixel_width = swath_width / (opixels_ss - 1);
 
 				/* initialize the output sidescan */
@@ -1362,29 +1426,30 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 					ossalongtrack[j] = 0.0;
 					ossbincount[j] = 0;
 					}
-									
+
 				/* find minimum range */
-				rr = table_range[0];
+				rangemin = table_range[0];
 				kstart = 0;
 				for (kangle=1;kangle<nangle;kangle++)
 					{
-					if (table_range[kangle] < rr)
+					if (table_range[kangle] < rangemin)
 						{
-						rr = table_range[kangle];
+						rangemin = table_range[kangle];
 						kstart = kangle;
 						}
 					}
-/*fprintf(stderr,"port minimum range:%f kstart:%d\n",rr,kstart);*/
+/*fprintf(stderr,"port minimum range:%f kstart:%d\n",rangemin,kstart);*/
 
 				/* bin port trace */
 				datashort = (unsigned short *) sschannelport->data;
 				istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
+				istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 				weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
 				for (i=istart;i<ssheaderport->samples;i++)
 					{
 					/* get sample value */
 					if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-						value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+						value = sqrt((double) (datashort[2*i] * datashort[2*i]
 							+ datashort[2*i+1] * datashort[2*i+1]));
 					else
 						value = (double)(datashort[i]);
@@ -1406,25 +1471,27 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 							}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle-1])
 							{
-							factor = (rr - table_range[kangle]) 
+							factor = (rr - table_range[kangle])
 								/ (table_range[kangle-1] - table_range[kangle]);
-							xtrack = table_xtrack[kangle] 
+							xtrack = table_xtrack[kangle]
 								+ factor * (table_xtrack[kangle-1] - table_xtrack[kangle]);
-							ltrack = table_ltrack[kangle] 
+							ltrack = table_ltrack[kangle]
 								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
 							}
 						else if (rr < table_range[kangle] && rr >= table_range[kangle-1])
 							{
-							factor = (rr - table_range[kangle]) 
+							factor = (rr - table_range[kangle])
 								/ (table_range[kangle-1] - table_range[kangle]);
-							xtrack = table_xtrack[kangle] 
+							xtrack = table_xtrack[kangle]
 								+ factor * (table_xtrack[kangle-1] - table_xtrack[kangle]);
-							ltrack = table_ltrack[kangle] 
+							ltrack = table_ltrack[kangle]
 								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
 							}
-							
+
 						/* bin the value and position */
 						if (found == MB_YES)
 							{
@@ -1435,20 +1502,20 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 								ossbincount[j]++;
 								ossalongtrack[j] += ltrack;
 								}
-/*fprintf(stderr,"port:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
-i,rr,xtrack,ltrack,kangle);*/
+/* fprintf(stderr,"port:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
+i,rr,xtrack,ltrack,kangle); */
 							}
 						}
 					}
-									
+
 				/* find minimum range */
-				rr = table_range[0];
+				rangemin = table_range[0];
 				kstart = 0;
 				for (kangle=1;kangle<nangle;kangle++)
 					{
-					if (table_range[kangle] < rr)
+					if (table_range[kangle] < rangemin)
 						{
-						rr = table_range[kangle];
+						rangemin = table_range[kangle];
 						kstart = kangle;
 						}
 					}
@@ -1461,12 +1528,13 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 				/* bin stbd trace */
 				datashort = (unsigned short *) sschannelstbd->data;
 				istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
+				istart = rangemin / (0.0000000005 * ssv_use * ssheaderstbd->sampleInterval);
 				weight = exp(MB_LN_2 * ((double)ssheaderstbd->weightingFactor));
 				for (i=istart;i<ssheaderstbd->samples;i++)
 					{
 					/* get sample value */
 					if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-						value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+						value = sqrt((double) (datashort[2*i] * datashort[2*i]
 							+ datashort[2*i+1] * datashort[2*i+1]));
 					else
 						value = (double)(datashort[i]);
@@ -1488,23 +1556,25 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 							}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle+1])
 							{
-							factor = (rr - table_range[kangle]) 
+							factor = (rr - table_range[kangle])
 								/ (table_range[kangle+1] - table_range[kangle]);
-							xtrack = table_xtrack[kangle] 
+							xtrack = table_xtrack[kangle]
 								+ factor * (table_xtrack[kangle+1] - table_xtrack[kangle]);
-							ltrack = table_ltrack[kangle] 
+							ltrack = table_ltrack[kangle]
 								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
 							}
 						else if (rr < table_range[kangle] && rr >= table_range[kangle+1])
 							{
-							factor = (rr - table_range[kangle]) 
+							factor = (rr - table_range[kangle])
 								/ (table_range[kangle+1] - table_range[kangle]);
-							xtrack = table_xtrack[kangle] 
+							xtrack = table_xtrack[kangle]
 								+ factor * (table_xtrack[kangle+1] - table_xtrack[kangle]);
-							ltrack = table_ltrack[kangle] 
+							ltrack = table_ltrack[kangle]
 								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
 							}
 
 						/* bin the value and position */
@@ -1517,8 +1587,8 @@ table_range[kstart],table_xtrack[kstart],table_ltrack[kstart]);*/
 								ossbincount[j]++;
 								ossalongtrack[j] += ltrack;
 								}
-/*fprintf(stderr,"stbd:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
-i,rr,xtrack,ltrack,kangle);*/
+/* fprintf(stderr,"stbd:%5d rr:%10.2f x:%10.2f l:%10.2f kangle:%d\n",
+i,rr,xtrack,ltrack,kangle); */
 							}
 						}
 					}
@@ -1567,16 +1637,16 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 }*/
 
 				/* insert data */
-				mb_insert_nav(verbose, ombio_ptr, (void *)ostore, 
-						time_i, time_d, 
-						navlon, navlat, speed, heading, draft, 
-						roll, pitch, heave, 
+				mb_insert_nav(verbose, ombio_ptr, (void *)ostore,
+						time_i, time_d,
+						navlon, navlat, speed, heading, draft,
+						roll, pitch, heave,
 						&error);
 				status = mb_insert_altitude(verbose, ombio_ptr, (void *)ostore,
 						sonardepth, ss_altitude, &error);
 				status = mb_insert(verbose, ombio_ptr, (void *)ostore,
-						MB_DATA_DATA, time_i, time_d, 
-						navlon, navlat, speed, heading, 
+						MB_DATA_DATA, time_i, time_d,
+						navlon, navlat, speed, heading,
 						beams_bath,beams_amp,opixels_ss,
 						beamflag,bath,amp,bathacrosstrack,
 						bathalongtrack,
@@ -1588,13 +1658,13 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 				mb_write_ping(verbose, ombio_ptr, (void *)ostore, &error);
 				}
 			}
-			
+
 	   	/* handle high frequency sidescan data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN3) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN3)
 			{
 /*fprintf(stderr,"MB_DATA_SIDESCAN3: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nreadsshi++;
-			
+
 			/* output data if desired */
 			if (extract_type == MB7K2SS_SSHIGH && nreadnav1 > 0 && oktowrite >= MB7K2SS_ONLINE_COUNT)
 				{
@@ -1617,12 +1687,12 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 				/* set some values */
 				ostore->depth_scale = 0;
 				ostore->distance_scale = 0;
-				ostore->beam_xwidth = 60;
-				ostore->beam_lwidth = 60;
+				ostore->beam_xwidth = 0.6;
+				ostore->beam_lwidth = 0.6;
 				ostore->kind = MB_DATA_DATA;
 				ostore->ss_type = MB_SIDESCAN_LINEAR;	/* sets sidescan to be scaled linear */
 				opixels_ss = MB7K2SS_SSDIMENSION;
-				
+
 				/* reset the sonar altitude using the specified mode */
 				if (bottompickmode == MB7K2SS_BOTTOMPICK_ARRIVAL)
 					{
@@ -1632,7 +1702,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					for (i=0;i<ssheaderport->samples;i++)
 						{
 						if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+							value = sqrt((double) (datashort[2*i] * datashort[2*i]
 								+ datashort[2*i+1] * datashort[2*i+1]));
 						else
 							value = (double)(datashort[i]);
@@ -1643,7 +1713,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					for (i=0;i<ssheaderport->samples && portchannelpick == 0;i++)
 						{
 						if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+							value = sqrt((double) (datashort[2*i] * datashort[2*i]
 								+ datashort[2*i+1] * datashort[2*i+1]));
 						else
 							value = (double)(datashort[i]);
@@ -1657,7 +1727,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					for (i=0;i<ssheaderstbd->samples;i++)
 						{
 						if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+							value = sqrt((double) (datashort[2*i] * datashort[2*i]
 								+ datashort[2*i+1] * datashort[2*i+1]));
 						else
 							value = (double)(datashort[i]);
@@ -1668,14 +1738,14 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					for (i=0;i<ssheaderstbd->samples && stbdchannelpick == 0;i++)
 						{
 						if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-							value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+							value = sqrt((double) (datashort[2*i] * datashort[2*i]
 								+ datashort[2*i+1] * datashort[2*i+1]));
 						else
 							value = (double)(datashort[i]);
 						if (value >= threshold)
 							stbdchannelpick = i;
 						}
-						
+
 					/* set sonar altitude */
 					ttime = 0.0000000005 * ((portchannelpick + stbdchannelpick) * ssheaderport->sampleInterval);
 					ss_altitude = 0.5 * ssv_use * ttime;
@@ -1692,24 +1762,25 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					{
 					ss_altitude = altitude;
 					}
-				
+
 				/* get flat bottom layout table */
 				if (sslayoutmode == MB7K2SS_SS_FLAT_BOTTOM)
-					mb7k2ss_get_flatbottom_table(verbose, nangle, angle_min, angle_max, 
-									navlon, navlat, ss_altitude, pitch,
-									table_xtrack, table_ltrack, table_altitude, 
+					mb7k2ss_get_flatbottom_table(verbose, nangle, angle_min, angle_max,
+									navlon, navlat, ss_altitude, 0.0,
+									table_xtrack, table_ltrack, table_altitude,
 									table_range, &error);
 				/* else get 3D bottom layout table */
 				else
-					mb7k2ss_get_3Dbottom_table(verbose, nangle, angle_min, angle_max, 
+					mb7k2ss_get_3Dbottom_table(verbose, nangle, angle_min, angle_max,
 									navlon, navlat, heading,
 									ss_altitude, sonardepth, pitch, &grid,
-									table_xtrack, table_ltrack, 
+									table_xtrack, table_ltrack,
 									table_altitude, table_range, &error);
-					
+
 				/* get swath width and pixel size */
 				rr = 0.0000000005 * ssv_use *(ssheaderport->samples * ssheaderport->sampleInterval);
-				swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
+				if (swath_width_set == MB_NO)
+					swath_width = 2.2 * sqrt(rr * rr - ss_altitude * ss_altitude);
 				pixel_width = swath_width / (opixels_ss - 1);
 
 				/* initialize the output sidescan */
@@ -1720,15 +1791,15 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					ossalongtrack[j] = 0.0;
 					ossbincount[j] = 0;
 					}
-									
+
 				/* find minimum range */
-				rr = table_range[0];
+				rangemin = table_range[0];
 				kstart = 0;
 				for (kangle=1;kangle<nangle;kangle++)
 					{
-					if (table_range[kangle] < rr)
+					if (table_range[kangle] < rangemin)
 						{
-						rr = table_range[kangle];
+						rangemin = table_range[kangle];
 						kstart = kangle;
 						}
 					}
@@ -1736,12 +1807,13 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 				/* bin port trace */
 				datashort = (unsigned short *) sschannelport->data;
 				istart = ss_altitude / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
+				istart = rangemin / (0.0000000005 * ssv_use * ssheaderport->sampleInterval);
 				weight = exp(MB_LN_2 * ((double)ssheaderport->weightingFactor));
 				for (i=istart;i<ssheaderport->samples;i++)
 					{
 					/* get sample value */
 					if (ssheaderport->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-						value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+						value = sqrt((double) (datashort[2*i] * datashort[2*i]
 							+ datashort[2*i+1] * datashort[2*i+1]));
 					else
 						value = (double)(datashort[i]);
@@ -1763,15 +1835,27 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 							}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle-1])
 							{
-							factor = (rr - table_range[kangle]) 
+							factor = (rr - table_range[kangle])
 								/ (table_range[kangle-1] - table_range[kangle]);
-							xtrack = table_xtrack[kangle] 
+							xtrack = table_xtrack[kangle]
 								+ factor * (table_xtrack[kangle-1] - table_xtrack[kangle]);
-							ltrack = table_ltrack[kangle] 
+							ltrack = table_ltrack[kangle]
 								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
 							}
-							
+						else if (rr < table_range[kangle] && rr >= table_range[kangle-1])
+							{
+							factor = (rr - table_range[kangle])
+								/ (table_range[kangle-1] - table_range[kangle]);
+							xtrack = table_xtrack[kangle]
+								+ factor * (table_xtrack[kangle-1] - table_xtrack[kangle]);
+							ltrack = table_ltrack[kangle]
+								+ factor * (table_ltrack[kangle-1] - table_ltrack[kangle]);
+							found = MB_YES;
+							done = MB_YES;
+							}
+
 						/* bin the value and position */
 						if (found == MB_YES)
 							{
@@ -1786,15 +1870,15 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 						}
 
 					}
-									
+
 				/* find minimum range */
-				rr = table_range[0];
+				rangemin = table_range[0];
 				kstart = 0;
 				for (kangle=1;kangle<nangle;kangle++)
 					{
-					if (table_range[kangle] < rr)
+					if (table_range[kangle] < rangemin)
 						{
-						rr = table_range[kangle];
+						rangemin = table_range[kangle];
 						kstart = kangle;
 						}
 					}
@@ -1807,7 +1891,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					{
 					/* get sample value */
 					if (ssheaderstbd->dataFormat == EDGETECH_TRACEFORMAT_ANALYTIC)
-						value = sqrt((double) (datashort[2*i] * datashort[2*i] 
+						value = sqrt((double) (datashort[2*i] * datashort[2*i]
 							+ datashort[2*i+1] * datashort[2*i+1]));
 					else
 						value = (double)(datashort[i]);
@@ -1829,13 +1913,25 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 							}
 						else if (rr > table_range[kangle] && rr <= table_range[kangle+1])
 							{
-							factor = (rr - table_range[kangle]) 
+							factor = (rr - table_range[kangle])
 								/ (table_range[kangle+1] - table_range[kangle]);
-							xtrack = table_xtrack[kangle] 
+							xtrack = table_xtrack[kangle]
 								+ factor * (table_xtrack[kangle+1] - table_xtrack[kangle]);
-							ltrack = table_ltrack[kangle] 
+							ltrack = table_ltrack[kangle]
 								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
 							found = MB_YES;
+							done = MB_YES;
+							}
+						else if (rr < table_range[kangle] && rr >= table_range[kangle+1])
+							{
+							factor = (rr - table_range[kangle])
+								/ (table_range[kangle+1] - table_range[kangle]);
+							xtrack = table_xtrack[kangle]
+								+ factor * (table_xtrack[kangle+1] - table_xtrack[kangle]);
+							ltrack = table_ltrack[kangle]
+								+ factor * (table_ltrack[kangle+1] - table_ltrack[kangle]);
+							found = MB_YES;
+							done = MB_YES;
 							}
 
 						/* bin the value and position */
@@ -1888,16 +1984,16 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 					}
 
 				/* insert data */
-				mb_insert_nav(verbose, ombio_ptr, (void *)ostore, 
-						time_i, time_d, 
-						navlon, navlat, speed, heading, draft, 
-						roll, pitch, heave, 
+				mb_insert_nav(verbose, ombio_ptr, (void *)ostore,
+						time_i, time_d,
+						navlon, navlat, speed, heading, draft,
+						roll, pitch, heave,
 						&error);
 				status = mb_insert_altitude(verbose, ombio_ptr, (void *)ostore,
 						sonardepth, ss_altitude, &error);
 				status = mb_insert(verbose, ombio_ptr, (void *)ostore,
-						MB_DATA_DATA, time_i, time_d, 
-						navlon, navlat, speed, heading, 
+						MB_DATA_DATA, time_i, time_d,
+						navlon, navlat, speed, heading,
 						beams_bath,beams_amp,opixels_ss,
 						beamflag,bath,amp,bathacrosstrack,
 						bathalongtrack,
@@ -1909,13 +2005,13 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 				mb_write_ping(verbose, ombio_ptr, (void *)ostore, &error);
 				}
 			}
-			
+
 	   	/* handle unknown data */
-		else  if (status == MB_SUCCESS) 
+		else  if (status == MB_SUCCESS)
 			{
 /*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
 			}
-			
+
 	   	/* handle read error */
 		else
 			{
@@ -1946,7 +2042,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 
 	/* close the swath file */
 	status = mb_close(verbose,&imbio_ptr,&error);
-	
+
 	/* output counts */
 	fprintf(stdout, "\nData records read from: %s\n", file);
 	fprintf(stdout, "     Survey:        %d\n", nreaddata);
@@ -1989,28 +2085,28 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 		{
 		/* close the swath file */
 		status = mb_close(verbose,&ombio_ptr,&error);
-		
+
 		/* generate inf file */
 		if (status == MB_SUCCESS)
 			{
-			status = mb_make_info(verbose, MB_YES, 
-						output_file, 
-						format_output, 
+			status = mb_make_info(verbose, MB_YES,
+						output_file,
+						format_output,
 						&error);
-				    
+
 			/* output commands to first cut plotting script file */
 			fprintf(sfp, "# Generate swath plot of sidescan file: %s\n", output_file);
-			fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n", 
+			fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n",
 				output_file, output_file);
 			fprintf(sfp, "%s_ssrawplot.cmd\n\n", output_file);
 			}
 		}
-	    
+
 	/* close plotting script file */
 	fclose(sfp);
 	sprintf(command, "chmod +x %s", scriptfile);
 	system(command);
-	
+
 	/* output counts */
 	fprintf(stdout, "\nTotal data records read:\n");
 	fprintf(stdout, "     Survey:        %d\n", nreaddatatot);
@@ -2023,16 +2119,16 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 	fprintf(stdout, "Total data records written:\n");
 	fprintf(stdout, "     Low Sidescan:  %d\n", nwritesslotot);
 	fprintf(stdout, "     High Sidescan: %d\n", nwritesshitot);
-		
+
 	/* deallocate route arrays */
 	if (route_file_set == MB_YES)
-		{	    
+		{
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelon, &error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routelat, &error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routeheading, &error);
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
 		}
-		
+
 	/* deallocate topography grid array */
 	if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM)
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&grid.data, &error);
@@ -2054,9 +2150,9 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max, 
+int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max,
 					double navlon, double navlat, double altitude, double pitch,
-					double *table_xtrack, double *table_ltrack, 
+					double *table_xtrack, double *table_ltrack,
 					double *table_altitude, double *table_range,
 					int *error)
 {
@@ -2066,7 +2162,7 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 	double	rr, xx, zz;
 	double	alpha, beta, theta, phi;
 	int	i;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -2081,7 +2177,7 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 		fprintf(stderr,"dbg2       navlat:          %f\n", navlat);
 		fprintf(stderr,"dbg2       pitch:           %f\n", pitch);
 		}
-		
+
 	/* loop over all of the angles */
 	dangle = (angle_max - angle_min) / (nangle - 1);
 	alpha = pitch;
@@ -2092,14 +2188,14 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 		angle = angle_min + dangle * i;
 		beta = 90.0 - angle;
 		mb_rollpitch_to_takeoff(
-			verbose, 
-			alpha, beta, 
-			&theta, &phi, 
+			verbose,
+			alpha, beta,
+			&theta, &phi,
 			error);
-			
+
 		/* calculate range required to achieve desired altitude */
 		rr = zz / cos(DTR * theta);
-		
+
 		/* get the position */
 		xx = rr * sin(DTR * theta);
 		table_xtrack[i] = xx * cos(DTR * phi);
@@ -2116,7 +2212,7 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       Lookup tables:\n");
 		for (i=0;i<nangle;i++)
-			fprintf(stderr,"dbg2         %d %f %f %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f %f %f\n",
 				i, table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2127,11 +2223,11 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double angle_max, 
-					double navlon, double navlat, double heading, 
+int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double angle_max,
+					double navlon, double navlat, double heading,
 					double altitude, double sonardepth, double pitch,
 					struct mb7k2ss_grid_struct *grid,
-					double *table_xtrack, double *table_ltrack, 
+					double *table_xtrack, double *table_ltrack,
 					double *table_altitude, double *table_range,
 					int *error)
 {
@@ -2143,7 +2239,7 @@ int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double
 	double	alpha, beta, theta, phi;
 	double	vx, vy, vz;
 	int	i;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -2178,7 +2274,7 @@ int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double
 		fprintf(stderr,"dbg2       grid->dy               %f\n", grid->dy);
 		fprintf(stderr,"dbg2       grid->data:            %lu\n", (size_t)grid->data);
 		}
-		
+
 	/* loop over all of the angles */
 	mb_coor_scale(verbose,navlat, &mtodeglon, &mtodeglat);
 	dangle = (angle_max - angle_min) / (nangle - 1);
@@ -2189,25 +2285,25 @@ int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double
 		angle = angle_min + dangle * i;
 		beta = 90.0 - angle;
 		mb_rollpitch_to_takeoff(
-			verbose, 
-			alpha, beta, 
-			&theta, &phi, 
+			verbose,
+			alpha, beta,
+			&theta, &phi,
 			error);
-			
+
 		/* calculate unit vector relative to the vehicle */
 		vz = cos(DTR * theta);
 		vx = sin(DTR * theta) * cos(DTR * phi);
 		vy = sin(DTR * theta) * sin(DTR * phi);
-			
+
 		/* rotate unit vector by vehicle heading */
 		vx = vx * cos(DTR * heading) + vy * sin(DTR * heading);
 		vy = -vx * sin(DTR * heading) + vy * cos(DTR * heading);
-		
+
 		/* find the range where this vector intersects the grid */
 		status = mb7k2ss_intersect_grid(verbose, navlon, navlat, altitude, sonardepth,
 					mtodeglon, mtodeglat, vx, vy, vz,
 					grid, &rr, error);
-			
+
 		/* get the position */
 		zz = rr * cos(DTR * theta);
 		xx = rr * sin(DTR * theta);
@@ -2225,7 +2321,7 @@ int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       Lookup tables:\n");
 		for (i=0;i<nangle;i++)
-			fprintf(stderr,"dbg2         %d %f %f %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f %f %f\n",
 				i, table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2253,7 +2349,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 	double	topotest, topo, dtopo;
 	int	nfound;
 	int	i, j, ii, jj, k;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -2288,7 +2384,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 		fprintf(stderr,"dbg2       grid->dy               %f\n", grid->dy);
 		fprintf(stderr,"dbg2       grid->data:            %lu\n", (size_t)grid->data);
 		}
-	
+
 	/* test different ranges along the vector until the grid is intersected */
 	done = MB_NO;
 	iteration = 0;
@@ -2303,12 +2399,12 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 		{
 		/* update the range to be tested */
 		r += dr;
-		
+
 		/* get position of range estimate projected along the vector */
 		lontest = navlon + mtodeglon * vx * r;
 		lattest = navlat + mtodeglat * vy * r;
 		topotest = -sonardepth - vz * r;
-		
+
 		/* get topography value at that point */
 		nfound = 0;
 		topo = 0.0;
@@ -2338,7 +2434,7 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 			{
 			topo /= (double)nfound;
 			}
-		
+
 		/* compare topographies at projected position */
 		if (nfound > 0)
 			{
@@ -2354,10 +2450,10 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 					rmax = MIN(rmax, r);
 				else if (dtopo > 0.0)
 					rmin = MIN(rmin, r);
-				
+
 				/* estimate distance to crossing point */
 				dr = dtopo / vz;
-				
+
 				/* make sure we don't overshoot the bounds */
 				if (r + dr >= rmax)
 					dr = 0.5 * (rmax - r);
@@ -2369,16 +2465,16 @@ int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double alt
 		else
 			{
 			}
-		
+
 		/* keep count of iterations */
 		iteration++;
 /*fprintf(stderr,"iter:%d done:%d r:%f dr:%f topo:%f topotest:%f dtopo:%f vz:%f\n",
 iteration,done,r,dr,topo,topotest,dtopo,vz);*/
 		}
-		
+
 	/* if success return the result */
 	*range = r;
-	
+
 
 	/* print output debug statements */
 	if (verbose >= 2)

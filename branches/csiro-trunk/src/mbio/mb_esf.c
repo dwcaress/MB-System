@@ -2,7 +2,7 @@
  *    The MB-system:	mb_esf.c	4/10/2003
  *    $Id$
  *
- *    Copyright (c) 2003-2009 by
+ *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -80,9 +80,7 @@
 #include "../../include/mb_process.h"
 #include "../../include/mb_swap.h"
 
-/* prototypes */
-int mb_mergesort(void *base, size_t nmemb,register size_t size, 
-	int (*cmp) (void *, void *));
+/* local prototypes */
 void mb_mergesort_setup(u_char *list1, u_char *list2, size_t n, size_t size, 
 	int (*cmp) (void *, void *));
 void mb_mergesort_insertionsort(u_char *a, size_t n, size_t size, 

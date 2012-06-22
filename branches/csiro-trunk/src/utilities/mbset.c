@@ -2,7 +2,7 @@
  *    The MB-system:	mbset.c	1/4/2000
  *    $Id$
  *
- *    Copyright (c) 2000-2009 by
+ *    Copyright (c) 2000-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -344,6 +344,17 @@ the manual pages for mbprocess and mbset. \n\n";
 			&process, &error);
 	process.mbp_ifile_specified = MB_YES;
 	
+	if (process.mbp_format_specified == MB_NO)
+		{
+		process.mbp_format = mbp_format;
+		process.mbp_format_specified = MB_YES;
+		}
+	if (process.mbp_ofile_specified == MB_NO)
+		{
+		process.mbp_ofile_specified == MB_YES;
+		mb_pr_default_output(verbose, &process, &error);
+		}
+	
 	/* process parameter list */
 	for (i=0;i<pargc;i++)
 		{
@@ -586,7 +597,7 @@ the manual pages for mbprocess and mbset. \n\n";
 				process.mbp_cut_num++;
 				}
 			}
-		    else if (strncmp(pargv[i], "SSCUTNUMBER", 12) == 0)
+		    else if (strncmp(pargv[i], "SSCUTNUMBER", 11) == 0)
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
@@ -598,7 +609,7 @@ the manual pages for mbprocess and mbset. \n\n";
 				process.mbp_cut_num++;
 				}
 			}
-		    else if (strncmp(pargv[i], "SSCUTDISTANCE", 14) == 0)
+		    else if (strncmp(pargv[i], "SSCUTDISTANCE", 13) == 0)
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{

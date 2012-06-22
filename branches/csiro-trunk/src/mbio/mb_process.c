@@ -2,7 +2,7 @@
  *    The MB-system:	mb_process.c	9/11/00
  *    $Id$
  *
- *    Copyright (c) 2000-2009 by
+ *    Copyright (c) 2000-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -574,11 +574,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		{
 		if (buffer[0] != '#')
 		    {
-			if (strlen(buffer) > 0)
-				{
-				if (buffer[strlen(buffer)-1] == '\n')
-					buffer[strlen(buffer)-1] = '\0';
-				}
+		    if (strlen(buffer) > 0)
+			    {
+			    if (buffer[strlen(buffer)-1] == '\n')
+				    buffer[strlen(buffer)-1] = '\0';
+			    }
 
 		    /* general parameters */
 		    if (strncmp(buffer, "EXPLICIT", 8) == 0)
@@ -2504,8 +2504,13 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 	else if (process->mbp_ofile_specified == MB_NO
 		&& process->mbp_format_specified == MB_YES)
 	    {
+	    status = MB_SUCCESS;
+	    *error = MB_ERROR_NO_ERROR;
+	    strcpy(fileroot, process->mbp_ifile);
+	    if (strncmp(&process->mbp_ifile[strlen(process->mbp_ifile)-4], ".txt", 4) == 0)
+	    	fileroot[strlen(process->mbp_ifile)-4] = '\0';
 	    sprintf(process->mbp_ofile, "%sp.mb%d", 
-			process->mbp_ifile, process->mbp_format);
+			fileroot, process->mbp_format);
 	    process->mbp_ofile_specified = MB_YES;
 	    }
 
@@ -6363,6 +6368,15 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       file:       %s\n",file);
 		}
+	
+	/* initialize return parameters */
+	*locked = MB_NO;
+	*purpose = 0;
+	program[0] = '\0';
+	user[0] = '\0';
+	cpu[0] = '\0';
+	date[0] = '\0';
+	
 
 	/* check if lock file exists */
 	sprintf(lockfile, "%s.lck", file);
@@ -6372,11 +6386,6 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked,
 		*locked = MB_YES;
 	    	if ((fp = fopen(lockfile, "r")) != NULL)
 			{
-			program[0] = '\0';
-			user[0] = '\0';
-			cpu[0] = '\0';
-			date[0] = '\0';
-			*purpose = 0;
 			while(fgets(line, MBP_FILENAMESIZE, fp) != NULL)
 				{
 				line[strlen(line)-1] = '\0';
@@ -6413,7 +6422,6 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked,
 		}
 	else
 		{
-		*locked = MB_NO;
 		*error = MB_ERROR_NO_ERROR;
 		status = MB_SUCCESS;
 		}

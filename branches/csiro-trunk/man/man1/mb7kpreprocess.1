@@ -1,4 +1,4 @@
-.TH mb7kpreprocess 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mb7kpreprocess 1 "29 December 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7kpreprocess\fP - performs preprocessing of Reson 7k multibeam data 
 in the 7k format (\fBMBIO\fP format 88).
@@ -7,8 +7,9 @@ in the 7k format (\fBMBIO\fP format 88).
 Version 5.0
 
 .SH SYNOPSIS
-\fBmb7kpreprocess\fP [\fB-A\fP \fB-B\fP \fB-D\fP\fIoffx/offy\fP \fB-F\fP\fIformat\fP 
-\fB-I\fIfile \fB-L\fP \fB-M\fP\fIrockfile\fP \fB-N\fP\fIinsfile\fP \fB-O\fP\fIoutfile\fP 
+\fBmb7kpreprocess\fP [\fB-A\fP \fB-B\fP \fB-D\fP\fIoffx/offy[/offdepth]\fP \fB-F\fP\fIformat\fP 
+\fB-I\fIfile \fB-K\fP\fIklugemode\fP \fB-L\fP \fB-M\fP\fIrockfile\fP \fB-N\fP\fIinsfile\fP \fB-O\fP\fIoutfile\fP  
+\fB-P\fP\fIsonardepthfile\fP \fB-PF\fP\fIfilterlength/filterdepth\fP 
 \fB-T\fP\fItimelag\fP \fB-W\fP\fIdslfile\fP \fB-H -V\fP]
 
 .SH DESCRIPTION
@@ -40,12 +41,13 @@ available navigation and attitude data. Normally, these records are ignored.
 This option corrects the bathymetry timetags so they agree with the subbottom profiler timetags. 
 .TP
 .B \-D
-\fIoffx/offz\fP
+\fIoffx/offz[/offdepth]\fP
 .br
 This option sets horizontal and vertical.distance offsets between the vehicle's 
 depth sensor and the multibeam receive head. If specified, these values are used
 in a lever-arm calculation to determine the sonar depth change  associated with
-vehicle pitch.
+vehicle pitch. The \fIoffdepth\fP value, if specified, is a static depth offset to be
+applied to the vehicle depth data.
 .TP
 .B \-F
 \fIformat\fP
@@ -77,6 +79,16 @@ data file should be followed by a data format identifier, e.g.:
 This program only reads Reson 7k format data files (\fBMBIO\fP
 format 88).
 .TP
+.B \-K
+\fIklugemode\fP
+.br
+This option causes the program to implement one of the available 
+processing "kluge" fixes. This are unusual steps required to fix
+data with particular, unusual problems. Kluge 1 forces \fBmb7kpreprocess\fP
+to replace the sonar depth value with values from vertical
+depth data records. Kuge 2 forces \fBmb7kpreprocess\fP to zero the initial
+beam alongtrack distance values.
+.TP
 .B \-L
 .br
 This option causes the program to list the timetags of bathymetry,
@@ -106,12 +118,42 @@ heading, roll, and pitch are in decimal degrees, and sonardepth is in meters.
 .br
 The program will read navigation and attitude from the MBARI AUV navigation
 log file \fIinsfile\fP and merge those data with the multibeam, sidescan,
-and subbtottom data in the 7k file.If a timelag model is specified using
+and subbtottom data in the 7k file. If a timelag model is specified using
 \fB-T\fP\fItimelag\fP, the time lag will be applied to the navigation and
 attitude data before merging with the sonar data. The navigation and attitude
 data from \fIinsfile\fP will also be embedded in asynchronous data records
 in the output 7k format data. Any pre-existing navigation data records will
 be replaced. MBARI AUV navigation files are binary and specific to MBARI.
+.TP
+.B \-P
+\fIsonardepthfile\fP 
+.br
+The program will read sonar depth data from \fIsonardepthfile\fP and merge 
+those data with the multibeam, sidescan, and subbtottom data in the 7k file.
+The \fIsonardepthfile\fP is a text data file containing two space delimited columns:
+ 	time_d sonardepth
+.br
+where:
+ 	time_d - decimal epoch seconds (since start of 1970)
+ 	sonardepth - sonar depth in meters, positive down
+.TP
+.B \-PF
+\fIsonardepthfile\fP \fB-PF\fP\fIfilterlength/filterdepth\fP 
+This option specifies Gaussian tapered time domain filtering of the 
+sonar depth data to be merged with the survey data, regardless of source. 
+The \fIfilterlength\fP value specifies
+the filter window length in seconds, and the \fIfilterdepth\fP value controls
+the depths to which filtering is applied. The filtered sonar depth is used
+to depths up to twice the \fIfilterdepth\fP value. Below that threshold, the
+value used transitions to unfiltered with an exponential taper. This filtering
+is used in two ways. First, one can apply short period smoothing of noisy 
+sonar depth at all by specifying a small \fIfilterlength\fP (e.g. 2 seconds)
+and a \fIfilterdepth\fP value deeper than the vehicle's track. Second, when
+an AUV or ROV is operated at shallow depths, the pressure
+values used to determine depth are affected by waves at the sea surface. In this
+case, a longer period \fIfilterlength\fP (e.g. 10 seconds) and a shallower 
+\fIfilterdepth\fP (e.g. 50 meters) may be used to lessen the artifacts due to
+surface swell.
 .TP
 .B \-T
 \fItimelag\fP

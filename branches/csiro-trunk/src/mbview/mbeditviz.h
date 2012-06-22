@@ -2,7 +2,7 @@
  *    The MB-system:	mbeditviz.h		4/27/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2009 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -129,7 +129,9 @@ struct	mbev_ping_struct
 struct mbev_file_struct
 	{
 	int	load_status;
-	int	proc_status;
+	int	load_status_shown;
+	int	locked;
+	int	esf_exists;
 	char 	name[MB_PATH_MAXLINE];
 	char 	path[MB_PATH_MAXLINE];
 	int	format;
@@ -235,6 +237,9 @@ EXTERNAL double	mbev_timelag_3dsdg;
 /* selected sounding parameters */
 EXTERNAL struct mb3dsoundings_struct mbev_selected;
 
+/* timer function */
+EXTERNAL int	timer_function_set;
+
 int do_mbeditviz_init(Widget parentwidget, XtAppContext appcon);
 void do_mbeditviz_mode_change( Widget w, XtPointer client_data, XtPointer call_data);
 void do_mbeditviz_openfile( Widget w, XtPointer client_data, XtPointer call_data);
@@ -253,6 +258,7 @@ void do_mbeditviz_deleteselected( Widget w, XtPointer client_data, XtPointer cal
 void do_mbeditviz_changeoutputmode( Widget w, XtPointer client_data, XtPointer call_data);
 int do_mbeditviz_opendata(char *input_file_ptr, int format);
 void do_mbeditviz_update_gui( );
+void do_mbeditviz_update_filelist( );
 void do_mbeditviz_pickonepoint_notify(size_t instance);
 void do_mbeditviz_picktwopoint_notify(size_t instance);
 void do_mbeditviz_pickarea_notify(size_t instance);
@@ -263,10 +269,13 @@ void do_mbeditviz_picknav_notify(size_t instance);
 void do_mbeditviz_regrid_notify( Widget w, XtPointer client_data, XtPointer call_data);
 int do_mbeditviz_message_on(char *message);
 int do_mbeditviz_message_off();
+int do_error_dialog(char *s1, char *s2, char *s3);
 void set_label_string(Widget w, String str);
 void set_label_multiline_string(Widget w, String str);
 void get_text_string(Widget w, String str);
 int do_wait_until_viewed();
+int do_mbeditviz_settimer();
+int do_mbeditviz_workfunction(XtPointer client_data);
 
 int mbeditviz_init(int argc,char **argv);
 int mbeditviz_get_format(char *file, int *form);

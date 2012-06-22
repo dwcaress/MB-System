@@ -2,7 +2,7 @@
  *    The MB-system:	mbview_callbacks.c	10/7/2002
  *    $Id$
  *
- *    Copyright (c) 2002-2009 by
+ *    Copyright (c) 2002-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -571,6 +571,13 @@ int mbview_reset_shared(int mode)
 		    	    = shared.shareddata.navpick.xpoints[2*j+i];
 		}
 	    }
+
+	/* vector data */
+	shared.shareddata.vector_mode = MBV_VECTOR_OFF;
+	shared.shareddata.nvector = 0;
+	shared.shareddata.vector_selected = MBV_SELECT_NONE;
+	shared.shareddata.vector_point_selected = MBV_SELECT_NONE;
+	shared.shareddata.vectors = NULL;
 		
 	/* print output debug statements */
 	if (mbv_verbose >= 2)
@@ -868,6 +875,9 @@ int mbview_reset(size_t instance)
 		/* nav data */
 		data->nav_view_mode = MBV_VIEW_OFF;
 		data->navdrape_view_mode = MBV_VIEW_OFF;
+
+		/* vector data */
+		data->vector_view_mode = MBV_VIEW_OFF;
 
 		/* profile data */
 		data->profile_view_mode = MBV_VIEW_OFF;
@@ -1266,6 +1276,35 @@ int mbview_getdataptr(int verbose, size_t instance, struct mbview_struct **datah
 				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[0]);
 				}
 			}
+																	  		  
+		/* vector data */
+		fprintf(stderr,"dbg2       vector_view_mode:          %d\n",data->vector_view_mode);
+		fprintf(stderr,"dbg2       vector_mode:               %d\n",shared.shareddata.vector_mode);
+		fprintf(stderr,"dbg2       nvector:                   %d\n",shared.shareddata.nvector);
+		fprintf(stderr,"dbg2       nvector_alloc:             %d\n",shared.shareddata.nvector_alloc);
+		fprintf(stderr,"dbg2       vector_selected:           %lu\n",(size_t)shared.shareddata.vector_selected);
+		fprintf(stderr,"dbg2       vector_point_selected:     %lu\n",(size_t)shared.shareddata.vector_point_selected);
+		for (i=0;i<shared.shareddata.nvector;i++)
+			{
+			fprintf(stderr,"dbg2       vector %d color:         %d\n",i,shared.shareddata.vectors[i].color);
+			fprintf(stderr,"dbg2       vector %d size:          %d\n",i,shared.shareddata.vectors[i].size);
+			fprintf(stderr,"dbg2       vector %d name:          %s\n",i,shared.shareddata.vectors[i].name);
+			fprintf(stderr,"dbg2       vector %d format:        %d\n",i,shared.shareddata.vectors[i].format);
+			fprintf(stderr,"dbg2       vector %d npoints:       %d\n",i,shared.shareddata.vectors[i].npoints);
+			fprintf(stderr,"dbg2       vector %d npoints_alloc: %d\n",i,shared.shareddata.vectors[i].npoints_alloc);
+			fprintf(stderr,"dbg2       vector %d nselected:     %d\n",i,shared.shareddata.vectors[i].nselected);
+			for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				{
+				fprintf(stderr,"dbg2       vector %d %d xgrid:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xgrid[0]);
+				fprintf(stderr,"dbg2       vector %d %d ygrid:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ygrid[0]);
+				fprintf(stderr,"dbg2       vector %d %d xlon:     %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xlon);
+				fprintf(stderr,"dbg2       vector %d %d ylat:     %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ylat);
+				fprintf(stderr,"dbg2       vector %d %d zdata:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.zdata);
+				fprintf(stderr,"dbg2       vector %d %d xdisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xdisplay[0]);
+				fprintf(stderr,"dbg2       vector %d %d ydisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ydisplay[0]);
+				fprintf(stderr,"dbg2       vector %d %d zdisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.zdisplay[0]);
+				}
+			}
 		
 		/* profile data */
 		fprintf(stderr,"dbg2       profile_view_mode:         %d\n",data->profile_view_mode);
@@ -1432,6 +1471,34 @@ int mbview_getsharedptr(int verbose, struct mbview_shareddata_struct **sharedhan
 				fprintf(stderr,"dbg2       nav %d %d stbd zdisplay: %f\n",i,j,shared.shareddata.navs[i].navpts[j].pointstbd.zdisplay[0]);
 				}
 			}
+																	  		  
+		/* vector data */
+		fprintf(stderr,"dbg2       vector_mode:               %d\n",shared.shareddata.vector_mode);
+		fprintf(stderr,"dbg2       nvector:                   %d\n",shared.shareddata.nvector);
+		fprintf(stderr,"dbg2       nvector_alloc:             %d\n",shared.shareddata.nvector_alloc);
+		fprintf(stderr,"dbg2       vector_selected:           %lu\n",(size_t)shared.shareddata.vector_selected);
+		fprintf(stderr,"dbg2       vector_point_selected:     %lu\n",(size_t)shared.shareddata.vector_point_selected);
+		for (i=0;i<shared.shareddata.nvector;i++)
+			{
+			fprintf(stderr,"dbg2       vector %d color:         %d\n",i,shared.shareddata.vectors[i].color);
+			fprintf(stderr,"dbg2       vector %d size:          %d\n",i,shared.shareddata.vectors[i].size);
+			fprintf(stderr,"dbg2       vector %d name:          %s\n",i,shared.shareddata.vectors[i].name);
+			fprintf(stderr,"dbg2       vector %d format:        %d\n",i,shared.shareddata.vectors[i].format);
+			fprintf(stderr,"dbg2       vector %d npoints:       %d\n",i,shared.shareddata.vectors[i].npoints);
+			fprintf(stderr,"dbg2       vector %d npoints_alloc: %d\n",i,shared.shareddata.vectors[i].npoints_alloc);
+			fprintf(stderr,"dbg2       vector %d nselected:     %d\n",i,shared.shareddata.vectors[i].nselected);
+			for (j=0;j<shared.shareddata.navs[i].npoints;j++)
+				{
+				fprintf(stderr,"dbg2       vector %d %d xgrid:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xgrid[0]);
+				fprintf(stderr,"dbg2       vector %d %d ygrid:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ygrid[0]);
+				fprintf(stderr,"dbg2       vector %d %d xlon:     %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xlon);
+				fprintf(stderr,"dbg2       vector %d %d ylat:     %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ylat);
+				fprintf(stderr,"dbg2       vector %d %d zdata:    %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.zdata);
+				fprintf(stderr,"dbg2       vector %d %d xdisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.xdisplay[0]);
+				fprintf(stderr,"dbg2       vector %d %d ydisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.ydisplay[0]);
+				fprintf(stderr,"dbg2       vector %d %d zdisplay: %f\n",i,j,shared.shareddata.vectors[i].vectorpts[j].point.zdisplay[0]);
+				}
+			}
 
 		fprintf(stderr,"dbg2       error:                     %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1532,6 +1599,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
 			int	route_view_mode,
 			int	nav_view_mode,
 			int	navdrape_view_mode,
+			int	vector_view_mode,
 			double	exageration,
 			double	modelelevation3d,
 			double	modelazimuth3d,
@@ -1580,6 +1648,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
 		fprintf(stderr,"dbg2       route_view_mode:           %d\n", route_view_mode);
 		fprintf(stderr,"dbg2       nav_view_mode:             %d\n", nav_view_mode);
 		fprintf(stderr,"dbg2       navdrape_view_mode:        %d\n", navdrape_view_mode);
+		fprintf(stderr,"dbg2       vector_view_mode:          %d\n", vector_view_mode);
 		fprintf(stderr,"dbg2       exageration:               %f\n", exageration);
 		fprintf(stderr,"dbg2       modelelevation3d:          %f\n", modelelevation3d);
 		fprintf(stderr,"dbg2       modelazimuth3d:            %f\n", modelazimuth3d);
@@ -1616,6 +1685,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
         data->route_view_mode = route_view_mode;
         data->nav_view_mode = nav_view_mode;
         data->navdrape_view_mode = navdrape_view_mode;
+        data->vector_view_mode = vector_view_mode;
         data->exageration = exageration;
         data->modelelevation3d = modelelevation3d;
         data->modelazimuth3d = modelazimuth3d;
@@ -1844,6 +1914,7 @@ int mbview_open(int verbose, size_t instance, int *error)
 		/* nav data */
 		fprintf(stderr,"dbg2       nav_view_mode:         %d\n",data->nav_view_mode);
 		fprintf(stderr,"dbg2       navdrape_view_mode:    %d\n",data->navdrape_view_mode);
+		fprintf(stderr,"dbg2       vector_view_mode:      %d\n",data->vector_view_mode);
 		fprintf(stderr,"dbg2       nav_mode:              %d\n",shared.shareddata.nav_mode);
 		fprintf(stderr,"dbg2       nnav:                  %d\n",shared.shareddata.nnav);
 		fprintf(stderr,"dbg2       nnav_alloc:            %d\n",shared.shareddata.nnav_alloc);
@@ -2610,6 +2681,17 @@ int mbview_update_sensitivity(int verbose, size_t instance, int *error)
 	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnav, "Pick Nav");
 	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_navfile, "Pick Nav File");
 	set_mbview_label_string(view->mb3dview.mbview_toggleButton_mode_rnavfile, "Pick Nav File");
+
+	ac = 0;
+	if (shared.shareddata.vector_mode == MBV_VECTOR_OFF)
+		{
+		XtSetArg(args[ac], XmNsensitive, False); ac++;
+		}
+	else
+		{
+		XtSetArg(args[ac], XmNsensitive, True); ac++;
+		}
+	XtSetValues(view->mb3dview.mbview_toggleButton_vector, args, ac);
 	
 	/* now set action buttons according to current pick states */
 	mbview_action_sensitivity(instance);
@@ -2864,6 +2946,7 @@ int mbview_set_widgets(int verbose, size_t instance, int *error)
 	set_mbview_route_view_mode(instance, data->route_view_mode);
 	set_mbview_nav_view_mode(instance, data->nav_view_mode);
 	set_mbview_navdrape_view_mode(instance, data->navdrape_view_mode);
+	set_mbview_vector_view_mode(instance, data->vector_view_mode);
 	if (data->grid_mode == MBV_GRID_VIEW_PRIMARY)
 		{
 		set_mbview_colortable(instance, data->primary_colortable);
@@ -3659,8 +3742,8 @@ acs->width, acs->height, instance, event->xany.type);
     acs = (mbGLwDrawingAreaCallbackStruct*)call_data;
     event = acs->event;
     
-    /* If there is input in the drawing area */
-    if (acs->reason == XmCR_INPUT)
+    /* If there is input in the drawing area and the drawing area is still initialized */
+    if (acs->reason == XmCR_INPUT && view->init != MBV_WINDOW_NULL)
     {
       
       /* Check for mouse pressed. */
@@ -5079,24 +5162,64 @@ int mbview_destroy(int verbose, size_t instance, int destroywidgets, int *error)
 		if (view->prglx_init == MB_YES)
 		    {
 		    /* make correct window current for OpenGL */
-		    glXMakeCurrent(XtDisplay(view->prglwmda),XtWindow(view->prglwmda),view->prglx_context);
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)XtWindow(view->prglwmda),(size_t)view->prglx_context);
+#endif
+		    glXMakeCurrent(view->dpy,XtWindow(view->prglwmda),view->prglx_context);
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXDestroyContext(%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)view->prglx_context);
+#endif
 		    glXDestroyContext(view->dpy, view->prglx_context);
 		    view->prglx_init = MB_NO;
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 		    }
 
 		/* delete old glx_context if it exists */
 		if (view->glx_init == MB_YES)
 		    {
 		    /* make correct window current for OpenGL */
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXMakeCurrent(%lu,%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)XtDisplay(view->glwmda),(size_t)XtWindow(view->glwmda),(size_t)view->glx_context);
+#endif
 		    glXMakeCurrent(XtDisplay(view->glwmda),XtWindow(view->glwmda),view->glx_context);
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld glXDestroyContext(%lu,%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->dpy,(size_t)view->glx_context);
+#endif
 		    glXDestroyContext(view->dpy, view->glx_context);
 		    view->glx_init = MB_NO;
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 		    }
 
 		/* destroy the topLevelShell and all its children */
+#ifdef MBV_DEBUG_GLX
+fprintf(stderr,"%s:%d:%s instance:%ld XtDestroyWidget(%lu)\n",
+__FILE__,__LINE__,function_name,instance,(size_t)view->topLevelShell);
+#endif
 		XtDestroyWidget(view->topLevelShell);
+	
+#ifdef MBV_GET_GLX_ERRORS
+mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
+#endif
 		}
 
 	    data->active = MB_NO;
@@ -6047,6 +6170,52 @@ instance, data->navdrape_view_mode);
     /* draw */
 if (mbv_verbose >= 2)
 fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_navdrape\n");
+    mbview_plotlowhigh(instance);
+}
+/*------------------------------------------------------------------------------*/
+
+void
+do_mbview_vector( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+    size_t	instance;
+    Boolean	value;
+    struct mbview_world_struct *view;
+    struct mbview_struct *data;
+
+    /* get instance */
+    ac = 0;
+    XtSetArg(args[ac], XmNuserData, (XtPointer) &instance); ac++;
+    XtGetValues(w, args, ac);
+	    
+    /* get view */
+    view = &(mbviews[instance]);
+    data = &(view->data);
+
+    /* get mode value */
+    value = XmToggleButtonGetState(w);
+    if (value == True)
+	data->vector_view_mode = MBV_VIEW_ON;
+    else
+   	{
+	data->vector_view_mode = MBV_VIEW_OFF;
+ 	if (data->nav_view_mode == MBV_VIEW_OFF
+		&& (data->mouse_mode == MBV_MOUSE_NAV 
+			|| data->mouse_mode == MBV_MOUSE_NAVFILE))
+		{
+		data->mouse_mode = MBV_MOUSE_MOVE;
+		set_mbview_mouse_mode(instance, data->mouse_mode);
+		}
+	}
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_vector instance:%ld mode:%d\n", 
+instance, data->vector_view_mode);
+    
+    /* draw */
+if (mbv_verbose >= 2)
+fprintf(stderr,"Calling mbview_plotlowhigh from do_mbview_vector\n");
     mbview_plotlowhigh(instance);
 }
 
@@ -7027,6 +7196,32 @@ fprintf(stderr,"do_mbview_nav_view_mode: instance:%ld mode:%d\n", instance, mode
 	else
 		value = False;
 	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_navdrape, 
+				    value, False);
+
+}
+
+/*------------------------------------------------------------------------------*/
+void
+set_mbview_vector_view_mode(size_t instance, int mode)
+{
+    Boolean	value;
+    struct mbview_world_struct *view;
+    struct mbview_struct *data;
+    MB3DViewData	*mb3dviewptr;
+
+if (mbv_verbose >= 2)
+fprintf(stderr,"do_mbview_vector_view_mode: instance:%ld mode:%d\n", instance, mode);
+	    
+    /* get view */
+    view = &(mbviews[instance]);
+    data = &(view->data);
+
+    mb3dviewptr = &(view->mb3dview);
+	if (mode == MBV_VIEW_ON)
+		value = True;
+	else
+		value = False;
+	XmToggleButtonSetState(mb3dviewptr->mbview_toggleButton_vector, 
 				    value, False);
 
 }
@@ -8359,7 +8554,7 @@ fprintf(stderr,"do_mbview_routelistselect:\n");
 			/* increment waypoint type */
 			shared.shareddata.routes[iroute].waypoint[iwaypoint]++;
 			if (shared.shareddata.routes[iroute].waypoint[iwaypoint] < MBV_ROUTE_WAYPOINT_SIMPLE
-				|| shared.shareddata.routes[iroute].waypoint[iwaypoint] > MBV_ROUTE_WAYPOINT_ENDLINE)
+				|| shared.shareddata.routes[iroute].waypoint[iwaypoint] > MBV_ROUTE_WAYPOINT_ENDLINE4)
 				shared.shareddata.routes[iroute].waypoint[iwaypoint] = MBV_ROUTE_WAYPOINT_SIMPLE;
 
 			/* update route list */
@@ -9717,3 +9912,4 @@ view->colordonecount,data->primary_nxy);*/
 }
 
 /*------------------------------------------------------------------------------*/
+

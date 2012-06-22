@@ -2,7 +2,7 @@
  *    The MB-system:	mb_track.c	8/15/93
  *    $Id$
  *
- *    Copyright (c) 1993-2009 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -90,10 +90,12 @@
 #include "../../include/mb_define.h"
 #include "../../include/mb_aux.h"
 
-/* global array dimensions etc */
-#define IUP 3
-#define IDN 2
-#define IOR -3
+//* global defines */
+#define IMOVE 	3
+#define IDRAW 	2
+#define ISTROKE	-2
+#define IOR 	-3
+#define EPS 0.0001
 
 static char rcs_id[]="$Id$";
 
@@ -124,52 +126,51 @@ void mb_track(int verbose, struct swath *data, int *error)
 		fprintf(stderr,"dbg2       time interval:        %f\n",data->time_annot_int);
 		fprintf(stderr,"dbg2       date interval:        %f\n",data->date_annot_int);
 		fprintf(stderr,"dbg2       time tick length:     %f\n",data->time_tick_len);
+		fprintf(stderr,"dbg2       data->npings:         %d\n",data->npings);
+		for (i=0;i<data->npings;i++)
+			{
+			fprintf(stderr,"dbg2       i:%d time:%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d position: %.9f %.9f\n",
+					i,data->pings[i].time_i[0],data->pings[i].time_i[1],data->pings[i].time_i[2],
+					data->pings[i].time_i[3],data->pings[i].time_i[4],data->pings[i].time_i[5],data->pings[i].time_i[6],
+					data->pings[i].navlon,data->pings[i].navlat);
+			}
 		}
 
 	/* set line width */
 	setline(3);
 	newpen(0);
 
-	/* draw the shiptrack */
-	for (i=1;i<data->npings;i++)
-		{
-/*		boldline(data->pings[i-1].navlon,data->pings[i-1].navlat,
-			data->pings[i].navlon,data->pings[i].navlat);*/
-		plot(data->pings[i-1].navlon,data->pings[i-1].navlat,IUP);
-		plot(data->pings[i].navlon,data->pings[i].navlat,IDN);
-		}
-
 	/* draw the time ticks */
 	for (i=1;i<data->npings;i++)
 		{
 		/* get time of day */
-		hour0 = data->pings[i-1].time_i[3] 
-			+ data->pings[i-1].time_i[4]/60.0 
+		hour0 = data->pings[i-1].time_i[3]
+			+ data->pings[i-1].time_i[4]/60.0
 			+ data->pings[i-1].time_i[5]/3600.0;
-		hour1 = data->pings[i].time_i[3] 
-			+ data->pings[i].time_i[4]/60.0 
+		hour1 = data->pings[i].time_i[3]
+			+ data->pings[i].time_i[4]/60.0
 			+ data->pings[i].time_i[5]/3600.0;
 
 		/* check for time tick */
 		time_tick = MB_NO;
-		if (floor(hour0/data->time_tick_int) 
+		if (floor(hour0/data->time_tick_int)
 			!= floor(hour1/data->time_tick_int))
 			time_tick = MB_YES;
 
 		/* check for time annotation */
 		time_annot = MB_NO;
-		if (floor(hour0/data->time_annot_int) 
+		if (floor(hour0/data->time_annot_int)
 			!= floor(hour1/data->time_annot_int))
 			time_annot = MB_YES;
 
 		/* check for date annotation */
 		date_annot = MB_NO;
-		if (floor(hour0/data->date_annot_int) 
+		if (floor(hour0/data->date_annot_int)
 			!= floor(hour1/data->date_annot_int))
 			date_annot = MB_YES;
 
 		/* now get azimuth and location if needed */
-		if (date_annot == MB_YES || time_annot == MB_YES 
+		if (date_annot == MB_YES || time_annot == MB_YES
 			|| time_tick == MB_YES)
 			{
 			/* get azimuth from heading */
@@ -180,9 +181,9 @@ void mb_track(int verbose, struct swath *data, int *error)
 			dy = cos(DTR*angle);
 
 			/* cheat and get location by averaging */
-			x = 0.5*(data->pings[i-1].navlon 
+			x = 0.5*(data->pings[i-1].navlon
 				+ data->pings[i].navlon);
-			y = 0.5*(data->pings[i-1].navlat 
+			y = 0.5*(data->pings[i-1].navlat
 				+ data->pings[i].navlat);
 			}
 
@@ -197,16 +198,15 @@ void mb_track(int verbose, struct swath *data, int *error)
 			y2 = y + 0.375*data->time_tick_len*(-dy - dx);
 			x4 = x + 0.375*data->time_tick_len*(-dx - dy);
 			y4 = y + 0.375*data->time_tick_len*(-dy + dx);
-/*			boldline(x1,y1,x2,y2);
-			boldline(x3,y3,x4,y4);*/
-			plot(x1,y1,IUP);
-			plot(x2,y2,IDN);
-			plot(x3,y3,IUP);
-			plot(x4,y4,IDN);
+			plot(x1,y1,IMOVE);
+			plot(x2,y2,IDRAW);
+			plot(x3,y3,IMOVE);
+			plot(x4,y4,ISTROKE);
 			mb_get_jtime(verbose,data->pings[i].time_i,time_j);
 			sprintf(label," %2.2d:%2.2d/%3.3d",
 				data->pings[i].time_i[3],
-				data->pings[i].time_i[4],							time_j[1]);
+				data->pings[i].time_i[4],
+				time_j[1]);
 			plot_string(x,y,data->time_tick_len,90.0-angle,label);
 			}
 
@@ -221,12 +221,10 @@ void mb_track(int verbose, struct swath *data, int *error)
 			y2 = y + 0.375*data->time_tick_len*(-dy - dx);
 			x4 = x + 0.375*data->time_tick_len*(-dx - dy);
 			y4 = y + 0.375*data->time_tick_len*(-dy + dx);
-/*			boldline(x1,y1,x2,y2);
-			boldline(x3,y3,x4,y4);*/
-			plot(x1,y1,IUP);
-			plot(x2,y2,IDN);
-			plot(x3,y3,IUP);
-			plot(x4,y4,IDN);
+			plot(x1,y1,IMOVE);
+			plot(x2,y2,IDRAW);
+			plot(x3,y3,IMOVE);
+			plot(x4,y4,ISTROKE);
 			sprintf(label,"   %2.2d:%2.2d",
 				data->pings[i].time_i[3],
 				data->pings[i].time_i[4]);
@@ -244,13 +242,22 @@ void mb_track(int verbose, struct swath *data, int *error)
 			y2 = y + 0.25*data->time_tick_len*(-dy - dx);
 			x4 = x + 0.25*data->time_tick_len*(-dx - dy);
 			y4 = y + 0.25*data->time_tick_len*(-dy + dx);
-/*			boldline(x1,y1,x2,y2);
-			boldline(x3,y3,x4,y4);*/
-			plot(x1,y1,IUP);
-			plot(x2,y2,IDN);
-			plot(x3,y3,IUP);
-			plot(x4,y4,IDN);
+			plot(x1,y1,IMOVE);
+			plot(x2,y2,IDRAW);
+			plot(x3,y3,IMOVE);
+			plot(x4,y4,ISTROKE);
 			}
+		}
+
+	/* draw the shiptrack */
+	for (i=0;i<data->npings;i++)
+		{
+		if (i == 0)
+			plot(data->pings[i].navlon,data->pings[i].navlat,IMOVE);
+		else if (i < data->npings - 1)
+			plot(data->pings[i].navlon,data->pings[i].navlat,IDRAW);
+		else
+			plot(data->pings[i].navlon,data->pings[i].navlat,ISTROKE);
 		}
 
 	/* reset line width */
@@ -338,8 +345,8 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error)
 			y1 = y - 0.375*data->pingnumber_tick_len*dy;
 			x2 = x - 1.5*justify[2]*dx;
 			y2 = y - 1.5*justify[2]*dy;
-			plot(x1,y1,IUP);
-			plot(x,y,IDN);
+			plot(x1,y1,IMOVE);
+			plot(x,y,IDRAW);
 			plot_string(x2,y2,data->pingnumber_tick_len,90.0-angle,label);
 			}
 
@@ -350,8 +357,8 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error)
 			y1 = y - 0.25*data->pingnumber_tick_len*dy;
 			x2 = x + 0.25*data->pingnumber_tick_len*dx;
 			y2 = y + 0.25*data->pingnumber_tick_len*dy;
-			plot(x1,y1,IUP);
-			plot(x,y,IDN);
+			plot(x1,y1,IMOVE);
+			plot(x,y,IDRAW);
 			}
 		}
 
@@ -372,7 +379,7 @@ void mb_trackpingnumber(int verbose, struct swath *data, int *error)
 }
 
 /*--------------------------------------------------------------------------*/
-/* 	function mb_trackname plots the filename on the shiptrack. 
+/* 	function mb_trackname plots the filename on the shiptrack.
 	 - contributed by Gordon Keith, CSIRO, December 2004 */
 void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file, int *error)
 {

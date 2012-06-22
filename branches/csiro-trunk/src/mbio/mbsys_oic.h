@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_oic.h	3/1/99
  *	$Id$
  *
- *    Copyright (c) 1999-2009 by
+ *    Copyright (c) 1999-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -285,6 +285,8 @@ int mbsys_oic_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
+int mbsys_oic_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_oic_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

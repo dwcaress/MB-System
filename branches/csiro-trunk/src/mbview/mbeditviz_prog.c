@@ -2,7 +2,7 @@
  *    The MB-system:	mbeditviz_prog.c		5/1/2007
  *    $Id$
  *
- *    Copyright (c) 2007-2009 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -110,6 +110,7 @@ double	mbdef_btime_d;
 double	mbdef_etime_d;
 double	mbdef_speedmin;
 double	mbdef_timegap;
+int	mbdef_uselockfiles;
 
 /*--------------------------------------------------------------------*/
 int mbeditviz_init(int argc,char **argv)
@@ -197,7 +198,8 @@ int mbeditviz_init(int argc,char **argv)
 	mbev_timelag = 0.0;
 
 	/* set mbio default values */
-	mbev_status = mb_lonflip(mbev_verbose,&mbdef_lonflip);
+	mb_lonflip(mbev_verbose,&mbdef_lonflip);
+	mb_uselockfiles(mbev_verbose,&mbdef_uselockfiles);
 	mbdef_pings = 1;
 	mbdef_format = 0;
 	mbdef_bounds[0] = -360.;
@@ -458,6 +460,7 @@ int mbeditviz_import_file(char *path, int format)
 	do_mbeditviz_message_on(message);
 		
 	/* allocate mbpr_file_struct array if needed */
+	mbev_status = MB_SUCCESS;
 	if (mbev_num_files_alloc <= mbev_num_files)
 		{
 		mbev_files = (struct mbev_file_struct *) realloc(mbev_files,
@@ -475,6 +478,10 @@ int mbeditviz_import_file(char *path, int format)
 	if (mbev_status == MB_SUCCESS)
 		{
 		file = &(mbev_files[mbev_num_files]);
+		file->load_status = MB_NO;
+		file->load_status_shown = MB_NO;
+		file->locked = MB_NO;
+		file->esf_exists = MB_NO;
 		strcpy(file->path, path);
 		strcpy(file->name, root);	
 		file->format = format;
@@ -507,6 +514,11 @@ int mbeditviz_import_file(char *path, int format)
 		if (mbev_status == MB_SUCCESS)
 			{
 			mbev_status = mb_pr_readpar(mbev_verbose, file->path, MB_NO, &(file->process), &mbev_error);
+			if (file->process.mbp_format_specified == MB_NO)
+				{
+				file->process.mbp_format_specified = MB_YES;
+				file->process.mbp_format = file->format;
+				}
 			}
 
 		/* load processed file info */
@@ -553,6 +565,19 @@ int mbeditviz_load_file(int ifile)
 	char	buffer[MBP_FILENAMESIZE], *result;
 	char	command[MBP_FILENAMESIZE];
 	int	nread;
+	
+	mb_path	error1;
+	mb_path	error2;
+	mb_path	error3;
+	
+	/* swath file locking variables */
+	int	lock_status;
+	int	locked;
+	int	lock_purpose;
+	mb_path	lock_program;
+	mb_path lock_cpu;
+	mb_path lock_user;
+	char	lock_date[25];
 
 	/* mbio read and write values */
 	int	format;
@@ -577,7 +602,7 @@ int mbeditviz_load_file(int ifile)
 
 	int	rawmodtime = 0;
 	int	gefmodtime = 0;
-	
+
 	double	mtodeglon, mtodeglat;
 	double	heading, sonardepth;
 	double	headingx, headingy;
@@ -595,11 +620,80 @@ int mbeditviz_load_file(int ifile)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       ifile:       %d\n",ifile);
 		}
-		
-	/* load the file */
+
+	/* lock the file if it needs loading */
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
 	if (ifile >= 0 && ifile < mbev_num_files 
+		&& mbev_files[ifile].load_status == MB_NO)
+		{
+		file = &(mbev_files[ifile]);
+
+		/* try to lock file */
+		if (mbdef_uselockfiles == MB_YES)
+			{
+			mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path, 
+					MBP_LOCK_EDITBATHY, program_name, &mbev_error);
+			}
+		else
+			{
+			mbev_status = mb_pr_lockinfo(mbev_verbose, file->path, &locked,
+					&lock_purpose, lock_program, lock_user, lock_cpu, 
+					lock_date, &mbev_error);
+
+			/* if locked get lock info */
+			if (mbev_error == MB_ERROR_FILE_LOCKED)
+				{
+				fprintf(stderr, "\nFile %s locked but lock ignored\n", file->path);
+				fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
+				fprintf(stderr, "on cpu <%s> at <%s>\n", lock_cpu, lock_date);
+				mbev_error = MB_ERROR_NO_ERROR;
+				mbev_status = MB_SUCCESS;
+				}
+			}
+		
+		/* if locked let the user know file can't be opened */
+		if (mbev_status == MB_FAILURE)
+			{	
+			/* turn off message */
+			do_mbeditviz_message_off();
+
+			/* if locked get lock info */
+			if (mbev_error == MB_ERROR_FILE_LOCKED)
+				{
+				lock_status = mb_pr_lockinfo(mbev_verbose, file->path, &locked,
+						&lock_purpose, lock_program, lock_user, lock_cpu, 
+						lock_date, &mbev_error);
+
+				sprintf(error1, "Unable to open input file:");
+				sprintf(error2, "File locked by <%s> running <%s>", lock_user, lock_program);
+				sprintf(error3, "on cpu <%s> at <%s>", lock_cpu, lock_date);
+				fprintf(stderr, "\nUnable to open input file:\n");
+				fprintf(stderr, "  %s\n", file->path);
+				fprintf(stderr, "File locked by <%s> running <%s>\n", lock_user, lock_program);
+				fprintf(stderr, "on cpu <%s> at <%s>\n", lock_cpu, lock_date);
+				}
+
+			/* else if unable to create lock file there is a permissions problem */
+			else if (mbev_error == MB_ERROR_OPEN_FAIL)
+				{
+				sprintf(error1, "Unable to create lock file");
+				sprintf(error2, "for intended input file:");
+				sprintf(error3, "-Likely permissions issue");
+				fprintf(stderr, "Unable to create lock file\n");
+				fprintf(stderr, "for intended input file:\n");
+				fprintf(stderr, "  %s\n", file->path);
+				fprintf(stderr, "-Likely permissions issue\n");
+				}
+
+			/* put up error dialog */
+			do_error_dialog(error1,error2, error3);
+			}
+		}
+		
+	/* load the file if it needs loading and has been locked */
+	if (mbev_status == MB_SUCCESS
+		&& ifile >= 0 && ifile < mbev_num_files 
 		&& mbev_files[ifile].load_status == MB_NO)
 		{
 		file = &(mbev_files[ifile]);
@@ -1776,6 +1870,8 @@ int mbeditviz_unload_file(int ifile)
 	char	*function_name = "mbeditviz_unload_file";
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
+	int	lock_status;
+	int	lock_error = MB_ERROR_NO_ERROR;
 	int	iping;	
 
 	/* print input debug statements */
@@ -1942,8 +2038,16 @@ int mbeditviz_unload_file(int ifile)
 			file->sync_attitude_pitch = NULL;
 			}
 		    }
+		    
+		/* reset load status */
 		file->load_status = MB_NO;
 		mbev_num_files_loaded--;
+		
+		/* unlock the file */
+		if (mbdef_uselockfiles == MB_YES)
+			lock_status = mb_pr_unlockswathfile(mbev_verbose, file->path, 
+						MBP_LOCK_EDITBATHY, program_name, &lock_error);
+		
 		}
 
 	/* print output debug statements */
@@ -3960,9 +4064,10 @@ ifile, iping, ibeam);
 	/* generate info string */
 	file = &mbev_files[ifile];
 	ping = &(file->pings[iping]);
-	sprintf(infostring,"Beam %d of %d   Ping %d of %d   File:%s\nPing Time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f",
+	sprintf(infostring,"Beam %d of %d   Ping %d of %d   File:%s\nPing Time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d %f\nLon:%.6f Lat:%.6f Depth:%.3f X:%.3f L:%.3f",
 		ibeam,ping->beams_bath,iping,file->num_pings,file->name,ping->time_i[0],ping->time_i[1],ping->time_i[2],
-		ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],ping->time_d);
+		ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],ping->time_d,
+		ping->bathlon[ibeam],ping->bathlat[ibeam],ping->bath[ibeam],ping->bathacrosstrack[ibeam],ping->bathalongtrack[ibeam]);
 		
 	/* print output debug statements */
 	if (mbev_verbose >= 2)

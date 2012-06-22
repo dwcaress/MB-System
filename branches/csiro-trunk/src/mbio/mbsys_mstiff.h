@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_mstiff.h	4/10/98
  *	$Id$
  *
- *    Copyright (c) 1998-2009 by
+ *    Copyright (c) 1998-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -194,6 +194,8 @@ int mbsys_mstiff_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
+int mbsys_mstiff_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_mstiff_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
 			double *ttimes, double *angles, 

@@ -1,4 +1,4 @@
-.TH mbfilter 1 "26 December 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbfilter 1 "6 June 2010" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbfilter\fP - Apply some simple filter functions to sidescan or beam
 amplitude data from swath sonar data files.
@@ -210,12 +210,10 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .B \-F
 \fIformat\fP
 .br
-Sets the data format used in reading the input from stdin
-or from a file. This program uses the \fBMBIO\fP library 
-and will read or write any swath sonar
-format supported by \fBMBIO\fP. A list of the swath sonar data formats
-currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
+Sets the MBIO integer format identifier for the input file  specified  with
+the  -I option. By default, mbfilter derives the format id from the mbpro-
+cess parameter file associated with the input file (-I option) or, if  nec-
+essary, infers the format from the "*.mbXX" MB-System suffix convention.
 .TP
 .B \-H
 This "help" flag causes the program to print out a description
@@ -224,11 +222,11 @@ of its operation and then exit immediately.
 .B \-I
 \fIinfile\fP
 .br
-Sets the input swath sonar data filename. 
-This program uses the \fBMBIO\fP library and will read or write any swath sonar
-format supported by \fBMBIO\fP. A list of the swath sonar data formats
-currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "stdin".
+Swath data file from which the input data will be read, or a datalist  file
+containing a list of input swath data files and/or other datalist files. If
+infile is a datalist file, then mbprocess will attempt to process all  data
+files identified by recursively reading infile. 
+Default: \fIinfile\fP = "datalist.mb-1"
 .TP
 .B \-N
 \fIbuffersize\fP

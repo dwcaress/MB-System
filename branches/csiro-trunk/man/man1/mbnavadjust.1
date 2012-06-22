@@ -1,18 +1,18 @@
-.TH mbnavadjust 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbnavadjust 1 "24 September 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbnavadjust\fP - Package that solves for optimal navigation by
-matching bathymetry of overlapping swathes.
+matching bathymetry of overlapping swaths.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbnavadjust\fP [\fB-V -H\fP] 
+\fBmbnavadjust\fP [\fB-V -H -D -R\fP] 
 
 .SH DESCRIPTION
 \fBMBnavadjust\fP is an interactive graphical program used to
 adjust swath data navigation by matching bathymetric features
-in overlapping and crossing swathes. The primary purpose of
+in overlapping and crossing swaths. The primary purpose of
 \fBmbnavadjust\fP is to eliminate relative navigational errors in swath
 data obtained from poorly navigated sonars. Submerged platforms
 such as towed vehicles, remotely operated vehicles (ROVs) and
@@ -32,13 +32,17 @@ initial use of this tool involved co-registering a deep-towed Reson
 with a hull mounted Simrad EM300 multibeam survey. 
 
 When swath surveys are poorly navigated, features clearly imaged
-by the sonar may not match in overlapping and crossing swathes.
-However, by systematically determining the lateral offsets between
+by the sonar may not match in overlapping and crossing swaths.
+However, by systematically determining the positional offsets between
 matching features throughout a survey, it is possible to solve,
 or invert, for a navigation model which is consistent with the
 original navigational constraints, satisfies the requirement
-of reasonableness, and also causes features in overlapping swathes
-to match within the sonar's resolution. 
+of reasonableness, and also causes features in overlapping swaths
+to match within the sonar's resolution. The analysis and adjustment
+can be limited to lateral (x and y or longitude and latitude) offsets
+when all vertical offsets have been corrected prior to importation
+into \fBMBnavadjust\fP (e.g. tidal corrections have been made). 
+Otherwise, the offset analysis and inversions are three dimensional.
 
 Previous attempts to address this problem (e.g. Nishimura et al. [1988])
 have focused on automating the identification of matching features
@@ -103,6 +107,17 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 This "help" flag cause the program to print out a description
 of its operation and then exit immediately.
 .TP
+.B \-D
+Normally, \fBmbnavadjust\fP uses a white background for the
+interactive plots. This option causes the program to use a
+black background for the plots.
+.TP
+.B \-R
+This option causes \fBmbnavadjust\fP to discard all navigation ties,
+set all crossings to "unanalyzed" status, and to save the project
+in this pristine state. Only use this option if you really, really
+want to start over.
+.TP
 .B \-V
 Normally, \fBmbnavadjust\fP outputs nothing to the stderr stream.
 If the \fB-V\fP flag is given, then \fBmbnavadjust\fP 
@@ -165,64 +180,159 @@ that set parameters controlling how swath data are imported and displayed.
 These widgets are discussed in the \fBControls\fP section below.
  .TP
 .B View
-This button brings up a pulldown menu with three items: 
-\fBShow Data Files\fP, \fBShow Crossings\fP, and \fBShow Ties\fP
-This menu controls the contents of the list widget in the lower
+This button brings up a pulldown menu with fifteen items in three 
+groups. This menu controls the contents of the list widget in the lower
 right \fBMBnavadjust Window\fP. If an \fBmbnavadjust\fP project
 has been created or opened, the \fBData Table\fP list 
-widget will display one of
-the three tables named by these menu items, and the corresponding
-menu item will be disabled. Selection of either of the other two
+widget will display a table of items controlled by these menu items, 
+and the corresponding menu item will be disabled. Selection of another item
 items will change what is displayed in the \fBData Table\fP list
 widget accordingly.
+
+The first group includes the \fBShow Surveys\fP, 
+\fBShow Data Files\fP, \fBShow Data File Sections\fP, \fBShow All Crossings\fP, 
+\fBShow All Crossings\fP, \fBShow >25% Crossings\fP, \fBShow >50% Crossings\fP,
+\fBShow True Crossings\fP, and \fBShow Ties\fP items.
+.TP
+.B View->Show Surveys
+This menu item causes the \fBData Table\fP list widget to display a list of the 
+surveys in the current \fBmbnavadjust\fP project. Within \fBMBnavadjust\fP, a 
+survey is a group of swath files that are contiguous in time.
 .TP
 .B View->Show Data Files
 This menu item causes the \fBData Table\fP list widget to display a list of the swath
 data files in the current \fBmbnavadjust\fP project. 
 .TP
-.B View->Show Crossings
+.B View->Show Data File Sections
 This menu item causes the \fBData Table\fP list widget to display a list of the swath
+data sections in the current \fBmbnavadjust\fP project. 
+.TP
+.B View->Show All Crossings
+This menu item causes the \fBData Table\fP list widget to display a list of all the swath
 crossings in the current \fBmbnavadjust\fP project. 
+When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
+selected crossing in the "Nav Err" window.
+.TP
+.B View->Show >25% Crossings
+This menu item causes the \fBData Table\fP list widget to display a list of all the swath
+crossings in the current \fBmbnavadjust\fP project for which the two sections overlap by 
+more than 25%. 
+When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
+selected crossing in the "Nav Err" window.
+.TP
+.B View->Show >50% Crossings
+This menu item causes the \fBData Table\fP list widget to display a list of all the swath
+crossings in the current \fBmbnavadjust\fP project for which the two sections overlap by 
+more than 50%.. 
+When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
+selected crossing in the "Nav Err" window.
+.TP
+.B View->Show True Crossings
+This menu item causes the \fBData Table\fP list widget to display a list of all the swath
+crossings  in the current \fBmbnavadjust\fP project for which the navigation tracks cross. 
+When this option is set, selecting a list item causes \fBmbnavadjust\fP to load and display the selected
+selected crossing in the "Nav Err" window.
 .TP
 .B View->Show Ties
 This menu item causes the \fBData Table\fP list widget to display a list of the tie points
 in the current \fBmbnavadjust\fP project. 
+
+The second group includes the 
+\fBShow All Surveys\fP, \fBShow Only Selected Survey\fP, \fBShow Only Selected File\fP, 
+and \fBShow Only Selected Section\fP items. One of these options is always active, and
+modifies what is displayed in the \fBData Table\fP list.
+.TP
+.B View->Show All Surveys
+This menu item allows all of the possible items (file, sections, crossings, ties)
+to be displayed in the \fBData Table\fP list. 
+.TP
+.B View->Show Only Selected Surveys
+This menu item limits the items (file, sections, crossings, ties) displayed in 
+the \fBData Table\fP list to those associated with the most recently
+selected survey (e.g. a survey selected by clicking in the \fBData Table\fP list 
+while the <View->Show Surveys> option is active).
+.TP
+.B View->Show Only Selected File
+This menu item limits the items (file, sections, crossings, ties) displayed in 
+the \fBData Table\fP list to those associated with the most recently
+selected file (e.g. a file selected by clicking in the \fBData Table\fP list 
+while the <View->Show Files> option is active).
+.TP
+.B View->Show Only Selected Section
+This menu item limits the items (file, sections, crossings, ties) displayed in 
+the \fBData Table\fP list to those associated with the most recently
+selected section (e.g. a section selected by clicking in the \fBData Table\fP list 
+while the <View->Show Sections> option is active).
+
+The third group includes two options:
+.TP
+.B View->Visualize Survey
+This option is not active, and is for future use.
+.TP
+.B View->Show Modelplot
+This option causes an addition "Model Plot" window to be shown that displays
+the navigation adjustment model as three time series: longitude on top, latitude
+in the middle, and vertical on the bottom.
 .TP
 .B Action
-This button brings up a pulldown menu with four items: 
-\fBFix File\fP, \fBUnfix File\fP, \fBGenerate Contours\fP, \fBAnalyze Crossings\fP, 
-and \fBInvert Navigation\fP
-This menu controls the contents of the list widget in the lower
-right \fBMBnavadjust Window\fP. If an \fBmbnavadjust\fP project
-has been created or opened, the \fBData Table\fP list 
-widget will display one of
-the three tables named by these menu items, and the corresponding
-menu item will be disabled. Selection of either of the other two
-items will change what is displayed in the \fBData Table\fP list
-widget accordingly.
+This button brings up a pulldown menu with nine items: 
+\fBSet File Poor Navigation\fP, \fBSet File Good Navigation\fP, 
+\fBSet File Fixed Navigation\fP, \fBAuto-Pick Offsets\fP, 
+\fBCheck for New Crossings\fP, \fBAnalyze Crossings\fP, \fBZero All Z Offsets\fP, 
+\fBInvert Navigation\fP, and \fBApply Adjusted Navigation\fP.
 .TP
-.B Action->Fix File
+.B Action->Set File Poor Navigation
 This menu item causes \fBmbnavadjust\fP to treat the navigation of
-a selected swath data file as fixed. This option is only activated
+a selected swath data file as poor. This option is only activated
 when the \fBData Table\fP list widget shows a list of the imported
-swath files and one currently unfixed file has been selected by
-clicking in that list.
+swath files and one file has been selected by clicking in that list.
+In the case where no files are fixed, the final adjusted navigation model
+is centered on the average navigation offsets required for good files.
+The offsets tieing to files with poor navigation are ignored in 
+calculating the averages.
 .TP
-.B Action->Unfix File
+.B Action->Set File Good Navigation
 This menu item causes \fBmbnavadjust\fP to treat the navigation of
-a selected swath data file as unfixed. This option is only activated
+a selected swath data file as good, which is in fact the default state
+for swath files. This option is only activated
 when the \fBData Table\fP list widget shows a list of the imported
-swath files and one currently fixed file has been selected by
-clicking in that list.
+swath files and one file has been selected by clicking in that list.
+In the case where no files are fixed, the final adjusted navigation model
+is centered on the average navigation offsets required for good files.
+The offsets tieing to files with good navigation are used in 
+calculating the averages.
 .TP
-.B Action->Generate Contours
-This menu item causes \fBmbnavadjust\fP to pre-generate contours
-for all data sections that are currently associated with crossings.
-This will greatly increase the speed with which crossings are
-loaded into the "Nav Err" window. This process will likely take
-a long time.
+.B Action->Set File Fixed Navigation
+This menu item causes \fBmbnavadjust\fP to treat the navigation of
+a selected swath data file as fixed, which means that all navigation
+points for this file will have zero offsets in the final adjusted navigation. 
+Effectively, all of the offsets between fixed and unfixed files are taken up in
+the adjustments of the unfixed files.
+This option is only activated
+when the \fBData Table\fP list widget shows a list of the imported
+swath files and one file has been selected by clicking in that list.
+.TP
+.B Action->Auto-Pick Offsets
+This menu item causes \fBmbnavadjust\fP to automatically pick offsets in 
+all of the unset crossings currently displayed in the \fBData Table\fP list.
+If <View->Show True Crossings> has been selected, then only true crossings are
+displayed and only the unset true crossings will be automatically picked.
+In general, unsupervised offset picks are frequently erroneous, and use
+of this experimental option is not encouraged.
+.TP
+.B Action->Check For New Crossings
+This menu item causes \fBmbnavadjust\fP to search for new crossings using
+the adjusted navigation from the current inversion. Often, new places where
+swaths overlap and cross emerge as the navigation is adjusted. The percentage
+of overlap is also recalculated for all of the existing crossings. If new true
+crossings are found, the user will be unable to perform a new inversion until
+all of the true crossings have been analyzed.
 .TP
 .B Action->Analyze Crossings
+This menu item causes \fBmbnavadjust\fP to load and display the first
+crossing in the "Nav Err" window.
+.TP
+.B Action->Zero All Z Offsets
 This menu item causes \fBmbnavadjust\fP to load and display the first
 crossing in the "Nav Err" window.
 .TP
@@ -230,8 +340,16 @@ crossing in the "Nav Err" window.
 This menu item causes \fBmbnavadjust\fP to invert for an optimal
 navigation solution that fits the offsets defined at the navigation
 tie points while minimizing speed and acceleration. This option is
-only activated when all of the crossings in the current
+only activated when all of the true crossings in the current
 \fBmbnavadjust\fP project have been analyzed interactively.
+.TP
+.B Action->Apply Adjusted Navigation
+This menu item causes \fBmbnavadjust\fP to export the adjusted
+navigation model from the current inversion to the
+swath files in the project.This option is
+only activated when the inversion is current, meaning that no new
+data have been imported and no changes to offset picks have been 
+made since the last inversion.
 .TP
 .B About
 This button brings up a pulldown menu with one item: \fBAbout\fP.
@@ -242,30 +360,45 @@ name, authors, and version. Clicking the \fBDismiss\fP button will
 close the window.
 .TP
 .B Data Table
-This list widget displays one of three tables of information regarding
+This list widget displays one of five tables of information regarding
 the current \fBmbnavadjust\fP project. These tables are a list of the
-imported swath data files, a list of the identified crossing swathes, and
+imported swath surveys, the data files, the shorter data sections 
+comprising each data file, a list of the identified crossing swaths, and
 a list of the navigation tie points defined interactively by the user.
 The \fBView\fP pulldown menu allows the user to set which table is displayed.
 
+The survey list will look something like:
+.br
+ 	00 53 2009/08/03 08:18:49.484999 2009/08/03 22:52:59.375000
+ 	01 51 2009/08/04 09:03:11.938999 2009/08/04 23:02:03.470999
+ 	02 01 1998/05/13 01:33:36.791000 1998/05/13 02:42:11.703999
+.br
+Here the first column is the survey counter, the second is the number
+of swath files included in each survey, and the following information
+consists of the start and end times of the data in each survey
+shown in YYYY/MM/DD HH:MM:SS.SSSSSS format.
+
 The file list will look something like:
 .br
- 0   15  free  0.0  0.0 mbari_1998_53.mb57
- 1    4  free  0.0  0.0 mbari_1998_54.mb57
- 2    2  free  0.0  0.0 mbari_1998_55.mb57
- 3    2  free  0.0  0.0 mbari_1998_56.mb57
- 4   16  free  0.0  0.0 mbari_1998_57.mb57
- 5    4 fixed  0.0  0.0 mbari_1998_58.mb57
- 6    3  free  0.0  0.0 mbari_1998_59.mb57
- 7    3  free  0.0  0.0 mbari_1998_60.mb57
- 8   13  free  0.0  0.0 mbari_1998_61.mb57
+ 	0000:00 gd   11  0.0  0.0 ../../20090803/20090803_081706.mb88
+ 	0001:00 gd   11  0.0  0.0 ../../20090803/20090803_083332.mb88
+ 	0002:00 gd   11  0.0  0.0 ../../20090803/20090803_085004.mb88
+ 	0003:00 gd   11  0.0  0.0 ../../20090803/20090803_090636.mb88
+ 	0004:00 gd   10  0.0  0.0 ../../20090803/20090803_092307.mb88
+ 	 	..........................................
+ 	0053:01 gd   12  0.0  0.0 ../../20090804/20090804_090127.mb88
+ 	0054:01 gd   10  0.0  0.0 ../../20090804/20090804_092036.mb88
+ 	0055:01 gd   11  0.0  0.0 ../../20090804/20090804_093707.mb88
+ 	0056:01 gd   10  0.0  0.0 ../../20090804/20090804_095339.mb88
+ 	0057:01 gd   11  0.0  0.0 ../../20090804/20090804_101010.mb88
+ 	 	..........................................
+ 	0104:02 fx    8  0.0  0.0 ../../MBARI/1998em300/mbari_1998_630_msn.mb57
 .br
-Here the first column is the file counter and the second is
-the number of sections extracted from this file. The third
-column normally is "free", but may show "fixed" if the navigation
-for a file has been set to be fixed (this forces \fBmbnavadjust\fP 
-to adjust the other swath data navigation relative to that of the
-fixed file or files).The fourth and fifth columns show any heading
+Here the first column is the file counter and survey counter separated by a colon.
+The second column indicates the file navigations state; "gd" indicates good
+navigation, "pr" indicates poor navigation, and "fx" indicates fixed
+navigation. The third column shows the number of sections extracted from this file. 
+The fourth and fifth columns show any heading
 or roll bias offsets in degrees applied to the swath data for that file. 
 The sixth column gives the name of the swath data file imported into
 \fBmbnavadjust\fP. Note that the name shown here is that of the "raw"
@@ -274,50 +407,84 @@ if possible, extracted from a "processed" swath file
 generated by \fBmbprocess\fP rather than the
 associated "raw" file.
 
-The crossing list will look something like:
+The file section list will look something like:
 .br
- *    0 001:000 000:013  1
- -    1 001:001 000:013  0
- *    2 002:000 001:002  3
- *    3 002:001 001:000  1
- *    4 002:001 001:001  1
- U    5 002:001 001:002  0
- *    6 004:000 003:001  1
+ 	00:0000:00 2009/08/03 08:17:07.546998 2009/08/03 08:18:49.484999
+ 	00:0000:01 2009/08/03 08:18:49.984999 2009/08/03 08:20:26.952999
+ 	00:0000:02 2009/08/03 08:20:27.452999 2009/08/03 08:22:05.890999
+ 	00:0000:03 2009/08/03 08:22:06.390999 2009/08/03 08:23:43.344001
+ 	00:0000:04 2009/08/03 08:23:43.844001 2009/08/03 08:25:19.796999
+ 	00:0000:05 2009/08/03 08:25:20.296999 2009/08/03 08:26:57.265997
+ 	00:0000:06 2009/08/03 08:26:57.765997 2009/08/03 08:28:35.219001
+ 	00:0000:07 2009/08/03 08:28:35.719001 2009/08/03 08:30:16.155999
+ 	00:0000:08 2009/08/03 08:30:16.655999 2009/08/03 08:31:57.594001
+ 	00:0000:09 2009/08/03 08:31:58.094001 2009/08/03 08:33:36.546999
+ 	00:0000:10 2009/08/03 08:33:37.046999 2009/08/03 08:33:37.546999
+.br
+Here the first column shows the section id with the survey counter, the file counter,
+and the section counter separated by colons. The following information
+consists of the start and end times of each section
+shown in YYYY/MM/DD HH:MM:SS.SSSSSS format.
+
+The crossing list will look something like:
+ 	-X    0 000:009 001:000  21  0
+ 	-     1 001:009 002:000  10  0
+ 	-     2 002:009 003:000  10  0
+ 	U     3 003:009 004:000   6  0
+ 	-     4 005:009 006:000  13  0
+ 	U     5 007:009 008:000   3  0
+ 	U     6 009:008 009:010   2  0
+ 	*     7 009:008 010:000  16  1
+ 	*X    8 009:009 010:000  41  1
+ 	-     9 009:008 010:001   1  0
 .br
 Here the first column indicates the processing status for the
-crossing. If the status flag is "U", then no tie points have been
-set for the crossing, but the crossing has also not been explicitely
-skipped. New crossings always show a "U" flag prior to being
-inspected by a user. The second column is the crossing counter. The
+crossing. The first character is the status flag. If the status flag is "U", 
+then no decision has been made about skipping or tieing this crossing. 
+New crossings always show a "U" flag prior to being
+inspected by a user. If the first character is "-", then the crossing
+has been skipped, and if the first character is "*", then at least one
+tie point has been set. The second column is the crossing counter. The
 third and fourth columns identify the swath data sections that overlap
 in this crossing. Each are identified by their file id and section id
-separated by ":". The fifth, and last column gives the number of tie
+separated by ":". The fifth column indicates the percentage of overlap
+of the two sections in this crossing. The larger the degree of overlap,
+the more likely that diagnostic matching topographic features exist that
+can be used to determine the navigation offsets required for this crossing.
+The sixth, and last column gives the number of tie
 points that have been defined for each crossing. New crossings always
-begin with 0 tie points prior to be inspected by a user.
+begin with 0 tie points prior to being inspected by a user.
 
 The tie point list will look something like:
 .br
-    0  0 001:000:01 000:013:03     0.00     0.00     0.56    -0.30
-    2  0 002:000:04 001:002:03   -19.47   -25.96     5.66    15.07
-    2  1 002:000:06 001:002:01   -12.97     6.49     1.04    -3.37
-    2  2 002:000:05 001:002:02   -12.97     6.49    -0.09    -7.26
-    3  0 002:001:04 001:000:00     0.00     0.00    -1.87     0.91
-    4  0 002:001:02 001:001:02    -6.41     6.41    -0.59    -1.93
-    6  0 004:000:02 003:001:01     0.00     0.00     0.00    -0.62
+ 	   7 0 009:008:07 010:000:04 00:00  1.02 -2.87 0.00 |  9.61  8.49 1.40 | 0.041 0.107 0.027
+ 	   8 0 009:009:02 010:000:00 00:00  0.90 -4.47 0.00 |  7.37  6.30 2.29 | 0.040 0.184 0.033
+ 	  12 0 009:008:04 010:002:04 00:00  4.11 -8.24 0.00 |  9.28  5.99 1.80 | 0.037 0.021 0.025
+ 	  14 0 010:000:02 010:002:06 00:00  2.12 -4.38 0.00 |  7.50  6.70 1.10 | 0.007 0.065 0.005
+ 	  16 0 009:007:04 010:003:04 00:00  5.90 -5.90 0.00 |  8.66  6.84 1.70 | 0.019 0.085 0.027
+ 	  19 0 009:006:04 010:004:04 00:00  8.32 -6.83 0.00 |  8.78  8.55 6.65 | 0.026 0.066 0.024
+ 	  21 0 009:005:05 010:005:03 00:00  8.96 -8.75 0.00 | 12.38  8.74 5.16 | 0.008 0.045 0.008
+ 	  23 0 009:004:04 010:006:04 00:00 12.23 -5.98 0.00 |  7.03  4.49 1.40 | 0.019 0.034 0.010
+ 	  26 0 009:003:04 010:007:04 00:00 17.42 -4.36 0.00 | 13.92 10.11 1.80 | 0.025 0.037 0.028
 .br
 Here the first column indicates the crossing which contains the tie point,
 and the second column shows which tie point (of those defined for that
 crossing) is displayed in a particular line. The third and fourth columns
 identify the navigation control points of the tie point. The navigation
 control points are specified by file, section, and nav point numbers separated
-by ":". The fifth and sixth columns are the longitude and latitude offsets (in
-meters) set interactively by the user. These represent the distance the second
+by ":". The fifth through seventh columns are the longitude, latitude and vertical
+offsets (in meters) set interactively by the user. These represent the distance the second
 navigation control point must be moved relative to the first in order to make
-the bathymetry in the two swathes match. The last two columns are nonzero only
+the bathymetry in the two swaths match. The tenth through twelth columns show the 
+magnitude of the three axes of the uncertainly ellipsoid associated with each tie.
+The uncertainly ellipsoid is estimated as a 3x3 tensor and used to weight the tie
+offsets in the navigation adjustment inversion. Here the major and second axes are
+always close to horizontal, and the minor is axis is always close to vertical.
+The last three columns are nonzero only
 after an inversion for an optimal navigation solution has been performed. These
 represent the residual, or difference, between the offset calculated for this tie
 point in the inversion and that set by the user 
-(displayed in the fifth and sixth columns).
+(displayed in the fifth through seventh columns).
 
 If the file list is displayed and one file is selected by clicking in
 the list, then the user can fix or unfix the navigation of that file using
@@ -338,7 +505,7 @@ dismiss the window.
 .B Max Section Length (km)
 When \fBmbnavadjust\fP imports swath data, it breaks each data file
 up into a set of sections, or pieces. The geographical coverages of all sections 
-are then compared to determine where swathes overlap or cross. This control
+are then compared to determine where swaths overlap or cross. This control
 sets the section track length. The ideal section length varies with the sonar
 altitude and ping rate. If the section length is too short, there will be too
 many small sections and an excessive number of crossings to analyze. If the
@@ -373,10 +540,13 @@ This slider widget sets the depth interval in meters at which contours have
 downhill facing tickmarks. The tick interval should be a multiple of the contour
 interval.
 .TP
-.B Precision (m)
-This slider widget sets the target inversion precision in meters as measured
-by the standard deviation misfit of the tie point offsets. See the Details of 
-the Inversion section below to learn how this value affects the inversion.
+.B Inversion Smoothing
+This slider widget sets the importance of smoothing in the adjusted
+navigation model. Larger values yield a smoother model, smaller values a rougher model.
+The default is 4.00, and possible ranges are 0.10 to
+10.0, where the smoothing penalty weight applied to the first and
+second derivatives of the adjusted navigation perturbation is ten
+raised to this power.
 .TP
 .B Apply
 This button applies any changed values in the slider widgets of the \fBControls Window\fP.
@@ -387,13 +557,13 @@ changes to the values controlled by the sliders are lost.
 This button closes the \fBControls Window\fP.
 
 .SS Nav Err Window
-This window allows users to interactively inspect crossing swathes,
+This window allows users to interactively inspect crossing swaths,
 define navigation tie points where bathymetric features can be matched,
 and set the navigation offsets at those tie points. This window can
 be brought up in a number of ways. If one pulls down the
 menu option <Action->Analyze Crossings>, then the "Nav Error" window 
 will come up with the first crossing loaded. Alternatively, if the
-<View->Show Crossings> menu item has been selected so that a table of
+<View->Show All Crossings> menu item has been selected so that a table of
 crossings is displayed, clicking once on any of the crossing items in
 this tabel will bring up the  "Nav Error" window with that crossing loaded.
 Similarly, if tie points have been established and the tie point table
@@ -404,21 +574,25 @@ and load the crossing that includes the selected tie point. If the
 in the display tables will load the selected crossing in place of whatever
 crossing was previously shown.
 
-The Nav Err window includes a number of button widgets and two display
+The Nav Err window includes a number of button widgets and three display
 canvases. The larger display to the right shows bathymetric contour maps
-of the overlapping swathes overlain by navigation tracks and any tie points
+of the overlapping swaths overlain by navigation tracks and any tie points
 that have been defined for the current crossing. The smaller canvas on the
-lower left shows the RMS bathymetry misfit between the two swathes. 
+middle left shows the RMS bathymetry misfit between the two swaths as a
+function of lateral (x and y) offset using the current vertical (z)offset. The
+smallest canvas on the lower left shows the RMS Bathymetry misfit between
+the two swaths as a function of vertical offset using the current
+lateral offset.
 
 .TP
 .B Contour Display
 This canvas displays color bathymetric contours from both overlapping
-swathes in the current swath crossing. Initially, the display is scaled
+swaths in the current swath crossing. Initially, the display is scaled
 so that the entire area covered by the current crossing is visible. The 
 bathymetric contours of the second swath can be moved relative to those
 of the first by dragging with the left mouse button in the canvas. The
 current navigational offset changes as the contours shift. The location 
-of the current offset also changes simultaneously on the misfit plot. The
+of the current lateral offset also changes simultaneously on the misfit plot. The
 user can display a subregion of the current map by dragging a rectangle in the canvas 
 with the middle mouse button. This zoom operation can be repeated as many times
 as desired. The right mouse button is used to set the location of the current
@@ -428,10 +602,11 @@ that position are selected for the current tie point. In practice, the user
 should right-click on the bathymetric feature being matched to set the
 tie point correctly.
 .TP
-.B Misfit Display
+.B Lateral Misfit Display
 This canvas shows a color two dimensional plot of the RMS bathymetric misfit
-between the two overlapping swathes. The misfit is shown as a function
-of relative lateral offsets between the two  swathes.  Put
+between the two overlapping swaths. The misfit is shown as a function
+of relative lateral (x and y) offsets between the two  swaths using the
+current vertical (z) offset.  Put
 another  way,  the misfit plot shows how good, or bad, the
 misfit becomes as one moves one swath relative to another.
 The  lowest misfit values are shown in red; higher misfits
@@ -440,9 +615,28 @@ misfit  is  marked by a black "X", and the location of the
 current navigation offset is shown by a small  red  square
 with a black outline. If an inversion has been performed, a
 small black "+" will mark the location of the offset calculated
-by the inversion. If a user clicks in the Misfit Display, the
+by the inversion. If a user left-clicks in the Lateral Misfit Display, the
 location of the cursor is taken as the new navigation offset
 and the red square moves to that location. Simultaneously, the
+bathymetric contours in the Contour Display shift to reflect
+the new offset.
+.TP
+.B Vertical Misfit Display
+This canvas shows a color profile plot of the RMS bathymetric misfit
+between the two overlapping swaths. The misfit is shown as a function
+of relative vertical (z) offset between the two  swaths using the
+current lateral (x andy) offsets.  Put
+another  way,  the misfit plot shows how good, or bad, the
+misfit becomes as one moves one swath vertically relative to another.
+The  lowest misfit values are shown in red and as high points
+in the profile; higher misfits
+are shown in blues to purples and as low points. The location of the minimum
+misfit  is  marked by a black "X", and the location of the
+current vertical offset is shown by a solid line. If an inversion has been performed, a
+small black "+" will mark the location of the offset calculated
+by the inversion. If a user left-clicks in the Vertical Misfit Display, the
+location of the cursor is taken as the new vertical offset
+and the solid line moves to that location. Simultaneously, the
 bathymetric contours in the Contour Display shift to reflect
 the new offset.
 .TP
@@ -467,20 +661,25 @@ Clicking this button causes the Nav Err window to load and display the next cros
 .TP
 .B Next Unset
 Clicking this button causes the Nav Err window to load and display the next crossing which
-has no tie points set and has not been explicitely skipped.
+has no tie points set and has not been explicitly skipped.
+.TP
+.B Skip Crossing
+This button indicates that no good tie points can be defined for the current crossing.
+The program \fBmbnavadjust\fP will not allow an inversion to be calculated until all true crossings
+either have tie points defined or have been explicitly skipped.
 .TP
 .B Full Size
 Clicking this button causes the contour display to resize so that it shows the entire area
 covered by the swath sections in the current crossing.
 .TP
-.B Select Tie
-If more than one navigation tie point has been defined for a crossing,
-then only one tie point can be active at any time. The navigation control points of the
-active tie points will be displayed as red boxes, and those of any inactive
-tie points will be shown as smaller red boxes. This button changes the active tie point.
-Repeatedly clicking this button will cycle through all of the tie points in the
-current crossing. Note that each tie point has its own offset defined, so in general
-the positions of the bathymetric contours will change as the active tie point changes.
+.B Unset Crossing
+This button returns the current crossing to the original unset state, deleting any ties that
+have been set.
+.TP
+.B Reset Crossing
+This button is active only if a tie has been set for the current crossing. If a tie exists,
+and the user has changed the current offset from that of the current tie, then this button
+returns the working offset values to that of the existing tie.
 .TP
 .B Set Offset
 This very important button causes the current navigational offset to be set for the
@@ -491,32 +690,42 @@ whatever navigational offset was viewed will be lost. Tie points are displayed i
 once they are set, and in red when either the navigational offset or the navigation
 points have been changed but not yet set.
 .TP
-.B Zero Offset
-This button sets the current navigational offset to zero meters longitude and zero meters latitude.
+.B Zero Z Offset
+This button sets the current vertical offset to zero meters.
 .TP
 .B Add Tie
 This button adds a new tie point for the current crossing and makes this new tie point
 active. The tie point initially adopts the current navigational offset.
 .TP
+.B Zero Offset
+This button sets the current navigational offset to zero meters for longitude, latitude, and vertical.
+.TP
+.B Select Tie
+If more than one navigation tie point has been defined for a crossing,
+then only one tie point can be active at any time. The navigation control points of the
+active tie points will be displayed as red boxes, and those of any inactive
+tie points will be shown as smaller red boxes. This button changes the active tie point.
+Repeatedly clicking this button will cycle through all of the tie points in the
+current crossing. Note that each tie point has its own offset defined, so in general
+the positions of the bathymetric contours will change as the active tie point changes.
+.TP
 .B Delete Tie
 This button deletes the current active tie point.
-.TP
-.B Skip Crossing
-This button indicates that no good tie points can be defined for the current crossing.
-The program \fBmbnavadjust\fP will not allow an inversion to be calculated until all crossings
-either have tie points defined or have been explicitely skipped.
-.TP
-.B Reset Offset
-This button resets the working or current navigational offset to that saved for the current
-crossing and active tie point.
 .TP
 .B Dismiss
 This button closes the Nav Err window.
 .TP
 .B Minimum Misfit
 This button shifts the current offset to the value identified as the minimum misfit in
-the current misfit display. The minimum misfit is always shown as a black X on the 
-color misfit plot.
+the current misfit display. The minimum misfit is shown as the large black X on the 
+color lateral misfit plot and on the vertical misfit profile.
+.TP
+.B Minimum XY Misfit
+This button shifts the current lateral offset to the values identified as the minimum lateral misfit in
+the current misfit display. The vertical offset is not changed. The minimum lateral 
+misfit is shown as the small black X on the lateral misfit plot. This button is generally
+used when the data are already corrected for all vertical offsets (e.g. tides), and so
+all z offsets can be confined to zero values. 
 .TP
 .B Center on Zero Offset
 This button causes the misfit plot to be regenerated using a zero navigational offset as the plot origin.
@@ -608,7 +817,7 @@ of the interactively defined navigation tie points. If no swath data has
 yet been imported, then the all of the tables will be empty. Once some data
 files are imported, the swath file table will have entries and
 some number of crossings will be defined (assuming that 
-swathes do overlap and cross), but no tie points will yet be defined.
+swaths do overlap and cross), but no tie points will yet be defined.
 
 In order to import swath data into an \fBmbnavadjust\fP project,
 pull down the <File->Import Swath Data> menu item. A file selection
@@ -633,15 +842,18 @@ compared to the other sections. Any pair of sections that overlap
 is added to a list of crossings to be investigated graphically. This list
 can be displayed by pulling down the <View->Show Crossings> menu item.
 
-As the user later works through the crossings, he or she will will define tie points
-whenever the overlapping bathymetry allows the navigational offset
-to be determined reliably. Each tie point will reference two of the navigation
-control points, one from each swath in the crossing. 
+As the user later works through the crossings, he or she will will define 
+tie points whenever the overlapping bathymetry allows the navigational offset
+to be determined reliably in three dimensions. Each tie point will reference 
+two of the navigation control points, one from each swath in the crossing. 
 Ultimately, some crossings will allow one, or in some case multiple tie 
 points to be defined. Other crossings will still have no tie points, either
-because the swathes don't really overlap or because there aren't any
+because the swaths don't really overlap or because there aren't any
 distinctive features to match. When all of the crossings have been inspected, 
 then the user can invoke inversion for an optimal navigation solution. 
+In cases where the data are known to be already corrected for vertical offsets,
+such as tides, then the user can uniformly set the vertical (z) components of
+offsets to zero.
 
 .SH USING MBNAVADJUST 2: INSPECTING CROSSINGS
 
@@ -663,13 +875,6 @@ and load the crossing that includes the selected tie point. If the
 in the display tables will load the selected crossing in place of whatever
 crossing was previously shown.
 
-The speed with which crossing are loaded into the "Nav Err" window is
-considerably limited by the contouring calculations. The <Action->Generate Contours>
-option causes \fBMBnavadjust\fP to pre-calculate the contours for all of
-the crossings using the current contour interval settings. This option is
-initially time consuming, but greatly increases the speed of interactively
-analyzing the crossings.
-
 Once the "Nav Err" window is displayed, the user can also move through
 the crossings by clicking on the <Previous>, <Next>, and <Next Unset>
 buttons. The <Previous> and <Next> buttons will load the previous or
@@ -685,25 +890,27 @@ To close the "Nav Err" window, click the <Dismiss> button.
 The "Nav Error" window is complicated in appearance, and
 regrettably complicated in function also.
 The purpose is to allow the user to determine if any seafloor features
-can be confidently matched in the overlapping swathes. If so, one or more
+can be confidently matched in the overlapping swaths. If so, one or more
 tie points can be defined. In order to ease the identification of matching
 features, two simultaneous displays are provided. 
 The larger plot on the right consists of overlain
-bathymetric contours derived from each of the two swathes. The smaller
+bathymetric contours derived from each of the two swaths. The smaller
 canvas on the left shows a color two dimensional plot 
-of the RMS misfit between the two swathes. The misfit is shown
-as a function of relative lateral offsets between the two swathes. Put another
+of the RMS misfit between the two swaths. The misfit is shown
+as a function of relative lateral offsets between the two swaths. Put another
 way, the misfit plot shows how good, or bad, the misfit becomes as one moves
 one swath relative to another. The lowest misfit values are shown in red; higher
-misfits are shown in blues to purples. The location of the minimum misfit is
-marked by a black "X", and the location of the current navigation offset is
+misfits are shown in blues to purples. The location of the global (three dimensional)
+minimum misfit is marked by the large black "X", the location of the minimum misfit
+using the current vertical offset value is marked by a small black "x", 
+and the location of the current navigation offset is
 shown by a small red square with a black outline.
 
 The interactive aspect of the "Nav Error" window works simultaneously
 in both displays. If the user holds down the left mouse button in the
 contour plot and moves the cursor, the bathymetry contours from one swath
 will move along with the cursor. In this way, the user can move one of the
-swathes around relative to the other until the contours line up and features
+swaths around relative to the other until the contours line up and features
 match. As the contours move, the red square showing the current offset location
 also moves on the misfit plot. The user can thus visually relate the contour matching
 to the misfit function. The combination of these two displays greatly improves
@@ -727,7 +934,7 @@ at the center of the plot, corresponding to an offset that is zero distance in
 both the east-west and north-south directions. If the navigation is bad, then
 the misfit minimum will be offset from the origin, and the offset vector
 will correspond to how far and what direction one must move one swath so that
-the features in both swathes match. In cases where there is no distinctive
+the features in both swaths match. In cases where there is no distinctive
 seafloor feature to match, the misfit plot will not display a strong
 minimum and it will be impossible to determine the relative navigational
 offset. Alternatively, the existence of multiple similar features can
@@ -745,7 +952,7 @@ The creation and manipulation of tie points is discussed in detail in a later se
 
 It is also important to understand that any apparent navigation offset observed
 in the contour and misfit plots is relative. It may turn
-out that both swathes are poorly navigated and have to be moved, or that all
+out that both swaths are poorly navigated and have to be moved, or that all
 of the offset can be applied to one swath or the other. The set of decisions about
 how to distribute the relative navigation offsets among the affected swath files
 intrinsically involves speed and acceleration changes. Fortunately, 
@@ -771,7 +978,7 @@ are regenerated to show the smaller area.
 Users may zoom as many times in succession as
 desired. One cannot undo the individual zoom events, but clicking the <Full Size>
 button in the "Nav Err" window will cause the plots to show the original, full
-area covered by the two swathes in the current crossing.
+area covered by the two swaths in the current crossing.
 
 The misfit plot represents lateral offsets scaled according to the current
 contour plot display. Specifically, the width and height of the misfit plot
@@ -784,7 +991,7 @@ minimum and maximum misfit values.
 .SS Setting Crossing Ties and Offsets
 
 In order to actually set the relative navigational offset between two particular
-points on overlapping or crossing swathes, the user must first create a tie point.
+points on overlapping or crossing swaths, the user must first create a tie point.
 This is accomplished by clicking on the <Add Tie> button in the "Nav Err" window.
 Once a tie point exists, it will be shown on the contour plot as two 
 yellow or red-filled, black
@@ -824,7 +1031,7 @@ that include these soundings (that is, the navigation points associated with
 the sonar pings that include the closest soundings).
 
 In order to set, and save, a navigational offset that causes a bathymetric
-feature to be matched in overlapping swathes, the user must click the
+feature to be matched in overlapping swaths, the user must click the
 <Set Offset> button above the contour display. If a user changes 
 the active tie point or loads a different crossing
 without clicking <Set Tie>, then no offset information will be saved.
@@ -847,13 +1054,13 @@ an optimal navigation solution involves the following steps:
  	   of interest by dragging a box
  	   with the middle mouse button.
  	5. Adjust the offsets so that the 
- 	   feature is matched in both swathes 
+ 	   feature is matched in both swaths 
  	   (operating in the contour display, 
  	   the misfit display, or both).
  	6. Click the <Set Offset> button.
 .br
 These steps should be followed for every feature that can be matched
-in overlapping swathes. 
+in overlapping swaths. 
 
 In some cases, the user will find it useful
 to create and set multiple tie points in a single crossing. Other crossings
@@ -871,19 +1078,20 @@ changed without restriction. Users may also quit \fBmbnavadjust\fP
 and then later reopen the same project without losing any
 information.
 
-.SS Setting Fixed Files
+.SS Setting Good, Poor and Fixed Navigation
 
-In some instances, users will wish to fix certain datafiles so that the
-navigation cannot be changed. This allows one to adjust the navigation
-of the unfixed swath files so that the features match those of the fixed
-files. In order to fix a swath file, the user first displays the table
-of imported swath files in the main window by pulling down the 
-<View->Show Data Files> menu option. The word "fixed" will be in the
-table row for any file that has already been fixed. If a user selects
-an unfixed file in the table, then pulling down the <Action->Fix File> 
-menu option will, not surprisingly, fix the file. Similarly, selecting 
-a fixed file and then pulling down the <Action->Unfix File> menu option 
-will unfix that file.
+The adjusted navigation model produced by \fBMBnavadjust\fP should be
+accurate to the bathymetric resolution in a relative sense, but fitting
+a set of relative offset ties does not provide constraints on the global
+location of the survey data. \fBMBnavadjust\fP provides two means to
+control the global location of the adjusted navigation. First, the global
+location of the model is essentially an average of the overall offsets
+associated with good navigation. Users may use the <Action->Set File Poor Navigation>
+menu item to set selected surveys or files to be ignored in setting the
+global model. Second, if certain data files are thought to have correct
+navigation, they can be fixed (e.g. to have zero adjustment) using the
+<Action->Set File Fixed Navigation> menu item. In this case, all of the
+non-fixed files are adjusted relative to the fixed files.
 
 .SH USING MBNAVADJUST 3: INVERTING FOR AN OPTIMAL NAVIGATION SOLUTION
 
@@ -1187,5 +1395,6 @@ Parker, R. L., \fBGeophysical Inverse Theory\fP, Princeton University Press, Pri
 \fBmbnavedit\fP(l), \fBmbset\fP(l)
 
 .SH BUGS
-It's too new to be bulletproof.
+It used to be too new to be bulletproof, now its too complicated to be bulletproof.
+Good luck.
 

@@ -46,8 +46,8 @@ LIBDIR = ../../lib
 INCDIR = ../../include
 
 # *** CHANGE THESE TO FIT YOUR LOCAL ENVIRONMENT ***
-# 
-# Compilers 
+#
+# Compilers
 CC = cc
 #
 # Compile and load flags:
@@ -58,16 +58,16 @@ ARCHIVE = ar rcv
 
 ### make all makes the gsf library, man page, and associated include files
 all:	$(LIBDIR)/libmbgsf.a \
-	$(INCDIR)/gsf.h $(INCDIR)/gsf.h 
+	$(INCDIR)/gsf.h $(INCDIR)/gsf.h
 
 ### make clean removes the object files
 clean:
 	rm -f *.o
 
 ### put together the library
-$(LIBDIR)/libmbgsf.a:	gsf.o gsf_dec.o gsf_enc.o gsf_indx.o
+$(LIBDIR)/libmbgsf.a:	gsf.o gsf_dec.o gsf_enc.o gsf_indx.o gsf_info.o
 	$(ARCHIVE) $(LIBDIR)/libmbgsf.a \
-		gsf.o gsf_dec.o gsf_enc.o gsf_indx.o
+		gsf.o gsf_dec.o gsf_enc.o gsf_indx.o gsf_info.o
 	ranlib $(LIBDIR)/libmbgsf.a
 
 ### compile the source files
@@ -79,6 +79,8 @@ gsf_enc.o:  gsf_enc.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
 	$(CC) -c $(CFLAGS) gsf_enc.c
 gsf_indx.o: gsf_indx.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
 	$(CC) -c $(CFLAGS) gsf_indx.c
+gsf_info.o: gsf_info.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
+	$(CC) -c $(CFLAGS) gsf_info.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/gsf.h:	gsf.h

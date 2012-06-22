@@ -2,7 +2,7 @@
  *    The MB-system:	mb_rt.c	11/14/94
  *    $Id$
  *
- *    Copyright (c) 1994-2009 by
+ *    Copyright (c) 1994-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -62,14 +62,17 @@
 #define	MB_RT_GRADIENT_TOLERANCE    0.00001
 #define	MB_RT_LAYER_HOMOGENEOUS	    0
 #define	MB_RT_LAYER_GRADIENT	    1
-#define	MB_RT_ERROR 0
-#define	MB_RT_DOWN 1
-#define	MB_RT_UP 2
-#define	MB_RT_DOWN_TURN 3
-#define	MB_RT_UP_TURN 4
-#define	MB_RT_OUT_BOTTOM 5
-#define	MB_RT_OUT_TOP 6
-#define	MB_RT_NUMBER_SEGMENTS 5
+#define	MB_RT_ERROR		0
+#define	MB_RT_DOWN		1
+#define	MB_RT_UP		2
+#define	MB_RT_DOWN_TURN		3
+#define	MB_RT_UP_TURN		4
+#define	MB_RT_OUT_BOTTOM	5
+#define	MB_RT_OUT_TOP		6
+#define	MB_RT_NUMBER_SEGMENTS	5
+#define MB_RT_PLOT_MODE_OFF		0
+#define MB_RT_PLOT_MODE_ON 		1
+#define MB_RT_PLOT_MODE_TABLE		2
 #define	MB_SSV_NO_USE	    0
 #define	MB_SSV_CORRECT	    1
 #define	MB_SSV_INCORRECT    2
@@ -77,6 +80,7 @@
 /* velocity model structure */
 struct	velocity_model
 	{
+	/* velocity model */
 	int	number_node;
 	double	*depth;
 	double	*velocity;
@@ -88,32 +92,35 @@ struct	velocity_model
 	double	*layer_depth_bottom;
 	double	*layer_vel_top;
 	double	*layer_vel_bottom;
+	
+	/* raytracing bookkeeping variables */
+	int	ray_status;
+	int	done;
+	int	outofbounds;
+	int	layer;
+	int	turned;
+	int	plot_mode;
+	int	number_plot_max;
+	int	number_plot;
+	int	sign_x;
+	double	xx;
+	double	zz;
+	double	xf;
+	double	zf;
+	double	tt;
+	double	dt;
+	double	tt_left;
+	double	vv_source;
+	double	pp;
+	double	xc;
+	double	zc;
+	double	radius;
+	double	*xx_plot;
+	double	*zz_plot;
 	};
 	
 /* global raytrace values */
 static struct velocity_model *model;
-static int	ray_status;
-static int	done;
-static int	outofbounds;
-static int	layer;
-static int	turned;
-static int	number_plot_max;
-static int	number_plot;
-static int	sign_x;
-static double	xx;
-static double	zz;
-static double	xf;
-static double	zf;
-static double	tt;
-static double	dt;
-static double	tt_left;
-static double	vv_source;
-static double	pp;
-static double	xc;
-static double	zc;
-static double	radius;
-static double	*xx_plot;
-static double	*zz_plot;
 
 int mb_rt_init(int verbose, int number_node, 
 		double *depth, double *velocity, 
@@ -212,6 +219,31 @@ int mb_rt_init(int verbose, int number_node,
 			model->layer_depth_center[i] = 0.0;
 			}
 		}
+	
+	/* initialize raytracing bookkeeping variables */
+	model->ray_status = 0;
+	model->done = 0;
+	model->outofbounds = 0;
+	model->layer = 0;
+	model->turned = 0;
+	model->plot_mode = 0;
+	model->number_plot_max = 0;
+	model->number_plot = 0;
+	model->sign_x = 0;
+	model->xx = 0.0;
+	model->zz = 0.0;
+	model->xf = 0.0;
+	model->zf = 0.0;
+	model->tt = 0.0;
+	model->dt = 0.0;
+	model->tt_left = 0.0;
+	model->vv_source = 0.0;
+	model->pp = 0.0;
+	model->xc = 0.0;
+	model->zc = 0.0;
+	model->radius = 0.0;
+	model->xx_plot = NULL;
+	model->zz_plot = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -317,28 +349,28 @@ int mb_rt(int verbose, void *modelptr,
 		}
 
 	/* prepare the ray */
-	layer = -1;
+	model->layer = -1;
 	for (i=0;i<model->number_layer;i++)
 		{
 		if (source_depth >= model->layer_depth_top[i] 
 			&& source_depth <= model->layer_depth_bottom[i])
-			layer = i;
+			model->layer = i;
 		}
-	if (verbose > 0 && layer == -1)
+	if (verbose > 0 && model->layer == -1)
 		{
 		fprintf(stderr,"\nError in MBIO function <%s>\n",
 			function_name);
 		fprintf(stderr,"Ray source depth not within model!!\n");
 		fprintf(stderr,"Raytracing terminated with error!!\n");
 		}
-	if (layer == -1)
+	if (model->layer == -1)
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_PARAMETER;
 		return(status);
 		}
-	vv_source = model->layer_vel_top[layer] 
-		+ model->layer_gradient[layer]*(source_depth - model->layer_depth_top[layer]);
+	model->vv_source = model->layer_vel_top[model->layer] 
+		+ model->layer_gradient[model->layer]*(source_depth - model->layer_depth_top[model->layer]);
 
 	/* reset takeoff angle because of surface sound velocity change:
 	    ssv_mode == MB_SSV_NO_USE:
@@ -359,53 +391,70 @@ int mb_rt(int verbose, void *modelptr,
 	 */
 	if (ssv_mode == MB_SSV_CORRECT && surface_vel > 0.0)
 		{
-		pp = sin(DTR*source_angle)/surface_vel;
-		vel_ratio = MIN(1.0, pp * vv_source);
+		model->pp = sin(DTR*source_angle)/surface_vel;
+		vel_ratio = MIN(1.0, model->pp * model->vv_source);
 		source_angle = asin(vel_ratio) * RTD;
 		}
 	else if (ssv_mode == MB_SSV_INCORRECT && surface_vel > 0.0)
 		{
 		diff_angle = source_angle - null_angle;
-		pp = sin(DTR*diff_angle)/surface_vel;
-		vel_ratio = MIN(1.0, pp * vv_source);
+		model->pp = sin(DTR*diff_angle)/surface_vel;
+		vel_ratio = MIN(1.0, model->pp * model->vv_source);
 		diff_angle = asin(vel_ratio) * RTD;
 		source_angle = null_angle + diff_angle;
 		}
 
 	/* now initialize ray */
 	if (source_angle > 0.0)
-		sign_x = 1;
+		model->sign_x = 1;
 	else
-		sign_x = -1;
+		model->sign_x = -1;
 	source_angle = fabs(source_angle);
-	pp = sin(DTR*source_angle)/vv_source;
+	model->pp = sin(DTR*source_angle)/model->vv_source;
 	if (source_angle < 90.0)
 		{
-		turned = MB_NO;
-		ray_status = MB_RT_DOWN;
+		model->turned = MB_NO;
+		model->ray_status = MB_RT_DOWN;
 		}
 	else
 		{
-		turned = MB_YES;
-		ray_status = MB_RT_UP;
+		model->turned = MB_YES;
+		model->ray_status = MB_RT_UP;
 		}
-	xx = 0.0;
-	zz = source_depth;
-	tt = 0.0;
-	tt_left = end_time;
-	outofbounds = MB_NO;
-	done = MB_NO;
+	model->xx = 0.0;
+	model->zz = source_depth;
+	model->tt = 0.0;
+	model->tt_left = end_time;
+	model->outofbounds = MB_NO;
+	model->done = MB_NO;
 
 	/* set up raypath plotting */
-	number_plot_max = nplot_max;
-	number_plot = 0;
-	if (number_plot_max > 0)
+	if (nplot_max > 0)
 		{
-		xx_plot = xplot;
-		zz_plot = zplot;
-		xx_plot[0] = xx;
-		zz_plot[0] = zz;
-		number_plot++;
+		model->plot_mode = MB_RT_PLOT_MODE_ON;
+		model->number_plot_max = nplot_max;
+		}
+	else if (nplot_max < 0)
+		{
+		model->plot_mode = MB_RT_PLOT_MODE_TABLE;
+		model->number_plot_max = -nplot_max;
+		}
+	else
+		{
+		model->plot_mode = MB_RT_PLOT_MODE_OFF;
+		model->number_plot_max = nplot_max;
+		}
+	model->number_plot = 0;
+	if (model->number_plot_max > 0)
+		{
+		model->xx_plot = xplot;
+		model->xx_plot[0] = model->xx;
+		if (model->plot_mode == MB_RT_PLOT_MODE_ON)
+			{
+			model->zz_plot = zplot;
+			model->zz_plot[0] = model->zz;
+			}
+		model->number_plot++;
 		}
 
 	/* print debug statements */
@@ -413,72 +462,71 @@ int mb_rt(int verbose, void *modelptr,
 		{
 		fprintf(stderr,"\ndbg2  About to trace ray in MB_RT function <%s> called\n",
 			function_name);
-		fprintf(stderr,"dbg2       xx:               %f\n",xx);
-		fprintf(stderr,"dbg2       zz:               %f\n",zz);
-		fprintf(stderr,"dbg2       layer:            %d\n",layer);
+		fprintf(stderr,"dbg2       xx:               %f\n",model->xx);
+		fprintf(stderr,"dbg2       zz:               %f\n",model->zz);
+		fprintf(stderr,"dbg2       layer:            %d\n",model->layer);
 		fprintf(stderr,"dbg2       layer_mode:       %d\n",
-			model->layer_mode[layer]);
-		fprintf(stderr,"dbg2       vv_source:        %f\n",vv_source);
-		fprintf(stderr,"dbg2       pp:               %f\n",pp);
-		fprintf(stderr,"dbg2       tt_left:          %f\n",tt_left);
+			model->layer_mode[model->layer]);
+		fprintf(stderr,"dbg2       vv_source:        %f\n",model->vv_source);
+		fprintf(stderr,"dbg2       pp:               %f\n",model->pp);
+		fprintf(stderr,"dbg2       tt_left:          %f\n",model->tt_left);
 		}
 
 	/* trace the ray */
-	while (!done && !outofbounds)
+	while (!model->done && !model->outofbounds)
 		{
 		/* trace ray through current layer */
-		if (model->layer_mode[layer] == MB_RT_LAYER_GRADIENT 
-			&& pp > 0.0)
+		if (model->layer_mode[model->layer] == MB_RT_LAYER_GRADIENT 
+			&& model->pp > 0.0)
 			status = mb_rt_circular(verbose, error);
-		else if (model->layer_mode[layer] == MB_RT_LAYER_GRADIENT)
+		else if (model->layer_mode[model->layer] == MB_RT_LAYER_GRADIENT)
 			status = mb_rt_vertical(verbose, error);
 		else
 			status = mb_rt_line(verbose, error);
 
 		/* update ray */
-		tt = tt + dt;
-		if (layer < 0)
+		model->tt = model->tt + model->dt;
+		if (model->layer < 0)
 			{
-			outofbounds = MB_YES;
-			ray_status = MB_RT_OUT_TOP;
+			model->outofbounds = MB_YES;
+			model->ray_status = MB_RT_OUT_TOP;
 			}
-		if (layer >= model->number_layer)
+		if (model->layer >= model->number_layer)
 			{
-			outofbounds = MB_YES;
-			ray_status = MB_RT_OUT_BOTTOM;
+			model->outofbounds = MB_YES;
+			model->ray_status = MB_RT_OUT_BOTTOM;
 			}
-		if (tt_left <= 0.0)
-			done = MB_YES;
+		if (model->tt_left <= 0.0)
+			model->done = MB_YES;
 
 		/* print debug statements */
 		if (verbose >= 2)
 			{
-			fprintf(stderr,"\ndbg2  Done with ray iteration in MB_RT function <%s>\n",
+			fprintf(stderr,"\ndbg2  model->done with ray iteration in MB_RT function <%s>\n",
 				function_name);
-			fprintf(stderr,"dbg2       xx:               %f\n",xx);
-			fprintf(stderr,"dbg2       zz:               %f\n",zz);
-			fprintf(stderr,"dbg2       xf:               %f\n",xf);
-			fprintf(stderr,"dbg2       zf:               %f\n",zf);
-			fprintf(stderr,"dbg2       layer:            %d\n",layer);
-			fprintf(stderr,"dbg2       layer_mode:       %d\n",
-				model->layer_mode[layer]);
-			fprintf(stderr,"dbg2       tt:               %f\n",tt);
-			fprintf(stderr,"dbg2       dt:               %f\n",dt);
-			fprintf(stderr,"dbg2       tt_left:          %f\n",tt_left);
+			fprintf(stderr,"dbg2       xx:               %f\n",model->xx);
+			fprintf(stderr,"dbg2       zz:               %f\n",model->zz);
+			fprintf(stderr,"dbg2       xf:               %f\n",model->xf);
+			fprintf(stderr,"dbg2       zf:               %f\n",model->zf);
+			fprintf(stderr,"dbg2       layer:            %d\n",model->layer);
+			fprintf(stderr,"dbg2       layer_mode:       %d\n",model->layer_mode[model->layer]);
+			fprintf(stderr,"dbg2       tt:               %f\n",model->tt);
+			fprintf(stderr,"dbg2       dt:               %f\n",model->dt);
+			fprintf(stderr,"dbg2       tt_left:          %f\n",model->tt_left);
 			}
 
 		/* reset position */
-		xx = xf;
-		zz = zf;
+		model->xx = model->xf;
+		model->zz = model->zf;
 		}
 
 	/* report results */
-	*x = xx;
-	*z = zz;
-	*travel_time = tt;
-	*ray_stat = ray_status;
-	if (number_plot_max > 0)
-		*nplot = number_plot;
+	*x = model->xx;
+	*z = model->zz;
+	*travel_time = model->tt;
+	*ray_stat = model->ray_status;
+	if (model->number_plot_max > 0)
+		*nplot = model->number_plot;
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -514,17 +562,17 @@ int mb_rt_circular(int verbose, int *error)
 		}
 
 	/* decide which case to use */
-	if (turned == MB_NO && model->layer_gradient[layer] > 0.0)
+	if (model->turned == MB_NO && model->layer_gradient[model->layer] > 0.0)
 		status = mb_rt_quad1(verbose, error);
-	else if (turned == MB_NO)
+	else if (model->turned == MB_NO)
 		status = mb_rt_quad3(verbose, error);	
-	else if (turned == MB_YES && model->layer_gradient[layer] > 0.0)
+	else if (model->turned == MB_YES && model->layer_gradient[model->layer] > 0.0)
 		status = mb_rt_quad2(verbose, error);	
-	else if (turned == MB_YES)
+	else if (model->turned == MB_YES)
 		status = mb_rt_quad4(verbose, error);
 
 	/* put points in plotting arrays */
-	if (number_plot_max > 0)
+	if (model->number_plot_max > 0)
 		status = mb_rt_plot_circular(verbose, error);
 
 	/* print output debug statements */
@@ -560,94 +608,94 @@ int mb_rt_quad1(int verbose, int *error)
 		}
 
 	/* find circular path */
-	radius = fabs(1.0 / (pp * model->layer_gradient[layer]));
-	zc = model->layer_depth_center[layer];
-	xc = xx + sqrt(radius * radius - (zz - zc) * (zz - zc));
-	vi = model->layer_vel_top[layer] 
-		+ (zz - model->layer_depth_top[layer]) 
-		* model->layer_gradient[layer];
-	ip = 1.0 / pp;
+	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
+	model->zc = model->layer_depth_center[model->layer];
+	model->xc = model->xx + sqrt(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
+	vi = model->layer_vel_top[model->layer] 
+		+ (model->zz - model->layer_depth_top[model->layer]) 
+		* model->layer_gradient[model->layer];
+	ip = 1.0 / model->pp;
 	ipvi = ip/vi;
 	beta = log(ipvi + sqrt(ipvi * ipvi - 1.0));
 
 	/* Check if ray turns in layer */
-	if (zc + radius < model->layer_depth_bottom[layer])
+	if (model->zc + model->radius < model->layer_depth_bottom[model->layer])
 		{
 		/* ray can turn in this layer */
-		dt = fabs(beta / model->layer_gradient[layer]);
+		model->dt = fabs(beta / model->layer_gradient[model->layer]);
 
 		/* raypath ends before turning */
-		if (dt >= tt_left)
+		if (model->dt >= model->tt_left)
 			{
-			mb_rt_get_depth(verbose, beta, -1, 1, &zf, error);
-			xf = xc - sqrt(radius * radius 
-				- (zf - zc) * (zf - zc));
-			dt = tt_left;
-			tt_left = 0.0;
+			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
+			model->xf = model->xc - sqrt(model->radius * model->radius 
+				- (model->zf - model->zc) * (model->zf - model->zc));
+			model->dt = model->tt_left;
+			model->tt_left = 0.0;
 			}
 
 		/* raypath turns */
 		else
 			{
-			ivf = 1.0 / model->layer_vel_top[layer];
-			dt = fabs((log(ip * ivf + 
-				ip * sqrt(ivf * ivf - pp * pp)) + beta)
-				/ model->layer_gradient[layer]);
+			ivf = 1.0 / model->layer_vel_top[model->layer];
+			model->dt = fabs((log(ip * ivf + 
+				ip * sqrt(ivf * ivf - model->pp * model->pp)) + beta)
+				/ model->layer_gradient[model->layer]);
 
 			/* ray turns and exits layer before 
 				exhausting tt_left */
-			if (dt <= tt_left)
+			if (model->dt <= model->tt_left)
 				{
-				turned = MB_YES;
-				ray_status = MB_RT_UP_TURN;
-				zf = model->layer_depth_top[layer];
-				xf = xc + sqrt(radius * radius 
-					- (zf - zc) * (zf - zc));
-				tt_left = tt_left - dt;
-				layer--;
+				model->turned = MB_YES;
+				model->ray_status = MB_RT_UP_TURN;
+				model->zf = model->layer_depth_top[model->layer];
+				model->xf = model->xc + sqrt(model->radius * model->radius 
+					- (model->zf - model->zc) * (model->zf - model->zc));
+				model->tt_left = model->tt_left - model->dt;
+				model->layer--;
 				}
 			/* ray turns and exhausts tt_left 
 				before exiting layer */
-			else if (dt > tt_left)
+			else if (model->dt > model->tt_left)
 				{
-				turned = MB_YES;
-				ray_status = MB_RT_UP_TURN;
-				mb_rt_get_depth(verbose, beta, 1, -1, &zf, error);
-				xf = xc + sqrt(radius * radius 
-					- (zf - zc) * (zf - zc));
-				dt = tt_left;
-				tt_left = 0.0;
+				model->turned = MB_YES;
+				model->ray_status = MB_RT_UP_TURN;
+				mb_rt_get_depth(verbose, beta, 1, -1, &model->zf, error);
+				model->xf = model->xc + sqrt(model->radius * model->radius 
+					- (model->zf - model->zc) * (model->zf - model->zc));
+				model->dt = model->tt_left;
+				model->tt_left = 0.0;
 				}
 			}
 		}
 	else
 		{
 		/* ray cannot turn in this layer */
-		ivf = 1.0 / model->layer_vel_bottom[layer];
-		dt = fabs((log(ip * ivf + 
-			ip * sqrt(ivf * ivf - pp * pp)) - beta)
-			/ model->layer_gradient[layer]);
+		ivf = 1.0 / model->layer_vel_bottom[model->layer];
+		model->dt = fabs((log(ip * ivf + 
+			ip * sqrt(ivf * ivf - model->pp * model->pp)) - beta)
+			/ model->layer_gradient[model->layer]);
 
 
 		/* ray exits layer before exhausting tt_left */
-		if (dt <= tt_left)
+		if (model->dt <= model->tt_left)
 			{
-			zf = model->layer_depth_bottom[layer];
-			xf = xc - sqrt(radius * radius 
-				- (zf - zc) * (zf - zc));
-			tt_left = tt_left - dt;
-			layer++;
+			model->zf = model->layer_depth_bottom[model->layer];
+			model->xf = model->xc - sqrt(model->radius * model->radius 
+				- (model->zf - model->zc) * (model->zf - model->zc));
+			model->tt_left = model->tt_left - model->dt;
+			model->layer++;
 			}
 		/* ray exhausts tt_left before exiting layer */
-		else if (dt > tt_left)
+		else if (model->dt > model->tt_left)
 			{
-			turned = MB_YES;
-			ray_status = MB_RT_UP_TURN;
-			mb_rt_get_depth(verbose, beta, -1, 1, &zf, error);
-			xf = xc - sqrt(radius * radius 
-				- (zf - zc) * (zf - zc));
-			dt = tt_left;
-			tt_left = 0.0;
+			model->turned = MB_YES;
+			model->ray_status = MB_RT_UP_TURN;
+			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
+			model->xf = model->xc - sqrt(model->radius * model->radius 
+				- (model->zf - model->zc) * (model->zf - model->zc));
+			model->dt = model->tt_left;
+			model->tt_left = 0.0;
 			}
 		}
 
@@ -684,39 +732,39 @@ int mb_rt_quad2(int verbose, int *error)
 		}
 
 	/* find circular path */
-	radius = fabs(1.0 / (pp * model->layer_gradient[layer]));
-	zc = model->layer_depth_center[layer];
-	xc = xx - sqrt(radius * radius - (zz - zc) * (zz - zc));
-	vi = model->layer_vel_top[layer] 
-		+ (zz - model->layer_depth_top[layer]) 
-		* model->layer_gradient[layer];
-	ip = 1.0 / pp;
+	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
+	model->zc = model->layer_depth_center[model->layer];
+	model->xc = model->xx - sqrt(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
+	vi = model->layer_vel_top[model->layer] 
+		+ (model->zz - model->layer_depth_top[model->layer]) 
+		* model->layer_gradient[model->layer];
+	ip = 1.0 / model->pp;
 	ipvi = ip/vi;
 	beta = log(ipvi + sqrt(ipvi * ipvi - 1.0));
 
 	/* Check if ray ends in layer */
-	ivf = 1.0 / model->layer_vel_top[layer];
-	dt = fabs((log(ip * ivf + 
-		ip * sqrt(ivf * ivf - pp * pp)) - beta)
-		/ model->layer_gradient[layer]);
+	ivf = 1.0 / model->layer_vel_top[model->layer];
+	model->dt = fabs((log(ip * ivf + 
+		ip * sqrt(ivf * ivf - model->pp * model->pp)) - beta)
+		/ model->layer_gradient[model->layer]);
 
 	/* ray exits layer before exhausting tt_left */
-	if (dt <= tt_left)
+	if (model->dt <= model->tt_left)
 		{
-		zf = model->layer_depth_top[layer];
-		xf = xc + sqrt(radius * radius 
-			- (zf - zc) * (zf - zc));
-		tt_left = tt_left - dt;
-		layer--;
+		model->zf = model->layer_depth_top[model->layer];
+		model->xf = model->xc + sqrt(model->radius * model->radius 
+			- (model->zf - model->zc) * (model->zf - model->zc));
+		model->tt_left = model->tt_left - model->dt;
+		model->layer--;
 		}
 	/* ray exhausts tt_left before exiting layer */
-	else if (dt > tt_left)
+	else if (model->dt > model->tt_left)
 		{
-		mb_rt_get_depth(verbose, beta, 1, 1, &zf, error);
-		xf = xc + sqrt(radius * radius 
-			- (zf - zc) * (zf - zc));
-		dt = tt_left;
-		tt_left = 0.0;
+		mb_rt_get_depth(verbose, beta, 1, 1, &model->zf, error);
+		model->xf = model->xc + sqrt(model->radius * model->radius 
+			- (model->zf - model->zc) * (model->zf - model->zc));
+		model->dt = model->tt_left;
+		model->tt_left = 0.0;
 		}
 
 	/* print output debug statements */
@@ -752,39 +800,39 @@ int mb_rt_quad3(int verbose, int *error)
 		}
 
 	/* find circular path */
-	radius = fabs(1.0 / (pp * model->layer_gradient[layer]));
-	zc = model->layer_depth_center[layer];
-	xc = xx - sqrt(radius * radius - (zz - zc) * (zz - zc));
-	vi = model->layer_vel_top[layer] 
-		+ (zz - model->layer_depth_top[layer]) 
-		* model->layer_gradient[layer];
-	ip = 1.0 / pp;
+	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
+	model->zc = model->layer_depth_center[model->layer];
+	model->xc = model->xx - sqrt(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
+	vi = model->layer_vel_top[model->layer] 
+		+ (model->zz - model->layer_depth_top[model->layer]) 
+		* model->layer_gradient[model->layer];
+	ip = 1.0 / model->pp;
 	ipvi = ip/vi;
 	beta = log(ipvi + sqrt(ipvi * ipvi - 1.0));
 
 	/* Check if ray ends in layer */
-	ivf = 1.0 / model->layer_vel_bottom[layer];
-	dt = fabs((log(ip * ivf + 
-		ip * sqrt(ivf * ivf - pp * pp)) - beta)
-		/ model->layer_gradient[layer]);
+	ivf = 1.0 / model->layer_vel_bottom[model->layer];
+	model->dt = fabs((log(ip * ivf + 
+		ip * sqrt(ivf * ivf - model->pp * model->pp)) - beta)
+		/ model->layer_gradient[model->layer]);
 
 	/* ray exits layer before exhausting tt_left */
-	if (dt <= tt_left)
+	if (model->dt <= model->tt_left)
 		{
-		zf = model->layer_depth_bottom[layer];
-		xf = xc + sqrt(radius * radius 
-			- (zf - zc) * (zf - zc));
-		tt_left = tt_left - dt;
-		layer++;
+		model->zf = model->layer_depth_bottom[model->layer];
+		model->xf = model->xc + sqrt(model->radius * model->radius 
+			- (model->zf - model->zc) * (model->zf - model->zc));
+		model->tt_left = model->tt_left - model->dt;
+		model->layer++;
 		}
 	/* ray exhausts tt_left before exiting layer */
-	else if (dt > tt_left)
+	else if (model->dt > model->tt_left)
 		{
-		mb_rt_get_depth(verbose, beta, 1, 1, &zf, error);
-		xf = xc + sqrt(radius * radius 
-			- (zf - zc) * (zf - zc));
-		dt = tt_left;
-		tt_left = 0.0;
+		mb_rt_get_depth(verbose, beta, 1, 1, &model->zf, error);
+		model->xf = model->xc + sqrt(model->radius * model->radius 
+			- (model->zf - model->zc) * (model->zf - model->zc));
+		model->dt = model->tt_left;
+		model->tt_left = 0.0;
 		}
 
 	/* print output debug statements */
@@ -820,94 +868,94 @@ int mb_rt_quad4(int verbose, int *error)
 		}
 
 	/* find circular path */
-	radius = fabs(1.0 / (pp * model->layer_gradient[layer]));
-	zc = model->layer_depth_center[layer];
-	xc = xx + sqrt(radius * radius - (zz - zc) * (zz - zc));
-	vi = model->layer_vel_top[layer] 
-		+ (zz - model->layer_depth_top[layer]) 
-		* model->layer_gradient[layer];
-	ip = 1.0 / pp;
+	model->radius = fabs(1.0 / (model->pp * model->layer_gradient[model->layer]));
+	model->zc = model->layer_depth_center[model->layer];
+	model->xc = model->xx + sqrt(model->radius * model->radius - (model->zz - model->zc) * (model->zz - model->zc));
+	vi = model->layer_vel_top[model->layer] 
+		+ (model->zz - model->layer_depth_top[model->layer]) 
+		* model->layer_gradient[model->layer];
+	ip = 1.0 / model->pp;
 	ipvi = ip/vi;
 	beta = log(ipvi + sqrt(ipvi * ipvi - 1.0));
 
 	/* Check if ray turns in layer */
-	if (zc - radius > model->layer_depth_top[layer])
+	if (model->zc - model->radius > model->layer_depth_top[model->layer])
 		{
 		/* ray can turn in this layer */
-		dt = fabs(beta / model->layer_gradient[layer]);
+		model->dt = fabs(beta / model->layer_gradient[model->layer]);
 
 		/* raypath ends before turning */
-		if (dt >= tt_left)
+		if (model->dt >= model->tt_left)
 			{
-			mb_rt_get_depth(verbose, beta, -1, 1, &zf, error);
-			xf = xc - sqrt(radius * radius 
-				- (zf - zc) * (zf - zc));
-			dt = tt_left;
-			tt_left = 0.0;
+			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
+			model->xf = model->xc - sqrt(model->radius * model->radius 
+				- (model->zf - model->zc) * (model->zf - model->zc));
+			model->dt = model->tt_left;
+			model->tt_left = 0.0;
 			}
 
 		/* raypath turns */
 		else
 			{
-			ivf = 1.0 / model->layer_vel_bottom[layer];
-			dt = fabs((log(ip * ivf + 
-				ip * sqrt(ivf * ivf - pp * pp)) + beta)
-				/ model->layer_gradient[layer]);
+			ivf = 1.0 / model->layer_vel_bottom[model->layer];
+			model->dt = fabs((log(ip * ivf + 
+				ip * sqrt(ivf * ivf - model->pp * model->pp)) + beta)
+				/ model->layer_gradient[model->layer]);
 
 			/* ray turns and exits layer before 
 				exhausting tt_left */
-			if (dt <= tt_left)
+			if (model->dt <= model->tt_left)
 				{
-				turned = MB_NO;
-				ray_status = MB_RT_DOWN_TURN;
-				zf = model->layer_depth_bottom[layer];
-				xf = xc + sqrt(radius * radius 
-					- (zf - zc) * (zf - zc));
-				tt_left = tt_left - dt;
-				layer++;
+				model->turned = MB_NO;
+				model->ray_status = MB_RT_DOWN_TURN;
+				model->zf = model->layer_depth_bottom[model->layer];
+				model->xf = model->xc + sqrt(model->radius * model->radius 
+					- (model->zf - model->zc) * (model->zf - model->zc));
+				model->tt_left = model->tt_left - model->dt;
+				model->layer++;
 				}
 			/* ray turns and exhausts tt_left 
 				before exiting layer */
-			else if (dt > tt_left)
+			else if (model->dt > model->tt_left)
 				{
-				turned = MB_NO;
-				ray_status = MB_RT_DOWN_TURN;
-				mb_rt_get_depth(verbose, beta, 1, -1, &zf, error);
-				xf = xc + sqrt(radius * radius 
-					- (zf - zc) * (zf - zc));
-				dt = tt_left;
-				tt_left = 0.0;
+				model->turned = MB_NO;
+				model->ray_status = MB_RT_DOWN_TURN;
+				mb_rt_get_depth(verbose, beta, 1, -1, &model->zf, error);
+				model->xf = model->xc + sqrt(model->radius * model->radius 
+					- (model->zf - model->zc) * (model->zf - model->zc));
+				model->dt = model->tt_left;
+				model->tt_left = 0.0;
 				}
 			}
 		}
 	else
 		{
 		/* ray cannot turn in this layer */
-		ivf = 1.0 / model->layer_vel_top[layer];
-		dt = fabs((log(ip * ivf + 
-			ip * sqrt(ivf * ivf - pp * pp)) - beta)
-			/ model->layer_gradient[layer]);
+		ivf = 1.0 / model->layer_vel_top[model->layer];
+		model->dt = fabs((log(ip * ivf + 
+			ip * sqrt(ivf * ivf - model->pp * model->pp)) - beta)
+			/ model->layer_gradient[model->layer]);
 
 
 		/* ray exits layer before exhausting tt_left */
-		if (dt <= tt_left)
+		if (model->dt <= model->tt_left)
 			{
-			zf = model->layer_depth_top[layer];
-			xf = xc - sqrt(radius * radius 
-				- (zf - zc) * (zf - zc));
-			tt_left = tt_left - dt;
-			layer--;
+			model->zf = model->layer_depth_top[model->layer];
+			model->xf = model->xc - sqrt(model->radius * model->radius 
+				- (model->zf - model->zc) * (model->zf - model->zc));
+			model->tt_left = model->tt_left - model->dt;
+			model->layer--;
 			}
 		/* ray exhausts tt_left before exiting layer */
-		else if (dt > tt_left)
+		else if (model->dt > model->tt_left)
 			{
-			turned = MB_YES;
-			ray_status = MB_RT_UP_TURN;
-			mb_rt_get_depth(verbose, beta, -1, 1, &zf, error);
-			xf = xc - sqrt(radius * radius 
-				- (zf - zc) * (zf - zc));
-			dt = tt_left;
-			tt_left = 0.0;
+			model->turned = MB_YES;
+			model->ray_status = MB_RT_UP_TURN;
+			mb_rt_get_depth(verbose, beta, -1, 1, &model->zf, error);
+			model->xf = model->xc - sqrt(model->radius * model->radius 
+				- (model->zf - model->zc) * (model->zf - model->zc));
+			model->dt = model->tt_left;
+			model->tt_left = 0.0;
 			}
 		}
 
@@ -945,13 +993,13 @@ int mb_rt_get_depth(int verbose, double beta, int dir_sign, int turn_sign,
 		}
 
 	/* find depth */
-	alpha = pp * exp(dir_sign * tt_left
-		* fabs(model->layer_gradient[layer]) 
+	alpha = model->pp * exp(dir_sign * model->tt_left
+		* fabs(model->layer_gradient[model->layer]) 
 		+ turn_sign*beta);
-	velf = 2 * alpha / (alpha * alpha + pp * pp);
-	*depth = model->layer_depth_top[layer] 
-		+ (velf - model->layer_vel_top[layer]) 
-		/ model->layer_gradient[layer];
+	velf = 2 * alpha / (alpha * alpha + model->pp * model->pp);
+	*depth = model->layer_depth_top[model->layer] 
+		+ (velf - model->layer_vel_top[model->layer]) 
+		/ model->layer_gradient[model->layer];
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -985,22 +1033,33 @@ int mb_rt_plot_circular(int verbose, int *error)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       verbose:          %d\n",verbose);
 		}
-
-	/* get angle range */
-	ai = atan2((xx - xc), (zz - zc));
-	af = atan2((xf - xc), (zf - zc));
-	dang = (af - ai)/MB_RT_NUMBER_SEGMENTS;
-
-	/* add points to plotting arrays */
-	for (i=0;i<MB_RT_NUMBER_SEGMENTS;i++)
+		
+	/* if full plot do circle segments */
+	if (model->plot_mode == MB_RT_PLOT_MODE_ON)
 		{
-		angle = ai + (i + 1) * dang;
-		if (number_plot < number_plot_max)
+		/* get angle range */
+		ai = atan2((model->xx - model->xc), (model->zz - model->zc));
+		af = atan2((model->xf - model->xc), (model->zf - model->zc));
+		dang = (af - ai)/MB_RT_NUMBER_SEGMENTS;
+
+		/* add points to plotting arrays */
+		for (i=0;i<MB_RT_NUMBER_SEGMENTS;i++)
 			{
-			xx_plot[number_plot] = sign_x * (xc + radius * sin(angle));
-			zz_plot[number_plot] = zc + radius * cos(angle);
-			number_plot++;
+			angle = ai + (i + 1) * dang;
+			if (model->number_plot < model->number_plot_max)
+				{
+				model->xx_plot[model->number_plot] = model->sign_x * (model->xc + model->radius * sin(angle));
+				model->zz_plot[model->number_plot] = model->zc + model->radius * cos(angle);
+				model->number_plot++;
+				}
 			}
+		}
+		
+	/* otherwise just add the layer end */
+	else if (model->plot_mode == MB_RT_PLOT_MODE_TABLE)
+		{
+		model->xx_plot[model->number_plot] = model->xf;
+		model->number_plot++;
 		}
 
 	/* print output debug statements */
@@ -1034,50 +1093,51 @@ int mb_rt_line(int verbose, int *error)
 		}
 
 	/* find linear path */
-	theta = asin(pp * model->layer_vel_top[layer]);
-	if (turned == MB_NO)
+	theta = asin(model->pp * model->layer_vel_top[model->layer]);
+	if (model->turned == MB_NO)
 		{
-		zf = model->layer_depth_bottom[layer];
+		model->zf = model->layer_depth_bottom[model->layer];
 		}
 	else
 		{
 		theta = theta + M_PI;
-		zf = model->layer_depth_top[layer];
+		model->zf = model->layer_depth_top[model->layer];
 		}
-	xvel = model->layer_vel_top[layer] * sin(theta);
-	zvel = model->layer_vel_top[layer] * cos(theta);
+	xvel = model->layer_vel_top[model->layer] * sin(theta);
+	zvel = model->layer_vel_top[model->layer] * cos(theta);
 	if (zvel != 0.0)
-		dt = (zf - zz) / zvel;
+		model->dt = (model->zf - model->zz) / zvel;
 	else
-		dt = 100 * tt_left;
+		model->dt = 100 * model->tt_left;
 
 	/* ray exhausts tt_left before exiting layer */
-	if (dt >= tt_left)
+	if (model->dt >= model->tt_left)
 		{
-		xf = xx + xvel * tt_left;
-		zf = zz + zvel * tt_left;
-		dt = tt_left;
-		tt_left = 0.0;
+		model->xf = model->xx + xvel * model->tt_left;
+		model->zf = model->zz + zvel * model->tt_left;
+		model->dt = model->tt_left;
+		model->tt_left = 0.0;
 		}
 
 	/* ray exits layer before exhausting tt_left */
 	else
 		{
-		xf = xx + xvel*dt;
-		zf = zz + zvel*dt;
-		tt_left = tt_left - dt;
-		if (turned == MB_YES)
-			layer--;
+		model->xf = model->xx + xvel*model->dt;
+		model->zf = model->zz + zvel*model->dt;
+		model->tt_left = model->tt_left - model->dt;
+		if (model->turned == MB_YES)
+			model->layer--;
 		else
-			layer++;
+			model->layer++;
 		}
 
 	/* put points in plotting arrays */
-	if (number_plot_max > 0 && number_plot < number_plot_max)
+	if (model->plot_mode != MB_RT_PLOT_MODE_OFF && model->number_plot < model->number_plot_max)
 		{
-		xx_plot[number_plot] = sign_x * xf;
-		zz_plot[number_plot] = zf;
-		number_plot++;
+		model->xx_plot[model->number_plot] = model->sign_x * model->xf;
+		if (model->plot_mode == MB_RT_PLOT_MODE_ON)
+			model->zz_plot[model->number_plot] = model->zf;
+		model->number_plot++;
 		}
 
 	/* print output debug statements */
@@ -1111,54 +1171,55 @@ int mb_rt_vertical(int verbose, int *error)
 		}
 
 	/* find linear path */
-	vi = model->layer_vel_top[layer] 
-		+ (zz - model->layer_depth_top[layer]) 
-		* model->layer_gradient[layer];
-	if (turned == MB_NO)
+	vi = model->layer_vel_top[model->layer] 
+		+ (model->zz - model->layer_depth_top[model->layer]) 
+		* model->layer_gradient[model->layer];
+	if (model->turned == MB_NO)
 		{
-		zf = model->layer_depth_bottom[layer];
-		vf = model->layer_vel_bottom[layer];
+		model->zf = model->layer_depth_bottom[model->layer];
+		vf = model->layer_vel_bottom[model->layer];
 		}
 	else
 		{
-		zf = model->layer_depth_top[layer];
-		vf = model->layer_vel_top[layer];
+		model->zf = model->layer_depth_top[model->layer];
+		vf = model->layer_vel_top[model->layer];
 		}
-	dt = fabs(log(vf / vi) / model->layer_gradient[layer]);
+	model->dt = fabs(log(vf / vi) / model->layer_gradient[model->layer]);
 
 	/* ray exhausts tt_left before exiting layer */
-	if (dt >= tt_left)
+	if (model->dt >= model->tt_left)
 		{
-		xf = xx;
-		vfvi = exp(tt_left * model->layer_gradient[layer]);
-		if (turned == MB_NO)
+		model->xf = model->xx;
+		vfvi = exp(model->tt_left * model->layer_gradient[model->layer]);
+		if (model->turned == MB_NO)
 			vf = vi * vfvi;
-		else if (turned == MB_YES)
+		else if (model->turned == MB_YES)
 			vf = vi / vfvi;
-		zf = (vf - model->layer_vel_top[layer])
-			/ model->layer_gradient[layer]
-			+ model->layer_depth_top[layer];
-		dt = tt_left;
-		tt_left = 0.0;
+		model->zf = (vf - model->layer_vel_top[model->layer])
+			/ model->layer_gradient[model->layer]
+			+ model->layer_depth_top[model->layer];
+		model->dt = model->tt_left;
+		model->tt_left = 0.0;
 		}
 
 	/* ray exits layer before exhausting tt_left */
 	else
 		{
-		xf = xx;
-		tt_left = tt_left - dt;
-		if (turned == MB_YES)
-			layer--;
+		model->xf = model->xx;
+		model->tt_left = model->tt_left - model->dt;
+		if (model->turned == MB_YES)
+			model->layer--;
 		else
-			layer++;
+			model->layer++;
 		}
 
 	/* put points in plotting arrays */
-	if (number_plot_max > 0 && number_plot < number_plot_max)
+	if (model->plot_mode != MB_RT_PLOT_MODE_OFF && model->number_plot < model->number_plot_max)
 		{
-		xx_plot[number_plot] = sign_x * xf;
-		zz_plot[number_plot] = zf;
-		number_plot++;
+		model->xx_plot[model->number_plot] = model->sign_x * model->xf;
+		if (model->plot_mode == MB_RT_PLOT_MODE_ON)
+			model->zz_plot[model->number_plot] = model->zf;
+		model->number_plot++;
 		}
 
 	/* print output debug statements */

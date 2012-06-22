@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_em710mba.c	2/26/2008
  *	$Id$
  *
- *    Copyright (c) 2008-2009 by
+ *    Copyright (c) 2008-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_em710mba.c contains the functions for reading and writing
- * multibeam data in the EM710MBA format.  
+ * multibeam data in the EM710MBA format.
  * These functions include:
  *   mbr_alm_em710mba	- allocate read/write memory
  *   mbr_dem_em710mba	- deallocate read/write memory
@@ -54,130 +54,133 @@
 
 /* include for byte swapping */
 #include "../../include/mb_swap.h"
-	
+
 /* turn on debug statements here */
 /* #define MBR_EM710MBA_DEBUG 1 */
-	
+
 /* essential function prototypes */
-int mbr_register_em710mba(int verbose, void *mbio_ptr, 
+int mbr_register_em710mba(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_em710mba(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_em710mba(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_em710mba(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_em710mba(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, 
+int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label,
 		short *type, short *sonar);
-int mbr_em710mba_rd_status(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_status(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short type, short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short type, short sonar, int *version, int *goodend, int *error);
-int mbr_em710mba_rd_run_parameter(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_run_parameter(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_clock(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_clock(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_tide(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_tide(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_height(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_height(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_heading(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_heading(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_ssv(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_ssv(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_svp(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_svp(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_svp2(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_svp2(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_bath2_mba(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_bath2_mba(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		int *match, short sonar, int version, int *goodend, int *error);
-int mbr_em710mba_rd_rawbeam4(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_bath3_mba(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
+		int *match, short sonar, int version, int *goodend, int *error);
+int mbr_em710mba_rd_rawbeam4(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
-int mbr_em710mba_rd_ss2(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_ss2(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *match, int *goodend, int *error);
-int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error);
 int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *error);
-int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_start(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_start(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_bath3_mba(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
-int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error);
 
 static char rcs_id[]="$Id$";
@@ -202,56 +205,58 @@ int mbr_register_em710mba(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_em710mba(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_em710mba(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_em710mba;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_em710mba; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_simrad3_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_simrad3_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_em710mba; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_em710mba; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_simrad3_dimensions; 
-	mb_io_ptr->mb_io_pingnumber = &mbsys_simrad3_pingnumber; 
-	mb_io_ptr->mb_io_extract = &mbsys_simrad3_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_simrad3_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad3_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_simrad3_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_simrad3_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_simrad3_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_simrad3_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_simrad3_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_simrad3_detects; 
-	mb_io_ptr->mb_io_gains = &mbsys_simrad3_gains; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad3_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_em710mba;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_simrad3_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_simrad3_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_em710mba;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_em710mba;
+	mb_io_ptr->mb_io_dimensions = &mbsys_simrad3_dimensions;
+	mb_io_ptr->mb_io_pingnumber = &mbsys_simrad3_pingnumber;
+	mb_io_ptr->mb_io_extract = &mbsys_simrad3_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_simrad3_insert;
+	mb_io_ptr->mb_io_extract_nnav = &mbsys_simrad3_extract_nnav;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_simrad3_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_simrad3_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_simrad3_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_simrad3_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_simrad3_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_simrad3_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_simrad3_detects;
+	mb_io_ptr->mb_io_pulses = &mbsys_simrad3_pulses;
+	mb_io_ptr->mb_io_gains = &mbsys_simrad3_gains;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_simrad3_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -286,6 +291,7 @@ int mbr_register_em710mba(int verbose, void *mbio_ptr, int *error)
 		fprintf(stderr,"dbg2       insert_svp:         %lu\n",(size_t)mb_io_ptr->mb_io_insert_svp);
 		fprintf(stderr,"dbg2       ttimes:             %lu\n",(size_t)mb_io_ptr->mb_io_ttimes);
 		fprintf(stderr,"dbg2       detects:            %lu\n",(size_t)mb_io_ptr->mb_io_detects);
+		fprintf(stderr,"dbg2       pulses:             %lu\n",(size_t)mb_io_ptr->mb_io_pulses);
 		fprintf(stderr,"dbg2       extract_rawss:      %lu\n",(size_t)mb_io_ptr->mb_io_extract_rawss);
 		fprintf(stderr,"dbg2       insert_rawss:       %lu\n",(size_t)mb_io_ptr->mb_io_insert_rawss);
 		fprintf(stderr,"dbg2       copyrecord:         %lu\n",(size_t)mb_io_ptr->mb_io_copyrecord);
@@ -299,25 +305,25 @@ int mbr_register_em710mba(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_em710mba(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_em710mba(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_em710mba";
@@ -341,7 +347,7 @@ int mbr_info_em710mba(int verbose,
 	*pixels_ss_max = 1024;
 	strncpy(format_name, "EM710MBA", MB_NAME_LENGTH);
 	strncpy(system_name, "SIMRAD3", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_EM710MBA\nInformal Description: Simrad current multibeam vendor format\nAttributes:           Simrad EM710,\n                      bathymetry, amplitude, and sidescan,\n                      up to 400 beams, variable pixels, binary, Simrad.\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:          MBF_EM710MBA\nInformal Description: Kongsberg current multibeam vendor format\nAttributes:           Kongsberg EM122, EM302, EM710,\n                      bathymetry, amplitude, and sidescan,\n                      up to 400 beams, variable pixels, binary, Simrad.\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_YES;
@@ -349,7 +355,7 @@ int mbr_info_em710mba(int verbose,
 	*beam_flagging = MB_YES;
 	*nav_source = MB_DATA_NAV;
 	*heading_source = MB_DATA_DATA;
-	*vru_source = MB_DATA_ATTITUDE;
+	*vru_source = MB_DATA_DATA;
 	*svp_source = MB_DATA_VELOCITY_PROFILE;
 	*beamwidth_xtrack = 2.0;
 	*beamwidth_ltrack = 2.0;
@@ -358,7 +364,7 @@ int mbr_info_em710mba(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -490,15 +496,10 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	struct mbsys_simrad3_ssv_struct *ssv;
 	struct mbsys_simrad3_ping_struct *ping;
 	int	time_i[7];
-	double	ntime_d, atime_d;
+	double	ntime_d, btime_d;
 	double	bath_time_d, ss_time_d;
 	double	roll, pitch, heave;
 	double	*pixel_size, *swath_width;
-	double	att_time_d[MBSYS_SIMRAD3_MAXATTITUDE];
-	double	att_roll[MBSYS_SIMRAD3_MAXATTITUDE];
-	double	att_pitch[MBSYS_SIMRAD3_MAXATTITUDE];
-	double	att_heave[MBSYS_SIMRAD3_MAXATTITUDE];
-	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -527,86 +528,38 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	pixel_size = (double *) &mb_io_ptr->saved1;
 	swath_width = (double *) &mb_io_ptr->saved2;
 
-	/* save fix if nav data */
+	/* save position, heading, attitude, sonar depth if survey data */
 	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_NAV)
+		&& store->kind == MB_DATA_DATA)
 		{
-		/* get nav time */
-		time_i[0] = store->pos_date / 10000;
-		time_i[1] = (store->pos_date % 10000) / 100;
-		time_i[2] = store->pos_date % 100;
-		time_i[3] = store->pos_msec / 3600000;
-		time_i[4] = (store->pos_msec % 3600000) / 60000;
-		time_i[5] = (store->pos_msec % 60000) / 1000;
-		time_i[6] = (store->pos_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &ntime_d);
+		/* get ping time */
+		time_i[0] = ping->png_date / 10000;
+		time_i[1] = (ping->png_date % 10000) / 100;
+		time_i[2] = ping->png_date % 100;
+		time_i[3] = ping->png_msec / 3600000;
+		time_i[4] = (ping->png_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_msec % 60000) / 1000;
+		time_i[6] = (ping->png_msec % 1000) * 1000;
+		mb_get_time(verbose, time_i, &btime_d);
 		
-		/* add latest fix */
-		if (store->pos_longitude != EM3_INVALID_INT
-			&& store->pos_latitude != EM3_INVALID_INT)
-			mb_navint_add(verbose, mbio_ptr, 
-				ntime_d, 
-				(double)(0.0000001 * store->pos_longitude), 
-				(double)(0.00000005 * store->pos_latitude), 
+		if (ping->png_longitude != EM3_INVALID_INT
+			&& ping->png_latitude != EM3_INVALID_INT)
+			mb_navint_add(verbose, mbio_ptr,
+				btime_d,
+				(double)(0.0000001 * ping->png_longitude),
+				(double)(0.00000005 * ping->png_latitude),
 				error);
-		}
+		mb_hedint_add(verbose, mbio_ptr,
+				btime_d, 0.01 * ping->png_heading,
+				error);
+		mb_attint_add(verbose, mbio_ptr,
+				btime_d, 0.01 * ping->png_heave, 
+				0.01 * ping->png_roll, 0.01 * ping->png_pitch,
+				error);
+		mb_depint_add(verbose, mbio_ptr,
+				btime_d,(double)ping->png_xducer_depth,
+				error);
 
-	/* save attitude if attitude data */
-	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_ATTITUDE
-		&& store->type == EM3_ATTITUDE)
-		{
-		/* get attitude time */
-		time_i[0] = attitude->att_date / 10000;
-		time_i[1] = (attitude->att_date % 10000) / 100;
-		time_i[2] = attitude->att_date % 100;
-		time_i[3] = attitude->att_msec / 3600000;
-		time_i[4] = (attitude->att_msec % 3600000) / 60000;
-		time_i[5] = (attitude->att_msec % 60000) / 1000;
-		time_i[6] = (attitude->att_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &atime_d);
-		
-		/* add latest attitude samples */
-		attitude->att_ndata = MIN(attitude->att_ndata,MBSYS_SIMRAD3_MAXATTITUDE);
-		for (i=0;i<attitude->att_ndata;i++)
-			{
-			att_time_d[i] = (double)(atime_d + 0.001 * attitude->att_time[i]);
-			att_heave[i] = (double)(0.01 * attitude->att_heave[i]);
-			att_roll[i] = (double)(0.01 * attitude->att_roll[i]);
-			att_pitch[i] = (double)(0.01 * attitude->att_pitch[i]);
-			}
-		mb_attint_nadd(verbose, mbio_ptr,
-				attitude->att_ndata,att_time_d,att_heave,att_roll,att_pitch,
-				error);
-		}
-
-	/* save attitude if network attitude data */
-	if (status == MB_SUCCESS
-		&& store->kind == MB_DATA_ATTITUDE
-		&& store->type == EM3_NETATTITUDE)
-		{
-		/* get attitude time */
-		time_i[0] = netattitude->nat_date / 10000;
-		time_i[1] = (netattitude->nat_date % 10000) / 100;
-		time_i[2] = netattitude->nat_date % 100;
-		time_i[3] = netattitude->nat_msec / 3600000;
-		time_i[4] = (netattitude->nat_msec % 3600000) / 60000;
-		time_i[5] = (netattitude->nat_msec % 60000) / 1000;
-		time_i[6] = (netattitude->nat_msec % 1000) * 1000;
-		mb_get_time(verbose, time_i, &atime_d);
-		
-		/* add latest attitude samples */
-		netattitude->nat_ndata = MIN(netattitude->nat_ndata,MBSYS_SIMRAD3_MAXATTITUDE);
-		for (i=0;i<netattitude->nat_ndata;i++)
-			{
-			att_time_d[i] = (double)(atime_d + 0.001 * netattitude->nat_time[i]);
-			att_heave[i] = (double)(0.01 * netattitude->nat_heave[i]);
-			att_roll[i] = (double)(0.01 * netattitude->nat_roll[i]);
-			att_pitch[i] = (double)(0.01 * netattitude->nat_pitch[i]);
-			}
-		mb_attint_nadd(verbose, mbio_ptr,
-				netattitude->nat_ndata,att_time_d,att_heave,att_roll,att_pitch,
-				error);
 		}
 
 	/* interpolate attitude data into navigation records */
@@ -627,25 +580,25 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_get_time(verbose, time_i, &ntime_d);
 
 		/* interpolate from saved attitude */
-		mb_attint_interp(verbose, mbio_ptr, ntime_d,  
+		mb_attint_interp(verbose, mbio_ptr, ntime_d,
 				    &heave, &roll, &pitch, error);
 		store->pos_roll = (int) rint(roll / 0.01);
 		store->pos_pitch = (int) rint(pitch / 0.01);
 		store->pos_heave = (int) rint(heave / 0.01);
 		}
-	
+
 	/* if no sidescan read then zero sidescan data */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA
 		&& ping->png_ss2_read == MB_NO)
 		{
 		status = mbsys_simrad3_zero_ss(verbose,store_ptr,error);
 		}
-	
+
 	/* else check that bath and sidescan data record time stamps
 	   match for survey data - we can have bath without
 	   sidescan but not sidescan without bath */
-	else if (status == MB_SUCCESS 
+	else if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA)
 		{
 		/* get times of bath and sidescan records */
@@ -667,7 +620,7 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		mb_get_time(verbose, time_i, &ss_time_d);
 /* fprintf(stderr,"Check: png_count:%d png_raw_count:%d png_ss_count:%d    Beams:%d %d %d\n",
 ping->png_count,ping->png_raw_count,ping->png_ss_count,ping->png_nbeams,ping->png_raw_nbeams,ping->png_nbeams_ss);*/
-		
+
 		/* check for time match - if bath newer than
 		   sidescan then zero sidescan,  if sidescan
 		   newer than bath then set error,  if ok then
@@ -682,7 +635,7 @@ ping->png_count,ping->png_raw_count,ping->png_ss_count,ping->png_nbeams,ping->pn
 		    {
 		    if (verbose > 0)
 		    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan zeroed, bathtime:%f >  sstime:%f\n",
-				function_name, time_i[0], time_i[1], time_i[2], 
+				function_name, time_i[0], time_i[1], time_i[2],
 					time_i[3], time_i[4], time_i[5], time_i[6],
 					bath_time_d, ss_time_d);
 		    status = mbsys_simrad3_zero_ss(verbose,store_ptr,error);
@@ -691,7 +644,7 @@ ping->png_count,ping->png_raw_count,ping->png_ss_count,ping->png_nbeams,ping->pn
 		    {
 		    if (verbose > 0)
 		    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Ping unintelligible bathtime:%f < sstime%f\n",
-				function_name, time_i[0], time_i[1], time_i[2], 
+				function_name, time_i[0], time_i[1], time_i[2],
 					time_i[3], time_i[4], time_i[5], time_i[6],
 					bath_time_d, ss_time_d);
 		    *error = MB_ERROR_UNINTELLIGIBLE;
@@ -705,7 +658,7 @@ ping->png_count,ping->png_raw_count,ping->png_ss_count,ping->png_nbeams,ping->pn
 			{
 		    	if (verbose > 1)
 			    	fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
-					function_name, time_i[0], time_i[1], time_i[2], 
+					function_name, time_i[0], time_i[1], time_i[2],
 					time_i[3], time_i[4], time_i[5], time_i[6],
 					ping->png_nbeams, ping->png_nbeams_ss);
 			}
@@ -824,7 +777,7 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	store = (struct mbsys_simrad3_struct *) store_ptr;
 	ping = (struct mbsys_simrad3_ping_struct *) store->ping;
 	mbfp = mb_io_ptr->mbfp;
-	
+
 	/* get saved values */
 	databyteswapped = (int *) &mb_io_ptr->save10;
 	record_size_save = (int *) &mb_io_ptr->save5;
@@ -868,6 +821,10 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	*error = MB_ERROR_NO_ERROR;
 	while (done == MB_NO)
 		{
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"\nabove mbr_em710raw_rd_data loop:\n");
+	fprintf(stderr,"label_save_flag:%d mbfp:%d status:%d\n",*label_save_flag,mb_io_ptr->mbfp,status);
+#endif
 		/* if no label saved get next record label */
 		if (*label_save_flag == MB_NO)
 			{
@@ -878,7 +835,10 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				status = MB_FAILURE;
 				*error = MB_ERROR_EOF;
 				}
-				
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"read record size:%d mbfp:%d status:%d\n",record_size,mb_io_ptr->mbfp,status);
+#endif
+
 			/* read label */
 			if ((read_len = fread(label,
 				1,4,mb_io_ptr->mbfp)) != 4)
@@ -887,11 +847,14 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				*error = MB_ERROR_EOF;
 				}
 
-			/* check label - if not a good label read a byte 
+			/* check label - if not a good label read a byte
 				at a time until a good label is found */
 			skip = 0;
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"read label:%x%x%x%x skip:%d status:%d\n",label[0],label[1],label[2],label[3],skip,status);
+#endif
 			while (status == MB_SUCCESS
-				&& mbr_em710mba_chk_label(verbose, 
+				&& mbr_em710mba_chk_label(verbose,
 					mbio_ptr, label, &type, &sonar) != MB_SUCCESS)
 			    {
 			    /* get next byte */
@@ -907,13 +870,16 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				*error = MB_ERROR_EOF;
 				}
 			    skip++;
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"read label:%x%x%x%x skip:%d status:%d\n",label[0],label[1],label[2],label[3],skip,status);
+#endif
 			    }
-			    
+
 			/* report problem */
 			if (skip > 0 && verbose > 0)
 			    {
 			    if (*nbadrec == 0)
-			    	fprintf(stderr, 
+			    	fprintf(stderr,
 "\nThe MBF_EM710MBA module skipped data between identified\n\
 data records. Something is broken, most probably the data...\n\
 However, the data may include a data record type that we\n\
@@ -939,7 +905,7 @@ Have a nice day...\n");
 				record_size = mb_swap_int(record_size);
 			*record_size_save = record_size;
 			}
-		
+
 		/* else use saved label */
 		else
 			{
@@ -947,6 +913,9 @@ Have a nice day...\n");
 			type = *typelast;
 			sonar = *sonarlast;
 			record_size = *record_size_save;
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"use previously read label:%x%x%x%x skip:%d status:%d\n",label[0],label[1],label[2],label[3],skip,status);
+#endif
 			}
 
 #ifdef MBR_EM710MBA_DEBUG
@@ -954,10 +923,10 @@ Have a nice day...\n");
 	fprintf(stderr,"skip:%d expect:%x type:%x first_type:%x sonar:%d recsize:%u done:%d\n",
 		skip, expect, type, first_type, sonar, *record_size_save, done);
 #endif
-		
+
 		/* allocate secondary data structure for
 			heading data if needed */
-		if (status == MB_SUCCESS && 
+		if (status == MB_SUCCESS &&
 			(type == EM3_HEADING)
 			&& store->heading == NULL)
 			{
@@ -965,10 +934,10 @@ Have a nice day...\n");
 					verbose,mbio_ptr,
 					store_ptr,error);
 			}
-		
+
 		/* allocate secondary data structure for
 			attitude data if needed */
-		if (status == MB_SUCCESS && 
+		if (status == MB_SUCCESS &&
 			(type == EM3_ATTITUDE)
 			&& store->attitude == NULL)
 			{
@@ -976,10 +945,10 @@ Have a nice day...\n");
 					verbose,mbio_ptr,
 					store_ptr,error);
 			}
-		
+
 		/* allocate secondary data structure for
 			netattitude data if needed */
-		if (status == MB_SUCCESS && 
+		if (status == MB_SUCCESS &&
 			(type == EM3_NETATTITUDE)
 			&& store->netattitude == NULL)
 			{
@@ -987,10 +956,10 @@ Have a nice day...\n");
 					verbose,mbio_ptr,
 					store_ptr,error);
 			}
-		
+
 		/* allocate secondary data structure for
 			ssv data if needed */
-		if (status == MB_SUCCESS && 
+		if (status == MB_SUCCESS &&
 			(type == EM3_SSV)
 			&& store->ssv == NULL)
 			{
@@ -998,10 +967,10 @@ Have a nice day...\n");
 					verbose,mbio_ptr,
 					store_ptr,error);
 			}
-		
+
 		/* allocate secondary data structure for
 			tilt data if needed */
-		if (status == MB_SUCCESS && 
+		if (status == MB_SUCCESS &&
 			(type == EM3_TILT)
 			&& store->tilt == NULL)
 			{
@@ -1009,11 +978,12 @@ Have a nice day...\n");
 					verbose,mbio_ptr,
 					store_ptr,error);
 			}
-		
+
 		/* allocate secondary data structure for
 			survey data if needed */
-		if (status == MB_SUCCESS && 
+		if (status == MB_SUCCESS &&
 			(type == EM3_BATH2_MBA
+			|| type == EM3_BATH3_MBA
 			|| type == EM3_RAWBEAM4
 			|| type == EM3_SS2))
 			{
@@ -1023,10 +993,10 @@ Have a nice day...\n");
 					store_ptr,error);
 			ping = (struct mbsys_simrad3_ping_struct *) store->ping;
 			}
-		
+
 		/* allocate secondary data structure for
 			water column data if needed */
-		if (status == MB_SUCCESS && 
+		if (status == MB_SUCCESS &&
 			(type == EM3_WATERCOLUMN))
 			{
 			if (store->wc == NULL)
@@ -1056,6 +1026,7 @@ Have a nice day...\n");
 			}
 		else if (type !=  EM3_STOP2
 			&& type != EM3_STATUS
+			&& type != EM3_OFF
 			&& type != EM3_ON
 			&& type != EM3_ATTITUDE
 			&& type != EM3_CLOCK
@@ -1075,7 +1046,7 @@ Have a nice day...\n");
 			&& type != EM3_SVP2
 			&& type != EM3_SVP
 			&& type != EM3_SSPINPUT
-			&& type != EM3_BATH2_MBA
+			&& type != EM3_BATH2
 			&& type != EM3_SS2
 			&& type != EM3_RAWBEAM2
 			&& type != EM3_RAWBEAM3
@@ -1088,7 +1059,8 @@ Have a nice day...\n");
 			&& type != EM3_BATH_MBA
 			&& type != EM3_SS_MBA
 			&& type != EM3_BATH2_MBA
-			&& type != EM3_SS2_MBA)
+			&& type != EM3_SS2_MBA
+			&& type != EM3_BATH3_MBA)
 			{
 #ifdef MBR_EM710MBA_DEBUG
 	fprintf(stderr,"call nothing, try again\n");
@@ -1295,7 +1267,7 @@ Have a nice day...\n");
 				else
 					*expect_save_flag = MB_NO;
 				}
-			}	
+			}
 		else if (type == EM3_NETATTITUDE)
 			{
 #ifdef MBR_EM710MBA_DEBUG
@@ -1315,7 +1287,7 @@ Have a nice day...\n");
 				else
 					*expect_save_flag = MB_NO;
 				}
-			}	
+			}
 		else if (type == EM3_POS)
 			{
 #ifdef MBR_EM710MBA_DEBUG
@@ -1376,7 +1348,19 @@ Have a nice day...\n");
 					*expect_save_flag = MB_NO;
 				}
 			}
-		else if (type == EM3_BATH2_MBA 
+		else if (type == EM3_BATH2_MBA
+			&& expect == EM3_SS2)
+			{
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"call nothing, expect %x but got type %x\n",expect,type);
+#endif
+			done = MB_YES;
+			expect = EM3_NONE;
+			type = first_type;
+			*label_save_flag = MB_YES;
+			store->kind = MB_DATA_DATA;
+			}
+		else if (type == EM3_BATH3_MBA
 			&& expect == EM3_SS2)
 			{
 #ifdef MBR_EM710MBA_DEBUG
@@ -1411,6 +1395,29 @@ Have a nice day...\n");
 					}
 				}
 			}
+		else if (type == EM3_BATH3_MBA)
+			{
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr,"call mbr_em710mba_rd_bath3_mba type %x\n",type);
+#endif
+			status = mbr_em710mba_rd_bath3_mba(
+				verbose,mbfp,swap,store,&match,sonar,*version,&good_end_bytes,error);
+			if (status == MB_SUCCESS)
+				{
+				if (first_type == EM3_NONE
+					|| match == MB_NO)
+					{
+					done = MB_NO;
+					first_type = EM3_BATH3_MBA;
+					expect = EM3_SS2;
+					}
+				else
+					{
+					done = MB_YES;
+					expect = EM3_NONE;
+					}
+				}
+			}
 		else if (type == EM3_RAWBEAM4)
 			{
 #ifdef MBR_EM710MBA_DEBUG
@@ -1427,8 +1434,8 @@ Have a nice day...\n");
 				expect = EM3_NONE;
 				}
 			}
-		else if (type == EM3_SS2 
-			&& expect != EM3_NONE 
+		else if (type == EM3_SS2
+			&& expect != EM3_NONE
 			&& expect != EM3_SS2)
 			{
 #ifdef MBR_EM710MBA_DEBUG
@@ -1455,7 +1462,7 @@ Have a nice day...\n");
 				{
 				done = MB_NO;
 				first_type = EM3_SS2;
-				expect = EM3_BATH2_MBA;
+				expect = EM3_BATH3_MBA;
 				}
 			    else
 				{
@@ -1467,7 +1474,14 @@ Have a nice day...\n");
                         /* salvage bath even if sidescan is corrupt */
 			else
 			    {
-			    if (first_type == EM3_BATH2_MBA 
+			    if (first_type == EM3_BATH2_MBA
+				&& match == MB_YES)
+				{
+				status = MB_SUCCESS;
+				done = MB_YES;
+				expect = EM3_NONE;
+				}
+			    else if (first_type == EM3_BATH3_MBA
 				&& match == MB_YES)
 				{
 				status = MB_SUCCESS;
@@ -1518,10 +1532,10 @@ Have a nice day...\n");
 		/* bail out if there is an error */
 		if (status == MB_FAILURE)
 			done = MB_YES;
-			
+
 		/* if necessary read over unread but expected bytes */
 		bytes_read = ftell(mbfp) - mb_io_ptr->file_bytes - 4;
-		if (*label_save_flag == MB_NO && good_end_bytes == MB_NO 
+		if (*label_save_flag == MB_NO && good_end_bytes == MB_NO
 			&& bytes_read < record_size)
 			{
 #ifdef MBR_EM710MBA_DEBUG
@@ -1541,13 +1555,13 @@ Have a nice day...\n");
 			}
 
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr,"record_size:%d bytes read:%d file_pos old:%d new:%d\n", 
+	fprintf(stderr,"record_size:%d bytes read:%ld file_pos old:%ld new:%ld\n",
 		record_size, ftell(mbfp) - mb_io_ptr->file_bytes, mb_io_ptr->file_bytes, ftell(mbfp));
-	fprintf(stderr,"done:%d expect:%x status:%d error:%d\n", 
-		done, expect, status, *error);
+	fprintf(stderr,"done:%d expect:%x label_save_flag:%d status:%d error:%d\n",
+		done, expect, *label_save_flag, status, *error);
 	fprintf(stderr,"end of mbr_em710mba_rd_data loop:\n\n");
 #endif
-		
+
 		/* get file position */
 		if (*label_save_flag == MB_YES)
 			mb_io_ptr->file_bytes = ftell(mbfp) - 2;
@@ -1601,20 +1615,20 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	sonar_save = (short *) (&mb_io_ptr->save4);
 	databyteswapped = (int *) &mb_io_ptr->save10;
-	
+
 #ifdef MBR_EM710MBA_DEBUG
 	fprintf(stderr, "Check label: %x|%x|%x|%x\n", label[0],label[1],label[2],label[3]);
 #endif
-		
+
 	/* check for valid start byte and type */
 	startbyte = label[0];
 	typebyte = label[1];
-	if (startbyte ==  EM3_START_BYTE && 
+	if (startbyte ==  EM3_START_BYTE &&
 		(typebyte == EM3_ID_STOP2
 		|| typebyte == EM3_ID_STATUS
+		|| typebyte == EM3_ID_OFF
 		|| typebyte == EM3_ID_ON
 		|| typebyte == EM3_ID_ATTITUDE
-		|| typebyte == EM3_ID_NETATTITUDE
 		|| typebyte == EM3_ID_CLOCK
 		|| typebyte == EM3_ID_BATH
 		|| typebyte == EM3_ID_SBDEPTH
@@ -1639,12 +1653,14 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		|| typebyte == EM3_ID_HEIGHT
 		|| typebyte == EM3_ID_STOP
 		|| typebyte == EM3_ID_WATERCOLUMN
+		|| typebyte == EM3_ID_NETATTITUDE
 		|| typebyte == EM3_ID_REMOTE
 		|| typebyte == EM3_ID_SSP
 		|| typebyte == EM3_ID_BATH_MBA
 		|| typebyte == EM3_ID_SS_MBA
 		|| typebyte == EM3_ID_BATH2_MBA
-		|| typebyte == EM3_ID_SS2_MBA))
+		|| typebyte == EM3_ID_SS2_MBA
+		|| typebyte == EM3_ID_BATH3_MBA))
 		{
 		typegood = MB_YES;
 		}
@@ -1652,7 +1668,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		{
 		typegood = MB_NO;
 		}
-		
+
 	/* check for data byte swapping if necessary */
 	if (typegood == MB_YES && *databyteswapped == -1)
 		{
@@ -1663,7 +1679,8 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		if (sonarunswap == MBSYS_SIMRAD3_EM710
 			|| sonarunswap == MBSYS_SIMRAD3_EM3002
 			|| sonarunswap == MBSYS_SIMRAD3_EM302
-			|| sonarunswap == MBSYS_SIMRAD3_EM122)
+			|| sonarunswap == MBSYS_SIMRAD3_EM122
+			|| sonarunswap == MBSYS_SIMRAD3_EM2040)
 			{
 			sonarunswapgood = MB_YES;
 			}
@@ -1676,7 +1693,8 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 		if (sonarswap == MBSYS_SIMRAD3_EM710
 			|| sonarswap == MBSYS_SIMRAD3_EM3002
 			|| sonarswap == MBSYS_SIMRAD3_EM302
-			|| sonarswap == MBSYS_SIMRAD3_EM122)
+			|| sonarswap == MBSYS_SIMRAD3_EM122
+			|| sonarswap == MBSYS_SIMRAD3_EM2040)
 			{
 			sonarswapgood = MB_YES;
 			}
@@ -1684,7 +1702,7 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			{
 			sonarswapgood = MB_NO;
 			}
-			
+
 		if (sonarunswapgood == MB_YES && sonarswapgood == MB_NO)
 			{
 			if (mb_io_ptr->byteswapped == MB_YES)
@@ -1699,12 +1717,12 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 			else
 				*databyteswapped = MB_YES;
 			}
-		
+
 		}
 
 	/* set flag to swap bytes if necessary */
 	swap =  *databyteswapped;
-		
+
 	*type = *((short *)&label[0]);
 	*sonar = *((short *)&label[2]);
 	if (mb_io_ptr->byteswapped == MB_YES)
@@ -1717,12 +1735,13 @@ int mbr_em710mba_chk_label(int verbose, void *mbio_ptr, char *label, short *type
 #ifdef MBR_EM710MBA_DEBUG
 fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyteswapped:%d *type:%d *sonar:%d\n",typegood,mb_io_ptr->byteswapped,sonarswapgood,*databyteswapped,*type,*sonar);
 #endif
-		
+
 	/* check for valid sonar */
 	if (*sonar != MBSYS_SIMRAD3_EM710
 		&& *sonar != MBSYS_SIMRAD3_EM3002
 		&& *sonar != MBSYS_SIMRAD3_EM302
-		&& *sonar != MBSYS_SIMRAD3_EM122)
+		&& *sonar != MBSYS_SIMRAD3_EM122
+		&& *sonar != MBSYS_SIMRAD3_EM2040)
 		{
 		sonargood = MB_NO;
 		}
@@ -1730,10 +1749,10 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 		{
 		sonargood = MB_YES;
 		}
-	
+
 	if (startbyte == EM3_START_BYTE && typegood == MB_NO && sonargood == MB_YES)
 		{
-		mb_notice_log_problem(verbose, mbio_ptr, 
+		mb_notice_log_problem(verbose, mbio_ptr,
 			MB_PROBLEM_BAD_DATAGRAM);
 		if (verbose >= 1)
 		    fprintf(stderr, "Bad datagram type: %4.4hX %4.4hX | %d %d\n", *type, *sonar, *type, *sonar);
@@ -1742,11 +1761,11 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 		{
 		status = MB_FAILURE;
 		}
-			
+
 	/* save sonar if successful */
 	if (status == MB_SUCCESS)
 	    *sonar_save = *sonar;
-		
+
 	/* allow exception found in some data */
 	if (*type == EM3_SSV && *sonar == 0 && *sonar_save != 0)
 		{
@@ -1769,8 +1788,8 @@ fprintf(stderr,"typegood:%d mb_io_ptr->byteswapped:%d sonarswapgood:%d *databyte
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_status(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_status(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short type, short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_status";
@@ -1791,10 +1810,10 @@ int mbr_em710mba_rd_status(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_STATUS;
 	store->type = EM3_STATUS;
@@ -1813,65 +1832,65 @@ int mbr_em710mba_rd_status(int verbose, FILE *mbfp, int swap,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &store->sts_date); 
+		mb_get_binary_int(swap, &line[0], &store->sts_date);
 		    if (store->sts_date != 0) store->date = store->sts_date;
-		mb_get_binary_int(swap, &line[4], &store->sts_msec); 
+		mb_get_binary_int(swap, &line[4], &store->sts_msec);
 		    if (store->sts_date != 0) store->msec = store->sts_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    store->sts_status_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    store->sts_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[12], &short_val); 
+		mb_get_binary_short(swap, &line[12], &short_val);
 		    store->sts_pingrate = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[14], &short_val); 
+		mb_get_binary_short(swap, &line[14], &short_val);
 		    store->sts_ping_count = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[16], &store->sts_load); 
-		mb_get_binary_int(swap, &line[20], &store->sts_udp_status); 
-		mb_get_binary_int(swap, &line[24], &store->sts_serial1_status); 
-		mb_get_binary_int(swap, &line[28], &store->sts_serial2_status); 
-		mb_get_binary_int(swap, &line[32], &store->sts_serial3_status); 
-		mb_get_binary_int(swap, &line[36], &store->sts_serial4_status); 
+		mb_get_binary_int(swap, &line[16], &store->sts_load);
+		mb_get_binary_int(swap, &line[20], &store->sts_udp_status);
+		mb_get_binary_int(swap, &line[24], &store->sts_serial1_status);
+		mb_get_binary_int(swap, &line[28], &store->sts_serial2_status);
+		mb_get_binary_int(swap, &line[32], &store->sts_serial3_status);
+		mb_get_binary_int(swap, &line[36], &store->sts_serial4_status);
 		store->sts_pps_status = (mb_u_char) line[40];
 		store->sts_position_status = (mb_s_char) line[41];
 		store->sts_attitude_status = (mb_s_char) line[42];
 		store->sts_clock_status = (mb_s_char) line[43];
 		store->sts_heading_status = (mb_s_char) line[44];
 		store->sts_pu_status = (mb_u_char) line[45];
-		mb_get_binary_short(swap, &line[46], &short_val); 
+		mb_get_binary_short(swap, &line[46], &short_val);
 		    store->sts_last_heading = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[48], &short_val); 
+		mb_get_binary_short(swap, &line[48], &short_val);
 		    store->sts_last_roll = (int) ((short) short_val);
-		mb_get_binary_short(swap, &line[50], &short_val); 
+		mb_get_binary_short(swap, &line[50], &short_val);
 		    store->sts_last_pitch = (int) ((short) short_val);
-		mb_get_binary_short(swap, &line[52], &short_val); 
+		mb_get_binary_short(swap, &line[52], &short_val);
 		    store->sts_last_heave = (int) ((short) short_val);
-		mb_get_binary_short(swap, &line[54], &short_val); 
+		mb_get_binary_short(swap, &line[54], &short_val);
 		    store->sts_last_ssv = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[56], &store->sts_last_depth); 
-		mb_get_binary_int(swap, &line[60], &store->sts_spare); 
+		mb_get_binary_int(swap, &line[56], &store->sts_last_depth);
+		mb_get_binary_int(swap, &line[60], &store->sts_spare);
 		store->sts_bso = (mb_s_char) line[64];
 		store->sts_bsn = (mb_s_char) line[65];
 		store->sts_gain = (mb_s_char) line[66];
 		store->sts_dno = (mb_u_char) line[67];
-		mb_get_binary_short(swap, &line[68], &short_val); 
+		mb_get_binary_short(swap, &line[68], &short_val);
 		    store->sts_rno = (int) ((unsigned short) short_val);
 		store->sts_port = (mb_s_char) line[70];
 		store->sts_stbd = (mb_u_char) line[71];
-		mb_get_binary_short(swap, &line[72], &short_val); 
+		mb_get_binary_short(swap, &line[72], &short_val);
 		    store->sts_ssp = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[74], &short_val); 
+		mb_get_binary_short(swap, &line[74], &short_val);
 		    store->sts_yaw = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[76], &short_val); 
+		mb_get_binary_short(swap, &line[76], &short_val);
 		    store->sts_port2 = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[78], &short_val); 
+		mb_get_binary_short(swap, &line[78], &short_val);
 		    store->sts_stbd2 = (int) ((unsigned short) short_val);
 		store->sts_spare2 = (mb_u_char) line[80];
 		if (line[EM3_STATUS_SIZE-7] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[EM3_STATUS_SIZE-7], line[EM3_STATUS_SIZE-7], 
-		line[EM3_STATUS_SIZE-6], line[EM3_STATUS_SIZE-6], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[EM3_STATUS_SIZE-7], line[EM3_STATUS_SIZE-7],
+		line[EM3_STATUS_SIZE-6], line[EM3_STATUS_SIZE-6],
 		line[EM3_STATUS_SIZE-5], line[EM3_STATUS_SIZE-5]);
 #endif
 		}
@@ -1939,8 +1958,8 @@ int mbr_em710mba_rd_status(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short type, short sonar, int *version, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_start";
@@ -1965,13 +1984,13 @@ int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       type:       %d\n",type);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* make sure comment is initialized */
 	store->par_com[0] = '\0';
-	
+
 	/* set type value */
 	store->type = type;
 	store->sonar = sonar;
@@ -1989,19 +2008,19 @@ int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &store->par_date); 
+		mb_get_binary_int(swap, &line[0], &store->par_date);
 		    store->date = store->par_date;
-		mb_get_binary_int(swap, &line[4], &store->par_msec); 
+		mb_get_binary_int(swap, &line[4], &store->par_msec);
 		    store->msec = store->par_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    store->par_line_num = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    store->par_serial_1 = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[12], &short_val); 
+		mb_get_binary_short(swap, &line[12], &short_val);
 		    store->par_serial_2 = (int) ((unsigned short) short_val);
 		}
-		
-	/* now loop over reading individual characters to 
+
+	/* now loop over reading individual characters to
 	    handle ASCII parameter values */
 	done = MB_NO;
 	len = 0;
@@ -2020,7 +2039,7 @@ int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
 			*error = MB_ERROR_EOF;
 			}
 
-		if (status == MB_SUCCESS 
+		if (status == MB_SUCCESS
 			&& (((mb_u_char)(line[len-1])) < 32
 			    || ((mb_u_char)(line[len-1])) > 127)
 			&& ((mb_u_char)(line[len-1])) != '\r'
@@ -2030,7 +2049,7 @@ int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
 			if (len > 1)
 			    line[0] = line[len-1];
 			}
-		else if (status == MB_SUCCESS 
+		else if (status == MB_SUCCESS
 			&& line[len-1] == ','
 			&& len > 5)
 			{
@@ -2082,7 +2101,7 @@ int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
 			    /* save the processor software version to use
 			       in tracking changes to the data format */
 			    strncpy(store->par_psv, &line[4], MIN(len-5, 15));
-			    if (sscanf(store->par_psv, "%d.%d.%d", &i1, &i2, &i3) 
+			    if (sscanf(store->par_psv, "%d.%d.%d", &i1, &i2, &i3)
 				== 3)
 				*version = i3 + 100 * i2 + 10000 * i1;
 			    }
@@ -2185,14 +2204,14 @@ int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
 			    }
 			len = 0;
 			}
-		else if (status == MB_SUCCESS 
+		else if (status == MB_SUCCESS
 			&& line[len-1] == ','
 			&& len <= 5)
 			{
 			len = 0;
 			}
 		}
-		
+
 	/* now set the data kind */
 	if (status == MB_SUCCESS)
 		{
@@ -2209,24 +2228,24 @@ int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
 		else if (store->type == EM3_ON)
 		    store->kind = MB_DATA_START;
 		}
-		
+
 	/* read end of record and last two check sum bytes */
 	if (status == MB_SUCCESS)
 	    {
-	    /* if EM3_END not yet found then the 
+	    /* if EM3_END not yet found then the
 		next byte should be EM3_END */
 	    if (line[0] != EM3_END)
 		{
 		read_len = fread(&line[0],1,1,mbfp);
 		}
-		
-	    /* if EM3_END not yet found then the 
+
+	    /* if EM3_END not yet found then the
 		next byte should be EM3_END */
 	    if (line[0] != EM3_END)
 		{
 		read_len = fread(&line[0],1,1,mbfp);
 		}
-		
+
 	    /* if we got the end byte then get check sum bytes */
 	    if (line[0] == EM3_END)
 		{
@@ -2240,9 +2259,9 @@ int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
 		already been read - next attempt to read
 		file will return error */
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[0], line[0], 
-		line[1], line[1], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[0], line[0],
+		line[1], line[1],
 		line[2], line[2]);
 #endif
 		}
@@ -2347,8 +2366,8 @@ int mbr_em710mba_rd_start(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_run_parameter(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_run_parameter(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_run_parameter";
@@ -2370,10 +2389,10 @@ int mbr_em710mba_rd_run_parameter(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_RUN_PARAMETER;
 	store->type = EM3_RUN_PARAMETER;
@@ -2392,26 +2411,26 @@ int mbr_em710mba_rd_run_parameter(int verbose, FILE *mbfp, int swap,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &store->run_date); 
+		mb_get_binary_int(swap, &line[0], &store->run_date);
 		    if (store->run_date != 0) store->date = store->run_date;
-		mb_get_binary_int(swap, &line[4], &store->run_msec); 
+		mb_get_binary_int(swap, &line[4], &store->run_msec);
 		    if (store->run_date != 0) store->msec = store->run_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    store->run_ping_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    store->run_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[12], &store->run_status); 
+		mb_get_binary_int(swap, &line[12], &store->run_status);
 		store->run_mode = (mb_u_char) line[16];
 		store->run_filter_id = (mb_u_char) line[17];
-		mb_get_binary_short(swap, &line[18], &short_val); 
+		mb_get_binary_short(swap, &line[18], &short_val);
 		    store->run_min_depth = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[20], &short_val); 
+		mb_get_binary_short(swap, &line[20], &short_val);
 		    store->run_max_depth = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[22], &short_val); 
+		mb_get_binary_short(swap, &line[22], &short_val);
 		    store->run_absorption = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[24], &short_val); 
+		mb_get_binary_short(swap, &line[24], &short_val);
 		    store->run_tran_pulse = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[26], &short_val); 
+		mb_get_binary_short(swap, &line[26], &short_val);
 		    store->run_tran_beam = (int) ((unsigned short) short_val);
 		store->run_tran_pow = (mb_u_char) line[28];
 		store->run_rec_beam = (mb_u_char) line[29];
@@ -2419,7 +2438,7 @@ int mbr_em710mba_rd_run_parameter(int verbose, FILE *mbfp, int swap,
 		store->run_rec_gain = (mb_u_char) line[31];
 		store->run_tvg_cross = (mb_u_char) line[32];
 		store->run_ssv_source = (mb_u_char) line[33];
-		mb_get_binary_short(swap, &line[34], &short_val); 
+		mb_get_binary_short(swap, &line[34], &short_val);
 		    store->run_max_swath = (int) ((unsigned short) short_val);
 		store->run_beam_space = (mb_u_char) line[36];
 		store->run_swath_angle = (mb_u_char) line[37];
@@ -2429,9 +2448,9 @@ int mbr_em710mba_rd_run_parameter(int verbose, FILE *mbfp, int swap,
 		if (line[EM3_RUN_PARAMETER_SIZE-7] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[EM3_RUN_PARAMETER_SIZE-7], line[EM3_RUN_PARAMETER_SIZE-7], 
-		line[EM3_RUN_PARAMETER_SIZE-6], line[EM3_RUN_PARAMETER_SIZE-6], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[EM3_RUN_PARAMETER_SIZE-7], line[EM3_RUN_PARAMETER_SIZE-7],
+		line[EM3_RUN_PARAMETER_SIZE-6], line[EM3_RUN_PARAMETER_SIZE-6],
 		line[EM3_RUN_PARAMETER_SIZE-5], line[EM3_RUN_PARAMETER_SIZE-5]);
 #endif
 		}
@@ -2485,8 +2504,8 @@ int mbr_em710mba_rd_run_parameter(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_clock(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_clock(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_clock";
@@ -2507,10 +2526,10 @@ int mbr_em710mba_rd_clock(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_CLOCK;
 	store->type = EM3_CLOCK;
@@ -2529,23 +2548,23 @@ int mbr_em710mba_rd_clock(int verbose, FILE *mbfp, int swap,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &store->clk_date); 
+		mb_get_binary_int(swap, &line[0], &store->clk_date);
 		    store->date = store->clk_date;
-		mb_get_binary_int(swap, &line[4], &store->clk_msec); 
+		mb_get_binary_int(swap, &line[4], &store->clk_msec);
 		    store->msec = store->clk_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    store->clk_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    store->clk_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[12], &store->clk_origin_date); 
-		mb_get_binary_int(swap, &line[16], &store->clk_origin_msec); 
+		mb_get_binary_int(swap, &line[12], &store->clk_origin_date);
+		mb_get_binary_int(swap, &line[16], &store->clk_origin_msec);
 		store->clk_1_pps_use = (mb_u_char) line[20];
 		if (line[EM3_CLOCK_SIZE-7] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[EM3_CLOCK_SIZE-7], line[EM3_CLOCK_SIZE-7], 
-		line[EM3_CLOCK_SIZE-6], line[EM3_CLOCK_SIZE-6], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[EM3_CLOCK_SIZE-7], line[EM3_CLOCK_SIZE-7],
+		line[EM3_CLOCK_SIZE-6], line[EM3_CLOCK_SIZE-6],
 		line[EM3_CLOCK_SIZE-5], line[EM3_CLOCK_SIZE-5]);
 #endif
 		}
@@ -2582,8 +2601,8 @@ int mbr_em710mba_rd_clock(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_tide(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_tide(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_tide";
@@ -2604,10 +2623,10 @@ int mbr_em710mba_rd_tide(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_TIDE;
 	store->type = EM3_TIDE;
@@ -2626,24 +2645,24 @@ int mbr_em710mba_rd_tide(int verbose, FILE *mbfp, int swap,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &store->tid_date); 
+		mb_get_binary_int(swap, &line[0], &store->tid_date);
 		    store->date = store->tid_date;
-		mb_get_binary_int(swap, &line[4], &store->tid_msec); 
+		mb_get_binary_int(swap, &line[4], &store->tid_msec);
 		    store->msec = store->tid_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    store->tid_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    store->tid_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[12], &store->tid_origin_date); 
-		mb_get_binary_int(swap, &line[16], &store->tid_origin_msec); 
-		mb_get_binary_short(swap, &line[20], &short_val); 
+		mb_get_binary_int(swap, &line[12], &store->tid_origin_date);
+		mb_get_binary_int(swap, &line[16], &store->tid_origin_msec);
+		mb_get_binary_short(swap, &line[20], &short_val);
 		    store->tid_tide = (int) short_val;
 		if (line[EM3_TIDE_SIZE-7] == 0x03)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[EM3_TIDE_SIZE-7], line[EM3_TIDE_SIZE-7], 
-		line[EM3_TIDE_SIZE-6], line[EM3_TIDE_SIZE-6], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[EM3_TIDE_SIZE-7], line[EM3_TIDE_SIZE-7],
+		line[EM3_TIDE_SIZE-6], line[EM3_TIDE_SIZE-6],
 		line[EM3_TIDE_SIZE-5], line[EM3_TIDE_SIZE-5]);
 #endif
 		}
@@ -2680,8 +2699,8 @@ int mbr_em710mba_rd_tide(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_height(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_height(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_height";
@@ -2702,10 +2721,10 @@ int mbr_em710mba_rd_height(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_HEIGHT;
 	store->type = EM3_HEIGHT;
@@ -2724,22 +2743,22 @@ int mbr_em710mba_rd_height(int verbose, FILE *mbfp, int swap,
 	/* get binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &store->hgt_date); 
+		mb_get_binary_int(swap, &line[0], &store->hgt_date);
 		    store->date = store->hgt_date;
-		mb_get_binary_int(swap, &line[4], &store->hgt_msec); 
+		mb_get_binary_int(swap, &line[4], &store->hgt_msec);
 		    store->msec = store->hgt_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    store->hgt_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    store->hgt_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[12], &store->hgt_height); 
+		mb_get_binary_int(swap, &line[12], &store->hgt_height);
 		store->hgt_type = (mb_u_char) line[16];
 		if (line[EM3_HEIGHT_SIZE-7] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[EM3_HEIGHT_SIZE-7], line[EM3_HEIGHT_SIZE-7], 
-		line[EM3_HEIGHT_SIZE-6], line[EM3_HEIGHT_SIZE-6], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[EM3_HEIGHT_SIZE-7], line[EM3_HEIGHT_SIZE-7],
+		line[EM3_HEIGHT_SIZE-6], line[EM3_HEIGHT_SIZE-6],
 		line[EM3_HEIGHT_SIZE-5], line[EM3_HEIGHT_SIZE-5]);
 #endif
 		}
@@ -2775,8 +2794,8 @@ int mbr_em710mba_rd_height(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_heading(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_heading(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_heading";
@@ -2799,13 +2818,13 @@ int mbr_em710mba_rd_heading(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* get  storage structure */
 	heading = (struct mbsys_simrad3_heading_struct *) store->heading;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_HEADING;
 	store->type = EM3_HEADING;
@@ -2824,15 +2843,15 @@ int mbr_em710mba_rd_heading(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &heading->hed_date); 
+		mb_get_binary_int(swap, &line[0], &heading->hed_date);
 		    store->date = heading->hed_date;
-		mb_get_binary_int(swap, &line[4], &heading->hed_msec); 
+		mb_get_binary_int(swap, &line[4], &heading->hed_msec);
 		    store->msec = heading->hed_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    heading->hed_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    heading->hed_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[12], &short_val); 
+		mb_get_binary_short(swap, &line[12], &short_val);
 		    heading->hed_ndata = (int) ((unsigned short) short_val);
 		}
 
@@ -2842,13 +2861,13 @@ int mbr_em710mba_rd_heading(int verbose, FILE *mbfp, int swap,
 	    for (i=0;i<heading->hed_ndata && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_HEADING_SLICE_SIZE,mbfp);
-		if (read_len == EM3_HEADING_SLICE_SIZE 
+		if (read_len == EM3_HEADING_SLICE_SIZE
 			&& i < MBSYS_SIMRAD3_MAXHEADING)
 			{
 			status = MB_SUCCESS;
-			mb_get_binary_short(swap, &line[0], &short_val); 
+			mb_get_binary_short(swap, &line[0], &short_val);
 			    heading->hed_time[i] = (int) ((unsigned short) short_val);
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    heading->hed_heading[i] = (int) ((unsigned short) short_val);
 			}
 		else
@@ -2859,7 +2878,7 @@ int mbr_em710mba_rd_heading(int verbose, FILE *mbfp, int swap,
 		}
 	    heading->hed_ndata = MIN(heading->hed_ndata, MBSYS_SIMRAD3_MAXHEADING);
 	    }
-		
+
 	/* now get last bytes of record */
 	if (status == MB_SUCCESS)
 		{
@@ -2880,9 +2899,9 @@ int mbr_em710mba_rd_heading(int verbose, FILE *mbfp, int swap,
 		if (line[1] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[1], line[1], 
-		line[2], line[2], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
 		line[3], line[3]);
 #endif
 		}
@@ -2923,8 +2942,8 @@ int mbr_em710mba_rd_heading(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_ssv(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_ssv(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_ssv";
@@ -2947,13 +2966,13 @@ int mbr_em710mba_rd_ssv(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* get  storage structure */
 	ssv = (struct mbsys_simrad3_ssv_struct *) store->ssv;
-	
+
 	/* set kind and type values */
 	store->kind = MB_DATA_SSV;
 	store->type = EM3_SSV;
@@ -2972,15 +2991,15 @@ int mbr_em710mba_rd_ssv(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &ssv->ssv_date); 
+		mb_get_binary_int(swap, &line[0], &ssv->ssv_date);
 		    store->date = ssv->ssv_date;
-		mb_get_binary_int(swap, &line[4], &ssv->ssv_msec); 
+		mb_get_binary_int(swap, &line[4], &ssv->ssv_msec);
 		    store->msec = ssv->ssv_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    ssv->ssv_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    ssv->ssv_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[12], &short_val); 
+		mb_get_binary_short(swap, &line[12], &short_val);
 		    ssv->ssv_ndata = (int) ((unsigned short) short_val);
 		}
 
@@ -2990,13 +3009,13 @@ int mbr_em710mba_rd_ssv(int verbose, FILE *mbfp, int swap,
 	    for (i=0;i<ssv->ssv_ndata && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_SSV_SLICE_SIZE,mbfp);
-		if (read_len == EM3_SSV_SLICE_SIZE 
+		if (read_len == EM3_SSV_SLICE_SIZE
 			&& i < MBSYS_SIMRAD3_MAXSSV)
 			{
 			status = MB_SUCCESS;
-			mb_get_binary_short(swap, &line[0], &short_val); 
+			mb_get_binary_short(swap, &line[0], &short_val);
 			    ssv->ssv_time[i] = (int) ((unsigned short) short_val);
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    ssv->ssv_ssv[i] = (int) ((unsigned short) short_val);
 			}
 		else
@@ -3007,7 +3026,7 @@ int mbr_em710mba_rd_ssv(int verbose, FILE *mbfp, int swap,
 		}
 	    ssv->ssv_ndata = MIN(ssv->ssv_ndata, MBSYS_SIMRAD3_MAXSSV);
 	    }
-		
+
 	/* now get last bytes of record */
 	if (status == MB_SUCCESS)
 		{
@@ -3027,9 +3046,9 @@ int mbr_em710mba_rd_ssv(int verbose, FILE *mbfp, int swap,
 		if (line[1] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[1], line[1], 
-		line[2], line[2], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
 		line[3], line[3]);
 #endif
 		}
@@ -3069,8 +3088,8 @@ int mbr_em710mba_rd_ssv(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_tilt";
@@ -3093,13 +3112,13 @@ int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* get  storage structure */
 	tilt = (struct mbsys_simrad3_tilt_struct *) store->tilt;
-	
+
 	/* set kind and type values */
 	store->kind = MB_DATA_TILT;
 	store->type = EM3_TILT;
@@ -3118,15 +3137,15 @@ int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &tilt->tlt_date); 
+		mb_get_binary_int(swap, &line[0], &tilt->tlt_date);
 		    store->date = tilt->tlt_date;
-		mb_get_binary_int(swap, &line[4], &tilt->tlt_msec); 
+		mb_get_binary_int(swap, &line[4], &tilt->tlt_msec);
 		    store->msec = tilt->tlt_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    tilt->tlt_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    tilt->tlt_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[12], &short_val); 
+		mb_get_binary_short(swap, &line[12], &short_val);
 		    tilt->tlt_ndata = (int) ((unsigned short) short_val);
 		}
 
@@ -3136,13 +3155,13 @@ int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap,
 	    for (i=0;i<tilt->tlt_ndata && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_TILT_SLICE_SIZE,mbfp);
-		if (read_len == EM3_TILT_SLICE_SIZE 
+		if (read_len == EM3_TILT_SLICE_SIZE
 			&& i < MBSYS_SIMRAD3_MAXTILT)
 			{
 			status = MB_SUCCESS;
-			mb_get_binary_short(swap, &line[0], &short_val); 
+			mb_get_binary_short(swap, &line[0], &short_val);
 			    tilt->tlt_time[i] = (int) ((unsigned short) short_val);
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    tilt->tlt_tilt[i] = (int) ((unsigned short) short_val);
 			}
 		else
@@ -3153,7 +3172,7 @@ int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap,
 		}
 	    tilt->tlt_ndata = MIN(tilt->tlt_ndata, MBSYS_SIMRAD3_MAXTILT);
 	    }
-		
+
 	/* now get last bytes of record */
 	if (status == MB_SUCCESS)
 		{
@@ -3173,9 +3192,9 @@ int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap,
 		if (line[1] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[1], line[1], 
-		line[2], line[2], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
 		line[3], line[3]);
 #endif
 		}
@@ -3215,8 +3234,8 @@ int mbr_em710mba_rd_tilt(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_attitude";
@@ -3239,15 +3258,14 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* get  storage structure */
 	attitude = (struct mbsys_simrad3_attitude_struct *) store->attitude;
-		
-	/* set kind and type values */
-	store->kind = MB_DATA_ATTITUDE;
+
+	/* set type values */
 	store->type = EM3_ATTITUDE;
 	store->sonar = sonar;
 
@@ -3264,15 +3282,15 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &attitude->att_date); 
+		mb_get_binary_int(swap, &line[0], &attitude->att_date);
 		    store->date = attitude->att_date;
-		mb_get_binary_int(swap, &line[4], &attitude->att_msec); 
+		mb_get_binary_int(swap, &line[4], &attitude->att_msec);
 		    store->msec = attitude->att_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    attitude->att_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    attitude->att_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[12], &short_val); 
+		mb_get_binary_short(swap, &line[12], &short_val);
 		    attitude->att_ndata = (int) ((unsigned short) short_val);
 		}
 
@@ -3282,21 +3300,21 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 	    for (i=0;i<attitude->att_ndata && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_ATTITUDE_SLICE_SIZE,mbfp);
-		if (read_len == EM3_ATTITUDE_SLICE_SIZE 
+		if (read_len == EM3_ATTITUDE_SLICE_SIZE
 			&& i < MBSYS_SIMRAD3_MAXATTITUDE)
 			{
 			status = MB_SUCCESS;
-			mb_get_binary_short(swap, &line[0], &short_val); 
+			mb_get_binary_short(swap, &line[0], &short_val);
 			    attitude->att_time[i] = (int) ((unsigned short) short_val);
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    attitude->att_sensor_status[i] = (int) ((unsigned short) short_val);
-			mb_get_binary_short(swap, &line[4], &short_val); 
+			mb_get_binary_short(swap, &line[4], &short_val);
 			    attitude->att_roll[i] = (int) short_val;
-			mb_get_binary_short(swap, &line[6], &short_val); 
+			mb_get_binary_short(swap, &line[6], &short_val);
 			    attitude->att_pitch[i] = (int) short_val;
-			mb_get_binary_short(swap, &line[8], &short_val); 
+			mb_get_binary_short(swap, &line[8], &short_val);
 			    attitude->att_heave[i] = (int) short_val;
-			mb_get_binary_short(swap, &line[10], &short_val); 
+			mb_get_binary_short(swap, &line[10], &short_val);
 			    attitude->att_heading[i] = (int) ((unsigned short) short_val);
 			}
 		else
@@ -3307,7 +3325,7 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 		}
 	    attitude->att_ndata = MIN(attitude->att_ndata, MBSYS_SIMRAD3_MAXATTITUDE);
 	    }
-		
+
 	/* now get last bytes of record */
 	if (status == MB_SUCCESS)
 		{
@@ -3315,7 +3333,7 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 		if (read_len == 4)
 			{
 			status = MB_SUCCESS;
-			attitude->att_heading_status = (mb_u_char) line[0];
+			attitude->att_sensordescriptor = (mb_u_char) line[0];
 			}
 		else
 			{
@@ -3328,17 +3346,28 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 		if (line[1] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[1], line[1], 
-		line[2], line[2], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
 		line[3], line[3]);
 #endif
+		}
+		
+	/* Set data kind */
+	if (status == MB_SUCCESS)
+		{
+		/* set data kind */
+		if ((attitude->att_sensordescriptor & 48) == 0)
+			store->kind = MB_DATA_ATTITUDE;
+		else if ((attitude->att_sensordescriptor & 48) == 16)
+			store->kind = MB_DATA_ATTITUDE1;
 		}
 
 	/* print debug statements */
 	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       kind:            %d\n",store->kind);
 		fprintf(stderr,"dbg5       type:            %d\n",store->type);
 		fprintf(stderr,"dbg5       sonar:           %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:            %d\n",store->date);
@@ -3352,10 +3381,10 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       -------------------------------------\n");
 		for (i=0;i<attitude->att_ndata;i++)
 			fprintf(stderr,"dbg5        %3d  %d  %d %d %d %d\n",
-				i, attitude->att_time[i], attitude->att_roll[i], 
-				attitude->att_pitch[i], attitude->att_heave[i], 
+				i, attitude->att_time[i], attitude->att_roll[i],
+				attitude->att_pitch[i], attitude->att_heave[i],
 				attitude->att_heading[i]);
-		fprintf(stderr,"dbg5       att_heading_status: %d\n",attitude->att_heading_status);
+		fprintf(stderr,"dbg5       att_sensordescriptor: %d\n",attitude->att_sensordescriptor);
 		}
 
 	/* print output debug statements */
@@ -3373,8 +3402,8 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_netattitude";
@@ -3398,15 +3427,14 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* get  storage structure */
 	netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
-		
-	/* set kind and type values */
-	store->kind = MB_DATA_ATTITUDE;
+
+	/* set type values */
 	store->type = EM3_NETATTITUDE;
 	store->sonar = sonar;
 
@@ -3423,17 +3451,24 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &netattitude->nat_date); 
+		mb_get_binary_int(swap, &line[0], &netattitude->nat_date);
 		    store->date = netattitude->nat_date;
-		mb_get_binary_int(swap, &line[4], &netattitude->nat_msec); 
+		mb_get_binary_int(swap, &line[4], &netattitude->nat_msec);
 		    store->msec = netattitude->nat_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    netattitude->nat_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    netattitude->nat_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[12], &short_val); 
+		mb_get_binary_short(swap, &line[12], &short_val);
 		    netattitude->nat_ndata = (int) ((unsigned short) short_val);
 		netattitude->nat_sensordescriptor = line[14];
+		}
+		
+	/* Set data kind */
+	if (status == MB_SUCCESS)
+		{
+		/* set data kind */
+		store->kind = MB_DATA_ATTITUDE2;
 		}
 
 	/* read binary netattitude values */
@@ -3443,19 +3478,19 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 	    for (i=0;i<netattitude->nat_ndata && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_NETATTITUDE_SLICE_SIZE,mbfp);
-		if (read_len == EM3_NETATTITUDE_SLICE_SIZE 
+		if (read_len == EM3_NETATTITUDE_SLICE_SIZE
 			&& i < MBSYS_SIMRAD3_MAXATTITUDE)
 			{
 			status = MB_SUCCESS;
-			mb_get_binary_short(swap, &line[0], &short_val); 
+			mb_get_binary_short(swap, &line[0], &short_val);
 			    netattitude->nat_time[i] = (int) ((unsigned short) short_val);
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    netattitude->nat_roll[i] = (int) short_val;
-			mb_get_binary_short(swap, &line[4], &short_val); 
+			mb_get_binary_short(swap, &line[4], &short_val);
 			    netattitude->nat_pitch[i] = (int) short_val;
-			mb_get_binary_short(swap, &line[6], &short_val); 
+			mb_get_binary_short(swap, &line[6], &short_val);
 			    netattitude->nat_heave[i] = (int) short_val;
-			mb_get_binary_short(swap, &line[8], &short_val); 
+			mb_get_binary_short(swap, &line[8], &short_val);
 			    netattitude->nat_heading[i] = (int) ((unsigned short) short_val);
 			netattitude->nat_nbyte_raw[i] = (mb_u_char) line[10];
 			if (netattitude->nat_nbyte_raw[i] <= MBSYS_SIMRAD3_BUFFER_SIZE)
@@ -3487,7 +3522,7 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 		}
 	    netattitude->nat_ndata = MIN(netattitude->nat_ndata, MBSYS_SIMRAD3_MAXATTITUDE);
 	    }
-		
+
 	/* now get last bytes of record */
 	if (status == MB_SUCCESS)
 		{
@@ -3512,9 +3547,9 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 		if (line[1] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[1], line[1], 
-		line[2], line[2], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
 		line[3], line[3]);
 #endif
 		}
@@ -3523,6 +3558,7 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       kind:                 %d\n",store->kind);
 		fprintf(stderr,"dbg5       type:                 %d\n",store->type);
 		fprintf(stderr,"dbg5       sonar:                %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:                 %d\n",store->date);
@@ -3538,8 +3574,8 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 		for (i=0;i<netattitude->nat_ndata;i++)
 			{
 			fprintf(stderr,"dbg5        %3d  %d  %d %d %d %d %d\n",
-				i, netattitude->nat_time[i], netattitude->nat_roll[i], 
-				netattitude->nat_pitch[i], netattitude->nat_heave[i], 
+				i, netattitude->nat_time[i], netattitude->nat_roll[i],
+				netattitude->nat_pitch[i], netattitude->nat_heave[i],
 				netattitude->nat_heading[i],netattitude->nat_nbyte_raw[i]);
 			fprintf(stderr,"dbg5        nat_raw[%d]: ",netattitude->nat_nbyte_raw[i]);
 			for (j=0;j<netattitude->nat_nbyte_raw[i];j++)
@@ -3563,8 +3599,8 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_pos";
@@ -3587,10 +3623,10 @@ int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_NAV;
 	store->type = EM3_POS;
@@ -3609,23 +3645,23 @@ int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &store->pos_date); 
+		mb_get_binary_int(swap, &line[0], &store->pos_date);
 		    store->date = store->pos_date;
-		mb_get_binary_int(swap, &line[4], &store->pos_msec); 
+		mb_get_binary_int(swap, &line[4], &store->pos_msec);
 		    store->msec = store->pos_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    store->pos_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    store->pos_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[12], &store->pos_latitude); 
-		mb_get_binary_int(swap, &line[16], &store->pos_longitude); 
-		mb_get_binary_short(swap, &line[20], &short_val); 
+		mb_get_binary_int(swap, &line[12], &store->pos_latitude);
+		mb_get_binary_int(swap, &line[16], &store->pos_longitude);
+		mb_get_binary_short(swap, &line[20], &short_val);
 		    store->pos_quality = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[22], &short_val); 
+		mb_get_binary_short(swap, &line[22], &short_val);
 		    store->pos_speed = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[24], &short_val); 
+		mb_get_binary_short(swap, &line[24], &short_val);
 		    store->pos_course = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[26], &short_val); 
+		mb_get_binary_short(swap, &line[26], &short_val);
 		    store->pos_heading = (int) ((unsigned short) short_val);
 		store->pos_system = (mb_u_char) line[28];
 		store->pos_input_size = (mb_u_char) line[29];
@@ -3646,8 +3682,8 @@ int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap,
 			*error = MB_ERROR_EOF;
 			}
 		}
-		
-	/* now loop over reading individual characters to 
+
+	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS)
 	    {
@@ -3664,9 +3700,9 @@ int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap,
 		if (line[0] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[0], line[0], 
-		line[1], line[1], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[0], line[0],
+		line[1], line[1],
 		line[2], line[2]);
 #endif
 			}
@@ -3688,7 +3724,7 @@ int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap,
 	fprintf(stderr, "\n");
 #endif
 	    }
-		
+
 	/* check for navigation source */
 	if (status == MB_SUCCESS)
 		{
@@ -3714,7 +3750,7 @@ int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap,
 			{
 			store->kind = MB_DATA_NAV3;
 			}
-    
+
 		    /* otherwise its an error */
 		    else
 			{
@@ -3722,7 +3758,7 @@ int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap,
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
 		    }
-		}	
+		}
 
 	/* print debug statements */
 	if (verbose >= 5)
@@ -3762,8 +3798,8 @@ int mbr_em710mba_rd_pos(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_svp(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_svp(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_svp";
@@ -3785,10 +3821,10 @@ int mbr_em710mba_rd_svp(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_VELOCITY_PROFILE;
 	store->type = EM3_SVP;
@@ -3807,19 +3843,19 @@ int mbr_em710mba_rd_svp(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &store->svp_use_date); 
+		mb_get_binary_int(swap, &line[0], &store->svp_use_date);
 		    store->date = store->svp_use_date;
-		mb_get_binary_int(swap, &line[4], &store->svp_use_msec); 
+		mb_get_binary_int(swap, &line[4], &store->svp_use_msec);
 		    store->msec = store->svp_use_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    store->svp_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    store->svp_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[12], &store->svp_origin_date); 
-		mb_get_binary_int(swap, &line[16], &store->svp_origin_msec); 
-		mb_get_binary_short(swap, &line[20], &short_val); 
+		mb_get_binary_int(swap, &line[12], &store->svp_origin_date);
+		mb_get_binary_int(swap, &line[16], &store->svp_origin_msec);
+		mb_get_binary_short(swap, &line[20], &short_val);
 		    store->svp_num = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[22], &short_val); 
+		mb_get_binary_short(swap, &line[22], &short_val);
 		    store->svp_depth_res = (int) ((unsigned short) short_val);
 		}
 
@@ -3837,15 +3873,15 @@ int mbr_em710mba_rd_svp(int verbose, FILE *mbfp, int swap,
 		else if (i < MBSYS_SIMRAD3_MAXSVP)
 			{
 			status = MB_SUCCESS;
-			mb_get_binary_short(swap, &line[0], &short_val); 
+			mb_get_binary_short(swap, &line[0], &short_val);
 			    store->svp_depth[i] = (int) ((unsigned short) short_val);
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    store->svp_vel[i] = (int) ((unsigned short) short_val);
 			}
 		}
 	    store->svp_num = MIN(store->svp_num, MBSYS_SIMRAD3_MAXSVP);
 	    }
-		
+
 	/* now get last bytes of record */
 	if (status == MB_SUCCESS)
 		{
@@ -3865,9 +3901,9 @@ int mbr_em710mba_rd_svp(int verbose, FILE *mbfp, int swap,
 		if (line[1] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[1], line[1], 
-		line[2], line[2], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
 		line[3], line[3]);
 #endif
 		}
@@ -3910,8 +3946,8 @@ int mbr_em710mba_rd_svp(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_svp2(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_svp2(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_svp2";
@@ -3933,10 +3969,10 @@ int mbr_em710mba_rd_svp2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_VELOCITY_PROFILE;
 	store->type = EM3_SVP2;
@@ -3955,19 +3991,19 @@ int mbr_em710mba_rd_svp2(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &store->svp_use_date); 
+		mb_get_binary_int(swap, &line[0], &store->svp_use_date);
 		    store->date = store->svp_use_date;
-		mb_get_binary_int(swap, &line[4], &store->svp_use_msec); 
+		mb_get_binary_int(swap, &line[4], &store->svp_use_msec);
 		    store->msec = store->svp_use_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    store->svp_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    store->svp_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[12], &store->svp_origin_date); 
-		mb_get_binary_int(swap, &line[16], &store->svp_origin_msec); 
-		mb_get_binary_short(swap, &line[20], &short_val); 
+		mb_get_binary_int(swap, &line[12], &store->svp_origin_date);
+		mb_get_binary_int(swap, &line[16], &store->svp_origin_msec);
+		mb_get_binary_short(swap, &line[20], &short_val);
 		    store->svp_num = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[22], &short_val); 
+		mb_get_binary_short(swap, &line[22], &short_val);
 		    store->svp_depth_res = (int) ((unsigned short) short_val);
 		}
 
@@ -3985,13 +4021,13 @@ int mbr_em710mba_rd_svp2(int verbose, FILE *mbfp, int swap,
 		else if (i < MBSYS_SIMRAD3_MAXSVP)
 			{
 			status = MB_SUCCESS;
-			mb_get_binary_int(swap, &line[0], &store->svp_depth[i]); 
-			mb_get_binary_int(swap, &line[4], &store->svp_vel[i]); 
+			mb_get_binary_int(swap, &line[0], &store->svp_depth[i]);
+			mb_get_binary_int(swap, &line[4], &store->svp_vel[i]);
 			}
 		}
 	    store->svp_num = MIN(store->svp_num, MBSYS_SIMRAD3_MAXSVP);
 	    }
-		
+
 	/* now get last bytes of record */
 	if (status == MB_SUCCESS)
 		{
@@ -4011,9 +4047,9 @@ int mbr_em710mba_rd_svp2(int verbose, FILE *mbfp, int swap,
 		if (line[1] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[1], line[1], 
-		line[2], line[2], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
 		line[3], line[3]);
 #endif
 		}
@@ -4056,8 +4092,8 @@ int mbr_em710mba_rd_svp2(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_bath2_mba(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_bath2_mba(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		int *match, short sonar, int version, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_bath2_mba";
@@ -4083,13 +4119,13 @@ int mbr_em710mba_rd_bath2_mba(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		fprintf(stderr,"dbg2       version:    %d\n",version);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* get  storage structure */
 	ping = (struct mbsys_simrad3_ping_struct *) store->ping;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_DATA;
 	store->type = EM3_BATH;
@@ -4108,47 +4144,47 @@ int mbr_em710mba_rd_bath2_mba(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &ping->png_date); 
+		mb_get_binary_int(swap, &line[0], &ping->png_date);
 		    store->date = ping->png_date;
-		mb_get_binary_int(swap, &line[4], &ping->png_msec); 
+		mb_get_binary_int(swap, &line[4], &ping->png_msec);
 		    store->msec = ping->png_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    ping->png_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    ping->png_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[12], &int_val); 
+		mb_get_binary_int(swap, &line[12], &int_val);
 		    ping->png_latitude = int_val;
-		mb_get_binary_int(swap, &line[16], &int_val); 
+		mb_get_binary_int(swap, &line[16], &int_val);
 		    ping->png_longitude = int_val;
-		mb_get_binary_short(swap, &line[20], &short_val); 
+		mb_get_binary_short(swap, &line[20], &short_val);
 		    ping->png_heading = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[22], &short_val); 
+		mb_get_binary_short(swap, &line[22], &short_val);
 		    ping->png_heave = (int) ((short) short_val);
-		mb_get_binary_short(swap, &line[24], &short_val); 
+		mb_get_binary_short(swap, &line[24], &short_val);
 		    ping->png_roll = (int) ((short) short_val);
-		mb_get_binary_short(swap, &line[26], &short_val); 
+		mb_get_binary_short(swap, &line[26], &short_val);
 		    ping->png_pitch = (int) ((short) short_val);
-		mb_get_binary_short(swap, &line[28], &short_val); 
+		mb_get_binary_short(swap, &line[28], &short_val);
 		    ping->png_speed = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[30], &short_val); 
+		mb_get_binary_short(swap, &line[30], &short_val);
 		    ping->png_ssv = (int) ((unsigned short) short_val);
-		mb_get_binary_float(swap, &line[32], &float_val); 
+		mb_get_binary_float(swap, &line[32], &float_val);
 		    ping->png_xducer_depth = float_val;
-		mb_get_binary_short(swap, &line[36], &short_val); 
+		mb_get_binary_short(swap, &line[36], &short_val);
 		    ping->png_nbeams = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[38], &short_val); 
+		mb_get_binary_short(swap, &line[38], &short_val);
 		    ping->png_nbeams_valid = (int) ((unsigned short) short_val);
-		mb_get_binary_float(swap, &line[40], &float_val); 
+		mb_get_binary_float(swap, &line[40], &float_val);
 		    ping->png_sample_rate = float_val;
-		mb_get_binary_int(swap, &line[44], &int_val); 
+		mb_get_binary_int(swap, &line[44], &int_val);
 		    ping->png_spare = int_val;
 #ifdef MBR_EM710MBA_DEBUG
 fprintf(stderr,"mbr_em710mba_rd_bath2_mba:    ping->png_date:%d     ping->png_msec:%d     ping->png_count:%d     ping->png_nbeams:%d\n",
 ping->png_date,ping->png_msec,ping->png_count,ping->png_nbeams);
 #endif
 		}
-		
-	/* check for some indicators of a broken record 
+
+	/* check for some indicators of a broken record
 	    - these do happen!!!! */
 	if (status == MB_SUCCESS)
 		{
@@ -4173,30 +4209,31 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 	    for (i=0;i<ping->png_nbeams && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_BATH2_MBA_BEAM_SIZE,mbfp);
-		if (read_len == EM3_BATH2_MBA_BEAM_SIZE 
+		if (read_len == EM3_BATH2_MBA_BEAM_SIZE
 			&& i < MBSYS_SIMRAD3_MAXBEAMS)
 			{
 			status = MB_SUCCESS;
-			mb_get_binary_float(swap, &line[0], &float_val); 
+			mb_get_binary_float(swap, &line[0], &float_val);
 			    ping->png_depth[i] = float_val;
-			mb_get_binary_float(swap, &line[4], &float_val); 
+			mb_get_binary_float(swap, &line[4], &float_val);
 			    ping->png_acrosstrack[i] = float_val;
-			mb_get_binary_float(swap, &line[8], &float_val); 
+			mb_get_binary_float(swap, &line[8], &float_val);
 			    ping->png_alongtrack[i] = float_val;
-			mb_get_binary_short(swap, &line[12], &short_val); 
+			mb_get_binary_short(swap, &line[12], &short_val);
 			    ping->png_window[i] = (int) ((unsigned short) short_val);
 			ping->png_quality[i] = (int)((mb_u_char) line[14]);
 			ping->png_iba[i] = (int)((mb_s_char) line[15]);
 			ping->png_detection[i] = (int)((mb_u_char) line[16]);
 			ping->png_clean[i] = (int)((mb_s_char) line[17]);
-			mb_get_binary_short(swap, &line[18], &short_val); 
+			mb_get_binary_short(swap, &line[18], &short_val);
 			    ping->png_amp[i] = (int) short_val;
-			mb_get_binary_float(swap, &line[20], &float_val); 
+			mb_get_binary_float(swap, &line[20], &float_val);
 			    ping->png_depression[i] = float_val;
-			mb_get_binary_float(swap, &line[24], &float_val); 
+			mb_get_binary_float(swap, &line[24], &float_val);
 			    ping->png_azimuth[i] = float_val;
-			mb_get_binary_float(swap, &line[28], &float_val); 
+			mb_get_binary_float(swap, &line[28], &float_val);
 			    ping->png_range[i] = float_val;
+			    ping->png_bheave[i] = 0.01 * (float)ping->png_heave;
 			ping->png_beamflag[i] = (int)((mb_s_char) line[32]);
 			/* ignore line[33] */
 			}
@@ -4207,7 +4244,7 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 			}
 		}
 	    }
-		
+
 	/* now get last bytes of record */
 	if (status == MB_SUCCESS)
 		{
@@ -4224,15 +4261,15 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 		if (line[1] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[1], line[1], 
-		line[2], line[2], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
 		line[3], line[3]);
 #endif
 		}
-		
-	/* check if bath and sidescan time tags agree 
-	   - we cannot pair bath 
+
+	/* check if bath and sidescan time tags agree
+	   - we cannot pair bath
 	   and sidescan records from different pings */
 	if (status == MB_SUCCESS)
 		{
@@ -4268,16 +4305,16 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 		fprintf(stderr,"dbg5       png_nbeams_valid:      %d\n",ping->png_nbeams_valid);
 		fprintf(stderr,"dbg5       png_sample_rate:       %f\n",ping->png_sample_rate);
 		fprintf(stderr,"dbg5       png_spare:             %d\n",ping->png_spare);
-		fprintf(stderr,"dbg5       cnt  depth xtrack ltrack win  qual  iba det cln amp\n");
+		fprintf(stderr,"dbg5       cnt  depth xtrack ltrack win  qual  iba det cln amp depression azimuth range heave flag\n");
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_nbeams;i++)
-			fprintf(stderr,"dbg5       %3d %7.2f %7.2f %7.2f %5d %5d %5d %4d %3d %3d %7.2f %7.2f %7.2f %3d\n",
-				i, ping->png_depth[i], ping->png_acrosstrack[i], 
-				ping->png_alongtrack[i], ping->png_window[i], 
-				ping->png_quality[i], ping->png_iba[i], 
-				ping->png_detection[i], ping->png_clean[i], 
-				ping->png_amp[i], ping->png_depression[i], 
-				ping->png_azimuth[i], ping->png_range[i], 
+			fprintf(stderr,"dbg5       %3d %7.2f %7.2f %7.2f %5d %5d %5d %4d %3d %3d %7.2f %7.2f %7.2f %7.2f %3u\n",
+				i, ping->png_depth[i], ping->png_acrosstrack[i],
+				ping->png_alongtrack[i], ping->png_window[i],
+				ping->png_quality[i], ping->png_iba[i],
+				ping->png_detection[i], ping->png_clean[i],
+				ping->png_amp[i], ping->png_depression[i],
+				ping->png_azimuth[i], ping->png_range[i], ping->png_bheave[i],
 				ping->png_beamflag[i]);
 		}
 
@@ -4297,8 +4334,256 @@ ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_rawbeam4(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_bath3_mba(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
+		int *match, short sonar, int version, int *goodend, int *error)
+{
+	char	*function_name = "mbr_em710mba_rd_bath3_mba";
+	int	status = MB_SUCCESS;
+	struct mbsys_simrad3_ping_struct *ping;
+	char	line[EM3_BATH3_MBA_HEADER_SIZE];
+	short	short_val;
+	float	float_val;
+	int	int_val;
+	int	read_len;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbfp:       %lu\n",(size_t)mbfp);
+		fprintf(stderr,"dbg2       swap:       %d\n",swap);
+		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
+		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
+		fprintf(stderr,"dbg2       version:    %d\n",version);
+		}
+
+	/* set goodend false until a good end is found */
+	*goodend = MB_NO;
+
+	/* get  storage structure */
+	ping = (struct mbsys_simrad3_ping_struct *) store->ping;
+
+	/* set kind and type values */
+	store->kind = MB_DATA_DATA;
+	store->type = EM3_BATH;
+	store->sonar = sonar;
+
+	/* read binary header values into char array */
+	read_len = fread(line,1,EM3_BATH3_MBA_HEADER_SIZE,mbfp);
+	if (read_len == EM3_BATH3_MBA_HEADER_SIZE)
+		status = MB_SUCCESS;
+	else
+		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_EOF;
+		}
+
+	/* get binary header data */
+	if (status == MB_SUCCESS)
+		{
+		mb_get_binary_int(swap, &line[0], &ping->png_date);
+		    store->date = ping->png_date;
+		mb_get_binary_int(swap, &line[4], &ping->png_msec);
+		    store->msec = ping->png_msec;
+		mb_get_binary_short(swap, &line[8], &short_val);
+		    ping->png_count = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[10], &short_val);
+		    ping->png_serial = (int) ((unsigned short) short_val);
+		mb_get_binary_int(swap, &line[12], &int_val);
+		    ping->png_latitude = int_val;
+		mb_get_binary_int(swap, &line[16], &int_val);
+		    ping->png_longitude = int_val;
+		mb_get_binary_short(swap, &line[20], &short_val);
+		    ping->png_heading = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[22], &short_val);
+		    ping->png_heave = (int) ((short) short_val);
+		mb_get_binary_short(swap, &line[24], &short_val);
+		    ping->png_roll = (int) ((short) short_val);
+		mb_get_binary_short(swap, &line[26], &short_val);
+		    ping->png_pitch = (int) ((short) short_val);
+		mb_get_binary_short(swap, &line[28], &short_val);
+		    ping->png_speed = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[30], &short_val);
+		    ping->png_ssv = (int) ((unsigned short) short_val);
+		mb_get_binary_float(swap, &line[32], &float_val);
+		    ping->png_xducer_depth = float_val;
+		mb_get_binary_short(swap, &line[36], &short_val);
+		    ping->png_nbeams = (int) ((unsigned short) short_val);
+		mb_get_binary_short(swap, &line[38], &short_val);
+		    ping->png_nbeams_valid = (int) ((unsigned short) short_val);
+		mb_get_binary_float(swap, &line[40], &float_val);
+		    ping->png_sample_rate = float_val;
+		mb_get_binary_int(swap, &line[44], &int_val);
+		    ping->png_spare = int_val;
+#ifdef MBR_EM710MBA_DEBUG
+fprintf(stderr,"mbr_em710mba_rd_bath2_mba:    ping->png_date:%d     ping->png_msec:%d     ping->png_count:%d     ping->png_nbeams:%d\n",
+ping->png_date,ping->png_msec,ping->png_count,ping->png_nbeams);
+#endif
+		}
+
+	/* check for some indicators of a broken record
+	    - these do happen!!!! */
+	if (status == MB_SUCCESS)
+		{
+		if (ping->png_nbeams_valid > ping->png_nbeams
+			|| ping->png_nbeams < 0
+			|| ping->png_nbeams_valid < 0
+			|| ping->png_nbeams > MBSYS_SIMRAD3_MAXBEAMS
+			|| ping->png_nbeams_valid > MBSYS_SIMRAD3_MAXBEAMS)
+			{
+#ifdef MBR_EM710MBA_DEBUG
+fprintf(stderr,"mbr_em710mba_rd_bath2_mba: ERROR SET: ping->png_nbeams:%d ping->png_nbeams_valid:%d MBSYS_SIMRAD3_MAXBEAMS:%d\n",
+ping->png_nbeams,ping->png_nbeams_valid,MBSYS_SIMRAD3_MAXBEAMS);
+#endif
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		}
+
+	/* read binary beam values */
+	if (status == MB_SUCCESS)
+	    {
+	    for (i=0;i<ping->png_nbeams && status == MB_SUCCESS;i++)
+		{
+		read_len = fread(line,1,EM3_BATH3_MBA_BEAM_SIZE,mbfp);
+		if (read_len == EM3_BATH3_MBA_BEAM_SIZE
+			&& i < MBSYS_SIMRAD3_MAXBEAMS)
+			{
+			status = MB_SUCCESS;
+			mb_get_binary_float(swap, &line[0], &float_val);
+			    ping->png_depth[i] = float_val;
+			mb_get_binary_float(swap, &line[4], &float_val);
+			    ping->png_acrosstrack[i] = float_val;
+			mb_get_binary_float(swap, &line[8], &float_val);
+			    ping->png_alongtrack[i] = float_val;
+			mb_get_binary_short(swap, &line[12], &short_val);
+			    ping->png_window[i] = (int) ((unsigned short) short_val);
+			ping->png_quality[i] = (int)((mb_u_char) line[14]);
+			ping->png_iba[i] = (int)((mb_s_char) line[15]);
+			ping->png_detection[i] = (int)((mb_u_char) line[16]);
+			ping->png_clean[i] = (int)((mb_s_char) line[17]);
+			mb_get_binary_short(swap, &line[18], &short_val);
+			    ping->png_amp[i] = (int) short_val;
+			mb_get_binary_float(swap, &line[20], &float_val);
+			    ping->png_depression[i] = float_val;
+			mb_get_binary_float(swap, &line[24], &float_val);
+			    ping->png_azimuth[i] = float_val;
+			mb_get_binary_float(swap, &line[28], &float_val);
+			    ping->png_range[i] = float_val;
+			mb_get_binary_float(swap, &line[32], &float_val);
+			    ping->png_bheave[i] = float_val;
+			ping->png_beamflag[i] = (int)((mb_s_char) line[36]);
+/* fprintf(stderr,"READ ping:%d beam %d  png_depression:%f ",ping->png_count,i,ping->png_depression[i]);
+fprintf(stderr,"png_azimuth:%f ",ping->png_azimuth[i]);
+fprintf(stderr,"png_range:%f ",ping->png_range[i]);
+fprintf(stderr,"png_bheave:%f ",ping->png_bheave[i]);
+fprintf(stderr,"png_beamflag:%d\n",ping->png_beamflag[i]); */
+			/* ignore line[37] */
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		}
+	    }
+
+	/* now get last bytes of record */
+	if (status == MB_SUCCESS)
+		{
+		read_len = fread(&line[0],1,4,mbfp);
+		if (read_len == 4)
+			{
+			status = MB_SUCCESS;
+			}
+		else
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_EOF;
+			}
+		if (line[1] == EM3_END)
+			*goodend = MB_YES;
+#ifdef MBR_EM710MBA_DEBUG
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
+		line[3], line[3]);
+#endif
+		}
+
+	/* check if bath and sidescan time tags agree
+	   - we cannot pair bath
+	   and sidescan records from different pings */
+	if (status == MB_SUCCESS)
+		{
+		if (ping->png_date == ping->png_ss_date
+		    && ping->png_msec == ping->png_ss_msec)
+		    *match = MB_YES;
+		else
+		    *match = MB_NO;
+		}
+
+	/* print debug statements */
+	if (verbose >= 5)
+		{
+		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
+		fprintf(stderr,"dbg5       type:                  %d\n",store->type);
+		fprintf(stderr,"dbg5       sonar:                 %d\n",store->sonar);
+		fprintf(stderr,"dbg5       date:                  %d\n",store->date);
+		fprintf(stderr,"dbg5       msec:                  %d\n",store->msec);
+		fprintf(stderr,"dbg5       png_date:              %d\n",ping->png_date);
+		fprintf(stderr,"dbg5       png_msec:              %d\n",ping->png_msec);
+		fprintf(stderr,"dbg5       png_count:             %d\n",ping->png_count);
+		fprintf(stderr,"dbg5       png_serial:            %d\n",ping->png_serial);
+		fprintf(stderr,"dbg5       png_latitude:          %f\n",ping->png_latitude);
+		fprintf(stderr,"dbg5       png_longitude:         %f\n",ping->png_longitude);
+		fprintf(stderr,"dbg5       png_heading:           %d\n",ping->png_heading);
+		fprintf(stderr,"dbg5       png_heave:             %d\n",ping->png_heave);
+		fprintf(stderr,"dbg5       png_roll:              %d\n",ping->png_roll);
+		fprintf(stderr,"dbg5       png_pitch:             %d\n",ping->png_pitch);
+		fprintf(stderr,"dbg5       png_speed:             %d\n",ping->png_speed);
+		fprintf(stderr,"dbg5       png_ssv:               %d\n",ping->png_ssv);
+		fprintf(stderr,"dbg5       png_xducer_depth:      %f\n",ping->png_xducer_depth);
+		fprintf(stderr,"dbg5       png_nbeams:            %d\n",ping->png_nbeams);
+		fprintf(stderr,"dbg5       png_nbeams_valid:      %d\n",ping->png_nbeams_valid);
+		fprintf(stderr,"dbg5       png_sample_rate:       %f\n",ping->png_sample_rate);
+		fprintf(stderr,"dbg5       png_spare:             %d\n",ping->png_spare);
+		fprintf(stderr,"dbg5       cnt  depth xtrack ltrack win  qual  iba det cln amp depression azimuth range heave flag\n");
+		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
+		for (i=0;i<ping->png_nbeams;i++)
+			fprintf(stderr,"dbg5       %3d %7.2f %7.2f %7.2f %5d %5d %5d %4d %3d %3d %7.2f %7.2f %7.2f %7.2f %3u\n",
+				i, ping->png_depth[i], ping->png_acrosstrack[i],
+				ping->png_alongtrack[i], ping->png_window[i],
+				ping->png_quality[i], ping->png_iba[i],
+				ping->png_detection[i], ping->png_clean[i],
+				ping->png_amp[i], ping->png_depression[i],
+				ping->png_azimuth[i], ping->png_range[i], ping->png_bheave[i],
+				ping->png_beamflag[i]);
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       match:      %d\n",*match);
+		fprintf(stderr,"dbg2       goodend:    %d\n",*goodend);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:  %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbr_em710mba_rd_rawbeam4(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_rawbeam4";
@@ -4323,13 +4608,13 @@ int mbr_em710mba_rd_rawbeam4(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* get  storage structure */
 	ping = (struct mbsys_simrad3_ping_struct *) store->ping;
-		
+
 	/* read binary header values into char array */
 	read_len = fread(line,1,EM3_RAWBEAM4_HEADER_SIZE,mbfp);
 	if (read_len == EM3_RAWBEAM4_HEADER_SIZE)
@@ -4343,31 +4628,31 @@ int mbr_em710mba_rd_rawbeam4(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &ping->png_raw_date); 
+		mb_get_binary_int(swap, &line[0], &ping->png_raw_date);
 		    store->date = ping->png_raw_date;
-		mb_get_binary_int(swap, &line[4], &ping->png_raw_msec); 
+		mb_get_binary_int(swap, &line[4], &ping->png_raw_msec);
 		    store->msec = ping->png_raw_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    ping->png_raw_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    ping->png_raw_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[12], &short_val); 
+		mb_get_binary_short(swap, &line[12], &short_val);
 		    ping->png_raw_ssv = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[14], &short_val); 
+		mb_get_binary_short(swap, &line[14], &short_val);
 		    ping->png_raw_ntx = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[16], &short_val); 
+		mb_get_binary_short(swap, &line[16], &short_val);
 		    ping->png_raw_nbeams = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[18], &short_val); 
+		mb_get_binary_short(swap, &line[18], &short_val);
 		    ping->png_raw_detections = (int) ((unsigned short) short_val);
-		mb_get_binary_float(swap, &line[20], &float_val); 
+		mb_get_binary_float(swap, &line[20], &float_val);
 		    ping->png_raw_sample_rate = (int) (float_val);
-		mb_get_binary_int(swap, &line[24], &int_val); 
+		mb_get_binary_int(swap, &line[24], &int_val);
 		    ping->png_raw_spare = (int) (int_val);
 /*fprintf(stderr,"ping->png_raw_date:%d ping->png_raw_msec:%d ping->png_raw_count:%d ping->png_raw_nbeams:%d\n",
 ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);*/
 		}
-		
-	/* check for some indicators of a broken record 
+
+	/* check for some indicators of a broken record
 	    - these do happen!!!! */
 	if (status == MB_SUCCESS)
 		{
@@ -4389,25 +4674,25 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 	    for (i=0;i<ping->png_raw_ntx && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_RAWBEAM4_TX_SIZE,mbfp);
-		if (read_len == EM3_RAWBEAM4_TX_SIZE 
+		if (read_len == EM3_RAWBEAM4_TX_SIZE
 			&& i < MBSYS_SIMRAD3_MAXTX)
 			{
 			status = MB_SUCCESS;
-			mb_get_binary_short(swap, &line[0], &short_val); 
+			mb_get_binary_short(swap, &line[0], &short_val);
 			    ping->png_raw_txtiltangle[i] = (int) short_val;
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    ping->png_raw_txfocus[i] = (int) ((unsigned short) short_val);
-			mb_get_binary_float(swap, &line[4], &float_val); 
+			mb_get_binary_float(swap, &line[4], &float_val);
 			    ping->png_raw_txsignallength[i] = float_val;
-			mb_get_binary_float(swap, &line[8], &float_val); 
+			mb_get_binary_float(swap, &line[8], &float_val);
 			    ping->png_raw_txoffset[i] = float_val;
-			mb_get_binary_float(swap, &line[12], &float_val); 
+			mb_get_binary_float(swap, &line[12], &float_val);
 			    ping->png_raw_txcenter[i] = float_val;
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    ping->png_raw_txabsorption[i] = (int) ((unsigned short) short_val);
 			ping->png_raw_txwaveform[i] = (int) line[18];
 			ping->png_raw_txsector[i] = (int) line[19];
-			mb_get_binary_float(swap, &line[20], &float_val); 
+			mb_get_binary_float(swap, &line[20], &float_val);
 			    ping->png_raw_txbandwidth[i] = float_val;
 			}
 		else
@@ -4424,21 +4709,21 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 	    for (i=0;i<ping->png_raw_nbeams && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_RAWBEAM4_BEAM_SIZE,mbfp);
-		if (read_len == EM3_RAWBEAM4_BEAM_SIZE 
+		if (read_len == EM3_RAWBEAM4_BEAM_SIZE
 			&& i < MBSYS_SIMRAD3_MAXBEAMS)
 			{
 			status = MB_SUCCESS;
-			mb_get_binary_short(swap, &line[0], &short_val); 
+			mb_get_binary_short(swap, &line[0], &short_val);
 			    ping->png_raw_rxpointangle[i] = (int) short_val;
 			ping->png_raw_rxsector[i] = (mb_u_char) line[2];
 			ping->png_raw_rxdetection[i] = (mb_u_char) line[3];
-			mb_get_binary_short(swap, &line[4], &short_val); 
+			mb_get_binary_short(swap, &line[4], &short_val);
 			    ping->png_raw_rxwindow[i] = (int) ((unsigned short) short_val);
 			ping->png_raw_rxquality[i] = (mb_u_char) line[6];
 			ping->png_raw_rxspare1[i] = (mb_s_char) line[7];
-			mb_get_binary_float(swap, &line[8], &float_val); 
+			mb_get_binary_float(swap, &line[8], &float_val);
 			    ping->png_raw_rxrange[i] = float_val;
-			mb_get_binary_short(swap, &line[12], &short_val); 
+			mb_get_binary_short(swap, &line[12], &short_val);
 			    ping->png_raw_rxamp[i] = (int) ((short) short_val);
 			ping->png_raw_rxcleaning[i] = (mb_s_char) line[14];
 			ping->png_raw_rxspare2[i] = (mb_u_char) line[15];
@@ -4450,7 +4735,7 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 			}
 		}
 	    }
-		
+
 	/* now get last bytes of record */
 	if (status == MB_SUCCESS)
 		{
@@ -4467,14 +4752,14 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 		if (line[1] == EM3_END)
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[1], line[1], 
-		line[2], line[2], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[1], line[1],
+		line[2], line[2],
 		line[3], line[3]);
 #endif
 		}
-		
-	/* check for some other indicators of a broken record 
+
+	/* check for some other indicators of a broken record
 	    - these do happen!!!! */
 	if (status == MB_SUCCESS)
 		{
@@ -4511,10 +4796,10 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_raw_ntx;i++)
 			fprintf(stderr,"dbg5       %3d %5d %5d %f %f %f %4d %4d %4d %f\n",
-				i, ping->png_raw_txtiltangle[i], 
-				ping->png_raw_txfocus[i], ping->png_raw_txsignallength[i], 
-				ping->png_raw_txoffset[i], ping->png_raw_txcenter[i], 
-				ping->png_raw_txabsorption[i], ping->png_raw_txwaveform[i], 
+				i, ping->png_raw_txtiltangle[i],
+				ping->png_raw_txfocus[i], ping->png_raw_txsignallength[i],
+				ping->png_raw_txoffset[i], ping->png_raw_txcenter[i],
+				ping->png_raw_txabsorption[i], ping->png_raw_txwaveform[i],
 				ping->png_raw_txsector[i], ping->png_raw_txbandwidth[i]);
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		fprintf(stderr,"dbg5       beam values:\n");
@@ -4522,10 +4807,10 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_raw_nbeams;i++)
 			fprintf(stderr,"dbg5       %3d %5d %3d %3d %4d %3d %5d %f %5d %5d %5d\n",
-				i, ping->png_raw_rxpointangle[i], ping->png_raw_rxsector[i], 
-				ping->png_raw_rxdetection[i], ping->png_raw_rxwindow[i], 
-				ping->png_raw_rxquality[i], ping->png_raw_rxspare1[i],  
-				ping->png_raw_rxrange[i],ping->png_raw_rxamp[i], 
+				i, ping->png_raw_rxpointangle[i], ping->png_raw_rxsector[i],
+				ping->png_raw_rxdetection[i], ping->png_raw_rxwindow[i],
+				ping->png_raw_rxquality[i], ping->png_raw_rxspare1[i],
+				ping->png_raw_rxrange[i],ping->png_raw_rxamp[i],
 				ping->png_raw_rxcleaning[i],ping->png_raw_rxspare2[i]);
 		}
 
@@ -4544,8 +4829,8 @@ ping->png_raw_date,ping->png_raw_msec,ping->png_raw_count,ping->png_raw_nbeams);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_ss2(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_ss2(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *match, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_ss2";
@@ -4573,13 +4858,13 @@ int mbr_em710mba_rd_ss2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* get  storage structure */
 	ping = (struct mbsys_simrad3_ping_struct *) store->ping;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_DATA;
 	store->type = EM3_SS2;
@@ -4598,37 +4883,37 @@ int mbr_em710mba_rd_ss2(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &ping->png_ss_date); 
+		mb_get_binary_int(swap, &line[0], &ping->png_ss_date);
 		    store->date = ping->png_ss_date;
-		mb_get_binary_int(swap, &line[4], & ping->png_ss_msec); 
+		mb_get_binary_int(swap, &line[4], & ping->png_ss_msec);
 		    store->msec = ping->png_ss_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    ping->png_ss_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    ping->png_ss_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_float(swap, &line[12], &float_val); 
+		mb_get_binary_float(swap, &line[12], &float_val);
 		    ping->png_ss_sample_rate = float_val;
-		mb_get_binary_short(swap, &line[16], &short_val); 
+		mb_get_binary_short(swap, &line[16], &short_val);
 		    ping->png_r_zero = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[18], &short_val); 
+		mb_get_binary_short(swap, &line[18], &short_val);
 		    ping->png_bsn = (int) ((short) short_val);
-		mb_get_binary_short(swap, &line[20], &short_val); 
+		mb_get_binary_short(swap, &line[20], &short_val);
 		    ping->png_bso = (int) ((short) short_val);
-		mb_get_binary_short(swap, &line[22], &short_val); 
+		mb_get_binary_short(swap, &line[22], &short_val);
 		    ping->png_tx = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[24], &short_val); 
+		mb_get_binary_short(swap, &line[24], &short_val);
 		    ping->png_tvg_crossover = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[26], &short_val); 
+		mb_get_binary_short(swap, &line[26], &short_val);
 		    ping->png_nbeams_ss = (int) ((unsigned short) short_val);
-		mb_get_binary_float(swap, &line[28], &float_val); 
+		mb_get_binary_float(swap, &line[28], &float_val);
 		    ping->png_pixel_size = float_val;
-		mb_get_binary_int(swap, &line[32], &int_val); 
+		mb_get_binary_int(swap, &line[32], &int_val);
 		    ping->png_pixels_ss = int_val;
 /*fprintf(stderr," ping->png_ss_date:%d  ping->png_ss_msec:%d  ping->png_ss_count:%d  ping->png_nbeams_ss:%d\n",
 ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		}
-		
-	/* check for some indicators of a broken record 
+
+	/* check for some indicators of a broken record
 	    - these do happen!!!! */
 	if (status == MB_SUCCESS)
 		{
@@ -4647,23 +4932,23 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 	    for (i=0;i<ping->png_nbeams_ss && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_SS2_MBA_BEAM_SIZE,mbfp);
-		if (read_len == EM3_SS2_MBA_BEAM_SIZE 
+		if (read_len == EM3_SS2_MBA_BEAM_SIZE
 			&& i < MBSYS_SIMRAD3_MAXBEAMS)
 			{
 			status = MB_SUCCESS;
 			ping->png_sort_direction[i] = (mb_s_char) line[0];
 			ping->png_ssdetection[i] = (mb_u_char) line[1];
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    ping->png_beam_samples[i] = (int) ((unsigned short) short_val);
-			mb_get_binary_short(swap, &line[4], &short_val); 
+			mb_get_binary_short(swap, &line[4], &short_val);
 			    ping->png_center_sample[i] = (int) ((unsigned short) short_val);
 
 			ping->png_start_sample[i] = ping->png_npixels;
 			ping->png_npixels += ping->png_beam_samples[i];
 			if (ping->png_npixels > MBSYS_SIMRAD3_MAXRAWPIXELS)
 				{
-				ping->png_beam_samples[i] 
-					-= (ping->png_npixels 
+				ping->png_beam_samples[i]
+					-= (ping->png_npixels
 						- MBSYS_SIMRAD3_MAXRAWPIXELS);
 				if (ping->png_beam_samples[i] < 0)
 					ping->png_beam_samples[i] = 0;
@@ -4680,7 +4965,7 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 	    if (ping->png_npixels > MBSYS_SIMRAD3_MAXRAWPIXELS)
 		{
 		if (verbose > 0)
-		    fprintf(stderr, "WARNING: Simrad multibeam sidescan pixels %d exceed maximum %d!\n", 
+		    fprintf(stderr, "WARNING: Simrad multibeam sidescan pixels %d exceed maximum %d!\n",
 			    ping->png_npixels, MBSYS_SIMRAD3_MAXRAWPIXELS);
 		junk_bytes = ping->png_npixels - MBSYS_SIMRAD3_MAXRAWPIXELS;
 		ping->png_npixels = MBSYS_SIMRAD3_MAXRAWPIXELS;
@@ -4712,8 +4997,8 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		for (i=0;i<junk_bytes;i++)
 		    read_len = fread(&line[0],1,1,mbfp);
 		}
-		
-		
+
+
 	/* read processed sidescan data */
 	if (status == MB_SUCCESS)
 		{
@@ -4730,18 +5015,18 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 			*error = MB_ERROR_EOF;
 			}
 		}
-		
+
 	/* get processed sidescan data */
 	if (status == MB_SUCCESS)
 		{
 		offset = (MBSYS_SIMRAD3_MAXPIXELS - ping->png_pixels_ss) / 2;
 		for (i=0;i<ping->png_pixels_ss;i++)
 		    {
-		    mb_get_binary_short(swap, &line[2*i], &short_val); 
+		    mb_get_binary_short(swap, &line[2*i], &short_val);
 			ping->png_ss[offset+i] = (short) short_val;
 		    }
 		}
-		
+
 	/* read processed sidescan alongtrack data */
 	if (status == MB_SUCCESS)
 		{
@@ -4765,12 +5050,12 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		offset = (MBSYS_SIMRAD3_MAXPIXELS - ping->png_pixels_ss) / 2;
 		for (i=0;i<ping->png_pixels_ss;i++)
 		    {
-		    mb_get_binary_short(swap, &line[2*i], &short_val); 
+		    mb_get_binary_short(swap, &line[2*i], &short_val);
 			ping->png_ssalongtrack[offset+i] = (short) short_val;
 		    }
-		}	
-		
-	/* now loop over reading individual characters to 
+		}
+
+	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS)
 	    {
@@ -4786,9 +5071,9 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 			read_len = fread(&line[1],2,1,mbfp);
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[0], line[0], 
-		line[1], line[1], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[0], line[0],
+		line[1], line[1],
 		line[2], line[2]);
 #endif
 			}
@@ -4810,9 +5095,9 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 	fprintf(stderr, "\n");
 #endif
 	    }
-		
-	/* check if bath and sidescan time tags agree 
-	   - we cannot pair bath 
+
+	/* check if bath and sidescan time tags agree
+	   - we cannot pair bath
 	   and sidescan records from different pings */
 	if (status == MB_SUCCESS)
 		{
@@ -4827,7 +5112,6 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 	if (verbose >= 5)
 		{
 		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-		fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 		fprintf(stderr,"dbg5       type:                  %d\n",store->type);
 		fprintf(stderr,"dbg5       sonar:                 %d\n",store->sonar);
 		fprintf(stderr,"dbg5       date:                  %d\n",store->date);
@@ -4836,7 +5120,7 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		fprintf(stderr,"dbg5       png_msec:              %d\n",ping->png_msec);
 		fprintf(stderr,"dbg5       png_count:             %d\n",ping->png_count);
 		fprintf(stderr,"dbg5       png_serial:            %d\n",ping->png_serial);
-		
+
 		fprintf(stderr,"dbg5       png_latitude:          %f\n",ping->png_latitude);
 		fprintf(stderr,"dbg5       png_longitude:         %f\n",ping->png_longitude);
 		fprintf(stderr,"dbg5       png_heading:           %d\n",ping->png_heading);
@@ -4850,16 +5134,16 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		fprintf(stderr,"dbg5       png_nbeams_valid:      %d\n",ping->png_nbeams_valid);
 		fprintf(stderr,"dbg5       png_sample_rate:       %f\n",ping->png_sample_rate);
 		fprintf(stderr,"dbg5       png_spare:             %d\n",ping->png_spare);
-		fprintf(stderr,"dbg5       cnt  depth xtrack ltrack win  qual  iba det cln amp\n");
+		fprintf(stderr,"dbg5       cnt  depth xtrack ltrack win  qual  iba det cln amp depression azimuth range heave flag\n");
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_nbeams;i++)
-			fprintf(stderr,"dbg5       %3d %7.2f %7.2f %7.2f %5d %5d %5d %4d %3d %3d %7.2f %7.2f %7.2f %3d\n",
-				i, ping->png_depth[i], ping->png_acrosstrack[i], 
-				ping->png_alongtrack[i], ping->png_window[i], 
-				ping->png_quality[i], ping->png_iba[i], 
-				ping->png_detection[i], ping->png_clean[i], 
-				ping->png_amp[i], ping->png_depression[i], 
-				ping->png_azimuth[i], ping->png_range[i], 
+			fprintf(stderr,"dbg5       %3d %7.2f %7.2f %7.2f %5d %5d %5d %4d %3d %3d %7.2f %7.2f %7.2f %7.2f %3u\n",
+				i, ping->png_depth[i], ping->png_acrosstrack[i],
+				ping->png_alongtrack[i], ping->png_window[i],
+				ping->png_quality[i], ping->png_iba[i],
+				ping->png_detection[i], ping->png_clean[i],
+				ping->png_amp[i], ping->png_depression[i],
+				ping->png_azimuth[i], ping->png_range[i], ping->png_bheave[i],
 				ping->png_beamflag[i]);
 
 		fprintf(stderr,"dbg5       png_ss_date:        %d\n",ping->png_ss_date);
@@ -4880,8 +5164,8 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 		fprintf(stderr,"dbg5       --------------------------------------------------\n");
 		for (i=0;i<ping->png_nbeams_ss;i++)
 			fprintf(stderr,"dbg5        %4d %2d %4d %4d %4d %4d\n",
-				i, ping->png_sort_direction[i], ping->png_ssdetection[i], 
-				ping->png_beam_samples[i], ping->png_start_sample[i], 
+				i, ping->png_sort_direction[i], ping->png_ssdetection[i],
+				ping->png_beam_samples[i], ping->png_start_sample[i],
 				ping->png_center_sample[i]);
 		fprintf(stderr,"dbg5       cnt  ss\n");
 		fprintf(stderr,"dbg5       --------------------------------------------------\n");
@@ -4911,8 +5195,8 @@ ping->png_ss_date,ping->png_ss_msec,ping->png_ss_count,ping->png_nbeams_ss);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap, 
-		struct mbsys_simrad3_struct *store, 
+int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap,
+		struct mbsys_simrad3_struct *store,
 		short sonar, int *goodend, int *error)
 {
 	char	*function_name = "mbr_em710mba_rd_wc";
@@ -4937,13 +5221,13 @@ int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		fprintf(stderr,"dbg2       sonar:      %d\n",sonar);
 		}
-		
+
 	/* set goodend false until a good end is found */
 	*goodend = MB_NO;
-		
+
 	/* get  storage structure */
 	wc = (struct mbsys_simrad3_watercolumn_struct *) store->wc;
-		
+
 	/* set kind and type values */
 	store->kind = MB_DATA_WATER_COLUMN;
 	store->type = EM3_WATERCOLUMN;
@@ -4963,38 +5247,38 @@ int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap,
 	/* get binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_get_binary_int(swap, &line[0], &wc->wtc_date); 
+		mb_get_binary_int(swap, &line[0], &wc->wtc_date);
 		    store->date = wc->wtc_date;
-		mb_get_binary_int(swap, &line[4], & wc->wtc_msec); 
+		mb_get_binary_int(swap, &line[4], & wc->wtc_msec);
 		    store->msec = wc->wtc_msec;
-		mb_get_binary_short(swap, &line[8], &short_val); 
+		mb_get_binary_short(swap, &line[8], &short_val);
 		    wc->wtc_count = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[10], &short_val); 
+		mb_get_binary_short(swap, &line[10], &short_val);
 		    wc->wtc_serial = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[12], &short_val); 
+		mb_get_binary_short(swap, &line[12], &short_val);
 		    wc->wtc_ndatagrams = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[14], &short_val); 
+		mb_get_binary_short(swap, &line[14], &short_val);
 		    wc->wtc_datagram = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[16], &short_val); 
+		mb_get_binary_short(swap, &line[16], &short_val);
 		    wc->wtc_ntx = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[18], &short_val); 
+		mb_get_binary_short(swap, &line[18], &short_val);
 		    wc->wtc_nrx = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[20], &short_val); 
+		mb_get_binary_short(swap, &line[20], &short_val);
 		    wc->wtc_nbeam = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[22], &short_val); 
+		mb_get_binary_short(swap, &line[22], &short_val);
 		    wc->wtc_ssv = (int) ((unsigned short) short_val);
-		mb_get_binary_int(swap, &line[24], &(wc->wtc_sfreq)); 
-		mb_get_binary_short(swap, &line[28], &short_val); 
+		mb_get_binary_int(swap, &line[24], &(wc->wtc_sfreq));
+		mb_get_binary_short(swap, &line[28], &short_val);
 		    wc->wtc_heave = (int) ((short) short_val);
-		mb_get_binary_short(swap, &line[30], &short_val); 
+		mb_get_binary_short(swap, &line[30], &short_val);
 		    wc->wtc_spare1 = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[32], &short_val); 
+		mb_get_binary_short(swap, &line[32], &short_val);
 		    wc->wtc_spare2 = (int) ((unsigned short) short_val);
-		mb_get_binary_short(swap, &line[34], &short_val); 
+		mb_get_binary_short(swap, &line[34], &short_val);
 		    wc->wtc_spare3 = (int) ((unsigned short) short_val);
 		}
-		
-	/* check for some indicators of a broken record 
+
+	/* check for some indicators of a broken record
 	    - these do happen!!!! */
 	if (status == MB_SUCCESS)
 		{
@@ -5014,12 +5298,12 @@ int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap,
 	    for (i=0;i<wc->wtc_ntx && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_WC_TX_SIZE,mbfp);
-		if (read_len == EM3_WC_TX_SIZE 
+		if (read_len == EM3_WC_TX_SIZE
 			&& i < MBSYS_SIMRAD3_MAXTX)
 			{
-			mb_get_binary_short(swap, &line[0], &short_val); 
+			mb_get_binary_short(swap, &line[0], &short_val);
 			    wc->wtc_txtiltangle[i] = (int) (short_val);
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    wc->wtc_txcenter[i] = (int) (short_val);
 			wc->wtc_txsector[i] = (int) ((mb_u_char) line[4]);
 			}
@@ -5032,16 +5316,16 @@ int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap,
 	    for (i=0;i<wc->wtc_nbeam && status == MB_SUCCESS;i++)
 		{
 		read_len = fread(line,1,EM3_WC_BEAM_SIZE,mbfp);
-		if (read_len == EM3_WC_BEAM_SIZE 
+		if (read_len == EM3_WC_BEAM_SIZE
 			&& i < MBSYS_SIMRAD3_MAXBEAMS)
 			{
-			mb_get_binary_short(swap, &line[0], &short_val); 
+			mb_get_binary_short(swap, &line[0], &short_val);
 			    wc->beam[i].wtc_rxpointangle = (int) (short_val);
-			mb_get_binary_short(swap, &line[2], &short_val); 
+			mb_get_binary_short(swap, &line[2], &short_val);
 			    wc->beam[i].wtc_start_sample = (int) (short_val);
-			mb_get_binary_short(swap, &line[4], &short_val); 
+			mb_get_binary_short(swap, &line[4], &short_val);
 			    wc->beam[i].wtc_beam_samples = (int) (unsigned short)(short_val);
-			mb_get_binary_short(swap, &line[6], &short_val); 
+			mb_get_binary_short(swap, &line[6], &short_val);
 			    wc->beam[i].wtc_beam_spare = (int) (unsigned short)(short_val);
 			wc->beam[i].wtc_sector = (int) (mb_u_char) (line[8]);
 			wc->beam[i].wtc_beam = (int) (mb_u_char) (line[9]);
@@ -5049,8 +5333,8 @@ int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap,
 		read_len = fread(wc->beam[i].wtc_amp,1,wc->beam[i].wtc_beam_samples,mbfp);
 		}
 	    }
-		
-	/* now loop over reading individual characters to 
+
+	/* now loop over reading individual characters to
 	    get last bytes of record */
 	if (status == MB_SUCCESS)
 	    {
@@ -5066,9 +5350,9 @@ int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap,
 			read_len = fread(&line[1],2,1,mbfp);
 			*goodend = MB_YES;
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n", 
-		line[0], line[0], 
-		line[1], line[1], 
+	fprintf(stderr, "End Bytes: %2.2hX %d | %2.2hX %d | %2.2hX %d\n",
+		line[0], line[0],
+		line[1], line[1],
 		line[2], line[2]);
 #endif
 			}
@@ -5119,7 +5403,7 @@ int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       ---------------------------\n");
 		for (i=0;i<wc->wtc_ntx;i++)
 			fprintf(stderr,"dbg5       %3d %6d %6d %6d\n",
-				i, wc->wtc_txtiltangle[i], wc->wtc_txcenter[i], 
+				i, wc->wtc_txtiltangle[i], wc->wtc_txcenter[i],
 				wc->wtc_txsector[i]);
 		for (i=0;i<wc->wtc_nbeam;i++)
 			{
@@ -5127,11 +5411,11 @@ int mbr_em710mba_rd_wc(int verbose, FILE *mbfp, int swap,
 			fprintf(stderr,"dbg5       cnt  angle start samples unknown sector beam\n");
 			fprintf(stderr,"dbg5       --------------------------------------------------\n");
 			fprintf(stderr,"dbg5        %4d %3d %2d %4d %4d %4d %4d\n",
-				i, wc->beam[i].wtc_rxpointangle, 
-				wc->beam[i].wtc_start_sample, 
-				wc->beam[i].wtc_beam_samples, 
-				wc->beam[i].wtc_beam_spare, 
-				wc->beam[i].wtc_sector, 
+				i, wc->beam[i].wtc_rxpointangle,
+				wc->beam[i].wtc_start_sample,
+				wc->beam[i].wtc_beam_samples,
+				wc->beam[i].wtc_beam_spare,
+				wc->beam[i].wtc_sector,
 				wc->beam[i].wtc_beam);
 /*			fprintf(stderr,"dbg5       --------------------------------------------------\n");
 			fprintf(stderr,"dbg5       beam[%d]: sample amplitude\n",i);
@@ -5259,14 +5543,17 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 #endif
 		status = mbr_em710mba_wr_tilt(verbose,mbfp,swap,store,error);
 		}
-	else if (store->kind == MB_DATA_ATTITUDE && store->type == EM3_ATTITUDE)
+	else if ((store->kind == MB_DATA_ATTITUDE
+			|| store->kind == MB_DATA_ATTITUDE1)
+		 && store->type == EM3_ATTITUDE)
 		{
 #ifdef MBR_EM710MBA_DEBUG
 	fprintf(stderr,"call mbr_em710mba_wr_attitude kind:%d type %x\n",store->kind,store->type);
 #endif
 		status = mbr_em710mba_wr_attitude(verbose,mbfp,swap,store,error);
 		}
-	else if (store->kind == MB_DATA_ATTITUDE && store->type == EM3_NETATTITUDE)
+	else if (store->kind == MB_DATA_ATTITUDE2
+		 && store->type == EM3_NETATTITUDE)
 		{
 #ifdef MBR_EM710MBA_DEBUG
 	fprintf(stderr,"call mbr_em710mba_wr_netattitude kind:%d type %x\n",store->kind,store->type);
@@ -5291,14 +5578,14 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	        if (store->type == EM3_SVP)
 		  status = mbr_em710mba_wr_svp(verbose,mbfp,swap,store,error);
 		else
-		  status = mbr_em710mba_wr_svp2(verbose,mbfp,swap,store,error); 
+		  status = mbr_em710mba_wr_svp2(verbose,mbfp,swap,store,error);
 		}
 	else if (store->kind == MB_DATA_DATA)
 		{
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr,"call mbr_em710mba_wr_bath2_mba kind:%d type %x\n",store->kind,store->type);
+	fprintf(stderr,"call mbr_em710mba_wr_bath3_mba kind:%d type %x\n",store->kind,store->type);
 #endif
-		status = mbr_em710mba_wr_bath2_mba(verbose,mbfp,swap,store,error);
+		status = mbr_em710mba_wr_bath3_mba(verbose,mbfp,swap,store,error);
 		if (ping->png_raw4_read == MB_YES)
 		    {
 #ifdef MBR_EM710MBA_DEBUG
@@ -5307,7 +5594,7 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		    status = mbr_em710mba_wr_rawbeam4(verbose,mbfp,swap,store,error);
 		    }
 #ifdef MBR_EM710MBA_DEBUG
-	if (ping->png_raw4_read == MB_NO) 
+	if (ping->png_raw4_read == MB_NO)
 	fprintf(stderr,"NOT call mbr_em710mba_wr_rawbeam4 kind:%d type %x\n",store->kind,store->type);
 #endif
 		if (ping->png_ss2_read == MB_YES)
@@ -5363,7 +5650,7 @@ int mbr_em710mba_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_start(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_start(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_start";
@@ -5467,18 +5754,18 @@ int mbr_em710mba_wr_start(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       par_pll:         %s\n",store->par_pll);
 		fprintf(stderr,"dbg5       par_com:         %s\n",store->par_com);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
-		
+
 	/* if data type not set - use start */
 	if (store->type == EM3_NONE)
 	    store->type = EM3_START;
-	    
+
 	/* if sonar not set use EM710 */
 	if (store->sonar == 0)
 	    store->sonar = MBSYS_SIMRAD3_EM710;
-		
+
 	/* set up start of output buffer - we handle this
 	   record differently because of the ascii data */
 	memset(line, 0, MBSYS_SIMRAD3_BUFFER_SIZE);
@@ -5488,13 +5775,13 @@ int mbr_em710mba_wr_start(int verbose, FILE *mbfp, int swap,
 		{
 		mb_put_binary_short(swap, (short) store->type, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) store->sonar, (void *) &line[6]);
-		mb_put_binary_int(swap, (int) store->par_date, (void *) &line[8]); 
-		mb_put_binary_int(swap, (int) store->par_msec, (void *) &line[12]); 
+		mb_put_binary_int(swap, (int) store->par_date, (void *) &line[8]);
+		mb_put_binary_int(swap, (int) store->par_msec, (void *) &line[12]);
 		mb_put_binary_short(swap, (unsigned short) store->par_line_num, (void *) &line[16]);
 		mb_put_binary_short(swap, (unsigned short) store->par_serial_1, (void *) &line[18]);
 		mb_put_binary_short(swap, (unsigned short) store->par_serial_2, (void *) &line[20]);
 		}
-		
+
 	/* construct ASCII parameter buffer */
 	buff = &line[22];
 	sprintf(&buff[0], "WLZ=%.2f,", store->par_wlz);
@@ -5572,7 +5859,7 @@ int mbr_em710mba_wr_start(int verbose, FILE *mbfp, int swap,
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "DSF=%.6f,", store->par_dsf);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "DSH=%c%c,", 
+	sprintf(&buff[buff_len], "DSH=%c%c,",
 		store->par_dsh[0], store->par_dsh[1]);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "APS=%d,",store->par_aps);
@@ -5625,7 +5912,7 @@ int mbr_em710mba_wr_start(int verbose, FILE *mbfp, int swap,
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "MSY=%.2f,", store->par_msy);
 	buff_len = strlen(buff);
-	sprintf(&buff[buff_len], "MRP=%c%c,", 
+	sprintf(&buff[buff_len], "MRP=%c%c,",
 		store->par_mrp[0], store->par_mrp[1]);
 	buff_len = strlen(buff);
 	sprintf(&buff[buff_len], "MSD=%.2f,", store->par_msd);
@@ -5673,19 +5960,19 @@ int mbr_em710mba_wr_start(int verbose, FILE *mbfp, int swap,
 	buff_len++;
 	if (buff_len % 2 == 0)
 	    buff_len++;
-	    
+
 	/* put end of record in buffer */
 	line[buff_len + 22] = EM3_END;
-		
+
 	/* get size of record */
 	write_size = 25 + buff_len;
-	mb_put_binary_int(swap, (int) (write_size - 4), (void *) &line[0]); 
-		
+	mb_put_binary_int(swap, (int) (write_size - 4), (void *) &line[0]);
+
 	/* compute checksum */
 	uchar_ptr = (mb_u_char *) line;
 	for (j=5;j<write_size-3;j++)
 	    checksum += uchar_ptr[j];
-    
+
 	/* set checksum */
 	mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[buff_len + 23]);
 
@@ -5713,7 +6000,7 @@ int mbr_em710mba_wr_start(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_status";
@@ -5785,12 +6072,12 @@ int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       sts_stbd2:           %d\n",store->sts_stbd2);
 		fprintf(stderr,"dbg5       sts_spare2:          %d\n",store->sts_spare2);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_STATUS_SIZE), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_STATUS_SIZE), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -5803,7 +6090,7 @@ int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_STATUS), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_STATUS), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5812,7 +6099,7 @@ int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -5821,7 +6108,7 @@ int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -5830,7 +6117,7 @@ int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -5840,18 +6127,18 @@ int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 	/* construct binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) store->sts_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) store->sts_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) store->sts_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) store->sts_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) store->sts_status_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) store->run_serial, (void *) &line[10]);
 		mb_put_binary_short(swap, (unsigned short) store->sts_pingrate, (void *) &line[12]);
 		mb_put_binary_short(swap, (unsigned short) store->sts_ping_count, (void *) &line[14]);
-		mb_put_binary_int(swap, (int) store->sts_load, (void *) &line[16]); 
-		mb_put_binary_int(swap, (int) store->sts_udp_status, (void *) &line[20]); 
-		mb_put_binary_int(swap, (int) store->sts_serial1_status, (void *) &line[24]); 
-		mb_put_binary_int(swap, (int) store->sts_serial2_status, (void *) &line[28]); 
-		mb_put_binary_int(swap, (int) store->sts_serial3_status, (void *) &line[32]); 
-		mb_put_binary_int(swap, (int) store->sts_serial3_status, (void *) &line[36]); 
+		mb_put_binary_int(swap, (int) store->sts_load, (void *) &line[16]);
+		mb_put_binary_int(swap, (int) store->sts_udp_status, (void *) &line[20]);
+		mb_put_binary_int(swap, (int) store->sts_serial1_status, (void *) &line[24]);
+		mb_put_binary_int(swap, (int) store->sts_serial2_status, (void *) &line[28]);
+		mb_put_binary_int(swap, (int) store->sts_serial3_status, (void *) &line[32]);
+		mb_put_binary_int(swap, (int) store->sts_serial3_status, (void *) &line[36]);
 		line[40] = store->sts_pps_status;
 		line[41] = store->sts_position_status;
 		line[42] = store->sts_attitude_status;
@@ -5863,8 +6150,8 @@ int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 		mb_put_binary_short(swap, (short) store->sts_last_pitch, (void *) &line[50]);
 		mb_put_binary_short(swap, (short) store->sts_last_heave, (void *) &line[52]);
 		mb_put_binary_short(swap, (unsigned short) store->sts_last_ssv, (void *) &line[54]);
-		mb_put_binary_int(swap, (int) store->sts_last_depth, (void *) &line[56]); 
-		mb_put_binary_int(swap, (int) store->sts_spare, (void *) &line[60]); 
+		mb_put_binary_int(swap, (int) store->sts_last_depth, (void *) &line[56]);
+		mb_put_binary_int(swap, (int) store->sts_spare, (void *) &line[60]);
 		line[64] = store->sts_bso;
 		line[65] = store->sts_bsn;
 		line[66] = store->sts_gain;
@@ -5878,12 +6165,12 @@ int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 		mb_put_binary_short(swap, (unsigned short) store->sts_stbd2, (void *) &line[78]);
 		line[80] = store->sts_spare2;
 		line[EM3_STATUS_SIZE-7] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_STATUS_SIZE-7;j++)
 		    checksum += uchar_ptr[j];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[EM3_STATUS_SIZE-6]);
 
@@ -5915,7 +6202,7 @@ int mbr_em710mba_wr_status(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_run_parameter";
@@ -5973,12 +6260,12 @@ int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 		for (i=0;i<6;i++)
 			fprintf(stderr,"dbg5       run_spare[%d]:    %d\n",i,store->run_spare[i]);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_RUN_PARAMETER_SIZE), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_RUN_PARAMETER_SIZE), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -5991,7 +6278,7 @@ int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_RUN_PARAMETER), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_RUN_PARAMETER), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6000,7 +6287,7 @@ int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -6009,7 +6296,7 @@ int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6018,7 +6305,7 @@ int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -6028,11 +6315,11 @@ int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 	/* construct binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) store->run_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) store->run_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) store->run_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) store->run_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) store->run_ping_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) store->run_serial, (void *) &line[10]);
-		mb_put_binary_int(swap, (int) store->run_status, (void *) &line[12]); 
+		mb_put_binary_int(swap, (int) store->run_status, (void *) &line[12]);
 		line[16] = store->run_mode;
 		line[17] = store->run_filter_id;
 		mb_put_binary_short(swap, (unsigned short) store->run_min_depth, (void *) &line[18]);
@@ -6053,12 +6340,12 @@ int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 		for (i=0;i<6;i++)
 		    line[39+i] = store->run_spare[i];
 		line[EM3_RUN_PARAMETER_SIZE-7] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_RUN_PARAMETER_SIZE-7;j++)
 		    checksum += uchar_ptr[j];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[EM3_RUN_PARAMETER_SIZE-6]);
 
@@ -6090,7 +6377,7 @@ int mbr_em710mba_wr_run_parameter(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_clock";
@@ -6131,12 +6418,12 @@ int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       clk_origin_msec: %d\n",store->clk_origin_msec);
 		fprintf(stderr,"dbg5       clk_1_pps_use:   %d\n",store->clk_1_pps_use);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_CLOCK_SIZE), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_CLOCK_SIZE), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -6149,7 +6436,7 @@ int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_CLOCK), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_CLOCK), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6158,7 +6445,7 @@ int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -6167,7 +6454,7 @@ int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6176,7 +6463,7 @@ int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -6186,20 +6473,20 @@ int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap,
 	/* construct binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) store->clk_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) store->clk_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) store->clk_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) store->clk_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) store->clk_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) store->clk_serial, (void *) &line[10]);
-		mb_put_binary_int(swap, (int) store->clk_origin_date, (void *) &line[12]); 
-		mb_put_binary_int(swap, (int) store->clk_origin_msec, (void *) &line[16]); 
+		mb_put_binary_int(swap, (int) store->clk_origin_date, (void *) &line[12]);
+		mb_put_binary_int(swap, (int) store->clk_origin_msec, (void *) &line[16]);
 		line[20] = store->clk_1_pps_use;
 		line[EM3_CLOCK_SIZE-7] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_CLOCK_SIZE-7;j++)
 		    checksum += uchar_ptr[j];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[EM3_CLOCK_SIZE-6]);
 
@@ -6231,7 +6518,7 @@ int mbr_em710mba_wr_clock(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_tide";
@@ -6272,12 +6559,12 @@ int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       tid_origin_msec: %d\n",store->tid_origin_msec);
 		fprintf(stderr,"dbg5       tid_tide:        %d\n",store->tid_tide);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_TIDE_SIZE), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_TIDE_SIZE), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -6290,7 +6577,7 @@ int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_TIDE), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_TIDE), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6299,7 +6586,7 @@ int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -6308,7 +6595,7 @@ int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6317,7 +6604,7 @@ int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -6327,21 +6614,21 @@ int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap,
 	/* construct binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) store->tid_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) store->tid_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) store->tid_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) store->tid_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) store->tid_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) store->tid_serial, (void *) &line[10]);
-		mb_put_binary_int(swap, (int) store->tid_origin_date, (void *) &line[12]); 
-		mb_put_binary_int(swap, (int) store->tid_origin_msec, (void *) &line[16]); 
+		mb_put_binary_int(swap, (int) store->tid_origin_date, (void *) &line[12]);
+		mb_put_binary_int(swap, (int) store->tid_origin_msec, (void *) &line[16]);
 		mb_put_binary_short(swap, (short) store->tid_tide, (void *) &line[20]);
 		line[EM3_TIDE_SIZE-8] = '\0';
 		line[EM3_TIDE_SIZE-7] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_TIDE_SIZE-7;j++)
 		    checksum += uchar_ptr[j];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[EM3_TIDE_SIZE-6]);
 
@@ -6373,7 +6660,7 @@ int mbr_em710mba_wr_tide(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_height";
@@ -6413,12 +6700,12 @@ int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       hgt_height:      %d\n",store->hgt_height);
 		fprintf(stderr,"dbg5       hgt_type:        %d\n",store->hgt_type);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_HEIGHT_SIZE), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_HEIGHT_SIZE), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -6431,7 +6718,7 @@ int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_HEIGHT), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_HEIGHT), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6440,7 +6727,7 @@ int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -6449,7 +6736,7 @@ int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6458,7 +6745,7 @@ int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -6468,19 +6755,19 @@ int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap,
 	/* construct binary data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) store->hgt_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) store->hgt_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) store->hgt_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) store->hgt_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) store->hgt_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) store->hgt_serial, (void *) &line[10]);
-		mb_put_binary_int(swap, (int) store->hgt_height, (void *) &line[12]); 
+		mb_put_binary_int(swap, (int) store->hgt_height, (void *) &line[12]);
 		line[16] = (mb_u_char) store->hgt_type;
 		line[EM3_HEIGHT_SIZE-7] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_HEIGHT_SIZE-7;j++)
 		    checksum += uchar_ptr[j];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[EM3_HEIGHT_SIZE-6]);
 
@@ -6512,7 +6799,7 @@ int mbr_em710mba_wr_height(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_heading";
@@ -6537,7 +6824,7 @@ int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
-		
+
 	/* get storage structure */
 	heading = (struct mbsys_simrad3_heading_struct *) store->heading;
 
@@ -6561,13 +6848,13 @@ int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 				i, heading->hed_time[i], heading->hed_heading[i]);
 		fprintf(stderr,"dbg5       hed_heading_status: %d\n",heading->hed_heading_status);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_HEADING_HEADER_SIZE 
-			+ EM3_HEADING_SLICE_SIZE * heading->hed_ndata + 8), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_HEADING_HEADER_SIZE
+			+ EM3_HEADING_SLICE_SIZE * heading->hed_ndata + 8), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -6580,7 +6867,7 @@ int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_HEADING), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_HEADING), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6589,7 +6876,7 @@ int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -6598,7 +6885,7 @@ int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6607,7 +6894,7 @@ int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -6617,12 +6904,12 @@ int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) heading->hed_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) heading->hed_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) heading->hed_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) heading->hed_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) heading->hed_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) heading->hed_serial, (void *) &line[10]);
 		mb_put_binary_short(swap, (unsigned short) heading->hed_ndata, (void *) &line[12]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_HEADING_HEADER_SIZE;j++)
@@ -6648,7 +6935,7 @@ int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 		{
 		mb_put_binary_short(swap, (unsigned short) heading->hed_time[i], (void *) &line[0]);
 		mb_put_binary_short(swap, (unsigned short) heading->hed_heading[i], (void *) &line[2]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_HEADING_SLICE_SIZE;j++)
@@ -6673,11 +6960,11 @@ int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 		{
 		line[0] = (mb_u_char) heading->hed_heading_status;
 		line[1] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		checksum += uchar_ptr[0];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -6709,7 +6996,7 @@ int mbr_em710mba_wr_heading(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_ssv";
@@ -6734,7 +7021,7 @@ int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
-		
+
 	/* get storage structure */
 	ssv = (struct mbsys_simrad3_ssv_struct *) store->ssv;
 
@@ -6757,13 +7044,13 @@ int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 			fprintf(stderr,"dbg5        %4d      %7d          %7d\n",
 				i, ssv->ssv_time[i], ssv->ssv_ssv[i]);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_SSV_HEADER_SIZE 
-			+ EM3_SSV_SLICE_SIZE * ssv->ssv_ndata + 8), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_SSV_HEADER_SIZE
+			+ EM3_SSV_SLICE_SIZE * ssv->ssv_ndata + 8), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -6776,7 +7063,7 @@ int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_SSV), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_SSV), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6785,7 +7072,7 @@ int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -6794,7 +7081,7 @@ int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6803,7 +7090,7 @@ int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -6813,12 +7100,12 @@ int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) ssv->ssv_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) ssv->ssv_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) ssv->ssv_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) ssv->ssv_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) ssv->ssv_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) ssv->ssv_serial, (void *) &line[10]);
 		mb_put_binary_short(swap, (unsigned short) ssv->ssv_ndata, (void *) &line[12]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_SSV_HEADER_SIZE;j++)
@@ -6844,7 +7131,7 @@ int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 		{
 		mb_put_binary_short(swap, (unsigned short) ssv->ssv_time[i], (void *) &line[0]);
 		mb_put_binary_short(swap, (unsigned short) ssv->ssv_ssv[i], (void *) &line[2]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_SSV_SLICE_SIZE;j++)
@@ -6869,11 +7156,11 @@ int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 		{
 		line[0] = 0;
 		line[1] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		checksum += uchar_ptr[0];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -6905,7 +7192,7 @@ int mbr_em710mba_wr_ssv(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_tilt";
@@ -6930,7 +7217,7 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
-		
+
 	/* get storage structure */
 	tilt = (struct mbsys_simrad3_tilt_struct *) store->tilt;
 
@@ -6953,13 +7240,13 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 			fprintf(stderr,"dbg5        %4d      %7d          %7d\n",
 				i, tilt->tlt_time[i], tilt->tlt_tilt[i]);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_TILT_HEADER_SIZE 
-			+ EM3_TILT_SLICE_SIZE * tilt->tlt_ndata + 8), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_TILT_HEADER_SIZE
+			+ EM3_TILT_SLICE_SIZE * tilt->tlt_ndata + 8), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -6972,7 +7259,7 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_TILT), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_TILT), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6981,7 +7268,7 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -6990,7 +7277,7 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -6999,7 +7286,7 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -7009,12 +7296,12 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) tilt->tlt_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) tilt->tlt_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) tilt->tlt_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) tilt->tlt_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) tilt->tlt_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) tilt->tlt_serial, (void *) &line[10]);
 		mb_put_binary_short(swap, (unsigned short) tilt->tlt_ndata, (void *) &line[12]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_TILT_HEADER_SIZE;j++)
@@ -7040,7 +7327,7 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 		{
 		mb_put_binary_short(swap, (unsigned short) tilt->tlt_time[i], (void *) &line[0]);
 		mb_put_binary_short(swap, (unsigned short) tilt->tlt_tilt[i], (void *) &line[2]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_TILT_SLICE_SIZE;j++)
@@ -7065,11 +7352,11 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 		{
 		line[0] = 0;
 		line[1] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		checksum += uchar_ptr[0];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -7101,7 +7388,7 @@ int mbr_em710mba_wr_tilt(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_attitude";
@@ -7126,7 +7413,7 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
-		
+
 	/* get storage structure */
 	attitude = (struct mbsys_simrad3_attitude_struct *) store->attitude;
 
@@ -7147,18 +7434,18 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       -------------------------------------\n");
 		for (i=0;i<attitude->att_ndata;i++)
 			fprintf(stderr,"dbg5        %3d  %d  %d %d %d %d\n",
-				i, attitude->att_time[i], attitude->att_roll[i], 
-				attitude->att_pitch[i], attitude->att_heave[i], 
+				i, attitude->att_time[i], attitude->att_roll[i],
+				attitude->att_pitch[i], attitude->att_heave[i],
 				attitude->att_heading[i]);
-		fprintf(stderr,"dbg5       att_heading_status: %d\n",attitude->att_heading_status);
+		fprintf(stderr,"dbg5       att_sensordescriptor: %d\n",attitude->att_sensordescriptor);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_ATTITUDE_HEADER_SIZE 
-			+ EM3_ATTITUDE_SLICE_SIZE * attitude->att_ndata + 8), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_ATTITUDE_HEADER_SIZE
+			+ EM3_ATTITUDE_SLICE_SIZE * attitude->att_ndata + 8), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -7171,7 +7458,7 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_ATTITUDE), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_ATTITUDE), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7180,7 +7467,7 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -7189,7 +7476,7 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7198,7 +7485,7 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -7208,12 +7495,12 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) attitude->att_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) attitude->att_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) attitude->att_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) attitude->att_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) attitude->att_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) attitude->att_serial, (void *) &line[10]);
 		mb_put_binary_short(swap, (unsigned short) attitude->att_ndata, (void *) &line[12]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_ATTITUDE_HEADER_SIZE;j++)
@@ -7243,7 +7530,7 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 		mb_put_binary_short(swap, (short) attitude->att_pitch[i], (void *) &line[6]);
 		mb_put_binary_short(swap, (short) attitude->att_heave[i], (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) attitude->att_heading[i], (void *) &line[10]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_ATTITUDE_SLICE_SIZE;j++)
@@ -7266,13 +7553,13 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 	/* output end of record */
 	if (status == MB_SUCCESS)
 		{
-		line[0] = (mb_u_char) attitude->att_heading_status;
+		line[0] = (mb_u_char) attitude->att_sensordescriptor;
 		line[1] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		checksum += uchar_ptr[0];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -7304,7 +7591,7 @@ int mbr_em710mba_wr_attitude(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_netattitude";
@@ -7330,7 +7617,7 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
-		
+
 	/* get storage structure */
 	netattitude = (struct mbsys_simrad3_netattitude_struct *) store->netattitude;
 
@@ -7353,8 +7640,8 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 		for (i=0;i<netattitude->nat_ndata;i++)
 			{
 			fprintf(stderr,"dbg5        %3d  %d  %d %d %d %d %d\n",
-				i, netattitude->nat_time[i], netattitude->nat_roll[i], 
-				netattitude->nat_pitch[i], netattitude->nat_heave[i], 
+				i, netattitude->nat_time[i], netattitude->nat_roll[i],
+				netattitude->nat_pitch[i], netattitude->nat_heave[i],
 				netattitude->nat_heading[i],netattitude->nat_nbyte_raw[i]);
 			fprintf(stderr,"dbg5        nat_raw[%d]: ",netattitude->nat_nbyte_raw[i]);
 			for (j=0;j<netattitude->nat_nbyte_raw[i];j++)
@@ -7362,7 +7649,7 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 			fprintf(stderr,"\n");
 			}
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
@@ -7378,7 +7665,7 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 		extrabyte++;
 		write_size++;
 		}
-	mb_put_binary_int(swap, (int)write_size, (void *) line); 
+	mb_put_binary_int(swap, (int)write_size, (void *) line);
 	write_len = fwrite(line,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -7391,7 +7678,7 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_NETATTITUDE), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_NETATTITUDE), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7400,7 +7687,7 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -7409,7 +7696,7 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7418,7 +7705,7 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -7428,14 +7715,14 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) netattitude->nat_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) netattitude->nat_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) netattitude->nat_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) netattitude->nat_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) netattitude->nat_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) netattitude->nat_serial, (void *) &line[10]);
 		mb_put_binary_short(swap, (unsigned short) netattitude->nat_ndata, (void *) &line[12]);
 		line[14] = (mb_u_char) netattitude->nat_sensordescriptor;
 		line[15] = (mb_u_char) 0;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_NETATTITUDE_HEADER_SIZE;j++)
@@ -7467,7 +7754,7 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 		line[10] = (mb_u_char) netattitude->nat_nbyte_raw[i];
 		for (j=0;j<netattitude->nat_nbyte_raw[i];j++)
 			line[i+11] = netattitude->nat_raw[i*MBSYS_SIMRAD3_BUFFER_SIZE+j];
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_NETATTITUDE_SLICE_SIZE+netattitude->nat_nbyte_raw[i];j++)
@@ -7492,7 +7779,7 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 		{
 		line[0] = 0;
 		line[1] = 0x03;
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -7541,7 +7828,7 @@ int mbr_em710mba_wr_netattitude(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_pos";
@@ -7588,14 +7875,14 @@ int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       pos_input_size:  %d\n",store->pos_input_size);
 		fprintf(stderr,"dbg5       pos_input:\ndbg5            %s\n",store->pos_input);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_POS_HEADER_SIZE 
-			+ store->pos_input_size 
-			- (store->pos_input_size % 2) + 8), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_POS_HEADER_SIZE
+			+ store->pos_input_size
+			- (store->pos_input_size % 2) + 8), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -7608,7 +7895,7 @@ int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_POS), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_POS), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7617,7 +7904,7 @@ int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -7626,7 +7913,7 @@ int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7635,7 +7922,7 @@ int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -7645,19 +7932,19 @@ int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) store->pos_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) store->pos_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) store->pos_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) store->pos_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) store->pos_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) store->pos_serial, (void *) &line[10]);
-		mb_put_binary_int(swap, (int) store->pos_latitude, (void *) &line[12]); 
-		mb_put_binary_int(swap, (int) store->pos_longitude, (void *) &line[16]); 
+		mb_put_binary_int(swap, (int) store->pos_latitude, (void *) &line[12]);
+		mb_put_binary_int(swap, (int) store->pos_longitude, (void *) &line[16]);
 		mb_put_binary_short(swap, (unsigned short) store->pos_quality, (void *) &line[20]);
 		mb_put_binary_short(swap, (unsigned short) store->pos_speed, (void *) &line[22]);
 		mb_put_binary_short(swap, (unsigned short) store->pos_course, (void *) &line[24]);
 		mb_put_binary_short(swap, (unsigned short) store->pos_heading, (void *) &line[26]);
 		line[28] = (mb_u_char) store->pos_system;
 		line[29] = (mb_u_char) store->pos_input_size;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_POS_HEADER_SIZE;j++)
@@ -7680,9 +7967,9 @@ int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 	/* output original ascii nav data */
 	if (status == MB_SUCCESS)
 		{
-		write_size = store->pos_input_size 
+		write_size = store->pos_input_size
 				- (store->pos_input_size % 2) + 1;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) store->pos_input;
 		for (j=0;j<write_size;j++)
@@ -7706,7 +7993,7 @@ int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 	if (status == MB_SUCCESS)
 		{
 		line[1] = 0x03;
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -7738,7 +8025,7 @@ int mbr_em710mba_wr_pos(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_svp";
@@ -7785,13 +8072,13 @@ int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 			fprintf(stderr,"dbg5        %d   %d  %d\n",
 				i, store->svp_depth[i], store->svp_vel[i]);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_SVP_HEADER_SIZE 
-			+ EM3_SVP_SLICE_SIZE * store->svp_num + 8), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_SVP_HEADER_SIZE
+			+ EM3_SVP_SLICE_SIZE * store->svp_num + 8), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -7804,7 +8091,7 @@ int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_SVP), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_SVP), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7813,7 +8100,7 @@ int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -7822,7 +8109,7 @@ int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -7831,7 +8118,7 @@ int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -7841,15 +8128,15 @@ int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) store->svp_use_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) store->svp_use_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) store->svp_use_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) store->svp_use_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) store->svp_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) store->svp_serial, (void *) &line[10]);
-		mb_put_binary_int(swap, (int) store->svp_origin_date, (void *) &line[12]); 
-		mb_put_binary_int(swap, (int) store->svp_origin_msec, (void *) &line[16]); 
+		mb_put_binary_int(swap, (int) store->svp_origin_date, (void *) &line[12]);
+		mb_put_binary_int(swap, (int) store->svp_origin_msec, (void *) &line[16]);
 		mb_put_binary_short(swap, (unsigned short) store->svp_num, (void *) &line[20]);
 		mb_put_binary_short(swap, (unsigned short) store->svp_depth_res, (void *) &line[22]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_SVP_HEADER_SIZE;j++)
@@ -7873,9 +8160,9 @@ int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<store->svp_num;i++)
 		{
-		mb_put_binary_short(swap, (unsigned short) store->svp_depth[i], (void *) &line[0]); 
-		mb_put_binary_short(swap, (unsigned short) store->svp_vel[i], (void *) &line[4]); 
-		
+		mb_put_binary_short(swap, (unsigned short) store->svp_depth[i], (void *) &line[0]);
+		mb_put_binary_short(swap, (unsigned short) store->svp_vel[i], (void *) &line[4]);
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_SVP_SLICE_SIZE;j++)
@@ -7900,11 +8187,11 @@ int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 		{
 		line[0] = '\0';
 		line[1] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		checksum += uchar_ptr[0];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -7936,7 +8223,7 @@ int mbr_em710mba_wr_svp(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_svp2";
@@ -7983,13 +8270,13 @@ int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 			fprintf(stderr,"dbg5        %d   %d  %d\n",
 				i, store->svp_depth[i], store->svp_vel[i]);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_SVP2_HEADER_SIZE 
-			+ EM3_SVP2_SLICE_SIZE * store->svp_num + 8), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_SVP2_HEADER_SIZE
+			+ EM3_SVP2_SLICE_SIZE * store->svp_num + 8), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -8002,7 +8289,7 @@ int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_SVP2), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_SVP2), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -8011,7 +8298,7 @@ int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -8020,7 +8307,7 @@ int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -8029,7 +8316,7 @@ int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -8039,15 +8326,15 @@ int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) store->svp_use_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) store->svp_use_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) store->svp_use_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) store->svp_use_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) store->svp_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) store->svp_serial, (void *) &line[10]);
-		mb_put_binary_int(swap, (int) store->svp_origin_date, (void *) &line[12]); 
-		mb_put_binary_int(swap, (int) store->svp_origin_msec, (void *) &line[16]); 
+		mb_put_binary_int(swap, (int) store->svp_origin_date, (void *) &line[12]);
+		mb_put_binary_int(swap, (int) store->svp_origin_msec, (void *) &line[16]);
 		mb_put_binary_short(swap, (unsigned short) store->svp_num, (void *) &line[20]);
 		mb_put_binary_short(swap, (unsigned short) store->svp_depth_res, (void *) &line[22]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_SVP2_HEADER_SIZE;j++)
@@ -8071,9 +8358,9 @@ int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 	if (status == MB_SUCCESS)
 	    for (i=0;i<store->svp_num;i++)
 		{
-		mb_put_binary_int(swap, (int) store->svp_depth[i], (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) store->svp_vel[i], (void *) &line[4]); 
-		
+		mb_put_binary_int(swap, (int) store->svp_depth[i], (void *) &line[0]);
+		mb_put_binary_int(swap, (int) store->svp_vel[i], (void *) &line[4]);
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_SVP2_SLICE_SIZE;j++)
@@ -8098,11 +8385,11 @@ int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 		{
 		line[0] = '\0';
 		line[1] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		checksum += uchar_ptr[0];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -8134,13 +8421,13 @@ int mbr_em710mba_wr_svp2(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_bath3_mba(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
-	char	*function_name = "mbr_em710mba_wr_bath2_mba";
+	char	*function_name = "mbr_em710mba_wr_bath3_mba";
 	int	status = MB_SUCCESS;
 	struct mbsys_simrad3_ping_struct *ping;
-	char	line[EM3_BATH2_MBA_HEADER_SIZE];
+	char	line[EM3_BATH3_MBA_HEADER_SIZE];
 	short	label;
 	int	write_len;
 	int	write_size;
@@ -8159,7 +8446,7 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
-		
+
 	/* get storage structure */
 	ping = (struct mbsys_simrad3_ping_struct *) store->ping;
 
@@ -8188,25 +8475,25 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       png_nbeams_valid:      %d\n",ping->png_nbeams_valid);
 		fprintf(stderr,"dbg5       png_sample_rate:       %f\n",ping->png_sample_rate);
 		fprintf(stderr,"dbg5       png_spare:             %d\n",ping->png_spare);
-		fprintf(stderr,"dbg5       cnt  depth xtrack ltrack win  qual  iba det cln amp\n");
+		fprintf(stderr,"dbg5       cnt  depth xtrack ltrack win  qual  iba det cln amp depression azimuth range heave flag\n");
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_nbeams;i++)
-			fprintf(stderr,"dbg5       %3d %7.2f %7.2f %7.2f %5d %5d %5d %4d %3d %3d %7.2f %7.2f %7.2f %3d\n",
-				i, ping->png_depth[i], ping->png_acrosstrack[i], 
-				ping->png_alongtrack[i], ping->png_window[i], 
-				ping->png_quality[i], ping->png_iba[i], 
-				ping->png_detection[i], ping->png_clean[i], 
-				ping->png_amp[i], ping->png_depression[i], 
-				ping->png_azimuth[i], ping->png_range[i], 
+			fprintf(stderr,"dbg5       %3d %7.2f %7.2f %7.2f %5d %5d %5d %4d %3d %3d %7.2f %7.2f %7.2f %7.2f %3u\n",
+				i, ping->png_depth[i], ping->png_acrosstrack[i],
+				ping->png_alongtrack[i], ping->png_window[i],
+				ping->png_quality[i], ping->png_iba[i],
+				ping->png_detection[i], ping->png_clean[i],
+				ping->png_amp[i], ping->png_depression[i],
+				ping->png_azimuth[i], ping->png_range[i], ping->png_bheave[i],
 				ping->png_beamflag[i]);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_BATH2_MBA_HEADER_SIZE 
-			+ EM3_BATH2_MBA_BEAM_SIZE * ping->png_nbeams + 8), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_BATH3_MBA_HEADER_SIZE
+			+ EM3_BATH3_MBA_BEAM_SIZE * ping->png_nbeams + 8), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -8219,7 +8506,7 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_BATH2_MBA), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_BATH3_MBA), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -8228,7 +8515,7 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -8237,7 +8524,7 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -8246,7 +8533,7 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -8256,8 +8543,8 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) ping->png_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) ping->png_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) ping->png_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) ping->png_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_serial, (void *) &line[10]);
 		mb_put_binary_int(swap, (int) ping->png_latitude, (void *) &line[12]);
@@ -8273,15 +8560,15 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 		mb_put_binary_short(swap, (unsigned short) ping->png_nbeams_valid, (void *) &line[38]);
 		mb_put_binary_float(swap, (float) ping->png_sample_rate, (void *) &line[40]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_spare, (void *) &line[44]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
-		for (j=0;j<EM3_BATH2_MBA_HEADER_SIZE;j++)
+		for (j=0;j<EM3_BATH3_MBA_HEADER_SIZE;j++)
 		    checksum += uchar_ptr[j];
 
 		/* write out data */
-		write_len = fwrite(line,1,EM3_BATH2_MBA_HEADER_SIZE,mbfp);
-		if (write_len != EM3_BATH2_MBA_HEADER_SIZE)
+		write_len = fwrite(line,1,EM3_BATH3_MBA_HEADER_SIZE,mbfp);
+		if (write_len != EM3_BATH3_MBA_HEADER_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -8309,17 +8596,23 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 		mb_put_binary_float(swap, ping->png_depression[i], (void *) &line[20]);
 		mb_put_binary_float(swap, ping->png_azimuth[i], (void *) &line[24]);
 		mb_put_binary_float(swap, ping->png_range[i], (void *) &line[28]);
-		line[32] = (mb_s_char) ping->png_beamflag[i];
-		line[33] = (mb_u_char) 0;
-		
+		mb_put_binary_float(swap, ping->png_bheave[i], (void *) &line[32]);
+		line[36] = (mb_s_char) ping->png_beamflag[i];
+		line[37] = (mb_u_char) 0;
+/* fprintf(stderr,"WRITE ping:%d beam %d  png_depression:%f ",ping->png_count,i,ping->png_depression[i]);
+fprintf(stderr,"png_azimuth:%f ",ping->png_azimuth[i]);
+fprintf(stderr,"png_range:%f ",ping->png_range[i]);
+fprintf(stderr,"png_bheave:%f ",ping->png_bheave[i]);
+fprintf(stderr,"png_beamflag:%d\n",ping->png_beamflag[i]); */
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
-		for (j=0;j<EM3_BATH2_MBA_BEAM_SIZE;j++)
+		for (j=0;j<EM3_BATH3_MBA_BEAM_SIZE;j++)
 		    checksum += uchar_ptr[j];
 
 		/* write out data */
-		write_len = fwrite(line,1,EM3_BATH2_MBA_BEAM_SIZE,mbfp);
-		if (write_len != EM3_BATH2_MBA_BEAM_SIZE)
+		write_len = fwrite(line,1,EM3_BATH3_MBA_BEAM_SIZE,mbfp);
+		if (write_len != EM3_BATH3_MBA_BEAM_SIZE)
 			{
 			*error = MB_ERROR_WRITE_FAIL;
 			status = MB_FAILURE;
@@ -8336,11 +8629,11 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 		{
 		line[0] = 0;
 		line[1] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		checksum += uchar_ptr[0];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -8372,7 +8665,7 @@ int mbr_em710mba_wr_bath2_mba(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_rawbeam4";
@@ -8397,7 +8690,7 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
-		
+
 	/* get storage structure */
 	ping = (struct mbsys_simrad3_ping_struct *) store->ping;
 
@@ -8426,10 +8719,10 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_raw_ntx;i++)
 			fprintf(stderr,"dbg5       %3d %5d %5d %f %f %f %4d %4d %4d %f\n",
-				i, ping->png_raw_txtiltangle[i], 
-				ping->png_raw_txfocus[i], ping->png_raw_txsignallength[i], 
-				ping->png_raw_txoffset[i], ping->png_raw_txcenter[i], 
-				ping->png_raw_txabsorption[i], ping->png_raw_txwaveform[i], 
+				i, ping->png_raw_txtiltangle[i],
+				ping->png_raw_txfocus[i], ping->png_raw_txsignallength[i],
+				ping->png_raw_txoffset[i], ping->png_raw_txcenter[i],
+				ping->png_raw_txabsorption[i], ping->png_raw_txwaveform[i],
 				ping->png_raw_txsector[i], ping->png_raw_txbandwidth[i]);
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		fprintf(stderr,"dbg5       beam values:\n");
@@ -8437,20 +8730,20 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_raw_nbeams;i++)
 			fprintf(stderr,"dbg5       %3d %5d %3d %3d %4d %3d %5d %f %5d %5d %5d\n",
-				i, ping->png_raw_rxpointangle[i], ping->png_raw_rxsector[i], 
-				ping->png_raw_rxdetection[i], ping->png_raw_rxwindow[i], 
-				ping->png_raw_rxquality[i], ping->png_raw_rxspare1[i],  
-				ping->png_raw_rxrange[i],ping->png_raw_rxamp[i], 
+				i, ping->png_raw_rxpointangle[i], ping->png_raw_rxsector[i],
+				ping->png_raw_rxdetection[i], ping->png_raw_rxwindow[i],
+				ping->png_raw_rxquality[i], ping->png_raw_rxspare1[i],
+				ping->png_raw_rxrange[i],ping->png_raw_rxamp[i],
 				ping->png_raw_rxcleaning[i],ping->png_raw_rxspare2[i]);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_RAWBEAM4_HEADER_SIZE 
+	mb_put_binary_int(swap, (int) (EM3_RAWBEAM4_HEADER_SIZE
 			+ EM3_RAWBEAM4_TX_SIZE * ping->png_raw_ntx
-			+ EM3_RAWBEAM4_BEAM_SIZE * ping->png_raw_nbeams + 8), (void *) &write_size); 
+			+ EM3_RAWBEAM4_BEAM_SIZE * ping->png_raw_nbeams + 8), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -8463,7 +8756,7 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_RAWBEAM4), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_RAWBEAM4), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -8472,7 +8765,7 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -8481,7 +8774,7 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 	/* write the sonar id */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -8490,7 +8783,7 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -8500,17 +8793,17 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) ping->png_raw_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) ping->png_raw_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) ping->png_raw_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) ping->png_raw_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_raw_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_raw_serial, (void *) &line[10]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_raw_ssv, (void *) &line[12]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_raw_ntx, (void *) &line[14]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_raw_nbeams, (void *) &line[16]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_raw_detections, (void *) &line[18]);
-		mb_put_binary_float(swap, ping->png_raw_sample_rate, (void *) &line[20]); 
-		mb_put_binary_int(swap, (int) ping->png_raw_spare, (void *) &line[24]); 
-		
+		mb_put_binary_float(swap, ping->png_raw_sample_rate, (void *) &line[20]);
+		mb_put_binary_int(swap, (int) ping->png_raw_spare, (void *) &line[24]);
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_RAWBEAM4_HEADER_SIZE;j++)
@@ -8536,14 +8829,14 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 		{
 		mb_put_binary_short(swap, (short) ping->png_raw_txtiltangle[i], (void *) &line[0]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_raw_txfocus[i], (void *) &line[2]);
-		mb_put_binary_float(swap, ping->png_raw_txsignallength[i], (void *) &line[4]); 
-		mb_put_binary_float(swap, ping->png_raw_txoffset[i], (void *) &line[8]); 
-		mb_put_binary_float(swap, ping->png_raw_txcenter[i], (void *) &line[12]); 
+		mb_put_binary_float(swap, ping->png_raw_txsignallength[i], (void *) &line[4]);
+		mb_put_binary_float(swap, ping->png_raw_txoffset[i], (void *) &line[8]);
+		mb_put_binary_float(swap, ping->png_raw_txcenter[i], (void *) &line[12]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_raw_txabsorption[i], (void *) &line[16]);
 		line[18] = (mb_u_char) ping->png_raw_txwaveform[i];
 		line[19] = (mb_u_char) ping->png_raw_txsector[i];
 		mb_put_binary_float(swap, ping->png_raw_txbandwidth[i], (void *) &line[20]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_RAWBEAM4_TX_SIZE;j++)
@@ -8577,7 +8870,7 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 		mb_put_binary_short(swap, (short) ping->png_raw_rxamp[i], (void *) &line[12]);
 		line[14] = (mb_u_char) ping->png_raw_rxcleaning[i];
 		line[15] = (mb_u_char) ping->png_raw_rxspare2[i];
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_RAWBEAM4_BEAM_SIZE;j++)
@@ -8602,11 +8895,11 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 		{
 		line[0] = 0;
 		line[1] = 0x03;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		checksum += uchar_ptr[0];
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -8638,7 +8931,7 @@ int mbr_em710mba_wr_rawbeam4(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_ss2";
@@ -8664,7 +8957,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
-		
+
 	/* get storage structure */
 	ping = (struct mbsys_simrad3_ping_struct *) store->ping;
 
@@ -8678,7 +8971,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       msec:               %d\n",store->msec);
 		fprintf(stderr,"dbg5       png_date:           %d\n",ping->png_date);
 		fprintf(stderr,"dbg5       png_msec:           %d\n",ping->png_msec);
-		
+
 		fprintf(stderr,"dbg5       png_count:             %d\n",ping->png_count);
 		fprintf(stderr,"dbg5       png_serial:            %d\n",ping->png_serial);
 		fprintf(stderr,"dbg5       png_latitude:          %f\n",ping->png_latitude);
@@ -8694,16 +8987,16 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       png_nbeams_valid:      %d\n",ping->png_nbeams_valid);
 		fprintf(stderr,"dbg5       png_sample_rate:       %f\n",ping->png_sample_rate);
 		fprintf(stderr,"dbg5       png_spare:             %d\n",ping->png_spare);
-		fprintf(stderr,"dbg5       cnt  depth xtrack ltrack win  qual  iba det cln amp\n");
+		fprintf(stderr,"dbg5       cnt  depth xtrack ltrack win  qual  iba det cln amp depression azimuth range heave flag\n");
 		fprintf(stderr,"dbg5       ------------------------------------------------------------\n");
 		for (i=0;i<ping->png_nbeams;i++)
-			fprintf(stderr,"dbg5       %3d %7.2f %7.2f %7.2f %5d %5d %5d %4d %3d %3d %7.2f %7.2f %7.2f %3d\n",
-				i, ping->png_depth[i], ping->png_acrosstrack[i], 
-				ping->png_alongtrack[i], ping->png_window[i], 
-				ping->png_quality[i], ping->png_iba[i], 
-				ping->png_detection[i], ping->png_clean[i], 
-				ping->png_amp[i], ping->png_depression[i], 
-				ping->png_azimuth[i], ping->png_range[i], 
+			fprintf(stderr,"dbg5       %3d %7.2f %7.2f %7.2f %5d %5d %5d %4d %3d %3d %7.2f %7.2f %7.2f %7.2f %3u\n",
+				i, ping->png_depth[i], ping->png_acrosstrack[i],
+				ping->png_alongtrack[i], ping->png_window[i],
+				ping->png_quality[i], ping->png_iba[i],
+				ping->png_detection[i], ping->png_clean[i],
+				ping->png_amp[i], ping->png_depression[i],
+				ping->png_azimuth[i], ping->png_range[i], ping->png_bheave[i],
 				ping->png_beamflag[i]);
 
 		fprintf(stderr,"dbg5       png_ss_date:        %d\n",ping->png_ss_date);
@@ -8722,8 +9015,8 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       --------------------------------------------------\n");
 		for (i=0;i<ping->png_nbeams_ss;i++)
 			fprintf(stderr,"dbg5        %4d %2d %4d %4d %4d %4d\n",
-				i, ping->png_sort_direction[i], ping->png_ssdetection[i], 
-				ping->png_beam_samples[i], ping->png_start_sample[i], 
+				i, ping->png_sort_direction[i], ping->png_ssdetection[i],
+				ping->png_beam_samples[i], ping->png_start_sample[i],
 				ping->png_center_sample[i]);
 		fprintf(stderr,"dbg5       cnt  ss\n");
 		fprintf(stderr,"dbg5       --------------------------------------------------\n");
@@ -8736,14 +9029,14 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 			fprintf(stderr,"dbg5        %d %d %d\n",
 				i, ping->png_ss[i], ping->png_ssalongtrack[i]);
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	mb_put_binary_int(swap, (int) (EM3_SS2_MBA_HEADER_SIZE 
-			+ EM3_SS2_MBA_BEAM_SIZE * ping->png_nbeams_ss 
-			+ ping->png_npixels - (ping->png_npixels % 2) + 8), (void *) &write_size); 
+	mb_put_binary_int(swap, (int) (EM3_SS2_MBA_HEADER_SIZE
+			+ EM3_SS2_MBA_BEAM_SIZE * ping->png_nbeams_ss
+			+ ping->png_npixels - (ping->png_npixels % 2) + 8), (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -8756,7 +9049,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_SS2), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_SS2), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -8765,7 +9058,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -8773,7 +9066,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -8782,7 +9075,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-			
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -8792,8 +9085,8 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) ping->png_ss_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) ping->png_ss_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) ping->png_ss_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) ping->png_ss_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_ss_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_ss_serial, (void *) &line[10]);
 		mb_put_binary_float(swap, ping->png_ss_sample_rate, (void *) &line[12]);
@@ -8833,7 +9126,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 		line[1] = (mb_u_char) ping->png_ssdetection[i];
 		mb_put_binary_short(swap, (unsigned short) ping->png_beam_samples[i], (void *) &line[2]);
 		mb_put_binary_short(swap, (unsigned short) ping->png_center_sample[i], (void *) &line[4]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_SS2_MBA_BEAM_SIZE;j++)
@@ -8884,13 +9177,13 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 		{
 		mb_put_binary_short(swap, (short) ping->png_ss[offset+i], (void *) &line[2*i]);
 		}
-		
+
 	    /* compute checksum */
 	    write_size = ping->png_pixels_ss * sizeof(short);
 	    uchar_ptr = (mb_u_char *) &line[0];
 	    for (j=0;j<write_size;j++)
 		checksum += uchar_ptr[j];
-    
+
 	    /* write out data */
 	    write_len = fwrite(line,1,write_size,mbfp);
 	    if (write_len != write_size)
@@ -8913,13 +9206,13 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 		{
 		mb_put_binary_short(swap, ping->png_ssalongtrack[offset+i], (void *) &line[2*i]);
 		}
-		
+
 	    /* compute checksum */
 	    write_size = ping->png_pixels_ss * sizeof(short);
 	    uchar_ptr = (mb_u_char *) &line[0];
 	    for (j=0;j<write_size;j++)
 		checksum += uchar_ptr[j];
-    
+
 	    /* write out data */
 	    write_len = fwrite(line,1,write_size,mbfp);
 	    if (write_len != write_size)
@@ -8938,7 +9231,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 	if (status == MB_SUCCESS)
 		{
 		line[1] = 0x03;
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 
@@ -8970,7 +9263,7 @@ int mbr_em710mba_wr_ss2(int verbose, FILE *mbfp, int swap,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap, 
+int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 		struct mbsys_simrad3_struct *store, int *error)
 {
 	char	*function_name = "mbr_em710mba_wr_wc";
@@ -8997,7 +9290,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg2       swap:       %d\n",swap);
 		fprintf(stderr,"dbg2       store:      %lu\n",(size_t)store);
 		}
-		
+
 	/* get storage structure */
 	wc = (struct mbsys_simrad3_watercolumn_struct *) store->wc;
 
@@ -9029,7 +9322,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 		fprintf(stderr,"dbg5       ---------------------------\n");
 		for (i=0;i<wc->wtc_ntx;i++)
 			fprintf(stderr,"dbg5       %3d %6d %6d %6d\n",
-				i, wc->wtc_txtiltangle[i], wc->wtc_txcenter[i], 
+				i, wc->wtc_txtiltangle[i], wc->wtc_txcenter[i],
 				wc->wtc_txsector[i]);
 		for (i=0;i<wc->wtc_nbeam;i++)
 			{
@@ -9037,11 +9330,11 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 			fprintf(stderr,"dbg5       cnt  angle start samples unknown sector beam\n");
 			fprintf(stderr,"dbg5       --------------------------------------------------\n");
 			fprintf(stderr,"dbg5        %4d %3d %2d %4d %4d %4d %4d\n",
-				i, wc->beam[i].wtc_rxpointangle, 
-				wc->beam[i].wtc_start_sample, 
-				wc->beam[i].wtc_beam_samples, 
-				wc->beam[i].wtc_beam_spare, 
-				wc->beam[i].wtc_sector, 
+				i, wc->beam[i].wtc_rxpointangle,
+				wc->beam[i].wtc_start_sample,
+				wc->beam[i].wtc_beam_samples,
+				wc->beam[i].wtc_beam_spare,
+				wc->beam[i].wtc_sector,
 				wc->beam[i].wtc_beam);
 /*			fprintf(stderr,"dbg5       --------------------------------------------------\n");
 			fprintf(stderr,"dbg5       beam[%d]: sample amplitude\n",i);
@@ -9051,13 +9344,13 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 					j, wc->beam[i].wtc_amp[j]);*/
 			}
 		}
-		
+
 	/* zero checksum */
 	checksum = 0;
 
 	/* write the record size */
-	record_size = EM3_WC_HEADER_SIZE 
-			+ EM3_WC_BEAM_SIZE * wc->wtc_nbeam 
+	record_size = EM3_WC_HEADER_SIZE
+			+ EM3_WC_BEAM_SIZE * wc->wtc_nbeam
 			+ EM3_WC_TX_SIZE * wc->wtc_ntx + 8;
 	for (i=0;i<wc->wtc_nbeam;i++)
 		{
@@ -9065,7 +9358,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 		}
 	pad = (record_size % 2);
 	record_size += pad;
-	mb_put_binary_int(swap, record_size, (void *) &write_size); 
+	mb_put_binary_int(swap, record_size, (void *) &write_size);
 	write_len = fwrite(&write_size,1,4,mbfp);
 	if (write_len != 4)
 		{
@@ -9078,7 +9371,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 	/* write the record label */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (EM3_WATERCOLUMN), (void *) &label); 
+		mb_put_binary_short(swap, (short) (EM3_WATERCOLUMN), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -9087,7 +9380,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[1];
@@ -9095,7 +9388,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label); 
+		mb_put_binary_short(swap, (short) (store->sonar), (void *) &label);
 		write_len = fwrite(&label,1,2,mbfp);
 		if (write_len != 2)
 			{
@@ -9104,7 +9397,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 			}
 		else
 			status = MB_SUCCESS;
-			
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) &label;
 		checksum += uchar_ptr[0];
@@ -9114,8 +9407,8 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 	/* output binary header data */
 	if (status == MB_SUCCESS)
 		{
-		mb_put_binary_int(swap, (int) wc->wtc_date, (void *) &line[0]); 
-		mb_put_binary_int(swap, (int) wc->wtc_msec, (void *) &line[4]); 
+		mb_put_binary_int(swap, (int) wc->wtc_date, (void *) &line[0]);
+		mb_put_binary_int(swap, (int) wc->wtc_msec, (void *) &line[4]);
 		mb_put_binary_short(swap, (unsigned short) wc->wtc_count, (void *) &line[8]);
 		mb_put_binary_short(swap, (unsigned short) wc->wtc_serial, (void *) &line[10]);
 		mb_put_binary_short(swap, (unsigned short) wc->wtc_ndatagrams, (void *) &line[12]);
@@ -9124,12 +9417,12 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 		mb_put_binary_short(swap, (unsigned short) wc->wtc_nrx, (void *) &line[18]);
 		mb_put_binary_short(swap, (unsigned short) wc->wtc_nbeam, (void *) &line[20]);
 		mb_put_binary_short(swap, (unsigned short) wc->wtc_ssv, (void *) &line[22]);
-		mb_put_binary_int(swap, (int) wc->wtc_sfreq, (void *) &line[24]); 
+		mb_put_binary_int(swap, (int) wc->wtc_sfreq, (void *) &line[24]);
 		mb_put_binary_short(swap, (short) wc->wtc_heave, (void *) &line[28]);
 		mb_put_binary_short(swap, (unsigned short) wc->wtc_spare1, (void *) &line[30]);
 		mb_put_binary_short(swap, (unsigned short) wc->wtc_spare2, (void *) &line[32]);
 		mb_put_binary_short(swap, (unsigned short) wc->wtc_spare3, (void *) &line[34]);
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_WC_HEADER_SIZE;j++)
@@ -9158,7 +9451,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 		mb_put_binary_short(swap, (unsigned short) wc->wtc_txcenter[i], (void *) &line[2]);
 		line[4] = (mb_u_char) wc->wtc_txsector[i];
 		line[5] = (mb_u_char) 0;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_WC_TX_SIZE;j++)
@@ -9185,7 +9478,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 		mb_put_binary_short(swap, (unsigned short) wc->beam[i].wtc_beam_spare, (void *) &line[6]);
 		line[8] = (mb_u_char) wc->beam[i].wtc_sector;
 		line[9] = (mb_u_char) wc->beam[i].wtc_beam;
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) line;
 		for (j=0;j<EM3_WC_BEAM_SIZE;j++)
@@ -9203,7 +9496,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 			*error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
-		
+
 		/* compute checksum */
 		uchar_ptr = (mb_u_char *) wc->beam[i].wtc_amp;
 		for (j=0;j<wc->beam[i].wtc_beam_samples;j++)
@@ -9233,7 +9526,7 @@ int mbr_em710mba_wr_wc(int verbose, FILE *mbfp, int swap,
 			checksum += line[0];
 			}
 		line[1] = 0x03;
-	    
+
 		/* set checksum */
 		mb_put_binary_short(swap, (unsigned short) checksum, (void *) &line[2]);
 

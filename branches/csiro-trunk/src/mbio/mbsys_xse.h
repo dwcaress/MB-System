@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_xse.h	3/27/2000
  *	$Id$
  *
- *    Copyright (c) 2000-2009 by 
+ *    Copyright (c) 2000-2012 by 
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -216,7 +216,7 @@
  */
 
 /* maximum number of beams and pixels */
-#define	MBSYS_XSE_MAXBEAMS		151
+#define	MBSYS_XSE_MAXBEAMS		630
 #define	MBSYS_XSE_MAXPIXELS		4096
 #define	MBSYS_XSE_MAXSAMPLES		8192
 #define	MBSYS_XSE_MAXSVP		200
@@ -712,6 +712,8 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			double *angles_forward, double *angles_null,
 			double *heave, double *alongtrack_offset, 
 			double *draft, double *ssv, int *error);
+int mbsys_xse_detects(int verbose, void *mbio_ptr, void *store_ptr,
+			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, double *transducer_depth, double *altitude, 
 			int *error);

@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  5/23/94
 #	$Id$
 #
-#     Copyright (c) 2009 by 
+#     Copyright (c) 2009-2011 by 
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -54,12 +54,14 @@ clean:
 ### link or copy the executables
 $(BINDIR)/mbotps: mbotps.o \
 		$(LIBDIR)/libmbio.a  \
+		$(LIBDIR)/libmbaux.a  \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a  \
 		$(LIBDIR)/libmr1pr.a
 	$(CC) $(CFLAGS) mbotps.o \
 		$(LIBDIR)/libmbio.a \
+		$(LIBDIR)/libmbaux.a \
 		$(PROJLIB) \
 		$(GSFLIB) \
 		$(LIBDIR)/libsapi.a \

@@ -5,7 +5,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    The MB-system:	mbm_xyplot.perl	8/6/95
 #    $Id$
 #
-#    Copyright (c) 1993-2009 by 
+#    Copyright (c) 1993-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -20,24 +20,24 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   mbm_xyplot
 #
 # Purpose:
-#   Macro to generate a shellscript of GMT commands which, 
+#   Macro to generate a shellscript of GMT commands which,
 #   when executed, will generate a Postscript plot of xy data.
-#   Axes may be linear, log,  or any of several geographic 
+#   Axes may be linear, log,  or any of several geographic
 #   projections. Data may be plotted as symbols or lines.
-#   The plot will be scaled to fit on the specified page size 
-#   or, if the scale is user defined, the page size will be 
-#   chosen in accordance with the plot size. The primary purpose 
+#   The plot will be scaled to fit on the specified page size
+#   or, if the scale is user defined, the page size will be
+#   chosen in accordance with the plot size. The primary purpose
 #   of this macro is to allow the simple, semi-automated
 #   production of nice looking plots with a few command line
 #   arguments. For users seeking more control over the plot
 #   appearance, a number of additional optional arguments are
-#   provided. Truly ambitious users may edit the plot shellscript 
-#   to take advantage of GMT capabilites not supported by this 
+#   provided. Truly ambitious users may edit the plot shellscript
+#   to take advantage of GMT capabilites not supported by this
 #   macro.
 #
-# Basic Usage: 
-#   mbm_xyplot -I[filepars:]file [ -Gfill -H -Oroot 
-#            -Ppagesize -Ssymbol/size -Uorientation  
+# Basic Usage:
+#   mbm_xyplot -I[filepars:]file [ -Gfill -H -Oroot
+#            -Ppagesize -Ssymbol/size -Uorientation
 #            -V -Wpen ]
 #
 # Additional Options:
@@ -151,14 +151,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 $program_name = "mbm_xyplot";
 
 # set page size database
-@page_size_names = (  
+@page_size_names = (
 	"a", "b", "c", "d", "e", "f", "e1",
-	"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", 
-	"b0", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", 
+	"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10",
+	"b0", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10",
 	"c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7",
 	"m1", "m2", "m3", "m4", "m5", "m6");
-%page_width_in = (  
-	"a",     8.50,   "b",    11.00,   "c",    17.00,   "d",    22.00, 
+%page_width_in = (
+	"a",     8.50,   "b",    11.00,   "c",    17.00,   "d",    22.00,
 	"e",    34.00,   "f",    28.00,   "e1",   44.00,   "a0",   33.11,
 	"a1",   23.39,   "a2",   16.54,   "a3",   11.69,   "a4",    8.27,
 	"a5",    5.83,   "a6",    4.13,   "a7",    2.91,   "a8",    2.05,
@@ -169,8 +169,8 @@ $program_name = "mbm_xyplot";
 	"c3",   12.80,   "c4",    9.00,   "c5",    6.40,   "c6",    4.50,
 	"c7",    3.20,   "m1",   54.00,   "m2",   54.00,   "m3",   54.00,
 	"m4",   60.00,   "m5",   60.00,   "m6",   60.00);
-%page_height_in = ( 
-	"a",    11.00,   "b",    17.00,   "c",    22.00,   "d",    34.00, 
+%page_height_in = (
+	"a",    11.00,   "b",    17.00,   "c",    22.00,   "d",    34.00,
 	"e",    44.00,   "f",    40.00,   "e1",   68.00,   "a0",   46.81,
 	"a1",   33.11,   "a2",   23.39,   "a3",   16.54,   "a4",   11.69,
 	"a5",    8.27,   "a6",    5.83,   "a7",    4.13,   "a8",    2.91,
@@ -181,7 +181,7 @@ $program_name = "mbm_xyplot";
 	"c3",   18.00,   "c4",   12.80,   "c5",    9.00,   "c6",    6.40,
 	"c7",    4.50,   "m1",   72.00,   "m2",   84.00,   "m3",   96.00,
 	"m4",   72.00,   "m5",   84.00,   "m6",   96.00);
-%page_anot_font = ( 
+%page_anot_font = (
 	"a",     8,   "b",    12,   "c",    16,   "d",    24,
 	"e",    24,   "f",    24,   "e1",   24,   "a0",   24,
 	"a1",   24,   "a2",   16,   "a3",   12,   "a4",    8,
@@ -206,7 +206,7 @@ $program_name = "mbm_xyplot";
 	"c7",    8,   "m1",   30,   "m2",   30,   "m3",   30,
 	"m4",   30,   "m5",   30,   "m6",   30);
 %page_gmt_name =     (
-	"a",     "archA",   "b",     "archB",   "c",     "archC",   "d",     "archD", 
+	"a",     "archA",   "b",     "archB",   "c",     "archC",   "d",     "archD",
 	"e",     "archE",   "f",     "B0",      "e1",    "B0",      "a0",    "A0",
 	"a1",    "A1",      "a2",    "A2",      "a3",    "A3",      "a4",    "A4",
 	"a5",    "A5",      "a6",    "A6",      "a7",    "A7",      "a8",    "A8",
@@ -215,11 +215,11 @@ $program_name = "mbm_xyplot";
 	"b6",    "A6",      "b7",    "A7",      "b8",    "A8",      "b9",    "A9",
 	"b10",   "A10",     "c0",    "B0",      "c1",    "B1",      "c2",    "B2",
 	"c3",    "B3",      "c4",    "B4",      "c5",    "B5",      "c6",    "B6",
-	"c7",    "B7",      "m1", "Custom_4241x5655",    "m2",   "Custom_4241x6578",   
-	"m3",   "Custom_4241x7540",  "m4",   "Custom_4712x5655",   
+	"c7",    "B7",      "m1", "Custom_4241x5655",    "m2",   "Custom_4241x6578",
+	"m3",   "Custom_4241x7540",  "m4",   "Custom_4712x5655",
 	"m5",   "Custom_4712x6578",  "m6",   "Custom_4712x7540");
 %xpsview_mem =     (
-	"a",     "4m",   "b",     "6m",   "c",     "8m",   "d",    "12m", 
+	"a",     "4m",   "b",     "6m",   "c",     "8m",   "d",    "12m",
 	"e",    "16m",   "f",    "16m",   "e1",   "16m",   "a0",   "16m",
 	"a1",   "12m",   "a2",    "8m",   "a3",    "6m",   "a4",    "4m",
 	"a5",    "4m",   "a6",    "4m",   "a7",    "4m",   "a8",    "4m",
@@ -236,10 +236,10 @@ $program_name = "mbm_xyplot";
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
-	if ($line =~ 
+	if ($line =~
 		/^grdinfo\s+(\S+)\s+\S+/)
 		{
-		($gmt_version) = $line =~ 
+		($gmt_version) = $line =~
 			/^grdinfo\s+(\S+)\s+\S+/;
 		}
 	}
@@ -322,7 +322,7 @@ if ($misc)
 		# set GMT default values
 		if ($cmd =~ /^[Gg][Dd]./)
 			{
-			($gmt_def) = $cmd =~ 
+			($gmt_def) = $cmd =~
 				/^[Gg][Dd](\S+)/;
 			push(@gmt_defs, $gmt_def);
 			}
@@ -330,19 +330,19 @@ if ($misc)
 		# set map scale
 		if ($cmd =~ /^[Gg][Ll]./)
 			{
-			($length_scale) = $cmd =~ 
+			($length_scale) = $cmd =~
 				/^[Gg][Ll](\S+)/;
 			}
 
 		# set text labels
 		if ($cmd =~ /^[Gg][Tt]./)
 			{
-			($tx, $ty, $tsize, $tangle, $font, $just, $txt) 
+			($tx, $ty, $tsize, $tangle, $font, $just, $txt)
 			    = $cmd
 			    =~ /^[Gg][Pp](\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(.+)/;
 			if ($txt)
 			    {
-			    ($text_info) = $cmd =~ 
+			    ($text_info) = $cmd =~
 				/^[Gg][Tt](.*)/;
 			    push(@text, $text_info);
 			    }
@@ -492,12 +492,12 @@ else
 # multiple "segments" of x,y pairs to be listed in a single file each
 # separated by a single line having a special character. The default
 # character is ">", and indeed that is the ONLY character supported
-# here. 
+# here.
 
 # When multiple flags are specified as described above, MBGetopts will
 # return their arguments concatinated by ":::::::". The first line
 # below splits those arguments so they may be processed separately for
-# each file. 
+# each file.
 
 # Each file may have any of several optional arguments. Most are quite
 # straightforward, however the column flag (C) warrents some
@@ -505,7 +505,7 @@ else
 # to be plotted by utilizing a simple syntax in which a column is
 # specified by c[N] where N deones the column number. The full syntax
 # is then c#[xcol]_c#[ycol] where the underbar delimits the syntax for
-# the x column and y columns respectively. 
+# the x column and y columns respectively.
 
 @data_file_list = split(/:::::::/, $file_data);
 foreach $xyfile_raw (@data_file_list) {
@@ -517,7 +517,7 @@ foreach $xyfile_raw (@data_file_list) {
     $delimiter_f = '\s+';
     $xmath_f='$line[0]';
     $ymath_f='$line[1]';
-    
+
     # figure out how many parameters to set for each file
     @filearg = split(/:/, $xyfile_raw);
 	for ($i = 0; $i < $#filearg; $i++) {
@@ -554,12 +554,12 @@ foreach $xyfile_raw (@data_file_list) {
 		$ymath_f =~ s/c\[(\d+)\]/\$line[$1-1]/g;
 		$xmath_f =~ s/\#/\$linecnt/g;
 		$ymath_f =~ s/\#/\$linecnt/g;
-		
-		
+
+
 	    }
-	    
+
 	}
-    
+
     # Push each argument into parallel arrays.
     push(@xysymbols, $xysymbol_f);
     push(@xyfills, $xyfill_f);
@@ -606,8 +606,8 @@ foreach $xyfile(@xyfiles){
     open INFILE or die "Cannot open $xyfile: $'";
     open OUTFILE or die "Cannot open temporary file: $'";
     $linecnt=1;
-    
-    
+
+
     while (<INFILE>) {
 	chomp;
 
@@ -629,30 +629,30 @@ foreach $xyfile(@xyfiles){
 	    if ( $_ =~ /^$delimiters[$i]/ ) {
 		$_ =~ s/^$delimiters[$i]//;
 	    }
-	    
-	       
+
+
 	    @line = split /$delimiters[$i]/, $_;
 
-            # Evaluate the perl/math expressions. If there's an error, 
-	    # don't quite but warn to STDIO. (should probably go to 
+            # Evaluate the perl/math expressions. If there's an error,
+	    # don't quite but warn to STDIO. (should probably go to
 	    # STDERR). Divide-by-zero errors will be caught by this.
 	my $xval = eval $xmath[$i];
-	
+
 	print "WARNING!!! NON-NUMERIC RESULT DETECTED: $@" if $@;
 
 	my $yval = eval $ymath[$i];
 
 	print "WARNING!!! NON-NUMERIC RESULT DETECTED: $@" if $@;
-	
+
 	# Verify that we got numbers...
-	if (! ($xval =~ m/-?\d*\.?\d*|-?\.\d+/ && 
+	if (! ($xval =~ m/-?\d*\.?\d*|-?\.\d+/ &&
 	       $yval =~ m/-?\d*\.?\d*|-?\.\d+/)  ) {
 	    print "WARNING!!! NON-NUMERIC RESULT DETECTED! X: $xval Y: $yval Skipping...\n";
 	}
-	
+
 	push(@xvalues, $xval);
 	push(@yvalues, $yval);
-	
+
 	print(OUTFILE "$xval\t$yval\n");
 
     }
@@ -685,7 +685,7 @@ if ($bounds)
 	{
 	if ($bounds =~ /^\S+\/\S+\/\S+\/\S+r$/)
 		{
-		($xmin_raw,$ymin_raw,$xmax_raw,$ymax_raw) = $bounds =~ 
+		($xmin_raw,$ymin_raw,$xmax_raw,$ymax_raw) = $bounds =~
 			/^(\S+)\/(\S+)\/(\S+)\/(\S+)r$/;
 		$xmin = &GetDecimalDegrees($xmin_raw);
 		$xmax = &GetDecimalDegrees($xmax_raw);
@@ -696,7 +696,7 @@ if ($bounds)
 		}
 	elsif ($bounds =~ /^\S+\/\S+\/\S+\/\S+$/)
 		{
-		($xmin_raw,$xmax_raw,$ymin_raw,$ymax_raw) = $bounds =~ 
+		($xmin_raw,$xmax_raw,$ymin_raw,$ymax_raw) = $bounds =~
 			/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 		$xmin = &GetDecimalDegrees($xmin_raw);
 		$xmax = &GetDecimalDegrees($xmax_raw);
@@ -731,7 +731,7 @@ if (!$bounds_plot)
 # set the relevent page width and height
 &GetPageSize;
 
-# get user constraints on map scale 
+# get user constraints on map scale
 if ($map_scale)
 	{
 	# sets $plot_scale or $plot_width if possible
@@ -782,7 +782,7 @@ print $line;
 	$xxmax = ($xx > $xxmax ? $xx : $xxmax);
 	$yymin = ($yy < $yymin ? $yy : $yymin);
 	$yymax = ($yy > $yymax ? $yy : $yymax);
-    }    
+    }
 }
 $dxx = $xxmax - $xxmin;
 $dyy = $yymax - $yymin;
@@ -854,8 +854,8 @@ if (($use_scale && $plot_scale) || ($use_width && $plot_width))
 				$width_max = $width_max_landscape;
 				$height_max = $height_max_landscape;
 				}
-			if (!$good_page && 
-				$plot_width <= $width_max 
+			if (!$good_page &&
+				$plot_width <= $width_max
 				&& $plot_height <= $height_max)
 				{
 				$good_page = 1;
@@ -915,15 +915,15 @@ elsif ($use_scale && $projection =~ /^x.*/ && !$geographic)
 	# construct plot scale parameters
 
 	## These lines break things. $projection_pars was already properly
-	## defined and $map_scale may not yet be defined. Moreover, 
+	## defined and $map_scale may not yet be defined. Moreover,
 	## $projection_pars should now contain JUST the scale values
 	## with no leading projection type.  The single line added
-	## is all that is required. 
+	## is all that is required.
 	## Val Schmidt LDEO/Columbia OCTOBER 2003
-	
+
 
 	#($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	#    $projection_pars = sprintf ("$projection_pars$separator%1.5g", 
+	#    $projection_pars = sprintf ("$projection_pars$separator%1.5g",
 	#				$plot_scale);
 	$projection_pars="$plot_scale";
 
@@ -957,14 +957,14 @@ elsif ($use_width && $projection =~ /^X.*/ && !$geographic)
 	# construct plot scale parameters
 
 	## These lines break things. $projection_pars was already properly
-	## defined and $map_scale may not yet be defined. Moreover, 
+	## defined and $map_scale may not yet be defined. Moreover,
 	## $projection_pars should now contain JUST the scale values
 	## with no leading projection type.  The single line added
-	## is all that is required. 
+	## is all that is required.
 	## Val Schmidt LDEO/Columbia OCTOBER 2003
-	
+
 	#($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	#$projection_pars = sprintf ("$projection_pars$separator%1.5g", 
+	#$projection_pars = sprintf ("$projection_pars$separator%1.5g",
 	#				$plot_width);
 	$projection_pars="$plot_width";
 	}
@@ -1025,7 +1025,7 @@ elsif ($use_scale)
 
 	# construct plot scale parameters
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = sprintf ("$projection_pars$separator%1.5g", 
+	$projection_pars = sprintf ("$projection_pars$separator%1.5g",
 					$plot_scale);
 
 	# handle special case for linear projections
@@ -1084,7 +1084,7 @@ elsif ($use_width)
 
 	# construct plot scale parameters
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
-	$projection_pars = sprintf ("$projection_pars$separator%1.5g", 
+	$projection_pars = sprintf ("$projection_pars$separator%1.5g",
 					$plot_width);
 
 	# handle special case for linear projections
@@ -1095,9 +1095,9 @@ elsif ($use_width)
 	}
 
 # place the origin so plot is more or less centered
-$xoffset = ($width - $plot_width 
+$xoffset = ($width - $plot_width
 	- $space_left - $space_right) / 2 + $space_left;
-$yoffset = ($height - $plot_height 
+$yoffset = ($height - $plot_height
 	- $space_bottom - $space_top) / 2 + $space_bottom;
 
 # get plot degree annotation for geographic maps
@@ -1282,10 +1282,25 @@ if ($nlabels < 3)
 # set basemap axes annotation
 if ($tick_info)
 	{
-	$axes = $tick_info;
-	if (!($tick_info =~ /.*:\..*/))
+	if ($tick_info =~ /.*\/.*/)
 		{
-		$axes = "$axes:.\"$tlabel\":";
+		($xtick, $ytick) = $tick_info =~ /(.*)\/(.*)/;
+		}
+	if ($tick_info =~ /.*:\..*/)
+		{
+		($title) = $tick_info =~ /.*:\.(.*)/;
+		}
+	else
+		{
+		$title = $tlabel;
+		}
+	if ($xtick && $ytick)
+		{
+		$axes = "$xtick:\"$xlabel\":/$ytick:\"$ylabel\"::.\"$title\":";
+		}
+	else
+		{
+		$axes = "$axes:.\"$title\":";
 		}
 	}
 elsif ($projection =~ /^[Xx].*/ && !$geographic)
@@ -1302,7 +1317,7 @@ else
 	}
 
 # do xy plots
-for ($i = 0; $i < scalar(@xyfiles); $i++) 
+for ($i = 0; $i < scalar(@xyfiles); $i++)
 	{
 	printf FCMD "#\n# Make xy data plot\n";
 	printf FCMD "echo Running psxy...\n";
@@ -1341,7 +1356,7 @@ for ($i = 0; $i < scalar(@xyfiles); $i++)
 	}
 
 # do coastline plots
-if ($coast_control) 
+if ($coast_control)
 	{
 	printf FCMD "#\n# Make coastline data plot\n";
 	printf FCMD "echo Running pscoast...\n";
@@ -1364,7 +1379,7 @@ if ($coast_control)
 		{
 		printf FCMD "-I$coast_river \\\n\t";
 		}
-	for ($i = 0; $i < scalar(@coast_boundaries); $i++) 
+	for ($i = 0; $i < scalar(@coast_boundaries); $i++)
 		{
 		printf FCMD "-N$coast_boundaries[$i] \\\n\t";
 		}
@@ -1496,11 +1511,21 @@ elsif ($ps_viewer eq "gv")
 	{
 	if ($portrait)
 		{
-		$view_pageflag = "--orientation=portrait --media=BBox";
+		$pagescale = 11.0 / $page_height_in{$pagesize};
+		if ($pagescale > 1.0)
+			{
+			$pagescale = 1.0;
+			}
+		$view_pageflag = "--orientation=portrait --media=BBox -scale=$pagescale";
 		}
 	elsif ($landscape)
 		{
-		$view_pageflag = "--orientation=landscape --media=BBox";
+		$pagescale = 11.0 / $page_width_in{$pagesize};
+		if ($pagescale > 1.0)
+			{
+			$pagescale = 1.0;
+			}
+		$view_pageflag = "--orientation=landscape --media=BBox -scale=$pagescale";
 		}
 	}
 elsif ($ps_viewer eq "ggv")
@@ -1590,20 +1615,20 @@ if ($verbose)
 		print "    Orientation:              landscape\n";
 		}
 	print "\n  XY Data Attributes:\n";
-	printf "    X min max:                %9.4g  %9.4g\n", 
+	printf "    X min max:                %9.4g  %9.4g\n",
 		$xmin, $xmax;
-	printf "    Y min max:                %9.4g  %9.4g\n", 
+	printf "    Y min max:                %9.4g  %9.4g\n",
 		$ymin, $ymax;
 	if (@xyfiles)
 		{
 		print "\n  Primary XY Plotting Controls:\n";
 		printf "    symbol     pen        fill       segment    file\n";
 		printf "    ------     ---        ----       -------    ----\n";
-		for ($i = 0; $i < scalar(@xyfiles); $i++) 
+		for ($i = 0; $i < scalar(@xyfiles); $i++)
 			{
-			printf "    %-10s %-10s %-10s %-10s %s\n", 
-				$xysymbols[$i], $xypens[$i], 
-				$xyfills[$i], $xysegments[$i], 
+			printf "    %-10s %-10s %-10s %-10s %s\n",
+				$xysymbols[$i], $xypens[$i],
+				$xyfills[$i], $xysegments[$i],
 				$xyfiles[$i];
 			}
 		}
@@ -1638,7 +1663,7 @@ if ($verbose)
 
 	if ($coast_control && $coast_boundaries)
 		{
-		for ($i = 0; $i < scalar(@coast_boundaries); $i++) 
+		for ($i = 0; $i < scalar(@coast_boundaries); $i++)
 			{
 			printf "    National Boundaries:      $coast_boundaries[$i]\n";
 			}
@@ -1694,7 +1719,7 @@ sub min {
 
 	# make local variables
 	local ($min);
-	
+
 	# get the minimum of the arguments
 	if ($_[0] < $_[1])
 		{
@@ -1711,7 +1736,7 @@ sub max {
 
 	# make local variables
 	local ($max);
-	
+
 	# get the minimum of the arguments
 	if ($_[0] > $_[1])
 		{
@@ -1732,25 +1757,25 @@ sub GetDecimalDegrees {
 	# deal with dd:mm:ss format
 	if ($_[0] =~ /^\S+:\S+:\S+$/)
 		{
-		($degrees, $minutes, $seconds) 
+		($degrees, $minutes, $seconds)
 			= $_[0] =~ /^(\S+):(\S+):(\S+)$/;
 		if ($degrees =~ /^-\S+/)
 			{
-			$dec_degrees = $degrees 
-				- $minutes / 60.0 
+			$dec_degrees = $degrees
+				- $minutes / 60.0
 				- $seconds / 3600.0;
 			}
 		else
 			{
-			$dec_degrees = $degrees 
-				+ $minutes / 60.0 
+			$dec_degrees = $degrees
+				+ $minutes / 60.0
 				+ $seconds / 3600.0;
 			}
 		}
 	# deal with dd:mm format
 	elsif ($_[0] =~ /^\S+:\S+$/)
 		{
-		($degrees, $minutes) 
+		($degrees, $minutes)
 			= $_[0] =~ /^(\S+):(\S+)$/;
 		if ($degrees =~ /^-\S+/)
 			{
@@ -1774,13 +1799,13 @@ sub GetDecimalDegrees {
 sub GetPageSize {
 
 # get space around edge of plot
-	$space_top =    1.25 * $page_height_in{$pagesize} 
+	$space_top =    1.25 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_bottom = 1.50 * $page_height_in{$pagesize} 
+	$space_bottom = 1.50 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_left =   1.00 * $page_height_in{$pagesize} 
+	$space_left =   1.00 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
-	$space_right =  1.00 * $page_height_in{$pagesize} 
+	$space_right =  1.00 * $page_height_in{$pagesize}
 			    / $page_height_in{"a"};
 
 # set the relevent page width and height
@@ -1810,7 +1835,7 @@ sub GetProjection {
 	($projection) = $map_scale =~ /^(\w)/;
 	($projection_pars) = $map_scale =~ /^$projection(\S+)/;
 
-	# see if plot scale or plot width defined 
+	# see if plot scale or plot width defined
 	$use_scale = 0;
 	$use_width = 0;
 	$separator = "/";
@@ -1819,25 +1844,25 @@ sub GetProjection {
 	# Cassini Projection
 	if ($projection eq "c")
 		{
-		($plot_scale) = $map_scale =~ /^c\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^c\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "C")
 		{
-		($plot_width) = $map_scale =~ /^C\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^C\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Mercator Projection
 	elsif ($projection eq "m")
 		{
-		($plot_scale) = $map_scale =~ /^m(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^m(\S+)$/;
 		$use_scale = 1;
 		$separator = "";
 		}
 	elsif ($projection eq "M")
 		{
-		($plot_width) = $map_scale =~ /^M(\S+)$/; 
+		($plot_width) = $map_scale =~ /^M(\S+)$/;
 		$use_width = 1;
 		$separator = "";
 		}
@@ -1879,213 +1904,213 @@ sub GetProjection {
 	# Equidistant Cylindrical Projection
 	elsif ($projection eq "q")
 		{
-		($plot_scale) = $map_scale =~ /^q\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^q\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "Q")
 		{
-		($plot_width) = $map_scale =~ /^Q\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^Q\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Transverse Mercator Projection
 	elsif ($projection eq "t")
 		{
-		($plot_scale) = $map_scale =~ /^t\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^t\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "T")
 		{
-		($plot_width) = $map_scale =~ /^T\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^T\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Universal Transverse Mercator Projection
 	elsif ($projection eq "u")
 		{
-		($plot_scale) = $map_scale =~ /^u\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^u\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "U")
 		{
-		($plot_width) = $map_scale =~ /^U\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^U\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Basic Cylindrical Projection
 	elsif ($projection eq "y")
 		{
-		($plot_scale) = $map_scale =~ /^y\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^y\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "Y")
 		{
-		($plot_width) = $map_scale =~ /^Y\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^Y\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Lambert Azimuthal Projection
 	elsif ($projection eq "a")
 		{
-		($plot_scale) = $map_scale =~ /^a\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^a\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		$trial_value = "1:1";
 		$use_ratio = 1;
 		}
 	elsif ($projection eq "A")
 		{
-		($plot_width) = $map_scale =~ /^A\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^A\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Equidistant Projection
 	elsif ($projection eq "e")
 		{
-		($plot_scale) = $map_scale =~ /^e\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^e\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		$trial_value = "1:1";
 		$use_ratio = 1;
 		}
 	elsif ($projection eq "E")
 		{
-		($plot_width) = $map_scale =~ /^E\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^E\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Orthographic Projection
 	elsif ($projection eq "g")
 		{
-		($plot_scale) = $map_scale =~ /^g\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^g\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		$trial_value = "1:1";
 		$use_ratio = 1;
 		}
 	elsif ($projection eq "G")
 		{
-		($plot_width) = $map_scale =~ /^G\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^G\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# General Sterographic Projection
 	elsif ($projection eq "s")
 		{
-		($plot_scale) = $map_scale =~ /^s\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^s\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		$trial_value = "1:1";
 		$use_ratio = 1;
 		}
 	elsif ($projection eq "S")
 		{
-		($plot_width) = $map_scale =~ /^S\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^S\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Albers Projection
 	elsif ($projection eq "b")
 		{
-		($plot_scale) = $map_scale =~ /^b\S+\/\S+\/\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^b\S+\/\S+\/\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "B")
 		{
-		($plot_width) = $map_scale =~ /^B\S+\/\S+\/\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^B\S+\/\S+\/\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Lambert Conic Projection
 	elsif ($projection eq "l")
 		{
-		($plot_scale) = $map_scale =~ /^l\S+\/\S+\/\S+\/\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^l\S+\/\S+\/\S+\/\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "L")
 		{
-		($plot_width) = $map_scale =~ /^L\S+\/\S+\/\S+\/\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^L\S+\/\S+\/\S+\/\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Hammer Projection
 	elsif ($projection eq "h")
 		{
-		($plot_scale) = $map_scale =~ /^h\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^h\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "H")
 		{
-		($plot_width) = $map_scale =~ /^H\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^H\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Sinusoidal Projection
 	elsif ($projection eq "i")
 		{
-		($plot_scale) = $map_scale =~ /^i\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^i\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "I")
 		{
-		($plot_width) = $map_scale =~ /^I\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^I\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Eckert VI Projection
 	elsif ($projection eq "k")
 		{
-		($plot_scale) = $map_scale =~ /^k\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^k\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "K")
 		{
-		($plot_width) = $map_scale =~ /^K\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^K\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Robinson Projection
 	elsif ($projection eq "n")
 		{
-		($plot_scale) = $map_scale =~ /^n\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^n\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "N")
 		{
-		($plot_width) = $map_scale =~ /^N\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^N\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Winkel Tripel Projection
 	elsif ($projection eq "r")
 		{
-		($plot_scale) = $map_scale =~ /^r\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^r\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "R")
 		{
-		($plot_width) = $map_scale =~ /^R\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^R\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Mollweide Projection
 	elsif ($projection eq "w")
 		{
-		($plot_scale) = $map_scale =~ /^w\S+\/(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^w\S+\/(\S+)$/;
 		$use_scale = 1;
 		}
 	elsif ($projection eq "W")
 		{
-		($plot_width) = $map_scale =~ /^W\S+\/(\S+)$/; 
+		($plot_width) = $map_scale =~ /^W\S+\/(\S+)$/;
 		$use_width = 1;
 		}
 
 	# Linear Polar Projection
 	elsif ($projection eq "p")
 		{
-		($plot_scale) = $map_scale =~ /^p(\S+)$/; 
+		($plot_scale) = $map_scale =~ /^p(\S+)$/;
 		$use_scale = 1;
 		$separator = "";
 		}
 	elsif ($projection eq "P")
 		{
-		($plot_width) = $map_scale =~ /^P(\S+)$/; 
+		($plot_width) = $map_scale =~ /^P(\S+)$/;
 		$use_width = 1;
 		$separator = "";
 		}
@@ -2100,7 +2125,7 @@ sub GetProjection {
 			}
 		else
 			{
-			($plot_scale) = $map_scale =~ /^x(\S+)$/; 
+			($plot_scale) = $map_scale =~ /^x(\S+)$/;
 			}
 		$use_scale = 1;
 		$separator = "";
@@ -2114,7 +2139,7 @@ sub GetProjection {
 			}
 		else
 			{
-			($plot_width) = $map_scale =~ /^X(\S+)$/; 
+			($plot_width) = $map_scale =~ /^X(\S+)$/;
 			}
 		$use_width = 1;
 		$separator = "";
@@ -2251,7 +2276,7 @@ sub GetBaseTick {
 # the same arg.
 #
 # Usage:
-#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
 #			    # -c does not take arg. Sets opt_* as a
 #                           # side effect.
 
@@ -2259,7 +2284,6 @@ sub MBGetopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
@@ -2282,7 +2306,7 @@ sub MBGetopts {
 		    $rest = shift(@ARGV);
 		}
 		if (eval "\$opt_$first") {
-		    eval "\$opt_$first = \$opt_$first 
+		    eval "\$opt_$first = \$opt_$first
 				. \":::::::\" . \$rest;";
 		}
 		else {
