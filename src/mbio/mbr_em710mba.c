@@ -541,7 +541,7 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		time_i[5] = (ping->png_msec % 60000) / 1000;
 		time_i[6] = (ping->png_msec % 1000) * 1000;
 		mb_get_time(verbose, time_i, &btime_d);
-		
+
 		if (ping->png_longitude != EM3_INVALID_INT
 			&& ping->png_latitude != EM3_INVALID_INT)
 			mb_navint_add(verbose, mbio_ptr,
@@ -553,7 +553,7 @@ int mbr_rt_em710mba(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 				btime_d, 0.01 * ping->png_heading,
 				error);
 		mb_attint_add(verbose, mbio_ptr,
-				btime_d, 0.01 * ping->png_heave, 
+				btime_d, 0.01 * ping->png_heave,
 				0.01 * ping->png_roll, 0.01 * ping->png_pitch,
 				error);
 		mb_depint_add(verbose, mbio_ptr,
@@ -823,7 +823,7 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		{
 #ifdef MBR_EM710MBA_DEBUG
 	fprintf(stderr,"\nabove mbr_em710raw_rd_data loop:\n");
-	fprintf(stderr,"label_save_flag:%d mbfp:%d status:%d\n",*label_save_flag,mb_io_ptr->mbfp,status);
+	fprintf(stderr,"label_save_flag:%d mbfp:%lu status:%d\n",*label_save_flag,(size_t)mb_io_ptr->mbfp,status);
 #endif
 		/* if no label saved get next record label */
 		if (*label_save_flag == MB_NO)
@@ -836,7 +836,7 @@ int mbr_em710mba_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 				*error = MB_ERROR_EOF;
 				}
 #ifdef MBR_EM710MBA_DEBUG
-	fprintf(stderr,"read record size:%d mbfp:%d status:%d\n",record_size,mb_io_ptr->mbfp,status);
+	fprintf(stderr,"read record size:%d mbfp:%lu status:%d\n",record_size,(size_t)mb_io_ptr->mbfp,status);
 #endif
 
 			/* read label */
@@ -3352,7 +3352,7 @@ int mbr_em710mba_rd_attitude(int verbose, FILE *mbfp, int swap,
 		line[3], line[3]);
 #endif
 		}
-		
+
 	/* Set data kind */
 	if (status == MB_SUCCESS)
 		{
@@ -3463,7 +3463,7 @@ int mbr_em710mba_rd_netattitude(int verbose, FILE *mbfp, int swap,
 		    netattitude->nat_ndata = (int) ((unsigned short) short_val);
 		netattitude->nat_sensordescriptor = line[14];
 		}
-		
+
 	/* Set data kind */
 	if (status == MB_SUCCESS)
 		{

@@ -85,6 +85,7 @@
  * clb          05-13-11  when decoding a ping, reject it if number of beams <= 0
  * clb          06-21-11  implemented DecodeEM12Specific() function
  * clb          09-20-11  added support for R2Sonic
+ * jcd          02-17-12  fixed DecodeQualityFlagsArray to work with num_beams not evenly divisible by 4
  *
  * Classification : Unclassified
  *
@@ -138,7 +139,7 @@ static int      DecodeByteArray(double **array, unsigned char *ptr, int num_beam
 static int      DecodeSignedByteArray(double **array, char *ptr, int num_beams, gsfScaleFactors * sf, int id, int handle);
 static int      DecodeFromByteToUnsignedShortArray(unsigned short **array, unsigned char *sptr, int num_beams, gsfScaleFactors * sf, int id, int handle);
 static int      DecodeBeamFlagsArray(unsigned char **array, unsigned char *ptr, int num_beams, int handle);
-static int      DecodeQualityFlagsArray(unsigned char **array, unsigned char *ptr, int num_beams, int handle);
+static int      DecodeQualityFlagsArray(unsigned char **array, unsigned char *ptr, int num_beams, int sr_size, int handle);
 static int      DecodeBRBIntensity(gsfBRBIntensity ** idata, unsigned char *ptr, int num_beams, int sensor_id, int handle);
 static int      DecodeSeabeamSpecific(gsfSensorSpecific * sdata, unsigned char *sptr);
 static int      DecodeEM12Specific(gsfSensorSpecific * sdata, unsigned char *sptr);
@@ -922,6 +923,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
         count = 0;
         while (((record_size - bytes - sr_size) > 4) && (count <= 3))
         {
+          
             int test_sizes[3] = {1, 2, 4};
             int test_fs;
 
@@ -1105,7 +1107,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                         break;
 
                     case GSF_FIELD_SIZE_FOUR:
-                        ret = DecodeFourByteArray(&ft->rec.mb_ping.travel_time, (char *)p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY, handle);
+                        ret = DecodeFourByteArray(&ft->rec.mb_ping.travel_time, p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_TRAVEL_TIME_ARRAY, handle);
                         break;
                 }
                 if (ret < 0)
@@ -1158,7 +1160,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                         break;
 
                     case GSF_FIELD_SIZE_TWO:
-                        ret = DecodeTwoByteArray(&ft->rec.mb_ping.mr_amplitude, (char *)p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY, handle);
+                        ret = DecodeTwoByteArray(&ft->rec.mb_ping.mr_amplitude, p, ping->number_beams, &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_MEAN_REL_AMPLITUDE_ARRAY, handle);
                         break;
                 }
                 if (ret < 0)
@@ -1256,7 +1258,17 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                 break;
 
             case (GSF_SWATH_BATHY_SUBRECORD_QUALITY_FLAGS_ARRAY):
-                ret = DecodeQualityFlagsArray(&ft->rec.mb_ping.quality_flags, p, ping->number_beams, handle);
+                // if the update flag is TRUE and the quality flags array
+                // is not fully encoded, return an error.
+                if (ft->update_flag)
+                {
+                    if (ping->number_beams > subrecord_size*4)
+                    {
+                        gsfError = GSF_QUALITY_FLAGS_DECODE_ERROR;
+                        return -1;
+                    }
+                }                
+                ret = DecodeQualityFlagsArray(&ft->rec.mb_ping.quality_flags, p, ping->number_beams, subrecord_size, handle);
                 if (ret < 0)
                 {
                     return (-1);
@@ -1335,7 +1347,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                  break;
 
            case (GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY):
-               ret = DecodeSignedByteArray(&ft->rec.mb_ping.incident_beam_adj, p, ping->number_beams,
+             ret = DecodeSignedByteArray(&ft->rec.mb_ping.incident_beam_adj, (char *) p, ping->number_beams,
                    &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_INCIDENT_BEAM_ADJ_ARRAY, handle);
                if (ret < 0)
                {
@@ -1357,7 +1369,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
                break;
 
            case (GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY):
-               ret = DecodeSignedByteArray(&ft->rec.mb_ping.doppler_corr, p, ping->number_beams,
+             ret = DecodeSignedByteArray(&ft->rec.mb_ping.doppler_corr, (char *) p, ping->number_beams,
                    &ft->rec.mb_ping.scaleFactors, GSF_SWATH_BATHY_SUBRECORD_DOPPLER_CORRECTION_ARRAY, handle);
                if (ret < 0)
                {
@@ -1618,7 +1630,7 @@ gsfDecodeSwathBathymetryPing(gsfSwathBathyPing *ping, unsigned char *sptr, GSF_F
         }
         bytes = p - sptr;
     }
-
+    
     /*  Extract subrecord id if the subrecord size is 0 */
     if (((record_size - bytes) == 4) && (ping->sensor_id != subrecord_id))
     {
@@ -2566,6 +2578,7 @@ DecodeBeamFlagsArray(unsigned char **array, unsigned char *sptr, int num_beams, 
  *            the array of beam data
  *    sptr = a pointer to an unsigned char containing the byte stream to read
  *    num_beams = an integer containing the number of beams
+ *    sr_size = size of the quality flags record
  *    handle = an integer containing the handle for this file, used to record
  *             the number of beams for memory reallocation purposes.
  *
@@ -2579,7 +2592,7 @@ DecodeBeamFlagsArray(unsigned char **array, unsigned char *sptr, int num_beams, 
  *
  ********************************************************************/
 static int
-DecodeQualityFlagsArray(unsigned char **array, unsigned char *sptr, int num_beams, int handle)
+DecodeQualityFlagsArray(unsigned char **array, unsigned char *sptr, int num_beams, int sr_size, int handle)
 {
     unsigned char  *ptr = sptr;
     unsigned char  *aptr;
@@ -2588,6 +2601,7 @@ DecodeQualityFlagsArray(unsigned char **array, unsigned char *sptr, int num_beam
     int             shift;
     unsigned char   mask[4];
     int             id = GSF_SWATH_BATHY_SUBRECORD_QUALITY_FLAGS_ARRAY;
+    int             count;
 
     if (num_beams <= 0)
     {
@@ -2633,7 +2647,13 @@ DecodeQualityFlagsArray(unsigned char **array, unsigned char *sptr, int num_beam
     mask[1] =  48;   /* bits 5 and 4 */
     mask[2] =  12;   /* bits 3 and 2 */
     mask[3] =   3;   /* bits 1 and 0 */
-    for (i = 0; i < num_beams; i++)
+
+    if ((sr_size * 4) < num_beams)
+        count = sr_size * 4; // not all the beams were encoded, only read the encoded beams
+    else
+        count = num_beams; // all beams encoded
+
+    for (i = 0; i < count; i++)
     {
         *aptr = (*ptr & mask[j]) >> shift;
         aptr++;
@@ -2651,6 +2671,12 @@ DecodeQualityFlagsArray(unsigned char **array, unsigned char *sptr, int num_beam
         }
     }
 
+    /*  If j doesn't get reset to 0 then we have a number of beams that is not evenly divisible by 4.  This causes all
+        sorts of problems because the sensor_id will get set to the wrong number when it returns to gsfDecodeSwathBathymetryPing.
+        The problem is that we actually decoded part of another byte but we didn't increment the ptr.  */
+    
+    if (j) ptr++;
+  
     return (ptr - sptr);
 }
 

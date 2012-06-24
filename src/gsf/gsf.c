@@ -2496,6 +2496,28 @@ gsfPrintError(FILE * fp)
 
 /********************************************************************
  *
+ * Function Name : gsfError
+ *
+ * Description : This function is used to return the 
+ *  most recent error encountered.
+ *  This function need only be called if
+ *  a -1 is returned from one of the gsf functions.
+ *
+ * Inputs : none
+ *
+ * Returns : constant integer value representing the most recent error
+ *
+ * Error Conditions : none
+ *
+ ********************************************************************/
+
+int gsfIntError(void)
+{
+    return gsfError;
+}
+
+/********************************************************************
+ *
  * Function Name : gsfStringError
  *
  * Description : This function is used to return a string with
@@ -2512,10 +2534,10 @@ gsfPrintError(FILE * fp)
  *
  ********************************************************************/
 
-char *
+const char *
 gsfStringError(void)
 {
-    char             *ptr;
+    const char             *ptr;
 
     switch (gsfError)
     {
@@ -2755,6 +2777,10 @@ gsfStringError(void)
 
         case GSF_PARTIAL_RECORD_AT_END_OF_FILE:
             ptr = "GSF corrupt/partial record at the end of the file";
+            break;
+
+        case GSF_QUALITY_FLAGS_DECODE_ERROR:
+            ptr = "GSF error decoding quality flags record";
             break;
 
         default:
@@ -3026,7 +3052,7 @@ gsfGetNumberRecords (int handle, int desiredRecord)
  ********************************************************************/
 
 int
-gsfCopyRecords (gsfRecords *target, gsfRecords *source)
+gsfCopyRecords (gsfRecords *target, const gsfRecords *source)
 {
     int             i;
 
@@ -4104,7 +4130,7 @@ gsfSetParam(int handle, int index, char *val, gsfRecords *rec)
  *
  ********************************************************************/
 int
-gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
+gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
 {
     char            temp[256];
     char            temp2[64];
@@ -7069,7 +7095,7 @@ gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
  *
  ********************************************************************/
 int
-gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays)
+gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays)
 {
     int i;
     char str[64];
@@ -7950,7 +7976,7 @@ gsfNumberParams(char *param)
  *
  ********************************************************************/
 int
-gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartship)
+gsfGetSwathBathyBeamWidths(const gsfRecords *data, double *fore_aft, double *athwartship)
 {
     int             ret=0;   /* Assume that we will be successful. */
 
@@ -8221,7 +8247,7 @@ gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartsh
  *
  ********************************************************************/
 int
-gsfIsStarboardPing(gsfRecords *data)
+gsfIsStarboardPing(const gsfRecords *data)
 {
     int ret = 0;
 
@@ -8512,7 +8538,7 @@ gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, int subrecordID, int 
  *
  ********************************************************************/
 int
-gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, double *min_value, double *max_value)
+gsfGetSwathBathyArrayMinMax(const gsfSwathBathyPing *ping, int subrecordID, double *min_value, double *max_value)
 {
     double          minimum;
     double          maximum;
@@ -8768,9 +8794,9 @@ gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, double *mi
  *    GSF_UNRECOGNIZED_ARRAY_SUBRECORD_ID
  *
  ********************************************************************/
-char *gsfGetSonarTextName(gsfSwathBathyPing *ping)
+const char *gsfGetSonarTextName(const gsfSwathBathyPing *ping)
 {
-    char             *ptr;
+    const char             *ptr;
 
     switch (ping->sensor_id)
     {
@@ -8990,7 +9016,7 @@ char *gsfGetSonarTextName(gsfSwathBathyPing *ping)
  *
  ********************************************************************/
 int
-gsfIsNewSurveyLine(int handle, gsfRecords *rec, double azimuth_change, double *last_heading)
+gsfIsNewSurveyLine(int handle, const gsfRecords *rec, double azimuth_change, double *last_heading)
 {
     double diff;
     int    new_line;

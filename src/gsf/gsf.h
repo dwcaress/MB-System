@@ -162,7 +162,7 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library */
-#define GSF_VERSION       "GSF-v03.03"
+#define GSF_VERSION       "GSF-v03.04"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    524288
@@ -1949,10 +1949,16 @@ typedef struct t_gsfMBParams
 #define GSF_ATTITUDE_RECORD_DECODE_FAILED        -50
 #define GSF_OPEN_TEMP_FILE_FAILED                -51
 #define GSF_PARTIAL_RECORD_AT_END_OF_FILE        -52
+#define GSF_QUALITY_FLAGS_DECODE_ERROR           -53
 
+/* Global external data defined in this module */
 
 /* The following are the function protoytpes for all functions intended
  * to be exported by the library.
+ 
+	Fugro modification - Mitch Ames - 2012-02-15
+    The original exported functions did not use const pointers everywhere that they could or should. 
+    I've added const where appropriate.  
  */
 
 int OPTLK       gsfOpen(const char *filename, const int mode, int *handle);
@@ -2250,7 +2256,19 @@ void OPTLK      gsfPrintError(FILE * fp);
  * Error Conditions : none
  */
 
-char *gsfStringError(void);
+int gsfIntError(void);
+/* Description : This function is used to return the most recent
+ *  error encountered.  This function need only be called if
+ *  a -1 is returned from one of the gsf functions.
+ *
+ * Inputs : none
+ *
+ * Returns : constant integer value representing the most recent error
+ *
+ * Error Conditions : none
+ */
+
+const char *gsfStringError(void);
 /* Description : This function is used to return a short message describing
  *  the most recent error encountered.  This function need only be called if
  *  a -1 is returned from one of the gsf functions.
@@ -2323,7 +2341,7 @@ int OPTLK       gsfGetNumberRecords (int handle, int desiredRecord);
  *  GSF_BAD_ACCESS_MODE
  */
 
-int OPTLK       gsfCopyRecords (gsfRecords *target, gsfRecords *source);
+int OPTLK       gsfCopyRecords (gsfRecords *target, const gsfRecords *source);
 /* Description : This function will copy all of the data contained in the
  *  source gsfRecords data structure to the target gsfRecords data
  *  structure. The target MUST be memset to zero before the first call to
@@ -2346,7 +2364,7 @@ int OPTLK       gsfCopyRecords (gsfRecords *target, gsfRecords *source);
  *  GSF_MEMORY_ALLOCATION_FAILED
  */
 
-int OPTLK       gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays);
+int OPTLK       gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays);
 /* Description : This function moves swath bathymetry sonar processing
  *    parameters from internal form to "KEYWORD=VALUE" form.  The internal
  *    form parameters are read from an MB_PARAMETERS data structure maintained
@@ -2373,7 +2391,7 @@ int OPTLK       gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int 
  *     GSF_PARAM_SIZE_FIXED
  */
 
-int OPTLK       gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays);
+int OPTLK       gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays);
 /* Description : This function moves swath bathymetry sonar processing
  *    parameters from external, form to internal form.  The external
  *    "KEYWORD=VALUE" format parameters are read from a processing_params
@@ -2398,7 +2416,7 @@ int OPTLK       gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays);
  *  none.
  */
 
-int OPTLK       gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartship);
+int OPTLK       gsfGetSwathBathyBeamWidths(const gsfRecords *data, double *fore_aft, double *athwartship);
 /* Description : This function returns to the caller the fore-aft and
  *    the port-starboard beam widths in degrees for a swath bathymetry
  *    multibeam sonar, given a gsfRecords data structure which contains
@@ -2420,7 +2438,7 @@ int OPTLK       gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, d
  * Error Conditions : unrecognized sonar id or mode.
  */
 
-int OPTLK gsfIsStarboardPing(gsfRecords *data);
+int OPTLK gsfIsStarboardPing(const gsfRecords *data);
 /* Description : This function uses the sonar specific data union
  *     of a gsfSwathBathymetry ping structure to determine if the ping
  *     is from the starboard arrays of a multibeam installation with
@@ -2472,7 +2490,7 @@ int OPTLK gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, int subreco
  *
  */
 
-int OPTLK gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, double *min_value, double *max_value);
+int OPTLK gsfGetSwathBathyArrayMinMax(const gsfSwathBathyPing *ping, int subrecordID, double *min_value, double *max_value);
 /* Description : This function may be used to obtain the minimum and maximum
  *  supportable values for each of the swath bathymetry arrays.  The minimum
  *  and maximum values are determined based on the scale factors and the array
@@ -2499,7 +2517,7 @@ int OPTLK gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, 
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
  */
 
-char *gsfGetSonarTextName(gsfSwathBathyPing *ping);
+const char *gsfGetSonarTextName(const gsfSwathBathyPing *ping);
 /* Description : This function is used to return the text of the sonar name.
  *
  * Inputs : The GSF ping
@@ -2709,7 +2727,7 @@ int gsfFileContainsMBImagery(int handle, int *status);
  *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
  */
 
-int gsfIsNewSurveyLine(int handle, gsfRecords *rec, double azimuth_change, double *last_heading);
+int gsfIsNewSurveyLine(int handle, const gsfRecords *rec, double azimuth_change, double *last_heading);
 /* Function Name : gsfIsNewSurveyLine
  *
  * Description : This function provides an approach for calling applications
