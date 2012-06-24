@@ -872,7 +872,7 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         }
         else
         {
-            if (gsfError != GSF_READ_TO_END_OF_FILE)
+            if (gsfError != GSF_READ_TO_END_OF_FILE && gsfError != GSF_PARTIAL_RECORD_AT_END_OF_FILE)
             {
                 return(-1);
             }
@@ -1647,7 +1647,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         }
         else
         {
-            if (gsfError != GSF_READ_TO_END_OF_FILE)
+            if (gsfError != GSF_READ_TO_END_OF_FILE && gsfError != GSF_PARTIAL_RECORD_AT_END_OF_FILE)
             {
                 /*  Get rid of the temp files.  */
                 for (i = 0; i < NUM_REC_TYPES; i++)

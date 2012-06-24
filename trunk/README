@@ -28,7 +28,8 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-  Version 5.3.1955       May 16, 2012
+  Version 5.3.1964       June 24, 2012
+* Version 5.3.1955       May 16, 2012
   Version 5.3.1941       March 6, 2012
 * Version 5.3.1917       January 10, 2012
 * Version 5.3.1912       November 19, 2011
@@ -186,10 +187,20 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+-----> 5.3.1964
+
+Added new program mbkongsbergpreprocess, which reads data from a third generation
+Kongsberg multibeam sonar (e.g. EM122, EM302, EM710),  interpolates  the asynchronous
+navigation, heading, and attitude onto the multibeam data, and writes a new file
+with that information correctly embedded in the multibeam  survey  data.  The  input
+files  may  be  in  the  vendor  format  MBF_EM710RAW  (format id 58) or the MB-System
+extended format MBF_EM710MBA (format id 59); the output  files  will  always  be  in
+the  MB-System  extended  format MBF_EM710MBA (format id 59).
+
+Updated GSF library to new release 3.04 from SAIC.
+
 Removed local($[) = 0 initializations from all perl macros for compatibility with the
 current version of perl (some macros were missed when this was done before 5.3.1955).
-
-Added new utility for preprocessing Kongsberg multibeam data.
 
 Fixed problem with mbprocess in which merged roll and pitch data were not applied
 to the bathymetry unless the bathymetry was being recalculated by raytracing.
