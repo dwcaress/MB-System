@@ -7,7 +7,7 @@ reading and writing swath sonar data
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbdefaults\fP [\fB-D\fP\fIpsdisplay\fP \fB-F\fP\fIfbtversion\fP  \fB-I\fP\fIimagedisplay\fP
+\fBmbdefaults\fP [\fB-B\fP\fIfileiobuffer\fP \fB-D\fP\fIpsdisplay\fP \fB-F\fP\fIfbtversion\fP  \fB-I\fP\fIimagedisplay\fP
 \fB-L\fP\fIlonflip\fP \fB-T\fP\fItimegap\fP \fB-U\fP\fIuselockfiles\fP
 \fB-W\fP\fIproject\fP \fB-V -H\fP]
 
@@ -42,6 +42,21 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
   Lamont-Doherty Earth Observatory
 
 .SH OPTIONS
+.TP
+.B \-B
+\fIfileiobuffer\fP
+.br
+Sets the file i/o block buffer size for certain formats (currently formats 88 and 58).
+The \fIfileiobuffer\fP value is in kilobytes, so \fIfileiobuffer\fP = 1000 corresponds
+rougly to a one megabyte buffer.
+This option allows users to optimize i/o speed of certain large and complex data formats
+(e.g Reson 7k and current generation Kongsberg multibeam) by increasing the block buffer
+size from the system default. Making the buffer size larger generally has benefit only
+when reading over a network; this option has little impact for filesystems mounted from
+locally attached hard drives. At MBARI, where our primary data storage is accessed over
+a gigabit ethernet network, setting \fIfileiobuffer\fP = 10000 achieves an 8% run time reduction
+for \fBmbprocess\fP. Default: \fIfileiobuffer\fP = 0, which corresponds to the system
+default.
 .TP
 .B \-D
 \fIpsdisplay\fP
@@ -134,6 +149,7 @@ The output will be:
  project:    none
  fbtversion: 3 (new)
  uselockfiles: 1
+ fileiobuffer: 10000 (use 10000 kB buffer for fread() & fwrite())
 
 Suppose that one just wishes to see what the current default
 parameters are.  The following will suffice:
@@ -149,6 +165,7 @@ The output will be
  project:    none
  fbtversion: 3 (new)
  uselockfiles: 1
+ fileiobuffer: 10000 (use 10000 kB buffer for fread() & fwrite())
 
 .SH SEE ALSO
 \fBmbsystem\fP(l), \fBmbio\fP(l), \fBmbcontour\fP(l),

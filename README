@@ -187,7 +187,10 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
------> 5.3.1964
+-----> 5.3.1965
+
+Altered mbprocess so that navigation shifts and offsets are applied to merged
+navigation. Navigation derived from mbnavadjust is not affected.
 
 Added new program mbkongsbergpreprocess, which reads data from a third generation
 Kongsberg multibeam sonar (e.g. EM122, EM302, EM710),  interpolates  the asynchronous

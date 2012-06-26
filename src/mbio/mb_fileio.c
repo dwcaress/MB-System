@@ -94,7 +94,7 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error)
 		if (fileiobuffer > 0)
 			{
 			/* the buffer size must be a multiple of 512, plus 8 to be efficient */
-			fileiobufferbytes = fileiobuffer * 1024 + 8;
+			fileiobufferbytes = (fileiobuffer * 1024) + 8;
 
 			/* allocate the buffer */
 			buffer_error = MB_ERROR_NO_ERROR;
