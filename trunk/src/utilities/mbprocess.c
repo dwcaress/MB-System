@@ -2174,27 +2174,6 @@ and mbedit edit save files.\n";
 		for (i=0;i<nnav;i++)
 		    ntime[i] += process.mbp_nav_timeshift;
 
-	    /* apply position shift if needed */
-    	    if (process.mbp_nav_shift == MBP_NAV_ON)
-		{
-		for (i=0;i<nnav;i++)
-		    {
-		    mb_coor_scale(verbose,nlat[i],&mtodeglon,&mtodeglat);
-		    headingx = sin(nheading[i] * DTR);
-		    headingy = cos(nheading[i] * DTR);
-		    nlon[i] -= (headingy * mtodeglon
-					* process.mbp_nav_offsetx
-			    	+ headingx * mtodeglon
-					* process.mbp_nav_offsety
-				- process.mbp_nav_shiftlon);
-		    nlat[i] -= (-headingx * mtodeglat
-					* process.mbp_nav_offsetx
-			    	+ headingy * mtodeglat
-					* process.mbp_nav_offsety
-				- process.mbp_nav_shiftlat);
-		    }
-		}
-
 	    /* set up spline interpolation of nav points */
 	    splineflag = 1.0e30;
 	    mb_spline_init(verbose, ntime-1, nlon-1, nnav,
@@ -4954,24 +4933,6 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			mb_get_date(verbose,time_d,time_i);
 			}
 
-		/* apply position shifts if needed */
-    		if (process.mbp_nav_shift == MBP_NAV_ON)
-			{
-			mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
-			headingx = sin(heading * DTR);
-			headingy = cos(heading * DTR);
-			navlon -= (headingy * mtodeglon
-					    * process.mbp_nav_offsetx
-			    	    + headingx * mtodeglon
-					    * process.mbp_nav_offsety
-				    - process.mbp_nav_shiftlon);
-			navlat -= (-headingx * mtodeglat
-					    * process.mbp_nav_offsetx
-			    	    + headingy * mtodeglat
-					    * process.mbp_nav_offsety
-				    - process.mbp_nav_shiftlat);
-			}
-
 		/* interpolate the navigation if desired */
 		if (error == MB_ERROR_NO_ERROR
 			&& process.mbp_nav_mode == MBP_NAV_ON
@@ -5050,43 +5011,6 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			}
 
 	/*--------------------------------------------
-	  handle adjusted navigation merging
-	  --------------------------------------------*/
-
-		/* interpolate the adjusted navigation if desired */
-		if (error == MB_ERROR_NO_ERROR
-			&& process.mbp_navadj_mode >= MBP_NAVADJ_LL
-			&& (kind == MB_DATA_DATA
-			    || kind == MB_DATA_NAV))
-			{
-			/* interpolate adjusted navigation */
-			if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
-			    && time_d >= natime[0]
-			    && time_d <= natime[nanav-1])
-			    {
-			    intstat = mb_spline_interp(verbose,
-					natime-1, nalon-1, nalonspl-1,
-					nanav, time_d, &navlon, &iatime,
-					&error);
-			    intstat = mb_spline_interp(verbose,
-					ntime-1, nalat-1, nalatspl-1,
-					nanav, time_d, &navlat, &iatime,
-					&error);
-			    }
-			else
-			    {
-			    intstat = mb_linear_interp(verbose,
-					natime-1, nalon-1,
-					nanav, time_d, &navlon, &iatime,
-					&error);
-			    intstat = mb_linear_interp(verbose,
-					natime-1, nalat-1,
-					nanav, time_d, &navlat, &iatime,
-					&error);
-			    }
-			}
-
-	/*--------------------------------------------
 	  handle attitude merging
 	  --------------------------------------------*/
 
@@ -5129,6 +5053,28 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			}
 
 	/*--------------------------------------------
+	  handle position shifts
+	  --------------------------------------------*/
+
+		/* apply position shifts if needed */
+    		if (process.mbp_nav_shift == MBP_NAV_ON)
+			{
+			mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+			headingx = sin(heading * DTR);
+			headingy = cos(heading * DTR);
+			navlon -= (headingy * mtodeglon
+					    * process.mbp_nav_offsetx
+			    	    + headingx * mtodeglon
+					    * process.mbp_nav_offsety
+				    - process.mbp_nav_shiftlon);
+			navlat -= (-headingx * mtodeglat
+					    * process.mbp_nav_offsetx
+			    	    + headingy * mtodeglat
+					    * process.mbp_nav_offsety
+				    - process.mbp_nav_shiftlat);
+			}
+
+	/*--------------------------------------------
 	  handle draft correction
 	  --------------------------------------------*/
 
@@ -5145,6 +5091,43 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 				draft = draft * process.mbp_draft_mult + process.mbp_draft_offset;
 			else if (process.mbp_draft_mode == MBP_DRAFT_SET)
 				draft = process.mbp_draft;
+			}
+
+	/*--------------------------------------------
+	  handle adjusted navigation merging
+	  --------------------------------------------*/
+
+		/* interpolate the adjusted navigation if desired */
+		if (error == MB_ERROR_NO_ERROR
+			&& process.mbp_navadj_mode >= MBP_NAVADJ_LL
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV))
+			{
+			/* interpolate adjusted navigation */
+			if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
+			    && time_d >= natime[0]
+			    && time_d <= natime[nanav-1])
+			    {
+			    intstat = mb_spline_interp(verbose,
+					natime-1, nalon-1, nalonspl-1,
+					nanav, time_d, &navlon, &iatime,
+					&error);
+			    intstat = mb_spline_interp(verbose,
+					ntime-1, nalat-1, nalatspl-1,
+					nanav, time_d, &navlat, &iatime,
+					&error);
+			    }
+			else
+			    {
+			    intstat = mb_linear_interp(verbose,
+					natime-1, nalon-1,
+					nanav, time_d, &navlon, &iatime,
+					&error);
+			    intstat = mb_linear_interp(verbose,
+					natime-1, nalat-1,
+					nanav, time_d, &navlat, &iatime,
+					&error);
+			    }
 			}
 
 	/*--------------------------------------------

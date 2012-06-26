@@ -107,7 +107,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "MBDEFAULTS";
 	char help_message[] = "MBDEFAULTS sets and retrieves the /default MBIO control \nparameters stored in the file ~/.mbio_defaults. \nOnly the parameters specified by command line \narguments will be changed; if no ~/.mbio_defaults \nfile exists one will be created.";
-	char usage_message[] = "mbdefaults [-Dpsdisplay -Ffbtversion -Iimagedisplay -Llonflip\n\t-Ttimegap -Wproject -V -H]";
+	char usage_message[] = "mbdefaults [-Bfileiobuffer -Dpsdisplay -Ffbtversion -Iimagedisplay -Llonflip\n\t-Ttimegap -Wproject -V -H]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
