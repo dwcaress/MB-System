@@ -28,7 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-  Version 5.3.1964       June 24, 2012
+  Version 5.3.1966       June 29, 2012
 * Version 5.3.1955       May 16, 2012
   Version 5.3.1941       March 6, 2012
 * Version 5.3.1917       January 10, 2012
@@ -187,7 +187,14 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
------> 5.3.1965
+-----> 5.3.1966
+
+Augmented the i/o module for Reson 7k data to work with data files that do not
+include the 7006 bathymetry records but instead include the raw detection 7027
+records.
+
+Altered mbnavlist so that longitude and latitude values are output with a
+precision about equivalent to 0.1 mm, the same as mblist and mbinfo.
 
 Altered mbprocess so that navigation shifts and offsets are applied to merged
 navigation. Navigation derived from mbnavadjust is not affected.

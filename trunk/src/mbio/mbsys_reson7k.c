@@ -4486,6 +4486,7 @@ int mbsys_reson7k_print_v2rawdetection(int verbose,
 	fprintf(stderr,"%s     detection_flags:            %d\n",first,v2rawdetection->detection_flags);
 	fprintf(stderr,"%s     sampling_rate:              %f\n",first,v2rawdetection->sampling_rate);
 	fprintf(stderr,"%s     tx_angle:                   %f\n",first,v2rawdetection->tx_angle);
+	fprintf(stderr,"%s     reserved:                   ",first);
 	for (i=0;i<64;i++)
 		fprintf(stderr,"%u ",v2rawdetection->reserved[i]);
 	fprintf(stderr,"\n%s     beam	beam_descriptor detection_point rx_angle flags quality uncertainty\n",first);
