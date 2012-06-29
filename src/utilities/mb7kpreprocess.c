@@ -123,6 +123,7 @@
 #define	MB7KPREPROCESS_KLUGE_USEVERTICALDEPTH	1
 #define	MB7KPREPROCESS_KLUGE_ZEROALONGTRACKANGLES	2
 #define	MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION	3
+#define	MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE	4
 static char rcs_id[] = "$Id$";
 
 /*--------------------------------------------------------------------*/
@@ -239,6 +240,8 @@ int main (int argc, char **argv)
 	s7kr_backscatter	*backscatter;
 	s7kr_beam		*beam;
 	s7kr_verticaldepth	*verticaldepth;
+	s7kr_v2detection	*v2detection;
+	s7kr_v2rawdetection	*v2rawdetection;
 	s7kr_image		*image;
 	s7kr_fileheader		*fileheader;
 	s7kr_remotecontrolsettings	*remotecontrolsettings;
@@ -488,7 +491,7 @@ int main (int argc, char **argv)
 	int	kluge_useverticaldepth = MB_NO; /* kluge 1 */
 	int	kluge_zeroalongtrackangles = MB_NO; /* kluge 2 */
 	int	kluge_zeroattitudecorrection = MB_NO; /* kluge 3 */
-
+	int	kluge_kearfottrovnoise = MB_NO; /* kluge 4 */
 	/* MBARI data flag */
 	int	MBARIdata = MB_NO;
 
@@ -497,7 +500,8 @@ int main (int argc, char **argv)
 	double	alpha, beta, theta, phi;
 	double	rr, xx, zz;
 	double	mtodeglon, mtodeglat;
-	double	dx, dy, dist, dt;
+	double	dx, dy, dist, dt, v;
+	double	longitude_offset, latitude_offset;
 	int	j1, j2;
 
 	FILE	*tfp = NULL;
@@ -605,6 +609,10 @@ int main (int argc, char **argv)
 			if (klugemode == MB7KPREPROCESS_KLUGE_ZEROATTITUDECORRECTION)
 				{
 				kluge_zeroattitudecorrection = MB_YES;
+				}
+			if (klugemode == MB7KPREPROCESS_KLUGE_KEARFOTTROVNOISE)
+				{
+				kluge_kearfottrovnoise = MB_YES;
 				}
 			flag++;
 			break;
@@ -3438,6 +3446,33 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 		batht_time_d_new[i] = batht_time_d[i] + batht_time_offset[i];
 		}
 
+	/* remove noise from position data associated with Kearfott INS on an ROV
+		that consists of jumps every two seconds */
+	if (kluge_kearfottrovnoise == MB_YES && ndat_nav > 2)
+		{
+		longitude_offset = 0.0;
+		latitude_offset = 0.0;
+		mb_coor_scale(verbose,dat_nav_lat[0],&mtodeglon,&mtodeglat);
+		for (i=1;i<ndat_nav;i++)
+			{
+			dat_nav_lon[i] -= longitude_offset;
+			dat_nav_lat[i] -= latitude_offset;
+
+			dx = (dat_nav_lon[i] - dat_nav_lon[i-1]) / mtodeglon;
+			dy = (dat_nav_lat[i] - dat_nav_lat[i-1]) / mtodeglat;
+			dt = (dat_nav_time_d[i] - dat_nav_time_d[i-1]);
+			v = sqrt(dx * dx + dy * dy) / dt;
+
+			if (v > 0.5)
+				{
+				longitude_offset += (dat_nav_lon[i] - dat_nav_lon[i-1]);
+				latitude_offset += (dat_nav_lat[i] - dat_nav_lat[i-1]);
+				dat_nav_lon[i] = dat_nav_lon[i-1];
+				dat_nav_lat[i] = dat_nav_lat[i-1];
+				}
+			}
+		}
+
 	/* output ins navigation and attitude data */
 	if (nins > 0 && (verbose > 0 || mode == MB7KPREPROCESS_TIMESTAMPLIST))
 		{
@@ -3852,6 +3887,8 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 			nrec_multibeam++;
 
 			bathymetry = &(istore->bathymetry);
+			v2detection = &(istore->v2detection);
+			v2rawdetection = &(istore->v2rawdetection);
 			if (istore->read_volatilesettings == MB_YES)
 				nrec_volatilesettings++;
 			if (istore->read_matchfilter == MB_YES)
@@ -4494,8 +4531,21 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 /* fprintf(stderr,"i:%d quality:%d range:%f\n",i,bathymetry->quality[i],bathymetry->range[i]); */
 						if ((bathymetry->quality[i] & 15) > 0)
 							{
-							alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr);
-							beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - rollr);
+							if (istore->read_v2rawdetection == MB_YES)
+								{
+								alpha = RTD * pitchr;
+								beta = 90.0 - RTD * (v2rawdetection->rx_angle[i] - rollr);
+								}
+							else if (istore->read_v2detection == MB_YES)
+								{
+								alpha = RTD * (v2detection->angle_y[i] + pitchr);
+								beta = 90.0 - RTD * (v2detection->angle_x[i] - rollr);
+								}
+							else
+								{
+								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr);
+								beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - rollr);
+								}
 							mb_rollpitch_to_takeoff(
 								verbose,
 								alpha, beta,
