@@ -168,7 +168,7 @@ EXTERNAL int	window_height;
 #define	MODEL_MODE_MEAN		1
 #define	MODEL_MODE_DR		2
 #define	MODEL_MODE_INVERT	3
-#define	NUM_FILES_MAX		100
+#define	NUM_FILES_MAX		1000
 
 /*--------------------------------------------------------------------*/
 
