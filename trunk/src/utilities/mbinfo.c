@@ -246,7 +246,8 @@ struct ping
 /* output formats */
 #define FREE_TEXT 	0
 #define JSON 		1
-#define MAX_OUTPUT_FORMAT 1
+#define XML			2
+#define MAX_OUTPUT_FORMAT 2
 
 static char rcs_id[] = "$Id$";
 
@@ -744,6 +745,9 @@ int main (int argc, char **argv)
 			case JSON:
 				strcat(output_file,"_inf.json");
 				break;
+			case XML:
+				strcat(output_file,"_inf.xml");
+				break;
 			case '?':
 				break;
 		}
@@ -760,6 +764,9 @@ int main (int argc, char **argv)
 			break;
 		case JSON:
 			fprintf(output,"{\n");
+			break;
+		case XML:
+			fprintf(output,"<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
 			break;
 		case '?':
 			break;
@@ -1020,6 +1027,28 @@ int main (int argc, char **argv)
 				fprintf(output,"\"attributes\": \"%s\"\n",&format_description[len1]);
 				fprintf(output,"},\n");
 				break;
+			case XML:
+				fprintf(output,"\t<file_info>\n");
+				fprintf(output,"\t\t<swath_data_file>%s</swath_data_file>\n",fileprint);
+				fprintf(output,"\t\t<mbio_data_format_id>%d</mbio_data_format_id>\n",format);
+				len1=strspn(format_description,"Formatname: ");
+				len2=strcspn(&format_description[len1],"\n");
+				strncpy(string,&format_description[len1],len2);
+				fprintf(output,"\t\t<format_name>%s</format_name>\n",string);
+				len1+=len2+1;
+				len1+=strspn(&format_description[len1],"InformalDescription: ");
+				len2=strcspn(&format_description[len1],"\n");
+				strncpy(string,&format_description[len1],len2);
+				fprintf(output,"\t\t<informal_description>%s</informal_description>\n",string);
+				len1+=len2+1;
+				len1+=strspn(&format_description[len1],"Attributes: ");
+				len2=strlen(format_description);
+				format_description[strlen(format_description)-1]='\0';
+				for (len2=len1;len2<=strlen(format_description);len2++)
+					if (format_description[len2]==10)format_description[len2]=' ';
+				fprintf(output,"\t\t<attributes>%s</attributes>\n",&format_description[len1]);
+				fprintf(output,"\t</file_info>\n");
+				break;
 			case '?':
 				errflg++;
 			}
@@ -1094,6 +1123,9 @@ int main (int argc, char **argv)
 								break;
 							case JSON:
 								fprintf(output,"\"comment\":\"%s\",\n",comment);
+								break;
+							case XML:
+								fprintf(output,"\t<comment>%s</comment>\n",comment);
 								break;
 							case '?':
 								break;
@@ -1405,7 +1437,157 @@ int main (int argc, char **argv)
 								meta_draft++;
 								}
 							break;
-								break;
+						case XML:
+							if (imetadata == 0)
+								{
+								fprintf(output,"\t<metadata>\n");
+								imetadata++;
+								}
+							if (strncmp(comment, "METAVESSEL:", 11) == 0)
+								{
+								if (meta_vessel == 0)
+					    			fprintf(output,"\t\t<vessel>%s</vessel>\n", &comment[11]);
+								meta_vessel++;
+								}
+							else if (strncmp(comment, "METAINSTITUTION:", 16) == 0)
+								{
+								if (meta_institution == 0)
+					    			fprintf(output,"\t\t<institution>%s</institution>\n", &comment[16]);
+								meta_institution++;
+								}
+							else if (strncmp(comment, "METAPLATFORM:", 13) == 0)
+								{
+								if (meta_platform == 0)
+					    			fprintf(output,"\t\t<platform>%s</platform>\n", &comment[13]);
+								meta_platform++;
+								}
+							else if (strncmp(comment, "METASONARVERSION:", 17) == 0)
+								{
+								if (meta_sonarversion == 0)
+					    			fprintf(output,"\t\t<sonar_version>%s<sonar_version>\n", &comment[17]);
+								meta_sonarversion++;
+								}
+							else if (strncmp(comment, "METASONAR:", 10) == 0)
+								{
+								if (meta_sonar == 0)
+					    			fprintf(output,"\t\t<sonar>%s</sonar>\n", &comment[10]);
+								meta_sonar++;
+								}
+							else if (strncmp(comment, "METACRUISEID:", 13) == 0)
+								{
+								if (meta_cruiseid == 0)
+					    			fprintf(output,"\t\t<cruise_id>%s</cruise_id>\n", &comment[13]);
+								meta_cruiseid++;
+								}
+							else if (strncmp(comment, "METACRUISENAME:", 15) == 0)
+								{
+								if (meta_cruisename == 0)
+					    			fprintf(output,"\t\t<cruise_name>%s</cruise_name>\n", &comment[15]);
+								meta_cruisename++;
+								}
+							else if (strncmp(comment, "METAPI:", 7) == 0)
+								{
+								if (meta_pi == 0)
+					    			fprintf(output,"\t\t<pi>%s</pi>\n", &comment[7]);
+								meta_pi++;
+								}
+							else if (strncmp(comment, "METAPIINSTITUTION:", 18) == 0)
+								{
+								if (meta_piinstitution == 0)
+					    			fprintf(output,"\t\t<pi_institution>%s</pi_institution>\n", &comment[18]);
+								meta_piinstitution++;
+								}
+							else if (strncmp(comment, "METACLIENT:", 11) == 0)
+								{
+								if (meta_client == 0)
+					    			fprintf(output,"\t\t<client>%s</client>\n", &comment[11]);
+								meta_client++;
+								}
+							else if (strncmp(comment, "METASVCORRECTED:", 16) == 0)
+								{
+								if (meta_svcorrected == 0)
+					    			{
+					    			sscanf(comment, "METASVCORRECTED:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"\t\t<corrected_depths>YES</corrected_depths>\n");
+					    			else
+									fprintf(output,"\t\t<corrected_depths>NO</corrected_depths>\n");
+					    			}
+								meta_svcorrected++;
+								}
+							else if (strncmp(comment, "METATIDECORRECTED:", 18) == 0)
+								{
+								if (meta_tidecorrected == 0)
+					    			{
+					    			sscanf(comment, "METATIDECORRECTED:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"\t\t<tide_corrected>YES</tide_corrected>\n");
+					    			else
+									fprintf(output,"\t\t<tide_corrected>NO</tide_corrected>\n");
+					    			}
+								meta_tidecorrected++;
+								}
+							else if (strncmp(comment, "METABATHEDITMANUAL:", 19) == 0)
+								{
+								if (meta_batheditmanual == 0)
+					    			{
+					    			sscanf(comment, "METABATHEDITMANUAL:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"\t\t<depths_manually_edited>YES</depths_manually_edited>\n");
+					    			else
+									fprintf(output,"\t\t<depths_manually_edited>NO</depths_manually_edited>\n");
+					    			}
+								meta_batheditmanual++;
+								}
+							else if (strncmp(comment, "METABATHEDITAUTO:", 17) == 0)
+								{
+								if (meta_batheditauto == 0)
+					    			{
+					    			sscanf(comment, "METABATHEDITAUTO:%d", &val_int);
+					    			if (val_int == MB_YES)
+									fprintf(output,"\t\t<depths_auto_edited>YES</depths_auto_edited>\n");
+					    			else
+									fprintf(output,"\t\t<depths_auto_edited>NO</depths_auto_edited>\n");
+					    			}
+								meta_batheditauto++;
+								}
+							else if (strncmp(comment, "METAROLLBIAS:", 13) == 0)
+								{
+								if (meta_rollbias == 0)
+					    			{
+					    			sscanf(comment, "METAROLLBIAS:%lf\n", &val_double);
+					    			fprintf(output,"\t\t<roll_bias>%f</roll_bias>\n", val_double);
+					    			}
+								meta_rollbias++;
+								}
+							else if (strncmp(comment, "METAPITCHBIAS:", 14) == 0)
+								{
+								if (meta_pitchbias == 0)
+					    			{
+					    			sscanf(comment, "METAPITCHBIAS:%lf", &val_double);
+					    			fprintf(output,"\t\t<pitch_bias>%f</pitch_bias>\n", val_double);
+					    			}
+								meta_pitchbias++;
+								}
+							else if (strncmp(comment, "METAHEADINGBIAS:", 16) == 0)
+								{
+								if (meta_headingbias == 0)
+					    			{
+					    			sscanf(comment, "METAHEADINGBIAS:%lf", &val_double);
+					    			fprintf(output,"\t\t<heading_bias>%f</heading_bias>\n", val_double);
+					    			}
+								meta_headingbias++;
+								}
+							else if (strncmp(comment, "METADRAFT:", 10) == 0)
+								{
+								if (meta_draft == 0)
+					    			{
+					    			sscanf(comment, "METADRAFT:%lf", &val_double);
+					    			fprintf(output,"\t\t<draft>%fm</draft>\n\t</metadata>\n", val_double);
+					    			}
+								meta_draft++;
+								}
+							break;
 							case '?':
 								break;
 						}
@@ -2216,6 +2398,7 @@ int main (int argc, char **argv)
 				fprintf(output,"Number of Tertiary Sidescan Records:  %8d\n",notice_list_tot[MB_DATA_SIDESCAN3]);
 			if (notice_list_tot[MB_DATA_WATER_COLUMN] > 0)
 				fprintf(output,"Number of Water Column Records:       %8d\n",notice_list_tot[MB_DATA_WATER_COLUMN]);
+				
 			fprintf(output,"Bathymetry Data (%d beams):\n",beams_bath_max);
 			fprintf(output,"  Number of Beams:         %8d\n",
 				ntdbeams);
@@ -2398,6 +2581,130 @@ int main (int argc, char **argv)
 					ssmin,ssmax);
 			fprintf(output,"\n}");
 			break;
+		case XML:
+			fprintf(output,"\t<data_totals>\n");
+			fprintf(output,"\t\t<number_of_records>%d</number_of_records>\n",irec);
+			isbtmrec = notice_list_tot[MB_DATA_SUBBOTTOM_MCS]
+					+ notice_list_tot[MB_DATA_SUBBOTTOM_CNTRBEAM]
+					+ notice_list_tot[MB_DATA_SUBBOTTOM_SUBBOTTOM];
+			if (isbtmrec > 0)
+				fprintf(output,"\t\t<number_of_subbottom_records>%d</number_of_subbottom_records>\n",isbtmrec);
+			if (notice_list_tot[MB_DATA_SIDESCAN2] > 0)
+				fprintf(output,"\t\t<number_of_secondary_sidescan_records>%d</number_of_secondary_sidescan_records>\n",notice_list_tot[MB_DATA_SIDESCAN2]);
+			if (notice_list_tot[MB_DATA_SIDESCAN3] > 0)
+				fprintf(output,"\t\t<number_of_tertiary_sidescan_records>%d</number_of_tertiary_sidescan_records>\n",notice_list_tot[MB_DATA_SIDESCAN3]);
+			if (notice_list_tot[MB_DATA_WATER_COLUMN] > 0)
+				fprintf(output,"\t\t<number_of_water_column_records>%d</number_of_water_column_records>\n",notice_list_tot[MB_DATA_WATER_COLUMN]);
+			fprintf(output,"\t</data_totals>\n");
+
+			fprintf(output,"\t<bathymetry_data>\n");
+			fprintf(output,"\t\t<max_beams_per_ping>%d</max_beams_per_ping>\n",beams_bath_max);
+			fprintf(output,"\t\t<number_beams>%d</number_beams>\n",ntdbeams);
+			fprintf(output,"\t\t<number_good_beams>%d</number_good_beams>\n",ngdbeams); 
+			fprintf(output,"\t\t<percent_good_beams>%.2f</percent_good_beams>\n",ngd_percent);
+			fprintf(output,"\t\t<number_zero_beams>%d</number_zero_beams>\n",nzdbeams); 
+			fprintf(output,"\t\t<percent_zero_beams>%.2f</percent_zero_beams>\n",nzd_percent);
+			fprintf(output,"\t\t<number_flagged_beams>%d</number_flagged_beams>\n",nfdbeams); 
+			fprintf(output,"\t\t<percent_flagged_beams>%.2f</percent_flagged_beams>\n",nfd_percent);
+			fprintf(output,"\t</bathymetry_data>\n");
+			fprintf(output,"\t<amplitude_data>\n");
+			fprintf(output,"\t\t<max_beams_per_ping>%d</max_beams_per_ping>\n",beams_bath_max);
+			fprintf(output,"\t\t<number_beams>%d</number_beams>\n",ntabeams);
+			fprintf(output,"\t\t<number_good_beams>%d</number_good_beams>\n",ngabeams); 
+			fprintf(output,"\t\t<percent_good_beams>%.2f</percent_good_beams>\n",nga_percent);
+			fprintf(output,"\t\t<number_zero_beams>%d</number_zero_beams>\n",nzabeams); 
+			fprintf(output,"\t\t<percent_zero_beams>%.2f</percent_zero_beams>\n",nza_percent);
+			fprintf(output,"\t\t<number_flagged_beams>%d</number_flagged_beams>\n",nfabeams); 
+			fprintf(output,"\t\t<percent_flagged_beams>%.2f</percent_flagged_beams>\n",nfa_percent);
+			fprintf(output,"\t</amplitude_data>\n");
+			fprintf(output,"\t<sidescan_data>\n");
+			fprintf(output,"\t\t<max_pixels_per_ping>%d</max_pixels_per_ping>\n",pixels_ss_max);
+			fprintf(output,"\t\t<number_pixels>%d</number_pixels>\n",ntsbeams);
+			fprintf(output,"\t\t<number_good_pixels>%d</number_good_pixels>\n",ngsbeams); 
+			fprintf(output,"\t\t<percent_good_pixels>%.2f</percent_good_pixels>\n",ngs_percent);
+			fprintf(output,"\t\t<number_zero_pixels>%d</number_zero_pixels>\n",nzsbeams); 
+			fprintf(output,"\t\t<percent_zero_pixels>%.2f</percent_zero_pixels>\n",nzs_percent);
+			fprintf(output,"\t\t<number_flagged_pixels>%d</number_flagged_pixels>\n",nfsbeams); 
+			fprintf(output,"\t\t<percent_flagged_pixels>%.2f</percent_flagged_pixels>\n",nfs_percent);
+			fprintf(output,"\t</sidescan_data>\n");
+
+			fprintf(output,"\t<tnavigation_totals>\n");
+			fprintf(output,"\t\t<total_time_hours>%.4f</total_time_hours>\n",timtot);
+			fprintf(output,"\t\t<total_track_length_km>%.4f</total_track_length_km>\n",distot);
+			fprintf(output,"\t\t<average_speed_km_per_hr>%.4f</average_speed_km_per_hr>\n",spdavg);
+			fprintf(output,"\t\t<average_speed_knots>%.4f</average_speed_knots>\n",spdavg/1.85);
+			fprintf(output,"\t</tnavigation_totals>\n");
+
+			fprintf(output,"\t<start_of_data>\n");
+			fprintf(output,"\t\t<time>%2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d</time>\n",
+				timbeg_i[1],timbeg_i[2],timbeg_i[0],timbeg_i[3],
+				timbeg_i[4],timbeg_i[5],timbeg_i[6],timbeg_j[1]);
+			fprintf(output,"\t\t<time_iso>%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d</time_iso>\n",
+				timbeg_i[0],timbeg_i[1],timbeg_i[2],timbeg_i[3],timbeg_i[4],timbeg_i[5],timbeg_i[6]);
+			if (bathy_in_feet == MB_NO)
+				{
+				fprintf(output,"\t\t<longitude>%.9f</longitude>\n",lonbeg);
+				fprintf(output,"\t\t<latitude>%.9f</latitude>\n",latbeg);
+				fprintf(output,"\t\t<depth_meters>%.4f</depth_meters>\n",bathbeg);
+				}
+			else
+				{
+				fprintf(output,"\t\t<longitude>%.9f</longitude>\n",lonbeg);
+				fprintf(output,"\t\t<latitude>%.9f</latitude>\n",latbeg);
+				fprintf(output,"\t\t<depth_meters>%.4f</depth_meters>\n",bathy_scale*bathbeg);
+				}
+			fprintf(output,"\t\t<speed_km_per_hour>%.4f</speed_km_per_hour>\n",spdbeg);
+			fprintf(output,"\t\t<speed_knots>%.4f</speed_knots>\n",spdbeg/1.85);
+			fprintf(output,"\t\t<heading_degrees>%.4f</heading_degrees>\n",hdgbeg);
+			fprintf(output,"\t\t<sonar_depth_meters>%.4f</sonar_depth_meters>\n",sdpbeg);
+			fprintf(output,"\t\t<sonar_altitude_meters>%.4f</sonar_altitude_meters>\n",altbeg);
+			fprintf(output,"\t</start_of_data>\n");
+
+			fprintf(output,"\t<end_of_data>\n");
+			fprintf(output,"\t\t<time>%2.2d %2.2d %4.4d %2.2d:%2.2d:%2.2d.%6.6d  JD%d</time>\n",
+				timend_i[1],timend_i[2],timend_i[0],timend_i[3],
+				timend_i[4],timend_i[5],timend_i[6],timend_j[1]);
+			fprintf(output,"\t\t<time_iso>%4.4d-%2.2d-%2.2dT%2.2d:%2.2d:%2.2d.%6.6d</time_iso>\n",
+				timend_i[0],timend_i[1],timend_i[2],timend_i[3],timend_i[4],timend_i[5],timend_i[6]);
+			if (bathy_in_feet == MB_NO)
+				{
+				fprintf(output,"\t\t<longitude>%.9f</longitude>\n",lonend);
+				fprintf(output,"\t\t<latitude>%.9f</latitude>\n",latend);
+				fprintf(output,"\t\t<depth_meters>%.4f</depth_meters>\n",bathend);
+				}
+			else
+				{
+				fprintf(output,"\t\t<longitude>%.9f</longitude>\n",lonend);
+				fprintf(output,"\t\t<latitude>%.9f</latitude>\n",latend);
+				fprintf(output,"\t\t<depth_meters>%.4f</depth_meters>\n",bathy_scale*bathend);
+				}
+			fprintf(output,"\t\t<speed_km_per_hour>%.4f</speed_km_per_hour>\n",spdend);
+			fprintf(output,"\t\t<speed_knots>%.4f</speed_knots>\n",spdend/1.85);
+			fprintf(output,"\t\t<heading_degrees>%.4f</heading_degrees>\n",hdgend);
+			fprintf(output,"\t\t<sonar_depth_meters>%.4f</sonar_depth_meters>\n",sdpend);
+			fprintf(output,"\t\t<sonar_altitude_meters>%.4f</sonar_altitude_meters>\n",altend);
+			fprintf(output,"\t</end_of_data>\n");
+			
+			fprintf(output,"\t<limits>\n");
+			fprintf(output,"\t\t<minimum_longitude>%.9f</minimum_longitude>\n",lonmin);
+			fprintf(output,"\t\t<maximum_longitude>%.9f</maximum_longitude>\n",lonmax);
+			fprintf(output,"\t\t<minimum_latitude>%.9f</minimum_latitude>\n",latmin);
+			fprintf(output,"\t\t<maximum_latitude>%.9f</maximum_latitude>\n",latmax);
+			fprintf(output,"\t\t<minimum_sonar_depth>%.4f</minimum_sonar_depth>\n",sdpmin);
+			fprintf(output,"\t\t<maximum_sonar_depth>%.4f</maximum_sonar_depth>\n",sdpmax);
+			fprintf(output,"\t\t<minimum_altitude>%.4f</minimum_altitude>\n",altmin);
+			fprintf(output,"\t\t<maximum_altitude>%.4f</maximum_altitude>\n",altmax);
+			if (ngdbeams > 0 || verbose >= 1)
+				fprintf(output,"\t\t<minimum_depth>%.4f</minimum_depth>\n",bathy_scale*bathmin);
+				fprintf(output,"\t\t<maximum_depth>%.4f</maximum_depth>\n",bathy_scale*bathmax);
+			if (ngabeams > 0 || verbose >= 1)
+				fprintf(output,"\t\t<minimum_amplitude>%.4f</minimum_amplitude>\n",ampmin);
+				fprintf(output,"\t\t<maximum_amplitude>%.4f</maximum_amplitude>\n",ampmax);
+			if (ngsbeams > 0 || verbose >= 1)
+				fprintf(output,"\t\t<minimum_sidescan>%.4f</minimum_sidescan>\n",ssmin);
+				fprintf(output,"\t\t<maximum_sidescan>%.4f</maximum_sidescan>\n",ssmax);
+			fprintf(output,"\t</limits>\n");			
+			break;
 		case '?':
 			break;
 	}
@@ -2433,6 +2740,23 @@ int main (int argc, char **argv)
 						bathy_scale*bathy_scale*bathvartot[i], sigma);
 				}
 				fprintf(output,"]}");
+				break;
+			case XML:
+				fprintf(output,"\t<beam_bathymetry_variances>\n");
+				fprintf(output,"\t\t<pings_averaged>%d</pings_averaged>\n",pings_read);
+                fprintf(output,"\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
+				fprintf(output,"\t\t<values>\n");
+				for (i=0;i<beams_bath_max;i++)
+				{
+					if(i>0)
+					sigma=bathy_scale*sqrt(bathvartot[i]);
+					if(isnan(sigma)) sigma=0;
+                    fprintf(output,"\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n",
+						i,nbathvartot[i],bathy_scale*bathmeantot[i],
+						bathy_scale*bathy_scale*bathvartot[i], sigma);
+				}
+				fprintf(output,"\t\t</values>\n");
+				fprintf(output,"\t</beam_bathymetry_variances>\n");
 				break;
 			case '?':
 				break;
@@ -2470,6 +2794,23 @@ int main (int argc, char **argv)
 				}
 				fprintf(output,"\n]}");
 				break;
+			case XML:
+				fprintf(output,"\t<beam_amplitude_variances>\n");
+				fprintf(output,"\t\t<pings_averaged>%d</pings_averaged>\n",pings_read);
+                fprintf(output,"\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
+				fprintf(output,"\t\t<values>\n");
+				for (i=0;i<beams_amp_max;i++)
+				{
+					if(i>0)
+					sigma=sqrt(ampvartot[i]);
+					if(isnan(sigma)) sigma=0;
+                    fprintf(output,"\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n",
+						i,nampvartot[i],ampmeantot[i],
+						ampvartot[i],sigma);
+				}
+				fprintf(output,"\t\t</values>\n");
+				fprintf(output,"\t</beam_amplitude_variances>\n");
+				break;
 			case '?':
 				break;
 			}
@@ -2505,6 +2846,23 @@ int main (int argc, char **argv)
 						ssvartot[i],sigma);
 				}
 				fprintf(output,"\n]\n}");
+				break;
+			case XML:
+				fprintf(output,"\t<pixel_sidescan_variances>\n");
+				fprintf(output,"\t\t<pings_averaged>%d</pings_averaged>\n",pings_read);
+                fprintf(output,"\t\t<columns>pixel,N,mean,variance,sigma</columns>\n");
+				fprintf(output,"\t\t<values>\n");
+				for (i=0;i<pixels_ss_max;i++)
+				{
+					if(i>0)
+					sigma=sqrt(ssvartot[i]);
+					if(isnan(sigma)) sigma=0;
+                    fprintf(output,"\t\t\t<row>%d,%d,%.2f,%.2f,%.2f</row>\n",
+						i,nssvartot[i],ssmeantot[i],
+						ssvartot[i],sigma);
+				}
+				fprintf(output,"\t\t</values>\n");
+				fprintf(output,"\t</pixel_sidescan_variances>\n");
 				break;
 			case '?':
 				break;
@@ -2594,6 +2952,41 @@ int main (int argc, char **argv)
 				if (notice_total>0) fprintf(output,"\n");
 				fprintf(output,"}\n");
 				fprintf(output,"}");
+				break;
+			case XML:
+				fprintf(output,"\t<data_record_type_notices>\n");
+				for (i=0;i<=MB_DATA_KINDS;i++)
+					{
+					if (notice_list_tot[i] > 0)
+						{
+						mb_notice_message(verbose, i, &notice_msg);
+						fprintf(output, "\t\t<notice_number>%d</notice_number>\n",notice_list_tot[i]);
+						fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_msg);
+						}
+					}
+				fprintf(output,"\t</data_record_type_notices>\n");
+				fprintf(output,"\t<nonfatal_error_notices>\n");
+				for (i=MB_DATA_KINDS+1;i<=MB_DATA_KINDS-(MB_ERROR_MIN);i++)
+					{
+					if (notice_list_tot[i] > 0)
+						{
+						mb_notice_message(verbose, i, &notice_msg);
+						fprintf(output, "\t\t<notice_number>%d</notice_number>\n",notice_list_tot[i]);
+						fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_msg);
+						}
+					}
+				fprintf(output,"\t</nonfatal_error_notices>\n");
+				fprintf(output,"\t<problem_notices>\n");
+				for (i=MB_DATA_KINDS-(MB_ERROR_MIN)+1;i<MB_NOTICE_MAX;i++)
+					{
+					if (notice_list_tot[i] > 0)
+						{
+						mb_notice_message(verbose, i, &notice_msg);
+						fprintf(output, "\t\t<notice_number>%d</notice_number>\n",notice_list_tot[i]);
+						fprintf(output, "\t\t<notice_messsage>%s</notice_messsage>\n", notice_msg);
+						}
+					}
+				fprintf(output,"\t</problem_notices>\n");
 				break;
 			case '?':
 				break;
