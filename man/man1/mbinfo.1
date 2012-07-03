@@ -51,7 +51,9 @@ option of \fBmbinfo\fP, or the \fB-N\fP and \fB-O\fP options of
 Data archives use metadata harvesting tools that often work better with
 information structured for machine parsing rather than for easy
 reading by humans. To output a variant of "*.inf" files in the JSON
-format, use the \fB-X\fP\fI1\fP option.
+format (with "_inf.json" suffixes), use the \fB-X\fP\fI1\fP option.
+Similarly, specifying the \fB-X\fP\fI2\fP option will result in XML
+output in files with "_xml.inf" suffixes.
 
 The program \fBmbprocess\fP can insert metadata recognized
 and printed by \fBmbinfo\fP. These metadata include items
@@ -271,6 +273,10 @@ reading. If this option is given with \fIoutputformat\fP=1, then the
 output will be in the JSON format. If the \fB-O\fP option is used to
 explicitly make "*.inf" files, then the output will be JSON and the output
 filenames will be named using the original data file path with an "_inf.json"
+suffix appended. If this option is given with \fIoutputformat\fP=2, then the
+output will be in the XML format. If the \fB-O\fP option is used to
+explicitly make "*.inf" files, then the output will be XML and the output
+filenames will be named using the original data file path with an "_inf.xml"
 suffix appended.
 
 .SH EXAMPLES
