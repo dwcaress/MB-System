@@ -113,8 +113,8 @@
 #include "../../include/mb_swap.h"
 
 
-#define MB_DEBUG 1
-#define MB_DEBUG2 1
+/* #define MB_DEBUG 1 */
+/* #define MB_DEBUG2 1 */
 
 /* set up byte swapping scenario */
 #ifdef DATAINPCBYTEORDER
