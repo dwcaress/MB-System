@@ -759,11 +759,11 @@ int main (int argc, char **argv)
 				offset_sonar_x, offset_sonar_y, 
 				offset_sonar_z, offset_sonar_t);
 	fprintf(stdout, "     MRU:   %8.3f %8.3f %8.3f %8.3f\n",
-				offset_sonar_x, offset_sonar_y, 
-				offset_sonar_z, offset_sonar_t);
+				offset_mru_x, offset_mru_y, 
+				offset_mru_z, offset_mru_t);
 	fprintf(stdout, "     Nav:   %8.3f %8.3f %8.3f %8.3f\n",
-				offset_sonar_x, offset_sonar_y, 
-				offset_sonar_z, offset_sonar_t);
+				offset_nav_x, offset_nav_y, 
+				offset_nav_z, offset_nav_t);
 	
 	nrec_POS_tot = 0;
 	nrec_POSunused_tot = 0;
