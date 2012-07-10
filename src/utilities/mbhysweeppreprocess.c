@@ -68,7 +68,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mbhysweeppreprocess";
 	char help_message[] =  "mbhysweeppreprocess reads a Hysweep HSX format file, interpolates the\nasynchronous navigation and attitude onto the multibeam data, \nand writes a new HSX file with that information correctly embedded\nin the multibeam data.";
-	char usage_message[] = "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias -Dsonardepthfile -Idatalist -Jprojection  -L -Mnavformat -Nnavfile -Ttimelag -H -V]";
+	char usage_message[] = "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias -Dsonardepthfile -Idatalist -L -Mnavformat -Nnavfile -Pprojection -Ttimelag -H -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
