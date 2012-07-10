@@ -94,27 +94,6 @@ data file should be followed by a data format identifier, e.g.:
 This program only reads Hysweep HSX format data files (\fBMBIO\fP
 format 201).
 .TP
-.B \-J
-\fIprojection\fP 
-.br
-The Hypack and Hysweep software packages operate with navigation in a user-defined
-projected coordinate system. Resultantly, HSX format files contain positions in a
-projected coordinate system rather than longitude and latitude in geographic 
-coordinates. Generally, the HSX files do not contain any description of the projection
-used to obtain the eastings and northings in those files. This option allows a
-user to specifiy the projection used to translate the eastings and northings back
-into longitude and latitude. If this option is not specified, \fBMB-System\fP will 
-assume the data are associated with UTM zone 1 north. The projection identifier must
-conform to the same usage as with projections specified for \fBmbgrid\fP. 
-For  instance, to fully specify a particular northern UTM zone, set projection = UTMXXN 
-where XX gives the UTM zone (defined from 01 to 60). As an example, a northern UTM 
-zone 12 projection can be specified using -JUTM12N.  Southern UTM zones are specified as
-UTMXXS. The European Petroleum Survey Group (EPSG) has defined a large number of PCS's 
-used worldwide and assigned number id's to each; one can also specify the northern 
-UTM zone 12 projection using its EPSG designation, or -Jepsg32612. The complete list
-of projected coordinate systems supported by \fBMB-System\fP is given in the \fBmbgrid\fP
-manual page.
-.TP
 .B \-L
 .br
 This option causes the program to list the timetags of bathymetry,
@@ -146,6 +125,27 @@ in the output format 201 data. Any pre-existing navigation data records will
 remain unchanged in the data stream. However, the HSX file header will be altered
 to show the newly merged data as "enabled" and the original, asynchronous data
 as not enabled.
+.TP
+.B \-P
+\fIprojection\fP 
+.br
+The Hypack and Hysweep software packages operate with navigation in a user-defined
+projected coordinate system. Resultantly, HSX format files contain positions in a
+projected coordinate system rather than longitude and latitude in geographic 
+coordinates. Generally, the HSX files do not contain any description of the projection
+used to obtain the eastings and northings in those files. This option allows a
+user to specifiy the projection used to translate the eastings and northings back
+into longitude and latitude. If this option is not specified, \fBMB-System\fP will 
+assume the data are associated with UTM zone 1 north. The projection identifier must
+conform to the same usage as with projections specified for \fBmbgrid\fP. 
+For  instance, to fully specify a particular northern UTM zone, set projection = UTMXXN 
+where XX gives the UTM zone (defined from 01 to 60). As an example, a northern UTM 
+zone 12 projection can be specified using -PUTM12N.  Southern UTM zones are specified as
+UTMXXS. The European Petroleum Survey Group (EPSG) has defined a large number of PCS's 
+used worldwide and assigned number id's to each; one can also specify the northern 
+UTM zone 12 projection using its EPSG designation, or -Pepsg32612. The complete list
+of projected coordinate systems supported by \fBMB-System\fP is given in the \fBmbgrid\fP
+manual page.
 .TP
 .B \-T
 \fItimelag\fP
