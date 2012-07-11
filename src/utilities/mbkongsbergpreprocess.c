@@ -1560,6 +1560,9 @@ int main (int argc, char **argv)
 		/* count the record that was just read */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
+			/* get survey data structure */
+			ping = (struct mbsys_simrad3_ping_struct *) istore->ping;
+
 			nrec_0xE5_bathymetry_mbari59++;
 			if (ping->png_raw4_read == MB_YES)
 				nrec_0x4E_rawbeamN++;
