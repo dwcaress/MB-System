@@ -2398,7 +2398,7 @@ int main (int argc, char **argv)
 				fprintf(output,"Number of Tertiary Sidescan Records:  %8d\n",notice_list_tot[MB_DATA_SIDESCAN3]);
 			if (notice_list_tot[MB_DATA_WATER_COLUMN] > 0)
 				fprintf(output,"Number of Water Column Records:       %8d\n",notice_list_tot[MB_DATA_WATER_COLUMN]);
-				
+
 			fprintf(output,"Bathymetry Data (%d beams):\n",beams_bath_max);
 			fprintf(output,"  Number of Beams:         %8d\n",
 				ntdbeams);
@@ -2600,31 +2600,31 @@ int main (int argc, char **argv)
 			fprintf(output,"\t<bathymetry_data>\n");
 			fprintf(output,"\t\t<max_beams_per_ping>%d</max_beams_per_ping>\n",beams_bath_max);
 			fprintf(output,"\t\t<number_beams>%d</number_beams>\n",ntdbeams);
-			fprintf(output,"\t\t<number_good_beams>%d</number_good_beams>\n",ngdbeams); 
+			fprintf(output,"\t\t<number_good_beams>%d</number_good_beams>\n",ngdbeams);
 			fprintf(output,"\t\t<percent_good_beams>%.2f</percent_good_beams>\n",ngd_percent);
-			fprintf(output,"\t\t<number_zero_beams>%d</number_zero_beams>\n",nzdbeams); 
+			fprintf(output,"\t\t<number_zero_beams>%d</number_zero_beams>\n",nzdbeams);
 			fprintf(output,"\t\t<percent_zero_beams>%.2f</percent_zero_beams>\n",nzd_percent);
-			fprintf(output,"\t\t<number_flagged_beams>%d</number_flagged_beams>\n",nfdbeams); 
+			fprintf(output,"\t\t<number_flagged_beams>%d</number_flagged_beams>\n",nfdbeams);
 			fprintf(output,"\t\t<percent_flagged_beams>%.2f</percent_flagged_beams>\n",nfd_percent);
 			fprintf(output,"\t</bathymetry_data>\n");
 			fprintf(output,"\t<amplitude_data>\n");
 			fprintf(output,"\t\t<max_beams_per_ping>%d</max_beams_per_ping>\n",beams_bath_max);
 			fprintf(output,"\t\t<number_beams>%d</number_beams>\n",ntabeams);
-			fprintf(output,"\t\t<number_good_beams>%d</number_good_beams>\n",ngabeams); 
+			fprintf(output,"\t\t<number_good_beams>%d</number_good_beams>\n",ngabeams);
 			fprintf(output,"\t\t<percent_good_beams>%.2f</percent_good_beams>\n",nga_percent);
-			fprintf(output,"\t\t<number_zero_beams>%d</number_zero_beams>\n",nzabeams); 
+			fprintf(output,"\t\t<number_zero_beams>%d</number_zero_beams>\n",nzabeams);
 			fprintf(output,"\t\t<percent_zero_beams>%.2f</percent_zero_beams>\n",nza_percent);
-			fprintf(output,"\t\t<number_flagged_beams>%d</number_flagged_beams>\n",nfabeams); 
+			fprintf(output,"\t\t<number_flagged_beams>%d</number_flagged_beams>\n",nfabeams);
 			fprintf(output,"\t\t<percent_flagged_beams>%.2f</percent_flagged_beams>\n",nfa_percent);
 			fprintf(output,"\t</amplitude_data>\n");
 			fprintf(output,"\t<sidescan_data>\n");
 			fprintf(output,"\t\t<max_pixels_per_ping>%d</max_pixels_per_ping>\n",pixels_ss_max);
 			fprintf(output,"\t\t<number_pixels>%d</number_pixels>\n",ntsbeams);
-			fprintf(output,"\t\t<number_good_pixels>%d</number_good_pixels>\n",ngsbeams); 
+			fprintf(output,"\t\t<number_good_pixels>%d</number_good_pixels>\n",ngsbeams);
 			fprintf(output,"\t\t<percent_good_pixels>%.2f</percent_good_pixels>\n",ngs_percent);
-			fprintf(output,"\t\t<number_zero_pixels>%d</number_zero_pixels>\n",nzsbeams); 
+			fprintf(output,"\t\t<number_zero_pixels>%d</number_zero_pixels>\n",nzsbeams);
 			fprintf(output,"\t\t<percent_zero_pixels>%.2f</percent_zero_pixels>\n",nzs_percent);
-			fprintf(output,"\t\t<number_flagged_pixels>%d</number_flagged_pixels>\n",nfsbeams); 
+			fprintf(output,"\t\t<number_flagged_pixels>%d</number_flagged_pixels>\n",nfsbeams);
 			fprintf(output,"\t\t<percent_flagged_pixels>%.2f</percent_flagged_pixels>\n",nfs_percent);
 			fprintf(output,"\t</sidescan_data>\n");
 
@@ -2684,7 +2684,7 @@ int main (int argc, char **argv)
 			fprintf(output,"\t\t<sonar_depth_meters>%.4f</sonar_depth_meters>\n",sdpend);
 			fprintf(output,"\t\t<sonar_altitude_meters>%.4f</sonar_altitude_meters>\n",altend);
 			fprintf(output,"\t</end_of_data>\n");
-			
+
 			fprintf(output,"\t<limits>\n");
 			fprintf(output,"\t\t<minimum_longitude>%.9f</minimum_longitude>\n",lonmin);
 			fprintf(output,"\t\t<maximum_longitude>%.9f</maximum_longitude>\n",lonmax);
@@ -2703,7 +2703,7 @@ int main (int argc, char **argv)
 			if (ngsbeams > 0 || verbose >= 1)
 				fprintf(output,"\t\t<minimum_sidescan>%.4f</minimum_sidescan>\n",ssmin);
 				fprintf(output,"\t\t<maximum_sidescan>%.4f</maximum_sidescan>\n",ssmax);
-			fprintf(output,"\t</limits>\n");			
+			fprintf(output,"\t</limits>\n");
 			break;
 		case '?':
 			break;

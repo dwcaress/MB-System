@@ -154,7 +154,7 @@ int mb_error(int verbose, int error, char **message)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_notice_log_datatype(int verbose, void *mbio_ptr, 
+int mb_notice_log_datatype(int verbose, void *mbio_ptr,
 				int data_id)
 {
 	char	*function_name = "mb_notice_log_datatype";
@@ -199,7 +199,7 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_notice_log_error(int verbose, void *mbio_ptr, 
+int mb_notice_log_error(int verbose, void *mbio_ptr,
 				int error_id)
 {
 	char	*function_name = "mb_notice_log_error";
@@ -244,7 +244,7 @@ int mb_notice_log_error(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_notice_log_problem(int verbose, void *mbio_ptr, 
+int mb_notice_log_problem(int verbose, void *mbio_ptr,
 				int problem_id)
 {
 	char	*function_name = "mb_notice_log_problem";
@@ -289,7 +289,7 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_notice_get_list(int verbose, void *mbio_ptr, 
+int mb_notice_get_list(int verbose, void *mbio_ptr,
 				int *notice_list)
 {
 	char	*function_name = "mb_notice_get_list";

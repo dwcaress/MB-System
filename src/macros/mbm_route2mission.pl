@@ -284,7 +284,7 @@ if ($altitudearg)
 	if ($altitudearg =~ /^\S+\/\S+\/\S+\/\S+/)
 		{
 		($altitudemin, $altitudeabort, $altitudedesired, $altitudedesired2)
-			= $altitudearg =~ /^(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+			= $altitudearg =~ /^(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 		$deltadepthrestart = $altitudemin - $altitudeabort;
 		}
 	elsif ($altitudearg =~ /^\S+\/\S+\/\S+/)
@@ -1383,6 +1383,7 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 			{
 			$sbp_duration = 300.0;
 			}
+
 
 		# do ascend, gps, descend at line starts and ends if specified
 		if (($iwaypoint != $nwaypoints - 1)

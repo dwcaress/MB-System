@@ -1,10 +1,10 @@
-.TH mbsystem 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbsystem 1 "7 July 2012" "MB-System 5.3" "MB-System 5.3"
 .SH NAME
-\fBmbsystem\fP - A set of utilities for manipulating and 
+\fBmbsystem\fP - A set of utilities for manipulating and
 processing swath sonar bathymetry, amplitude, and sidescan data.
 
 .SH VERSION
-Version 5.1
+Version 5.3
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -27,31 +27,23 @@ tools for editing swath bathymetry, editing navigation, modeling bathymetry calc
 adjusting survey navigation.
 
 The acronym MB stands for MultiBeam; this reflects the fact that the early development of
-\fBMB-System\fP focused on processing deep sea data from multibeam sonars. However, \fBMB-System\fP
-now supports several data formats from sidescan and interferometric sonars and works with data
-from all depth ranges. 
+\fBMB-System\fP focused on processing deep sea bathymetry data from ship-mounted multibeam sonars. However, \fBMB-System\fP
+now supports several data formats from sidescan and interferometric sonars and works with sonar data
+that map the seafloor at scales from centimeters to kilometers.
 
-The National Science Foundation (NSF) has been the primary supporter of \fBMB-System\fP
-development. NSF initially provided grants to the authors at the Lamont-Doherty Earth
-Observatory (L-DEO) of Columbia University in 1993 (two years), and 1995 (five years). 
-SeaBeam Instruments also contributed significant effort from 1994 to 1999. Since Caress 
-moved to the Monterey Bay Aquarium Research  Institute (MBARI) in 1998, NSF has continued 
-support through two five year grants (1999-2005 & 2006-2011) to both Caress at MBARI and Chayes 
-at L-DEO. The Packard Foundation matches the NSF support to Caress at MBARI.
-
-The original NSF mandate was to create a set of generic tools which would work with all of the
-sonar data used in NSF-supported projects. Not surprisingly, the core of the \fBMB-System\fP user
-community consists of NSF-supported researchers at U.S. institutions such as the
+The original National Science Foundation (NSF) mandate in 1993 was to create a set of generic tools which would work with all of the
+sonar data collected on U.S. academic research vessels in NSF-supported projects. Not surprisingly, the early core of the \fBMB-System\fP user
+community consisted of NSF-supported researchers at U.S. institutions such as the
 Lamont-Doherty Earth Observatory, the Scripps Institution of Oceanography, and the Woods
-Hole Oceanographic Institution. However, \fBMB-System\fP has also come to be used widely in the
-international marine geological community. 
+Hole Oceanographic Institution. However, in recent years \fBMB-System\fP has also come to be used widely in the
+international oceanographic community and in the marine technology industry.
 
 The \fBMB-System\fP source code is distributed under the GNU General Public License as formulated
 by the GNU Project. MB-System installation depends on some other software packages (e.g.
 GMT and netCDF), all of which are freely available as source code.
 
 .SH COPYRIGHT AND LICENSING
-\fBMB-System\fP Copyright (C) 1993-2004 by
+\fBMB-System\fP Copyright (C) 1993-2012 by
 .br
 David W. Caress (caress@mbari.org)
     Monterey Bay Aquarium Research Institute
@@ -66,23 +58,23 @@ All Rights Reserved
 All Wrongs Remembered
 
 The MB-System source code is distributed under the GNU General Public License as formulated
-by the GNU Project. Previous MB-System distributions have been described as "public domain",
-which meant there was no restrictions whatsoever on the use of the code. We have now adopted
+by the GNU Project. Early MB-System distributions were described as "public domain",
+which meant there was no restrictions whatsoever on the use of the code. We adopted
 the more restrictive GNU GPL license in order to insure that anyone who distributes software
 based in whole or in part on MB-System also distributes the modified MB-System source code
-and any additional source code. 
+and any additional source code.
 
 The GNU GPL also prohibits the distribution of proprietary executables linked with
 MB-System libraries unless the source code is also distributed. We waive this restriction on
 distributing proprietary compiled programs for specific software products if and only if those
 software products meet the following two conditions:
 .RS
-.HP 
-1) The software product was created, sold, and delivered to customers using source code 
-derived from MB-System release 4.6 distributions. 
+.HP
+1) The software product was created, sold, and delivered to customers using source code
+derived from MB-System release 4.6 distributions.
 .br
-.HP 
-2) The software product was sold and delivered to customers prior to January 1, 2001. 
+.HP
+2) The software product was sold and delivered to customers prior to January 1, 2001.
 .RE
 
 .SH HISTORY
@@ -103,7 +95,7 @@ SeaBeam Instruments and Antarctic Support Associates provided additional support
 to the new SeaBeam 2100 series of sonars. A considerably enhanced \fBMB-System\fP version
 4.0 was released on October 22, 1994; this release followed an almost complete rewrite of
 the underlying source code. The new capabilities included support for sidescan as well as
-bathymetry data and support for data from a number of very different sonars. 
+bathymetry data and support for data from a number of very different sonars.
 
 The National Science Foundation funded a five year effort begun in 1995 to maintain and
 further develop \fBMB-System\fP. From 1994 to 1997, SeaBeam Instruments (a major
@@ -124,12 +116,12 @@ generating data products that could be imported directly into GIS software packa
 The National Science Foundation has continued to support \fBMB-System\fP development through
 additional five year grants (2001-2006 & 2006-2011) to MBARI and
 L-DEO. The Packard Foundation matches the NSF support to Caress at MBARI. The version 5.0 release,
-of which this documentation is a part, incorporates yet another substantial rewrite of the
+incorporated another substantial rewrite of the
 underlying code as well as providing significant new capabilities.
 
 .SH WHAT'S NEW ABOUT VERSION 5
-The version 5.0 release of \fBMB-System\fP includes a number of changes and improvements relative
-to the version 4 releases. The most significant changes include:
+The version 5.0 release of \fBMB-System\fP included a number of changes and improvements relative
+to the version 4 releases. The most significant changes included:
 
 .SS A new approach to managing data processing.
 .IP \(bu 4
@@ -140,96 +132,96 @@ files. \fBMB-System\fP version 5.0 features the integration of the editing and a
 tools with a single program, mbprocess, that outputs processed data files. The new
 "parallel" processing scheme covers bathymetry data processing, but does not yet
 incorporate the sidescan processing capabilities. All of the old tools and capabilities
-are still part of the distribution. 
+are still part of the distribution.
 .IP \(bu 4
 Recursive datalists. The lists of data files used by gridding and plotting programs can
-now be recursive, making it simpler to manage data from many different surveys. 
+now be recursive, making it simpler to manage data from many different surveys.
 .IP \(bu 4
 Automatic format identification. \fBMB-System\fP programs will now attempt to
-automatically identify the swath data format based on the filename suffix. 
+automatically identify the swath data format based on the filename suffix.
 .IP \(bu 4
 Ancillary data files. Many common \fBMB-System\fP tasks (e.g. swath plotting
 and gridding) can be accomplished more rapidly using ancillary data files containing
 file statistics (".inf" files), quickly read bathymetry (".fbt" files), and
 (".fnv") files. Each of these files is named by adding the indicated four character
 suffix to the original swath data filename. The ".inf" files are created by directing
-the output of \fBmbinfo\fP to a file. The ".fbt" files are creating by using 
+the output of \fBmbinfo\fP to a file. The ".fbt" files are creating by using
 \fBmbcopy\fP to extract the bathymetry into a format 71 file. The ".fnv" files
 are created using \fBmblist\fP to create a text navigation list.
-These ancillary files are automatically created together using the 
+These ancillary files are automatically created together using the
 program \fBmbdatalist\fP.
 
 .SS New tools.
 .IP \(bu 4
 \fBmbnavadjust\fP. This new tool allows users to adjust poorly navigated surveys by
 matching features in overlapping swathes. It is particularly useful for processing
-surveys conducted from submerged platforms. 
+surveys conducted from submerged platforms.
 .IP \(bu 4
 \fBmbprocess\fP. This new tool performs a variety of processing tasks and produces a
 single output processed swath data file. The program mbprocess can apply
 bathymetry edits from mbedit and mbclean, navigation edits from mbnavedit, sound
-velocity profile changes from mbvelocitytool, and a variety of other corrections. 
+velocity profile changes from mbvelocitytool, and a variety of other corrections.
 .IP \(bu 4
 \fBmbset\fP. This new tool allows users to create and modify the parameter files used to
-control the operation of mbprocess. 
+control the operation of mbprocess.
 .IP \(bu 4
 \fBmbdatalist\fP. This new tool allows users to list the files referenced by
 a recursive datalist structure. It can also be used to create the ancillary ".inf",
 ".fbt", and ".fnv" files for all of the data files referenced in a recursive datalist
-structure. 
+structure.
 .IP \(bu 4
 \fBmbsvplist\fP. This new tool lists water sound velocity profiles embedded
-in swath data files, creating secondary files that 
+in swath data files, creating secondary files that
 can be read into MBvelocitytool.
 .IP \(bu 4
 \fBmbareaclean\fP. This new tool identifies and flags artifacts in swath sonar
 bathymetry data within a specified area of interest. The
 area is divided into a grid with square cells or bins, and the
 data are grouped according to these bins. Once all
-of  data  are read, statistical tests are applied 
+of  data  are read, statistical tests are applied
 to the soundings within each bin.
 
 .SS Support for Projected Coordinate Systems.
 .IP \(bu 4
 \fBMB-System\fP now incorporates the source code for the PROJ.4 Cartographic Projections library,
 providing support for (apparently) all commonly used geodetic coordinate systems.
-\fBPROJ.4\fP was developed by Gerald Evenden (then of the USGS), and was obtained from 
+\fBPROJ.4\fP was developed by Gerald Evenden (then of the USGS), and was obtained from
 the www.remotesensing.org website.
 .IP \(bu 4
 A large number of commonly used projected coordinate systems (e.g. UTM) are defined
 in a file (mbsystem/share/projections.dat) distributed with \fBMB-System\fP. These include
-all of the standard UTM zones, all of the standard state plate coordinate systems, and 
+all of the standard UTM zones, all of the standard state plate coordinate systems, and
 most of the European Petroleum Survey Group (EPSG) coordinate systems (also including UTM).
 .IP \(bu 4
 \fBMB-System\fP can now handle swath data that is navigated in a supported projected
 coordinate system. In particular, data files that are navigated with UTM eastings and
-northings instead of longitude and latitude can now be plotted and processed with 
+northings instead of longitude and latitude can now be plotted and processed with
 \fBMB-System\fP.
 .IP \(bu 4
-The programs \fBmbgrid\fP and \fBmbmosaic\fP can now output grids and mosaics in any of 
+The programs \fBmbgrid\fP and \fBmbmosaic\fP can now output grids and mosaics in any of
 the projected coordinate systems specified in mbsystem/share/projections.dat.
 .IP \(bu 4
 The TIFF images generated with \fBmbm_grdtiff\fP and \fBmbgrdtiff\fP now fully conform
 to the GeoTIFF standard, providing that the source grids or mosaics were generated
 using \fBmbgrid\fP or \fBmbmosaic\fP in either Geographic coordinates, UTM coordinates,
 or any of the EPSG coordinate systems specified in the projections.dat file. This means,
-for instance, that GeoTIFF images generated with \fBmbgrdtiff\fP will be properly 
+for instance, that GeoTIFF images generated with \fBmbgrdtiff\fP will be properly
 georeferenced when they are imported into ESRI \fBArcGIS\fP or other GIS packages.
 
 .SS Restructuring the code.
 .IP \(bu 4
-All of the C code now conforms to the ANSI C standard. 
+All of the C code now conforms to the ANSI C standard.
 .IP \(bu 4
 The underlying input/output library (\fBMBIO\fP) has been substantially rewritten. The
 structure has been streamlined, simplifying both future development and support of
-the existing code. The \fBMBIO\fP API has been greatly modified. 
+the existing code. The \fBMBIO\fP API has been greatly modified.
 
-.SS Handling of old Simrad multibeam data. 
+.SS Handling of old Simrad multibeam data.
 .IP \(bu 4
 Vendor format data from the old Simrad multibeams (pre-1997 sonars) are now
 supported by a single format id (51) rather than a separate format id for each sonar
 model. The old format id's are automatically aliased to 51, so existing shellscripts
-will continue to work. 
+will continue to work.
 .IP \(bu 4
 MB-System no longer supports beam flagging in format 51 data. The use of mbedit and mbclean on format 51
 data will cause the flagged beams to be irrevocably nulled. Previous versions of MB-System used the highest bit
@@ -237,13 +229,13 @@ in the depth values to represent beam flags because no Simrad data seemed to use
 data with depth values using the full bit-range, conflicting with the old beam flagging scheme. We recommend
 that old Simrad data be translated to the extended processing format (57) which contains proper beam flags and
 supports all processing functions. Format 57 is also used for processing data from the current Simrad multibeam
-sonars. 
+sonars.
 .IP \(bu 4
 Sidescan data from old Simrad multibeams (pre-1997 sonars) are now handled in the same manner as data from
 the newer sonars (e.g. EM3000, EM3000, EM120). The raw samples in the vendor data format are binned,
 averaged, and interpolated into a 1024 pixel sidescan swath. This binned sidescan is not saved in the vendor
 format, so (as above) it is recommended that the data be translated to an extended format (57) that stores both
-bathymetry beam flags and processed sidescan. 
+bathymetry beam flags and processed sidescan.
 
 .SS Streamlining of MB-System Default Parameters.
 .IP \(bu 4
@@ -262,31 +254,31 @@ line arguments.
 
 .SS New Data Formats.
 .IP \(bu 4
-Furuno HS10 multibeam bathymetry is supported as format 171. 
+Furuno HS10 multibeam bathymetry is supported as format 171.
 .IP \(bu 4
 SeaBeam 2120 multibeam data in the L3 Communications XSE format are supported as format 94 (already used
-to support Elac Bottomchart MkII XSE data). 
+to support Elac Bottomchart MkII XSE data).
 .IP \(bu 4
 Raw STN Atlas multibeam data generated by the upgraded Hydrosweep DS2 multibeam on the R/V Ewing are
-supported by read-only format 182. Processing is supported using the augmented read-write format 183. 
+supported by read-only format 182. Processing is supported using the augmented read-write format 183.
 .IP \(bu 4
 The IFREMER netCDF multibeam archiving data format is supported as format 75. Similarly, the IFREMER
-netCDF navigation archiving data format is supported as format 167. 
+netCDF navigation archiving data format is supported as format 167.
 .IP \(bu 4
 The STN Atlas processing data format SURF is supported as format 181. At
 present, SURF is supported as a read-only format. This allows plotting and gridding
 of the SURF data, but not processing. Writing or translating the SURF data to
 allow processing will be supported in a later version.
 .IP \(bu 4
-The Hawaii Mapping Research Group's new MR1 format is supported as format 64. 
-This format is used to disseminate data from both the HMRG 
-interferometric sonars (e.g. MR1) and the WHOI DSL 120 
-deep-towed inteferometric sonar. This format has been 
-supported by including the code for the HMRG library libmr1pr 
-in the \fBMB-System MBIO\fP library. Thanks to Roger Davis and HMRG for 
+The Hawaii Mapping Research Group's new MR1 format is supported as format 64.
+This format is used to disseminate data from both the HMRG
+interferometric sonars (e.g. MR1) and the WHOI DSL 120
+deep-towed inteferometric sonar. This format has been
+supported by including the code for the HMRG library libmr1pr
+in the \fBMB-System MBIO\fP library. Thanks to Roger Davis and HMRG for
 making the code available under the GPL.
 .IP \(bu 4
-The Edgetech Jstar format for sidescan and subbottom data is 
+The Edgetech Jstar format for sidescan and subbottom data is
 now supported as formats 132 and 133.
 
 .SH THE NEW VERSION 5 DATA PROCESSING STRUCTURE
@@ -300,10 +292,10 @@ the programs are used does matter. However, one consequence of serial
 processing has been that processing data frequently results in a large
 number of intermediate data files. For instance, if
 an EM300 data file called "mbari_1998_524.mb57" has
-spikes in the bathymetry, outliers in the navigation, and 
+spikes in the bathymetry, outliers in the navigation, and
 the bathymetry has been calculated using an incorrect model
 for the water sound speed structure, users of \fBMB-System\fP
-would previously have processed it with a sequence 
+would previously have processed it with a sequence
 something like this:
 
      1) Run \fBmbclean\fP to automatically flag
@@ -352,13 +344,13 @@ something like this:
             Output: mbari_1998_524_cenbsc.mb57
 
 The result of this processing includes the input swath
-data file, the final swath data file, and five 
+data file, the final swath data file, and five
 intermediate swath data files. The impact of this approach
 on data storage requirements is obvious (though some users
 have ameliorated the issue by working with scripts that
 automatically delete unneeded data files or by piping
-data from one non-graphical process to 
-another to avoid making intermediate files). 
+data from one non-graphical process to
+another to avoid making intermediate files).
 The serial processing approach
 also presents data management problems because data files
 frequently have different processing requirements, even
@@ -377,7 +369,7 @@ processing tasks in a single step:
 .IP \(bu 4
 Merge edited navigation generated by \fBmbnavedit\fP.
 .IP \(bu 4
-Apply bathymetry edit flags from \fBmbedit\fP 
+Apply bathymetry edit flags from \fBmbedit\fP
 and \fBmbclean\fP
 .IP \(bu 4
 Recalculate bathymetry from raw travel time and
@@ -402,20 +394,20 @@ Apply tides to bathymetry.
 The actions of \fBmbprocess\fP are controlled by text
 parameter files. Each \fBmbprocess\fP parameter file is
 named by adding a ".par" suffix to the associated input
-swath data file and contains single line commands that set 
+swath data file and contains single line commands that set
 processing modes and parameters. Tools such as \fBmbedit\fP,
 \fBmbnavedit\fP, and \fBmbclean\fP all generate and/or modify
 parameter files in addition to generating parallel files
-used by \fBmbprocess\fP. The program \fBmbset\fP 
-can also be used to create and modify \fBmbprocess\fP 
+used by \fBmbprocess\fP. The program \fBmbset\fP
+can also be used to create and modify \fBmbprocess\fP
 parameter files.
 
-The same processing steps described above as a serial 
+The same processing steps described above as a serial
 processing scheme can be accomplished with the new parallel
 processing scheme as follows:
 
      1) Run \fBmbdatalist\fP to create ancillary
-        data files containing statistics 
+        data files containing statistics
         (".inf"), quickly read bathymetry
         (".fbt"), and quickly read navigation
         (".fnv"). These files are used to
@@ -426,23 +418,23 @@ processing scheme as follows:
                     mbari_1998_524.mb57.fbt
                     mbari_1998_524.mb57.fnv
 
-     2) Run \fBmbclean\fP to identify 
+     2) Run \fBmbclean\fP to identify
         the obvious bathymetric artifacts
         and output a list of the edit events.
         The parameter file is created and
-        set to apply bathymetry flags from 
+        set to apply bathymetry flags from
         the ".esf" file.
             Input:  mbari_1998_524.mb57
             Output: mbari_1998_524.mb57.esf
                     mbari_1998_524.mb57.par
 
-     3) Run \fBmbedit\fP to interactively 
+     3) Run \fBmbedit\fP to interactively
         identify bathymetric artifacts
         and output a list of the edit events.
         The existing edits from \fBmbclean\fP
         are loaded and applied prior to editing.
         The parameter file is updated and
-        set to apply bathymetry flags from 
+        set to apply bathymetry flags from
         the ".esf" file.
             Input:  mbari_1998_524.mb57
                     mbari_1998_524.mb57.esf
@@ -450,11 +442,11 @@ processing scheme as follows:
             Output: mbari_1998_524.mb57.esf
                     mbari_1998_524.mb57.par
 
-     4) Run \fBmbnavedit\fP to interactively 
-        clean the navigation. The edited 
+     4) Run \fBmbnavedit\fP to interactively
+        clean the navigation. The edited
         navigation is output to the ".nve" file.
         The parameter file is updated and
-        set to merge the navigation from 
+        set to merge the navigation from
         the ".nve" file.
             Input:  mbari_1998_524.mb57
                     mbari_1998_524.mb57.par
@@ -462,11 +454,11 @@ processing scheme as follows:
                     mbari_1998_524.mb57.par
 
      5) Run \fBmbvelocitytool\fP to generate an
-        an appropriate sound velocity profile  
-        (SVP) for recalculating the bathymetry.   
-        The SVP is output to the ".svp" file.  
+        an appropriate sound velocity profile
+        (SVP) for recalculating the bathymetry.
+        The SVP is output to the ".svp" file.
         The parameter file is updated and
-        set to recalculate the bathymetry by 
+        set to recalculate the bathymetry by
         raytracing throught SVP model from
         the ".svp" file.
             Input:  mbari_1998_524.mb57
@@ -478,10 +470,10 @@ processing scheme as follows:
         a set of amplitude vs grazing angle
         tables at regular intervals in the
         data. These tables are placed into
-        a single ".sga" file. The parameter 
-        file is updated and set to correct 
-        the sidescan by interpolating the 
-        amplitude vs grazing angle table for 
+        a single ".sga" file. The parameter
+        file is updated and set to correct
+        the sidescan by interpolating the
+        amplitude vs grazing angle table for
         each ping.
             Input:  mbari_1998_524.mb57
                     mbari_1998_524.mb57.par
@@ -500,8 +492,8 @@ processing scheme as follows:
      8) Run \fBmbprocess\fP to apply the bathymetric
         edits, merge the cleaned navigation,
         recalculate the bathymetry, recalculate
-        the sidescan, and correct the sidescan. 
-        The processed swath data is written to 
+        the sidescan, and correct the sidescan.
+        The processed swath data is written to
         an output swath data file. The usual
         ancillary data files containing statistics,
         quickly read bathymetry, and quickly
@@ -533,13 +525,13 @@ distributed with \fBMB-System\fP. However, some of the serial
 tools have been replaced by new versions of the same name
 (e.g. \fBmbedit\fP, \fBmbclean\fP, \fBmbbackangle\fP, and \fBmbnavedit\fP).
 In these cases, the old versions are preserved as programs
-with "old" added to their names (e.g. \fBmbeditold\fP, 
+with "old" added to their names (e.g. \fBmbeditold\fP,
 \fBmbcleanold\fP, \fBmbbackangleold\fP, and \fBmbnaveditold\fP).
 
 .SH THE NEW VERSION 5 DATALIST FILES
 Previous versions of \fBMB-System\fP have used lists of
 data files, or datalists, as input to several programs
-(e.g. \fBmbgrid\fP, \fBmbmosaic\fP, \fBmbinfo\fP, 
+(e.g. \fBmbgrid\fP, \fBmbmosaic\fP, \fBmbinfo\fP,
 \fBmblist\fP, and \fBmbm_plot\fP). The basic datalist
 entry has consisted of a swath data name (often including
 the entire path) followed by a space and then the \fBMB-System\fP format
@@ -555,14 +547,14 @@ weight some data higher than other data. For example, one might
 weight SeaBeam 2112 data with a value of 1.0 and lower
 quality SeaBeam classic data with a value of 0.001. The result
 would be that the newer 2112 data effectively overlies the less good
-data wherever overlap occurs. The third new feature of datalists 
+data wherever overlap occurs. The third new feature of datalists
 works with data processed using the new parallel processing scheme.
 In the parallel processing scheme the raw data files are often,
 but not always,
-accompanied by processed files produced by \fBmbprocess\fP. 
+accompanied by processed files produced by \fBmbprocess\fP.
 It is awkward to maintain datalists that directly refer to the
 current best datafiles. If one inserts the text $PROCESSED
-into the first line of a datalist containing raw files, 
+into the first line of a datalist containing raw files,
 then programs like \fBmbgrid\fP will read the processed file
 if it exists, but otherwise will read the raw file. Similarly,
 a first line of $RAW will force the programs to only
@@ -590,7 +582,7 @@ will be much easier if the convention is followed. Quite
 simply, the convention is for swath files to end with a
 suffix of the format ".mbXX" or ".mbXXX", where XX or XXX
 is the two digit or three digit \fBMB-System\fP format id,
-respectively. For instance, a Simrad EM3000 file in the 
+respectively. For instance, a Simrad EM3000 file in the
 processing format 57 might have a name like:
  	0053_20020518_205816.mb57
 .br
@@ -608,229 +600,229 @@ are recognized as either old (format 51) or new (format 56)
 Simrad multibeam data (and the programs also determine which
 of the two formats apply). Filenames ending with ".rec" are
 recognized as SeaBeam 2100 multibeam data. Filenames ending
-with ".xse" are known to be Elac Bottomchart or SeaBeam 
+with ".xse" are known to be Elac Bottomchart or SeaBeam
 2100 multibeam data in the XSE format 94. In these instances
 the program \fBmbprocess\fP will automatically replace the
 vendor suffix with the \fBMB-System\fP convention suffix when
 it creates a processed output file.
 
 .SH LIST OF MB-SYSTEM PROGRAMS AND MACROS
-See the individual manual pages for detailed information about 
+See the individual manual pages for detailed information about
 specific programs.
-See the manual page for \fBMBIO\fP for information about the 
+See the manual page for \fBMBIO\fP for information about the
 i/o library and the swath sonar data formats supported by \fBMBIO\fP.
 
 These are the MB-system programs which are used in the
 version 5 parallel processing scheme. Those programs that
 are also relevant to the serial processing scheme are
 marked with an *:
- \fBmb7k2jstar\fP: Extract Jstar format (format 132) sidescan 
- 		and subbottom data from Reson 7k (format 88) 
+ \fBmb7k2jstar\fP: Extract Jstar format (format 132) sidescan
+ 		and subbottom data from Reson 7k (format 88)
  		data files.
- \fBmb7kpreprocess\fP: Preprocess Reson 7k data (format 88), 
- 		including applying time lag and biases to 
+ \fBmb7kpreprocess\fP: Preprocess Reson 7k data (format 88),
+ 		including applying time lag and biases to
  		attitude and navigation data.
- \fBmbbackangle\fP:  Generates tables of the average 
- 		amplitude or sidescan values as a 
- 		function of the grazing angle with 
+ \fBmbbackangle\fP:  Generates tables of the average
+ 		amplitude or sidescan values as a
+ 		function of the grazing angle with
  		the seafloor at regular intervals in
 		the data.
- \fBmbclean\fP:  Automatically identifies and 
+ \fBmbclean\fP:  Automatically identifies and
  		flags bad beams in swath sonar
- 		bathymetry data. 
- \fBmbcontour\fP*:  Generate GMT compatible Postscript 
+ 		bathymetry data.
+ \fBmbcontour\fP*:  Generate GMT compatible Postscript
  		color swath contour plots.
- \fBmbcopy\fP*:  Copy swath sonar data files. 
- \fBmbdatalist\fP:  Parses recursive datalist files 
-  		and outputs the  complete  list  of  
+ \fBmbcopy\fP*:  Copy swath sonar data files.
+ \fBmbdatalist\fP:  Parses recursive datalist files
+  		and outputs the  complete  list  of
  		data  files,  formats,  and  file weights.
- \fBmbdefaults\fP*:  Set or list default mbio parameters 
- 		for reading and writing swath sonar data 
- \fBmbedit\fP:  Interactive editor used to flag bad 
- 		beams in swath sonar bathymetry data. 
- \fBmbextractsegy\fP: Extract subbottom profiler or 
+ \fBmbdefaults\fP*:  Set or list default mbio parameters
+ 		for reading and writing swath sonar data
+ \fBmbedit\fP:  Interactive editor used to flag bad
+ 		beams in swath sonar bathymetry data.
+ \fBmbextractsegy\fP: Extract subbottom profiler or
  		center beam reflection data to segy files.
- \fBmbformat\fP*:   List information about swath sonar 
- 		data formats supported by the \fBMBIO\fP library. 
- \fBmbgetesf\fP*:  Extract list of flagging or unflagging 
- 		beam edit events from a swath sonar data 
+ \fBmbformat\fP*:   List information about swath sonar
+ 		data formats supported by the \fBMBIO\fP library.
+ \fBmbgetesf\fP*:  Extract list of flagging or unflagging
+ 		beam edit events from a swath sonar data
  		file in the edit save file (".esf") format
  		used by \fBmbedit\fP, \fBmbclean\fP, and
  		\fBmbprocess\fP.
  \fBmbgrdtiff\fP: Generate TIFF image from gridded data
  \fBmbgrdviz\fP: Vizualize GMT grids.
- \fBmbgrid\fP*:  Grid bathymetry, amplitude, and sidescan 
- 		data from swath sonar data files. 
- \fBmbhistogram\fP*:  Obtain histogram of bathymetry, 
+ \fBmbgrid\fP*:  Grid bathymetry, amplitude, and sidescan
+ 		data from swath sonar data files.
+ \fBmbhistogram\fP*:  Obtain histogram of bathymetry,
  		amplitude, or sidescan data from
   		swath sonar data files.
- \fBmbinfo\fP*:  Output some basic statistics of 
- 		swath sonar data files. 
- \fBmblevitus\fP*:  Create a water velocity profile 
- 		which is representative of the mean 
- 		annual water column for a specified 
- 		1 degree by 1 degree region. 
- \fBmblist\fP*:  List data in swath sonar data files. 
- \fBmbmosaic\fP*:  Mosaic sidescan and amplitude data. 
+ \fBmbinfo\fP*:  Output some basic statistics of
+ 		swath sonar data files.
+ \fBmblevitus\fP*:  Create a water velocity profile
+ 		which is representative of the mean
+ 		annual water column for a specified
+ 		1 degree by 1 degree region.
+ \fBmblist\fP*:  List data in swath sonar data files.
+ \fBmbmosaic\fP*:  Mosaic sidescan and amplitude data.
  \fBmbnavadjust\fP:  Interactive navigation adjustment
  		package that adjusts navigation so
  		that swath bathymetry matches where
- 		swathes overlap or cross. 
+ 		swathes overlap or cross.
  \fBmbnavedit\fP:  Interactive editor used to fix
  		problems with navigation in
- 		swath sonar data files. 
- \fBmbnavlist\fP*:  List navigation data in swath 
- 		sonar data files. 
- \fBmbneptune2esf\fP: Extract bathymetry edits from 
- 		Simrad Neptune software into edit save 
+ 		swath sonar data files.
+ \fBmbnavlist\fP*:  List navigation data in swath
+ 		sonar data files.
+ \fBmbneptune2esf\fP: Extract bathymetry edits from
+ 		Simrad Neptune software into edit save
 		file format.
  \fBmbprocess\fP: Performs a variety of processing
  		tasks in a single step, including
- 		merging navigation, applying 
+ 		merging navigation, applying
  		bathymetry edits, recalculating
  		bathymetry, and recalculating
  		sidescan.
  \fBmbps\fP*:    Simple perspective views of swath
- 		bathymetry in Postscript. 
- \fBmbrolltimelag\fP:  Estimate attitude time lag by cross 
- 		correlation of apparent bottom slope with the 
- 		roll time series: 
- \fBmbsegygrid\fP: Generate time vs. trace number 
+ 		bathymetry in Postscript.
+ \fBmbrolltimelag\fP:  Estimate attitude time lag by cross
+ 		correlation of apparent bottom slope with the
+ 		roll time series:
+ \fBmbsegygrid\fP: Generate time vs. trace number
  		grids of seismic data from segy files.
- \fBmbsegyinfo\fP: Output some basic statistics of 
+ \fBmbsegyinfo\fP: Output some basic statistics of
  		segy seismic data files.
- \fBmbsegylist\fP: List selected header values in 
+ \fBmbsegylist\fP: List selected header values in
  		segy seismic data files.
  \fBmbset\fP:  Create and modify \fBmbprocess\fP
- 		parameter files. 
+ 		parameter files.
  \fBmbsvplist\fP*:  List water sound velocity profiles in swath
  		sonar data files.
- \fBmbswath\fP*:  Generate GMT compatible Postscript 
+ \fBmbswath\fP*:  Generate GMT compatible Postscript
  		color and color shaded relief swath plots.
- \fBmbvelocitytool\fP*:  Interactive program for 
- 		modeling the affect of the water 
- 		velocity profile on swath sonar 
+ \fBmbvelocitytool\fP*:  Interactive program for
+ 		modeling the affect of the water
+ 		velocity profile on swath sonar
  		bathymetry calculations.
 
 The following are MB-system programs which are not used in the
 version 5 parallel processing scheme. These programs are
 included in the version 5 releases for backward compatability
 with the old serial processing scheme:
- \fBhsdump\fP:  Lists contents of the various sorts of 
- 		data records in Hydrosweep DS data. 
- \fBmbanglecorrect\fP:  Apply a grazing angle correction 
- 		to beam amplitude or sidescan data. 
- \fBmbbackangle\fP:  Generates a table of the average 
- 		amplitude or sidescan values as a 
- 		function of the grazing angle with 
+ \fBhsdump\fP:  Lists contents of the various sorts of
+ 		data records in Hydrosweep DS data.
+ \fBmbanglecorrect\fP:  Apply a grazing angle correction
+ 		to beam amplitude or sidescan data.
+ \fBmbbackangle\fP:  Generates a table of the average
+ 		amplitude or sidescan values as a
+ 		function of the grazing angle with
  		the seafloor.
- \fBmbbath\fP:  Generates bathymetry from travel times 
- 		in swath sonar data. 
- \fBmbcleanold\fP:  Old tool that utomatically 
- 		identifies and flags bad beams 
- 		in swath sonar bathymetry data. 
+ \fBmbbath\fP:  Generates bathymetry from travel times
+ 		in swath sonar data.
+ \fBmbcleanold\fP:  Old tool that utomatically
+ 		identifies and flags bad beams
+ 		in swath sonar bathymetry data.
  \fBmbcut\fP:  Removes data from portions of swath
- 		as specified by the user. 
- \fBmbeditold\fP:  Old interactive editor used to flag bad 
- 		beams in swath sonar bathymetry data. 
- \fBmbfilter\fP:   Apply some simple filter functions 
- 		to sidescan, beam amplitude, or 
- 		bathymetry data. 
- \fBmbgetmask\fP:  Extract list of flagged or edited 
+ 		as specified by the user.
+ \fBmbeditold\fP:  Old interactive editor used to flag bad
+ 		beams in swath sonar bathymetry data.
+ \fBmbfilter\fP:   Apply some simple filter functions
+ 		to sidescan, beam amplitude, or
+ 		bathymetry data.
+ \fBmbgetmask\fP:  Extract list of flagged or edited
  		beams from a swath sonar data file.
- \fBmbmask\fP:  Apply editing information obtained 
- 		from one file with \fBmbgetmask\fP 
+ \fBmbmask\fP:  Apply editing information obtained
+ 		from one file with \fBmbgetmask\fP
  		to another file.
- \fBmbmerge\fP:  Merge swath sonar data with new 
- 		navigation. 
+ \fBmbmerge\fP:  Merge swath sonar data with new
+ 		navigation.
  \fBmbnaveditold\fP:  Old interactive editor used to fix
  		problems with navigation in
- 		swath sonar data files. 
- \fBmbrollbias\fP:  Evaluate the roll bias of a 
- 		swath sonar system using two pieces 
- 		of coincident bathymetry data 
+ 		swath sonar data files.
+ \fBmbrollbias\fP:  Evaluate the roll bias of a
+ 		swath sonar system using two pieces
+ 		of coincident bathymetry data
  		collected with opposing ship headings.
- \fBmbsimradmakess\fP:  Regenerate sidescan imagery 
- 		from the raw amplitude samples contained 
- 		in data from Simrad EM300 and EM3000 sonars. 
+ \fBmbsimradmakess\fP:  Regenerate sidescan imagery
+ 		from the raw amplitude samples contained
+ 		in data from Simrad EM300 and EM3000 sonars.
  \fBmbtide\fP:  Corrects swath sonar bathymetry
- 		for tide data. 
- \fBmbunclean\fP:  Unflags edited beams in swath sonar 
- 		bathymetry data. 
+ 		for tide data.
+ \fBmbunclean\fP:  Unflags edited beams in swath sonar
+ 		bathymetry data.
 
-Macros are programs or shellscripts which make use of programs 
+Macros are programs or shellscripts which make use of programs
 from the MB-system and other software packages to accomplish common
 tasks easily.  These are the current MB-system macros:
- \fBmbm_arc2grd\fP:  Convert an ESRI ArcView ASCII grid file 
+ \fBmbm_arc2grd\fP:  Convert an ESRI ArcView ASCII grid file
  		to a GMT grid file.
- \fBmbm_copy\fP:  Translate groups of swath data files 
+ \fBmbm_copy\fP:  Translate groups of swath data files
  		between formats
  \fBmbm_dslnavfix\fP:  Reads a WHOI DSL AMS-120 processed
  		navigation file containing UTM northings
  		and eastings and outputs a navigation file
  		containing longitude and latitude which is
  		suitable for use with \fBmbmerge\fP.
- \fBmbm_fmtvel\fP:  Scans a Hydrosweep DS data file 
- 		and outputs a formatted table of 
- 		the mean water velocity and surface 
- 		water velocity values used in 
+ \fBmbm_fmtvel\fP:  Scans a Hydrosweep DS data file
+ 		and outputs a formatted table of
+ 		the mean water velocity and surface
+ 		water velocity values used in
  		processing that data.
- \fBmbm_grd2arc\fP:  Converts a GMT grid file to an ESRI ArcView 
+ \fBmbm_grd2arc\fP:  Converts a GMT grid file to an ESRI ArcView
  		ASCII grid file.
- \fBmbm_grd2geovrml\fP:  Create and execute commands which 
-  		generate a TerraVision tileset and GeoVRML 
- 		set  of  files  that can  be combined with 
+ \fBmbm_grd2geovrml\fP:  Create and execute commands which
+  		generate a TerraVision tileset and GeoVRML
+ 		set  of  files  that can  be combined with
  		other data and viewed in a web browser.
- \fBmbm_grd3dplot\fP:  Reads a GMT GRD grid file and 
- 		writes a shellscript which will 
+ \fBmbm_grd3dplot\fP:  Reads a GMT GRD grid file and
+ 		writes a shellscript which will
  		generate a GMT 3D perspective view
  		of the data.
  \fBmbm_grdcut\fP:  Extracts a subarea of a GMT grid file.
- \fBmbm_grdplot\fP:  Reads a GMT GRD grid file and 
- 		writes a shellscript which will 
+ \fBmbm_grdplot\fP:  Reads a GMT GRD grid file and
+ 		writes a shellscript which will
  		generate a GMT map of the data.
- \fBmbm_grdtiff\fP:  Reads a GMT GRD grid file and writes a 
- 		shellscript which will generate a TIFF image 
+ \fBmbm_grdtiff\fP:  Reads a GMT GRD grid file and writes a
+ 		shellscript which will generate a TIFF image
  		of the data.
- \fBmbm_grid\fP:  Reads a swath sonar data file and writes a 
- 		shellscript which will grid bathymetry data or 
- 		mosaic sidescan (or amplitude) data using 
+ \fBmbm_grid\fP:  Reads a swath sonar data file and writes a
+ 		shellscript which will grid bathymetry data or
+ 		mosaic sidescan (or amplitude) data using
  		reasonable guesses at the appropriate grid
  		bounds and bin size.
- \fBmbm_makedatalist\fP: Generates an MB-System datalist 
- 		file referencing  all identifiable swath 
+ \fBmbm_makedatalist\fP: Generates an MB-System datalist
+ 		file referencing  all identifiable swath
  		files in the specified target directory.
- \fBmbm_plot\fP:  Reads a swath sonar data file and 
- 		writes a shellscript which will 
- 		generate a swath and/or contour 
+ \fBmbm_plot\fP:  Reads a swath sonar data file and
+ 		writes a shellscript which will
+ 		generate a swath and/or contour
  		plot of the data.
  \fBmbm_rollerror\fP:  Reads a swath sonar data file,
- 		calculates the noise in the vertical reference 
- 		used by the sonar, and generates a file 
+ 		calculates the noise in the vertical reference
+ 		used by the sonar, and generates a file
  		containing roll corrections which
  		can be applied to the data.
- \fBmbm_route2mission\fP:  Translate an mbgrdviz survey route 
+ \fBmbm_route2mission\fP:  Translate an mbgrdviz survey route
  		file into an MBARI AUV mission script.
- \fBmbm_stat\fP:  Runs \fBmbinfo\fP on a swath sonar data  
- 		file and extracts beam statistics from 
+ \fBmbm_stat\fP:  Runs \fBmbinfo\fP on a swath sonar data
+ 		file and extracts beam statistics from
  		the output of \fBmbinfo\fP.
- \fBmbm_utm\fP: Performs forward and inverse UTM projections 
- 		of ASCII data triples. 
+ \fBmbm_utm\fP: Performs forward and inverse UTM projections
+ 		of ASCII data triples.
  \fBmbm_vrefcheck\fP:  Generates a plot of high pass
  		filtered apparent crosstrack seafloor slope.
- \fBmbm_xbt\fP:  Processes a Sparton XBT data file 
- 		and outputs a sound velocity profile 
- 		file which can be used to process 
+ \fBmbm_xbt\fP:  Processes a Sparton XBT data file
+ 		and outputs a sound velocity profile
+ 		file which can be used to process
  		swath sonar data.
- \fBmbm_xyplot\fP:  Reads one or more ASCII "X-Y" 
- 		data files and writes a shellscript 
+ \fBmbm_xyplot\fP:  Reads one or more ASCII "X-Y"
+ 		data files and writes a shellscript
  		which will generate an XY plot of the data.
 
 .SH EXAMPLE PROCESSING APPROACH
 
-An example processing stream for swath sonar data 
+An example processing stream for swath sonar data
 which uses the new, parallel processing
-scheme is provided here. Note that a '\' character at 
+scheme is provided here. Note that a '\' character at
 the end of a line indicates
 that the command line should actually continue with the
 text on the next line. Refer to individual program manual
@@ -840,16 +832,16 @@ functionality of the various programs.
 .SH PROCESSING SEABEAM 2100 DATA
 
 The following data processing stream is recommended for
-data obtained with SeaBeam 2100 series multibeam sonars. 
-SeaBeam 2112 sonars are currently in use on the R/V Knorr 
+data obtained with SeaBeam 2100 series multibeam sonars.
+SeaBeam 2112 sonars are currently in use on the R/V Knorr
 (operated by the Woods Hole Oceanographic Institution),
 the R/V Ronald Brown (operated by NOAA), among other vessels.
 This same approach is appropriate for data from all other
 multibeam sonars, with small variations. The issues and
-differences associated with data from certain other types 
+differences associated with data from certain other types
 of sonars are discussed in the following sections.
 
-Consider a data file "sb199411211212.rec" 
+Consider a data file "sb199411211212.rec"
 containing one hour's worth of
 SeaBeam 2112 data in the vendor format (format 41).
 This file contains bathymetry, beam amplitude, and
@@ -884,7 +876,7 @@ call ancillary files:
 
 \fBStep 3\fP: Generate first cut plota.
 
-We are now set up to process the data. However, first 
+We are now set up to process the data. However, first
 we visually check the data by generating a swath plot
 of color filled bathymetry overlaid with contours and
 navigation. This is easily accomplished with \fBmbm_plot\fP:
@@ -894,7 +886,7 @@ navigation. This is easily accomplished with \fBmbm_plot\fP:
 	ZSwathBathCont.cmd
 .br
 Here the ZSwathBathCont represents the plot name, and multiple
-files will be generated with names constructed by adding 
+files will be generated with names constructed by adding
 different suffixes to this name. The \fBmbm_plot\fP command
 generates a shellscript called ZSwathBathCont.cmd. Running
 this shellscript in turn generates a Postscript plot called
@@ -907,7 +899,7 @@ The types of swath plots produced by \fBmbm_plot\fP include:
      - color fill bathymetry with contours
      - shaded relief color fill bathymetry
      - color fill bathymetry overlaid with amplitude
-     - grayscale amplitude 
+     - grayscale amplitude
      - grayscale sidescan
 
 We have already generated the first type of plot. We now
@@ -932,12 +924,12 @@ generate the other four as well:
 We use the -S option to apply histogram equalization to
 sidescan and amplitude data; note that for the bathymetry
 overlaid with amplitude map we use -S0/1 so that the
-the amplitude data used for shading is histogram 
+the amplitude data used for shading is histogram
 equalized but the bathymetry is not.
 
 \fBStep 3\fP: Apply Analysis Tools
 
-We now have a reasonable idea of the data quality. 
+We now have a reasonable idea of the data quality.
 There are several data analysis and editing tools that
 may be used to fix problems (or just to further investigate
 the data). These may be used in any order, at any time.
@@ -948,7 +940,7 @@ The program \fBmbclean\fP applies some simple artifact
 detection algorithms to the bathymetry, effectively
 providing a means of automatically editing the bathymetry.
 We generally recommend that users edit the bathymetry
-interactively (see option B below) because 
+interactively (see option B below) because
 no automated filter yet approaches
 (in our opinion) the ability of the human eye and brain
 to discern the difference between interesting seafloor
@@ -964,20 +956,20 @@ your data, look at it.\fP
 When we apply \fBmbclean\fP, we usually use a filter that flags all
 soundings that deviate more than a specified fraction of
 the local median depth from that median depth (the \fB-G\fP
-option). The choice of the filter or filters and the 
+option). The choice of the filter or filters and the
 filter parameters used depends very much on the nature of the
 bathymetry data being processed:
  	mbclean -I sb199411211212.mb41 -G0.9/1.1 -V
 .br
-If an "edit save file" named sb199411211212.mb41.esf already 
-exists, \fBmbclean\fP reads this file and applies the 
+If an "edit save file" named sb199411211212.mb41.esf already
+exists, \fBmbclean\fP reads this file and applies the
 pre-existing edits prior to beginning its filtering.
-All pre-existing edit events and all newly generated flags 
-by \fBmbclean\fP are output to a new 
-"edit save file", again called sb199411211212.mb41.esf. 
+All pre-existing edit events and all newly generated flags
+by \fBmbclean\fP are output to a new
+"edit save file", again called sb199411211212.mb41.esf.
 Since this is the first
 of the analyis programs to be run on this data file, \fBmbclean\fP
-also creates an \fBmbprocess\fP parameter file called 
+also creates an \fBmbprocess\fP parameter file called
 sb199411211212.mb41.par which contains all of the parameters
 and settings to be used by \fBmbprocess\fP in generating a
 processed swath file. If the parameter file already existed,
@@ -986,7 +978,7 @@ would be applied when \fBmbprocess\fP is run.
 
 \fBAnalysis Option B\fP: Interactive Bathymetry Editing.
 
-We use the interactive graphical tool \fBmbedit\fP to check 
+We use the interactive graphical tool \fBmbedit\fP to check
 the quality of the bathymetry
 and to flag artifacts as necessary. We can start \fBmbedit\fP with
 the simple command:
@@ -997,15 +989,15 @@ Alternatively, we can specify the swath file on the command
 line:
  	mbedit -I sb199411211212.mb41
 .br
-While we are editing the bathymetry, all edit 
+While we are editing the bathymetry, all edit
 events, both flag and unflag, are
 written to an "edit save file" called sb199411211212.mb41.esf. This
-file is closed when the <Done> or <Quit> button is clicked. 
+file is closed when the <Done> or <Quit> button is clicked.
 In turn, this file of edit events will be read and these events
 applied if we run \fBmbclean\fP, or \fBmbprocess\fP, or if
 we choose to run \fBmbedit\fP again. If this is the first
 of the analyis programs to be run on this data file, \fBmbedit\fP
-also creates an \fBmbprocess\fP parameter file called 
+also creates an \fBmbprocess\fP parameter file called
 sb199411211212.mb41.par which contains all of the parameters
 and settings to be used by \fBmbprocess\fP in generating a
 processed swath file. If the parameter file already existed,
@@ -1014,7 +1006,7 @@ would be applied when \fBmbprocess\fP is run.
 
 \fBAnalysis Option C\fP: Editing the navigation.
 
-We use the interactive graphical tool \fBmbnavedit\fP to check 
+We use the interactive graphical tool \fBmbnavedit\fP to check
 the quality of the navigation
 and to fix problems as necessary. We can start \fBmbnavedit\fP with
 the simple command:
@@ -1025,7 +1017,7 @@ Alternatively, we can specify the swath file on the command
 line:
  	mbnavedit -I sb199411211212.mb41
 .br
-When we have completed editing the navigation, we click the 
+When we have completed editing the navigation, we click the
 <Done> or <Quit> button. The program then writes the final
 navigation to an "edited navigation" file called sb199411211212.mb41.nve.
 The program \fBmbnavedit\fP
@@ -1035,7 +1027,7 @@ swath data when \fBmbprocess\fP is run.
 
 \fBAnalysis Option D\fP: Modeling sound velocity profiles.
 
-We use the interactive graphical tool \fBmbvelocitytool\fP to model 
+We use the interactive graphical tool \fBmbvelocitytool\fP to model
 the effect of altering the sound velocity profile (SVP) used to
 calculate bathymetry from the raw travel times and angles stored
 in the swath data. We can start \fBmbvelocitytool\fP with
@@ -1052,7 +1044,7 @@ will attempt to run \fBmblevitus\fP to extract a reference sound velocity
 profile for the approximate location of the swath data file. This SVP
 will be displayed along with the editable SVP used for modeling. See
 the \fBmbvelocitytool\fP manual page for details on its operation.
-If we conclude that the bathymetry data include artifacts associated with 
+If we conclude that the bathymetry data include artifacts associated with
 having been calculated using an incorrect SVP, and we arrive through
 modeling at an SVP which is more likely correct, we save this SVP
 using the <File->Save swath svp file> menu button. Then \fBmbvelocitytool\fP
@@ -1064,7 +1056,7 @@ the bathymetry by raytracing through this SVP.
 \fBAnalysis Option E\fP: Correcting sidescan data.
 
 We often find that sidescan imagery, despite the best efforts
-of sonar manufacturers, is dominated by a systematic variation 
+of sonar manufacturers, is dominated by a systematic variation
 in amplitude across the swath. Most commonly, the center or nadir
 region of the swath is characterized by high amplitudes, and the
 outer swath exhibits much lower amplitudes. This effect can be
@@ -1082,7 +1074,7 @@ Here a new table is constructed every 25 pings, and the tables
 will consist of 161 angle bins ranging from -80 degrees to +80 degress
 grazing angles. The tables are written by \fBmbbackangle\fP to an
 amplitude vs. grazing angle file called sb199411211212.mb41.sga.
-Of course, the program also sets (or creates if needed)  
+Of course, the program also sets (or creates if needed)
 the parameter file sb199411211212.mb41.par
 so that \fBmbprocess\fP will correct the sidescan.
 
@@ -1090,7 +1082,7 @@ so that \fBmbprocess\fP will correct the sidescan.
 
 The program that actually takes the input, raw swath data
 and produces processed swath data is \fBmbprocess\fP. This
-program operates using the parameters listed in the 
+program operates using the parameters listed in the
 parameter file sb199411211212.mb41.par. To process the
 data, we run
  	mbprocess -I sb199411211212.mb41
@@ -1098,7 +1090,7 @@ data, we run
 The program produces an output processed swath file called
 sb199411211212p.mb41 (a 'p' character is inserted in the
 filename just before the \fBMB-System\fP suffix. The program
-\fBmbprocess\fP also automatically generates the three basic 
+\fBmbprocess\fP also automatically generates the three basic
 ancillary data
 files for the processed swath file:
  	sb199411211212.mb41.inf
@@ -1120,13 +1112,13 @@ which will cause the grid to be oversampled towards
 the center of the swath, but undersampled towards the
 edges of the swath.
 
-The program \fBmbgrid\fP takes a datalist as input, so we first 
+The program \fBmbgrid\fP takes a datalist as input, so we first
 construct that file:
  	echo sb199411211212p.mb41 41 > datalist_grid
 
 Now run \fBmbgrid\fP using the gaussian weighted mean algorithm
 (-F1) and longitude and latitude grid cell spacings of
-150 m (-E150/150/m) to grid bathymetry (-A1). We use 
+150 m (-E150/150/m) to grid bathymetry (-A1). We use
 spline interpolation to fill in small gaps in the data
 no larger than two grid cells (-C2), and we set regions
 with no data to Nan values for compatibility with
@@ -1158,7 +1150,7 @@ nadir region of the swath except where no other data is
 available, or to create mosaics of sidescan data with
 particular look azimuths. The sidescan data has a higher
 resolution than the bathymetry so a smaller grid size
-can be appropriate. However, we wish to overlay the 
+can be appropriate. However, we wish to overlay the
 sidescan on the bathymetry, so we use the same grid
 cell spacing of 150 m.
 
@@ -1215,7 +1207,7 @@ relief image is likely to be grainy. To fix this problem, we
 specify a dots per inch resolution of 72 (-MGQ72); this
 will take longer and generate a larger plotfile, but the
 plot will look better. We also use the -L option to specify
-the title and color scale label for the plot. Here is the 
+the title and color scale label for the plot. Here is the
 command:
  	mbm_grdplot -IZGridBath.grd \\
  		-G2 -A0.4/45 -D -MGQ72 -V \\
@@ -1231,7 +1223,7 @@ histogram equalization, but we also want histogram
 equalization to be applied to the sidescan data used for
 shading. To do this, we use -S0/1, where the first number
 (0) specifies no histogram equalization of the color
-scale and the second number (1) causes histogram 
+scale and the second number (1) causes histogram
 equalization of the shading sidescan data to be
 implemented. In order to maintain the convention that
 high sidescan amplitudes are black, we flip both the
@@ -1255,8 +1247,8 @@ using the macro \fBmbm_grd3dplot\fP. The grid file is in
 bathymetry (positive down) rather in topography (positive
 up), so the bathymetry needs to be rescaled by multiplying
 by -1 (-MGS-1). We choose an illumination magnitude of 0.4
-and an illumination azimuth of 45 degrees (-A0.4/45). We 
-also choose a perspective azimuth of 250 degrees and an 
+and an illumination azimuth of 45 degrees (-A0.4/45). We
+also choose a perspective azimuth of 250 degrees and an
 elevation of 30 degrees (-E240/30):
  	mbm_grd3dplot -IZGridBath.grd \\
  		-G2 -A0.4/45 -E250/30 -MGS-1 -V \\
@@ -1292,7 +1284,7 @@ However, both formats 51 and 56 lack places to store some information
 that is important to processing. In particular, the raw Simrad formats
 do not store beam flags, so the only to apply bathymetry edits is
 to null the flagged beams. This is not recommended, as it precludes
-unflagging flagged beams later determined to be good. 
+unflagging flagged beams later determined to be good.
 
 Also, the raw
 Simrad formats store the intial sidescan samples derived from subsampling
@@ -1346,7 +1338,7 @@ to set this parameter manually.
 .SH PROCESSING HYDROSWEEP DS DATA
 
 Hydrosweep DS sonars were used on the R/V Maurice
-Ewing (operated by the Lamont-Doherty Earth Observatory 
+Ewing (operated by the Lamont-Doherty Earth Observatory
 and the R/V Thomas Thompson (operated by the University of
 Washington) from the early 1990's until 2001. The raw data
 was logged in a text format (21) that is slow to read and write.
@@ -1380,14 +1372,14 @@ and then run \fBmbprocess\fP as usual.
 .SH PROCESSING HYDROSWEEP MD DATA
 
 Processing Hydrosweep MD data is similar to processing
-Hydrosweep DS data. In particular, recalculating 
+Hydrosweep DS data. In particular, recalculating
 bathymetry from the travel times is necessary because
 the sonar uses a homogeneous water velocity model.
 The difference is simply in the data formats used.
 The raw Hydrosweep MD data files (typically named
 with a ".R" suffix) contain only the travel times; the
 sonar calculated bathymetry is contained in parallel
-files (typically named with a ".P" suffix). The 
+files (typically named with a ".P" suffix). The
 ".R" files are supported as format 101. Format 102
 data files contain bathymetry in addition to the travel
 times. To translate the data from format 101 to 102 we

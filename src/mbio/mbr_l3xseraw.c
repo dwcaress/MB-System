@@ -677,7 +677,7 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 	buffer = mb_io_ptr->hdr_comment;
 	store->sbm_properties = MB_NO;
 	store->sbm_hrp = MB_NO;
-	store->sbm_center = MB_NO;
+	store->sbm_signal = MB_NO;
 	store->sbm_message = MB_NO;
 	done = MB_NO;
 	if (*frame_save == MB_YES)
@@ -709,6 +709,14 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
 		    }
+
+#ifdef MB_DEBUG
+fprintf(stderr,"Byte: %d %c %o %x\n", label[0],label[0],label[0],label[0]);
+fprintf(stderr,"Byte: %d %c %o %x\n", label[1],label[1],label[1],label[1]);
+fprintf(stderr,"Byte: %d %c %o %x\n", label[2],label[2],label[2],label[2]);
+fprintf(stderr,"Byte: %d %c %o %x\n", label[3],label[3],label[3],label[3]);
+#endif
+
 #ifdef DATAINPCBYTEORDER
 		while (status == MB_SUCCESS
 		    && strncmp(label, "FSH$", 4))
@@ -728,6 +736,9 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		    else
 				{
 				skip++;
+#ifdef MB_DEBUG
+fprintf(stderr,"Byte: %d %c %o %x\n", label[3],label[3],label[3],label[3]);
+#endif
 				}
 		    }
 
@@ -1502,8 +1513,8 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_GEN\n",__FILE__,__LINE__);
 				/* currently unused by MB-System */
 				}
 
-		    /* handle depth group */
-		    if (group_id == MBSYS_XSE_SVP_GROUP_DEPTH)
+			/* handle depth group */
+			if (group_id == MBSYS_XSE_SVP_GROUP_DEPTH)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_DEPTH\n",__FILE__,__LINE__);
@@ -1518,8 +1529,8 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_DEPTH\n",__FILE__,__LINE__);
 				    }
 				}
 
-		    /* handle velocity group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_VELOCITY)
+			/* handle velocity group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_VELOCITY)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_VELOCITY\n",__FILE__,__LINE__);
@@ -1534,8 +1545,8 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_VELOCITY\n",__FILE__,__LINE__);
 				    }
 				}
 
-		    /* handle conductivity group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_CONDUCTIVITY)
+			/* handle conductivity group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_CONDUCTIVITY)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_CONDUCTIVITY\n",__FILE__,__LINE__);
@@ -1550,8 +1561,8 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_CONDUCTIVITY\n",__FILE__,__LINE__);
 				    }
 				}
 
-		    /* handle salinity group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_SALINITY)
+			/* handle salinity group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_SALINITY)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_SALINITY\n",__FILE__,__LINE__);
@@ -1566,8 +1577,8 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_SALINITY\n",__FILE__,__LINE__);
 				    }
 				}
 
-		    /* handle temperature group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_TEMP)
+			/* handle temperature group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_TEMP)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_TEMP\n",__FILE__,__LINE__);
@@ -1582,8 +1593,8 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_TEMP\n",__FILE__,__LINE__);
 				    }
 				}
 
-		    /* handle pressure group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_PRESSURE)
+			/* handle pressure group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_PRESSURE)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_PRESSURE\n",__FILE__,__LINE__);
@@ -1598,14 +1609,16 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_PRESSURE\n",__FILE__,__LINE__);
 				    }
 				}
 
-		    /* handle ssv group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_SSV)
+			/* handle ssv group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_SSV)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_SSV\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_ssv); index += 8;
-				}
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_ssv_depth); index += 8;
+				store->svp_ssv_depthflag = buffer[index]; index++;
+ 				}
 
 			/* handle point group */
 			else if (group_id == MBSYS_XSE_SVP_GROUP_POS)
@@ -2110,8 +2123,8 @@ fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>
 				    group_id, byte_count, function_name);
 #endif
 
-		    /* handle general group */
-		    if (group_id == MBSYS_XSE_SSN_GROUP_GEN)
+			/* handle general group */
+			if (group_id == MBSYS_XSE_SSN_GROUP_GEN)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SSN_GROUP_GEN\n",__FILE__,__LINE__);
@@ -2500,6 +2513,8 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *sto
 	store->mul_group_hits = MB_NO;		/* boolean flag - hits group read */
 	store->mul_group_heavereceive = MB_NO;	/* boolean flag - heavereceive group read */
 	store->mul_group_azimuth = MB_NO;	/* boolean flag - azimuth group read */
+	store->mul_group_properties = MB_NO;	/* boolean flag - properties group read */
+	store->mul_group_normamp = MB_NO;	/* boolean flag - normalized amplitude group read */
 	store->mul_group_mbsystemnav = MB_NO;	/* boolean flag - mbsystemnav group read */
 
 	/* get source and time */
@@ -2972,13 +2987,87 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_AZIMUTH\n",__FILE__,__LINE__);
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
 						{
-						mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->beams[i].azimuth); index += 4;
+						mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->beams[i].azimuth); index += 8;
 						}
 				    }
 #ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "azimuth[%d]=%f\n", i, store->beams[i].azimuth);
+#endif
+				}
+
+			/* handle properties group */
+			else if (group_id == MBSYS_XSE_MBM_GROUP_PROPERTIES)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "%s:%d | READ MBM_GROUP_PROPERTIES\n",__FILE__,__LINE__);
+#endif
+				store->mul_group_properties = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_properties); index += 4;
+				for (i=0;i<store->mul_num_properties;i++)
+				    {
+				    if (i < MBSYS_XSE_MAXPROPERTIES)
+						{
+						mb_get_binary_short(SWAPFLAG, &buffer[index], (double *) &store->mul_properties_type[i]); index += 2;
+						mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->mul_properties_value); index += 8;
+						}
+				    }
+				for (i=0;i<40;i++)
+				    {
+				    store->mul_properties_reserved[i] = buffer[index]; index++;
+				    }
+#ifdef MB_DEBUG2
+fprintf(stderr, "N=%u\n", store->mul_num_properties);
+for (i=0;i<store->mul_num_properties;i++)
+    fprintf(stderr,"dbg5       mul_properties[%d]: %d %f\n",
+	i, store->mul_properties_type[i], store->mul_properties_value[i]);
+for (i=0;i<40;i++)
+    fprintf(stderr,"dbg5       mul_properties_reserved[%d]: %d\n",
+	i, store->mul_properties_reserved[i]);
+#endif
+				}
+
+			/* handle normalized amplitude group */
+			else if (group_id == MBSYS_XSE_MBM_GROUP_NORMAMP)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "%s:%d | READ MBM_GROUP_NORMAMP\n",__FILE__,__LINE__);
+#endif
+				store->mul_group_normamp = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_normamp_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_normamp_flags); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->mul_normamp_along_beamwidth); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->mul_normamp_across_beamwidth); index += 4;
+				for (i=0;i<store->mul_normamp_num_beams;i++)
+				    {
+				    if (i < MBSYS_XSE_MAXBEAMS)
+						{
+						mb_get_binary_short(SWAPFLAG, &buffer[index], (double *) &store->beams[i].normamp); index += 2;
+						}
+				    }
+				if (store->mul_normamp_flags == 0)
+				    {
+				    mb_get_binary_float(SWAPFLAG, &buffer[index], (double *) &store->beams[0].frequency); index += 4;
+				    for (i=1;i<store->mul_normamp_num_beams;i++)
+					{
+					store->beams[i].frequency = store->beams[0].frequency;
+					}
+				    }
+				else
+				    {
+				    for (i=0;i<store->mul_normamp_num_beams;i++)
+					{
+					if (i < MBSYS_XSE_MAXBEAMS)
+						{
+						mb_get_binary_float(SWAPFLAG, &buffer[index], (double *) &store->beams[i].frequency); index += 4;
+						}
+					}
+				    }
+#ifdef MB_DEBUG2
+fprintf(stderr, "N=%u\n", store->mul_num_beams);
+for(i=0;i<store->mul_num_beams;i++)
+	fprintf(stderr, "beam[%d]: normamp=%d frequency=%f\n", i, store->beams[i].normamp, store->beams[i].frequency);
 #endif
 				}
 
@@ -2995,9 +3084,9 @@ fprintf(stderr, "%s:%d | READ MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV\n",__FILE__,__LINE
 				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->mul_speed); index += 8;
 #ifdef MB_DEBUG2
 fprintf(stderr, "lon=%f\n", store->mul_lon);
-fprintf(stderr, "lon=%f\n", store->mul_lat);
-fprintf(stderr, "lon=%f\n", store->mul_heading);
-fprintf(stderr, "lon=%f\n", store->mul_speed);
+fprintf(stderr, "lat=%f\n", store->mul_lat);
+fprintf(stderr, "heading=%f\n", store->mul_heading);
+fprintf(stderr, "speed=%f\n", store->mul_speed);
 #endif
 				}
 
@@ -3094,16 +3183,6 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_OTHER  group_id:%d\n",__FILE__,__LINE__,
 	if (verbose >= 5)
 	    {
 	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-	    fprintf(stderr,"dbg5       mul_source:          %d\n",store->mul_source);
-	    fprintf(stderr,"dbg5       mul_sec:             %u\n",store->mul_sec);
-	    fprintf(stderr,"dbg5       mul_usec:            %u\n",store->mul_usec);
-	    fprintf(stderr,"dbg5       mul_ping:            %d\n",store->mul_ping);
-	    fprintf(stderr,"dbg5       mul_frequency:       %f\n",store->mul_frequency);
-	    fprintf(stderr,"dbg5       mul_pulse:           %f\n",store->mul_pulse);
-	    fprintf(stderr,"dbg5       mul_power:           %f\n",store->mul_power);
-	    fprintf(stderr,"dbg5       mul_bandwidth:       %f\n",store->mul_bandwidth);
-	    fprintf(stderr,"dbg5       mul_sample:          %f\n",store->mul_sample);
-	    fprintf(stderr,"dbg5       mul_swath:           %f\n",store->mul_swath);
 	    fprintf(stderr,"dbg5       mul_group_beam:      %d\n",store->mul_group_beam);
 	    fprintf(stderr,"dbg5       mul_group_tt:        %d\n",store->mul_group_tt);
 	    fprintf(stderr,"dbg5       mul_group_quality:   %d\n",store->mul_group_quality);
@@ -3116,9 +3195,32 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_OTHER  group_id:%d\n",__FILE__,__LINE__,
 	    fprintf(stderr,"dbg5       mul_group_heave:     %d\n",store->mul_group_heave);
 	    fprintf(stderr,"dbg5       mul_group_roll:      %d\n",store->mul_group_roll);
 	    fprintf(stderr,"dbg5       mul_group_pitch:     %d\n",store->mul_group_pitch);
+	    fprintf(stderr,"dbg5       mul_group_gates:     %d\n",store->mul_group_gates);
+	    fprintf(stderr,"dbg5       mul_group_noise:     %d\n",store->mul_group_noise);
+	    fprintf(stderr,"dbg5       mul_group_length:    %d\n",store->mul_group_length);
+	    fprintf(stderr,"dbg5       mul_group_hits:      %d\n",store->mul_group_hits);
+	    fprintf(stderr,"dbg5       mul_group_heavereceive: %d\n",store->mul_group_heavereceive);
+	    fprintf(stderr,"dbg5       mul_group_azimuth:    %d\n",store->mul_group_azimuth);
+	    fprintf(stderr,"dbg5       mul_group_properties: %d\n",store->mul_group_properties);
+	    fprintf(stderr,"dbg5       mul_group_normamp:    %d\n",store->mul_group_normamp);
+	    fprintf(stderr,"dbg5       mul_group_mbsystemnav:  %d\n",store->mul_group_mbsystemnav);
+	    fprintf(stderr,"dbg5       mul_source:          %d\n",store->mul_source);
+	    fprintf(stderr,"dbg5       mul_sec:             %u\n",store->mul_sec);
+	    fprintf(stderr,"dbg5       mul_usec:            %u\n",store->mul_usec);
+	    fprintf(stderr,"dbg5       mul_ping:            %d\n",store->mul_ping);
+	    fprintf(stderr,"dbg5       mul_frequency:       %f\n",store->mul_frequency);
+	    fprintf(stderr,"dbg5       mul_pulse:           %f\n",store->mul_pulse);
+	    fprintf(stderr,"dbg5       mul_power:           %f\n",store->mul_power);
+	    fprintf(stderr,"dbg5       mul_bandwidth:       %f\n",store->mul_bandwidth);
+	    fprintf(stderr,"dbg5       mul_sample:          %f\n",store->mul_sample);
+	    fprintf(stderr,"dbg5       mul_swath:           %f\n",store->mul_swath);
 	    fprintf(stderr,"dbg5       mul_num_beams:       %d\n",store->mul_num_beams);
+	    fprintf(stderr,"dbg5       mul_lon:             %f\n",store->mul_lon);
+	    fprintf(stderr,"dbg5       mul_lat:             %f\n",store->mul_lat);
+	    fprintf(stderr,"dbg5       mul_heading:         %f\n",store->mul_heading);
+	    fprintf(stderr,"dbg5       mul_speed:           %f\n",store->mul_speed);
 	    for (i=0;i<store->mul_num_beams;i++)
-		fprintf(stderr,"dbg5       beam[%d]: %3d %7.2f %7.2f %7.2f %3d %3d %6.3f %6.2f %5.3f %5.2f %6.2f %6.2f\n",
+		fprintf(stderr,"dbg5       beam[%d]: %3d %7.2f %7.2f %7.2f %3d %3d %6.3f %6.2f %5.3f %5.2f %6.2f %6.2f  %f %f %f %f %f %d %f %f %d %f\n",
 		    i, store->beams[i].beam,
 		    store->beams[i].lateral,
 		    store->beams[i].along,
@@ -3130,7 +3232,28 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_OTHER  group_id:%d\n",__FILE__,__LINE__,
 		    store->beams[i].delay,
 		    store->beams[i].heave,
 		    store->beams[i].roll,
-		    store->beams[i].pitch);
+		    store->beams[i].pitch,
+		    store->beams[i].gate_angle,
+		    store->beams[i].gate_start,
+		    store->beams[i].gate_stop,
+		    store->beams[i].noise,
+		    store->beams[i].length,
+		    store->beams[i].hits,
+		    store->beams[i].heavereceive,
+		    store->beams[i].azimuth,
+		    store->beams[i].normamp,
+		    store->beams[i].frequency);
+	    fprintf(stderr,"dbg5       mul_num_properties: %d\n",store->mul_num_properties);
+	    for (i=0;i<store->mul_num_properties;i++)
+		fprintf(stderr,"dbg5       mun_property[%d]: %d %f\n",
+		    i, store->mul_properties_type[i], store->mul_properties_value[i]);
+	    for (i=0;i<40;i++)
+		fprintf(stderr,"dbg5       mul_properties_reserved[%d]: %d\n",
+		    i, store->mul_properties_reserved[i]);
+	    fprintf(stderr,"dbg5       mul_normamp_num_beams:        %d\n",store->mul_normamp_num_beams);
+	    fprintf(stderr,"dbg5       mul_normamp_flags:            %d\n",store->mul_normamp_flags);
+	    fprintf(stderr,"dbg5       mul_normamp_along_beamwidth:  %f\n",store->mul_normamp_along_beamwidth);
+	    fprintf(stderr,"dbg5       mul_normamp_across_beamwidth: %f\n",store->mul_normamp_across_beamwidth);
 	    }
 
 	/* print output debug statements */
@@ -3350,18 +3473,18 @@ fprintf(stderr, "%s:%d | READ SBM_GROUP_HRP\n",__FILE__,__LINE__);
 				}
 
 		    /* handle center group */
-		    if (group_id == MBSYS_XSE_SBM_GROUP_CENTER)
+		    if (group_id == MBSYS_XSE_SBM_GROUP_SIGNAL)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "%s:%d | READ SBM_GROUP_CENTER\n",__FILE__,__LINE__);
+fprintf(stderr, "%s:%d | READ SBM_GROUP_SIGNAL\n",__FILE__,__LINE__);
 #endif
-				store->sbm_center = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_beam); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_count); index += 4;
-				store->sbm_center_count = MIN(MBSYS_XSE_MAXSAMPLES, store->sbm_center_count);
-				for (i=0;i<store->sbm_center_count;i++)
+				store->sbm_signal = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_signal_beam); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_signal_count); index += 4;
+				store->sbm_signal_count = MIN(MBSYS_XSE_MAXSAMPLES, store->sbm_signal_count);
+				for (i=0;i<store->sbm_signal_count;i++)
 				    {
-				    mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_center_amp[i]);
+				    mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_signal_amp[i]);
 				    index += 4;
 				    }
 				}
@@ -3383,6 +3506,40 @@ if (store->sbm_message_len > buffer_size)
 				    index++;
 				    }
 				store->sbm_message_txt[store->sbm_message_len] = 0;
+				}
+
+		    /* handle sweep segments group */
+		    if (group_id == MBSYS_XSE_SBM_GROUP_SWEEPSEGMENTS)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "%s:%d | READ SBM_GROUP_SWEEPSEGMENTS\n",__FILE__,__LINE__);
+#endif
+				store->sbm_sweepsegments = MB_YES;
+				store->sbm_sweep_direction = buffer[index]; index++;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_azimuth); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_segments); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_seconds); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_micro); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_extrapolateazimuth); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_interpolatedazimuth); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_extrapolatepitch); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_interpolatedpitch); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_extrapolateroll); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_interpolatedroll); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_stabilizedangle); index += 4;
+				}
+
+		    /* handle spacing mode group */
+		    if (group_id == MBSYS_XSE_SBM_GROUP_SPACINGMODE)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "%s:%d | READ SBM_GROUP_SPACINGMODE\n",__FILE__,__LINE__);
+#endif
+				store->sbm_spacingmode = MB_YES;
+				store->sbm_spacing_mode = buffer[index]; index++;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_spacing_equidistance); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_spacing_equidistance_min); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_spacing_equidistance_max); index += 4;
 				}
 		    }
 	    }
@@ -3416,19 +3573,41 @@ if (store->sbm_message_len > buffer_size)
 	    fprintf(stderr,"dbg5       sbm_roll:            %f\n",store->sbm_roll);
 	    fprintf(stderr,"dbg5       sbm_pitch:           %f\n",store->sbm_pitch);
 	    }
-	if (verbose >= 5 && store->sbm_center == MB_YES)
+	if (verbose >= 5 && store->sbm_signal == MB_YES)
 	    {
-	    fprintf(stderr,"dbg5       sbm_center_beam:     %d\n",store->sbm_center_beam);
-	    fprintf(stderr,"dbg5       sbm_center_count:    %d\n",store->sbm_center_count);
-	    for (i=0;i<store->sbm_center_count;i++)
+	    fprintf(stderr,"dbg5       sbm_signal_beam:     %d\n",store->sbm_signal_beam);
+	    fprintf(stderr,"dbg5       sbm_signal_count:    %d\n",store->sbm_signal_count);
+	    for (i=0;i<store->sbm_signal_count;i++)
 		fprintf(stderr,"dbg5       sample[%d]: %f\n",
-		    i, store->sbm_center_amp[i]);
+		    i, store->sbm_signal_amp[i]);
 	    }
 	if (verbose >= 5 && store->sbm_message == MB_YES)
 	    {
 	    fprintf(stderr,"dbg5       sbm_message_id:      %d\n",store->sbm_message_id);
 	    fprintf(stderr,"dbg5       sbm_message_len:     %d\n",store->sbm_message_len);
 	    fprintf(stderr,"dbg5       sbm_message_txt:     %s\n",store->sbm_message_txt);
+	    }
+	if (verbose >= 5 && store->sbm_sweepsegments == MB_YES)
+	    {
+	    fprintf(stderr,"dbg5       sbm_sweep_direction: %d\n",store->sbm_sweep_direction);
+	    fprintf(stderr,"dbg5       sbm_sweep_azimuth:   %f\n",store->sbm_sweep_azimuth);
+	    fprintf(stderr,"dbg5       sbm_sweep_segments:  %d\n",store->sbm_sweep_segments);
+	    fprintf(stderr,"dbg5       sbm_sweep_seconds:   %d\n",store->sbm_sweep_seconds);
+	    fprintf(stderr,"dbg5       sbm_sweep_micro:     %d\n",store->sbm_sweep_micro);
+	    fprintf(stderr,"dbg5       sbm_sweep_extrapolateazimuth:  %f\n",store->sbm_sweep_extrapolateazimuth);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedazimuth: %f\n",store->sbm_sweep_interpolatedazimuth);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_extrapolatepitch:    %f\n",store->sbm_sweep_extrapolatepitch);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedpitch:   %f\n",store->sbm_sweep_interpolatedpitch);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_extrapolateroll:     %f\n",store->sbm_sweep_extrapolateroll);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedroll:    %f\n",store->sbm_sweep_interpolatedroll);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_stabilizedangle:     %f\n",store->sbm_sweep_stabilizedangle);
+	    }
+	if (verbose >= 5 && store->sbm_spacingmode == MB_YES)
+	    {
+	    fprintf(stderr,"dbg5       sbm_spacing_mode:      	      %d\n",store->sbm_spacing_mode);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance:      %f\n",store->sbm_spacing_equidistance);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance_min:  %f\n",store->sbm_spacing_equidistance_min);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance_max:  %f\n",store->sbm_spacing_equidistance_max);
 	    }
 
 	/* print output debug statements */
@@ -4710,6 +4889,8 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 			{
 			mb_put_binary_double(SWAPFLAG, store->svp_velocity[i], &buffer[index]); index += 8;
 			}
+	    mb_put_binary_double(SWAPFLAG, store->svp_ssv_depth, &buffer[index]); index += 8;
+	    buffer[index] = store->svp_ssv_depthflag; index++;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4718,7 +4899,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-	    group_count += 8 + store->svp_nsvp*8;
+	    group_count += 17 + store->svp_nsvp*8;
 
 	    /* go back and fill in group byte count */
 	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
@@ -4915,6 +5096,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    frame_count += group_count + 12;
 	    }
 
+	/* get ssv group */
 	if (store->svp_ssv > 0.0)
 	    {
 	    /* get group label */
@@ -4935,6 +5117,8 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    group_id = MBSYS_XSE_SVP_GROUP_SSV;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_double(SWAPFLAG, store->svp_ssv, &buffer[index]); index += 8;
+	    mb_put_binary_double(SWAPFLAG, store->svp_ssv_depth, &buffer[index]); index += 8;
+	    buffer[index] = store->svp_ssv_depthflag; index++;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4943,7 +5127,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-	    group_count += 12;
+	    group_count += 21;
 
 	    /* go back and fill in group byte count */
 	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
@@ -5470,19 +5654,10 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	store = (struct mbsys_xse_struct *) store_ptr;
 
 	/* print debug statements */
+	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-	    fprintf(stderr,"dbg5       mul_source:          %d\n",store->mul_source);
-	    fprintf(stderr,"dbg5       mul_sec:             %u\n",store->mul_sec);
-	    fprintf(stderr,"dbg5       mul_usec:            %u\n",store->mul_usec);
-	    fprintf(stderr,"dbg5       mul_ping:            %d\n",store->mul_ping);
-	    fprintf(stderr,"dbg5       mul_frequency:       %f\n",store->mul_frequency);
-	    fprintf(stderr,"dbg5       mul_pulse:           %f\n",store->mul_pulse);
-	    fprintf(stderr,"dbg5       mul_power:           %f\n",store->mul_power);
-	    fprintf(stderr,"dbg5       mul_bandwidth:       %f\n",store->mul_bandwidth);
-	    fprintf(stderr,"dbg5       mul_sample:          %f\n",store->mul_sample);
-	    fprintf(stderr,"dbg5       mul_swath:           %f\n",store->mul_swath);
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       mul_group_beam:      %d\n",store->mul_group_beam);
 	    fprintf(stderr,"dbg5       mul_group_tt:        %d\n",store->mul_group_tt);
 	    fprintf(stderr,"dbg5       mul_group_quality:   %d\n",store->mul_group_quality);
@@ -5495,9 +5670,32 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    fprintf(stderr,"dbg5       mul_group_heave:     %d\n",store->mul_group_heave);
 	    fprintf(stderr,"dbg5       mul_group_roll:      %d\n",store->mul_group_roll);
 	    fprintf(stderr,"dbg5       mul_group_pitch:     %d\n",store->mul_group_pitch);
+	    fprintf(stderr,"dbg5       mul_group_gates:     %d\n",store->mul_group_gates);
+	    fprintf(stderr,"dbg5       mul_group_noise:     %d\n",store->mul_group_noise);
+	    fprintf(stderr,"dbg5       mul_group_length:    %d\n",store->mul_group_length);
+	    fprintf(stderr,"dbg5       mul_group_hits:      %d\n",store->mul_group_hits);
+	    fprintf(stderr,"dbg5       mul_group_heavereceive: %d\n",store->mul_group_heavereceive);
+	    fprintf(stderr,"dbg5       mul_group_azimuth:    %d\n",store->mul_group_azimuth);
+	    fprintf(stderr,"dbg5       mul_group_properties: %d\n",store->mul_group_properties);
+	    fprintf(stderr,"dbg5       mul_group_normamp:    %d\n",store->mul_group_normamp);
+	    fprintf(stderr,"dbg5       mul_group_mbsystemnav:  %d\n",store->mul_group_mbsystemnav);
+	    fprintf(stderr,"dbg5       mul_source:          %d\n",store->mul_source);
+	    fprintf(stderr,"dbg5       mul_sec:             %u\n",store->mul_sec);
+	    fprintf(stderr,"dbg5       mul_usec:            %u\n",store->mul_usec);
+	    fprintf(stderr,"dbg5       mul_ping:            %d\n",store->mul_ping);
+	    fprintf(stderr,"dbg5       mul_frequency:       %f\n",store->mul_frequency);
+	    fprintf(stderr,"dbg5       mul_pulse:           %f\n",store->mul_pulse);
+	    fprintf(stderr,"dbg5       mul_power:           %f\n",store->mul_power);
+	    fprintf(stderr,"dbg5       mul_bandwidth:       %f\n",store->mul_bandwidth);
+	    fprintf(stderr,"dbg5       mul_sample:          %f\n",store->mul_sample);
+	    fprintf(stderr,"dbg5       mul_swath:           %f\n",store->mul_swath);
 	    fprintf(stderr,"dbg5       mul_num_beams:       %d\n",store->mul_num_beams);
+	    fprintf(stderr,"dbg5       mul_lon:             %f\n",store->mul_lon);
+	    fprintf(stderr,"dbg5       mul_lat:             %f\n",store->mul_lat);
+	    fprintf(stderr,"dbg5       mul_heading:         %f\n",store->mul_heading);
+	    fprintf(stderr,"dbg5       mul_speed:           %f\n",store->mul_speed);
 	    for (i=0;i<store->mul_num_beams;i++)
-		fprintf(stderr,"dbg5       beam[%d]: %3d %7.2f %7.2f %7.2f %3d %3d %6.3f %6.2f %5.3f %5.2f %6.2f %6.2f\n",
+		fprintf(stderr,"dbg5       beam[%d]: %3d %7.2f %7.2f %7.2f %3d %3d %6.3f %6.2f %5.3f %5.2f %6.2f %6.2f  %f %f %f %f %f %d %f %f %d %f\n",
 		    i, store->beams[i].beam,
 		    store->beams[i].lateral,
 		    store->beams[i].along,
@@ -5509,7 +5707,28 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 		    store->beams[i].delay,
 		    store->beams[i].heave,
 		    store->beams[i].roll,
-		    store->beams[i].pitch);
+		    store->beams[i].pitch,
+		    store->beams[i].gate_angle,
+		    store->beams[i].gate_start,
+		    store->beams[i].gate_stop,
+		    store->beams[i].noise,
+		    store->beams[i].length,
+		    store->beams[i].hits,
+		    store->beams[i].heavereceive,
+		    store->beams[i].azimuth,
+		    store->beams[i].normamp,
+		    store->beams[i].frequency);
+	    fprintf(stderr,"dbg5       mul_num_properties: %d\n",store->mul_num_properties);
+	    for (i=0;i<store->mul_num_properties;i++)
+		fprintf(stderr,"dbg5       mun_property[%d]: %d %f\n",
+		    i, store->mul_properties_type[i], store->mul_properties_value[i]);
+	    for (i=0;i<40;i++)
+		fprintf(stderr,"dbg5       mul_properties_reserved[%d]: %d\n",
+		    i, store->mul_properties_reserved[i]);
+	    fprintf(stderr,"dbg5       mul_normamp_num_beams:        %d\n",store->mul_normamp_num_beams);
+	    fprintf(stderr,"dbg5       mul_normamp_flags:            %d\n",store->mul_normamp_flags);
+	    fprintf(stderr,"dbg5       mul_normamp_along_beamwidth:  %f\n",store->mul_normamp_along_beamwidth);
+	    fprintf(stderr,"dbg5       mul_normamp_across_beamwidth: %f\n",store->mul_normamp_across_beamwidth);
 	    }
 
 	/* get the frame label */
@@ -6333,7 +6552,110 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    frame_count += group_count + 12;
 	    }
 
-	/* get azimuth groups */
+	/* get properties groups */
+	if (store->mul_group_properties == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+
+	    /* get properties array */
+	    group_id = MBSYS_XSE_MBM_GROUP_PROPERTIES;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_num_properties, &buffer[index]); index += 4;
+	    for (i=0;i<store->mul_num_properties;i++)
+			{
+			mb_put_binary_short(SWAPFLAG, store->mul_properties_type[i], &buffer[index]); index += 2;
+			mb_put_binary_double(SWAPFLAG, store->mul_properties_value[i], &buffer[index]); index += 8;
+			}
+	    for (i=0;i<40;i++)
+			{
+			buffer[index] = store->mul_properties_reserved[i]; index++;
+			}
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    group_count += 8 + store->mul_num_properties*10 + 40;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* get normalized amplitude groups */
+	if (store->mul_group_normamp == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+
+	    /* get properties array */
+	    group_id = MBSYS_XSE_MBM_GROUP_NORMAMP;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_normamp_num_beams, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_normamp_flags, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->mul_normamp_along_beamwidth, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->mul_normamp_across_beamwidth, &buffer[index]); index += 4;
+	    for (i=0;i<store->mul_normamp_num_beams;i++)
+			{
+			mb_put_binary_short(SWAPFLAG, store->beams[i].normamp, &buffer[index]); index += 2;
+			}
+	    if (store->mul_normamp_flags == 0)
+			{
+			mb_put_binary_float(SWAPFLAG, store->beams[0].frequency, &buffer[index]); index += 4;
+			}
+	    else for (i=0;i<store->mul_normamp_num_beams;i++)
+			{
+			mb_put_binary_float(SWAPFLAG, store->beams[i].frequency, &buffer[index]); index += 4;
+			}
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    if (store->mul_normamp_flags == 0)
+		group_count += 24 + store->mul_normamp_num_beams * 2;
+	    else
+		group_count += 20 + store->mul_normamp_num_beams * 2 + store->mul_normamp_num_beams * 4;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* get mbsystemnav groups */
 	if (store->mul_group_mbsystemnav == MB_YES)
 	    {
 	    /* get group label */
@@ -7028,19 +7350,41 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    fprintf(stderr,"dbg5       sbm_roll:            %f\n",store->sbm_roll);
 	    fprintf(stderr,"dbg5       sbm_pitch:           %f\n",store->sbm_pitch);
 	    }
-	if (verbose >= 5 && store->sbm_center == MB_YES)
+	if (verbose >= 5 && store->sbm_signal == MB_YES)
 	    {
-	    fprintf(stderr,"dbg5       sbm_center_beam:     %d\n",store->sbm_center_beam);
-	    fprintf(stderr,"dbg5       sbm_center_count:    %d\n",store->sbm_center_count);
-	    for (i=0;i<store->sbm_center_count;i++)
+	    fprintf(stderr,"dbg5       sbm_signal_beam:     %d\n",store->sbm_signal_beam);
+	    fprintf(stderr,"dbg5       sbm_signal_count:    %d\n",store->sbm_signal_count);
+	    for (i=0;i<store->sbm_signal_count;i++)
 		fprintf(stderr,"dbg5       sample[%d]: %f\n",
-		    i, store->sbm_center_amp[i]);
+		    i, store->sbm_signal_amp[i]);
 	    }
 	if (verbose >= 5 && store->sbm_message == MB_YES)
 	    {
 	    fprintf(stderr,"dbg5       sbm_message_id:      %d\n",store->sbm_message_id);
 	    fprintf(stderr,"dbg5       sbm_message_len:     %d\n",store->sbm_message_len);
 	    fprintf(stderr,"dbg5       sbm_message_txt:     %s\n",store->sbm_message_txt);
+	    }
+	if (verbose >= 5 && store->sbm_sweepsegments == MB_YES)
+	    {
+	    fprintf(stderr,"dbg5       sbm_sweep_direction: %d\n",store->sbm_sweep_direction);
+	    fprintf(stderr,"dbg5       sbm_sweep_azimuth:   %f\n",store->sbm_sweep_azimuth);
+	    fprintf(stderr,"dbg5       sbm_sweep_segments:  %d\n",store->sbm_sweep_segments);
+	    fprintf(stderr,"dbg5       sbm_sweep_seconds:   %d\n",store->sbm_sweep_seconds);
+	    fprintf(stderr,"dbg5       sbm_sweep_micro:     %d\n",store->sbm_sweep_micro);
+	    fprintf(stderr,"dbg5       sbm_sweep_extrapolateazimuth:  %f\n",store->sbm_sweep_extrapolateazimuth);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedazimuth: %f\n",store->sbm_sweep_interpolatedazimuth);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_extrapolatepitch:    %f\n",store->sbm_sweep_extrapolatepitch);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedpitch:   %f\n",store->sbm_sweep_interpolatedpitch);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_extrapolateroll:     %f\n",store->sbm_sweep_extrapolateroll);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedroll:    %f\n",store->sbm_sweep_interpolatedroll);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_stabilizedangle:     %f\n",store->sbm_sweep_stabilizedangle);
+	    }
+	if (verbose >= 5 && store->sbm_spacingmode == MB_YES)
+	    {
+	    fprintf(stderr,"dbg5       sbm_spacing_mode:      	      %d\n",store->sbm_spacing_mode);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance:      %f\n",store->sbm_spacing_equidistance);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance_min:  %f\n",store->sbm_spacing_equidistance_min);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance_max:  %f\n",store->sbm_spacing_equidistance_max);
 	    }
 
 	/* get the frame label */
@@ -7155,8 +7499,8 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    frame_count += group_count + 12;
 	    }
 
-	/* deal with center group */
-	if (store->sbm_center == MB_YES)
+	/* deal with signal group */
+	if (store->sbm_signal == MB_YES)
 	    {
 	    /* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -7172,17 +7516,17 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    group_cnt_index = index;
 	    index += 4;
 
-	    /* get center group */
-	    group_id = MBSYS_XSE_SBM_GROUP_CENTER;
+	    /* get signal group */
+	    group_id = MBSYS_XSE_SBM_GROUP_SIGNAL;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
-	    mb_put_binary_int(SWAPFLAG, store->sbm_center_beam, &buffer[index]); index += 4;
-	    mb_put_binary_int(SWAPFLAG, store->sbm_center_count, &buffer[index]); index += 4;
-	    for (i=0;i<store->sbm_center_count;i++)
+	    mb_put_binary_int(SWAPFLAG, store->sbm_signal_beam, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->sbm_signal_count, &buffer[index]); index += 4;
+	    for (i=0;i<store->sbm_signal_count;i++)
 		{
-		mb_put_binary_float(SWAPFLAG, store->sbm_center_amp[i], &buffer[index]);
+		mb_put_binary_float(SWAPFLAG, store->sbm_signal_amp[i], &buffer[index]);
 		index += 4;
 		}
-	    group_count += 12 + 4 * store->sbm_center_count;
+	    group_count += 12 + 4 * store->sbm_signal_count;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -7216,7 +7560,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    group_cnt_index = index;
 	    index += 4;
 
-	    /* get center group */
+	    /* get message group */
 	    group_id = MBSYS_XSE_SBM_GROUP_MESSAGE;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->sbm_message_id, &buffer[index]); index += 4;
@@ -7227,6 +7571,96 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 		index++;
 		}
 	    group_count += 12 + store->sbm_message_len;
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* deal with sweep segments group */
+	if (store->sbm_sweepsegments == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+
+	    /* get sweep segments group */
+	    group_id = MBSYS_XSE_SBM_GROUP_SWEEPSEGMENTS;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    buffer[index] = store->sbm_sweep_direction; index++;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_azimuth, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->sbm_sweep_segments, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->sbm_sweep_seconds, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->sbm_sweep_micro, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_extrapolateazimuth, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_interpolatedazimuth, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_extrapolatepitch, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_interpolatedpitch, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_extrapolateroll, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_interpolatedroll, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_stabilizedangle, &buffer[index]); index += 4;
+	    group_count += 49;
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* deal with spacing mode group */
+	if (store->sbm_message == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+
+	    /* get spacing mode group */
+	    group_id = MBSYS_XSE_SBM_GROUP_MESSAGE;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    buffer[index] = store->sbm_spacing_mode; index++;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_spacing_equidistance, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_spacing_equidistance_min, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_spacing_equidistance_max, &buffer[index]); index += 4;
+	    group_count += 17 + store->sbm_message_len;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
