@@ -217,14 +217,15 @@
 
 /* maximum number of beams and pixels */
 #define	MBSYS_XSE_MAXBEAMS		630
-#define	MBSYS_XSE_MAXPIXELS		4096
-#define	MBSYS_XSE_MAXSAMPLES		8192
+#define	MBSYS_XSE_MAXPIXELS		32768
+#define	MBSYS_XSE_MAXSAMPLES		32768
 #define	MBSYS_XSE_MAXSVP		200
 #define MBSYS_XSE_MAXDRAFT		200
+#define MBSYS_XSE_MAXPROPERTIES		6
 #define	MBSYS_XSE_COMMENT_LENGTH	200
 #define	MBSYS_XSE_DESCRIPTION_LENGTH	64
 #define	MBSYS_XSE_TIME_OFFSET		2177452800.0
-#define	MBSYS_XSE_BUFFER_SIZE		64000
+#define	MBSYS_XSE_BUFFER_SIZE		131072
 #define	MBSYS_XSE_MAX_SIZE		200
 #define	MBSYS_XSE_MAX_SENSORS		16
 #define	MBSYS_XSE_MAX_TRANSDUCERS	512
@@ -308,6 +309,8 @@
 #define MBSYS_XSE_MBM_GROUP_HITS		17
 #define MBSYS_XSE_MBM_GROUP_HEAVERECEIVE	18
 #define MBSYS_XSE_MBM_GROUP_AZIMUTH		19
+#define MBSYS_XSE_MBM_GROUP_PROPERTIES		20
+#define MBSYS_XSE_MBM_GROUP_NORMAMP		21
 #define MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV		99
 
 #define MBSYS_XSE_SNG_FRAME			7
@@ -325,9 +328,22 @@
 #define MBSYS_XSE_SBM_GROUP_SETTINGS		5
 #define MBSYS_XSE_SBM_GROUP_BEAMS		6
 #define MBSYS_XSE_SBM_GROUP_GATES		7
-#define MBSYS_XSE_SBM_GROUP_RAW			8
-#define MBSYS_XSE_SBM_GROUP_CENTER		9
+#define MBSYS_XSE_SBM_GROUP_SLICE		8
+#define MBSYS_XSE_SBM_GROUP_SIGNAL		9
+#define MBSYS_XSE_SBM_GROUP_SIDESCAN		10
+#define MBSYS_XSE_SBM_GROUP_SHUTDOWN		11
+#define MBSYS_XSE_SBM_GROUP_PING		12
+#define MBSYS_XSE_SBM_GROUP_CALIBRATE		13
+#define MBSYS_XSE_SBM_GROUP_COLLECT		14
+#define MBSYS_XSE_SBM_GROUP_SURFACE		15
+#define MBSYS_XSE_SBM_GROUP_HYDROPHONE		16
+#define MBSYS_XSE_SBM_GROUP_PROJECTOR		17
+#define MBSYS_XSE_SBM_GROUP_BIAS		18
+#define MBSYS_XSE_SBM_GROUP_ACKNOWLEDGE		19
+#define MBSYS_XSE_SBM_GROUP_WARNING		20
 #define MBSYS_XSE_SBM_GROUP_MESSAGE		21
+#define MBSYS_XSE_SBM_GROUP_SWEEPSEGMENTS	40
+#define MBSYS_XSE_SBM_GROUP_SPACINGMODE		50
 
 #define MBSYS_XSE_MSG_FRAME			14
 #define MBSYS_XSE_ATT_FRAME			15
@@ -357,6 +373,8 @@ struct mbsys_xse_beam_struct
 	unsigned int hits;
 	double      heavereceive;
 	double      azimuth;
+        short       normamp;
+        float       frequency;
 	};
 
 struct mbsys_xse_struct
@@ -470,6 +488,8 @@ struct mbsys_xse_struct
 	double	svp_temperature[MBSYS_XSE_MAXSVP];	/* degree celcius */
 	double	svp_pressure[MBSYS_XSE_MAXSVP];	/* bar */
 	double	svp_ssv;		/* m/s */
+        double  svp_ssv_depth;          /* m */
+        char    svp_ssv_depthflag;      /* 0 = invalid depth, otherwise depth valid */
 
 	/* position (navigation frames) */
 	int	nav_group_general;	/* boolean flag */
@@ -556,6 +576,8 @@ struct mbsys_xse_struct
 	int	mul_group_hits;		/* boolean flag - hits group read */
 	int	mul_group_heavereceive;	/* boolean flag - heavereceive group read */
 	int	mul_group_azimuth;	/* boolean flag - azimuth group read */
+	int	mul_group_properties;	/* boolean flag - properties group read */
+	int	mul_group_normamp;	/* boolean flag - normalized amplitude group read */
 	int	mul_group_mbsystemnav;	/* boolean flag - mbsystemnav group read */
 	int	mul_source;		/* sensor id */
 	unsigned int	mul_sec;	/* sec since 1/1/1901 00:00 */
@@ -573,6 +595,26 @@ struct mbsys_xse_struct
 	double	mul_heading;		/* heading (radians) */
 	double	mul_speed;		/* speed (m/s) */
 	struct mbsys_xse_beam_struct beams[MBSYS_XSE_MAXBEAMS];
+        int     mul_num_properties;     /* number of properties */
+        unsigned short mul_properties_type[MBSYS_XSE_MAXPROPERTIES];
+        double  mul_properties_value[MBSYS_XSE_MAXPROPERTIES];
+        char    mul_properties_reserved[40];
+        int     mul_normamp_num_beams;  /* number of beams */
+        int     mul_normamp_flags;      /* multi-frequency flag:
+                                            0=one frequency is written,
+                                            1=one frequency is written for each beam */
+        float   mul_normamp_along_beamwidth;    /* along track beam width for center beam (radians) */
+        float   mul_normamp_across_beamwidth;   /* across track beam width for center beam (radians) */
+        short   mul_normamp_amp[MBSYS_XSE_MAXBEAMS];
+                                        /* Normalized Amplitude of Bottom Echo per Beam.
+                                            All System Gain Values (Receiver Gain, Source
+                                            Level, etc.) have been removed from this value.
+                                            System independent losses are not part of
+                                            the normalization! (Beam Order is the same as
+                                            in the Angle Group (Id 10) ) */
+        float   mul_normamp_frequency[MBSYS_XSE_MAXBEAMS];
+                                        /* System Frequency (Number of Values depends on
+                                            Multi-Frequency- Flag, see above) */
 
 	/* survey sidescan (sidescan frames) */
 	int	sid_frame;		/* boolean flag - sidescan frame read */
@@ -642,7 +684,9 @@ struct mbsys_xse_struct
 	/* seabeam (seabeam frames) */
 	int	sbm_properties;		/* boolean flag - sbm properties group read */
 	int	sbm_hrp;		/* boolean flag - sbm hrp group read */
-	int	sbm_center;		/* boolean flag - sbm center group read */
+	int	sbm_signal;		/* boolean flag - sbm signal group read */
+	int	sbm_sweepsegments;	/* boolean flag - sbm sweep segments group read */
+	int	sbm_spacingmode;	/* boolean flag - sbm spacing mode group read */
 	int	sbm_source;		/* sensor id */
 	int	sbm_message;		/* sensor id */
 	unsigned int	sbm_sec;	/* sec since 1/1/1901 00:00 */
@@ -662,12 +706,28 @@ struct mbsys_xse_struct
 	double	sbm_heave;		/* heave (m) */
 	double	sbm_roll;		/* roll (radians) */
 	double	sbm_pitch;		/* pitch (radians) */
-	int	sbm_center_beam;	/* beam number for center beam profile */
-	int	sbm_center_count;	/* number of samples in center beam profile */
-	float	sbm_center_amp[MBSYS_XSE_MAXSAMPLES];	/* center beam profile values */
+	int	sbm_signal_beam;	/* beam number for signal */
+	int	sbm_signal_count;	/* number of samples in signal */
+	float	sbm_signal_amp[MBSYS_XSE_MAXSAMPLES];	/* signal values */
 	int	sbm_message_id;		/* seabeam message id */
 	int	sbm_message_len;	/* seabeam message length */
 	char	sbm_message_txt[MBSYS_XSE_COMMENT_LENGTH]; /* seabeam message */
+        char    sbm_sweep_direction;    /* sweep direction 0=static, 1=port, 2=starboard */
+        float   sbm_sweep_azimuth;      /* effective azimuth (radians) */
+        unsigned int    sbm_sweep_segments;     /* number of segments */
+        unsigned int    sbm_sweep_seconds;      /* seconds since start of ping and end of sweep segment */
+        unsigned int    sbm_sweep_micro;        /* microseconds of seconds */
+        float   sbm_sweep_extrapolateazimuth;   /* extrapolated azimuth at center of sweep segment (radians) */
+        float   sbm_sweep_interpolatedazimuth;  /* interpolated azimuth at center of sweep segment (radians) */
+        float   sbm_sweep_extrapolatepitch;     /* extrapolated pitch at center of sweep segment (radians) */
+        float   sbm_sweep_interpolatedpitch;    /* interpolated pitch at center of sweep segment (radians) */
+        float   sbm_sweep_extrapolateroll;      /* extrapolated roll at center of sweep segment (radians) */
+        float   sbm_sweep_interpolatedroll;     /* interpolated roll at center of sweep segment (radians) */
+        float   sbm_sweep_stabilizedangle;      /* sweep segment stabilized angle (radians) */
+        char    sbm_spacing_mode;               /* spacing mode: 0=equiangle, 1=equidistant */
+        float   sbm_spacing_equidistance;       /* equidistance (percentage of center depth) */
+        float   sbm_spacing_equidistance_min;   /* equidistance minimum value (percentage of center depth) */
+        float   sbm_spacing_equidistance_max;   /* equidistance maximum value (percentage of center depth) */
 
 	/* comment */
 	int	com_source;		/* sensor id */
