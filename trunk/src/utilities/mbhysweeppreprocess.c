@@ -68,7 +68,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mbhysweeppreprocess";
 	char help_message[] =  "mbhysweeppreprocess reads a Hysweep HSX format file, interpolates the\nasynchronous navigation and attitude onto the multibeam data, \nand writes a new HSX file with that information correctly embedded\nin the multibeam data.";
-	char usage_message[] = "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias -Dsonardepthfile -Idatalist -L -Mnavformat -Nnavfile -Pprojection -Ttimelag -H -V]";
+	char usage_message[] = "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias -Dsonardepthfile -Idatalist -Jprojection -L -Mnavformat -Nnavfile -Ttimelag -H -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -270,7 +270,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:F:f:I:i:K:k:LlM:m:N:n:O:o:P:p:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:D:d:F:f:I:i:J:j:K:k:LlM:m:N:n:O:o:T:t:VvHh")) != -1)
 	  switch (c) 
 		{
 		case 'H':
@@ -344,6 +344,12 @@ int main (int argc, char **argv)
 			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
+		case 'J':
+		case 'j':
+			sscanf (optarg,"%s", proj4command);
+			projection_set = MB_YES;
+			flag++;
+			break;
 		case 'K':
 		case 'k':
 			sscanf (optarg,"%d", &klugemode);
@@ -374,12 +380,6 @@ int main (int argc, char **argv)
 		case 'o':
 			sscanf (optarg,"%s", ofile);
 			ofile_set  = MB_YES;
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf (optarg,"%s", proj4command);
-			projection_set = MB_YES;
 			flag++;
 			break;
 		case 'T':
