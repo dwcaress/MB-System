@@ -130,7 +130,7 @@ corresponds to the revision id in the archive).
 
 Since 2004 a major theme of \fBMB-System\fP development has been the processing of multibeam, sidescan,
 and subbottom profiler data collected on submerged platforms, particularly autonomous
-underwater vehicles (AUVs). 
+underwater vehicles (AUVs).
 
 .SH WHAT'S NEW ABOUT VERSION 5
 The version 5.0 release of \fBMB-System\fP included a number of changes and improvements relative
@@ -632,9 +632,17 @@ marked with an *:
  \fBmb7k2jstar\fP: Extract Jstar format (format 132) sidescan
  		and subbottom data from Reson 7k (format 88)
  		data files.
- \fBmb7kpreprocess\fP: Preprocess Reson 7k data (format 88),
+ \fBmb7k2ss\fP: Extract sidescan sonar data from Reson 7k format
+ 		data, bins and lays the sidescan onto the
+ 		seafloor, and outputs files in the MBF_MBLDEOIH
+ 		formst (MBIO format 71).
+ \fBmb7kpreprocess\fP: Preprocess Reson 7k data (MBIO format 88),
  		including applying time lag and biases to
  		attitude and navigation data.
+ \fBmbhysweeppreprocess\fP: Preprocess multibeam data in the
+ 		Hysweep HSX format (MBIO format 201).
+ \fBmbkongsbergpreprocess\fP: Preprocess data from third generation
+ 		Kongsberg multibeam sonars (MBIO formats 58 and 59).
  \fBmbbackangle\fP:  Generates tables of the average
  		amplitude or sidescan values as a
  		function of the grazing angle with
@@ -846,9 +854,12 @@ functionality of the various programs.
 
 The following data processing stream is recommended for
 data obtained with SeaBeam 2100 series multibeam sonars.
-SeaBeam 2112 sonars are currently in use on the R/V Knorr
-(operated by the Woods Hole Oceanographic Institution),
-the R/V Ronald Brown (operated by NOAA), among other vessels.
+A number of SeaBeam 2112 sonars were installed on academic
+research vessels during the 1990's, including the R/V Knorr
+and R/V Atlantis operated by the Woods Hole Oceanographic
+Institution, the R/V Revelle operated by the Scripps Institution
+of Oceanography, the R/V Ronald Brown operated by NOAA,
+R/V Mirai and R/V Kairai operated by JAMSTEC and other vessels.
 This same approach is appropriate for data from all other
 multibeam sonars, with small variations. The issues and
 differences associated with data from certain other types
@@ -1280,13 +1291,93 @@ shading magnitude of 0.2 would produce, so we use -A0.5:
  		-Osb199411211212_bathss3d
  	ZGridBathSS3D.cmd
 
-.SH PROCESSING SIMRAD MULTIBEAM DATA
+.SH PROCESSING THIRD GENERATION KONGSBERG MULTIBEAM DATA
+
+The current generation of Kongsberg multibeam sonars (EM122, EM302, EM710)
+record data in files typically named with a *.all suffix. These binary
+files consist of many different data records, most of which are
+similarly structure but distinct from the records output by the
+earlier generations of Kongsberg (formerly Simrad) multibeams described
+in a later section. The raw Kongsberg format is supported in \fBMB-System\fP
+as format 58. However, format 58 lacks places to store some information
+that is important to processing. In particular, the raw Kongsberg format
+does not store beam flags, so the only to apply bathymetry edits is
+to null the flagged beams. This is not recommended, as it precludes
+unflagging flagged beams later determined to be good.
+
+Also, the raw Kongsberg format stores the intial sidescan samples derived from subsampling
+the bottom returns in each of the formed beams. The locations of these
+samples on the seafloor are irregular, and the number of samples varies
+greatly from ping to ping. This raw sidescan is not well suited for
+mapmaking or processing because of the irregular locations. \fBMB-System\fP
+automatically bins and averages the available sidescan samples into
+a regularly spaced 1024 pixels with pixel sizes that vary only slightly
+from ping to ping. This resampled sidescan is what appears in swath plots
+and in the statistics reported by \fBmbinfo\fP. The raw format has no
+space to store the rebinned sidescan, so any corrections or other
+processing applied to the sidescan in formats 58 is lost.
+
+We have defined a processing format (59) for Kongsberg multibeam that stores
+beam flags and rebinned sidescan in addition to all of the information
+in the raw file format 58. We strongly recommend that third generation
+Kongsberg multibeam data be translated into format 59 before processing. This can
+be accomplished, albeit unsatisfactorily, with mbcopy. For example, given a raw EM122 file called
+0006_20111219_201329_METEOR_EM122.all, we can translate it to format 59 using:
+ 	mbcopy -F58/59 -I 0006_20111219_201329_METEOR_EM122.all \\
+ 		-O 0006_20111219_201329_METEOR_EM122.mb59
+.br
+If we have a number of EM122 files referenced through a datalist file called
+datalist_raw.mb-1, we can translate all of them using the macro \fBmbm_copy\fP:
+ 	mbm_copy -F59 -I datalist_raw.mb-1
+.br
+This macro simply executes \fBmbcopy\fP for each of the data referenced in
+the input datalist structure.
+
+The problem with using \fBmbcopy\fP for translation
+between formats 58 and 59 is that the navigation, heading, and attitude
+contained in format 58 files are purely asynchronous, which means these values
+are defined according to their own time stamps and not the time stamps
+of the multibeam sonar pings. When format 58 data are read, the navigation,
+heading and attitude values must be read from their own data records and
+interpolated (or extrapolated) onto the time stamps of the multibeam pings
+for each survey record. This works fine if the relevant asynchronous navigation
+and attitude data are always found in the data files before the survey data
+from the same time, but that advantageious timing is neither assured nor common.
+A better approach is to use the tool \fBmbkongsbergpreprocess\fP to preprocess
+the Kongsberg multibeam data. This program makes two passes through reading
+each input file, the first to read and store the navigation and attitude data,
+and the second to properly interpolate the navigation and attitude values onto the
+multibeam survey pings. The usage is of the form:
+ 	mbkongsbergpreprocess -I datalist_raw.mb-1 -V
+
+One further feature of Simrad multibeam data processing should be noted.
+Given that the raw sidescan samples are derived directly from the
+bottom returns identified by the sonar for each beam, it follows that
+whenever a bottom return pick is erroneous, the sidescan samples
+associated with that beam are also erroneous. Consequently, the binned
+sidescan shoulde be reprocessed following the application of beam flags
+to exclude the incorrect sidescan samples from the final imagery.
+Recalculating the Simrad sidescan is an \fBmbprocess\fP option which
+can set using \fBmbset\fP. To turn on sidescan calculation, we use:
+ 	mbset -I 0006_20111219_201329_METEOR_EM122.mb59 \\
+ 		=PSSRECALCMOD:1 -V
+.br
+We can also turn off sidescan recalculation using:
+ 	mbset -I 0006_20111219_201329_METEOR_EM122.mb59 \\
+ 		=PSSRECALCMOD:0 -V
+
+In practice, \fBmbedit\fP, \fBmbeditviz\fP and \fBmbclean\fP automatically set the
+parameter file to turn on sidescan recalculation when writing an
+"edit save file" for format 59 data, so users should not have
+to set this parameter manually.
+
+.SH PROCESSING OLDER KONGSBERG (FORMERLY SIMRAD) MULTIBEAM DATA
 
 The older series of Simrad multibeam sonars (EM100, EM950, EM1000, EM12,
-EM12D, EM121A) record raw data
+EM12D, EM121A) recorded raw data
 in files typically named with an "_raw.all" suffix. These older data
 are supported in \fBMB-System\fP using format 51. The data
-from the newer Simrad multibeams (EM3000, EM2000, EM1002, EM300,
+from the second generation Simrad (Kongsberg) multibeams (EM3000, EM2000, EM1002, EM300,
 EM120) also come in files with the "_raw.all" suffix, but the
 format is different, and is supported by \fBMB-System\fP as format
 56. \fBMB-System\fP programs can automatically discern the difference
