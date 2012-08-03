@@ -28,6 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.3.1981       August 2, 2012
 * Version 5.3.1980       July 13, 2012
 * Version 5.3.1955       May 16, 2012
   Version 5.3.1941       March 6, 2012
@@ -187,7 +188,15 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
------> 5.3.1978
+-----> 5.3.1981
+
+Fixed problem with mbprocess in which the heading was unexpectedly replaced by course-made-good.
+Now this can only happen with HEADINGMODE:1 or HEADINGMODE:2 in the parameter file.
+
+Fixed error in the definition of the OMG HDCS format in mbf_omghdcsj.h
+This fix provided by Bob Covill.
+
+-----> 5.3.1980
 
 Augmented support for L3 XSE format (94) so that data from recent SeaBeam 3000 and SeaBeam 3050
 multibeams can be processed.
