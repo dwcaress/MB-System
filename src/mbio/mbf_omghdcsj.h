@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbf_omghdcsj.h defines the data structures used by MBIO functions
- * to store multibeam data read from the  MBF_OMGHDCSJ format (MBIO id 141).  
+ * to store multibeam data read from the  MBF_OMGHDCSJ format (MBIO id 141).
  *
  * Author:	D. W. Caress
  * Date:	March 10, 1999
@@ -47,8 +47,8 @@
 /*
  * Notes on the MBF_OMGHDCSJ data format:
  *   1. The OMG-HDCS format is a collection of similar data
- *      formats used by the seafloor mapping software 
- *      developed by Dr. John Hughes Clarke (Ocean Mapping 
+ *      formats used by the seafloor mapping software
+ *      developed by Dr. John Hughes Clarke (Ocean Mapping
  *      Group of the University of New Brunswick). A variety
  *      of sonars are supported in OMG-HDCS.
  *   2. OMG-HDCS files all begin with a summary header that
@@ -66,12 +66,12 @@
  *      amplitude files. The sidescan files have the suffix
  *      ".ss_data" added to the end of the primary file's name.
  *   5. Comment records are encoded in MBIO by setting the first
- *      eight bytes of the data record header (profile) to '#' 
+ *      eight bytes of the data record header (profile) to '#'
  *      values. The profile part of the comment record will have
  *      the same size as expected for data from the tool type
  *      listed in the summary. However, the data section for
  *      comment records will always be 256 bytes long regardless
- *      of the tool type. This mechanism is supported only by 
+ *      of the tool type. This mechanism is supported only by
  *      MB-System.
  *
  */
@@ -89,7 +89,7 @@
 #define MBF_OMGHDCSJ_BEAM_LENGTH	2
 #define MBF_OMGHDCSJ_IMAGE_LENGTH	3
 
-static int mbf_omghdcsj_tooldefs1[MBSYS_HDCS_NUM_TOOLS][4] = 
+static int mbf_omghdcsj_tooldefs1[MBSYS_HDCS_NUM_TOOLS][4] =
 		    {/*                            PRS     no. DRS  IRS */
                     /*   0:SingleBeam,        */  { 44,     1,   8, 0},
                     /*   1:ELAC BottomChartMk1*/  { 64,    56,  44, 0},
@@ -98,19 +98,19 @@ static int mbf_omghdcsj_tooldefs1[MBSYS_HDCS_NUM_TOOLS][4] =
                     /*   4:FanSweep10 (old)   */  { 44,    52,  36, 0},
                     /*   5:Seabeam "Classic"  */  { 24,    19,  24, 0},
                     /*   6:EM3000S            */  { 64,   128,  64, 0},
-                    /*   7:Navitronics        */  { 44,    33,  36, 0},
+                    /*   7:ROSS sweep         */  { 44,    16,  12, 0},
                     /*   8:EM12(single)       */  { 64,    81,  64, 0},
                     /*   9:EM100+Amplitudes   */  { 64,    32,  44, 0},
                     /*  10:EM1000             */  { 64,    60,  64, 0},
                     /*  11:LADS secondary     */  { 44,    24,  36, 0},
                     /*  12:EM3000D            */  { 64,   256,  64, 0},
-                    /*  13:Seabeam 2100       */  { 44,   120,  44, 0},
-                    /*  14:ISIS Submetrix     */  { 44,   100,  44, 0},
+                    /*  13:Seabeam 2100       */  { 44,   151,  44, 0},
+                    /*  14:ISIS Submetrix     */  { 44,   128,  44, 0},
                     /*  15:EM-1000 (justampl) */  { 44,    60,  44, 0},
                     /*  16:SB2K               */  { 64,   121,  64, 0},
                     /*  17:Seabat9001         */  { 44,    60,  44, 0},
                     /*  18:FanSweep 10 A      */  { 64,    52,  64, 0},
-                    /*  19:FanSweep 20        */  { 64,  1440,  64, 0},
+                    /*  19:FanSweep 20        */  { 64,   600,  64, 0},
                     /*  20:ISIS SWA format    */  { 64,  1280,  64, 0},
                     /*  21:SeaBeam 1180 Mk II */  { 64,    42,  64, 0},
                     /*  22:SeaBat 8101        */  { 64,   101,  64, 0},
@@ -120,7 +120,7 @@ static int mbf_omghdcsj_tooldefs1[MBSYS_HDCS_NUM_TOOLS][4] =
 		    /*  26:HydroSweep MD2     */  {280,   320,  76, 0},
 		    /*  23:EM1002             */  { 88,   111,  76, 0},
 		    /*  28:HUMMIN'BIRD        */  { 64,     6,  44, 0},
-		    /*  29:Knudsen 320        */  {  0,     2,   0, 0},
+		    /*  29:Knudsen 320        */  { 88,     2,  76, 0},
 		    /*  30: EM 120            */  { 88,   191,  76, 0},
 		    /*  31:SeaBat 8125        */  { 64,   240,  64, 0},
 		    /*  32:SeaBat 8111        */  { 64,   101,  64, 0},
@@ -139,38 +139,38 @@ static int mbf_omghdcsj_tooldefs1[MBSYS_HDCS_NUM_TOOLS][4] =
 		    /*  45:OMG GLORIA	      */  { 1,    1024, 1,  0}
 
 		    };
-static int mbf_omghdcsj_tooldefs2[MBSYS_HDCS_NUM_TOOLS][4] = 
+static int mbf_omghdcsj_tooldefs2[MBSYS_HDCS_NUM_TOOLS][4] =
 		    {/*                            PRS     no. DRS  IRS */
-                    /*   0:SingleBeam,        */  { 32,     1,   5, 0},
+                    /*   0:SingleBeam,        */  { 32,     1,  20, 0},
                     /*   1:ELAC Bottom_Chart  */  { 32,    56,  12, 0},
                     /*   2:EM12(dual)         */  { 32,   162,  00, 0},
                     /*   3:EM100 (just depths)*/  { 32,    32,  00, 0},
                     /*   4:FanSweep           */  { 32,    52,  00, 0},
                     /*   5:Seabeam            */  { 32,    19,  10, 0},
                     /*   6:EM3000S            */  { 32,   128,  20, 0},
-                    /*   7:Navitronics        */  { 32,    33,  00, 0},
-                    /*   8:EM12(single)       */  { 32,    81,  00, 0},
+                    /*   7:ROSS sweep         */  { 32,    16,  10, 0},
+                    /*   8:EM12(single)       */  { 32,    81,  20, 0},
                     /*   9:EM100+Amplitudes   */  { 32,    32,  12, 0},
                     /*  10:EM1000             */  { 32,    60,  20, 0},
                     /*  11:LADS secondary     */  { 32,    24,  12, 0},
                     /*  12:EM3000D            */  { 32,   256,  20, 0},
-                    /*  13:Seabeam 2100       */  { 32,   120,  12, 0},
-                    /*  14:ISIS Submetrix     */  { 32,   100,  20, 0},
+                    /*  13:Seabeam 2100       */  { 32,   151,  12, 0},
+                    /*  14:ISIS Submetrix     */  { 32,   128,  20, 0},
                     /*  15:EM-1000 (justampl) */  { 32,    60,  00, 0},
                     /*  16:SB2K               */  { 32,   121,  00, 0},
                     /*  17:Seabat9001         */  { 32,    60,  12, 0},
                     /*  18:FanSweep 10 A      */  { 32,    52,  20, 0},
-                    /*  19:FanSweep 20        */  { 32,  1440,  12, 0},
+                    /*  19:FanSweep 20        */  { 32,   600,  12, 0},
                     /*  20:ISIS SWA format    */  { 32,  1280,   8, 0},
-                    /*  21:SeaBeam 1180 Mk II */  { 32,   126,  12, 0},
+                    /*  21:SeaBeam 1180 Mk II */  { 32,    42,  12, 0},
                     /*  22:SeaBat 8101        */  { 32,   101,  12, 0},
                     /*  23:EM300              */  { 32,   137,  20, 0},
-                    /*  23:EM121A             */  { 32,   121,  20, 0},
+                    /*  24:EM121A             */  { 32,   121,  20, 0},
 		    /*  25:SM2000             */  { 32,   128,  20, 0},
 		    /*  26:HydroSweep MD2     */  { 32,   320,  20, 0},
 		    /*  27:EM1002             */  { 32,   111,  20, 0},
 		    /*  28:HUMMIN'BIRD        */  { 32,     6,  12, 0},
-		    /*  29:Knudsen 320        */  {  0,     2,   0, 0},
+		    /*  29:Knudsen 320        */  { 32,     2,  20, 0},
 		    /*  30: EM 120            */  { 32,   191,  20, 0},
 		    /*  31:SeaBat 8125        */  { 32,   240,  12, 0},
 		    /*  32:SeaBat 8111        */  { 32,   101,  12, 0},
@@ -188,33 +188,33 @@ static int mbf_omghdcsj_tooldefs2[MBSYS_HDCS_NUM_TOOLS][4] =
                     /*  44:SeaBat 7150        */  { 32,   880,  12, 0},
                     /*  45:OMG GLORIA        */   {  1,   1024,  1, 0}
 		    };
-static int mbf_omghdcsj_tooldefs3[MBSYS_HDCS_NUM_TOOLS][4] = 
+static int mbf_omghdcsj_tooldefs3[MBSYS_HDCS_NUM_TOOLS][4] =
 		    {/*                            PRS     no. DRS  IRS */
-                    /*   0:SingleBeam,        */  { 32,     1,   5, 0},
+                    /*   0:SingleBeam,        */  { 32,     1,  20, 0},
                     /*   1:ELAC Bottom_Chart  */  { 32,    56,  12, 0},
                     /*   2:EM12(dual)         */  { 32,   162,  00, 0},
                     /*   3:EM100 (just depths)*/  { 32,    32,  00, 0},
                     /*   4:FanSweep           */  { 32,    52,  00, 0},
                     /*   5:Seabeam            */  { 32,    19,  10, 0},
-                    /*   6:EM3000S            */  { 32,   128,  20, 0},
-                    /*   7:Navitronics        */  { 32,    33,  00, 0},
-                    /*   8:EM12(single)       */  { 32,    81,  00, 0},
+                    /*   6:EM3000S            */  { 32,   128,  28, 0},
+                    /*   7:ROSS sweep         */  { 32,    16,  10, 0},
+                    /*   8:EM12(single)       */  { 32,    81,  28, 0},
                     /*   9:EM100+Amplitudes   */  { 32,    32,  12, 0},
-                    /*  10:EM1000             */  { 32,    60,  20, 0},
+                    /*  10:EM1000             */  { 56,    60,  28, 0},
                     /*  11:LADS secondary     */  { 32,    24,  12, 0},
-                    /*  12:EM3000D            */  { 32,   256,  20, 0},
-                    /*  13:Seabeam 2100       */  { 32,   120,  12, 0},
-                    /*  14:ISIS Submetrix     */  { 32,   100,  20, 0},
+                    /*  12:EM3000D            */  { 32,   256,  28, 0},
+                    /*  13:Seabeam 2100       */  { 56,   151,  28, 0},
+                    /*  14:ISIS Submetrix     */  { 36,   128,  28, 0},
                     /*  15:EM-1000 (justampl) */  { 32,    60,  00, 0},
                     /*  16:SB2K               */  { 32,   121,  00, 0},
-                    /*  17:Seabat9001         */  { 32,    60,  12, 0},
+                    /*  17:Seabat9001         */  { 32,    60,  20, 0},
                     /*  18:FanSweep 10 A      */  { 32,    52,  20, 0},
-                    /*  19:FanSweep 20        */  { 32,  1440,  12, 0},
+                    /*  19:FanSweep 20        */  {272,   600,  28, 0},
                     /*  20:ISIS SWA format    */  { 32,  1280,   8, 0},
                     /*  21:SeaBeam 1180 Mk II */  {272,    42,  28, 0},
-                    /*  22:SeaBat 8101        */  { 32,   101,  12, 0},
+                    /*  22:SeaBat 8101        */  {272,   101,  28, 0},
                     /*  23:EM300              */  { 56,   135,  28, 0},
-                    /*  23:EM121A             */  { 32,   121,  20, 0},
+                    /*  24:EM121A             */  { 32,   121,  28, 0},
 		    /*  25:SM2000             */  { 56,   128,  28, 0},
 		    /*  26:HydroSweep MD2     */  {272,   320,  28, 0},
 		    /*  27:EM1002             */  { 56,   111,  28, 0},
@@ -305,9 +305,9 @@ struct mbf_omghdcs_profile_subparams_struct
 
 /* define profile record structure */
 struct mbf_omghdcsj_profile_struct{
-        int    status;		/* status is either OK (0) 
+        int    status;		/* status is either OK (0)
 					or no nav (1)
-					or unwanted for gridding (2) 
+					or unwanted for gridding (2)
 					or comment record (999) (MB-System only) */
         int    numDepths;	/* Number of depths in profile        */
         int    numSamples;	/* Number of sidescan samples in parallel file        */
@@ -320,7 +320,7 @@ struct mbf_omghdcsj_profile_struct{
         int    vesselRoll;	/* Vessel roll (100 nRadians)         */
         int    tide;		/* Tide (mm)                          */
         int    vesselVelocity;	/* Vessel Velocity (mm/s)
-					note - transducer pitch is 
+					note - transducer pitch is
 					generally tucked into the vel field     */
 
 	/* the above fields are sufficient for original EM100 data without imagery
@@ -332,10 +332,10 @@ struct mbf_omghdcsj_profile_struct{
         int	soundVelocity; 	/* mm/s */
 	int	lengthImageDataField;
         int	pingNo;
-	char	mode;  
-	char	Q_factor;  
+	char	mode;
+	char	Q_factor;
 	char	pulseLength;   /* centisecs*/
-	mb_u_char unassigned;  
+	mb_u_char unassigned;
 
 	/* the fields below were added to cope with EM300 */
 	unsigned short td_sound_speed;
@@ -407,9 +407,9 @@ struct mbf_omghdcsj_profile_struct{
 
 	/* units of 1,000,000,000 of the Optech laser microsecond(?) time stamp */
   	unsigned int laser_timestampRef;
-		
+
   	/* Added to accomodate EM710 (and EM302/EM122) transmit sector info */
-  
+
   	unsigned int tx_sector_offset;
   	unsigned short num_tx_sectors;
 
@@ -446,16 +446,16 @@ struct mbf_omghdcsj_beam_struct {
         int	processedDepth;    /* Depth (mm)                            */
 	int	timeOffset;
         int	depthAccuracy;    /* Depth accuracy (mm)                   */
-	mb_u_char reflectivity;  
-	char	Q_factor;  /* phase or amplitude detection */ 
-	char	beam_no;  
+	mb_u_char reflectivity;
+	char	Q_factor;  /* phase or amplitude detection */
+	char	beam_no;
 	char	freq;   /* 12.7, 13.0, 13.3, 95.0, Smii, GLORIA */
 
-	char	calibratedBackscatter; /* effects of power/TVG and atten. 
+	char	calibratedBackscatter; /* effects of power/TVG and atten.
 					    removed*/
-	char	mindB;		
+	char	mindB;
 	char	maxdB;
-	mb_u_char	pseudoAngleIndependentBackscatter;		
+	mb_u_char	pseudoAngleIndependentBackscatter;
 					/* corrected for mean angular dependence
 					    for geological visualisation */
 	int	range;   /* other option on EM 12 */
@@ -476,14 +476,14 @@ struct mbf_omghdcsj_beam_struct {
 
 	mb_u_char TxSector;
 	unsigned int timestampOffset; /* really is a 64 bit integer, trying to compress */
-				/* would'nt even need if didn't have to relate wavefile 
+				/* would'nt even need if didn't have to relate wavefile
 			 	by this number */
-	unsigned short no_RAMAN; 
-	unsigned short no_IR; 
-	unsigned short no_GAPD; 
+	unsigned short no_RAMAN;
+	unsigned short no_IR;
+	unsigned short no_GAPD;
 	unsigned short no_PMT;
-	mb_u_char prim_depth_conf; 
-	mb_u_char seco_depth_conf; 
+	mb_u_char prim_depth_conf;
+	mb_u_char seco_depth_conf;
 	signed short scan_azimuth; 	/* 100ths of degree */
 	unsigned short nadir_angle; 	/* 100ths of degree */
 				/* always dynamically compressed for v4 using scaling factor */
@@ -516,7 +516,7 @@ struct mbf_omghdcsj_data_struct
 	short	ss_proc[MBF_OMGHDCSJ_MAX_PIXELS];
 				/* the processed sidescan ordered port to starboard */
 	int	ssalongtrack[MBF_OMGHDCSJ_MAX_PIXELS];
-				/* the processed sidescan alongtrack distances 
+				/* the processed sidescan alongtrack distances
 					in mm */
 	};
 
@@ -723,7 +723,7 @@ struct mbf_omghdcsj_struct
 /* Added for Reson 7K systems */
 #define PROF_ui_sonar_settings_offset	0x00000001
 #define PROF_ui_ping_number		0x00000002
-#define PROF_us_multi_ping_sequence	0x00000004	
+#define PROF_us_multi_ping_sequence	0x00000004
 #define PROF_ui_num_beams		0x00000008
 #define PROF_uc_layer_compensation_flag 0x00000010
 #define PROF_f_bs_beam_position		0x00000020
@@ -732,4 +732,3 @@ struct mbf_omghdcsj_struct
 #define PROF_us_bs_current_beam_number  0x00000100
 #define PROF_uc_bs_sample_descriptor	0x00000200
 #define PROF_ui_snippet_sample_descriptor 0x00000400
-

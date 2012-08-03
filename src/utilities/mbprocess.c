@@ -360,6 +360,10 @@ and mbedit edit save files.\n";
 	int	pixels_ss;
 	void	*imbio_ptr = NULL;
 	void	*ombio_ptr = NULL;
+        int     nav_source;
+        int     heading_source;
+	int     vru_source;
+        int     svp_source;
 
 	/* mbio read and write values */
 	void	*store_ptr = NULL;
@@ -493,6 +497,7 @@ and mbedit edit save files.\n";
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	double	del_time, dx, dy, dist;
+        double  headingcalc, speedcalc;
 	double	lever_x = 0.0;
 	double	lever_y = 0.0;
 	double	lever_heave = 0.0;
@@ -3551,6 +3556,12 @@ and mbedit edit save files.\n";
 		exit(error);
 		}
 
+        /* get data kind sources for input format */
+        mb_format_source(verbose, &(process.mbp_format),
+		&nav_source, &heading_source,
+		&vru_source, &svp_source,
+		&error);
+
 	/*--------------------------------------------
 	  read the input file to get first ssv if necessary
 	  --------------------------------------------*/
@@ -5218,7 +5229,7 @@ alpha, beta, lever_heave);*/
 		    }
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA
-			    || kind == MB_DATA_NAV)
+			    || kind == nav_source)
 			&& calculatespeedheading == MB_YES)
 			{
 			if (process.mbp_nav_mode == MBP_NAV_ON)
@@ -5251,22 +5262,38 @@ alpha, beta, lever_heave);*/
 			    dist = sqrt(dx*dx + dy*dy);
 			    if (del_time > 0.0)
 				{
-				speed = 3.6*dist/del_time;
+				speedcalc = 3.6*dist/del_time;
 				}
 			    else
-				speed = speed_old;
-			    if (dist > 0.0)
+				speedcalc = speed_old;
+			    if (dist > 0.0 && del_time > 0.0)
 				{
-				heading = RTD*atan2(dx/dist,dy/dist);
+				headingcalc = RTD*atan2(dx/dist,dy/dist);
+                                if (headingcalc < 0.0)
+                                    headingcalc += 360.0;
 				}
 			    else
-				heading = heading_old;
+				headingcalc = heading_old;
 			    }
+                        else
+                            {
+                            speedcalc = speed;
+                            headingcalc = heading;
+                            }
+                        if (process.mbp_heading_mode == MBP_HEADING_CALC
+                                || process.mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+                                {
+                                heading = headingcalc;
+                                }
+                        else
+                                {
+                                speed = speedcalc;
+                                }
 			time_d_old = time_d;
 			navlon_old = navlon;
 			navlat_old = navlat;
-			heading_old = heading;
-			speed_old = speed;
+			heading_old = headingcalc;
+			speed_old = speedcalc;
 			}
 
 		/* adjust heading if required */
