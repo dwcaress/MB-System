@@ -8626,8 +8626,11 @@ mbnavadjust_invertnav()
 		    }
 
 		/* print out warning */
-		fprintf(stderr,"\nThe inversion was not performed because there are one or more zero offset uncertainty values.\n");
-		fprintf(stderr,"Please fix the ties with problems noted above before trying again.\n");
+		if (ok_to_invert == MB_NO)
+			{
+			fprintf(stderr,"\nThe inversion was not performed because there are one or more zero offset uncertainty values.\n");
+			fprintf(stderr,"Please fix the ties with problems noted above before trying again.\n\n");
+			}
 		}
 
 

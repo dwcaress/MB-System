@@ -1,4 +1,4 @@
-.TH mbkongsbergpreprocess 1 "24 June 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mbkongsbergpreprocess 1 "15 August 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbkongsbergpreprocess\fP - performs preprocessing of data from third generation Kongsberg multibeam sonars (e.g. EM122, EM302, EM710).
 
@@ -6,7 +6,7 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbkongsbergpreprocess\fP [\fB-A\fP \fB-F\fP\fIformat\fP
+\fBmbkongsbergpreprocess\fP [\fB-A\fP \fB-C\fP \fB-D\fP\fIoutputdirectory\fP \fB-F\fP\fIformat\fP
 \fB-I\fIfile \fB-O\fP\fIoutfile\fP \fB-SF\fP\fIdatatype/source\fP
 \fB-T\fP\fItimelag\fP \fB-H -V\fP]
 
@@ -70,6 +70,18 @@ soundings are recalculated by raytracing. Thus, if one needs to recalculate
 bathymetry with a new model for the sound speed structure of the water
 column (often called a sound velocity profile or SVP), the data should first
 be preprocessed using the \fB-A\fP option.
+.TP
+.B \-C
+.br
+This option causes \fBmbkongsbergpreprocess\fP to print counts of the many
+different data record types compising a Kongsberg data stream. The data record
+counts are output for each file and as totals from all files processed.
+.TP
+.B \-D
+\fIoutputdirectory\fP
+.br
+This option causes all format 59 output files to be placed in the specified directory
+\fIoutputdirectory\fP rather than parallel to the original "raw" files.
 .TP
 .B \-F
 \fIformat\fP

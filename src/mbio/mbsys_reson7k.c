@@ -782,6 +782,8 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		bathymetry->range[i] = 0.0;
 		bathymetry->quality[i] = 0;
 		bathymetry->intensity[i] = 0.0;
+		bathymetry->min_depth_gate[i] = 0.0;
+		bathymetry->max_depth_gate[i] = 0.0;
 		}
 	bathymetry->optionaldata = MB_NO;
 	bathymetry->frequency = 0.0;
@@ -925,8 +927,10 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	v2detectionsetup->minimum_nadir_search = 0.0;
 	v2detectionsetup->maximum_nadir_search = 0.0;
 	v2detectionsetup->automatic_filter_window = 0.0;
-	for (i=0;i<64;i++)
-		v2detectionsetup->reserved[i] = 0;
+	v2detectionsetup->applied_roll = 0.0;
+	v2detectionsetup->depth_gate_tilt = 0.0;
+	for (i=0;i<14;i++)
+		v2detectionsetup->reserved[i] = 0.0;
 	for (i=0;i<MBSYS_RESON7K_MAX_BEAMS;i++)
 		{
 		v2detectionsetup->beam_descriptor[i] = 0;
@@ -937,7 +941,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		v2detectionsetup->user_limits_min_sample[i] = 0;
 		v2detectionsetup->user_limits_max_sample[i] = 0;
 		v2detectionsetup->quality[i] = 0;
-		v2detectionsetup->reserved2[i] = 0;
+		v2detectionsetup->uncertainty[i] = 0;
 		}
 
 	/* Reson 7k beamformed magnitude and phase data (record 7018) */
@@ -3569,8 +3573,9 @@ int mbsys_reson7k_print_bathymetry(int verbose,
 	fprintf(stderr,"%s     sound_vel_flag:             %d\n",first,bathymetry->sound_vel_flag);
 	fprintf(stderr,"%s     sound_velocity:             %f\n",first,bathymetry->sound_velocity);
 	for (i=0;i<bathymetry->number_beams;i++)
-		fprintf(stderr,"%s     beam[%d]:  range:%f quality:%d intensity:%f\n",
-				first,i,bathymetry->range[i],bathymetry->quality[i],bathymetry->intensity[i]);
+		fprintf(stderr,"%s     beam[%d]:  range:%f quality:%d intensity:%f min_depth_gate:%f min_depth_gate:%f\n",
+				first,i,bathymetry->range[i],bathymetry->quality[i],bathymetry->intensity[i],
+				bathymetry->min_depth_gate[i],bathymetry->max_depth_gate[i]);
 	fprintf(stderr,"%s     optionaldata:               %d\n",first,bathymetry->optionaldata);
 	fprintf(stderr,"%s     frequency:                  %f\n",first,bathymetry->frequency);
 	fprintf(stderr,"%s     latitude:                   %f\n",first,bathymetry->latitude);
@@ -4088,11 +4093,17 @@ int mbsys_reson7k_print_v2detectionsetup(int verbose,
 	fprintf(stderr,"%s     minimum_nadir_search:       %f\n",first,v2detectionsetup->minimum_nadir_search);
 	fprintf(stderr,"%s     maximum_nadir_search:       %f\n",first,v2detectionsetup->maximum_nadir_search);
 	fprintf(stderr,"%s     automatic_filter_window:    %u\n",first,v2detectionsetup->automatic_filter_window);
-	fprintf(stderr,"%s     beam	descriptor pick flag amin amax umin umax quality reserve2\n",first);
+	fprintf(stderr,"%s     applied_roll:               %f\n",first,v2detectionsetup->applied_roll);
+	fprintf(stderr,"%s     depth_gate_tilt:            %f\n",first,v2detectionsetup->depth_gate_tilt);
+	for (i=0;i<14;i++)
+		{
+		fprintf(stderr,"%s     reserved[%2d]:               %f\n",first,i,v2detectionsetup->reserved[i]);
+		}
+	fprintf(stderr,"%s     beam	descriptor pick flag amin amax umin umax quality uncertainty\n",first);
 	fprintf(stderr,"%s     ---------------------------------------------------------\n",first);
 	for (i=0;i<v2detectionsetup->number_beams;i++)
 		{
-		fprintf(stderr,"%s     %3d %u %10.3f %u %u %u %u %u %u %u\n",
+		fprintf(stderr,"%s     %3d %u %10.3f %u %u %u %u %u %u %f\n",
 			first,i,v2detectionsetup->beam_descriptor[i],
 			v2detectionsetup->detection_point[i],
 			v2detectionsetup->flags[i],
@@ -4101,7 +4112,7 @@ int mbsys_reson7k_print_v2detectionsetup(int verbose,
 			v2detectionsetup->user_limits_min_sample[i],
 			v2detectionsetup->user_limits_max_sample[i],
 			v2detectionsetup->quality[i],
-			v2detectionsetup->reserved2[i]);
+			v2detectionsetup->uncertainty[i]);
 		}
 
 	/* print output debug statements */
