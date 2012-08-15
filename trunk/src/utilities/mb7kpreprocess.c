@@ -495,6 +495,18 @@ int main (int argc, char **argv)
 	/* MBARI data flag */
 	int	MBARIdata = MB_NO;
 
+	int	jtimedelay = 0;
+	int	jtimelag = 0;
+	int	jins = 0;
+	int	jrock = 0;
+	int	jdsl = 0;
+	int	jsonardepth = 0;
+	int	jdnav = 0;
+	int	jdaltitude = 0;
+	int	jdheading = 0;
+	int	jdattitude = 0;
+	int	jdsonardepth = 0;
+
 	int	interp_status;
 	double	soundspeed;
 	double	alpha, beta, theta, phi;
@@ -2948,7 +2960,7 @@ fprintf(stderr,"Applying timelag to %d nav data\n", ndat_nav);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, dat_nav_time_d[i], &timelag, &j,
+						ntimedelay, dat_nav_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -2958,7 +2970,7 @@ fprintf(stderr,"Applying timelag to %d nav data\n", ndat_nav);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_nav_time_d[i], &timelagm, &j,
+							ntimelag, dat_nav_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -2973,7 +2985,7 @@ fprintf(stderr,"Applying timelag to %d heading data\n", ndat_heading);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, dat_heading_time_d[i], &timelag, &j,
+						ntimedelay, dat_heading_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -2983,7 +2995,7 @@ fprintf(stderr,"Applying timelag to %d heading data\n", ndat_heading);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_heading_time_d[i], &timelagm, &j,
+							ntimelag, dat_heading_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -2998,7 +3010,7 @@ fprintf(stderr,"Applying timelag to %d attitude data\n", ndat_rph);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, dat_rph_time_d[i], &timelag, &j,
+						ntimedelay, dat_rph_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -3008,7 +3020,7 @@ fprintf(stderr,"Applying timelag to %d attitude data\n", ndat_rph);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_rph_time_d[i], &timelagm, &j,
+							ntimelag, dat_rph_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -3023,7 +3035,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth data\n", ndat_sonardepth);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, dat_sonardepth_time_d[i], &timelag, &j,
+						ntimedelay, dat_sonardepth_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -3033,7 +3045,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth data\n", ndat_sonardepth);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_sonardepth_time_d[i], &timelagm, &j,
+							ntimelag, dat_sonardepth_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -3048,7 +3060,7 @@ fprintf(stderr,"Applying timelag to %d altitude data\n", ndat_altitude);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, dat_altitude_time_d[i], &timelag, &j,
+						ntimedelay, dat_altitude_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -3058,7 +3070,7 @@ fprintf(stderr,"Applying timelag to %d altitude data\n", ndat_altitude);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_altitude_time_d[i], &timelagm, &j,
+							ntimelag, dat_altitude_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -3074,7 +3086,7 @@ fprintf(stderr,"Applying timelag to %d INS data\n", nins);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, ins_time_d[i], &timelag, &j,
+						ntimedelay, ins_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -3084,7 +3096,7 @@ fprintf(stderr,"Applying timelag to %d INS data\n", nins);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, ins_time_d[i], &timelagm, &j,
+							ntimelag, ins_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -3098,7 +3110,7 @@ fprintf(stderr,"Applying timelag to %d INS altitude data\n", nins_altitude);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, ins_altitude_time_d[i], &timelag, &j,
+						ntimedelay, ins_altitude_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -3108,7 +3120,7 @@ fprintf(stderr,"Applying timelag to %d INS altitude data\n", nins_altitude);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, ins_altitude_time_d[i], &timelagm, &j,
+							ntimelag, ins_altitude_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -3122,7 +3134,7 @@ fprintf(stderr,"Applying timelag to %d INS speed data\n", nins_speed);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, ins_speed_time_d[i], &timelag, &j,
+						ntimedelay, ins_speed_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -3132,7 +3144,7 @@ fprintf(stderr,"Applying timelag to %d INS speed data\n", nins_speed);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, ins_speed_time_d[i], &timelagm, &j,
+							ntimelag, ins_speed_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -3148,7 +3160,7 @@ fprintf(stderr,"Applying timelag to %d DSL nav data\n", ndsl);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, dsl_time_d[i], &timelag, &j,
+						ntimedelay, dsl_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -3158,7 +3170,7 @@ fprintf(stderr,"Applying timelag to %d DSL nav data\n", ndsl);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dsl_time_d[i], &timelagm, &j,
+							ntimelag, dsl_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -3174,7 +3186,7 @@ fprintf(stderr,"Applying timelag to %d Steve Rock nav data\n", nrock);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, rock_time_d[i], &timelag, &j,
+						ntimedelay, rock_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -3184,7 +3196,7 @@ fprintf(stderr,"Applying timelag to %d Steve Rock nav data\n", nrock);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, rock_time_d[i], &timelagm, &j,
+							ntimelag, rock_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -3200,7 +3212,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, sonardepth_time_d[i], &timelag, &j,
+						ntimedelay, sonardepth_time_d[i], &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -3210,7 +3222,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, sonardepth_time_d[i], &timelagm, &j,
+							ntimelag, sonardepth_time_d[i], &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -4186,29 +4198,29 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						{
 						interp_status = mb_linear_interp_degrees(verbose,
 									ins_time_d-1, ins_lon-1,
-									nins, time_d, &navlon, &j,
+									nins, time_d, &navlon, &jins,
 									&error);
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp_degrees(verbose,
 									ins_time_d-1, ins_lat-1,
-									nins, time_d, &navlat, &j,
+									nins, time_d, &navlat, &jins,
 									&error);
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp(verbose,
 									ins_speed_time_d-1, ins_speed-1,
-									nins_speed, time_d, &speed, &j,
+									nins_speed, time_d, &speed, &jins,
 									&error);
 						}
 					else if (nrock > 0)
 						{
 						interp_status = mb_linear_interp_degrees(verbose,
 									rock_time_d-1, rock_lon-1,
-									nrock, time_d, &navlon, &j,
+									nrock, time_d, &navlon, &jrock,
 									&error);
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp_degrees(verbose,
 									rock_time_d-1, rock_lat-1,
-									nrock, time_d, &navlat, &j,
+									nrock, time_d, &navlat, &jrock,
 									&error);
 						if (j > 1)
 							{
@@ -4232,12 +4244,12 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						{
 						interp_status = mb_linear_interp_degrees(verbose,
 									dsl_time_d-1, dsl_lon-1,
-									ndsl, time_d, &navlon, &j,
+									ndsl, time_d, &navlon, &jdsl,
 									&error);
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp_degrees(verbose,
 									dsl_time_d-1, dsl_lat-1,
-									ndsl, time_d, &navlat, &j,
+									ndsl, time_d, &navlat, &jdsl,
 									&error);
 						if (j > 1)
 							{
@@ -4261,17 +4273,17 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						{
 						interp_status = mb_linear_interp_degrees(verbose,
 									dat_nav_time_d-1, dat_nav_lon-1,
-									ndat_nav, time_d, &navlon, &j,
+									ndat_nav, time_d, &navlon, &jdnav,
 									&error);
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp_degrees(verbose,
 									dat_nav_time_d-1, dat_nav_lat-1,
-									ndat_nav, time_d, &navlat, &j,
+									ndat_nav, time_d, &navlat, &jdnav,
 									&error);
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp_degrees(verbose,
 									dat_nav_time_d-1, dat_nav_speed-1,
-									ndat_nav, time_d, &speed, &j,
+									ndat_nav, time_d, &speed, &jdnav,
 									&error);
 						}
 					else
@@ -4290,28 +4302,28 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						{
 						interp_status = mb_linear_interp_degrees(verbose,
 									ins_time_d-1, ins_heading-1,
-									nins, time_d, &heading, &j,
+									nins, time_d, &heading, &jins,
 									&error);
 						}
 					else if (nrock > 0)
 						{
 						interp_status = mb_linear_interp_degrees(verbose,
 									rock_time_d-1, rock_heading-1,
-									nrock, time_d, &heading, &j,
+									nrock, time_d, &heading, &jrock,
 									&error);
 						}
 					else if (ndsl > 0)
 						{
 						interp_status = mb_linear_interp_degrees(verbose,
 									dsl_time_d-1, dsl_heading-1,
-									ndsl, time_d, &heading, &j,
+									ndsl, time_d, &heading, &jdsl,
 									&error);
 						}
 					else if (ndat_heading > 0)
 						{
 						interp_status = mb_linear_interp_degrees(verbose,
 									dat_heading_time_d-1, dat_heading_heading-1,
-									ndat_heading, time_d, &heading, &j,
+									ndat_heading, time_d, &heading, &jdheading,
 									&error);
 						}
 					else
@@ -4327,14 +4339,14 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						{
 						interp_status = mb_linear_interp(verbose,
 									ins_altitude_time_d-1, ins_altitude-1,
-									nins_altitude, time_d, &altitude, &j,
+									nins_altitude, time_d, &altitude, &jins,
 									&error);
 						}
 					else if (ndat_altitude > 0)
 						{
 						interp_status = mb_linear_interp(verbose,
 									dat_altitude_time_d-1, dat_altitude_altitude-1,
-									ndat_altitude, time_d, &altitude, &j,
+									ndat_altitude, time_d, &altitude, &jdaltitude,
 									&error);
 						}
 					else
@@ -4350,48 +4362,48 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						{
 						interp_status = mb_linear_interp(verbose,
 									ins_time_d-1, ins_roll-1,
-									nins, time_d, &roll, &j,
+									nins, time_d, &roll, &jins,
 									&error);
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp(verbose,
 									ins_time_d-1, ins_pitch-1,
-									nins, time_d, &pitch, &j,
+									nins, time_d, &pitch, &jins,
 									&error);
 						}
 					else if (nrock > 0)
 						{
 						interp_status = mb_linear_interp(verbose,
 									rock_time_d-1, rock_roll-1,
-									nrock, time_d, &roll, &j,
+									nrock, time_d, &roll, &jrock,
 									&error);
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp(verbose,
 									rock_time_d-1, rock_pitch-1,
-									nrock, time_d, &pitch, &j,
+									nrock, time_d, &pitch, &jrock,
 									&error);
 						}
 					else if (ndsl > 0)
 						{
 						interp_status = mb_linear_interp(verbose,
 									dsl_time_d-1, dsl_roll-1,
-									ndsl, time_d, &roll, &j,
+									ndsl, time_d, &roll, &jdsl,
 									&error);
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp(verbose,
 									dsl_time_d-1, dsl_pitch-1,
-									ndsl, time_d, &pitch, &j,
+									ndsl, time_d, &pitch, &jdsl,
 									&error);
 						}
 					else if (ndat_rph > 0)
 						{
 						interp_status = mb_linear_interp(verbose,
 									dat_rph_time_d-1, dat_rph_roll-1,
-									ndat_rph, time_d, &roll, &j,
+									ndat_rph, time_d, &roll, &jdattitude,
 									&error);
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp(verbose,
 									dat_rph_time_d-1, dat_rph_pitch-1,
-									ndat_rph, time_d, &pitch, &j,
+									ndat_rph, time_d, &pitch, &jdattitude,
 									&error);
 						}
 					else
@@ -4414,28 +4426,28 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp(verbose,
 									sonardepth_time_d-1, sonardepth_sonardepth-1,
-									nsonardepth, time_d, &sonardepth, &j,
+									nsonardepth, time_d, &sonardepth, &jsonardepth,
 									&error);
 						}
 					else if (nins > 0)
 						{
 						interp_status = mb_linear_interp(verbose,
 									ins_time_d-1, ins_sonardepth-1,
-									nins, time_d, &sonardepth, &j,
+									nins, time_d, &sonardepth, &jins,
 									&error);
 						}
 					else if (nrock > 0)
 						{
 						interp_status = mb_linear_interp(verbose,
 									rock_time_d-1, rock_sonardepth-1,
-									nrock, time_d, &sonardepth, &j,
+									nrock, time_d, &sonardepth, &jrock,
 									&error);
 						}
 					else if (ndsl > 0)
 						{
 						interp_status = mb_linear_interp(verbose,
 									dsl_time_d-1, dsl_sonardepth-1,
-									ndsl, time_d, &sonardepth, &j,
+									ndsl, time_d, &sonardepth, &jdsl,
 									&error);
 						}
 					else if (ndat_sonardepth > 0)
@@ -4447,7 +4459,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							{
 							interp_status = mb_linear_interp(verbose,
 									dat_sonardepth_time_d-1, dat_sonardepth_sonardepthrate-1,
-									ndat_sonardepth, time_d, &sonardepthrate, &j,
+									ndat_sonardepth, time_d, &sonardepthrate, &jdsonardepth,
 									&error);
 							sonardepthlag = sonardepthrate * sonardepthlagmax / sonardepthratemax;
 							if (sonardepthrate >= sonardepthratemax)
@@ -4456,14 +4468,14 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						if (interp_status == MB_SUCCESS)
 						interp_status = mb_linear_interp(verbose,
 									dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
-									ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &j,
+									ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &jdsonardepth,
 									&error);
 						}
 					else if (ndat_rph > 0)
 						{
 						interp_status = mb_linear_interp(verbose,
 									dat_rph_time_d-1, dat_rph_heave-1,
-									ndat_rph, time_d, &heave, &j,
+									ndat_rph, time_d, &heave, &jdattitude,
 									&error);
 						sonardepth = heave;
 						}
@@ -4510,7 +4522,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							}
 						}
 
-					/* get bathymetry */
+					/* get ready to calculate bathymetry */
 					if (volatilesettings->sound_velocity > 0.0)
 						soundspeed = volatilesettings->sound_velocity;
 					else if (bluefin->environmental[0].sound_speed > 0.0)
@@ -4526,26 +4538,35 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 						rollr = 0.0;
 						pitchr = 0.0;
 						}
-					for (i=0;i<bathymetry->number_beams;i++)
+
+					/* loop over detections as available - the 7k format has used several
+					   different records over the years, so there are several different
+					   cases that must be handled */
+
+					/* case of v2rawdetection record */
+					if (istore->read_v2rawdetection == MB_YES)
 						{
-/* fprintf(stderr,"i:%d quality:%d range:%f\n",i,bathymetry->quality[i],bathymetry->range[i]); */
-						if ((bathymetry->quality[i] & 15) > 0)
+						/* initialize all of the beams */
+						for (i=0;i<bathymetry->number_beams;i++)
 							{
-							if (istore->read_v2rawdetection == MB_YES)
-								{
-								alpha = RTD * pitchr;
-								beta = 90.0 - RTD * (v2rawdetection->rx_angle[i] - rollr);
-								}
-							else if (istore->read_v2detection == MB_YES)
-								{
-								alpha = RTD * (v2detection->angle_y[i] + pitchr);
-								beta = 90.0 - RTD * (v2detection->angle_x[i] - rollr);
-								}
-							else
-								{
-								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr);
-								beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - rollr);
-								}
+							bathymetry->quality[i] = 0;
+							bathymetry->depth[i] = 0.0;
+							bathymetry->acrosstrack[i] = 0.0;
+							bathymetry->alongtrack[i] = 0.0;
+							bathymetry->pointing_angle[i] = 0.0;
+							bathymetry->azimuth_angle[i] = 0.0;
+							}
+
+						/* now loop over the detects */
+						for (j=0;j<v2rawdetection->number_beams;j++)
+							{
+							i = v2rawdetection->beam_descriptor[j];
+							bathymetry->range[i] = v2rawdetection->detection_point[j]
+										/ v2rawdetection->sampling_rate;
+							bathymetry->quality[i] = v2rawdetection->quality[j];
+							bathymetry->intensity[i] = 0.0;
+							alpha = RTD * pitchr;
+							beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - rollr);
 							mb_rollpitch_to_takeoff(
 								verbose,
 								alpha, beta,
@@ -4564,13 +4585,74 @@ i,roll, bathymetry->roll,pitch, bathymetry->pitch,
 alpha,beta,theta,phi,
 bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							}
-						else
+						}
+
+					/* case of v2detection record */
+					else if (istore->read_v2detection == MB_YES)
+						{
+						/* now loop over the detects */
+						for (i=0;i<v2detection->number_beams;i++)
 							{
-							bathymetry->depth[i] = 0.0;
-							bathymetry->acrosstrack[i] = 0.0;
-							bathymetry->alongtrack[i] = 0.0;
-							bathymetry->pointing_angle[i] = 0.0;
-							bathymetry->azimuth_angle[i] = 0.0;
+							bathymetry->range[i] = v2detection->range[i];
+							alpha = RTD * (v2detection->angle_y[i] + pitchr);
+							beta = 90.0 - RTD * (v2detection->angle_x[i] - rollr);
+							mb_rollpitch_to_takeoff(
+								verbose,
+								alpha, beta,
+								&theta, &phi,
+								&error);
+							rr = 0.5 * soundspeed * bathymetry->range[i];
+							xx = rr * sin(DTR * theta);
+							zz = rr * cos(DTR * theta);
+							bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+							bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+							bathymetry->depth[i] = zz + sonardepth;
+							bathymetry->pointing_angle[i] = DTR * theta;
+							bathymetry->azimuth_angle[i] = DTR * phi;
+/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+i,roll, bathymetry->roll,pitch, bathymetry->pitch,
+alpha,beta,theta,phi,
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+							}
+						}
+
+					/* else default case of beamgeometry record */
+					else
+						{
+						/* loop over all beams */
+						for (i=0;i<bathymetry->number_beams;i++)
+							{
+							if ((bathymetry->quality[i] & 15) > 0)
+								{
+								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr);
+								beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - rollr);
+								mb_rollpitch_to_takeoff(
+									verbose,
+									alpha, beta,
+									&theta, &phi,
+									&error);
+								rr = 0.5 * soundspeed * bathymetry->range[i];
+								xx = rr * sin(DTR * theta);
+								zz = rr * cos(DTR * theta);
+								bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+								bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+								bathymetry->depth[i] = zz + sonardepth;
+								bathymetry->pointing_angle[i] = DTR * theta;
+								bathymetry->azimuth_angle[i] = DTR * phi;
+/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+i,roll, bathymetry->roll,pitch, bathymetry->pitch,
+alpha,beta,theta,phi,
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+								}
+							else
+								{
+								bathymetry->quality[i] = 0;
+								bathymetry->depth[i] = 0.0;
+								bathymetry->acrosstrack[i] = 0.0;
+								bathymetry->alongtrack[i] = 0.0;
+								bathymetry->pointing_angle[i] = 0.0;
+								bathymetry->azimuth_angle[i] = 0.0;
+								}
 							}
 						}
 
@@ -4739,7 +4821,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -4749,7 +4831,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -4789,7 +4871,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -4799,7 +4881,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -4860,7 +4942,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -4870,7 +4952,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -4910,7 +4992,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -4920,7 +5002,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -4960,22 +5042,17 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
-				if (ntimedelay > 0)
-				interp_status = mb_linear_interp(verbose,
-							timedelay_time_d-1, timedelay_timedelay-1,
-							ntimedelay, time_d, &timelag, &j,
-							&error);
 				timelag -= timelagconstant;
 				}
 			else if (timelagmode == MB7KPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -5015,7 +5092,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -5025,7 +5102,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -5065,7 +5142,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -5075,7 +5152,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -5137,7 +5214,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -5147,7 +5224,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -5187,7 +5264,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -5197,7 +5274,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -5259,7 +5336,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -5269,7 +5346,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -5309,7 +5386,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -5319,7 +5396,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -5386,7 +5463,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -5396,7 +5473,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -5447,48 +5524,48 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					{
 					interp_status = mb_linear_interp_degrees(verbose,
 								ins_time_d-1, ins_lon-1,
-								nins, time_d, &navlon, &j,
+								nins, time_d, &navlon, &jins,
 								&error);
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp_degrees(verbose,
 								ins_time_d-1, ins_lat-1,
-								nins, time_d, &navlat, &j,
+								nins, time_d, &navlat, &jins,
 								&error);
 					}
 				else if (nrock > 0)
 					{
 					interp_status = mb_linear_interp_degrees(verbose,
 								rock_time_d-1, rock_lon-1,
-								nrock, time_d, &navlon, &j,
+								nrock, time_d, &navlon, &jrock,
 								&error);
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp_degrees(verbose,
 								rock_time_d-1, rock_lat-1,
-								nrock, time_d, &navlat, &j,
+								nrock, time_d, &navlat, &jrock,
 								&error);
 					}
 				else if (ndsl > 0)
 					{
 					interp_status = mb_linear_interp_degrees(verbose,
 								dsl_time_d-1, dsl_lon-1,
-								ndsl, time_d, &navlon, &j,
+								ndsl, time_d, &navlon, &jdsl,
 								&error);
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp_degrees(verbose,
 								dsl_time_d-1, dsl_lat-1,
-								ndsl, time_d, &navlat, &j,
+								ndsl, time_d, &navlat, &jdsl,
 								&error);
 					}
 				else if (ndat_nav > 0)
 					{
 					interp_status = mb_linear_interp_degrees(verbose,
 								dat_nav_time_d-1, dat_nav_lon-1,
-								ndat_nav, time_d, &navlon, &j,
+								ndat_nav, time_d, &navlon, &jdnav,
 								&error);
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp_degrees(verbose,
 								dat_nav_time_d-1, dat_nav_lat-1,
-								ndat_nav, time_d, &navlat, &j,
+								ndat_nav, time_d, &navlat, &jdnav,
 								&error);
 					}
 				else
@@ -5506,28 +5583,28 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp(verbose,
 								sonardepth_time_d-1, sonardepth_sonardepth-1,
-								nsonardepth, time_d, &sonardepth, &j,
+								nsonardepth, time_d, &sonardepth, &jsonardepth,
 								&error);
 					}
 				else if (nins > 0)
 					{
 					interp_status = mb_linear_interp(verbose,
 								ins_time_d-1, ins_sonardepth-1,
-								nins, time_d, &sonardepth, &j,
+								nins, time_d, &sonardepth, &jins,
 								&error);
 					}
 				else if (nrock > 0)
 					{
 					interp_status = mb_linear_interp(verbose,
 								rock_time_d-1, rock_sonardepth-1,
-								nrock, time_d, &sonardepth, &j,
+								nrock, time_d, &sonardepth, &jrock,
 								&error);
 					}
 				else if (ndsl > 0)
 					{
 					interp_status = mb_linear_interp(verbose,
 								dsl_time_d-1, dsl_sonardepth-1,
-								ndsl, time_d, &sonardepth, &j,
+								ndsl, time_d, &sonardepth, &jdsl,
 								&error);
 					}
 				else if (ndat_sonardepth > 0)
@@ -5539,7 +5616,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 						{
 						interp_status = mb_linear_interp(verbose,
 								dat_sonardepth_time_d-1, dat_sonardepth_sonardepthrate-1,
-								ndat_sonardepth, time_d, &sonardepthrate, &j,
+								ndat_sonardepth, time_d, &sonardepthrate, &jdsonardepth,
 								&error);
 						sonardepthlag = sonardepthrate * sonardepthlagmax / sonardepthratemax;
 						if (sonardepthrate >= sonardepthratemax)
@@ -5548,14 +5625,14 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					if (interp_status == MB_SUCCESS)
 					interp_status = mb_linear_interp(verbose,
 								dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
-								ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &j,
+								ndat_sonardepth, time_d + sonardepthlag, &sonardepth, &jdsonardepth,
 								&error);
 					}
 				else if (ndat_rph > 0)
 					{
 					interp_status = mb_linear_interp(verbose,
 								dat_rph_time_d-1, dat_rph_heave-1,
-								ndat_rph, time_d, &heave, &j,
+								ndat_rph, time_d, &heave, &jdattitude,
 								&error);
 					sonardepth = heave;
 					}
@@ -5572,14 +5649,14 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					{
 					interp_status = mb_linear_interp(verbose,
 								ins_altitude_time_d-1, ins_altitude-1,
-								nins_altitude, time_d, &altitude, &j,
+								nins_altitude, time_d, &altitude, &jins,
 								&error);
 					}
 				else if (ndat_altitude > 0)
 					{
 					interp_status = mb_linear_interp(verbose,
 								dat_altitude_time_d-1, dat_altitude_altitude-1,
-								ndat_altitude, time_d, &altitude, &j,
+								ndat_altitude, time_d, &altitude, &jdaltitude,
 								&error);
 					}
 				else
@@ -5621,7 +5698,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			if (ntimedelay > 0)
 			interp_status = mb_linear_interp(verbose,
 						timedelay_time_d-1, timedelay_timedelay-1,
-						ntimedelay, time_d, &timelag, &j,
+						ntimedelay, time_d, &timelag, &jtimedelay,
 						&error);
 			if (timelagmode == MB7KPREPROCESS_TIMELAG_CONSTANT)
 				{
@@ -5631,7 +5708,7 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				{
 				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, time_d, &timelagm, &j,
+							ntimelag, time_d, &timelagm, &jtimelag,
 							&error);
 				timelag -= timelagm;
 				}
@@ -5911,13 +5988,13 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					mb_linear_interp(verbose,
 								ins_speed_time_d-1, ins_speed-1,
 								nins_speed, ins_time_d[ins_output_index],
-								&speed, &j,
+								&speed, &jins,
 								&error);
 					bluefin->nav[i].depth = ins_sonardepth[ins_output_index];
 					mb_linear_interp(verbose,
 								ins_altitude_time_d-1, ins_altitude-1,
 								nins_altitude, ins_time_d[ins_output_index],
-								&(bluefin->nav[i].altitude), &j,
+								&(bluefin->nav[i].altitude), &jins,
 								&error);
 					bluefin->nav[i].roll = DTR * ins_roll[ins_output_index];
 					bluefin->nav[i].pitch = DTR * ins_pitch[ins_output_index];

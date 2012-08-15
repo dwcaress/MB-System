@@ -28,6 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+* Version 5.3.1982       August 15, 2012
   Version 5.3.1981       August 2, 2012
 * Version 5.3.1980       July 13, 2012
 * Version 5.3.1955       May 16, 2012
@@ -188,7 +189,32 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
------> 5.3.1981
+-----> 5.3.1982 (August 15, 2012)
+
+Fixed significant issue in mb7kpreprocess and in Reson 7k format support in general.
+The code was not handling the current raw detection data records correctly.
+
+Fixed mbotps so that it handles requests for sound speed models on locations that
+are dry land in the Topex mdoels more gracefully.
+
+Fixed minor info printing issue with mbnavadjust (now doesn't report failure to
+invert unless there is a failure to invert).
+
+Improved performance of navigation and attitude merging for both mb7kpreprocess
+and mbkongsbergpreprocess
+
+Added new functionality to mbkongsbergpreprocess (contributed by Suzanne O'Hara):
+  -Added Ðd<outputDirectory> argument to allow users to set new directory for
+    output files; original code always created output in input directory.
+    This is a problem where users should not be modifying original directories.
+    Using this flag allows the user to use the datalist optiona and is easier
+    than copying the original mb58 data to a different directory or to using a
+    script that loops through all the data using the Ðo option
+  -Added Ðc flag to output counts. Current code always outputs many rows of
+    information that can be confusing. The default now is to work silently
+    unless there is a problem.
+
+-----> 5.3.1981 (August 2, 2012)
 
 Fixed problem with mbprocess in which the heading was unexpectedly replaced by course-made-good.
 Now this can only happen with HEADINGMODE:1 or HEADINGMODE:2 in the parameter file.
@@ -196,7 +222,7 @@ Now this can only happen with HEADINGMODE:1 or HEADINGMODE:2 in the parameter fi
 Fixed error in the definition of the OMG HDCS format in mbf_omghdcsj.h
 This fix provided by Bob Covill.
 
------> 5.3.1980
+-----> 5.3.1980 (July 13, 2012)
 
 Augmented support for L3 XSE format (94) so that data from recent SeaBeam 3000 and SeaBeam 3050
 multibeams can be processed.
@@ -239,7 +265,7 @@ pitch data are stored, the sonar is treated as if it is pointed down rather than
 horizontal. Also fixed the module so that the profile tile angle parameter is
 used correctly.
 
------> 5.3.1955
+-----> 5.3.1955 (May 16, 2012)
 
 Removed ($[) = 0 initializations from all perl macros for compatibility with the
 current version of perl.
@@ -294,7 +320,7 @@ the end points of a survey line. This approach to plotting subbottom sections re
 impact of speed variations and deemphasizes data where the sonar platform moved slowly
 or stopped.
 
------> 5.3.1941
+-----> 5.3.1941 (March 6, 2012)
 
 Fixed sidescan filtering with mbfilter. The filtered sidescan output in
 format 71 files had incorrect acrosstrack locations.
@@ -357,7 +383,7 @@ Hamish Bowman of the University of Otago.
 Bug fixes to mbr_mstiffss.c related to reading Marine Sonics sidescan data. This fix
 provided by Val Schmidt of CCOM/JHC at University of New Hampshire.
 
------> 5.3.1917
+-----> 5.3.1917 (January 10, 2012)
 
 Added preliminary support for HYSWEEP HSX format as MBIO format 201. Added program mbhysweeppreprocess to preprocess the HSX data.
 
@@ -365,7 +391,7 @@ Fixed bug in mb_lever() function in mb_angle.c.
 
 GSF 3.03 update.
 
------> 5.3.1912
+-----> 5.3.1912 (November 19, 2011)
 
 Formats 58 and 59 (third generation Kongsberg multibeam data):
 Augmented code to handle bathymetry data in which beams are reported
@@ -376,7 +402,7 @@ Formats 58 and 59 (third generation Kongsberg multibeam data):
 Fixes to the handling of attitude ecords, particularly with regard
 to writing the records.
 
------> 5.3.1909
+-----> 5.3.1909 (November 16, 2011)
 
 Program mbnavlist:
 Fixed attitude record output so that use of -K18, -K55, -K56, or -K57
@@ -388,7 +414,7 @@ Fixed the i/o modules to successfully output attitude and netattitude
 records identified as MB_DATA_ATTITUDE1,  MB_DATA_ATTITUDE2, or
 MB_DATA_ATTITUDE3.
 
------> 5.3.1907
+-----> 5.3.1907 (November 9, 2011)
 
 Program mblist:
 Added output of beam bottom detection algorithm (amplitude or phase)
@@ -424,7 +450,7 @@ primary attitude source are identified as type MB_DATA_ATTITUDE (18)
 while ancilliary records will be identified as MB_DATA_ATTITUDE1 (55),
 MB_DATA_ATTITUDE2 (56), or MB_DATA_ATTITUDE3(57).
 
------> 5.3.1906
+-----> 5.3.1906 (September 28, 2011)
 
 Program mbnavadjust:
 Added -D option to invert foreground (normally black) and background
@@ -671,7 +697,7 @@ Increased verbosity of mbnavedit for -X option.
 MB-SYSTEM VERSION 5.2 RELEASE NOTES:
 ------------------------------------------
 
------> 5.2.1880
+-----> 5.2.1880 (December 30, 2010)
 
 Augmented mbotps to output tide in both
  	time_d tide

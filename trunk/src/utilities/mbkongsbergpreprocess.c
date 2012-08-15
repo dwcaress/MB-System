@@ -73,7 +73,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mbkongsbergpreprocess";
 	char help_message[] =  "mbkongsbergpreprocess reads a Kongsberg multibeam vendor format file (or datalist of files),\ninterpolates the asynchronous navigation and attitude onto the multibeam data, \nand writes the data as one or more format 59 files.";
-	char usage_message[] = "mbkongsbergpreprocess [-C -Iinputfile -H -V]";
+	char usage_message[] = "mbkongsbergpreprocess [-C -Doutputdirectory -Iinputfile -H -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -105,6 +105,8 @@ int main (int argc, char **argv)
 	char	ifile[MB_PATH_MAXLINE];
 	char	ofile[MB_PATH_MAXLINE];
 	int	ofile_set = MB_NO;
+	char	odir[MB_PATH_MAXLINE];
+	int	odir_set = MB_NO;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -152,6 +154,7 @@ int main (int argc, char **argv)
 	int	heading_source = MB_DATA_HEADING;
 
 	/* counting variables file */
+	int	output_counts = MB_NO;
 	int	nrec_0x30_parameter_stop = 0;
 	int	nrec_0x31_parameter_off = 0;
 	int	nrec_0x32_parameter_on = 0;
@@ -277,6 +280,7 @@ int main (int argc, char **argv)
 	char	*result;
 	int	read_data;
 	char	fileroot[MB_PATH_MAXLINE];
+	char	*filenameptr;
 	int	testformat;
 	int	type, source;
 	double	start_time_d, end_time_d;
@@ -303,6 +307,11 @@ int main (int argc, char **argv)
 	int	ray_stat, iterx, iterz;
 	int	done;
 
+	int	jtimelag = 0;
+	int	jnav = 0;
+	int	jheading = 0;
+	int	jattitude = 0;
+
 	int	i, j;
 
 	/* get current default values */
@@ -318,7 +327,7 @@ int main (int argc, char **argv)
 	heading_source = MB_DATA_NAV;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaF:f:I:i:K:k:O:o:S:s:T:t:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "AaCcD:d:F:f:I:i:K:k:O:o:S:s:T:t:VvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -332,6 +341,17 @@ int main (int argc, char **argv)
 		case 'A':
 		case 'a':
 			recalculate_beam_angles = MB_YES;
+			flag++;
+			break;
+		case 'C':
+		case 'c':
+			output_counts = MB_YES;
+			flag++;
+			break;
+		case 'D':
+		case 'd':
+			sscanf (optarg,"%s", odir);
+			odir_set  = MB_YES;
 			flag++;
 			break;
 		case 'F':
@@ -438,6 +458,8 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       read_file:           %s\n",read_file);
 		fprintf(stderr,"dbg2       ofile:               %s\n",ofile);
 		fprintf(stderr,"dbg2       ofile_set:           %d\n",ofile_set);
+		fprintf(stderr,"dbg2       odir:               %s\n",odir);
+		fprintf(stderr,"dbg2       odir_set:           %d\n",odir_set);
 		if (timelagmode == MBKONSBERGPREPROCESS_TIMELAG_MODEL)
 			{
 			fprintf(stderr,"dbg2       timelagfile:         %s\n",timelagfile);
@@ -851,7 +873,7 @@ int main (int argc, char **argv)
 						{
 						interp_status = mb_linear_interp(verbose,
 									timelag_time_d-1, timelag_model-1,
-									ntimelag, dat_nav_time_d[ndat_nav], &timelag, &j,
+									ntimelag, dat_nav_time_d[ndat_nav], &timelag, &jtimelag,
 									&error);
 						dat_nav_time_d[ndat_nav] -= timelag;
 						}
@@ -897,7 +919,7 @@ int main (int argc, char **argv)
 						{
 						interp_status = mb_linear_interp(verbose,
 									timelag_time_d-1, timelag_model-1,
-									ntimelag, dat_heading_time_d[ndat_heading], &timelag, &j,
+									ntimelag, dat_heading_time_d[ndat_heading], &timelag, &jtimelag,
 									&error);
 						dat_nav_time_d[ndat_heading] -= timelag;
 						}
@@ -969,7 +991,7 @@ int main (int argc, char **argv)
 						{
 						interp_status = mb_linear_interp(verbose,
 									timelag_time_d-1, timelag_model-1,
-									ntimelag, dat_rph_time_d[ndat_rph], &timelag, &j,
+									ntimelag, dat_rph_time_d[ndat_rph], &timelag, &jtimelag,
 									&error);
 						dat_rph_time_d[ndat_rph] -= timelag;
 						}
@@ -1040,7 +1062,7 @@ int main (int argc, char **argv)
 						{
 						interp_status = mb_linear_interp(verbose,
 									timelag_time_d-1, timelag_model-1,
-									ntimelag, dat_rph_time_d[ndat_rph], &timelag, &j,
+									ntimelag, dat_rph_time_d[ndat_rph], &timelag, &jtimelag,
 									&error);
 						dat_rph_time_d[ndat_rph] -= timelag;
 						}
@@ -1107,7 +1129,7 @@ int main (int argc, char **argv)
 						{
 						interp_status = mb_linear_interp(verbose,
 									timelag_time_d-1, timelag_model-1,
-									ntimelag, dat_heading_time_d[ndat_heading], &timelag, &j,
+									ntimelag, dat_heading_time_d[ndat_heading], &timelag, &jtimelag,
 									&error);
 						dat_heading_time_d[ndat_heading] -= timelag;
 						}
@@ -1145,80 +1167,83 @@ int main (int argc, char **argv)
 	status = mb_close(verbose,&imbio_ptr,&error);
 
 	/* output counts */
-	fprintf(stdout, "\nData records read from: %s\n", ifile);
-	fprintf(stdout, "     nrec_0x30_parameter_stop:         %d\n", nrec_0x30_parameter_stop);
-	fprintf(stdout, "     nrec_0x31_parameter_off:          %d\n", nrec_0x31_parameter_off);
-	fprintf(stdout, "     nrec_0x32_parameter_on:           %d\n", nrec_0x32_parameter_on);
-	fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
-	fprintf(stdout, "     nrec_0x41_attitude:               %d\n", nrec_0x41_attitude);
-	fprintf(stdout, "     nrec_0x43_clock:                  %d\n", nrec_0x43_clock);
-	fprintf(stdout, "     nrec_0x44_bathymetry:             %d\n", nrec_0x44_bathymetry);
-	fprintf(stdout, "     nrec_0x45_singlebeam:             %d\n", nrec_0x45_singlebeam);
-	fprintf(stdout, "     nrec_0x46_rawbeamF:               %d\n", nrec_0x46_rawbeamF);
-	fprintf(stdout, "     nrec_0x47_surfacesoundspeed2:     %d\n", nrec_0x47_surfacesoundspeed2);
-	fprintf(stdout, "     nrec_0x48_heading:                %d\n", nrec_0x48_heading);
-	fprintf(stdout, "     nrec_0x49_parameter_start:        %d\n", nrec_0x49_parameter_start);
-	fprintf(stdout, "     nrec_0x4A_tilt:                   %d\n", nrec_0x4A_tilt);
-	fprintf(stdout, "     nrec_0x4B_echogram:               %d\n", nrec_0x4B_echogram);
-	fprintf(stdout, "     nrec_0x4E_rawbeamN:               %d\n", nrec_0x4E_rawbeamN);
-	fprintf(stdout, "     nrec_0x50_pos:                    %d\n", nrec_0x50_pos);
-	fprintf(stdout, "     nrec_0x52_runtime:                %d\n", nrec_0x52_runtime);
-	fprintf(stdout, "     nrec_0x53_sidescan:               %d\n", nrec_0x53_sidescan);
-	fprintf(stdout, "     nrec_0x54_tide:                   %d\n", nrec_0x54_tide);
-	fprintf(stdout, "     nrec_0x55_svp2:                   %d\n", nrec_0x55_svp2);
-	fprintf(stdout, "     nrec_0x56_svp:                    %d\n", nrec_0x56_svp);
-	fprintf(stdout, "     nrec_0x57_surfacesoundspeed:      %d\n", nrec_0x57_surfacesoundspeed);
-	fprintf(stdout, "     nrec_0x58_bathymetry2:            %d\n", nrec_0x58_bathymetry2);
-	fprintf(stdout, "     nrec_0x59_sidescan2:              %d\n", nrec_0x59_sidescan2);
-	fprintf(stdout, "     nrec_0x66_rawbeamf:               %d\n", nrec_0x66_rawbeamf);
-	fprintf(stdout, "     nrec_0x68_height:                 %d\n", nrec_0x68_height);
-	fprintf(stdout, "     nrec_0x69_parameter_stop:         %d\n", nrec_0x69_parameter_stop);
-	fprintf(stdout, "     nrec_0x6B_water_column:           %d\n", nrec_0x6B_water_column);
-	fprintf(stdout, "     nrec_0x6E_network_attitude:       %d\n", nrec_0x6E_network_attitude);
-	fprintf(stdout, "     nrec_0x70_parameter:              %d\n", nrec_0x70_parameter);
-	fprintf(stdout, "     nrec_0x73_surface_sound_speed:    %d\n", nrec_0x73_surface_sound_speed);
-	fprintf(stdout, "     nrec_0xE1_bathymetry_mbari57:     %d\n", nrec_0xE1_bathymetry_mbari57);
-	fprintf(stdout, "     nrec_0xE2_sidescan_mbari57:       %d\n", nrec_0xE2_sidescan_mbari57);
-	fprintf(stdout, "     nrec_0xE3_bathymetry_mbari59:     %d\n", nrec_0xE3_bathymetry_mbari59);
-	fprintf(stdout, "     nrec_0xE4_sidescan_mbari59:       %d\n", nrec_0xE4_sidescan_mbari59);
-	fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59:     %d\n", nrec_0xE5_bathymetry_mbari59);
+	if (output_counts == MB_YES)
+		{
+		fprintf(stdout, "\nData records read from: %s\n", ifile);
+		fprintf(stdout, "     nrec_0x30_parameter_stop:         %d\n", nrec_0x30_parameter_stop);
+		fprintf(stdout, "     nrec_0x31_parameter_off:          %d\n", nrec_0x31_parameter_off);
+		fprintf(stdout, "     nrec_0x32_parameter_on:           %d\n", nrec_0x32_parameter_on);
+		fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
+		fprintf(stdout, "     nrec_0x41_attitude:               %d\n", nrec_0x41_attitude);
+		fprintf(stdout, "     nrec_0x43_clock:                  %d\n", nrec_0x43_clock);
+		fprintf(stdout, "     nrec_0x44_bathymetry:             %d\n", nrec_0x44_bathymetry);
+		fprintf(stdout, "     nrec_0x45_singlebeam:             %d\n", nrec_0x45_singlebeam);
+		fprintf(stdout, "     nrec_0x46_rawbeamF:               %d\n", nrec_0x46_rawbeamF);
+		fprintf(stdout, "     nrec_0x47_surfacesoundspeed2:     %d\n", nrec_0x47_surfacesoundspeed2);
+		fprintf(stdout, "     nrec_0x48_heading:                %d\n", nrec_0x48_heading);
+		fprintf(stdout, "     nrec_0x49_parameter_start:        %d\n", nrec_0x49_parameter_start);
+		fprintf(stdout, "     nrec_0x4A_tilt:                   %d\n", nrec_0x4A_tilt);
+		fprintf(stdout, "     nrec_0x4B_echogram:               %d\n", nrec_0x4B_echogram);
+		fprintf(stdout, "     nrec_0x4E_rawbeamN:               %d\n", nrec_0x4E_rawbeamN);
+		fprintf(stdout, "     nrec_0x50_pos:                    %d\n", nrec_0x50_pos);
+		fprintf(stdout, "     nrec_0x52_runtime:                %d\n", nrec_0x52_runtime);
+		fprintf(stdout, "     nrec_0x53_sidescan:               %d\n", nrec_0x53_sidescan);
+		fprintf(stdout, "     nrec_0x54_tide:                   %d\n", nrec_0x54_tide);
+		fprintf(stdout, "     nrec_0x55_svp2:                   %d\n", nrec_0x55_svp2);
+		fprintf(stdout, "     nrec_0x56_svp:                    %d\n", nrec_0x56_svp);
+		fprintf(stdout, "     nrec_0x57_surfacesoundspeed:      %d\n", nrec_0x57_surfacesoundspeed);
+		fprintf(stdout, "     nrec_0x58_bathymetry2:            %d\n", nrec_0x58_bathymetry2);
+		fprintf(stdout, "     nrec_0x59_sidescan2:              %d\n", nrec_0x59_sidescan2);
+		fprintf(stdout, "     nrec_0x66_rawbeamf:               %d\n", nrec_0x66_rawbeamf);
+		fprintf(stdout, "     nrec_0x68_height:                 %d\n", nrec_0x68_height);
+		fprintf(stdout, "     nrec_0x69_parameter_stop:         %d\n", nrec_0x69_parameter_stop);
+		fprintf(stdout, "     nrec_0x6B_water_column:           %d\n", nrec_0x6B_water_column);
+		fprintf(stdout, "     nrec_0x6E_network_attitude:       %d\n", nrec_0x6E_network_attitude);
+		fprintf(stdout, "     nrec_0x70_parameter:              %d\n", nrec_0x70_parameter);
+		fprintf(stdout, "     nrec_0x73_surface_sound_speed:    %d\n", nrec_0x73_surface_sound_speed);
+		fprintf(stdout, "     nrec_0xE1_bathymetry_mbari57:     %d\n", nrec_0xE1_bathymetry_mbari57);
+		fprintf(stdout, "     nrec_0xE2_sidescan_mbari57:       %d\n", nrec_0xE2_sidescan_mbari57);
+		fprintf(stdout, "     nrec_0xE3_bathymetry_mbari59:     %d\n", nrec_0xE3_bathymetry_mbari59);
+		fprintf(stdout, "     nrec_0xE4_sidescan_mbari59:       %d\n", nrec_0xE4_sidescan_mbari59);
+		fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59:     %d\n", nrec_0xE5_bathymetry_mbari59);
 
-	nrec_0x30_parameter_stop_tot += nrec_0x30_parameter_stop;
-	nrec_0x31_parameter_off_tot += nrec_0x31_parameter_off;
-	nrec_0x32_parameter_on_tot += nrec_0x32_parameter_on;
-	nrec_0x33_parameter_extra_tot += nrec_0x33_parameter_extra;
-	nrec_0x41_attitude_tot += nrec_0x41_attitude;
-	nrec_0x43_clock_tot += nrec_0x43_clock;
-	nrec_0x44_bathymetry_tot += nrec_0x44_bathymetry;
-	nrec_0x45_singlebeam_tot += nrec_0x45_singlebeam;
-	nrec_0x46_rawbeamF_tot += nrec_0x46_rawbeamF;
-	nrec_0x47_surfacesoundspeed2_tot += nrec_0x47_surfacesoundspeed2;
-	nrec_0x48_heading_tot += nrec_0x48_heading;
-	nrec_0x49_parameter_start_tot += nrec_0x49_parameter_start;
-	nrec_0x4A_tilt_tot += nrec_0x4A_tilt;
-	nrec_0x4B_echogram_tot += nrec_0x4B_echogram;
-	nrec_0x4E_rawbeamN_tot += nrec_0x4E_rawbeamN;
-	nrec_0x50_pos_tot += nrec_0x50_pos;
-	nrec_0x52_runtime_tot += nrec_0x52_runtime;
-	nrec_0x53_sidescan_tot += nrec_0x53_sidescan;
-	nrec_0x54_tide_tot += nrec_0x54_tide;
-	nrec_0x55_svp2_tot += nrec_0x55_svp2;
-	nrec_0x56_svp_tot += nrec_0x56_svp;
-	nrec_0x57_surfacesoundspeed_tot += nrec_0x57_surfacesoundspeed;
-	nrec_0x58_bathymetry2_tot += nrec_0x58_bathymetry2;
-	nrec_0x59_sidescan2_tot += nrec_0x59_sidescan2;
-	nrec_0x66_rawbeamf_tot += nrec_0x66_rawbeamf;
-	nrec_0x68_height_tot += nrec_0x68_height;
-	nrec_0x69_parameter_stop_tot += nrec_0x69_parameter_stop;
-	nrec_0x6B_water_column_tot += nrec_0x6B_water_column;
-	nrec_0x6E_network_attitude_tot += nrec_0x6E_network_attitude;
-	nrec_0x70_parameter_tot += nrec_0x70_parameter;
-	nrec_0x73_surface_sound_speed_tot += nrec_0x73_surface_sound_speed;
-	nrec_0xE1_bathymetry_mbari57_tot += nrec_0xE1_bathymetry_mbari57;
-	nrec_0xE2_sidescan_mbari57_tot += nrec_0xE2_sidescan_mbari57;
-	nrec_0xE3_bathymetry_mbari59_tot += nrec_0xE3_bathymetry_mbari59;
-	nrec_0xE4_sidescan_mbari59_tot += nrec_0xE4_sidescan_mbari59;
-	nrec_0xE5_bathymetry_mbari59_tot += nrec_0xE5_bathymetry_mbari59;
+		nrec_0x30_parameter_stop_tot += nrec_0x30_parameter_stop;
+		nrec_0x31_parameter_off_tot += nrec_0x31_parameter_off;
+		nrec_0x32_parameter_on_tot += nrec_0x32_parameter_on;
+		nrec_0x33_parameter_extra_tot += nrec_0x33_parameter_extra;
+		nrec_0x41_attitude_tot += nrec_0x41_attitude;
+		nrec_0x43_clock_tot += nrec_0x43_clock;
+		nrec_0x44_bathymetry_tot += nrec_0x44_bathymetry;
+		nrec_0x45_singlebeam_tot += nrec_0x45_singlebeam;
+		nrec_0x46_rawbeamF_tot += nrec_0x46_rawbeamF;
+		nrec_0x47_surfacesoundspeed2_tot += nrec_0x47_surfacesoundspeed2;
+		nrec_0x48_heading_tot += nrec_0x48_heading;
+		nrec_0x49_parameter_start_tot += nrec_0x49_parameter_start;
+		nrec_0x4A_tilt_tot += nrec_0x4A_tilt;
+		nrec_0x4B_echogram_tot += nrec_0x4B_echogram;
+		nrec_0x4E_rawbeamN_tot += nrec_0x4E_rawbeamN;
+		nrec_0x50_pos_tot += nrec_0x50_pos;
+		nrec_0x52_runtime_tot += nrec_0x52_runtime;
+		nrec_0x53_sidescan_tot += nrec_0x53_sidescan;
+		nrec_0x54_tide_tot += nrec_0x54_tide;
+		nrec_0x55_svp2_tot += nrec_0x55_svp2;
+		nrec_0x56_svp_tot += nrec_0x56_svp;
+		nrec_0x57_surfacesoundspeed_tot += nrec_0x57_surfacesoundspeed;
+		nrec_0x58_bathymetry2_tot += nrec_0x58_bathymetry2;
+		nrec_0x59_sidescan2_tot += nrec_0x59_sidescan2;
+		nrec_0x66_rawbeamf_tot += nrec_0x66_rawbeamf;
+		nrec_0x68_height_tot += nrec_0x68_height;
+		nrec_0x69_parameter_stop_tot += nrec_0x69_parameter_stop;
+		nrec_0x6B_water_column_tot += nrec_0x6B_water_column;
+		nrec_0x6E_network_attitude_tot += nrec_0x6E_network_attitude;
+		nrec_0x70_parameter_tot += nrec_0x70_parameter;
+		nrec_0x73_surface_sound_speed_tot += nrec_0x73_surface_sound_speed;
+		nrec_0xE1_bathymetry_mbari57_tot += nrec_0xE1_bathymetry_mbari57;
+		nrec_0xE2_sidescan_mbari57_tot += nrec_0xE2_sidescan_mbari57;
+		nrec_0xE3_bathymetry_mbari59_tot += nrec_0xE3_bathymetry_mbari59;
+		nrec_0xE4_sidescan_mbari59_tot += nrec_0xE4_sidescan_mbari59;
+		nrec_0xE5_bathymetry_mbari59_tot += nrec_0xE5_bathymetry_mbari59;
+		}
 
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
@@ -1267,43 +1292,46 @@ int main (int argc, char **argv)
 			}
 
 	/* output counts */
-	fprintf(stdout, "\nTotal data records read from: %s\n", read_file);
-	fprintf(stdout, "     nrec_0x30_parameter_stop_tot:     %d\n", nrec_0x30_parameter_stop_tot);
-	fprintf(stdout, "     nrec_0x31_parameter_off_tot:      %d\n", nrec_0x31_parameter_off_tot);
-	fprintf(stdout, "     nrec_0x32_parameter_on_tot:       %d\n", nrec_0x32_parameter_on_tot);
-	fprintf(stdout, "     nrec_0x33_parameter_extra_tot:    %d\n", nrec_0x33_parameter_extra_tot);
-	fprintf(stdout, "     nrec_0x41_attitude_tot:           %d\n", nrec_0x41_attitude_tot);
-	fprintf(stdout, "     nrec_0x43_clock_tot:              %d\n", nrec_0x43_clock_tot);
-	fprintf(stdout, "     nrec_0x44_bathymetry_tot:         %d\n", nrec_0x44_bathymetry_tot);
-	fprintf(stdout, "     nrec_0x45_singlebeam_tot:         %d\n", nrec_0x45_singlebeam_tot);
-	fprintf(stdout, "     nrec_0x46_rawbeamF_tot:           %d\n", nrec_0x46_rawbeamF_tot);
-	fprintf(stdout, "     nrec_0x47_surfacesoundspeed2_tot: %d\n", nrec_0x47_surfacesoundspeed2_tot);
-	fprintf(stdout, "     nrec_0x48_heading_tot:            %d\n", nrec_0x48_heading_tot);
-	fprintf(stdout, "     nrec_0x49_parameter_start_tot:    %d\n", nrec_0x49_parameter_start_tot);
-	fprintf(stdout, "     nrec_0x4A_tilt_tot:               %d\n", nrec_0x4A_tilt_tot);
-	fprintf(stdout, "     nrec_0x4B_echogram_tot:           %d\n", nrec_0x4B_echogram_tot);
-	fprintf(stdout, "     nrec_0x4E_rawbeamN_tot:           %d\n", nrec_0x4E_rawbeamN_tot);
-	fprintf(stdout, "     nrec_0x50_pos_tot:                %d\n", nrec_0x50_pos_tot);
-	fprintf(stdout, "     nrec_0x52_runtime_tot:            %d\n", nrec_0x52_runtime_tot);
-	fprintf(stdout, "     nrec_0x53_sidescan_tot:           %d\n", nrec_0x53_sidescan_tot);
-	fprintf(stdout, "     nrec_0x54_tide_tot:               %d\n", nrec_0x54_tide_tot);
-	fprintf(stdout, "     nrec_0x55_svp2_tot:               %d\n", nrec_0x55_svp2_tot);
-	fprintf(stdout, "     nrec_0x56_svp_tot:                %d\n", nrec_0x56_svp_tot);
-	fprintf(stdout, "     nrec_0x57_surfacesoundspeed_tot:  %d\n", nrec_0x57_surfacesoundspeed_tot);
-	fprintf(stdout, "     nrec_0x58_bathymetry2_tot:        %d\n", nrec_0x58_bathymetry2_tot);
-	fprintf(stdout, "     nrec_0x59_sidescan2_tot:          %d\n", nrec_0x59_sidescan2_tot);
-	fprintf(stdout, "     nrec_0x66_rawbeamf_tot:           %d\n", nrec_0x66_rawbeamf_tot);
-	fprintf(stdout, "     nrec_0x68_height_tot:             %d\n", nrec_0x68_height_tot);
-	fprintf(stdout, "     nrec_0x69_parameter_stop_tot:     %d\n", nrec_0x69_parameter_stop_tot);
-	fprintf(stdout, "     nrec_0x6B_water_column_tot:       %d\n", nrec_0x6B_water_column_tot);
-	fprintf(stdout, "     nrec_0x6E_network_attitude_tot:   %d\n", nrec_0x6E_network_attitude_tot);
-	fprintf(stdout, "     nrec_0x70_parameter_tot:          %d\n", nrec_0x70_parameter_tot);
-	fprintf(stdout, "     nrec_0x73_surface_sound_speed_tot:%d\n", nrec_0x73_surface_sound_speed_tot);
-	fprintf(stdout, "     nrec_0xE1_bathymetry_mbari57_tot: %d\n", nrec_0xE1_bathymetry_mbari57_tot);
-	fprintf(stdout, "     nrec_0xE2_sidescan_mbari57_tot:   %d\n", nrec_0xE2_sidescan_mbari57_tot);
-	fprintf(stdout, "     nrec_0xE3_bathymetry_mbari59_tot: %d\n", nrec_0xE3_bathymetry_mbari59_tot);
-	fprintf(stdout, "     nrec_0xE4_sidescan_mbari59_tot:   %d\n", nrec_0xE4_sidescan_mbari59_tot);
-	fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59_tot: %d\n", nrec_0xE5_bathymetry_mbari59_tot);
+	if (output_counts == MB_YES)
+		{
+		fprintf(stdout, "\nTotal data records read from: %s\n", read_file);
+		fprintf(stdout, "     nrec_0x30_parameter_stop_tot:     %d\n", nrec_0x30_parameter_stop_tot);
+		fprintf(stdout, "     nrec_0x31_parameter_off_tot:      %d\n", nrec_0x31_parameter_off_tot);
+		fprintf(stdout, "     nrec_0x32_parameter_on_tot:       %d\n", nrec_0x32_parameter_on_tot);
+		fprintf(stdout, "     nrec_0x33_parameter_extra_tot:    %d\n", nrec_0x33_parameter_extra_tot);
+		fprintf(stdout, "     nrec_0x41_attitude_tot:           %d\n", nrec_0x41_attitude_tot);
+		fprintf(stdout, "     nrec_0x43_clock_tot:              %d\n", nrec_0x43_clock_tot);
+		fprintf(stdout, "     nrec_0x44_bathymetry_tot:         %d\n", nrec_0x44_bathymetry_tot);
+		fprintf(stdout, "     nrec_0x45_singlebeam_tot:         %d\n", nrec_0x45_singlebeam_tot);
+		fprintf(stdout, "     nrec_0x46_rawbeamF_tot:           %d\n", nrec_0x46_rawbeamF_tot);
+		fprintf(stdout, "     nrec_0x47_surfacesoundspeed2_tot: %d\n", nrec_0x47_surfacesoundspeed2_tot);
+		fprintf(stdout, "     nrec_0x48_heading_tot:            %d\n", nrec_0x48_heading_tot);
+		fprintf(stdout, "     nrec_0x49_parameter_start_tot:    %d\n", nrec_0x49_parameter_start_tot);
+		fprintf(stdout, "     nrec_0x4A_tilt_tot:               %d\n", nrec_0x4A_tilt_tot);
+		fprintf(stdout, "     nrec_0x4B_echogram_tot:           %d\n", nrec_0x4B_echogram_tot);
+		fprintf(stdout, "     nrec_0x4E_rawbeamN_tot:           %d\n", nrec_0x4E_rawbeamN_tot);
+		fprintf(stdout, "     nrec_0x50_pos_tot:                %d\n", nrec_0x50_pos_tot);
+		fprintf(stdout, "     nrec_0x52_runtime_tot:            %d\n", nrec_0x52_runtime_tot);
+		fprintf(stdout, "     nrec_0x53_sidescan_tot:           %d\n", nrec_0x53_sidescan_tot);
+		fprintf(stdout, "     nrec_0x54_tide_tot:               %d\n", nrec_0x54_tide_tot);
+		fprintf(stdout, "     nrec_0x55_svp2_tot:               %d\n", nrec_0x55_svp2_tot);
+		fprintf(stdout, "     nrec_0x56_svp_tot:                %d\n", nrec_0x56_svp_tot);
+		fprintf(stdout, "     nrec_0x57_surfacesoundspeed_tot:  %d\n", nrec_0x57_surfacesoundspeed_tot);
+		fprintf(stdout, "     nrec_0x58_bathymetry2_tot:        %d\n", nrec_0x58_bathymetry2_tot);
+		fprintf(stdout, "     nrec_0x59_sidescan2_tot:          %d\n", nrec_0x59_sidescan2_tot);
+		fprintf(stdout, "     nrec_0x66_rawbeamf_tot:           %d\n", nrec_0x66_rawbeamf_tot);
+		fprintf(stdout, "     nrec_0x68_height_tot:             %d\n", nrec_0x68_height_tot);
+		fprintf(stdout, "     nrec_0x69_parameter_stop_tot:     %d\n", nrec_0x69_parameter_stop_tot);
+		fprintf(stdout, "     nrec_0x6B_water_column_tot:       %d\n", nrec_0x6B_water_column_tot);
+		fprintf(stdout, "     nrec_0x6E_network_attitude_tot:   %d\n", nrec_0x6E_network_attitude_tot);
+		fprintf(stdout, "     nrec_0x70_parameter_tot:          %d\n", nrec_0x70_parameter_tot);
+		fprintf(stdout, "     nrec_0x73_surface_sound_speed_tot:%d\n", nrec_0x73_surface_sound_speed_tot);
+		fprintf(stdout, "     nrec_0xE1_bathymetry_mbari57_tot: %d\n", nrec_0xE1_bathymetry_mbari57_tot);
+		fprintf(stdout, "     nrec_0xE2_sidescan_mbari57_tot:   %d\n", nrec_0xE2_sidescan_mbari57_tot);
+		fprintf(stdout, "     nrec_0xE3_bathymetry_mbari59_tot: %d\n", nrec_0xE3_bathymetry_mbari59_tot);
+		fprintf(stdout, "     nrec_0xE4_sidescan_mbari59_tot:   %d\n", nrec_0xE4_sidescan_mbari59_tot);
+		fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59_tot: %d\n", nrec_0xE5_bathymetry_mbari59_tot);
+		}
 	nrec_0x30_parameter_stop_tot = 0;
 	nrec_0x31_parameter_off_tot = 0;
 	nrec_0x32_parameter_on_tot = 0;
@@ -1384,6 +1412,13 @@ int main (int argc, char **argv)
 		sprintf(ofile, "%sf.mb%d", fileroot, MBF_EM710MBA);
 	else
 		sprintf(ofile, "%s.mb%d", fileroot, MBF_EM710MBA);
+
+	/* if output directory was set by user, reset file path */
+	if (odir_set == MB_YES && odir!=NULL)
+		{
+		filenameptr = strrchr(ofile, '/') + 1;
+		sprintf(ofile,"%s/%s",odir,filenameptr);
+		}
 
 	/* initialize reading the input swath file */
 	if ((status = mb_read_init(
@@ -1644,12 +1679,12 @@ int main (int argc, char **argv)
 				{
 				interp_status = mb_linear_interp_degrees(verbose,
 							dat_nav_time_d-1, dat_nav_lon-1,
-							ndat_nav, time_d, &navlon, &j,
+							ndat_nav, time_d, &navlon, &jnav,
 							&error);
 				if (interp_status == MB_SUCCESS)
 				interp_status = mb_linear_interp_degrees(verbose,
 							dat_nav_time_d-1, dat_nav_lat-1,
-							ndat_nav, time_d, &navlat, &j,
+							ndat_nav, time_d, &navlat, &jnav,
 							&error);
 				}
 			else
@@ -1664,7 +1699,7 @@ int main (int argc, char **argv)
 				{
 				interp_status = mb_linear_interp_degrees(verbose,
 							dat_heading_time_d-1, dat_heading_heading-1,
-							ndat_heading, time_d, &heading, &j,
+							ndat_heading, time_d, &heading, &jheading,
 							&error);
 				}
 			else
@@ -1677,17 +1712,17 @@ int main (int argc, char **argv)
 				{
 				interp_status = mb_linear_interp(verbose,
 							dat_rph_time_d-1, dat_rph_roll-1,
-							ndat_rph, time_d, &roll, &j,
+							ndat_rph, time_d, &roll, &jattitude,
 							&error);
 				if (interp_status == MB_SUCCESS)
 				interp_status = mb_linear_interp(verbose,
 							dat_rph_time_d-1, dat_rph_pitch-1,
-							ndat_rph, time_d, &pitch, &j,
+							ndat_rph, time_d, &pitch, &jattitude,
 							&error);
 				if (interp_status == MB_SUCCESS)
 				interp_status = mb_linear_interp(verbose,
 							dat_rph_time_d-1, dat_rph_heave-1,
-							ndat_rph, time_d, &heave, &j,
+							ndat_rph, time_d, &heave, &jattitude,
 							&error);
 				}
 			else
@@ -2281,43 +2316,46 @@ int main (int argc, char **argv)
 	fclose(stafp);
 
 	/* output counts */
-	fprintf(stdout, "\nData records written to: %s\n", ofile);
-	fprintf(stdout, "     nrec_0x30_parameter_stop:         %d\n", nrec_0x30_parameter_stop);
-	fprintf(stdout, "     nrec_0x31_parameter_off:          %d\n", nrec_0x31_parameter_off);
-	fprintf(stdout, "     nrec_0x32_parameter_on:           %d\n", nrec_0x32_parameter_on);
-	fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
-	fprintf(stdout, "     nrec_0x41_attitude:               %d\n", nrec_0x41_attitude);
-	fprintf(stdout, "     nrec_0x43_clock:                  %d\n", nrec_0x43_clock);
-	fprintf(stdout, "     nrec_0x44_bathymetry:             %d\n", nrec_0x44_bathymetry);
-	fprintf(stdout, "     nrec_0x45_singlebeam:             %d\n", nrec_0x45_singlebeam);
-	fprintf(stdout, "     nrec_0x46_rawbeamF:               %d\n", nrec_0x46_rawbeamF);
-	fprintf(stdout, "     nrec_0x47_surfacesoundspeed2:     %d\n", nrec_0x47_surfacesoundspeed2);
-	fprintf(stdout, "     nrec_0x48_heading:                %d\n", nrec_0x48_heading);
-	fprintf(stdout, "     nrec_0x49_parameter_start:        %d\n", nrec_0x49_parameter_start);
-	fprintf(stdout, "     nrec_0x4A_tilt:                   %d\n", nrec_0x4A_tilt);
-	fprintf(stdout, "     nrec_0x4B_echogram:               %d\n", nrec_0x4B_echogram);
-	fprintf(stdout, "     nrec_0x4E_rawbeamN:               %d\n", nrec_0x4E_rawbeamN);
-	fprintf(stdout, "     nrec_0x50_pos:                    %d\n", nrec_0x50_pos);
-	fprintf(stdout, "     nrec_0x52_runtime:                %d\n", nrec_0x52_runtime);
-	fprintf(stdout, "     nrec_0x53_sidescan:               %d\n", nrec_0x53_sidescan);
-	fprintf(stdout, "     nrec_0x54_tide:                   %d\n", nrec_0x54_tide);
-	fprintf(stdout, "     nrec_0x55_svp2:                   %d\n", nrec_0x55_svp2);
-	fprintf(stdout, "     nrec_0x56_svp:                    %d\n", nrec_0x56_svp);
-	fprintf(stdout, "     nrec_0x57_surfacesoundspeed:      %d\n", nrec_0x57_surfacesoundspeed);
-	fprintf(stdout, "     nrec_0x58_bathymetry2:            %d\n", nrec_0x58_bathymetry2);
-	fprintf(stdout, "     nrec_0x59_sidescan2:              %d\n", nrec_0x59_sidescan2);
-	fprintf(stdout, "     nrec_0x66_rawbeamf:               %d\n", nrec_0x66_rawbeamf);
-	fprintf(stdout, "     nrec_0x68_height:                 %d\n", nrec_0x68_height);
-	fprintf(stdout, "     nrec_0x69_parameter_stop:         %d\n", nrec_0x69_parameter_stop);
-	fprintf(stdout, "     nrec_0x6B_water_column:           %d\n", nrec_0x6B_water_column);
-	fprintf(stdout, "     nrec_0x6E_network_attitude:       %d\n", nrec_0x6E_network_attitude);
-	fprintf(stdout, "     nrec_0x70_parameter:              %d\n", nrec_0x70_parameter);
-	fprintf(stdout, "     nrec_0x73_surface_sound_speed:    %d\n", nrec_0x73_surface_sound_speed);
-	fprintf(stdout, "     nrec_0xE1_bathymetry_mbari57:     %d\n", nrec_0xE1_bathymetry_mbari57);
-	fprintf(stdout, "     nrec_0xE2_sidescan_mbari57:       %d\n", nrec_0xE2_sidescan_mbari57);
-	fprintf(stdout, "     nrec_0xE3_bathymetry_mbari59:     %d\n", nrec_0xE3_bathymetry_mbari59);
-	fprintf(stdout, "     nrec_0xE4_sidescan_mbari59:       %d\n", nrec_0xE4_sidescan_mbari59);
-	fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59:     %d\n", nrec_0xE5_bathymetry_mbari59);
+	if(output_counts == MB_YES)
+		{
+		fprintf(stdout, "\nData records written to: %s\n", ofile);
+		fprintf(stdout, "     nrec_0x30_parameter_stop:         %d\n", nrec_0x30_parameter_stop);
+		fprintf(stdout, "     nrec_0x31_parameter_off:          %d\n", nrec_0x31_parameter_off);
+		fprintf(stdout, "     nrec_0x32_parameter_on:           %d\n", nrec_0x32_parameter_on);
+		fprintf(stdout, "     nrec_0x33_parameter_extra:        %d\n", nrec_0x33_parameter_extra);
+		fprintf(stdout, "     nrec_0x41_attitude:               %d\n", nrec_0x41_attitude);
+		fprintf(stdout, "     nrec_0x43_clock:                  %d\n", nrec_0x43_clock);
+		fprintf(stdout, "     nrec_0x44_bathymetry:             %d\n", nrec_0x44_bathymetry);
+		fprintf(stdout, "     nrec_0x45_singlebeam:             %d\n", nrec_0x45_singlebeam);
+		fprintf(stdout, "     nrec_0x46_rawbeamF:               %d\n", nrec_0x46_rawbeamF);
+		fprintf(stdout, "     nrec_0x47_surfacesoundspeed2:     %d\n", nrec_0x47_surfacesoundspeed2);
+		fprintf(stdout, "     nrec_0x48_heading:                %d\n", nrec_0x48_heading);
+		fprintf(stdout, "     nrec_0x49_parameter_start:        %d\n", nrec_0x49_parameter_start);
+		fprintf(stdout, "     nrec_0x4A_tilt:                   %d\n", nrec_0x4A_tilt);
+		fprintf(stdout, "     nrec_0x4B_echogram:               %d\n", nrec_0x4B_echogram);
+		fprintf(stdout, "     nrec_0x4E_rawbeamN:               %d\n", nrec_0x4E_rawbeamN);
+		fprintf(stdout, "     nrec_0x50_pos:                    %d\n", nrec_0x50_pos);
+		fprintf(stdout, "     nrec_0x52_runtime:                %d\n", nrec_0x52_runtime);
+		fprintf(stdout, "     nrec_0x53_sidescan:               %d\n", nrec_0x53_sidescan);
+		fprintf(stdout, "     nrec_0x54_tide:                   %d\n", nrec_0x54_tide);
+		fprintf(stdout, "     nrec_0x55_svp2:                   %d\n", nrec_0x55_svp2);
+		fprintf(stdout, "     nrec_0x56_svp:                    %d\n", nrec_0x56_svp);
+		fprintf(stdout, "     nrec_0x57_surfacesoundspeed:      %d\n", nrec_0x57_surfacesoundspeed);
+		fprintf(stdout, "     nrec_0x58_bathymetry2:            %d\n", nrec_0x58_bathymetry2);
+		fprintf(stdout, "     nrec_0x59_sidescan2:              %d\n", nrec_0x59_sidescan2);
+		fprintf(stdout, "     nrec_0x66_rawbeamf:               %d\n", nrec_0x66_rawbeamf);
+		fprintf(stdout, "     nrec_0x68_height:                 %d\n", nrec_0x68_height);
+		fprintf(stdout, "     nrec_0x69_parameter_stop:         %d\n", nrec_0x69_parameter_stop);
+		fprintf(stdout, "     nrec_0x6B_water_column:           %d\n", nrec_0x6B_water_column);
+		fprintf(stdout, "     nrec_0x6E_network_attitude:       %d\n", nrec_0x6E_network_attitude);
+		fprintf(stdout, "     nrec_0x70_parameter:              %d\n", nrec_0x70_parameter);
+		fprintf(stdout, "     nrec_0x73_surface_sound_speed:    %d\n", nrec_0x73_surface_sound_speed);
+		fprintf(stdout, "     nrec_0xE1_bathymetry_mbari57:     %d\n", nrec_0xE1_bathymetry_mbari57);
+		fprintf(stdout, "     nrec_0xE2_sidescan_mbari57:       %d\n", nrec_0xE2_sidescan_mbari57);
+		fprintf(stdout, "     nrec_0xE3_bathymetry_mbari59:     %d\n", nrec_0xE3_bathymetry_mbari59);
+		fprintf(stdout, "     nrec_0xE4_sidescan_mbari59:       %d\n", nrec_0xE4_sidescan_mbari59);
+		fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59:     %d\n", nrec_0xE5_bathymetry_mbari59);
+		}
 
 	nrec_0x30_parameter_stop_tot += nrec_0x30_parameter_stop;
 	nrec_0x31_parameter_off_tot += nrec_0x31_parameter_off;
@@ -2383,43 +2421,46 @@ int main (int argc, char **argv)
 		mb_datalist_close(verbose,&datalist,&error);
 
 	/* output counts */
-	fprintf(stdout, "\nTotal data records written from: %s\n", read_file);
-	fprintf(stdout, "     nrec_0x30_parameter_stop_tot:     %d\n", nrec_0x30_parameter_stop_tot);
-	fprintf(stdout, "     nrec_0x31_parameter_off_tot:      %d\n", nrec_0x31_parameter_off_tot);
-	fprintf(stdout, "     nrec_0x32_parameter_on_tot:       %d\n", nrec_0x32_parameter_on_tot);
-	fprintf(stdout, "     nrec_0x33_parameter_extra_tot:    %d\n", nrec_0x33_parameter_extra_tot);
-	fprintf(stdout, "     nrec_0x41_attitude_tot:           %d\n", nrec_0x41_attitude_tot);
-	fprintf(stdout, "     nrec_0x43_clock_tot:              %d\n", nrec_0x43_clock_tot);
-	fprintf(stdout, "     nrec_0x44_bathymetry_tot:         %d\n", nrec_0x44_bathymetry_tot);
-	fprintf(stdout, "     nrec_0x45_singlebeam_tot:         %d\n", nrec_0x45_singlebeam_tot);
-	fprintf(stdout, "     nrec_0x46_rawbeamF_tot:           %d\n", nrec_0x46_rawbeamF_tot);
-	fprintf(stdout, "     nrec_0x47_surfacesoundspeed2_tot: %d\n", nrec_0x47_surfacesoundspeed2_tot);
-	fprintf(stdout, "     nrec_0x48_heading_tot:            %d\n", nrec_0x48_heading_tot);
-	fprintf(stdout, "     nrec_0x49_parameter_start_tot:    %d\n", nrec_0x49_parameter_start_tot);
-	fprintf(stdout, "     nrec_0x4A_tilt_tot:               %d\n", nrec_0x4A_tilt_tot);
-	fprintf(stdout, "     nrec_0x4B_echogram_tot:           %d\n", nrec_0x4B_echogram_tot);
-	fprintf(stdout, "     nrec_0x4E_rawbeamN_tot:           %d\n", nrec_0x4E_rawbeamN_tot);
-	fprintf(stdout, "     nrec_0x50_pos_tot:                %d\n", nrec_0x50_pos_tot);
-	fprintf(stdout, "     nrec_0x52_runtime_tot:            %d\n", nrec_0x52_runtime_tot);
-	fprintf(stdout, "     nrec_0x53_sidescan_tot:           %d\n", nrec_0x53_sidescan_tot);
-	fprintf(stdout, "     nrec_0x54_tide_tot:               %d\n", nrec_0x54_tide_tot);
-	fprintf(stdout, "     nrec_0x55_svp2_tot:               %d\n", nrec_0x55_svp2_tot);
-	fprintf(stdout, "     nrec_0x56_svp_tot:                %d\n", nrec_0x56_svp_tot);
-	fprintf(stdout, "     nrec_0x57_surfacesoundspeed_tot:  %d\n", nrec_0x57_surfacesoundspeed_tot);
-	fprintf(stdout, "     nrec_0x58_bathymetry2_tot:        %d\n", nrec_0x58_bathymetry2_tot);
-	fprintf(stdout, "     nrec_0x59_sidescan2_tot:          %d\n", nrec_0x59_sidescan2_tot);
-	fprintf(stdout, "     nrec_0x66_rawbeamf_tot:           %d\n", nrec_0x66_rawbeamf_tot);
-	fprintf(stdout, "     nrec_0x68_height_tot:             %d\n", nrec_0x68_height_tot);
-	fprintf(stdout, "     nrec_0x69_parameter_stop_tot:     %d\n", nrec_0x69_parameter_stop_tot);
-	fprintf(stdout, "     nrec_0x6B_water_column_tot:       %d\n", nrec_0x6B_water_column_tot);
-	fprintf(stdout, "     nrec_0x6E_network_attitude_tot:   %d\n", nrec_0x6E_network_attitude_tot);
-	fprintf(stdout, "     nrec_0x70_parameter_tot:          %d\n", nrec_0x70_parameter_tot);
-	fprintf(stdout, "     nrec_0x73_surface_sound_speed_tot:%d\n", nrec_0x73_surface_sound_speed_tot);
-	fprintf(stdout, "     nrec_0xE1_bathymetry_mbari57_tot: %d\n", nrec_0xE1_bathymetry_mbari57_tot);
-	fprintf(stdout, "     nrec_0xE2_sidescan_mbari57_tot:   %d\n", nrec_0xE2_sidescan_mbari57_tot);
-	fprintf(stdout, "     nrec_0xE3_bathymetry_mbari59_tot: %d\n", nrec_0xE3_bathymetry_mbari59_tot);
-	fprintf(stdout, "     nrec_0xE4_sidescan_mbari59_tot:   %d\n", nrec_0xE4_sidescan_mbari59_tot);
-	fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59_tot: %d\n", nrec_0xE5_bathymetry_mbari59_tot);
+	if(output_counts == MB_YES)
+		{
+		fprintf(stdout, "\nTotal data records written from: %s\n", read_file);
+		fprintf(stdout, "     nrec_0x30_parameter_stop_tot:     %d\n", nrec_0x30_parameter_stop_tot);
+		fprintf(stdout, "     nrec_0x31_parameter_off_tot:      %d\n", nrec_0x31_parameter_off_tot);
+		fprintf(stdout, "     nrec_0x32_parameter_on_tot:       %d\n", nrec_0x32_parameter_on_tot);
+		fprintf(stdout, "     nrec_0x33_parameter_extra_tot:    %d\n", nrec_0x33_parameter_extra_tot);
+		fprintf(stdout, "     nrec_0x41_attitude_tot:           %d\n", nrec_0x41_attitude_tot);
+		fprintf(stdout, "     nrec_0x43_clock_tot:              %d\n", nrec_0x43_clock_tot);
+		fprintf(stdout, "     nrec_0x44_bathymetry_tot:         %d\n", nrec_0x44_bathymetry_tot);
+		fprintf(stdout, "     nrec_0x45_singlebeam_tot:         %d\n", nrec_0x45_singlebeam_tot);
+		fprintf(stdout, "     nrec_0x46_rawbeamF_tot:           %d\n", nrec_0x46_rawbeamF_tot);
+		fprintf(stdout, "     nrec_0x47_surfacesoundspeed2_tot: %d\n", nrec_0x47_surfacesoundspeed2_tot);
+		fprintf(stdout, "     nrec_0x48_heading_tot:            %d\n", nrec_0x48_heading_tot);
+		fprintf(stdout, "     nrec_0x49_parameter_start_tot:    %d\n", nrec_0x49_parameter_start_tot);
+		fprintf(stdout, "     nrec_0x4A_tilt_tot:               %d\n", nrec_0x4A_tilt_tot);
+		fprintf(stdout, "     nrec_0x4B_echogram_tot:           %d\n", nrec_0x4B_echogram_tot);
+		fprintf(stdout, "     nrec_0x4E_rawbeamN_tot:           %d\n", nrec_0x4E_rawbeamN_tot);
+		fprintf(stdout, "     nrec_0x50_pos_tot:                %d\n", nrec_0x50_pos_tot);
+		fprintf(stdout, "     nrec_0x52_runtime_tot:            %d\n", nrec_0x52_runtime_tot);
+		fprintf(stdout, "     nrec_0x53_sidescan_tot:           %d\n", nrec_0x53_sidescan_tot);
+		fprintf(stdout, "     nrec_0x54_tide_tot:               %d\n", nrec_0x54_tide_tot);
+		fprintf(stdout, "     nrec_0x55_svp2_tot:               %d\n", nrec_0x55_svp2_tot);
+		fprintf(stdout, "     nrec_0x56_svp_tot:                %d\n", nrec_0x56_svp_tot);
+		fprintf(stdout, "     nrec_0x57_surfacesoundspeed_tot:  %d\n", nrec_0x57_surfacesoundspeed_tot);
+		fprintf(stdout, "     nrec_0x58_bathymetry2_tot:        %d\n", nrec_0x58_bathymetry2_tot);
+		fprintf(stdout, "     nrec_0x59_sidescan2_tot:          %d\n", nrec_0x59_sidescan2_tot);
+		fprintf(stdout, "     nrec_0x66_rawbeamf_tot:           %d\n", nrec_0x66_rawbeamf_tot);
+		fprintf(stdout, "     nrec_0x68_height_tot:             %d\n", nrec_0x68_height_tot);
+		fprintf(stdout, "     nrec_0x69_parameter_stop_tot:     %d\n", nrec_0x69_parameter_stop_tot);
+		fprintf(stdout, "     nrec_0x6B_water_column_tot:       %d\n", nrec_0x6B_water_column_tot);
+		fprintf(stdout, "     nrec_0x6E_network_attitude_tot:   %d\n", nrec_0x6E_network_attitude_tot);
+		fprintf(stdout, "     nrec_0x70_parameter_tot:          %d\n", nrec_0x70_parameter_tot);
+		fprintf(stdout, "     nrec_0x73_surface_sound_speed_tot:%d\n", nrec_0x73_surface_sound_speed_tot);
+		fprintf(stdout, "     nrec_0xE1_bathymetry_mbari57_tot: %d\n", nrec_0xE1_bathymetry_mbari57_tot);
+		fprintf(stdout, "     nrec_0xE2_sidescan_mbari57_tot:   %d\n", nrec_0xE2_sidescan_mbari57_tot);
+		fprintf(stdout, "     nrec_0xE3_bathymetry_mbari59_tot: %d\n", nrec_0xE3_bathymetry_mbari59_tot);
+		fprintf(stdout, "     nrec_0xE4_sidescan_mbari59_tot:   %d\n", nrec_0xE4_sidescan_mbari59_tot);
+		fprintf(stdout, "     nrec_0xE5_bathymetry_mbari59_tot: %d\n", nrec_0xE5_bathymetry_mbari59_tot);
+		}
 	}
 
 	/* deallocate navigation arrays */
