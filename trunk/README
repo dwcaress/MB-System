@@ -189,6 +189,9 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+Added -MXexcludepercent option to mblist to exclude a user defined
+percentage of outer beams from mblist output. (contributed by Suzanne O'Hara)
+
 -----> 5.3.1982 (August 15, 2012)
 
 Fixed significant issue in mb7kpreprocess and in Reson 7k format support in general.
