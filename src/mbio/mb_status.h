@@ -29,8 +29,8 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.3.1982"
-#define	MB_BUILD_DATE	"15 August 2012"
+#define	MB_VERSION	"5.3.1983"
+#define	MB_BUILD_DATE	"16 August 2012"
 #define	MB_SVN		"$Id$"
 
 /* MBIO function boolean convention */

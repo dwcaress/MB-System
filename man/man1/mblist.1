@@ -1,4 +1,4 @@
-.TH mblist 1 "6 November 2011" "MB-System 5.0" "MB-System 5.0"
+.TH mblist 1 "16 August 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmblist\fP - List data in swath data files.
 
@@ -6,33 +6,33 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmblist\fP [\fB-A\fP \fB-B\fP\fIyr/mo/da/hr/mn/sc\fP 
-\fB-C\fP 
-\fB-D\fP\fIdumpmode\fP 
+\fBmblist\fP [\fB-A\fP \fB-B\fP\fIyr/mo/da/hr/mn/sc\fP
+\fB-C\fP
+\fB-D\fP\fIdumpmode\fP
 \fB-E\fP\fIyr/mo/da/hr/mn/sc\fP \fB-F\fP\fIformat\fP \fB-G\fP\fIdelimiter\fP
 \fB-H\fP \fB-I\fP\fIinfilename\fP \fB-K\fP\fIdecimate\fP
-\fB-L\fP\fIlonflip\fP \fB-M\fP\fIstart_beam/end_beam\fP 
-\fB-N\fP\fIstart_pixel/end_pixel\fP 
-\fB-O\fP\fIoutput_format\fP \fB-P\fP\fIpings\fP \fB-Q\fP 
-\fB-R\fP\fIwest/east/south/north\fP 
-\fB-S\fP\fIspeed\fP \fB-T\fP\fItimegap\fP 
-\fB-U\fP\fIcheck\fP \fB-V\fP \fB-W\fP 
+\fB-L\fP\fIlonflip\fP \fB-M\fP[\fIstart_beam/end_beam\fP | \fBA\fP | \fBX\fP\fIpercentage\fP]
+\fB-N\fP\fIstart_pixel/end_pixel\fP
+\fB-O\fP\fIoutput_format\fP \fB-P\fP\fIpings\fP \fB-Q\fP
+\fB-R\fP\fIwest/east/south/north\fP
+\fB-S\fP\fIspeed\fP \fB-T\fP\fItimegap\fP
+\fB-U\fP\fIcheck\fP \fB-V\fP \fB-W\fP
 \fB-X\fP\fIoutfile\fP
 \fB-Z\fP\fIsegment\fP]
 
 .SH DESCRIPTION
-\fBmblist\fP is a utility to list the contents of a swath 
-data file or files to stdout. By default, \fBmblist\fP 
+\fBmblist\fP is a utility to list the contents of a swath
+data file or files to stdout. By default, \fBmblist\fP
 produces ASCII files in
 spreadsheet style, with data columns separated by tabs. Alternatively,
 other column delimiters can be used (\fB-G\fP option), or
-the output can be binary, with each field represented 
-as a double precision float (\fB-A\fP option). 
+the output can be binary, with each field represented
+as a double precision float (\fB-A\fP option).
 Output can also be in netCDF CDL (\fB-C\fP option) format,
 or as a binary netCDF file (\fB-C -A\fP).
 The output of
 \fBmblist\fP can be piped to plotting and data analysis programs. The
-option \fB-O\fP\fIoutput_format\fP can be 
+option \fB-O\fP\fIoutput_format\fP can be
 used to control the data types that
 are sent to stdout. The default is to output a single record for
 each survey ping, and for any output navigation values to reflect
@@ -78,7 +78,7 @@ delimiter specified with the \fB-G\fP option.
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the starting time for data allowed in the input data.
-The \fB-E\fP option sets the ending time for data. If the 
+The \fB-E\fP option sets the ending time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -90,7 +90,7 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 1962/2/21/10/30/0.
 .B \-C
 .br
 Causes netCDF CDL format output to be generated (see \fBncgen\fP).
-When the \fB-A\fP (binary) option is also set \fBmblist\fP will call \fBncgen\fP to 
+When the \fB-A\fP (binary) option is also set \fBmblist\fP will call \fBncgen\fP to
 convert the CDL file to a binary netCDF file (default name is \fImblist.nc\fP),
 if successful the CDL file will be removed.
 .TP
@@ -127,7 +127,7 @@ Default: \fImode\fP = 1.
 \fIyr/mo/da/hr/mn/sc\fP
 .br
 This option sets the ending time for data allowed in the input data.
-The \fB-B\fP option sets the starting time for data. If the 
+The \fB-B\fP option sets the starting time for data. If the
 starting time is before the ending time, then any data
 with a time stamp before the starting time or after the
 ending time is ignored. If instead the starting time is
@@ -139,8 +139,8 @@ Default: \fIyr/mo/da/hr/mn/sc\fP = 2062/2/21/10/30/0.
 .B \-F
 \fIformat\fP
 .br
-Sets the format for the input swath data using 
-\fBMBIO\fP integer format identifiers. 
+Sets the format for the input swath data using
+\fBMBIO\fP integer format identifiers.
 This program uses the \fBMBIO\fP library and will read any swath
 format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
@@ -159,11 +159,11 @@ of its operation and then exit immediately.
 .B \-I
 \fIfilename\fP
 .br
-Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-F\fP option) then the swath data contained in \fIinfile\fP 
+Sets the input filename. If \fIformat\fP > 0 (set with the
+\fB-F\fP option) then the swath data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath
-data files to be processed and their formats.  The program will read 
+data files to be processed and their formats.  The program will read
 the data in each one of these files.
 In the \fIinfile\fP file, each
 data file should be followed by a data format identifier, e.g.:
@@ -173,14 +173,14 @@ data file should be followed by a data format identifier, e.g.:
 This program uses the \fBMBIO\fP library and will read any swath
 format supported by \fBMBIO\fP. A list of the swath data formats
 currently supported by \fBMBIO\fP and their identifier values
-is given in the \fBMBIO\fP manual page. 
+is given in the \fBMBIO\fP manual page.
 Default: \fIinfile\fP = "datalist.mb-1".
 .TP
 .B \-K
 \fIdecimate\fP
 .br
-Sets the decimation of the output data. By default (i.e. \fIdecimate\fP=1), 
-every available data record is output. If \fIdecimate\fP>1, then only 
+Sets the decimation of the output data. By default (i.e. \fIdecimate\fP=1),
+every available data record is output. If \fIdecimate\fP>1, then only
 every "\fIdecimate\fP"th record will be output. Default: \fIdecimate\fP=1.
 .TP
 .B \-L
@@ -188,30 +188,32 @@ every "\fIdecimate\fP"th record will be output. Default: \fIdecimate\fP=1.
 .br
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If \fIlonflip\fP=0 
+the range from -360 to 0 degrees. If \fIlonflip\fP=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If \fIlonflip\fP=1 
+the range from -180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
 .TP
 .B \-M
-\fIstart_beam/end_beam\fP or \fIA\fP
+\fIstart_beam/end_beam\fP or \fBA\fP or \fBX\fP\fIexcludepercent\fP
 .br
 Determines the range of bathymetry beams for which records will be output.
-If \fB-M\fP\fIA\fP is given, then a record
+If this option is used, then any longitude and latitude values output
+will reflect the positions of individual beams on the seafloor.
+If \fB-MA\fP is given, then a record
 will be output for each valid beam. If \fIstart_beam/end_beam\fP
 is specified, then records will be output only for beams in this
-range. Beam numbers start with zero on the port side. 
-If this option is used,
-then any longitude and latitude values output will reflect the
-positions of individual beams on the seafloor. 
-The default is to output a single record for each ping 
-in which longitude and latitude values reflect 
+range. Beam numbers start with zero on the port side.
+If \fB-MX\fP\fIexcludepercent\fP is given, then records will be output
+for each valid, non-excluded beam where the outer \fIexcludepercent\fP
+percentage of beams are excluded.
+The default is to output a single record for each ping
+in which longitude and latitude values reflect
 the sonar navigation, the depth,
-topography, and amplitude values reflect the valid beam 
+topography, and amplitude values reflect the valid beam
 nearest to vertical, and the sidescan value reflects the pixel
-nearest to vertical. 
+nearest to vertical.
 .TP
 .B \-N
 \fIstart_pixel/end_pixel\fP or \fIA\fP
@@ -219,12 +221,12 @@ nearest to vertical.
 Determines the range of sidescan pixels for which records will be output.
 If \fIstart_pixel/end_pixel\fP
 is specified, then records will be output only for pixels in this
-range. Pixel numbers start with zero on the port side. The default is 
-to not output records associated with sidescan pixels. Instead, 
-the default is to output a single record for each ping 
-in which longitude and latitude values reflect 
+range. Pixel numbers start with zero on the port side. The default is
+to not output records associated with sidescan pixels. Instead,
+the default is to output a single record for each ping
+in which longitude and latitude values reflect
 the sonar navigation, the depth,
-topography, and amplitude values reflect the valid beam 
+topography, and amplitude values reflect the valid beam
 nearest to vertical, and the sidescan value reflects the pixel
 nearest to vertical. If \fB-N\fP\fIA\fP is given, then a record
 will be output for all sidescan pixels.
@@ -235,64 +237,64 @@ will be output for all sidescan pixels.
 Determines the form of the output. \fIOutput_format\fP is a string composed
 of one or more of the following characters:
 .IP
-\fB/\fP 
-special character: this causes the value 
+\fB/\fP
+special character: this causes the value
 indicated by the next character to be  inverted. This applies only to simple
-numeric values such as depth and 
-heading and not to values like time  
-strings or positions with hemisphere 
+numeric values such as depth and
+heading and not to values like time
+strings or positions with hemisphere
 characters.
 .IP
-\fB-\fP  
-special character: this causes the value 
-indicated by the next character to be 
-multiplied by -1. This applies only 
-to simple numeric values such as  
-depth and heading and not to values   
-like time strings or positions with 
+\fB-\fP
+special character: this causes the value
+indicated by the next character to be
+multiplied by -1. This applies only
+to simple numeric values such as
+depth and heading and not to values
+like time strings or positions with
 hemisphere characters.
 .IP
-\fB=\fP  
-special character: this causes the value 
-indicated by the next character to 
+\fB=\fP
+special character: this causes the value
+indicated by the next character to
 derive from the port-most non-null
-beam or pixel. This applies only 
+beam or pixel. This applies only
 to numeric values associated with
 beams or pixels such as depth, longitude,
 or latitude.
 .IP
-\fB+\fP  
-special character: this causes the value 
-indicated by the next character to 
+\fB+\fP
+special character: this causes the value
+indicated by the next character to
 derive from the starboard-most non-null
-beam or pixel. This applies only 
+beam or pixel. This applies only
 to numeric values associated with
 beams or pixels such as depth, longitude,
 or latitude.
 .IP
-\fBA\fP 
-for apparent seafloor crosstrack slope 
+\fBA\fP
+for apparent seafloor crosstrack slope
 (degrees from horizontal with positive
-slopes dipping toward port.) Calculated 
+slopes dipping toward port.) Calculated
 by fitting a line to the the
 bathymetry data of each ping.
 .IP
-\fBa\fP 
-for apparent seafloor crosstrack slope 
+\fBa\fP
+for apparent seafloor crosstrack slope
 (degrees from horizontal with positive
-slopes dipping toward port.) Calculated 
+slopes dipping toward port.) Calculated
 by interpolation for each beam or pixel.
 .IP
 \fBB\fP
 for amplitude
 .IP
-\fBb\fP 
+\fBb\fP
 for sidescan
 .IP
 \fBC\fP
 for sonar altitude above the bottom (m)
 .IP
-\fBc\fP 
+\fBc\fP
 for sonar tranducer depth (m)
 .IP
 \fBD\fP
@@ -320,27 +322,27 @@ for heading (degrees)
 for course made good (degrees)
 .IP
 \fBJ\fP
-for a time string (yyyy jd hh mm ss.ssssss) 
+for a time string (yyyy jd hh mm ss.ssssss)
 where jd is the day of the year
 .IP
-\fBj\fP 
-for a time string (yyyy jd dm ss.ssssss) 
+\fBj\fP
+for a time string (yyyy jd dm ss.ssssss)
 where jd is the day of the year
 and dm is the minute of the day
 .IP
-\fBL\fP 
+\fBL\fP
 for cumulative along-track distance (km)
 .IP
-\fBl\fP 
+\fBl\fP
 for cumulative along-track distance (m)
 .IP
-\fBM\fP 
+\fBM\fP
 for unix (epoch) time in decimal seconds since 1/1/70 00:00:00
 .IP
-\fBm\fP 
+\fBm\fP
 for time in decimal seconds since first record
 .IP
-\fBN\fP 
+\fBN\fP
 for ping count
 .IP
 \fBP\fP  for pitch in degrees
@@ -383,8 +385,8 @@ for ping count
 .IP
 \fB#\fP  for beam or pixel number
 .IP
-\fB .\fP 
-special character: this causes the next character to be 
+\fB .\fP
+special character: this causes the next character to be
 interpretted from the following list rather than the above list.
 These allow access to raw values in format specific form and may
 not be supported by all formats.
@@ -459,15 +461,15 @@ output as zero. This option is equivalent to \fB-U\fP\fI2\fP.
 .B \-R
 \fIwest/east/south/north\fP
 .br
-Sets the longitude and latitude bounds within which swath 
+Sets the longitude and latitude bounds within which swath
 data will be read. Only the data which lies within these bounds will
-be read. 
+be read.
 Default: \fIwest\fP=-360, east\fI=360\fP, \fIsouth\fP=-90, \fInorth\fP=90.
 .TP
 .B \-S
 \fIspeed\fP
 .br
-Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 copied. Default: \fIspeed\fP = 0.
 .TP
@@ -483,15 +485,15 @@ the data is considered to have a gap. Default: \fItimegap\fP = 1.
 Sets the manner in which \fBmblist\fP handles flagged and null
 bathymetry, amplitude, and sidescan values. By default, \fBmblist\fP
 omits lines of output if they contain flagged or null values. This
-default corresponds to \fIcheck\fP = 0. 
-If \fIcheck\fP = 1, then flagged values will be output 
+default corresponds to \fIcheck\fP = 0.
+If \fIcheck\fP = 1, then flagged values will be output
 unchanged and null values will be ignored.
 If \fIcheck\fP = 2,
 then flagged values will be output unchanged and null values
 will be output as zero (This corresponds to the \fB-Q\fP option).
 If \fIcheck\fP = 3, then flagged values will be output unchanged
 and null values will be output as "NaN".
-If \fIcheck\fP = 4, then flagged values and null values 
+If \fIcheck\fP = 4, then flagged values and null values
 will be output as "NaN".
 .TP
 .B \-V
@@ -510,7 +512,7 @@ in feet.
 \fIoutfile\fP
 .br
 Normally, \fBmblist\fP outputs to stdout.
-If the \fB-X\fP flag is given, then \fBmblist\fP creates a new file 
+If the \fB-X\fP flag is given, then \fBmblist\fP creates a new file
 \fIoutfile\fP and outputs to it.
 An output file must be specified if a netCDF file (\fB-C -A\fP) is required.
 .TP
@@ -527,9 +529,9 @@ when the \fB-A\fP option is specified. The most common usage
 is \fB-Z\fP\I>\fP.
 
 .SH EXAMPLES
-Suppose one wishes to obtain a centerbeam profile 
+Suppose one wishes to obtain a centerbeam profile
 from a raw Hydrosweep file
-(format 21) in a region between 105W and 103W 
+(format 21) in a region between 105W and 103W
 longitude and between 10S and 8S latitude. The following will suffice:
 
 	mblist -Iinfile.mb21 -F21 -R-105/-103/-10/-8 -OLz
@@ -641,7 +643,7 @@ Either way, the output is as follows:
  	.....
 
 Suppose one wishes to obtain a dump of longitude, latitude, and
-depth for all beams, valid or not, in a Hydrosweep data file. 
+depth for all beams, valid or not, in a Hydrosweep data file.
 The approach is the same as the preceding example, except that
 the \fB-Q\fP option is used to disable validity checking of
 beam values. One can explicitly specify the output format as
