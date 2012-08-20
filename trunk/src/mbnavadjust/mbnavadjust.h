@@ -193,6 +193,8 @@ struct mbna_section {
 	double	snav_lon_offset_int[MBNA_SNAV_NUM];
 	double	snav_lat_offset_int[MBNA_SNAV_NUM];
 	double	snav_z_offset_int[MBNA_SNAV_NUM];
+	int	show_in_modelplot;
+	int	modelplot_start_count;
 	int	contoursuptodate;
 };
 struct mbna_file {
@@ -210,6 +212,7 @@ struct mbna_file {
 	double	block_offset_x;
 	double	block_offset_y;
 	double	block_offset_z;
+	int	show_in_modelplot;
 	int	num_snavs;
 	int	num_pings;
 	int	num_beams;
@@ -291,7 +294,7 @@ struct mbna_project {
 	int	modelplot_style;
 	FILE	*logfp;
 };
-struct mbna_plot_vector 
+struct mbna_plot_vector
     {
     int	    command;
     int	    color;
@@ -403,6 +406,10 @@ EXTERNAL struct mbna_contour_vector mbna_contour2;
 EXTERNAL int	mbna_modelplot_width;
 EXTERNAL int	mbna_modelplot_height;
 EXTERNAL int	mbna_modelplot;
+EXTERNAL int	mbna_modelplot_count;
+EXTERNAL int	mbna_modelplot_start;
+EXTERNAL int	mbna_modelplot_end;
+EXTERNAL int	mbna_num_ties_plot;
 EXTERNAL int	mbna_modelplot_xo;
 EXTERNAL int	mbna_modelplot_yo_lon;
 EXTERNAL int	mbna_modelplot_yo_lat;
@@ -410,10 +417,11 @@ EXTERNAL int	mbna_modelplot_yo_z;
 EXTERNAL double	mbna_modelplot_xscale;
 EXTERNAL double	mbna_modelplot_yscale;
 EXTERNAL double	mbna_modelplot_yzscale;
+EXTERNAL int	mbna_modelplot_zoom;
 EXTERNAL int	mbna_modelplot_zoom_x1;
 EXTERNAL int	mbna_modelplot_zoom_x2;
-EXTERNAL int	mbna_modelplot_pingstart;
-EXTERNAL int	mbna_modelplot_pingend;
+EXTERNAL int	mbna_modelplot_startzoom;
+EXTERNAL int	mbna_modelplot_endzoom;
 EXTERNAL int	mbna_modelplot_pickfile;
 EXTERNAL int	mbna_modelplot_picksection;
 EXTERNAL int	mbna_modelplot_picksnav;
@@ -479,15 +487,15 @@ int	mbnavadjust_crossing_unload();
 int	mbnavadjust_crossing_replot();
 int	mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, void **swath_ptr, int num_pings);
 int	mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_ptr, double zoffset);
-int	mbnavadjust_section_contour(int fileid, int sectionid, 
+int	mbnavadjust_section_contour(int fileid, int sectionid,
 				struct swath *swath,
 				struct mbna_contour_vector *contour);
 int	mbnavadjust_naverr_snavpoints(int ix, int iy);
 int	mbnavadjust_sections_intersect(int crossing_id);
 int	mbnavadjust_crossing_overlap(int crossing_id);
-int	mbnavadjust_crossing_overlapbounds(int crossing_id, 
+int	mbnavadjust_crossing_overlapbounds(int crossing_id,
 				double offset_x, double offset_y,
-				double *lonmin, double *lonmax, 
+				double *lonmin, double *lonmax,
 				double *latmin, double *latmax);
 int	mbnavadjust_get_misfit();
 int	mbnavadjust_get_misfitxy();
