@@ -2058,7 +2058,7 @@ and mbedit edit save files.\n";
 				fprintf(stderr,"Draft data missing from nav file.\nMerging of draft data disabled.\n");
 				process.mbp_nav_draft = MBP_NAV_OFF;
 				}
-			    if (process.mbp_nav_draft == MBP_NAV_ON && nget < 15)
+			    if (process.mbp_nav_attitude == MBP_NAV_ON && nget < 15)
 				{
 				fprintf(stderr,"Roll, pitch, and heave data missing from nav file.\nMerging of roll, pitch, and heave data disabled.\n");
 				process.mbp_nav_attitude = MBP_NAV_OFF;
