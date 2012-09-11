@@ -37,6 +37,13 @@
 #define	MB_YES	1
 #define	MB_NO	0
 
+/* MBIO sonar types */
+#define	MB_SONARTYPE_UNKNOWN		0
+#define	MB_SONARTYPE_ECHOSOUNDER	1
+#define	MB_SONARTYPE_MULTIBEAM		2
+#define	MB_SONARTYPE_SIDESCAN		3
+#define	MB_SONARTYPE_INTERFEROMETRIC	4
+
 /* MBIO data type ("kind") convention */
 #define	MB_DATA_KINDS			59
 #define	MB_DATA_NONE			0

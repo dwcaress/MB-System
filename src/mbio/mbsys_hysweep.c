@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_hysweep.c contains the MBIO functions for handling data logged 
+ * mbsys_hysweep.c contains the MBIO functions for handling data logged
  * in the HYSWEEP format using HYSWEEP from HYPACK Inc.
  * The data format associated with this representation is:
  *      MBF_HYSWEEP1 : MBIO ID 201
@@ -37,14 +37,14 @@
 #include "../../include/mb_io.h"
 #include "../../include/mb_define.h"
 #include "../../include/mbsys_hysweep.h"
-	
+
 /* turn on debug statements here */
 /* #define MSYS_HYSWEEP_DEBUG 1 */
 
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_hysweep_alloc";
@@ -112,22 +112,22 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->HSP_low_beam_quality = 0;	/* HSP: low beam quality; codes < this are bad */
 	store->HSP_sonar_range = 0.0;	/* HSP: sonar range setting in work units */
 	store->HSP_towfish_layback = 0.0;	/* HSP: towfish layback in work units */
-	store->HSP_units = 0;		/* HSP: work units: 
+	store->HSP_units = 0;		/* HSP: work units:
 						0: = meters
 						1 = US foot
 						2 = international foot */
 	store->HSP_sonar_id = 0;		/* HSP: sonar id for advanced processing (see defines above) */
 	for (i=0;i<MB_NAME_LENGTH;i++)
 		store->PRJ_proj4_command[i] = '\0';	/* PRJ: projection in use defined as either
-								a PROJ4 command string or as an 
+								a PROJ4 command string or as an
 								EPSG identifier */
-						
+
 	/* HYSWEEP devices */
 	store->num_devices = 0;		/* number of devices defined */
 	for (i=0;i<MBSYS_HYSWEEP_DEVICE_NUM_MAX;i++)
 		{
 		device = (struct mbsys_hysweep_device_struct *) &(store->devices[i]);
-	
+
 		/* DEV: first line of device declaration
 			DEV dn dc "name"
 			DEV 0 544 "IXSEA OCTANS Serial" */
@@ -172,8 +172,8 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		for (j=0;j<MBSYS_HYSWEEP_OFFSET_NUM_MAX;j++)
 			{
 			offset = (struct mbsys_hysweep_device_offset_struct *) &(device->offsets[j]);
-			
-			/* OF2: Hysweep device offsets 
+
+			/* OF2: Hysweep device offsets
 				OF2 dn on n1 n2 n3 n4 n5 n6 n7 */
 			offset->OF2_device_number = 0;	/* device number */
 			offset->OF2_offset_type = 0;	/* offset type
@@ -196,14 +196,14 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		/* PRI: device set as primary navigational device */
 		device->PRI_primary_nav_device = 0;	/* 1 if device is primary navigational device */
 
-		/* MBI: multibeam / multiple transducer device information 
+		/* MBI: multibeam / multiple transducer device information
 			MBI dn st sf db n1 n2 fa ai */
 		device->MBI_sonar_id = 0;	/* sonar id from table, not part of MBI record
 							but instead inferred from device name in the
 							corresponding DEV record */
 		device->MBI_sonar_receive_shape = 0;	/* sonar receive head shape, not part of MBI record
-								but instead inferred from device name in the 
-								corresponding DEV record 
+								but instead inferred from device name in the
+								corresponding DEV record
 									0 - flat
 									1 - circular */
 		device->MBI_sonar_type = 0;	/* sonar type code:
@@ -217,9 +217,9 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 							0x0002 - pitch corrected by sonar
 							0x0004 - dual head
 							0x0008 - heading corrected by sonar (ver 1)
-							0x0010 - medium depth: slant ranges recorded to 1 dm 
+							0x0010 - medium depth: slant ranges recorded to 1 dm
 									resolution (version 2)
-							0x0020 - deep water: slant ranges divided by 1 m 
+							0x0020 - deep water: slant ranges divided by 1 m
 									resolution (ver 2)
 							0x0040 - SVP corrected by sonar (ver 5)
 							0x0080 - topographic device, upgoing beams accepted (ver 6) */
@@ -243,12 +243,12 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		device->MBI_num_beams_1 = 0;	/* number of beams, head 1 (multibeam) or number of transducers
 							(multitransducer) */
 		device->MBI_num_beams_2 = 0;	/* number of beams, head 2 (multibeam) */
-		device->MBI_first_beam_angle = 0.0;	/* first beam angle is for sonar type = fixed angle 
+		device->MBI_first_beam_angle = 0.0;	/* first beam angle is for sonar type = fixed angle
 							(degrees, TSS convention) */
-		device->MBI_angle_increment = 0.0;	/* angle increment is for sonare type = fixed angle 
+		device->MBI_angle_increment = 0.0;	/* angle increment is for sonare type = fixed angle
 							(degrees, TSS convention) */
 
-		/* SSI: sidescan device information 
+		/* SSI: sidescan device information
 			SSI dn sf np ns */
 		device->SSI_sonar_flags = 0;	/* sonar flags (bit coded hexadecimal)
 							0x0100 - amplitude is bit-shifted into byte storage */
@@ -256,9 +256,9 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		device->SSI_starboard_num_samples = 0;	/* number of samples per ping, starboard transducer */
 		}
 	store->primary_nav_device = 0;	/* device number of primary navigational device */
-	
+
 	/* HYSWEEP HVF - Hysweep view filters - always first record after end of file header
-		HVF dn tt p1 p2 p3 p4 p5 p6 
+		HVF dn tt p1 p2 p3 p4 p5 p6
 			dn: dummy device number, always = 99
 			tt: time tag this filter set became active (in seconds past midnight)
 			p1: minimum depth in work units
@@ -283,9 +283,9 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->FIX_device_number = 0;	/* device number */
 	store->FIX_time_after_midnight = 0.0;	/* time in seconds after midnight */
 	store->FIX_event_number = 0;		/* FIX event number */
-	
-	/* HYSWEEP RMB - raw multibeam data 
-		RMB dn t st sf bd n sv pn psa 
+
+	/* HYSWEEP RMB - raw multibeam data
+		RMB dn t st sf bd n sv pn psa
 			dn: device number 
 			t: time tag (seconds past midnight) 
 			st: sonar type code (see MBI above) 
@@ -328,9 +328,9 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 						0x0002 - pitch corrected by sonar
 						0x0004 - dual head
 						0x0008 - heading corrected by sonar (ver 1)
-						0x0010 - medium depth: slant ranges recorded to 1 dm 
+						0x0010 - medium depth: slant ranges recorded to 1 dm
 								resolution (version 2)
-						0x0020 - deep water: slant ranges divided by 1 m 
+						0x0020 - deep water: slant ranges divided by 1 m
 								resolution (ver 2)
 						0x0040 - SVP corrected by sonar (ver 5)
 						0x0080 - topographic device, upgoing beams accepted (ver 6) */
@@ -371,36 +371,36 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->RMB_sounding_quality = NULL;		/* beam quality codes (from sonar unit) */
 	store->RMB_sounding_flags = NULL;		/* beam edit flags */
 
-	/* RSS - Raw Sidescan 
+	/* RSS - Raw Sidescan
 		RSS dn t sf np ns sv pn alt sr amin amax bs freq
-			dn: device number 
-			t: time tag (seconds past midnight) 
+			dn: device number
+			t: time tag (seconds past midnight)
 			sf: sonar flags (bit coded hexadecimal)
 				0100 - amplitude is bit-shifted into byte storage
-			np: number of samples, port transducer (down-sampled to 4096 max) 
-			ns: number of samples, starboard transducer (down-sampled to 4096 max) 
-			sv: sound velocity in m/sec 
+			np: number of samples, port transducer (down-sampled to 4096 max)
+			ns: number of samples, starboard transducer (down-sampled to 4096 max)
+			sv: sound velocity in m/sec
 			pn: ping number (or 0 if not tracked)
-			alt: altitude in work units 
-			sr: sample rate (samples per second after down-sample) 
-			amin: amplitude minimum 
-			amax: amplitude maximum 
-			bs: bit shift for byte recording 
+			alt: altitude in work units
+			sr: sample rate (samples per second after down-sample)
+			amin: amplitude minimum
+			amax: amplitude maximum
+			bs: bit shift for byte recording
 			freq: frequency 0 or 1 for simultaneous dual frequency operation
-			
-		Immediately following the RSS record are two records containing port and 
+
+		Immediately following the RSS record are two records containing port and
 		starboard amplitude samples.
 
-		Example: 
-		RSS 3 61323.082 100 341 341 1460.00 0 10.75 4983.47 0 4096 4 0 
-		109 97 84 95 120 111 ... (341 port samples) 
+		Example:
+		RSS 3 61323.082 100 341 341 1460.00 0 10.75 4983.47 0 4096 4 0
+		109 97 84 95 120 111 ... (341 port samples)
 		106 93 163 106 114 127 ... (341 starboard samples) */
 	store->RSS_device_number = 0;	/* device number */
 	store->RSS_time = 0.0;		/* time tag (seconds past midnight) */
 	store->RSS_sonar_flags = 0;	/* sonar flags:
-						0100 - amplitude is bit-shifted into byte storage */			
+						0100 - amplitude is bit-shifted into byte storage */
 	store->RSS_port_num_samples = 0; 	/* number of samples, port transducer (down-sampled to 4096 max) */
-	store->RSS_starboard_num_samples = 0; 	/* number of samples, starboard transducer 
+	store->RSS_starboard_num_samples = 0; 	/* number of samples, starboard transducer
 						(down-sampled to 4096 max) */
 	store->RSS_port_num_samples_alloc = 0;
 	store->RSS_starboard_num_samples_alloc = 0;
@@ -415,7 +415,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->RSS_port = NULL;		/* port sidescan amplitude samples */
 	store->RSS_starboard = NULL;		/* starboard sidescan amplitude samples */
 
-	/* SNR - dynamic sonar settings 
+	/* SNR - dynamic sonar settings
 		up to 12 fields depending on sonar type
 		SNR dn t pn sonar ns s0 --- s11
 			dn: device number 
@@ -423,33 +423,33 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			pn: ping number (or 0 if not tracked)
 			sonar: sonar ID code (see defines above) 
 			ns: number of settings to follow
-			s: up to 12 settings 
-	 
-		Up to 12 fields are included in SNR records, providing sonar runtime settings. 
-		Not available for all systems. Defined differently depending on sonar model 
+			s: up to 12 settings
+
+		Up to 12 fields are included in SNR records, providing sonar runtime settings.
+		Not available for all systems. Defined differently depending on sonar model
 		and manufacturer.
-			
-		For Seabat 81XX Serial and 81XX Network Drivers: 
-			Sonar id: 1, 23, 24, 25, 39 
-			P0: Sonar range setting in meters. 
+
+		For Seabat 81XX Serial and 81XX Network Drivers:
+			Sonar id: 1, 23, 24, 25, 39
+			P0: Sonar range setting in meters.
 			P1: power setting, 0 - 8
-			P2: gain setting, 1 Ð 45 
+			P2: gain setting, 1 Ð 45
 			P3: gain modes: bit 0 = TVG on/off, bit 1 = auto gain on/off.
-	 
-		For Seabat 7K drivers (7125, 7101, 7150, 7111) 
-			Sonar id: 22, 53, 60, 62 
-			P0: Sonar range selection in meters. 
-			P1: Transmit power selection in dBs relative to 1 uPa. 
+
+		For Seabat 7K drivers (7125, 7101, 7150, 7111)
+			Sonar id: 22, 53, 60, 62
+			P0: Sonar range selection in meters.
+			P1: Transmit power selection in dBs relative to 1 uPa.
 			P2: Receiver gain selection in 0.1 dBs.
-			P3: Transmitter frequency in KHz. 
+			P3: Transmitter frequency in KHz.
 			P4: Transmit pulse width in microseconds.
-	 
-		For EdgeTech 4200 Driver 
-			Sonar id: 7-10 
-			P0: Pulse power setting, 0 to 100 percent. 
-			P1: ADC Gain factor. 
-			P2: Start Frequency in 10 * Hz. 
-			P3: End Frequency in 10 * Hz. 
+
+		For EdgeTech 4200 Driver
+			Sonar id: 7-10
+			P0: Pulse power setting, 0 to 100 percent.
+			P1: ADC Gain factor.
+			P2: Start Frequency in 10 * Hz.
+			P3: End Frequency in 10 * Hz.
 			P4: Sweep length in milliseconds. */
 	store->SNR_device_number = 0;	/* device number */
 	store->SNR_time = 0.0;		/* time tag (seconds past midnight) */
@@ -459,14 +459,14 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	for (i=0;i<12;i++)
 		store->SNR_settings[i] = 0;	/* sonar settings */
 
-	/* PSA - pitch stabilization angle 
+	/* PSA - pitch stabilization angle
 		PSA dn t pn a0 a1
 			dn: device number 
 			t: time tag (seconds past midnight) 
 			pn: ping number (or 0 if not tracked)
 			a0: projector (head 0) pitch angle
-			a1: projector (head 1) pitch angle 
-	 
+			a1: projector (head 1) pitch angle
+
 		Note: PSA records are recorded only when pitch stabilization
 		is active. They immediately proceed corresponding RMB records. */
 	store->PSA_device_number = 0;	/* device number */
@@ -474,7 +474,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->PSA_ping_number = 0.0;	/* ping number (or 0 if not tracked) */
 	store->PSA_a0 = 0.0;			/* projector (head 0) pitch angle */
 	store->PSA_a1 = 0.0;			/* projector (head 1) pitch angle */
-	
+
 	/* HCP - heave compensation
 		HCP dn t h r p
 			dn: device number
@@ -489,18 +489,18 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->HCP_heave = 0.0;		/* heave (meters) */
 	store->HCP_roll = 0.0;		/* roll (+ port side up) */
 	store->HCP_pitch = 0.0;		/* pitch (+ bow up) */
-	
+
 	/* EC1 - echo sounding (single frequency)
 		EC1 dn t rd
 			dn: device number
 			t: time tag (seconds past midnight)
-			rd: raw depth			
+			rd: raw depth
 		Example:
 		EC1 1 80491.897 99.02 */
 	store->EC1_device_number = 0;	/* device number */
 	store->EC1_time = 0.0;		/* time tag (seconds past midnight) */
 	store->EC1_rawdepth = 0.0;		/* raw depth */
-	
+
 	/* GPS - GPS measurements
 		GPS dn t cog sog hdeop mode nsats
 			dn: device number
@@ -512,8 +512,8 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 				0 - unknown
 				1 - stand alone
 				2 - differential
-				3 - rtk	
-			nsats: number of satellites		
+				3 - rtk
+			nsats: number of satellites
 		Example:
 		GPS 1 80491.897 178.16 0.23 1.2 2 8 */
 	store->GPS_device_number = 0;	/* device number */
@@ -521,59 +521,59 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->GPS_cog = 0.0;		/* course over ground (degrees) */
 	store->GPS_sog = 0.0;		/* speed over ground (knots) */
 	store->GPS_hdop = 0.0;		/* GPS hdop */
-	store->GPS_mode = 0;		/* GPS mode 
+	store->GPS_mode = 0;		/* GPS mode
 						0 - unknown
 						1 - stand alone
 						2 - differential
 						3 - rtk */
 	store->GPS_nsats = 0;		/* number of satellites */
-	
+
 	/* GYR - gyro data (heading)
 		GYR dn t h
 			dn: device number
 			t: time tag (seconds past midnight)
-			h: heading (degrees)		
+			h: heading (degrees)
 		Example:
 		GYR 1 80491.897 178.16 */
 	store->GYR_device_number = 0;	/* device number */
 	store->GYR_time = 0.0;		/* time tag (seconds past midnight) */
 	store->GYR_heading = 0.0;		/* heading (degrees) */
-	
+
 	/* POS - position
 		POS dn t x y
 			dn: device number
 			t: time tag (seconds past midnight)
 			x: easting
-			y: northing		
+			y: northing
 		Example:
 		POS 1 80491.897 308214.82 1414714.97 */
 	store->POS_device_number = 0;	/* device number */
 	store->POS_time = 0.0;		/* time tag (seconds past midnight) */
 	store->POS_x = 0.0;			/* easting */
 	store->POS_y = 0.0;			/* northing */
-	
+
 	/* DFT - dynamic draft (squat) correction
 		DFT dn t dc
 			dn: device number
 			t: time tag (seconds past midnight)
-			dc: draft correction		
+			dc: draft correction
 		Example:
 		DFT 1 80491.897 1453.44 */
 	store->DFT_device_number = 0;	/* device number */
 	store->DFT_time = 0.0;		/* time tag (seconds past midnight) */
 	store->DFT_draft = 0.0;		/* draft correction */
-	
+
 	/* TID - tide correction
 		TID dn t tc
 			dn: device number
 			t: time tag (seconds past midnight)
-			tc: tide correction		
+			tc: tide correction
 		Example:
 		TID 1 80491.897 0.00 */
 	store->TID_device_number = 0;	/* device number */
 	store->TID_time = 0.0;		/* time tag (seconds past midnight) */
 	store->TID_tide = 0.0;		/* tide correction */
-	
+
 	/* COM - comment record - MB-System extension
 		COM c
 			c: comment string
@@ -597,7 +597,7 @@ int mbsys_hysweep_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_hysweep_deall";
@@ -617,7 +617,7 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_hysweep_struct *) *store_ptr;
-	
+
 	/* deallocate arrays */
 	if (store->RMB_beam_ranges != NULL)
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)(&store->RMB_beam_ranges), error);	/* beam ranges (survey units) */
@@ -668,7 +668,7 @@ int mbsys_hysweep_deall(int verbose, void *mbio_ptr, void **store_ptr,
 }
 
 /*--------------------------------------------------------------------*/
-int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_hysweep_dimensions";
@@ -733,7 +733,7 @@ int mbsys_hysweep_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr, 
+int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr,
 		int *pingnumber, int *error)
 {
 	char	*function_name = "mbsys_hysweep_pingnumber";
@@ -775,12 +775,192 @@ int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error)
+{
+	char	*function_name = "mbsys_hysweep_sidescantype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_hysweep_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_hysweep_struct *) store_ptr;
+
+	/* get sonar type */
+	if (store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_SEABAT8101_150		/* Reson Seabat 8101 - 150 Deg - 1 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_SEABAT7125		/* Reson Seabat 7125 - 22 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_SEABAT8111		/* Reson Seabat 8111 - 23 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_SEABAT8124		/* Reson Seabat 8124 - 24 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_SEABAT8125		/* Reson Seabat 8125 - 25 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_SEABAT9001		/* Reson Seabat 9001 - 26 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_SEABAT9003		/* Reson Seabat 9003 - 27 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SEABEAM_2100		/* Seabeam 2100 - 29 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SEABEAM_1185		/* Seabeam SB1185 - 30 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_EA400		/* Simrad EA400 - 31 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_EM102		/* Simrad EM102 - 32 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_EM1002		/* Simrad EM1002 - 33 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_EM2000		/* Simrad EM2000 - 34 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_EM3000		/* Simrad EM3000 - 35 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_EM3000D		/* Simrad EM3000D - 36 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_EM3002		/* Simrad EM3002 - 37 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_EM3002D		/* Simrad EM3002D - 38 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_SEABAT8101_210	/* Reson Seabat 8101 - 210 Deg - 39 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_IMAGENEX_DELTAT		/* Imagenex Delta T - 40 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_ATLAS_HYDROSWEEPMD2	/* Atlas Hydrosweep MD2 - 41 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_SM2000		/* Simrad SM2000 - 42 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_EM710		/* Simrad EM710 - 43 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SIMRAD_EM302		/* Simrad EM302 - 44 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_BLUEVIEW_MB1350_45	/* Blueview MB1350-45 - 45 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_BLUEVIEW_MB2250_45	/* Blueview MB2250-45 - 46 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_BLUEVIEW_MB1350_90	/* Blueview MB1350-90 - 47 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_BLUEVIEW_MB2250_90	/* Blueview MB2250-90 - 48 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_7101		/* Reson Seabat 7101 - 53 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_FURUNO_HS300F		/* Furuno HS-300F - 54 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_FURUNO_HS600		/* Furuno HS-600 - 55 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_FURUNO_HS600F		/* Furuno HS-600F - 56 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_8150		/* Reson 8150 - 58 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_8160		/* Reson 8160 - 59 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_7150		/* Reson 7150 - 60 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_RESON_7111		/* Reson Seabat 7111 - 62 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_R2SONIC_SONIC2024		/* R2Sonic SONIC 2024 - 63 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_WASSP_MULTIBEAM		/* WASSP Multibeam - 65 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_ATLAS_HYDROSWEEPMD50	/* Atlas Hydrosweep  MD/50 - 66 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_ATLAS_HYDROSWEEPMD30	/* Atlas Hydrosweep  MD/30 - 67 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_ATLAS_HYDROSWEEPDS	/* Atlas Hydrosweep  DS - 68 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SEABEAM_3012		/* SeaBeam 3012 - 70 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SEABEAM_3020		/* SeaBeam 3020 - 71 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SEABEAM_3050		/* SeaBeam 3050 - 72 */)
+		{
+		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		}
+	else if (store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_ATLAS_FANSWEEP20		/* Atlas Fansweep 20 - 2 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_BENTHOS_C3D		/* Benthos C3D - 3 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_GEOACOUSTICS_GEOSWATH	/* GeoAcoustics GeoSwath - 11 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_KLEIN_5000		/* Klein 5000 - 18 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SEA_SWATHPLUS		/* SEA Swathplus - 28 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_GEOACOUSTICS_DSS		/* Geoacoustics digital sidescan - 49 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_EDGETECH_4600		/* Edgetech 4600 - 61 */)
+		{
+		*sonartype = MB_SONARTYPE_INTERFEROMETRIC;
+		}
+	else if (store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_EDGETECH_272		/* EdgeTech 272 - 5 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_EDGETECH_4100		/* EdgeTech 4100 - 6 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_EDGETECH_4125		/* EdgeTech 4125 - 7 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_EDGETECH_4150		/* EdgeTech 4150 - 8 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_EDGETECH_4200		/* EdgeTech 4200 - 9 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_EDGETECH_4300		/* EdgeTech 4300 - 10 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_KLEIN_595			/* Klein 595 - 14 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_KLEIN_2000		/* Klein 2000 - 15 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_KLEIN_3000		/* Klein 3000 - 16 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_KLEIN_3900		/* Klein 3900 - 17 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_BENTHOS_1624		/* Benthos 1624 - 50 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_BENTHOS_1625		/* Benthos 1625 - 51 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_MARINESONIC_SEASCAN	/* Marine Sonic Sea Scan - 52 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_TRITECH_STARFISH		/* Tritech Starfish - 57 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_INNOMAR_SES		/* Innomar SES - 69 */)
+		{
+		*sonartype = MB_SONARTYPE_SIDESCAN;
+		}
+	else if (store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_CMAX_CM2			/* CMAX CM-2 - 4 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_IMAGENEX_SPORTSCAN	/* Imagenex Sportscan - 12 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_IMAGENEX_YELLOWFIN	/* Imagenex Yellowfin - 13 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_ODOM_CV3			/* Odom CV3 - 19 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_ODOM_ECHOSCAN2		/* Odom Echoscan 2 - 20 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_ODOM_ES3			/* Odom ES3 - 21 */
+		|| store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_MDL_DYNASCAN		/* MDL Dynascan - 64 */)
+		{
+		*sonartype = MB_SONARTYPE_ECHOSOUNDER;
+		}
+	else
+		{
+		*sonartype = MB_SONARTYPE_UNKNOWN;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sonartype:  %d\n",*sonartype);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_hysweep_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *ss_type, int *error)
+{
+	char	*function_name = "mbsys_hysweep_sidescantype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_hysweep_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_hysweep_struct *) store_ptr;
+
+	/* get sidescan type */
+	if (store->HSP_sonar_id == MBSYS_HYSWEEP_SONAR_SEABEAM_2100		/* Seabeam 2100 - 29 */)
+		{
+		*ss_type = MB_SIDESCAN_LINEAR;
+		}
+	else
+		{
+		*ss_type = MB_SIDESCAN_LOGARITHMIC;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ss_type:    %d\n",*ss_type);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -822,13 +1002,15 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get interpolated nav heading and speed  */
 		*speed = 0.0;
 		if (mb_io_ptr->nfix > 0)
-			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed,
 				    navlon, navlat, speed, error);
 
 		/* get heading */
 		*heading = store->RMBint_heading;
 
-		/* get navigation */
+		/* get navigation - actually return the easting northing because
+			the projection is set and so the position will be inverse
+			projected */
 		*navlon = store->RMBint_x;
 		*navlat = store->RMBint_y;
 
@@ -870,9 +1052,9 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 					{
 					beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
 					}
-				}			
+				}
 			}
-			
+
 		/* initialize sidescan */
 		*nss = 0;
 
@@ -933,7 +1115,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* extract data from structure */
-	else if (*kind == MB_DATA_NAV 
+	else if (*kind == MB_DATA_NAV
 		|| *kind == MB_DATA_NAV1
 		|| *kind == MB_DATA_NAV2)
 		{
@@ -941,19 +1123,21 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<7;i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
-		
+
 		/* get heading */
 		if (mb_io_ptr->nheading > 0)
-			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,
 				    heading, error);
-		
-		/* get speed */
+
+		/* get nav and speed */
 		*speed = 0.0;
 		if (mb_io_ptr->nfix > 0)
-			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed,
 				    navlon, navlat, speed, error);
 
-		/* get navigation */
+		/* get navigation - actually return the easting northing because
+			the projection is set and so the position will be inverse
+			projected */
 		*navlon = store->POS_x;
 		*navlat = store->POS_y;
 
@@ -1009,7 +1193,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<7;i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
-		
+
 		/* copy comment */
 		if (strlen(store->COM_comment) > 0)
 			strncpy(comment, store->COM_comment, MB_COMMENT_MAXLINE);
@@ -1093,13 +1277,13 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1115,7 +1299,7 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -1146,12 +1330,12 @@ int mbsys_hysweep_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -1191,18 +1375,18 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -1230,6 +1414,9 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
+		/* get navigation - actually easting northings show up here because
+			the projection is set and so the position has been
+			projected */
 		/* get navigation */
 		store->RMBint_x = navlon;
 		store->RMBint_y = navlat;
@@ -1255,7 +1442,7 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			if (store->RMB_sounding_along == NULL)
 				status = mb_reallocd(verbose, __FILE__, __LINE__, nbath * sizeof(double),
 							(void **)&(store->RMB_sounding_along), error);
-							
+
 			/* insert the depth and distance values into the storage arrays */
 			for (i=0;i<store->RMB_num_beams;i++)
 				{
@@ -1271,7 +1458,7 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			if (store->RMB_sounding_intensities == NULL)
 				status = mb_reallocd(verbose, __FILE__, __LINE__, namp * sizeof(double),
 							(void **)&(store->RMB_sounding_intensities), error);
-							
+
 			/* insert the amplitude values into the storage arrays */
 			for (i=0;i<store->RMB_num_beams;i++)
 				{
@@ -1292,9 +1479,15 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
-		/* get navigation */
+		/* get navigation - actually easting northings show up here because
+			the projection is set and so the position has been
+			projected */
 		store->POS_x = navlon;
 		store->POS_y = navlat;
+fprintf(stderr, "INSERT1b %.3f %.2f %.2f\r\n",
+	store->POS_time,
+	store->POS_x,
+	store->POS_y);
 
 		/* get heading */
 
@@ -1323,9 +1516,9 @@ int mbsys_hysweep_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_hysweep_ttimes";
@@ -1367,7 +1560,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get sound velocity */
 		*ssv = store->RMB_sound_velocity;
-			
+
 		/* get draft */
 		*draft = store->RMBint_draft;
 
@@ -1376,7 +1569,7 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		device = (struct mbsys_hysweep_device_struct *) &(store->devices[store->RMB_device_number]);
 		for (i=0;i<store->RMB_num_beams;i++)
 			{
-			ttimes[i] = store->RMB_beam_ranges[i] / (*ssv);
+			ttimes[i] = 2.0 * store->RMB_beam_ranges[i] / (*ssv);
 			if (store->RMB_sounding_takeoffangles != NULL && store->RMB_sounding_azimuthalangles != NULL)
 				{
 				angles[i] = store->RMB_sounding_takeoffangles[i];
@@ -1394,11 +1587,11 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				/* correct beta for roll if necessary */
 				if (!(device->MBI_sonar_flags & 0x0001))
 					beta -= store->RMBint_roll;
-				   
+
 				mb_rollpitch_to_takeoff(
-					verbose, 
-					alpha, beta, 
-					&theta, &phi, 
+					verbose,
+					alpha, beta,
+					&theta, &phi,
 					error);
 				angles[i] = theta;
 				angles_forward[i] = phi;
@@ -1408,7 +1601,10 @@ int mbsys_hysweep_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			else
 				angles_null[i] = 0.0;
 			heave[i] = store->RMBint_heave;
-			alongtrack_offset[i] = store->GPS_sog * 0.0005144 * store->RMB_sounding_timedelays[i];
+			if (store->RMB_beam_data_available & 0x0400)
+				alongtrack_offset[i] = store->GPS_sog * 0.0005144 * store->RMB_sounding_timedelays[i];
+			else
+				alongtrack_offset[i] = 0.0;
 			}
 
 		/* set status */
@@ -1554,7 +1750,7 @@ int mbsys_hysweep_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transmit_gain, double *pulse_length, 
+			int *kind, double *transmit_gain, double *pulse_length,
 			double *receive_gain, int *error)
 {
 	char	*function_name = "mbsys_hysweep_gains";
@@ -1643,7 +1839,7 @@ int mbsys_hysweep_gains(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitudev, 
+	int *kind, double *transducer_depth, double *altitudev,
 	int *error)
 {
 	char	*function_name = "mbsys_hysweep_extract_altitude";
@@ -1684,7 +1880,7 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		altitude_found = MB_NO;
 		if (mb_io_ptr->naltitude > 0)
 			{
-			mb_altint_interp(verbose, mbio_ptr, store->time_d,  
+			mb_altint_interp(verbose, mbio_ptr, store->time_d,
 				    altitudev, error);
 			altitude_found = MB_YES;
 			}
@@ -1752,8 +1948,8 @@ int mbsys_hysweep_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_hysweep_extract_nav";
@@ -1796,10 +1992,13 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get interpolated nav heading and speed  */
 		*speed = 0.0;
 		if (mb_io_ptr->nfix > 0)
-			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed,
 				    navlon, navlat, speed, error);
 
-		/* get navigation */
+
+		/* get navigation - actually return the easting northing because
+			the projection is set and so the position will be inverse
+			projected */
 		*navlon = store->RMBint_x;
 		*navlat = store->RMBint_y;
 
@@ -1824,26 +2023,29 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<7;i++)
 			time_i[i] = store->time_i[i];
 		*time_d = store->time_d;
-		
+
 		/* get heading */
 		if (mb_io_ptr->nheading > 0)
-			mb_hedint_interp(verbose, mbio_ptr, store->time_d,  
+			mb_hedint_interp(verbose, mbio_ptr, store->time_d,
 				    heading, error);
 
 		/* get speed */
 		*speed = 0.0;
 		if (mb_io_ptr->nfix > 0)
-			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed, 
+			mb_navint_interp(verbose, mbio_ptr, store->time_d, *heading, *speed,
 				    navlon, navlat, speed, error);
 
-		/* get navigation */
+
+		/* get navigation - actually return the easting northing because
+			the projection is set and so the position will be inverse
+			projected */
 		*navlon = store->POS_x;
 		*navlat = store->POS_y;
 
 		/* get roll pitch and heave */
 		if (mb_io_ptr->nattitude > 0)
 			{
-			mb_attint_interp(verbose, mbio_ptr, *time_d,  
+			mb_attint_interp(verbose, mbio_ptr, *time_d,
 				    heave, roll, pitch, error);
 			}
 
@@ -1851,7 +2053,7 @@ int mbsys_hysweep_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		if (mb_io_ptr->nsonardepth > 0)
 			{
 			if (mb_io_ptr->nsonardepth > 0)
-				mb_depint_interp(verbose, mbio_ptr, store->time_d,  
+				mb_depint_interp(verbose, mbio_ptr, store->time_d,
 				    draft, error);
 			*heave = 0.0;
 			}
@@ -1924,7 +2126,7 @@ time_i[0],time_i[1],time_i[2],time_i[3],time_i[4],time_i[5],time_i[6],
 int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1975,6 +2177,9 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
+		/* get navigation - actually easting northings show up here because
+			the projection is set and so the position has been
+			projected */
 		/* get navigation */
 		store->RMBint_x = navlon;
 		store->RMBint_y = navlat;
@@ -1997,16 +2202,18 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 
 	/* insert data in nav structure */
-	else if (store->kind == MB_DATA_NAV 
-		&& store->kind == MB_DATA_NAV1 
-		&& store->kind == MB_DATA_NAV2)
+	else if (store->kind == MB_DATA_NAV
+		|| store->kind == MB_DATA_NAV1
+		|| store->kind == MB_DATA_NAV2)
 		{
 		/* get time */
 		for (i=0;i<7;i++)
 			store->time_i[i] = time_i[i];
 		store->time_d = time_d;
 
-		/* get navigation */
+		/* get navigation - actually easting northings show up here because
+			the projection is set and so the position has been
+			projected */
 		store->POS_x = navlon;
 		store->POS_y = navlat;
 
@@ -2033,7 +2240,7 @@ int mbsys_hysweep_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hysweep_copy(int verbose, void *mbio_ptr, 
+int mbsys_hysweep_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -2061,7 +2268,7 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr,
 	/* get data structure pointers */
 	store = (struct mbsys_hysweep_struct *) store_ptr;
 	copy = (struct mbsys_hysweep_struct *) copy_ptr;
-	
+
 	/* copy over structures, allocating memory where necessary */
 	(*copy) = (*store);
 	copy->RMB_beam_ranges = NULL;	/* beam ranges (survey units) */
@@ -2127,7 +2334,7 @@ int mbsys_hysweep_copy(int verbose, void *mbio_ptr,
 		status = mb_mallocd(verbose, __FILE__, __LINE__, copy->RMB_num_beams * sizeof(int),
 					(void **)&(copy->RMB_sounding_flags), error);
 		}
-	
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{

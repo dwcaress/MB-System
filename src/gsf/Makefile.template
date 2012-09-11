@@ -58,11 +58,18 @@ ARCHIVE = ar rcv
 
 ### make all makes the gsf library, man page, and associated include files
 all:	$(LIBDIR)/libmbgsf.a \
-	$(INCDIR)/gsf.h $(INCDIR)/gsf.h
+	$(INCDIR)/gsf.h $(INCDIR)/gsf_ft.h \
+	$(INCDIR)/gsf_enc.h $(INCDIR)/gsf_dec.h \
+	$(BINDIR)/dump_gsf
 
 ### make clean removes the object files
 clean:
 	rm -f *.o
+
+### link the executables
+$(BINDIR)/dump_gsf:	dump_gsf.o $(LIBDIR)/libmbgsf.a
+	$(CC) $(CFLAGS) dump_gsf.o $(LIBDIR)/libmbgsf.a $(LFLAGS) \
+		-o $(BINDIR)/dump_gsf
 
 ### put together the library
 $(LIBDIR)/libmbgsf.a:	gsf.o gsf_dec.o gsf_enc.o gsf_indx.o gsf_info.o
@@ -81,8 +88,19 @@ gsf_indx.o: gsf_indx.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
 	$(CC) -c $(CFLAGS) gsf_indx.c
 gsf_info.o: gsf_info.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
 	$(CC) -c $(CFLAGS) gsf_info.c
+dump_gsf.o:	dump_gsf.c $(INCDIR)/gsf.h gsf_dec.h gsf_enc.h gsf_ft.h gsf_indx.h
+	$(CC) -c $(CFLAGS) dump_gsf.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/gsf.h:	gsf.h
 	cp gsf.h $(INCDIR)/gsf.h
 	chmod 664 $(INCDIR)/gsf.h
+$(INCDIR)/gsf_ft.h:	gsf_ft.h
+	cp gsf_ft.h $(INCDIR)/gsf_ft.h
+	chmod 664 $(INCDIR)/gsf_ft.h
+$(INCDIR)/gsf_enc.h:	gsf_enc.h
+	cp gsf_enc.h $(INCDIR)/gsf_enc.h
+	chmod 664 $(INCDIR)/gsf_enc.h
+$(INCDIR)/gsf_dec.h:	gsf_dec.h
+	cp gsf_dec.h $(INCDIR)/gsf_dec.h
+	chmod 664 $(INCDIR)/gsf_dec.h

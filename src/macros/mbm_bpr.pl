@@ -73,7 +73,7 @@ if ($help)
 	print "\nMB-System macro to process data from a Seabird SBE53 pressure\n";
 	print "sensor into a tidal model for use by mbprocess\n";
 	print "\nUsage: \n";
-	print "\t$Program_name -Ibprfile -Otidefile [-Doffset -T -H -V]\n";
+	print "\t$Program_name -Ibprfile -Otidefile [-Doffset -Rbprlon/bprlat -T -H -V]\n";
 	exit 0;
 	}
 

@@ -134,7 +134,7 @@ int mbeditviz_init(int argc,char **argv)
 	mbev_verbose = 0;
 
 	mbev_mode_output = MBEV_OUTPUT_MODE_EDIT;
-	mbev_grid_algorithm = MBEV_GRID_ALGORITH_FOOTPRINT;	
+	mbev_grid_algorithm = MBEV_GRID_ALGORITH_FOOTPRINT;
 	mbev_num_files = 0;
 	mbev_num_files_alloc = 0;
 	mbev_num_files_loaded = 0;
@@ -224,7 +224,7 @@ int mbeditviz_init(int argc,char **argv)
 	mbdef_timegap = 1000000000.0;
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhF:f:I:i:")) != -1)
+	while ((c = getopt(argc, argv, "VvHhF:f:GgI:i:")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -238,6 +238,11 @@ int mbeditviz_init(int argc,char **argv)
 		case 'F':
 		case 'f':
 			sscanf (optarg,"%d", &mbdef_format);
+			flag++;
+			break;
+		case 'G':
+		case 'g':
+			mbev_grid_algorithm = MBEV_GRID_ALGORITH_SIMPLE;
 			flag++;
 			break;
 		case 'I':
@@ -335,12 +340,12 @@ int mbeditviz_get_format(char *file, int *form)
 
 	/* get filenames */
 	/* look for MB suffix convention */
-	if ((mbev_status = mb_get_format(mbev_verbose, file, tmp, 
+	if ((mbev_status = mb_get_format(mbev_verbose, file, tmp,
 				    &tform, &mbev_error))
 				    == MB_SUCCESS)
 	    {
 	    *form = tform;
-	    }		
+	    }
 
 	/* print output debug statements */
 	if (mbev_verbose >= 2)
@@ -377,7 +382,7 @@ int mbeditviz_open_data(char *path, int format)
 		fprintf(stderr,"dbg2       file:        %s\n",path);
 		fprintf(stderr,"dbg2       format:      %d\n",format);
 		}
-	
+
 	/* get format if required */
 	if (format == 0)
 		mb_get_format(mbev_verbose,path,NULL,&format,&mbev_error);
@@ -449,7 +454,7 @@ int mbeditviz_import_file(char *path, int format)
 		fprintf(stderr,"dbg2       path:        %s\n",path);
 		fprintf(stderr,"dbg2       format:      %d\n",format);
 		}
-		
+
 	/* turn on message */
 	root = (char *) strrchr(path, '/');
 	if (root == NULL)
@@ -458,7 +463,7 @@ int mbeditviz_import_file(char *path, int format)
 		root++;
 	sprintf(message,"Importing format %d data from %s",format,root);
 	do_mbeditviz_message_on(message);
-		
+
 	/* allocate mbpr_file_struct array if needed */
 	mbev_status = MB_SUCCESS;
 	if (mbev_num_files_alloc <= mbev_num_files)
@@ -473,7 +478,7 @@ int mbeditviz_import_file(char *path, int format)
 			mbev_error = MB_ERROR_MEMORY_FAIL;
 			}
 		}
-		
+
 	/* set new file structure */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -483,7 +488,7 @@ int mbeditviz_import_file(char *path, int format)
 		file->locked = MB_NO;
 		file->esf_exists = MB_NO;
 		strcpy(file->path, path);
-		strcpy(file->name, root);	
+		strcpy(file->name, root);
 		file->format = format;
 		file->raw_info_loaded = MB_NO;
 		file->esf_open = MB_NO;
@@ -501,7 +506,7 @@ int mbeditviz_import_file(char *path, int format)
 		file->sync_attitude_time_d = NULL;
 		file->sync_attitude_roll = NULL;
 		file->sync_attitude_pitch = NULL;
-				
+
 		/* load info */
 		mbev_status = mb_get_info(mbev_verbose, file->path, &(file->raw_info), mbdef_lonflip, &mbev_error);
 		if (mbev_status == MB_SUCCESS)
@@ -527,7 +532,7 @@ int mbeditviz_import_file(char *path, int format)
 			if ((fstatus = stat(file->process.mbp_ofile, &file_status)) == 0
 				&& (file_status.st_mode & S_IFMT) != S_IFDIR)
 				{
-				mbev_status = mb_get_info(mbev_verbose, file->process.mbp_ofile, 
+				mbev_status = mb_get_info(mbev_verbose, file->process.mbp_ofile,
 							&(file->processed_info),mbdef_lonflip, &mbev_error);
 				if (mbev_status == MB_SUCCESS)
 					file->processed_info_loaded = MB_YES;
@@ -565,11 +570,11 @@ int mbeditviz_load_file(int ifile)
 	char	buffer[MBP_FILENAMESIZE], *result;
 	char	command[MBP_FILENAMESIZE];
 	int	nread;
-	
+
 	mb_path	error1;
 	mb_path	error2;
 	mb_path	error3;
-	
+
 	/* swath file locking variables */
 	int	lock_status;
 	int	locked;
@@ -624,7 +629,7 @@ int mbeditviz_load_file(int ifile)
 	/* lock the file if it needs loading */
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
-	if (ifile >= 0 && ifile < mbev_num_files 
+	if (ifile >= 0 && ifile < mbev_num_files
 		&& mbev_files[ifile].load_status == MB_NO)
 		{
 		file = &(mbev_files[ifile]);
@@ -632,13 +637,13 @@ int mbeditviz_load_file(int ifile)
 		/* try to lock file */
 		if (mbdef_uselockfiles == MB_YES)
 			{
-			mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path, 
+			mbev_status = mb_pr_lockswathfile(mbev_verbose, file->path,
 					MBP_LOCK_EDITBATHY, program_name, &mbev_error);
 			}
 		else
 			{
 			mbev_status = mb_pr_lockinfo(mbev_verbose, file->path, &locked,
-					&lock_purpose, lock_program, lock_user, lock_cpu, 
+					&lock_purpose, lock_program, lock_user, lock_cpu,
 					lock_date, &mbev_error);
 
 			/* if locked get lock info */
@@ -651,10 +656,10 @@ int mbeditviz_load_file(int ifile)
 				mbev_status = MB_SUCCESS;
 				}
 			}
-		
+
 		/* if locked let the user know file can't be opened */
 		if (mbev_status == MB_FAILURE)
-			{	
+			{
 			/* turn off message */
 			do_mbeditviz_message_off();
 
@@ -662,7 +667,7 @@ int mbeditviz_load_file(int ifile)
 			if (mbev_error == MB_ERROR_FILE_LOCKED)
 				{
 				lock_status = mb_pr_lockinfo(mbev_verbose, file->path, &locked,
-						&lock_purpose, lock_program, lock_user, lock_cpu, 
+						&lock_purpose, lock_program, lock_user, lock_cpu,
 						lock_date, &mbev_error);
 
 				sprintf(error1, "Unable to open input file:");
@@ -690,10 +695,10 @@ int mbeditviz_load_file(int ifile)
 			do_error_dialog(error1,error2, error3);
 			}
 		}
-		
+
 	/* load the file if it needs loading and has been locked */
 	if (mbev_status == MB_SUCCESS
-		&& ifile >= 0 && ifile < mbev_num_files 
+		&& ifile >= 0 && ifile < mbev_num_files
 		&& mbev_files[ifile].load_status == MB_NO)
 		{
 		file = &(mbev_files[ifile]);
@@ -729,7 +734,7 @@ int mbeditviz_load_file(int ifile)
 			format = file->format;
 			file->esf_open = MB_NO;
 			mb_get_shortest_path(mbev_verbose, swathfile, &mbev_error);
-			
+
 			/* use fbt file if possible */
 			mb_get_fbt(mbev_verbose, swathfile, &format, &mbev_error);
 
@@ -773,13 +778,13 @@ int mbeditviz_load_file(int ifile)
 				mbev_status = mb_register_array(mbev_verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 								sizeof(double), (void **)&bathalongtrack, &mbev_error);
 			if (mbev_error == MB_ERROR_NO_ERROR)
-				mbev_status = mb_register_array(mbev_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+				mbev_status = mb_register_array(mbev_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 								sizeof(double), (void **)&ss, &mbev_error);
 			if (mbev_error == MB_ERROR_NO_ERROR)
-				mbev_status = mb_register_array(mbev_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+				mbev_status = mb_register_array(mbev_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 								sizeof(double), (void **)&ssacrosstrack, &mbev_error);
 			if (mbev_error == MB_ERROR_NO_ERROR)
-				mbev_status = mb_register_array(mbev_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+				mbev_status = mb_register_array(mbev_verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 								sizeof(double), (void **)&ssalongtrack, &mbev_error);
 
 			/* if error initializing memory then don't read the file */
@@ -790,12 +795,12 @@ int mbeditviz_load_file(int ifile)
 					error_message);
 				}
  			}
-			
+
 		/* set the beamwidths */
 		imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
 		file->beamwidth_xtrack = imb_io_ptr->beamwidth_xtrack;
 		file->beamwidth_ltrack = imb_io_ptr->beamwidth_ltrack;
-		
+
 		/* read the data */
 		if (mbev_status == MB_SUCCESS)
 			{
@@ -824,7 +829,7 @@ int mbeditviz_load_file(int ifile)
 					mbev_status = MB_SUCCESS;
 					mbev_error = MB_ERROR_NO_ERROR;
 					}
-					
+
 				/* check for multiplicity of pings with the same time stamp */
 				if (mbev_error == MB_ERROR_NO_ERROR
 				    && kind == MB_DATA_DATA)
@@ -838,7 +843,7 @@ int mbeditviz_load_file(int ifile)
 						ping->multiplicity = 0;
 						}
 					}
-					
+
 				/* allocate memory for pings */
 				if (mbev_error == MB_ERROR_NO_ERROR
 				    && kind == MB_DATA_DATA)
@@ -879,101 +884,101 @@ int mbeditviz_load_file(int ifile)
 						{
 fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 						mbev_status = MB_FAILURE;
-						if (ping->beamflag != NULL) 
+						if (ping->beamflag != NULL)
 							{
 							free(ping->beamflag);
 							ping->beamflag = NULL;
 							}
-						if (ping->beamflagorg != NULL) 
+						if (ping->beamflagorg != NULL)
 							{
 							free(ping->beamflagorg);
 							ping->beamflagorg = NULL;
 							}
-						if (ping->bath != NULL) 
+						if (ping->bath != NULL)
 							{
 							free(ping->bath);
 							ping->bath = NULL;
 							}
-						if (ping->bathacrosstrack != NULL) 
+						if (ping->bathacrosstrack != NULL)
 							{
 							free(ping->bathacrosstrack);
 							ping->bathacrosstrack = NULL;
 							}
-						if (ping->bathalongtrack != NULL) 
+						if (ping->bathalongtrack != NULL)
 							{
 							free(ping->bathalongtrack);
 							ping->bathalongtrack = NULL;
 							}
-						if (ping->bathcorr != NULL) 
+						if (ping->bathcorr != NULL)
 							{
 							free(ping->bathcorr);
 							ping->bathcorr = NULL;
 							}
-						if (ping->bathlon != NULL) 
+						if (ping->bathlon != NULL)
 							{
 							free(ping->bathlon);
 							ping->bathlon = NULL;
 							}
-						if (ping->bathlat != NULL) 
+						if (ping->bathlat != NULL)
 							{
 							free(ping->bathlat);
 							ping->bathlat = NULL;
 							}
-						if (ping->bathx != NULL) 
+						if (ping->bathx != NULL)
 							{
 							free(ping->bathx);
 							ping->bathx = NULL;
 							}
-						if (ping->bathy != NULL) 
+						if (ping->bathy != NULL)
 							{
 							free(ping->bathy);
 							ping->bathy = NULL;
 							}
-						if (ping->angles != NULL) 
+						if (ping->angles != NULL)
 							{
 							free(ping->angles);
 							ping->angles = NULL;
 							}
-						if (ping->angles_forward != NULL) 
+						if (ping->angles_forward != NULL)
 							{
 							free(ping->angles_forward);
 							ping->angles_forward = NULL;
 							}
-						if (ping->angles_null != NULL) 
+						if (ping->angles_null != NULL)
 							{
 							free(ping->angles_null);
 							ping->angles_null = NULL;
 							}
-						if (ping->ttimes != NULL) 
+						if (ping->ttimes != NULL)
 							{
 							free(ping->ttimes);
 							ping->ttimes = NULL;
 							}
-						if (ping->bheave != NULL) 
+						if (ping->bheave != NULL)
 							{
 							free(ping->bheave);
 							ping->bheave = NULL;
 							}
-						if (ping->alongtrack_offset != NULL) 
+						if (ping->alongtrack_offset != NULL)
 							{
 							free(ping->alongtrack_offset);
 							ping->alongtrack_offset = NULL;
 							}
 						}
 					}
-					
+
 				/* copy data into ping arrays */
 				if (mbev_error == MB_ERROR_NO_ERROR
 				    && kind == MB_DATA_DATA)
 					{
-					mbeditviz_apply_timelag(file, ping, 
-								mbev_rollbias, mbev_pitchbias, mbev_headingbias, mbev_timelag,  
+					mbeditviz_apply_timelag(file, ping,
+								mbev_rollbias, mbev_pitchbias, mbev_headingbias, mbev_timelag,
 								&heading, &sonardepth,
 								&rolldelta, &pitchdelta);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
 					headingx = sin(heading * DTR);
 					headingy = cos(heading * DTR);
-					
+
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
 						ping->beamflag[ibeam] = beamflag[ibeam];
@@ -984,18 +989,18 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 							ping->bath[ibeam] = bath[ibeam];
 							ping->bathacrosstrack[ibeam] = bathacrosstrack[ibeam];
 							ping->bathalongtrack[ibeam] = bathalongtrack[ibeam];
-							
+
 							/* apply rotations and calculate position */
 							mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 										mtodeglon, mtodeglat,
-										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-										sonardepth, 
+										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+										sonardepth,
 										rolldelta, pitchdelta,
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
 							}
 						}
 					}
-				
+
 
 				/* extract some more values */
 				if (mbev_error == MB_ERROR_NO_ERROR
@@ -1004,7 +1009,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 					mbev_status = mb_extract_nav(mbev_verbose,imbio_ptr,
 						istore_ptr,&kind,
 						ping->time_i,&ping->time_d,&ping->navlon,&ping->navlat,&ping->speed,
-						&ping->heading,&draft,&ping->roll,&ping->pitch,&ping->heave, 
+						&ping->heading,&draft,&ping->roll,&ping->pitch,&ping->heave,
 						&mbev_error);
 					}
 
@@ -1026,7 +1031,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 				        {
 					if (format == MBF_MBPRONAV)
 						{
-						mbev_status = mbsys_singlebeam_swathbounds(mbev_verbose, imbio_ptr, istore_ptr, &kind, 
+						mbev_status = mbsys_singlebeam_swathbounds(mbev_verbose, imbio_ptr, istore_ptr, &kind,
 											&ping->portlon, &ping->portlat,
 											&ping->stbdlon, &ping->stbdlat,
 											&mbev_error);
@@ -1126,7 +1131,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 
 			/* close the file */
 			mbev_status = mb_close(mbev_verbose,&imbio_ptr,&mbev_error);
-			
+
 			/* if processed file read, then reset the beam edits to the original raw state
 				by reading in a global esf file from the raw file */
 			if (file->processed_info_loaded == MB_YES)
@@ -1149,7 +1154,7 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 					fprintf(stderr,"Generating global edit file:\n\t%s\n",command);
 					system(command);
 					}
-				
+
 				/* now read and apply the global edits */
 				mbev_status = mb_esf_open(mbev_verbose, geffile, MB_YES, MBP_ESF_NOWRITE,
 							&(file->esf), &mbev_error);
@@ -1174,8 +1179,8 @@ fprintf(stderr,"MBeditviz is applying %d original beam states\n",file->esf.nedit
 						ping = &(file->pings[iping]);
 
 						/* apply edits for this ping */
-						mb_esf_apply(mbev_verbose, &(file->esf), 
-		    					    ping->time_d, ping->multiplicity, ping->beams_bath, 
+						mb_esf_apply(mbev_verbose, &(file->esf),
+		    					    ping->time_d, ping->multiplicity, ping->beams_bath,
 							    ping->beamflag, &mbev_error);
 						for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 							ping->beamflagorg[ibeam] = ping->beamflag[ibeam];
@@ -1183,7 +1188,7 @@ fprintf(stderr,"MBeditviz is applying %d original beam states\n",file->esf.nedit
 						/* update message every 250 records */
 						if (iping % 250 == 0)
 							{
-							sprintf(message, "MBeditviz: global edits applied to %d of %d records so far...", 
+							sprintf(message, "MBeditviz: global edits applied to %d of %d records so far...",
 								iping, file->num_pings);
 							do_mbeditviz_message_on(message);
 							}
@@ -1197,11 +1202,11 @@ fprintf(stderr,"MBeditviz is applying %d original beam states\n",file->esf.nedit
 						}
 					}
 				}
-			
+
 if (mbev_verbose > 0)
 fprintf(stderr,"loaded swathfile:%s file->processed_info_loaded:%d file->process.mbp_edit_mode:%d\n",
 swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
-			
+
 			/* attempt to load bathymetry edits */
 			mbev_status = mb_esf_load(mbev_verbose, file->path, MB_YES, MBP_ESF_NOWRITE,
 							file->esffile, &(file->esf), &mbev_error);
@@ -1224,21 +1229,21 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 					ping = &(file->pings[iping]);
 
 					/* apply edits for this ping */
-					mb_esf_apply(mbev_verbose, &(file->esf), 
-		    				    ping->time_d, ping->multiplicity, ping->beams_bath, 
+					mb_esf_apply(mbev_verbose, &(file->esf),
+		    				    ping->time_d, ping->multiplicity, ping->beams_bath,
 						    ping->beamflag, &mbev_error);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						ping->beamflagorg[ibeam] = ping->beamflag[ibeam];
-			
+
 					/* update message every 250 records */
 					if (iping % 250 == 0)
 						{
-						sprintf(message, "MBeditviz: saved edits applied to %d of %d records so far...", 
+						sprintf(message, "MBeditviz: saved edits applied to %d of %d records so far...",
 							iping, file->num_pings);
 						do_mbeditviz_message_on(message);
 						}
 					}
-				
+
 				/* close the esf */
 				if (file->esf_open == MB_YES)
 					{
@@ -1260,14 +1265,14 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 				/* count the asynchronous heading data */
 				file->n_async_heading = 0;
 				file->n_async_heading_alloc = 0;
-				if ((afp = fopen(asyncfile, "r")) != NULL) 
+				if ((afp = fopen(asyncfile, "r")) != NULL)
 					{
 					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
 						if (buffer[0] != '#')
 						    file->n_async_heading++;
 					fclose(afp);
 					}
-				
+
 				/* allocate space for asynchronous heading */
 				if (file->n_async_heading > 0)
 					{
@@ -1287,7 +1292,7 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 
 				/* read the asynchronous heading data */
 				file->n_async_heading = 0;
-				if ((afp = fopen(asyncfile, "r")) != NULL) 
+				if ((afp = fopen(asyncfile, "r")) != NULL)
 					{
 					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
 						{
@@ -1302,9 +1307,9 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 						}
 					fclose(afp);
 					}
-				
+
 				}
-				
+
 			/* if heading data not loaded from file extract from ping data */
 			if (file->n_async_heading <= 0)
 				{
@@ -1331,7 +1336,7 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 						}
 					}
 				}
-			
+
 			/* try to load sonardepth data */
 			strcpy(asyncfile, file->path);
 			strcat(asyncfile, ".ats");
@@ -1341,14 +1346,14 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 				/* count the asynchronous sonardepth data */
 				file->n_async_sonardepth = 0;
 				file->n_async_sonardepth_alloc = 0;
-				if ((afp = fopen(asyncfile, "r")) != NULL) 
+				if ((afp = fopen(asyncfile, "r")) != NULL)
 					{
 					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
 						if (buffer[0] != '#')
 						    file->n_async_sonardepth++;
 					fclose(afp);
 					}
-				
+
 				/* allocate space for asynchronous sonardepth */
 				if (file->n_async_sonardepth > 0)
 					{
@@ -1368,7 +1373,7 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 
 				/* read the asynchronous sonardepth data */
 				file->n_async_sonardepth = 0;
-				if ((afp = fopen(asyncfile, "r")) != NULL) 
+				if ((afp = fopen(asyncfile, "r")) != NULL)
 					{
 					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
 						{
@@ -1383,9 +1388,9 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 						}
 					fclose(afp);
 					}
-				
+
 				}
-				
+
 			/* if sonardepth data not loaded from file extract from ping data */
 			if (file->n_async_sonardepth <= 0)
 				{
@@ -1412,7 +1417,7 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 						}
 					}
 				}
-			
+
 			/* try to load asynchronous attitude data */
 			strcpy(asyncfile, file->path);
 			strcat(asyncfile, ".ata");
@@ -1422,14 +1427,14 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 				/* count the asynchronous attitude data */
 				file->n_async_attitude = 0;
 				file->n_async_attitude_alloc = 0;
-				if ((afp = fopen(asyncfile, "r")) != NULL) 
+				if ((afp = fopen(asyncfile, "r")) != NULL)
 					{
 					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
 						if (buffer[0] != '#')
 						    file->n_async_attitude++;
 					fclose(afp);
 					}
-				
+
 				/* allocate space for asynchronous attitude */
 				if (file->n_async_attitude > 0)
 					{
@@ -1465,7 +1470,7 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 
 				/* read the asynchronous attitude data */
 				file->n_async_attitude = 0;
-				if ((afp = fopen(asyncfile, "r")) != NULL) 
+				if ((afp = fopen(asyncfile, "r")) != NULL)
 					{
 					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
 						{
@@ -1480,9 +1485,9 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 							}
 						}
 					fclose(afp);
-					}				
-				}			
-				
+					}
+				}
+
 			/* if attitude data not loaded from file extract from ping data */
 			if (file->n_async_attitude <= 0)
 				{
@@ -1526,7 +1531,7 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 						}
 					}
 				}
-			
+
 			/* try to load synchronous attitude data */
 			strcpy(asyncfile, file->path);
 			strcat(asyncfile, ".sta");
@@ -1536,14 +1541,14 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 				/* count the synchronous attitude data */
 				file->n_sync_attitude = 0;
 				file->n_sync_attitude_alloc = 0;
-				if ((afp = fopen(asyncfile, "r")) != NULL) 
+				if ((afp = fopen(asyncfile, "r")) != NULL)
 					{
 					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
 						if (buffer[0] != '#')
 						    file->n_sync_attitude++;
 					fclose(afp);
 					}
-				
+
 				/* allocate space for asynchronous attitude */
 				if (file->n_sync_attitude > 0)
 					{
@@ -1579,7 +1584,7 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 
 				/* read the synchronous attitude data */
 				file->n_sync_attitude = 0;
-				if ((afp = fopen(asyncfile, "r")) != NULL) 
+				if ((afp = fopen(asyncfile, "r")) != NULL)
 					{
 					while ((result = fgets(buffer,MBP_FILENAMESIZE,afp)) == buffer)
 						{
@@ -1594,9 +1599,9 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 							}
 						}
 					fclose(afp);
-					}				
-				}			
-				
+					}
+				}
+
 			/* if attitude data not loaded from file extract from ping data */
 			if (file->n_sync_attitude <= 0)
 				{
@@ -1665,8 +1670,8 @@ swathfile,file->processed_info_loaded,file->process.mbp_edit_mode);
 	return(mbev_status);
 }
 /*--------------------------------------------------------------------*/
-int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping, 
-				double rollbias, double pitchbias, double headingbias, double timelag,  
+int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_struct *ping,
+				double rollbias, double pitchbias, double headingbias, double timelag,
 				double *heading, double *sonardepth,
 				double *rolldelta, double *pitchdelta)
 {
@@ -1696,16 +1701,16 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 
 	/* apply timelag to get new values of lon, lat, heading, rollbias, pitchbias */
 	if (file != NULL && ping != NULL)
-		{		
+		{
 		/* get adjusted time for interpolation in asyncronous time series */
 		time_d = ping->time_d + timelag;
 
 		/* if asyncronous heading available, interpolate new value */
 		if (file->n_async_heading > 0)
 			{
-			intstat = mb_linear_interp_degrees(mbev_verbose, 
+			intstat = mb_linear_interp_degrees(mbev_verbose,
 					file->async_heading_time_d-1, file->async_heading_heading-1,
-					file->n_async_heading, time_d, heading, &iheading, 
+					file->n_async_heading, time_d, heading, &iheading,
 					&mbev_error);
 			*heading += headingbias;
 			}
@@ -1717,9 +1722,9 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 		/* if asyncronous sonardepth available, interpolate new value */
 		if (file->n_async_sonardepth > 0)
 			{
-			intstat = mb_linear_interp(mbev_verbose, 
+			intstat = mb_linear_interp(mbev_verbose,
 					file->async_sonardepth_time_d-1, file->async_sonardepth_sonardepth-1,
-					file->n_async_sonardepth, time_d, sonardepth, &isonardepth, 
+					file->n_async_sonardepth, time_d, sonardepth, &isonardepth,
 					&mbev_error);
 			}
 		else
@@ -1730,21 +1735,21 @@ int mbeditviz_apply_timelag(struct mbev_file_struct *file, struct mbev_ping_stru
 		/* if both synchronous and asyncronous attitude available, interpolate new values */
 		if (file->n_sync_attitude > 0 && file->n_async_attitude > 0)
 			{
-			intstat = mb_linear_interp(mbev_verbose, 
+			intstat = mb_linear_interp(mbev_verbose,
 					file->sync_attitude_time_d-1, file->sync_attitude_roll-1,
-					file->n_sync_attitude, ping->time_d, &rollsync, &iattitude, 
+					file->n_sync_attitude, ping->time_d, &rollsync, &iattitude,
 					&mbev_error);
-			intstat = mb_linear_interp(mbev_verbose, 
+			intstat = mb_linear_interp(mbev_verbose,
 					file->sync_attitude_time_d-1, file->sync_attitude_pitch-1,
-					file->n_sync_attitude, ping->time_d, &pitchsync, &iattitude, 
+					file->n_sync_attitude, ping->time_d, &pitchsync, &iattitude,
 					&mbev_error);
-			intstat = mb_linear_interp(mbev_verbose, 
+			intstat = mb_linear_interp(mbev_verbose,
 					file->async_attitude_time_d-1, file->async_attitude_roll-1,
-					file->n_async_attitude, time_d, &rollasync, &iattitude, 
+					file->n_async_attitude, time_d, &rollasync, &iattitude,
 					&mbev_error);
-			intstat = mb_linear_interp(mbev_verbose, 
+			intstat = mb_linear_interp(mbev_verbose,
 					file->async_attitude_time_d-1, file->async_attitude_pitch-1,
-					file->n_async_attitude, time_d, &pitchasync, &iattitude, 
+					file->n_async_attitude, time_d, &pitchasync, &iattitude,
 					&mbev_error);
 			*rolldelta = rollasync - rollsync + rollbias;
 			*pitchdelta = pitchasync - pitchsync + pitchbias;
@@ -1781,9 +1786,9 @@ fprintf(stderr,"pitchdelta: %f %f    pitch:%f %f   %d\n", *pitchdelta, pitchbias
 /*--------------------------------------------------------------------*/
 int mbeditviz_beam_position(double navlon, double navlat, double headingx, double headingy,
 				double mtodeglon, double mtodeglat,
-				double bath, double acrosstrack, double alongtrack, 
-				double sonardepth, 
-				double rollbias, double pitchbias, 
+				double bath, double acrosstrack, double alongtrack,
+				double sonardepth,
+				double rollbias, double pitchbias,
 				double *bathcorr, double *lon, double *lat)
 {
 	/* local variables */
@@ -1792,7 +1797,7 @@ int mbeditviz_beam_position(double navlon, double navlat, double headingx, doubl
 	double	range;
 	double	alpha, beta;
 	double	newbath, newacrosstrack, newalongtrack;
-	
+
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
 		{
@@ -1816,12 +1821,12 @@ int mbeditviz_beam_position(double navlon, double navlat, double headingx, doubl
 	/* strip off heave + draft */
 	bathuse = bath - sonardepth;
 
-	/* get range and angles in 
+	/* get range and angles in
 	    roll-pitch frame */
-	range = sqrt(bathuse * bathuse 
-		    + acrosstrack 
+	range = sqrt(bathuse * bathuse
+		    + acrosstrack
 			* acrosstrack
-		    + alongtrack 
+		    + alongtrack
 			* alongtrack);
 	alpha = asin(alongtrack / range);
 	beta = acos(acrosstrack / range / cos(alpha));
@@ -1833,16 +1838,16 @@ int mbeditviz_beam_position(double navlon, double navlat, double headingx, doubl
 	/* recalculate bathymetry */
 	newbath = range * cos(alpha) * sin(beta);
 	newalongtrack = range * sin(alpha);
-	newacrosstrack = range * cos(alpha) * cos(beta);	
+	newacrosstrack = range * cos(alpha) * cos(beta);
 
-	/* add heave and draft back in */	    
+	/* add heave and draft back in */
 	*bathcorr = newbath + sonardepth;
-	
+
 	/* locate lon lat position */
-	*lon = navlon 
+	*lon = navlon
 		+ headingy * mtodeglon * acrosstrack
 		+ headingx * mtodeglon * alongtrack;
-	*lat = navlat 
+	*lat = navlat
 		- headingx * mtodeglat * acrosstrack
 		+ headingy * mtodeglat * alongtrack;
 
@@ -1872,7 +1877,7 @@ int mbeditviz_unload_file(int ifile)
 	struct mbev_ping_struct *ping;
 	int	lock_status;
 	int	lock_error = MB_ERROR_NO_ERROR;
-	int	iping;	
+	int	iping;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -1882,9 +1887,9 @@ int mbeditviz_unload_file(int ifile)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       ifile:       %d\n",ifile);
 		}
-		
+
 	/* unload the file */
-	if (ifile >= 0 && ifile < mbev_num_files 
+	if (ifile >= 0 && ifile < mbev_num_files
 		&& mbev_files[ifile].load_status == MB_YES)
 		{
 
@@ -1978,7 +1983,7 @@ int mbeditviz_unload_file(int ifile)
 			}
 		    free(file->pings);
 		    file->pings = NULL;
-		    
+
 		    file->n_async_heading = 0;
 		    file->n_async_heading_alloc = 0;
 		    if (file->async_heading_time_d != NULL)
@@ -2038,16 +2043,16 @@ int mbeditviz_unload_file(int ifile)
 			file->sync_attitude_pitch = NULL;
 			}
 		    }
-		    
+
 		/* reset load status */
 		file->load_status = MB_NO;
 		mbev_num_files_loaded--;
-		
+
 		/* unlock the file */
 		if (mbdef_uselockfiles == MB_YES)
-			lock_status = mb_pr_unlockswathfile(mbev_verbose, file->path, 
+			lock_status = mb_pr_unlockswathfile(mbev_verbose, file->path,
 						MBP_LOCK_EDITBATHY, program_name, &lock_error);
-		
+
 		}
 
 	/* print output debug statements */
@@ -2069,7 +2074,7 @@ int mbeditviz_delete_file(int ifile)
 {
 	/* local variables */
 	char	*function_name = "mbeditviz_delete_file";
-	int	i;	
+	int	i;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -2079,14 +2084,14 @@ int mbeditviz_delete_file(int ifile)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       ifile:       %d\n",ifile);
 		}
-		
+
 	/* unload the file if needed */
-	if (ifile >= 0 && ifile < mbev_num_files 
+	if (ifile >= 0 && ifile < mbev_num_files
 		&& mbev_files[ifile].load_status == MB_YES)
 		{
 		mbeditviz_unload_file(ifile);
 		}
-		
+
 	/* delete the file */
 	for (i=ifile;i<mbev_num_files-1;i++)
 		{
@@ -2128,9 +2133,9 @@ double mbeditviz_erf(double x)
  * function mbeditviz_bin_weight calculates the integrated weight over a bin
  * given the footprint of a sounding
  */
-int mbeditviz_bin_weight(double foot_a, double foot_b, double scale, 
-		    double pcx, double pcy, double dx, double dy, 
-		    double *px, double *py, 
+int mbeditviz_bin_weight(double foot_a, double foot_b, double scale,
+		    double pcx, double pcy, double dx, double dy,
+		    double *px, double *py,
 		    double *weight, int *use)
 {
 	char	*function_name = "mbeditviz_bin_weight";
@@ -2160,7 +2165,7 @@ int mbeditviz_bin_weight(double foot_a, double foot_b, double scale,
 		fprintf(stderr,"dbg2       p4 x:       %f\n",px[3]);
 		fprintf(stderr,"dbg2       p4 y:       %f\n",py[3]);
 		}
-		
+
 	/* The weighting function is
 		w(x, y) = (1 / (PI * a * b)) * exp(-(x**2/a**2 + y**2/b**2))
 	    in the footprint coordinate system, where the x axis
@@ -2170,16 +2175,16 @@ int mbeditviz_bin_weight(double foot_a, double foot_b, double scale,
 	    by corners (x1, y1), (x2, y1), (x1, y2), (x2, y2) is
 		    x2 y2
 		W = I  I { w(x, y) } dx dy
-		    x1 y1 
-		
+		    x1 y1
+
 		  = 1 / 4 * ( erfc(x1/a) - erfc(x2/a)) * ( erfc(y1/a) - erfc(y2/a))
 	    where erfc(u) is the complementary error function.
 	    Each bin is represented as a simple integral in geographic
 	    coordinates, but is rotated in the footprint coordinate system.
 	    I can't figure out how to evaluate this integral over a
-	    rotated rectangle,  and so I am crudely and incorrectly 
+	    rotated rectangle,  and so I am crudely and incorrectly
 	    approximating the integrated weight value by evaluating it over
-	    the same sized rectangle centered at the same location. 
+	    the same sized rectangle centered at the same location.
 	    Maybe someday I'll figure out how to do it correctly.
 	    DWC 11/18/99 */
 
@@ -2188,7 +2193,7 @@ int mbeditviz_bin_weight(double foot_a, double foot_b, double scale,
 	fb = scale * foot_b;
 	*weight = 0.25 * ( mbeditviz_erf((pcx + dx) / fa) - mbeditviz_erf((pcx - dx) / fa))
 			* ( mbeditviz_erf((pcy + dy) / fb) - mbeditviz_erf((pcy - dy) / fb));
-		    	    
+
 	/* use if weight large or any ratio <= 1 */
 	if (*weight > 0.05)
 	    {
@@ -2227,7 +2232,7 @@ int mbeditviz_bin_weight(double foot_a, double foot_b, double scale,
 
 	/* return status */
 	return(mbev_status);
-}				   
+}
 /*--------------------------------------------------------------------*/
 int mbeditviz_get_grid_bounds()
 {
@@ -2253,7 +2258,7 @@ int mbeditviz_get_grid_bounds()
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		}
-		
+
 	/* find lon lat bounds of loaded files */
 	if (mbev_num_files_loaded > 0)
 		{
@@ -2301,7 +2306,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);*/
 				}
 			}
 		}
-	if (mbev_num_files_loaded <= 0 || mbev_grid_bounds[1] <= mbev_grid_bounds[0] 
+	if (mbev_num_files_loaded <= 0 || mbev_grid_bounds[1] <= mbev_grid_bounds[0]
 		|| mbev_grid_bounds[3] <= mbev_grid_bounds[2])
 		{
 		mbev_status = MB_FAILURE;
@@ -2312,7 +2317,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);*/
 		mbev_status = MB_SUCCESS;
 		mbev_error = MB_ERROR_NO_ERROR;
 		}
-		
+
 	/* get projection */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -2326,10 +2331,10 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);*/
 		utm_zone = (int)(((reference_lon + 183.0)
 			/ 6.0) + 0.5);
 		if (reference_lat >= 0.0)
-			sprintf(projection_id, "UTM%2.2dN", utm_zone); 
+			sprintf(projection_id, "UTM%2.2dN", utm_zone);
 		else
-			sprintf(projection_id, "UTM%2.2dS", utm_zone); 
-		proj_status = mb_proj_init(mbev_verbose,projection_id, 
+			sprintf(projection_id, "UTM%2.2dS", utm_zone);
+		proj_status = mb_proj_init(mbev_verbose,projection_id,
 			&(pjptr), &mbev_error);
 		if (proj_status != MB_SUCCESS)
 			{
@@ -2337,7 +2342,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);*/
 			mbev_error = MB_ERROR_BAD_PARAMETER;
 			}
 		}
-		
+
 	/* get grid cell size and dimensions */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -2374,7 +2379,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);*/
 		mbev_grid_boundsutm[1] = MAX(mbev_grid_boundsutm[1], xx);
 		mbev_grid_boundsutm[2] = MIN(mbev_grid_boundsutm[2], yy);
 		mbev_grid_boundsutm[3] = MAX(mbev_grid_boundsutm[3], yy);
-		
+
 		/* get grid spacing */
 /*fprintf(stderr,"altitude: %f %f\n", altitude_min, altitude_max);*/
 		if (altitude_max > 0.0)
@@ -2383,7 +2388,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);*/
 			mbev_grid_cellsize = 0.02 * depth_max;
 		else
 			mbev_grid_cellsize = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / 250;
-		
+
 		/* get grid dimensions */
 		mbev_grid_nx = (mbev_grid_boundsutm[1] - mbev_grid_boundsutm[0]) / mbev_grid_cellsize + 1;
 		mbev_grid_ny = (mbev_grid_boundsutm[3] - mbev_grid_boundsutm[2]) / mbev_grid_cellsize + 1;
@@ -2394,7 +2399,7 @@ mbev_grid_bounds[0],mbev_grid_bounds[1],mbev_grid_bounds[2],mbev_grid_bounds[3],
 mbev_grid_boundsutm[0],mbev_grid_boundsutm[1],mbev_grid_boundsutm[2],mbev_grid_boundsutm[3]);
 fprintf(stderr,"cell size:%f dimensions: %d %d\n",
 mbev_grid_cellsize,mbev_grid_nx,mbev_grid_ny);*/
-		
+
 		/* release projection */
 		mb_proj_free(mbev_verbose, &(pjptr), &mbev_error);
 		}
@@ -2413,7 +2418,7 @@ mbev_grid_cellsize,mbev_grid_nx,mbev_grid_ny);*/
 	/* return */
 	return(mbev_status);
 }
-		
+
 /*--------------------------------------------------------------------*/
 int mbeditviz_setup_grid()
 {
@@ -2431,21 +2436,21 @@ int mbeditviz_setup_grid()
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		}
-		
+
 	/* find lon lat bounds of loaded files */
 	if (mbev_num_files_loaded > 0)
-		{	
+		{
 		/* get grid bounds */
 		mbev_grid.bounds[0] = mbev_grid_bounds[0];
 		mbev_grid.bounds[1] = mbev_grid_bounds[1];
 		mbev_grid.bounds[2] = mbev_grid_bounds[2];
 		mbev_grid.bounds[3] = mbev_grid_bounds[3];
-		
+
 		/* get grid spacing */
 		mbev_grid.dx = mbev_grid_cellsize;
 		mbev_grid.dy = mbev_grid_cellsize;
 		}
-	if (mbev_num_files_loaded <= 0 || mbev_grid.bounds[1] <= mbev_grid.bounds[0] 
+	if (mbev_num_files_loaded <= 0 || mbev_grid.bounds[1] <= mbev_grid.bounds[0]
 		|| mbev_grid.bounds[3] <= mbev_grid.bounds[2])
 		{
 		mbev_status = MB_FAILURE;
@@ -2456,7 +2461,7 @@ int mbeditviz_setup_grid()
 		mbev_status = MB_SUCCESS;
 		mbev_error = MB_ERROR_NO_ERROR;
 		}
-		
+
 	/* get projection */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -2470,10 +2475,10 @@ int mbeditviz_setup_grid()
 		utm_zone = (int)(((reference_lon + 183.0)
 			/ 6.0) + 0.5);
 		if (reference_lat >= 0.0)
-			sprintf(mbev_grid.projection_id, "UTM%2.2dN", utm_zone); 
+			sprintf(mbev_grid.projection_id, "UTM%2.2dN", utm_zone);
 		else
-			sprintf(mbev_grid.projection_id, "UTM%2.2dS", utm_zone); 
-		proj_status = mb_proj_init(mbev_verbose,mbev_grid.projection_id, 
+			sprintf(mbev_grid.projection_id, "UTM%2.2dS", utm_zone);
+		proj_status = mb_proj_init(mbev_verbose,mbev_grid.projection_id,
 			&(mbev_grid.pjptr), &mbev_error);
 		if (proj_status != MB_SUCCESS)
 			{
@@ -2481,7 +2486,7 @@ int mbeditviz_setup_grid()
 			mbev_error = MB_ERROR_BAD_PARAMETER;
 			}
 		}
-		
+
 	/* get grid cell size and dimensions */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -2518,7 +2523,7 @@ int mbeditviz_setup_grid()
 		mbev_grid.boundsutm[1] = MAX(mbev_grid.boundsutm[1], xx);
 		mbev_grid.boundsutm[2] = MIN(mbev_grid.boundsutm[2], yy);
 		mbev_grid.boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
-		
+
 		/* get grid dimensions */
 		mbev_grid.nx = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / mbev_grid.dx + 1;
 		mbev_grid.ny = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
@@ -2530,7 +2535,7 @@ mbev_grid.boundsutm[0],mbev_grid.boundsutm[1],mbev_grid.boundsutm[2],mbev_grid.b
 fprintf(stderr,"cell size:%f %f dimensions: %d %d\n",
 mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);*/
 		}
-				
+
 	/* allocate memory for grid */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -2567,7 +2572,7 @@ mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);*/
 	/* return */
 	return(mbev_status);
 }
-		
+
 /*--------------------------------------------------------------------*/
 int mbeditviz_project_soundings()
 {
@@ -2602,17 +2607,17 @@ int mbeditviz_project_soundings()
 				for (iping=0;iping<file->num_pings;iping++)
 					{
 					ping = &(file->pings[iping]);
-					mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
+					mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 							ping->navlon, ping->navlat,
-							&ping->navlonx, &ping->navlaty, 
+							&ping->navlonx, &ping->navlaty,
 							&mbev_error);
 					for (ibeam=0;ibeam<ping->beams_bath;ibeam++)
 						{
 						if (ping->beamflag[ibeam] != MB_FLAG_NULL)
 							{
-							mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
+							mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
-									&ping->bathx[ibeam], &ping->bathy[ibeam], 
+									&ping->bathx[ibeam], &ping->bathy[ibeam],
 									&mbev_error);
 							}
 						}
@@ -2635,8 +2640,8 @@ int mbeditviz_project_soundings()
 	/* return */
 	return(mbev_status);
 }
-							
-		
+
+
 /*--------------------------------------------------------------------*/
 int mbeditviz_make_grid()
 {
@@ -2647,7 +2652,7 @@ int mbeditviz_make_grid()
 	int	first;
 	int	ifile, iping, ibeam;
 	int	filecount;
-	int	i, j, k;	
+	int	i, j, k;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -2736,7 +2741,7 @@ int mbeditviz_make_grid()
 	/* return */
 	return(mbev_status);
 }
-							
+
 /*--------------------------------------------------------------------*/
 int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *ping, int ibeam, int beam_ok, int apply_now)
 {
@@ -2754,7 +2759,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 	int	use_weight;
 	int	ix1, ix2, iy1, iy2;
 	int	ii, jj, kk;
-	int	i, j;	
+	int	i, j;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -2774,133 +2779,185 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 		/ mbev_grid.dx;
 	j = (ping->bathy[ibeam] - mbev_grid.boundsutm[2] + 0.5 * mbev_grid.dy)
 		/ mbev_grid.dy;
-		
+
 	/* proceed if beam in grid */
 	if (i >= 0 && i < mbev_grid.nx && j >= 0 && j < mbev_grid.ny)
 		{
-		/* calculate footprint */
-		foot_dx = (ping->bathx[ibeam] - ping->navlonx);
-		foot_dy = (ping->bathy[ibeam] - ping->navlaty);
-		foot_lateral = sqrt(foot_dx * foot_dx + foot_dy * foot_dy);
-		if (foot_lateral > 0.0)
+		/* simple gridding mode */
+		if (mbev_grid_algorithm == MBEV_GRID_ALGORITH_SIMPLE)
 			{
-			foot_dxn = foot_dx / foot_lateral;
-			foot_dyn = foot_dy / foot_lateral;
+			/* get location in grid arrays */
+			kk = i * mbev_grid.ny + j;
+
+			/* add to weights and sums */
+			if (beam_ok == MB_YES)
+				{
+				mbev_grid.wgt[kk] += 1.0;
+				mbev_grid.sum[kk] += (-ping->bathcorr[ibeam]);
+				mbev_grid.sgm[kk] += ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+				}
+			else
+				{
+				mbev_grid.wgt[kk] -= 1.0;
+				mbev_grid.sum[kk] -= (-ping->bathcorr[ibeam]);
+				mbev_grid.sgm[kk] -= ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+				if (mbev_grid.wgt[kk] < MBEV_GRID_WEIGHT_TINY)
+					mbev_grid.wgt[kk] = 0.0;
+				}
+
+			/* recalculate grid cell if desired */
+			if (apply_now == MB_YES)
+				{
+				/* recalculate grid cell */
+				if (mbev_grid.wgt[kk] > 0.0)
+					{
+					mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
+					mbev_grid.sgm[kk] = sqrt(fabs(mbev_grid.sgm[kk] / mbev_grid.wgt[kk]
+								- mbev_grid.val[kk] * mbev_grid.val[kk]));
+					mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[kk]);
+					mbev_grid.max = MAX(mbev_grid.max, mbev_grid.val[kk]);
+					mbev_grid.smin = MIN(mbev_grid.smin, mbev_grid.sgm[kk]);
+					mbev_grid.smax = MAX(mbev_grid.smax, mbev_grid.sgm[kk]);
+					}
+				else
+					{
+					mbev_grid.val[kk] = mbev_grid.nodatavalue;
+					mbev_grid.sgm[kk] = mbev_grid.nodatavalue;
+					}
+
+				/* update grid in mbview display */
+				mbview_updateprimarygridcell(mbev_verbose, 0, i, j, mbev_grid.val[kk], &mbev_error);
+				}
 			}
+
+		/* else footprint gridding algorithm */
 		else
 			{
-			foot_dxn = 1.0;
-			foot_dyn = 0.0;
-			}
-		foot_range = sqrt(foot_lateral * foot_lateral + ping->altitude * ping->altitude);
-		foot_theta = RTD * atan2(foot_lateral, (ping->bathcorr[ibeam] - ping->sonardepth));
-		foot_dtheta = 0.5 * file->beamwidth_xtrack;
-		foot_dphi = 0.5 * file->beamwidth_ltrack;
-		if (foot_dtheta <= 0.0)
-			foot_dtheta = 1.0;
-		if (foot_dphi <= 0.0)
-			foot_dphi = 1.0;
-		foot_hwidth =(ping->bathcorr[ibeam] - ping->sonardepth) 
-				* tan(DTR * (foot_theta + foot_dtheta)) 
-				    - foot_lateral;
-		foot_hlength = foot_range * tan(DTR * foot_dphi);
-
-		/* get range of bins around footprint to examine */
-		foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / mbev_grid.dx);
-		foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / mbev_grid.dx);
-		foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / mbev_grid.dy);
-		foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / mbev_grid.dy);
-		foot_dix = 2 * MAX(foot_wix, foot_lix);
-		foot_diy = 2 * MAX(foot_wiy, foot_liy);
-		ix1 = MAX(i - foot_dix, 0);
-		ix2 = MIN(i + foot_dix, mbev_grid.nx - 1);
-		iy1 = MAX(j - foot_diy, 0);
-		iy2 = MIN(j + foot_diy, mbev_grid.ny - 1);
-
-		/* loop over neighborhood of bins */
-		for (ii=ix1;ii<=ix2;ii++)
-			for (jj=iy1;jj<=iy2;jj++)
+			/* calculate footprint */
+			foot_dx = (ping->bathx[ibeam] - ping->navlonx);
+			foot_dy = (ping->bathy[ibeam] - ping->navlaty);
+			foot_lateral = sqrt(foot_dx * foot_dx + foot_dy * foot_dy);
+			if (foot_lateral > 0.0)
 				{
-				/* find distance of bin center from sounding center */
-				xx = (mbev_grid.boundsutm[0] + ii * mbev_grid.dx 
-					+ 0.5 * mbev_grid.dx - ping->bathx[ibeam]);
-				yy = (mbev_grid.boundsutm[2] + jj * mbev_grid.dy 
-					+ 0.5 * mbev_grid.dy - ping->bathy[ibeam]);
+				foot_dxn = foot_dx / foot_lateral;
+				foot_dyn = foot_dy / foot_lateral;
+				}
+			else
+				{
+				foot_dxn = 1.0;
+				foot_dyn = 0.0;
+				}
+			foot_range = sqrt(foot_lateral * foot_lateral + ping->altitude * ping->altitude);
+			foot_theta = RTD * atan2(foot_lateral, (ping->bathcorr[ibeam] - ping->sonardepth));
+			foot_dtheta = 0.5 * file->beamwidth_xtrack;
+			foot_dphi = 0.5 * file->beamwidth_ltrack;
+			if (foot_dtheta <= 0.0)
+				foot_dtheta = 1.0;
+			if (foot_dphi <= 0.0)
+				foot_dphi = 1.0;
+			foot_hwidth =(ping->bathcorr[ibeam] - ping->sonardepth)
+					* tan(DTR * (foot_theta + foot_dtheta))
+					    - foot_lateral;
+			foot_hlength = foot_range * tan(DTR * foot_dphi);
 
-				/* get center and corners of bin in meters from sounding center */
-				xx0 = xx;
-				yy0 = yy;
-				bdx = 0.5 * mbev_grid.dx;
-				bdy = 0.5 * mbev_grid.dy;
-				xx1 = xx0 - bdx;
-				xx2 = xx0 + bdx;
-				yy1 = yy0 - bdy;
-				yy2 = yy0 + bdy;
+			/* get range of bins around footprint to examine */
+			foot_wix = fabs(foot_hwidth * cos(DTR * foot_theta) / mbev_grid.dx);
+			foot_wiy = fabs(foot_hwidth * sin(DTR * foot_theta) / mbev_grid.dx);
+			foot_lix = fabs(foot_hlength * sin(DTR * foot_theta) / mbev_grid.dy);
+			foot_liy = fabs(foot_hlength * cos(DTR * foot_theta) / mbev_grid.dy);
+			foot_dix = 2 * MAX(foot_wix, foot_lix);
+			foot_diy = 2 * MAX(foot_wiy, foot_liy);
+			ix1 = MAX(i - foot_dix, 0);
+			ix2 = MIN(i + foot_dix, mbev_grid.nx - 1);
+			iy1 = MAX(j - foot_diy, 0);
+			iy2 = MIN(j + foot_diy, mbev_grid.ny - 1);
 
-				/* rotate center and corners of bin to footprint coordinates */
-				prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
-				pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
-				prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
-				pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
-				prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
-				pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
-				prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
-				pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
-				prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
-				pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
-
-				/* get weight integrated over bin */
-				mbeditviz_bin_weight(foot_hwidth, foot_hlength, 1.0, 
-					prx[0], pry[0], bdx, bdy, 
-					&prx[1], &pry[1], 
-					&weight, &use_weight);
-
-				/* if beam affects cell apply using weight */
-				if (use_weight == MBEV_USE_YES)
+			/* loop over neighborhood of bins */
+			for (ii=ix1;ii<=ix2;ii++)
+				for (jj=iy1;jj<=iy2;jj++)
 					{
-					/* get location in grid arrays */
-					kk = ii * mbev_grid.ny + jj;
-					
-					/* add to weights and sums */
-					if (beam_ok == MB_YES)
+					/* find distance of bin center from sounding center */
+					xx = (mbev_grid.boundsutm[0] + ii * mbev_grid.dx
+						+ 0.5 * mbev_grid.dx - ping->bathx[ibeam]);
+					yy = (mbev_grid.boundsutm[2] + jj * mbev_grid.dy
+						+ 0.5 * mbev_grid.dy - ping->bathy[ibeam]);
+
+					/* get center and corners of bin in meters from sounding center */
+					xx0 = xx;
+					yy0 = yy;
+					bdx = 0.5 * mbev_grid.dx;
+					bdy = 0.5 * mbev_grid.dy;
+					xx1 = xx0 - bdx;
+					xx2 = xx0 + bdx;
+					yy1 = yy0 - bdy;
+					yy2 = yy0 + bdy;
+
+					/* rotate center and corners of bin to footprint coordinates */
+					prx[0] = xx0 * foot_dxn + yy0 * foot_dyn;
+					pry[0] = -xx0 * foot_dyn + yy0 * foot_dxn;
+					prx[1] = xx1 * foot_dxn + yy1 * foot_dyn;
+					pry[1] = -xx1 * foot_dyn + yy1 * foot_dxn;
+					prx[2] = xx2 * foot_dxn + yy1 * foot_dyn;
+					pry[2] = -xx2 * foot_dyn + yy1 * foot_dxn;
+					prx[3] = xx1 * foot_dxn + yy2 * foot_dyn;
+					pry[3] = -xx1 * foot_dyn + yy2 * foot_dxn;
+					prx[4] = xx2 * foot_dxn + yy2 * foot_dyn;
+					pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
+
+					/* get weight integrated over bin */
+					mbeditviz_bin_weight(foot_hwidth, foot_hlength, 1.0,
+						prx[0], pry[0], bdx, bdy,
+						&prx[1], &pry[1],
+						&weight, &use_weight);
+
+					/* if beam affects cell apply using weight */
+					if (use_weight == MBEV_USE_YES)
 						{
-						mbev_grid.wgt[kk] += weight;
-						mbev_grid.sum[kk] += weight * (-ping->bathcorr[ibeam]);
-						mbev_grid.sgm[kk] += weight * ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
-						}
-					else
-						{
-						mbev_grid.wgt[kk] -= weight;
-						mbev_grid.sum[kk] -= weight * (-ping->bathcorr[ibeam]);
-						mbev_grid.sgm[kk] -= weight * ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
-						if (mbev_grid.wgt[kk] < MBEV_GRID_WEIGHT_TINY)
-							mbev_grid.wgt[kk] = 0.0;
-						}
-					
-					/* recalculate grid cell if desired */
-					if (apply_now == MB_YES)
-						{
-						/* recalculate grid cell */
-						if (mbev_grid.wgt[kk] > 0.0)
+						/* get location in grid arrays */
+						kk = ii * mbev_grid.ny + jj;
+
+						/* add to weights and sums */
+						if (beam_ok == MB_YES)
 							{
-							mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
-							mbev_grid.sgm[kk] = sqrt(fabs(mbev_grid.sgm[kk] / mbev_grid.wgt[kk]
-										- mbev_grid.val[kk] * mbev_grid.val[kk]));
-							mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[kk]);
-							mbev_grid.max = MAX(mbev_grid.max, mbev_grid.val[kk]);
-							mbev_grid.smin = MIN(mbev_grid.smin, mbev_grid.sgm[kk]);
-							mbev_grid.smax = MAX(mbev_grid.smax, mbev_grid.sgm[kk]);
+							mbev_grid.wgt[kk] += weight;
+							mbev_grid.sum[kk] += weight * (-ping->bathcorr[ibeam]);
+							mbev_grid.sgm[kk] += weight * ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
 							}
 						else
 							{
-							mbev_grid.val[kk] = mbev_grid.nodatavalue;
-							mbev_grid.sgm[kk] = mbev_grid.nodatavalue;
+							mbev_grid.wgt[kk] -= weight;
+							mbev_grid.sum[kk] -= weight * (-ping->bathcorr[ibeam]);
+							mbev_grid.sgm[kk] -= weight * ping->bathcorr[ibeam] * ping->bathcorr[ibeam];
+							if (mbev_grid.wgt[kk] < MBEV_GRID_WEIGHT_TINY)
+								mbev_grid.wgt[kk] = 0.0;
 							}
-						/* update grid in mbview display */
-						mbview_updateprimarygridcell(mbev_verbose, 0, ii, jj, mbev_grid.val[kk], &mbev_error);
+
+						/* recalculate grid cell if desired */
+						if (apply_now == MB_YES)
+							{
+							/* recalculate grid cell */
+							if (mbev_grid.wgt[kk] > 0.0)
+								{
+								mbev_grid.val[kk] = mbev_grid.sum[kk] / mbev_grid.wgt[kk];
+								mbev_grid.sgm[kk] = sqrt(fabs(mbev_grid.sgm[kk] / mbev_grid.wgt[kk]
+											- mbev_grid.val[kk] * mbev_grid.val[kk]));
+								mbev_grid.min = MIN(mbev_grid.min, mbev_grid.val[kk]);
+								mbev_grid.max = MAX(mbev_grid.max, mbev_grid.val[kk]);
+								mbev_grid.smin = MIN(mbev_grid.smin, mbev_grid.sgm[kk]);
+								mbev_grid.smax = MAX(mbev_grid.smax, mbev_grid.sgm[kk]);
+								}
+							else
+								{
+								mbev_grid.val[kk] = mbev_grid.nodatavalue;
+								mbev_grid.sgm[kk] = mbev_grid.nodatavalue;
+								}
+
+							/* update grid in mbview display */
+							mbview_updateprimarygridcell(mbev_verbose, 0, ii, jj, mbev_grid.val[kk], &mbev_error);
+							}
 						}
 					}
-				}
+			}
 		}
 
 	/* print output debug statements */
@@ -2917,7 +2974,7 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 	/* return */
 	return(mbev_status);
 }
-		
+
 /*--------------------------------------------------------------------*/
 int mbeditviz_make_grid_simple()
 {
@@ -2935,7 +2992,7 @@ int mbeditviz_make_grid_simple()
 	int	proj_status;
 	int	ifile, iping, ibeam;
 	int	filecount;
-	int	i, j, k;	
+	int	i, j, k;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -2944,7 +3001,7 @@ int mbeditviz_make_grid_simple()
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		}
-		
+
 	/* find lon lat bounds of loaded files */
 	if (mbev_num_files_loaded > 0)
 		{
@@ -2994,7 +3051,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 				}
 			}
 		}
-	if (mbev_num_files_loaded <= 0 || mbev_grid.bounds[1] <= mbev_grid.bounds[0] 
+	if (mbev_num_files_loaded <= 0 || mbev_grid.bounds[1] <= mbev_grid.bounds[0]
 		|| mbev_grid.bounds[3] <= mbev_grid.bounds[2])
 		{
 		mbev_status = MB_FAILURE;
@@ -3005,7 +3062,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 		mbev_status = MB_SUCCESS;
 		mbev_error = MB_ERROR_NO_ERROR;
 		}
-		
+
 	/* get projection */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -3019,10 +3076,10 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 		utm_zone = (int)(((reference_lon + 183.0)
 			/ 6.0) + 0.5);
 		if (reference_lat >= 0.0)
-			sprintf(mbev_grid.projection_id, "UTM%2.2dN", utm_zone); 
+			sprintf(mbev_grid.projection_id, "UTM%2.2dN", utm_zone);
 		else
-			sprintf(mbev_grid.projection_id, "UTM%2.2dS", utm_zone); 
-		proj_status = mb_proj_init(mbev_verbose,mbev_grid.projection_id, 
+			sprintf(mbev_grid.projection_id, "UTM%2.2dS", utm_zone);
+		proj_status = mb_proj_init(mbev_verbose,mbev_grid.projection_id,
 			&(mbev_grid.pjptr), &mbev_error);
 		if (proj_status != MB_SUCCESS)
 			{
@@ -3030,7 +3087,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 			mbev_error = MB_ERROR_BAD_PARAMETER;
 			}
 		}
-		
+
 	/* get grid cell size and dimensions */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -3067,7 +3124,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 		mbev_grid.boundsutm[1] = MAX(mbev_grid.boundsutm[1], xx);
 		mbev_grid.boundsutm[2] = MIN(mbev_grid.boundsutm[2], yy);
 		mbev_grid.boundsutm[3] = MAX(mbev_grid.boundsutm[3], yy);
-		
+
 		/* get grid spacing */
 		mbev_grid.dx = 0.14 * altitude_max;
 		mbev_grid.dy = 0.14 * altitude_max;
@@ -3086,7 +3143,7 @@ info->lon_min,info->lon_max,info->lat_min,info->lat_max);
 			mbev_grid.dx = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / 250;
 			mbev_grid.dy = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / 250;
 			}
-		
+
 		/* get grid dimensions */
 		mbev_grid.nx = (mbev_grid.boundsutm[1] - mbev_grid.boundsutm[0]) / mbev_grid.dx + 1;
 		mbev_grid.ny = (mbev_grid.boundsutm[3] - mbev_grid.boundsutm[2]) / mbev_grid.dy + 1;
@@ -3100,7 +3157,7 @@ if (mbev_verbose > 0)
 fprintf(stderr,"cell size:%f %f dimensions: %d %d\n",
 mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);
 		}
-		
+
 	/* allocate memory for grid */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -3122,7 +3179,7 @@ mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);
 		else
 			mbev_status = MB_FAILURE;
 		}
-		
+
 	/* make grid */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -3143,9 +3200,9 @@ mbev_grid.dx,mbev_grid.dy,mbev_grid.nx,mbev_grid.ny);
 						{
 						if (ping->beamflag[ibeam] != MB_FLAG_NULL)
 							{
-							mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
+							mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
-									&ping->bathx[ibeam], &ping->bathy[ibeam], 
+									&ping->bathx[ibeam], &ping->bathy[ibeam],
 									&mbev_error);
 							}
 						if (mb_beam_ok(ping->beamflag[ibeam]))
@@ -3222,7 +3279,7 @@ int mbeditviz_destroy_grid()
 	struct mbev_ping_struct *ping;
 	int	action;
 	int	ifile, iping, ibeam;
-	int	i;	
+	int	i;
 
 	/* print input debug statements */
 	if (mbev_verbose >= 2)
@@ -3234,7 +3291,7 @@ int mbeditviz_destroy_grid()
 
 if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_destroy_grid status:%d\n", mbev_status);
-		
+
 	/* loop over all files and output edits as necessary */
 	for (ifile=0;ifile<mbev_num_files;ifile++)
 		{
@@ -3270,21 +3327,21 @@ ifile,iping,ibeam, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR, acti
 						}
 					}
 				}
-				
+
 			/* update the process structure */
 			file->process.mbp_edit_mode = MBP_EDIT_ON;
 			strcpy(file->process.mbp_editfile, file->esf.esffile);
-				
+
 			/* close the esf file */
 			mb_esf_close(mbev_verbose, &(file->esf), &mbev_error);
 			file->esf_open = MB_NO;
-			
+
 			/* update mbprocess parameter file */
-			mb_pr_writepar(mbev_verbose, file->path, 
+			mb_pr_writepar(mbev_verbose, file->path,
 						&(file->process), &mbev_error);
 			}
 		}
-		
+
 	/* deallocate memory and reset status */
 	if (mbev_grid.status != MBEV_GRID_NONE)
 		{
@@ -3301,10 +3358,10 @@ ifile,iping,ibeam, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR, acti
 		mbev_grid.wgt = NULL;
 		mbev_grid.val = NULL;
 		mbev_grid.sgm = NULL;
-		
+
 		/* release projection */
 		mb_proj_free(mbev_verbose, &(mbev_grid.pjptr), &mbev_error);
-		
+
 		/* reset parameters */
 		memset(mbev_grid.projection_id, 0, MB_PATH_MAXLINE);
 		for (i=0;i<4;i++)
@@ -3316,7 +3373,7 @@ ifile,iping,ibeam, ibeam + ping->multiplicity * MB_ESF_MULTIPLICITY_FACTOR, acti
 		mbev_grid.dy = 0.0;
 		mbev_grid.nx = 0;
 		mbev_grid.ny = 0;
-		
+
 		/* reset status */
 		mbev_grid.status = MBEV_GRID_NONE;
 		}
@@ -3361,10 +3418,10 @@ int mbeditviz_selectregion(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:     %ld\n",instance);
 		}
-		
+
     	/* check data source for selected area */
 	mbev_status = mbview_getdataptr(mbev_verbose, instance, &mbviewdata, &mbev_error);
-					
+
 	/* check if area is currently defined */
 	if (mbev_status == MB_SUCCESS && mbviewdata->region_type == MBV_REGION_QUAD)
 		{
@@ -3392,7 +3449,7 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 			ymin = MIN(ymin, region->cornerpoints[i].ygrid);
 			ymax = MAX(ymax, region->cornerpoints[i].ygrid);
 			}
-	
+
 		/* get sounding bounds */
 		mbev_selected.xorigin = 0.5 * (xmin + xmax);
 		mbev_selected.yorigin = 0.5 * (ymin + ymax);
@@ -3410,7 +3467,7 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 		mbev_selected.num_soundings = 0;
 		mbev_selected.num_soundings_unflagged = 0;
 		mbev_selected.num_soundings_flagged = 0;
-		
+
 		/* loop over all files */
 		for (ifile=0;ifile<mbev_num_files;ifile++)
 			{
@@ -3420,8 +3477,8 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 				for (iping=0;iping<file->num_pings;iping++)
 					{
 					ping = &(file->pings[iping]);
-					mbeditviz_apply_timelag(file, ping, 
-								mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,  
+					mbeditviz_apply_timelag(file, ping,
+								mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,
 								&heading, &sonardepth,
 								&rolldelta, &pitchdelta);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
@@ -3437,32 +3494,32 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 								&& ping->bathy[ibeam] <= ymax)
 								{
 								/* allocate memory if needed */
-								if (mbev_selected.num_soundings 
+								if (mbev_selected.num_soundings
 									>= mbev_selected.num_soundings_alloc)
 									{
 									mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
-									mbev_selected.soundings = realloc(mbev_selected.soundings, mbev_selected.num_soundings_alloc 
+									mbev_selected.soundings = realloc(mbev_selected.soundings, mbev_selected.num_soundings_alloc
 													* sizeof(struct mb3dsoundings_sounding_struct));
 									}
-									
+
 								/* same beam ids */
 								mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
 								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
-								
+
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 										mtodeglon, mtodeglat,
-										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-										sonardepth, 
-										rolldelta, pitchdelta, 
+										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+										sonardepth,
+										rolldelta, pitchdelta,
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-								mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
+								mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
-									&ping->bathx[ibeam], &ping->bathy[ibeam], 
+									&ping->bathx[ibeam], &ping->bathy[ibeam],
 									&mbev_error);
-								
+
 								/* get local position in selected region */
 								x = ping->bathx[ibeam] - mbev_selected.xorigin;
 								y = ping->bathy[ibeam] - mbev_selected.yorigin;
@@ -3470,11 +3527,11 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 								yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
 								mbev_selected.soundings[mbev_selected.num_soundings].x = xx;
 								mbev_selected.soundings[mbev_selected.num_soundings].y = yy;
-									/*mbev_selected.soundings[mbev_selected.num_soundings].x 
+									/*mbev_selected.soundings[mbev_selected.num_soundings].x
 										= xx * mbev_selected.cosbearing - yy * mbev_selected.sinbearing;
-									mbev_selected.soundings[mbev_selected.num_soundings].y 
+									mbev_selected.soundings[mbev_selected.num_soundings].y
 										= xx * mbev_selected.sinbearing + yy * mbev_selected.cosbearing;*/
-								mbev_selected.soundings[mbev_selected.num_soundings].z 
+								mbev_selected.soundings[mbev_selected.num_soundings].z
 									= -ping->bathcorr[ibeam];
 								if (mbev_selected.num_soundings == 0)
 									{
@@ -3504,10 +3561,10 @@ mbev_selected.soundings[mbev_selected.num_soundings].z);*/
 					}
 				}
 			}
-			
+
 		/* get zscaling */
 		mbev_selected.zscale = mbev_selected.scale;
-		dz = zmax - zmin; 
+		dz = zmax - zmin;
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
 		mbev_selected.zmin = -0.5 * dz;
 		mbev_selected.zmax = 0.5 * dz;
@@ -3531,7 +3588,7 @@ mbev_selected.num_soundings);
 
 	/* return status */
 	return(mbev_status);
-}				   
+}
 /*--------------------------------------------------------------------*/
 int mbeditviz_selectarea(size_t instance)
 {
@@ -3557,10 +3614,10 @@ int mbeditviz_selectarea(size_t instance)
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		fprintf(stderr,"dbg2       instance:     %ld\n",instance);
 		}
-		
+
     	/* check data source for selected area */
 	mbev_status = mbview_getdataptr(mbev_verbose, instance, &mbviewdata, &mbev_error);
-			
+
 	/* check if area is currently defined */
 	if (mbev_status == MB_SUCCESS && mbviewdata->area_type == MBV_AREA_QUAD)
 		{
@@ -3575,7 +3632,7 @@ area->cornerpoints[0].xgrid,area->cornerpoints[0].ygrid,
 area->cornerpoints[1].xgrid,area->cornerpoints[2].ygrid,
 area->cornerpoints[2].xgrid,area->cornerpoints[2].ygrid,
 area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
-	
+
 		/* get sounding bounds */
 		mbev_selected.xorigin = 0.5 * (area->endpoints[0].xgrid + area->endpoints[1].xgrid);
 		mbev_selected.yorigin = 0.5 * (area->endpoints[0].ygrid + area->endpoints[1].ygrid);;
@@ -3591,7 +3648,7 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 		mbev_selected.num_soundings = 0;
 		mbev_selected.num_soundings_unflagged = 0;
 		mbev_selected.num_soundings_flagged = 0;
-		
+
 		/* loop over all files */
 		for (ifile=0;ifile<mbev_num_files;ifile++)
 			{
@@ -3601,8 +3658,8 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 				for (iping=0;iping<file->num_pings;iping++)
 					{
 					ping = &(file->pings[iping]);
-					mbeditviz_apply_timelag(file, ping, 
-								mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,  
+					mbeditviz_apply_timelag(file, ping,
+								mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,
 								&heading, &sonardepth,
 								&rolldelta, &pitchdelta);
 					mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
@@ -3622,40 +3679,40 @@ area->cornerpoints[3].xgrid,area->cornerpoints[3].ygrid);
 								&& yy <= mbev_selected.ymax)
 								{
 								/* allocate memory if needed */
-								if (mbev_selected.num_soundings 
+								if (mbev_selected.num_soundings
 									>= mbev_selected.num_soundings_alloc)
 									{
 									mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
-									mbev_selected.soundings = realloc(mbev_selected.soundings, mbev_selected.num_soundings_alloc 
+									mbev_selected.soundings = realloc(mbev_selected.soundings, mbev_selected.num_soundings_alloc
 													* sizeof(struct mb3dsoundings_sounding_struct));
 									}
-									
+
 								/* same beam ids */
 								mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
 								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
-			
+
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 										mtodeglon, mtodeglat,
-										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-										sonardepth, 
-										rolldelta, pitchdelta, 
+										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+										sonardepth,
+										rolldelta, pitchdelta,
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-								mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
+								mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
-									&ping->bathx[ibeam], &ping->bathy[ibeam], 
+									&ping->bathx[ibeam], &ping->bathy[ibeam],
 									&mbev_error);
 								x = ping->bathx[ibeam] - mbev_selected.xorigin;
 								y = ping->bathy[ibeam] - mbev_selected.yorigin;
 								yy = -x * mbev_selected.cosbearing + y * mbev_selected.sinbearing;
 								xx = x * mbev_selected.sinbearing + y * mbev_selected.cosbearing;
-								
+
 								/* get local position in selected region */
 								mbev_selected.soundings[mbev_selected.num_soundings].x = xx;
 								mbev_selected.soundings[mbev_selected.num_soundings].y = yy;
-								mbev_selected.soundings[mbev_selected.num_soundings].z 
+								mbev_selected.soundings[mbev_selected.num_soundings].z
 									= -ping->bathcorr[ibeam];
 								if (mbev_selected.num_soundings == 0)
 									{
@@ -3684,10 +3741,10 @@ mbev_selected.soundings[mbev_selected.num_soundings].z);*/
 					}
 				}
 			}
-			
+
 		/* get zscaling */
 		mbev_selected.zscale = mbev_selected.scale;
-		dz = zmax - zmin; 
+		dz = zmax - zmin;
 		mbev_selected.zorigin = 0.5 * (zmin + zmax);
 		mbev_selected.zmin = -0.5 * dz;
 		mbev_selected.zmax = 0.5 * dz;
@@ -3711,7 +3768,7 @@ mbev_selected.num_soundings);
 
 	/* return status */
 	return(mbev_status);
-}				   
+}
 /*--------------------------------------------------------------------*/
 int mbeditviz_selectnav(size_t instance)
 {
@@ -3740,10 +3797,10 @@ int mbeditviz_selectnav(size_t instance)
 		}
 if (mbev_verbose > 0)
 fprintf(stderr,"mbeditviz_selectnav: \n");
-		
+
     	/* check shared data source for selected nav */
 	mbev_status = mbview_getsharedptr(mbev_verbose, &mbviewshared, &mbev_error);
-			
+
 	/* check if any nav is currently selected */
 	if (mbev_status == MB_SUCCESS)
 		{
@@ -3770,8 +3827,8 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 					if (navpts[iping].selected == MB_YES)
 						{
 						ping = &(file->pings[iping]);
-						mbeditviz_apply_timelag(file, ping, 
-								  	mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,  
+						mbeditviz_apply_timelag(file, ping,
+								  	mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,
 								  	&heading, &sonardepth,
 								  	&rolldelta, &pitchdelta);
 						mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
@@ -3782,32 +3839,32 @@ fprintf(stderr,"mbeditviz_selectnav: \n");
 							if (ping->beamflag[ibeam] != MB_FLAG_NULL)
 								{
 								/* allocate memory if needed */
-								if (mbev_selected.num_soundings 
+								if (mbev_selected.num_soundings
 									>= mbev_selected.num_soundings_alloc)
 									{
 									mbev_selected.num_soundings_alloc += MBEV_ALLOCK_NUM;
-									mbev_selected.soundings = realloc(mbev_selected.soundings, mbev_selected.num_soundings_alloc 
+									mbev_selected.soundings = realloc(mbev_selected.soundings, mbev_selected.num_soundings_alloc
 													* sizeof(struct mb3dsoundings_sounding_struct));
 									}
-									
+
 								/* same beam ids */
 								mbev_selected.soundings[mbev_selected.num_soundings].ifile = ifile;
 								mbev_selected.soundings[mbev_selected.num_soundings].iping = iping;
 								mbev_selected.soundings[mbev_selected.num_soundings].ibeam = ibeam;
 								mbev_selected.soundings[mbev_selected.num_soundings].beamflag = ping->beamflag[ibeam];
-			
+
 								/* apply rotations and recalculate position */
 								mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 										mtodeglon, mtodeglat,
-										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-										sonardepth, 
-										rolldelta, pitchdelta, 
+										ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+										sonardepth,
+										rolldelta, pitchdelta,
 										&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-								mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
+								mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 									ping->bathlon[ibeam], ping->bathlat[ibeam],
-									&ping->bathx[ibeam], &ping->bathy[ibeam], 
+									&ping->bathx[ibeam], &ping->bathy[ibeam],
 									&mbev_error);
-								
+
 								/* get local position in selected region */
 								mbev_selected.soundings[mbev_selected.num_soundings].x = ping->bathx[ibeam];
 								mbev_selected.soundings[mbev_selected.num_soundings].y = ping->bathy[ibeam];
@@ -3845,13 +3902,13 @@ mbev_selected.soundings[mbev_selected.num_soundings].z);*/
 							}
 						}
 					}
-				
+
 				inavcount++;
 				}
 			}
 
 		/* get origin and scaling */
-		dz = zmax - zmin; 
+		dz = zmax - zmin;
 		dx = xmax - xmin;
 		dy = ymax - ymin;
 		mbev_selected.xorigin = 0.5 * (xmin + xmax);
@@ -3889,7 +3946,7 @@ mbev_selected.num_soundings);
 
 	/* return status */
 	return(mbev_status);
-}				   
+}
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_dismiss()
 {
@@ -3904,7 +3961,7 @@ fprintf(stderr,"mbeditviz_mb3dsoundings_dismiss\n");
 			function_name);
 		fprintf(stderr,"dbg2  Input arguments:\n");
 		}
-		
+
 	/* release the memory of the soundings */
 	if (mbev_selected.num_soundings_alloc > 0)
 		{
@@ -3943,7 +4000,7 @@ fprintf(stderr,"mbeditviz_mb3dsoundings_dismiss\n");
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       mbev_status:%d\n",mbev_status);
 		}
-}				   
+}
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag, int flush)
 {
@@ -3951,7 +4008,7 @@ void mbeditviz_mb3dsoundings_edit(int ifile, int iping, int ibeam, char beamflag
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 	int	action;
-/* fprintf(stderr,"mbeditviz_mb3dsoundings_edit:%d %d %d beamflag:%d flush:%d\n", 
+/* fprintf(stderr,"mbeditviz_mb3dsoundings_edit:%d %d %d beamflag:%d flush:%d\n",
 ifile, iping, ibeam, beamflag, flush); */
 
 	/* print input debug statements */
@@ -3966,20 +4023,20 @@ ifile, iping, ibeam, beamflag, flush); */
 		fprintf(stderr,"dbg2       beamflag:    %d\n",beamflag);
 		fprintf(stderr,"dbg2       flush:       %d\n",flush);
 		}
-		
+
 	/* apply current edit event */
 	if (flush != MB3DSDG_EDIT_FLUSHPREVIOUS)
 		{
 		file = &mbev_files[ifile];
 		ping = &(file->pings[iping]);
-		
+
 		/* check for real flag state change */
 		if (mb_beam_ok(ping->beamflag[ibeam]) != mb_beam_ok(beamflag))
 			{
 			/* apply change to grid */
 			mbeditviz_grid_beam(file, ping, ibeam, mb_beam_ok(beamflag), MB_YES);
 			}
-			
+
 		/* output edits if desired */
 		if (mbev_mode_output == MBEV_OUTPUT_MODE_EDIT)
 			{
@@ -3999,7 +4056,7 @@ ifile, iping, ibeam, beamflag, flush); */
 					mbev_error = MB_ERROR_NO_ERROR;
 					}
 				}
-				
+
 			/* save the edits to the esf stream */
 			if (file->esf_open == MB_YES)
 				{
@@ -4018,11 +4075,11 @@ ifile, iping, ibeam, beamflag, flush); */
 						action, &mbev_error);
 				}
 			}
-		
+
 		/* save new beamflag */
 		ping->beamflag[ibeam] = beamflag;
 		}
-		
+
 	/* redisplay grid if flush specified */
 	if (flush !=  MB3DSDG_EDIT_NOFLUSH)
 		{
@@ -4039,7 +4096,7 @@ ifile, iping, ibeam, beamflag, flush); */
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       mbev_status:%d\n",mbev_status);
 		}
-}				   
+}
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostring)
 {
@@ -4047,7 +4104,7 @@ void mbeditviz_mb3dsoundings_info(int ifile, int iping, int ibeam, char *infostr
 	struct mbev_file_struct *file;
 	struct mbev_ping_struct *ping;
 if (mbev_verbose > 0)
-fprintf(stderr,"mbeditviz_mb3dsoundings_info:%d %d %d\n", 
+fprintf(stderr,"mbeditviz_mb3dsoundings_info:%d %d %d\n",
 ifile, iping, ibeam);
 
 	/* print input debug statements */
@@ -4060,7 +4117,7 @@ ifile, iping, ibeam);
 		fprintf(stderr,"dbg2       iping:       %d\n",iping);
 		fprintf(stderr,"dbg2       ibeam:       %d\n",ibeam);
 		}
-		
+
 	/* generate info string */
 	file = &mbev_files[ifile];
 	ping = &(file->pings[iping]);
@@ -4068,7 +4125,7 @@ ifile, iping, ibeam);
 		ibeam,ping->beams_bath,iping,file->num_pings,file->name,ping->time_i[0],ping->time_i[1],ping->time_i[2],
 		ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6],ping->time_d,
 		ping->bathlon[ibeam],ping->bathlat[ibeam],ping->bath[ibeam],ping->bathacrosstrack[ibeam],ping->bathalongtrack[ibeam]);
-		
+
 	/* print output debug statements */
 	if (mbev_verbose >= 2)
 		{
@@ -4080,7 +4137,7 @@ ifile, iping, ibeam);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       mbev_status:%d\n",mbev_status);
 		}
-}				   
+}
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double headingbias, double timelag)
 {
@@ -4098,7 +4155,7 @@ void mbeditviz_mb3dsoundings_bias(double rollbias, double pitchbias, double head
 	int	i;
 
 if (mbev_verbose > 0)
-fprintf(stderr,"mbeditviz_mb3dsoundings_bias:%f %f %f %f\n", 
+fprintf(stderr,"mbeditviz_mb3dsoundings_bias:%f %f %f %f\n",
 rollbias, pitchbias, headingbias, timelag);
 
 	/* print input debug statements */
@@ -4112,7 +4169,7 @@ rollbias, pitchbias, headingbias, timelag);
 		fprintf(stderr,"dbg2       headingbias: %f\n",headingbias);
 		fprintf(stderr,"dbg2       timelag:     %f\n",timelag);
 		}
-		
+
 	/* copy bias parameters */
 	mbev_rollbias_3dsdg = rollbias;
 	mbev_pitchbias_3dsdg = pitchbias;
@@ -4120,7 +4177,7 @@ rollbias, pitchbias, headingbias, timelag);
 	mbev_timelag_3dsdg = timelag;
 	ifilelast = -1;
 	ipinglast = -1;
-		
+
 	/* apply bias parameters */
 	for (i=0;i<mbev_selected.num_soundings;i++)
 		{
@@ -4132,8 +4189,8 @@ rollbias, pitchbias, headingbias, timelag);
 
 		if (ifile != ifilelast || iping != ipinglast)
 			{
-			mbeditviz_apply_timelag(file, ping, 
-					mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,  
+			mbeditviz_apply_timelag(file, ping,
+					mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,
 					&heading, &sonardepth,
 					&rolldelta, &pitchdelta);
 			mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
@@ -4146,13 +4203,13 @@ rollbias, pitchbias, headingbias, timelag);
 		/* apply rotations and recalculate position */
 		mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 				mtodeglon, mtodeglat,
-				ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-				sonardepth, 
-				rolldelta, pitchdelta, 
+				ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+				sonardepth,
+				rolldelta, pitchdelta,
 				&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-		mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
+		mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 			ping->bathlon[ibeam], ping->bathlat[ibeam],
-			&ping->bathx[ibeam], &ping->bathy[ibeam], 
+			&ping->bathx[ibeam], &ping->bathy[ibeam],
 			&mbev_error);
 		x = ping->bathx[ibeam] - mbev_selected.xorigin;
 		y = ping->bathy[ibeam] - mbev_selected.yorigin;
@@ -4177,7 +4234,7 @@ rollbias, pitchbias, headingbias, timelag);
 
 	/* get zscaling */
 	mbev_selected.zscale = mbev_selected.scale;
-	dz = zmax - zmin; 
+	dz = zmax - zmin;
 	mbev_selected.zorigin = 0.5 * (zmin + zmax);
 	mbev_selected.zmin = -0.5 * dz;
 	mbev_selected.zmax = 0.5 * dz;
@@ -4194,7 +4251,7 @@ rollbias, pitchbias, headingbias, timelag);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       mbev_status:%d\n",mbev_status);
 		}
-}				   
+}
 /*--------------------------------------------------------------------*/
 void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double headingbias, double timelag)
 {
@@ -4208,7 +4265,7 @@ void mbeditviz_mb3dsoundings_biasapply(double rollbias, double pitchbias, double
 	double	mtodeglon, mtodeglat;
 
 if (mbev_verbose > 0)
-fprintf(stderr,"mbeditviz_mb3dsoundings_biasapply:%f %f %f %f\n", 
+fprintf(stderr,"mbeditviz_mb3dsoundings_biasapply:%f %f %f %f\n",
 rollbias, pitchbias, headingbias, timelag);
 
 	/* print input debug statements */
@@ -4222,7 +4279,7 @@ rollbias, pitchbias, headingbias, timelag);
 		fprintf(stderr,"dbg2       headingbias: %f\n",headingbias);
 		fprintf(stderr,"dbg2       timelag:     %f\n",timelag);
 		}
-		
+
 	/* copy bias parameters */
 	mbev_rollbias = rollbias;
 	mbev_pitchbias = pitchbias;
@@ -4233,7 +4290,7 @@ rollbias, pitchbias, headingbias, timelag);
 	sprintf(message, "Regridding using new bias parameters %f %f %f %f\n",
 				mbev_rollbias, mbev_pitchbias, mbev_headingbias, mbev_timelag);
 	do_mbeditviz_message_on(message);
-		
+
 	/* apply bias parameters to swath data */
 	for (ifile=0;ifile<mbev_num_files;ifile++)
 		{
@@ -4243,8 +4300,8 @@ rollbias, pitchbias, headingbias, timelag);
 			for (iping=0;iping<file->num_pings;iping++)
 				{
 				ping = &(file->pings[iping]);
-				mbeditviz_apply_timelag(file, ping, 
-							mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,  
+				mbeditviz_apply_timelag(file, ping,
+							mbev_rollbias_3dsdg, mbev_pitchbias_3dsdg, mbev_headingbias_3dsdg, mbev_timelag_3dsdg,
 							&heading, &sonardepth,
 							&rolldelta, &pitchdelta);
 				mb_coor_scale(mbev_verbose,ping->navlat,&mtodeglon,&mtodeglat);
@@ -4255,29 +4312,29 @@ rollbias, pitchbias, headingbias, timelag);
 					/* apply rotations and recalculate position */
 					mbeditviz_beam_position(ping->navlon, ping->navlat, headingx, headingy,
 							mtodeglon, mtodeglat,
-							ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam], 
-							sonardepth, 
-							rolldelta, pitchdelta, 
+							ping->bath[ibeam], ping->bathacrosstrack[ibeam], ping->bathalongtrack[ibeam],
+							sonardepth,
+							rolldelta, pitchdelta,
 							&(ping->bathcorr[ibeam]), &(ping->bathlon[ibeam]), &(ping->bathlat[ibeam]));
-					mb_proj_forward(mbev_verbose, mbev_grid.pjptr, 
+					mb_proj_forward(mbev_verbose, mbev_grid.pjptr,
 						ping->bathlon[ibeam], ping->bathlat[ibeam],
-						&ping->bathx[ibeam], &ping->bathy[ibeam], 
+						&ping->bathx[ibeam], &ping->bathy[ibeam],
 						&mbev_error);
 					}
 				}
 			}
 		}
-		
+
 	/* recalculate grid */
 	mbeditviz_make_grid();
-			
+
 	/* update the grid to mbview */
 	mbview_updateprimarygrid(mbev_verbose, 0, mbev_grid.nx, mbev_grid.ny, mbev_grid.val, &mbev_error);
 	mbview_updatesecondarygrid(mbev_verbose, 0, mbev_grid.nx, mbev_grid.ny, mbev_grid.sgm, &mbev_error);
 
 	/* turn message of */
 	do_mbeditviz_message_off();
-		
+
 	/* redisplay grid */
 	mbview_plothigh(0);
 
@@ -4291,5 +4348,5 @@ rollbias, pitchbias, headingbias, timelag);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       mbev_status:%d\n",mbev_status);
 		}
-}				   
+}
 /*--------------------------------------------------------------------*/

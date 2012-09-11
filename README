@@ -189,6 +189,14 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+Added MBIO function mb_sonartype() that returns the type of sonar associated
+with some data, using the definitions:
+  #define	MB_SONARTYPE_UNKNOWN		0
+  #define	MB_SONARTYPE_ECHOSOUNDER	1
+  #define	MB_SONARTYPE_MULTIBEAM		2
+  #define	MB_SONARTYPE_SIDESCAN		3
+  #define	MB_SONARTYPE_INTERFEROMETRIC	4
+
 Added -MXexcludepercent option to mblist to exclude a user defined
 percentage of outer beams from mblist output. (contributed by Suzanne O'Hara)
 

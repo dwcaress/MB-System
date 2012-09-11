@@ -4,7 +4,7 @@
  *
  * BuilderXcessory Version 6.1.3.
  *
- * Identification: 
+ * Identification:
  */
 module main_uil
 version = 'V2.1'
@@ -71,6 +71,7 @@ identifier BXG_pushButton_invertnav;
 identifier BXG_pushButton_zerozoffsets;
 identifier BXG_pushButton_analyzecrossings;
 identifier BXG_pushButton_newcrossings;
+identifier BXG_pushButton_autosetsvsvertical;
 identifier BXG_pushButton_autopickhorizontal;
 identifier BXG_pushButton_autopick;
 identifier BXG_pushButton_tie_xyz;
@@ -168,6 +169,7 @@ procedure BxUnmanageCB(string);
 procedure do_action_analyzecrossings();
 procedure do_action_autopick();
 procedure do_action_autopickhorizontal();
+procedure do_action_autosetsvsvertical();
 procedure do_action_checknewcrossings();
 procedure do_action_fixednav();
 procedure do_action_fixedxynav();
@@ -3608,6 +3610,23 @@ object pushButton_autopickhorizontal : XmPushButton widget {
 !(BX)    };
 };
 
+object pushButton_autosetsvsvertical : XmPushButton widget {
+    arguments {
+        arguments Style_use2;
+        XmNlabelString = compound_string("Auto-Set Survey-vs-Survey Vertical Offsets");
+    };
+    controls {
+    };
+    callbacks {
+        callbacks Style_use2Reasons;
+        MrmNcreateCallback = procedure BxGlobalWidgetId(BXG_pushButton_autosetsvsvertical);
+        XmNactivateCallback = procedure do_action_autosetsvsvertical();
+    };
+!(BX)    handlers {
+!(BX)        handlers Style_use2Handlers;
+!(BX)    };
+};
+
 object separator10 : XmSeparator widget {
     arguments {
     };
@@ -3753,6 +3772,7 @@ object pulldownMenu_action : XmPulldownMenu widget {
          managed XmSeparator separator7;
          managed XmPushButton pushButton_autopick;
          managed XmPushButton pushButton_autopickhorizontal;
+         managed XmPushButton pushButton_autosetsvsvertical;
          managed XmSeparator separator10;
          managed XmPushButton pushButton_newcrossings;
          managed XmSeparator separator17;
