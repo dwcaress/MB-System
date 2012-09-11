@@ -522,7 +522,7 @@ and mbedit edit save files.\n";
 	mb_path	lock_program;
 	mb_path lock_cpu;
 	mb_path lock_user;
-	char	lock_date[24];
+	mb_path	lock_date;
 
 	/* edit save file control variables */
 	struct mb_esf_struct esf;
@@ -5088,7 +5088,6 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 	/*--------------------------------------------
 	  handle draft correction
 	  --------------------------------------------*/
-
 		/* add user specified draft correction if desired */
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA
@@ -5338,7 +5337,7 @@ alpha, beta, lever_heave);*/
 			/* estimate travel times if they don't exist */
 			else
 			    {
-			    draft_org = sonardepth;
+			    draft_org = sonardepth - heave;
 			    ssv = 1500.0;
 			    nbeams = nbath;
 			    for (i=0;i<nbath;i++)
@@ -5665,7 +5664,7 @@ bath[i]-zz); */
 			    {
 			    /* get draft change */
 			    depth_offset_change = draft - draft_org + lever_heave;
-/*fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  depth offset:%f\n",
+/* fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  depth_offset_change:%f\n",
 time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 
 			    /* loop over the beams */
@@ -5675,7 +5674,7 @@ time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 				{
 				/* apply transducer depth change to depths */
 				bath[i] += depth_offset_change;
-/*fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);*/
+/* fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);*/
 
 				/* output some debug values */
 				if (verbose >= 5)

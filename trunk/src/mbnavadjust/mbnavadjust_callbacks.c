@@ -2386,6 +2386,9 @@ void do_update_status()
 		XtVaSetValues(pushButton_autopickhorizontal,
 			XmNsensitive, True,
 			NULL);
+		XtVaSetValues(pushButton_autosetsvsvertical,
+			XmNsensitive, True,
+			NULL);
         	if (project.inversion == MBNA_INVERSION_CURRENT)
 			XtVaSetValues(pushButton_newcrossings,
 				XmNsensitive, True,
@@ -2435,6 +2438,9 @@ void do_update_status()
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_autopickhorizontal,
+			XmNsensitive, False,
+			NULL);
+		XtVaSetValues(pushButton_autosetsvsvertical,
 			XmNsensitive, False,
 			NULL);
 		XtVaSetValues(pushButton_newcrossings,
@@ -2552,6 +2558,12 @@ void do_update_status()
 	    XmToggleButtonSetState(toggleButton_misfitcenter_auto,
 			TRUE, TRUE);
 	    }
+}
+/*--------------------------------------------------------------------*/
+
+void do_update_modelplot_status()
+{
+    	struct mbna_crossing *crossing;
 
 	/* deal with modelplot */
 	if (project.modelplot == MB_YES)
@@ -2570,27 +2582,47 @@ void do_update_status()
 			    NULL);
 		    }
 
-	   /* set model view status label */
-	   if (mbna_crossing_select == MBNA_SELECT_NONE)
-		   {
-        	   sprintf(string,":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom extent\":t\"No Selection\"");
-		   }
-	   else
-		   {
-		   crossing = &(project.crossings[mbna_crossing_select]);
-        	   sprintf(string,":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
-			       mbna_crossing_select,
-			       project.files[crossing->file_id_1].block,
-			       crossing->file_id_1,
-			       crossing->section_1,
-			       project.files[crossing->file_id_2].block,
-			       crossing->file_id_2,
-			       crossing->section_2);
-		   }
-	    set_label_multiline_string(label_modelplot_status, string);
+	    /* set model view status label */
+	    if (project.modelplot_style == MBNA_MODELPLOT_SEQUENTIAL)
+		{
+		if (mbna_crossing_select == MBNA_SELECT_NONE)
+			{
+			sprintf(string,":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom extent\":t\"No Selection\"");
+			}
+		else
+			{
+			crossing = &(project.crossings[mbna_crossing_select]);
+			sprintf(string,":::t\"Mouse: <left> select  tie; <middle> select untied crossing; <right> drag zoom extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
+				    mbna_crossing_select,
+				    project.files[crossing->file_id_1].block,
+				    crossing->file_id_1,
+				    crossing->section_1,
+				    project.files[crossing->file_id_2].block,
+				    crossing->file_id_2,
+				    crossing->section_2);
+			}
+		}
+	    else
+		{
+		if (mbna_crossing_select == MBNA_SELECT_NONE)
+			{
+			sprintf(string,":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent\":t\"No Selection\"");
+			}
+		else
+			{
+			crossing = &(project.crossings[mbna_crossing_select]);
+			sprintf(string,":::t\"Mouse: <left> select  tie; <middle> select block to view; <right> drag zoom extent\":t\"Selected Crossing: %4d %2.2d:%3.3d:%3.3d %2.2d:%3.3d:%3.3d\"",
+				    mbna_crossing_select,
+				    project.files[crossing->file_id_1].block,
+				    crossing->file_id_1,
+				    crossing->section_1,
+				    project.files[crossing->file_id_2].block,
+				    crossing->file_id_2,
+				    crossing->section_2);
+			}
+		}
 
-	    /* replot the modelplot */
-	    mbnavadjust_modelplot_plot();
+	    set_label_multiline_string(label_modelplot_status, string);
 	    }
 }
 /*--------------------------------------------------------------------*/
@@ -3653,6 +3685,11 @@ do_naverr_previous( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3667,6 +3704,11 @@ do_naverr_next( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3681,6 +3723,11 @@ do_naverr_nextunset( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3695,6 +3742,11 @@ do_naverr_addtie( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3709,6 +3761,11 @@ do_naverr_deletetie( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3723,6 +3780,11 @@ do_naverr_selecttie( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
    do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3738,6 +3800,11 @@ do_naverr_unset( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3753,6 +3820,11 @@ do_naverr_setnone( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3767,6 +3839,11 @@ do_naverr_setoffset( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3781,6 +3858,11 @@ do_naverr_resettie( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3905,8 +3987,7 @@ do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavadjust_crossing_replot();
    	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     	do_update_naverr();
-	if (project.modelplot == MB_YES)
-		mbnavadjust_modelplot_plot();
+	do_update_status();
 
 }
 
@@ -3947,6 +4028,7 @@ do_naverr_misfitcenter( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavadjust_get_misfit();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 	do_update_naverr();
+	do_update_status();
 }
 
 /*--------------------------------------------------------------------*/
@@ -3998,6 +4080,7 @@ do_biases_apply( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavadjust_crossing_replot();
 	mbnavadjust_get_misfit();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+	do_update_status();
 }
 
 /*--------------------------------------------------------------------*/
@@ -4040,6 +4123,7 @@ do_biases_applyall( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavadjust_crossing_replot();
 	mbnavadjust_get_misfit();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
+	do_update_status();
 }
 
 /*--------------------------------------------------------------------*/
@@ -4615,6 +4699,11 @@ do_view_showallsurveys( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbna_view_mode = MBNA_VIEW_MODE_ALL;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4627,6 +4716,11 @@ do_view_showselectedsurveys( Widget w, XtPointer client_data, XtPointer call_dat
 
     mbna_view_mode = MBNA_VIEW_MODE_SURVEY;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4639,6 +4733,11 @@ do_view_showselectedfile( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbna_view_mode = MBNA_VIEW_MODE_FILE;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4651,6 +4750,11 @@ do_view_showwithselectedsurveys( Widget w, XtPointer client_data, XtPointer call
 
     mbna_view_mode = MBNA_VIEW_MODE_WITHSURVEY;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4663,6 +4767,11 @@ do_view_showwithselectedfile( Widget w, XtPointer client_data, XtPointer call_da
 
     mbna_view_mode = MBNA_VIEW_MODE_WITHFILE;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4675,6 +4784,11 @@ do_view_showselectedsection( Widget w, XtPointer client_data, XtPointer call_dat
 
     mbna_view_mode = MBNA_VIEW_MODE_WITHSECTION;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4864,12 +4978,15 @@ do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 
-    /* make sure that contours are generated for all of the existing crossings */
-
-    mbna_status = MBNA_STATUS_MAKECONTOUR;
+    mbna_status = MBNA_STATUS_AUTOPICK;
     mbnavadjust_autopick(MB_YES);
     mbna_status = MBNA_STATUS_GUI;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 
 }
 /*--------------------------------------------------------------------*/
@@ -4880,12 +4997,34 @@ do_action_autopickhorizontal( Widget w, XtPointer client_data, XtPointer call_da
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 
-    /* make sure that contours are generated for all of the existing crossings */
-
-    mbna_status = MBNA_STATUS_MAKECONTOUR;
+    mbna_status = MBNA_STATUS_AUTOPICK;
     mbnavadjust_autopick(MB_NO);
     mbna_status = MBNA_STATUS_GUI;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
+
+}
+/*--------------------------------------------------------------------*/
+
+void
+do_action_autosetsvsvertical( Widget w, XtPointer client_data, XtPointer call_data)
+{
+    XmAnyCallbackStruct *acs;
+    acs = (XmAnyCallbackStruct*)call_data;
+
+    mbna_status = MBNA_STATUS_AUTOPICK;
+    mbnavadjust_autosetsvsvertical();
+    mbna_status = MBNA_STATUS_GUI;
+    do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 
 }
 
@@ -4908,6 +5047,11 @@ do_action_checknewcrossings( Widget w, XtPointer client_data, XtPointer call_dat
 
     mbnavadjust_findcrossings();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4934,6 +5078,11 @@ do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_invertnav();
     mbna_status = MBNA_STATUS_GUI;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -5003,9 +5152,16 @@ do_modelplot_show( Widget w, XtPointer client_data, XtPointer call_data)
     mbna_modelplot_pickfile = MBNA_SELECT_NONE;
     mbna_modelplot_picksection = MBNA_SELECT_NONE;
     mbna_modelplot_picksnav = MBNA_SELECT_NONE;
+    mbna_modelplot_blocksurvey1 = MBNA_SELECT_NONE;
+    mbna_modelplot_blocksurvey2 = MBNA_SELECT_NONE;
 
     /* update status */
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 /*--------------------------------------------------------------------*/
 
@@ -5084,9 +5240,11 @@ do_modelplot_resize( Widget w, XtPointer client_data, XEvent *event, Boolean *un
 		xg_init(display, modp_xid, modp_borders, xgfont, &modp_xgid);
 		status = mbnavadjust_set_modelplot_graphics(modp_xgid, modp_borders);
 
+		/* update model status */
+		do_update_modelplot_status();
+
 		/* plot the model */
 		mbnavadjust_modelplot_plot();
-
 	    	}
 	    }
 }
@@ -5100,11 +5258,23 @@ do_modelplot_fullsize( Widget w, XtPointer client_data, XtPointer call_data)
     acs = (XmAnyCallbackStruct*)call_data;
 
 	/* replot model */
-	mbna_modelplot_zoom = MB_NO;
 	mbna_modelplot_zoom_x1 = 0;
 	mbna_modelplot_zoom_x2 = 0;
-	mbna_modelplot_start = 0;
-	mbna_modelplot_end = 0;
+	if (project.modelplot_style == MBNA_MODELPLOT_SEQUENTIAL)
+	    {
+	    mbna_modelplot_zoom = MB_NO;
+	    mbna_modelplot_start = 0;
+	    mbna_modelplot_end = 0;
+	    }
+	else
+	    {
+	    mbna_modelplot_tiezoom = MB_NO;
+	    mbna_modelplot_tiestartzoom = 0;
+	    mbna_modelplot_tieendzoom = 0;
+	    mbna_modelplot_blocksurvey1 = MBNA_SELECT_NONE;
+	    mbna_modelplot_blocksurvey2 = MBNA_SELECT_NONE;
+	    }
+
 	mbnavadjust_modelplot_setzoom();
 	mbnavadjust_modelplot_plot();
 }
@@ -5160,6 +5330,9 @@ do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
 		  /* pick nearest tie point */
 		  mbnavadjust_modelplot_pick(event->xbutton.x, event->xbutton.y);
 
+		  /* update model status */
+		  do_update_modelplot_status();
+
 		  /* replot model */
 		  mbnavadjust_modelplot_plot();
 	    	  }
@@ -5172,6 +5345,9 @@ do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
 		  /* pick nearest tie point */
 		  mbnavadjust_modelplot_middlepick(event->xbutton.x, event->xbutton.y);
 
+		  /* update model status */
+		  do_update_modelplot_status();
+
 		  /* replot model */
 		  mbnavadjust_modelplot_plot();
 		  }
@@ -5181,6 +5357,9 @@ do_modelplot_input( Widget w, XtPointer client_data, XtPointer call_data)
 	    	  {
 	    	  button3down = MB_NO;
 	    	  mbna_modelplot_zoom_x2 = event->xbutton.x;
+
+		  /* update model status */
+		  do_update_modelplot_status();
 
 		  /* replot model */
 		  mbnavadjust_modelplot_setzoom();
@@ -5215,6 +5394,9 @@ do_modelplot_expose( Widget w, XtPointer client_data, XtPointer call_data)
     XmAnyCallbackStruct *acs;
     acs = (XmAnyCallbackStruct*)call_data;
 
+    /* update model status */
+    do_update_modelplot_status();
+
     /* replot the model */
     mbnavadjust_modelplot_plot();
 }
@@ -5231,6 +5413,9 @@ do_modelplot_block( Widget w, XtPointer client_data, XtPointer call_data)
 	if (XmToggleButtonGetState(toggleButton_modelplot_block))
 	    {
 	    project.modelplot_style = MBNA_MODELPLOT_SURVEY;
+
+	    /* update model status */
+	    do_update_modelplot_status();
 
 	    /* replot the model */
     	    mbnavadjust_modelplot_plot();
@@ -5251,6 +5436,9 @@ do_modelplot_sequential( Widget w, XtPointer client_data, XtPointer call_data)
 	if (XmToggleButtonGetState(toggleButton_modelplot_sequential))
 	    {
 	    project.modelplot_style = MBNA_MODELPLOT_SEQUENTIAL;
+
+	    /* update model status */
+	    do_update_modelplot_status();
 
 	    /* replot the model */
     	    mbnavadjust_modelplot_plot();
@@ -5275,9 +5463,15 @@ do_modelplot_clearblock( Widget w, XtPointer client_data, XtPointer call_data)
 	    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 	    do_update_naverr();
 	    }
-	if (project.modelplot == MB_YES)
-	    mbnavadjust_modelplot_plot();
-	do_update_status();
+
+	/* update status */
+ 	do_update_status();
+
+	/* update model status */
+	do_update_modelplot_status();
+
+	/* replot the model */
+ 	mbnavadjust_modelplot_plot();
 
 }
 

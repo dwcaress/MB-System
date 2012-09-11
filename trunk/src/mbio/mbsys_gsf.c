@@ -14,9 +14,9 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_gsf.c contains the functions for handling the data structure
- * used by MBIO functions to store data 
+ * used by MBIO functions to store data
  * from Gsf BottomChart Mark II multibeam sonar systems.
- * The data formats which are commonly used to store Gsf 
+ * The data formats which are commonly used to store Gsf
  * data in files include
  *      MBF_ELUNB : MBIO ID 92
  *
@@ -107,7 +107,7 @@
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_gsf_alloc";
@@ -147,7 +147,7 @@ int mbsys_gsf_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_gsf_deall";
@@ -186,7 +186,7 @@ int mbsys_gsf_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_gsf_dimensions";
@@ -272,12 +272,198 @@ int mbsys_gsf_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_gsf_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error)
+{
+	char	*function_name = "mbsys_gsf_sonartype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	dataID = &(store->dataID);
+	records = &(store->records);
+	mb_ping = &(records->mb_ping);
+
+	/* get sonar type */
+	if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC          /* 102 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM12_SPECIFIC      /* 103 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM100_SPECIFIC            /* 104 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM950_SPECIFIC            /* 105 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM121A_SPECIFIC           /* 106 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM121_SPECIFIC            /* 107 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SASS_SPECIFIC             /* 108 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC           /* 109 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC           /* 110 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC           /* 111 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC  /* 112 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC           /* 113 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC        /* 114 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC      /* 115 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC     /* 116 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC        /* 117 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC           /* 118 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC           /* 119 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC            /* 120 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_CMP_SASS_SPECIFIC         /* 121 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC       /* 122 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC       /* 123 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC       /* 124 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC       /* 125 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC       /* 126 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC       /* 127 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC            /* 128 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC           /* 129 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC          /* 130 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC          /* 131 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC       /* 132 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC            /* 133 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC            /* 134 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC            /* 135 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_RESON_7125_SPECIFIC       /* 138 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM2000_SPECIFIC           /* 139 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM300_RAW_SPECIFIC        /* 140 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM1002_RAW_SPECIFIC       /* 141 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM2000_RAW_SPECIFIC       /* 142 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM3000_RAW_SPECIFIC       /* 143 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM120_RAW_SPECIFIC        /* 144 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM3002_RAW_SPECIFIC       /* 145 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM3000D_RAW_SPECIFIC      /* 146 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM3002D_RAW_SPECIFIC      /* 147 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_RAW_SPECIFIC   /* 148 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC           /* 149 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC          /* 150 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC     /* 151 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC     /* 152 */)
+		{
+		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		}
+	else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC    /* 136 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC   /* 137 */)
+		{
+		*sonartype = MB_SONARTYPE_INTERFEROMETRIC;
+		}
+	else if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC    /* 136 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC   /* 137 */)
+		{
+		*sonartype = MB_SONARTYPE_SIDESCAN;
+		}
+	else if (mb_ping->sensor_id == GSF_SINGLE_BEAM_SUBRECORD_ECHOTRAC_SPECIFIC     		/* 201 */
+		|| mb_ping->sensor_id == GSF_SINGLE_BEAM_SUBRECORD_BATHY2000_SPECIFIC		/* 202 */
+		|| mb_ping->sensor_id == GSF_SINGLE_BEAM_SUBRECORD_MGD77_SPECIFIC        	/* 203 */
+		|| mb_ping->sensor_id == GSF_SINGLE_BEAM_SUBRECORD_BDB_SPECIFIC          	/* 204 */
+		|| mb_ping->sensor_id == GSF_SINGLE_BEAM_SUBRECORD_NOSHDB_SPECIFIC       	/* 205 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SB_SUBRECORD_ECHOTRAC_SPECIFIC		/* 206 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SB_SUBRECORD_BATHY2000_SPECIFIC	/* 207 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SB_SUBRECORD_MGD77_SPECIFIC		/* 208 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SB_SUBRECORD_BDB_SPECIFIC		/* 209 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SB_SUBRECORD_NOSHDB_SPECIFIC		/* 210 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC		/* 211 */
+		|| mb_ping->sensor_id == GSF_SWATH_BATHY_SB_SUBRECORD_NAVISOUND_SPECIFIC	/* 212 */)
+		{
+		*sonartype = MB_SONARTYPE_ECHOSOUNDER;
+		}
+	else
+		{
+		*sonartype = MB_SONARTYPE_UNKNOWN;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sensor_id:  %d\n",mb_ping->sensor_id);
+		fprintf(stderr,"dbg2       sonartype:  %d\n",*sonartype);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_gsf_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *ss_type, int *error)
+{
+	char	*function_name = "mbsys_gsf_sidescantype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_gsf_struct *store;
+	gsfDataID	    *dataID;
+	gsfRecords	    *records;
+	gsfSwathBathyPing   *mb_ping;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_gsf_struct *) store_ptr;
+	dataID = &(store->dataID);
+	records = &(store->records);
+	mb_ping = &(records->mb_ping);
+
+	/* get sidescan type */
+	if (mb_ping->sensor_id == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC)
+		{
+		*ss_type = MB_SIDESCAN_LINEAR;
+		}
+	else
+		{
+		*ss_type = MB_SIDESCAN_LOGARITHMIC;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ss_type:    %d\n",*ss_type);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -323,7 +509,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_ping = &(records->mb_ping);
 
 		/* get time */
-		*time_d = mb_ping->ping_time.tv_sec 
+		*time_d = mb_ping->ping_time.tv_sec
 				+ 0.000000001 * mb_ping->ping_time.tv_nsec;
 		mb_get_date(verbose,*time_d,time_i);
 
@@ -336,105 +522,111 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		*speed = 1.852 * mb_ping->speed;
-		
+
 		/* set beamwidths in mb_io structure */
-		gsfstatus = gsfGetSwathBathyBeamWidths(records, 
+		gsfstatus = gsfGetSwathBathyBeamWidths(records,
 			&(mb_io_ptr->beamwidth_ltrack),
 			&(mb_io_ptr->beamwidth_xtrack));
 
 		/* if not set then use hard coded values */
-		if (mb_io_ptr->beamwidth_ltrack <= 0.0 
+		if (mb_io_ptr->beamwidth_ltrack <= 0.0
 			|| mb_io_ptr->beamwidth_xtrack <= 0.0)
 			{
-			if (mb_ping->sensor_id 
+			if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 2.67;
 			    mb_io_ptr->beamwidth_xtrack = 2.67;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_EM100_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 3.3;
 			    mb_io_ptr->beamwidth_xtrack = 3.3;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_EM950_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 3.3;
 			    mb_io_ptr->beamwidth_xtrack = 3.3;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_EM121A_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 1.0;
 			    mb_io_ptr->beamwidth_xtrack = 1.0;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_EM121_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 1.0;
 			    mb_io_ptr->beamwidth_xtrack = 1.0;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 2.0;
 			    mb_io_ptr->beamwidth_xtrack = 2.0;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 1.5;
 			    mb_io_ptr->beamwidth_xtrack = 1.5;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 3.3;
 			    mb_io_ptr->beamwidth_xtrack = 3.3;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 2.67;
 			    mb_io_ptr->beamwidth_xtrack = 2.67;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 2.0;
 			    mb_io_ptr->beamwidth_xtrack = 2.0;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 1.5;
 			    mb_io_ptr->beamwidth_xtrack = 1.5;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 1.5;
 			    mb_io_ptr->beamwidth_xtrack = 1.5;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 2.0;
 			    mb_io_ptr->beamwidth_xtrack = 2.0;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 1.5;
 			    mb_io_ptr->beamwidth_xtrack = 2.8;
 			    }
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 			    == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC)
 			    {
 			    mb_io_ptr->beamwidth_ltrack = 1.5;
 			    mb_io_ptr->beamwidth_xtrack = 2.8;
+			    }
+			else if (mb_ping->sensor_id
+			    == GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC)
+			    {
+			    mb_io_ptr->beamwidth_ltrack = 1.0;
+			    mb_io_ptr->beamwidth_xtrack = 0.1;
 			    }
 			else
 			    {
@@ -475,7 +667,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		    {
 		    for (i=0;i<*nbath;i++)
 			if (mb_beam_ok(beamflag[i]))
-			    beamflag[i] 
+			    beamflag[i]
 				= mb_beam_set_flag_manual(beamflag[i]);
 		    }*/
 
@@ -490,39 +682,39 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			amp[i] = mb_ping->mr_amplitude[i];
 			}
-			
+
 		/* read multibeam sidescan if available */
 		if (mb_ping->brb_inten != NULL)
 			{
 			/* get sample rate and raw sidescan sample size */
-			if (mb_ping->sensor_id 
+			if (mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC)
 				{
 				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfReson8100Specific.sample_rate);
 				}
-			else if (mb_ping->sensor_id 
+			else if (mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_EM3000D_SPECIFIC
-				|| mb_ping->sensor_id 
+				|| mb_ping->sensor_id
 					== GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC)
 				{
 				ss_spacing = 750.0 / ((double)mb_ping->sensor_data.gsfEM3Specific.sample_rate);
@@ -629,13 +821,13 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -651,7 +843,7 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -682,12 +874,12 @@ int mbsys_gsf_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -699,9 +891,6 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	gsfDataID	    *dataID;
 	gsfRecords	    *records;
 	gsfSwathBathyPing   *mb_ping;
-	double	bathmax;
-	double	bathacrosstrackmax;
-	double	bathalongtrackmax;
 	int	anyunflagged;
 	int	i;
 
@@ -734,13 +923,13 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
@@ -771,10 +960,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get time */
 		mb_ping->ping_time.tv_sec = (int) time_d;
-		mb_ping->ping_time.tv_nsec 
-			= (int) (1000000000 
-			    * (time_d 
-				    - mb_ping->ping_time.tv_sec));
+		mb_ping->ping_time.tv_nsec = (int) (1000000000 * (time_d - mb_ping->ping_time.tv_sec));
 
 		/* get navigation */
 		mb_ping->longitude = navlon;
@@ -788,26 +974,18 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get numbers of beams */
 		mb_ping->number_beams = nbath;
-		
+
 		/* allocate memory in arrays if required */
 		if (nbath > 0)
 		    {
-		    mb_ping->beam_flags 
-			= (unsigned char *) 
+		    mb_ping->beam_flags
+			= (unsigned char *)
 			    realloc(mb_ping->beam_flags,
 					nbath * sizeof(char));
-		    mb_ping->depth 
-			= (double *) 
-			    realloc(mb_ping->depth,
-					nbath * sizeof(double));
-		    mb_ping->across_track 
-			= (double *) 
-			    realloc(mb_ping->across_track,
-					nbath * sizeof(double));
-		    mb_ping->along_track 
-			= (double *) 
-			    realloc(mb_ping->along_track,
-					nbath * sizeof(double));
+		    mb_ping->depth
+			= (double *) realloc(mb_ping->depth, nbath * sizeof(double));
+		    mb_ping->across_track = (double *) realloc(mb_ping->across_track, nbath * sizeof(double));
+		    mb_ping->along_track = (double *) realloc(mb_ping->along_track, nbath * sizeof(double));
 		    if (mb_ping->beam_flags == NULL
 			|| mb_ping->depth == NULL
 			|| mb_ping->across_track == NULL
@@ -820,10 +998,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		if (namp > 0
 		    && mb_ping->mc_amplitude != NULL)
 		    {
-		    mb_ping->mc_amplitude 
-			= (double *) 
-			    realloc(mb_ping->mc_amplitude,
-					namp * sizeof(double));
+		    mb_ping->mc_amplitude = (double *) realloc(mb_ping->mc_amplitude, namp * sizeof(double));
 		    if (mb_ping->mc_amplitude == NULL)
 			{
 			status = MB_FAILURE;
@@ -832,10 +1007,7 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    }
 		else if (namp > 0)
 		    {
-		    mb_ping->mr_amplitude 
-			= (double *) 
-			    realloc(mb_ping->mr_amplitude,
-					namp * sizeof(double));
+		    mb_ping->mr_amplitude = (double *) realloc(mb_ping->mr_amplitude, namp * sizeof(double));
 		    if (mb_ping->mr_amplitude == NULL)
 			{
 			status = MB_FAILURE;
@@ -856,56 +1028,6 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			mb_ping->ping_flags = GSF_IGNORE_PING;
 		else
 			mb_ping->ping_flags = 0;
-		
-		/* get scale factor for bathymetry */
-		bathmax = 0.0;
-		bathacrosstrackmax = 0.0;
-		bathalongtrackmax = 0.0;
-		for (i=0;i<nbath;i++)
-			{
-			if (beamflag[i] != MB_FLAG_NULL)
-			    {
-			    bathmax = MAX(bathmax, fabs(bath[i]));
-			    bathacrosstrackmax = MAX(bathacrosstrackmax, fabs(bathacrosstrack[i]));
-			    bathalongtrackmax = MAX(bathalongtrackmax, fabs(bathalongtrack[i]));
-			    }
-			}
-		if (bathmax < 10.0)
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY-1].multiplier
-			= 1000.0;
-		else if (bathmax < 100.0)
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY-1].multiplier
-			= 100.0;
-		else if (bathmax < 1000.0)
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY-1].multiplier
-			= 10.0;
-		else
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_DEPTH_ARRAY-1].multiplier
-			= 1.0;
-		if (bathacrosstrackmax < 10.0)
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY-1].multiplier
-			= 1000.0;
-		else if (bathacrosstrackmax < 100.0)
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY-1].multiplier
-			= 100.0;
-		else if (bathacrosstrackmax < 1000.0)
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY-1].multiplier
-			= 10.0;
-		else
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ACROSS_TRACK_ARRAY-1].multiplier
-			= 1.0;
-		if (bathalongtrackmax < 10.0)
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY-1].multiplier
-			= 1000.0;
-		else if (bathalongtrackmax < 100.0)
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY-1].multiplier
-			= 100.0;
-		else if (bathalongtrackmax < 1000.0)
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY-1].multiplier
-			= 10.0;
-		else
-		    mb_ping->scaleFactors.scaleTable[GSF_SWATH_BATHY_SUBRECORD_ALONG_TRACK_ARRAY-1].multiplier
-			= 1.0;
 
 		/* read depth and beam location values into storage arrays */
 		for (i=0;i<nbath;i++)
@@ -936,6 +1058,9 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			mb_ping->mr_amplitude[i] = amp[i];
 			}
+
+		/* get scale factor for bathymetry */
+		gsfSetDefaultScaleFactor(mb_ping);
 		}
 
 	/* insert comment in structure */
@@ -944,11 +1069,11 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		dataID->recordID = GSF_RECORD_COMMENT;
 		if (records->comment.comment_length < strlen(comment) + 1)
 		    {
-		    if ((records->comment.comment 
-				= (char *) 
+		    if ((records->comment.comment
+				= (char *)
 				    realloc(records->comment.comment,
 					strlen(comment)+1))
-					    == NULL) 
+					    == NULL)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_MEMORY_FAIL;
@@ -960,9 +1085,9 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    strcpy(records->comment.comment, comment);
 		    records->comment.comment_length = strlen(comment)+1;
 		    records->comment.comment_time.tv_sec = (int) time_d;
-		    records->comment.comment_time.tv_nsec 
-			    = (int) (1000000000 
-				* (time_d 
+		    records->comment.comment_time.tv_nsec
+			    = (int) (1000000000
+				* (time_d
 					- records->comment.comment_time.tv_sec));
 		    }
 		}
@@ -983,9 +1108,9 @@ int mbsys_gsf_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_gsf_ttimes";
@@ -1063,10 +1188,10 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			alongtrack_offset[i] = 0.0;
 			}
 		    }
-		
-		/* get surface sound velocity and 
+
+		/* get surface sound velocity and
 		    effective array mount angles */
-		if (mb_ping->sensor_id 
+		if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC)
 		    {
 		    *ssv = 1500.0;
@@ -1074,7 +1199,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<*nbeams;i++)
 			angles_null[i] = 0.0;
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_EM100_SPECIFIC)
 		    {
 		    *ssv = 1500.0;
@@ -1082,7 +1207,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = angles[i];
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_EM950_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfEM950Specific.surface_velocity;
@@ -1090,7 +1215,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = angles[i];
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_EM121A_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfEM121ASpecific.surface_velocity;
@@ -1098,7 +1223,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<*nbeams;i++)
 			angles_null[i] = 0.0;
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_EM121_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfEM121Specific.surface_velocity;
@@ -1106,7 +1231,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<*nbeams;i++)
 			angles_null[i] = 0.0;
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC)
 		    {
 		    *ssv = 1500.0;
@@ -1114,7 +1239,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = 50.0;
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfSeaBatSpecific.surface_velocity;
@@ -1129,15 +1254,15 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			    else
 				beta = 90.0 - mb_ping->beam_angle[i];
 			    alpha = mb_ping->pitch;
-			    mb_rollpitch_to_takeoff(verbose, 
-				alpha, beta, &angles[i], 
+			    mb_rollpitch_to_takeoff(verbose,
+				alpha, beta, &angles[i],
 				&angles_forward[i], error);
 			    }
 			}
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = angles[i];
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfEM1000Specific.surface_velocity;
@@ -1145,7 +1270,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = angles[i];
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC)
 		    {
 		    *ssv = 1500.0;
@@ -1153,7 +1278,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<*nbeams;i++)
 			angles_null[i] = 0.0;
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC)
 		    {
 		    *ssv = 1500.0;
@@ -1161,7 +1286,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<*nbeams;i++)
 			angles_null[i] = 0.0;
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfSeaBatIISpecific.surface_velocity;
@@ -1176,15 +1301,15 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			    else
 				beta = 90.0 - mb_ping->beam_angle[i];
 			    alpha = mb_ping->pitch;
-			    mb_rollpitch_to_takeoff(verbose, 
-				alpha, beta, &angles[i], 
+			    mb_rollpitch_to_takeoff(verbose,
+				alpha, beta, &angles[i],
 				&angles_forward[i], error);
 			    }
 			}
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = angles[i];
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfSeaBat8101Specific.surface_velocity;
@@ -1199,23 +1324,23 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			    else
 				beta = 90.0 - mb_ping->beam_angle[i];
 			    alpha = mb_ping->pitch;
-			    mb_rollpitch_to_takeoff(verbose, 
-				alpha, beta, &angles[i], 
+			    mb_rollpitch_to_takeoff(verbose,
+				alpha, beta, &angles[i],
 				&angles_forward[i], error);
 			    }
 			}
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = angles[i];
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfReson8100Specific.surface_velocity;
 		    *draft = mb_ping->depth_corrector;
 		    for (i=0;i<*nbeams;i++)
 			    angles_null[i] = angles[i];
-		    }		    
-		else if (mb_ping->sensor_id 
+		    }
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfSeaBeam2112Specific.surface_velocity;
@@ -1223,7 +1348,7 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    for (i=0;i<*nbeams;i++)
 			angles_null[i] = 0.0;
 		    }
-		else if (mb_ping->sensor_id 
+		else if (mb_ping->sensor_id
 		    == GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC)
 		    {
 		    *ssv = mb_ping->sensor_data.gsfElacMkIISpecific.sound_vel;
@@ -1234,8 +1359,8 @@ int mbsys_gsf_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			    {
 			    beta = 90.0 - mb_ping->beam_angle[i];
 			    alpha = mb_ping->pitch;
-			    mb_rollpitch_to_takeoff(verbose, 
-				alpha, beta, &angles[i], 
+			    mb_rollpitch_to_takeoff(verbose,
+				alpha, beta, &angles[i],
 				&angles_forward[i], error);
 			    }
 			}
@@ -1403,7 +1528,7 @@ int mbsys_gsf_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_gsf_extract_altitude";
@@ -1446,30 +1571,32 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	    *transducer_depth = mb_ping->depth_corrector + mb_ping->heave;
 
 	    /* get altitude if available */
-	    if (mb_ping->sensor_id 
+	    if (mb_ping->sensor_id
 		== GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC)
 		{
 		*altitude = mb_ping->sensor_data.gsfSeamapSpecific.altitude;
 		}
-		
+
 	    /* else get altitude from depth */
 	    else if (mb_ping->depth != NULL)
 		{
 		bath_best = 0.0;
-		if (mb_ping->depth[mb_ping->number_beams/2] > 0.0)
-		    bath_best = mb_ping->depth[mb_ping->number_beams/2];
+		if (mb_beam_ok(mb_ping->beam_flags[mb_ping->number_beams/2]))
+			{
+			bath_best = mb_ping->depth[mb_ping->number_beams/2];
+			}
 		else
 		    {
 		    xtrack_min = 99999999.9;
 		    for (i=0;i<mb_ping->number_beams;i++)
 			{
-			if (mb_beam_check_flag(mb_ping->beam_flags[i])
+			if (mb_beam_ok(mb_ping->beam_flags[i])
 			    && fabs(mb_ping->across_track[i]) < xtrack_min)
 			    {
 			    xtrack_min = fabs(mb_ping->across_track[i]);
 			    bath_best = mb_ping->depth[i];
 			    }
-			}		
+			}
 		    }
 		if (bath_best <= 0.0)
 		    {
@@ -1482,11 +1609,11 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    xtrack_min = fabs(mb_ping->across_track[i]);
 			    bath_best = mb_ping->depth[i];
 			    }
-			}		
+			}
 		    }
 		*altitude = bath_best - *transducer_depth;
 		}
-	    
+
 	    /* else no info */
 	    else
 		{
@@ -1535,7 +1662,7 @@ int mbsys_gsf_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	double transducer_depth, double altitude, 
+	double transducer_depth, double altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_gsf_insert_altitude";
@@ -1574,11 +1701,14 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	    mb_ping->depth_corrector = transducer_depth - mb_ping->heave;
 
 	    /* set altitude if possible */
-	    if (mb_ping->sensor_id 
+	    if (mb_ping->sensor_id
 		== GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC)
 		{
 		mb_ping->sensor_data.gsfSeamapSpecific.altitude = altitude;
 		}
+
+	    /* get scale factor for bathymetry */
+	    gsfSetDefaultScaleFactor(mb_ping);
 
 	    /* set status */
 	    *error = MB_ERROR_NO_ERROR;
@@ -1621,8 +1751,8 @@ int mbsys_gsf_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_gsf_extract_nav";
@@ -1660,7 +1790,7 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		*time_d = mb_ping->ping_time.tv_sec 
+		*time_d = mb_ping->ping_time.tv_sec
 				+ 0.000000001 * mb_ping->ping_time.tv_nsec;
 		mb_get_date(verbose,*time_d,time_i);
 
@@ -1753,7 +1883,7 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1787,7 +1917,7 @@ int mbsys_gsf_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1841,9 +1971,9 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get time */
 		mb_ping->ping_time.tv_sec = (int) time_d;
-		mb_ping->ping_time.tv_nsec 
-			= (int) (1000000000 
-			    * (time_d 
+		mb_ping->ping_time.tv_nsec
+			= (int) (1000000000
+			    * (time_d
 				    - mb_ping->ping_time.tv_sec));
 
 		/* get navigation */
@@ -1863,6 +1993,9 @@ int mbsys_gsf_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_ping->roll = roll;
 		mb_ping->pitch = pitch;
 		mb_ping->heave = heave;
+
+		/* get scale factors */
+		gsfSetDefaultScaleFactor(mb_ping);
 		}
 
 	/* print output debug statements */
@@ -1921,7 +2054,7 @@ int mbsys_gsf_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		*nsvp = svp->number_points;
-		
+
 		/* get profile */
 		for (i=0;i<*nsvp;i++)
 			{
@@ -2018,7 +2151,7 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get number of depth-velocity pairs */
 		svp->number_points = nsvp;
-		
+
 		/* get profile */
 		for (i=0;i<svp->number_points;i++)
 			{
@@ -2041,7 +2174,7 @@ int mbsys_gsf_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_gsf_copy(int verbose, void *mbio_ptr, 
+int mbsys_gsf_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -2069,7 +2202,7 @@ int mbsys_gsf_copy(int verbose, void *mbio_ptr,
 	/* get data structure pointers */
 	store = (struct mbsys_gsf_struct *) store_ptr;
 	copy = (struct mbsys_gsf_struct *) copy_ptr;
-	
+
 	/* clear copy structure */
 	gsfFree(&(copy->records));
 	gsfCopyRecords(&(copy->records), &(store->records));
@@ -2090,8 +2223,8 @@ int mbsys_gsf_copy(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata, 
-			int nbits, int signedvalue, 
+int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata,
+			int nbits, int signedvalue,
 			double *multiplier, double *offset, int *error)
 {
 	char	*function_name = "mbsys_gsf_getscale";
@@ -2100,7 +2233,7 @@ int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata,
 	double	datamax;
 	int	firstfound;
 	int 	i;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -2121,9 +2254,9 @@ int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata,
 	datamax = 0.0;
 	datamin  = 0.0;
 	firstfound = MB_NO;
-	for (i=0; i < ndata; i++) 
+	for (i=0; i < ndata; i++)
 		{
-		if (flag == NULL || flag[i] != MB_FLAG_NULL ) 
+		if (flag == NULL || flag[i] != MB_FLAG_NULL )
 			{
 			if (firstfound == MB_NO)
 				{
@@ -2139,16 +2272,16 @@ int mbsys_gsf_getscale(int verbose, double *data, char *flag, int ndata,
 			}
 		}
 
-	if (datamin != datamax) 
+	if (datamin != datamax)
 		{
 		/* double rounded to an integer */
-		*multiplier = (double)((int)pow(2, nbits) 
+		*multiplier = (double)((int)pow(2, nbits)
 			/ (1.05 * (datamax - datamin)));
-		if (signedvalue == MB_YES)  
-			{ 
+		if (signedvalue == MB_YES)
+			{
 			*offset = -(datamax + datamin) / 2;
-			} 
-		else 
+			}
+		else
 			{
 			*offset = -datamin;
 			}

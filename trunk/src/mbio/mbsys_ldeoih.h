@@ -143,10 +143,18 @@ struct mbsys_ldeoih_struct
 					alongtrackdistance[i] = alongtrack[i] * distance_scale */
 
 	/* sidescan type */
-	short	ss_type;	/* indicates if sidescan values are logarithmic or linear
+	mb_u_char	spare2;
+	mb_u_char	ss_type;	/* indicates if sidescan values are logarithmic or linear
 					ss_type = 0: logarithmic (dB)
 					ss_type = 1: linear (voltage) */
-	short	spare2;
+	mb_u_char	spare3;
+	mb_u_char	sonartype;      /* indicates type of sonar from which data originated:
+                                        0	MB_SONARTYPE_NONE
+                                        1	MB_SONARTYPE_ECHOSOUNDER
+                                        2	MB_SONARTYPE_MULTIBEAM
+                                        3	MB_SONARTYPE_SIDESCAN
+                                        4	MB_SONARTYPE_INTERFEROMETRIC */
+
 
 	/* pointers to arrays */
 	unsigned char *beamflag;
@@ -240,6 +248,8 @@ int mbsys_ldeoih_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_ldeoih_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
+int mbsys_ldeoih_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error);
 int mbsys_ldeoih_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
 int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,

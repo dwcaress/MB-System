@@ -477,6 +477,8 @@ struct mb_io_struct
 		int *pingnumber, int *error);
 	int (*mb_io_segynumber)(int verbose, void *mbio_ptr,
 		int *line, int *shot, int *cdp, int *error);
+	int (*mb_io_sonartype)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error);
 	int (*mb_io_sidescantype)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
 	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr,

@@ -112,13 +112,13 @@
  * DHG 2008/12/18 Add "PLATFORM_TYPE" to Processing Parameters for AUV vs Surface Ship discrimination.
  * mab 02-01-09   Updates to support Reson 7125. Added new subrecord IDs and subrecord definitions for Kongsberg
  *                sonar systems where TWTT and angle are populated from raw range and beam angle datagram. Added
- *                new subrecord definition for EM2000.  Bug fixes in gsfOpen and gsfPercent. 
+ *                new subrecord definition for EM2000.  Bug fixes in gsfOpen and gsfPercent.
  * clb 05-17-11   Added depth sensor and receiver array offsets to the gsfGetMBParams() and gsfPutMBParams()
  * clb 10-04-11   Added check in gsfUnpackStream() for a partial record at the end of the file
  * clb 10-17-11   Handle all the error processing in gsfOpen() and gsfOpenBuffered() consistently
  * clb 11-09-aa   Added validity checks in gsfPutMBParams(); initialize param structure in gsfGetMBParams();
  *                added gsfInitializeMBParams(); validate handles in functions that use them
- * 
+ *
  *
  * Classification : Unclassified
  *
@@ -2498,7 +2498,7 @@ gsfPrintError(FILE * fp)
  *
  * Function Name : gsfError
  *
- * Description : This function is used to return the 
+ * Description : This function is used to return the
  *  most recent error encountered.
  *  This function need only be called if
  *  a -1 is returned from one of the gsf functions.
@@ -3729,7 +3729,7 @@ gsfCopyRecords (gsfRecords *target, const gsfRecords *source)
     target->mb_ping.course              = source->mb_ping.course;
     target->mb_ping.speed               = source->mb_ping.speed;
     target->mb_ping.height              = source->mb_ping.height;
-    target->mb_ping.sep                 = source->mb_ping.sep;    
+    target->mb_ping.sep                 = source->mb_ping.sep;
     target->mb_ping.scaleFactors        = source->mb_ping.scaleFactors;
     target->mb_ping.sensor_id           = source->mb_ping.sensor_id;
     target->mb_ping.sensor_data         = source->mb_ping.sensor_data;
@@ -4143,15 +4143,15 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         return (-1);
     }
 
-    /* If the file is open update, we do not want to allow a write with 
+    /* If the file is open update, we do not want to allow a write with
      * a larger number of parameters than currently exist.
      */
     if ((gsfFileTable[handle-1].access_mode == GSF_UPDATE) ||
         (gsfFileTable[handle-1].access_mode == GSF_UPDATE_INDEX))
     {
-        if ((gsfFileTable[handle-1].rec.process_parameters.number_parameters > 0) && 
+        if ((gsfFileTable[handle-1].rec.process_parameters.number_parameters > 0) &&
             (gsfFileTable[handle-1].rec.process_parameters.number_parameters < GSF_NUMBER_PROCESSING_PARAMS))
-        {       
+        {
             gsfError = GSF_PARAM_SIZE_FIXED;
             return(-1);
         }
@@ -4301,7 +4301,7 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         return(-1);
     }
 
-    /* This parameter indicates whether the motion sensor bias - measured from the 
+    /* This parameter indicates whether the motion sensor bias - measured from the
      *  patch test has been added to the attitude (roll, pitch, heading) data.
      */
     if (p->msb_applied_to_attitude == GSF_TRUE)
@@ -4318,7 +4318,7 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         return(-1);
     }
 
-    /* This parameter indicates whether the heave data has been subtracted from 
+    /* This parameter indicates whether the heave data has been subtracted from
      *  the GPS tide corrector value.
      */
     if (p->heave_removed_from_gps_tc == GSF_TRUE)
@@ -4629,7 +4629,7 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         return(-1);
     }
-    
+
     /* The ANTENNA_OFFSET_TO_APPLY parameter is place holder for a antenna
      *  offset which is known, but not yet applied.
      */
@@ -5285,7 +5285,7 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         return(-1);
     }
-        
+
     /* The DEPTH_SENSOR_OFFSET_TO_APPLY parameter is place holder for a depth
      *  sensor offset which is known, but not yet applied.
      */
@@ -5337,7 +5337,7 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         return(-1);
     }
-       
+
     /* The RX_TRANSDUCER_OFFSET_TO_APPLY parameter is place holder for a
      * receiver position offset which is known, but not yet applied.
      */
@@ -5654,8 +5654,8 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         return(-1);
     }
 
-    /***** end of "to apply" parameters, on to "applied" ****/    
-    
+    /***** end of "to apply" parameters, on to "applied" ****/
+
     /* The APPLIED_DRAFT parameter defines the transducer draft value
      * previously applied to the depths.
      */
@@ -5720,12 +5720,12 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         if (p->applied.pitch_bias[0] == GSF_UNKNOWN_PARAM_VALUE)
         {
-            sprintf(temp, "APPLIED_PITCH_BIAS=%s", 
+            sprintf(temp, "APPLIED_PITCH_BIAS=%s",
                 GSF_UNKNOWN_PARAM_TEXT);
         }
         else if ((p->applied.pitch_bias[0] > GSF_MIN_PARAM) && (p->applied.pitch_bias[0] < GSF_MAX_PARAM))
         {
-            sprintf(temp, "APPLIED_PITCH_BIAS=%+06.2f", 
+            sprintf(temp, "APPLIED_PITCH_BIAS=%+06.2f",
                 p->applied.pitch_bias[0]);
         }
         else
@@ -6531,7 +6531,7 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         return(-1);
     }
-   
+
     /* The APPLIED_POSITION_LATENCY parameter defines the navigation
      * sensor latency value which has already been applied.
      */
@@ -6606,7 +6606,7 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         return(-1);
     }
-        
+
     /* The APPLIED_DEPTH_SENSOR_OFFSET parameter defines the x,y,z position
      * offsets that have been applied
      */
@@ -6658,7 +6658,7 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         return(-1);
     }
-    
+
     /* The APPLIED_RX_TRANSDUCER_OFFSET parameter is the x, y, z position
      * offsets of the receiver array that have been applied
      */
@@ -6971,7 +6971,7 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
     {
         return(-1);
     }
-    
+
     /******* end of the applied parameters *******/
 
     /* The horizontal datum parameter defines the elipsoid to which the
@@ -7046,7 +7046,7 @@ gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays)
         case (GSF_V_DATUM_MLWN):
              sprintf(temp, "TIDAL_DATUM=MLWN  ");
              break;
-            
+
         case (GSF_V_DATUM_MSL):
              sprintf(temp, "TIDAL_DATUM=MSL   ");
              break;
@@ -7113,7 +7113,7 @@ gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays)
         }
 
         /* DHG 2008/12/18 Add "PLATFORM_TYPE" */
-                                
+
         else if (strncmp (rec->process_parameters.param[i], "PLATFORM_TYPE", strlen ("PLATFORM_TYPE")) == 0)
         {
             if (strstr(rec->process_parameters.param[i], "AUV"))
@@ -7530,7 +7530,7 @@ gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->to_apply.rx_transducer_heading_offset[0],
                     &p->to_apply.rx_transducer_heading_offset[1]);
             }
-        }  /** end of "to apply" values */        
+        }  /** end of "to apply" values */
         else if (strncmp(rec->process_parameters.param[i], "APPLIED_DRAFT", strlen("APPLIED_DRAFT")) == 0)
         {
             p->applied.draft[0] = GSF_UNKNOWN_PARAM_VALUE;
@@ -7819,7 +7819,7 @@ gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays)
                     &p->applied.rx_transducer_heading_offset[1]);
             }
         }   /** end of "applied" parameters **/
-        
+
         /* The horizontal datum parameter defines the elipsoid to which
          * the latitude and longitude values are referenced.
          */
@@ -8076,7 +8076,7 @@ gsfGetSwathBathyBeamWidths(const gsfRecords *data, double *fore_aft, double *ath
             *fore_aft = data->mb_ping.sensor_data.gsfSeaBat8101Specific.fore_aft_bw;
             *athwartship = data->mb_ping.sensor_data.gsfSeaBat8101Specific.athwart_bw;
             break;
-            
+
 
         case (GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC):
             *fore_aft = 2.0;
@@ -8196,7 +8196,7 @@ gsfGetSwathBathyBeamWidths(const gsfRecords *data, double *fore_aft, double *ath
             *fore_aft = GSF_BEAM_WIDTH_UNKNOWN;
             *athwartship = GSF_BEAM_WIDTH_UNKNOWN;
             break;
-        
+
         case (GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC):
             *fore_aft = 3.0;
             *athwartship = 3.0;
@@ -8992,9 +8992,9 @@ const char *gsfGetSonarTextName(const gsfSwathBathyPing *ping)
  *  last ping read is from a new survey line. External to this function, calling
  *  applications can decide on their own if the first ping read from a newly opened
  *  GSF file should be considered to be from a new survey transect line or not.
- *  This function assumes that the GSF file is read in chronological order from 
+ *  This function assumes that the GSF file is read in chronological order from
  *  the beginning of the file, file access can be either direct or sequential
- * 
+ *
  * Inputs :
  *  handle         = The handle to the file as provided by gsfOpen
  *  rec            = A pointer to a gsfRecords structure containing the data from the most
@@ -9028,17 +9028,17 @@ gsfIsNewSurveyLine(int handle, const gsfRecords *rec, double azimuth_change, dou
         gsfError = GSF_BAD_FILE_HANDLE;
         return (-1);
     }
-    if (gsfFileTable[handle-1].last_record_type == GSF_RECORD_SWATH_BATHYMETRY_PING) 
-    {   
+    if (gsfFileTable[handle-1].last_record_type == GSF_RECORD_SWATH_BATHYMETRY_PING)
+    {
         /* A negative value for last heading is the start/reset trigger. */
-        if (*last_heading < 0.0) 
+        if (*last_heading < 0.0)
         {
             new_line = 1;
-            *last_heading = rec->mb_ping.heading;        
+            *last_heading = rec->mb_ping.heading;
         }
         else
         {
-            diff = fabs (rec->mb_ping.heading - *last_heading);   
+            diff = fabs (rec->mb_ping.heading - *last_heading);
             if ((diff > azimuth_change) && (diff < 350.0))
             {
                 new_line = 1;
@@ -9170,4 +9170,3 @@ gsfInitializeMBParams (gsfMBParams *p)
         p->applied.rx_transducer_heading_offset[i] = GSF_UNKNOWN_PARAM_VALUE;
     }
 }
-
