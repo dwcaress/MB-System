@@ -3086,7 +3086,6 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 		    do_update_naverr();
-		    do_update_status();
 		    }
 		}
 	else if (mbna_view_list == MBNA_VIEW_LIST_GOODCROSSINGS)
@@ -3138,7 +3137,6 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 		    do_update_naverr();
-		    do_update_status();
 		    }
 		}
 	else if (mbna_view_list == MBNA_VIEW_LIST_BETTERCROSSINGS)
@@ -3190,7 +3188,6 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 		    do_update_naverr();
-		    do_update_status();
 		    }
 		}
 	else if (mbna_view_list == MBNA_VIEW_LIST_TRUECROSSINGS)
@@ -3242,7 +3239,6 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 		    do_update_naverr();
-		    do_update_status();
 		    }
 		}
 	else if (mbna_view_list == MBNA_VIEW_LIST_TIES)
@@ -3297,7 +3293,6 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
 		    mbnavadjust_naverr_specific(mbna_crossing_select, mbna_tie_select);
 		    mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 		    do_update_naverr();
-		    do_update_status();
 		    }
 		}
      	free(position_list);
@@ -3360,6 +3355,11 @@ do_list_data_select( Widget w, XtPointer client_data, XtPointer call_data)
     	}
 
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 
 }
 
@@ -3888,6 +3888,11 @@ do_dismiss_naverr( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_checkoksettie();
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3964,6 +3969,11 @@ do_naverr_applyzoffset( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 	do_naverr_offsetlabel();
 	do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -3988,6 +3998,11 @@ do_naverr_minmisfit( Widget w, XtPointer client_data, XtPointer call_data)
    	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     	do_update_naverr();
 	do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 
 }
 
@@ -4010,6 +4025,11 @@ do_naverr_minxymisfit( Widget w, XtPointer client_data, XtPointer call_data)
    	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     	do_update_naverr();
 	do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 /*--------------------------------------------------------------------*/
 
@@ -4029,6 +4049,11 @@ do_naverr_misfitcenter( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 	do_update_naverr();
 	do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4081,6 +4106,11 @@ do_biases_apply( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavadjust_get_misfit();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 	do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4124,6 +4154,11 @@ do_biases_applyall( Widget w, XtPointer client_data, XtPointer call_data)
 	mbnavadjust_get_misfit();
 	mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
 	do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4360,6 +4395,11 @@ do_controls_apply( Widget w, XtPointer client_data, XtPointer call_data)
     mbnavadjust_naverr_plot(MBNA_PLOT_MODE_FIRST);
     do_update_naverr();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 
@@ -4585,6 +4625,11 @@ do_file_close( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbnavadjust_close_project();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4801,6 +4846,11 @@ do_view_showsurveys( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbna_view_list = MBNA_VIEW_LIST_SURVEYS;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4812,6 +4862,11 @@ do_view_showdata( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbna_view_list = MBNA_VIEW_LIST_FILES;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 /*--------------------------------------------------------------------*/
 
@@ -4823,6 +4878,11 @@ do_view_showsections( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbna_view_list = MBNA_VIEW_LIST_FILESECTIONS;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4834,6 +4894,11 @@ do_view_showcrossings( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbna_view_list = MBNA_VIEW_LIST_CROSSINGS;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 /*--------------------------------------------------------------------*/
 
@@ -4845,6 +4910,11 @@ do_view_showgoodcrossings( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbna_view_list = MBNA_VIEW_LIST_GOODCROSSINGS;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 /*--------------------------------------------------------------------*/
 
@@ -4856,6 +4926,11 @@ do_view_showbettercrossings( Widget w, XtPointer client_data, XtPointer call_dat
 
     mbna_view_list = MBNA_VIEW_LIST_BETTERCROSSINGS;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4867,6 +4942,11 @@ do_view_showtruecrossings( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbna_view_list = MBNA_VIEW_LIST_TRUECROSSINGS;
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4877,7 +4957,12 @@ do_view_showties( Widget w, XtPointer client_data, XtPointer call_data)
     acs = (XmAnyCallbackStruct*)call_data;
 
     mbna_view_list = MBNA_VIEW_LIST_TIES;
-    do_update_status();
+    do_update_status();do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
@@ -4947,6 +5032,11 @@ do_action_tie_xy( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbnavadjust_set_tie_xy();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 /*--------------------------------------------------------------------*/
 
@@ -4958,6 +5048,11 @@ do_action_z( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbnavadjust_set_tie_z();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 /*--------------------------------------------------------------------*/
 
@@ -4969,6 +5064,11 @@ do_action_tie_xyz( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbnavadjust_set_tie_xyz();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 /*--------------------------------------------------------------------*/
 
@@ -5064,6 +5164,11 @@ do_zerozoffsets( Widget w, XtPointer client_data, XtPointer call_data)
 
     mbnavadjust_zerozoffsets();
     do_update_status();
+    if (project.modelplot == MB_YES)
+	{
+	do_update_modelplot_status();
+	mbnavadjust_modelplot_plot();
+	}
 }
 
 /*--------------------------------------------------------------------*/
