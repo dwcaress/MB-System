@@ -28,6 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.3.1986       September 12, 2012
 * Version 5.3.1982       August 15, 2012
   Version 5.3.1981       August 2, 2012
 * Version 5.3.1980       July 13, 2012
@@ -189,6 +190,13 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+-----> 5.3.1986 (September 12, 2012)
+
+MBnavadjust now treats data from interferometric sonars different than data
+from other sonars. When interferometric bathymetry is imported, the many soundings
+are binned and averaged into 1-degree wide "pseudo-beams" to allow reasonable
+(both visually and computationally) contouring.
+
 Added MBIO function mb_sonartype() that returns the type of sonar associated
 with some data, using the definitions:
   #define	MB_SONARTYPE_UNKNOWN		0
@@ -196,6 +204,11 @@ with some data, using the definitions:
   #define	MB_SONARTYPE_MULTIBEAM		2
   #define	MB_SONARTYPE_SIDESCAN		3
   #define	MB_SONARTYPE_INTERFEROMETRIC	4
+
+Added function to mbnavadjust that will estimate vertical offset between surveys
+and then set relevant ties accordingly.
+
+Fixed some plotting defaults for mbm_histplot.
 
 Added -MXexcludepercent option to mblist to exclude a user defined
 percentage of outer beams from mblist output. (contributed by Suzanne O'Hara)
