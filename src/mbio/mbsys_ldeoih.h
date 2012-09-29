@@ -143,7 +143,11 @@ struct mbsys_ldeoih_struct
 					alongtrackdistance[i] = alongtrack[i] * distance_scale */
 
 	/* sidescan type */
-	mb_u_char	spare2;
+        mb_u_char       ss_scalepower;  /* gives scaling factor for sidescan values in powers of 10:
+                                 *      ss_scalepower = 0: ss = ss_stored * 1
+                                 *      ss_scalepower = 1: ss = ss_stored * 10
+                                 *      ss_scalepower = 2: ss = ss_stored * 100
+                                 *      ss_scalepower = 3: ss = ss_stored * 1000 */
 	mb_u_char	ss_type;	/* indicates if sidescan values are logarithmic or linear
 					ss_type = 0: logarithmic (dB)
 					ss_type = 1: linear (voltage) */
