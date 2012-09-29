@@ -3442,12 +3442,16 @@ region->cornerpoints[3].xgrid,region->cornerpoints[3].ygrid);
 		xmax = region->cornerpoints[0].xgrid;
 		ymin = region->cornerpoints[0].ygrid;
 		ymax = region->cornerpoints[0].ygrid;
+		zmin = region->cornerpoints[0].zdata;
+		zmax = region->cornerpoints[0].zdata;
 		for (i=1;i<4;i++)
 			{
 			xmin = MIN(xmin, region->cornerpoints[i].xgrid);
 			xmax = MAX(xmax, region->cornerpoints[i].xgrid);
 			ymin = MIN(ymin, region->cornerpoints[i].ygrid);
 			ymax = MAX(ymax, region->cornerpoints[i].ygrid);
+			zmin = MIN(zmin, region->cornerpoints[i].zdata);
+			zmax = MAX(zmax, region->cornerpoints[i].zdata);
 			}
 
 		/* get sounding bounds */

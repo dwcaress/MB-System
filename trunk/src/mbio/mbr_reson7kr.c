@@ -662,6 +662,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	s7kr_verticaldepth	*verticaldepth;
 	s7kr_image		*image;
 	s7kr_v2detection	*v2detection;
+	s7kr_v2detectionsetup	*v2detectionsetup;
 	s7kr_v2rawdetection	*v2rawdetection;
 	s7kr_bluefin		*bluefin;
 	int	*current_ping;
@@ -1105,15 +1106,46 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
 			}
 
-		/* case of v2detection record */
+		/* case of v2detection record with v2detectionsetup */
+		else if (store->read_v2detection == MB_YES && store->read_v2detectionsetup == MB_YES)
+			{
+			/* now loop over the detects */
+			for (j=0;j<v2detection->number_beams;j++)
+				{
+				i = v2detectionsetup->beam_descriptor[j];
+
+				bathymetry->range[i] = v2detection->range[j];
+				alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch);
+				beta = 90.0 - RTD * (v2detection->angle_x[j] - bathymetry->roll);
+				mb_rollpitch_to_takeoff(
+					verbose,
+					alpha, beta,
+					&theta, &phi,
+					error);
+				rr = 0.5 * soundspeed * bathymetry->range[i];
+				xx = rr * sin(DTR * theta);
+				zz = rr * cos(DTR * theta);
+				bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+				bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+				bathymetry->depth[i] = zz + sonar_depth;
+				bathymetry->pointing_angle[i] = DTR * theta;
+				bathymetry->azimuth_angle[i] = DTR * phi;
+/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+i,roll, bathymetry->roll,pitch, bathymetry->pitch,
+alpha,beta,theta,phi,
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+				}
+			}
+
+		/* case of v2detection record alone */
 		else if (store->read_v2detection == MB_YES)
 			{
 			/* now loop over the detects */
 			for (i=0;i<v2detection->number_beams;i++)
 				{
-				bathymetry->range[i] = v2detection->range[i];
-				alpha = RTD * (v2detection->angle_y[i] + bathymetry->pitch);
-				beta = 90.0 - RTD * (v2detection->angle_x[i] - bathymetry->roll);
+				bathymetry->range[i] = v2detection->range[j];
+				alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch);
+				beta = 90.0 - RTD * (v2detection->angle_x[j] - bathymetry->roll);
 				mb_rollpitch_to_takeoff(
 					verbose,
 					alpha, beta,

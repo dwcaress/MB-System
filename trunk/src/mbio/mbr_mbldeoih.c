@@ -663,7 +663,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_get_binary_short(MB_NO, (void *)  &buffer[index], &store->spare1); index +=2;
 			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->depth_scale); index +=4;
 			mb_get_binary_float(MB_NO, (void *)  &buffer[index], &store->distance_scale); index +=4;
-			store->spare2 = buffer[index]; index++;
+			store->ss_scalepower = buffer[index]; index++;
 			store->ss_type = buffer[index]; index++;
 			store->spare3 = buffer[index]; index++;
 			store->sonartype = buffer[index]; index++;
@@ -767,7 +767,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			store->distance_scale = 0.001 * oldstore.distance_scale;
 
 			/* get sidescan type */
-			store->spare2 = 0;
+			store->ss_scalepower = 0;
 			store->ss_type = oldstore.ss_type;
 			store->spare3 = 0;
 			store->sonartype = MB_SONARTYPE_UNKNOWN;
@@ -833,7 +833,7 @@ int mbr_rt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5       spare1:           %d\n",store->spare1);
 		fprintf(stderr,"dbg5       depth_scale:      %f\n",store->depth_scale);
 		fprintf(stderr,"dbg5       distance_scale:   %f\n",store->distance_scale);
-		fprintf(stderr,"dbg5       spare2:           %d\n",store->spare2);
+		fprintf(stderr,"dbg5       ss_scalepower:    %d\n",store->ss_scalepower);
 		fprintf(stderr,"dbg5       ss_type:          %d\n",store->ss_type);
 		fprintf(stderr,"dbg5       spare3:           %d\n",store->spare3);
 		fprintf(stderr,"dbg5       sonartype:        %d\n",store->sonartype);
@@ -1235,7 +1235,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		fprintf(stderr,"dbg5       spare1:           %d\n",store->spare1);
 		fprintf(stderr,"dbg5       depth_scale:      %f\n",store->depth_scale);
 		fprintf(stderr,"dbg5       distance_scale:   %f\n",store->distance_scale);
-		fprintf(stderr,"dbg5       spare2:           %d\n",store->spare2);
+		fprintf(stderr,"dbg5       ss_scalepower:    %d\n",store->ss_scalepower);
 		fprintf(stderr,"dbg5       ss_type:          %d\n",store->ss_type);
 		fprintf(stderr,"dbg5       spare3:           %d\n",store->spare3);
 		fprintf(stderr,"dbg5       sonartype:        %d\n",store->sonartype);
@@ -1346,7 +1346,7 @@ int mbr_wt_mbldeoih(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			mb_put_binary_short(MB_NO, store->spare1, (void *)  &buffer[index]); index +=2;
 			mb_put_binary_float(MB_NO, store->depth_scale, (void *)  &buffer[index]); index +=4;
 			mb_put_binary_float(MB_NO, store->distance_scale, (void *)  &buffer[index]); index +=4;
-			buffer[index] = store->spare2; index++;
+			buffer[index] = store->ss_scalepower; index++;
 			buffer[index] = store->ss_type; index++;
 			buffer[index] = store->spare3; index++;
 			buffer[index] = store->sonartype; index++;
