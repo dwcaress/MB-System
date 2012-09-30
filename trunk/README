@@ -28,6 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.3.1988       September 29, 2012
   Version 5.3.1986       September 12, 2012
 * Version 5.3.1982       August 15, 2012
   Version 5.3.1981       August 2, 2012
@@ -190,7 +191,7 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
------> 5.3.1987 (September 29, 2012)
+-----> 5.3.1988 (September 29, 2012)
 
 Format 71 (mbf_mbldeoih): Implemented automatic scaling of sidescan values to improve
 fidelity of stored values to the original values.
