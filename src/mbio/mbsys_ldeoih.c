@@ -521,7 +521,7 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			amp[i] = store->amp[i];
 			}
-		ss_scale = pow(10.0, (double)(store->ss_scalepower));
+		ss_scale = pow(2.0, (double)(store->ss_scalepower));
 		for (i=0;i<*nss;i++)
 			{
 			if (store->ss[i] != 0)
@@ -907,8 +907,8 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    store->distance_scale = 0.001 * (float)(MAX((int) (1 + distmax / 30.0), 1));
 		if (ssmax > 0.0)
 			{
-			store->ss_scalepower = (short)(log10(ssmax / 32000.0)) + 1;
-			ss_scale = pow(10.0, (double)(store->ss_scalepower));
+			store->ss_scalepower = (short)(log2(ssmax / 32767.0)) + 1;
+			ss_scale = pow(2.0, (double)(store->ss_scalepower));
 			}
 		else
 			{
