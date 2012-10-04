@@ -15,7 +15,7 @@
 /*
  * mb_aux.h defines data structures used by swath contouring
  * functions and programs.  The source files mb_contour.c, mb_track.c,
- * and mbcontour.c all depend on this include file. 
+ * and mbcontour.c all depend on this include file.
  *
  * Author:	D. W. Caress
  * Date:	May 15, 1994
@@ -175,7 +175,7 @@ struct swath
 
 /* mb_contour function prototypes */
 int mb_contour_init(
-		int	verbose, 
+		int	verbose,
 		struct swath **data,
 		int	npings_max,
 		int	beams_bath,
@@ -207,24 +207,24 @@ int mb_contour_init(
 		double	pingnumber_tick_len,
 		int	*error);
 int mb_contour_deall(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error);
 int mb_contour(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error);
 void mb_track(int verbose, struct swath *data, int *error);
 void mb_trackpingnumber(int verbose, struct swath *data, int *error);
 void mb_trackname(int verbose, int perpendicular, struct swath *data, char *file, int *error);
 
 /* pslibface function prototypes */
-int plot_init(	int	verbose, 
-		int	argc, 
-		char	**argv, 
-		double	*bounds_use, 
-		double	*scale, 
-		double	*inch2lon, 
+int plot_init(	int	verbose,
+		int	argc,
+		char	**argv,
+		double	*bounds_use,
+		double	*scale,
+		double	*inch2lon,
 		int	*error);
 int plot_end(int verbose, int *error);
 int plot_exit(int argc, char **argv);
@@ -239,14 +239,18 @@ void plot_string(double x, double y, double hgt, double angle, char *label);
 int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat,
 		double xxmin, double xxmax, double yymin, double yymax, double xxinc, double yyinc,
 		double ttension, float *sgrid);
-int mb_zgrid(float *z, int *nx, int *ny, 
-		float *x1, float *y1, float *dx, float *dy, float *xyz, 
-		int *n, float *zpij, int *knxt, int *imnew, 
+int mb_zgrid(float *z, int *nx, int *ny,
+		float *x1, float *y1, float *dx, float *dy, float *xyz,
+		int *n, float *zpij, int *knxt, int *imnew,
+		float *cay, int *nrng);
+int mb_zgrid2(float *z, int *nx, int *ny,
+		float *x1, float *y1, float *dx, float *dy, float *xyz,
+		int *n, float *zpij, int *knxt, int *imnew,
 		float *cay, int *nrng);
 
 /* mb_truecont function prototypes */
 int mb_contour_init(
-		int	verbose, 
+		int	verbose,
 		struct swath **data,
 		int	npings_max,
 		int	beams_bath,
@@ -278,41 +282,41 @@ int mb_contour_init(
 		double	pingnumber_tick_len,
 		int	*error);
 int mb_contour_deall(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error);
 int mb_contour(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error);
 int mb_tcontour(
-		int	verbose, 
-		struct swath *data, 
+		int	verbose,
+		struct swath *data,
 		int	*error);
 
 /* mb_delaun function prototypes */
 int mb_delaun(
-	int	verbose, 
-	int	npts, 
-	double	*p1, 
-	double	*p2, 
-	int	*ed, 
-	int	*ntri, 
-	int	*iv1, 
-	int	*iv2, 
-	int	*iv3, 
-	int	*ct1, 
-	int	*ct2, 
-	int	*ct3, 
-	int	*cs1, 
-	int	*cs2, 
-	int	*cs3, 
-	double	*v1, 
-	double	*v2, 
-	double	*v3, 
-	int	*istack, 
-	int	*kv1, 
-	int	*kv2, 
+	int	verbose,
+	int	npts,
+	double	*p1,
+	double	*p2,
+	int	*ed,
+	int	*ntri,
+	int	*iv1,
+	int	*iv2,
+	int	*iv3,
+	int	*ct1,
+	int	*ct2,
+	int	*ct3,
+	int	*cs1,
+	int	*cs2,
+	int	*cs3,
+	double	*v1,
+	double	*v2,
+	double	*v3,
+	int	*istack,
+	int	*kv1,
+	int	*kv2,
 	int	*error);
 
 /* mb_readgrd function prototypes */
@@ -337,7 +341,7 @@ int mb_readgrd(int verbose, char *grdfile,
 			int	*error);
 
 /* mb_spline function prototypes */
-int mb_spline_init(int verbose, double *x, double *y, 
+int mb_spline_init(int verbose, double *x, double *y,
 	int n, double yp1, double ypn, double *y2, int *error);
 int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 	int n, double x, double *y, int *i, int *error);

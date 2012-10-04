@@ -1,4 +1,4 @@
-.TH mb7k2ss 1 "26 September 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mb7k2ss 1 "4 October 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7k2ss\fP - extracts sidescan sonar
 data from Reson 7k format data, bins and lays the sidescan
@@ -167,9 +167,9 @@ suffix replaced by a ".mb71) suffix. The record types to be extracted are set
 using the \fB-A\fP option.
 .TP
 .B \-Q
-\fIroutefile\fP
+\fIroutetimefile\fP
 .br
-This option specifies a route file containing the times that the survey reached
+This option specifies a file containing the times that the survey reached
 the intended waypoints. This text file consists of lines of the form:
  	count waypoint longitude latitude heading time_d
 .br
@@ -177,8 +177,9 @@ where count is just an integer counter starting at 0, waypoint is the waypoint
 number starting at 0, longitude and latitude are the waypoint position in
 decimal degrees, heading is the heading in decimal degrees, and time_d is
 the unix or epoch time (time since 00:00:00 January 1, 1970) in decimal
-seconds that the survey reached this waypoint.
-If \fIroutefile\fP is specified, \fBmb7k2ss\fP
+seconds that the survey reached this waypoint. This file can be generated from
+an \fBmbgrdviz\fP route file and survey data using the program \fBmbroutetime\fP.
+If \fIroutetimefile\fP is specified, \fBmb7k2ss\fP
 will output data in files corresponding to the planned survey lines.
 The output file names will be based on \fIlineroot\fP and will include
 the line number starting with \fIstarline\fP, both of which are specified

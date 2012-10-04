@@ -155,6 +155,7 @@
 
 /* 2000-2999 reserved for user defined records */
 #define R7KRECID_XYZ					2000
+#define R7KRECID_MB-SystemSidescan			2900
 
 /* 3000-6999 reserved for other vendor records */
 #define R7KRECID_FSDWsidescan				3000

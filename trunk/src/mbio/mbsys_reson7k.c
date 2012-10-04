@@ -4578,7 +4578,7 @@ int mbsys_reson7k_print_v2snippet(int verbose,
 			v2snippettimeseries->begin_sample,
 			v2snippettimeseries->detect_sample,
 			v2snippettimeseries->end_sample);
-		for (j=0;j<v2snippettimeseries->detect_sample-v2snippettimeseries->begin_sample+1;j++)
+		for (j=0;j<v2snippettimeseries->end_sample-v2snippettimeseries->begin_sample+1;j++)
 			fprintf(stderr,"%s     amplitude[%d]:%d\n",
 				first,v2snippettimeseries->begin_sample+j,v2snippettimeseries->amplitude[j]);
 		}
