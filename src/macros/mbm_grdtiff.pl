@@ -40,7 +40,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 # Additional Options:
 #            [-Dflipcolor/flipshade -MGSscalefactor
-#            -Q -Rw/e/s/n -X -Y -Zmin/max]
+#            -Q -Rw/e/s/n -X -Y -Zmin/max[/mode]]
 #
 # Author:
 #   David W. Caress
@@ -198,7 +198,7 @@ if ($help)
 	print "\t\t-V -Wcolor_style[/pallette[/ncolors]] ]\n";
 	print "Additional Options:\n";
 	print "\t\t[-Dflipcolor/flipshade\n";
-	print "\t\t-MGSscalefactor -Q -Rw/e/s/n -X -Y -Zmin/max]\n";
+	print "\t\t-MGSscalefactor -Q -Rw/e/s/n -X -Y -Zmin/max[/mode]]\n";
 	exit 0;
 	}
 
@@ -495,18 +495,53 @@ if ($file_intensity)
 		}
 	}
 
-# get limits of files using grdinfo
-if (!$bounds || !$zbounds)
+# parse $zbounds to get zmode
+if ($zbounds =~ /(\S+)\/(\S+)\/(\S+)/)
 	{
+	($zmin,$zmax,$zmode) = $zbounds =~ /(\S+)\/(\S+)\/(\S+)/;
+	}
+elsif ($zbounds =~ /(\S+)\/(\S+)/)
+	{
+	($zmin,$zmax) = $zbounds =~ /(\S+)\/(\S+)/;
+	$zmode = 0;
+	}
+else
+	{
+	$zmode = 0;
+	}
+
+# get limits of files using grdinfo
+if (!$bounds || !$zbounds || $zmode == 1)
+	{
+	if ($verbose > 0)
+		{
+		print "\nRunning grdinfo to get file bounds and min max...\n";
+		}
+
 	foreach $file_grd (@files_data) {
 
 	if ($bounds)
 		{
-		@grdinfo = `mbm_grdinfo -I$file_grd -R$bounds`;
+		if ($verbose > 0)
+			{
+			print "\tmbm_grdinfo -I$file_grd -R$bounds -V\n";
+			}
+		if ($verbose > 0)
+			{
+			@grdinfo = `mbm_grdinfo -I$file_grd -R$bounds -V`;
+			}
+		else
+			{
+			@grdinfo = `mbm_grdinfo -I$file_grd -R$bounds`;
+			}
 		}
 	else
 		{
-		@grdinfo = `grdinfo $file_grd`;
+		@grdinfo = `grdinfo $file_grd 2>&1`;
+		if ($verbose > 0)
+			{
+			print "\tgrdinfo -I$file_grd\n";
+			}
 		}
 	while (@grdinfo)
 		{
@@ -517,6 +552,29 @@ if (!$bounds || !$zbounds)
 			($utm_zone) = $line =~
 				/\s+Projection: UTM Zone (\S+)/;
 			$gridprojected = 1;
+			}
+		if ($line =~
+			/\s+Projection: Geographic/)
+			{
+			$gridprojected = 0;
+			}
+
+		if ($line =~
+			/\s+Projection: UTM Zone \S+/)
+			{
+			($utm_zone) = $line =~
+				/\s+Projection: UTM Zone (\S+)/;
+			$gridprojected = 1;
+			}
+		if ($line =~
+			/\s+Projection: SeismicProfile/)
+			{
+			$gridprojected = 2;
+			}
+		if ($line =~
+			/\s+Projection: GenericLinear/)
+			{
+			$gridprojected = 3;
 			}
 		if ($line =~
 			/\s+Projection: Geographic/)
@@ -585,8 +643,8 @@ if (!$bounds || !$zbounds)
 		$xmax = $xmax_f;
 		$ymin = $ymin_f;
 		$ymax = $ymax_f;
-		$zmin = $zmin_f;
-		$zmax = $zmax_f;
+		$zmin_t = $zmin_f;
+		$zmax_t = $zmax_f;
 		}
 	else
 		{
@@ -594,12 +652,13 @@ if (!$bounds || !$zbounds)
 		$xmax = &max($xmax, $xmax_f);
 		$ymin = &min($ymin, $ymin_f);
 		$ymax = &max($ymax, $ymax_f);
-		$zmin = &min($zmin, $zmin_f);
-		$zmax = &max($zmax, $zmax_f);
+		$zmin_t = &min($zmin_t, $zmin_f);
+		$zmax_t = &max($zmax_t, $zmax_f);
 		}
 
-	# check that there is data
-	if ($xmin_f >= $xmax_f || $ymin_f >= $ymax_f || $zmin_f >= $zmax_f)
+	# check that there are data
+	if ($xmin_f >= $xmax_f || $ymin_f >= $ymax_f
+		|| ($zmin_f >= $zmax_f && !$zbounds))
 		{
 		print "\a";
 		die "The program grdinfo does not appear to have worked \nproperly with file $file_grd!\n$program_name aborted.\n"
@@ -657,14 +716,17 @@ if (!$bounds_plot)
 		$xmin, $xmax, $ymin, $ymax);
 	}
 
-# use user defined data limits
-if ($zbounds)
+# set $zmin and $zmax from data if $zbounds not available
+if (!$zbounds)
 	{
-	($zmin,$zmax) = $zbounds =~ /(\S+)\/(\S+)/;
+	$zmode = 0;
+	$zmin = $zmin_t;
+	$zmax = $zmax_t;
 	}
 
-# check that there is data
-if ($xmin >= $xmax || $ymin >= $ymax || $zmin >= $zmax)
+# check again that there are data
+if ((!$use_corner_points && ($xmin >= $xmax || $ymin >= $ymax))
+	|| $zmin >= $zmax)
 	{
 	print "\a";
 	die "Improper data limits: x: $xmin $xmax  y: $ymin $ymax  z: $zmin $zmax\n$program_name aborted.\n"
@@ -675,11 +737,19 @@ if ($data_scale)
 	{
 	$zmin = $data_scale * $zmin;
 	$zmax = $data_scale * $zmax;
+	$zmin_t = $data_scale * $zmin_t;
+	$zmax_t = $data_scale * $zmax_t;
 	if ($zmin > $zmax)
 		{
 		$tmp = $zmin;
 		$zmin = $zmax;
 		$zmax = $tmp;
+		}
+	if ($zmin_t > $zmax_t)
+		{
+		$tmp = $zmin_t;
+		$zmin_t = $zmax_t;
+		$zmax_t = $tmp;
 		}
 	}
 
@@ -919,10 +989,28 @@ if ($color_mode && !$file_cpt)
 				{
 				$d2 = $d1 + $color_int;
 				}
+			if ($zmode == 1)
+				{
+				if ($i == 0)
+					{
+					if ($color_mode == 4 && $d1 > 0.0)
+						{
+						$d1 = 0.0;
+						}
+					elsif ($color_mode != 4 && $zmin_t < $d1)
+						{
+						$d1 = $zmin_t;
+						}
+					}
+				if ($i == $ncolors - 2 && $zmax_t > $d2)
+					{
+					$d2 = $zmax_t;
+					}
+				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
 				$d2,@cptr[$i+1],@cptg[$i+1],@cptb[$i+1];
-			if ($i == 0)
+			if ($zmode == 1 && $i == 0)
 				{
 				print FCMD " >";
 				}
@@ -945,6 +1033,24 @@ if ($color_mode && !$file_cpt)
 			else
 				{
 				$d2 = $d1 + $color_int;
+				}
+			if ($zmode == 1)
+				{
+				if ($i == $ncolors - 2)
+					{
+					if ($color_mode == 4 && $d1 > 0.0)
+						{
+						$d1 = 0.0;
+						}
+					elsif ($color_mode != 4 && $zmin_t < $d1)
+						{
+						$d1 = $zmin_t;
+						}
+					}
+				if ($i == 0 && $zmax_t > $d2)
+					{
+					$d2 = $zmax_t;
+					}
 				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i+1],@cptg[$i+1],@cptb[$i+1],
@@ -973,6 +1079,24 @@ if ($color_mode && !$file_cpt)
 				{
 				$d2 = $d1 + $color_int;
 				}
+			if ($zmode == 1)
+				{
+				if ($i == 0)
+					{
+					if ($color_mode == 4 && $d1 > 0.0)
+						{
+						$d1 = 0.0;
+						}
+					elsif ($color_mode != 4 && $zmin_t < $d1)
+						{
+						$d1 = $zmin_t;
+						}
+					}
+				if ($i == $ncolors - 1 && $zmax_t > $d2)
+					{
+					$d2 = $zmax_t;
+					}
+				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
@@ -1000,10 +1124,28 @@ if ($color_mode && !$file_cpt)
 				{
 				$d2 = $d1 + $color_int;
 				}
+			if ($zmode == 1)
+				{
+				if ($i == $ncolors - 1)
+					{
+					if ($color_mode == 4 && $d1 > 0.0)
+						{
+						$d1 = 0.0;
+						}
+					elsif ($color_mode != 4 && $zmin_t < $d1)
+						{
+						$d1 = $zmin_t;
+						}
+					}
+				if ($i == 0 && $zmax_t > $d2)
+					{
+					$d2 = $zmax_t;
+					}
+				}
 			printf FCMD "echo %6g %3d %3d %3d %6g %3d %3d %3d",
 				$d1,@cptr[$i],@cptg[$i],@cptb[$i],
 				$d2,@cptr[$i],@cptg[$i],@cptb[$i];
-			if ($i == ($ncolors - 2))
+			if ($i == ($ncolors - 1))
 				{
 				print FCMD " >";
 				}

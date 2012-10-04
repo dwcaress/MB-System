@@ -1,4 +1,4 @@
-.TH mbextractsegy 1 "26 September 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mbextractsegy 1 "4 October 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbextractsegy\fP - extracts subbottom profiler, center beam reflection,
 or seismic reflection data from swath data supported by MB-System and
@@ -152,7 +152,7 @@ the output SEGY filename (or files if a datalist is being processed) will
 be the input swath filename with ".segy" appended.
 .TP
 .B \-Q
-\fIroutefile\fP
+\fIroutetimefile\fP
 .br
 This option specifies route file containing the times that the survey reached
 the intended waypoints. This text file consists of lines of the form:
@@ -162,8 +162,9 @@ where count is just an integer counter starting at 0, waypoint is the waypoint
 number starting at 0, longitude and latitude are the waypoint position in
 decimal degrees, heading is the heading in decimal degrees, and time_d is
 the unix or epoch time (time since 00:00:00 January 1, 1970) in decimal
-seconds that the survey reached this waypoint.
-If \fIroutefile\fP is specified, \fBmbextractsegy\fP
+seconds that the survey reached this waypoint. This file can be generated from
+an \fBmbgrdviz\fP route file and survey data using the program \fBmbroutetime\fP.
+If \fIroutetimefile\fP is specified, \fBmbextractsegy\fP
 will output SEGY data in files corresponding to the planned survey lines.
 The output SEGY file names will be based on \fIlineroot\fP and will include
 the line number starting with \fIstarline\fP, both of which are specified

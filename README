@@ -191,6 +191,23 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+-----> 5.3.1989 (October 4, 2012)
+
+Mbm_grdplot & mbm_grdtiff: Fixed application of strict color table bounds in
+mbm_grdplot and mbm_grdtiff.
+
+mb7k2ss: Added -Q option so that sidescan lines can be constructed based on the
+times starting and ending waypoints were reached.
+
+Format 71 (mbf_mbldeoih): Fixed scaling of sidescan values to handle data with
+small values.
+
+Mbgrid and mbmosaic: Fixed the zgrid interpolation code, and also changed the
+usage so that the interpolation stages will proceed much more rapidly. This is
+now accomplished for large grids by iteratively calculating a smooth Laplacian model
+for a low resolution grid and then resampling this onto the desired full resolution
+grid using bilinear interpolation.
+
 -----> 5.3.1988 (September 29, 2012)
 
 Format 71 (mbf_mbldeoih): Implemented automatic scaling of sidescan values to improve

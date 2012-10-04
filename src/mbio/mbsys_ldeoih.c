@@ -682,6 +682,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_ldeoih_struct *store;
 	double	depthmax, distmax;
 	double	ssmax, ss_scale;
+	int	ngood;
 	int	i;
 
 	/* print input debug statements */
@@ -907,7 +908,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    store->distance_scale = 0.001 * (float)(MAX((int) (1 + distmax / 30.0), 1));
 		if (ssmax > 0.0)
 			{
-			store->ss_scalepower = (short)(log2(ssmax / 32767.0)) + 1;
+			store->ss_scalepower = (mb_s_char)(log2(ssmax / 32767.0)) + 1;
 			ss_scale = pow(2.0, (double)(store->ss_scalepower));
 			}
 		else
@@ -938,10 +939,14 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			store->amp[i] = amp[i];
 			}
 		store->pixels_ss = nss;
+		ngood = 0;
 		for (i=0;i<nss;i++)
 			{
 			if (ss[i] > MB_SIDESCAN_NULL)
+				{
 				store->ss[i] = (short)(ss[i] / ss_scale);
+				ngood++;
+				}
 			else
 				store->ss[i] = 0;
 			store->ss_acrosstrack[i] = ssacrosstrack[i] / store->distance_scale;

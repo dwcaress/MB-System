@@ -2886,7 +2886,7 @@ kgrid,norm_weight,grid[kgrid],norm[kgrid],cnt[kgrid]);*/
 		ymin = symin - 0.5 * dy;
 		ddx = dx;
 		ddy = dy;
-		mb_zgrid(sgrid,&gxdim,&gydim,&xmin,&ymin,
+		mb_zgrid2(sgrid,&gxdim,&gydim,&xmin,&ymin,
 			&ddx,&ddy,sdata,&ndata,
 			work1,work2,work3,&cay,&clip);
 
