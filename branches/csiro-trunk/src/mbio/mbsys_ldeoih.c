@@ -207,8 +207,10 @@ int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->pixels_ss_alloc = 0;
 	store->depth_scale = 0.0;
 	store->distance_scale = 0.0;
+	store->ss_scalepower = 0;
 	store->ss_type = 0;
-	store->spare2 = 0;
+	store->spare3 = 0;
+	store->sonartype = MB_SONARTYPE_UNKNOWN;
 	store->beamflag = NULL;
 	store->bath = NULL;
 	store->amp = NULL;
@@ -344,6 +346,49 @@ int mbsys_ldeoih_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_ldeoih_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error)
+{
+	char	*function_name = "mbsys_ldeoih_sidescantype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_ldeoih_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_ldeoih_struct *) store_ptr;
+
+	/* get sidescan type */
+	*sonartype = store->sonartype;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sonartype:  %d\n",*sonartype);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_ldeoih_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error)
 {
@@ -401,6 +446,7 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
+	double	ss_scale;
 	int	i;
 
 	/* print input debug statements */
@@ -475,10 +521,11 @@ int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			amp[i] = store->amp[i];
 			}
+		ss_scale = pow(2.0, (double)(store->ss_scalepower));
 		for (i=0;i<*nss;i++)
 			{
 			if (store->ss[i] != 0)
-				ss[i] = store->ss[i];
+				ss[i] = ss_scale * store->ss[i];
 			else
 				ss[i] = MB_SIDESCAN_NULL;
 			ssacrosstrack[i] = store->distance_scale * store->ss_acrosstrack[i];
@@ -634,6 +681,8 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_ldeoih_struct *store;
 	double	depthmax, distmax;
+	double	ssmax, ss_scale;
+	int	ngood;
 	int	i;
 
 	/* print input debug statements */
@@ -834,6 +883,7 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get scaling */
 		depthmax = 0.0;
 		distmax = 0.0;
+		ssmax = 0.0;
 		for (i=0;i<nbath;i++)
 		    {
 		    if (beamflag[i] != MB_FLAG_NULL)
@@ -849,12 +899,23 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			distmax = MAX(distmax, fabs(ssacrosstrack[i]));
 			distmax = MAX(distmax, fabs(ssalongtrack[i]));
+			ssmax = MAX(ssmax, fabs(ss[i]));
 			}
 		    }
 		if (depthmax > 0.0)
 		    store->depth_scale = 0.001 * (float)(MAX((int) (1 + depthmax / 30.0), 1));
 		if (distmax > 0.0)
 		    store->distance_scale = 0.001 * (float)(MAX((int) (1 + distmax / 30.0), 1));
+		if (ssmax > 0.0)
+			{
+			store->ss_scalepower = (mb_s_char)(log2(ssmax / 32767.0)) + 1;
+			ss_scale = pow(2.0, (double)(store->ss_scalepower));
+			}
+		else
+			{
+			store->ss_scalepower = 0;
+			ss_scale = 1.0;
+			}
 
 		/* set beam widths */
 		if (store->beam_xwidth == 0.0)
@@ -878,10 +939,14 @@ int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			store->amp[i] = amp[i];
 			}
 		store->pixels_ss = nss;
+		ngood = 0;
 		for (i=0;i<nss;i++)
 			{
 			if (ss[i] > MB_SIDESCAN_NULL)
-				store->ss[i] = ss[i];
+				{
+				store->ss[i] = (short)(ss[i] / ss_scale);
+				ngood++;
+				}
 			else
 				store->ss[i] = 0;
 			store->ss_acrosstrack[i] = ssacrosstrack[i] / store->distance_scale;
@@ -1637,7 +1702,7 @@ int mbsys_ldeoih_copy(int verbose, void *mbio_ptr,
 	    copy->depth_scale = store->depth_scale;
 	    copy->distance_scale = store->distance_scale;
 	    copy->ss_type = store->ss_type;
-	    copy->spare2 = store->spare2;
+	    copy->ss_scalepower = store->ss_scalepower;
 	    for (i=0;i<copy->beams_bath;i++)
 		    {
 		    copy->beamflag[i] = store->beamflag[i];

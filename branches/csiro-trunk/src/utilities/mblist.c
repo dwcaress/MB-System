@@ -13,9 +13,9 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * MBlist prints the specified contents of a swath sonar data  
- * file to stdout. The form of the output is quite flexible; 
- * MBlist is tailored to produce ascii files in spreadsheet  
+ * MBlist prints the specified contents of a swath sonar data
+ * file to stdout. The form of the output is quite flexible;
+ * MBlist is tailored to produce ascii files in spreadsheet
  * style with data columns separated by tabs.
  *
  * Author:	D. W. Caress
@@ -289,39 +289,41 @@
 #define	MBLIST_SET_OFF	0
 #define	MBLIST_SET_ON	1
 #define	MBLIST_SET_ALL	2
+#define MBLIST_SET_EXCLUDE_OUTER 3
 
 /* function prototypes */
-int set_output(	int	verbose, 
-		int	beams_bath, 
-		int	beams_amp, 
-		int	pixels_ss, 
-		int	use_bath, 
-		int	use_amp, 
-		int	use_ss, 
-		int	dump_mode, 
-		int	beam_set, 
-		int	pixel_set, 
-		int	beam_vertical, 
-		int	pixel_vertical, 
-		int	*beam_start, 
-		int	*beam_end, 
-		int	*pixel_start, 
-		int	*pixel_end, 
-		int	*n_list, 
-		char	*list, 
+int set_output(	int	verbose,
+		int	beams_bath,
+		int	beams_amp,
+		int	pixels_ss,
+		int	use_bath,
+		int	use_amp,
+		int	use_ss,
+		int	dump_mode,
+		int	beam_set,
+		int	pixel_set,
+		int	beam_vertical,
+		int	pixel_vertical,
+		int	*beam_start,
+		int	*beam_end,
+		int     *beam_exclude_percent,
+		int	*pixel_start,
+		int	*pixel_end,
+		int	*n_list,
+		char	*list,
 		int	*error);
 int set_bathyslope(int verbose,
 		int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-		int *ndepths, double *depths, double *depthacrosstrack, 
-		int *nslopes, double *slopes, double *slopeacrosstrack, 
+		int *ndepths, double *depths, double *depthacrosstrack,
+		int *nslopes, double *slopes, double *slopeacrosstrack,
 		int *error);
 int get_bathyslope(int verbose,
-		int ndepths, double *depths, double *depthacrosstrack, 
-		int nslopes, double *slopes, double *slopeacrosstrack, 
-		double acrosstrack, double *depth,  double *slope, 
+		int ndepths, double *depths, double *depthacrosstrack,
+		int nslopes, double *slopes, double *slopeacrosstrack,
+		double acrosstrack, double *depth,  double *slope,
 		int *error);
-int printsimplevalue(int verbose, FILE *output, 
-		double value, int width, int precision, 
+int printsimplevalue(int verbose, FILE *output,
+		double value, int width, int precision,
 		int ascii, int *invert, int *flipsign, int *error);
 int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, int *error);
 int mb_get_raw(int verbose, void *mbio_ptr,
@@ -351,7 +353,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		int *center_sample,
 		double *ss_pixels,
 		int *error);
-int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
+int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 		int *mode,
 		int *ipulse_length,
 		int *png_count,
@@ -378,7 +380,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 		int *center_sample,
 		double *ss_pixels,
 		int *error);
-int mb_get_raw_simrad3(int verbose, void *mbio_ptr, 
+int mb_get_raw_simrad3(int verbose, void *mbio_ptr,
 		int *mode,
 		int *ipulse_length,
 		int *png_count,
@@ -414,7 +416,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "MBLIST";
 	char help_message[] =  "MBLIST prints the specified contents of a swath data \nfile to stdout. The form of the output is quite flexible; \nMBLIST is tailored to produce ascii files in spreadsheet \nstyle with data columns separated by tabs.";
-	char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Kdecimate -Llonflip -Mbeam_start/beam_end -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
+	char usage_message[] = "mblist [-Byr/mo/da/hr/mn/sc -C -Ddump_mode -Eyr/mo/da/hr/mn/sc \n-Fformat -Gdelimiter -H -Ifile -Kdecimate -Llonflip -M[beam_start/beam_end | A | X%] -Npixel_start/pixel_end \n-Ooptions -Ppings -Rw/e/s/n -Sspeed -Ttimegap -Ucheck -Xoutfile -V -W -Zsegment]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -456,6 +458,7 @@ int main (int argc, char **argv)
 	int	beam_set = MBLIST_SET_OFF;
 	int	beam_start;
 	int	beam_end;
+	int     beam_exclude_percent;
 	int	beam_vertical = 0;
 	int	pixel_set = MBLIST_SET_OFF;
 	int	pixel_start;
@@ -556,7 +559,7 @@ int main (int argc, char **argv)
 	int	degrees;
 	char	hemi;
 	double	headingx, headingy, mtodeglon, mtodeglat;
-	
+
 	/* swathbounds variables */
 	int	use_swathbounds = MB_NO;
 	int	beam_port, beam_stbd;
@@ -625,7 +628,7 @@ int main (int argc, char **argv)
 	/* set default input to datalist.mb-1 */
 	strcpy (read_file, "datalist.mb-1");
 
-	/* set up the default list controls 
+	/* set up the default list controls
 		(Time, lon, lat, heading, speed, along-track distance, center beam depth) */
 	list[0]='T';
 	list[1]='X';
@@ -648,7 +651,7 @@ int main (int argc, char **argv)
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "AaB:b:CcD:d:E:e:F:f:G:g:I:i:K:k:L:l:M:m:N:n:O:o:P:p:QqR:r:S:s:T:t:U:u:X:x:Z:z:VvWwHh")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -729,6 +732,11 @@ int main (int argc, char **argv)
 			    {
 			    beam_set = MBLIST_SET_ALL;
 			    }
+			else if (optarg[0] == 'x' || optarg[0] == 'X')
+				{
+				beam_set = MBLIST_SET_EXCLUDE_OUTER;
+				sscanf(optarg,"%*c%d",&beam_exclude_percent);
+				}
 			else
 			    {
 			    sscanf (optarg,"%d/%d", &beam_start,&beam_end);
@@ -788,7 +796,7 @@ int main (int argc, char **argv)
 			else
 			    {
 			    sscanf (optarg,"%d", &check_values);
-			    if (check_values < MBLIST_CHECK_ON 
+			    if (check_values < MBLIST_CHECK_ON
 			      || check_values > MBLIST_CHECK_OFF_FLAGNAN)
 				check_values = MBLIST_CHECK_ON;
 			    }
@@ -863,8 +871,8 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       etime_i[6]:     %d\n",etime_i[6]);
 		fprintf(stderr,"dbg2       speedmin:       %f\n",speedmin);
 		fprintf(stderr,"dbg2       timegap:        %f\n",timegap);
-		fprintf(stderr,"dbg2       file:           %s\n",file);		
-		fprintf(stderr,"dbg2       output_file:    %s\n",output_file);		
+		fprintf(stderr,"dbg2       file:           %s\n",file);
+		fprintf(stderr,"dbg2       output_file:    %s\n",output_file);
 		fprintf(stderr,"dbg2       ascii:          %d\n",ascii);
 		fprintf(stderr,"dbg2       netcdf:         %d\n",netcdf);
 		fprintf(stderr,"dbg2       netcdf_cdl:     %d\n",netcdf_cdl);
@@ -874,6 +882,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       beam_set:       %d\n",beam_set);
 		fprintf(stderr,"dbg2       beam_start:     %d\n",beam_start);
 		fprintf(stderr,"dbg2       beam_end:       %d\n",beam_end);
+		fprintf(stderr,"dbg2       beam_exclude_percent: %d\n",beam_exclude_percent);
 		fprintf(stderr,"dbg2       pixel_set:      %d\n",pixel_set);
 		fprintf(stderr,"dbg2       pixel_start:    %d\n",pixel_start);
 		fprintf(stderr,"dbg2       pixel_end:      %d\n",pixel_end);
@@ -938,12 +947,12 @@ int main (int argc, char **argv)
 	/* set the initial along track distance here so */
 	/* it's cummulative over multiple files*/
 	distance_total = 0.0;
-	
+
 	/* initialize output files */
 	status = mb_mallocd(verbose, __FILE__, __LINE__, n_list*sizeof(FILE*), (void **)&output, &error);
-	
+
 	if (netcdf == MB_NO)
-	    { 
+	    {
 	    /* open output file */
 	    if (0 == strncmp("-",output_file,2))
 	      outfile = stdout;
@@ -964,7 +973,7 @@ int main (int argc, char **argv)
 	    /* netcdf must be ascii and must not be segmented */
 	    ascii = MB_YES;
 	    segment = MB_NO;
-	    
+
 	    /* open CDL file */
 	    if (0 == strncmp("-",output_file,2) && netcdf_cdl == MB_NO)
 	      strcpy(output_file, "mblist.nc");
@@ -972,7 +981,7 @@ int main (int argc, char **argv)
 	      {
 		outfile = stdout;
 	      }
-	    else 
+	    else
 	      {
 		strncpy(output_file_temp, output_file, MB_PATH_MAXLINE - 5);
 		if (netcdf_cdl == MB_NO)
@@ -995,14 +1004,14 @@ int main (int argc, char **argv)
 
 	    /* find dimensions in format list */
 	    raw_next_value = MB_NO;
-	    for (i=0; i<n_list; i++) 
-	    	if (list[i] == '/' || list[i] == '-' 
+	    for (i=0; i<n_list; i++)
+	    	if (list[i] == '/' || list[i] == '-'
 			|| list[i] == '=' || list[i] == '+') {
 		  // ignore
 		} else if (raw_next_value == MB_NO) {
 		    if (list[i] == '.')
 		        raw_next_value = MB_YES;
-		} else if (list[i] >= '0' && list[i] <= '9') 
+		} else if (list[i] >= '0' && list[i] <= '9')
 		    count = count * 10 + list[i] - '0';
 		else {
 		  raw_next_value = MB_NO;
@@ -1029,12 +1038,12 @@ int main (int argc, char **argv)
 	    else
 	      strcpy(user, "unknown");
 	    gethostname(host,128);
-	    
+
 	    fprintf(outfile, "\t:run = \"by <%s> on cpu <%s> at <%s>\";\n\n", user, host, date);
-	    
+
 
 	    /* get temporary output file for each variable */
-	    for (i=0; i<n_list; i++) 
+	    for (i=0; i<n_list; i++)
 	      {
 		output[i] = tmpfile();
 		if (output[i] == NULL)
@@ -1045,7 +1054,7 @@ int main (int argc, char **argv)
 
 		if (raw_next_value == MB_NO)
 		  {
-		switch (list[i]) 
+		switch (list[i])
 		  {
 		  case '/': /* Inverts next simple value */
 		    invert_next_value = MB_YES;
@@ -1064,7 +1073,7 @@ int main (int argc, char **argv)
 
 		  case '+': /* Starboard-most value next field - ignored here*/
 		    break;
-		    
+
 		  case 'A': /* Average seafloor crosstrack slope */
 		    strcpy(variable, "aslope");
 		    if (signflip_next_value == MB_YES)
@@ -1134,7 +1143,7 @@ int main (int argc, char **argv)
 
 		    signflip_next_value = MB_NO;
 		    invert_next_value = MB_NO;
-		    
+
 		    break;
 
 		  case 'b': /* sidescan */
@@ -1421,7 +1430,7 @@ int main (int argc, char **argv)
 		    invert_next_value = MB_NO;
 		    break;
 
-		  case 'M': /* Decimal unix seconds since 
+		  case 'M': /* Decimal unix seconds since
 						1/1/70 00:00:00 */
 		    strcpy(variable, "unix_time");
 		    if (signflip_next_value == MB_YES)
@@ -1444,7 +1453,7 @@ int main (int argc, char **argv)
 		    invert_next_value = MB_NO;
 		    break;
 
-		  case 'm': /* time in decimal seconds since 
+		  case 'm': /* time in decimal seconds since
 						first record */
 
 		    strcpy(variable, "survey_time");
@@ -1670,7 +1679,7 @@ int main (int argc, char **argv)
 		    break;
 
 		  case 'V': /* time in seconds since last ping */
-		  case 'v': 
+		  case 'v':
 		    strcpy(variable, "ping_time");
 
 		    fprintf(output[i], "\t%s = ", variable);
@@ -1813,7 +1822,7 @@ int main (int argc, char **argv)
 		  }
 		else
 		  {
-		switch (list[i]) 
+		switch (list[i])
 		  {
 		  case '/': /* Inverts next simple value */
 		    invert_next_value = MB_YES;
@@ -1853,9 +1862,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Backscatter\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -1864,7 +1873,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "dB\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -1876,9 +1885,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Mean absorption\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -1887,7 +1896,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "dB/km\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -1899,9 +1908,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Normal incidence backscatter\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -1910,7 +1919,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "dB\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -1922,9 +1931,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"mean backscatter\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -1933,7 +1942,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "dB\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -1968,9 +1977,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Oblique backscatter\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -1982,7 +1991,7 @@ int main (int argc, char **argv)
 			  fprintf(outfile, "dB + 64\";\n");
 			else
 			  fprintf(outfile, "backscatter\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -1994,9 +2003,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Beam depression angle\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2005,7 +2014,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "degrees\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2021,7 +2030,7 @@ int main (int argc, char **argv)
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 
 			fprintf(outfile, "file name\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2029,15 +2038,15 @@ int main (int argc, char **argv)
 
 		  case 'f': /* format */
 		    	strcpy(variable, "format");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
 
 			fprintf(outfile, "\tshort %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"MBsystem file format number\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
-			
+
 			fprintf(outfile, "see mbformat\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2049,9 +2058,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Start range of TVG ramp\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2060,7 +2069,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "samples\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2072,9 +2081,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Stop range of TVG ramp\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2083,7 +2092,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "samples\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2093,12 +2102,12 @@ int main (int argc, char **argv)
 		    	strcpy(variable, "pulse_length");
 
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tlong %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Pulse Length\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 			fprintf(outfile, "us\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2110,9 +2119,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Pulse length\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2121,7 +2130,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "seconds\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2131,12 +2140,12 @@ int main (int argc, char **argv)
 		    	strcpy(variable, "mode");
 
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tlong %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Sounder mode\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 			fprintf(outfile, "0=very shallow,1=shallow,2=medium,3=deep,4=very deep,5=extra deep\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2166,7 +2175,7 @@ int main (int argc, char **argv)
 			fprintf(outfile, "\t\t%s:long_name = \"Sounder ping counter\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 			fprintf(outfile, "pings\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2223,9 +2232,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			if (count == 0)
 			  fprintf(outfile, "\tfloat %s(data);\n", variable);
 			else
@@ -2238,21 +2247,21 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "dB\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
 			break;
-		    
+
 		  case 'R': /* range */
 			strcpy(variable, "range");
 			if (signflip_next_value == MB_YES)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Range \";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2261,7 +2270,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "samples\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2273,9 +2282,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Sample Rate\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2284,7 +2293,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "Hertz\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2296,9 +2305,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Total sidescan pixels \";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2307,7 +2316,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "pixels\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2319,9 +2328,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Sidescan pixels per beam\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2330,7 +2339,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "pixels\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2342,9 +2351,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Transmit gain\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2353,7 +2362,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "dB\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2365,9 +2374,9 @@ int main (int argc, char **argv)
 			  strcat(variable, "-");
 			if (invert_next_value == MB_YES)
 			  strcat(variable, "_");
-			
+
 			fprintf(output[i], "\t%s = ", variable);
-			
+
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
 			fprintf(outfile, "\t\t%s:long_name = \"Receive gain\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
@@ -2376,7 +2385,7 @@ int main (int argc, char **argv)
 			if (invert_next_value == MB_YES)
 			  fprintf(outfile, "1/");
 			fprintf(outfile, "dB\";\n");
-			
+
 			signflip_next_value = MB_NO;
 			invert_next_value = MB_NO;
 			raw_next_value = MB_NO;
@@ -2466,9 +2475,9 @@ int main (int argc, char **argv)
 	else if (dump_mode == DUMP_MODE_SS)
 		use_ss = MB_YES;
 	else
-		for (i=0; i<n_list; i++) 
+		for (i=0; i<n_list; i++)
 		    {
-		    if (raw_next_value == MB_NO) 
+		    if (raw_next_value == MB_NO)
 		        {
 			if (list[i] == 'Z' || list[i] == 'z'
 				|| list[i] == 'A' || list[i] == 'a'
@@ -2487,12 +2496,12 @@ int main (int argc, char **argv)
 			if (list[i] == 'A' || list[i] == 'a'
 				|| list[i] == 'G' || list[i] == 'g')
 				use_slope = MB_YES;
-			if (list[i] == 'P' || list[i] == 'p' 
+			if (list[i] == 'P' || list[i] == 'p'
 				|| list[i] == 'R' || list[i] == 'r')
 				use_attitude = MB_YES;
 			if (list[i] == 'Q' || list[i] == 'q')
 				use_detects = MB_YES;
-			if (list[i] == 'X' || list[i] == 'x' 
+			if (list[i] == 'X' || list[i] == 'x'
 				|| list[i] == 'Y' || list[i] == 'y')
 				use_nav = MB_YES;
 			if (list[i] == '.')
@@ -2545,13 +2554,13 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -2591,7 +2600,7 @@ int main (int argc, char **argv)
                 if (error == MB_ERROR_NO_ERROR)
                         status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
                                                         sizeof(int), (void **)&sort, &error);
-		status = mb_mallocd(verbose, __FILE__, __LINE__, 
+		status = mb_mallocd(verbose, __FILE__, __LINE__,
 					(MBSYS_SIMRAD2_MAXRAWPIXELS)*sizeof(double),
 					(void **)&ss_pixels,&error);
 		}
@@ -2606,7 +2615,7 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
-		
+
 	/* output separator for GMT style segment file output */
 	if (segment == MB_YES && ascii == MB_YES && netcdf == MB_NO)
 		{
@@ -2620,7 +2629,7 @@ int main (int argc, char **argv)
 		{
 		/* reset error */
 		error = MB_ERROR_NO_ERROR;
-		
+
 		/* read a ping of data */
 		if (pings == 1 || use_attitude == MB_YES || use_detects == MB_YES)
 		    {
@@ -2674,14 +2683,14 @@ int main (int argc, char **argv)
 			    status = MB_SUCCESS;
 			    }
 		    }
-		    
+
 		/* make sure non survey data records are ignored */
 		if (error == MB_ERROR_NO_ERROR
 			&& kind != MB_DATA_DATA)
 			error = MB_ERROR_OTHER;
 
 		/* increment counter and set cumulative distance */
-		if (error <= MB_ERROR_NO_ERROR 
+		if (error <= MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA)
 			{
 			nread++;
@@ -2715,7 +2724,7 @@ int main (int argc, char **argv)
 			/* find vertical-most non-null beam
 				and port and starboard-most good beams */
 			status = mb_swathbounds(verbose, MB_YES,
-				navlon, navlat, heading, 
+				navlon, navlat, heading,
 				beams_bath, pixels_ss,
 				beamflag, bath, bathacrosstrack, bathalongtrack,
 				ss, ssacrosstrack, ssalongtrack,
@@ -2728,8 +2737,9 @@ int main (int argc, char **argv)
 				beams_bath,beams_amp,pixels_ss,
 				use_bath,use_amp,use_ss,
 				dump_mode,beam_set,pixel_set,
-				beam_vertical, pixel_vertical, 
+				beam_vertical, pixel_vertical,
 				&beam_start,&beam_end,
+				&beam_exclude_percent,
 				&pixel_start,&pixel_end,
 				&n_list,list,&error);
 
@@ -2759,6 +2769,8 @@ int main (int argc, char **argv)
 					beam_start);
 				fprintf(stderr,"dbg2       beam_end:     %d\n",
 					beam_end);
+				fprintf(stderr,"dbg2       beam_exclude_percent: %d\n",
+					beam_exclude_percent);
 				fprintf(stderr,"dbg2       pixel_start:  %d\n",
 					pixel_start);
 				fprintf(stderr,"dbg2       pixel_end:    %d\n",
@@ -2786,22 +2798,22 @@ int main (int argc, char **argv)
 			headingx = sin(DTR*heading);
 			headingy = cos(DTR*heading);
 			}
-		
+
 		/* get time interval since last ping */
-		if (error == MB_ERROR_NO_ERROR 
+		if (error == MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA
 			&& first == MB_YES)
 			{
 			time_interval = 0.0;
 			}
-		else if (error == MB_ERROR_NO_ERROR 
+		else if (error == MB_ERROR_NO_ERROR
 			&& kind == MB_DATA_DATA)
 			{
 			time_interval = time_d - time_d_old;
 			}
 
 		/* calculate course made good */
-		if (error == MB_ERROR_NO_ERROR 
+		if (error == MB_ERROR_NO_ERROR
 			&& use_course == MB_YES)
 			{
 			if (first == MB_YES)
@@ -2826,13 +2838,13 @@ int main (int argc, char **argv)
 				if (dt > 0.0)
 					speed_made_good = 3.6*dist/dt;
 				else
-					speed_made_good 
+					speed_made_good
 						= speed_made_good_old;
 				}
 			}
-			
+
 		/* calculate slopes if required */
-		if (error == MB_ERROR_NO_ERROR 
+		if (error == MB_ERROR_NO_ERROR
 			&& use_slope == MB_YES)
 			{
 			/* get average slope */
@@ -2860,9 +2872,9 @@ int main (int argc, char **argv)
 			  }
 			else
 			  avgslope = 0.0;
-			  
+
 			/* get per beam slope */
-			set_bathyslope(verbose, 
+			set_bathyslope(verbose,
 				beams_bath,beamflag,bath,bathacrosstrack,
 				&ndepths,depths,depthacrosstrack,
 				&nslopes,slopes,slopeacrosstrack,
@@ -2880,7 +2892,7 @@ int main (int argc, char **argv)
 			}
 
 		/* get raw values if required */
-		if (error == MB_ERROR_NO_ERROR 
+		if (error == MB_ERROR_NO_ERROR
 			&& use_raw == MB_YES)
 			{
 			status = mb_get_raw(verbose, mbio_ptr,
@@ -2910,15 +2922,15 @@ int main (int argc, char **argv)
 					center_sample,
 					ss_pixels,
 					&error);
-			}  
+			}
 
 		/* get gains values if required */
-		if (error == MB_ERROR_NO_ERROR 
+		if (error == MB_ERROR_NO_ERROR
 			&& use_gains == MB_YES)
 			{
 			status = mb_gains(verbose,mbio_ptr,store_ptr,&kind,
 					&transmit_gain,&pulse_length,&receive_gain,&error);
-			}  
+			}
 
 		/* now loop over beams */
 		if (error == MB_ERROR_NO_ERROR && (nread - 1) % decimate == 0)
@@ -2926,20 +2938,20 @@ int main (int argc, char **argv)
 		  {
 		  /* check beam status */
 		  beam_status = MB_SUCCESS;
-		  if (check_bath == MB_YES 
-		    && check_values == MBLIST_CHECK_ON 
+		  if (check_bath == MB_YES
+		    && check_values == MBLIST_CHECK_ON
 		    && !mb_beam_ok(beamflag[j]))
 			beam_status = MB_FAILURE;
-		  else if (check_bath == MB_YES 
-		    && check_values == MBLIST_CHECK_ON_NULL 
+		  else if (check_bath == MB_YES
+		    && check_values == MBLIST_CHECK_ON_NULL
 		    && beamflag[j] == MB_FLAG_NULL)
 			beam_status = MB_FAILURE;
-		  if (check_amp == MB_YES 
-		    && check_values == MBLIST_CHECK_ON 
+		  if (check_amp == MB_YES
+		    && check_values == MBLIST_CHECK_ON
 		    && !mb_beam_ok(beamflag[j]))
 			beam_status = MB_FAILURE;
-		  else if (check_amp == MB_YES 
-		    && check_values == MBLIST_CHECK_ON_NULL 
+		  else if (check_amp == MB_YES
+		    && check_values == MBLIST_CHECK_ON_NULL
 		    && beamflag[j] == MB_FLAG_NULL)
 			beam_status = MB_FAILURE;
 		  if (check_ss == MB_YES && j != beam_vertical)
@@ -2955,7 +2967,7 @@ int main (int argc, char **argv)
 		  /* print out good beams */
 		  if (beam_status == MB_SUCCESS)
 		    {
-		    for (i=0; i<n_list; i++) 
+		    for (i=0; i<n_list; i++)
 			{
 			if (netcdf == MB_YES && lcount > 0)
 			  fprintf(output[i], ", ");
@@ -2974,7 +2986,7 @@ int main (int argc, char **argv)
 
 			if (raw_next_value == MB_NO)
 			    {
-			    switch (list[i]) 
+			    switch (list[i])
 				{
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
@@ -2993,8 +3005,8 @@ int main (int argc, char **argv)
 				  	stbd_next_value = MB_YES;
 				  	break;
 				case 'A': /* Average seafloor crosstrack slope */
-					printsimplevalue(verbose, output[i], avgslope, 0, 4, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], avgslope, 0, 4, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'a': /* Per-beam seafloor crosstrack slope */
@@ -3002,13 +3014,13 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[k])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
@@ -3018,8 +3030,8 @@ int main (int argc, char **argv)
 						nslopes,slopes,slopeacrosstrack,
 						bathacrosstrack[k],
 						&depth,&slope,&error);
-					    printsimplevalue(verbose, output[i], slope, 0, 4, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], slope, 0, 4, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					break;
@@ -3028,35 +3040,35 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[k])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
-					    printsimplevalue(verbose, output[i], amp[k], 0, 3, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], amp[k], 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'b': /* sidescan */
-					printsimplevalue(verbose, output[i], ss[pixel_vertical], 0, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], ss[pixel_vertical], 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'C': /* Sonar altitude (m) */
-					printsimplevalue(verbose, output[i], altitude, 0, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], altitude, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'c': /* Sonar transducer depth (m) */
-					printsimplevalue(verbose, output[i], sonardepth, 0, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], sonardepth, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'D': /* acrosstrack dist. */
@@ -3065,20 +3077,20 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[k])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bathacrosstrack[k];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					break;
@@ -3088,20 +3100,20 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[k])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bathalongtrack[k];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					break;
@@ -3110,20 +3122,20 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[k])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    angle = RTD*(atan(bathacrosstrack[k] / (bath[k] - sonardepth)));
-					    printsimplevalue(verbose, output[i], angle, 0, 3, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], angle, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					break;
@@ -3132,13 +3144,13 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[k])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
@@ -3150,26 +3162,26 @@ int main (int argc, char **argv)
 						&depth,&slope,&error);
 					    angle = RTD * (atan(bathacrosstrack[k] / (bath[k] - sonardepth)))
 						+ slope;
-					    printsimplevalue(verbose, output[i], angle, 0, 3, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], angle, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					break;
 				case 'H': /* heading */
-					printsimplevalue(verbose, output[i], heading, 6, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], heading, 6, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'h': /* course */
-					printsimplevalue(verbose, output[i], course, 6, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], course, 6, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
 					if (ascii == MB_YES)
 					    {
-					    if (netcdf == MB_YES) 
+					    if (netcdf == MB_YES)
 					    fprintf(output[i],"%d, %d, %d, %d, %d, %d",
 						time_j[0],time_j[1],
 						time_i[3],time_i[4],
@@ -3225,22 +3237,22 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'L': /* along-track distance (km) */
-					printsimplevalue(verbose, output[i], distance_total, 7, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], distance_total, 7, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'l': /* along-track distance (m) */
-					printsimplevalue(verbose, output[i], 1000.0 * distance_total, 7, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], 1000.0 * distance_total, 7, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
-				case 'M': /* Decimal unix seconds since 
+				case 'M': /* Decimal unix seconds since
 						1/1/70 00:00:00 */
-					printsimplevalue(verbose, output[i], time_d, 0, 6, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], time_d, 0, 6, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
-				case 'm': /* time in decimal seconds since 
+				case 'm': /* time in decimal seconds since
 						first record */
 					if (first_m == MB_YES)
 						{
@@ -3248,8 +3260,8 @@ int main (int argc, char **argv)
 						first_m = MB_NO;
 						}
 					b = time_d - time_d_ref;
-					printsimplevalue(verbose, output[i], b, 0, 6, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], b, 0, 6, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'N': /* ping counter */
@@ -3262,20 +3274,20 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'P': /* pitch */
-					printsimplevalue(verbose, output[i], pitch, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], pitch, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'p': /* draft */
-					printsimplevalue(verbose, output[i], draft, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], draft, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'q': /* bottom detection type */
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-						
+
 					    fprintf(output[i],"%d",detect[k]);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -3311,23 +3323,23 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'R': /* roll */
-					printsimplevalue(verbose, output[i], roll, 6, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], roll, 6, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'r': /* heave */
-					printsimplevalue(verbose, output[i], heave, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], heave, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'S': /* speed */
-					printsimplevalue(verbose, output[i], speed, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], speed, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 's': /* speed made good */
-					printsimplevalue(verbose, output[i], speed_made_good, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], speed_made_good, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
@@ -3413,11 +3425,11 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'V': /* time in seconds since last ping */
-				case 'v': 
+				case 'v':
 					if (ascii == MB_YES)
 					    {
 					    if ( fabs(time_interval) > 100. )
-						fprintf(output[i],"%g",time_interval); 
+						fprintf(output[i],"%g",time_interval);
 					    else
 						fprintf(output[i],"%7.3f",time_interval);
 					    }
@@ -3433,8 +3445,8 @@ int main (int argc, char **argv)
 							*bathacrosstrack[k]
 						    + headingx*mtodeglon
 							*bathalongtrack[k];
-					printsimplevalue(verbose, output[i], dlon, 14, 9, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], dlon, 14, 9, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'x': /* longitude degress + decimal minutes */
@@ -3476,8 +3488,8 @@ int main (int argc, char **argv)
 							*bathacrosstrack[k]
 						    + headingy*mtodeglat
 							*bathalongtrack[k];
-					printsimplevalue(verbose, output[i], dlat, 14, 9, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], dlat, 14, 9, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
@@ -3517,20 +3529,20 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[k])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = -bathy_scale * bath[k];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					break;
@@ -3539,20 +3551,20 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[k])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bath[k];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					break;
@@ -3574,7 +3586,7 @@ int main (int argc, char **argv)
 			    }
 			else /* raw_next_value */
 			    {
-			    switch (list[i]) 
+			    switch (list[i])
 				{
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
@@ -3593,7 +3605,7 @@ int main (int argc, char **argv)
 				  	stbd_next_value = MB_YES;
 				  	break;
 
-				
+
 				case '0':
 				case '1':
 				case '2':
@@ -3612,38 +3624,38 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[k])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
-					    printsimplevalue(verbose, output[i], bs[k], 5, 1, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], bs[k], 5, 1, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					raw_next_value = MB_NO;
 					break;
 				case 'a': /* absorption */
-				        printsimplevalue(verbose, output[i], absorption, 5, 2, ascii, 
-							    &invert_next_value, 
+				        printsimplevalue(verbose, output[i], absorption, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 				case 'B': /* BSN - Normal incidence backscatter */
-				        printsimplevalue(verbose, output[i], bsn, 5, 2, ascii, 
-							    &invert_next_value, 
+				        printsimplevalue(verbose, output[i], bsn, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 				case 'b': /* BSO - Oblique backscatter */
-					printsimplevalue(verbose, output[i], bso, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], bso, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
@@ -3662,8 +3674,8 @@ int main (int argc, char **argv)
 					    nback++;
 					  }
 					}
-					printsimplevalue(verbose, output[i], mback / nback, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], mback / nback, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
@@ -3672,19 +3684,19 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[k])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
-				            printsimplevalue(verbose, output[i], depression[k], 5, 2, ascii, 
-							    &invert_next_value, 
+				            printsimplevalue(verbose, output[i], depression[k], 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					raw_next_value = MB_NO;
@@ -3695,11 +3707,11 @@ int main (int argc, char **argv)
 					fprintf(output[i], "%s", file);
 
 					if (netcdf == MB_YES) fprintf(output[i], "\"");
-					
+
 					if (ascii == MB_NO)
 					  for (k = strlen(file); k < MB_PATH_MAXLINE; k++)
 					    fwrite(&file[strlen(file)], sizeof(char), 1, outfile);
-					
+
 					raw_next_value = MB_NO;
 					break;
 
@@ -3746,8 +3758,8 @@ int main (int argc, char **argv)
 					raw_next_value = MB_NO;
 					break;
 				case 'l': /* Transmit pulse length (sec) */
-					printsimplevalue(verbose, output[i], pulse_length, 9, 6, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], pulse_length, 9, 6, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
@@ -3814,12 +3826,12 @@ int main (int argc, char **argv)
 				case 'p': /* sidescan */
 					invert = invert_next_value;
 					flip = signflip_next_value;
-				  	printsimplevalue(verbose, output[i], ss_pixels[start_sample[k]], 5, 1, ascii, 
-							 &invert_next_value, 
+				  	printsimplevalue(verbose, output[i], ss_pixels[start_sample[k]], 5, 1, ascii,
+							 &invert_next_value,
 							 &signflip_next_value, &error);
 					if (count > 0)
 					  {
-					    for (m = 1; m < count && m < beam_samples[k]; m++) 
+					    for (m = 1; m < count && m < beam_samples[k]; m++)
 					      {
 						if (netcdf == MB_YES)
 						  fprintf(output[i], ", ");
@@ -3828,8 +3840,8 @@ int main (int argc, char **argv)
 						invert_next_value = invert;
 						signflip_next_value = flip;
 
-						printsimplevalue(verbose, output[i], ss_pixels[start_sample[k] + m], 5, 1, ascii, 
-								 &invert_next_value, 
+						printsimplevalue(verbose, output[i], ss_pixels[start_sample[k] + m], 5, 1, ascii,
+								 &invert_next_value,
 								 &signflip_next_value, &error);
 					      }
 					    for (; m < count; m++)
@@ -3838,7 +3850,7 @@ int main (int argc, char **argv)
 						  fprintf(output[i], ", ");
 						if (ascii == MB_YES)
 						  fprintf(output[i], "%s", delimiter);
-						printNaN(verbose, output[i], ascii, &invert_next_value, 
+						printNaN(verbose, output[i], ascii, &invert_next_value,
 							 &signflip_next_value, &error);
 					      }
 					  }
@@ -3886,14 +3898,14 @@ int main (int argc, char **argv)
 					raw_next_value = MB_NO;
 					break;
 				case 'T': /* Transmit gain (dB) */
-					printsimplevalue(verbose, output[i], transmit_gain, 5, 1, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], transmit_gain, 5, 1, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 				case 't': /* Receive gain (dB) */
-					printsimplevalue(verbose, output[i], receive_gain, 5, 1, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], receive_gain, 5, 1, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
@@ -3965,7 +3977,7 @@ int main (int argc, char **argv)
 		  /* print out good pixels */
 		  if (pixel_status == MB_SUCCESS)
 		    {
-		    for (i=0; i<n_list; i++) 
+		    for (i=0; i<n_list; i++)
 			{
 			if (netcdf == MB_YES && lcount > 0)
 			  fprintf(output[i], ", ");
@@ -3981,11 +3993,11 @@ int main (int argc, char **argv)
 				}
 			else
 				k = j;
-			
+
 
 			if (raw_next_value == MB_NO)
 			    {
-			    switch (list[i]) 
+			    switch (list[i])
 				{
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
@@ -4004,8 +4016,8 @@ int main (int argc, char **argv)
 				  	stbd_next_value = MB_YES;
 				  	break;
 				case 'A': /* Average seafloor crosstrack slope */
-					printsimplevalue(verbose, output[i], avgslope, 0, 4, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], avgslope, 0, 4, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'a': /* Per-pixel seafloor crosstrack slope */
@@ -4014,42 +4026,42 @@ int main (int argc, char **argv)
 						nslopes,slopes,slopeacrosstrack,
 						ssacrosstrack[k],
 						&depth,&slope,&error);
-					printsimplevalue(verbose, output[i], slope, 0, 4, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], slope, 0, 4, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'B': /* amplitude */
-					printsimplevalue(verbose, output[i], amp[beam_vertical], 0, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], amp[beam_vertical], 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'b': /* sidescan */
-					printsimplevalue(verbose, output[i], ss[k], 0, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], ss[k], 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'C': /* Sonar altitude (m) */
-					printsimplevalue(verbose, output[i], altitude, 0, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], altitude, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'c': /* Sonar transducer depth (m) */
-					printsimplevalue(verbose, output[i], sonardepth, 0, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], sonardepth, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'D': /* acrosstrack dist. */
 				case 'd':
 					b = bathy_scale * ssacrosstrack[k];
-					printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
-							&invert_next_value, 
+					printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+							&invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'E': /* alongtrack dist. */
 				case 'e':
 					b = bathy_scale * ssalongtrack[k];
-					printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
-							&invert_next_value, 
+					printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+							&invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'G': /* flat bottom grazing angle */
@@ -4059,8 +4071,8 @@ int main (int argc, char **argv)
 					    ssacrosstrack[k],
 					    &depth,&slope,&error);
 					angle = RTD*(atan(ssacrosstrack[k] / (depth - sonardepth)));
-					printsimplevalue(verbose, output[i], angle, 0, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], angle, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'g': /* grazing angle using slope */
@@ -4071,25 +4083,25 @@ int main (int argc, char **argv)
 					    &depth,&slope,&error);
 					angle = RTD * (atan(bathacrosstrack[k] / (depth - sonardepth)))
 					    + slope;
-					printsimplevalue(verbose, output[i], angle, 0, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], angle, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'H': /* heading */
-					printsimplevalue(verbose, output[i], heading, 6, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], heading, 6, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'h': /* course */
-					printsimplevalue(verbose, output[i], course, 6, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], course, 6, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'J': /* time string */
 					mb_get_jtime(verbose,time_i,time_j);
 					if (ascii == MB_YES)
 					    {
-					    if (netcdf == MB_YES) 
+					    if (netcdf == MB_YES)
 					    fprintf(output[i],"%d, %d, %d, %d, %d, %d",
 						time_j[0],time_j[1],
 						time_i[3],time_i[4],
@@ -4144,22 +4156,22 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'L': /* along-track distance (km) */
-					printsimplevalue(verbose, output[i], distance_total, 7, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], distance_total, 7, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'l': /* along-track distance (m) */
-					printsimplevalue(verbose, output[i], 1000.0 * distance_total, 7, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], 1000.0 * distance_total, 7, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
-				case 'M': /* Decimal unix seconds since 
+				case 'M': /* Decimal unix seconds since
 						1/1/70 00:00:00 */
-					printsimplevalue(verbose, output[i], time_d, 0, 6, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], time_d, 0, 6, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
-				case 'm': /* time in decimal seconds since 
+				case 'm': /* time in decimal seconds since
 						first record */
 					if (first_m == MB_YES)
 						{
@@ -4167,8 +4179,8 @@ int main (int argc, char **argv)
 						first_m = MB_NO;
 						}
 					b = time_d - time_d_ref;
-					printsimplevalue(verbose, output[i], b, 0, 6, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], b, 0, 6, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'N': /* ping counter */
@@ -4181,20 +4193,20 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'P': /* pitch */
-					printsimplevalue(verbose, output[i], pitch, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], pitch, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'p': /* draft */
-					printsimplevalue(verbose, output[i], draft, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], draft, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'Q': /* bottom detection type */
 					if (ascii == MB_YES)
 					    {
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
-						
+
 					    fprintf(output[i],"%d",MB_DETECT_UNKNOWN);
 					    if (netcdf == MB_YES) fprintf(output[i], "\"");
 					    }
@@ -4205,23 +4217,23 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'R': /* roll */
-					printsimplevalue(verbose, output[i], roll, 6, 3, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], roll, 6, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'r': /* heave */
-					printsimplevalue(verbose, output[i], heave, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], heave, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'S': /* speed */
-					printsimplevalue(verbose, output[i], speed, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], speed, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 's': /* speed made good */
-					printsimplevalue(verbose, output[i], speed_made_good, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], speed_made_good, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'T': /* yyyy/mm/dd/hh/mm/ss time string */
@@ -4306,11 +4318,11 @@ int main (int argc, char **argv)
 					    }
 					break;
 				case 'V': /* time in seconds since last ping */
-				case 'v': 
+				case 'v':
 					if (ascii == MB_YES)
 					    {
 					    if ( fabs(time_interval) > 100. )
-						fprintf(output[i],"%g",time_interval); 
+						fprintf(output[i],"%g",time_interval);
 					    else
 						fprintf(output[i],"%7.3f",time_interval);
 					    }
@@ -4326,8 +4338,8 @@ int main (int argc, char **argv)
 							*ssacrosstrack[k]
 						    + headingx*mtodeglon
 							*ssalongtrack[k];
-					printsimplevalue(verbose, output[i], dlon, 14, 9, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], dlon, 14, 9, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'x': /* longitude degress + decimal minutes */
@@ -4369,8 +4381,8 @@ int main (int argc, char **argv)
 							*ssacrosstrack[k]
 						    + headingy*mtodeglat
 							*ssalongtrack[k];
-					printsimplevalue(verbose, output[i], dlat, 14, 9, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], dlat, 14, 9, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					break;
 				case 'y': /* latitude degrees + decimal minutes */
@@ -4410,20 +4422,20 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[beam_vertical])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = -bathy_scale * bath[beam_vertical];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					break;
@@ -4432,20 +4444,20 @@ int main (int argc, char **argv)
 					    && (check_values == MBLIST_CHECK_OFF_NAN
 						|| check_values == MBLIST_CHECK_OFF_FLAGNAN))
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else if (!mb_beam_ok(beamflag[beam_vertical])
 					    && check_values == MBLIST_CHECK_OFF_FLAGNAN)
 					    {
-					    printNaN(verbose, output[i], ascii, &invert_next_value, 
+					    printNaN(verbose, output[i], ascii, &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					else
 					    {
 					    b = bathy_scale * bath[beam_vertical];
-					    printsimplevalue(verbose, output[i], b, 0, 3, ascii, 
-							    &invert_next_value, 
+					    printsimplevalue(verbose, output[i], b, 0, 3, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					    }
 					break;
@@ -4466,7 +4478,7 @@ int main (int argc, char **argv)
 			    }
 			else /* raw_next_value */
 			    {
-			    switch (list[i]) 
+			    switch (list[i])
 				{
 				case '/': /* Inverts next simple value */
 					invert_next_value = MB_YES;
@@ -4499,26 +4511,26 @@ int main (int argc, char **argv)
 					break;
 
 				case 'A': /* backscatter */
-				        printsimplevalue(verbose, output[i], bs[beam_vertical], 5, 1, ascii, 
-							    &invert_next_value, 
+				        printsimplevalue(verbose, output[i], bs[beam_vertical], 5, 1, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 				case 'a': /* absorption */
-				        printsimplevalue(verbose, output[i], absorption, 5, 2, ascii, 
-							    &invert_next_value, 
+				        printsimplevalue(verbose, output[i], absorption, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 				case 'B': /* BSN - Normal incidence backscatter */
-				        printsimplevalue(verbose, output[i], bsn, 5, 2, ascii, 
-							    &invert_next_value, 
+				        printsimplevalue(verbose, output[i], bsn, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 				case 'b': /* BSO - Oblique backscatter */
-					printsimplevalue(verbose, output[i], bso, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], bso, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
@@ -4537,14 +4549,14 @@ int main (int argc, char **argv)
 					    nback++;
 					  }
 					}
-					printsimplevalue(verbose, output[i], mback / nback, 5, 2, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], mback / nback, 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 				case 'd': /* beam depression angle */
-				        printsimplevalue(verbose, output[i], depression[beam_vertical], 5, 2, ascii, 
-							    &invert_next_value, 
+				        printsimplevalue(verbose, output[i], depression[beam_vertical], 5, 2, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
@@ -4552,11 +4564,11 @@ int main (int argc, char **argv)
 				  	if (netcdf == MB_YES) fprintf(output[i], "\"");
 					fprintf(output[i], "%s", file);
 					if (netcdf == MB_YES) fprintf(output[i], "\"");
-					
+
 					if (ascii == MB_NO)
 					  for (k = strlen(file); k < MB_PATH_MAXLINE; k++)
 					    fwrite(&file[strlen(file)], sizeof(char), 1, outfile);
-					
+
 					raw_next_value = MB_NO;
 					break;
 
@@ -4602,8 +4614,8 @@ int main (int argc, char **argv)
 					raw_next_value = MB_NO;
 					break;
 				case 'l': /* Transmit pulse length (sec) */
-					printsimplevalue(verbose, output[i], pulse_length, 9, 6, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], pulse_length, 9, 6, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
@@ -4675,7 +4687,7 @@ int main (int argc, char **argv)
 							 &signflip_next_value, &error);
 					if (count > 0)
 					  {
-					    for (m = 1; m < count && m < beam_samples[beam_vertical]; m++) 
+					    for (m = 1; m < count && m < beam_samples[beam_vertical]; m++)
 					      {
 						if (netcdf == MB_YES)
 						  fprintf(output[i], ", ");
@@ -4684,8 +4696,8 @@ int main (int argc, char **argv)
 						invert_next_value = invert;
 						signflip_next_value = flip;
 
-						printsimplevalue(verbose, output[i], ss_pixels[start_sample[beam_vertical] + m], 5, 1, ascii, 
-								 &invert_next_value, 
+						printsimplevalue(verbose, output[i], ss_pixels[start_sample[beam_vertical] + m], 5, 1, ascii,
+								 &invert_next_value,
 								 &signflip_next_value, &error);
 					      }
 					    for (; m < count; m++)
@@ -4694,7 +4706,7 @@ int main (int argc, char **argv)
 						  fprintf(output[i], ", ");
 						if (ascii == MB_YES)
 						  fprintf(output[i], "%s", delimiter);
-						printNaN(verbose, output[i], ascii, &invert_next_value, 
+						printNaN(verbose, output[i], ascii, &invert_next_value,
 							 &signflip_next_value, &error);
 					      }
 					  }
@@ -4745,14 +4757,14 @@ int main (int argc, char **argv)
 					raw_next_value = MB_NO;
 					break;
 				case 'T': /* Transmit gain (dB) */
-					printsimplevalue(verbose, output[i], transmit_gain, 5, 1, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], transmit_gain, 5, 1, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
 				case 't': /* Receive gain (dB) */
-					printsimplevalue(verbose, output[i], receive_gain, 5, 1, ascii, 
-							    &invert_next_value, 
+					printsimplevalue(verbose, output[i], receive_gain, 5, 1, ascii,
+							    &invert_next_value,
 							    &signflip_next_value, &error);
 					raw_next_value = MB_NO;
 					break;
@@ -4800,7 +4812,7 @@ int main (int argc, char **argv)
 	/* deallocate memory used for data arrays */
 	if (use_raw == MB_YES)
 		{
-		mb_freed(verbose,__FILE__, __LINE__, (void **)&ss_pixels,&error); 
+		mb_freed(verbose,__FILE__, __LINE__, (void **)&ss_pixels,&error);
 		}
 
 	/* figure out whether and what to read next */
@@ -4824,9 +4836,9 @@ int main (int argc, char **argv)
 		mb_datalist_close(verbose,&datalist,&error);
 
 	/* compile CDL file */
-	if (netcdf == MB_YES) 
+	if (netcdf == MB_YES)
 	    {
-	    for (i=0; i<n_list; i++) 
+	    for (i=0; i<n_list; i++)
 	        {
 		if(list[i] != '/' && list[i] != '-' && list[i] != '.' &&
 		   !(list[i] >= '0' && list[i] <= '9'))
@@ -4837,7 +4849,7 @@ int main (int argc, char **argv)
 		    /* copy data to CDL file */
 		    for (j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i]);
 			 j > 0;
-			 j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i])) 
+			 j = fread(buffer, sizeof(char), MB_BUFFER_MAX, output[i]))
 		        {
 			if (j != fwrite(buffer, sizeof(char), j, outfile))
 			    {
@@ -4861,12 +4873,12 @@ int main (int argc, char **argv)
 		    system(output_file_temp);
 		    }
 		}
-	    } 
+	    }
 	else
 	    {
 	    fclose(outfile);
 	    }
-	  
+
 	/* check memory */
 	if (verbose >= 4)
 		status = mb_memory_list(verbose,&error);
@@ -4884,24 +4896,25 @@ int main (int argc, char **argv)
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-int set_output(	int	verbose, 
-		int	beams_bath, 
-		int	beams_amp, 
-		int	pixels_ss, 
-		int	use_bath, 
-		int	use_amp, 
-		int	use_ss, 
-		int	dump_mode, 
-		int	beam_set, 
-		int	pixel_set, 
-		int	beam_vertical, 
-		int	pixel_vertical, 
-		int	*beam_start, 
-		int	*beam_end, 
-		int	*pixel_start, 
-		int	*pixel_end, 
-		int	*n_list, 
-		char	*list, 
+int set_output(	int	verbose,
+		int	beams_bath,
+		int	beams_amp,
+		int	pixels_ss,
+		int	use_bath,
+		int	use_amp,
+		int	use_ss,
+		int	dump_mode,
+		int	beam_set,
+		int	pixel_set,
+		int	beam_vertical,
+		int	pixel_vertical,
+		int	*beam_start,
+		int	*beam_end,
+		int     *beam_exclude_percent,
+		int	*pixel_start,
+		int	*pixel_end,
+		int	*n_list,
+		char	*list,
 		int	*error)
 {
 	char	*function_name = "set_output";
@@ -4928,6 +4941,7 @@ int set_output(	int	verbose,
 		fprintf(stderr,"dbg2       pixel_vertical:  %d\n",pixel_vertical);
 		fprintf(stderr,"dbg2       beam_start:      %d\n",*beam_start);
 		fprintf(stderr,"dbg2       beam_end:        %d\n",*beam_end);
+		fprintf(stderr,"dbg2       beam_exclude_percent: %d\n",*beam_exclude_percent);
 		fprintf(stderr,"dbg2       pixel_start:     %d\n",*pixel_start);
 		fprintf(stderr,"dbg2       pixel_end:       %d\n",*pixel_end);
 		fprintf(stderr,"dbg2       n_list:          %d\n",*n_list);
@@ -4940,7 +4954,7 @@ int set_output(	int	verbose,
 	*error = MB_ERROR_NO_ERROR;
 	status = MB_SUCCESS;
 
-	if (beam_set == MBLIST_SET_OFF 
+	if (beam_set == MBLIST_SET_OFF
 		&& pixel_set == MBLIST_SET_OFF
 		&& beams_bath <= 0
 		&& pixels_ss <= 0)
@@ -4965,12 +4979,17 @@ int set_output(	int	verbose,
 	else if (beam_set == MBLIST_SET_OFF)
 		{
 		*beam_start = beam_vertical;
-		*beam_end = beam_vertical;			
+		*beam_end = beam_vertical;
 		}
 	else if (beam_set == MBLIST_SET_ALL)
 		{
 		*beam_start = 0;
-		*beam_end = beams_bath - 1;			
+		*beam_end = beams_bath - 1;
+		}
+	else if (beam_set == MBLIST_SET_EXCLUDE_OUTER)
+                {
+		*beam_start = (beams_bath * *beam_exclude_percent) / 100;
+		*beam_end= beams_bath - (*beam_start+1);
 		}
 	if (pixel_set == MBLIST_SET_OFF && beams_bath > 0)
 		{
@@ -5029,8 +5048,8 @@ int set_output(	int	verbose,
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
 		}
-	else if (use_bath == MB_YES 
-		&& *beam_end >= *beam_start 
+	else if (use_bath == MB_YES
+		&& *beam_end >= *beam_start
 		&& (*beam_start < 0 || *beam_end >= beams_bath))
 		{
 		fprintf(stderr,"\nBeam range %d to %d exceeds available beams 0 to %d\n",
@@ -5038,14 +5057,14 @@ int set_output(	int	verbose,
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
 		}
-	if (*error == MB_ERROR_NO_ERROR 
+	if (*error == MB_ERROR_NO_ERROR
 		&& use_amp == MB_YES && beams_amp <= 0)
 		{
 		fprintf(stderr,"\nAmplitude data not available\n");
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
 		}
-	else if (*error == MB_ERROR_NO_ERROR 
+	else if (*error == MB_ERROR_NO_ERROR
 		&& *beam_end >= *beam_start && use_amp == MB_YES &&
 		(*beam_start < 0 || *beam_end >= beams_amp))
 		{
@@ -5054,7 +5073,7 @@ int set_output(	int	verbose,
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
 		}
-	if (*error == MB_ERROR_NO_ERROR 
+	if (*error == MB_ERROR_NO_ERROR
 		&& (use_ss == MB_YES || *pixel_end >= *pixel_start)
 		&& pixels_ss <= 0)
 		{
@@ -5062,8 +5081,8 @@ int set_output(	int	verbose,
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_USAGE;
 		}
-	else if (*error == MB_ERROR_NO_ERROR 
-		&& *pixel_end >= *pixel_start && 
+	else if (*error == MB_ERROR_NO_ERROR
+		&& *pixel_end >= *pixel_start &&
 		(*pixel_start < 0 || *pixel_end >= pixels_ss))
 		{
 		fprintf(stderr,"\nPixels range %d to %d exceeds available pixels 0 to %d\n",
@@ -5097,14 +5116,14 @@ int set_output(	int	verbose,
 /*--------------------------------------------------------------------*/
 int set_bathyslope(int verbose,
 	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int *ndepths, double *depths, double *depthacrosstrack, 
-	int *nslopes, double *slopes, double *slopeacrosstrack, 
+	int *ndepths, double *depths, double *depthacrosstrack,
+	int *nslopes, double *slopes, double *slopeacrosstrack,
 	int *error)
 {
 	char	*function_name = "set_bathyslope";
 	int	status = MB_SUCCESS;
 	int	i;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5118,7 +5137,7 @@ int set_bathyslope(int verbose,
 		fprintf(stderr,"dbg2       bathacrosstrack: %lu\n",(size_t)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, bath[i], bathacrosstrack[i]);
 		}
 
@@ -5140,7 +5159,7 @@ int set_bathyslope(int verbose,
 		{
 		slopes[i+1] = (depths[i+1] - depths[i])
 			/(depthacrosstrack[i+1] - depthacrosstrack[i]);
-		slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1] 
+		slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1]
 			+ depthacrosstrack[i]);
 		}
 	if (*ndepths > 1)
@@ -5148,7 +5167,7 @@ int set_bathyslope(int verbose,
 		slopes[0] = 0.0;
 		slopeacrosstrack[0] = depthacrosstrack[0];
 		slopes[*ndepths] = 0.0;
-		slopeacrosstrack[*ndepths] = 
+		slopeacrosstrack[*ndepths] =
 			depthacrosstrack[*ndepths-1];
 		}
 
@@ -5162,13 +5181,13 @@ int set_bathyslope(int verbose,
 			*ndepths);
 		fprintf(stderr,"dbg2       depths:\n");
 		for (i=0;i<*ndepths;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr,"dbg2       nslopes:         %d\n",
 			*nslopes);
 		fprintf(stderr,"dbg2       slopes:\n");
 		for (i=0;i<*nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, slopes[i], slopeacrosstrack[i]);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5180,9 +5199,9 @@ int set_bathyslope(int verbose,
 }
 /*--------------------------------------------------------------------*/
 int get_bathyslope(int verbose,
-	int ndepths, double *depths, double *depthacrosstrack, 
-	int nslopes, double *slopes, double *slopeacrosstrack, 
-	double acrosstrack, double *depth,  double *slope, 
+	int ndepths, double *depths, double *depthacrosstrack,
+	int nslopes, double *slopes, double *slopeacrosstrack,
+	double acrosstrack, double *depth,  double *slope,
 	int *error)
 {
 	char	*function_name = "get_bathyslope";
@@ -5190,7 +5209,7 @@ int get_bathyslope(int verbose,
 	int	found_depth, found_slope;
 	int	idepth, islope;
 	int	i;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5203,13 +5222,13 @@ int get_bathyslope(int verbose,
 			ndepths);
 		fprintf(stderr,"dbg2       depths:\n");
 		for (i=0;i<ndepths;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr,"dbg2       nslopes:         %d\n",
 			nslopes);
 		fprintf(stderr,"dbg2       slopes:\n");
 		for (i=0;i<nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, slopes[i], slopeacrosstrack[i]);
 		fprintf(stderr,"dbg2       acrosstrack:     %f\n",acrosstrack);
 		}
@@ -5230,9 +5249,9 @@ int get_bathyslope(int verbose,
 		if (acrosstrack >= depthacrosstrack[idepth]
 		    && acrosstrack <= depthacrosstrack[idepth+1])
 		    {
-		    *depth = depths[idepth] 
+		    *depth = depths[idepth]
 			    + (acrosstrack - depthacrosstrack[idepth])
-			    /(depthacrosstrack[idepth+1] 
+			    /(depthacrosstrack[idepth+1]
 			    - depthacrosstrack[idepth])
 			    *(depths[idepth+1] - depths[idepth]);
 		    found_depth = MB_YES;
@@ -5248,9 +5267,9 @@ int get_bathyslope(int verbose,
 		if (acrosstrack >= slopeacrosstrack[islope]
 		    && acrosstrack <= slopeacrosstrack[islope+1])
 		    {
-		    *slope = slopes[islope] 
+		    *slope = slopes[islope]
 			    + (acrosstrack - slopeacrosstrack[islope])
-			    /(slopeacrosstrack[islope+1] 
+			    /(slopeacrosstrack[islope+1]
 			    - slopeacrosstrack[islope])
 			    *(slopes[islope+1] - slopes[islope]);
 		    found_slope = MB_YES;
@@ -5290,12 +5309,12 @@ int get_bathyslope(int verbose,
 }
 /*--------------------------------------------------------------------*/
 int printsimplevalue(int verbose, FILE *output,
-	double value, int width, int precision, 
+	double value, int width, int precision,
 	int ascii, int *invert, int *flipsign, int *error)
 {
 	char	*function_name = "printsimplevalue";
 	int	status = MB_SUCCESS;
-	char	format[24];	
+	char	format[24];
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -5311,7 +5330,7 @@ int printsimplevalue(int verbose, FILE *output,
 		fprintf(stderr,"dbg2       invert:          %d\n",*invert);
 		fprintf(stderr,"dbg2       flipsign:        %d\n",*flipsign);
 		}
-		
+
 	/* make print format */
 	format[0] = '%';
 	if (*invert == MB_YES)
@@ -5320,7 +5339,7 @@ int printsimplevalue(int verbose, FILE *output,
 	    sprintf(&format[1], "%d.%df", width, precision);
 	else
 	    sprintf(&format[1], ".%df", precision);
-	
+
 	/* invert value if desired */
 	if (*invert == MB_YES)
 	    {
@@ -5328,14 +5347,14 @@ int printsimplevalue(int verbose, FILE *output,
 	    if (value != 0.0)
 		value = 1.0 / value;
 	    }
-	
+
 	/* flip sign value if desired */
 	if (*flipsign == MB_YES)
 	    {
 	    *flipsign = MB_NO;
 	    value = -value;
 	    }
-	    
+
 	/* print value */
 	if (ascii == MB_YES)
 	    fprintf(output,format, value);
@@ -5374,15 +5393,15 @@ int printNaN(int verbose, FILE *output, int ascii, int *invert, int *flipsign, i
 		fprintf(stderr,"dbg2       invert:          %d\n",*invert);
 		fprintf(stderr,"dbg2       flipsign:        %d\n",*flipsign);
 		}
-		
+
 	/* reset invert flag */
 	if (*invert == MB_YES)
 	    *invert = MB_NO;
-		
+
 	/* reset flipsign flag */
 	if (*flipsign == MB_YES)
 	    *flipsign = MB_NO;
-	    
+
 	/* print value */
 	if (ascii == MB_YES)
 	    fprintf(output,"NaN");
@@ -5450,9 +5469,9 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:        %lu\n",(size_t)mbio_ptr);
 		}
-	
+
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	*mode = -1;
 	*ipulse_length = 0;
 	*png_count = 0;
@@ -5482,11 +5501,11 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	    center_sample[i] = 0;
 	    }
 
-	switch (mb_io_ptr->format) 
+	switch (mb_io_ptr->format)
 	    {
 	case MBF_EM300MBA:
 	case MBF_EM300RAW:
-	    mb_get_raw_simrad2(verbose, mbio_ptr, 
+	    mb_get_raw_simrad2(verbose, mbio_ptr,
 		    mode,
 		    ipulse_length,
 		    png_count,
@@ -5517,7 +5536,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 	    break;
 	  case MBF_EM710MBA:
 	  case MBF_EM710RAW:
-	    mb_get_raw_simrad3(verbose, mbio_ptr, 
+	    mb_get_raw_simrad3(verbose, mbio_ptr,
 				mode,
 				ipulse_length,
 				png_count,
@@ -5595,7 +5614,7 @@ int mb_get_raw(int verbose, void *mbio_ptr,
 Method to get fields from simrad2 raw data.
 */
 
-int mb_get_raw_simrad2(int verbose, void *mbio_ptr, 
+int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 			int	*mode,
 			int	*ipulse_length,
 			int	*png_count,
@@ -5671,7 +5690,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 		range[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_range[i];
 		bs[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_amp[i] * 0.5;
 		}
-	    for (i = 0; i < ping_ptr->png_nbeams_ss; i++) 
+	    for (i = 0; i < ping_ptr->png_nbeams_ss; i++)
 		{
 		sort[ping_ptr->png_beam_num[i] - 1] = ping_ptr->png_sort_direction[i];
 		beam_samples[ping_ptr->png_beam_index[i]] = ping_ptr->png_beam_samples[i];
@@ -5731,7 +5750,7 @@ int mb_get_raw_simrad2(int verbose, void *mbio_ptr,
 Method to get fields from simrad3 raw data.
 */
 
-int mb_get_raw_simrad3(int verbose, void *mbio_ptr, 
+int mb_get_raw_simrad3(int verbose, void *mbio_ptr,
 			int	*mode,
 			int	*ipulse_length,
 			int	*png_count,
@@ -5795,15 +5814,15 @@ int mb_get_raw_simrad3(int verbose, void *mbio_ptr,
 	    *tvg_crossover = ping_ptr->png_tvg_crossover;
 	    *nbeams_ss = ping_ptr->png_nbeams_ss;
 	    *npixels = ping_ptr->png_npixels;
-	    
-	    
+
+
 	    for (i = 0; i < ping_ptr->png_nbeams; i++)
 	      {
 		range[i] = ping_ptr->png_range[i];
 		depression[i] = ping_ptr->png_depression[i] * .01;
 		bs[i] = ping_ptr->png_amp[i] * 0.5;
 	      }
-	    for (i = 0; i < ping_ptr->png_nbeams_ss; i++) 
+	    for (i = 0; i < ping_ptr->png_nbeams_ss; i++)
 	      {
 		beam_samples[i] = ping_ptr->png_beam_samples[i];
 		start_sample[i] = ping_ptr->png_start_sample[i];

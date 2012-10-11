@@ -94,7 +94,7 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error)
 		if (fileiobuffer > 0)
 			{
 			/* the buffer size must be a multiple of 512, plus 8 to be efficient */
-			fileiobufferbytes = fileiobuffer * 1024 + 8;
+			fileiobufferbytes = (fileiobuffer * 1024) + 8;
 
 			/* allocate the buffer */
 			buffer_error = MB_ERROR_NO_ERROR;
@@ -105,7 +105,7 @@ int mb_fileio_open(int verbose, void *mbio_ptr, int *error)
 			if (buffer_status == MB_SUCCESS)
 				{
 				buffer_status = setvbuf(mb_io_ptr->mbfp, mb_io_ptr->file_iobuffer, _IOFBF, fileiobufferbytes);
-fprintf(stderr,"Called setvbuf size:%d status:%d\n",fileiobufferbytes,buffer_status);
+/* printf(stderr,"Called setvbuf size:%d status:%d\n",fileiobufferbytes,buffer_status); */
 				}
 			}
 		}

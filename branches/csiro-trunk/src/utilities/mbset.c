@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * MBset is a tool for setting values in an mbprocess parameter file.
- * MBprocess is a tool for processing swath sonar bathymetry data  
+ * MBprocess is a tool for processing swath sonar bathymetry data
  * which performs a number of functions, including:
  *   - merging navigation
  *   - recalculating bathymetry from travel time and angle data
@@ -24,7 +24,7 @@
  * The parameters controlling mbprocess are included in an ascii
  * parameter file. The parameter file syntax is documented by
  * comments in the source file mbsystem/src/mbio/mb_process.h
- * and the manual pages for mbprocess and mbset. 
+ * and the manual pages for mbprocess and mbset.
  *
  * Author:	D. W. Caress
  * Date:	January 4, 2000
@@ -183,15 +183,15 @@ the manual pages for mbprocess and mbset. \n\n";
 	int	flag = 0;
 	int	pargc = 0;
 	char	**pargv = NULL;
-	
+
 	/* MBIO status variables */
 	int	status = MB_SUCCESS;
 	int	verbose = 0;
 	int	error = MB_ERROR_NO_ERROR;
-	
+
 	/* parameter controls */
 	struct mb_process_struct process;
-	
+
 	/* processing variables */
 	int	explicit = MB_NO;
 	int	read_datalist = MB_NO;
@@ -210,10 +210,10 @@ the manual pages for mbprocess and mbset. \n\n";
 	/* set default input and output */
 	strcpy (mbp_ifile, "\0");
 	strcpy (read_file, "datalist.mb-1");
-	
+
 	/* process argument list */
 	while ((c = getopt(argc, argv, "VvHhEeF:f:I:i:LlP:p:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -260,7 +260,7 @@ the manual pages for mbprocess and mbset. \n\n";
 				    break;
 				    }
 				}
-				
+
 			    /* store the parameter argument */
 			    pargv = (char **) realloc(pargv, (pargc + 1) * sizeof(char *));
 			    pargv[pargc] = (char *) malloc(strlen(optarg)+1);
@@ -302,11 +302,11 @@ the manual pages for mbprocess and mbset. \n\n";
 	/* get format if required */
 	if (format == 0)
 		mb_get_format(verbose,read_file,NULL,&format,&error);
-  
+
 	/* determine whether to read one file or a list of files */
 	if (format < 0)
 		read_datalist = MB_YES;
-	
+
 	/* open file list */
 	if (read_datalist == MB_YES)
 	    {
@@ -334,16 +334,16 @@ the manual pages for mbprocess and mbset. \n\n";
 	    mbp_format = format;
 	    read_data = MB_YES;
 	    }
-	    
+
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 	{
-	
+
 	/* load parameters */
-	status = mb_pr_readpar(verbose, mbp_ifile, lookforfiles, 
+	status = mb_pr_readpar(verbose, mbp_ifile, lookforfiles,
 			&process, &error);
 	process.mbp_ifile_specified = MB_YES;
-	
+
 	if (process.mbp_format_specified == MB_NO)
 		{
 		process.mbp_format = mbp_format;
@@ -351,10 +351,10 @@ the manual pages for mbprocess and mbset. \n\n";
 		}
 	if (process.mbp_ofile_specified == MB_NO)
 		{
-		process.mbp_ofile_specified == MB_YES;
+		process.mbp_ofile_specified = MB_YES;
 		mb_pr_default_output(verbose, &process, &error);
 		}
-	
+
 	/* process parameter list */
 	for (i=0;i<pargc;i++)
 		{
@@ -372,7 +372,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		    sscanf(pargv[i], "FORMAT:%d", &process.mbp_format);
 		    process.mbp_format_specified = MB_YES;
 		    }
-		    
+
 		/* navigation merging */
 		else if (strncmp(pargv[i], "NAVMODE", 7) == 0)
 		    {
@@ -418,7 +418,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "NAVTIMESHIFT:%lf", &process.mbp_nav_timeshift);
 		    }
-		    
+
 		/* navigation offsets and shifts */
 		else if (strncmp(pargv[i], "NAVOFFSETX", 10) == 0)
 		    {
@@ -517,7 +517,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(pargv[i], "DATACUT:%d:%d:%lf:%lf", 
+				sscanf(pargv[i], "DATACUT:%d:%d:%lf:%lf",
 					&process.mbp_cut_kind[process.mbp_cut_num],
 					&process.mbp_cut_mode[process.mbp_cut_num],
 					&process.mbp_cut_min[process.mbp_cut_num],
@@ -529,11 +529,11 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(pargv[i], "BATHCUTNUMBER:%lf:%lf", 
+				sscanf(pargv[i], "BATHCUTNUMBER:%lf:%lf",
 					&process.mbp_cut_min[process.mbp_cut_num],
 					&process.mbp_cut_max[process.mbp_cut_num]);
-				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_BATH; 
-				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_BATH;
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_NUMBER;
 				process.mbp_cut_num++;
 				}
 			}
@@ -541,11 +541,11 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(pargv[i], "BATHCUTDISTANCE:%lf:%lf", 
+				sscanf(pargv[i], "BATHCUTDISTANCE:%lf:%lf",
 					&process.mbp_cut_min[process.mbp_cut_num],
 					&process.mbp_cut_max[process.mbp_cut_num]);
-				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_BATH; 
-				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_BATH;
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_DISTANCE;
 				process.mbp_cut_num++;
 				}
 			}
@@ -553,11 +553,11 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(pargv[i], "BATHCUTSPEED:%lf:%lf", 
+				sscanf(pargv[i], "BATHCUTSPEED:%lf:%lf",
 					&process.mbp_cut_min[process.mbp_cut_num],
 					&process.mbp_cut_max[process.mbp_cut_num]);
-				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_BATH; 
-				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_SPEED; 
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_BATH;
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_SPEED;
 				process.mbp_cut_num++;
 				}
 			}
@@ -565,11 +565,11 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(pargv[i], "AMPCUTNUMBER:%lf:%lf", 
+				sscanf(pargv[i], "AMPCUTNUMBER:%lf:%lf",
 					&process.mbp_cut_min[process.mbp_cut_num],
 					&process.mbp_cut_max[process.mbp_cut_num]);
-				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_AMP; 
-				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_AMP;
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_NUMBER;
 				process.mbp_cut_num++;
 				}
 			}
@@ -577,11 +577,11 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(pargv[i], "AMPCUTDISTANCE:%lf:%lf", 
+				sscanf(pargv[i], "AMPCUTDISTANCE:%lf:%lf",
 					&process.mbp_cut_min[process.mbp_cut_num],
 					&process.mbp_cut_max[process.mbp_cut_num]);
-				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_AMP; 
-				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_AMP;
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_DISTANCE;
 				process.mbp_cut_num++;
 				}
 			}
@@ -589,11 +589,11 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(pargv[i], "AMPCUTSPEED:%lf:%lf", 
+				sscanf(pargv[i], "AMPCUTSPEED:%lf:%lf",
 					&process.mbp_cut_min[process.mbp_cut_num],
 					&process.mbp_cut_max[process.mbp_cut_num]);
-				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_AMP; 
-				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_SPEED; 
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_AMP;
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_SPEED;
 				process.mbp_cut_num++;
 				}
 			}
@@ -601,11 +601,11 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(pargv[i], "SSCUTNUMBER:%lf:%lf", 
+				sscanf(pargv[i], "SSCUTNUMBER:%lf:%lf",
 					&process.mbp_cut_min[process.mbp_cut_num],
 					&process.mbp_cut_max[process.mbp_cut_num]);
-				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_SS; 
-				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_SS;
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_NUMBER;
 				process.mbp_cut_num++;
 				}
 			}
@@ -613,11 +613,11 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(pargv[i], "SSCUTDISTANCE:%lf:%lf",  
+				sscanf(pargv[i], "SSCUTDISTANCE:%lf:%lf",
 					&process.mbp_cut_min[process.mbp_cut_num],
 					&process.mbp_cut_max[process.mbp_cut_num]);
-				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_SS; 
-				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_SS;
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_DISTANCE;
 				process.mbp_cut_num++;
 				}
 			}
@@ -625,15 +625,15 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			if (process.mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(pargv[i], "SSCUTSPEED:%lf:%lf", 
+				sscanf(pargv[i], "SSCUTSPEED:%lf:%lf",
 					&process.mbp_cut_min[process.mbp_cut_num],
 					&process.mbp_cut_max[process.mbp_cut_num]);
-				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_SS; 
-				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_SPEED; 
+				process.mbp_cut_kind[process.mbp_cut_num] = MBP_CUT_DATA_SS;
+				process.mbp_cut_mode[process.mbp_cut_num] = MBP_CUT_MODE_SPEED;
 				process.mbp_cut_num++;
 				}
 			}
-	
+
 		/* bathymetry editing */
 		else if (strncmp(pargv[i], "EDITSAVEMODE", 12) == 0)
 		    {
@@ -647,7 +647,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			process.mbp_edit_mode = MBP_EDIT_ON;
 			}
 		    }
-    
+
 		/* bathymetry recalculation */
 		else if (strncmp(pargv[i], "RAYTRACE", 8) == 0)
 		    {
@@ -693,7 +693,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "SOUNDSPEEDREF:%d", &process.mbp_corrected);
 		    }
-		    
+
 		/* static beam bathymetry correction */
 		else if (strncmp(pargv[i], "STATICMODE", 10) == 0)
 		    {
@@ -707,7 +707,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			process.mbp_static_mode = MBP_SVP_ON;
 			}
 		    }
- 
+
 		/* draft correction */
 		else if (strncmp(pargv[i], "DRAFTMODE", 9) == 0)
 		    {
@@ -749,7 +749,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			process.mbp_draft_mode = MBP_DRAFT_SET;
 			}
 		    }
-    
+
 		/* heave correction */
 		else if (strncmp(pargv[i], "HEAVEMODE", 9) == 0)
 		    {
@@ -783,7 +783,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			process.mbp_heave_mode = MBP_HEAVE_MULTIPLY;
 			}
 		    }
-    
+
 		/* lever correction */
 		else if (strncmp(pargv[i], "LEVERMODE", 9) == 0)
 		    {
@@ -837,7 +837,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			process.mbp_lever_mode = MBP_LEVER_ON;
 			}
 		    }
-    
+
 		/* roll correction */
 		else if (strncmp(pargv[i], "ROLLBIASMODE", 12) == 0)
 		    {
@@ -867,7 +867,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			process.mbp_rollbias_mode = MBP_ROLLBIAS_SINGLE;
 			}
 		    }
-    
+
 		/* pitch correction */
 		else if (strncmp(pargv[i], "PITCHBIASMODE", 13) == 0)
 		    {
@@ -881,7 +881,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			process.mbp_pitchbias_mode = MBP_PITCHBIAS_ON;
 			}
 		    }
-    
+
 		/* heading correction */
 		else if (strncmp(pargv[i], "HEADINGMODE", 11) == 0)
 		    {
@@ -901,7 +901,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			process.mbp_heading_mode = MBP_HEADING_OFFSET;
 			}
 		    }
-    
+
 		/* tide correction */
 		else if (strncmp(pargv[i], "TIDEMODE", 8) == 0)
 		    {
@@ -919,7 +919,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "TIDEFORMAT:%d", &process.mbp_tide_format);
 		    }
-	
+
 		/* amplitude correction */
 		else if (strncmp(pargv[i], "AMPCORRMODE", 11) == 0)
 		    {
@@ -963,7 +963,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "AMPSSCORRTOPOFILE:%s", process.mbp_ampsscorr_topofile);
 		    }
-	
+
 		/* sidescan correction */
 		else if (strncmp(pargv[i], "SSCORRMODE", 10) == 0)
 		    {
@@ -1020,7 +1020,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		    {
 		    sscanf(pargv[i], "SSINTERPOLATE:%d", &process.mbp_ssrecalc_interpolate);
 		    }
-   
+
                 /* absorption correction */
                 else if (strncmp(pargv[i], "SAPMODE", 7) == 0)
                     {
@@ -1126,7 +1126,7 @@ the manual pages for mbprocess and mbset. \n\n";
 			{
 			sscanf(pargv[i], "METADRAFT:%lf", &(process.mbp_meta_draft));
 			}
-   
+
 		/* processing kluges */
 		else if (strncmp(pargv[i], "KLUGE001:", 8) == 0)
 			{
@@ -1172,18 +1172,18 @@ the manual pages for mbprocess and mbset. \n\n";
 		/* unrecognized command */
 		else
 		    {
-		    fprintf(stderr, "\nUnrecognized %s command: %s\n", 
+		    fprintf(stderr, "\nUnrecognized %s command: %s\n",
 			    program_name, pargv[i]);
 		    }
 		}
-	    
+
 	/* figure out data format or output filename if required */
 	if (process.mbp_format_specified == MB_NO
 	    || process.mbp_ofile_specified == MB_NO)
 	    {
 	    mb_pr_default_output(verbose, &process, &error);
 	    }
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, &error);
 
@@ -1204,7 +1204,7 @@ the manual pages for mbprocess and mbset. \n\n";
 	    {
 	    fprintf(stderr,"\nProgram <%s>\n",program_name);
 	    fprintf(stderr,"Version %s\n",rcs_id);
-	    fprintf(stderr,"MB-system Version %s\n",MB_VERSION);		
+	    fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
 	    fprintf(stderr,"\nOutput MBprocess Parameters:\n");
 	    fprintf(stderr,"\nInput and Output Files:\n");
 	    if (process.mbp_format_specified == MB_YES)
@@ -1255,7 +1255,7 @@ the manual pages for mbprocess and mbset. \n\n";
 		    fprintf(stderr,"  Navigation longitude shift:%f\n", process.mbp_nav_shiftlon);
 		    fprintf(stderr,"  Navigation latitude shift: %f\n", process.mbp_nav_shiftlat);
 		    }
-	    else 
+	    else
 		    fprintf(stderr,"  Navigation positions not shifted.\n");
 
 	    fprintf(stderr,"\nAdjusted Navigation Merging:\n");
@@ -1531,9 +1531,9 @@ the manual pages for mbprocess and mbset. \n\n";
 	    }
 
 	/* write parameters */
-	status = mb_pr_writepar(verbose, mbp_ifile, 
+	status = mb_pr_writepar(verbose, mbp_ifile,
 			&process, &error);
-			
+
 	/* output results */
 	if (status == MB_SUCCESS)
 		{
@@ -1572,4 +1572,3 @@ the manual pages for mbprocess and mbset. \n\n";
 	exit(error);
 }
 /*--------------------------------------------------------------------*/
-

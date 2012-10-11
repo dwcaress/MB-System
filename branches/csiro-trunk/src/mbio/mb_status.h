@@ -29,16 +29,23 @@
 #define MB_STATUS_DEF
 
 /* MB-system version id */
-#define	MB_VERSION	"5.3.1961"
-#define	MB_BUILD_DATE	"8 June 2012"
+#define	MB_VERSION	"5.3.1989"
+#define	MB_BUILD_DATE	"4 October 2012"
 #define	MB_SVN		"$Id$"
 
 /* MBIO function boolean convention */
 #define	MB_YES	1
 #define	MB_NO	0
 
+/* MBIO sonar types */
+#define	MB_SONARTYPE_UNKNOWN		0
+#define	MB_SONARTYPE_ECHOSOUNDER	1
+#define	MB_SONARTYPE_MULTIBEAM		2
+#define	MB_SONARTYPE_SIDESCAN		3
+#define	MB_SONARTYPE_INTERFEROMETRIC	4
+
 /* MBIO data type ("kind") convention */
-#define	MB_DATA_KINDS			60
+#define	MB_DATA_KINDS			59
 #define	MB_DATA_NONE			0
 #define	MB_DATA_DATA			1	/* general survey data */
 #define	MB_DATA_COMMENT			2	/* general comment */
@@ -284,6 +291,8 @@ static char *notice_msg[] =
 	"MB_DATA_ATTITUDE1 (55): ancillary attitude system 1",
 	"MB_DATA_ATTITUDE2 (56): ancillary attitude system 2",
 	"MB_DATA_ATTITUDE3 (57): ancillary attitude system 3",
+	"MB_DATA_SONARDEPTH (58): HYSWEEP dynamic draft",
+	"MB_DATA_ALTITUDE (59): HYSWEEP single beam echosounder",
 
 	/* notices for nonfatal error messages */
 	"MB_ERROR_TIME_GAP (ID=-1): Time gap in data",

@@ -661,6 +661,9 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	s7kr_beam		*beam;
 	s7kr_verticaldepth	*verticaldepth;
 	s7kr_image		*image;
+	s7kr_v2detection	*v2detection;
+	s7kr_v2detectionsetup	*v2detectionsetup;
+	s7kr_v2rawdetection	*v2rawdetection;
 	s7kr_bluefin		*bluefin;
 	int	*current_ping;
 	double	speed, heading, longitude, latitude;
@@ -668,7 +671,7 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	double	sonar_depth, sonar_altitude;
 	double	soundspeed, alpha, beta, theta, phi;
 	double	rr, xx, zz;
-	int	i;
+	int	i, j;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -697,6 +700,8 @@ int mbr_rt_reson7kr(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	backscatter = &store->backscatter;
 	beam = &store->beam;
 	image = &store->image;
+	v2detection = &store->v2detection;
+	v2rawdetection = &store->v2rawdetection;
 	bluefin = &store->bluefin;
 	current_ping = (int *) &mb_io_ptr->save14;
 
@@ -938,6 +943,55 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 			}
 		}
 */
+
+	/* calculate bathymetry if only raw detects are available */
+	if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_DATA
+		&& store->read_bathymetry == MB_NO
+		&& store->read_v2rawdetection == MB_YES)
+		{
+		bathymetry->header = v2rawdetection->header;
+		bathymetry->header.RecordType = R7KRECID_7kBathymetricData;
+		bathymetry->serial_number = v2rawdetection->serial_number;
+		bathymetry->ping_number = v2rawdetection->ping_number;
+		bathymetry->multi_ping = v2rawdetection->multi_ping;
+		bathymetry->number_beams = v2rawdetection->number_beams;
+		bathymetry->layer_comp_flag = 0;
+		bathymetry->sound_vel_flag = 0;
+		if (volatilesettings->sound_velocity > 0.0)
+			bathymetry->sound_velocity = volatilesettings->sound_velocity;
+		else if (bluefin->environmental[0].sound_speed > 0.0)
+			bathymetry->sound_velocity = bluefin->environmental[0].sound_speed;
+		else
+			bathymetry->sound_velocity = 1500.0;
+		bathymetry->optionaldata = MB_NO;
+		store->read_bathymetry = MB_YES;
+		}
+
+	/* else calculate bathymetry if only detects are available */
+	else if (status == MB_SUCCESS
+		&& store->kind == MB_DATA_DATA
+		&& store->read_bathymetry == MB_NO
+		&& store->read_v2detection == MB_YES)
+		{
+		bathymetry->header = v2detection->header;
+		bathymetry->header.RecordType = R7KRECID_7kBathymetricData;
+		bathymetry->serial_number = v2detection->serial_number;
+		bathymetry->ping_number = v2detection->ping_number;
+		bathymetry->multi_ping = v2detection->multi_ping;
+		bathymetry->number_beams = v2detection->number_beams;
+		bathymetry->layer_comp_flag = 0;
+		bathymetry->sound_vel_flag = 0;
+		if (volatilesettings->sound_velocity > 0.0)
+			bathymetry->sound_velocity = volatilesettings->sound_velocity;
+		else if (bluefin->environmental[0].sound_speed > 0.0)
+			bathymetry->sound_velocity = bluefin->environmental[0].sound_speed;
+		else
+			bathymetry->sound_velocity = 1500.0;
+		bathymetry->optionaldata = MB_NO;
+		store->read_bathymetry = MB_YES;
+		}
+
 	/* get optional values in bathymetry record if needed */
 	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA
@@ -996,19 +1050,42 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 		bathymetry->heave = heave;
 		bathymetry->vehicle_height = -sonar_depth;
 
-		/* get bathymetry */
+		/* get ready to calculate bathymetry */
 		if (volatilesettings->sound_velocity > 0.0)
 			soundspeed = volatilesettings->sound_velocity;
 		else if (bluefin->environmental[0].sound_speed > 0.0)
 			soundspeed = bluefin->environmental[0].sound_speed;
 		else
 			soundspeed = 1500.0;
-		for (i=0;i<bathymetry->number_beams;i++)
+
+		/* loop over detections as available - the 7k format has used several
+		   different records over the years, so there are several different
+		   cases that must be handled */
+
+		/* case of v2rawdetection record */
+		if (store->read_v2rawdetection == MB_YES)
 			{
-			if ((bathymetry->quality[i] & 15) > 0)
+			/* initialize all of the beams */
+			for (i=0;i<bathymetry->number_beams;i++)
 				{
-				alpha = RTD * (beamgeometry->angle_alongtrack[i] + bathymetry->pitch);
-				beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - bathymetry->roll);
+				bathymetry->quality[i] = 0;
+				bathymetry->depth[i] = 0.0;
+				bathymetry->acrosstrack[i] = 0.0;
+				bathymetry->alongtrack[i] = 0.0;
+				bathymetry->pointing_angle[i] = 0.0;
+				bathymetry->azimuth_angle[i] = 0.0;
+				}
+
+			/* now loop over the detects */
+			for (j=0;j<v2rawdetection->number_beams;j++)
+				{
+				i = v2rawdetection->beam_descriptor[j];
+				bathymetry->range[i] = v2rawdetection->detection_point[j]
+							/ v2rawdetection->sampling_rate;
+				bathymetry->quality[i] = v2rawdetection->quality[j];
+				bathymetry->intensity[i] = 0.0;
+				alpha = RTD * bathymetry->pitch;
+				beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - bathymetry->roll);
 				mb_rollpitch_to_takeoff(
 					verbose,
 					alpha, beta,
@@ -1022,14 +1099,110 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 				bathymetry->depth[i] = zz + sonar_depth;
 				bathymetry->pointing_angle[i] = DTR * theta;
 				bathymetry->azimuth_angle[i] = DTR * phi;
+/* fprintf(stderr,"j:%d i:%d quality:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+j, i, bathymetry->quality[i], roll, bathymetry->roll,pitch, bathymetry->pitch,
+alpha,beta,theta,phi,
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				}
-			else
+			}
+
+		/* case of v2detection record with v2detectionsetup */
+		else if (store->read_v2detection == MB_YES && store->read_v2detectionsetup == MB_YES)
+			{
+			/* now loop over the detects */
+			for (j=0;j<v2detection->number_beams;j++)
 				{
-				bathymetry->depth[i] = 0.0;
-				bathymetry->acrosstrack[i] = 0.0;
-				bathymetry->alongtrack[i] = 0.0;
-				bathymetry->pointing_angle[i] = 0.0;
-				bathymetry->azimuth_angle[i] = 0.0;
+				i = v2detectionsetup->beam_descriptor[j];
+
+				bathymetry->range[i] = v2detection->range[j];
+				alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch);
+				beta = 90.0 - RTD * (v2detection->angle_x[j] - bathymetry->roll);
+				mb_rollpitch_to_takeoff(
+					verbose,
+					alpha, beta,
+					&theta, &phi,
+					error);
+				rr = 0.5 * soundspeed * bathymetry->range[i];
+				xx = rr * sin(DTR * theta);
+				zz = rr * cos(DTR * theta);
+				bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+				bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+				bathymetry->depth[i] = zz + sonar_depth;
+				bathymetry->pointing_angle[i] = DTR * theta;
+				bathymetry->azimuth_angle[i] = DTR * phi;
+/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+i,roll, bathymetry->roll,pitch, bathymetry->pitch,
+alpha,beta,theta,phi,
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+				}
+			}
+
+		/* case of v2detection record alone */
+		else if (store->read_v2detection == MB_YES)
+			{
+			/* now loop over the detects */
+			for (i=0;i<v2detection->number_beams;i++)
+				{
+				bathymetry->range[i] = v2detection->range[j];
+				alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch);
+				beta = 90.0 - RTD * (v2detection->angle_x[j] - bathymetry->roll);
+				mb_rollpitch_to_takeoff(
+					verbose,
+					alpha, beta,
+					&theta, &phi,
+					error);
+				rr = 0.5 * soundspeed * bathymetry->range[i];
+				xx = rr * sin(DTR * theta);
+				zz = rr * cos(DTR * theta);
+				bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+				bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+				bathymetry->depth[i] = zz + sonar_depth;
+				bathymetry->pointing_angle[i] = DTR * theta;
+				bathymetry->azimuth_angle[i] = DTR * phi;
+/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+i,roll, bathymetry->roll,pitch, bathymetry->pitch,
+alpha,beta,theta,phi,
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+				}
+			}
+
+		/* else default case of beamgeometry record */
+		else
+			{
+			/* loop over all beams */
+			for (i=0;i<bathymetry->number_beams;i++)
+				{
+				if ((bathymetry->quality[i] & 15) > 0)
+					{
+					alpha = RTD * (beamgeometry->angle_alongtrack[i] + bathymetry->pitch);
+					beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - bathymetry->roll);
+					mb_rollpitch_to_takeoff(
+						verbose,
+						alpha, beta,
+						&theta, &phi,
+						error);
+					rr = 0.5 * soundspeed * bathymetry->range[i];
+					xx = rr * sin(DTR * theta);
+					zz = rr * cos(DTR * theta);
+					bathymetry->acrosstrack[i] = xx * cos(DTR * phi);
+					bathymetry->alongtrack[i] = xx * sin(DTR * phi);
+					bathymetry->depth[i] = zz + sonar_depth;
+					bathymetry->pointing_angle[i] = DTR * theta;
+					bathymetry->azimuth_angle[i] = DTR * phi;
+/* fprintf(stderr,"i:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+i,roll, bathymetry->roll,pitch, bathymetry->pitch,
+alpha,beta,theta,phi,
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+					}
+				else
+					{
+					bathymetry->quality[i] = 0;
+					bathymetry->depth[i] = 0.0;
+					bathymetry->acrosstrack[i] = 0.0;
+					bathymetry->alongtrack[i] = 0.0;
+					bathymetry->pointing_angle[i] = 0.0;
+					bathymetry->azimuth_angle[i] = 0.0;
+					}
 				}
 			}
 
@@ -1117,6 +1290,8 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	s7kr_beam		*beam;
 	s7kr_image		*image;
 	s7kr_beamgeometry	*beamgeometry;
+	s7kr_v2detection	*v2detection;
+	s7kr_v2rawdetection	*v2rawdetection;
 	double	*edgetech_time_d;
 	double	*edgetech_dt;
 	double	*last_7k_time_d;
@@ -1348,6 +1523,7 @@ fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %
 					&& *new_ping >= 0
 					&& *last_ping != *new_ping)
 					{
+					/* good ping if bathymetry record is read */
 					if (store->read_bathymetry == MB_YES)
 						{
 						done = MB_YES;
@@ -1361,6 +1537,53 @@ fprintf(stderr,"current ping:%d records read: %d %d %d %d %d %d %d %d %d %d %d %
 						/* get the time */
 						bathymetry = &(store->bathymetry);
 						header = &(bathymetry->header);
+						time_j[0] = header->s7kTime.Year;
+						time_j[1] = header->s7kTime.Day;
+						time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+						time_j[3] = (int) header->s7kTime.Seconds;
+						time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+						mb_get_itime(verbose, time_j, store->time_i);
+						mb_get_time(verbose, store->time_i, &(store->time_d));
+						}
+
+					/* good ping if at least the detects are available */
+					else if (store->read_v2detection == MB_YES)
+						{
+						done = MB_YES;
+						store->kind = MB_DATA_DATA;
+						*save_flag = MB_YES;
+						*current_ping = *last_ping;
+						*last_ping = -1;
+						for (i=0;i<*size;i++)
+							buffersave[i] = buffer[i];
+
+						/* get the time */
+						v2detection = &(store->v2detection);
+						header = &(v2detection->header);
+						time_j[0] = header->s7kTime.Year;
+						time_j[1] = header->s7kTime.Day;
+						time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+						time_j[3] = (int) header->s7kTime.Seconds;
+						time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+						mb_get_itime(verbose, time_j, store->time_i);
+						mb_get_time(verbose, store->time_i, &(store->time_d));
+
+						}
+
+					/* good ping if at least the raw detects are available */
+					else if (store->read_v2rawdetection == MB_YES)
+						{
+						done = MB_YES;
+						store->kind = MB_DATA_DATA;
+						*save_flag = MB_YES;
+						*current_ping = *last_ping;
+						*last_ping = -1;
+						for (i=0;i<*size;i++)
+							buffersave[i] = buffer[i];
+
+						/* get the time */
+						v2rawdetection = &(store->v2rawdetection);
+						header = &(v2rawdetection->header);
 						time_j[0] = header->s7kTime.Year;
 						time_j[1] = header->s7kTime.Day;
 						time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
@@ -2070,38 +2293,6 @@ header->RecordNumber,image->ping_number);
 					*current_ping = *last_ping;
 					*last_ping = -1;
 					}
-				}
-			else if (status == MB_SUCCESS
-				&& ping_record == MB_YES
-				&& store->read_matchfilter == MB_YES)
-				{
-				if (status == MB_SUCCESS
-					&& ping_record == MB_YES
-					&& store->read_volatilesettings == MB_YES
-					&& store->read_matchfilter == MB_YES
-					&& store->read_beamgeometry == MB_YES
-					&& store->read_bathymetry == MB_YES
-					&& store->read_remotecontrolsettings == MB_YES
-					&& store->read_backscatter == MB_YES
-					&& store->read_beam == MB_YES
-					&& store->read_verticaldepth == MB_YES
-					&& store->read_image == MB_YES)
-					{
-					done = MB_YES;
-					*current_ping = *last_ping;
-					*last_ping = -1;
-					}
-				}
-			else if (status == MB_SUCCESS
-				&& ping_record == MB_YES
-				&& store->read_volatilesettings == MB_YES
-				&& store->read_beamgeometry == MB_YES
-				&& store->read_bathymetry == MB_YES
-				&& store->read_image == MB_YES)
-				{
-				done = MB_YES;
-				*current_ping = *last_ping;
-				*last_ping = -1;
 				}
 			}
 
@@ -6483,6 +6674,18 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 		{
 		mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->intensity[i])); index += 4;
 		}
+	if ((header->OffsetToOptionalData == 0 && header->Size >= 92 + 17 * bathymetry->number_beams)
+		|| (header->OffsetToOptionalData > 0 && header->Size >= 137 + 37 * bathymetry->number_beams))
+		{
+		for (i=0;i<bathymetry->number_beams;i++)
+			{
+			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->min_depth_gate[i])); index += 4;
+			}
+		for (i=0;i<bathymetry->number_beams;i++)
+			{
+			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->max_depth_gate[i])); index += 4;
+			}
+		}
 
 	/* extract the optional data */
 	if (header->OffsetToOptionalData > 0)
@@ -7409,7 +7612,7 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
 	s7kr_v2detectionsetup *v2detectionsetup;
 	int	index;
 	int	time_j[5];
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -7447,9 +7650,11 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
 	mb_get_binary_float(MB_YES, &buffer[index], &(v2detectionsetup->minimum_nadir_search)); index += 4;
 	mb_get_binary_float(MB_YES, &buffer[index], &(v2detectionsetup->maximum_nadir_search)); index += 4;
 	v2detectionsetup->automatic_filter_window = buffer[index]; index++;
-	for (i=0;i<64;i++)
+	mb_get_binary_float(MB_YES, &buffer[index], &(v2detectionsetup->applied_roll)); index += 4;
+	mb_get_binary_float(MB_YES, &buffer[index], &(v2detectionsetup->depth_gate_tilt)); index += 4;
+	for (i=0;i<14;i++)
 		{
-		v2detectionsetup->reserved[i] = buffer[index]; index++;
+		mb_get_binary_float(MB_YES, &buffer[index], &(v2detectionsetup->reserved[i])); index += 4;
 		}
 
 	/* extract v2detectionsetup data */
@@ -7463,20 +7668,13 @@ int mbr_reson7kr_rd_v2detectionsetup(int verbose, char *buffer, void *store_ptr,
 		mb_get_binary_int(MB_YES, &buffer[index], &(v2detectionsetup->user_limits_min_sample[i])); index += 4;
 		mb_get_binary_int(MB_YES, &buffer[index], &(v2detectionsetup->user_limits_max_sample[i])); index += 4;
 		mb_get_binary_int(MB_YES, &buffer[index], &(v2detectionsetup->quality[i])); index += 4;
-		if (v2detectionsetup->data_field_size >= R7KRDTSIZE_7kV2DetectionSetup+ 4)
+		if (v2detectionsetup->data_field_size >= R7KRDTSIZE_7kV2DetectionSetup + 4)
 			{
-			mb_get_binary_int(MB_YES, &buffer[index], &(v2detectionsetup->reserved2[i])); index += 4;
-			for (j=0;j<v2detectionsetup->data_field_size-R7KRDTSIZE_7kV2DetectionSetup-4;j++)
-				{
-				index++;
-				}
+			mb_get_binary_float(MB_YES, &buffer[index], &(v2detectionsetup->uncertainty[i])); index += 4;
 			}
 		else
 			{
-			for (j=0;j<v2detectionsetup->data_field_size-R7KRDTSIZE_7kV2DetectionSetup;j++)
-				{
-				index++;
-				}
+			v2detectionsetup->uncertainty[i] = 0.0;
 			}
 		}
 
@@ -13746,13 +13944,13 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 	/* figure out size of output record */
 	*size = MBSYS_RESON7K_RECORDHEADER_SIZE + MBSYS_RESON7K_RECORDTAIL_SIZE;
 	*size += R7KHDRSIZE_7kBathymetricData;
-	*size += bathymetry->number_beams * 9;
+	*size += bathymetry->number_beams * 17;
 	if (bathymetry->optionaldata == MB_YES)
 		{
 		*size += 45 + bathymetry->number_beams * 20;
 		header->OffsetToOptionalData = MBSYS_RESON7K_RECORDHEADER_SIZE
 								+ R7KHDRSIZE_7kBathymetricData
-								+ bathymetry->number_beams * 9;
+								+ bathymetry->number_beams * 17;
 		}
 	else
 		header->OffsetToOptionalData = 0;
@@ -13817,6 +14015,14 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 		for (i=0;i<bathymetry->number_beams;i++)
 			{
 			mb_put_binary_float(MB_YES, bathymetry->intensity[i], &buffer[index]); index += 4;
+			}
+		for (i=0;i<bathymetry->number_beams;i++)
+			{
+			mb_put_binary_float(MB_YES, bathymetry->min_depth_gate[i], &buffer[index]); index += 4;
+			}
+		for (i=0;i<bathymetry->number_beams;i++)
+			{
+			mb_put_binary_float(MB_YES, bathymetry->max_depth_gate[i], &buffer[index]); index += 4;
 			}
 
 		/* insert the optional data */
@@ -14753,7 +14959,7 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
 	unsigned int checksum;
 	int	index;
 	char	*buffer;
-	int	i, j;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -14826,9 +15032,11 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
 		mb_put_binary_float(MB_YES, v2detectionsetup->minimum_nadir_search, &buffer[index]); index += 4;
 		mb_put_binary_float(MB_YES, v2detectionsetup->maximum_nadir_search, &buffer[index]); index += 4;
 		buffer[index] = v2detectionsetup->automatic_filter_window; index++;
-		for (i=0;i<64;i++)
+		mb_put_binary_float(MB_YES, v2detectionsetup->applied_roll, &buffer[index]); index += 4;
+		mb_put_binary_float(MB_YES, v2detectionsetup->depth_gate_tilt, &buffer[index]); index += 4;
+		for (i=0;i<14;i++)
 			{
-			buffer[index] = v2detectionsetup->reserved[i]; index++;
+			mb_put_binary_float(MB_YES, v2detectionsetup->reserved[i], &buffer[index]); index += 4;
 			}
 		for (i=0;i<v2detectionsetup->number_beams;i++)
 			{
@@ -14842,18 +15050,7 @@ int mbr_reson7kr_wr_v2detectionsetup(int verbose, int *bufferalloc, char **buffe
 			mb_put_binary_int(MB_YES, v2detectionsetup->quality[i], &buffer[index]); index += 4;
 			if (v2detectionsetup->data_field_size >= R7KRDTSIZE_7kV2DetectionSetup + 4)
 				{
-				mb_put_binary_int(MB_YES, v2detectionsetup->reserved2[i], &buffer[index]); index += 4;
-				for (j=0;j<v2detectionsetup->data_field_size-R7KRDTSIZE_7kV2DetectionSetup-4;j++)
-					{
-					buffer[index] = 0; index++;
-					}
-				}
-			else
-				{
-				for (j=0;j<v2detectionsetup->data_field_size-R7KRDTSIZE_7kV2DetectionSetup;j++)
-					{
-					buffer[index] = 0; index++;
-					}
+				mb_put_binary_int(MB_YES, v2detectionsetup->uncertainty[i], &buffer[index]); index += 4;
 				}
 			}
 

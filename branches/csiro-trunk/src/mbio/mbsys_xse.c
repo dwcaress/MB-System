@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_xse.c	3/27/2000
  *	$Id$
  *
- *    Copyright (c) 2000-2012 by 
+ *    Copyright (c) 2000-2012 by
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,8 +13,8 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_xse.h contains the functions for handling 
- * the data structure used by MBIO functions 
+ * mbsys_xse.h contains the functions for handling
+ * the data structure used by MBIO functions
  * to store swath sonar data in the XSE Data Exchange Format
  * developed by L-3 Communications ELAC Nautik.
  * This format is used for data from ELAC Bottomchart multibeam sonars
@@ -116,7 +116,7 @@
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_xse_alloc";
@@ -148,7 +148,7 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	/* initialize everything */
 	/* type of data record */
 	store->kind = MB_DATA_NONE;  /* Survey, nav, Comment */
-	
+
 	/* parameter (ship frames) */
 	store->par_parameter = MB_NO;	/* boolean flag for parameter group */
 	store->par_source = 0;		/* sensor id */
@@ -215,7 +215,7 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		store->par_xdr_z[i] = 0.0;	/* transducer center vertical offset (m) */
 		store->par_xdr_roll[i] = 0.0;	/* beamforming roll bias (radians - port up positive) */
 		store->par_xdr_pitch[i] = 0.0;	/* beamforming pitch bias (radians - bow up positive) */
-		store->par_xdr_azimuth[i] = 0.0;	/* beamforming azimuth bias (radians 
+		store->par_xdr_azimuth[i] = 0.0;	/* beamforming azimuth bias (radians
 									- projector axis clockwise with
 									respect to compass positive) */
 		}
@@ -233,7 +233,7 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->svp_usec = 0;		/* microseconds */
 	store->svp_nsvp = 0;		/* number of depth values */
 	store->svp_nctd = 0;		/* number of ctd values */
-	store->svp_ssv = 0.0;				/* m/s */
+	store->svp_ssv = 0.0;		/* m/s */
 	for (i=0;i<MBSYS_XSE_MAXSVP;i++)
 	    {
 	    store->svp_depth[i] = 0.0;		/* m */
@@ -243,6 +243,8 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->svp_temperature[i] = 0.0;	/* degree celcius */
 	    store->svp_pressure[i] = 0.0;	/* bar */
 	    }
+ 	store->svp_ssv_depth = 0.0;	/* m */
+ 	store->svp_ssv_depthflag = 0;	/* 0 = invalid depth, otherwise depth valid */
 
 	/* position (navigation frames) */
 	store->nav_group_general = MB_NO;	/* boolean flag */
@@ -257,7 +259,7 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->nav_group_pitch = MB_NO;		/* boolean flag */
 	store->nav_group_heading = MB_NO;	/* boolean flag */
 	store->nav_group_log = MB_NO;		/* boolean flag */
-	store->nav_group_gps = MB_NO;		/* boolean flag */	
+	store->nav_group_gps = MB_NO;		/* boolean flag */
 	store->nav_source = 0;			/* sensor id */
 	store->nav_sec = 0;			/* sec since 1/1/1901 00:00 */
 	store->nav_usec = 0;			/* microseconds */
@@ -266,11 +268,11 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->nav_description_len = 0;
 	for (i=0;i<MBSYS_XSE_DESCRIPTION_LENGTH;i++)
 	    store->nav_description[i] = 0;
-	store->nav_x = 0.0;			/* eastings (m) or 
+	store->nav_x = 0.0;			/* eastings (m) or
 					    longitude (radians) */
-	store->nav_y = 0.0;			/* northings (m) or 
+	store->nav_y = 0.0;			/* northings (m) or
 					    latitude (radians) */
-	store->nav_z = 0.0;			/* height (m) or 
+	store->nav_z = 0.0;			/* height (m) or
 					    ellipsoidal height (m) */
 	store->nav_acc_quality = 0;	/* GPS quality:
 						0: invalid
@@ -309,7 +311,7 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->nav_gps_geoidalseparation = 0.0;	/* difference between WGS84 ellipsoid and geoid (m)
 							(positive means sea level geoid is above
 							ellipsoid) */
-	
+
 	/* survey depth (multibeam frames) */
 	store->mul_frame = MB_NO;	/* boolean flag - multibeam frame read */
 	store->mul_group_beam = MB_NO;	/* boolean flag - beam group read */
@@ -330,6 +332,8 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->mul_group_hits = MB_NO;	/* boolean flag - hits group read */
 	store->mul_group_heavereceive = MB_NO;	/* boolean flag - heavereceive group read */
 	store->mul_group_azimuth = MB_NO;	/* boolean flag - azimuth group read */
+	store->mul_group_properties = MB_NO;	/* boolean flag - properties group read */
+	store->mul_group_normamp = MB_NO;	/* boolean flag - normalized amplitude group read */
 	store->mul_group_mbsystemnav = MB_NO;	/* boolean flag - mbsystemnav group read */
 	store->mul_source = 0;		/* sensor id */
 	store->mul_sec = 0;		/* sec since 1/1/1901 00:00 */
@@ -359,7 +363,7 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->beams[i].pitch = 0.0;
 	    store->beams[i].beam = i + 1;
 	    store->beams[i].quality = 0;
-	    store->beams[i].amplitude = 0;		    
+	    store->beams[i].amplitude = 0;
 	    store->beams[i].gate_angle = 0.0;
 	    store->beams[i].gate_start = 0.0;
 	    store->beams[i].gate_stop = 0.0;
@@ -369,7 +373,17 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->beams[i].heavereceive = 0.0;
 	    store->beams[i].azimuth = 0.0;
 	    }
-	
+	store->mul_num_properties = 0;     /* number of properties */
+ 	for (i=0;i<MBSYS_XSE_MAXPROPERTIES;i++)
+	    {
+	    store->mul_properties_type[i] = 0;
+            store->mul_properties_value[i] = 0.0;
+	    }
+	for (i=0;i<MBSYS_XSE_MAXPROPERTIES;i++)
+	    {
+	    store->mul_properties_reserved[i] = 0;
+	    }
+
 	/* survey sidescan (sidescan frames) */
 	store->sid_frame = MB_NO;		/* boolean flag - sidescan frame read */
 	store->sid_group_avt = MB_NO;		/* boolean flag - amp vs time group read */
@@ -433,19 +447,21 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		store->sid_cmp_real[i] = 0; /* real sidescan signal */
 	for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
 		store->sid_cmp_imaginary[i] = 0; /* imaginary sidescan signal */
-	store->sid_wgt_factorleft = 0;		/* weighting factor for block floating 
-						point expansion  -- 
+	store->sid_wgt_factorleft = 0;		/* weighting factor for block floating
+						point expansion  --
 						defined as 2^(-N) volts for lsb */
 	store->sid_wgt_samplesleft = 0;	/* number of left samples */
-	store->sid_wgt_factorright = 0;		/* weighting factor for block floating 
-						point expansion  -- 
+	store->sid_wgt_factorright = 0;		/* weighting factor for block floating
+						point expansion  --
 						defined as 2^(-N) volts for lsb */
 	store->sid_wgt_samplesright = 0;	/* number of right samples */
 
 	/* seabeam (seabeam frames) */
 	store->sbm_properties = MB_NO;		/* boolean flag - sbm properties group read */
 	store->sbm_hrp = MB_NO;			/* boolean flag - sbm hrp group read */
-	store->sbm_center = MB_NO;		/* boolean flag - sbm center group read */
+	store->sbm_signal = MB_NO;		/* boolean flag - sbm signal group read */
+	store->sbm_sweepsegments = MB_NO;	/* boolean flag - sbm sweep segments group read */
+	store->sbm_spacingmode = MB_NO;		/* boolean flag - sbm spacing mode group read */
 	store->sbm_message = MB_NO;		/* boolean flag - sbm message group read */
 	store->sbm_source = 0;			/* sensor id */
 	store->sbm_sec = 0;			/* sec since 1/1/1901 00:00 */
@@ -465,14 +481,26 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->sbm_heave = 0.0;			/* heave (m) */
 	store->sbm_roll = 0.0;			/* roll (radians) */
 	store->sbm_pitch = 0.0;			/* pitch (radians) */
-	store->sbm_center_beam = 0;		/* beam number for center beam profile */
-	store->sbm_center_count = 0;		/* number of samples in center beam profile */
-	for (i=0;i<MBSYS_XSE_MAXPIXELS;i++)
-	    store->sbm_center_amp[i] = 0.0;	/* center beam profile values */
+	store->sbm_signal_beam = 0;		/* beam number for signal */
+	store->sbm_signal_count = 0;		/* number of samples in signal */
+	for (i=0;i<MBSYS_XSE_MAXSAMPLES;i++)
+	    store->sbm_signal_amp[i] = 0.0;	/* signal values */
 	store->sbm_message_id = 0;			/* seabeam message id */
 	store->sbm_message_len = 0;			/* seabeam message length */
 	for (i=0;i<MBSYS_XSE_COMMENT_LENGTH;i++)
-	    store->sbm_message_txt[i] = 0; /* seabeam message */
+	    store->sbm_message_txt[i] = 0; 	/* seabeam message */
+        store->sbm_sweep_direction = 0;    	/* sweep direction 0=static, 1=port, 2=starboard */
+        store->sbm_sweep_azimuth = 0.0;      	/* effective azimuth (radians) */
+        store->sbm_sweep_segments = 0; 		/* number of segments */
+        store->sbm_sweep_seconds = 0;  		/* seconds since start of ping and end of sweep segment */
+        store->sbm_sweep_micro = 0;    		/* microseconds of seconds */
+        store->sbm_sweep_extrapolateazimuth = 0.0;   	/* extrapolated azimuth at center of sweep segment (radians) */
+        store->sbm_sweep_interpolatedazimuth = 0.0;  	/* interpolated azimuth at center of sweep segment (radians) */
+        store->sbm_sweep_extrapolatepitch = 0.0;   	/* extrapolated pitch at center of sweep segment (radians) */
+        store->sbm_sweep_interpolatedpitch = 0.0;  	/* interpolated pitch at center of sweep segment (radians) */
+        store->sbm_sweep_extrapolateroll = 0.0;   	/* extrapolated roll at center of sweep segment (radians) */
+        store->sbm_sweep_interpolatedroll = 0.0;  	/* interpolated roll at center of sweep segment (radians) */
+        store->sbm_sweep_stabilizedangle = 0.0;   	/* sweep segment stabilized angle (radians) */
 
 	/* comment */
 	for (i=0;i<MBSYS_XSE_COMMENT_LENGTH;i++)
@@ -498,7 +526,7 @@ int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_xse_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_xse_deall";
@@ -532,7 +560,7 @@ int mbsys_xse_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_xse_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_xse_dimensions";
@@ -608,12 +636,12 @@ int mbsys_xse_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -651,7 +679,7 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		*time_d = store->mul_sec 
+		*time_d = store->mul_sec
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->mul_usec;
 		mb_get_date(verbose,*time_d,time_i);
@@ -665,21 +693,21 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed  */
 		*speed  = 3.6 * store->mul_speed;
-			
+
 		/* set beamwidths in mb_io structure */
 		if (store->mul_frequency >= 50.0
 		    || store->mul_frequency <= 0.0)
 		    {
-		    mb_io_ptr->beamwidth_ltrack 
+		    mb_io_ptr->beamwidth_ltrack
 			= 2.8;
-		    mb_io_ptr->beamwidth_xtrack 
+		    mb_io_ptr->beamwidth_xtrack
 			= 1.5;
 		    }
 		else
 		    {
-		    mb_io_ptr->beamwidth_ltrack 
+		    mb_io_ptr->beamwidth_ltrack
 			= 1.0;
-		    mb_io_ptr->beamwidth_xtrack 
+		    mb_io_ptr->beamwidth_xtrack
 			= 1.0;
 		    }
 
@@ -693,8 +721,8 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		    *nbath = store->mul_num_beams;
 		    if (store->mul_group_amp == MB_YES)
 			    *namp = store->mul_num_beams;
-			    
-		    /* determine whether beams are ordered 
+
+		    /* determine whether beams are ordered
 			port to starboard or starboard to port */
 		    xtrackmin = 0.0;
 		    xtrackmax = 0.0;
@@ -719,11 +747,11 @@ int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			dsign = 1.0;
 
 /*
-fprintf(stderr, "itrack: %d %d   freq:%f\n", 
+fprintf(stderr, "itrack: %d %d   freq:%f\n",
 ixtrackmin, ixtrackmax, store->mul_frequency);
 */
 
-		    /* now extract the bathymetry */		  
+		    /* now extract the bathymetry */
 		    for (i=0;i<store->mul_num_beams;i++)
 			{
 			j = store->mul_num_beams - store->beams[i].beam;
@@ -739,13 +767,13 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 			    beamflag[j] = MB_FLAG_FILTER + MB_FLAG_FLAG;
 			else
 			    beamflag[j] = MB_FLAG_NULL;
-			    
+
 			/* bathymetry from SeaBeam 2100 multibeams is already heave and draft compensated
 				- bathymetry from Bottomchart multibeams need to have
 				heave and draft applied */
 			bath[j] = store->beams[i].depth;
 			if (store->par_ship_nsensor > 0
-				&& (store->par_ship_sensor_type[0] < 2000 
+				&& (store->par_ship_sensor_type[0] < 2000
 					|| store->par_ship_sensor_type[0] > 3000))
 				{
 				bath[j] += store->beams[i].heave;
@@ -754,15 +782,15 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 				else
 				    bath[j] += store->par_trans_z_stbd;
 				}
-			bathacrosstrack[j] 
+			bathacrosstrack[j]
 				= dsign * store->beams[i].lateral;
-			bathalongtrack[j] 
+			bathalongtrack[j]
 				= store->beams[i].along;
 			amp[j] = store->beams[i].amplitude;
 			}
 		    }
 
-		/* get sidescan */		  
+		/* get sidescan */
 		if (store->sid_frame == MB_YES)
 		    {
 		    if (store->sid_group_avl == MB_YES)
@@ -772,12 +800,12 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 			    {
 			    j = *nss - i - 1;
 			    ss[j] = store->sid_avl_amp[i];
-			    ssacrosstrack[j] 
-				= dsign * 0.001 * store->sid_avl_binsize 
+			    ssacrosstrack[j]
+				= dsign * 0.001 * store->sid_avl_binsize
 				    * (i - *nss / 2);
 			    if (store->mul_frame == MB_YES)
-				ssalongtrack[j] 
-				    = 0.5 * store->nav_speed_ground 
+				ssalongtrack[j]
+				    = 0.5 * store->nav_speed_ground
 					* (store->sid_sec + 0.000001 * store->sid_usec
 					    - (store->mul_sec + 0.000001 * store->mul_usec));
 			    else
@@ -794,7 +822,7 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 	else if (*kind == MB_DATA_NAV)
 		{
 		/* get time */
-		*time_d = store->nav_sec 
+		*time_d = store->nav_sec
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->nav_usec;
 		mb_get_date(verbose,*time_d,time_i);
@@ -811,16 +839,16 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 		else if (store->nav_group_motiontw == MB_YES)
 			*heading = RTD * store->nav_course_water;
 		else
-			mb_hedint_interp(verbose, mbio_ptr, *time_d, 
+			mb_hedint_interp(verbose, mbio_ptr, *time_d,
 				 heading, error);
 
 		/* get speed  */
 		if (store->nav_group_log == MB_YES)
-			*speed = 3.6 * store->nav_log_speed;	    
+			*speed = 3.6 * store->nav_log_speed;
 		else if (store->nav_group_motiongt == MB_YES)
-			*speed = 3.6 * store->nav_speed_ground;	    
+			*speed = 3.6 * store->nav_speed_ground;
 		else if (store->nav_group_motiontw == MB_YES)
-			*speed = 3.6 * store->nav_speed_water;	    
+			*speed = 3.6 * store->nav_speed_water;
 
 		/* get distance and depth values */
 		*nbath = 0;
@@ -857,13 +885,13 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -879,7 +907,7 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -907,12 +935,12 @@ ixtrackmin, ixtrackmax, store->mul_frequency);
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -955,13 +983,13 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
@@ -991,7 +1019,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get time */
 		store->mul_sec = (unsigned int) (time_d + MBSYS_XSE_TIME_OFFSET);
-		store->mul_usec = (time_d 
+		store->mul_usec = (time_d
 				    - ((int) time_d)) * 1000000;
 		store->sid_sec = store->mul_sec;
 		store->sid_usec = store->mul_usec;
@@ -1013,7 +1041,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ixtrackmax = 0;
 		if (store->mul_frame == MB_YES)
 		    {
-		    /* determine whether beams are ordered 
+		    /* determine whether beams are ordered
 			port to starboard or starboard to port */
 		    for (i=0;i<store->mul_num_beams;i++)
 			{
@@ -1033,7 +1061,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		    else
 			dsign = 1.0;
 
-		    /* now insert the bathymetry */		  
+		    /* now insert the bathymetry */
 		    for (i=0;i<store->mul_num_beams;i++)
 			{
 			j = store->mul_num_beams - store->beams[i].beam;
@@ -1050,7 +1078,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				else if (store->beams[i].quality == 1)
 				    store->beams[i].quality = 7;
 				}
-			    else 
+			    else
 				store->beams[i].quality = 1;
 			    store->beams[i].lateral = dsign * bathacrosstrack[j];
 			    store->beams[i].along = bathalongtrack[j];
@@ -1061,15 +1089,15 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				    heave and draft removed before storage */
 			    store->beams[i].depth = bath[j];
 			    if (store->par_ship_nsensor > 0
-				    && (store->par_ship_sensor_type[0] < 2000 
+				    && (store->par_ship_sensor_type[0] < 2000
 					    || store->par_ship_sensor_type[0] > 3000))
 				    {
 				    if (store->beams[i].lateral < 0.0)
-					store->beams[i].depth 
+					store->beams[i].depth
 					    -= (store->beams[i].heave
 				    		+ store->par_trans_z_port);
 				    else
-					store->beams[i].depth 
+					store->beams[i].depth
 					    -= (store->beams[i].heave
 				    		+ store->par_trans_z_stbd);
 				    }
@@ -1077,7 +1105,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			}
 		    }
 
-		/* now insert the sidescan */		  
+		/* now insert the sidescan */
 		if (store->sid_frame == MB_YES)
 		    {
 		    store->sid_group_avl = MB_YES;
@@ -1111,7 +1139,7 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get time */
 		store->nav_sec = (unsigned int) (time_d + MBSYS_XSE_TIME_OFFSET);
-		store->nav_usec = (time_d 
+		store->nav_usec = (time_d
 				    - ((int) time_d)) * 1000000;
 
 		/*get navigation */
@@ -1150,9 +1178,9 @@ int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_xse_ttimes";
@@ -1211,7 +1239,7 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		*nbeams = 0;
 		if (store->mul_frame == MB_YES)
 		    {
-		    /* determine whether beams are ordered 
+		    /* determine whether beams are ordered
 			port to starboard or starboard to port */
 		    xtrackmin = 0.0;
 		    xtrackmax = 0.0;
@@ -1243,22 +1271,22 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			ttimes[j] = store->beams[i].tt;
 			beta = 90.0 - dsign * RTD * store->beams[i].angle;
 			alpha = RTD * store->beams[i].pitch;
-			mb_rollpitch_to_takeoff(verbose, 
-			    alpha, beta, &angles[j], 
+			mb_rollpitch_to_takeoff(verbose,
+			    alpha, beta, &angles[j],
 			    &angles_forward[j], error);
 			if (store->mul_frequency >= 50000.0
 				|| store->mul_frequency <= 0.0)
 			    {
 			    if (store->beams[j].angle < 0.0)
 				{
-				angles_null[j] = 37.5 
-					+ RTD 
+				angles_null[j] = 37.5
+					+ RTD
 					* store->par_trans_err_port;
 				}
 			    else
 				{
-				angles_null[j] = 37.5 
-					+ RTD 
+				angles_null[j] = 37.5
+					+ RTD
 					* store->par_trans_err_stbd;
 				}
 			    }
@@ -1267,8 +1295,8 @@ int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			    angles_null[j] = 0.0;
 			    }
 			heave[j] = store->beams[i].heave;
-			alongtrack_offset[j] 
-			    = 0.5 * store->nav_speed_ground 
+			alongtrack_offset[j]
+			    = 0.5 * store->nav_speed_ground
 				    * store->beams[i].delay;
 			}
 		    }
@@ -1379,7 +1407,7 @@ int mbsys_xse_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			j = store->mul_num_beams - store->beams[i].beam;
 			*nbeams = MAX(store->beams[i].beam, *nbeams);
 			}
-			
+
 		    /* loop over beams to set detects */
 		    for (i=0;i<*nbeams;i++)
 			{
@@ -1437,7 +1465,7 @@ int mbsys_xse_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_xse_extract_altitude";
@@ -1490,13 +1518,13 @@ int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			for (i=0;i<store->mul_num_beams;i++)
 			    {
 			    if (store->beams[i].quality == 1
-				&& fabs(store->beams[i].lateral) 
+				&& fabs(store->beams[i].lateral)
 				    < xtrack_min)
 				{
 				xtrack_min = fabs(store->beams[i].lateral);
 				bath_best = store->beams[i].depth;
 				}
-			    }		
+			    }
 			}
 		    if (bath_best <= 0.0)
 			{
@@ -1504,13 +1532,13 @@ int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			for (i=0;i<store->mul_num_beams;i++)
 			    {
 			    if (store->beams[i].quality < 8
-				&& fabs(store->beams[i].lateral) 
+				&& fabs(store->beams[i].lateral)
 				    < xtrack_min)
 				{
 				xtrack_min = fabs(store->beams[i].lateral);
 				bath_best = store->beams[i].depth;
 				}
-			    }		
+			    }
 			}
 		    }
 		*altitude = bath_best - *transducer_depth;
@@ -1559,8 +1587,8 @@ int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_xse_extract_nav";
@@ -1592,7 +1620,7 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	if (*kind == MB_DATA_DATA)
 		{
 		/* get time */
-		*time_d = store->mul_sec 
+		*time_d = store->mul_sec
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->mul_usec;
 		mb_get_date(verbose,*time_d,time_i);
@@ -1627,8 +1655,8 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			*pitch = RTD * store->nav_hrp_pitch;
 			*heave = store->nav_hrp_heave;
 			}
-		else if (store->nav_group_heave == MB_YES 
-			&& store->nav_group_roll == MB_YES 
+		else if (store->nav_group_heave == MB_YES
+			&& store->nav_group_roll == MB_YES
 			&& store->nav_group_pitch == MB_YES)
 			{
 			*roll = RTD * store->nav_rol_roll;
@@ -1650,27 +1678,27 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	else if (*kind == MB_DATA_NAV)
 		{
 		/* get time */
-		*time_d = store->nav_sec 
+		*time_d = store->nav_sec
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->nav_usec;
 		mb_get_date(verbose,*time_d,time_i);
 
 		/* get heading */
 		if (store->nav_group_heading == MB_YES)
-			*heading = RTD * store->nav_hdg_heading;	    
+			*heading = RTD * store->nav_hdg_heading;
 		else if (store->nav_group_motiongt == MB_YES)
-			*heading = RTD * store->nav_course_ground;	    
+			*heading = RTD * store->nav_course_ground;
 		else if (store->nav_group_motiontw == MB_YES)
-			*heading = RTD * store->nav_course_water;	    
+			*heading = RTD * store->nav_course_water;
 		else
-			mb_hedint_interp(verbose, mbio_ptr, *time_d, 
+			mb_hedint_interp(verbose, mbio_ptr, *time_d,
 				 heading, error);
 
 		/* get speed if possible */
 		if (store->nav_group_log == MB_YES)
-			*speed = 3.6 * store->nav_log_speed;	    
+			*speed = 3.6 * store->nav_log_speed;
 		else if (store->nav_group_motiongt == MB_YES)
-			*speed = 3.6 * store->nav_speed_ground;	    
+			*speed = 3.6 * store->nav_speed_ground;
 		else if (store->nav_group_motiontw == MB_YES)
 			*speed = 3.6 * store->nav_speed_water;
 		else
@@ -1683,7 +1711,7 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			*navlat = RTD * store->nav_y;
 			}
 		else
-			mb_navint_interp(verbose, mbio_ptr, *time_d, *heading, *speed, 
+			mb_navint_interp(verbose, mbio_ptr, *time_d, *heading, *speed,
 				    navlon, navlat, speed, error);
 
 		/* get draft */
@@ -1700,8 +1728,8 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			*pitch = RTD * store->nav_hrp_pitch;
 			*heave = store->nav_hrp_heave;
 			}
-		else if (store->nav_group_heave == MB_YES 
-			&& store->nav_group_roll == MB_YES 
+		else if (store->nav_group_heave == MB_YES
+			&& store->nav_group_roll == MB_YES
 			&& store->nav_group_pitch == MB_YES)
 			{
 			*roll = RTD * store->nav_rol_roll;
@@ -1748,7 +1776,7 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1781,7 +1809,7 @@ int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1827,7 +1855,7 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get time */
 		store->mul_sec = (unsigned int) (time_d + MBSYS_XSE_TIME_OFFSET);
-		store->mul_usec = (time_d 
+		store->mul_usec = (time_d
 				    - ((int) time_d)) * 1000000;
 		store->sid_sec = store->mul_sec;
 		store->sid_usec = store->mul_usec;
@@ -1861,7 +1889,7 @@ int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get time */
 		store->nav_sec = (unsigned int) (time_d + MBSYS_XSE_TIME_OFFSET);
-		store->nav_usec = (time_d 
+		store->nav_usec = (time_d
 				    - ((int) time_d)) * 1000000;
 
 		/*get navigation */
@@ -1941,7 +1969,7 @@ int mbsys_xse_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		*nsvp = store->svp_nsvp;
-		
+
 		/* get profile */
 		for (i=0;i<*nsvp;i++)
 			{
@@ -2023,7 +2051,7 @@ int mbsys_xse_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		store->svp_nsvp = MIN(nsvp, MBSYS_XSE_MAXSVP);
-		
+
 		/* get profile */
 		for (i=0;i<store->svp_nsvp;i++)
 			{
@@ -2046,7 +2074,7 @@ int mbsys_xse_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_xse_copy(int verbose, void *mbio_ptr, 
+int mbsys_xse_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {

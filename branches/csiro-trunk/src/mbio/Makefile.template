@@ -482,7 +482,7 @@ mbsys_hsmd.o:	mbsys_hsmd.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)
 	$(CC) -c $(CFLAGS) mbsys_hsmd.c
 mbsys_dsl.o:	mbsys_dsl.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_dsl.h
 	$(CC) -c $(CFLAGS) mbsys_dsl.c
-mbsys_gsf.o:	mbsys_gsf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_gsf.h
+mbsys_gsf.o:	mbsys_gsf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_gsf.h $(INCDIR)/gsf.h $(INCDIR)/gsf_ft.h $(INCDIR)/gsf_enc.h
 	$(CC) -c $(CFLAGS) -I$(GSFINCDIR) mbsys_gsf.c
 mbsys_mstiff.o:	mbsys_mstiff.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mbsys_mstiff.h
 	$(CC) -c $(CFLAGS) mbsys_mstiff.c
@@ -596,7 +596,7 @@ mbr_dsl120pf.o: mbr_dsl120pf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INC
 	$(CC) -c $(CFLAGS) mbr_dsl120pf.c
 mbr_dsl120sf.o: mbr_dsl120sf.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_dsl120sf.h $(INCDIR)/mbsys_dsl.h
 	$(CC) -c $(CFLAGS) mbr_dsl120sf.c
-mbr_gsfgenmb.o: mbr_gsfgenmb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_gsfgenmb.h $(INCDIR)/mbsys_gsf.h
+mbr_gsfgenmb.o: mbr_gsfgenmb.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_gsfgenmb.h $(INCDIR)/mbsys_gsf.h $(INCDIR)/gsf.h $(INCDIR)/gsf_ft.h $(INCDIR)/gsf_enc.h
 	$(CC) -c $(CFLAGS) -I$(GSFINCDIR)  mbr_gsfgenmb.c
 mbr_mstiffss.o: mbr_mstiffss.c $(INCDIR)/mb_status.h $(INCDIR)/mb_format.h $(INCDIR)/mb_io.h $(INCDIR)/mb_define.h $(INCDIR)/mb_swap.h $(INCDIR)/mbf_mstiffss.h $(INCDIR)/mbsys_mstiff.h
 	$(CC) -c $(CFLAGS) mbr_mstiffss.c

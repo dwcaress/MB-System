@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_hdcs.c contains the functions for handling the data structure
- * used by MBIO functions to store swath sonar data stored 
+ * used by MBIO functions to store swath sonar data stored
  * in UNB OMG HDCS formats:
  *      MBF_OMGHDCSJ : MBIO ID 151
  *
@@ -92,7 +92,7 @@
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_hdcs_alloc";
@@ -122,7 +122,7 @@ int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    {
 	    /* get pointer to data structure */
 	    store = (struct mbsys_hdcs_struct *) *store_ptr;
-    
+
 	    /* initialize values in structure */
 	    store->kind = MB_DATA_NONE;
 	    store->sensorNumber = 1;
@@ -148,7 +148,7 @@ int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->minProcDepth = 0;
 	    store->maxProcDepth = 0;
 	    store->status_sum = 0;
-	    store->status_pro = 0;		/* status is either OK (0) 
+	    store->status_pro = 0;		/* status is either OK (0)
 						or no nav (1)
 						or unwanted for gridding (2) */
 	    store->numDepths_pro = 0;		/* Number of depths in profile        */
@@ -162,7 +162,7 @@ int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->vesselRoll = 0;	/* Vessel roll (100 nRadians)         */
 	    store->tide = 0;		/* Tide (mm)                          */
 	    store->vesselVelocity = 0;	/* Vessel Velocity (mm/s)
-						note - transducer pitch is 
+						note - transducer pitch is
 						generally tucked into the vel field     */
 	    store->power = 0;
 	    store->TVG = 0;
@@ -171,10 +171,10 @@ int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->soundVelocity = 0; 	/* mm/s */
 	    store->lengthImageDataField = 0;
 	    store->pingNo = 0;
-	    store->mode = 0;  
-	    store->Q_factor = 0;  
+	    store->mode = 0;
+	    store->Q_factor = 0;
 	    store->pulseLength = 0;   /* centisecs*/
-	    store->unassigned = 0;  
+	    store->unassigned = 0;
 	    store->td_sound_speed = 0;
 	    store->samp_rate = 0;
 	    store->z_res_cm = 0;
@@ -220,7 +220,7 @@ int mbsys_hdcs_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hdcs_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_hdcs_deall";
@@ -264,7 +264,7 @@ int mbsys_hdcs_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hdcs_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_hdcs_dimensions";
@@ -326,12 +326,166 @@ int mbsys_hdcs_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hdcs_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error)
+{
+	char	*function_name = "mbsys_hdcs_sidescantype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_hdcs_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+	    {
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+		    function_name);
+	    fprintf(stderr,"dbg2  Input arguments:\n");
+	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+	    fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+	    }
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_hdcs_struct *) store_ptr;
+
+	/* get sonar type */
+	if (store->toolType == MBSYS_HDCS_ELAC_BottomChart		/* 1 */
+		|| store->toolType == MBSYS_HDCS_EM12_dual		/* 2 */
+		|| store->toolType == MBSYS_HDCS_EM100_depth		/* 3 */
+		|| store->toolType == MBSYS_HDCS_SeaBeam		/* 5 */
+		|| store->toolType == MBSYS_HDCS_EM3000			/* 6 */
+		|| store->toolType == MBSYS_HDCS_EM12_single		/* 8 */
+		|| store->toolType == MBSYS_HDCS_EM100_depth_ss		/* 9 */
+		|| store->toolType == MBSYS_HDCS_EM1000			/* 10 */
+		|| store->toolType == MBSYS_HDCS_EM3000D		/* 12 */
+		|| store->toolType == MBSYS_HDCS_SB2100			/* 13 */
+		|| store->toolType == MBSYS_HDCS_EM1000_ampl		/* 15 */
+		|| store->toolType == MBSYS_HDCS_SB2K			/* 16 */
+		|| store->toolType == MBSYS_HDCS_Seabat9001		/* 17 */
+		|| store->toolType == MBSYS_HDCS_SeaBeam_1180_MkII	/* 21 */
+		|| store->toolType == MBSYS_HDCS_SeaBat_8101		/* 22 */
+		|| store->toolType == MBSYS_HDCS_EM300 			/* 23 */
+		|| store->toolType == MBSYS_HDCS_EM121A 		/* 24 */
+		|| store->toolType == MBSYS_HDCS_SM2000 		/* 25 */
+		|| store->toolType == MBSYS_HDCS_HydroSweep_MD2		/* 26 */
+		|| store->toolType == MBSYS_HDCS_EM1002			/* 27 */
+		|| store->toolType == MBSYS_HDCS_EM120			/* 30 */
+		|| store->toolType == MBSYS_HDCS_SeaBat_8125		/* 31 */
+		|| store->toolType == MBSYS_HDCS_SeaBat_8111		/* 32 */
+		|| store->toolType == MBSYS_HDCS_SeaBat_8150		/* 33 */
+		|| store->toolType == MBSYS_HDCS_EM3002			/* 34 */
+		|| store->toolType == MBSYS_HDCS_EM710			/* 36 */
+		|| store->toolType == MBSYS_HDCS_EM3002D		/* 37 */
+		|| store->toolType == MBSYS_HDCS_SeaBat_8160		/* 38 */
+		|| store->toolType == MBSYS_HDCS_EM122			/* 40 */
+		|| store->toolType == MBSYS_HDCS_EM302			/* 41 */
+		|| store->toolType == MBSYS_HDCS_SeaBat_7125		/* 42 */
+		|| store->toolType == MBSYS_HDCS_R2Sonic_2024		/* 43 */
+		|| store->toolType == MBSYS_HDCS_SeaBat_7150 		/* 44 */)
+		{
+		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		}
+	else if (store->toolType == MBSYS_HDCS_FanSweep		/* 4 */
+		|| store->toolType == MBSYS_HDCS_ISIS_Submetrix		/* 14 */
+		|| store->toolType == MBSYS_HDCS_FanSweep_10A		/* 18 */
+		|| store->toolType == MBSYS_HDCS_FanSweep_20		/* 19 */
+		|| store->toolType == MBSYS_HDCS_ISIS_SWA		/* 20 */
+		|| store->toolType == MBSYS_HDCS_SEA_SwathPlus 		/* 39 */)
+		{
+		*sonartype = MB_SONARTYPE_INTERFEROMETRIC;
+		}
+	else if (store->toolType == MBSYS_HDCS_Humminbird		/* 28 */
+		|| store->toolType == MBSYS_HDCS_OMG_GLORIA		/* 45 */)
+		{
+		*sonartype = MB_SONARTYPE_SIDESCAN;
+		}
+	else if (store->toolType == MBSYS_HDCS_SingleBeam		/* 0 */
+		 || store->toolType == MBSYS_HDCS_ROSS_Profiler		/* 7 */
+		|| store->toolType == MBSYS_HDCS_LADS_2ndary		/* 11 */
+		|| store->toolType == MBSYS_HDCS_Knudsen_320		/* 29 */
+		|| store->toolType == MBSYS_HDCS_Optech_Laser		/* 35 */)
+		{
+		*sonartype = MB_SONARTYPE_ECHOSOUNDER;
+		}
+	else
+		{
+		*sonartype = MB_SONARTYPE_UNKNOWN;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sonartype:  %d\n",*sonartype);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_hdcs_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *ss_type, int *error)
+{
+	char	*function_name = "mbsys_hdcs_sidescantype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_hdcs_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+	    {
+	    fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",
+		    function_name);
+	    fprintf(stderr,"dbg2  Input arguments:\n");
+	    fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+	    fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+	    fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+	    }
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_hdcs_struct *) store_ptr;
+
+	/* get sidescan type */
+	if (store->toolType == MBSYS_HDCS_SB2100)
+		{
+		*ss_type = MB_SIDESCAN_LINEAR;
+		}
+	else
+		{
+		*ss_type = MB_SIDESCAN_LOGARITHMIC;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ss_type:    %d\n",*ss_type);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -368,20 +522,20 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	    {
 	    /* get time */
 	    *time_d = 100.0 * store->refTime
-					+ 1.0e-6 
-					    * ((double)store->timeScale) 
+					+ 1.0e-6
+					    * ((double)store->timeScale)
 					    * ((double)store->timeOffset);
 	    mb_get_date(verbose,*time_d,time_i);
 
 	    /* get navigation */
 	    if (store->positionType == 1)
 		{
-		*navlon = 
+		*navlon =
 			RTD * (1.0E-7 * (double)store->refLong
 				+ 1.0E-9 * (double)store->vesselLongOffset
 				    * (double)store->positionScale);
-		*navlat = 
-			RTD * (1.0E-7 * (double)store->refLat 
+		*navlat =
+			RTD * (1.0E-7 * (double)store->refLat
 				+ 1.0E-9 * (double)store->vesselLatOffset
 				    * (double)store->positionScale);
 		}
@@ -409,9 +563,9 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg4       toolType:   %d\n",store->toolType);
 		fprintf(stderr,"dbg4       toolType:   %s\n",mbsys_hdcs_tool_names[store->toolType]);
 		}
-	
+
 	    /* set beamwidths in mb_io structure */
-	    if (store->rx_beam_width > 0 && store->rx_beam_width < 255 
+	    if (store->rx_beam_width > 0 && store->rx_beam_width < 255
 	    	&& store->tx_beam_width > 0 && store->tx_beam_width < 65535)
 		{
 		mb_io_ptr->beamwidth_ltrack = 0.1 * store->tx_beam_width;
@@ -577,7 +731,7 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_io_ptr->beamwidth_xtrack = 2.0;
 		}
 
-	    /* read distance, depth, and backscatter 
+	    /* read distance, depth, and backscatter
 		    values into storage arrays */
 	    *nbath = store->numDepths_pro;
 	    *namp = store->numDepths_pro;
@@ -696,13 +850,13 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	    fprintf(stderr,"dbg2  Return values:\n");
 	    fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 	    }
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 	    && *kind == MB_DATA_COMMENT)
 	    {
 	    fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 		    comment);
 	    }
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 	    && *kind != MB_DATA_COMMENT)
 	    {
 	    fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -718,7 +872,7 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	    fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 	    fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 	    }
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 	    && *kind == MB_DATA_DATA)
 	    {
 	    fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -749,12 +903,12 @@ int mbsys_hdcs_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -796,18 +950,18 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	    {
 	    fprintf(stderr,"dbg2       nbath:      %d\n",
 		    nbath);
-	    if (verbose >= 3) 
+	    if (verbose >= 3)
 	     for (i=0;i<nbath;i++)
 	      fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 		    i,beamflag[i],bath[i],
 		    bathacrosstrack[i],bathalongtrack[i]);
 	    fprintf(stderr,"dbg2       namp:       %d\n",namp);
-	    if (verbose >= 3) 
+	    if (verbose >= 3)
 	     for (i=0;i<namp;i++)
 	      fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 		    i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 	    fprintf(stderr,"dbg2        nss:       %d\n",nss);
-	    if (verbose >= 3) 
+	    if (verbose >= 3)
 	     for (i=0;i<nss;i++)
 	      fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 		    i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -839,10 +993,10 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		|| navlat != 0.0)
 		{
 		store->positionType = 1;
-		store->vesselLongOffset = 1.0E9 * (DTR * navlon 
+		store->vesselLongOffset = 1.0E9 * (DTR * navlon
 						- 1.0E-7 * (double)store->refLong)
 						/ ((double)store->positionScale);
-		store->vesselLatOffset = 1.0E9 * (DTR * navlat 
+		store->vesselLatOffset = 1.0E9 * (DTR * navlat
 						- 1.0E-7 * (double)store->refLat)
 						/ ((double)store->positionScale);
 		}
@@ -858,7 +1012,7 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		&& store->beams == NULL)
 		{
 		status = mb_mallocd(verbose,__FILE__, __LINE__,
-			    store->num_beam * sizeof(struct mbsys_hdcs_beam_struct), 
+			    store->num_beam * sizeof(struct mbsys_hdcs_beam_struct),
 			    (void **)&store->beams,error);
 		}
 
@@ -875,9 +1029,9 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			beam->status = 0;
 			beam->observedDepth = 0;
 			}
-		    else 
+		    else
 			{
-			beam->observedDepth 
+			beam->observedDepth
 				= 1000 * bath[i] + store->tide;
 			if (mb_beam_ok(beamflag[i]))
 			    beam->status = 0;
@@ -885,7 +1039,7 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			    beam->status = 22;
 			}
 		    }
-    
+
 		/* read amplitude values into storage arrays */
 		for (i=0;i<store->numDepths_pro;i++)
 		    {
@@ -916,9 +1070,9 @@ int mbsys_hdcs_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_hdcs_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_hdcs_ttimes";
@@ -1126,7 +1280,7 @@ int mbsys_hdcs_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hdcs_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_hdcs_extract_altitude";
@@ -1201,7 +1355,7 @@ int mbsys_hdcs_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hdcs_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	double transducer_depth, double altitude, 
+	double transducer_depth, double altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_hdcs_insert_altitude";
@@ -1267,8 +1421,8 @@ int mbsys_hdcs_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_hdcs_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_hdcs_extract_nav";
@@ -1301,20 +1455,20 @@ int mbsys_hdcs_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	    {
 	    /* get time */
 	    *time_d = 100.0 * store->refTime
-					+ 1.0e-6 
-					    * ((double)store->timeScale) 
+					+ 1.0e-6
+					    * ((double)store->timeScale)
 					    * ((double)store->timeOffset);
 	    mb_get_date(verbose,*time_d,time_i);
 
 	    /* get navigation */
 	    if (store->positionType == 1)
 		{
-		*navlon = 
+		*navlon =
 			RTD * (1.0E-7 * (double)store->refLong
 				+ 1.0E-9 * (double)store->vesselLongOffset
 				    * (double)store->positionScale);
-		*navlat = 
-			RTD * (1.0E-7 * (double)store->refLat 
+		*navlat =
+			RTD * (1.0E-7 * (double)store->refLat
 				+ 1.0E-9 * (double)store->vesselLatOffset
 				    * (double)store->positionScale);
 		}
@@ -1412,7 +1566,7 @@ int mbsys_hdcs_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	    fprintf(stderr,"dbg2  Return values:\n");
 	    fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 	    }
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 	    {
 	    fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1446,7 +1600,7 @@ int mbsys_hdcs_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_hdcs_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1500,10 +1654,10 @@ int mbsys_hdcs_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		|| navlat != 0.0)
 		{
 		store->positionType = 1;
-		store->vesselLongOffset = 1.0E9 * (DTR * navlon 
+		store->vesselLongOffset = 1.0E9 * (DTR * navlon
 						- 1.0E-7 * (double)store->refLong)
 						/ ((double)store->positionScale);
-		store->vesselLatOffset = 1.0E9 * (DTR * navlat 
+		store->vesselLatOffset = 1.0E9 * (DTR * navlat
 						- 1.0E-7 * (double)store->refLat)
 						/ ((double)store->positionScale);
 		}
@@ -1537,7 +1691,7 @@ int mbsys_hdcs_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hdcs_copy(int verbose, void *mbio_ptr, 
+int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -1568,7 +1722,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 	/* get data structure pointers */
 	store = (struct mbsys_hdcs_struct *) store_ptr;
 	copy = (struct mbsys_hdcs_struct *) copy_ptr;
-	
+
 	/* copy the basic header data */
 	if (store != NULL && copy != NULL)
 	    {
@@ -1650,14 +1804,14 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 	    copy->beam_spacing = store->beam_spacing;
 	    copy->coverage_sector = store->coverage_sector;
 	    copy->yaw_stab_mode = store->yaw_stab_mode;
-	    
+
 	    /* don't copy beams that aren't there */
 	    if (store->beams == NULL)
 		{
 		if (copy->beams != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->beams,error);
 		}
-		
+
 	    /* else copy beams */
 	    else
 		{
@@ -1665,7 +1819,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 		if (copy->beams != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->beams,error);
 		status = mb_mallocd(verbose,__FILE__, __LINE__,
-				copy->num_beam * sizeof(struct mbsys_hdcs_beam_struct), 
+				copy->num_beam * sizeof(struct mbsys_hdcs_beam_struct),
 				(void **)&copy->beams,error);
 		if (status == MB_SUCCESS)
 		    {
@@ -1673,7 +1827,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 			{
 			beam = &store->beams[i];
 			cbeam = &copy->beams[i];
-			
+
 			cbeam->status = beam->status;
 			cbeam->scaling_factor = beam->scaling_factor;
 			cbeam->observedDepth = beam->observedDepth;
@@ -1684,12 +1838,12 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 			cbeam->processedDepth = beam->processedDepth;
 			cbeam->timeOffset = beam->timeOffset;
 			cbeam->depthAccuracy = beam->depthAccuracy;
-			cbeam->reflectivity = beam->reflectivity;  
+			cbeam->reflectivity = beam->reflectivity;
 			cbeam->Q_factor = beam->Q_factor;
 			cbeam->beam_no = beam->beam_no;
 			cbeam->freq = beam->freq;
 			cbeam->calibratedBackscatter = beam->calibratedBackscatter;
-			cbeam->mindB = beam->mindB;		
+			cbeam->mindB = beam->mindB;
 			cbeam->maxdB = beam->maxdB;
 			cbeam->pseudoAngleIndependentBackscatter = beam->pseudoAngleIndependentBackscatter;
 			cbeam->range = beam->range;
@@ -1706,7 +1860,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 			}
 		    }
 		}
-	    
+
 	    /* don't copy sidescan samples that aren't there */
 	    if (store->numSamples == 0
 		|| store->ss_raw == NULL)
@@ -1715,7 +1869,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->ss_raw,error);
 		copy->numSamples = 0;
 		}
-		
+
 	    /* else copy sidescan samples */
 	    else
 		{
@@ -1723,7 +1877,7 @@ int mbsys_hdcs_copy(int verbose, void *mbio_ptr,
 		if (copy->ss_raw != NULL)
 		    status = mb_freed(verbose,__FILE__, __LINE__, (void **)&copy->ss_raw,error);
 		status = mb_mallocd(verbose,__FILE__, __LINE__,
-				copy->numSamples, 
+				copy->numSamples,
 				(void **)&copy->ss_raw,error);
 		if (status == MB_SUCCESS)
 		    {

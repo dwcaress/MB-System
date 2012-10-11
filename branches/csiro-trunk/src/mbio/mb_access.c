@@ -379,6 +379,108 @@ int mb_beamwidths(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error)
+{
+	char	*function_name = "mb_sonartype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ sonartype routine
+			mb_io_ptr->system == MB_SYS_LDEOIH
+			mb_io_ptr->system == MB_SYS_GSF
+			mb_io_ptr->system == MB_SYS_HDCS
+			mb_io_ptr->system == MB_SYS_HYSWEEP */
+	if (mb_io_ptr->mb_io_sonartype != NULL)
+		{
+		if (store_ptr == NULL)
+			store_ptr = (void *) mb_io_ptr->store_data;
+		status = (*mb_io_ptr->mb_io_sonartype)
+				(verbose, mbio_ptr, store_ptr, sonartype, error);
+		}
+
+	/* Some systems are definitively echosounders */
+	else if (mb_io_ptr->system == MB_SYS_SINGLEBEAM)
+		{
+		*sonartype = MB_SONARTYPE_ECHOSOUNDER;
+		}
+
+	/* Some systems are definitively multibeams */
+	else if (mb_io_ptr->system == MB_SYS_SB
+			|| mb_io_ptr->system == MB_SYS_HSDS
+			|| mb_io_ptr->system == MB_SYS_SB2000
+			|| mb_io_ptr->system == MB_SYS_SB2100
+			|| mb_io_ptr->system == MB_SYS_SIMRAD
+			|| mb_io_ptr->system == MB_SYS_SIMRAD2
+			|| mb_io_ptr->system == MB_SYS_SIMRAD3
+			|| mb_io_ptr->system == MB_SYS_RESON
+			|| mb_io_ptr->system == MB_SYS_RESON8K
+			|| mb_io_ptr->system == MB_SYS_ELAC
+			|| mb_io_ptr->system == MB_SYS_ELACMK2
+			|| mb_io_ptr->system == MB_SYS_HSMD
+			|| mb_io_ptr->system == MB_SYS_XSE
+			|| mb_io_ptr->system == MB_SYS_NETCDF
+			|| mb_io_ptr->system == MB_SYS_HS10
+			|| mb_io_ptr->system == MB_SYS_ATLAS
+			|| mb_io_ptr->system == MB_SYS_SURF
+			|| mb_io_ptr->system == MB_SYS_RESON7K)
+		{
+		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		}
+
+	/* Some systems are definitively sidescans */
+	else if (mb_io_ptr->system == MB_SYS_MSTIFF
+			|| mb_io_ptr->system == MB_SYS_JSTAR
+			|| mb_io_ptr->system == MB_SYS_BENTHOS
+			|| mb_io_ptr->system == MB_SYS_IMAGE83P)
+		{
+		*sonartype = MB_SONARTYPE_SIDESCAN;
+		}
+
+	/* Some systems are definitively interferometric sonars */
+	else if (mb_io_ptr->system == MB_SYS_MR1
+			|| mb_io_ptr->system == MB_SYS_MR1B
+			|| mb_io_ptr->system == MB_SYS_MR1V2001
+			|| mb_io_ptr->system == MB_SYS_DSL
+			|| mb_io_ptr->system == MB_SYS_OIC)
+		{
+		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		}
+	else
+		{
+		*sonartype = MB_SONARTYPE_UNKNOWN;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sonartype:  %d\n",*sonartype);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error)
 {
