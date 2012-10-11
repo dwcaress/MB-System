@@ -444,6 +444,8 @@ int mb_segynumber(int verbose, void *mbio_ptr,
 		int *line, int *shot, int *cdp, int *error);
 int mb_beamwidths(int verbose, void *mbio_ptr,
 		double *beamwidth_xtrack, double *beamwidth_ltrack, int *error);
+int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error);
 int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
 int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,

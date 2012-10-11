@@ -91,6 +91,7 @@
  * clb          04-13-11  When encoding a ping, reject it if the number of beams <= 0
  * clb          06-21-11  Added em12 to list of available sensors
  * clb          09-20-11  Added support for R2Sonic
+ * jcd          02-17-12  fixed EncodeQualityFlagsArray to work with num_beams not evenly divisible by 4
  *
  * Classification : Unclassified
  *
@@ -2456,6 +2457,13 @@ EncodeQualityFlagsArray(unsigned char *sptr, unsigned char *array, int num_beams
             shift -= 2;
         }
     }
+
+
+    /*  If shift doesn't get reset to 6 then we have a number of beams that is not evenly divisible by 4.  The problem is that
+        we actually encoded part of another byte but we didn't increment the ptr.  */
+
+    if (shift != 6) ptr++;
+
 
     /* subrecord identifier has array id in first byte, and size in the
     *  remaining three bytes

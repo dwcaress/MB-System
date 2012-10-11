@@ -47,7 +47,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Additional Options:
 #            [-Btickinfo -Dflipcolor/flipshade -Fcontour_file
 #            -Jprojection[/scale | width] -Ltitle[:scale_label]
-#            -Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max]
+#            -Mmisc -Q -Rw/e/s/n -X -Y -Zmin/max[/mode]]
 #
 # Miscellaneous Options:
 #            [-MGDgmtdef/value -MGFscale_loc";
@@ -1124,10 +1124,15 @@ if ($file_intensity)
 		}
 	}
 
-# check for zmode == 1 in zbounds
+# parse $zbounds to get zmode
 if ($zbounds =~ /(\S+)\/(\S+)\/(\S+)/)
 	{
 	($zmin,$zmax,$zmode) = $zbounds =~ /(\S+)\/(\S+)\/(\S+)/;
+	}
+elsif ($zbounds =~ /(\S+)\/(\S+)/)
+	{
+	($zmin,$zmax) = $zbounds =~ /(\S+)\/(\S+)/;
+	$zmode = 0;
 	}
 else
 	{
@@ -1331,20 +1336,8 @@ if (!$bounds_plot)
 		$xmin, $xmax, $ymin, $ymax);
 	}
 
-# use user defined data limits
-if ($zbounds)
-	{
-	if ($zbounds =~ /(\S+)\/(\S+)\/(\S+)/)
-		{
-		($zmin,$zmax,$zmode) = $zbounds =~ /(\S+)\/(\S+)\/(\S+)/;
-		}
-	elsif ($zbounds =~ /(\S+)\/(\S+)/)
-		{
-		($zmin,$zmax) = $zbounds =~ /(\S+)\/(\S+)/;
-		$zmode = 0;
-		}
-	}
-else
+# set $zmin and $zmax from data if $zbounds not available
+if (!$zbounds)
 	{
 	$zmode = 0;
 	$zmin = $zmin_t;
@@ -1794,13 +1787,7 @@ elsif ($color_mode)
 	{
 	$ncolors_use = $ncolors + 1;
 	}
-if ($color_mode && $zbounds)
-	{
-	$color_int = ($zmax - $zmin)/($ncolors_use - 1);
-	$color_start = $zmin;
-	$color_end = $color_start + $color_int * ($ncolors_use - 1);
-	}
-elsif ($color_mode && !$no_nice_color_int && $dzz > 0)
+if ($color_mode && !$no_nice_color_int && $dzz > 0)
 	{
 	$start_int = $contour_int / 2;
 	$multiplier = int($dzz / ($ncolors_use - 1) / $start_int) + 1;

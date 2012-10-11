@@ -1,4 +1,4 @@
-.TH mbprocess 1 "5 June 2011" "MB-System 5.0" "MB-System 5.0"
+.TH mbprocess 1 "25 June 2011" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbprocess\fP - this program performs a
 variety of swath data processing
@@ -150,6 +150,12 @@ The \fBmbprocess\fP commands found in parameter files are:
           prior to merging
 
  NAVIGATION OFFSETS AND SHIFTS:
+        - These offsets and shifts will be applied to the
+          original navigation and to any merged navigation,
+          but will not be applied to adjusted navigation
+          (because generally adjusted navigation generated
+          by mbnavadjust already has offsets and shifts
+          applied).
    NAVSHIFT boolean
         sets navigation offset [0]
         - note: offsets and shifts are applied to navigation

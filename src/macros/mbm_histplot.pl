@@ -312,9 +312,9 @@ if (!$bounds)
 		}
 
 	# make cells
-	$ncell = floor(($xmax - $xmin) / $cellwidth) + 4;
+	$ncell = floor(($xmax - $xmin) / $cellwidth) + 5;
 	$nxmin = floor($xmin / $cellwidth) - 1;
-	$xmin = $nxmin * $cellwidth;
+	$xmin = ($nxmin - 0.5) * $cellwidth;
 	$xmax = $xmin + $cellwidth * $ncell;
 	for ($i=0;$i<$ncell;$i++)
 		{

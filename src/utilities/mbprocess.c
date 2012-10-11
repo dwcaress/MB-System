@@ -369,6 +369,10 @@ and mbedit edit save files.\n";
 	int	pixels_ss;
 	void	*imbio_ptr = NULL;
 	void	*ombio_ptr = NULL;
+        int     nav_source;
+        int     heading_source;
+	int     vru_source;
+        int     svp_source;
 
 	/* mbio read and write values */
 	void	*store_ptr = NULL;
@@ -502,6 +506,7 @@ and mbedit edit save files.\n";
 	double	headingx, headingy;
 	double	mtodeglon, mtodeglat;
 	double	del_time, dx, dy, dist;
+        double  headingcalc, speedcalc;
 	double	lever_x = 0.0;
 	double	lever_y = 0.0;
 	double	lever_heave = 0.0;
@@ -532,7 +537,7 @@ and mbedit edit save files.\n";
 	mb_path	lock_program;
 	mb_path lock_cpu;
 	mb_path lock_user;
-	char	lock_date[24];
+	mb_path	lock_date;
 
 	/* edit save file control variables */
 	struct mb_esf_struct esf;
@@ -2216,7 +2221,7 @@ and mbedit edit save files.\n";
 				fprintf(stderr,"Draft data missing from nav file.\nMerging of draft data disabled.\n");
 				process.mbp_nav_draft = MBP_NAV_OFF;
 				}
-			    if (process.mbp_nav_draft == MBP_NAV_ON && nget < 15)
+			    if (process.mbp_nav_attitude == MBP_NAV_ON && nget < 15)
 				{
 				fprintf(stderr,"Roll, pitch, and heave data missing from nav file.\nMerging of roll, pitch, and heave data disabled.\n");
 				process.mbp_nav_attitude = MBP_NAV_OFF;
@@ -2336,27 +2341,6 @@ and mbedit edit save files.\n";
 	    if (process.mbp_nav_timeshift != 0.0)
 		for (i=0;i<nnav;i++)
 		    ntime[i] += process.mbp_nav_timeshift;
-
-	    /* apply position shift if needed */
-    	    if (process.mbp_nav_shift == MBP_NAV_ON)
-		{
-		for (i=0;i<nnav;i++)
-		    {
-		    mb_coor_scale(verbose,nlat[i],&mtodeglon,&mtodeglat);
-		    headingx = sin(nheading[i] * DTR);
-		    headingy = cos(nheading[i] * DTR);
-		    nlon[i] -= (headingy * mtodeglon
-					* process.mbp_nav_offsetx
-			    	+ headingx * mtodeglon
-					* process.mbp_nav_offsety
-				- process.mbp_nav_shiftlon);
-		    nlat[i] -= (-headingx * mtodeglat
-					* process.mbp_nav_offsetx
-			    	+ headingy * mtodeglat
-					* process.mbp_nav_offsety
-				- process.mbp_nav_shiftlat);
-		    }
-		}
 
 	    /* set up spline interpolation of nav points */
 	    splineflag = 1.0e30;
@@ -3813,6 +3797,12 @@ and mbedit edit save files.\n";
 		exit(error);
 		}
 
+        /* get data kind sources for input format */
+        mb_format_source(verbose, &(process.mbp_format),
+		&nav_source, &heading_source,
+		&vru_source, &svp_source,
+		&error);
+
 	/*--------------------------------------------
 	  read the input file to get first ssv if necessary
 	  --------------------------------------------*/
@@ -5232,24 +5222,6 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			mb_get_date(verbose,time_d,time_i);
 			}
 
-		/* apply position shifts if needed */
-    		if (process.mbp_nav_shift == MBP_NAV_ON)
-			{
-			mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
-			headingx = sin(heading * DTR);
-			headingy = cos(heading * DTR);
-			navlon -= (headingy * mtodeglon
-					    * process.mbp_nav_offsetx
-			    	    + headingx * mtodeglon
-					    * process.mbp_nav_offsety
-				    - process.mbp_nav_shiftlon);
-			navlat -= (-headingx * mtodeglat
-					    * process.mbp_nav_offsetx
-			    	    + headingy * mtodeglat
-					    * process.mbp_nav_offsety
-				    - process.mbp_nav_shiftlat);
-			}
-
 		/* interpolate the navigation if desired */
 		if (error == MB_ERROR_NO_ERROR
 			&& process.mbp_nav_mode == MBP_NAV_ON
@@ -5328,43 +5300,6 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			}
 
 	/*--------------------------------------------
-	  handle adjusted navigation merging
-	  --------------------------------------------*/
-
-		/* interpolate the adjusted navigation if desired */
-		if (error == MB_ERROR_NO_ERROR
-			&& process.mbp_navadj_mode >= MBP_NAVADJ_LL
-			&& (kind == MB_DATA_DATA
-			    || kind == MB_DATA_NAV))
-			{
-			/* interpolate adjusted navigation */
-			if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
-			    && time_d >= natime[0]
-			    && time_d <= natime[nanav-1])
-			    {
-			    intstat = mb_spline_interp(verbose,
-					natime-1, nalon-1, nalonspl-1,
-					nanav, time_d, &navlon, &iatime,
-					&error);
-			    intstat = mb_spline_interp(verbose,
-					ntime-1, nalat-1, nalatspl-1,
-					nanav, time_d, &navlat, &iatime,
-					&error);
-			    }
-			else
-			    {
-			    intstat = mb_linear_interp(verbose,
-					natime-1, nalon-1,
-					nanav, time_d, &navlon, &iatime,
-					&error);
-			    intstat = mb_linear_interp(verbose,
-					natime-1, nalat-1,
-					nanav, time_d, &navlat, &iatime,
-					&error);
-			    }
-			}
-
-	/*--------------------------------------------
 	  handle attitude merging
 	  --------------------------------------------*/
 
@@ -5407,9 +5342,30 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 			}
 
 	/*--------------------------------------------
-	  handle draft correction
+	  handle position shifts
 	  --------------------------------------------*/
 
+		/* apply position shifts if needed */
+    		if (process.mbp_nav_shift == MBP_NAV_ON)
+			{
+			mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
+			headingx = sin(heading * DTR);
+			headingy = cos(heading * DTR);
+			navlon -= (headingy * mtodeglon
+					    * process.mbp_nav_offsetx
+			    	    + headingx * mtodeglon
+					    * process.mbp_nav_offsety
+				    - process.mbp_nav_shiftlon);
+			navlat -= (-headingx * mtodeglat
+					    * process.mbp_nav_offsetx
+			    	    + headingy * mtodeglat
+					    * process.mbp_nav_offsety
+				    - process.mbp_nav_shiftlat);
+			}
+
+	/*--------------------------------------------
+	  handle draft correction
+	  --------------------------------------------*/
 		/* add user specified draft correction if desired */
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA
@@ -5423,6 +5379,43 @@ time_d,idata-1,ntime[idata-1],process.mbp_kluge005);*/
 				draft = draft * process.mbp_draft_mult + process.mbp_draft_offset;
 			else if (process.mbp_draft_mode == MBP_DRAFT_SET)
 				draft = process.mbp_draft;
+			}
+
+	/*--------------------------------------------
+	  handle adjusted navigation merging
+	  --------------------------------------------*/
+
+		/* interpolate the adjusted navigation if desired */
+		if (error == MB_ERROR_NO_ERROR
+			&& process.mbp_navadj_mode >= MBP_NAVADJ_LL
+			&& (kind == MB_DATA_DATA
+			    || kind == MB_DATA_NAV))
+			{
+			/* interpolate adjusted navigation */
+			if (process.mbp_navadj_algorithm == MBP_NAV_SPLINE
+			    && time_d >= natime[0]
+			    && time_d <= natime[nanav-1])
+			    {
+			    intstat = mb_spline_interp(verbose,
+					natime-1, nalon-1, nalonspl-1,
+					nanav, time_d, &navlon, &iatime,
+					&error);
+			    intstat = mb_spline_interp(verbose,
+					ntime-1, nalat-1, nalatspl-1,
+					nanav, time_d, &navlat, &iatime,
+					&error);
+			    }
+			else
+			    {
+			    intstat = mb_linear_interp(verbose,
+					natime-1, nalon-1,
+					nanav, time_d, &navlon, &iatime,
+					&error);
+			    intstat = mb_linear_interp(verbose,
+					natime-1, nalat-1,
+					nanav, time_d, &navlat, &iatime,
+					&error);
+			    }
 			}
 
 	/*--------------------------------------------
@@ -5513,7 +5506,7 @@ alpha, beta, lever_heave);*/
 		    }
 		if (error == MB_ERROR_NO_ERROR
 			&& (kind == MB_DATA_DATA
-			    || kind == MB_DATA_NAV)
+			    || kind == nav_source)
 			&& calculatespeedheading == MB_YES)
 			{
 			if (process.mbp_nav_mode == MBP_NAV_ON)
@@ -5546,22 +5539,38 @@ alpha, beta, lever_heave);*/
 			    dist = sqrt(dx*dx + dy*dy);
 			    if (del_time > 0.0)
 				{
-				speed = 3.6*dist/del_time;
+				speedcalc = 3.6*dist/del_time;
 				}
 			    else
-				speed = speed_old;
-			    if (dist > 0.0)
+				speedcalc = speed_old;
+			    if (dist > 0.0 && del_time > 0.0)
 				{
-				heading = RTD*atan2(dx/dist,dy/dist);
+				headingcalc = RTD*atan2(dx/dist,dy/dist);
+                                if (headingcalc < 0.0)
+                                    headingcalc += 360.0;
 				}
 			    else
-				heading = heading_old;
+				headingcalc = heading_old;
 			    }
+                        else
+                            {
+                            speedcalc = speed;
+                            headingcalc = heading;
+                            }
+                        if (process.mbp_heading_mode == MBP_HEADING_CALC
+                                || process.mbp_heading_mode == MBP_HEADING_CALCOFFSET)
+                                {
+                                heading = headingcalc;
+                                }
+                        else
+                                {
+                                speed = speedcalc;
+                                }
 			time_d_old = time_d;
 			navlon_old = navlon;
 			navlat_old = navlat;
-			heading_old = heading;
-			speed_old = speed;
+			heading_old = headingcalc;
+			speed_old = speedcalc;
 			}
 
 		/* adjust heading if required */
@@ -5606,7 +5615,7 @@ alpha, beta, lever_heave);*/
 			/* estimate travel times if they don't exist */
 			else
 			    {
-			    draft_org = sonardepth;
+			    draft_org = sonardepth - heave;
 			    ssv = 1500.0;
 			    nbeams = nbath;
 			    for (i=0;i<nbath;i++)
@@ -5933,7 +5942,7 @@ bath[i]-zz); */
 			    {
 			    /* get draft change */
 			    depth_offset_change = draft - draft_org + lever_heave;
-/*fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  depth offset:%f\n",
+/* fprintf(stderr, "time:%f  drafts:%f %f  lever:%f  depth_offset_change:%f\n",
 time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 
 			    /* loop over the beams */
@@ -5943,7 +5952,7 @@ time_d, draft, draft_org, lever_heave, depth_offset_change);*/
 				{
 				/* apply transducer depth change to depths */
 				bath[i] += depth_offset_change;
-/*fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);*/
+/* fprintf(stderr,"depth_offset_change:%f bath[%d]:%f\n",depth_offset_change,i,bath[i]);*/
 
 				/* output some debug values */
 				if (verbose >= 5)

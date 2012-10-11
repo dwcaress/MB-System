@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbhysweeppreprocess reads a HYSWEEP HSX format file, interpolates the
- * asynchronous navigation and attitude onto the multibeam data, 
+ * asynchronous navigation and attitude onto the multibeam data,
  * and writes a new HSX file with that information correctly embedded
  * in the multibeam data. This program can also fix various problems
  * with the data, including sensor offsets.
@@ -68,7 +68,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mbhysweeppreprocess";
 	char help_message[] =  "mbhysweeppreprocess reads a Hysweep HSX format file, interpolates the\nasynchronous navigation and attitude onto the multibeam data, \nand writes a new HSX file with that information correctly embedded\nin the multibeam data.";
-	char usage_message[] = "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias -Dsonardepthfile -Idatalist -Jprojection  -L -Mnavformat -Nnavfile -Ttimelag -H -V]";
+	char usage_message[] = "mbhysweeppreprocess [-Aoffsettype/x/y/z/t -Brollbias/pitchbias/headingbias -Dsonardepthfile -Idatalist -Jprojection -L -Mnavformat -Nnavfile -Ttimelag -H -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -135,10 +135,10 @@ int main (int argc, char **argv)
 	double	*ssacrosstrack = NULL;
 	double	*ssalongtrack = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
-	
+
 	/* program mode */
 	int	mode = MBHYSWEEPPREPROCESS_PROCESS;
-	
+
 	/* counting variables */
 	int	nrec_POS = 0;
 	int	nrec_POSunused = 0;
@@ -156,12 +156,12 @@ int main (int argc, char **argv)
 	int	nrec_DFT_tot = 0;
 	int	nrec_RMB_tot = 0;
 	int	nrec_other_tot = 0;
-	
+
 	/* projection */
 	int	projection_set = MB_NO;
 	mb_path	proj4command;
 	void	*pjptr = NULL;
-	
+
 	/* merge navigation data file */
 	char	navfile[MB_PATH_MAXLINE];
 	int	navdata = MB_NO;
@@ -173,26 +173,26 @@ int main (int argc, char **argv)
 	double	*nav_heading = NULL;
 	double	*nav_sonardepth = NULL;
 	double	*nav_altitude = NULL;
-	
+
 	/* merge sonardepth from separate data file */
 	char	sonardepthfile[MB_PATH_MAXLINE];
 	int	sonardepthdata = MB_NO;
 	int	nsonardepth = 0;
 	double	*sonardepth_time_d = NULL;
 	double	*sonardepth_sonardepth = NULL;
-	
+
 	/* asynchronous navigation, heading, attitude data */
 	int	ndat_nav = 0;
 	int	ndat_nav_alloc = 0;
 	double	*dat_nav_time_d = NULL;
 	double	*dat_nav_lon = NULL;
 	double	*dat_nav_lat = NULL;
-	
+
 	int	ndat_sonardepth = 0;
 	int	ndat_sonardepth_alloc = 0;
 	double	*dat_sonardepth_time_d = NULL;
 	double	*dat_sonardepth_sonardepth = NULL;
-	
+
 	int	ndat_heading = 0;
 	int	ndat_heading_alloc = 0;
 	double	*dat_heading_time_d = NULL;
@@ -209,7 +209,7 @@ int main (int argc, char **argv)
 	int	ndat_altitude_alloc = 0;
 	double	*dat_altitude_time_d = NULL;
 	double	*dat_altitude_altitude = NULL;
-	
+
 	/* timelag parameters */
 	int	timelagmode = MBHYSWEEPPREPROCESS_TIMELAG_OFF;
 	double	timelag = 0.0;
@@ -219,7 +219,7 @@ int main (int argc, char **argv)
 	int	ntimelag = 0;
 	double	*timelag_time_d = NULL;
 	double	*timelag_model = NULL;
-	
+
 	/* sensor offset parameters */
 	double	offset_sonar_roll = 0.0;
 	double	offset_sonar_pitch = 0.0;
@@ -236,14 +236,14 @@ int main (int argc, char **argv)
 	double	offset_nav_y = 0.0;
 	double	offset_nav_z = 0.0;
 	double	offset_nav_t = 0.0;
-	
+
 	/* processing kluge modes */
 	int	klugemode;
-	
+
 	int	interp_status;
 	double	alpha, beta, theta, phi;
 	double	rr, xx, zz;
-	
+
 	FILE	*tfp = NULL;
 	struct stat file_status;
 	int	fstat;
@@ -270,8 +270,8 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:D:d:F:f:I:i:K:k:LlM:m:N:n:O:o:P:p:T:t:VvHh")) != -1)
-	  switch (c) 
+	while ((c = getopt(argc, argv, "A:a:B:b:D:d:F:f:I:i:J:j:K:k:LlM:m:N:n:O:o:T:t:VvHh")) != -1)
+	  switch (c)
 		{
 		case 'H':
 		case 'h':
@@ -283,7 +283,7 @@ int main (int argc, char **argv)
 			break;
 		case 'A':
 		case 'a':
-			nscan = sscanf (optarg,"%d/%lf/%lf/%lf/%lf", 
+			nscan = sscanf (optarg,"%d/%lf/%lf/%lf/%lf",
 					&type, &offset_x, &offset_y, &offset_z, &offset_t);
 			if (nscan == 5)
 				{
@@ -313,7 +313,7 @@ int main (int argc, char **argv)
 			break;
 		case 'B':
 		case 'b':
-			nscan = sscanf (optarg,"%lf/%lf/%lf", 
+			nscan = sscanf (optarg,"%lf/%lf/%lf",
 					&offset_roll, &offset_pitch, &offset_heading);
 			if (nscan == 3)
 				{
@@ -342,6 +342,12 @@ int main (int argc, char **argv)
 		case 'I':
 		case 'i':
 			sscanf (optarg,"%s", read_file);
+			flag++;
+			break;
+		case 'J':
+		case 'j':
+			sscanf (optarg,"%s", proj4command);
+			projection_set = MB_YES;
 			flag++;
 			break;
 		case 'K':
@@ -374,12 +380,6 @@ int main (int argc, char **argv)
 		case 'o':
 			sscanf (optarg,"%s", ofile);
 			ofile_set  = MB_YES;
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf (optarg,"%s", proj4command);
-			projection_set = MB_YES;
 			flag++;
 			break;
 		case 'T':
@@ -497,18 +497,18 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
-		
+
 	/* set projection for nav data */
 	if (projection_set == MB_YES)
 		{
 		mb_proj_init(verbose, proj4command, &pjptr, &error);
 		}
-		
+
 	/* read navigation data from file if specified */
 	if (navdata == MB_YES)
 		{
 		/* count the data points in the nav file */
-		if ((tfp = fopen(navfile, "r")) == NULL) 
+		if ((tfp = fopen(navfile, "r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr,"\nUnable to open nav data file <%s> for reading\n",navfile);
@@ -516,8 +516,8 @@ int main (int argc, char **argv)
 				program_name);
 			exit(error);
 			}
-						
-		/* count the binary data records described by the header 
+
+		/* count the binary data records described by the header
 			then rewind the file to the start of the binary data */
 		nnav = 0;
 		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != NULL)
@@ -547,7 +547,7 @@ int main (int argc, char **argv)
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);
 			exit(error);
-			}		    
+			}
 		    }
 
 		/* if no nav data then quit */
@@ -558,7 +558,7 @@ int main (int argc, char **argv)
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 
 		/* read the data points in the nav file */
 		nnav = 0;
@@ -579,7 +579,7 @@ int main (int argc, char **argv)
 					time_i[5] = (int)floor(second);
 					time_i[6] = (int)((second - time_i[5]) * 1000000.0);
 					mb_get_time(verbose, time_i, &time_d);
-					
+
 					if (projection_set == MB_YES)
 						{
 						mb_proj_inverse(verbose, pjptr, easting, northing,
@@ -590,7 +590,7 @@ int main (int argc, char **argv)
 						navlon = easting;
 						navlat = northing;
 						}
-					
+
 					nav_time_d[nnav] = time_d;
 					nav_lon[nnav] = navlon;
 					nav_lat[nnav] = navlat;
@@ -603,7 +603,7 @@ int main (int argc, char **argv)
 			}
 		fclose(tfp);
 		}
-		
+
 	/* set projection for nav data */
 	if (projection_set == MB_YES)
 		{
@@ -614,7 +614,7 @@ int main (int argc, char **argv)
 	if (sonardepthdata == MB_YES)
 		{
 		/* count the data points in the sonardepth file */
-		if ((tfp = fopen(sonardepthfile, "r")) == NULL) 
+		if ((tfp = fopen(sonardepthfile, "r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr,"\nUnable to open sonardepth data file <%s> for reading\n",sonardepthfile);
@@ -622,7 +622,7 @@ int main (int argc, char **argv)
 				program_name);
 			exit(error);
 			}
-			
+
 		/* count the data records then rewind the file to the start of the binary data */
 		nsonardepth = 0;
 		while (fgets(buffer, MB_PATH_MAXLINE, tfp) != NULL)
@@ -644,7 +644,7 @@ int main (int argc, char **argv)
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);
 			exit(error);
-			}		    
+			}
 		    }
 
 		/* if no sonardepth data then quit */
@@ -655,7 +655,7 @@ int main (int argc, char **argv)
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 
 		/* read the data points in the separate file */
 		nsonardepth = 0;
@@ -676,7 +676,7 @@ int main (int argc, char **argv)
 					time_i[5] = (int)floor(second);
 					time_i[6] = (int)((second - time_i[5]) * 1000000.0);
 					mb_get_time(verbose, time_i, &time_d);
-					
+
 					sonardepth_time_d[nsonardepth] = time_d;
 					sonardepth_sonardepth[nsonardepth] = sonardepth;
 					nsonardepth++;
@@ -686,13 +686,13 @@ int main (int argc, char **argv)
 			}
 		fclose(tfp);
 		}
-		
+
 	/* get time lag model if specified */
 	if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL)
 		{
 		/* count the data points in the timelag file */
 		ntimelag = 0;
-		if ((tfp = fopen(timelagfile, "r")) == NULL) 
+		if ((tfp = fopen(timelagfile, "r")) == NULL)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr,"\nUnable to open time lag model File <%s> for reading\n",timelagfile);
@@ -718,7 +718,7 @@ int main (int argc, char **argv)
 			fprintf(stderr,"\nProgram <%s> Terminated\n",
 				program_name);
 			exit(error);
-			}		    
+			}
 		    }
 
 		/* if no time lag data then quit */
@@ -729,7 +729,7 @@ int main (int argc, char **argv)
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
 			    program_name);
 		    exit(error);
-		    }		    
+		    }
 
 		/* read the data points in the timelag file */
 		ntimelag = 0;
@@ -744,27 +744,27 @@ int main (int argc, char **argv)
 		    }
 		fclose(tfp);
 		}
-	
+
 	/* output counts */
 	fprintf(stdout, "\nData available for merging:\n");
 	fprintf(stdout, "     Navigation (northing easting sonardepth altitude heading): %d\n", nnav);
 	fprintf(stdout, "     Sonar depth (sonardepth):                                  %d\n", nsonardepth);
 	fprintf(stdout, "     Time lag:                                                  %d\n", ntimelag);
 	fprintf(stdout, "\nOffsets to be applied:\n");
-	fprintf(stdout, "               X (m)   Y (m)   Z (m)   T (sec)\n");
 	fprintf(stdout, "     Roll bias:    %8.3f\n", offset_sonar_roll);
 	fprintf(stdout, "     Pitch bias:   %8.3f\n", offset_sonar_pitch);
 	fprintf(stdout, "     Heading bias: %8.3f\n", offset_sonar_heading);
+	fprintf(stdout, "               X (m)   Y (m)   Z (m)   T (sec)\n");
 	fprintf(stdout, "     Sonar: %8.3f %8.3f %8.3f %8.3f\n",
-				offset_sonar_x, offset_sonar_y, 
+				offset_sonar_x, offset_sonar_y,
 				offset_sonar_z, offset_sonar_t);
 	fprintf(stdout, "     MRU:   %8.3f %8.3f %8.3f %8.3f\n",
-				offset_sonar_x, offset_sonar_y, 
-				offset_sonar_z, offset_sonar_t);
+				offset_mru_x, offset_mru_y,
+				offset_mru_z, offset_mru_t);
 	fprintf(stdout, "     Nav:   %8.3f %8.3f %8.3f %8.3f\n",
-				offset_sonar_x, offset_sonar_y, 
-				offset_sonar_z, offset_sonar_t);
-	
+				offset_nav_x, offset_nav_y,
+				offset_nav_z, offset_nav_t);
+
 	nrec_POS_tot = 0;
 	nrec_POSunused_tot = 0;
 	nrec_GYR_tot = 0;
@@ -808,7 +808,7 @@ int main (int argc, char **argv)
 	    strcpy(ifile, read_file);
 	    read_data = MB_YES;
 	    }
-		
+
 	/* loop over all files to be read */
 	while (read_data == MB_YES && format == MBF_HYSWEEP1)
 	{
@@ -832,6 +832,12 @@ int main (int argc, char **argv)
 	imb_io_ptr = (struct mb_io_struct *) imbio_ptr;
 	istore_ptr = imb_io_ptr->store_data;
 	istore = (struct mbsys_hysweep_struct *) istore_ptr;
+
+	/* set projection if specified */
+	if (projection_set == MB_YES)
+		{
+		strcpy(istore->PRJ_proj4_command,proj4command);
+		}
 
 	if (error == MB_ERROR_NO_ERROR)
 		{
@@ -860,13 +866,13 @@ int main (int argc, char **argv)
 		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
@@ -895,7 +901,7 @@ int main (int argc, char **argv)
 		{
 		/* reset error */
 		error = MB_ERROR_NO_ERROR;
-		
+
 		/* read next data record */
 		status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
 				    time_i,&time_d,&navlon,&navlat,
@@ -905,37 +911,37 @@ int main (int argc, char **argv)
 				    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				    ss,ssacrosstrack,ssalongtrack,
 				    comment,&error);
-		    
+
 		/* some nonfatal errors do not matter */
 		if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE)
 			{
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
-			
+
 	   	/* handle multibeam data */
-		if (status == MB_SUCCESS && kind == MB_DATA_DATA) 
+		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 			nrec_RMB++;
 			}
-			
+
 	   	/* save primary navigation data */
-		else if (status == MB_SUCCESS 
+		else if (status == MB_SUCCESS
 			&& (istore->kind == MB_DATA_NAV
 				|| istore->kind == MB_DATA_NAV1
-				|| istore->kind == MB_DATA_NAV2)) 
+				|| istore->kind == MB_DATA_NAV2))
 			{
 			/* check device for being enabled */
 			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->POS_device_number]);
 			if (device->DV2_enabled == MB_YES)
 				{
 				nrec_POS++;
-				
+
 				/* add latest fix */
 				if (imb_io_ptr->projection_initialized == MB_YES)
 					{
 					mb_proj_inverse(verbose, imb_io_ptr->pjptr,
-									istore->POS_x, 
+									istore->POS_x,
 									istore->POS_y,
 									&navlon, &navlat,
 									&error);
@@ -965,7 +971,7 @@ int main (int argc, char **argv)
 						fprintf(stderr,"\nProgram <%s> Terminated\n",
 						    program_name);
 						exit(error);
-						}		    
+						}
 					}
 
 				/* store the position data */
@@ -981,18 +987,18 @@ int main (int argc, char **argv)
 				{
 				nrec_POSunused++;
 				}
-				
+
 			}
-			
+
 	   	/* save primary attitude data */
-		if (status == MB_SUCCESS && kind == MB_DATA_ATTITUDE) 
+		if (status == MB_SUCCESS && kind == MB_DATA_ATTITUDE)
 			{
 			/* check device for being enabled */
 			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->HCP_device_number]);
 			if (device->DV2_enabled == MB_YES)
 				{
 				nrec_HCP++;
-				
+
 
 				if (MBHYSWEEPPREPROCESS_TIMESTAMPLIST == MB_YES)
 					fprintf(stderr,"Record time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d HCP record:%d\n",
@@ -1014,23 +1020,23 @@ int main (int argc, char **argv)
 						fprintf(stderr,"\nProgram <%s> Terminated\n",
 						    program_name);
 						exit(error);
-						}		    
+						}
 					}
 
 				/* store the attitude data */
 				if (ndat_rph == 0 || dat_rph_time_d[ndat_rph-1] < istore->time_d)
 					{
 					dat_rph_time_d[ndat_rph] = istore->time_d;
-					dat_rph_roll[ndat_rph] = istore->HCP_roll;
-					dat_rph_pitch[ndat_rph] = istore->HCP_pitch;
-					dat_rph_heave[ndat_rph] = istore->HCP_heave;
+					dat_rph_roll[ndat_rph] = -istore->HCP_roll;
+					dat_rph_pitch[ndat_rph] = -istore->HCP_pitch;
+					dat_rph_heave[ndat_rph] = -istore->HCP_heave;
 					ndat_rph++;
 					}
 				}
 			}
-			
+
 	   	/* save primary heading data */
-		if (status == MB_SUCCESS && kind == MB_DATA_HEADING) 
+		if (status == MB_SUCCESS && kind == MB_DATA_HEADING)
 			{
 			/* check device for being enabled */
 			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->GYR_device_number]);
@@ -1056,7 +1062,7 @@ int main (int argc, char **argv)
 						fprintf(stderr,"\nProgram <%s> Terminated\n",
 						    program_name);
 						exit(error);
-						}		    
+						}
 					}
 
 				/* store the heading data */
@@ -1068,9 +1074,9 @@ int main (int argc, char **argv)
 					}
 				}
 			}
-			
+
 	   	/* save primary sonardepth data */
-		if (status == MB_SUCCESS && kind == MB_DATA_SONARDEPTH) 
+		if (status == MB_SUCCESS && kind == MB_DATA_SONARDEPTH)
 			{
 			/* check device for being enabled */
 			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->DFT_device_number]);
@@ -1096,7 +1102,7 @@ int main (int argc, char **argv)
 						fprintf(stderr,"\nProgram <%s> Terminated\n",
 						    program_name);
 						exit(error);
-						}		    
+						}
 					}
 
 				/* store the sonardepth data */
@@ -1108,9 +1114,9 @@ int main (int argc, char **argv)
 					}
 				}
 			}
-			
+
 	   	/* save primary altitude data */
-		if (status == MB_SUCCESS && kind == MB_DATA_ALTITUDE) 
+		if (status == MB_SUCCESS && kind == MB_DATA_ALTITUDE)
 			{
 			/* check device for being enabled */
 			device = (struct mbsys_hysweep_device_struct *)&(istore->devices[istore->GYR_device_number]);
@@ -1136,7 +1142,7 @@ int main (int argc, char **argv)
 						fprintf(stderr,"\nProgram <%s> Terminated\n",
 						    program_name);
 						exit(error);
-						}		    
+						}
 					}
 
 				/* store the altitude data */
@@ -1148,14 +1154,14 @@ int main (int argc, char **argv)
 					}
 				}
 			}
-			
+
 	   	/* handle unknown data */
-		else  if (status == MB_SUCCESS) 
+		else  if (status == MB_SUCCESS)
 			{
 /*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
 			nrec_other++;
 			}
-			
+
 	   	/* handle read error */
 		else
 			{
@@ -1175,7 +1181,7 @@ int main (int argc, char **argv)
 
 	/* close the swath file */
 	status = mb_close(verbose,&imbio_ptr,&error);
-	
+
 	/* output counts */
 	fprintf(stdout, "\nData records read from: %s\n", ifile);
 	fprintf(stdout, "     Positions (POS):                   %d\n", nrec_POS);
@@ -1214,13 +1220,13 @@ int main (int argc, char **argv)
 	}
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
-	
-	/* apply time lag to all relevant data 
+
+	/* apply time lag to all relevant data
 		timelag value calculated either from model imported from file (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL)
 			or by a constant offset (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_CONSTANT) */
 	if (timelagmode != MBHYSWEEPPREPROCESS_TIMELAG_OFF)
 		{
-		/* correct time of navigation, heading, attitude, sonardepth, altitude 
+		/* correct time of navigation, heading, attitude, sonardepth, altitude
 			read from asynchronous records in files */
 fprintf(stderr,"Applying timelag to %d nav data\n", ndat_nav);
 		j = 0;
@@ -1234,9 +1240,9 @@ fprintf(stderr,"Applying timelag to %d nav data\n", ndat_nav);
 				}
 			else if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_nav_time_d[i], &timelagm, &j, 
+							ntimelag, dat_nav_time_d[i], &timelagm, &j,
 							&error);
 				timelag -= timelagm;
 				}
@@ -1254,9 +1260,9 @@ fprintf(stderr,"Applying timelag to %d heading data\n", ndat_heading);
 				}
 			else if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_heading_time_d[i], &timelagm, &j, 
+							ntimelag, dat_heading_time_d[i], &timelagm, &j,
 							&error);
 				timelag -= timelagm;
 				}
@@ -1274,9 +1280,9 @@ fprintf(stderr,"Applying timelag to %d attitude data\n", ndat_rph);
 				}
 			else if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_rph_time_d[i], &timelagm, &j, 
+							ntimelag, dat_rph_time_d[i], &timelagm, &j,
 							&error);
 				timelag -= timelagm;
 				}
@@ -1294,9 +1300,9 @@ fprintf(stderr,"Applying timelag to %d sonardepth data\n", ndat_sonardepth);
 				}
 			else if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_sonardepth_time_d[i], &timelagm, &j, 
+							ntimelag, dat_sonardepth_time_d[i], &timelagm, &j,
 							&error);
 				timelag -= timelagm;
 				}
@@ -1314,15 +1320,15 @@ fprintf(stderr,"Applying timelag to %d altitude data\n", ndat_altitude);
 				}
 			else if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, dat_altitude_time_d[i], &timelagm, &j, 
+							ntimelag, dat_altitude_time_d[i], &timelagm, &j,
 							&error);
 				timelag -= timelagm;
 				}
 			dat_altitude_time_d[i] += timelag;
 			}
-			
+
 		/* correct time of nav data read from separate file */
 fprintf(stderr,"Applying timelag to %d INS data\n", nnav);
 		for (i=0;i<nnav;i++)
@@ -1335,15 +1341,15 @@ fprintf(stderr,"Applying timelag to %d INS data\n", nnav);
 				}
 			else if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, nav_time_d[i], &timelagm, &j, 
+							ntimelag, nav_time_d[i], &timelagm, &j,
 							&error);
 				timelag -= timelagm;
 				}
 			nav_time_d[i] += timelag;
 			}
-			
+
 		/* correct time of sonar depth data read from separate file */
 fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		for (i=0;i<nsonardepth;i++)
@@ -1356,16 +1362,16 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 				}
 			else if (timelagmode == MBHYSWEEPPREPROCESS_TIMELAG_MODEL && ntimelag > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							timelag_time_d-1, timelag_model-1,
-							ntimelag, sonardepth_time_d[i], &timelagm, &j, 
+							ntimelag, sonardepth_time_d[i], &timelagm, &j,
 							&error);
 				timelag -= timelagm;
 				}
 			sonardepth_time_d[i] += timelag;
 			}
 		}
-		
+
 	/* apply roll bias */
 	if (offset_sonar_roll != 0.0)
 		{
@@ -1374,7 +1380,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			dat_rph_roll[i] += offset_sonar_roll;
 			}
 		}
-	
+
 	/* apply pitch bias */
 	if (offset_sonar_pitch != 0.0)
 		{
@@ -1383,7 +1389,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			dat_rph_pitch[i] += offset_sonar_pitch;
 			}
 		}
-	
+
 	/* apply heading bias */
 	if (offset_sonar_heading != 0.0)
 		{
@@ -1391,8 +1397,8 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			{
 			dat_heading_heading[i] += offset_sonar_heading;
 			}
-		}				
-		
+		}
+
 	/* output navigation data */
 	if (nnav > 0 && (verbose > 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST))
 		fprintf(stdout, "\nTotal navigation data read: %d\n", nnav);
@@ -1401,12 +1407,12 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		fprintf(stdout, "\nTotal navigation data read: %d\n", nnav);
 		for (i=0;i<nnav;i++)
 			{
-			fprintf(stdout, "  NAVIGATION: %12d %17.6f %11.6f %10.6f %8.3f %7.3f %6.3f\n", 
+			fprintf(stdout, "  NAVIGATION: %12d %17.6f %11.6f %10.6f %8.3f %7.3f %6.3f\n",
 				i, nav_time_d[i], nav_lon[i], nav_lat[i], nav_heading[i],
 				nav_sonardepth[i], nav_altitude[i]);
 			}
 		}
-		
+
 	/* output sonardepth data */
 	if (nsonardepth > 0 && (verbose >= 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST))
 		fprintf(stdout, "\nTotal sonardepth data read: %d\n", nsonardepth);
@@ -1415,7 +1421,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		fprintf(stdout, "\nTotal sonardepth data read: %d\n", nsonardepth);
 		for (i=0;i<nnav;i++)
 			{
-			fprintf(stdout, "  SONARDEPTH: %12d %8.3f %8.3f\n", 
+			fprintf(stdout, "  SONARDEPTH: %12d %8.3f %8.3f\n",
 				i, sonardepth_time_d[i], sonardepth_sonardepth[i]);
 			}
 		}
@@ -1426,7 +1432,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	if (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
 		for (i=0;i<ndat_nav;i++)
 			{
-			fprintf(stdout, "  NAV: %5d %17.6f %11.6f %10.6f\n", 
+			fprintf(stdout, "  NAV: %5d %17.6f %11.6f %10.6f\n",
 				i, dat_nav_time_d[i], dat_nav_lon[i], dat_nav_lat[i]);
 			}
 	if (verbose > 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
@@ -1434,7 +1440,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	if (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
 		for (i=0;i<ndat_heading;i++)
 			{
-			fprintf(stdout, "  HDG: %5d %17.6f %8.3f\n", 
+			fprintf(stdout, "  HDG: %5d %17.6f %8.3f\n",
 				i, dat_heading_time_d[i], dat_heading_heading[i]);
 			}
 	if (verbose > 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
@@ -1442,7 +1448,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	if (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
 		for (i=0;i<ndat_sonardepth;i++)
 			{
-			fprintf(stdout, "  DEP: %5d %17.6f %8.3f\n", 
+			fprintf(stdout, "  DEP: %5d %17.6f %8.3f\n",
 				i, dat_sonardepth_time_d[i], dat_sonardepth_sonardepth[i]);
 			}
 	if (verbose > 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
@@ -1450,7 +1456,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	if (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
 		for (i=0;i<ndat_altitude;i++)
 			{
-			fprintf(stdout, "  ALT: %5d %17.6f %8.3f\n", 
+			fprintf(stdout, "  ALT: %5d %17.6f %8.3f\n",
 				i, dat_altitude_time_d[i], dat_altitude_altitude[i]);
 			}
 	if (verbose > 0 || mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
@@ -1458,10 +1464,10 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	if (mode == MBHYSWEEPPREPROCESS_TIMESTAMPLIST)
 		for (i=0;i<ndat_rph;i++)
 			{
-			fprintf(stdout, "  HCP: %5d %17.6f %8.3f %8.3f %8.3f\n", 
+			fprintf(stdout, "  HCP: %5d %17.6f %8.3f %8.3f %8.3f\n",
 				i, dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i], dat_rph_heave[i]);
 			}
-	
+
 	/* output counts */
 	fprintf(stdout, "\nTotal data records read from: %s\n", read_file);
 	fprintf(stdout, "     Positions (POS):                   %d\n", nrec_POS_tot);
@@ -1513,16 +1519,16 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	    strcpy(ifile, read_file);
 	    read_data = MB_YES;
 	    }
-	
+
 	/* loop over all files to be read */
 	while (read_data == MB_YES && format == MBF_HYSWEEP1)
 	{
 	/* figure out the output file name */
 	status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
-	if (testformat == MBF_HYSWEEP1 
+	if (testformat == MBF_HYSWEEP1
 		&& strncmp(".HSX",&ifile[strlen(ifile)-4],4) == 0)
 		sprintf(ofile, "%s.mb%d", fileroot, testformat);
-	else if (testformat == MBF_HYSWEEP1 
+	else if (testformat == MBF_HYSWEEP1
 		&& strncmp(".hsx",&ifile[strlen(ifile)-4],4) == 0)
 		sprintf(ofile, "%s.mb%d", fileroot, testformat);
 	else if (testformat == MBF_HYSWEEP1)
@@ -1561,6 +1567,12 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	istore_ptr = imb_io_ptr->store_data;
 	istore = (struct mbsys_hysweep_struct *) istore_ptr;
 
+	/* set projection if specified */
+	if (projection_set == MB_YES)
+		{
+		strcpy(istore->PRJ_proj4_command,proj4command);
+		}
+
 	if (error == MB_ERROR_NO_ERROR)
 		{
 		beamflag = NULL;
@@ -1588,13 +1600,13 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
 
 	/* if error initializing memory then quit */
@@ -1617,14 +1629,14 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	nrec_DFT = 0;
 	nrec_RMB = 0;
 	nrec_other = 0;
-		
+
 	/* read and write data */
 	while (error <= MB_ERROR_NO_ERROR)
 		{
 		/* reset error */
 		status = MB_SUCCESS;
 		error = MB_ERROR_NO_ERROR;
-		
+
 		/* read next data record */
 		status = mb_get_all(verbose,imbio_ptr,&istore_ptr,&kind,
 				    time_i,&time_d,&navlon,&navlat,
@@ -1634,42 +1646,42 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 				    beamflag,bath,amp,bathacrosstrack,bathalongtrack,
 				    ss,ssacrosstrack,ssalongtrack,
 				    comment,&error);
-		    
+
 		/* some nonfatal errors do not matter */
 		if (error < MB_ERROR_NO_ERROR && error > MB_ERROR_UNINTELLIGIBLE)
 			{
 			error = MB_ERROR_NO_ERROR;
 			status = MB_SUCCESS;
 			}
-			
+
 	   	/* handle multibeam data */
 		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
 			{
 			nrec_RMB++;
-			
+
 			/* merge navigation from best available source */
 			if (nnav > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose, 
+				interp_status = mb_linear_interp_degrees(verbose,
 							nav_time_d-1, nav_lon-1,
-							nnav, time_d, &navlon, &j, 
+							nnav, time_d, &navlon, &j,
 							&error);
 				if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp_degrees(verbose, 
+				interp_status = mb_linear_interp_degrees(verbose,
 							nav_time_d-1, nav_lat-1,
-							nnav, time_d, &navlat, &j, 
+							nnav, time_d, &navlat, &j,
 							&error);
 				}
 			else if (ndat_nav > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose, 
+				interp_status = mb_linear_interp_degrees(verbose,
 							dat_nav_time_d-1, dat_nav_lon-1,
-							ndat_nav, time_d, &navlon, &j, 
+							ndat_nav, time_d, &navlon, &j,
 							&error);
 				if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp_degrees(verbose, 
+				interp_status = mb_linear_interp_degrees(verbose,
 							dat_nav_time_d-1, dat_nav_lat-1,
-							ndat_nav, time_d, &navlat, &j, 
+							ndat_nav, time_d, &navlat, &j,
 							&error);
 				}
 			else
@@ -1678,67 +1690,67 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 				navlat = 0.0;
 				speed = 0.0;
 				}
-			
+
 			/* merge heading from best available source */
 			if (nnav > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose, 
+				interp_status = mb_linear_interp_degrees(verbose,
 							nav_time_d-1, nav_heading-1,
-							nnav, time_d, &heading, &j, 
+							nnav, time_d, &heading, &j,
 							&error);
 				}
 			else if (ndat_heading > 0)
 				{
-				interp_status = mb_linear_interp_degrees(verbose, 
+				interp_status = mb_linear_interp_degrees(verbose,
 							dat_heading_time_d-1, dat_heading_heading-1,
-							ndat_heading, time_d, &heading, &j, 
+							ndat_heading, time_d, &heading, &j,
 							&error);
 				}
 			else
 				{
 				heading = 0.0;
 				}
-			
+
 			/* merge sonardepth from best available source */
 			if (nsonardepth > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							sonardepth_time_d-1, sonardepth_sonardepth-1,
-							nsonardepth, time_d, &sonardepth, &j, 
+							nsonardepth, time_d, &sonardepth, &j,
 							&error);
 				}
 			else if (nnav > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							nav_time_d-1, nav_sonardepth-1,
-							nnav, time_d, &sonardepth, &j, 
+							nnav, time_d, &sonardepth, &j,
 							&error);
 				}
 			else if (ndat_sonardepth > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							dat_sonardepth_time_d-1, dat_sonardepth_sonardepth-1,
-							ndat_sonardepth, time_d, &sonardepth, &j, 
+							ndat_sonardepth, time_d, &sonardepth, &j,
 							&error);
 				}
 			else
 				{
 				sonardepth = 0.0;
 				}
-			
+
 			/* merge altitude from best available source */
 			if (nnav > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							nav_time_d-1, nav_altitude-1,
-							nnav, time_d, &altitude, &j, 
+							nnav, time_d, &altitude, &j,
 							&error);
 				}
 			else if (ndat_altitude > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							dat_altitude_time_d-1, dat_altitude_altitude-1,
-							ndat_altitude, time_d, &altitude, &j, 
+							ndat_altitude, time_d, &altitude, &j,
 							&error);
 				}
 			else
@@ -1749,14 +1761,14 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			/* get attitude from best available source */
 			if (ndat_rph > 0)
 				{
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							dat_rph_time_d-1, dat_rph_roll-1,
-							ndat_rph, time_d, &roll, &j, 
+							ndat_rph, time_d, &roll, &j,
 							&error);
 				if (interp_status == MB_SUCCESS)
-				interp_status = mb_linear_interp(verbose, 
+				interp_status = mb_linear_interp(verbose,
 							dat_rph_time_d-1, dat_rph_pitch-1,
-							ndat_rph, time_d, &pitch, &j, 
+							ndat_rph, time_d, &pitch, &j,
 							&error);
 				}
 			else
@@ -1764,23 +1776,23 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 				roll = 0.0;
 				pitch = 0.0;
 				}
-	
+
 			/* do lever arm calculation with sensor offsets */
 			mb_lever(verbose, offset_sonar_x, offset_sonar_y, offset_sonar_z,
 					offset_mru_x, offset_mru_y, offset_mru_z,
 					offset_nav_x, offset_nav_y, offset_nav_z,
 					roll, pitch,
 					&lever_x, &lever_y, &lever_z, &error);
-				
+
 			/* set values at sonar ping time */
 			istore->RMBint_lon = navlon;
 			istore->RMBint_lat = navlat;
 			if (imb_io_ptr->projection_initialized == MB_YES)
 				{
 				mb_proj_forward(verbose, imb_io_ptr->pjptr,
-								istore->RMBint_lon, 
+								istore->RMBint_lon,
 								istore->RMBint_lat,
-								&(istore->RMBint_x), 
+								&(istore->RMBint_x),
 								&(istore->RMBint_y),
 								&error);
 				}
@@ -1806,7 +1818,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 					{
 					for (i=0;i<istore->RMB_num_beams;i++)
 						{
-						istore->RMB_sounding_rollangles[i] 
+						istore->RMB_sounding_rollangles[i]
 							= device->MBI_first_beam_angle + i * device->MBI_angle_increment;
 						}
 					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x0080;
@@ -1834,9 +1846,9 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 						beta -= istore->RMBint_roll;
 
 					mb_rollpitch_to_takeoff(
-						verbose, 
-						alpha, beta, 
-						&theta, &phi, 
+						verbose,
+						alpha, beta,
+						&theta, &phi,
 						&error);
 					istore->RMB_sounding_takeoffangles[i] = theta;
 					istore->RMB_sounding_azimuthalangles[i] = phi;
@@ -1863,7 +1875,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 					istore->RMB_sounding_flags[i] = MB_FLAG_NONE;
 					}
 				istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x2000;
-				}			
+				}
 
 			/* deal with case of multiple transducer sonar */
 			if (istore->RMB_beam_data_available & 0x0002)
@@ -1916,9 +1928,9 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 						alpha = istore->RMB_sounding_pitchangles[i];
 						beta = 90.0 - istore->RMB_sounding_rollangles[i];
 						mb_rollpitch_to_takeoff(
-							verbose, 
-							alpha, beta, 
-							&theta, &phi, 
+							verbose,
+							alpha, beta,
+							&theta, &phi,
 							&error);
 						istore->RMB_sounding_takeoffangles[i] = theta;
 						istore->RMB_sounding_azimuthalangles[i] = phi;
@@ -1944,7 +1956,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 						istore->RMB_sounding_depths[i] = zz + istore->RMBint_draft - istore->RMBint_heave;
 						}
 					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x003C;
-					}			
+					}
 
 				/* get beam flags if necessary */
 				if (!(istore->RMB_beam_data_available & 0x2000))
@@ -1954,14 +1966,14 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 						istore->RMB_sounding_flags[i] = MB_FLAG_NONE;
 						}
 					istore->RMB_beam_data_available = istore->RMB_beam_data_available | 0x2000;
-					}			
+					}
 				}
 			}
-			
+
 	   	/* handle navigation data */
-		else if (status == MB_SUCCESS 
-			&& (kind == MB_DATA_NAV 
-				|| kind == MB_DATA_NAV1 
+		else if (status == MB_SUCCESS
+			&& (kind == MB_DATA_NAV
+				|| kind == MB_DATA_NAV1
 				|| kind == MB_DATA_NAV2))
 			{
 			/* check device for being enabled */
@@ -1971,37 +1983,37 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 			else
 				nrec_POSunused++;
 			}
-			
+
 	   	/* handle attitude data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_ATTITUDE) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_ATTITUDE)
 			{
 			nrec_HCP++;
 			}
-			
+
 	   	/* handle heading data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_HEADING) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_HEADING)
 			{
 			nrec_GYR++;
 			}
-			
+
 	   	/* handle altitude data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_ALTITUDE) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_ALTITUDE)
 			{
 			nrec_EC1++;
 			}
-			
+
 	   	/* handle sonar depth data */
-		else if (status == MB_SUCCESS && kind == MB_DATA_SONARDEPTH) 
+		else if (status == MB_SUCCESS && kind == MB_DATA_SONARDEPTH)
 			{
 			nrec_DFT++;
 			}
-			
+
 	   	/* handle unknown data */
-		else  if (status == MB_SUCCESS) 
+		else  if (status == MB_SUCCESS)
 			{
 /*fprintf(stderr,"DATA TYPE UNKNOWN: status:%d error:%d kind:%d\n",status,error,kind);*/
 			}
-			
+
 	   	/* handle read error */
 		else
 			{
@@ -2048,7 +2060,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	/* close the swath file */
 	status = mb_close(verbose,&imbio_ptr,&error);
 	status = mb_close(verbose,&ombio_ptr,&error);
-	
+
 	/* output counts */
 	fprintf(stdout, "\nData records written to: %s\n", ofile);
 	fprintf(stdout, "     Positions (POS):                   %d\n", nrec_POS);
@@ -2067,7 +2079,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	nrec_DFT_tot += nrec_DFT;
 	nrec_RMB_tot += nrec_RMB;
 	nrec_other_tot += nrec_other;
-		
+
 	/* generate inf fnv and fbt files */
 	if (status == MB_SUCCESS)
 		{
@@ -2093,7 +2105,7 @@ fprintf(stderr,"Applying timelag to %d sonardepth nav data\n", nsonardepth);
 	}
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
-			
+
 	/* output counts */
 	fprintf(stdout, "\nTotal data records written from: %s\n", read_file);
 	fprintf(stdout, "     Positions (POS):                   %d\n", nrec_POS_tot);

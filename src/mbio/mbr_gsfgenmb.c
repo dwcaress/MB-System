@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_gsfgenmb.c contains the functions for reading and writing
- * multibeam data in the GSFGENMB format.  
+ * multibeam data in the GSFGENMB format.
  * These functions include:
  *   mbr_alm_gsfgenmb	- allocate read/write memory
  *   mbr_dem_gsfgenmb	- deallocate read/write memory
@@ -95,27 +95,27 @@
 extern int gsfError;
 
 /* essential function prototypes */
-int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, 
+int mbr_register_gsfgenmb(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_gsfgenmb(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_gsfgenmb(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_gsfgenmb(int verbose, void *mbio_ptr, int *error);
@@ -144,54 +144,58 @@ int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_gsfgenmb(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_gsfgenmb(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_gsfgenmb;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_gsfgenmb; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_gsf_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_gsf_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_gsfgenmb; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_gsfgenmb; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_gsf_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_gsf_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_gsf_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_gsf_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_gsf_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_gsf_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = &mbsys_gsf_insert_altitude; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_gsf_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_gsf_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_gsf_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_gsf_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_gsf_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_gsfgenmb;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_gsf_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_gsf_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_gsfgenmb;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_gsfgenmb;
+	mb_io_ptr->mb_io_sonartype = &mbsys_gsf_sonartype;
+	mb_io_ptr->mb_io_sidescantype = &mbsys_gsf_sidescantype;
+	mb_io_ptr->mb_io_dimensions = &mbsys_gsf_dimensions;
+	mb_io_ptr->mb_io_sonartype = &mbsys_gsf_sonartype;
+	mb_io_ptr->mb_io_sidescantype = &mbsys_gsf_sidescantype;
+	mb_io_ptr->mb_io_extract = &mbsys_gsf_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_gsf_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_gsf_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_gsf_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_gsf_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = &mbsys_gsf_insert_altitude;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_gsf_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_gsf_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_gsf_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_gsf_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_gsf_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -239,25 +243,25 @@ int mbr_register_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_gsfgenmb(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_gsfgenmb(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_gsfgenmb";
@@ -298,7 +302,7 @@ int mbr_info_gsfgenmb(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -355,7 +359,7 @@ int mbr_alm_gsfgenmb(int verbose, void *mbio_ptr, int *error)
 	memset(mb_io_ptr->raw_data, 0, mb_io_ptr->structure_size);
 	status = mbsys_gsf_alloc(verbose,mbio_ptr,
 		&mb_io_ptr->store_data,error);
-		
+
 	/* set processing parameter output flag */
 	mb_io_ptr->save1 = MB_NO;
 
@@ -446,18 +450,18 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_gsfgenmb_struct *) mb_io_ptr->raw_data;
-	
+
 	/* get pointers to GSF structures */
 	dataID = &(data->dataID);
 	records = &(data->records);
 	mb_ping = &(records->mb_ping);
-	
+
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* read next record from file */
 	ret = gsfRead((int)mb_io_ptr->gsfid, GSF_NEXT_RECORD, dataID, records, NULL, 0);
-	
+
 	/* deal with errors */
 	if (ret < 0)
 	    {
@@ -467,12 +471,12 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		*error = MB_ERROR_EOF;
 		}
 	    else
-		{	
+		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_UNINTELLIGIBLE;
 		}
 	    }
-	    
+
 	/* else deal with data */
 	else
 	    {
@@ -482,35 +486,35 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		}
-		
+
 	    else if (dataID->recordID == GSF_RECORD_SWATH_BATHY_SUMMARY)
 		{
 		data->kind = MB_DATA_SUMMARY;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		}
-		
+
 	    else if (dataID->recordID == GSF_RECORD_PROCESSING_PARAMETERS)
 		{
 		data->kind = MB_DATA_PROCESSING_PARAMETERS;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		}
-		
+
 	    else if (dataID->recordID == GSF_RECORD_SENSOR_PARAMETERS)
 		{
 		data->kind = MB_DATA_PROCESSING_PARAMETERS;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		}
-		
+
 	    else if (dataID->recordID == GSF_RECORD_NAVIGATION_ERROR)
 		{
 		data->kind = MB_DATA_NAVIGATION_ERROR;
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
-		}		
-		
+		}
+
 	    else if (dataID->recordID == GSF_RECORD_SOUND_VELOCITY_PROFILE)
 		{
 		data->kind = MB_DATA_VELOCITY_PROFILE;
@@ -533,15 +537,15 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    *error = MB_ERROR_UNINTELLIGIBLE;
 		    }
 		}
-		
+
 	    else if (dataID->recordID == GSF_RECORD_SWATH_BATHYMETRY_PING)
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
 		data->kind = MB_DATA_DATA;
-		
+
 		/* get beam widths */
-		ret = gsfGetSwathBathyBeamWidths(records, &(mb_io_ptr->beamwidth_ltrack), 
+		ret = gsfGetSwathBathyBeamWidths(records, &(mb_io_ptr->beamwidth_ltrack),
 							&(mb_io_ptr->beamwidth_xtrack));
 		if (ret < 0)
 		    {
@@ -549,18 +553,18 @@ int mbr_rt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    mb_io_ptr->beamwidth_xtrack = 0.0;
 		    }
 		}
-		
+
 	    else
 		{
 		status = MB_FAILURE;
 		*error = MB_ERROR_UNINTELLIGIBLE;
-		}	
+		}
 	    }
 
 	/* set error and kind in mb_io_ptr */
 	mb_io_ptr->new_error = *error;
 	mb_io_ptr->new_kind = data->kind;
-	
+
 	/* output debug info */
 	if (verbose >= 4)
 		{
@@ -682,7 +686,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 
 	/* get pointer to raw data structure */
 	data = (struct mbf_gsfgenmb_struct *) mb_io_ptr->raw_data;
-	
+
 	/* get pointers to GSF structures */
 	dataID = &(data->dataID);
 	records = &(data->records);
@@ -697,7 +701,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		*dataID = store->dataID;
 		data->kind = store->kind;
 		}
-	
+
 	/* output debug info */
 	if (verbose >= 4)
 		{
@@ -764,12 +768,12 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	/* write gsf data to file */
 	if (status == MB_SUCCESS)
 	    {
-	    /* if first survey ping and no processing parameters output, 
+	    /* if first survey ping and no processing parameters output,
 	    	output the processing parameters */
 	    if (data->kind == MB_DATA_DATA && mb_io_ptr->save1 == MB_NO)
 	    	{
 		/* write a processing parameter record */
-		dataID->recordID = GSF_RECORD_PROCESSING_PARAMETERS; 
+		dataID->recordID = GSF_RECORD_PROCESSING_PARAMETERS;
 		if ((ret = gsfWrite((int)mb_io_ptr->gsfid, dataID, records)) < 0)
 		    {
 		    status = MB_FAILURE;
@@ -781,7 +785,7 @@ int mbr_wt_gsfgenmb(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		}
 	    else if (data->kind == MB_DATA_PROCESSING_PARAMETERS)
 		mb_io_ptr->save1 = MB_YES;
-	    
+
 	    /* write the record */
 	    if ((ret = gsfWrite((int)mb_io_ptr->gsfid, dataID, records)) < 0)
 		{

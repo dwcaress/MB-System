@@ -2,7 +2,7 @@
  *    The MB-system:	mbr_l3xseraw.c	3/27/2000
  *	$Id$
  *
- *    Copyright (c) 2000-2012 by 
+ *    Copyright (c) 2000-2012 by
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -14,7 +14,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_sb2102xs.c contains the functions for reading and writing
- * multibeam data in the L3XSERAW format.  
+ * multibeam data in the L3XSERAW format.
  * These functions include:
  *   mbr_alm_l3xseraw	- allocate read/write memory
  *   mbr_dem_l3xseraw	- deallocate read/write memory
@@ -124,27 +124,27 @@
 #endif
 
 /* essential function prototypes */
-int mbr_register_l3xseraw(int verbose, void *mbio_ptr, 
+int mbr_register_l3xseraw(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_l3xseraw(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_l3xseraw(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_l3xseraw(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_l3xseraw(int verbose, void *mbio_ptr, int *error);
@@ -197,54 +197,54 @@ int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_l3xseraw(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_l3xseraw(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_l3xseraw;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_l3xseraw; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_xse_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_xse_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_l3xseraw; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_l3xseraw; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_xse_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_xse_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_xse_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_xse_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_xse_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_xse_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_xse_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_xse_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_xse_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_xse_detects; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_xse_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_l3xseraw;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_xse_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_xse_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_l3xseraw;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_l3xseraw;
+	mb_io_ptr->mb_io_dimensions = &mbsys_xse_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_xse_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_xse_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_xse_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_xse_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_xse_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_xse_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_xse_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_xse_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_xse_detects;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_xse_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -292,25 +292,25 @@ int mbr_register_l3xseraw(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_l3xseraw(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_l3xseraw(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_l3xseraw";
@@ -351,7 +351,7 @@ int mbr_info_l3xseraw(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -488,7 +488,7 @@ int mbr_rt_l3xseraw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 	status = mbr_l3xseraw_rd_data(verbose,mbio_ptr,store_ptr,error);
 
 /*fprintf(stderr, "read kind:%d\n", store->kind);
-fprintf(stderr, "store->mul_frame:%d store->sid_frame:%d\n\n", 
+fprintf(stderr, "store->mul_frame:%d store->sid_frame:%d\n\n",
 store->mul_frame, store->sid_frame);*/
 
 	/* set error and kind in mb_io_ptr */
@@ -500,56 +500,56 @@ store->mul_frame, store->sid_frame);*/
 		&& store->kind == MB_DATA_NAV)
 		{
 		/* get time */
-		time_d = store->nav_sec 
+		time_d = store->nav_sec
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->nav_usec;
-			    
+
 		/* add nav to navlist */
 		if (store->nav_group_position == MB_YES)
-			mb_navint_add(verbose, mbio_ptr, time_d, 
-				RTD * store->nav_x, 
-				RTD * store->nav_y, error);	    
-			    
+			mb_navint_add(verbose, mbio_ptr, time_d,
+				RTD * store->nav_x,
+				RTD * store->nav_y, error);
+
 		/* add heading to navlist */
 		if (store->nav_group_heading == MB_YES)
-			mb_hedint_add(verbose, mbio_ptr, time_d, 
-				RTD * store->nav_hdg_heading, error);	    
+			mb_hedint_add(verbose, mbio_ptr, time_d,
+				RTD * store->nav_hdg_heading, error);
 		else if (store->nav_group_motiongt == MB_YES)
-			mb_hedint_add(verbose, mbio_ptr, time_d, 
-				RTD * store->nav_course_ground, error);	    
+			mb_hedint_add(verbose, mbio_ptr, time_d,
+				RTD * store->nav_course_ground, error);
 		else if (store->nav_group_motiontw == MB_YES)
-			mb_hedint_add(verbose, mbio_ptr, time_d, 
-				RTD * store->nav_course_water, error);	    
+			mb_hedint_add(verbose, mbio_ptr, time_d,
+				RTD * store->nav_course_water, error);
 		}
 
 	/* interpolate navigation for survey pings if needed */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& store->kind == MB_DATA_DATA
 		&& store->mul_group_mbsystemnav == MB_NO)
 		{
 		/* get timestamp */
-		time_d = store->mul_sec 
+		time_d = store->mul_sec
 			    - MBSYS_XSE_TIME_OFFSET
 			    + 0.000001 * store->mul_usec;
-			    
+
 		/* interpolate heading */
-		mb_hedint_interp(verbose, mbio_ptr, time_d, 
+		mb_hedint_interp(verbose, mbio_ptr, time_d,
 				 &heading, error);
 
 		/* get speed if possible */
 		if (store->nav_group_log == MB_YES)
-			speed = 3.6 * store->nav_log_speed;	    
+			speed = 3.6 * store->nav_log_speed;
 		else if (store->nav_group_motiongt == MB_YES)
-			speed = 3.6 * store->nav_speed_ground;	    
+			speed = 3.6 * store->nav_speed_ground;
 		else if (store->nav_group_motiontw == MB_YES)
 			speed = 3.6 * store->nav_speed_water;
 		else
 			speed = 0.0;
 
 		/* interpolate position */
-		mb_navint_interp(verbose, mbio_ptr, time_d, heading, speed, 
+		mb_navint_interp(verbose, mbio_ptr, time_d, heading, speed,
 				    &lon, &lat, &speed, error);
-				    
+
 		/* set values */
 		store->mul_lon = DTR * lon;
 		store->mul_lat = DTR * lat;
@@ -663,7 +663,7 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 
 	/* set file position */
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
-	
+
 	/* read until done */
 	*error = MB_ERROR_NO_ERROR;
 	frame_expect = (int *) &mb_io_ptr->save1;
@@ -677,7 +677,7 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 	buffer = mb_io_ptr->hdr_comment;
 	store->sbm_properties = MB_NO;
 	store->sbm_hrp = MB_NO;
-	store->sbm_center = MB_NO;
+	store->sbm_signal = MB_NO;
 	store->sbm_message = MB_NO;
 	done = MB_NO;
 	if (*frame_save == MB_YES)
@@ -697,11 +697,11 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 			buffer_size = *buffer_size_save;
 			*frame_save = MB_NO;
 			}
-		
+
 	    /* else read from file */
 	    else
 		{
-		
+
 		/* look for the next frame start */
 		skip = 0;
 		if ((read_len = fread(&label[0],1,4,mb_io_ptr->mbfp)) != 4)
@@ -709,6 +709,14 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_EOF;
 		    }
+
+#ifdef MB_DEBUG
+fprintf(stderr,"Byte: %d %c %o %x\n", label[0],label[0],label[0],label[0]);
+fprintf(stderr,"Byte: %d %c %o %x\n", label[1],label[1],label[1],label[1]);
+fprintf(stderr,"Byte: %d %c %o %x\n", label[2],label[2],label[2],label[2]);
+fprintf(stderr,"Byte: %d %c %o %x\n", label[3],label[3],label[3],label[3]);
+#endif
+
 #ifdef DATAINPCBYTEORDER
 		while (status == MB_SUCCESS
 		    && strncmp(label, "FSH$", 4))
@@ -728,13 +736,16 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		    else
 				{
 				skip++;
+#ifdef MB_DEBUG
+fprintf(stderr,"Byte: %d %c %o %x\n", label[3],label[3],label[3],label[3]);
+#endif
 				}
 		    }
 
 		/* Read entire data record into buffer. The XSE frame byte count value */
 		/* is notorious for being incorrect.  So we read the data record by */
 		/* reading up to the next frame end mark. */
-		
+
 		/* copy the frame start label to the buffer */
 		if(status==MB_SUCCESS)
 			{
@@ -758,7 +769,7 @@ int mbr_l3xseraw_rd_data(int verbose,void *mbio_ptr,void *store_ptr,int *error)
 		    		mb_get_binary_int(SWAPFLAG, &buffer[4], (int *) &frame_size);
 				}
 			}
-		
+
 		/* now read a byte at a time, continuing until we find the end mark */
 #ifdef DATAINPCBYTEORDER
 		while (status == MB_SUCCESS
@@ -795,7 +806,7 @@ if (*error != MB_ERROR_EOF)
 fprintf(stderr,"%s:%d | \n",__FILE__,__LINE__);
 if (skip > 0)
 fprintf(stderr, "\n%s:%d | BYTES SKIPPED BETWEEN FRAMES: %d\n",__FILE__,__LINE__, skip);
-fprintf(stderr, "\n%s:%d | BUFFER SIZE: %u  MAX FOUND: %u  MAX: %u\n",__FILE__,__LINE__, 
+fprintf(stderr, "\n%s:%d | BUFFER SIZE: %u  MAX FOUND: %u  MAX: %u\n",__FILE__,__LINE__,
 buffer_size,*buffer_size_max,MBSYS_XSE_BUFFER_SIZE);
 }
 #endif
@@ -818,7 +829,7 @@ buffer_size,*buffer_size_max,MBSYS_XSE_BUFFER_SIZE);
 			    }
 		    }
 		}
-				
+
 	    /* parse data if possible */
 	    if (status == MB_SUCCESS)
 			{
@@ -1064,7 +1075,7 @@ fprintf(stderr, "%s:%d | READ NOTHING - SAVE HEADER\n",__FILE__,__LINE__);
 		    *frame_expect = MBSYS_XSE_NONE_FRAME;
 		    done = MB_YES;
 		    }
-		    	
+
 	    /* check for status */
 	    if (status == MB_FAILURE)
 			{
@@ -1075,7 +1086,7 @@ fprintf(stderr, "%s:%d | READ NOTHING - SAVE HEADER\n",__FILE__,__LINE__);
 
 	/* get file position */
 	mb_io_ptr->file_bytes = ftell(mbfp);
-	
+
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
@@ -1116,13 +1127,13 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 
 	/* get pointer to store data structure */
 	store = (struct mbsys_xse_struct *) store_ptr;
-		
+
 	/* get source and time */
 	index = 12;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_source); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_sec); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_usec); index += 4;
-	
+
 	/* reset group read flags */
 	store->nav_group_general = MB_NO;	/* boolean flag */
 	store->nav_group_position = MB_NO;	/* boolean flag */
@@ -1136,11 +1147,11 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 	store->nav_group_pitch = MB_NO;		/* boolean flag */
 	store->nav_group_heading = MB_NO;	/* boolean flag */
 	store->nav_group_log = MB_NO;		/* boolean flag */
-	store->nav_group_gps = MB_NO;		/* boolean flag */	
-		
+	store->nav_group_gps = MB_NO;		/* boolean flag */
+
 	/* loop over groups */
 	done = MB_NO;
-	while (index <= buffer_size 
+	while (index <= buffer_size
 		&& status == MB_SUCCESS
 		&& done == MB_NO)
 	    {
@@ -1173,11 +1184,11 @@ int mbr_l3xseraw_rd_nav(int verbose,int buffer_size,char *buffer,void *store_ptr
 	    else
 			index += 4;
 #endif
-	    
+
 #ifdef MB_DEBUG
 if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
-	    
+
 	    /* deal with group */
 	    if (done == MB_NO)
 			{
@@ -1195,7 +1206,7 @@ if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FI
 fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
-	    
+
 		    /* handle general group */
 		    if (group_id == MBSYS_XSE_NAV_GROUP_GEN)
 				{
@@ -1206,7 +1217,7 @@ fprintf(stderr, "%s:%d | READ NAV_GROUP_GEN\n",__FILE__,__LINE__);
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_status); index += 4;
 				store->nav_group_general = MB_YES;
 				}
-	    
+
 		    /* handle point group */
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_POS)
 				{
@@ -1225,7 +1236,7 @@ fprintf(stderr, "%s:%d | READ NAV_GROUP_POS\n",__FILE__,__LINE__);
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_z); index += 8;
 				store->nav_group_position = MB_YES;
 				}
-	    
+
 		    /* handle accuracy group */
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_ACCURACY)
 				{
@@ -1239,7 +1250,7 @@ fprintf(stderr, "%s:%d | READ NAV_GROUP_ACCURACY\n",__FILE__,__LINE__);
 				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->nav_acc_diffref); index += 4;
 				store->nav_group_accuracy = MB_YES;
 				}
-	    
+
 		    /* handle motion ground truth group */
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_MOTIONGT)
 				{
@@ -1250,7 +1261,7 @@ fprintf(stderr, "%s:%d | READ NAV_GROUP_MOTIONGT\n",__FILE__,__LINE__);
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->nav_course_ground); index += 8;
 				store->nav_group_motiongt = MB_YES;
 				}
-	    
+
 		    /* handle motion through water group */
 		    else if (group_id == MBSYS_XSE_NAV_GROUP_MOTIONTW)
 				{
@@ -1290,7 +1301,7 @@ fprintf(stderr, "%s:%d | READ NAV_GROUP_HRP\n",__FILE__,__LINE__);
 				store->nav_group_hrp = MB_YES;
 				/* heave, roll, and pitch are best obtained from the multibeam frame */
 				}
-		    
+
 			/* handle the heave group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_HEAVE)
 				{
@@ -1301,7 +1312,7 @@ fprintf(stderr, "%s:%d | READ NAV_GROUP_HEAVE\n",__FILE__,__LINE__);
 				store->nav_group_heave = MB_YES;
 				/* heave is obtained from the multibeam frame */
 				}
-		    
+
 			/* handle the roll group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_ROLL)
 				{
@@ -1312,7 +1323,7 @@ fprintf(stderr, "%s:%d | READ NAV_GROUP_ROLL\n",__FILE__,__LINE__);
 				store->nav_group_roll = MB_YES;
 				/* roll is obtained from the multibeam frame */
 				}
-		    
+
 			/* handle the pitch group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_PITCH)
 				{
@@ -1323,7 +1334,7 @@ fprintf(stderr, "%s:%d | READ NAV_GROUP_PITCH\n",__FILE__,__LINE__);
 				store->nav_group_pitch = MB_YES;
 				/* pitch is obtained from the multibeam frame */
 				}
-		    
+
 			/* handle the heading group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_HEADING)
 				{
@@ -1334,7 +1345,7 @@ fprintf(stderr, "%s:%d | READ NAV_GROUP_HEADING\n",__FILE__,__LINE__);
 				store->nav_group_heading = MB_YES;
 				/* Heading Group value overrides the MTW Group course value */
 				}
-		    
+
 			/* handle the log group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_LOG)
 				{
@@ -1346,7 +1357,7 @@ fprintf(stderr, "%s:%d | READ NAV_GROUP_LOG\n",__FILE__,__LINE__);
 				/* speed is obtained from the motion ground truth */
 				/* and motion through water groups */
 				}
-		    
+
 			/* handle the gps group */
 			else if (group_id == MBSYS_XSE_NAV_GROUP_GPS)
 				{
@@ -1428,16 +1439,16 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 
 	/* get pointer to store data structure */
 	store = (struct mbsys_xse_struct *) store_ptr;
-		
+
 	/* get source and time */
 	index = 12;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_source); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_sec); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->svp_usec); index += 4;
-		
+
 	/* loop over groups */
 	done = MB_NO;
-	while (index <= buffer_size 
+	while (index <= buffer_size
 		&& status == MB_SUCCESS
 		&& done == MB_NO)
 	    {
@@ -1470,11 +1481,11 @@ int mbr_l3xseraw_rd_svp(int verbose,int buffer_size,char *buffer,void *store_ptr
 	    else
 			index += 4;
 #endif
-	    
+
 #ifdef MB_DEBUG
 if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
-	    
+
 	    /* deal with group */
 	    if (done == MB_NO)
 			{
@@ -1501,9 +1512,9 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_GEN\n",__FILE__,__LINE__);
 #endif
 				/* currently unused by MB-System */
 				}
-	    
-		    /* handle depth group */
-		    if (group_id == MBSYS_XSE_SVP_GROUP_DEPTH) 
+
+			/* handle depth group */
+			if (group_id == MBSYS_XSE_SVP_GROUP_DEPTH)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_DEPTH\n",__FILE__,__LINE__);
@@ -1517,9 +1528,9 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_DEPTH\n",__FILE__,__LINE__);
 						}
 				    }
 				}
-	    
-		    /* handle velocity group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_VELOCITY)
+
+			/* handle velocity group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_VELOCITY)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_VELOCITY\n",__FILE__,__LINE__);
@@ -1533,9 +1544,9 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_VELOCITY\n",__FILE__,__LINE__);
 						}
 				    }
 				}
-	    
-		    /* handle conductivity group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_CONDUCTIVITY)
+
+			/* handle conductivity group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_CONDUCTIVITY)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_CONDUCTIVITY\n",__FILE__,__LINE__);
@@ -1549,9 +1560,9 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_CONDUCTIVITY\n",__FILE__,__LINE__);
 						}
 				    }
 				}
-	    
-		    /* handle salinity group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_SALINITY)
+
+			/* handle salinity group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_SALINITY)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_SALINITY\n",__FILE__,__LINE__);
@@ -1565,9 +1576,9 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_SALINITY\n",__FILE__,__LINE__);
 						}
 				    }
 				}
-	    
-		    /* handle temperature group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_TEMP)
+
+			/* handle temperature group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_TEMP)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_TEMP\n",__FILE__,__LINE__);
@@ -1581,9 +1592,9 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_TEMP\n",__FILE__,__LINE__);
 						}
 				    }
 				}
-	    
-		    /* handle pressure group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_PRESSURE)
+
+			/* handle pressure group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_PRESSURE)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_PRESSURE\n",__FILE__,__LINE__);
@@ -1597,15 +1608,17 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_PRESSURE\n",__FILE__,__LINE__);
 						}
 				    }
 				}
-	    
-		    /* handle ssv group */
-		    else if (group_id == MBSYS_XSE_SVP_GROUP_SSV)
+
+			/* handle ssv group */
+			else if (group_id == MBSYS_XSE_SVP_GROUP_SSV)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SVP_GROUP_SSV\n",__FILE__,__LINE__);
 #endif
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_ssv); index += 8;
-				}
+				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->svp_ssv_depth); index += 8;
+				store->svp_ssv_depthflag = buffer[index]; index++;
+ 				}
 
 			/* handle point group */
 			else if (group_id == MBSYS_XSE_SVP_GROUP_POS)
@@ -1640,7 +1653,7 @@ fprintf(stderr, "%s:%d | READ SVP_GROUP_OTHER\n",__FILE__,__LINE__);
 		    i, store->svp_depth[i], store->svp_velocity[i]);
 	    for (i=0;i<store->svp_nctd;i++)
 		fprintf(stderr,"dbg5       cstd[%d]:        %f %f %f %f\n",
-		    i, store->svp_conductivity[i], store->svp_salinity[i], 
+		    i, store->svp_conductivity[i], store->svp_salinity[i],
 		    store->svp_temperature[i], store->svp_pressure[i]);
 	    }
 
@@ -1724,16 +1737,16 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_pt
 
 	/* get pointer to store data structure */
 	store = (struct mbsys_xse_struct *) store_ptr;
-		
+
 	/* get source and time */
 	index = 12;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->par_source); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->par_sec); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->par_usec); index += 4;
-		
+
 	/* loop over groups */
 	done = MB_NO;
-	while (index <= buffer_size 
+	while (index <= buffer_size
 		&& status == MB_SUCCESS
 		&& done == MB_NO)
 	    {
@@ -1766,11 +1779,11 @@ int mbr_l3xseraw_rd_ship(int verbose,int buffer_size,char *buffer,void *store_pt
 	    else
 			index += 4;
 #endif
-	    
+
 #ifdef MB_DEBUG
 if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
-	    
+
 	    /* deal with group */
 	    if (done == MB_NO)
 			{
@@ -1805,7 +1818,7 @@ fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_ship_displacement); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_ship_weight); index += 8;
 				}
-		
+
 			/* handle time group */
 			else if (group_id == MBSYS_XSE_SHP_GROUP_TIME)
 				{
@@ -1847,13 +1860,13 @@ fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>
 				{
 				/* currently unused by MB-System */
 				}
-	
+
 			/* handle description group */
 			else if (group_id == MBSYS_XSE_SHP_GROUP_DESCRIPTION)
 				{
 				/* currently unused by MB-System */
 				}
-	    
+
 		    /* handle parameter group */
 		    else if (group_id == MBSYS_XSE_SHP_GROUP_PARAMETER)
 				{
@@ -1877,7 +1890,7 @@ fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->par_hrp_y); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->par_hrp_z); index += 4;
 				}
-	    
+
 		    /* handle navigation and motion group */
 		    else if (group_id == MBSYS_XSE_SHP_GROUP_NAVIGATIONANDMOTION)
 				{
@@ -1894,7 +1907,7 @@ fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_hrp_y); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_nam_hrp_z); index += 8;
 				}
-	    
+
 		    /* handle transducer group */
 		    else if (group_id == MBSYS_XSE_SHP_GROUP_TRANSDUCER)
 				{
@@ -1917,7 +1930,7 @@ fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>
 					mb_get_binary_double(SWAPFLAG, &buffer[index], &store->par_xdr_azimuth[i]); index += 8;
 					}
 				}
-	    
+
 		    /* handle tranducer extended group */
 		    else if (group_id == MBSYS_XSE_SHP_GROUP_TRANSDUCEREXTENDED)
 				{
@@ -1987,14 +2000,14 @@ fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>
 	    fprintf(stderr,"dbg5       par_xdr_num_transducer:  %d\n",store->par_xdr_num_transducer);
 	    fprintf(stderr,"dbg5       # sensor xducer freq side roll pitch azi dist\n");
 	    for (i=0;i<store->par_xdr_num_transducer;i++)
-	    	fprintf(stderr,"dbg5       %d %d %d %d %d %f %f %f %f\n", i, store->par_xdr_sensorid[i], store->par_xdr_transducer[i], 
-	    							store->par_xdr_frequency[i], store->par_xdr_side[i], 
-								store->par_xdr_mountingroll[i], store->par_xdr_mountingpitch[i], 
+	    	fprintf(stderr,"dbg5       %d %d %d %d %d %f %f %f %f\n", i, store->par_xdr_sensorid[i], store->par_xdr_transducer[i],
+	    							store->par_xdr_frequency[i], store->par_xdr_side[i],
+								store->par_xdr_mountingroll[i], store->par_xdr_mountingpitch[i],
 								store->par_xdr_mountingazimuth[i], store->par_xdr_mountingdistance[i]);
 	    fprintf(stderr,"dbg5       # x y z roll pitch azimuth\n");
 	    for (i=0;i<store->par_xdr_num_transducer;i++)
-	    	fprintf(stderr,"dbg5       %d %f %f %f %f %f %f\n", i, store->par_xdr_x[i], store->par_xdr_y[i], 
-	    							store->par_xdr_z[i], store->par_xdr_roll[i], 
+	    	fprintf(stderr,"dbg5       %d %f %f %f %f %f %f\n", i, store->par_xdr_x[i], store->par_xdr_y[i],
+	    							store->par_xdr_z[i], store->par_xdr_roll[i],
 								store->par_xdr_pitch[i], store->par_xdr_azimuth[i]);
 	    fprintf(stderr,"dbg5       par_xdx_num_transducer:  %d\n",store->par_xdx_num_transducer);
 	    fprintf(stderr,"dbg5       # roll pitch azimuth\n");
@@ -2051,10 +2064,10 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *stor
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_source); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_sec); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sid_usec); index += 4;
-		
+
 	/* loop over groups */
 	done = MB_NO;
-	while (index <= buffer_size 
+	while (index <= buffer_size
 		&& status == MB_SUCCESS
 		&& done == MB_NO)
 	    {
@@ -2087,11 +2100,11 @@ int mbr_l3xseraw_rd_sidescan(int verbose,int buffer_size,char *buffer,void *stor
 	    else
 			index += 4;
 #endif
-	    
+
 #ifdef MB_DEBUG
 if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
-	    
+
 	    /* deal with group */
 	    if (done == MB_NO)
 			{
@@ -2109,9 +2122,9 @@ if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FI
 fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
-	    
-		    /* handle general group */
-		    if (group_id == MBSYS_XSE_SSN_GROUP_GEN)
+
+			/* handle general group */
+			if (group_id == MBSYS_XSE_SSN_GROUP_GEN)
 				{
 #ifdef MB_DEBUG
 fprintf(stderr, "%s:%d | READ SSN_GROUP_GEN\n",__FILE__,__LINE__);
@@ -2131,7 +2144,7 @@ fprintf(stderr, "bandwidth=%g\n", store->sid_bandwidth);
 fprintf(stderr, "sample=%g\n", store->sid_sample);
 #endif
 				}
-	
+
 			/* handle amplitude vs traveltime group */
 			else if (group_id == MBSYS_XSE_SSN_GROUP_AMPVSTT)
 				{
@@ -2156,7 +2169,7 @@ for (i=0;i<store->sid_avt_num_samples;i++)
 #endif
 				}
 
-			/* handle phase vs traveltime group */  
+			/* handle phase vs traveltime group */
 			else if (group_id == MBSYS_XSE_SSN_GROUP_PHASEVSTT)
 				{
 #ifdef MB_DEBUG
@@ -2179,7 +2192,7 @@ for (i=0;i<store->sid_pvt_num_samples;i++)
 	fprintf(stderr, "sid_pvt_phase[%d]:%d\n", i, store->sid_pvt_phase[i]);
 #endif
 				}
-	    
+
 		    /* handle amplitude vs lateral group */
 		    else if (group_id == MBSYS_XSE_SSN_GROUP_AMPVSLAT)
 				{
@@ -2335,7 +2348,7 @@ fprintf(stderr, "%s:%d | READ SSN_GROUP_OTHER\n",__FILE__,__LINE__);
 				}
 			}
 	    }
-	    
+
 	/* now if multibeam already read but bin size lacking then
 	   calculate bin size from bathymetry */
 	if (store->mul_frame == MB_YES
@@ -2351,12 +2364,12 @@ fprintf(stderr, "%s:%d | READ SSN_GROUP_OTHER\n",__FILE__,__LINE__);
 			xmin = MIN(xmin, store->beams[i].lateral);
 			xmax = MAX(xmax, store->beams[i].lateral);
 			}
-	    
+
 	    /* get number of nonzero pixels */
 	    ngoodss = 0;
 	    for (i=0;i<store->sid_avl_num_samples;i++)
 			if (store->sid_avl_amp[i] != 0) ngoodss++;
-		
+
 	    /* get bin size */
 	    if (xmax > xmin && ngoodss > 1)
 			{
@@ -2500,17 +2513,19 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *sto
 	store->mul_group_hits = MB_NO;		/* boolean flag - hits group read */
 	store->mul_group_heavereceive = MB_NO;	/* boolean flag - heavereceive group read */
 	store->mul_group_azimuth = MB_NO;	/* boolean flag - azimuth group read */
+	store->mul_group_properties = MB_NO;	/* boolean flag - properties group read */
+	store->mul_group_normamp = MB_NO;	/* boolean flag - normalized amplitude group read */
 	store->mul_group_mbsystemnav = MB_NO;	/* boolean flag - mbsystemnav group read */
-		
+
 	/* get source and time */
 	index = 12;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_source); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_sec); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_usec); index += 4;
-		
+
 	/* loop over groups */
 	done = MB_NO;
-	while (index <= buffer_size 
+	while (index <= buffer_size
 		&& status == MB_SUCCESS
 		&& done == MB_NO)
 	    {
@@ -2547,7 +2562,7 @@ int mbr_l3xseraw_rd_multibeam(int verbose,int buffer_size,char *buffer,void *sto
 #ifdef MB_DEBUG
 if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
-	    
+
 	    /* deal with group */
 	    if (done == MB_NO)
 			{
@@ -2565,7 +2580,7 @@ if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FI
 fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
-	    
+
 		    /* handle general group */
 		    if (group_id == MBSYS_XSE_MBM_GROUP_GEN)
 				{
@@ -2589,7 +2604,7 @@ fprintf(stderr, "sample=%f\n", store->mul_sample);
 fprintf(stderr, "swath=%f\n", store->mul_swath);
 #endif
 				}
-	    
+
 		    /* handle beam group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_BEAM)
 				{
@@ -2606,7 +2621,7 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_BEAM\n",__FILE__,__LINE__);
 						}
 				    }
 				}
-	    
+
 		    /* handle traveltime group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_TT)
 				{
@@ -2628,7 +2643,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "tt[%d]=%f\n", i, store->beams[i].tt);
 #endif
 				}
-	    
+
 		    /* handle quality group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_QUALITY)
 				{
@@ -2648,7 +2663,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "quality[%d]=%u\n", i, store->beams[i].quality);
 #endif
 				}
-	    
+
 		    /* handle amplitude group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_AMP)
 				{
@@ -2670,7 +2685,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "amp[%d]=%d\n", i, store->beams[i].amplitude);
 #endif
 				}
-	    
+
 		    /* handle delay group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_DELAY)
 				{
@@ -2692,7 +2707,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "delay[%d]=%lf\n", i, store->beams[i].delay);
 #endif
 				}
-	    
+
 		    /* handle lateral group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_LATERAL)
 				{
@@ -2714,7 +2729,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "lateral[%d]=%lf\n", i, store->beams[i].lateral);
 #endif
 				}
-	    
+
 		    /* handle along group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_ALONG)
 				{
@@ -2736,7 +2751,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "along[%d]=%lf\n", i, store->beams[i].along);
 #endif
 				}
-	    
+
 		    /* handle depth group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_DEPTH)
 				{
@@ -2758,7 +2773,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "depth[%d]=%lf\n", i, store->beams[i].depth);
 #endif
 				}
-	    
+
 		    /* handle angle group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_ANGLE)
 				{
@@ -2780,7 +2795,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "angle[%d]=%lf\n", i, store->beams[i].angle);
 #endif
 				}
-	    
+
 		    /* handle heave group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_HEAVE)
 				{
@@ -2802,7 +2817,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "heave[%d]=%lf\n", i, store->beams[i].heave);
 #endif
 				}
-	    
+
 		    /* handle roll group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_ROLL)
 				{
@@ -2824,7 +2839,7 @@ for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "roll[%d]=%lf\n", i, store->beams[i].roll);
 #endif
 				}
-	    
+
 		    /* handle pitch group */
 		    else if (group_id == MBSYS_XSE_MBM_GROUP_PITCH)
 				{
@@ -2867,7 +2882,7 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_GATES\n",__FILE__,__LINE__);
 #ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
-	fprintf(stderr, "gate_angle[%d]=%lf gate_start[%d]=%lf gate_stop[%d]=%lf\n", 
+	fprintf(stderr, "gate_angle[%d]=%lf gate_start[%d]=%lf gate_stop[%d]=%lf\n",
 	    i, store->beams[i].gate_angle, i,store->beams[i].gate_start, i,store->beams[i].gate_stop);
 #endif
 				}
@@ -2972,13 +2987,87 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_AZIMUTH\n",__FILE__,__LINE__);
 				    {
 				    if (i < MBSYS_XSE_MAXBEAMS)
 						{
-						mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->beams[i].azimuth); index += 4;
+						mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->beams[i].azimuth); index += 8;
 						}
 				    }
 #ifdef MB_DEBUG2
 fprintf(stderr, "N=%u\n", store->mul_num_beams);
 for(i=0;i<store->mul_num_beams;i++)
 	fprintf(stderr, "azimuth[%d]=%f\n", i, store->beams[i].azimuth);
+#endif
+				}
+
+			/* handle properties group */
+			else if (group_id == MBSYS_XSE_MBM_GROUP_PROPERTIES)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "%s:%d | READ MBM_GROUP_PROPERTIES\n",__FILE__,__LINE__);
+#endif
+				store->mul_group_properties = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_num_properties); index += 4;
+				for (i=0;i<store->mul_num_properties;i++)
+				    {
+				    if (i < MBSYS_XSE_MAXPROPERTIES)
+						{
+						mb_get_binary_short(SWAPFLAG, &buffer[index], (double *) &store->mul_properties_type[i]); index += 2;
+						mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->mul_properties_value); index += 8;
+						}
+				    }
+				for (i=0;i<40;i++)
+				    {
+				    store->mul_properties_reserved[i] = buffer[index]; index++;
+				    }
+#ifdef MB_DEBUG2
+fprintf(stderr, "N=%u\n", store->mul_num_properties);
+for (i=0;i<store->mul_num_properties;i++)
+    fprintf(stderr,"dbg5       mul_properties[%d]: %d %f\n",
+	i, store->mul_properties_type[i], store->mul_properties_value[i]);
+for (i=0;i<40;i++)
+    fprintf(stderr,"dbg5       mul_properties_reserved[%d]: %d\n",
+	i, store->mul_properties_reserved[i]);
+#endif
+				}
+
+			/* handle normalized amplitude group */
+			else if (group_id == MBSYS_XSE_MBM_GROUP_NORMAMP)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "%s:%d | READ MBM_GROUP_NORMAMP\n",__FILE__,__LINE__);
+#endif
+				store->mul_group_normamp = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_normamp_num_beams); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->mul_normamp_flags); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->mul_normamp_along_beamwidth); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->mul_normamp_across_beamwidth); index += 4;
+				for (i=0;i<store->mul_normamp_num_beams;i++)
+				    {
+				    if (i < MBSYS_XSE_MAXBEAMS)
+						{
+						mb_get_binary_short(SWAPFLAG, &buffer[index], (double *) &store->beams[i].normamp); index += 2;
+						}
+				    }
+				if (store->mul_normamp_flags == 0)
+				    {
+				    mb_get_binary_float(SWAPFLAG, &buffer[index], (double *) &store->beams[0].frequency); index += 4;
+				    for (i=1;i<store->mul_normamp_num_beams;i++)
+					{
+					store->beams[i].frequency = store->beams[0].frequency;
+					}
+				    }
+				else
+				    {
+				    for (i=0;i<store->mul_normamp_num_beams;i++)
+					{
+					if (i < MBSYS_XSE_MAXBEAMS)
+						{
+						mb_get_binary_float(SWAPFLAG, &buffer[index], (double *) &store->beams[i].frequency); index += 4;
+						}
+					}
+				    }
+#ifdef MB_DEBUG2
+fprintf(stderr, "N=%u\n", store->mul_num_beams);
+for(i=0;i<store->mul_num_beams;i++)
+	fprintf(stderr, "beam[%d]: normamp=%d frequency=%f\n", i, store->beams[i].normamp, store->beams[i].frequency);
 #endif
 				}
 
@@ -2995,9 +3084,9 @@ fprintf(stderr, "%s:%d | READ MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV\n",__FILE__,__LINE
 				mb_get_binary_double(SWAPFLAG, &buffer[index], (double *) &store->mul_speed); index += 8;
 #ifdef MB_DEBUG2
 fprintf(stderr, "lon=%f\n", store->mul_lon);
-fprintf(stderr, "lon=%f\n", store->mul_lat);
-fprintf(stderr, "lon=%f\n", store->mul_heading);
-fprintf(stderr, "lon=%f\n", store->mul_speed);
+fprintf(stderr, "lat=%f\n", store->mul_lat);
+fprintf(stderr, "heading=%f\n", store->mul_heading);
+fprintf(stderr, "speed=%f\n", store->mul_speed);
 #endif
 				}
 
@@ -3009,7 +3098,7 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_OTHER  group_id:%d\n",__FILE__,__LINE__,
 				}
 		    }
 		}
-	    
+
 	/* now if tt and angles read but bathymetry not read
 	   calculate bathymetry assuming 1500 m/s velocity */
 	if (status == MB_SUCCESS
@@ -3027,23 +3116,23 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_OTHER  group_id:%d\n",__FILE__,__LINE__,
 		{
 		beta = 90.0 - RTD * store->beams[i].angle;
 		alpha = RTD * store->beams[i].pitch;
-		mb_rollpitch_to_takeoff(verbose, 
-		    alpha, beta, &theta, 
+		mb_rollpitch_to_takeoff(verbose,
+		    alpha, beta, &theta,
 		    &phi, error);
 		/* divide range by 2 because of round trip travel time */
 		rr = 1500.0 * store->beams[i].tt/2.0;
 		xx = rr * sin(DTR * theta);
 		zz = rr * cos(DTR * theta);
-		store->beams[i].lateral 
+		store->beams[i].lateral
 			= xx * cos(DTR * phi);
-		store->beams[i].along 
-			= xx * sin(DTR * phi) 
-		    + 0.5 * store->nav_speed_ground 
+		store->beams[i].along
+			= xx * sin(DTR * phi)
+		    + 0.5 * store->nav_speed_ground
 			* store->beams[i].delay;
 		store->beams[i].depth = zz;
 		}
 	    }
-	    
+
 	/* check for sensible bathymetry */
 	if (status == MB_SUCCESS
 	    && store->mul_group_depth == MB_YES)
@@ -3054,13 +3143,13 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_OTHER  group_id:%d\n",__FILE__,__LINE__,
 		    {
 		    status = MB_FAILURE;
 		    *error = MB_ERROR_UNINTELLIGIBLE;
-		    
+
 		    if (fabs(store->beams[i].heave) > 100.0)
 			store->beams[i].heave = 0.0;
 		    }
 		}
 	    }
-	    
+
 	/* now if sidescan already read but bin size lacking then
 	   calculate bin size from bathymetry */
 	if (store->mul_num_beams > 1
@@ -3076,12 +3165,12 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_OTHER  group_id:%d\n",__FILE__,__LINE__,
 			xmin = MIN(xmin, store->beams[i].lateral);
 			xmax = MAX(xmax, store->beams[i].lateral);
 			}
-	    
+
 	    /* get number of nonzero pixels */
 	    ngoodss = 0;
 	    for (i=0;i<store->sid_avl_num_samples;i++)
 			if (store->sid_avl_amp[i] != 0) ngoodss++;
-		
+
 	    /* get bin size */
 	    if (xmax > xmin && ngoodss > 1)
 			{
@@ -3094,16 +3183,6 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_OTHER  group_id:%d\n",__FILE__,__LINE__,
 	if (verbose >= 5)
 	    {
 	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
-	    fprintf(stderr,"dbg5       mul_source:          %d\n",store->mul_source);
-	    fprintf(stderr,"dbg5       mul_sec:             %u\n",store->mul_sec);
-	    fprintf(stderr,"dbg5       mul_usec:            %u\n",store->mul_usec);
-	    fprintf(stderr,"dbg5       mul_ping:            %d\n",store->mul_ping);
-	    fprintf(stderr,"dbg5       mul_frequency:       %f\n",store->mul_frequency);
-	    fprintf(stderr,"dbg5       mul_pulse:           %f\n",store->mul_pulse);
-	    fprintf(stderr,"dbg5       mul_power:           %f\n",store->mul_power);
-	    fprintf(stderr,"dbg5       mul_bandwidth:       %f\n",store->mul_bandwidth);
-	    fprintf(stderr,"dbg5       mul_sample:          %f\n",store->mul_sample);
-	    fprintf(stderr,"dbg5       mul_swath:           %f\n",store->mul_swath);
 	    fprintf(stderr,"dbg5       mul_group_beam:      %d\n",store->mul_group_beam);
 	    fprintf(stderr,"dbg5       mul_group_tt:        %d\n",store->mul_group_tt);
 	    fprintf(stderr,"dbg5       mul_group_quality:   %d\n",store->mul_group_quality);
@@ -3116,21 +3195,65 @@ fprintf(stderr, "%s:%d | READ MBM_GROUP_OTHER  group_id:%d\n",__FILE__,__LINE__,
 	    fprintf(stderr,"dbg5       mul_group_heave:     %d\n",store->mul_group_heave);
 	    fprintf(stderr,"dbg5       mul_group_roll:      %d\n",store->mul_group_roll);
 	    fprintf(stderr,"dbg5       mul_group_pitch:     %d\n",store->mul_group_pitch);
+	    fprintf(stderr,"dbg5       mul_group_gates:     %d\n",store->mul_group_gates);
+	    fprintf(stderr,"dbg5       mul_group_noise:     %d\n",store->mul_group_noise);
+	    fprintf(stderr,"dbg5       mul_group_length:    %d\n",store->mul_group_length);
+	    fprintf(stderr,"dbg5       mul_group_hits:      %d\n",store->mul_group_hits);
+	    fprintf(stderr,"dbg5       mul_group_heavereceive: %d\n",store->mul_group_heavereceive);
+	    fprintf(stderr,"dbg5       mul_group_azimuth:    %d\n",store->mul_group_azimuth);
+	    fprintf(stderr,"dbg5       mul_group_properties: %d\n",store->mul_group_properties);
+	    fprintf(stderr,"dbg5       mul_group_normamp:    %d\n",store->mul_group_normamp);
+	    fprintf(stderr,"dbg5       mul_group_mbsystemnav:  %d\n",store->mul_group_mbsystemnav);
+	    fprintf(stderr,"dbg5       mul_source:          %d\n",store->mul_source);
+	    fprintf(stderr,"dbg5       mul_sec:             %u\n",store->mul_sec);
+	    fprintf(stderr,"dbg5       mul_usec:            %u\n",store->mul_usec);
+	    fprintf(stderr,"dbg5       mul_ping:            %d\n",store->mul_ping);
+	    fprintf(stderr,"dbg5       mul_frequency:       %f\n",store->mul_frequency);
+	    fprintf(stderr,"dbg5       mul_pulse:           %f\n",store->mul_pulse);
+	    fprintf(stderr,"dbg5       mul_power:           %f\n",store->mul_power);
+	    fprintf(stderr,"dbg5       mul_bandwidth:       %f\n",store->mul_bandwidth);
+	    fprintf(stderr,"dbg5       mul_sample:          %f\n",store->mul_sample);
+	    fprintf(stderr,"dbg5       mul_swath:           %f\n",store->mul_swath);
 	    fprintf(stderr,"dbg5       mul_num_beams:       %d\n",store->mul_num_beams);
+	    fprintf(stderr,"dbg5       mul_lon:             %f\n",store->mul_lon);
+	    fprintf(stderr,"dbg5       mul_lat:             %f\n",store->mul_lat);
+	    fprintf(stderr,"dbg5       mul_heading:         %f\n",store->mul_heading);
+	    fprintf(stderr,"dbg5       mul_speed:           %f\n",store->mul_speed);
 	    for (i=0;i<store->mul_num_beams;i++)
-		fprintf(stderr,"dbg5       beam[%d]: %3d %7.2f %7.2f %7.2f %3d %3d %6.3f %6.2f %5.3f %5.2f %6.2f %6.2f\n",
-		    i, store->beams[i].beam, 
-		    store->beams[i].lateral, 
-		    store->beams[i].along, 
-		    store->beams[i].depth, 
-		    store->beams[i].amplitude, 
-		    store->beams[i].quality, 
-		    store->beams[i].tt, 
-		    store->beams[i].angle, 
-		    store->beams[i].delay, 
-		    store->beams[i].heave, 
-		    store->beams[i].roll, 
-		    store->beams[i].pitch);
+		fprintf(stderr,"dbg5       beam[%d]: %3d %7.2f %7.2f %7.2f %3d %3d %6.3f %6.2f %5.3f %5.2f %6.2f %6.2f  %f %f %f %f %f %d %f %f %d %f\n",
+		    i, store->beams[i].beam,
+		    store->beams[i].lateral,
+		    store->beams[i].along,
+		    store->beams[i].depth,
+		    store->beams[i].amplitude,
+		    store->beams[i].quality,
+		    store->beams[i].tt,
+		    store->beams[i].angle,
+		    store->beams[i].delay,
+		    store->beams[i].heave,
+		    store->beams[i].roll,
+		    store->beams[i].pitch,
+		    store->beams[i].gate_angle,
+		    store->beams[i].gate_start,
+		    store->beams[i].gate_stop,
+		    store->beams[i].noise,
+		    store->beams[i].length,
+		    store->beams[i].hits,
+		    store->beams[i].heavereceive,
+		    store->beams[i].azimuth,
+		    store->beams[i].normamp,
+		    store->beams[i].frequency);
+	    fprintf(stderr,"dbg5       mul_num_properties: %d\n",store->mul_num_properties);
+	    for (i=0;i<store->mul_num_properties;i++)
+		fprintf(stderr,"dbg5       mun_property[%d]: %d %f\n",
+		    i, store->mul_properties_type[i], store->mul_properties_value[i]);
+	    for (i=0;i<40;i++)
+		fprintf(stderr,"dbg5       mul_properties_reserved[%d]: %d\n",
+		    i, store->mul_properties_reserved[i]);
+	    fprintf(stderr,"dbg5       mul_normamp_num_beams:        %d\n",store->mul_normamp_num_beams);
+	    fprintf(stderr,"dbg5       mul_normamp_flags:            %d\n",store->mul_normamp_flags);
+	    fprintf(stderr,"dbg5       mul_normamp_along_beamwidth:  %f\n",store->mul_normamp_along_beamwidth);
+	    fprintf(stderr,"dbg5       mul_normamp_across_beamwidth: %f\n",store->mul_normamp_across_beamwidth);
 	    }
 
 	/* print output debug statements */
@@ -3251,16 +3374,16 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 
 	/* get pointer to store data structure */
 	store = (struct mbsys_xse_struct *) store_ptr;
-		
+
 	/* get source and time */
 	index = 12;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_source); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_sec); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_usec); index += 4;
-		
+
 	/* loop over groups */
 	done = MB_NO;
-	while (index <= buffer_size 
+	while (index <= buffer_size
 		&& status == MB_SUCCESS
 		&& done == MB_NO)
 	    {
@@ -3293,18 +3416,18 @@ int mbr_l3xseraw_rd_seabeam(int verbose,int buffer_size,char *buffer,void *store
 	    else
 			index += 4;
 #endif
-	    
+
 #ifdef MB_DEBUG
 if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
-	    
+
 	    /* deal with group */
 	    if (done == MB_NO)
 		    {
 		    /* get group size and id */
 		    mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &byte_count); index += 4;
 		    mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &group_id); index += 4;
-	
+
 		    /* print debug statements */
 		    if (verbose >= 5)
 			{
@@ -3315,7 +3438,7 @@ if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FI
 fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
-		    
+
 		    /* handle properties group */
 		    if (group_id == MBSYS_XSE_SBM_GROUP_PROPERTIES)
 				{
@@ -3336,7 +3459,7 @@ fprintf(stderr, "%s:%d | READ SBM_GROUP_PROPERTIES\n",__FILE__,__LINE__);
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_frequency); index += 4;
 				mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_bandwidth); index += 4;
 				}
-		    
+
 		    /* handle hrp group */
 		    if (group_id == MBSYS_XSE_SBM_GROUP_HRP)
 				{
@@ -3348,24 +3471,24 @@ fprintf(stderr, "%s:%d | READ SBM_GROUP_HRP\n",__FILE__,__LINE__);
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->sbm_roll); index += 8;
 				mb_get_binary_double(SWAPFLAG, &buffer[index], &store->sbm_pitch); index += 8;
 				}
-		    
+
 		    /* handle center group */
-		    if (group_id == MBSYS_XSE_SBM_GROUP_CENTER)
+		    if (group_id == MBSYS_XSE_SBM_GROUP_SIGNAL)
 				{
 #ifdef MB_DEBUG
-fprintf(stderr, "%s:%d | READ SBM_GROUP_CENTER\n",__FILE__,__LINE__);
+fprintf(stderr, "%s:%d | READ SBM_GROUP_SIGNAL\n",__FILE__,__LINE__);
 #endif
-				store->sbm_center = MB_YES;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_beam); index += 4;
-				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_center_count); index += 4;
-				store->sbm_center_count = MIN(MBSYS_XSE_MAXSAMPLES, store->sbm_center_count);
-				for (i=0;i<store->sbm_center_count;i++)
+				store->sbm_signal = MB_YES;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_signal_beam); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_signal_count); index += 4;
+				store->sbm_signal_count = MIN(MBSYS_XSE_MAXSAMPLES, store->sbm_signal_count);
+				for (i=0;i<store->sbm_signal_count;i++)
 				    {
-				    mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_center_amp[i]); 
+				    mb_get_binary_float(SWAPFLAG, &buffer[index], &store->sbm_signal_amp[i]);
 				    index += 4;
 				    }
 				}
-		    
+
 		    /* handle message group */
 		    if (group_id == MBSYS_XSE_SBM_GROUP_MESSAGE)
 				{
@@ -3379,10 +3502,44 @@ if (store->sbm_message_len > buffer_size)
  fprintf(stderr,"Read message: %d %d %d\n",buffer_size,store->sbm_message_len,store->sbm_message_id);
 				for (i=0;i<store->sbm_message_len;i++)
 				    {
-				    store->sbm_message_txt[i] = buffer[index]; 
+				    store->sbm_message_txt[i] = buffer[index];
 				    index++;
 				    }
 				store->sbm_message_txt[store->sbm_message_len] = 0;
+				}
+
+		    /* handle sweep segments group */
+		    if (group_id == MBSYS_XSE_SBM_GROUP_SWEEPSEGMENTS)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "%s:%d | READ SBM_GROUP_SWEEPSEGMENTS\n",__FILE__,__LINE__);
+#endif
+				store->sbm_sweepsegments = MB_YES;
+				store->sbm_sweep_direction = buffer[index]; index++;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_azimuth); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_segments); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_seconds); index += 4;
+				mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_micro); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_extrapolateazimuth); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_interpolatedazimuth); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_extrapolatepitch); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_interpolatedpitch); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_extrapolateroll); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_interpolatedroll); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_sweep_stabilizedangle); index += 4;
+				}
+
+		    /* handle spacing mode group */
+		    if (group_id == MBSYS_XSE_SBM_GROUP_SPACINGMODE)
+				{
+#ifdef MB_DEBUG
+fprintf(stderr, "%s:%d | READ SBM_GROUP_SPACINGMODE\n",__FILE__,__LINE__);
+#endif
+				store->sbm_spacingmode = MB_YES;
+				store->sbm_spacing_mode = buffer[index]; index++;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_spacing_equidistance); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_spacing_equidistance_min); index += 4;
+				mb_get_binary_float(SWAPFLAG, &buffer[index], (int *) &store->sbm_spacing_equidistance_max); index += 4;
 				}
 		    }
 	    }
@@ -3416,19 +3573,41 @@ if (store->sbm_message_len > buffer_size)
 	    fprintf(stderr,"dbg5       sbm_roll:            %f\n",store->sbm_roll);
 	    fprintf(stderr,"dbg5       sbm_pitch:           %f\n",store->sbm_pitch);
 	    }
-	if (verbose >= 5 && store->sbm_center == MB_YES)
+	if (verbose >= 5 && store->sbm_signal == MB_YES)
 	    {
-	    fprintf(stderr,"dbg5       sbm_center_beam:     %d\n",store->sbm_center_beam);
-	    fprintf(stderr,"dbg5       sbm_center_count:    %d\n",store->sbm_center_count);
-	    for (i=0;i<store->sbm_center_count;i++)
+	    fprintf(stderr,"dbg5       sbm_signal_beam:     %d\n",store->sbm_signal_beam);
+	    fprintf(stderr,"dbg5       sbm_signal_count:    %d\n",store->sbm_signal_count);
+	    for (i=0;i<store->sbm_signal_count;i++)
 		fprintf(stderr,"dbg5       sample[%d]: %f\n",
-		    i, store->sbm_center_amp[i]);
+		    i, store->sbm_signal_amp[i]);
 	    }
 	if (verbose >= 5 && store->sbm_message == MB_YES)
 	    {
 	    fprintf(stderr,"dbg5       sbm_message_id:      %d\n",store->sbm_message_id);
 	    fprintf(stderr,"dbg5       sbm_message_len:     %d\n",store->sbm_message_len);
 	    fprintf(stderr,"dbg5       sbm_message_txt:     %s\n",store->sbm_message_txt);
+	    }
+	if (verbose >= 5 && store->sbm_sweepsegments == MB_YES)
+	    {
+	    fprintf(stderr,"dbg5       sbm_sweep_direction: %d\n",store->sbm_sweep_direction);
+	    fprintf(stderr,"dbg5       sbm_sweep_azimuth:   %f\n",store->sbm_sweep_azimuth);
+	    fprintf(stderr,"dbg5       sbm_sweep_segments:  %d\n",store->sbm_sweep_segments);
+	    fprintf(stderr,"dbg5       sbm_sweep_seconds:   %d\n",store->sbm_sweep_seconds);
+	    fprintf(stderr,"dbg5       sbm_sweep_micro:     %d\n",store->sbm_sweep_micro);
+	    fprintf(stderr,"dbg5       sbm_sweep_extrapolateazimuth:  %f\n",store->sbm_sweep_extrapolateazimuth);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedazimuth: %f\n",store->sbm_sweep_interpolatedazimuth);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_extrapolatepitch:    %f\n",store->sbm_sweep_extrapolatepitch);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedpitch:   %f\n",store->sbm_sweep_interpolatedpitch);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_extrapolateroll:     %f\n",store->sbm_sweep_extrapolateroll);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedroll:    %f\n",store->sbm_sweep_interpolatedroll);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_stabilizedangle:     %f\n",store->sbm_sweep_stabilizedangle);
+	    }
+	if (verbose >= 5 && store->sbm_spacingmode == MB_YES)
+	    {
+	    fprintf(stderr,"dbg5       sbm_spacing_mode:      	      %d\n",store->sbm_spacing_mode);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance:      %f\n",store->sbm_spacing_equidistance);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance_min:  %f\n",store->sbm_spacing_equidistance_min);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance_max:  %f\n",store->sbm_spacing_equidistance_max);
 	    }
 
 	/* print output debug statements */
@@ -3662,16 +3841,16 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,void *store
 
 	/* get pointer to store data structure */
 	store = (struct mbsys_xse_struct *) store_ptr;
-		
+
 	/* get source and time */
 	index = 12;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->com_source); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->com_sec); index += 4;
 	mb_get_binary_int(SWAPFLAG, &buffer[index], (int *) &store->com_usec); index += 4;
-		
+
 	/* loop over groups */
 	done = MB_NO;
-	while (index <= buffer_size 
+	while (index <= buffer_size
 		&& status == MB_SUCCESS
 		&& done == MB_NO)
 	    {
@@ -3704,11 +3883,11 @@ int mbr_l3xseraw_rd_comment(int verbose,int buffer_size,char *buffer,void *store
 	    else
 			index += 4;
 #endif
-	    
+
 #ifdef MB_DEBUG
 if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FILE__,__LINE__, skip-4, function_name);
 #endif
-	    
+
 	    /* deal with group */
 	    if (done == MB_NO)
 			{
@@ -3726,7 +3905,7 @@ if (skip > 4) fprintf(stderr, "%s:%d | skipped %d bytes in function <%s>\n",__FI
 fprintf(stderr, "%s:%d | Group %d of %d bytes to be parsed in MBIO function <%s>\n",__FILE__,__LINE__,
 				    group_id, byte_count, function_name);
 #endif
-	    
+
 		    /* handle general group */
 		    if (group_id == MBSYS_XSE_COM_GROUP_GEN)
 				{
@@ -3990,7 +4169,7 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
-	
+
 	/* get frame time */
 	frame_id = MBSYS_XSE_NAV_FRAME;
 	mb_put_binary_int(SWAPFLAG, frame_id, &buffer[index]); index += 4;
@@ -3998,9 +4177,9 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 	mb_put_binary_int(SWAPFLAG, store->nav_sec, &buffer[index]); index += 4;
 	mb_put_binary_int(SWAPFLAG, store->nav_usec, &buffer[index]); index += 4;
 	frame_count += 16;
-	
+
 	/*****************************************/
-	
+
 	/* write general group */
 	if (store->nav_group_general == MB_YES)
 		{
@@ -4039,9 +4218,9 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
-	
+
 	/* write position group */
 	if (store->nav_group_position == MB_YES)
 		{
@@ -4086,9 +4265,9 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
-	
+
 	/* write accuracy group */
 	if (store->nav_group_accuracy == MB_YES)
 		{
@@ -4130,7 +4309,7 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* write motion ground truth group */
@@ -4171,7 +4350,7 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* write motion through water group */
@@ -4184,19 +4363,19 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		strncpy(&buffer[index], "$HSG", 4);
 #endif
 		index += 4;
-	
+
 		/* start the group byte count, but don't write it to buffer yet */
 		/* mark the byte count spot in the buffer and increment index so we skip it */
 		group_count = 0;
 		group_cnt_index = index;
 		index += 4;
-		
+
 		/* get motion through water group */
 		group_id = MBSYS_XSE_NAV_GROUP_MOTIONTW;
 		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 		mb_put_binary_double(SWAPFLAG, store->nav_speed_water, &buffer[index]); index += 8;
 		mb_put_binary_double(SWAPFLAG, store->nav_course_water, &buffer[index]); index += 8;
-	
+
 		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH#", 4);
@@ -4205,14 +4384,14 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 #endif
 		index += 4;
 		group_count += 20;
-	
+
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-	
+
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* write track steering group */
@@ -4225,13 +4404,13 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		strncpy(&buffer[index], "$HSG", 4);
 #endif
 		index += 4;
-	
+
 		/* start the group byte count, but don't write it to buffer yet */
 		/* mark the byte count spot in the buffer and increment index so we skip it */
 		group_count = 0;
 		group_cnt_index = index;
 		index += 4;
-		
+
 		/* get motion through water group */
 		group_id = MBSYS_XSE_NAV_GROUP_TRACK;
 		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -4242,7 +4421,7 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		mb_put_binary_double(SWAPFLAG, store->nav_trk_azimuth_sol, &buffer[index]); index += 8;
 		mb_put_binary_double(SWAPFLAG, store->nav_trk_distance_eol, &buffer[index]); index += 8;
 		mb_put_binary_double(SWAPFLAG, store->nav_trk_azimuth_eol, &buffer[index]); index += 8;
-	
+
 		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH#", 4);
@@ -4251,14 +4430,14 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 #endif
 		index += 4;
 		group_count += 20;
-	
+
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-	
+
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* write heave roll pitch group */
@@ -4271,20 +4450,20 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		strncpy(&buffer[index], "$HSG", 4);
 #endif
 		index += 4;
-	
+
 		/* start the group byte count, but don't write it to buffer yet */
 		/* mark the byte count spot in the buffer and increment index so we skip it */
 		group_count = 0;
 		group_cnt_index = index;
 		index += 4;
-		
+
 		/* get motion through water group */
 		group_id = MBSYS_XSE_NAV_GROUP_HRP;
 		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 		mb_put_binary_double(SWAPFLAG, store->nav_hrp_heave, &buffer[index]); index += 8;
 		mb_put_binary_double(SWAPFLAG, store->nav_hrp_roll, &buffer[index]); index += 8;
 		mb_put_binary_double(SWAPFLAG, store->nav_hrp_pitch, &buffer[index]); index += 8;
-	
+
 		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH#", 4);
@@ -4293,14 +4472,14 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 #endif
 		index += 4;
 		group_count += 20;
-	
+
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-	
+
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* write heave group */
@@ -4313,18 +4492,18 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		strncpy(&buffer[index], "$HSG", 4);
 #endif
 		index += 4;
-	
+
 		/* start the group byte count, but don't write it to buffer yet */
 		/* mark the byte count spot in the buffer and increment index so we skip it */
 		group_count = 0;
 		group_cnt_index = index;
 		index += 4;
-		
+
 		/* get motion through water group */
 		group_id = MBSYS_XSE_NAV_GROUP_HEAVE;
 		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 		mb_put_binary_double(SWAPFLAG, store->nav_hea_heave, &buffer[index]); index += 8;
-	
+
 		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH#", 4);
@@ -4333,14 +4512,14 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 #endif
 		index += 4;
 		group_count += 20;
-	
+
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-	
+
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* write roll group */
@@ -4353,18 +4532,18 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		strncpy(&buffer[index], "$HSG", 4);
 #endif
 		index += 4;
-	
+
 		/* start the group byte count, but don't write it to buffer yet */
 		/* mark the byte count spot in the buffer and increment index so we skip it */
 		group_count = 0;
 		group_cnt_index = index;
 		index += 4;
-		
+
 		/* get motion through water group */
 		group_id = MBSYS_XSE_NAV_GROUP_ROLL;
 		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 		mb_put_binary_double(SWAPFLAG, store->nav_rol_roll, &buffer[index]); index += 8;
-	
+
 		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH#", 4);
@@ -4373,14 +4552,14 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 #endif
 		index += 4;
 		group_count += 20;
-	
+
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-	
+
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* write pitch group */
@@ -4393,18 +4572,18 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		strncpy(&buffer[index], "$HSG", 4);
 #endif
 		index += 4;
-	
+
 		/* start the group byte count, but don't write it to buffer yet */
 		/* mark the byte count spot in the buffer and increment index so we skip it */
 		group_count = 0;
 		group_cnt_index = index;
 		index += 4;
-		
+
 		/* get motion through water group */
 		group_id = MBSYS_XSE_NAV_GROUP_PITCH;
 		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 		mb_put_binary_double(SWAPFLAG, store->nav_pit_pitch, &buffer[index]); index += 8;
-	
+
 		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH#", 4);
@@ -4413,14 +4592,14 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 #endif
 		index += 4;
 		group_count += 20;
-	
+
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-	
+
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* write heading group */
@@ -4433,18 +4612,18 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		strncpy(&buffer[index], "$HSG", 4);
 #endif
 		index += 4;
-	
+
 		/* start the group byte count, but don't write it to buffer yet */
 		/* mark the byte count spot in the buffer and increment index so we skip it */
 		group_count = 0;
 		group_cnt_index = index;
 		index += 4;
-		
+
 		/* get motion through water group */
 		group_id = MBSYS_XSE_NAV_GROUP_HEADING;
 		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 		mb_put_binary_double(SWAPFLAG, store->nav_hdg_heading, &buffer[index]); index += 8;
-	
+
 		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH#", 4);
@@ -4453,14 +4632,14 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 #endif
 		index += 4;
 		group_count += 12;
-	
+
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-	
+
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* write speed log group */
@@ -4473,18 +4652,18 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		strncpy(&buffer[index], "$HSG", 4);
 #endif
 		index += 4;
-	
+
 		/* start the group byte count, but don't write it to buffer yet */
 		/* mark the byte count spot in the buffer and increment index so we skip it */
 		group_count = 0;
 		group_cnt_index = index;
 		index += 4;
-		
+
 		/* get motion through water group */
 		group_id = MBSYS_XSE_NAV_GROUP_LOG;
 		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 		mb_put_binary_double(SWAPFLAG, store->nav_log_speed, &buffer[index]); index += 8;
-	
+
 		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH#", 4);
@@ -4493,14 +4672,14 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 #endif
 		index += 4;
 		group_count += 12;
-	
+
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-	
+
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* write gps altitude group */
@@ -4513,19 +4692,19 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 		strncpy(&buffer[index], "$HSG", 4);
 #endif
 		index += 4;
-	
+
 		/* start the group byte count, but don't write it to buffer yet */
 		/* mark the byte count spot in the buffer and increment index so we skip it */
 		group_count = 0;
 		group_cnt_index = index;
 		index += 4;
-		
+
 		/* get motion through water group */
 		group_id = MBSYS_XSE_NAV_GROUP_GPS;
 		mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 		mb_put_binary_float(SWAPFLAG, store->nav_gps_altitude, &buffer[index]); index += 4;
 		mb_put_binary_float(SWAPFLAG, store->nav_gps_geoidalseparation, &buffer[index]); index += 4;
-	
+
 		/* get end of group label */
 #ifdef DATAINPCBYTEORDER
 		strncpy(&buffer[index], "GSH#", 4);
@@ -4534,27 +4713,27 @@ int mbr_l3xseraw_wr_nav(int verbose,int *buffer_size,char *buffer,void *store_pt
 #endif
 		index += 4;
 		group_count += 12;
-	
+
 		/* go back and fill in group byte count */
 		mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-	
+
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
-	
+
 	/* get end of frame label */
 #ifdef DATAINPCBYTEORDER
 	strncpy(&buffer[index], "FSH#", 4);
 #else
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
-	index += 4;	
+	index += 4;
 
 	/* go back and fill in frame byte count */
 	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
-	
+
 	/* set buffer size */
 	*buffer_size = index;
 
@@ -4620,7 +4799,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 		    i, store->svp_depth[i], store->svp_velocity[i]);
 	    for (i=0;i<store->svp_nctd;i++)
 		fprintf(stderr,"dbg5       cstd[%d]:        %f %f %f %f\n",
-		    i, store->svp_conductivity[i], store->svp_salinity[i], 
+		    i, store->svp_conductivity[i], store->svp_salinity[i],
 		    store->svp_temperature[i], store->svp_pressure[i]);
 	    }
 
@@ -4638,7 +4817,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
-	
+
 	/* get frame time */
 	frame_id = MBSYS_XSE_SVP_FRAME;
 	mb_put_binary_int(SWAPFLAG, frame_id, &buffer[index]); index += 4;
@@ -4663,7 +4842,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get depth array */
 	    group_id = MBSYS_XSE_SVP_GROUP_DEPTH;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -4701,7 +4880,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get depth array */
 	    group_id = MBSYS_XSE_SVP_GROUP_VELOCITY;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -4710,6 +4889,8 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 			{
 			mb_put_binary_double(SWAPFLAG, store->svp_velocity[i], &buffer[index]); index += 8;
 			}
+	    mb_put_binary_double(SWAPFLAG, store->svp_ssv_depth, &buffer[index]); index += 8;
+	    buffer[index] = store->svp_ssv_depthflag; index++;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4718,7 +4899,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-	    group_count += 8 + store->svp_nsvp*8;		
+	    group_count += 17 + store->svp_nsvp*8;
 
 	    /* go back and fill in group byte count */
 	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
@@ -4760,7 +4941,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get conductivity array */
 	    group_id = MBSYS_XSE_SVP_GROUP_CONDUCTIVITY;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -4797,13 +4978,13 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get salinity array */
 	    group_id = MBSYS_XSE_SVP_GROUP_SALINITY;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -4846,7 +5027,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get temperature array */
 	    group_id = MBSYS_XSE_SVP_GROUP_TEMP;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -4883,13 +5064,13 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get pressure array */
 	    group_id = MBSYS_XSE_SVP_GROUP_PRESSURE;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -4907,14 +5088,15 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 #endif
 	    index += 4;
 	    group_count += 8 + store->svp_nctd*8;
-	    
+
 	    /* go back and fill in group byte count */
 	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
 
 	    /* add group count to the frame count */
 	    frame_count += group_count + 12;
 	    }
-	    
+
+	/* get ssv group */
 	if (store->svp_ssv > 0.0)
 	    {
 	    /* get group label */
@@ -4924,17 +5106,19 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get ssv */
 	    group_id = MBSYS_XSE_SVP_GROUP_SSV;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_double(SWAPFLAG, store->svp_ssv, &buffer[index]); index += 8;
+	    mb_put_binary_double(SWAPFLAG, store->svp_ssv_depth, &buffer[index]); index += 8;
+	    buffer[index] = store->svp_ssv_depthflag; index++;
 
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
@@ -4943,7 +5127,7 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-	    group_count += 12;
+	    group_count += 21;
 
 	    /* go back and fill in group byte count */
 	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
@@ -4958,12 +5142,12 @@ int mbr_l3xseraw_wr_svp(int verbose,int *buffer_size,char *buffer,void *store_pt
 #else
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
-	index += 4;	
+	index += 4;
 
 	/* go back and fill in frame byte count */
 	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
- 	
-	/* set buffer size */	
+
+	/* set buffer size */
 	*buffer_size = index;
 
 	/* print output debug statements */
@@ -5064,14 +5248,14 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	    fprintf(stderr,"dbg5       par_xdr_num_transducer:  %d\n",store->par_xdr_num_transducer);
 	    fprintf(stderr,"dbg5       # sensor xducer freq side roll pitch azi dist\n");
 	    for (i=0;i<store->par_xdr_num_transducer;i++)
-	    	fprintf(stderr,"dbg5       %d %d %d %d %d %f %f %f %f\n", i, store->par_xdr_sensorid[i], store->par_xdr_transducer[i], 
-	    							store->par_xdr_frequency[i], store->par_xdr_side[i], 
-								store->par_xdr_mountingroll[i], store->par_xdr_mountingpitch[i], 
+	    	fprintf(stderr,"dbg5       %d %d %d %d %d %f %f %f %f\n", i, store->par_xdr_sensorid[i], store->par_xdr_transducer[i],
+	    							store->par_xdr_frequency[i], store->par_xdr_side[i],
+								store->par_xdr_mountingroll[i], store->par_xdr_mountingpitch[i],
 								store->par_xdr_mountingazimuth[i], store->par_xdr_mountingdistance[i]);
 	    fprintf(stderr,"dbg5       # x y z roll pitch azimuth\n");
 	    for (i=0;i<store->par_xdr_num_transducer;i++)
-	    	fprintf(stderr,"dbg5       %d %f %f %f %f %f %f\n", i, store->par_xdr_x[i], store->par_xdr_y[i], 
-	    							store->par_xdr_z[i], store->par_xdr_roll[i], 
+	    	fprintf(stderr,"dbg5       %d %f %f %f %f %f %f\n", i, store->par_xdr_x[i], store->par_xdr_y[i],
+	    							store->par_xdr_z[i], store->par_xdr_roll[i],
 								store->par_xdr_pitch[i], store->par_xdr_azimuth[i]);
 	    fprintf(stderr,"dbg5       par_xdx_num_transducer:  %d\n",store->par_xdx_num_transducer);
 	    fprintf(stderr,"dbg5       # roll pitch azimuth\n");
@@ -5093,7 +5277,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
-	
+
 	/* get frame time */
 	frame_id = MBSYS_XSE_SHP_FRAME;
 	mb_put_binary_int(SWAPFLAG, frame_id, &buffer[index]); index += 4;
@@ -5101,7 +5285,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	mb_put_binary_int(SWAPFLAG, store->par_sec, &buffer[index]); index += 4;
 	mb_put_binary_int(SWAPFLAG, store->par_usec, &buffer[index]); index += 4;
 	frame_count += 16;
-	
+
 	/*****************************************/
 
 	/* get group label */
@@ -5117,7 +5301,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 	group_count = 0;
 	group_cnt_index = index;
 	index += 4;
-	
+
 	/* get general group */
 	group_id = MBSYS_XSE_SHP_GROUP_GEN;
 	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -5148,7 +5332,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 
 	/* add group count to the frame count */
 	frame_count += group_count + 12;
-	
+
 	/*****************************************/
 
 	if (store->par_ship_nsensor > 0)
@@ -5199,7 +5383,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	if (store->par_parameter == MB_YES)
@@ -5255,7 +5439,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	if (store->par_navigationandmotion == MB_YES)
@@ -5304,7 +5488,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	if (store->par_xdr_num_transducer >0)
@@ -5360,7 +5544,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	if (store->par_xdx_num_transducer >0)
@@ -5409,7 +5593,7 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 		/* add group count to the frame count */
 		frame_count += group_count + 12;
 		}
-	
+
 	/*****************************************/
 
 	/* get end of frame label */
@@ -5418,11 +5602,11 @@ int mbr_l3xseraw_wr_ship(int verbose,int *buffer_size,char *buffer,void *store_p
 #else
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
-	index += 4;	
+	index += 4;
 
 	/* go back and fill in frame byte count */
 	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
-        
+
 	/* set buffer size */
 	*buffer_size = index;
 
@@ -5470,19 +5654,10 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	store = (struct mbsys_xse_struct *) store_ptr;
 
 	/* print debug statements */
+	/* print debug statements */
 	if (verbose >= 5)
 	    {
-	    fprintf(stderr,"\ndbg5  Values to be written in MBIO function <%s>\n",function_name);
-	    fprintf(stderr,"dbg5       mul_source:          %d\n",store->mul_source);
-	    fprintf(stderr,"dbg5       mul_sec:             %u\n",store->mul_sec);
-	    fprintf(stderr,"dbg5       mul_usec:            %u\n",store->mul_usec);
-	    fprintf(stderr,"dbg5       mul_ping:            %d\n",store->mul_ping);
-	    fprintf(stderr,"dbg5       mul_frequency:       %f\n",store->mul_frequency);
-	    fprintf(stderr,"dbg5       mul_pulse:           %f\n",store->mul_pulse);
-	    fprintf(stderr,"dbg5       mul_power:           %f\n",store->mul_power);
-	    fprintf(stderr,"dbg5       mul_bandwidth:       %f\n",store->mul_bandwidth);
-	    fprintf(stderr,"dbg5       mul_sample:          %f\n",store->mul_sample);
-	    fprintf(stderr,"dbg5       mul_swath:           %f\n",store->mul_swath);
+	    fprintf(stderr,"\ndbg5  Values read in MBIO function <%s>\n",function_name);
 	    fprintf(stderr,"dbg5       mul_group_beam:      %d\n",store->mul_group_beam);
 	    fprintf(stderr,"dbg5       mul_group_tt:        %d\n",store->mul_group_tt);
 	    fprintf(stderr,"dbg5       mul_group_quality:   %d\n",store->mul_group_quality);
@@ -5495,21 +5670,65 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    fprintf(stderr,"dbg5       mul_group_heave:     %d\n",store->mul_group_heave);
 	    fprintf(stderr,"dbg5       mul_group_roll:      %d\n",store->mul_group_roll);
 	    fprintf(stderr,"dbg5       mul_group_pitch:     %d\n",store->mul_group_pitch);
+	    fprintf(stderr,"dbg5       mul_group_gates:     %d\n",store->mul_group_gates);
+	    fprintf(stderr,"dbg5       mul_group_noise:     %d\n",store->mul_group_noise);
+	    fprintf(stderr,"dbg5       mul_group_length:    %d\n",store->mul_group_length);
+	    fprintf(stderr,"dbg5       mul_group_hits:      %d\n",store->mul_group_hits);
+	    fprintf(stderr,"dbg5       mul_group_heavereceive: %d\n",store->mul_group_heavereceive);
+	    fprintf(stderr,"dbg5       mul_group_azimuth:    %d\n",store->mul_group_azimuth);
+	    fprintf(stderr,"dbg5       mul_group_properties: %d\n",store->mul_group_properties);
+	    fprintf(stderr,"dbg5       mul_group_normamp:    %d\n",store->mul_group_normamp);
+	    fprintf(stderr,"dbg5       mul_group_mbsystemnav:  %d\n",store->mul_group_mbsystemnav);
+	    fprintf(stderr,"dbg5       mul_source:          %d\n",store->mul_source);
+	    fprintf(stderr,"dbg5       mul_sec:             %u\n",store->mul_sec);
+	    fprintf(stderr,"dbg5       mul_usec:            %u\n",store->mul_usec);
+	    fprintf(stderr,"dbg5       mul_ping:            %d\n",store->mul_ping);
+	    fprintf(stderr,"dbg5       mul_frequency:       %f\n",store->mul_frequency);
+	    fprintf(stderr,"dbg5       mul_pulse:           %f\n",store->mul_pulse);
+	    fprintf(stderr,"dbg5       mul_power:           %f\n",store->mul_power);
+	    fprintf(stderr,"dbg5       mul_bandwidth:       %f\n",store->mul_bandwidth);
+	    fprintf(stderr,"dbg5       mul_sample:          %f\n",store->mul_sample);
+	    fprintf(stderr,"dbg5       mul_swath:           %f\n",store->mul_swath);
 	    fprintf(stderr,"dbg5       mul_num_beams:       %d\n",store->mul_num_beams);
+	    fprintf(stderr,"dbg5       mul_lon:             %f\n",store->mul_lon);
+	    fprintf(stderr,"dbg5       mul_lat:             %f\n",store->mul_lat);
+	    fprintf(stderr,"dbg5       mul_heading:         %f\n",store->mul_heading);
+	    fprintf(stderr,"dbg5       mul_speed:           %f\n",store->mul_speed);
 	    for (i=0;i<store->mul_num_beams;i++)
-		fprintf(stderr,"dbg5       beam[%d]: %3d %7.2f %7.2f %7.2f %3d %3d %6.3f %6.2f %5.3f %5.2f %6.2f %6.2f\n",
-		    i, store->beams[i].beam, 
-		    store->beams[i].lateral, 
-		    store->beams[i].along, 
-		    store->beams[i].depth, 
-		    store->beams[i].amplitude, 
-		    store->beams[i].quality, 
-		    store->beams[i].tt, 
-		    store->beams[i].angle, 
-		    store->beams[i].delay, 
-		    store->beams[i].heave, 
-		    store->beams[i].roll, 
-		    store->beams[i].pitch);
+		fprintf(stderr,"dbg5       beam[%d]: %3d %7.2f %7.2f %7.2f %3d %3d %6.3f %6.2f %5.3f %5.2f %6.2f %6.2f  %f %f %f %f %f %d %f %f %d %f\n",
+		    i, store->beams[i].beam,
+		    store->beams[i].lateral,
+		    store->beams[i].along,
+		    store->beams[i].depth,
+		    store->beams[i].amplitude,
+		    store->beams[i].quality,
+		    store->beams[i].tt,
+		    store->beams[i].angle,
+		    store->beams[i].delay,
+		    store->beams[i].heave,
+		    store->beams[i].roll,
+		    store->beams[i].pitch,
+		    store->beams[i].gate_angle,
+		    store->beams[i].gate_start,
+		    store->beams[i].gate_stop,
+		    store->beams[i].noise,
+		    store->beams[i].length,
+		    store->beams[i].hits,
+		    store->beams[i].heavereceive,
+		    store->beams[i].azimuth,
+		    store->beams[i].normamp,
+		    store->beams[i].frequency);
+	    fprintf(stderr,"dbg5       mul_num_properties: %d\n",store->mul_num_properties);
+	    for (i=0;i<store->mul_num_properties;i++)
+		fprintf(stderr,"dbg5       mun_property[%d]: %d %f\n",
+		    i, store->mul_properties_type[i], store->mul_properties_value[i]);
+	    for (i=0;i<40;i++)
+		fprintf(stderr,"dbg5       mul_properties_reserved[%d]: %d\n",
+		    i, store->mul_properties_reserved[i]);
+	    fprintf(stderr,"dbg5       mul_normamp_num_beams:        %d\n",store->mul_normamp_num_beams);
+	    fprintf(stderr,"dbg5       mul_normamp_flags:            %d\n",store->mul_normamp_flags);
+	    fprintf(stderr,"dbg5       mul_normamp_along_beamwidth:  %f\n",store->mul_normamp_along_beamwidth);
+	    fprintf(stderr,"dbg5       mul_normamp_across_beamwidth: %f\n",store->mul_normamp_across_beamwidth);
 	    }
 
 	/* get the frame label */
@@ -5526,7 +5745,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
-	
+
 	/* get frame time */
 	frame_id = MBSYS_XSE_MBM_FRAME;
 	mb_put_binary_int(SWAPFLAG, frame_id, &buffer[index]); index += 4;
@@ -5548,7 +5767,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	group_count = 0;
 	group_cnt_index = index;
 	index += 4;
-	
+
 	/* get general group */
 	group_id = MBSYS_XSE_MBM_GROUP_GEN;
 	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -5591,7 +5810,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get beam array */
 	    group_id = MBSYS_XSE_MBM_GROUP_BEAM;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -5627,13 +5846,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get tt array */
 	    group_id = MBSYS_XSE_MBM_GROUP_TT;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -5669,20 +5888,20 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get quality array */
 	    group_id = MBSYS_XSE_MBM_GROUP_QUALITY;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->mul_num_beams, &buffer[index]); index += 4;
 	    for (i=0;i<store->mul_num_beams;i++)
 			{
-			buffer[index] = store->beams[i].quality; index++;		    
+			buffer[index] = store->beams[i].quality; index++;
 			}
 
 	    /* get end of group label */
@@ -5711,13 +5930,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get amplitude array */
 	    group_id = MBSYS_XSE_MBM_GROUP_AMP;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -5753,13 +5972,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get delay array */
 	    group_id = MBSYS_XSE_MBM_GROUP_DELAY;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -5795,13 +6014,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get lateral array */
 	    group_id = MBSYS_XSE_MBM_GROUP_LATERAL;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -5837,13 +6056,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get along array */
 	    group_id = MBSYS_XSE_MBM_GROUP_ALONG;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -5879,13 +6098,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get depth array */
 	    group_id = MBSYS_XSE_MBM_GROUP_DEPTH;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -5921,13 +6140,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get angle array */
 	    group_id = MBSYS_XSE_MBM_GROUP_ANGLE;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -5963,13 +6182,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get heave array */
 	    group_id = MBSYS_XSE_MBM_GROUP_HEAVE;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6011,7 +6230,7 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get roll array */
 	    group_id = MBSYS_XSE_MBM_GROUP_ROLL;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6047,13 +6266,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get pitch array */
 	    group_id = MBSYS_XSE_MBM_GROUP_PITCH;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6089,13 +6308,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get gates array */
 	    group_id = MBSYS_XSE_MBM_GROUP_GATES;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6133,13 +6352,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get noise array */
 	    group_id = MBSYS_XSE_MBM_GROUP_NOISE;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6175,13 +6394,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get length array */
 	    group_id = MBSYS_XSE_MBM_GROUP_LENGTH;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6217,13 +6436,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get hits array */
 	    group_id = MBSYS_XSE_MBM_GROUP_HITS;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6259,13 +6478,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get heavereceive array */
 	    group_id = MBSYS_XSE_MBM_GROUP_HEAVERECEIVE;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6301,13 +6520,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get azimuth array */
 	    group_id = MBSYS_XSE_MBM_GROUP_AZIMUTH;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6333,7 +6552,110 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    frame_count += group_count + 12;
 	    }
 
-	/* get azimuth groups */
+	/* get properties groups */
+	if (store->mul_group_properties == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+
+	    /* get properties array */
+	    group_id = MBSYS_XSE_MBM_GROUP_PROPERTIES;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_num_properties, &buffer[index]); index += 4;
+	    for (i=0;i<store->mul_num_properties;i++)
+			{
+			mb_put_binary_short(SWAPFLAG, store->mul_properties_type[i], &buffer[index]); index += 2;
+			mb_put_binary_double(SWAPFLAG, store->mul_properties_value[i], &buffer[index]); index += 8;
+			}
+	    for (i=0;i<40;i++)
+			{
+			buffer[index] = store->mul_properties_reserved[i]; index++;
+			}
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    group_count += 8 + store->mul_num_properties*10 + 40;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* get normalized amplitude groups */
+	if (store->mul_group_normamp == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+
+	    /* get properties array */
+	    group_id = MBSYS_XSE_MBM_GROUP_NORMAMP;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_normamp_num_beams, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->mul_normamp_flags, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->mul_normamp_along_beamwidth, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->mul_normamp_across_beamwidth, &buffer[index]); index += 4;
+	    for (i=0;i<store->mul_normamp_num_beams;i++)
+			{
+			mb_put_binary_short(SWAPFLAG, store->beams[i].normamp, &buffer[index]); index += 2;
+			}
+	    if (store->mul_normamp_flags == 0)
+			{
+			mb_put_binary_float(SWAPFLAG, store->beams[0].frequency, &buffer[index]); index += 4;
+			}
+	    else for (i=0;i<store->mul_normamp_num_beams;i++)
+			{
+			mb_put_binary_float(SWAPFLAG, store->beams[i].frequency, &buffer[index]); index += 4;
+			}
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+	    if (store->mul_normamp_flags == 0)
+		group_count += 24 + store->mul_normamp_num_beams * 2;
+	    else
+		group_count += 20 + store->mul_normamp_num_beams * 2 + store->mul_normamp_num_beams * 4;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* get mbsystemnav groups */
 	if (store->mul_group_mbsystemnav == MB_YES)
 	    {
 	    /* get group label */
@@ -6343,13 +6665,13 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get azimuth array */
 	    group_id = MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6380,11 +6702,11 @@ int mbr_l3xseraw_wr_multibeam(int verbose,int *buffer_size,char *buffer,void *st
 #else
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
-	index += 4;	
+	index += 4;
 
 	/* go back and fill in frame byte count */
 	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
-	
+
 	/* set buffer size */
 	*buffer_size = index;
 
@@ -6515,7 +6837,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
-	
+
 	/* get frame time */
 	frame_id = MBSYS_XSE_SSN_FRAME;
 	mb_put_binary_int(SWAPFLAG, frame_id, &buffer[index]); index += 4;
@@ -6523,7 +6845,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	mb_put_binary_int(SWAPFLAG, store->sid_sec, &buffer[index]); index += 4;
 	mb_put_binary_int(SWAPFLAG, store->sid_usec, &buffer[index]); index += 4;
 	frame_count += 16;
-	
+
 	/*****************************************/
 
 	/* get general group */
@@ -6540,7 +6862,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 	group_count = 0;
 	group_cnt_index = index;
 	index += 4;
-	
+
 	/* get general group */
 	group_id = MBSYS_XSE_SSN_GROUP_GEN;
 	mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -6948,7 +7270,7 @@ int mbr_l3xseraw_wr_sidescan(int verbose,int *buffer_size,char *buffer,void *sto
 #else
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
-	index += 4;	
+	index += 4;
 
 	/* go back and fill in frame byte count */
 	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
@@ -7028,19 +7350,41 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    fprintf(stderr,"dbg5       sbm_roll:            %f\n",store->sbm_roll);
 	    fprintf(stderr,"dbg5       sbm_pitch:           %f\n",store->sbm_pitch);
 	    }
-	if (verbose >= 5 && store->sbm_center == MB_YES)
+	if (verbose >= 5 && store->sbm_signal == MB_YES)
 	    {
-	    fprintf(stderr,"dbg5       sbm_center_beam:     %d\n",store->sbm_center_beam);
-	    fprintf(stderr,"dbg5       sbm_center_count:    %d\n",store->sbm_center_count);
-	    for (i=0;i<store->sbm_center_count;i++)
+	    fprintf(stderr,"dbg5       sbm_signal_beam:     %d\n",store->sbm_signal_beam);
+	    fprintf(stderr,"dbg5       sbm_signal_count:    %d\n",store->sbm_signal_count);
+	    for (i=0;i<store->sbm_signal_count;i++)
 		fprintf(stderr,"dbg5       sample[%d]: %f\n",
-		    i, store->sbm_center_amp[i]);
+		    i, store->sbm_signal_amp[i]);
 	    }
 	if (verbose >= 5 && store->sbm_message == MB_YES)
 	    {
 	    fprintf(stderr,"dbg5       sbm_message_id:      %d\n",store->sbm_message_id);
 	    fprintf(stderr,"dbg5       sbm_message_len:     %d\n",store->sbm_message_len);
 	    fprintf(stderr,"dbg5       sbm_message_txt:     %s\n",store->sbm_message_txt);
+	    }
+	if (verbose >= 5 && store->sbm_sweepsegments == MB_YES)
+	    {
+	    fprintf(stderr,"dbg5       sbm_sweep_direction: %d\n",store->sbm_sweep_direction);
+	    fprintf(stderr,"dbg5       sbm_sweep_azimuth:   %f\n",store->sbm_sweep_azimuth);
+	    fprintf(stderr,"dbg5       sbm_sweep_segments:  %d\n",store->sbm_sweep_segments);
+	    fprintf(stderr,"dbg5       sbm_sweep_seconds:   %d\n",store->sbm_sweep_seconds);
+	    fprintf(stderr,"dbg5       sbm_sweep_micro:     %d\n",store->sbm_sweep_micro);
+	    fprintf(stderr,"dbg5       sbm_sweep_extrapolateazimuth:  %f\n",store->sbm_sweep_extrapolateazimuth);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedazimuth: %f\n",store->sbm_sweep_interpolatedazimuth);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_extrapolatepitch:    %f\n",store->sbm_sweep_extrapolatepitch);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedpitch:   %f\n",store->sbm_sweep_interpolatedpitch);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_extrapolateroll:     %f\n",store->sbm_sweep_extrapolateroll);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_interpolatedroll:    %f\n",store->sbm_sweep_interpolatedroll);
+ 	    fprintf(stderr,"dbg5       sbm_sweep_stabilizedangle:     %f\n",store->sbm_sweep_stabilizedangle);
+	    }
+	if (verbose >= 5 && store->sbm_spacingmode == MB_YES)
+	    {
+	    fprintf(stderr,"dbg5       sbm_spacing_mode:      	      %d\n",store->sbm_spacing_mode);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance:      %f\n",store->sbm_spacing_equidistance);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance_min:  %f\n",store->sbm_spacing_equidistance_min);
+	    fprintf(stderr,"dbg5       sbm_spacing_equidistance_max:  %f\n",store->sbm_spacing_equidistance_max);
 	    }
 
 	/* get the frame label */
@@ -7057,7 +7401,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	frame_count = 0;
 	frame_cnt_index = index;
 	index += 4;
-	
+
 	/* get frame time */
 	frame_id = MBSYS_XSE_SBM_FRAME;
 	mb_put_binary_int(SWAPFLAG, frame_id, &buffer[index]); index += 4;
@@ -7076,13 +7420,13 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get properties group */
 	    group_id = MBSYS_XSE_SBM_GROUP_PROPERTIES;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -7099,7 +7443,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    mb_put_binary_float(SWAPFLAG, store->sbm_frequency, &buffer[index]); index += 4;
 	    mb_put_binary_float(SWAPFLAG, store->sbm_bandwidth, &buffer[index]); index += 4;
 	    group_count += 52;
-    
+
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
 	    strncpy(&buffer[index], "GSH#", 4);
@@ -7107,10 +7451,10 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* go back and fill in group byte count */
 	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-    
+
 	    /* add group count to the frame count */
 	    frame_count += group_count + 12;
 	    }
@@ -7125,13 +7469,13 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
+
 	    /* get hrp group */
 	    group_id = MBSYS_XSE_SBM_GROUP_HRP;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
@@ -7139,7 +7483,7 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    mb_put_binary_double(SWAPFLAG, store->sbm_roll, &buffer[index]); index += 8;
 	    mb_put_binary_double(SWAPFLAG, store->sbm_pitch, &buffer[index]); index += 8;
 	    group_count += 28;
-    
+
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
 	    strncpy(&buffer[index], "GSH#", 4);
@@ -7147,16 +7491,16 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* go back and fill in group byte count */
 	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-    
+
 	    /* add group count to the frame count */
 	    frame_count += group_count + 12;
 	    }
 
-	/* deal with center group */
-	if (store->sbm_center == MB_YES)
+	/* deal with signal group */
+	if (store->sbm_signal == MB_YES)
 	    {
 	    /* get group label */
 #ifdef DATAINPCBYTEORDER
@@ -7165,25 +7509,25 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
-	    /* get center group */
-	    group_id = MBSYS_XSE_SBM_GROUP_CENTER;
+
+	    /* get signal group */
+	    group_id = MBSYS_XSE_SBM_GROUP_SIGNAL;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
-	    mb_put_binary_int(SWAPFLAG, store->sbm_center_beam, &buffer[index]); index += 4;
-	    mb_put_binary_int(SWAPFLAG, store->sbm_center_count, &buffer[index]); index += 4;
-	    for (i=0;i<store->sbm_center_count;i++)
+	    mb_put_binary_int(SWAPFLAG, store->sbm_signal_beam, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->sbm_signal_count, &buffer[index]); index += 4;
+	    for (i=0;i<store->sbm_signal_count;i++)
 		{
-		mb_put_binary_float(SWAPFLAG, store->sbm_center_amp[i], &buffer[index]); 
+		mb_put_binary_float(SWAPFLAG, store->sbm_signal_amp[i], &buffer[index]);
 		index += 4;
 		}
-	    group_count += 12 + 4 * store->sbm_center_count;
-    
+	    group_count += 12 + 4 * store->sbm_signal_count;
+
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
 	    strncpy(&buffer[index], "GSH#", 4);
@@ -7191,10 +7535,10 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* go back and fill in group byte count */
 	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-    
+
 	    /* add group count to the frame count */
 	    frame_count += group_count + 12;
 	    }
@@ -7209,25 +7553,25 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "$HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* start the group byte count, but don't write it to buffer yet */
 	    /* mark the byte count spot in the buffer and increment index so we skip it */
 	    group_count = 0;
 	    group_cnt_index = index;
 	    index += 4;
-	    
-	    /* get center group */
+
+	    /* get message group */
 	    group_id = MBSYS_XSE_SBM_GROUP_MESSAGE;
 	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->sbm_message_id, &buffer[index]); index += 4;
 	    mb_put_binary_int(SWAPFLAG, store->sbm_message_len, &buffer[index]); index += 4;
 	    for (i=0;i<store->sbm_message_len;i++)
 		{
-		buffer[index] = store->sbm_message_txt[i]; 
+		buffer[index] = store->sbm_message_txt[i];
 		index++;
 		}
 	    group_count += 12 + store->sbm_message_len;
-    
+
 	    /* get end of group label */
 #ifdef DATAINPCBYTEORDER
 	    strncpy(&buffer[index], "GSH#", 4);
@@ -7235,10 +7579,100 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 	    strncpy(&buffer[index], "#HSG", 4);
 #endif
 	    index += 4;
-    
+
 	    /* go back and fill in group byte count */
 	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
-    
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* deal with sweep segments group */
+	if (store->sbm_sweepsegments == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+
+	    /* get sweep segments group */
+	    group_id = MBSYS_XSE_SBM_GROUP_SWEEPSEGMENTS;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    buffer[index] = store->sbm_sweep_direction; index++;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_azimuth, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->sbm_sweep_segments, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->sbm_sweep_seconds, &buffer[index]); index += 4;
+	    mb_put_binary_int(SWAPFLAG, store->sbm_sweep_micro, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_extrapolateazimuth, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_interpolatedazimuth, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_extrapolatepitch, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_interpolatedpitch, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_extrapolateroll, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_interpolatedroll, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_sweep_stabilizedangle, &buffer[index]); index += 4;
+	    group_count += 49;
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
+	    /* add group count to the frame count */
+	    frame_count += group_count + 12;
+	    }
+
+	/* deal with spacing mode group */
+	if (store->sbm_message == MB_YES)
+	    {
+	    /* get group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH$", 4);
+#else
+	    strncpy(&buffer[index], "$HSG", 4);
+#endif
+	    index += 4;
+
+	    /* start the group byte count, but don't write it to buffer yet */
+	    /* mark the byte count spot in the buffer and increment index so we skip it */
+	    group_count = 0;
+	    group_cnt_index = index;
+	    index += 4;
+
+	    /* get spacing mode group */
+	    group_id = MBSYS_XSE_SBM_GROUP_MESSAGE;
+	    mb_put_binary_int(SWAPFLAG, group_id, &buffer[index]); index += 4;
+	    buffer[index] = store->sbm_spacing_mode; index++;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_spacing_equidistance, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_spacing_equidistance_min, &buffer[index]); index += 4;
+	    mb_put_binary_float(SWAPFLAG, store->sbm_spacing_equidistance_max, &buffer[index]); index += 4;
+	    group_count += 17 + store->sbm_message_len;
+
+	    /* get end of group label */
+#ifdef DATAINPCBYTEORDER
+	    strncpy(&buffer[index], "GSH#", 4);
+#else
+	    strncpy(&buffer[index], "#HSG", 4);
+#endif
+	    index += 4;
+
+	    /* go back and fill in group byte count */
+	    mb_put_binary_int(SWAPFLAG, group_count, &buffer[group_cnt_index]);
+
 	    /* add group count to the frame count */
 	    frame_count += group_count + 12;
 	    }
@@ -7249,11 +7683,11 @@ int mbr_l3xseraw_wr_seabeam(int verbose,int *buffer_size,char *buffer,void *stor
 #else
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
-	index += 4;	
+	index += 4;
 
 	/* go back and fill in frame byte count */
 	mb_put_binary_int(SWAPFLAG, frame_count, &buffer[frame_cnt_index]);
-	
+
 	/* set buffer size */
 	*buffer_size = index;
 
@@ -7319,7 +7753,7 @@ int mbr_l3xseraw_wr_comment(int verbose,int *buffer_size,char *buffer,void *stor
 	    len += 4 - (len % 4);
 	size = len + 32;
 	mb_put_binary_int(SWAPFLAG, size, &buffer[index]); index += 4;
-	
+
 	/* get frame time */
 	frame_id = MBSYS_XSE_COM_FRAME;
 	mb_put_binary_int(SWAPFLAG, frame_id, &buffer[index]); index += 4;
@@ -7356,7 +7790,7 @@ int mbr_l3xseraw_wr_comment(int verbose,int *buffer_size,char *buffer,void *stor
 	strncpy(&buffer[index], "#HSF", 4);
 #endif
 	index += 4;
-	
+
 	*buffer_size = index;
 
 	/* print output debug statements */

@@ -1,4 +1,4 @@
-.TH mbm_grdplot 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbm_grdplot 1 "4 October 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbm_grdplot\fP - Create an executable shellscript which will generate
 a GMT map of gridded data in a GMT grd file.
@@ -1113,9 +1113,10 @@ in the background before \fBmbm_grdplot\fP exits.
 Normally, \fBmbm_grdplot\fP generates nicely rounded numbers
 for the boundaries of the color pallette. Often, the resulting
 color bounds extend well outside the range of the gridded data.
-This option causes
-the color boundaries to be uniformly distributed between the
-minimum and maximum values of the grid.
+This option causes the minimum and maximum color boundaries to
+exactly conform to the minimum and maximum values of the grid,
+or, if the \fB-Z\fP option is used, the minimum and maximum
+values specified by the user.
 .TP
 .B \-Z
 \fImin/max[/mode]\fP
@@ -1123,14 +1124,17 @@ minimum and maximum values of the grid.
 This option overrides the minimum and maximum values of
 the gridded data, affecting the color pallette and the
 contour interval if those parameters are not specified
-by the user. If \fImode\fP is omitted or equal to 0, then
-the color pallette will end at
-\fImin\fP and \fImax\fP whether it is linear stretched or
-histogram equalized. If \fImode\fP = 1, then the color
-stretching calculations will be done using
-\fImin\fP and \fImax\fP, but then the first and last
-values in the color pallette will be set to the actual minimum and
-maximum values.so that all the data are displayed.
+by the user. By default (i.e. \fImode\fP is omitted
+or equal to 0), the macro selects the color pallette bounds
+so that they encompass \fImin\fP and \fImax\fP while using
+nicely rounded numbers. If \fImode\fP is omitted or equal
+to 0, then the color pallette will end near \fImin\fP and
+\fImax\fP whether it is linear stretched or histogram equalized.
+If \fImode\fP = 1, then the color stretching calculations
+will be done using \fImin\fP and \fImax\fP, but then the
+first and last values in the color pallette will be set to
+the actual minimum and maximum values.so that all the data
+are displayed.
 
 .SH EXAMPLES
 Suppose we have obtained two GRD files with dimensions of
