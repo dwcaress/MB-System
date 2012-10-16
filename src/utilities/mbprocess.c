@@ -305,12 +305,23 @@ int get_corrtable(int verbose,
 int get_anglecorr(int verbose,
 	int nangle, double *angles, double *corrs,
 	double angle, double *corr, int *error);
+int get_area(int verbose, double xbeamwidth, double ybeamwidth, double soundspeed, double pulselength,
+	double incident, double along_slope, double range,
+	double* area, int*error);
 int get_absorption(int verbose, int mbp_sap_src, double mbp_sap_old,
 	void *mbio_ptr, double *absorption, int* error);
 int get_absorption_simrad2(int verbose, int mbp_sap_src,
 	void *mbio_ptr, double *absorption, int* error);
 int set_absorption(int verbose, void *mbio_ptr, double absorption, int* error);
 int set_absorption_simrad2(int verbose, void *mbio_ptr, double absorption, int* error);
+int get_footprint_characteristics(int verbose, void *mbio_ptr,
+	double* xbeamwidth, double* ybeamwidth, double* soundspeed, double* pulselength,
+	int* nslope, double* incident, double* range,
+	int* error);
+int get_footprint_characteristics_simrad2(int verbose, void *mbio_ptr,
+	double* xbeamwidth, double* ybeamwidth, double* soundspeed, double* pulselength,
+	int* nslope, double* incident, double* range,
+	int* error);
 
 static char rcs_id[] = "$Id$";
 
@@ -460,7 +471,7 @@ and mbedit edit save files.\n";
 	char	str_locked_no[] = "unlocked";
  	int	format = 0;
 	int	variable_beams;
-	int	traveltime;
+	int	traveltime = MB_NO;
 	int	beam_flagging;
 	int	calculatespeedheading = MB_NO;
 	int	mbp_ifile_specified;
@@ -562,7 +573,7 @@ and mbedit edit save files.\n";
 	/* ssv handling variables */
 	int	ssv_prelimpass = MB_NO;
 	double	ssv_default;
-	double	ssv_start;
+	double	ssv_start = 0.0;
 
 	/* sidescan correction */
 	double	altitude_default = 1000.0;
@@ -580,22 +591,34 @@ and mbedit edit save files.\n";
 	struct mbprocess_sscorr_struct	sscorrreftable;
 	int	nampcorrtable = 0;
 	int	nampcorrangle = 0;
+	int	nrefampcorrangle = 0;
 	struct mbprocess_sscorr_struct	*ampcorrtable = NULL;
 	struct mbprocess_sscorr_struct	ampcorrtableuse;
 	struct mbprocess_sscorr_struct	ampcorrreftable;
 	int	ndepths;
-	double	*depths;
-	double	*depthsmooth;
-	double	*depthacrosstrack;
+	double	*depths = NULL;
+	double	*depthsmooth = NULL;
+	double	*depthacrosstrack = NULL;
 	int	nslopes;
-	double	*slopes;
-	double	*slopeacrosstrack;
+	double	*slopes = NULL;
+	double	*slopeacrosstrack = NULL;
+	double	soundspeed = 1500.0;
+	double	tx_beamwidth;
+	double	rx_beamwidth;
+	double	pulselength;
+	int	nareas;
+	double	acq_area;
+	double	cor_area;
+	double	*grazing = NULL;
+	double	*ranges = NULL;
 	double	r[3];
 	double	v1[3], v2[3], v[3], vv;
 	double	slope;
 	double	bathy;
 	double	altitude_use;
 	double	angle;
+	double	across_angle;
+	double	along_angle;
 	double	correction;
 	double	sigma = 1;
 	double	reference_sigma;
@@ -3421,7 +3444,7 @@ and mbedit edit save files.\n";
 		    }
 
 	    /* read reference file */
-	    nampcorrangle = 0;
+	    nrefampcorrangle = 0;
 	    ampcorrreftable.nangle=0;
 	    sscorrreftable.nangle=0;
 	    if (process.mbp_ampcorr_reffile[0] != NULL  && (tfp = fopen(process.mbp_ampcorr_reffile, "r")) != NULL)
@@ -3429,7 +3452,7 @@ and mbedit edit save files.\n";
 	    while ((result = fgets(buffer,MBP_FILENAMESIZE,tfp)) == buffer)
 	    	{
 		if (strncmp(buffer,"# nangles:",10) == 0)
-		    sscanf(buffer,"# nangles:%d",&nampcorrangle);
+		    sscanf(buffer,"# nangles:%d",&nrefampcorrangle);
 	    	}
 	    fclose(tfp);
 
@@ -3437,9 +3460,9 @@ and mbedit edit save files.\n";
 		ampcorrreftable.angle = NULL;
 		ampcorrreftable.amplitude = NULL;
 		ampcorrreftable.sigma = NULL;
-		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrreftable.angle),&error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrreftable.amplitude),&error);
-		status = mb_mallocd(verbose,__FILE__,__LINE__,nampcorrangle*sizeof(double),(void **)&(ampcorrreftable.sigma),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nrefampcorrangle*sizeof(double),(void **)&(ampcorrreftable.angle),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nrefampcorrangle*sizeof(double),(void **)&(ampcorrreftable.amplitude),&error);
+		status = mb_mallocd(verbose,__FILE__,__LINE__,nrefampcorrangle*sizeof(double),(void **)&(ampcorrreftable.sigma),&error);
 
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
@@ -3452,13 +3475,12 @@ and mbedit edit save files.\n";
 		    }
 
 		ampcorrreftable.nangle=0;
-		for (i=0;i<nampcorrangle; i++)
+		for (i=0;i<nrefampcorrangle; i++)
 		    {
 		    ampcorrreftable.angle[i]=0;
 		    ampcorrreftable.amplitude[i]=0;
 		    ampcorrreftable.sigma[i]=0;
 		    }
-		}
 
 	    /* read the data points in the amplitude correction file */
 	    if ((tfp = fopen(process.mbp_ampcorr_reffile, "r")) == NULL)
@@ -3471,7 +3493,7 @@ and mbedit edit save files.\n";
 		}
 	    while ((result = fgets(buffer,MBP_FILENAMESIZE,tfp)) == buffer)
 		{
-		if (buffer[0] != '#' && ampcorrreftable.nangle <nampcorrangle)
+		if (buffer[0] != '#' && ampcorrreftable.nangle <nrefampcorrangle)
 			{
 			nget = sscanf(buffer, "%lf %lf %lf",
 				&(ampcorrreftable.angle[ampcorrreftable.nangle]),
@@ -3486,6 +3508,7 @@ and mbedit edit save files.\n";
 			}
 		}
 	    fclose(tfp);
+	    }
 	    }
 
 	/*--------------------------------------------
@@ -3949,6 +3972,8 @@ and mbedit edit save files.\n";
 
 	/* allocate memory for amplitude and sidescan correction arrays */
 	if (process.mbp_sscorr_mode == MBP_SSCORR_ON
+		|| process.mbp_ampcorr_area == MB_YES
+		|| process.mbp_sscorr_area == MB_YES
 		|| process.mbp_ampcorr_mode == MBP_AMPCORR_ON)
 		{
 		if (error == MB_ERROR_NO_ERROR)
@@ -3966,6 +3991,12 @@ and mbedit edit save files.\n";
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							2 * sizeof(double), (void **)&slopeacrosstrack, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							2 * sizeof(double), (void **)&grazing, &error);
+		if (error == MB_ERROR_NO_ERROR)
+			status = mb_register_array(verbose, imbio_ptr, MB_MEM_TYPE_BATHYMETRY,
+							2 * sizeof(double), (void **)&ranges, &error);
 		}
 
 	/*--------------------------------------------
@@ -6359,10 +6390,12 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 	  --------------------------------------------*/
 
 	  	/* correct amplitude and sidescan using slopes from multibeam swath data */
-		if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+		if (((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+				|| process.mbp_ampcorr_area == MB_YES)
 				&& (process.mbp_ampcorr_slope == MBP_AMPCORR_IGNORESLOPE
 					|| process.mbp_ampcorr_slope == MBP_AMPCORR_USESLOPE))
-			|| (process.mbp_sscorr_mode == MBP_SSCORR_ON
+			|| ((process.mbp_sscorr_mode == MBP_SSCORR_ON
+					 || process.mbp_sscorr_area == MB_YES)
 				&& (process.mbp_sscorr_slope == MBP_SSCORR_IGNORESLOPE
 					|| process.mbp_sscorr_slope == MBP_SSCORR_USESLOPE)))
 			{
@@ -6377,7 +6410,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 					&& nsscorrtable > 0
 					&& nsscorrangle > 0)
 					))
-				{
+			{
 				mb_pr_set_bathyslope(verbose,
 						nsmooth,
 						nbath,
@@ -6392,14 +6425,35 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 						slopeacrosstrack,
 						depthsmooth,
 						&error);
-				}
+			}
+
+			if (error == MB_ERROR_NO_ERROR
+				&& kind == MB_DATA_DATA
+				&& (process.mbp_ampcorr_area == MB_YES
+					|| process.mbp_sscorr_area == MB_YES))
+			{
+				status = get_footprint_characteristics(verbose,
+						imbio_ptr,
+						&rx_beamwidth,
+						&tx_beamwidth,
+						&soundspeed,
+						&pulselength,
+						&nareas,
+						grazing,
+						ranges,
+						&error);
+			}
 
 			/* correct the amplitude if desired */
-			if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+			if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+					|| process.mbp_ampcorr_area == MB_YES)
 			    && error == MB_ERROR_NO_ERROR
-				&& kind == MB_DATA_DATA
-				&& nampcorrtable > 0
-				&& nampcorrangle > 0)
+				&& kind == MB_DATA_DATA)
+				{
+
+				if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+					&& nampcorrtable > 0
+					&& nampcorrangle > 0)
 				{
 				/* calculate the correction table */
 				status = get_corrtable(verbose,
@@ -6482,6 +6536,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 	for (i=0;i<ampcorrtableuse.nangle;i++)
 	fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
 	i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]);*/
+				}
 
 				/* get seafloor slopes */
 		    		for (i=0;i<namp;i++)
@@ -6523,30 +6578,101 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 							angle = RTD * atan((bathacrosstrack[i] - sonar_acrosstrack) / altitude_use);
 							if (process.mbp_ampcorr_slope != MBP_AMPCORR_IGNORESLOPE)
 							   angle += RTD * atan(slope);
+
+							if (process.mbp_ampcorr_area == MB_YES)
+							{
+								status = get_area(verbose,
+										rx_beamwidth,
+										tx_beamwidth,
+										soundspeed,
+										pulselength,
+										grazing[i],
+										0,
+										ranges[i],
+										&acq_area,
+										&error);
+								status = get_area(verbose,
+										rx_beamwidth,
+										tx_beamwidth,
+										soundspeed,
+										pulselength,
+										angle,
+										0,
+										ranges[i],
+										&cor_area,
+										&error);
+
+								if (acq_area > 0 && cor_area > 0)
+								{
+									if (verbose >= 1) {
+										fprintf(stderr,"area: %d %d  %.1f  %.1f  %.0f  %f  %.2f  %.2f  %.2f  %.0f  %f  %f  %f  %f\n",
+												idata,
+												i,
+												rx_beamwidth,
+												tx_beamwidth,
+												soundspeed,
+												pulselength,
+												angle - RTD * atan(slope),
+												grazing[i],
+												angle,
+												ranges[i],
+												acq_area,
+												cor_area,
+												10 * log10(acq_area / cor_area),
+												depths[i]);
+									}
+									amp[i] = amp[i] + 10 * log10(acq_area / cor_area);
+								}
+								else
+								{
+									if (verbose >= 1) {
+										fprintf(stderr,"badarea: %d  %d  %.1f  %.1f  %.0f  %f  %.2f  %.2f  %.2f  %.0f  %f  %f\n",
+												idata,
+												i,
+												rx_beamwidth,
+												tx_beamwidth,
+												soundspeed,
+												pulselength,
+												angle - RTD * atan(slope),
+												grazing[i],
+												angle,
+												ranges[i],
+												acq_area,
+												cor_area);
+									}
+
+								}
+							}
+
+							if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+								&& nampcorrtable > 0
+								&& nampcorrangle > 0)
+							{
 							status = get_anglecorr(verbose,
 									ampcorrtableuse.nangle,
 									ampcorrtableuse.angle,
 									ampcorrtableuse.amplitude,
 									angle, &correction, &error);
-                                                        if (process.mbp_ampcorr_stddev == MBP_AMPCORR_IGNORESTD)
-                                                            sigma = 1;
-                                                        else
-                                                            {
-							    status = get_anglecorr(verbose,
-								    ampcorrtableuse.nangle,
-								    ampcorrtableuse.angle,
-								    ampcorrtableuse.sigma,
-								    angle, &sigma, &error);
-							    if (sigma == 0)
+							if (process.mbp_ampcorr_stddev == MBP_AMPCORR_IGNORESTD)
 								sigma = 1;
-                                                            }
-/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f",
+							else
+							{
+								status = get_anglecorr(verbose,
+										ampcorrtableuse.nangle,
+										ampcorrtableuse.angle,
+										ampcorrtableuse.sigma,
+										angle, &sigma, &error);
+								if (sigma == 0)
+									sigma = 1;
+							}
+							/*fprintf(stderr, "ping:%d beam:%d slope:%f angle:%f corr:%f reference:%f amp: %f",
 j, i, slope, angle, correction, reference_amp, amp[i]);*/
 							if (process.mbp_ampcorr_type == MBP_AMPCORR_SUBTRACTION)
-				    				amp[i] = (amp[i] - correction) * reference_sigma / sigma + reference_amp;
+								amp[i] = (amp[i] - correction) * reference_sigma / sigma + reference_amp;
 							else
-				    				amp[i] = amp[i] / correction * reference_amp;
-/*fprintf(stderr, " amp: %f\n", amp[i]);*/
+								amp[i] = amp[i] / correction * reference_amp;
+							/*fprintf(stderr, " amp: %f\n", amp[i]);*/
+							}
 							}
 			    			}
 					}
@@ -6656,10 +6782,12 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 			}
 
 	  	/* correct amplitude and sidescan using slopes from topography grid */
-		else if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+		else if (((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+					|| process.mbp_ampcorr_area == MB_YES)
 				&& (process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPO
 					|| process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPOSLOPE))
-			|| (process.mbp_sscorr_mode == MBP_SSCORR_ON
+			|| ((process.mbp_sscorr_mode == MBP_SSCORR_ON
+					|| process.mbp_sscorr_area == MB_YES)
 				&& (process.mbp_sscorr_slope == MBP_SSCORR_USETOPO
 					|| process.mbp_sscorr_slope == MBP_SSCORR_USETOPOSLOPE)))
 			{
@@ -6668,13 +6796,34 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 			headingx = sin(heading * DTR);
 			headingy = cos(heading * DTR);
 
-			/* correct the amplitude if desired */
-			if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON
-			    && error == MB_ERROR_NO_ERROR
+			if (error == MB_ERROR_NO_ERROR
 				&& kind == MB_DATA_DATA
-				&& nampcorrtable > 0
-				&& nampcorrangle > 0)
+				&& (process.mbp_ampcorr_area == MB_YES
+					|| process.mbp_sscorr_area == MB_YES))
+			{
+				status = get_footprint_characteristics(verbose,
+						imbio_ptr,
+						&rx_beamwidth,
+						&tx_beamwidth,
+						&soundspeed,
+						&pulselength,
+						&nareas,
+						grazing,
+						ranges,
+						&error);
+			}
+
+			/* correct the amplitude if desired */
+			if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+					|| process.mbp_ampcorr_area == MB_YES)
+			    && error == MB_ERROR_NO_ERROR
+				&& kind == MB_DATA_DATA)
 				{
+
+				if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+					&& nampcorrtable > 0
+					&& nampcorrangle > 0)
+					{
 				/* calculate the correction table */
 				status = get_corrtable(verbose,
 					    time_d,
@@ -6705,6 +6854,7 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 	for (i=0;i<ampcorrtableuse.nangle;i++)
 	fprintf(stderr,"i:%d angle:%f amplitude:%f sigma:%f\n",
 	i,ampcorrtableuse.angle[i],ampcorrtableuse.amplitude[i],ampcorrtableuse.sigma[i]);*/
+					}
 
 				/* get seafloor slopes */
 		    		for (i=0;i<namp;i++)
@@ -6743,7 +6893,7 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 							r[2] /= rr;
 
 							/* get normal vector to grid surface */
-							if (process.mbp_ampcorr_slope == MB_YES)
+							if (process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPOSLOPE)
 								{
 								v1[0] = 2.0 * grid.dx / mtodeglon;
 								v1[1] = 2.0 * grid.dy / mtodeglat;
@@ -6772,6 +6922,29 @@ j, i, slope, angle, correction, reference_amp, amp[i]);*/
 							if ((bathacrosstrack[i] - sonar_acrosstrack) < 0.0)
 								angle = -angle;
 
+
+							if (process.mbp_ampcorr_area == MB_YES)
+							{
+								/* rotate normal vector from north east to along across coordinates */
+								v1[0] = v[0];
+								v1[1] = v[1];
+								v[0] = headingy * v1[0] - headingx * v1[1];
+								v[1] = headingx * v1[0] + headingy * v1[1];
+
+								across_angle = atan2(bathacrosstrack[i] - sonar_acrosstrack, - sonardepth - grid.data[kgrid]);
+								along_angle  = atan2(bathalongtrack[i]  - sonar_alongtrack, - sonardepth - grid.data[kgrid]);
+								across_angle += atan2(v[0],v[2]);
+								along_angle  += atan2(v[1],v[2]);
+								across_angle *= RTD;
+								along_angle  *= RTD;
+fprintf(stderr,"grid (sw,nw,se,ne): %f %f %f %f  ne: %f %f %f  xg: %f %f %f\n", grid.data[kgrid00],grid.data[kgrid01],grid.data[kgrid10],grid.data[kgrid11],
+		v1[0],v1[1],v[2],v[0],v[1],v[2]);
+fprintf(stderr,"heading: %f normal: %f N %f E @ %f  %f x %f g @ %f  beam: %f x %f g grazing: %f across: %f along: %f\n",
+		heading, RTD * atan2(v1[1],v[2]), RTD * atan2(v1[0],v[2]), RTD * atan2(v1[1],v1[0]),
+		RTD * atan2(v[0],v[2]), RTD * atan2(v[1],v[2]), RTD * atan2(v[1],v[0]),
+		RTD * atan2(bathacrosstrack[i] - sonar_acrosstrack, - sonardepth - grid.data[kgrid]), RTD * atan2(bathalongtrack[i] - sonar_alongtrack, - sonardepth - grid.data[kgrid]),
+		angle, across_angle, along_angle);
+							}
 /* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
 i,bathacrosstrack[i],bathalongtrack[i],bath[i],sonardepth,RTD * atan(bathacrosstrack[i] / (sonardepth + grid.data[kgrid])));
 fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
@@ -6788,8 +6961,82 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 							    bathy = bath[i];
 							angle = RTD * atan((bathacrosstrack[i] - sonar_acrosstrack) / (bathy - sonardepth));
 							slope = 0.0;
+							across_angle = angle;
+							along_angle = 0;
 							}
 
+
+						if (process.mbp_ampcorr_area == MB_YES)
+						{
+
+							status = get_area(verbose,
+									rx_beamwidth,
+									tx_beamwidth,
+									soundspeed,
+									pulselength,
+									grazing[i],
+									0,
+									ranges[i],
+									&acq_area,
+									&error);
+							status = get_area(verbose,
+									rx_beamwidth,
+									tx_beamwidth,
+									soundspeed,
+									pulselength,
+									across_angle,
+									along_angle,
+									ranges[i],
+									&cor_area,
+									&error);
+
+							if (acq_area > 0 && cor_area > 0)
+							{
+								if (verbose >= 1) {
+									fprintf(stderr,"area: %d  %d  %.1f  %.1f  %.0f  %f  %.2f  %.2f  %.2f  %.2f  %.0f  %f  %f  %f  %f\n",
+											idata,
+											i,
+											rx_beamwidth,
+											tx_beamwidth,
+											soundspeed,
+											pulselength,
+											angle,
+											grazing[i],
+											across_angle,
+											along_angle,
+											ranges[i],
+											acq_area,
+											cor_area,
+											10 * log10(acq_area / cor_area),
+											depths[i]);
+								}
+								amp[i] = amp[i] + 10 * log10(acq_area / cor_area);
+							}
+							else
+							{
+								if (verbose >= 1) {
+									fprintf(stderr,"badarea: %d  %d  %.1f  %.1f  %.0f  %f  %.2f  %.2f  %.2f  %.2f  %.0f  %f  %f \n",
+											idata,
+											i,
+											rx_beamwidth,
+											tx_beamwidth,
+											soundspeed,
+											pulselength,
+											angle,
+											grazing[i],
+											across_angle,
+											along_angle,
+											ranges[i],
+											acq_area,
+											cor_area);
+								}
+							}
+						}
+
+						if (process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+							&& nampcorrtable > 0
+							&& nampcorrangle > 0)
+							{
 						/* apply correction */
 						status = get_anglecorr(verbose,
 								ampcorrtableuse.nangle,
@@ -6803,6 +7050,7 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 						else
 				    			amp[i] = amp[i] / correction * reference_amp;
 /*fprintf(stderr, " amp: %f\n", amp[i]);*/
+			    			}
 			    			}
 					}
 				}
@@ -7609,7 +7857,54 @@ int get_anglecorr(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+/*
+ * Calculate the area ensonified by a sample on sea floor.
+ * This is used to correct amplitude and side scan values as a function of incident angle
+ */
+int get_area(int verbose, double xbeamwidth, double ybeamwidth, double soundspeed, double pulselength,
+	double incident, double along_slope, double range,
+	double* area, int*error)
+{
+	char    *function_name = "get_area";
+	int     status = MB_SUCCESS;
+	double 	nadir;
+	double 	outer;
+	double	along;
 
+	xbeamwidth = xbeamwidth * DTR;
+	ybeamwidth = ybeamwidth * DTR;
+	incident = incident < 0 ? -incident * DTR : incident * DTR;
+	along_slope = along_slope < 0 ? -along_slope * DTR : along_slope * DTR;
+
+	along = xbeamwidth * range / cos(along_slope);
+	if (along_slope > xbeamwidth)
+	{
+		outer = soundspeed * pulselength * 0.5 / sin(along_slope);
+		along = (along < outer) ? along : outer;
+	}
+
+	nadir = ybeamwidth * range * along / cos(incident);
+	if (incident > ybeamwidth)
+	{
+	    outer = soundspeed * pulselength * along * 0.5 / sin(incident);
+	    *area = (nadir < outer) ? nadir : outer;
+	}
+	else
+	{
+	    *area = nadir;
+	}
+
+	return status;
+}
+/*--------------------------------------------------------------------*/
+/**********************************************************************
+ *  The following functions belong in mbio.
+ *  They have been placed here either because:
+ *  1) I am too lazy to put them in the right place
+ *  2) Implementing them properly would be too much work
+ *  3) It would create more changes than are justified to the system.
+ *  Take your pick - GJK
+ */
 int get_absorption(int verbose, int mbp_sap_src, double mbp_sap_old, void *mbio_ptr, double *absorption, int* error)
 {
         char    *function_name = "get_absorption";
@@ -7622,7 +7917,7 @@ int get_absorption(int verbose, int mbp_sap_src, double mbp_sap_old, void *mbio_
         if (mbp_sap_src == MBP_SAP_SRC_CONST)
         {
             *absorption = mbp_sap_old;
-            status = MB_SUCCESS;
+            status = MB_FAILURE;
         }
         else
         {
@@ -7706,3 +8001,80 @@ int set_absorption_simrad2(int verbose, void *mbio_ptr, double absorption, int* 
 	return status;
 }
 /*--------------------------------------------------------------------*/
+/**
+ * Get the values needed to calculate sample area of beam footprint.
+ * Returns:
+ * xbeamwidth - Receive beamwidth in degrees
+ * ybeamwidth - Transmit beamwidth in degrees
+ * soundspeec - soundspeed at seafloor
+ * pulselength - pulse length in seconds
+ * nslope - number of beams in slope and range
+ * slope - grazing angle used by sounder to calculate sample area in backscatter in degrees
+ * range - range bottom (in m)
+ */
+int get_footprint_characteristics(int verbose, void *mbio_ptr,
+	double* xbeamwidth, double* ybeamwidth, double* soundspeed, double* pulselength,
+	int* nangles, double* incident, double* range,
+	int* error)
+{
+    char    *function_name = "get_footprint_characteristics";
+    int     status = MB_FAILURE;
+
+    struct mb_io_struct     *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+    switch (mb_io_ptr->format)
+        {
+    case MBF_EM300MBA:
+    case MBF_EM300RAW:
+        status = get_footprint_characteristics_simrad2(verbose, mbio_ptr,
+        	xbeamwidth, ybeamwidth, soundspeed, pulselength,
+        	nangles, incident,  range, error);
+        break;
+        }
+
+    return status;
+}
+/*--------------------------------------------------------------------*/
+int get_footprint_characteristics_simrad2(int verbose, void *mbio_ptr,
+	double* xbeamwidth, double* ybeamwidth, double* soundspeed, double* pulselength,
+	int* nangles, double* incident, double* range,
+	int* error)
+{
+	char    *function_name = "get_absorption_simrad2";
+	int     status = MB_SUCCESS;
+	int	i, j;
+
+	struct mb_io_struct             *mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+	struct mbsys_simrad2_struct     *store_ptr = (struct mbsys_simrad2_struct *) mb_io_ptr->store_data;
+	struct mbsys_simrad2_ping_struct *ping_ptr = store_ptr->ping;
+
+	double range_normal = ping_ptr->png_r_zero_corr * 2.0;
+	double sample_time = 0.25 / ping_ptr->png_sample_rate;		/* Not for EM3000D */ /* GJK - I don't understand why 0.25 */
+
+	*xbeamwidth = store_ptr->run_rec_beam * 0.1;
+	*ybeamwidth = store_ptr->run_tran_beam * 0.1;
+	*pulselength = store_ptr->run_tran_pulse * 0.000001;
+	*nangles = mb_io_ptr->beams_bath_max;
+
+	if (*soundspeed < 1000.0)
+	    *soundspeed = 1500.0;
+	for(i = 0; i < store_ptr->svp_num && store_ptr->svp_depth[i] < range_normal * sample_time * *soundspeed; i++)
+	{
+	    *soundspeed = store_ptr->svp_vel[i] * 0.1;
+	}
+
+	for(i = 0; i<mb_io_ptr->beams_bath_max; i++) {
+	    incident[i] = 0;
+	    range[i] = 0;
+	}
+        for (i=0;i<ping_ptr->png_nbeams;i++)
+        {
+            j = ping_ptr->png_beam_num[i] - 1;
+            if (ping_ptr->png_range[i] <= range_normal)
+        	incident[j] = 0;
+            else
+        	incident[j] = RTD * acos(range_normal/ping_ptr->png_range[i]);
+            range[j] = ping_ptr->png_range[i] * sample_time * *soundspeed;	/* OK this is a rough approximation for now */
+        }
+
+	return status;
+}

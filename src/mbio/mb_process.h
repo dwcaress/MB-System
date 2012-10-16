@@ -936,6 +936,7 @@ struct mb_process_struct
 	int	mbp_ampcorr_symmetry;
 	double	mbp_ampcorr_angle;
 	int	mbp_ampcorr_slope;
+	int	mbp_ampcorr_area;
 	int	mbp_ampcorr_stddev;
 	char	mbp_ampcorr_reffile[MBP_FILENAMESIZE];
 	
@@ -946,6 +947,7 @@ struct mb_process_struct
 	int	mbp_sscorr_symmetry;
 	double	mbp_sscorr_angle;
 	int	mbp_sscorr_slope;
+	int	mbp_sscorr_area;
 	int	mbp_sscorr_stddev;
 	
 	/* amplitude and sidescan correction */
@@ -1166,6 +1168,7 @@ int mb_pr_update_ampcorr(int verbose, char *file,
 			int	mbp_ampcorr_symmetry,
 			double	mbp_ampcorr_angle,
 			int	mbp_ampcorr_slope,
+			int	mbp_ampcorr_area,
 			char	*mbp_ampcorr_topofile,
 			int *error);
 int mb_pr_update_sscorr(int verbose, char *file, 
@@ -1175,6 +1178,7 @@ int mb_pr_update_sscorr(int verbose, char *file,
 			int	mbp_sscorr_symmetry,
 			double	mbp_sscorr_angle,
 			int	mbp_sscorr_slope,
+			int	mbp_sscorr_area,
 			char	*mbp_sscorr_topofile,
 			int *error);
 int mb_pr_update_ssrecalc(int verbose, char *file, 
@@ -1332,6 +1336,7 @@ int mb_pr_get_ampcorr(int verbose, char *file,
 			int	*mbp_ampcorr_symmetry,
 			double	*mbp_ampcorr_angle,
 			int	*mbp_ampcorr_slope,
+			int	*mbp_ampcorr_area,
 			char	*mbp_ampcorr_topofile,
 			int *error);
 int mb_pr_get_sscorr(int verbose, char *file, 
@@ -1341,6 +1346,7 @@ int mb_pr_get_sscorr(int verbose, char *file,
 			int	*mbp_sscorr_symmetry,
 			double	*mbp_sscorr_angle,
 			int	*mbp_sscorr_slope,
+			int	*mbp_sscorr_area,
 			char	*mbp_sscorr_topofile,
 			int *error);
 int mb_pr_get_ssrecalc(int verbose, char *file, 
