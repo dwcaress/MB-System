@@ -525,7 +525,12 @@ The \fBmbprocess\fP parameter file commands modified by \fBmbset\fP are:
              for this angle and multiply by standard deviation of the
              reference angle.
    AMPCORR_REFFILE filename
-        amplitude correction reference file path		  
+        amplitude correction reference file path		
+   AMPCORRAREA
+        sets amplitude area correction mode [0]
+          0: no correction applied
+          1: amplitude is adjusted by change in calculated area ensonified
+             using slope (see AMPCORRSLOPE)
 
  SIDESCAN CORRECTION:
    SSCORRMODE  boolean
@@ -561,6 +566,11 @@ The \fBmbprocess\fP parameter file commands modified by \fBmbset\fP are:
           2: divide correction by the standard deviation 
              for this angle and multiply by standard deviation of the
              reference angle.
+   SSCORRAREA
+        sets amplitude area correction mode [0]
+          0: no correction applied
+          1: amplitude is adjusted by change in calculated area ensonified
+             using slope (see SSCORRSLOPE)
 
  SIDESCAN RECALCULATION:
    SSRECALCMODE  boolean

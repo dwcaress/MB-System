@@ -353,11 +353,14 @@ by MBprocess.";
 	double	ssbeamwidth = 50.0;
 	double	ssdepression = 20.0;
 	int	corr_slope = MB_NO;
+	int	corr_area = MB_NO;
 	int	corr_topogrid = MB_NO;
 	int	corr_symmetry = MBP_SSCORR_ASYMMETRIC; /* BOB */
 	int	amp_corr_type;
 	int	amp_corr_slope = MBP_AMPCORR_IGNORESLOPE;
 	int	ss_corr_slope = MBP_SSCORR_IGNORESLOPE;
+	int	amp_corr_area = MB_NO;
+	int 	ss_corr_area = MB_NO;
 	int	ss_type;
 	int	ss_corr_type;
 	double	ref_angle;
@@ -456,7 +459,7 @@ by MBprocess.";
 	memset(&grid, 0, sizeof (struct mbba_grid_struct));
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:K:k:N:n:P:p:QqR:r:T:t:X:x:VvZ:z:")) != -1)
+	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:K:k:N:n:P:p:QqR:r:SsT:t:X:x:VvZ:z:")) != -1)
 	  switch (c) 
 		{
 		case 'A':
@@ -553,6 +556,13 @@ by MBprocess.";
 		case 'R':
 		case 'r':
 			sscanf (optarg,"%lf", &ref_angle_default);
+			flag++;
+			break;
+		case 'S':
+		case 's':
+			corr_area = MB_YES;
+			amp_corr_area = MB_YES;
+			ss_corr_area = MB_YES;
 			flag++;
 			break;
 		case 'T':
@@ -782,6 +792,8 @@ by MBprocess.";
 			fprintf(stderr, "Using seafloor slope in calculating correction tables...\n");
 		else
 			fprintf(stderr, "Using flat bottom assumption in calculating correction tables...\n");
+		if (corr_area == MB_YES)
+			fprintf(stderr, "Adjust backscatter for change in area due to beam angle...\n");
 		if (gridamp == MB_YES)
 			fprintf(stderr, "Outputting gridded histograms of beam amplitude vs grazing angle...\n");
 		if (gridss == MB_YES)
@@ -2012,14 +2024,14 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	if (amplitude_on == MB_YES)
 		status = mb_pr_update_ampcorr(verbose, swathfile, 
 			MB_YES, amptablefile, 
-			amp_corr_type, corr_symmetry, ref_angle, amp_corr_slope, 
+			amp_corr_type, corr_symmetry, ref_angle, amp_corr_slope, amp_corr_area,
 			grid.file, &error);
 
 	/* set sidescan correction in parameter file */
 	if (sidescan_on == MB_YES)
 		status = mb_pr_update_sscorr(verbose, swathfile, 
 			MB_YES, sstablefile, 
-			ss_corr_type, corr_symmetry, ref_angle, ss_corr_slope, 
+			ss_corr_type, corr_symmetry, ref_angle, ss_corr_slope, ss_corr_area,
 			grid.file, &error);
 
 	/* output information */
