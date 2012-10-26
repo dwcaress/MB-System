@@ -115,11 +115,13 @@ all:	$(BINDIR)/mbm_xbt \
 	$(BINDIR)/mbm_copy \
 	$(BINDIR)/mbm_route2mission \
 	$(BINDIR)/mbm_makedatalist \
-	$(BINDIR)/mbm_histplot \
+	$(BINDIR)/mbm_histplot	\
+	$(BINDIR)/mbm_datalist \
 	$(BINDIR)/mbm_multiprocess \
 	$(BINDIR)/mbm_multidatalist \
 	$(BINDIR)/mbm_multicopy \
-	$(BINDIR)/mbm_bpr
+	$(BINDIR)/mbm_bpr \
+	$(BINDIR)/mbm_region
 
 
 ### make clean does nothing
@@ -180,6 +182,9 @@ $(BINDIR)/mbm_makedatalist:	mbm_makedatalist.pl
 $(BINDIR)/mbm_histplot:	mbm_histplot.pl
 	cp mbm_histplot.pl $(BINDIR)/mbm_histplot
 	chmod 775 $(BINDIR)/mbm_histplot
+$(BINDIR)/mbm_datalist: mbm_datalist.pl
+	cp mbm_datalist.pl $(BINDIR)/mbm_datalist
+	chmod 775 $(BINDIR)/mbm_datalist
 $(BINDIR)/mbm_multiprocess:	mbm_multiprocess.pl
 	cp mbm_multiprocess.pl $(BINDIR)/mbm_multiprocess
 	chmod 775 $(BINDIR)/mbm_multiprocess
@@ -192,3 +197,7 @@ $(BINDIR)/mbm_multicopy:	mbm_multicopy.pl
 $(BINDIR)/mbm_bpr:	mbm_bpr.pl
 	cp mbm_bpr.pl $(BINDIR)/mbm_bpr
 	chmod 775 $(BINDIR)/mbm_bpr
+$(BINDIR)/mbm_region:      mbm_region.pl
+	cp mbm_region.pl $(BINDIR)/mbm_region
+	chmod 775 $(BINDIR)/mbm_region
+
