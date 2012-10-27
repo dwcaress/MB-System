@@ -117,6 +117,9 @@
 #define MB7KPREPROCESS_ALLOC_CHUNK 1000
 #define MB7KPREPROCESS_PROCESS		1
 #define MB7KPREPROCESS_TIMESTAMPLIST	2
+#define MB7KPREPROCESS_TIMEFIX_NONE	0
+#define MB7KPREPROCESS_TIMEFIX_RESON	1
+#define MB7KPREPROCESS_TIMEFIX_EDGETECH	2
 #define	MB7KPREPROCESS_TIMEDELAY_UNDEFINED	-1
 #define	MB7KPREPROCESS_TIMEDELAY_OFF		0
 #define	MB7KPREPROCESS_TIMEDELAY_ON		1
@@ -135,7 +138,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mb7kpreprocess";
 	char help_message[] =  "mb7kpreprocess reads a Reson 7k format file, interpolates the\nasynchronous navigation and attitude onto the multibeam data, \nand writes a new 7k file with that information correctly embedded\nin the multibeam data. This program can also fix various problems\nwith 7k data.";
-	char usage_message[] = "mb7kpreprocess [-A -B -Doffx/offy -Fformat -Ifile -Kklugemode -L  -Ninsfile  -Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ttimelag -H -V]";
+	char usage_message[] = "mb7kpreprocess [-A -B -Doffx/offy -Fformat -Ifile -Kklugemode -L  -Ninsfile  -Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ssidescansource -Ttimelag -H -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -207,7 +210,7 @@ int main (int argc, char **argv)
 
 	/* program mode */
 	int	mode = MB7KPREPROCESS_PROCESS;
-	int	fix_time_stamps = MB_NO;
+	int	fix_time_stamps = MB7KPREPROCESS_TIMEFIX_NONE;
 	int	goodnavattitudeonly = MB_YES;
 
 	/* data structure pointers */
@@ -242,9 +245,14 @@ int main (int argc, char **argv)
 	s7kr_bathymetry		*bathymetry;
 	s7kr_backscatter	*backscatter;
 	s7kr_beam		*beam;
+	s7kr_v2pingmotion	*v2pingmotion;
+	s7kr_v2detectionsetup	*v2detectionsetup;
+	s7kr_v2beamformed	*v2beamformed;
 	s7kr_verticaldepth	*verticaldepth;
 	s7kr_v2detection	*v2detection;
 	s7kr_v2rawdetection	*v2rawdetection;
+	s7kr_v2snippet		*v2snippet;
+	s7kr_processedsidescan	*processedsidescan;
 	s7kr_image		*image;
 	s7kr_fileheader		*fileheader;
 	s7kr_remotecontrolsettings	*remotecontrolsettings;
@@ -283,6 +291,13 @@ int main (int argc, char **argv)
 	int	nrec_beam = 0;
 	int	nrec_verticaldepth = 0;
 	int	nrec_image = 0;
+	int	nrec_v2pingmotion = 0;
+	int	nrec_v2detectionsetup = 0;
+	int	nrec_v2beamformed = 0;
+	int	nrec_v2detection = 0;
+	int	nrec_v2rawdetection = 0;
+	int	nrec_v2snippet = 0;
+	int	nrec_processedsidescan = 0;
 	int	nrec_installation = 0;
 	int	nrec_systemeventmessage = 0;
 	int	nrec_fileheader = 0;
@@ -321,6 +336,13 @@ int main (int argc, char **argv)
 	int	nrec_beam_tot = 0;
 	int	nrec_verticaldepth_tot = 0;
 	int	nrec_image_tot = 0;
+	int	nrec_v2pingmotion_tot = 0;
+	int	nrec_v2detectionsetup_tot = 0;
+	int	nrec_v2beamformed_tot = 0;
+	int	nrec_v2detection_tot = 0;
+	int	nrec_v2rawdetection_tot = 0;
+	int	nrec_v2snippet_tot = 0;
+	int	nrec_processedsidescan_tot = 0;
 	int	nrec_installation_tot = 0;
 	int	nrec_systemeventmessage_tot = 0;
 	int	nrec_fileheader_tot = 0;
@@ -443,6 +465,10 @@ int main (int argc, char **argv)
 	int	nedget_alloc = 0;
 	double	*edget_time_d = NULL;
 	int	*edget_ping = NULL;
+	double	*edget_time_d_new = NULL;
+	double	*edget_time_offset = NULL;
+	int	*edget_ping_offset = NULL;
+	int	*edget_good_offset = NULL;
 
 	/* timedelay parameters */
 	int	timedelaymode = MB7KPREPROCESS_TIMEDELAY_UNDEFINED;
@@ -482,6 +508,9 @@ int main (int argc, char **argv)
 	double	sonardepthlag = 0.0;
 	double	sonardepthrate;
 
+	/* multibeam sidescan parameters */
+	int	ss_source = R7KRECID_None;
+
 	/* output asynchronous and synchronous time series ancilliary files */
 	char	athfile[MB_PATH_MAXLINE];
 	char	atsfile[MB_PATH_MAXLINE];
@@ -498,6 +527,7 @@ int main (int argc, char **argv)
 	int	kluge_zeroalongtrackangles = MB_NO; /* kluge 2 */
 	int	kluge_zeroattitudecorrection = MB_NO; /* kluge 3 */
 	int	kluge_kearfottrovnoise = MB_NO; /* kluge 4 */
+
 	/* MBARI data flag */
 	int	MBARIdata = MB_NO;
 
@@ -521,6 +551,11 @@ int main (int argc, char **argv)
 	double	dx, dy, dist, dt, v;
 	double	longitude_offset, latitude_offset;
 	int	j1, j2;
+	double	pixel_size;
+	double	swath_width;
+	int	time7k_i[7];
+	int	time7k_j[5];
+	double	time7k_d;
 
 	FILE	*tfp = NULL;
 	struct stat file_status;
@@ -531,6 +566,7 @@ int main (int argc, char **argv)
 	int	testformat;
 	char	fileroot[MB_PATH_MAXLINE];
 	int	found;
+	int	reson_lastread;
 	int	sslo_lastread;
 	double	sslo_last_time_d;
 	int	sslo_last_ping;
@@ -572,7 +608,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaBbD:d:F:f:I:i:K:k:LlM:m:N:n:O:o:P:p:R:r:T:t:W:w:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:D:d:F:f:I:i:K:k:LlM:m:N:n:O:o:P:p:R:r:S:s:T:t:W:w:VvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -590,7 +626,7 @@ int main (int argc, char **argv)
 			break;
 		case 'B':
 		case 'b':
-			fix_time_stamps = MB_YES;
+			sscanf (optarg,"%d", &fix_time_stamps);
 			break;
 		case 'D':
 		case 'd':
@@ -702,6 +738,16 @@ int main (int argc, char **argv)
 				}
 			flag++;
 			break;
+		case 'S':
+		case 's':
+			if (optarg[0] == 'S')
+				ss_source = R7KRECID_7kV2SnippetData;
+			else if (optarg[0] == 'B')
+				ss_source = R7KRECID_7kBackscatterImageData;
+			else
+				sscanf (optarg,"%d", &ss_source);
+			flag++;
+			break;
 		case 'T':
 		case 't':
 			sscanf (optarg,"%s", buffer);
@@ -789,6 +835,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       read_file:           %s\n",read_file);
 		fprintf(stderr,"dbg2       ofile:               %s\n",ofile);
 		fprintf(stderr,"dbg2       ofile_set:           %d\n",ofile_set);
+		fprintf(stderr,"dbg2       ss_source:           %d\n",ss_source);
 		fprintf(stderr,"dbg2       rockfile:            %s\n",rockfile);
 		fprintf(stderr,"dbg2       rockdata:            %d\n",rockdata);
 		fprintf(stderr,"dbg2       dslfile:             %s\n",dslfile);
@@ -1559,6 +1606,13 @@ sonardepth_sonardepth[nsonardepth]);*/
 	nrec_beam = 0;
 	nrec_verticaldepth = 0;
 	nrec_image = 0;
+	nrec_v2pingmotion = 0;
+	nrec_v2detectionsetup = 0;
+	nrec_v2beamformed = 0;
+	nrec_v2detection = 0;
+	nrec_v2rawdetection = 0;
+	nrec_v2snippet = 0;
+	nrec_processedsidescan = 0;
 	nrec_installation = 0;
 	nrec_systemeventmessage = 0;
 	nrec_fileheader = 0;
@@ -1566,6 +1620,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 	nrec_other = 0;
 
 	/* read and print data */
+	reson_lastread = MB_NO;
 	sslo_lastread = MB_NO;
 	while (error <= MB_ERROR_NO_ERROR)
 		{
@@ -1613,6 +1668,20 @@ sonardepth_sonardepth[nsonardepth]);*/
 				nrec_verticaldepth++;
 			if (istore->read_image == MB_YES)
 				nrec_image++;
+			if (istore->read_v2pingmotion == MB_YES)
+				nrec_v2pingmotion++;
+			if (istore->read_v2detectionsetup == MB_YES)
+				nrec_v2detectionsetup++;
+			if (istore->read_v2beamformed == MB_YES)
+				nrec_v2beamformed++;
+			if (istore->read_v2detection == MB_YES)
+				nrec_v2detection++;
+			if (istore->read_v2rawdetection == MB_YES)
+				nrec_v2rawdetection++;
+			if (istore->read_v2snippet == MB_YES)
+				nrec_v2snippet++;
+			if (istore->read_processedsidescan == MB_YES)
+				nrec_processedsidescan++;
 
 			/* print out record headers */
 			if (istore->read_volatilesettings == MB_YES)
@@ -1727,7 +1796,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					batht_ping[nbatht] = bathymetry->ping_number;
 
 					/* grab the last sslo ping if it was the last thing read */
-					if (sslo_lastread == MB_YES)
+					if (nedget > 0)
 						{
 						batht_time_offset[nbatht] = sslo_last_time_d - time_d;
 						batht_ping_offset[nbatht] = sslo_last_ping - bathymetry->ping_number;
@@ -1810,7 +1879,125 @@ sonardepth_sonardepth[nsonardepth]);*/
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber,image->ping_number,image->width,image->height);
 				}
-
+			if (istore->read_v2pingmotion == MB_YES)
+				{
+				v2pingmotion = &(istore->v2pingmotion);
+				header = &(v2pingmotion->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kV2PingMotionData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d samples:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,v2pingmotion->ping_number,v2pingmotion->n);
+				}
+			if (istore->read_v2detectionsetup == MB_YES)
+				{
+				v2detectionsetup = &(istore->v2detectionsetup);
+				header = &(v2detectionsetup->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kV2DetectionSetupData:    7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,v2detectionsetup->ping_number,v2detectionsetup->number_beams);
+				}
+			if (istore->read_v2beamformed == MB_YES)
+				{
+				v2beamformed = &(istore->v2beamformed);
+				header = &(v2beamformed->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kV2BeamformedData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,v2beamformed->ping_number,v2beamformed->number_beams);
+				}
+			if (istore->read_v2detection == MB_YES)
+				{
+				v2detection = &(istore->v2detection);
+				header = &(v2detection->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kV2DetectionData:         7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,v2detection->ping_number,v2detection->number_beams);
+				}
+			if (istore->read_v2rawdetection == MB_YES)
+				{
+				v2rawdetection = &(istore->v2rawdetection);
+				header = &(v2rawdetection->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kV2RawDetectionData:      7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,v2rawdetection->ping_number,v2rawdetection->number_beams);
+				}
+			if (istore->read_v2snippet == MB_YES)
+				{
+				v2snippet = &(istore->v2snippet);
+				header = &(v2snippet->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kV2SnippetData:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d beams:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,v2snippet->ping_number,v2snippet->number_beams);
+				}
+			if (istore->read_processedsidescan == MB_YES)
+				{
+				processedsidescan = &(istore->processedsidescan);
+				header = &(processedsidescan->header);
+				time_j[0] = header->s7kTime.Year;
+				time_j[1] = header->s7kTime.Day;
+				time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+				time_j[3] = (int) header->s7kTime.Seconds;
+				time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
+				mb_get_itime(verbose, time_j, time_i);
+				mb_get_time(verbose, time_i, &time_d);
+				if (verbose > 0)
+				fprintf(stderr,"R7KRECID_7kProcessedSidescanData:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d pixels:%d\n",
+					time_i[0],time_i[1],time_i[2],
+					time_i[3],time_i[4],time_i[5],time_i[6],
+					header->RecordNumber,processedsidescan->ping_number,processedsidescan->number_pixels);
+				}
 			}
 
 	   	/* handle reference point data */
@@ -2774,6 +2961,10 @@ sonardepth_sonardepth[nsonardepth]);*/
 				nedget_alloc +=  MB7KPREPROCESS_ALLOC_CHUNK;
 				status = mb_reallocd(verbose,__FILE__,__LINE__,nedget_alloc*sizeof(double),(void **)&edget_time_d,&error);
 				status = mb_reallocd(verbose,__FILE__,__LINE__,nedget_alloc*sizeof(int),(void **)&edget_ping,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nedget_alloc*sizeof(double),(void **)&edget_time_d_new,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nedget_alloc*sizeof(double),(void **)&edget_time_offset,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nedget_alloc*sizeof(int),(void **)&edget_ping_offset,&error);
+				status = mb_reallocd(verbose,__FILE__,__LINE__,nedget_alloc*sizeof(int),(void **)&edget_good_offset,&error);
 				if (error != MB_ERROR_NO_ERROR)
 					{
 					mb_error(verbose,error,&message);
@@ -2800,6 +2991,20 @@ sonardepth_sonardepth[nsonardepth]);*/
 				edget_time_d[nedget] = time_d;
 				edget_ping[nedget] = fsdwssheader->pingNum;
 				nedget++;
+
+				/* grab the last reson ping time if it exists */
+				if (nbatht > 1)
+					{
+					edget_time_offset[nedget] = batht_time_d[nbatht-1] + (batht_time_d[nbatht-1] - batht_time_d[nbatht-2]) - time_d;
+					edget_ping_offset[nedget] = batht_ping[nbatht-1] - fsdwssheader->pingNum;
+					edget_good_offset[nedget] = MB_YES;
+					}
+				else
+					{
+					edget_time_offset[nedget] = -9999.99;
+					edget_ping_offset[nedget] = 0;
+					edget_good_offset[nedget] = MB_NO;
+					}
 				}
 			sslo_last_time_d = time_d;
 			sslo_last_ping = fsdwssheader->pingNum;
@@ -2857,6 +3062,12 @@ sonardepth_sonardepth[nsonardepth]);*/
 			fprintf(stderr,"dbg2       status:         %d\n",status);
 			}
 
+		/* set reson_lastread flag */
+		if (status == MB_SUCCESS && kind == MB_DATA_DATA)
+			reson_lastread = MB_YES;
+		else
+			reson_lastread = MB_NO;
+
 		/* set sslo_lastread flag */
 		if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2)
 			sslo_lastread = MB_YES;
@@ -2876,9 +3087,17 @@ sonardepth_sonardepth[nsonardepth]);*/
 	fprintf(stdout, "          Beam Geometry:                     %d\n", nrec_beamgeometry);
 	fprintf(stdout, "          Remote Control:                    %d\n", nrec_remotecontrolsettings);
 	fprintf(stdout, "          Bathymetry:                        %d\n", nrec_bathymetry);
+	fprintf(stdout, "          Processed Sidescan:                %d\n", nrec_processedsidescan);
 	fprintf(stdout, "          Backscatter:                       %d\n", nrec_backscatter);
 	fprintf(stdout, "          Beam:                              %d\n", nrec_beam);
 	fprintf(stdout, "          Image:                             %d\n", nrec_image);
+	fprintf(stdout, "          V2PingMotion:                      %d\n", nrec_v2pingmotion);
+	fprintf(stdout, "          V2DetectionSetup:                  %d\n", nrec_v2detectionsetup);
+	fprintf(stdout, "          V2Beamformed:                      %d\n", nrec_v2beamformed);
+	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection);
+	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection);
+	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet);
+	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal);
@@ -2917,6 +3136,13 @@ sonardepth_sonardepth[nsonardepth]);*/
 	nrec_backscatter_tot += nrec_backscatter;
 	nrec_beam_tot += nrec_beam;
 	nrec_image_tot += nrec_image;
+	nrec_v2pingmotion_tot += nrec_v2pingmotion;
+	nrec_v2detectionsetup_tot += nrec_v2detectionsetup;
+	nrec_v2beamformed_tot += nrec_v2beamformed;
+	nrec_v2detection_tot += nrec_v2detection;
+	nrec_v2rawdetection_tot += nrec_v2rawdetection;
+	nrec_v2snippet_tot += nrec_v2snippet;
+	nrec_processedsidescan_tot += nrec_processedsidescan;
 	nrec_reference_tot += nrec_reference;
 	nrec_sensoruncal_tot += nrec_sensoruncal;
 	nrec_sensorcal_tot += nrec_sensorcal;
@@ -3452,13 +3678,6 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 		}
 
 	/* fix problems with batht timestamp arrays */
-	for (i=0;i<nbatht-1;i++)
-		{
-		if (batht_good_offset[i+1] == MB_NO)
-			{
-			batht_good_offset[i] = MB_NO;
-			}
-		}
 	for (i=0;i<nbatht;i++)
 		{
 		if (batht_good_offset[i] == MB_NO)
@@ -3497,6 +3716,47 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 				}
 			}
 		batht_time_d_new[i] = batht_time_d[i] + batht_time_offset[i];
+		}
+
+	/* fix problems with edget timestamp arrays */
+	for (i=0;i<nedget;i++)
+		{
+		if (edget_good_offset[i] == MB_NO)
+			{
+			foundstart = MB_NO;
+			foundend = MB_NO;
+			for (j = i - 1; j >= 0 && foundstart == MB_NO; j--)
+				{
+				if (edget_good_offset[j] == MB_YES)
+					{
+					foundstart = MB_YES;
+					start = j;
+					}
+				}
+			for (j = i + 1; j < nedget && foundend == MB_NO; j++)
+				{
+				if (edget_good_offset[j] == MB_YES)
+					{
+					foundend = MB_YES;
+					end = j;
+					}
+				}
+			if (foundstart == MB_YES && foundend == MB_YES)
+				{
+				edget_time_offset[i] = edget_time_offset[start]
+							+ (edget_time_offset[end] - edget_time_offset[start])
+								* ((double)(i - start)) / ((double)(end - start));
+				}
+			else if (foundstart == MB_YES)
+				{
+				edget_time_offset[i] = edget_time_offset[start];
+				}
+			else if (foundend == MB_YES)
+				{
+				edget_time_offset[i] = edget_time_offset[end];
+				}
+			}
+		edget_time_d_new[i] = edget_time_d[i] + edget_time_offset[i];
 		}
 
 	/* remove noise from position data associated with Kearfott INS on an ROV
@@ -3598,8 +3858,8 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 		fprintf(stdout, "\nTotal Edgetech time stamp data read: %d\n", nedget);
 		for (i=0;i<nedget;i++)
 			{
-			fprintf(stdout, "  EDG: %5d %17.6f %d\n",
-				i, edget_time_d[i], edget_ping[i]);
+			fprintf(stdout, "  EDG: %5d %17.6f %17.6f %5d   offsets: %17.6f %5d  %5d\n",
+				i, edget_time_d[i], edget_time_d_new[i], edget_ping[i], edget_time_offset[i], edget_ping_offset[i], edget_good_offset[i]);
 			}
 		fprintf(stdout, "\nTotal multibeam time stamp data read: %d\n", nbatht);
 		for (i=0;i<nbatht;i++)
@@ -3621,6 +3881,13 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 	fprintf(stdout, "          Backscatter:                       %d\n", nrec_backscatter_tot);
 	fprintf(stdout, "          Beam:                              %d\n", nrec_beam_tot);
 	fprintf(stdout, "          Image:                             %d\n", nrec_image_tot);
+	fprintf(stdout, "          V2PingMotion:                      %d\n", nrec_v2pingmotion_tot);
+	fprintf(stdout, "          V2DetectionSetup:                  %d\n", nrec_v2detectionsetup_tot);
+	fprintf(stdout, "          V2Beamformed:                      %d\n", nrec_v2beamformed_tot);
+	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection_tot);
+	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection_tot);
+	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet_tot);
+	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan_tot);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference_tot);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal_tot);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal_tot);
@@ -3823,6 +4090,10 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 	istore_ptr = imb_io_ptr->store_data;
 	istore = (struct mbsys_reson7k_struct *) istore_ptr;
 
+	/* initialize pixel_size and swath_width */
+	pixel_size = 0.0;
+	swath_width = 0.0;
+
 	if (error == MB_ERROR_NO_ERROR)
 		{
 		beamflag = NULL;
@@ -3904,6 +4175,13 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 	nrec_beam = 0;
 	nrec_verticaldepth = 0;
 	nrec_image = 0;
+	nrec_v2pingmotion = 0;
+	nrec_v2detectionsetup = 0;
+	nrec_v2beamformed = 0;
+	nrec_v2detection = 0;
+	nrec_v2rawdetection = 0;
+	nrec_v2snippet = 0;
+	nrec_processedsidescan = 0;
 	nrec_installation = 0;
 	nrec_systemeventmessage = 0;
 	nrec_fileheader = 0;
@@ -3960,6 +4238,20 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 				nrec_verticaldepth++;
 			if (istore->read_image == MB_YES)
 				nrec_image++;
+			if (istore->read_v2pingmotion == MB_YES)
+				nrec_v2pingmotion++;
+			if (istore->read_v2detectionsetup == MB_YES)
+				nrec_v2detectionsetup++;
+			if (istore->read_v2beamformed == MB_YES)
+				nrec_v2beamformed++;
+			if (istore->read_v2detection == MB_YES)
+				nrec_v2detection++;
+			if (istore->read_v2rawdetection == MB_YES)
+				nrec_v2rawdetection++;
+			if (istore->read_v2snippet == MB_YES)
+				nrec_v2snippet++;
+			if (istore->read_processedsidescan == MB_YES)
+				nrec_processedsidescan++;
 
 			/* print out record headers */
 			if (istore->read_volatilesettings == MB_YES)
@@ -4062,7 +4354,7 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 				if (status == MB_SUCCESS)
 					{
 					/* fix time stamp */
-					if (fix_time_stamps == MB_YES)
+					if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_RESON)
 						{
 						found = MB_NO;
 						for (j=0; j < nbatht && found == MB_NO; j++)
@@ -4605,7 +4897,6 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							bathymetry->range[i] = v2rawdetection->detection_point[j]
 										/ v2rawdetection->sampling_rate;
 							bathymetry->quality[i] = v2rawdetection->quality[j];
-							bathymetry->intensity[i] = 0.0;
 							alpha = RTD * pitchr;
 							beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - rollr);
 							mb_rollpitch_to_takeoff(
@@ -4777,6 +5068,12 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 					time_i[3],time_i[4],time_i[5],time_i[6],
 					header->RecordNumber,image->ping_number,image->width,image->height);
 				}
+
+			/* regenerate sidescan */
+			status = mbsys_reson7k_makess(verbose, imbio_ptr, istore_ptr,
+						ss_source, MB_NO, &pixel_size,
+						MB_NO, &swath_width,
+						MB_YES, &error);
 			}
 
 	   	/* handle reference point data */
@@ -5811,15 +6108,15 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			fsdwsb = &(istore->fsdwsb);
 			header = &(fsdwsb->header);
-			time_j[0] = header->s7kTime.Year;
-			time_j[1] = header->s7kTime.Day;
-			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
-			time_j[3] = (int) header->s7kTime.Seconds;
-			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
-			mb_get_itime(verbose, time_j, time_i);
-			mb_get_time(verbose, time_i, &time_d);
-			last_fsdwsbp_time_d = MAX(last_fsdwsbp_time_d, time_d);
-			if (last_fsdwsbp_time_d > time_d)
+			time7k_j[0] = header->s7kTime.Year;
+			time7k_j[1] = header->s7kTime.Day;
+			time7k_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time7k_j[3] = (int) header->s7kTime.Seconds;
+			time7k_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time7k_j[3]));
+			mb_get_itime(verbose, time7k_j, time7k_i);
+			mb_get_time(verbose, time7k_i, &time7k_d);
+			last_fsdwsbp_time_d = MAX(last_fsdwsbp_time_d, time7k_d);
+			if (last_fsdwsbp_time_d > time7k_d)
 				{
 				status = MB_FAILURE;
 				error = MB_ERROR_IGNORE;
@@ -5828,29 +6125,60 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			fsdwsegyheader = &(fsdwsb->segyheader);
 			if (verbose > 0)
 				fprintf(stderr,"R7KRECID_FSDWsubbottom:            7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d sampint:%d samples:%d\n",
-				time_i[0],time_i[1],time_i[2],
-				time_i[3],time_i[4],time_i[5],time_i[6],
+				time7k_i[0],time7k_i[1],time7k_i[2],
+				time7k_i[3],time7k_i[4],time7k_i[5],time7k_i[6],
 				fsdwsegyheader->year,fsdwsegyheader->day,fsdwsegyheader->hour,fsdwsegyheader->minute,fsdwsegyheader->second,
 				fsdwsegyheader->millisecondsToday - 1000 * (int)(0.001 * fsdwsegyheader->millisecondsToday),
 				fsdwsb->ping_number,fsdwchannel->sample_interval,fsdwchannel->number_samples);
+
+			/* fix time stamp */
+			if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH)
+				{
+				found = MB_NO;
+				for (j=0; j < nedget && found == MB_NO; j++)
+					{
+					if (istore->time_d >= edget_time_d[j])
+						{
+						found = MB_YES;
+						time_d = istore->time_d + edget_time_offset[j];
+						mb_get_date(verbose, time_d, time_i);
+						mb_get_jtime(verbose, time_i, time_j);
+						fsdwsegyheader->year = time_i[0];
+						fsdwsegyheader->day = time_j[1];
+						fsdwsegyheader->hour = time_i[3];
+						fsdwsegyheader->minute = time_i[4];
+						fsdwsegyheader->second = time_i[5];
+						fsdwsegyheader->millisecondsToday = 0.001 * time_i[6]
+										+ 1000 * (time_i[5]
+										+ 60.0 * (time_i[4]
+										+ 60.0 * time_i[3]));
+						if (verbose > 0)
+							fprintf(stderr,"R7KRECID_FSDWsubbottom FIXED:      7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d sampint:%d samples:%d\n",
+							time7k_i[0],time7k_i[1],time7k_i[2],
+							time7k_i[3],time7k_i[4],time7k_i[5],time7k_i[6],
+							fsdwsegyheader->year,fsdwsegyheader->day,fsdwsegyheader->hour,fsdwsegyheader->minute,fsdwsegyheader->second,
+							fsdwsegyheader->millisecondsToday - 1000 * (int)(0.001 * fsdwsegyheader->millisecondsToday),
+							fsdwsb->ping_number,fsdwchannel->sample_interval,fsdwchannel->number_samples);
+						}
+					}
+				}
 			}
 
 	   	/* handle low frequency sidescan data */
 		else if (status == MB_SUCCESS && kind == MB_DATA_SIDESCAN2)
 			{
 			nrec_fsdwsslo++;
-
 			fsdwsslo = &(istore->fsdwsslo);
 			header = &(fsdwsslo->header);
-			time_j[0] = header->s7kTime.Year;
-			time_j[1] = header->s7kTime.Day;
-			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
-			time_j[3] = (int) header->s7kTime.Seconds;
-			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
-			mb_get_itime(verbose, time_j, time_i);
-			mb_get_time(verbose, time_i, &time_d);
-			last_fsdwsslo_time_d = MAX(last_fsdwsslo_time_d, time_d);
-			if (last_fsdwsslo_time_d > time_d)
+			time7k_j[0] = header->s7kTime.Year;
+			time7k_j[1] = header->s7kTime.Day;
+			time7k_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time7k_j[3] = (int) header->s7kTime.Seconds;
+			time7k_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time7k_j[3]));
+			mb_get_itime(verbose, time7k_j, time7k_i);
+			mb_get_time(verbose, time7k_i, &time7k_d);
+			last_fsdwsslo_time_d = MAX(last_fsdwsslo_time_d, time7k_d);
+			if (last_fsdwsslo_time_d > time7k_d)
 				{
 				status = MB_FAILURE;
 				error = MB_ERROR_IGNORE;
@@ -5860,13 +6188,51 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				fsdwchannel = &(fsdwsslo->channel[i]);
 				fsdwssheader = &(fsdwsslo->ssheader[i]);
 				if (verbose > 0)
-				fprintf(stderr,"R7KRECID_FSDWsidescanLo:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d channel:%d sampint:%d samples:%d\n",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5],time_i[6],
+					fprintf(stderr,"R7KRECID_FSDWsidescanLo:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d channel:%d sampint:%d samples:%d\n",
+					time7k_i[0],time7k_i[1],time7k_i[2],
+					time7k_i[3],time7k_i[4],time7k_i[5],time7k_i[6],
 					fsdwssheader->year,fsdwssheader->day,fsdwssheader->hour,fsdwssheader->minute,fsdwssheader->second,
 					fsdwssheader->millisecondsToday - 1000 * (int)(0.001 * fsdwssheader->millisecondsToday),
 					fsdwsslo->ping_number,fsdwchannel->number,
 					fsdwchannel->sample_interval,fsdwchannel->number_samples);
+				}
+
+			/* fix time stamp */
+			if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH)
+				{
+				found = MB_NO;
+				for (j=0; j < nedget && found == MB_NO; j++)
+					{
+					if (istore->time_d >= edget_time_d[j])
+						{
+						found = MB_YES;
+						time_d = istore->time_d + edget_time_offset[j];
+						mb_get_date(verbose, time_d, time_i);
+						mb_get_jtime(verbose, time_i, time_j);
+						for (i=0;i<fsdwsslo->number_channels;i++)
+							{
+							fsdwchannel = &(fsdwsslo->channel[i]);
+							fsdwssheader = &(fsdwsslo->ssheader[i]);
+							fsdwssheader->year = time_i[0];
+							fsdwssheader->day = time_j[1];
+							fsdwssheader->hour = time_i[3];
+							fsdwssheader->minute = time_i[4];
+							fsdwssheader->second = time_i[5];
+							fsdwssheader->millisecondsToday = 0.001 * time_i[6]
+										+ 1000 * (time_i[5]
+										+ 60.0 * (time_i[4]
+										+ 60.0 * time_i[3]));
+							if (verbose > 0)
+								fprintf(stderr,"R7KRECID_FSDWsidescanLo FIXED:     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d channel:%d sampint:%d samples:%d\n",
+								time7k_i[0],time7k_i[1],time7k_i[2],
+								time7k_i[3],time7k_i[4],time7k_i[5],time7k_i[6],
+								fsdwssheader->year,fsdwssheader->day,fsdwssheader->hour,fsdwssheader->minute,fsdwssheader->second,
+								fsdwssheader->millisecondsToday - 1000 * (int)(0.001 * fsdwssheader->millisecondsToday),
+								fsdwsslo->ping_number,fsdwchannel->number,
+								fsdwchannel->sample_interval,fsdwchannel->number_samples);
+							}
+						}
+					}
 				}
 			}
 
@@ -5877,15 +6243,15 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 
 			fsdwsshi = &(istore->fsdwsshi);
 			header = &(fsdwsshi->header);
-			time_j[0] = header->s7kTime.Year;
-			time_j[1] = header->s7kTime.Day;
-			time_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
-			time_j[3] = (int) header->s7kTime.Seconds;
-			time_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time_j[3]));
-			mb_get_itime(verbose, time_j, time_i);
-			mb_get_time(verbose, time_i, &time_d);
-			last_fsdwsshi_time_d = MAX(last_fsdwsshi_time_d, time_d);
-			if (last_fsdwsshi_time_d > time_d)
+			time7k_j[0] = header->s7kTime.Year;
+			time7k_j[1] = header->s7kTime.Day;
+			time7k_j[2] = 60 * header->s7kTime.Hours + header->s7kTime.Minutes;
+			time7k_j[3] = (int) header->s7kTime.Seconds;
+			time7k_j[4] = (int) (1000000 * (header->s7kTime.Seconds - time7k_j[3]));
+			mb_get_itime(verbose, time7k_j, time7k_i);
+			mb_get_time(verbose, time7k_i, &time7k_d);
+			last_fsdwsshi_time_d = MAX(last_fsdwsshi_time_d, time7k_d);
+			if (last_fsdwsshi_time_d > time7k_d)
 				{
 				status = MB_FAILURE;
 				error = MB_ERROR_IGNORE;
@@ -5895,13 +6261,51 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				fsdwchannel = &(fsdwsshi->channel[i]);
 				fsdwssheader = &(fsdwsshi->ssheader[i]);
 				if (verbose > 0)
-				fprintf(stderr,"R7KRECID_FSDWsidescanHi:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d channel:%d sampint:%d samples:%d\n",
-					time_i[0],time_i[1],time_i[2],
-					time_i[3],time_i[4],time_i[5],time_i[6],
+					fprintf(stderr,"R7KRECID_FSDWsidescanHi:           7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d channel:%d sampint:%d samples:%d\n",
+					time7k_i[0],time7k_i[1],time7k_i[2],
+					time7k_i[3],time7k_i[4],time7k_i[5],time7k_i[6],
 					fsdwssheader->year,fsdwssheader->day,fsdwssheader->hour,fsdwssheader->minute,fsdwssheader->second,
 					fsdwssheader->millisecondsToday - 1000 * (int)(0.001 * fsdwssheader->millisecondsToday),
 					fsdwsshi->ping_number,fsdwchannel->number,
 					fsdwchannel->sample_interval,fsdwchannel->number_samples);
+				}
+
+			/* fix time stamp */
+			if (fix_time_stamps == MB7KPREPROCESS_TIMEFIX_EDGETECH)
+				{
+				found = MB_NO;
+				for (j=0; j < nedget && found == MB_NO; j++)
+					{
+					if (istore->time_d >= edget_time_d[j])
+						{
+						found = MB_YES;
+						time_d = istore->time_d + edget_time_offset[j];
+						mb_get_date(verbose, time_d, time_i);
+						mb_get_jtime(verbose, time_i, time_j);
+						for (i=0;i<fsdwsslo->number_channels;i++)
+							{
+							fsdwchannel = &(fsdwsshi->channel[i]);
+							fsdwssheader = &(fsdwsshi->ssheader[i]);
+							fsdwssheader->year = time_i[0];
+							fsdwssheader->day = time_j[1];
+							fsdwssheader->hour = time_i[3];
+							fsdwssheader->minute = time_i[4];
+							fsdwssheader->second = time_i[5];
+							fsdwssheader->millisecondsToday = 0.001 * time_i[6]
+										+ 1000 * (time_i[5]
+										+ 60.0 * (time_i[4]
+										+ 60.0 * time_i[3]));
+							if (verbose > 0)
+								fprintf(stderr,"R7KRECID_FSDWsidescanHi FIXED:     7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) FSDWtime(%4.4d-%3.3d %2.2d:%2.2d:%2.2d.%3.3d) ping:%d channel:%d sampint:%d samples:%d\n",
+								time7k_i[0],time7k_i[1],time7k_i[2],
+								time7k_i[3],time7k_i[4],time7k_i[5],time7k_i[6],
+								fsdwssheader->year,fsdwssheader->day,fsdwssheader->hour,fsdwssheader->minute,fsdwssheader->second,
+								fsdwssheader->millisecondsToday - 1000 * (int)(0.001 * fsdwssheader->millisecondsToday),
+								fsdwsshi->ping_number,fsdwchannel->number,
+								fsdwchannel->sample_interval,fsdwchannel->number_samples);
+							}
+						}
+					}
 				}
 			}
 
@@ -6127,6 +6531,13 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	fprintf(stdout, "          Backscatter:                       %d\n", nrec_backscatter);
 	fprintf(stdout, "          Beam:                              %d\n", nrec_beam);
 	fprintf(stdout, "          Image:                             %d\n", nrec_image);
+	fprintf(stdout, "          V2PingMotion:                      %d\n", nrec_v2pingmotion);
+	fprintf(stdout, "          V2DetectionSetup:                  %d\n", nrec_v2detectionsetup);
+	fprintf(stdout, "          V2Beamformed:                      %d\n", nrec_v2beamformed);
+	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection);
+	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection);
+	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet);
+	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal);
@@ -6165,6 +6576,13 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	nrec_backscatter_tot += nrec_backscatter;
 	nrec_beam_tot += nrec_beam;
 	nrec_image_tot += nrec_image;
+	nrec_v2pingmotion_tot += nrec_v2pingmotion;
+	nrec_v2detectionsetup_tot += nrec_v2detectionsetup;
+	nrec_v2beamformed_tot += nrec_v2beamformed;
+	nrec_v2detection_tot += nrec_v2detection;
+	nrec_v2rawdetection_tot += nrec_v2rawdetection;
+	nrec_v2snippet_tot += nrec_v2snippet;
+	nrec_processedsidescan_tot += nrec_processedsidescan;
 	nrec_reference_tot += nrec_reference;
 	nrec_sensoruncal_tot += nrec_sensoruncal;
 	nrec_sensorcal_tot += nrec_sensorcal;
@@ -6233,6 +6651,13 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	fprintf(stdout, "          Backscatter:                       %d\n", nrec_backscatter_tot);
 	fprintf(stdout, "          Beam:                              %d\n", nrec_beam_tot);
 	fprintf(stdout, "          Image:                             %d\n", nrec_image_tot);
+	fprintf(stdout, "          V2PingMotion:                      %d\n", nrec_v2pingmotion_tot);
+	fprintf(stdout, "          V2DetectionSetup:                  %d\n", nrec_v2detectionsetup_tot);
+	fprintf(stdout, "          V2Beamformed:                      %d\n", nrec_v2beamformed_tot);
+	fprintf(stdout, "          V2Detection:                       %d\n", nrec_v2detection_tot);
+	fprintf(stdout, "          V2RawDetection:                    %d\n", nrec_v2rawdetection_tot);
+	fprintf(stdout, "          V2Snippet:                         %d\n", nrec_v2snippet_tot);
+	fprintf(stdout, "          processedsidescan:                 %d\n", nrec_processedsidescan_tot);
 	fprintf(stdout, "     Reference:                         %d\n", nrec_reference_tot);
 	fprintf(stdout, "     Uncalibrated Sensor Offset:        %d\n", nrec_sensoruncal_tot);
 	fprintf(stdout, "     Calibrated Sensor Offset:          %d\n", nrec_sensorcal_tot);
@@ -6304,11 +6729,18 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_ping,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_time_d_new,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_time_offset,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_ping_offset,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&batht_good_offset,&error);
 		}
 	if (nedget > 0)
 		{
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&edget_time_d,&error);
 		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&edget_ping,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&edget_time_d_new,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&edget_time_offset,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&edget_ping_offset,&error);
+		status = mb_freed(verbose,__FILE__,__LINE__,(void **)&edget_good_offset,&error);
 		}
 	if (nins > 0)
 		{

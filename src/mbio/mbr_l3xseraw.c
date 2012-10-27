@@ -334,7 +334,7 @@ int mbr_info_l3xseraw(int verbose,
 	*pixels_ss_max = 2000;
 	strncpy(format_name, "L3XSERAW", MB_NAME_LENGTH);
 	strncpy(system_name, "XSE", MB_NAME_LENGTH);
-	strncpy(format_description, "Format name:          MBF_L3XSERAW\nInformal Description: ELAC/SeaBeam XSE vendor format\nAttributes:           Bottomchart MkII 50 kHz and 180 kHz multibeam, \n                      SeaBeam 2120 20 KHz multibeam,\n		      bathymetry, amplitude and sidescan,\n                      variable beams and pixels, binary, \n                      L3 Communications (Elac Nautik \n                      and SeaBeam Instruments).\n", MB_DESCRIPTION_LENGTH);
+	strncpy(format_description, "Format name:          MBF_L3XSERAW\nInformal Description: ELAC/SeaBeam XSE vendor format\nAttributes:           Bottomchart MkII 50 kHz and 180 kHz multibeam, \n                      SeaBeam 2120 20 KHz multibeam,\n                      bathymetry, amplitude and sidescan,\n                      variable beams and pixels, binary, \n                      L3 Communications (Elac Nautik \n                      and SeaBeam Instruments).\n", MB_DESCRIPTION_LENGTH);
 	*numfile = 1;
 	*filetype = MB_FILETYPE_NORMAL;
 	*variable_beams = MB_YES;

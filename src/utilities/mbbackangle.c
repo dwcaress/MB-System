@@ -181,7 +181,7 @@ extern int isnanf(float x);
 #define	MBBACKANGLE_BEAMPATTERN_SIDESCAN		1
 
 /* define grid structure */
-struct mbba_grid_struct 
+struct mbba_grid_struct
 	{
 	mb_path	file;
         mb_path projectionname;
@@ -205,22 +205,22 @@ struct mbba_grid_struct
 /* function prototypes */
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	int nangles, double angle_max, double dangle, int symmetry,
-	int *nmean, double *mean, double *sigma, 
+	int *nmean, double *mean, double *sigma,
 	int *error);
-int output_model(int verbose, FILE *tfp, 
+int output_model(int verbose, FILE *tfp,
 	double ssbeamwidth, double ssdepression, double ref_angle,
 	int ntable, int nping, double time_d, double altitude,
 	int nangles, double angle_max, double dangle, int symmetry,
-	int *nmean, double *mean, double *sigma, 
+	int *nmean, double *mean, double *sigma,
 	int *error);
 int write_cdfgrd(int verbose, char *outfile, float *grid,
-		int nx, int ny, 
+		int nx, int ny,
 		double xmin, double xmax, double ymin, double ymax,
-		double zmin, double zmax, double dx, double dy, 
-		char *xlab, char *ylab, char *zlab, char *titl, 
-		char *projection, int argc, char **argv, 
+		double zmin, double zmax, double dx, double dy,
+		char *xlab, char *ylab, char *zlab, char *titl,
+		char *projection, int argc, char **argv,
 		int *error);
-						
+
 static char rcs_id[] = "$Id$";
 char program_name[] = "mbbackangle";
 
@@ -228,7 +228,7 @@ char program_name[] = "mbbackangle";
 
 int main (int argc, char **argv)
 {
-	char help_message[] =  
+	char help_message[] =
 "MBbackangle reads a swath sonar data file and generates a set \n\t\
 of tables containing the average amplitude an/or sidescan values\n\t\
 as a function of the angle of interaction (grazing angle) \n\t\
@@ -275,7 +275,7 @@ by MBprocess.";
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	
+
 	/* ESF File read */
 	char	esffile[MB_PATH_MAXLINE];
 	int     esffile_open = MB_NO;
@@ -358,7 +358,7 @@ by MBprocess.";
 	int	ss_corr_type;
 	double	ref_angle;
 	double	ref_angle_default = 30.0;
-	
+
 	/* amp vs angle grid variables */
 	int	gridamp = MB_NO;
 	double	gridampangle = 0.0;
@@ -412,7 +412,7 @@ by MBprocess.";
 	int	i, j;
 	int	ix, jy, kgrid, k, n;
 	int	kgrid00, kgrid10,kgrid01,kgrid11;
-	
+
 	char	*ctime();
 	char	*getenv();
 
@@ -426,13 +426,13 @@ by MBprocess.";
 
 	/* set default input to stdin */
 	strcpy (read_file, "datalist.mb-1");
-	
+
 	/* initialize grid */
 	memset(&grid, 0, sizeof (struct mbba_grid_struct));
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:CcDdF:f:G:g:HhI:i:N:n:P:p:QqR:r:T:t:VvZ:z:")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'A':
 		case 'a':
@@ -561,9 +561,9 @@ by MBprocess.";
 		fprintf(stderr,"Version %s\n",rcs_id);
 		fprintf(stderr,"MB-system Version %s\n",MB_VERSION);
 		}
-		
+
 	/* set mode if necessary */
-	if (amplitude_on != MB_YES 
+	if (amplitude_on != MB_YES
 		&& sidescan_on != MB_YES)
 		{
 		amplitude_on = MB_YES;
@@ -774,7 +774,7 @@ by MBprocess.";
 		meantotss[i] = 0.0;
 		sigmatotss[i] = 0.0;
 		}
-		
+
 	/* get topography grid if specified */
 	if (corr_topogrid == MB_YES)
 		{
@@ -783,7 +783,7 @@ by MBprocess.";
 					&grid.nxy, &grid.nx, &grid.ny, &grid.min, &grid.max,
 					&grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
 					&grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
-		if (status == MB_FAILURE) 
+		if (status == MB_FAILURE)
 			{
 			error = MB_ERROR_OPEN_FAIL;
 			fprintf(stderr,"\nUnable to read grd file: %s\n",
@@ -846,8 +846,8 @@ by MBprocess.";
 	if (gridamp == MB_YES)
 		{
 		/* allocate memory for output grids */
-		status = mb_mallocd(verbose,__FILE__,__LINE__, 
-					gridampnx * gridampny * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,
+					gridampnx * gridampny * sizeof(float),
 					(void **)&gridamphist, &error);
 
 		/* if error initializing memory then quit */
@@ -865,8 +865,8 @@ by MBprocess.";
 	if (gridss == MB_YES)
 		{
 		/* allocate memory for output grids */
-		status = mb_mallocd(verbose,__FILE__,__LINE__, 
-					gridssnx * gridssny * sizeof(float), 
+		status = mb_mallocd(verbose,__FILE__,__LINE__,
+					gridssnx * gridssny * sizeof(float),
 					(void **)&gridsshist, &error);
 
 		/* if error initializing memory then quit */
@@ -916,19 +916,19 @@ by MBprocess.";
 	    strcpy(swathfile, read_file);
 	    read_data = MB_YES;
 	    }
-	    
+
 	/* Deal with ESF File if avialable */
 	if (status == MB_SUCCESS)
 	{
 		status = mb_esf_load(verbose, swathfile, MB_YES, MB_NO, esffile, &esf, &error);
-		
+
 	}
 
 	/* loop over all files to be read */
 	while (read_data == MB_YES)
 	{
 
-	/* obtain format array location - format id will 
+	/* obtain format array location - format id will
 		be aliased to current id if old format id given */
 	status = mb_format(verbose,&format,&error);
 
@@ -946,13 +946,14 @@ by MBprocess.";
 			program_name);
 		exit(error);
 		}
-		
+
 	/* set correction modes according to format */
 	if (format == MBF_SB2100RW
 	    || format == MBF_SB2100B1
 	    || format == MBF_SB2100B2
 	    || format == MBF_EDGJSTAR
-	    || format == MBF_EDGJSTR2)
+	    || format == MBF_EDGJSTR2
+	    || format == MBF_RESON7KR)
 	    ss_corr_type = MBP_SSCORR_DIVISION;
 	else if (format == MBF_MBLDEOIH)
 	    ss_corr_type = MBP_SSCORR_UNKNOWN;
@@ -960,7 +961,7 @@ by MBprocess.";
 	    ss_corr_type = MBP_SSCORR_SUBTRACTION;
 	amp_corr_type = MBP_AMPCORR_SUBTRACTION;
 	ref_angle = ref_angle_default;
-	
+
 	/* allocate memory for data arrays */
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_mallocd(verbose,__FILE__,__LINE__,beams_bath*sizeof(char),
@@ -1017,13 +1018,13 @@ by MBprocess.";
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bathalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ss, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssacrosstrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
-		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 						sizeof(double), (void **)&ssalongtrack, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
@@ -1070,7 +1071,7 @@ by MBprocess.";
 			{
 			gridamphist[i] = 0.0;
 			}
-		}			
+		}
 	    if (gridss == MB_YES)
 		{
 		/* initialize the memory */
@@ -1208,8 +1209,8 @@ by MBprocess.";
 			status = mb_esf_apply(verbose, &esf,
 					time_d, 0,
 					beams_bath, beamflag, &error);
-					
-		}	
+
+		}
 
 
 		if ((navg > 0
@@ -1224,11 +1225,11 @@ by MBprocess.";
 			if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
 				{
 				if (amplitude_on == MB_YES)
-				output_table(verbose, atfp, ntable, navg, time_d_avg, 
+				output_table(verbose, atfp, ntable, navg, time_d_avg,
 						nangles, angle_max, dangle, symmetry,
 						nmeanamp, meanamp, sigmaamp, &error);
 				if (sidescan_on == MB_YES)
-				output_table(verbose, stfp, ntable, navg, time_d_avg, 
+				output_table(verbose, stfp, ntable, navg, time_d_avg,
 						nangles, angle_max, dangle, symmetry,
 						nmeanss, meanss, sigmass, &error);
 				}
@@ -1246,7 +1247,7 @@ by MBprocess.";
 						nmeanss, meanss, sigmass, &error);
 				}
 			ntable++;
-					
+
 			/* reinitialize arrays */
 			navg = 0;
 			time_d_avg = 0.0;
@@ -1269,7 +1270,7 @@ by MBprocess.";
 
 
 		/* process the pings */
-		if (error == MB_ERROR_NO_ERROR 
+		if (error == MB_ERROR_NO_ERROR
 		    || error == MB_ERROR_TIME_GAP)
 		    {
 		    /* if needed, attempt to get sidescan correction type */
@@ -1290,12 +1291,12 @@ by MBprocess.";
 				ss_corr_type = MBP_SSCORR_SUBTRACTION;
 				}
 			}
-		    
+
 		    /* increment record counter */
 		    nrec++;
 		    navg++;
 		    ntotavg++;
-		    
+
 		    /* increment time */
 		    time_d_avg += time_d;
 		    altitude_avg += altitude;
@@ -1311,12 +1312,12 @@ by MBprocess.";
 				depthsmooth,
 				&error);
 
-	     
+
 		    /* get distance scaling and heading vector */
 		    mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
 		    headingx = sin(heading * DTR);
 		    headingy = cos(heading * DTR);
-				
+
 		    /* do the amplitude */
 		    if (amplitude_on == MB_YES)
 		    for (i=0;i<beams_amp;i++)
@@ -1352,7 +1353,7 @@ by MBprocess.";
 					r[0] /= rr;
 					r[1] /= rr;
 					r[2] /= rr;
-					
+
 					/* get normal vector to grid surface */
 					if (corr_slope == MB_YES)
 						{
@@ -1376,13 +1377,13 @@ by MBprocess.";
 						v[1] = 0.0;
 						v[2] = 1.0;
 						}
-					
+
 					/* angle between look vector and surface normal
 						is the acos(r dot v) */
 					angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] *v[2]);
 					if (bathacrosstrack[i] < 0.0)
 						angle = -angle;
-					
+
 /* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
 i,bathacrosstrack[i],bathalongtrack[i],bath[i],sonardepth,RTD * atan(bathacrosstrack[i] / (sonardepth + grid.data[kgrid])));
 fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
@@ -1448,7 +1449,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 				    sigmatotamp[j] += amp[i]*amp[i];
 				    nmeantotamp[j]++;
 				    }
-					
+
 				/* load amplitude into grid */
 				if (gridamp == MB_YES)
 				    {
@@ -1468,7 +1469,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 				fprintf(stderr,"dbg5       %d %d: slope:%f altitude:%f xtrack:%f ang:%f j:%d\n",
 				    nrec, i, slope, altitude_use, bathacrosstrack[i], angle, j);
 				}
-			    } 
+			    }
 			}
 
 
@@ -1507,7 +1508,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 					r[0] /= rr;
 					r[1] /= rr;
 					r[2] /= rr;
-					
+
 					/* get normal vector to grid surface */
 					if (corr_slope == MB_YES)
 						{
@@ -1531,13 +1532,13 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 						v[1] = 0.0;
 						v[2] = 1.0;
 						}
-					
+
 					/* angle between look vector and surface normal
 						is the acos(r dot v) */
 					angle = RTD * acos(r[0] * v[0] + r[1] * v[1] + r[2] *v[2]);
 					if (ssacrosstrack[i] < 0.0)
 						angle = -angle;
-					
+
 /* fprintf(stderr,"i:%d xtrack:%f ltrack:%f depth:%f sonardepth:%f rawangle:%f\n",
 i,ssacrosstrack[i],ssalongtrack[i],ss[i],sonardepth,RTD * atan(ssacrosstrack[i] / (sonardepth + grid.data[kgrid])));
 fprintf(stderr,"ix:%d of %d jy:%d of %d  topo:%f\n",
@@ -1604,7 +1605,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 				    sigmatotss[j] += ss[i]*ss[i];
 				    nmeantotss[j]++;
 				    }
-					
+
 				/* load amplitude into grid */
 				if (gridss == MB_YES)
 				    {
@@ -1644,7 +1645,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	nrectot += nrec;
 	namptot += namp;
 	nsstot += nss;
-		
+
 	/* output grids */
 	if (gridamp == MB_YES)
 		{
@@ -1669,29 +1670,29 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 					}
 				}
 			}
-		
+
 		/* set the strings */
 		strcpy(gridfile, swathfile);
  	    	strcat(gridfile,"_aga.grd");
 		strcpy(zlabel, "Beam Amplitude PDF (X1000)");
 		strcpy(title, "Beam Amplitude vs. Grazing Angle PDF");
-		
+
 		/* output the grid */
 		write_cdfgrd(verbose, gridfile, gridamphist,
-				gridampnx, gridampny, 
-				(double)(-gridampangle), gridampangle, 
+				gridampnx, gridampny,
+				(double)(-gridampangle), gridampangle,
 				(double)0.0, gridampmax,
 				(double)0.0, ampmax,
 				gridampdx, gridampdy,
 				xlabel, ylabel, zlabel, title, projection,
 				argc, argv, &error);
-	
+
 		/* run mbm_grdplot */
-		sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -S -MGQ100 -MXM# -MXI%s -V -L\"File %s - %s:%s\"", 
+		sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -S -MGQ100 -MXM# -MXI%s -V -L\"File %s - %s:%s\"",
 				gridfile, amptablefile, gridfile, title, zlabel);
 		if (verbose)
 			{
-			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n",
 				plot_cmd);
 			}
 		plot_status = system(plot_cmd);
@@ -1723,29 +1724,29 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 					}
 				}
 			}
-		
+
 		/* set the strings */
 		strcpy(gridfile, swathfile);
  	    	strcat(gridfile,"_sga.grd");
 		strcpy(zlabel, "Sidescan Amplitude PDF (X1000)");
 		strcpy(title, "Sidescan Amplitude vs. Grazing Angle PDF");
-		
+
 		/* output the grid */
 		write_cdfgrd(verbose, gridfile, gridsshist,
-				gridssnx, gridssny, 
-				(double)(-gridssangle), gridssangle, 
+				gridssnx, gridssny,
+				(double)(-gridssangle), gridssangle,
 				(double)0.0, gridssmax,
 				(double)0.0, ampmax,
 				gridssdx, gridssdy,
 				xlabel, ylabel, zlabel, title, projection,
 				argc, argv, &error);
-	
+
 		/* run mbm_grdplot */
-		sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -S -MGQ100 -MXM# -MXI%s -V -L\"File %s - %s:%s\"", 
+		sprintf(plot_cmd, "mbm_grdplot -I%s -JX9/5 -G1 -S -MGQ100 -MXM# -MXI%s -V -L\"File %s - %s:%s\"",
 				gridfile, sstablefile, gridfile, title, zlabel);
 		if (verbose)
 			{
-			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n", 
+			fprintf(stderr, "\nexecuting mbm_grdplot...\n%s\n",
 				plot_cmd);
 			}
 		plot_status = system(plot_cmd);
@@ -1757,16 +1758,16 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 
 	/* set amplitude correction in parameter file */
 	if (amplitude_on == MB_YES)
-		status = mb_pr_update_ampcorr(verbose, swathfile, 
-			MB_YES, amptablefile, 
-			amp_corr_type, corr_symmetry, ref_angle, amp_corr_slope, 
+		status = mb_pr_update_ampcorr(verbose, swathfile,
+			MB_YES, amptablefile,
+			amp_corr_type, corr_symmetry, ref_angle, amp_corr_slope,
 			grid.file, &error);
 
 	/* set sidescan correction in parameter file */
 	if (sidescan_on == MB_YES)
-		status = mb_pr_update_sscorr(verbose, swathfile, 
-			MB_YES, sstablefile, 
-			ss_corr_type, corr_symmetry, ref_angle, ss_corr_slope, 
+		status = mb_pr_update_sscorr(verbose, swathfile,
+			MB_YES, sstablefile,
+			ss_corr_type, corr_symmetry, ref_angle, ss_corr_slope,
 			grid.file, &error);
 
 	/* output information */
@@ -1844,9 +1845,9 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	    fprintf(atfp, "## Slope correction:      %d\n", amp_corr_slope);
 	    fprintf(atfp, "## Data type:             beam amplitude\n");
 	    if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
-		    output_table(verbose, atfp, 0, ntotavg, time_d_totavg, 
+		    output_table(verbose, atfp, 0, ntotavg, time_d_totavg,
 				    nangles, angle_max, dangle, symmetry,
-				    nmeanamp, meanamp, sigmaamp, &error);
+				    nmeantotamp, meantotamp, sigmatotamp, &error);
 	    else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
 		    output_model(verbose, atfp, ssbeamwidth, ssdepression, ref_angle,
 				    0, ntotavg, time_d_totavg, altitude_totavg,
@@ -1890,7 +1891,7 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 	    fprintf(stfp, "## Slope Correction:      %d\n", ss_corr_slope);
 	    fprintf(stfp, "## Data type:             sidescan\n");
 	    if (beammode == MBBACKANGLE_BEAMPATTERN_EMPIRICAL)
-		    output_table(verbose, stfp, 0, ntotavg, time_d_totavg, 
+		    output_table(verbose, stfp, 0, ntotavg, time_d_totavg,
 				    nangles, angle_max, dangle, symmetry,
 				    nmeantotss, meantotss, sigmatotss, &error);
 	    else if (beammode == MBBACKANGLE_BEAMPATTERN_SIDESCAN)
@@ -1972,8 +1973,8 @@ r[0],r[1],r[2],v1[0],v1[1],v1[2],v2[0],v2[1],v2[2],v[0],v[1],v[2],angle);*/
 }
 /*--------------------------------------------------------------------*/
 int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
-	int nangles, double angle_max, double dangle, int symmetry, 
-	int *nmean, double *mean, double *sigma, 
+	int nangles, double angle_max, double dangle, int symmetry,
+	int *nmean, double *mean, double *sigma,
 	int *error)
 {
 	char	*function_name = "output_table";
@@ -1982,7 +1983,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	int	time_i[7];
 	int	ii, jj, i0, i1;
 	int	i;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2001,7 +2002,7 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 		fprintf(stderr,"dbg2       symmetry:        %d\n", symmetry);
 		fprintf(stderr,"dbg2       mean and sigma:\n");
 		for (i=0;i<nangles;i++)
-			fprintf(stderr,"dbg2         %d %f %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %d %f %f\n",
 				i, (i * dangle), nmean[i], mean[i], sigma[i]);
 		}
 
@@ -2070,11 +2071,11 @@ int output_table(int verbose, FILE *tfp, int ntable, int nping, double time_d,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int output_model(int verbose, FILE *tfp, 
+int output_model(int verbose, FILE *tfp,
 	double beamwidth, double depression, double ref_angle,
 	int ntable, int nping, double time_d, double altitude,
 	int nangles, double angle_max, double dangle, int symmetry,
-	int *nmean, double *mean, double *sigma, 
+	int *nmean, double *mean, double *sigma,
 	int *error)
 {
 	char	*function_name = "output_model";
@@ -2084,7 +2085,7 @@ int output_model(int verbose, FILE *tfp,
 	int	time_i[7];
 	int	ii, jj, i0, i1, iref;
 	int	i;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2107,10 +2108,10 @@ int output_model(int verbose, FILE *tfp,
 		fprintf(stderr,"dbg2       symmetry:        %d\n", symmetry);
 		fprintf(stderr,"dbg2       mean and sigma:\n");
 		for (i=0;i<nangles;i++)
-			fprintf(stderr,"dbg2         %d %f %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %d %f %f\n",
 				i, (i * dangle), nmean[i], mean[i], sigma[i]);
 		}
-		
+
 	/* get average amplitude at reference angle */
 	iref = (angle_max - ref_angle) / dangle;
 	i0 = MAX(iref - 1, 0);
@@ -2134,7 +2135,7 @@ int output_model(int verbose, FILE *tfp,
 		ref_amp = sum /  sumn;
 		asigma = sqrt((sumsq / sumn) - amean * amean);
 		}
-		
+
 	/* get model that combines gaussian with 1/r
 		- gaussian must drop to 0.7 max at 0.5 * beamwidth
 		- model must equal ref_amp at ref_angle */
@@ -2180,15 +2181,15 @@ int output_model(int verbose, FILE *tfp,
 }
 /*--------------------------------------------------------------------*/
 /*
- * function write_cdfgrd writes output grid to a 
- * GMT version 2 netCDF grd file 
+ * function write_cdfgrd writes output grid to a
+ * GMT version 2 netCDF grd file
  */
 int write_cdfgrd(int verbose, char *outfile, float *grid,
-		int nx, int ny, 
+		int nx, int ny,
 		double xmin, double xmax, double ymin, double ymax,
-		double zmin, double zmax, double dx, double dy, 
-		char *xlab, char *ylab, char *zlab, char *titl, 
-		char *projection, int argc, char **argv, 
+		double zmin, double zmax, double dx, double dy,
+		char *xlab, char *ylab, char *zlab, char *titl,
+		char *projection, int argc, char **argv,
 		int *error)
 {
 	char	*function_name = "write_cdfgrd";
@@ -2316,7 +2317,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		/* free memory for output array */
 		mb_freed(verbose,__FILE__, __LINE__, (void **) &a, error);
 		}
-	    
+
 	/* free GMT memory */
 	GMT_free ((void *)GMT_io.skip_if_NaN);
 	GMT_free ((void *)GMT_io.in_col_type);
