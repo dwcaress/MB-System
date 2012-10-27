@@ -217,6 +217,7 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+-----> 5.3.1995 (October 27, 2012)
 -----> 5.3.1994 (October 27, 2012)
 
 Mbfilter: when filtering sidescan the output file now includes any bathymetry available in the
