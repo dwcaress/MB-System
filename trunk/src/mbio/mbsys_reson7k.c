@@ -206,6 +206,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	s7kr_fsdwss		*fsdwsshi;
 	s7kr_fsdwsb		*fsdwsb;
 	s7kr_bluefin		*bluefin;
+	s7kr_processedsidescan	*processedsidescan;
 	s7kr_volatilesettings	*volatilesettings;
 	s7kr_configuration	*configuration;
 	s7kr_matchfilter	*matchfilter;
@@ -277,6 +278,7 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->read_v2detection = MB_NO;
 	store->read_v2rawdetection = MB_NO;
 	store->read_v2snippet = MB_NO;
+	store->read_processedsidescan = MB_NO;
 
 	/* MB-System time stamp */
 	store->time_d = 0;
@@ -670,6 +672,25 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			bluefin->environmental[i].reserved2[j] = 0;
 		}
 
+	/* Processed sidescan - MB-System extension to 7k format (record 3199) */
+	processedsidescan = &store->processedsidescan;
+	mbsys_reson7k_zero7kheader(verbose, &processedsidescan->header, error);
+	processedsidescan->serial_number = 0;
+	processedsidescan->ping_number = 0;
+	processedsidescan->multi_ping = 0;
+	processedsidescan->recordversion = 0;
+	processedsidescan->ss_source = 0;
+	processedsidescan->number_pixels = 0;
+	processedsidescan->ss_type = 0;
+	processedsidescan->pixelwidth = 0;
+	processedsidescan->sonardepth = 0;
+	processedsidescan->altitude = 0;
+	for (i=0;i<MBSYS_RESON7K_MAX_PIXELS;i++)
+		{
+		processedsidescan->sidescan[i] = 0.0;
+		processedsidescan->alongtrack[i] = 0.0;
+		}
+
 	/* Reson 7k volatile sonar settings (record 7000) */
 	volatilesettings = &store->volatilesettings;
 	mbsys_reson7k_zero7kheader(verbose, &volatilesettings->header, error);
@@ -859,14 +880,6 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		beam->snippets[i].amplitude = NULL;
 		beam->snippets[i].phase = NULL;
 		}
-	beam->optionaldata = 0;
-	beam->frequency = 0.0;
-	beam->latitude = 0.0;
-	beam->longitude = 0.0;
-	beam->heading = 0.0;
-	beam->alongtrack[MBSYS_RESON7K_MAX_BEAMS] = 0.0;
-	beam->acrosstrack[MBSYS_RESON7K_MAX_BEAMS] = 0.0;
-	beam->center_sample[MBSYS_RESON7K_MAX_BEAMS] = 0;
 
 	/* Reson 7k vertical depth (record 7009) */
 	verticaldepth = &store->verticaldepth;
@@ -3126,6 +3139,67 @@ int mbsys_reson7k_print_bluefin(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_reson7k_print_processedsidescan(int verbose,
+			s7kr_processedsidescan *processedsidescan,
+			int *error)
+{
+	char	*function_name = "mbsys_reson7k_print_processedsidescan";
+	int	status = MB_SUCCESS;
+	char	*debug_str = "dbg2  ";
+	char	*nodebug_str = "  ";
+	char	*first;
+	int	i;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:           %d\n",verbose);
+		fprintf(stderr,"dbg2       processedsidescan: %lu\n",(size_t)processedsidescan);
+		}
+
+	/* print Reson 7k data record header information */
+	mbsys_reson7k_print_header(verbose, &processedsidescan->header, error);
+
+	/* print Reson 7k beam geometry (record 7004) */
+	if (verbose >= 2)
+		first = debug_str;
+	else
+		{
+		first = nodebug_str;
+		fprintf(stderr,"\n%sMBIO function <%s> called\n",
+			first,function_name);
+		}
+	fprintf(stderr,"%sStructure Contents:\n", first);
+	fprintf(stderr,"%s     serial_number:              %llu\n",first,processedsidescan->serial_number);
+	fprintf(stderr,"%s     ping_number:                %u\n",first,processedsidescan->ping_number);
+	fprintf(stderr,"%s     multi_ping:                 %u\n",first,processedsidescan->multi_ping);
+	fprintf(stderr,"%s     recordversion:              %u\n",first,processedsidescan->recordversion);
+	fprintf(stderr,"%s     ss_source:                  %u\n",first,processedsidescan->ss_source);
+	fprintf(stderr,"%s     number_pixels:              %u\n",first,processedsidescan->number_pixels);
+	fprintf(stderr,"%s     pixelwidth:                 %f\n",first,processedsidescan->pixelwidth);
+	fprintf(stderr,"%s     sonardepth:                 %f\n",first,processedsidescan->sonardepth);
+	fprintf(stderr,"%s     altitude:                   %f\n",first,processedsidescan->altitude);
+	for (i=0;i<processedsidescan->number_pixels;i++)
+	fprintf(stderr,"%s     pixel[%d]:  sidescan:%f alongtrack:%f\n",
+			first,i,processedsidescan->sidescan[i],processedsidescan->alongtrack[i]);
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_reson7k_print_volatilesettings(int verbose,
 			s7kr_volatilesettings *volatilesettings,
 			int *error)
@@ -3815,17 +3889,6 @@ int mbsys_reson7k_print_beam(int verbose,
 				fprintf(stderr,"   amplitude:%d   phase:%d",intptramp[j],intptrphase[j]);
 			fprintf(stderr,"\n");
 			}
-		}
-	fprintf(stderr,"%s     optionaldata:               %d\n",first,beam->optionaldata);
-	fprintf(stderr,"%s     frequency:                  %f\n",first,beam->frequency);
-	fprintf(stderr,"%s     latitude:                   %f\n",first,beam->latitude);
-	fprintf(stderr,"%s     longitude:                  %f\n",first,beam->longitude);
-	fprintf(stderr,"%s     heading:                    %f\n",first,beam->heading);
-	for (i=0;i<beam->number_beams;i++)
-		{
-		fprintf(stderr,"%s     beam[%d]:   acrosstrack:%f alongtrack:%f center_sample:%d\n",
-					first,i,beam->acrosstrack[i],beam->alongtrack[i],
-					beam->center_sample[i]);
 		}
 
 	/* print output debug statements */
@@ -5354,6 +5417,92 @@ int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error)
+{
+	char	*function_name = "mbsys_reson7k_sonartype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_reson7k_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+
+	/* get sonar type */
+	*sonartype = MB_SONARTYPE_MULTIBEAM;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sonartype:  %d\n",*sonartype);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *ss_type, int *error)
+{
+	char	*function_name = "mbsys_reson7k_sidescantype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_reson7k_struct *store;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_reson7k_struct *) store_ptr;
+
+	/* get sidescan type */
+	*ss_type = MB_SIDESCAN_LINEAR;
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       ss_type:    %d\n",*ss_type);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
@@ -5369,6 +5518,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
 	s7kr_bluefin *bluefin;
+	s7kr_processedsidescan *processedsidescan;
 	s7kr_beamgeometry *beamgeometry;
 	s7kr_bathymetry *bathymetry;
 	s7kr_backscatter *backscatter;
@@ -5401,6 +5551,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	/* get data structure pointer */
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	bluefin = (s7kr_bluefin *) &store->bluefin;
+	processedsidescan = (s7kr_processedsidescan *) &store->processedsidescan;
 	beamgeometry = (s7kr_beamgeometry *) &(store->beamgeometry);
 	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
 	backscatter = (s7kr_backscatter *) &store->backscatter;
@@ -5523,26 +5674,36 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 #endif
 			bathacrosstrack[i] = bathymetry->acrosstrack[i];
 			bathalongtrack[i] = bathymetry->alongtrack[i];
-			amp[i] = bathymetry->intensity[i];
+			amp[i] = 20.0 * log10((double)bathymetry->intensity[i]);
 			}
 
-		/* initialize sidescan */
+		/* extract sidescan */
 		*nss = 0;
-		for (i=0;i<MBSYS_RESON7K_MAX_PIXELS;i++)
+		if (store->read_processedsidescan == MB_YES)
 			{
-			ss[i] = 0.0;
-			ssacrosstrack[i] = 0.0;
-			ssalongtrack[i] = 0.0;
+			*nss = processedsidescan->number_pixels;
+			for (i=0;i<processedsidescan->number_pixels;i++)
+				{
+				ss[i] = processedsidescan->sidescan[i];
+				ssacrosstrack[i] = processedsidescan->pixelwidth
+							* (i - (int)processedsidescan->number_pixels / 2);
+				ssalongtrack[i] = processedsidescan->alongtrack[i];
+				}
+			for (i=processedsidescan->number_pixels;i<MBSYS_RESON7K_MAX_PIXELS;i++)
+				{
+				ss[i] = MB_SIDESCAN_NULL;
+				ssacrosstrack[i] = 0.0;
+				ssalongtrack[i] = 0.0;
+				}
 			}
-
-		/* now generate sidescan from the snippet data */
-		if (store->read_beam == MB_YES)
+		else
 			{
-			status = mbsys_reson7k_makess(verbose, mbio_ptr, store_ptr,
-							MB_NO, pixel_size,
-							MB_NO, swath_width, 0,
-							nss, ss, ssacrosstrack, ssalongtrack,
-							error);
+			for (i=0;i<MBSYS_RESON7K_MAX_PIXELS;i++)
+				{
+				ss[i] = MB_SIDESCAN_NULL;
+				ssacrosstrack[i] = 0.0;
+				ssalongtrack[i] = 0.0;
+				}
 			}
 
 		/* print debug statements */
@@ -6051,6 +6212,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
 	s7kr_bluefin *bluefin;
+	s7kr_processedsidescan *processedsidescan;
 	s7kr_volatilesettings *volatilesettings;
 	s7kr_bathymetry *bathymetry;
 	s7kr_backscatter *backscatter;
@@ -6126,6 +6288,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
 	backscatter = (s7kr_backscatter *) &store->backscatter;
 	beam = (s7kr_beam *) &store->beam;
+	processedsidescan = (s7kr_processedsidescan *) &store->processedsidescan;
 	position = (s7kr_position *) &store->position;
 	systemeventmessage = (s7kr_systemeventmessage *) &store->systemeventmessage;
 	fsdwsb = &(store->fsdwsb);
@@ -6175,7 +6338,7 @@ int mbsys_reson7k_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			bathymetry->acrosstrack[i] = bathacrosstrack[i];
 			bathymetry->alongtrack[i] = bathalongtrack[i];
-			bathymetry->intensity[i] = amp[i];
+			bathymetry->intensity[i] = (float)(pow(10.0, (amp[i] / 20.0)));
 #ifdef MSYS_RESON7KR_DEBUG
 fprintf(stderr,"INSERT: beam:%d quality:%d q&240:%d ",i,bathymetry->quality[i],bathymetry->quality[i] & 240);
 if (bathymetry->quality[i] & 1) fprintf(stderr,"1"); else fprintf(stderr,"0");
@@ -6190,7 +6353,18 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 #endif
 			}
 
-		/* do nothing for sidescan now */
+		/* insert the sidescan */
+		processedsidescan->number_pixels = nss;
+		for (i=0;i<processedsidescan->number_pixels;i++)
+			{
+			processedsidescan->sidescan[i] = ss[i];
+			processedsidescan->alongtrack[i] = processedsidescan->alongtrack[i];
+			}
+		for (i=processedsidescan->number_pixels;i<MBSYS_RESON7K_MAX_PIXELS;i++)
+			{
+			processedsidescan->sidescan[i] = 0.0;
+			processedsidescan->alongtrack[i] = 0.0;
+			}
 		}
 
 	/* insert data in nav structure */
@@ -9467,38 +9641,56 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
-		int pixel_size_set, double *pixel_size,
+		int source, int pixel_size_set, double *pixel_size,
 		int swath_width_set, double *swath_width,
-		int pixel_int,
-		int *nss, double *ss, double *ssacrosstrack, double *ssalongtrack,
-		int *error)
+		int pixel_int, int *error)
 {
 	char	*function_name = "mbsys_reson7k_makess";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_reson7k_struct *store;
-	s7kr_volatilesettings *volatilesettings;
-	s7kr_beamgeometry *beamgeometry;
-	s7kr_bathymetry *bathymetry;
+	s7kr_reference		*reference;
+	s7kr_volatilesettings	*volatilesettings;
+	s7kr_beamgeometry	*beamgeometry;
+	s7kr_bathymetry		*bathymetry;
+	s7kr_backscatter	*backscatter;
 	s7kr_snippet		*snippet;
 	s7kr_beam		*beam;
+	s7kr_v2snippettimeseries *snippettimeseries;
+	s7kr_v2snippet		*v2snippet;
+	s7kr_processedsidescan  *processedsidescan;
 	s7kr_bluefin		*bluefin;
+	s7kr_soundvelocity	*soundvelocity;
+	int	nss;
 	int	ss_cnt[MBSYS_RESON7K_MAX_PIXELS];
+	double	ss[MBSYS_RESON7K_MAX_PIXELS];
+	double	ssacrosstrack[MBSYS_RESON7K_MAX_PIXELS];
+	double	ssalongtrack[MBSYS_RESON7K_MAX_PIXELS];
 	int	nbathsort;
 	double	bathsort[MBSYS_RESON7K_MAX_BEAMS];
+	char	beamflag[MBSYS_RESON7K_MAX_BEAMS];
 	double  pixel_size_calc;
 	double	ss_spacing, ss_spacing_use;
 	double	soundspeed;
+	int	iminxtrack;
+	double	minxtrack;
+	double	maxxtrack;
+	int	nrangetable;
+	double	rangetable[MBSYS_RESON7K_MAX_BEAMS];
+	double	acrosstracktable[MBSYS_RESON7K_MAX_BEAMS], acrosstracktablemin;
+	double	alongtracktable[MBSYS_RESON7K_MAX_BEAMS];
+	int	irangenadir, irange;
+	int	found;
 	int	pixel_int_use;
-	int	nsample, nsample_use, sample_start, sample_end;
-	double	angle, altitude, xtrack, xtrackss;
+	int	nsample, nsample_use, sample_start, sample_detect, sample_end;
+	double	angle, altitude, xtrack, xtrackss, ltrackss, factor;
 	double	range, beam_foot, beamwidth, sint;
+	mb_u_char	*data_uchar;
+	unsigned short	*data_ushort;
+	unsigned int	*data_uint;
 	int	first, last, k1, k2;
-	int	sample_type_amp;
-	char	*charptr;
-	unsigned short 	*ushortptr;
-	unsigned int	*uintptr;
-	int	i, k, kk;
+	int	ibeam;
+	int	i, j, k, kk;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -9509,6 +9701,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       verbose:         %d\n",verbose);
 		fprintf(stderr,"dbg2       mbio_ptr:        %lu\n",(size_t)mbio_ptr);
 		fprintf(stderr,"dbg2       store_ptr:       %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       source:          %d\n",source);
 		fprintf(stderr,"dbg2       pixel_size_set:  %d\n",pixel_size_set);
 		fprintf(stderr,"dbg2       pixel_size:      %f\n",*pixel_size);
 		fprintf(stderr,"dbg2       swath_width_set: %d\n",swath_width_set);
@@ -9521,15 +9714,156 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get data structure pointer */
 	store = (struct mbsys_reson7k_struct *) store_ptr;
+	reference = (s7kr_reference *) &store->reference;
 	volatilesettings = (s7kr_volatilesettings *) &store->volatilesettings;
 	beamgeometry = (s7kr_beamgeometry *) &store->beamgeometry;
 	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
+	backscatter = (s7kr_backscatter *) &store->backscatter;
+	v2snippet = (s7kr_v2snippet *) &store->v2snippet;
 	beam = (s7kr_beam *) &store->beam;
-	bluefin = &store->bluefin;
+	processedsidescan = (s7kr_processedsidescan *) &store->processedsidescan;
+	bluefin = (s7kr_bluefin *) &store->bluefin;
+	soundvelocity = (s7kr_soundvelocity *) &store->soundvelocity;
 
-	/* insert data in structure */
-	if (store->kind == MB_DATA_DATA)
+	/* calculate sidescan from the desired source data if it is available */
+	if (store->kind == MB_DATA_DATA &&
+		((source == R7KRECID_7kV2SnippetData && store->read_v2snippet == MB_YES)
+		 || (source == R7KRECID_7kBeamData && store->read_beam == MB_YES)
+		 || (source == R7KRECID_7kBackscatterImageData && store->read_backscatter == MB_YES)))
 		{
+		/* get beamflags - only use snippets from good beams */
+		for (i=0;i<bathymetry->number_beams;i++)
+			{
+			/* beamflagging scheme:
+				Reson quality flags use bits 0-3
+					bit 0: brightness test
+					bit 1: colinearity test
+					bit 2: amplitude pick
+					bit 3: phase pick
+				Early MB scheme (through 2007) - use bits 0-5
+					null: 0
+					flagged: 2
+					good: 15
+					amplitude: +16
+					phase: +32
+				Current MB scheme (>= 2008) - use bits 4-7
+					- bits 0-3 left in original values
+					- beam valid if bit 4 or 5 are set
+					- beam flagged if bit 6 or 7 set
+					bit 4: on = amplitude
+					bit 5: on = phase
+					bit 6: on = auto flag
+					bit 7: on = manual flag */
+			if (bathymetry->quality[i] == 0)
+				{
+				beamflag[i] = MB_FLAG_NULL;
+				}
+			else if (bathymetry->quality[i] & 64)
+				{
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+				}
+			else if (bathymetry->quality[i] & 128)
+				{
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				}
+			else if (bathymetry->quality[i] & 240)
+				{
+				beamflag[i] = MB_FLAG_NONE;
+				}
+			else if ((bathymetry->quality[i] & 3) == 3)
+				{
+				beamflag[i] = MB_FLAG_NONE;
+				}
+			else if ((bathymetry->quality[i] & 15) == 0)
+				{
+				beamflag[i] = MB_FLAG_NULL;
+				}
+			else if ((bathymetry->quality[i] & 3) == 0)
+				{
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_FILTER;
+				}
+			else
+				{
+				beamflag[i] = MB_FLAG_FLAG + MB_FLAG_MANUAL;
+				}
+			}
+
+		/* get beam angle size */
+		beamwidth = 2.0 * RTD * volatilesettings->receive_width;
+
+		/* get soundspeed */
+		if (volatilesettings->sound_velocity > 0.0)
+			soundspeed = volatilesettings->sound_velocity;
+		else if (soundvelocity->soundvelocity > 0.0)
+			soundspeed = soundvelocity->soundvelocity;
+		else if (bluefin->environmental[0].sound_speed > 0.0)
+			soundspeed = bluefin->environmental[0].sound_speed;
+		else
+			soundspeed = 1500.0;
+
+		/* get raw pixel size */
+		ss_spacing = 0.5 * soundspeed / volatilesettings->sample_rate;
+
+		/* get median depth relative to the sonar and check for min max xtrack */
+		nbathsort = 0;
+		minxtrack = 0.0;
+		maxxtrack = 0.0;
+		iminxtrack = bathymetry->number_beams / 2;
+		found = MB_NO;
+		for (i=0;i<bathymetry->number_beams;i++)
+			{
+			if (mb_beam_ok(beamflag[i]))
+				{
+				bathsort[nbathsort] = bathymetry->depth[i] + bathymetry->vehicle_height;
+				nbathsort++;
+
+				if (found == MB_NO || fabs(bathymetry->acrosstrack[i] < minxtrack))
+					{
+					minxtrack = fabs(bathymetry->acrosstrack[i]);
+					iminxtrack = i;
+					found = MB_YES;
+					}
+
+				maxxtrack = MAX(fabs(bathymetry->acrosstrack[i]), maxxtrack);
+				}
+			}
+
+		/* set number of pixels */
+		nss = MIN(4 * bathymetry->number_beams, MBSYS_RESON7K_MAX_PIXELS);
+
+		/* get sidescan pixel size */
+		if (swath_width_set == MB_NO)
+			{
+			(*swath_width) = MAX(fabs(RTD * beamgeometry->angle_acrosstrack[0]),
+					fabs(RTD * beamgeometry->angle_acrosstrack[bathymetry->number_beams-1]));
+			}
+		if (pixel_size_set == MB_NO
+		    && nbathsort > 0)
+			{
+			/* calculate pixel size implied using swath width and nadir altitude */
+			qsort((char *)bathsort, nbathsort, sizeof(double),(void *)mb_double_compare);
+			pixel_size_calc = 2.1 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2] / nss;
+
+			/* use pixel size based on actual swath width if that is larger than the first value */
+			pixel_size_calc = MAX(pixel_size_calc, 2.1 * maxxtrack / nss);
+
+			/* make sure the pixel size is at least equivalent to a 0.1 degree nadir beamwidth */
+			pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
+
+			/* if the pixel size appears to be changing in size, moderate the change */
+			if ((*pixel_size) <= 0.0)
+				(*pixel_size) = pixel_size_calc;
+			else if (0.95 * (*pixel_size) > pixel_size_calc)
+				(*pixel_size) = 0.95 * (*pixel_size);
+			else if (1.05 * (*pixel_size) < pixel_size_calc)
+				(*pixel_size) = 1.05 * (*pixel_size);
+			else
+				(*pixel_size) = pixel_size_calc;
+			}
+
+		/* get pixel interpolation */
+		pixel_int_use = pixel_int + 1;
+
 		/* zero the sidescan */
 		for (i=0;i<MBSYS_RESON7K_MAX_PIXELS;i++)
 			{
@@ -9538,179 +9872,306 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 			ssalongtrack[i] = 0.0;
 			ss_cnt[i] = 0;
 			}
-
-		/* get raw pixel size */
-		ss_spacing = 750.0 / volatilesettings->sample_rate;
-
-		/* get beam angle size */
-		beamwidth = 2.0 * RTD * volatilesettings->receive_width;
-
-		/* get soundspeed */
-		if (volatilesettings->sound_velocity > 0.0)
-			soundspeed = volatilesettings->sound_velocity;
-		else if (bluefin->environmental[0].sound_speed > 0.0)
-			soundspeed = bluefin->environmental[0].sound_speed;
-		else
-			soundspeed = 1500.0;
-
-		/* get median depth */
-		nbathsort = 0;
-		for (i=0;i<bathymetry->number_beams;i++)
-		    {
-		    if ((bathymetry->quality[i] & 15) == 15)
+		for (i=0;i<nss;i++)
 			{
-			bathsort[nbathsort] = bathymetry->depth[i] + bathymetry->vehicle_height;
-			nbathsort++;
+			ssacrosstrack[i] = (*pixel_size) * (double)(i - (nss / 2));;
 			}
-		    }
 
-		/* get sidescan pixel size */
-		if (swath_width_set == MB_NO
-		    && nbathsort > 0)
-		    {
-		    (*swath_width) = MAX(fabs(RTD * beamgeometry->angle_acrosstrack[0]),
-				    fabs(RTD * beamgeometry->angle_acrosstrack[bathymetry->number_beams-1]));
-		    }
-		if (pixel_size_set == MB_NO
-		    && nbathsort > 0)
-		    {
-		    qsort((char *)bathsort, nbathsort, sizeof(double),(void *)mb_double_compare);
-		    pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2]
-					/ MBSYS_RESON7K_MAX_PIXELS;
-/* fprintf(stderr,"swath_width:%f altitude:%f pixel_size_calc:%f\n",
-*swath_width, bathsort[nbathsort/2], pixel_size_calc);*/
-		    pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
-		    if ((*pixel_size) <= 0.0)
-			(*pixel_size) = pixel_size_calc;
-		    else if (0.95 * (*pixel_size) > pixel_size_calc)
-			(*pixel_size) = 0.95 * (*pixel_size);
-		    else if (1.05 * (*pixel_size) < pixel_size_calc)
-			(*pixel_size) = 1.05 * (*pixel_size);
-		    else
-			(*pixel_size) = pixel_size_calc;
-		    }
+		/* loop over raw backscatter or sidescan from the desired source,
+		 * 	putting each raw sample into the binning arrays */
 
-		/* get pixel interpolation */
-		pixel_int_use = pixel_int + 1;
-
-		/* loop over raw sidescan, putting each raw pixel into
-			the binning arrays */
-		sample_type_amp = beam->sample_type & 15;
-		for (i=0;i<beam->number_beams;i++)
+		/* use current generation snippet data */
+		if (source == R7KRECID_7kV2SnippetData && v2snippet->error_flag == MB_NO)
 			{
-			snippet = &(beam->snippets[i]);
-			if (sample_type_amp == 1)
-				charptr = (char *)snippet->amplitude;
-			else if (sample_type_amp == 2)
-				ushortptr = (unsigned short *)snippet->amplitude;
-			else if (sample_type_amp == 3)
-				uintptr = (unsigned int *)snippet->amplitude;
-			if ((bathymetry->quality[i] & 15) == 15
-				&& snippet->end_sample > snippet->begin_sample)
-			    {
-			    nsample = snippet->end_sample - snippet->begin_sample + 1;
-			    altitude = bathymetry->depth[i] + bathymetry->vehicle_height;
-			    xtrack = bathymetry->acrosstrack[i];
-			    range = 0.5 * soundspeed * bathymetry->range[i];
-			    angle = RTD * beamgeometry->angle_acrosstrack[i];
-			    beam_foot = range * sin(DTR * beamwidth)
-						    / cos(DTR * angle);
-			    sint = fabs(sin(DTR * angle));
-			    nsample_use = beam_foot / ss_spacing;
-			    if (sint < nsample_use * ss_spacing / beam_foot)
-				ss_spacing_use = beam_foot / nsample_use;
-			    else
-				ss_spacing_use = ss_spacing / sint;
+			for (i=0;i<v2snippet->number_beams;i++)
+				{
+				snippettimeseries = (s7kr_v2snippettimeseries *)&(v2snippet->snippettimeseries[i]);
+				ibeam = snippettimeseries->beam_number;
+
+				/* only use snippets from non-null and unflagged beams */
+				if (mb_beam_ok(beamflag[ibeam]))
+					{
+					nsample = snippettimeseries->end_sample - snippettimeseries->begin_sample + 1;
+					altitude = bathymetry->depth[ibeam] + bathymetry->vehicle_height;
+					xtrack = bathymetry->acrosstrack[ibeam];
+					range = 0.5 * soundspeed * bathymetry->range[ibeam];
+					angle = RTD * beamgeometry->angle_acrosstrack[ibeam];
+					beam_foot = range * sin(DTR * beamwidth)
+								/ cos(DTR * angle);
+					sint = fabs(sin(DTR * angle));
+					nsample_use = beam_foot / ss_spacing;
+					if (sint < nsample_use * ss_spacing / beam_foot)
+					    ss_spacing_use = beam_foot / nsample_use;
+					else
+					    ss_spacing_use = ss_spacing / sint;
+/* fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
+ss_spacing, ss_spacing_use,
+nsample_use, sint, angle, range, beam_foot,
+nsample_use * ss_spacing / beam_foot); */
+					sample_start = MAX(((int)snippettimeseries->detect_sample - (nsample_use / 2)),
+								(int)snippettimeseries->begin_sample);
+					sample_end = MIN(((int)snippettimeseries->detect_sample + (nsample_use / 2) - 1),
+								(int)snippettimeseries->end_sample);
+					for (k=sample_start;k<=sample_end;k++)
+						{
+						if (xtrack < 0.0)
+							xtrackss = xtrack - ss_spacing_use * (k - (int)snippettimeseries->detect_sample);
+						else
+							xtrackss = xtrack + ss_spacing_use * (k - (int)snippettimeseries->detect_sample);
+						kk = nss / 2
+						    + (int)(xtrackss / (*pixel_size));
+						kk = MIN(MAX(0,kk), nss-1);
+						ss[kk]  += (double) snippettimeseries->amplitude[k-(int)snippettimeseries->begin_sample];
+						ssalongtrack[kk] += bathymetry->alongtrack[i];
+						ss_cnt[kk]++;
+/* fprintf(stderr,"k:%d detect:%d xtrack:%f xtrackss:%f kk:%d ss:%f ss_cnt:%d\n",
+k,snippettimeseries->detect_sample,xtrack,xtrackss,kk,ss[kk],ss_cnt[kk]); */
+						}
+					}
+				}
+			}
+
+		/* use old snippet data */
+		else if (source == R7KRECID_7kBeamData)
+			{
+			for (i=0;i<beam->number_beams;i++)
+				{
+				snippet = (s7kr_snippet *)&(beam->snippets[i]);
+				ibeam = snippet->beam_number;
+
+				/* only use snippets from non-null and unflagged beams */
+				if (mb_beam_ok(beamflag[ibeam]))
+					{
+					nsample = snippet->end_sample - snippet->begin_sample + 1;
+					altitude = bathymetry->depth[ibeam] + bathymetry->vehicle_height;
+					xtrack = bathymetry->acrosstrack[ibeam];
+					range = 0.5 * soundspeed * bathymetry->range[ibeam];
+					angle = RTD * beamgeometry->angle_acrosstrack[ibeam];
+					beam_foot = range * sin(DTR * beamwidth)
+								/ cos(DTR * angle);
+					sint = fabs(sin(DTR * angle));
+					nsample_use = beam_foot / ss_spacing;
+					if (sint < nsample_use * ss_spacing / beam_foot)
+					    ss_spacing_use = beam_foot / nsample_use;
+					else
+					    ss_spacing_use = ss_spacing / sint;
 /*fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
 ss_spacing, ss_spacing_use,
 nsample_use, sint, angle, range, beam_foot,
 nsample_use * ss_spacing / beam_foot);*/
-			    sample_start = (nsample / 2) - (nsample_use / 2);
-			    sample_end = (nsample / 2) + (nsample_use / 2) - 1;
-			    for (k=sample_start;k<=sample_end;k++)
-				{
-				if (xtrack < 0.0)
-					xtrackss = xtrack - ss_spacing_use * (k - nsample / 2);
-				else
-					xtrackss = xtrack + ss_spacing_use * (k - nsample / 2);
-				kk = MBSYS_RESON7K_MAX_PIXELS / 2
-				    + (int)(xtrackss / (*pixel_size));
-				kk = MIN(MAX(0,kk), MBSYS_RESON7K_MAX_PIXELS-1);
-				if (sample_type_amp == 1)
-					ss[kk]  += (double) charptr[k];
-				else if (sample_type_amp == 2)
-					ss[kk]  += (double) ushortptr[k];
-				else if (sample_type_amp == 3)
-					ss[kk]  += (double) uintptr[k];
-				ssacrosstrack[kk] += xtrackss;
-				ssalongtrack[kk] += bathymetry->alongtrack[i];
-				ss_cnt[kk]++;
-/* fprintf(stderr,"k:%d kk:%d ss:%f ss_cnt:%d\n",
-k,kk,ss[kk],ss_cnt[kk]);*/
+					sample_detect = volatilesettings->sample_rate * bathymetry->range[ibeam];
+					sample_start = sample_detect - (nsample_use / 2);
+					sample_end = sample_detect + (nsample_use / 2) - 1;
+					if ((beam->sample_type & 15) == 3)
+						data_uint = (unsigned int *) snippet->amplitude;
+					else if ((beam->sample_type & 15) == 2)
+						data_ushort = (unsigned short *) snippet->amplitude;
+					else
+						data_uchar = (mb_u_char *) snippet->amplitude;
+					for (k=sample_start;k<=sample_end;k++)
+						{
+						if (xtrack < 0.0)
+							xtrackss = xtrack - ss_spacing_use * (k - sample_detect);
+						else
+							xtrackss = xtrack + ss_spacing_use * (k - sample_detect);
+						kk = nss / 2
+						    + (int)(xtrackss / (*pixel_size));
+						kk = MIN(MAX(0,kk), nss-1);
+						if ((beam->sample_type & 15) == 3)
+							ss[kk]  += (double) data_uint[k-snippet->begin_sample];
+						else if ((beam->sample_type & 15) == 2)
+							ss[kk]  += (double) data_ushort[k-snippet->begin_sample];
+						else
+							ss[kk]  += (double) data_uchar[k-snippet->begin_sample];
+						ssalongtrack[kk] += bathymetry->alongtrack[ibeam];
+						ss_cnt[kk]++;
+/* fprintf(stderr,"k:%d kk:%d ss:%f ss_cnt:%d\n", k,kk,ss[kk],ss_cnt[kk]);*/
+						}
+					}
 				}
-			    }
+			}
+
+		/* use backscatter record - basically a pseudosidescan */
+		else if (source == R7KRECID_7kBackscatterImageData)
+			{
+			/* get acrosstrack distance versus range table from bathymetry */
+			nrangetable = 0;
+			for (i=bathymetry->number_beams-1;i>=0;i--)
+				{
+				if (mb_beam_ok(beamflag[i]))
+					{
+					rangetable[nrangetable] = bathymetry->range[i];
+					acrosstracktable[nrangetable] = bathymetry->acrosstrack[i];
+					alongtracktable[nrangetable] = bathymetry->alongtrack[i];
+					if (nrangetable == 0 || fabs(acrosstracktable[nrangetable]) < acrosstracktablemin)
+						{
+						irangenadir = nrangetable;
+						acrosstracktablemin = fabs(acrosstracktable[nrangetable]);
+						}
+					nrangetable++;
+					}
+				}
+
+			/* lay out port side */
+			data_uchar = (mb_u_char *) backscatter->port_data;
+			data_ushort = (unsigned short *) backscatter->port_data;
+			data_uint = (unsigned int *) backscatter->port_data;
+			sample_start = rangetable[irangenadir] * volatilesettings->sample_rate;
+			sample_end = MIN(rangetable[0] * volatilesettings->sample_rate, backscatter->number_samples - 1);
+			irange = irangenadir;
+			for (i=sample_start;i<sample_end;i++)
+				{
+				range = ((double)i) / ((double)volatilesettings->sample_rate);
+				found = MB_NO;
+				for (j=irange;j>0 && found == MB_NO;j--)
+					{
+					if (range >= rangetable[j] && range < rangetable[j-1])
+						{
+						irange = j;
+						found = MB_YES;
+						}
+					}
+				factor = (range - rangetable[irange])
+							/ (rangetable[irange-1] - rangetable[irange]);
+				xtrackss = acrosstracktable[irange]
+						+ factor * (acrosstracktable[irange-1] - acrosstracktable[irange]);
+				ltrackss = alongtracktable[irange]
+						+ factor * (alongtracktable[irange-1] - alongtracktable[irange]);
+				kk = nss / 2 + (int)(xtrackss / (*pixel_size));
+				if (kk >= 0 && kk < nss)
+					{
+					if (backscatter->sample_size == 1)
+						ss[kk]  += (double) data_uchar[i];
+					else if (backscatter->sample_size == 2)
+						ss[kk]  += (double) data_ushort[i];
+					else
+						ss[kk]  += (double) data_uint[i];
+					ssalongtrack[kk] += ltrackss;
+					ss_cnt[kk]++;
+					}
+				}
+
+			/* lay out starboard side */
+			data_uchar = (mb_u_char *) backscatter->stbd_data;
+			data_ushort = (unsigned short *) backscatter->stbd_data;
+			data_uint = (unsigned int *) backscatter->stbd_data;
+			sample_start = rangetable[irangenadir] * volatilesettings->sample_rate;
+			sample_end = MIN(rangetable[nrangetable-1] * volatilesettings->sample_rate, backscatter->number_samples - 1);
+			irange = irangenadir;
+			for (i=sample_start;i<sample_end;i++)
+				{
+				range = ((double)i) / ((double)volatilesettings->sample_rate);
+				found = MB_NO;
+				for (j=irange;j<nrangetable-1 && found == MB_NO;j++)
+					{
+					if (range >= rangetable[j] && range < rangetable[j+1])
+						{
+						irange = j;
+						found = MB_YES;
+						}
+					}
+				factor = (range - rangetable[irange])
+							/ (rangetable[irange+1] - rangetable[irange]);
+				xtrackss = acrosstracktable[irange]
+						+ factor * (acrosstracktable[irange+1] - acrosstracktable[irange]);
+				ltrackss = alongtracktable[irange]
+						+ factor * (alongtracktable[irange+1] - alongtracktable[irange]);
+				kk = nss / 2 + (int)(xtrackss / (*pixel_size));
+				if (kk >= 0 && kk < nss)
+					{
+					if (backscatter->sample_size == 1)
+						ss[kk]  += (double) data_uchar[i];
+					else if (backscatter->sample_size == 2)
+						ss[kk]  += (double) data_ushort[i];
+					else
+						ss[kk]  += (double) data_uint[i];
+					ssalongtrack[kk] += ltrackss;
+					ss_cnt[kk]++;
+					}
+				}
+
+
 			}
 
 		/* average the sidescan */
-		first = MBSYS_RESON7K_MAX_PIXELS;
+		first = nss;
 		last = -1;
-		for (k=0;k<MBSYS_RESON7K_MAX_PIXELS;k++)
+		for (k=0;k<nss;k++)
 			{
 			if (ss_cnt[k] > 0)
 				{
 				ss[k] /= ss_cnt[k];
 				ssalongtrack[k] /= ss_cnt[k];
-				ssacrosstrack[k]
-					= (k - MBSYS_RESON7K_MAX_PIXELS / 2)
-						* (*pixel_size);
 				first = MIN(first, k);
 				last = k;
 				}
 			else
 				ss[k] = MB_SIDESCAN_NULL;
 			}
-		if (last > first)
-			*nss = MBSYS_RESON7K_MAX_PIXELS;
 
 		/* interpolate the sidescan */
 		k1 = first;
 		k2 = first;
 		for (k=first+1;k<last;k++)
-		    {
-		    if (ss_cnt[k] <= 0)
 			{
-			if (k2 <= k)
-			    {
-			    k2 = k+1;
-			    while (ss_cnt[k2] <= 0 && k2 < last)
-				k2++;
-			    }
-			if (k2 - k1 <= pixel_int_use)
-			    {
-			    ss[k] = ss[k1]
-				+ (ss[k2] - ss[k1])
-				    * ((double)(k - k1)) / ((double)(k2 - k1));
-			    ssacrosstrack[k]
-				    = (k - MBSYS_RESON7K_MAX_PIXELS / 2)
-					    * (*pixel_size);
-			    ssalongtrack[k] = ssalongtrack[k1]
-				+ (ssalongtrack[k2] - ssalongtrack[k1])
-				    * ((double)(k - k1)) / ((double)(k2 - k1));
-			    }
+			if (ss_cnt[k] <= 0)
+				{
+				if (k2 <= k)
+					{
+					k2 = k+1;
+					while (ss_cnt[k2] <= 0 && k2 < last)
+					    k2++;
+					}
+				if (k2 - k1 <= pixel_int_use)
+					{
+					ss[k] = ss[k1] + (ss[k2] - ss[k1])
+						* ((double)(k - k1)) / ((double)(k2 - k1));
+					ssacrosstrack[k] = (k - nss / 2) * (*pixel_size);
+					ssalongtrack[k] = ssalongtrack[k1]
+								+ (ssalongtrack[k2] - ssalongtrack[k1])
+									* ((double)(k - k1)) / ((double)(k2 - k1));
+					}
+				}
+			else
+				{
+				k1 = k;
+				 }
 			}
-		    else
+
+		/* embed the sidescan into the processed sidescan record */
+		store->read_processedsidescan = MB_YES;
+		processedsidescan->header = bathymetry->header;
+		processedsidescan->header.Offset = R7KRECID_ProcessedSidescan;
+		processedsidescan->header.Size = MBSYS_RESON7K_RECORDHEADER_SIZE
+							+ MBSYS_RESON7K_RECORDTAIL_SIZE
+							+ R7KHDRSIZE_ProcessedSidescan
+							+ nss * 8;
+		processedsidescan->header.OffsetToOptionalData = 0;
+		processedsidescan->header.OptionalDataIdentifier = 0;
+		processedsidescan->header.RecordType = R7KRECID_ProcessedSidescan;
+		processedsidescan->serial_number = bathymetry->serial_number;
+		processedsidescan->ping_number = bathymetry->ping_number;
+		processedsidescan->multi_ping = bathymetry->multi_ping;
+		processedsidescan->recordversion = 1;
+		processedsidescan->ss_source = source;
+		processedsidescan->number_pixels = nss;
+		processedsidescan->ss_type = MB_SIDESCAN_LINEAR;
+		processedsidescan->pixelwidth = *pixel_size;
+		processedsidescan->sonardepth = -bathymetry->vehicle_height + reference->water_z;
+		processedsidescan->altitude = bathymetry->depth[iminxtrack] - processedsidescan->sonardepth;
+		for (i=0;i<MBSYS_RESON7K_MAX_PIXELS;i++)
 			{
-			k1 = k;
+			processedsidescan->sidescan[i] = ss[i];
+			processedsidescan->alongtrack[i] = ssalongtrack[i];
 			}
-		    }
 
 		/* print debug statements */
 		if (verbose >= 2)
 			{
 			fprintf(stderr,"\ndbg2  Sidescan regenerated in <%s>\n",
 				function_name);
-			fprintf(stderr,"dbg2       pixels_ss:  %d\n", *nss);
-			for (i=0;i<*nss;i++)
+			fprintf(stderr,"dbg2       pixels_ss:  %d\n", nss);
+			for (i=0;i<nss;i++)
 			  fprintf(stderr,"dbg2       pixel:%4d  cnt:%3d  ss:%10f  xtrack:%10f  ltrack:%10f\n",
 				i,ss_cnt[i],ss[i],
 				ssacrosstrack[i],

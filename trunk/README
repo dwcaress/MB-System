@@ -28,6 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+  Version 5.3.1994       October 27, 2012
   Version 5.3.1988       September 29, 2012
   Version 5.3.1986       September 12, 2012
 * Version 5.3.1982       August 15, 2012
@@ -159,7 +160,7 @@ All Wrongs Remembered
 The MB-System source code is distributed under the GNU
 General Public License as formulated by the GNU Project.
 Early MB-System distributions were described as "public
-domain", which meant there was no restrictions whatsoever
+domain", which meant there was no restriction whatsoever
 on the use of the code. For over a decade we have adopted the
 more restrictive GNU GPL license in order to insure that
 anyone who distributes software based in whole or in part on
@@ -178,6 +179,31 @@ System release 4.6 distributions.
    2) The software product was sold and delivered to
 customers prior to January 1, 2001.
 
+The MB-System distribution includes some source code derived
+from packages that are distributed separately and have been
+authored by programmers other than the MB-System team. This includes:
+   - The Generic Sensor Format (GSF) library source located in
+     mbsystem/src/gsf. The GSF package is distributed by the
+     Science Applications International Corporation under contract
+     to the Naval Oceanographic Office.
+   - The SURF API (SAPI) library source located in mbsystem/src/surf.
+     The SAPI package has been released under the GNU General Public
+     License by Atlas Hydrographic.
+   - The MR1PR library source located in mbsystem/src/mr1pr. This
+     package has been openly released by the Hawaii Mapping
+     Research Group.
+   - The PROJ.4 library source located in mbsystem/src/proj.
+     This package was originally developed by Gerald Evenden
+     of the United States Geological Survey, and is now maintained
+     and distributed under an MIT license (that is very close to
+     public domain) by Frank Warmerdam in association with the Open
+     Source Geospational Foundation
+   - The mb_mergesort() function found in mbsystem/src/mbio/mb_esf.c
+     derives from the GNU-Darwin Distribution. This code is released
+     under both the Apple Public Source License Version 1.1 and the
+     BSD license, with original copyright by the Regents of the
+     University of California.
+
 The MB-System does not come with any warranties, nor is it
 guarenteed to work on your computer or to do anything useful. The
 user assumes full responsibility for the use of this system. In
@@ -190,6 +216,44 @@ that may follow from correct or incorrect use of these programs.
 
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
+
+-----> 5.3.1994 (October 27, 2012)
+
+Mbfilter: when filtering sidescan the output file now includes any bathymetry available in the
+original file. The bathymetry can be used by mbmosaic for calculating apparent grazing
+angles and data priorities.
+
+Mbmosaic: substantially rewrote the calculation of apparent grazing angle for sidescan
+data to be more reliable and to optionally use a topographic model supplied by a
+topography grid (specified with the -T option).
+
+Mb7k2ss: removed functions associated with laying out sidescan on a 3D topographic
+model. These functions are now found in src/mbaux/mb_intersectgrid.c.
+
+Format 88 (mbf_reson7kr) and mb7kpreprocess: added support for multibeam sidescan
+derived from either the backscatter records or the snippet records. The snippets are
+generally better, and are the default source when . The program mb7kpreprocess can be
+set to generate the multibeam sidescan from either record type. The multibeam sidescan is stored using
+MB-System-only "processed sidescan" records as an MB-System-specific extension
+to the 7k format.
+
+libmbaux: added functions to the mbaux library that locate the intersection of
+arbitrary vectors from a sonar platform with a topographic grid. This code is
+located in src/mbaux/mb_intersectgrid.c, and includes functions formerly found
+in src/utilities/mb7k2ss.c. These functions are now used to lay sidescan out
+on a seafloor topographic model and to calculate the apparent grazing angles
+needed for angle-based priority calculation in mbmosaic.
+
+Mbgrid: fixed -Cclip[/mode] option so that -C0/3 will in fact fully interpolate
+the resulting grid.
+
+Format 88 (mbf_reson7kr): fixed travel time and angle calculation for current
+generation data using v2detectionsetup data records.
+
+Mbgrid and mbmosaic: Added -Rfactor option that will allow users to specify that
+the output grid extent will be the data extent expanded by a multiplicitive
+factor. For instance, specifying factor = 1.1 means the grid is expanded 5% to
+the west, east, south and north for a total expansion of 0.1 or 10%.
 
 -----> 5.3.1989 (October 4, 2012)
 

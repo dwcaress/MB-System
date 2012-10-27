@@ -155,7 +155,6 @@
 
 /* 2000-2999 reserved for user defined records */
 #define R7KRECID_XYZ					2000
-#define R7KRECID_MB-SystemSidescan			2900
 
 /* 3000-6999 reserved for other vendor records */
 #define R7KRECID_FSDWsidescan				3000
@@ -165,6 +164,7 @@
 #define R7KRECID_Bluefin				3100
 #define R7KRECID_BluefinNav				0
 #define R7KRECID_BluefinEnvironmental			1
+#define R7KRECID_ProcessedSidescan		        3199
 
 /* 7000-7999 reserved for SeaBat 7k records */
 #define R7KRECID_7kVolatileSonarSettings		7000
@@ -258,6 +258,7 @@
 #define R7KHDRSIZE_FSDWchannelinfo				64
 #define R7KHDRSIZE_FSDWssheader					80
 #define R7KHDRSIZE_FSDWsbheader					240
+#define R7KHDRSIZE_ProcessedSidescan    			48
 
 /* 7000-7999 reserved for SeaBat 7k records */
 #define R7KHDRSIZE_7kVolatileSonarSettings			156
@@ -1137,6 +1138,42 @@ typedef struct s7kr_bluefin_struct
 }
 s7kr_bluefin;
 
+/* Processed sidescan - MB-System extension to 7k format (record 3199) */
+typedef struct s7kr_processedsidescan_struct
+{
+	s7k_header	header;
+	mb_u_long	serial_number;		/* Sonar serial number */
+	unsigned int	ping_number;		/* Sequential number */
+	unsigned short	multi_ping;		/* Flag to indicate multi-ping mode
+							0 = no multi-ping
+							>0 = sequence number of ping
+								in the multi-ping
+								sequence */
+        unsigned short  recordversion;          /* allows for progression of versions of this data record
+                                                    version = 1: initial version as of 8 October 2012 */
+        unsigned int    ss_source;              /* Source of raw backscatter for this sidescan that has
+                                                    been laid out on the seafloor:
+                                                        ss_source = 0:     None
+                                                        ss_source = 1:     Non-Reson sidescan
+                                                        ss_source = 7007:  7kBackscatterImageData
+                                                        ss_source = 7008:  7kBeamData
+                                                        ss_source = 7028:  7kV2SnippetData */
+	unsigned int	number_pixels;		/* Number of sidescan pixels across the entire swath */
+	unsigned int	ss_type;		/* indicates if sidescan values are logarithmic or linear
+                                                    ss_type = 0: logarithmic (dB)
+                                                    ss_type = 1: linear (voltage) */
+	float		pixelwidth;		/* Pixel acrosstrack width in m
+                                                    Acrosstrack distance of each pixel given by
+                                                        acrosstrack = (ipixel - number_pixels / 2) * pixelwidth
+                                                    where i = pixel number and N is the total number
+                                                    of pixels, counting from port to starboard starting at 0 */
+	double		sonardepth;		/* Sonar depth in m */
+	double		altitude;		/* Sonar nadir altitude in m */
+	float		sidescan[MBSYS_RESON7K_MAX_PIXELS];		/* Depth releative to chart datum in meters */
+	float		alongtrack[MBSYS_RESON7K_MAX_PIXELS];	/* Alongtrack distance in meters */
+}
+s7kr_processedsidescan;
+
 /* Reson 7k volatile sonar settings (record 7000) */
 typedef struct s7kr_volatilesettings_struct
 {
@@ -1477,21 +1514,6 @@ typedef struct s7kr_beam_struct
 								0 = Beam formed data
 								1 = Element data */
 	s7kr_snippet	snippets[MBSYS_RESON7K_MAX_RECEIVERS];
-	unsigned int	optionaldata;		/* Flag indicating if values below filled in
-								0 = No
-								1 = Yes
-							This is an internal MB-System flag, not
-							a value in the data format */
-	float		frequency;		/* Ping frequency in Hz */
-	double		latitude;		/* Latitude of vessel reference point
-							in radians, -pi/2 to +pi/2 */
-	double		longitude;		/* Longitude of vessel reference point
-							in radians, -pi to +pi */
-	float		heading;		/* Heading of vessel at transmit time
-							in radians */
-	float		alongtrack[MBSYS_RESON7K_MAX_BEAMS];	/* Alongtrack distance in meters */
-	float		acrosstrack[MBSYS_RESON7K_MAX_BEAMS];	/* Acrosstrack distance in meters */
-	unsigned int	center_sample[MBSYS_RESON7K_MAX_BEAMS];	/* Sample number at detection point of beam */
 }
 s7kr_beam;
 
@@ -2194,6 +2216,7 @@ struct mbsys_reson7k_struct
 	int		read_v2detection;
 	int		read_v2rawdetection;
 	int		read_v2snippet;
+	int		read_processedsidescan;
 
 	/* MB-System time stamp */
 	double		time_d;
@@ -2265,6 +2288,9 @@ struct mbsys_reson7k_struct
 
 	/* Bluefin data frames (record 3100) */
 	s7kr_bluefin	bluefin;
+
+        /* Processed sidescan - MB-System extension to 7k format (record 3199) */
+	s7kr_processedsidescan   processedsidescan;
 
 	/* Reson 7k volatile sonar settings (record 7000) */
 	s7kr_volatilesettings	volatilesettings;
@@ -2388,6 +2414,10 @@ int mbsys_reson7k_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
 int mbsys_reson7k_pingnumber(int verbose, void *mbio_ptr,
 			int *pingnumber, int *error);
+int mbsys_reson7k_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error);
+int mbsys_reson7k_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *ss_type, int *error);
 int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
@@ -2477,12 +2507,9 @@ int mbsys_reson7k_copy(int verbose, void *mbio_ptr,
 			int *error);
 int mbsys_reson7k_checkheader(s7k_header header);
 int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
-			int pixel_size_set, double *pixel_size,
+			int source, int pixel_size_set, double *pixel_size,
 			int swath_width_set, double *swath_width,
-			int pixel_int,
-			int *nss, double *ss,
-			double *ssacrosstrack, double *ssalongtrack,
-			int *error);
+			int pixel_int, int *error);
 int mbsys_reson7k_print_header(int verbose,
 			s7k_header *header,
 			int *error);
@@ -2557,6 +2584,9 @@ int mbsys_reson7k_print_fsdwsb(int verbose,
 			int *error);
 int mbsys_reson7k_print_bluefin(int verbose,
 			s7kr_bluefin *bluefin,
+			int *error);
+int mbsys_reson7k_print_processedsidescan(int verbose,
+			s7kr_processedsidescan *processedsidescan,
 			int *error);
 int mbsys_reson7k_print_volatilesettings(int verbose,
 			s7kr_volatilesettings *volatilesettings,

@@ -6526,9 +6526,13 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 								sscorrtableuse.amplitude,
 								angle, &correction, &error);
 						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
-				    			ss[i] = ss[i] - correction + reference_amp;
+				    			{
+                                                        ss[i] = ss[i] - correction + reference_amp;
+                                                        }
 						else
-				    			ss[i] = ss[i] / correction * reference_amp;
+				    			{
+                                                        ss[i] = ss[i] / correction * reference_amp;
+                                                        }
 			    			}
 					}
 				}
