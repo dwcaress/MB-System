@@ -1940,7 +1940,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 
 				/* write the record */
 				nwritesslo++;
-				mb_write_ping(5, ombio_ptr, (void *)ostore, &error);
+				mb_write_ping(verbose, ombio_ptr, (void *)ostore, &error);
 				}
 			}
 
