@@ -2990,7 +2990,6 @@ sonardepth_sonardepth[nsonardepth]);*/
 				{
 				edget_time_d[nedget] = time_d;
 				edget_ping[nedget] = fsdwssheader->pingNum;
-				nedget++;
 
 				/* grab the last reson ping time if it exists */
 				if (nbatht > 1)
@@ -3005,6 +3004,7 @@ sonardepth_sonardepth[nsonardepth]);*/
 					edget_ping_offset[nedget] = 0;
 					edget_good_offset[nedget] = MB_NO;
 					}
+				nedget++;
 				}
 			sslo_last_time_d = time_d;
 			sslo_last_ping = fsdwssheader->pingNum;
