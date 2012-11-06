@@ -2903,7 +2903,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		}
 
-	/* extract data from attitude structure */
+	/* extract data from netattitude structure */
 	else if (store->type == EM3_NETATTITUDE
 		&& store->netattitude != NULL)
 		{

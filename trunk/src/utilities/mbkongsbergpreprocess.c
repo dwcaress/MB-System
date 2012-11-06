@@ -93,6 +93,7 @@ int main (int argc, char **argv)
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format = 0;
+	int	oformat = 0;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -588,7 +589,11 @@ int main (int argc, char **argv)
 	    }
 
 	/* loop over all files to be read */
-	while (read_data == MB_YES && format == MBF_EM710RAW)
+	while (read_data == MB_YES &&
+	       (format == MBF_EM300RAW
+		|| format == MBF_EM300MBA
+		|| format == MBF_EM710RAW
+		|| format == MBF_EM710MBA))
 	{
 	/* initialize reading the swath file */
 	if ((status = mb_read_init(
@@ -724,7 +729,23 @@ int main (int argc, char **argv)
 			/* get survey data structure */
 			ping = (struct mbsys_simrad3_ping_struct *) istore->ping;
 
-			if (format == MBF_EM710RAW)
+			if (format == MBF_EM300RAW)
+				{
+				nrec_0x58_bathymetry2++;
+				if (ping->png_raw4_read == MB_YES)
+					nrec_0x4E_rawbeamN++;
+				if (ping->png_ss2_read == MB_YES)
+					nrec_0x59_sidescan2++;
+				}
+			else if (format == MBF_EM300MBA)
+				{
+				nrec_0xE5_bathymetry_mbari59++;
+				if (ping->png_raw4_read == MB_YES)
+					nrec_0x4E_rawbeamN++;
+				if (ping->png_ss2_read == MB_YES)
+					nrec_0x59_sidescan2++;
+				}
+			else if (format == MBF_EM710RAW)
 				{
 				nrec_0x58_bathymetry2++;
 				if (ping->png_raw4_read == MB_YES)

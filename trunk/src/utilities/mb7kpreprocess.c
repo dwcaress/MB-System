@@ -138,7 +138,7 @@ int main (int argc, char **argv)
 {
 	char program_name[] = "mb7kpreprocess";
 	char help_message[] =  "mb7kpreprocess reads a Reson 7k format file, interpolates the\nasynchronous navigation and attitude onto the multibeam data, \nand writes a new 7k file with that information correctly embedded\nin the multibeam data. This program can also fix various problems\nwith 7k data.";
-	char usage_message[] = "mb7kpreprocess [-A -B -Doffx/offy -Fformat -Ifile -Kklugemode -L  -Ninsfile  -Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ssidescansource -Ttimelag -H -V]";
+	char usage_message[] = "mb7kpreprocess [-A -B -Crollbias/pitchbias -Doffx/offy -Fformat -Ifile -Kklugemode -L  -Ninsfile  -Ooutfile [-Psonardepthfile | -Plagmax/ratemax] -Ssidescansource -Ttimelag -H -V]";
 	extern char *optarg;
 	int	errflg = 0;
 	int	c;
@@ -508,6 +508,10 @@ int main (int argc, char **argv)
 	double	sonardepthlag = 0.0;
 	double	sonardepthrate;
 
+	/* roll and pitch bias parameters */
+	double	rollbias = 0.0;
+	double	pitchbias = 0.0;
+
 	/* multibeam sidescan parameters */
 	int	ss_source = R7KRECID_None;
 
@@ -608,7 +612,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "AaB:b:D:d:F:f:I:i:K:k:LlM:m:N:n:O:o:P:p:R:r:S:s:T:t:W:w:VvHh")) != -1)
+	while ((c = getopt(argc, argv, "AaB:b:C:c:D:d:F:f:I:i:K:k:LlM:m:N:n:O:o:P:p:R:r:S:s:T:t:W:w:VvHh")) != -1)
 	  switch (c)
 		{
 		case 'H':
@@ -627,6 +631,10 @@ int main (int argc, char **argv)
 		case 'B':
 		case 'b':
 			sscanf (optarg,"%d", &fix_time_stamps);
+			break;
+		case 'C':
+		case 'c':
+			sscanf (optarg,"%lf/%lf", &rollbias,&pitchbias);
 			break;
 		case 'D':
 		case 'd':
@@ -869,6 +877,8 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       sonardepthoffset:       %f\n",sonardepthoffset);
 		fprintf(stderr,"dbg2       depthsensoroffx:        %f\n",depthsensoroffx);
 		fprintf(stderr,"dbg2       depthsensoroffz:        %f\n",depthsensoroffz);
+		fprintf(stderr,"dbg2       rollbias:               %f\n",rollbias);
+		fprintf(stderr,"dbg2       pitchbias:              %f\n",pitchbias);
 		for (i=0;i<nrangeoffset;i++)
 			fprintf(stderr,"dbg2       rangeoffset[%d]:         %d %d %f\n",
 				i,rangeoffsetstart[i], rangeoffsetend[i], rangeoffset[i]);
@@ -4897,8 +4907,8 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 							bathymetry->range[i] = v2rawdetection->detection_point[j]
 										/ v2rawdetection->sampling_rate;
 							bathymetry->quality[i] = v2rawdetection->quality[j];
-							alpha = RTD * pitchr;
-							beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - rollr);
+							alpha = RTD * pitchr + pitchbias;
+							beta = 90.0 - RTD * (v2rawdetection->rx_angle[j] - rollr) + rollbias;
 							mb_rollpitch_to_takeoff(
 								verbose,
 								alpha, beta,
@@ -4926,8 +4936,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 						for (i=0;i<v2detection->number_beams;i++)
 							{
 							bathymetry->range[i] = v2detection->range[i];
-							alpha = RTD * (v2detection->angle_y[i] + pitchr);
-							beta = 90.0 - RTD * (v2detection->angle_x[i] - rollr);
+							alpha = RTD * (v2detection->angle_y[i] + pitchr) + pitchbias;
+							beta = 90.0 - RTD * (v2detection->angle_x[i] - rollr) + rollbias;
 							mb_rollpitch_to_takeoff(
 								verbose,
 								alpha, beta,
@@ -4956,8 +4966,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 							{
 							if ((bathymetry->quality[i] & 15) > 0)
 								{
-								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr);
-								beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - rollr);
+								alpha = RTD * (beamgeometry->angle_alongtrack[i] + pitchr) + pitchbias;
+								beta = 90.0 - RTD * (beamgeometry->angle_acrosstrack[i] - rollr) + rollbias;
 								mb_rollpitch_to_takeoff(
 									verbose,
 									alpha, beta,
