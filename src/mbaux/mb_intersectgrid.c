@@ -74,47 +74,57 @@ int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
 				&topogrid->xmin, &topogrid->xmax, &topogrid->ymin, &topogrid->ymax,
 				&topogrid->dx, &topogrid->dy, &topogrid->data, NULL, NULL, error);
 
-	/* rationalize topogrid bounds and lonflip */
-	if (*lonflip == -1)
+	/* check for reasonable results */
+	if (topogrid->nxy <= 0 || topogrid->data == NULL)
 		{
+		status = MB_FAILURE;
+		*error = MB_ERROR_OPEN_FAIL;
+		}
+
+	/* rationalize topogrid bounds and lonflip */
+	if (status == MB_SUCCESS)
+		{
+		if (*lonflip == -1)
+			{
+			if (topogrid->xmax > 180.0)
+				{
+				topogrid->xmin -= 360.0;
+				topogrid->xmax -= 360.0;
+				}
+			}
+		else if (*lonflip == 0)
+			{
+			if (topogrid->xmin > 180.0)
+				{
+				topogrid->xmin -= 360.0;
+				topogrid->xmax -= 360.0;
+				}
+			else if (topogrid->xmax < -180.0)
+				{
+				topogrid->xmin += 360.0;
+				topogrid->xmax += 360.0;
+				}
+			}
+		else if (*lonflip == 1)
+			{
+			if (topogrid->xmin < -180.0)
+				{
+				topogrid->xmin += 360.0;
+				topogrid->xmax += 360.0;
+				}
+			}
 		if (topogrid->xmax > 180.0)
 			{
-			topogrid->xmin -= 360.0;
-			topogrid->xmax -= 360.0;
+			*lonflip = 1;
 			}
-		}
-	else if (*lonflip == 0)
-		{
-		if (topogrid->xmin > 180.0)
+		else if (topogrid->xmin < -180.0)
 			{
-			topogrid->xmin -= 360.0;
-			topogrid->xmax -= 360.0;
+			*lonflip = -1;
 			}
-		else if (topogrid->xmax < -180.0)
+		else
 			{
-			topogrid->xmin += 360.0;
-			topogrid->xmax += 360.0;
+			*lonflip = 0;
 			}
-		}
-	else if (*lonflip == 1)
-		{
-		if (topogrid->xmin < -180.0)
-			{
-			topogrid->xmin += 360.0;
-			topogrid->xmax += 360.0;
-			}
-		}
-	if (topogrid->xmax > 180.0)
-		{
-		*lonflip = 1;
-		}
-	else if (topogrid->xmin < -180.0)
-		{
-		*lonflip = -1;
-		}
-	else
-		{
-		*lonflip = 0;
 		}
 
 	/* print output debug statements */

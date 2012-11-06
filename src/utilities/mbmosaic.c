@@ -1470,6 +1470,15 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);
 	if (usetopogrid == MB_YES)
 		{
 		status = mb_topogrid_init(verbose, topogridfile, &lonflip, &topogrid_ptr, &error);
+		if (error != MB_ERROR_NO_ERROR)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error loading topography grid: %s\n%s\n",topogridfile,message);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			mb_memory_clear(verbose, &error);
+			exit(error);
+			}
 		}
 
 	/* output info */

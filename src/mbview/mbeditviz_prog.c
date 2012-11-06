@@ -983,6 +983,15 @@ fprintf(stderr,"MEMORY FAILURE in mbeditviz_load_file\n");
 						{
 						ping->beamflag[ibeam] = beamflag[ibeam];
 						ping->beamflagorg[ibeam] = beamflag[ibeam];
+						if (ping->beamflag[ibeam] != MB_FLAG_NULL
+							&& (isnan(bath[ibeam] || isnan(bathacrosstrack[ibeam] || isnan(bathalongtrack[ibeam])))))
+							{
+							ping->beamflag[ibeam] = MB_FLAG_NULL;
+fprintf(stderr,"\nEncountered NaN value in swath data from file: %s\n",swathfile);
+fprintf(stderr,"     Ping time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+	ping->time_i[0],ping->time_i[1],ping->time_i[2],ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6]);
+fprintf(stderr,"     Beam bathymetry: %d %f %f %f\n",ibeam,ping->bath[ibeam],ping->bathacrosstrack[ibeam],ping->bathalongtrack[ibeam]);
+							}
 						if (ping->beamflag[ibeam] != MB_FLAG_NULL)
 							{
 							/* copy bath */
@@ -1828,8 +1837,18 @@ int mbeditviz_beam_position(double navlon, double navlat, double headingx, doubl
 			* acrosstrack
 		    + alongtrack
 			* alongtrack);
-	alpha = asin(alongtrack / range);
-	beta = acos(acrosstrack / range / cos(alpha));
+	if (fabs(range) < 0.001)
+		{
+		alpha = 0.0;
+		beta = 0.5 * M_PI;
+		}
+	else
+		{
+		alpha = asin(MAX(-1.0, MIN(1.0, (alongtrack / range))));
+		beta = acos(MAX(-1.0, MIN(1.0, (acrosstrack / range / cos(alpha)))));
+		}
+	if (bathuse < 0.0)
+		beta = 2.0 * M_PI - beta;
 
 	/* apply roll pitch corrections */
 	alpha += DTR * pitchbias;
@@ -1850,6 +1869,30 @@ int mbeditviz_beam_position(double navlon, double navlat, double headingx, doubl
 	*lat = navlat
 		- headingx * mtodeglat * acrosstrack
 		+ headingy * mtodeglat * alongtrack;
+if (isnan(*bathcorr))
+{
+fprintf(stderr,"\nFunction mbeditviz_beam_position(): Calculated NaN bathcorr\n");
+fprintf(stderr,"     navlon:      %f\n",navlon);
+fprintf(stderr,"     navlat:      %f\n",navlat);
+fprintf(stderr,"     mtodeglon:   %f\n",mtodeglon);
+fprintf(stderr,"     mtodeglat:   %f\n",mtodeglat);
+fprintf(stderr,"     headingx:    %f\n",headingx);
+fprintf(stderr,"     headingy:    %f\n",headingy);
+fprintf(stderr,"     bath:        %f\n",bath);
+fprintf(stderr,"     acrosstrack: %f\n",acrosstrack);
+fprintf(stderr,"     alongtrack:  %f\n",alongtrack);
+fprintf(stderr,"     sonardepth:  %f\n",sonardepth);
+fprintf(stderr,"     rollbias:    %f\n",rollbias);
+fprintf(stderr,"     pitchbias:   %f\n",pitchbias);
+fprintf(stderr,"     bathuse:     %f\n",bathuse);
+fprintf(stderr,"     range:       %f\n",range);
+fprintf(stderr,"     alpha:       %f\n",alpha);
+fprintf(stderr,"     beta:        %f\n",beta);
+fprintf(stderr,"     newbath:     %f\n",newbath);
+fprintf(stderr,"     bathcorr:    %f\n",*bathcorr);
+fprintf(stderr,"     lon:         %f\n",*lon);
+fprintf(stderr,"     lat:         %f\n",*lat);
+}
 
 	/* print output debug statements */
 	if (mbev_verbose >= 2)
@@ -2788,6 +2831,14 @@ int mbeditviz_grid_beam(struct mbev_file_struct *file, struct mbev_ping_struct *
 			{
 			/* get location in grid arrays */
 			kk = i * mbev_grid.ny + j;
+
+if (isnan(ping->bathcorr[ibeam]))
+{
+fprintf(stderr,"\nFunction mbeditviz_grid_beam(): Encountered NaN value in swath data from file: %s\n",file->path);
+fprintf(stderr,"     Ping time: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d\n",
+	ping->time_i[0],ping->time_i[1],ping->time_i[2],ping->time_i[3],ping->time_i[4],ping->time_i[5],ping->time_i[6]);
+fprintf(stderr,"     Beam bathymetry: beam:%d flag:%d bath:<%f %f> acrosstrack:%f alongtrack:%f\n",ibeam,ping->beamflag[ibeam],ping->bath[ibeam],ping->bathcorr[ibeam],ping->bathacrosstrack[ibeam],ping->bathalongtrack[ibeam]);
+}
 
 			/* add to weights and sums */
 			if (beam_ok == MB_YES)

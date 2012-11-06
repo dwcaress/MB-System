@@ -1,4 +1,4 @@
-.TH mb7kpreprocess 1 "26 October 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mb7kpreprocess 1 "30 October 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7kpreprocess\fP - performs preprocessing of Reson 7k multibeam data
 in the 7k format (\fBMBIO\fP format 88).
@@ -7,7 +7,7 @@ in the 7k format (\fBMBIO\fP format 88).
 Version 5.0
 
 .SH SYNOPSIS
-\fBmb7kpreprocess\fP [\fB-A\fP \fB-B\fP \fB-D\fP\fIoffx/offy[/offdepth]\fP \fB-F\fP\fIformat\fP
+\fBmb7kpreprocess\fP [\fB-A\fP \fB-B\fP \fB-C\fP\fIrollbias/pitchbias\fP \fB-D\fP\fIoffx/offy[/offdepth]\fP \fB-F\fP\fIformat\fP
 \fB-I\fIfile \fB-K\fP\fIklugemode\fP \fB-L\fP \fB-M\fP\fIrockfile\fP \fB-N\fP\fIinsfile\fP \fB-O\fP\fIoutfile\fP
 \fB-P\fP\fIsonardepthfile\fP \fB-PF\fP\fIfilterlength/filterdepth\fP
 \fB-T\fP\fItimelag\fP \fB-W\fP\fIdslfile\fP \fB-H -V\fP]
@@ -46,6 +46,13 @@ sonars are all synchronized to ping simulataneously. If \fB-B\fP is specified wi
 the Edgetech data records. If \fB-B\fP is given with \fImode\fP=2, then the Edgetech
 data time stamps will be reset to the values of the multibeam data records. Although the
 sonar computer clocks are supposed to be synchronized, this clock discipline sometimes fails.
+.TP
+.B \-C
+\fIrollbias/pitchbias\fP
+.br
+This option sets the roll and pitch bias of the sonar with respect to the attitude sensor
+in degrees. If specified, these parameters are applied to the sonar attitude data prior to
+the calculation of bathymetry from travel times and angles.
 .TP
 .B \-D
 \fIoffx/offz[/offdepth]\fP

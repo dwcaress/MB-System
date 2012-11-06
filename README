@@ -217,6 +217,25 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+-----> 5.3.1998 (Navember 6, 2012)
+
+Mb7kpreprocess: Added -C option to apply roll bias and pitch bias during preprocessing. Fixed
+rotation calculations so that side-looking and up looking mapping data can be handled
+properly.
+
+Mbmosaic: added checks for valid topography grid file.
+
+Mbprocess: Fixed rotation calculations so that side-looking and up looking mapping data
+can be handled properly.
+
+Mbm_route2mission: added handling of third specified altitude value in AUV missions.
+
+Mbeditviz: Fixed rotation calculations so that side-looking and up looking mapping data
+can be handled properly.
+
+Formats 56 (mbf_em300raw) and 57 (mbf_em300mba): added support for asynchronous attitude
+output, in particular by mbnavlist -K18.
+
 -----> 5.3.1995 (October 27, 2012)
 -----> 5.3.1994 (October 27, 2012)
 

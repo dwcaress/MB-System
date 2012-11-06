@@ -5589,6 +5589,17 @@ bath[i]-zz); */
 			      {
 			      if (beamflag[i] != MB_FLAG_NULL)
 				{
+				/* output some debug messages */
+				if (verbose >= 5)
+				    {
+				    fprintf(stderr,"\ndbg5  Depth value to be calculated in program <%s>:\n",program_name);
+				    fprintf(stderr,"dbg5       kind:  %d\n",kind);
+				    fprintf(stderr,"dbg5       beam:  %d\n",i);
+				    fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
+				    fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
+				    fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
+				    }
+
 				/* add heave and draft */
 				depth_offset_use = bheave[i] + draft + lever_heave;
 				depth_offset_org = bheave[i] + draft_org;
@@ -5603,10 +5614,18 @@ bath[i]-zz); */
 						* bathacrosstrack[i]
 					    + bathalongtrack[i]
 						* bathalongtrack[i]);
-				alpha = asin(bathalongtrack[i]
-					/ range);
-				beta = acos(bathacrosstrack[i]
-					/ range / cos(alpha));
+                                if (fabs(range) < 0.001)
+                                        {
+                                        alpha = 0.0;
+                                        beta = 0.5 * M_PI;
+                                        }
+                                else
+                                        {
+                                        alpha = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
+                                        beta = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alpha)))));
+                                        }
+                                if (bath[i] < 0.0)
+                                        beta = 2.0 * M_PI - beta;
 
 				/* apply roll pitch corrections */
                                 if (process.mbp_nav_attitude == MBP_NAV_ON
@@ -5626,12 +5645,9 @@ bath[i]-zz); */
 			    		beta += DTR * process.mbp_rollbias_port;
 
 				/* recalculate bathymetry */
-				bath[i]
-				    = range * cos(alpha) * sin(beta);
-				bathalongtrack[i]
-				    = range * sin(alpha);
-				bathacrosstrack[i]
-				    = range * cos(alpha) * cos(beta);
+				bath[i] = range * cos(alpha) * sin(beta);
+				bathalongtrack[i] = range * sin(alpha);
+				bathacrosstrack[i] = range * cos(alpha) * cos(beta);
 
 				/* add heave and draft back in */
 				bath[i] += depth_offset_use;
