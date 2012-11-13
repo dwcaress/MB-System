@@ -217,6 +217,16 @@ that may follow from correct or incorrect use of these programs.
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------------
 
+-----> 5.3.1999 (Navember 13, 2012)
+
+Mbm_route2mission: Added multibeam pulse length as a command line argument.
+
+Mbnavadjust: Added capability to solve for a z-offset model in which each
+survey has a uniform or constant z-offset, and then reset all ties automatically using
+those z-offsets.
+
+Format 88 (mbf_reson7kr): Fixed bug that caused seg faults with pings that have no valid soundings.
+
 -----> 5.3.1998 (Navember 6, 2012)
 
 Mb7kpreprocess: Added -C option to apply roll bias and pitch bias during preprocessing. Fixed

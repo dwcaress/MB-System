@@ -253,7 +253,7 @@ if ($help) {
     print "\t\t-Bbehavior -Caborttime -Ddepthconstant[/depthconstant2] -Fforwarddistance -Ggpsmode \r\n";
     print "\t\t-Jdepthprofilefile -Lapproachdepth -M[sonarlist] -N \r\n";
     print "-Omissionfile \r\n\t\t-P[startlon/startlat | startdistance] \r\n";
-    print "\t\t-Rtransmitpower/receivegain[/rangeminfraction] \r\n";
+    print "\t\t-Rtransmitpower/receivegain[/rangeminfraction[/pulsewidth]] \r\n";
     print "\t\t-Tstarttime -Wwaypointspacing -Z -V -H]\r\n";
     exit 0;
 }
@@ -418,14 +418,18 @@ elsif ($spiraldescent)
 	{
 	$spiraldescentaltitude = $altitudedesired;
 	}
-if ($multibeamsettings =~ /\S+\/\S+\/\S+/)
+if ($multibeamsettings =~ /\S+\/\S+\/\S+\/\S+/)
+	{
+	($mb_transmitgain,$mb_receivegain,$mb_minrangefraction,$pulsewidth) = $multibeamsettings =~ /(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+	$mb_pulsewidth = $pulsewidth / 1000000.0;
+	}
+elsif ($multibeamsettings =~ /\S+\/\S+\/\S+/)
 	{
 	($mb_transmitgain,$mb_receivegain,$mb_minrangefraction) = $multibeamsettings =~ /(\S+)\/(\S+)\/(\S+)/;
 	}
 elsif ($multibeamsettings =~ /\S+\/\S+/)
 	{
 	($mb_transmitgain,$mb_receivegain) = $multibeamsettings =~ /(\S+)\/(\S+)/;
-	$mb_minrangefraction = 0.2;
 	}
 if ($mappingsonar && $beamdata)
 	{
@@ -961,8 +965,9 @@ elsif ($verbose)
 		{
 		printf "    Mapping sonar control enabled:          \r\n";
 		printf "                               Multibeam enabled\r\n";
-		printf "                                 Multibeam receive gain:           $mb_receivegain\r\n";
-		printf "                                 Multibeam transmit gain:          $mb_transmitgain\r\n";
+		printf "                                 Multibeam receive gain:           $mb_receivegain dB\r\n";
+		printf "                                 Multibeam transmit gain:          $mb_transmitgain dB\r\n";
+		printf "                                 Multibeam pulse width:            $mb_pulsewidth usec\r\n";
 		printf "                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
 		if ($beamdata)
 			{
@@ -1117,8 +1122,9 @@ if (!$outputoff)
 		{
 		printf MFILE "#     Mapping sonar control enabled:          \r\n";
 		printf MFILE "#                               Multibeam enabled\r\n";
-		printf MFILE "#                                 Multibeam receive gain:           $mb_receivegain\r\n";
-		printf MFILE "#                                 Multibeam transmit gain:          $mb_transmitgain\r\n";
+		printf MFILE "#                                 Multibeam receive gain:           $mb_receivegain dB\r\n";
+		printf MFILE "#                                 Multibeam transmit gain:          $mb_transmitgain dB\r\n";
+		printf MFILE "#                                 Multibeam pulse width:            $mb_pulsewidth usec\r\n";
 		printf MFILE "#                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
 		if ($beamdata)
 			{
