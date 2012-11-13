@@ -1633,17 +1633,14 @@ int main (int argc, char **argv)
 				}
 
 			/* take note of min and maxes */
+			beams_bath_max = MAX(beams_bath_max, beams_bath);
+			beams_amp_max = MAX(beams_amp_max, beams_amp);
+			pixels_ss_max = MAX(pixels_ss_max, pixels_ss);
 			if (pass == 0
 				&& (error == MB_ERROR_NO_ERROR
 				    || error == MB_ERROR_TIME_GAP))
 				{
 				/* update data counts */
-				beams_bath_max
-				    = MAX(beams_bath_max, beams_bath);
-				beams_amp_max
-				    = MAX(beams_amp_max, beams_amp);
-				pixels_ss_max
-				    = MAX(pixels_ss_max, pixels_ss);
 				ntdbeams += beams_bath;
 				ntabeams += beams_amp;
 				ntsbeams += pixels_ss;
