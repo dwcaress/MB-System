@@ -9832,7 +9832,7 @@ int mbsys_reson7k_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		nss = MIN(4 * bathymetry->number_beams, MBSYS_RESON7K_MAX_PIXELS);
 
 		/* get sidescan pixel size */
-		if (swath_width_set == MB_NO)
+		if (swath_width_set == MB_NO && bathymetry->number_beams > 0)
 			{
 			(*swath_width) = MAX(fabs(RTD * beamgeometry->angle_acrosstrack[0]),
 					fabs(RTD * beamgeometry->angle_acrosstrack[bathymetry->number_beams-1]));
