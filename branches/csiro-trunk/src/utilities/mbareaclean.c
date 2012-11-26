@@ -215,16 +215,16 @@ int main (int argc, char **argv)
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
-	char	*beamflag;
-	char	*beamflagorg;
-	int	*detect;
-	double	*bath;
-	double	*amp;
-	double	*bathlon;
-	double	*bathlat;
-	double	*ss;
-	double	*sslon;
-	double	*sslat;
+	char	*beamflag = NULL;
+	char	*beamflagorg = NULL;
+	int	*detect = NULL;
+	double	*bath = NULL;
+	double	*amp = NULL;
+	double	*bathlon = NULL;
+	double	*bathlat = NULL;
+	double	*ss = NULL;
+	double	*sslon = NULL;
+	double	*sslat = NULL;
 	char	comment[MB_COMMENT_MAXLINE];
 
 	/* mbareaclean control parameters */
@@ -759,7 +759,7 @@ int main (int argc, char **argv)
 						sizeof(char), (void **)&beamflag, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
-						sizeof(char), (void **)&detect, &error);
+						sizeof(int), (void **)&detect, &error);
 	if (error == MB_ERROR_NO_ERROR)
 		status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 						sizeof(double), (void **)&bath, &error);
