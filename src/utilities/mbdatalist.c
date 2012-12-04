@@ -152,7 +152,7 @@ int main (int argc, char **argv)
 	strcpy (read_file, "datalist.mb-1");
 
 	/* process argument list */
-	while ((c = getopt(argc, argv, "VvHhCcF:f:I:i:NnOoPpQqR:r:SsUuYyZz")) != -1)
+	while ((c = getopt(argc, argv, "VvHhCcF:f:I:i:L:l:NnOoPpQqR:r:SsUuYyZz")) != -1)
 	  switch (c) 
 		{
 		case 'C':
@@ -174,6 +174,11 @@ int main (int argc, char **argv)
 			sscanf (optarg,"%s", read_file);
 			flag++;
 			break;
+                case 'L':
+                case 'l':
+                        sscanf (optarg,"%d", &lonflip);
+                        flag++;
+                        break;
 		case 'N':
 		case 'n':
 			force_update = MB_YES;
