@@ -51,13 +51,13 @@ if [ -z "$contour" ] ; then
 fi
 
 echo
-echo "Enter any options, eg to restrict to a region -Rwest/east/south/north"
+echo "Enter any options, eg to restrict to a region -Rwest/east/south/north to restrict range -Llow/high"
 read options
 
 out=`basename $grid .grd`.contour$contour
 
 gmtset D_FORMAT %.9lg
-grdcontour $grid -C$contour -Q20 -D$out -M -Jm1:1000 $options > /dev/null 
+grdcontour $grid -C$contour -Q20 -D$out -m -Jm1:1000 $options > /dev/null 
 
 awk '/>/ { print id++ "," $2 ",0,0" }' $out > $out.MID
 

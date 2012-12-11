@@ -107,15 +107,17 @@ west=$1
 east=$2
 south=$3
 north=$4
+step=$5
+[ -z "$step" ] && step=1
 
 export SWATHDIR=/home/swath/mbproc/em300/public_datalist.mb-1
 
 lon=$west
 while [ $lon -lt $east ] ; do
-	nextlon=$[ $lon + 1 ]
+	nextlon=$[ $lon + $step ]
 	lat=$south
 	while [ $lat -lt $north ] ; do
-		nextlat=$[ $lat + 1 ]
+		nextlat=$[ $lat + $step ]
 		export REGION=$lon/$nextlon/$lat/$nextlat
 		region=`echo $REGION | sed s:/:_:g `
 
@@ -124,15 +126,15 @@ while [ $lon -lt $east ] ; do
 		fi
 	
 
-                g=`ls -t *$region*.grd | head -1`
+		g=`ls -t *$region*.grd | head -1`
 		
 		if [ -z "$g" ] ; then
 			rm *$region*mb-1
 		elif [  -f "$g" -a `grdinfo "$g" | grep -c e+308` = 0 ] ; then
 			map_grid backtif
-                        gdaladdo --config COMPRESS_OVERVIEW JPEG --config PHOTOMETRIC_OVERVIEW YCBCR --config INTERLEAVE_OVERVIEW PIXEL back300_0002_${region}_back.tif 2 4 8 16 32 64 128 256
+            gdaladdo --config COMPRESS_OVERVIEW JPEG --config PHOTOMETRIC_OVERVIEW YCBCR --config INTERLEAVE_OVERVIEW PIXEL back300_0002_${region}_back.tif 2 4 8 16 32 64 128 256
 			map_grid back3tif
-                        gdaladdo --config COMPRESS_OVERVIEW JPEG --config PHOTOMETRIC_OVERVIEW YCBCR --config INTERLEAVE_OVERVIEW PIXEL -r nearest back300_0002_${region}_back_3c.tif 2 4 8 16 32 64 128 256
+            daladdo --config COMPRESS_OVERVIEW JPEG --config PHOTOMETRIC_OVERVIEW YCBCR --config INTERLEAVE_OVERVIEW PIXEL -r nearest back300_0002_${region}_back_3c.tif 2 4 8 16 32 64 128 256
 
 		elif [ ! -z "$g" ] ; then
 		
