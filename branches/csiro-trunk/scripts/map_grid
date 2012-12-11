@@ -46,14 +46,15 @@ while [ $gotmaptype = 0 ]; do
 
 		echo 	
 		echo Please enter type of map:
-		echo   "1: Color fill of bathymetry data."
-		echo   "2: Color shaded relief bathymetry. (colour sun illumination)"
-		echo   "3: Color fill of slope data."
+		echo   "1: Colour fill of bathymetry data."
+		echo   "2: Colour shaded relief bathymetry. (colour sun illumination)"
+		echo   "3: Colour fill of slope data."
 		echo   "4: Grayscale fill of amplitude data. (backscatter)"
 		echo   "5: Grayscale fill of sidescan data."
 		echo   "6: Bathymetry shaded using amplitude data."
 		echo   "7: Grayscale relief bathymetry (sun illumination)"
 		echo   "8: Grayscale rendering of SEGY grid"
+		echo   "9: Colour slope shaded bathymetry"
 		echo 
 
 		read MAPTYPE
@@ -113,6 +114,13 @@ while [ $gotmaptype = 0 ]; do
 		MAPTYPENAME=segy
 		gotmaptype=1
 		;;
+
+	9)
+                PLOT_OPTIONS="$PLOT_OPTIONS -G5 -D0/1 -MGS-1"
+                TYPE_NAME=bathymetry
+                MAPTYPENAME=bathy
+                gotmaptype=1
+        ;;
 
 	*)
 		echo Map type not recognised.
@@ -850,14 +858,14 @@ echo
 
 PATH=$PATH:.
 
-if [ -z "$REGION" ] ; then
+if [ -z "$REGION" -o ! -z "$FULL_GRID" ] ; then
     REGIONOPTION=""
 else
     REGIONOPTION=-R$REGION
 fi
 
 if [ $MAPTYPE = 6 ] ; then
-	grdmath $BACK_FILE $minback SUB $minback $maxback SUB DIV 2 MUL 1 SUB -1 MAX 1 MIN = $BACK_INT_FILE
+	grdmath "$BACK_FILE" $maxback SUB $minback $maxback SUB DIV 2 MUL 1 SUB -1 MAX "$BACK_FILE" OR 1 MIN = "$BACK_INT_FILE"
 fi
 
 if [ $tiff != n ] ; then

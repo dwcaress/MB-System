@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh 
 #
 #  grid_swath
 #
@@ -24,6 +24,7 @@
 #    20050627 GJK - Added support for reading answers from input file
 #    20070808 GJK - log answers to a command file
 #    20091124 GJK - clean exit if no data
+#    20121029 GJK - use mbdatalist -P to ensure highest level of processing
 
 if [ $# -gt 0 ] ; then
     cat $@ | awk ' { if (substr($1, 0, 1) != "#") print $0 }' | sed 's/[^:]*://' | $0
@@ -274,7 +275,7 @@ if [ "$options" = "y" -o "$options" = "Y" ] ; then
 	echo 
 	echo "Grid file name prefix (no spaces or /) [$GRIDNAME]"
         if [ $adprompt = 1 ] ; then
-                echo "\$ will be replaced by $MAPNAME, @ will be replaced by $dirname, # will be replaced by $REGION"
+                echo "\$ will be replaced by $GRIDNAME, @ will be replaced by $dirname, # will be replaced by $REGION"
         fi
 
 	read MAPNAME
@@ -362,10 +363,11 @@ echo REGION=$REGION
 echo
 
 # set datalist from best of SWATHDIR, DST or default
-[ -z "$DST" ] && DST=$SWATHDIR
-[ -z "$DST" ] && DST=/swath4/mbproc/raw
-[ ! -d "$DST" ] && DST=/home/swath/mbproc/em300
-[ ! -f "$DLST" ] && DLST="$DST/datalist.mb-1" 
+[ -z "$DLST" ] && DLST=$SWATHDIR
+[ -z "$DLST" ] && DLST=$DST
+[ -z "$DLST" ] && DLST=/swath4/mbproc/raw
+[ ! -e "$DLST" ] && DLST=/home/swath/mbproc/em300
+[ ! -f "$DLST" ] && DLST="$DLST/datalist.mb-1" 
 
 DATALIST=${GRIDNAME}_dataset.mb-1
 
@@ -387,19 +389,19 @@ echo $DLST -1 1 > $DATALIST
 
 if [ ! -z $REGION ] ; then
 	processDatalist=${GRIDNAME}_datalist.mb-1
-	echo $processed > $processDatalist
 	if [ ! -z "$FULL_PROCESS" ] ; then
 		echo `date` Checking data list...
 		nice mbdatalist -I $DATALIST -O 
 	fi
 
 	echo `date` Compiling data list...
-	nice mbdatalist -I $DATALIST -R$REGION >> $processDatalist 
+	nice mbdatalist -I $DATALIST -R$REGION -L1 -P > tmp_$processDatalist 
+	mbdatalist -I tmp_$processDatalist -P > $processDatalist
 fi
 
 if [ `wc -l $processDatalist | awk '{ print $1 }'` = 1 ] ; then
 	echo
-	echo ">> No data found for $REGION in $DST"
+	echo ">> No data found for $REGION in $DLST"
 	echo
 	exit 2
 fi
