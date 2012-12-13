@@ -4451,8 +4451,8 @@ int mbmosaic_get_beampriorities(
                 azi_starboard -= 360.0 * ((int) ((azi_starboard + 180.0) / 360.0));
             else if (azi_starboard < -180.0)
                 azi_starboard += 360.0 * ((int) ((-azi_starboard + 180.0) / 360.0));
-            if (azi_starboard <= -90.0
-                || azi_starboard >= 90.0)
+            if (priority_azimuth_factor * azi_starboard <= -90.0
+                || priority_azimuth_factor * azi_starboard >= 90.0)
                 weight_starboard = 0.0;
             else
                 weight_starboard = MAX(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
@@ -4461,8 +4461,8 @@ int mbmosaic_get_beampriorities(
                 azi_port -= 360.0 * ((int) ((azi_port + 180.0) / 360.0));
             else if (azi_port < -180.0)
                 azi_port += 360.0 * ((int) ((-azi_port + 180.0) / 360.0));
-            if (azi_port <= -90.0
-                || azi_port >= 90.0)
+            if (priority_azimuth_factor * azi_port <= -90.0
+                || priority_azimuth_factor * azi_port >= 90.0)
                 weight_port = 0.0;
             else
                 weight_port = MAX(cos(DTR * priority_azimuth_factor * azi_port), 0.0);
@@ -5052,8 +5052,8 @@ int mbmosaic_get_sspriorities(
                 azi_starboard -= 360.0 * ((int) ((azi_starboard + 180.0) / 360.0));
             else if (azi_starboard < -180.0)
                 azi_starboard += 360.0 * ((int) ((-azi_starboard + 180.0) / 360.0));
-            if (azi_starboard <= -90.0
-                || azi_starboard >= 90.0)
+            if (priority_azimuth_factor * azi_starboard <= -90.0
+                || priority_azimuth_factor * azi_starboard >= 90.0)
                 weight_starboard = 0.0;
             else
                 weight_starboard = MAX(cos(DTR * priority_azimuth_factor * azi_starboard), 0.0);
@@ -5062,8 +5062,8 @@ int mbmosaic_get_sspriorities(
                 azi_port -= 360.0 * ((int) ((azi_port + 180.0) / 360.0));
             else if (azi_port < -180.0)
                 azi_port += 360.0 * ((int) ((-azi_port + 180.0) / 360.0));
-            if (azi_port <= -90.0
-                || azi_port >= 90.0)
+            if (priority_azimuth_factor * azi_port <= -90.0
+                || priority_azimuth_factor * azi_port >= 90.0)
                 weight_port = 0.0;
             else
                 weight_port = MAX(cos(DTR * priority_azimuth_factor * azi_port), 0.0);

@@ -186,7 +186,7 @@
 #define MB_SVP_MAX 1024
 
 /* maximum number of CTD samples per record */
-#define MB_CTD_MAX 64
+#define MB_CTD_MAX 256
 
 /* file mode (read or write) */
 #define	MB_FILEMODE_READ	0

@@ -214,14 +214,41 @@ organizations involved in the design and maintenance of the
 MB-System software package are NOT responsible for any damage
 that may follow from correct or incorrect use of these programs.
 
+------------------------------------
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
-------------------------------------------
+------------------------------------
+-----> 5.3.2004 (December 12, 2012)
+
+Mbsvplist: Added -S option to output surface sound speed from survey data rather
+
+Mb7kpreprocess: Changed lever arm correction specified with the -D option to
+involve three dimensions rather than just two.
+
+Format 88 (mbf_reson7kr): Fixed so that mbctdlist and mbsvplist can output
+surface sound speed values from Reson 7k data.
+
+Format 88 (mbf_reson7kr): Fixed so that the storage of bathymetry acrosstrack and
+alongtrack distance values in bathymetry (7006) records is correct. MB-System has
+output incorrect 7006 records since the Reson 7k format (88) was first supported.
+The error was that the acrosstrack and alongtrack distance values were transposed
+relative to the format specification and the data output by the PDS2000 datalogger
+(a reality that only became apparent when I finally had access to a sample of
+PDS2000-logged data). The format 88 i/o module has been augmented to detect if
+data being read derives from pre-fix versions of MB-System, and to fix the data
+if necessary. The existence of this error and its fix should be invisible to
+users, except that data written by pre-fix MB-System will probably import to
+other software packages with the acrosstrack and alongtrack distances switched.
+
+Mbmosaic: Fixed azimuthal priority weighting so that directional mosaicing is
+more reliable.
 
 -----> 5.3.2000 (Navember 14, 2012)
 
 Mbinfo: Changed mbinfo to gracefully handle the situation of reading a file that
 has no data records while the -P option is specified (gracefully means not
 seg faulting).
+
+Mbmosaic: fixed bug in the use of the azimuth weighting factor.
 
 -----> 5.3.1999 (Navember 13, 2012)
 

@@ -801,8 +801,8 @@ int main (int argc, char **argv)
 						time_d_old = time_d;
 
 						/* now loop over list of output parameters */
-						ctd_count += nctd;
-						ctd_count_tot += nctd;
+						ctd_count++;
+						ctd_count_tot++;
 						if (nctd % decimate == 0)
 						for (i=0; i<n_list; i++)
 							{

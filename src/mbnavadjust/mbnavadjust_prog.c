@@ -1075,12 +1075,14 @@ int mbnavadjust_write_project()
 	/* local variables */
 	char	*function_name = "mbnavadjust_write_project";
 	int	status = MB_SUCCESS;
-	FILE	*hfp;
+	FILE	*hfp, *xfp, *yfp;
 	struct mbna_file *file;
 	struct mbna_section *section;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
 	char	datalist[STRING_MAX];
+	char	xoffsetfile[STRING_MAX];
+	char	yoffsetfile[STRING_MAX];
 	double	navlon1, navlon2, navlat1, navlat2;
 	int	nroute;
 	int	i, j, k, l;
@@ -1373,6 +1375,42 @@ fprintf(stderr,"Crossing %d status %d but num_ties %d....\n",i,crossing->status,
 fprintf(stderr,"Output %d fixed tie locations to %s\n",nroute,datalist);
 		}
 
+	/* output offset vectors */
+	if (project.inversion == MBNA_INVERSION_CURRENT)
+		{
+		sprintf(xoffsetfile,"%s%s_dx.txt",project.path,project.name);
+		sprintf(yoffsetfile,"%s%s_dy.txt",project.path,project.name);
+		if ((xfp = fopen(xoffsetfile,"w")) != NULL
+		    && (yfp = fopen(yoffsetfile,"w")) != NULL)
+			{
+			for (i=0;i<project.num_files;i++)
+			    {
+			    file = &project.files[i];
+			    for (j=0;j<file->num_sections;j++)
+				{
+				section = &file->sections[j];
+				for (k=0;k<section->num_snav;k++)
+				    {
+				    fprintf(xfp, "%f %f %f\n", section->snav_lon[k], section->snav_lat[k],
+								section->snav_lon_offset[k]/mbna_mtodeglon);
+				    fprintf(yfp, "%f %f %f\n", section->snav_lon[k], section->snav_lat[k],
+								section->snav_lat_offset[k]/mbna_mtodeglat);
+				    }
+				}
+			    }
+			fclose(xfp);
+			fclose(yfp);
+			}
+
+		/* else set error */
+		else
+			{
+			status = MB_FAILURE;
+			sprintf(message,"Unable to update project %s\n > Offset vector files: %s %s\n",
+				project.name, xoffsetfile, yoffsetfile);
+			do_info_add(message, MB_YES);
+			}
+		}
 
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -10246,6 +10284,8 @@ i,j,isnav,k,x[3*k+1],xa[3*k+1],mbna_mtodeglat,section->snav_lat_offset[isnav]); 
 				    section->snav_z_offset[isnav] = (x[3*k+2] + xa[3*k+2]);
 /* fprintf(stderr,"i:%d j:%d isnav:%d k:%d x[3*k+2]:%f xa[3*k+2]:%f section->snav_z_offset[isnav]:%f\n\n",
 i,j,isnav,k,x[3*k+2],xa[3*k+2],section->snav_z_offset[isnav]); */
+fprintf(stderr,"i:%d j:%d isnav:%d k:%d xa: %f %f %f  x: %f %f %f\n",i,j,isnav,k,
+xa[3*k],xa[3*k+1],xa[3*k+2],x[3*k],x[3*k+1],x[3*k+2]);
 				    }
 				}
 			    }
@@ -10306,8 +10346,8 @@ i,j,isnav,k,x[3*k+2],xa[3*k+2],section->snav_z_offset[isnav]); */
 				offsetx = tie->offset_x_m - (xa[3*nc2] - xa[3*nc1]);
 				offsety = tie->offset_y_m - (xa[3*nc2+1] - xa[3*nc1+1]);
 				offsetz = tie->offset_z_m - (xa[3*nc2+2] - xa[3*nc1+2]);
-/* fprintf(stderr,"STAGE 2 RESULT: icrossing:%d jtie:%d nc1:%d %d nc2:%d %d offsets: %f %f %f\n",
-icrossing,jtie,nc1,file1->status,nc2,file2->status,offsetx,offsety,offsetz); */
+fprintf(stderr,"STAGE 2 RESULT: icrossing:%d jtie:%d nc1:%d %d nc2:%d %d offsets: %f %f %f\n",
+icrossing,jtie,nc1,file1->status,nc2,file2->status,offsetx,offsety,offsetz);
 				}
 			    }
 			}
