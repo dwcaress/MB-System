@@ -547,6 +547,7 @@ int mbr_alm_reson7kr(int verbose, void *mbio_ptr, int *error)
 	fileheaders = (int *) &mb_io_ptr->save12;
 	pixel_size = (double *) &mb_io_ptr->saved1;
 	swath_width = (double *) &mb_io_ptr->saved2;
+
 	*current_ping = -1;
 	*last_ping = -1;
 	*save_flag = MB_NO;
@@ -1351,6 +1352,8 @@ int mbr_reson7kr_rd_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 	int	ping_record;
 	int	time_j[5], time_i[7];
 	double	time_d;
+	int	nscan;
+	int	version_major, version_minor, version_svn;
 	int	i;
 
 	/* print input debug statements */
@@ -2334,6 +2337,30 @@ header->RecordNumber,image->ping_number);
 					done = MB_YES;
 					*current_ping = *last_ping;
 					*last_ping = -1;
+					}
+				}
+
+			/* check for MB-System format error in bathymetry records by checking comments
+			 * for MB-System distributions earlier than 4.3.2004 */
+			if (status == MB_SUCCESS
+				&& *recordid == R7KRECID_7kSystemEventMessage
+				&& store->systemeventmessage.message_length > 0)
+				{
+				nscan = sscanf(store->systemeventmessage.message,"MB-System Version %d.%d.%d", &version_major, &version_minor, &version_svn);
+				if (nscan == 0)
+					nscan = sscanf(store->systemeventmessage.message,"MB-system Version %d.%d.%d", &version_major, &version_minor, &version_svn);
+				if (nscan == 3
+					&& (version_major < 5
+						|| (version_major == 5 && version_minor < 3)
+						|| (version_major == 5 && version_minor == 3 && version_svn < 2004)))
+					{
+					store->bathymetry.acrossalongerror = MB_YES;
+					}
+				else if (nscan == 2
+					&& (version_major < 5
+						|| (version_major == 5 && version_minor < 3)))
+					{
+					store->bathymetry.acrossalongerror = MB_YES;
 					}
 				}
 			}
@@ -6771,6 +6798,7 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 	s7kr_bathymetry *bathymetry;
 	int	index;
 	int	time_j[5];
+	double	acrosstrackmax, alongtrackmax;
 	int	i;
 
 	/* print input debug statements */
@@ -6858,11 +6886,52 @@ int mbr_reson7kr_rd_bathymetry(int verbose, char *buffer, void *store_ptr, int *
 		for (i=0;i<bathymetry->number_beams;i++)
 			{
 			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->depth[i])); index += 4;
-			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->acrosstrack[i])); index += 4;
 			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->alongtrack[i])); index += 4;
+			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->acrosstrack[i])); index += 4;
 			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->pointing_angle[i])); index += 4;
 			mb_get_binary_float(MB_YES, &buffer[index], &(bathymetry->azimuth_angle[i])); index += 4;
 			}
+
+		/* now check to see if these data were written incorrectly with acrosstrack before alongtrack
+		 * (ashamedly, this was true for MB-System through 4.3.2000)
+		 * - if so, switch the arrays */
+		if (bathymetry->acrossalongerror == MB_MAYBE)
+			{
+			acrosstrackmax = 0.0;
+			alongtrackmax = 0.0;
+			for (i=0;i<bathymetry->number_beams;i++)
+				{
+				acrosstrackmax = MAX(acrosstrackmax, fabs(bathymetry->acrosstrack[i]));
+				alongtrackmax = MAX(alongtrackmax, fabs(bathymetry->alongtrack[i]));
+				}
+			if (alongtrackmax > acrosstrackmax)
+				{
+				bathymetry->nacrossalongerroryes++;
+				}
+			else
+				{
+				bathymetry->nacrossalongerrorno++;
+				}
+			if (bathymetry->nacrossalongerroryes > 10)
+				{
+				bathymetry->acrossalongerror = MB_YES;
+				}
+			else if (bathymetry->nacrossalongerrorno > 10)
+				{
+				bathymetry->acrossalongerror = MB_NO;
+				}
+			}
+		if (bathymetry->acrossalongerror == MB_YES
+			|| (bathymetry->acrossalongerror == MB_MAYBE && alongtrackmax > acrosstrackmax))
+			{
+			for (i=0;i<bathymetry->number_beams;i++)
+				{
+				acrosstrackmax = bathymetry->acrosstrack[i];
+				bathymetry->acrosstrack[i] = bathymetry->alongtrack[i];
+				bathymetry->alongtrack[i] = acrosstrackmax;
+				}
+			}
+
 		}
 	else
 		{
@@ -14317,8 +14386,8 @@ int mbr_reson7kr_wr_bathymetry(int verbose, int *bufferalloc, char **bufferptr, 
 			for (i=0;i<bathymetry->number_beams;i++)
 				{
 				mb_put_binary_float(MB_YES, bathymetry->depth[i], &buffer[index]); index += 4;
-				mb_put_binary_float(MB_YES, bathymetry->acrosstrack[i], &buffer[index]); index += 4;
 				mb_put_binary_float(MB_YES, bathymetry->alongtrack[i], &buffer[index]); index += 4;
+				mb_put_binary_float(MB_YES, bathymetry->acrosstrack[i], &buffer[index]); index += 4;
 				mb_put_binary_float(MB_YES, bathymetry->pointing_angle[i], &buffer[index]); index += 4;
 				mb_put_binary_float(MB_YES, bathymetry->azimuth_angle[i], &buffer[index]); index += 4;
 				}

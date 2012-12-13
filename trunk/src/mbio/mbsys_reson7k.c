@@ -825,6 +825,9 @@ int mbsys_reson7k_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 		bathymetry->pointing_angle[i] = 0.0;
 		bathymetry->azimuth_angle[i] = 0.0;
 		}
+	bathymetry->acrossalongerror = MB_MAYBE;
+	bathymetry->nacrossalongerroryes = 0;
+	bathymetry->nacrossalongerrorno = 0;
 
 	/* Reson 7k backscatter imagery data (record 7007) */
 	backscatter = &store->backscatter;
@@ -5674,7 +5677,10 @@ fprintf(stderr," flag:%d\n",beamflag[i]);
 #endif
 			bathacrosstrack[i] = bathymetry->acrosstrack[i];
 			bathalongtrack[i] = bathymetry->alongtrack[i];
-			amp[i] = 20.0 * log10((double)bathymetry->intensity[i]);
+			if (bathymetry->intensity[i] > 0.0)
+				amp[i] = 20.0 * log10((double)bathymetry->intensity[i]);
+			else
+				amp[i] = 0.0;
 			}
 
 		/* extract sidescan */
@@ -8903,7 +8909,7 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 		for (i=0;i<bluefin->number_frames;i++)
 			{
 			environmental = &(bluefin->environmental[i]);
-			if (environmental->ctd_time > 0.0)
+			if (environmental->ctd_time > 0.0 && *nctd < MB_CTD_MAX)
 				{
 				/* get time_d if needed */
 				if (environmental->ctd_time < 10000.0)
@@ -8944,10 +8950,12 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 		mb_get_itime(verbose, time_j, time_i);
 		mb_get_time(verbose, time_i, &time_d[0]);
 
-		*nctd = ctd->n;
-		for (i=0;i<ctd->n;i++)
+		*nctd = MIN(ctd->n, MB_CTD_MAX);
+		for (i=0;i<*nctd;i++)
 			{
-			time_d[i] = time_d[0] + i * (1.0 / ctd->sample_rate);
+			time_d[i] = time_d[0];
+			if (ctd->sample_rate > 0.0)
+				time_d[i] += i * (1.0 / ctd->sample_rate);
 			if (ctd->conductivity_flag == 0)
 				conductivity[i] = ctd->conductivity_salinity[i];
 			else
@@ -8961,8 +8969,7 @@ int mbsys_reson7k_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 	/* else failure */
 	else
 		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
+		*nctd = 0;
 		}
 
 	/* print output debug statements */
@@ -9057,8 +9064,7 @@ int mbsys_reson7k_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 	/* else failure */
 	else
 		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
+		*nsamples = 0;
 		}
 
 	/* print output debug statements */
@@ -9955,13 +9961,14 @@ k,snippettimeseries->detect_sample,xtrack,xtrackss,kk,ss[kk],ss_cnt[kk]); */
 					    ss_spacing_use = beam_foot / nsample_use;
 					else
 					    ss_spacing_use = ss_spacing / sint;
-/*fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
+/* fprintf(stderr, "spacing: %f %f xtrack:%f altitude:%f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
 ss_spacing, ss_spacing_use,
+xtrack,altitude,
 nsample_use, sint, angle, range, beam_foot,
-nsample_use * ss_spacing / beam_foot);*/
+nsample_use * ss_spacing / beam_foot); */
 					sample_detect = volatilesettings->sample_rate * bathymetry->range[ibeam];
-					sample_start = sample_detect - (nsample_use / 2);
-					sample_end = sample_detect + (nsample_use / 2) - 1;
+					sample_start = MAX(sample_detect - (nsample_use / 2), snippet->begin_sample);
+					sample_end = MIN(sample_detect + (nsample_use / 2) - 1, snippet->end_sample);
 					if ((beam->sample_type & 15) == 3)
 						data_uint = (unsigned int *) snippet->amplitude;
 					else if ((beam->sample_type & 15) == 2)
@@ -9985,7 +9992,8 @@ nsample_use * ss_spacing / beam_foot);*/
 							ss[kk]  += (double) data_uchar[k-snippet->begin_sample];
 						ssalongtrack[kk] += bathymetry->alongtrack[ibeam];
 						ss_cnt[kk]++;
-/* fprintf(stderr,"k:%d kk:%d ss:%f ss_cnt:%d\n", k,kk,ss[kk],ss_cnt[kk]);*/
+/* fprintf(stderr,"ibeam:%d k:%d kk:%d ss_cnt:%d ss:%f xtrackss:%f %f ssalongtrack:%f \n",
+ibeam,k,kk,ss_cnt[kk],ss[kk], xtrackss, (k-nss/2)*(*pixel_size), ssalongtrack[kk]); */
 						}
 					}
 				}

@@ -1397,6 +1397,18 @@ typedef struct s7kr_bathymetry_struct
 	float		acrosstrack[MBSYS_RESON7K_MAX_BEAMS];	/* Acrosstrack distance in meters */
 	float		pointing_angle[MBSYS_RESON7K_MAX_BEAMS];/* Pointing angle from vertical in radians */
 	float		azimuth_angle[MBSYS_RESON7K_MAX_BEAMS];	/* Azimuth angle in radians */
+
+	int             acrossalongerror;           /* MB-System flipped the order of the alongtrack
+                                                     * and acrosstrack distance values through 4.3.2003
+                                                     * - if acrossalongerror == MB_MAYBE check max values of
+                                                     *       the acrosstrack and alongtrack arrays and treat the larger
+                                                     *       as acrosstrack - if this is found to be the case ten
+                                                     *       times then set acrossalongerro = MB_YES and always flip
+                                                     *       the values - if this is found to not be the case ten
+                                                     *       times then set acrossalongerror = MB_NO and never flip
+                                                     *       the values. */
+	int             nacrossalongerroryes;       /* counter for times acrosstrack and alongtrack values flipped */
+	int             nacrossalongerrorno;        /* counter for times acrosstrack and alongtrack values not flipped */
 }
 s7kr_bathymetry;
 

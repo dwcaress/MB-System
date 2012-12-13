@@ -499,6 +499,7 @@ int main (int argc, char **argv)
 
 	/* depth sensor lever arm parameter */
 	double	depthsensoroffx = 0.0;
+	double	depthsensoroffy = 0.0;
 	double	depthsensoroffz = 0.0;
 
 	/* depth sensor time lag parameters */
@@ -638,13 +639,31 @@ int main (int argc, char **argv)
 			break;
 		case 'D':
 		case 'd':
-			nscan = sscanf (optarg,"%lf/%lf/%lf", &depthsensoroffx, &depthsensoroffz, &sonardepthoffset);
-			if (nscan < 3)
-				sonardepthoffset = 0.0;
-			if (nscan < 2)
-				depthsensoroffz = 0.0;
-			if (nscan < 1)
-				depthsensoroffx = 0.0;
+			nscan = sscanf (optarg,"%lf/%lf/%lf/%lf", &depthsensoroffx, &depthsensoroffy, &depthsensoroffz, &sonardepthoffset);
+			if (nscan < 4)
+				{
+				if (nscan == 3)
+					{
+					sonardepthoffset = depthsensoroffz;
+					depthsensoroffz = depthsensoroffy;
+					depthsensoroffy = depthsensoroffx;
+					depthsensoroffx = 0.0;
+					}
+				else if (nscan == 2)
+					{
+					sonardepthoffset = 0.0;
+					depthsensoroffz = depthsensoroffy;
+					depthsensoroffy = depthsensoroffx;
+					depthsensoroffx = 0.0;
+					}
+				else if (nscan == 1)
+					{
+					sonardepthoffset = 0.0;
+					depthsensoroffz = 0.0;
+					depthsensoroffy = depthsensoroffx;
+					depthsensoroffx = 0.0;
+					}
+				}
 			flag++;
 			break;
 		case 'F':
@@ -876,6 +895,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       sonardepthratemax:      %f\n",sonardepthratemax);
 		fprintf(stderr,"dbg2       sonardepthoffset:       %f\n",sonardepthoffset);
 		fprintf(stderr,"dbg2       depthsensoroffx:        %f\n",depthsensoroffx);
+		fprintf(stderr,"dbg2       depthsensoroffy:        %f\n",depthsensoroffy);
 		fprintf(stderr,"dbg2       depthsensoroffz:        %f\n",depthsensoroffz);
 		fprintf(stderr,"dbg2       rollbias:               %f\n",rollbias);
 		fprintf(stderr,"dbg2       pitchbias:              %f\n",pitchbias);
@@ -4003,14 +4023,17 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 	while (read_data == MB_YES && format == MBF_RESON7KR)
 	{
 	/* figure out the output file name */
-	status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
-	if (testformat == MBF_RESON7KR
-		&& strncmp(".s7k",&ifile[strlen(ifile)-4],4) == 0)
-		sprintf(ofile, "%s.mb%d", fileroot, testformat);
-	else if (testformat == MBF_RESON7KR)
-		sprintf(ofile, "%sf.mb%d", fileroot, testformat);
-	else if (testformat == MBF_RESON7KR)
-		sprintf(ofile, "%s.mb%d", ifile, testformat);
+	if (ofile_set == MB_NO)
+		{
+		status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
+		if (testformat == MBF_RESON7KR
+			&& strncmp(".s7k",&ifile[strlen(ifile)-4],4) == 0)
+			sprintf(ofile, "%s.mb%d", fileroot, testformat);
+		else if (testformat == MBF_RESON7KR)
+			sprintf(ofile, "%sf.mb%d", fileroot, testformat);
+		else
+			sprintf(ofile, "%s.mb%d", ifile, testformat);
+		}
 
 	/* initialize reading the input swath file */
 	if ((status = mb_read_init(
@@ -4829,7 +4852,8 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 
 					/* apply offset between depth sensor and sonar */
 					sonardepth += sonardepthoffset
-							+ depthsensoroffx * sin(DTR * pitch)
+							+ depthsensoroffx * sin(DTR * roll)
+							+ depthsensoroffy * sin(DTR * pitch)
 							+ depthsensoroffz * cos(DTR * pitch);
 
 					/* if the optional data are not all available, this ping
@@ -6102,7 +6126,8 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 				/* output asynchronous heading, sonardepth, and attitude */
 				fprintf(athfp, "%0.6f\t%7.3f\n", time_d, RTD * bluefin->nav[i].yaw);
 				sonardepth = bluefin->nav[i].depth
-						+ depthsensoroffx * sin(bluefin->nav[i].pitch)
+						+ depthsensoroffx * sin(bluefin->nav[i].roll)
+						+ depthsensoroffy * sin(bluefin->nav[i].pitch)
 						+ depthsensoroffz * cos(bluefin->nav[i].pitch)
 						+ sonardepthoffset;
 				fprintf(atsfp, "%0.6f\t%0.3f\n", time_d, sonardepth);

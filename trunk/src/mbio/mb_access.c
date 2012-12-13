@@ -2396,7 +2396,7 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 	double *sensor4, double *sensor5, double *sensor6,
 	double *sensor7, double *sensor8, int *error)
 {
-	char	*function_name = "mb_ctd";
+	char	*function_name = "mb_ancilliarysensor";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
 	int	i;
@@ -2428,8 +2428,7 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 	else
 		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
+		*nsensor = 0;
 		}
 
 	/* print output debug statements */
