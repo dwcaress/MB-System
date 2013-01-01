@@ -1658,36 +1658,65 @@ and mbedit edit save files.\n";
 		    /* read the depth & sound speed pair */
 		    mm = sscanf(buffer,"%lf %lf",&depth[nsvp],&velocity[nsvp]);
 
-		    /* output some debug values */
-		    if (verbose >= 5 && mm == 2)
-			{
-			fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
-			fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-			    nsvp,depth[nsvp],nsvp,velocity[nsvp]);
-			}
+                    /* check for validity */
+                    if (mm == 2)
+                        {
+                        /* output some debug values */
+                        if (verbose >= 5)
+                            {
+                            fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
+                            fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
+                                nsvp,depth[nsvp],nsvp,velocity[nsvp]);
+                            }
 
-		    /* update counter */
-		    if (mm == 2)
-			nsvp++;
+                        /* set initial depth to zero if needed */
+                        if (nsvp == 0)
+                            {
+                            if (depth[0] < 0.0)
+                                {
+                                /* output some info */
+                                fprintf(stderr,"Warning:\n\tProblem with svp value read in program <%s>\n",program_name);
+                                fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f reset so that first entry has zero depth\n",
+                                        nsvp,depth[0],nsvp,velocity[0]);
 
-		    /* check for nonzero initial depth & fix it if found */
-		    if (mm == 2 && nsvp == 1 && depth[0] != 0.0)
-		    	{
-			depth[1] = depth[0];
-			velocity[1] = velocity[0];
-			depth[0] = 0.0;
-			nsvp++;
+                                depth[0] = 0.0;
+                                nsvp++;
+                                }
+                            else if (depth[0] > 0.0)
+                                {
+                                depth[1] = depth[0];
+                                depth[0] = 0.0;
+                                velocity[1] = velocity[0];
+                                nsvp += 2;
 
-			/* output some debug values */
-			if (verbose >= 5)
-			    {
-			    fprintf(stderr,"\ndbg5  Nonzero initial SVP depth fixed in program <%s>\n",program_name);
-			    fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-				0,depth[0],0,velocity[0]);
-			    fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-				1,depth[1],1,velocity[1]);
-			    }
-			}
+                                /* output some info */
+                                 fprintf(stderr,"Warning:\n\tProblem with svp value read in program <%s>\n",program_name);
+                                fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f added so that first entry has zero depth\n",
+                                         nsvp,depth[0],nsvp,velocity[0]);
+                                fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f did not have zero depth\n",
+                                        nsvp,depth[1],nsvp,velocity[1]);
+                                }
+                            else
+                                {
+                                nsvp++;
+                                }
+                             }
+
+                        /* increment counter if all is ok */
+                        else if (depth[nsvp] > depth[nsvp-1])
+                            {
+                            nsvp++;
+                            }
+
+                        /* ignore sound speed value with duplicate or decreasing depth */
+                        else
+                            {
+                            /* output some info */
+                            fprintf(stderr,"Warning:\n\tProblem with svp value read in program <%s>\n",program_name);
+                            fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f ignored due to duplicate or decreasing depth\n",
+                                    nsvp,depth[nsvp],nsvp,velocity[nsvp]);
+                            }
+                        }
 		    }
 		}
 	    fclose(tfp);

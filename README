@@ -217,6 +217,36 @@ that may follow from correct or incorrect use of these programs.
 ------------------------------------
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------
+
+-----> 5.3.2005 (December 31, 2012)
+
+Mbsvplist: Added -M option to control SVP printing. If mode=0 (the default), then
+the first SVP of each file will be output, plus any SVP that is different from
+the previous SVP. If mode=1, then only the first instance of each unique SVP will
+be output, even through multiple files referenced through a datalist structure.
+If mode=2, then all SVPs will be output even if they are duplicates (equivalent
+to the -D option). The -D option is retained for compatibility.
+
+Format 88 (mbf_reson7kr): MB-System now recognizes files with a *.7k suffix as
+Reson multibeam data in format 88. Usually Reson data are logged to files with
+a *.s7k suffix.
+
+Mbm_route2mission: Updated the calculation of the number of photos to be taken
+during a Dorado-class AUV bottom photography mission.
+
+Formats 58 (mbf_em710raw) and 59 (mbf_em710mba): Added support for for the
+"Extraparameters" datagram.
+
+Formats 58 (mbf_em710raw) and 59 (mbf_em710mba): Changed the encoding of binary
+values in the format 58 and 59 files written by MB-System to be little-endian
+(Intel byte order). The Kongsberg format specification allows byte encoding to
+be little or big-endian, and previously MB-System has consistently used big-endian.
+
+Mblist: Fixed bug regarding the output of transmit pulse length values.
+
+Mbprocess: Altered mbprocess so that input SVP files are checked for zero
+thickness layers.
+
 -----> 5.3.2004 (December 12, 2012)
 
 Mbsvplist: Added -S option to output surface sound speed from survey data rather

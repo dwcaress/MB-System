@@ -1,4 +1,4 @@
-.TH mbsvplist 1 "5 December 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mbsvplist 1 "15 December 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbsvplist\fP - List water sound velocity profiles in swath sonar data files.
 
@@ -6,7 +6,7 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbsvplist\fP [\fB-C -D \fB-F\fIformat \fB-H \fB-I\fIfile \fB-O -P -S -V -Z\fP]
+\fBmbsvplist\fP [\fB-C -D \fB-F\fIformat \fB-H \fB-I\fIfile \fB-M\fImode\fP \fB-O -P -S -V -Z\fP]
 
 .SH DESCRIPTION
 This program, \fBmbsvplist\fP, lists all water
@@ -54,7 +54,7 @@ Causes \fBmbsvplist\fP to output the number of unique SVPs in each file to the s
 .TP
 .B \-D
 .br
-Causes \fBmbsvplist\fI to output duplicate SVPs.
+Causes \fBmbsvplist\fP to output duplicate SVPs. This is equivalent to \fB-M\fP\fI2\fP.
 .TP
 .B \-F
 \fIformat\fP
@@ -92,6 +92,15 @@ This program uses the \fBMBIO\fP library and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
 is given in the \fBMBIO\fP manual page. Default: \fIfile\fP = "datalist.mb-1".
+.TP
+.B \-M
+\fImode\fP
+.br
+Sets the SVP output mode. If \fImode\fP=0 (the default), then the first SVP of
+each file will be output, plus any SVP that is different from the previous SVP.
+If \fImode\fP=1, then only the first instance of each unique SVP will be output, even
+through multiple files referenced through a datalist structure. If \fImode\fP=2,
+then all SVPs will be output even if they are duplicates (equivalent to the \fB-D\fP option).
 .TP
 .B \-O
 .br
