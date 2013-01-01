@@ -1110,10 +1110,10 @@ fprintf(stderr,"Record returned: type:%d status:%d error:%d\n\n",store->kind, st
 				bathymetry->depth[i] = zz + sonar_depth;
 				bathymetry->pointing_angle[i] = DTR * theta;
 				bathymetry->azimuth_angle[i] = DTR * phi;
-/* fprintf(stderr,"j:%d i:%d quality:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
+/*fprintf(stderr,"j:%d i:%d quality:%d roll:%f %f pitch:%f %f alpha:%f beta:%f theta:%f phi:%f  depth:%f %f %f\n",
 j, i, bathymetry->quality[i], roll, bathymetry->roll,pitch, bathymetry->pitch,
 alpha,beta,theta,phi,
-bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
+bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]);*/
 				}
 			}
 
@@ -1796,300 +1796,346 @@ mb_navint_add(verbose, mbio_ptr,
 			else if (*recordid == R7KRECID_ReferencePoint)
 				{
 				status = mbr_reson7kr_rd_reference(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_UncalibratedSensorOffset)
 				{
 				status = mbr_reson7kr_rd_sensoruncal(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_CalibratedSensorOffset)
 				{
 				status = mbr_reson7kr_rd_sensorcal(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_Position)
 				{
 				status = mbr_reson7kr_rd_position(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_CustomAttitude)
 				{
 				status = mbr_reson7kr_rd_customattitude(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_Tide)
 				{
 				status = mbr_reson7kr_rd_tide(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_Altitude)
 				{
 				status = mbr_reson7kr_rd_altitude(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_MotionOverGround)
 				{
 				status = mbr_reson7kr_rd_motion(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_Depth)
 				{
 				status = mbr_reson7kr_rd_depth(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_SoundVelocityProfile)
 				{
 				status = mbr_reson7kr_rd_svp(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_CTD)
 				{
 				status = mbr_reson7kr_rd_ctd(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_Geodesy)
 				{
 				status = mbr_reson7kr_rd_geodesy(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_RollPitchHeave)
 				{
 				status = mbr_reson7kr_rd_rollpitchheave(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_Heading)
 				{
 				status = mbr_reson7kr_rd_heading(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_SurveyLine)
 				{
 				status = mbr_reson7kr_rd_surveyline(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_Navigation)
 				{
 				status = mbr_reson7kr_rd_navigation(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_Attitude)
 				{
 				status = mbr_reson7kr_rd_attitude(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_Rec1022)
 				{
 				status = mbr_reson7kr_rd_rec1022(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_FSDWsidescan
 				&& *deviceid == R7KDEVID_EdgetechFSDW
 				&& *enumerator == 20)
 				{
 				status = mbr_reson7kr_rd_fsdwsslo(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
 
-				/* store the Edgetech timestamp for possible use in fixing 7k time */
-				fsdwsslo = &(store->fsdwsslo);
-				header = &(fsdwsslo->header);
-				fsdwssheader = &(fsdwsslo->ssheader[0]);
-				time_j[0] = fsdwssheader->year;
-				time_j[1] = fsdwssheader->day;
-				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
-				time_j[3] = fsdwssheader->second;
-				time_j[4] = 1000 * (fsdwssheader->millisecondsToday
-							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
-				mb_get_itime(verbose, time_j, time_i);
-				mb_get_time(verbose, time_i, &time_d);
-				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
-					*edgetech_dt = time_d - *edgetech_time_d;
-				*edgetech_time_d = time_d;
+					/* store the Edgetech timestamp for possible use in fixing 7k time */
+					fsdwsslo = &(store->fsdwsslo);
+					header = &(fsdwsslo->header);
+					fsdwssheader = &(fsdwsslo->ssheader[0]);
+					time_j[0] = fsdwssheader->year;
+					time_j[1] = fsdwssheader->day;
+					time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
+					time_j[3] = fsdwssheader->second;
+					time_j[4] = 1000 * (fsdwssheader->millisecondsToday
+								- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
+					mb_get_itime(verbose, time_j, time_i);
+					mb_get_time(verbose, time_i, &time_d);
+					if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
+						*edgetech_dt = time_d - *edgetech_time_d;
+					*edgetech_time_d = time_d;
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif
+					}
 				}
 			else if (*recordid == R7KRECID_FSDWsidescan
 				&& *deviceid == R7KDEVID_EdgetechFSDWSSLF)
 				{
 				status = mbr_reson7kr_rd_fsdwsslo(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
 
-				/* store the Edgetech timestamp for possible use in fixing 7k time */
-				fsdwsslo = &(store->fsdwsslo);
-				header = &(fsdwsslo->header);
-				fsdwssheader = &(fsdwsslo->ssheader[0]);
-				time_j[0] = fsdwssheader->year;
-				time_j[1] = fsdwssheader->day;
-				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
-				time_j[3] = fsdwssheader->second;
-				time_j[4] = 1000 * (fsdwssheader->millisecondsToday
-							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
-				mb_get_itime(verbose, time_j, time_i);
-				mb_get_time(verbose, time_i, &time_d);
-				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
-					*edgetech_dt = time_d - *edgetech_time_d;
-				*edgetech_time_d = time_d;
+					/* store the Edgetech timestamp for possible use in fixing 7k time */
+					fsdwsslo = &(store->fsdwsslo);
+					header = &(fsdwsslo->header);
+					fsdwssheader = &(fsdwsslo->ssheader[0]);
+					time_j[0] = fsdwssheader->year;
+					time_j[1] = fsdwssheader->day;
+					time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
+					time_j[3] = fsdwssheader->second;
+					time_j[4] = 1000 * (fsdwssheader->millisecondsToday
+								- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
+					mb_get_itime(verbose, time_j, time_i);
+					mb_get_time(verbose, time_i, &time_d);
+					if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
+						*edgetech_dt = time_d - *edgetech_time_d;
+					*edgetech_time_d = time_d;
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsslo: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif
+					}
 				}
 			else if (*recordid == R7KRECID_FSDWsidescan
 				&& *deviceid == R7KDEVID_EdgetechFSDW
 				&& *enumerator == 21)
 				{
 				status = mbr_reson7kr_rd_fsdwsshi(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
 
-				/* store the Edgetech timestamp for possible use in fixing 7k time */
-				fsdwsshi = &(store->fsdwsshi);
-				header = &(fsdwsshi->header);
-				fsdwssheader = &(fsdwsshi->ssheader[0]);
-				time_j[0] = fsdwssheader->year;
-				time_j[1] = fsdwssheader->day;
-				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
-				time_j[3] = fsdwssheader->second;
-				time_j[4] = 1000 * (fsdwssheader->millisecondsToday
-							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
-				mb_get_itime(verbose, time_j, time_i);
-				mb_get_time(verbose, time_i, &time_d);
-				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
-					*edgetech_dt = time_d - *edgetech_time_d;
-				*edgetech_time_d = time_d;
+					/* store the Edgetech timestamp for possible use in fixing 7k time */
+					fsdwsshi = &(store->fsdwsshi);
+					header = &(fsdwsshi->header);
+					fsdwssheader = &(fsdwsshi->ssheader[0]);
+					time_j[0] = fsdwssheader->year;
+					time_j[1] = fsdwssheader->day;
+					time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
+					time_j[3] = fsdwssheader->second;
+					time_j[4] = 1000 * (fsdwssheader->millisecondsToday
+								- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
+					mb_get_itime(verbose, time_j, time_i);
+					mb_get_time(verbose, time_i, &time_d);
+					if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
+						*edgetech_dt = time_d - *edgetech_time_d;
+					*edgetech_time_d = time_d;
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif
+					}
 				}
 			else if (*recordid == R7KRECID_FSDWsidescan
 				&& *deviceid == R7KDEVID_EdgetechFSDWSSHF)
 				{
 				status = mbr_reson7kr_rd_fsdwsshi(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
 
-				/* store the Edgetech timestamp for possible use in fixing 7k time */
-				fsdwsshi = &(store->fsdwsshi);
-				header = &(fsdwsshi->header);
-				fsdwssheader = &(fsdwsshi->ssheader[0]);
-				time_j[0] = fsdwssheader->year;
-				time_j[1] = fsdwssheader->day;
-				time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
-				time_j[3] = fsdwssheader->second;
-				time_j[4] = 1000 * (fsdwssheader->millisecondsToday
-							- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
-				mb_get_itime(verbose, time_j, time_i);
-				mb_get_time(verbose, time_i, &time_d);
-				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
-					*edgetech_dt = time_d - *edgetech_time_d;
-				*edgetech_time_d = time_d;
+					/* store the Edgetech timestamp for possible use in fixing 7k time */
+					fsdwsshi = &(store->fsdwsshi);
+					header = &(fsdwsshi->header);
+					fsdwssheader = &(fsdwsshi->ssheader[0]);
+					time_j[0] = fsdwssheader->year;
+					time_j[1] = fsdwssheader->day;
+					time_j[2] = 60 * fsdwssheader->hour + fsdwssheader->minute;
+					time_j[3] = fsdwssheader->second;
+					time_j[4] = 1000 * (fsdwssheader->millisecondsToday
+								- 1000 * ((int)(0.001 * fsdwssheader->millisecondsToday)));
+					mb_get_itime(verbose, time_j, time_i);
+					mb_get_time(verbose, time_i, &time_d);
+					if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
+						*edgetech_dt = time_d - *edgetech_time_d;
+					*edgetech_time_d = time_d;
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsshi: EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif
+					}
 				}
 			else if (*recordid == R7KRECID_FSDWsubbottom)
 				{
 				status = mbr_reson7kr_rd_fsdwsb(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					{
+					done = MB_YES;
 
-				/* store the Edgetech timestamp for possible use in fixing 7k time */
-				fsdwsb = &(store->fsdwsb);
-				header = &(fsdwsb->header);
-				fsdwsegyheader = &(fsdwsb->segyheader);
-				time_j[0] = fsdwsegyheader->year;
-				time_j[1] = fsdwsegyheader->day;
-				time_j[2] = 60 * fsdwsegyheader->hour + fsdwsegyheader->minute;
-				time_j[3] = fsdwsegyheader->second;
-				time_j[4] = 1000 * (fsdwsegyheader->millisecondsToday
-							- 1000 * ((int)(0.001 * fsdwsegyheader->millisecondsToday)));
-				mb_get_itime(verbose, time_j, time_i);
-				mb_get_time(verbose, time_i, &time_d);
-				if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
-					*edgetech_dt = time_d - *edgetech_time_d;
-				*edgetech_time_d = time_d;
+					/* store the Edgetech timestamp for possible use in fixing 7k time */
+					fsdwsb = &(store->fsdwsb);
+					header = &(fsdwsb->header);
+					fsdwsegyheader = &(fsdwsb->segyheader);
+					time_j[0] = fsdwsegyheader->year;
+					time_j[1] = fsdwsegyheader->day;
+					time_j[2] = 60 * fsdwsegyheader->hour + fsdwsegyheader->minute;
+					time_j[3] = fsdwsegyheader->second;
+					time_j[4] = 1000 * (fsdwsegyheader->millisecondsToday
+								- 1000 * ((int)(0.001 * fsdwsegyheader->millisecondsToday)));
+					mb_get_itime(verbose, time_j, time_i);
+					mb_get_time(verbose, time_i, &time_d);
+					if (*edgetech_time_d > 0.0 && time_d - *edgetech_time_d > 0.002)
+						*edgetech_dt = time_d - *edgetech_time_d;
+					*edgetech_time_d = time_d;
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"mbr_reson7kr_rd_fsdwsb:    EDGETECH TIME: %f %f\n", *edgetech_time_d, *edgetech_dt);
 #endif
+					}
 				}
 			else if (*recordid == R7KRECID_Bluefin)
 				{
 				status = mbr_reson7kr_rd_bluefin(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_ProcessedSidescan)
 				{
 				status = mbr_reson7kr_rd_processedsidescan(verbose, buffer, store_ptr, error);
-				store->read_processedsidescan = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_processedsidescan = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kVolatileSonarSettings)
 				{
 				status = mbr_reson7kr_rd_volatilesonarsettings(verbose, buffer, store_ptr, error);
-				store->read_volatilesettings = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_volatilesettings = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kConfiguration)
 				{
 				status = mbr_reson7kr_rd_configuration(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kMatchFilter)
 				{
 				status = mbr_reson7kr_rd_matchfilter(verbose, buffer, store_ptr, error);
-				store->read_matchfilter = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_matchfilter = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kV2FirmwareHardwareConfiguration)
 				{
 				status = mbr_reson7kr_rd_v2firmwarehardwareconfiguration(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kBeamGeometry)
 				{
 				status = mbr_reson7kr_rd_beamgeometry(verbose, buffer, store_ptr, error);
-				store->read_beamgeometry = MB_YES;
-				done = MB_NO;
+				if (status == MB_SUCCESS)
+					{
+					store->read_beamgeometry = MB_YES;
+					done = MB_NO;
 
-				/* set beam widths */
-				beamgeometry = &(store->beamgeometry);
-				mb_io_ptr->beamwidth_xtrack = RTD * beamgeometry->beamwidth_acrosstrack[beamgeometry->number_beams/2];
-				mb_io_ptr->beamwidth_ltrack = RTD * beamgeometry->beamwidth_alongtrack[beamgeometry->number_beams/2];
+					/* set beam widths */
+					beamgeometry = &(store->beamgeometry);
+					mb_io_ptr->beamwidth_xtrack = RTD * beamgeometry->beamwidth_acrosstrack[beamgeometry->number_beams/2];
+					mb_io_ptr->beamwidth_ltrack = RTD * beamgeometry->beamwidth_alongtrack[beamgeometry->number_beams/2];
+					}
 				}
 			else if (*recordid == R7KRECID_7kCalibrationData)
 				{
 				status = mbr_reson7kr_rd_calibration(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kBathymetricData)
 				{
 				status = mbr_reson7kr_rd_bathymetry(verbose, buffer, store_ptr, error);
-				store->read_bathymetry = MB_YES;
-
-				/* if needed use most recent Edgetech timestamp to fix 7k time */
-				bathymetry = &(store->bathymetry);
-				header = &(bathymetry->header);
-				*last_7k_time_d = store->time_d;
-				if (header->s7kTime.Year < 2004
-					&& *edgetech_time_d > 0.0
-					&& *edgetech_dt > 0.0
-					&& *edgetech_dt < 2.0)
+				if (status == MB_SUCCESS)
 					{
-					if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+					store->read_bathymetry = MB_YES;
+
+					/* if needed use most recent Edgetech timestamp to fix 7k time */
+					bathymetry = &(store->bathymetry);
+					header = &(bathymetry->header);
+					*last_7k_time_d = store->time_d;
+					if (header->s7kTime.Year < 2004
+						&& *edgetech_time_d > 0.0
+						&& *edgetech_dt > 0.0
+						&& *edgetech_dt < 2.0)
 						{
-						store->time_d = *edgetech_time_d + *edgetech_dt;
-						}
-					else
-						{
-						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
-						}
-					mb_get_date(verbose, store->time_d, store->time_i);
-					mb_get_jtime(verbose, store->time_i, time_j);
-					header->s7kTime.Year = store->time_i[0];
-					header->s7kTime.Day = time_j[1];
-					header->s7kTime.Hours = store->time_i[3];
-					header->s7kTime.Minutes = store->time_i[4];
-					header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
+						if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+							{
+							store->time_d = *edgetech_time_d + *edgetech_dt;
+							}
+						else
+							{
+							store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
+							}
+						mb_get_date(verbose, store->time_d, store->time_i);
+						mb_get_jtime(verbose, store->time_i, time_j);
+						header->s7kTime.Year = store->time_i[0];
+						header->s7kTime.Day = time_j[1];
+						header->s7kTime.Hours = store->time_i[3];
+						header->s7kTime.Minutes = store->time_i[4];
+						header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"TIME CORRECTION: R7KRECID_7kBathymetricData:        7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,bathymetry->ping_number);
 #endif
+						}
 					}
 
 /*mbsys_reson7k_print_bathymetry(verbose, &(store->bathymetry), error);*/
@@ -2098,163 +2144,182 @@ header->RecordNumber,bathymetry->ping_number);
 			else if (*recordid == R7KRECID_7kBackscatterImageData)
 				{
 				status = mbr_reson7kr_rd_backscatter(verbose, buffer, store_ptr, error);
-				store->read_backscatter = MB_YES;
-
-				/* if needed use most recent Edgetech timestamp to fix 7k time */
-				backscatter = &(store->backscatter);
-				header = &(backscatter->header);
-				*last_7k_time_d = store->time_d;
-				if (header->s7kTime.Year < 2004
-					&& *edgetech_time_d > 0.0
-					&& *edgetech_dt > 0.0
-					&& *edgetech_dt < 2.0)
+				if (status == MB_SUCCESS)
 					{
-					if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+					store->read_backscatter = MB_YES;
+
+					/* if needed use most recent Edgetech timestamp to fix 7k time */
+					backscatter = &(store->backscatter);
+					header = &(backscatter->header);
+					*last_7k_time_d = store->time_d;
+					if (header->s7kTime.Year < 2004
+						&& *edgetech_time_d > 0.0
+						&& *edgetech_dt > 0.0
+						&& *edgetech_dt < 2.0)
 						{
-						store->time_d = *edgetech_time_d + *edgetech_dt;
-						}
-					else
-						{
-						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
-						}
-					mb_get_date(verbose, store->time_d, store->time_i);
-					mb_get_jtime(verbose, store->time_i, time_j);
-					header->s7kTime.Year = store->time_i[0];
-					header->s7kTime.Day = time_j[1];
-					header->s7kTime.Hours = store->time_i[3];
-					header->s7kTime.Minutes = store->time_i[4];
-					header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
+						if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+							{
+							store->time_d = *edgetech_time_d + *edgetech_dt;
+							}
+						else
+							{
+							store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
+							}
+						mb_get_date(verbose, store->time_d, store->time_i);
+						mb_get_jtime(verbose, store->time_i, time_j);
+						header->s7kTime.Year = store->time_i[0];
+						header->s7kTime.Day = time_j[1];
+						header->s7kTime.Hours = store->time_i[3];
+						header->s7kTime.Minutes = store->time_i[4];
+						header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"TIME CORRECTION: R7KRECID_7kBackscatterImageData:   7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,backscatter->ping_number);
 #endif
+						}
 					}
 				}
 			else if (*recordid == R7KRECID_7kBeamData)
 				{
 				status = mbr_reson7kr_rd_beam(verbose, buffer, store_ptr, error);
-				store->read_beam = MB_YES;
-
-				/* if needed use most recent Edgetech timestamp to fix 7k time */
-				beam = &(store->beam);
-				header = &(beam->header);
-				*last_7k_time_d = store->time_d;
-				if (header->s7kTime.Year < 2004
-					&& *edgetech_time_d > 0.0
-					&& *edgetech_dt > 0.0
-					&& *edgetech_dt < 2.0)
+				if (status == MB_SUCCESS)
 					{
-					if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+					store->read_beam = MB_YES;
+
+					/* if needed use most recent Edgetech timestamp to fix 7k time */
+					beam = &(store->beam);
+					header = &(beam->header);
+					*last_7k_time_d = store->time_d;
+					if (header->s7kTime.Year < 2004
+						&& *edgetech_time_d > 0.0
+						&& *edgetech_dt > 0.0
+						&& *edgetech_dt < 2.0)
 						{
-						store->time_d = *edgetech_time_d + *edgetech_dt;
-						}
-					else
-						{
-						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
-						}
-					mb_get_date(verbose, store->time_d, store->time_i);
-					mb_get_jtime(verbose, store->time_i, time_j);
-					header->s7kTime.Year = store->time_i[0];
-					header->s7kTime.Day = time_j[1];
-					header->s7kTime.Hours = store->time_i[3];
-					header->s7kTime.Minutes = store->time_i[4];
-					header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
+						if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+							{
+							store->time_d = *edgetech_time_d + *edgetech_dt;
+							}
+						else
+							{
+							store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
+							}
+						mb_get_date(verbose, store->time_d, store->time_i);
+						mb_get_jtime(verbose, store->time_i, time_j);
+						header->s7kTime.Year = store->time_i[0];
+						header->s7kTime.Day = time_j[1];
+						header->s7kTime.Hours = store->time_i[3];
+						header->s7kTime.Minutes = store->time_i[4];
+						header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"TIME CORRECTION: R7KRECID_7kBeamData: 7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,beam->ping_number);
 #endif
+						}
 					}
 				}
 			else if (*recordid == R7KRECID_7kVerticalDepth)
 				{
 				status = mbr_reson7kr_rd_verticaldepth(verbose, buffer, store_ptr, error);
-				store->read_verticaldepth = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_verticaldepth = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kImageData)
 				{
 				status = mbr_reson7kr_rd_image(verbose, buffer, store_ptr, error);
-				store->read_image = MB_YES;
-
-				/* if needed use most recent Edgetech timestamp to fix 7k time */
-				image = &(store->image);
-				header = &(image->header);
-				*last_7k_time_d = store->time_d;
-				if (header->s7kTime.Year < 2004
-					&& *edgetech_time_d > 0.0
-					&& *edgetech_dt > 0.0
-					&& *edgetech_dt < 2.0)
+				if (status == MB_SUCCESS)
 					{
-					if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+					store->read_image = MB_YES;
+
+					/* if needed use most recent Edgetech timestamp to fix 7k time */
+					image = &(store->image);
+					header = &(image->header);
+					*last_7k_time_d = store->time_d;
+					if (header->s7kTime.Year < 2004
+						&& *edgetech_time_d > 0.0
+						&& *edgetech_dt > 0.0
+						&& *edgetech_dt < 2.0)
 						{
-						store->time_d = *edgetech_time_d + *edgetech_dt;
-						}
-					else
-						{
-						store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
-						}
-					mb_get_date(verbose, store->time_d, store->time_i);
-					mb_get_jtime(verbose, store->time_i, time_j);
-					header->s7kTime.Year = store->time_i[0];
-					header->s7kTime.Day = time_j[1];
-					header->s7kTime.Hours = store->time_i[3];
-					header->s7kTime.Minutes = store->time_i[4];
-					header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
+						if (*edgetech_time_d + *edgetech_dt > *last_7k_time_d + 0.002)
+							{
+							store->time_d = *edgetech_time_d + *edgetech_dt;
+							}
+						else
+							{
+							store->time_d = *edgetech_time_d + 2 * (*edgetech_dt);
+							}
+						mb_get_date(verbose, store->time_d, store->time_i);
+						mb_get_jtime(verbose, store->time_i, time_j);
+						header->s7kTime.Year = store->time_i[0];
+						header->s7kTime.Day = time_j[1];
+						header->s7kTime.Hours = store->time_i[3];
+						header->s7kTime.Minutes = store->time_i[4];
+						header->s7kTime.Seconds = store->time_i[5] + 0.000001 * store->time_i[6];
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"TIME CORRECTION: R7KRECID_7kImageData:              7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
 store->time_i[0],store->time_i[1],store->time_i[2],
 store->time_i[3],store->time_i[4],store->time_i[5],store->time_i[6],
 header->RecordNumber,image->ping_number);
 #endif
+						}
 					}
 				}
 			else if (*recordid == R7KRECID_7kV2PingMotion)
 				{
 				status = mbr_reson7kr_rd_v2pingmotion(verbose, buffer, store_ptr, error);
-				store->read_v2pingmotion = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_v2pingmotion = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kV2DetectionSetup)
 				{
 				status = mbr_reson7kr_rd_v2detectionsetup(verbose, buffer, store_ptr, error);
-				store->read_v2detectionsetup = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_v2detectionsetup = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kV2BeamformedData)
 				{
 				status = mbr_reson7kr_rd_v2beamformed(verbose, buffer, store_ptr, error);
-				store->read_v2beamformed = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_v2beamformed = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kV2BITEData)
 				{
 				status = mbr_reson7kr_rd_v2bite(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kV27kCenterVersion)
 				{
 				status = mbr_reson7kr_rd_v27kcenterversion(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kV28kWetEndVersion)
 				{
 				status = mbr_reson7kr_rd_v28kwetendversion(verbose, buffer, store_ptr, error);
-				done = MB_YES;
+				if (status == MB_SUCCESS)
+					done = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kV2Detection)
 				{
 				status = mbr_reson7kr_rd_v2detection(verbose, buffer, store_ptr, error);
-				store->read_v2detection = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_v2detection = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kV2RawDetection)
 				{
 				status = mbr_reson7kr_rd_v2rawdetection(verbose, buffer, store_ptr, error);
-				store->read_v2rawdetection = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_v2rawdetection = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kV2SnippetData)
 				{
 				status = mbr_reson7kr_rd_v2snippet(verbose, buffer, store_ptr, error);
-				store->read_v2snippet = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_v2snippet = MB_YES;
 				}
 			else if (*recordid == R7KRECID_7kInstallationParameters)
 				{
@@ -2269,7 +2334,8 @@ header->RecordNumber,image->ping_number);
 			else if (*recordid == R7KRECID_7kRemoteControlSonarSettings)
 				{
 				status = mbr_reson7kr_rd_remotecontrolsettings(verbose, buffer, store_ptr, error);
-				store->read_remotecontrolsettings = MB_YES;
+				if (status == MB_SUCCESS)
+					store->read_remotecontrolsettings = MB_YES;
 				done = MB_NO;
 				}
 			else if (*recordid == R7KRECID_7kReserved)
@@ -8579,6 +8645,16 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 		store->kind = MB_DATA_NONE;
 		}
 
+	/* check for broken record */
+	for (i=0;i<v2rawdetection->number_beams;i++)
+		{
+		if (v2rawdetection->beam_descriptor[i] > v2rawdetection->number_beams)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
+		}
+
 	/* print out the results */
 #ifdef MBR_RESON7KR_DEBUG
 fprintf(stderr,"R7KRECID_7kV2RawDetection:             7Ktime(%4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d) record_number:%d ping:%d\n",
@@ -8662,6 +8738,13 @@ int mbr_reson7kr_rd_v2snippet(int verbose, char *buffer, void *store_ptr, int *e
 		mb_get_binary_int(MB_YES, &buffer[index], &(snippettimeseries->begin_sample)); index += 4;
 		mb_get_binary_int(MB_YES, &buffer[index], &(snippettimeseries->detect_sample)); index += 4;
 		mb_get_binary_int(MB_YES, &buffer[index], &(snippettimeseries->end_sample)); index += 4;
+
+		if (snippettimeseries->begin_sample > snippettimeseries->end_sample
+		    || snippettimeseries->detect_sample > snippettimeseries->end_sample)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 
 		/* allocate memory for snippettimeseries if needed */
 		if (status == MB_SUCCESS

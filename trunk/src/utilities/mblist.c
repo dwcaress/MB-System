@@ -1926,7 +1926,7 @@ int main (int argc, char **argv)
 			fprintf(output[i], "\t%s = ", variable);
 
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
-			fprintf(outfile, "\t\t%s:long_name = \"mean backscatter\";\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Oblique backscatter\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 			if (signflip_next_value == MB_YES)
 			  fprintf(outfile, "-");
@@ -1949,7 +1949,7 @@ int main (int argc, char **argv)
 			fprintf(output[i], "\t%s = ", variable);
 
 			fprintf(outfile, "\tfloat %s(data);\n", variable);
-			fprintf(outfile, "\t\t%s:long_name = \"Oblique backscatter\";\n", variable);
+			fprintf(outfile, "\t\t%s:long_name = \"Mean backscatter\";\n", variable);
 			fprintf(outfile, "\t\t%s:units = \"", variable);
 			if (signflip_next_value == MB_YES)
 			  fprintf(outfile, "-");
@@ -2376,7 +2376,7 @@ int main (int argc, char **argv)
 			}
 		    else
 			{
-			if (list[i] == 'T' || list[i] == 't' || list[i] == 'U')
+			if (list[i] == 'T' || list[i] == 't' || list[i] == 'U' || list[i] == 'l')
 				use_gains = MB_YES;
 			else if (list[i] == 'F' || list[i] == 'f')
 				;// ignore

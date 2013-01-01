@@ -192,6 +192,9 @@ $mb_pulsewidth = 0.000060;
 $resongainsetcount = 0;
 $mb_snippetmode = 1;
 
+# camera control - each sample period = 0.2 seconds so ($nsampleperiods = 10) == 2 seconds
+$nsampleperiods = 10;
+
 # behavior waypoint and waypoint_depth
 $behaviorWaypointID = 0;
 $behaviorWaypointDepthID = 1;
@@ -1454,7 +1457,7 @@ print "Behavior: reson (start, Log_Mode = $logmode)\n";
 				if ($mstartstops[$i] == 1)
 					{
 					$camerarunlength = $cameraenddistance - $mdistances[$i];
-					# $nphotos = int (1.1 * $camerarunlength / 10.0);
+					$nphotos = int (($camerarunlength / $survey_speed) / ($nsampleperiods * 0.2));
 					$nphotos = 0;
 					print MFILE "#######################################################\r\n";
 					print MFILE "# Start taking pictures with camera.\r\n";
@@ -1464,8 +1467,8 @@ print "Behavior: reson (start, Log_Mode = $logmode)\n";
 					print MFILE "behavior startCamera \r\n";
 					print MFILE "{ \r\n";
 					print MFILE "duration  = 1; \r\n";
-					print MFILE "nPhotos = $nphotos; \r\n";
-					print MFILE "nSamplePeriods = 9; \r\n";
+					#print MFILE "nPhotos = $nphotos; \r\n";
+					print MFILE "nSamplePeriods = 10; \r\n";
 					print MFILE "} \r\n";
 					print MFILE "# \r\n";
 					print MFILE "#######################################################\r\n";
@@ -2046,7 +2049,7 @@ print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint
 		if ($camera && $i > 0 && $mstartstops[$i-1] == 1)
 			{
 			$camerarunlength = $cameraenddistance - $mdistances[$i-1];
-			$nphotos = int (1.1 * $camerarunlength / 10.0);
+			$nphotos = int (($camerarunlength / $survey_speed) / ($nsampleperiods * 0.2));
 			# $nphotos = 0;
 			print MFILE "#######################################################\r\n";
 			print MFILE "# Start taking pictures with camera.\r\n";
@@ -2057,7 +2060,7 @@ print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint
 			print MFILE "{ \r\n";
 			print MFILE "duration  = 1; \r\n";
 			#print MFILE "nPhotos = $nphotos; \r\n";
-			print MFILE "nSamplePeriods = 9; \r\n";
+			print MFILE "nSamplePeriods = $nsampleperiods; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";
