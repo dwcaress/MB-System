@@ -2,7 +2,7 @@
  *    The MB-system:	mbkongsbergpreprocess.c	1/1/2012
  *    $Id: mbkongsbergpreprocess.c 1938 2012-02-22 20:58:08Z caress $
  *
- *    Copyright (c) 2012 by
+ *    Copyright (c) 2012-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1437,8 +1437,16 @@ int main (int argc, char **argv)
 	/* if output directory was set by user, reset file path */
 	if (odir_set == MB_YES && odir!=NULL)
 		{
-		filenameptr = strrchr(ofile, '/') + 1;
-		sprintf(ofile,"%s/%s",odir,filenameptr);
+		strcpy(buffer, odir);
+		if (buffer[strlen(odir)-1] != '/')
+			strcat(buffer, "/");
+		if (strrchr(ofile, '/') != NULL)
+			filenameptr = strrchr(ofile, '/') + 1;
+		else
+			filenameptr = ofile;
+		strcat(buffer, filenameptr);
+		strcpy(ofile,buffer);
+
 		}
 
 	/* initialize reading the input swath file */
