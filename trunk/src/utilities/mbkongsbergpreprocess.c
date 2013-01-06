@@ -93,7 +93,6 @@ int main (int argc, char **argv)
 	int	look_processed = MB_DATALIST_LOOK_UNSET;
 	double	file_weight;
 	int	format = 0;
-	int	oformat = 0;
 	int	pings;
 	int	lonflip;
 	double	bounds[4];
@@ -156,6 +155,8 @@ int main (int argc, char **argv)
 
 	/* counting variables file */
 	int	output_counts = MB_NO;
+	int	nfile_read = 0;
+	int	nfile_write = 0;
 	int	nrec_0x30_parameter_stop = 0;
 	int	nrec_0x31_parameter_off = 0;
 	int	nrec_0x32_parameter_on = 0;
@@ -313,7 +314,7 @@ int main (int argc, char **argv)
 	int	jheading = 0;
 	int	jattitude = 0;
 
-	int	i, j;
+	int	i;
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings,&lonflip,bounds,
@@ -1426,13 +1427,16 @@ int main (int argc, char **argv)
 	/* loop over all files to be read */
 	while (read_data == MB_YES && (format == MBF_EM710RAW || format == MBF_EM710MBA))
 	{
-	/* figure out the output file name */
-	status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
-	if (format == MBF_EM710MBA
-		&& strncmp(".mb59",&ifile[strlen(ifile)-5],5) == 0)
-		sprintf(ofile, "%sf.mb%d", fileroot, MBF_EM710MBA);
-	else
-		sprintf(ofile, "%s.mb%d", fileroot, MBF_EM710MBA);
+	/* figure out the output file name if not specified */
+	if (ofile_set == MB_NO)
+		{
+		status = mb_get_format(verbose, ifile, fileroot, &testformat, &error);
+		if (format == MBF_EM710MBA
+			&& strncmp(".mb59",&ifile[strlen(ifile)-5],5) == 0)
+			sprintf(ofile, "%sf.mb%d", fileroot, MBF_EM710MBA);
+		else
+			sprintf(ofile, "%s.mb%d", fileroot, MBF_EM710MBA);
+		}
 
 	/* if output directory was set by user, reset file path */
 	if (odir_set == MB_YES && odir!=NULL)
@@ -1463,40 +1467,47 @@ int main (int argc, char **argv)
 			program_name);
 		exit(error);
 		}
+	nfile_read++;
 
-	/* initialize writing the output swath sonar file */
-	if ((status = mb_write_init(
-		verbose,ofile,MBF_EM710MBA,&ombio_ptr,
-		&obeams_bath,&obeams_amp,&opixels_ss,&error)) != MB_SUCCESS)
+	/* if ofile has been set then there is only one output file, otherwise there
+		is an output file for each input file */
+	if (ofile_set == MB_NO || nfile_write == 0)
 		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+		/* initialize writing the output swath sonar file */
+		if ((status = mb_write_init(
+			verbose,ofile,MBF_EM710MBA,&ombio_ptr,
+			&obeams_bath,&obeams_amp,&opixels_ss,&error)) != MB_SUCCESS)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
+			fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+		nfile_write++;
 
-	/* initialize asynchronous sonardepth output file */
-	sprintf(atsfile,"%s.ats",ofile);
-	if ((atsfp = fopen(atsfile, "w")) == NULL)
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open asynchronous sonardepth data file <%s> for writing\n",atsfile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+		/* initialize asynchronous sonardepth output file */
+		sprintf(atsfile,"%s.ats",ofile);
+		if ((atsfp = fopen(atsfile, "w")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open asynchronous sonardepth data file <%s> for writing\n",atsfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
-	/* initialize synchronous attitude output file */
-	sprintf(stafile,"%s.sta",ofile);
-	if ((stafp = fopen(stafile, "w")) == NULL)
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open synchronous attitude data file <%s> for writing\n",stafile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
+		/* initialize synchronous attitude output file */
+		sprintf(stafile,"%s.sta",ofile);
+		if ((stafp = fopen(stafile, "w")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open synchronous attitude data file <%s> for writing\n",stafile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 		}
 
 	/* get pointers to data storage */
@@ -2294,56 +2305,6 @@ int main (int argc, char **argv)
 			}
 		}
 
-	/* open up start and end times by two minutes */
-	start_time_d -= 120.0;
-	end_time_d += 120.0;
-
-	/* output asynchronous heading output file */
-	sprintf(athfile,"%s.ath",ofile);
-	if ((athfp = fopen(athfile, "w")) != NULL)
-		{
-		for (i=0;i<ndat_heading;i++)
-			{
-			if (dat_heading_time_d[i] > start_time_d && dat_heading_time_d[i] < end_time_d)
-				fprintf(athfp, "%0.6f\t%7.3f\n",dat_heading_time_d[i], dat_heading_heading[i]);
-			}
-		fclose(athfp);
-		}
-	else
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open asynchronous heading data file <%s> for writing\n",athfile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* output asynchronous attitude output file */
-	sprintf(atafile,"%s.ata",ofile);
-	if ((atafp = fopen(atafile, "w")) != NULL)
-		{
-		for (i=0;i<ndat_rph;i++)
-			{
-			if (dat_rph_time_d[i] > start_time_d && dat_rph_time_d[i] < end_time_d)
-				fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n",dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i]);
-			}
-		fclose(atafp);
-		}
-	else
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open asynchronous attitude data file <%s> for writing\n",atafile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
-
-	/* close the swath file */
-	status = mb_close(verbose,&imbio_ptr,&error);
-	status = mb_close(verbose,&ombio_ptr,&error);
-	fclose(atsfp);
-	fclose(stafp);
-
 	/* output counts */
 	if(output_counts == MB_YES)
 		{
@@ -2423,12 +2384,6 @@ int main (int argc, char **argv)
 	nrec_0xE4_sidescan_mbari59_tot += nrec_0xE4_sidescan_mbari59;
 	nrec_0xE5_bathymetry_mbari59_tot += nrec_0xE5_bathymetry_mbari59;
 
-	/* generate inf fnv and fbt files */
-	if (status == MB_SUCCESS)
-		{
-		status = mb_make_info(verbose, MB_YES, ofile, MBF_EM710MBA, &error);
-		}
-
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
@@ -2444,6 +2399,70 @@ int main (int argc, char **argv)
                 read_data = MB_NO;
                 }
 
+	/* close the input swath file */
+	status = mb_close(verbose,&imbio_ptr,&error);
+
+	/* close the output swath file if necessary */
+	if (ofile_set == MB_NO || read_data == MB_NO)
+		{
+		status = mb_close(verbose,&ombio_ptr,&error);
+		fclose(tfp);
+
+		/* open up start and end times by two minutes */
+		start_time_d -= 120.0;
+		end_time_d += 120.0;
+
+		/* output asynchronous heading output file */
+		sprintf(athfile,"%s.ath",ofile);
+		if ((athfp = fopen(athfile, "w")) != NULL)
+			{
+			for (i=0;i<ndat_heading;i++)
+				{
+				if (dat_heading_time_d[i] > start_time_d && dat_heading_time_d[i] < end_time_d)
+					fprintf(athfp, "%0.6f\t%7.3f\n",dat_heading_time_d[i], dat_heading_heading[i]);
+				}
+			fclose(athfp);
+			}
+		else
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open asynchronous heading data file <%s> for writing\n",athfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		/* output asynchronous attitude output file */
+		sprintf(atafile,"%s.ata",ofile);
+		if ((atafp = fopen(atafile, "w")) != NULL)
+			{
+			for (i=0;i<ndat_rph;i++)
+				{
+				if (dat_rph_time_d[i] > start_time_d && dat_rph_time_d[i] < end_time_d)
+					fprintf(atafp, "%0.6f\t%0.3f\t%0.3f\n",dat_rph_time_d[i], dat_rph_roll[i], dat_rph_pitch[i]);
+				}
+			fclose(atafp);
+			}
+		else
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open asynchronous attitude data file <%s> for writing\n",atafile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+
+		/* close ats and sta files */
+		fclose(atsfp);
+		fclose(stafp);
+
+		/* generate inf fnv and fbt files */
+		if (status == MB_SUCCESS)
+			{
+			status = mb_make_info(verbose, MB_YES, ofile, MBF_EM710MBA, &error);
+			}
+		}
+
 	/* end loop over files in list */
 	}
 	if (read_datalist == MB_YES)
@@ -2452,6 +2471,8 @@ int main (int argc, char **argv)
 	/* output counts */
 	if(output_counts == MB_YES)
 		{
+		fprintf(stdout, "\nTotal files read:  %d\n", nfile_read);
+		fprintf(stdout, "Total files written: %d\n", nfile_write);
 		fprintf(stdout, "\nTotal data records written from: %s\n", read_file);
 		fprintf(stdout, "     nrec_0x30_parameter_stop_tot:     %d\n", nrec_0x30_parameter_stop_tot);
 		fprintf(stdout, "     nrec_0x31_parameter_off_tot:      %d\n", nrec_0x31_parameter_off_tot);

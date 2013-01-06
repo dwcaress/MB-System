@@ -1,4 +1,4 @@
-.TH mb7kpreprocess 1 "30 October 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mb7kpreprocess 1 "5 January 2013" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7kpreprocess\fP - performs preprocessing of Reson 7k multibeam data
 in the 7k format (\fBMBIO\fP format 88).
@@ -138,6 +138,13 @@ attitude data before merging with the sonar data. The navigation and attitude
 data from \fIinsfile\fP will also be embedded in asynchronous data records
 in the output 7k format data. Any pre-existing navigation data records will
 be replaced. MBARI AUV navigation files are binary and specific to MBARI.
+.TP
+.B \-O
+\fIoutfile\fP
+.br
+This option causes \fBmb7kpreprocess\fP to output all data to a single file
+specified as \fIoutfile\fP. By default, the program creates output files for
+each input file.
 .TP
 .B \-P
 \fIsonardepthfile\fP

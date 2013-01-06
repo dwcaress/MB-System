@@ -258,6 +258,8 @@ int main (int argc, char **argv)
 	s7kr_remotecontrolsettings	*remotecontrolsettings;
 
 	/* counting variables */
+	int	nfile_read = 0;
+	int	nfile_write = 0;
 	int	nrec_reference = 0;
 	int	nrec_sensoruncal = 0;
 	int	nrec_sensorcal = 0;
@@ -4049,73 +4051,80 @@ fprintf(stderr,"Calculating sonardepth change rate for %d sonardepth data\n", nd
 			program_name);
 		exit(error);
 		}
+	nfile_read++;
 
-	/* initialize writing the output swath sonar file */
-	if ((status = mb_write_init(
-		verbose,ofile,format,&ombio_ptr,
-		&obeams_bath,&obeams_amp,&opixels_ss,&error)) != MB_SUCCESS)
+	/* if ofile has been set then there is only one output file, otherwise there
+		is an output file for each input file */
+	if (ofile_set == MB_NO || nfile_write == 0)
 		{
-		mb_error(verbose,error,&message);
-		fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
-		fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+		/* initialize writing the output swath sonar file */
+		if ((status = mb_write_init(
+			verbose,ofile,format,&ombio_ptr,
+			&obeams_bath,&obeams_amp,&opixels_ss,&error)) != MB_SUCCESS)
+			{
+			mb_error(verbose,error,&message);
+			fprintf(stderr,"\nMBIO Error returned from function <mb_write_init>:\n%s\n",message);
+			fprintf(stderr,"\nMultibeam File <%s> not initialized for writing\n",ofile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
+		nfile_write++;
 
-	/* initialize ctd output file */
-	sprintf(ctdfile,"%s_ctd.txt",fileroot);
-	if ((tfp = fopen(ctdfile, "w")) == NULL)
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open ctd data file <%s> for writing\n",ctdfile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+		/* initialize ctd output file */
+		sprintf(ctdfile,"%s_ctd.txt",fileroot);
+		if ((tfp = fopen(ctdfile, "w")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open ctd data file <%s> for writing\n",ctdfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
-	/* initialize asynchronous heading output file */
-	sprintf(athfile,"%s.ath",ofile);
-	if ((athfp = fopen(athfile, "w")) == NULL)
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open asynchronous heading data file <%s> for writing\n",athfile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+		/* initialize asynchronous heading output file */
+		sprintf(athfile,"%s.ath",ofile);
+		if ((athfp = fopen(athfile, "w")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open asynchronous heading data file <%s> for writing\n",athfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
-	/* initialize asynchronous sonardepth output file */
-	sprintf(atsfile,"%s.ats",ofile);
-	if ((atsfp = fopen(atsfile, "w")) == NULL)
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open asynchronous sonardepth data file <%s> for writing\n",atsfile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+		/* initialize asynchronous sonardepth output file */
+		sprintf(atsfile,"%s.ats",ofile);
+		if ((atsfp = fopen(atsfile, "w")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open asynchronous sonardepth data file <%s> for writing\n",atsfile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
-	/* initialize asynchronous attitude output file */
-	sprintf(atafile,"%s.ata",ofile);
-	if ((atafp = fopen(atafile, "w")) == NULL)
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open asynchronous attitude data file <%s> for writing\n",atafile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
-		}
+		/* initialize asynchronous attitude output file */
+		sprintf(atafile,"%s.ata",ofile);
+		if ((atafp = fopen(atafile, "w")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open asynchronous attitude data file <%s> for writing\n",atafile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 
-	/* initialize synchronous attitude output file */
-	sprintf(stafile,"%s.sta",ofile);
-	if ((stafp = fopen(stafile, "w")) == NULL)
-		{
-		error = MB_ERROR_OPEN_FAIL;
-		fprintf(stderr,"\nUnable to open synchronous attitude data file <%s> for writing\n",stafile);
-		fprintf(stderr,"\nProgram <%s> Terminated\n",
-			program_name);
-		exit(error);
+		/* initialize synchronous attitude output file */
+		sprintf(stafile,"%s.sta",ofile);
+		if ((stafp = fopen(stafile, "w")) == NULL)
+			{
+			error = MB_ERROR_OPEN_FAIL;
+			fprintf(stderr,"\nUnable to open synchronous attitude data file <%s> for writing\n",stafile);
+			fprintf(stderr,"\nProgram <%s> Terminated\n",
+				program_name);
+			exit(error);
+			}
 		}
 
 	/* get pointers to data storage */
@@ -6545,15 +6554,6 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 			}
 		}
 
-	/* close the swath file */
-	status = mb_close(verbose,&imbio_ptr,&error);
-	status = mb_close(verbose,&ombio_ptr,&error);
-	fclose(tfp);
-	fclose(athfp);
-	fclose(atsfp);
-	fclose(atafp);
-	fclose(stafp);
-
 	/* output counts */
 	fprintf(stdout, "\nData records written to: %s\n", ofile);
 	fprintf(stdout, "     File Header:                       %d\n", nrec_fileheader);
@@ -6648,12 +6648,6 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 	nrec_systemeventmessage_tot += nrec_systemeventmessage;
 	nrec_other_tot += nrec_other;
 
-	/* generate inf fnv and fbt files */
-	if (status == MB_SUCCESS)
-		{
-		status = mb_make_info(verbose, MB_YES, ofile, format, &error);
-		}
-
 	/* figure out whether and what to read next */
         if (read_datalist == MB_YES)
                 {
@@ -6669,12 +6663,34 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
                 read_data = MB_NO;
                 }
 
+	/* close the input swath file */
+	status = mb_close(verbose,&imbio_ptr,&error);
+
+	/* close the output swath file if necessary */
+	if (ofile_set == MB_NO || read_data == MB_NO)
+		{
+		status = mb_close(verbose,&ombio_ptr,&error);
+		fclose(tfp);
+		fclose(athfp);
+		fclose(atsfp);
+		fclose(atafp);
+		fclose(stafp);
+
+		/* generate inf fnv and fbt files */
+		if (status == MB_SUCCESS)
+			{
+			status = mb_make_info(verbose, MB_YES, ofile, format, &error);
+			}
+		}
+
 	/* end loop over files in list */
 	}
 	if (read_datalist == MB_YES)
 		mb_datalist_close(verbose,&datalist,&error);
 
 	/* output counts */
+	fprintf(stdout, "\nTotal files read:  %d\n", nfile_read);
+	fprintf(stdout, "Total files written: %d\n", nfile_write);
 	fprintf(stdout, "\nTotal data records written from: %s\n", read_file);
 	fprintf(stdout, "     File Header:                       %d\n", nrec_fileheader_tot);
 	fprintf(stdout, "     Multibeam:                         %d\n", nrec_multibeam_tot);
