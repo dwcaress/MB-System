@@ -8569,6 +8569,7 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 	struct mbsys_reson7k_struct *store;
 	s7k_header *header;
 	s7kr_v2rawdetection *v2rawdetection;
+	s7kr_bathymetry *bathymetry;
 	int	index;
 	int	time_j[5];
 	int	i;
@@ -8588,6 +8589,7 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	v2rawdetection = &(store->v2rawdetection);
 	header = &(v2rawdetection->header);
+	bathymetry = &(store->bathymetry);
 
 	/* extract the header */
 	index = 0;
@@ -8648,7 +8650,8 @@ int mbr_reson7kr_rd_v2rawdetection(int verbose, char *buffer, void *store_ptr, i
 	/* check for broken record */
 	for (i=0;i<v2rawdetection->number_beams;i++)
 		{
-		if (v2rawdetection->beam_descriptor[i] > v2rawdetection->number_beams)
+		if ((v2rawdetection->beam_descriptor[i] > MBSYS_RESON7K_MAX_BEAMS)
+			|| (bathymetry->number_beams > 0 && v2rawdetection->beam_descriptor[i] > bathymetry->number_beams))
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
