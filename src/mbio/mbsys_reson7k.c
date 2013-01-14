@@ -5522,6 +5522,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	struct mbsys_reson7k_struct *store;
 	s7kr_bluefin *bluefin;
 	s7kr_processedsidescan *processedsidescan;
+	s7kr_volatilesettings *volatilesettings;
 	s7kr_beamgeometry *beamgeometry;
 	s7kr_bathymetry *bathymetry;
 	s7kr_backscatter *backscatter;
@@ -5555,6 +5556,7 @@ int mbsys_reson7k_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	store = (struct mbsys_reson7k_struct *) store_ptr;
 	bluefin = (s7kr_bluefin *) &store->bluefin;
 	processedsidescan = (s7kr_processedsidescan *) &store->processedsidescan;
+	volatilesettings = (s7kr_volatilesettings *) &(store->volatilesettings);
 	beamgeometry = (s7kr_beamgeometry *) &(store->beamgeometry);
 	bathymetry = (s7kr_bathymetry *) &store->bathymetry;
 	backscatter = (s7kr_backscatter *) &store->backscatter;
@@ -5601,8 +5603,21 @@ bathymetry->longitude,bathymetry->latitude,*navlon,*navlat); */
 			}
 
 		/* set beamwidths in mb_io structure */
-		mb_io_ptr->beamwidth_xtrack = RTD * beamgeometry->beamwidth_acrosstrack[beamgeometry->number_beams/2];
-		mb_io_ptr->beamwidth_ltrack = RTD * beamgeometry->beamwidth_alongtrack[beamgeometry->number_beams/2];
+		if (store->read_volatilesettings == MB_YES)
+			{
+			mb_io_ptr->beamwidth_xtrack = RTD * volatilesettings->receive_width;
+			mb_io_ptr->beamwidth_ltrack = RTD * volatilesettings->beamwidth_vertical;
+fprintf(stderr,"! BEAMWIDTH volatilesettings: %f %f\n",mb_io_ptr->beamwidth_xtrack,mb_io_ptr->beamwidth_ltrack);
+			}
+		else if (store->read_beamgeometry == MB_YES)
+			{
+			mb_io_ptr->beamwidth_xtrack = RTD * beamgeometry->beamwidth_acrosstrack[beamgeometry->number_beams/2];
+			mb_io_ptr->beamwidth_ltrack = RTD * beamgeometry->beamwidth_alongtrack[beamgeometry->number_beams/2];
+fprintf(stderr,"! BEAMWIDTH beamgeometry: %f %f\n",mb_io_ptr->beamwidth_xtrack,mb_io_ptr->beamwidth_ltrack);
+			}
+		mb_io_ptr->beamwidth_xtrack = MIN(mb_io_ptr->beamwidth_xtrack, 2.0);
+		mb_io_ptr->beamwidth_ltrack = MIN(mb_io_ptr->beamwidth_ltrack, 2.0);
+fprintf(stderr,"! BEAMWIDTH: %f %f\n\n",mb_io_ptr->beamwidth_xtrack,mb_io_ptr->beamwidth_ltrack);
 
 		/* read distance and depth values into storage arrays */
 		*nbath = bathymetry->number_beams;
