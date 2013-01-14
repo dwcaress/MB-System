@@ -490,7 +490,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		char *xlab, char *ylab, char *zlab, char *titl,
 		char *projection, int argc, char **argv,
 		int *error);
-int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale,
+int mbgrid_weight(int verbose, double foot_a, double foot_b,
 		    double pcx, double pcy, double dx, double dy,
 		    double *px, double *py,
 		    double *weight, int *use, int *error);
@@ -2691,8 +2691,8 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				if (foot_range > 0.0)
 				    {
 				    foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
-				    foot_dtheta = 0.5 * mb_io_ptr->beamwidth_xtrack;
-				    foot_dphi = 0.5 * mb_io_ptr->beamwidth_ltrack;
+				    foot_dtheta = 0.5 * scale * mb_io_ptr->beamwidth_xtrack;
+				    foot_dphi = 0.5 * scale * mb_io_ptr->beamwidth_ltrack;
 				    if (foot_dtheta <= 0.0)
 					foot_dtheta = 1.0;
 				    if (foot_dphi <= 0.0)
@@ -2779,7 +2779,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				       pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
 
 				       /* get weight integrated over bin */
-				       mbgrid_weight(verbose, foot_hwidth, foot_hlength, scale,
+				       mbgrid_weight(verbose, foot_hwidth, foot_hlength,
 						    prx[0], pry[0], bdx, bdy,
 						    &prx[1], &pry[1],
 						    &weight, &use_weight, &error);
@@ -5560,7 +5560,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
  * function mbgrid_weight calculates the integrated weight over a bin
  * given the footprint of a sounding
  */
-int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale,
+int mbgrid_weight(int verbose, double foot_a, double foot_b,
 		    double pcx, double pcy, double dx, double dy,
 		    double *px, double *py,
 		    double *weight, int *use, int *error)
@@ -5580,7 +5580,6 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale,
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       foot_a:     %f\n",foot_a);
 		fprintf(outfp,"dbg2       foot_b:     %f\n",foot_b);
-		fprintf(outfp,"dbg2       scale:      %f\n",scale);
 		fprintf(outfp,"dbg2       pcx:        %f\n",pcx);
 		fprintf(outfp,"dbg2       pcy:        %f\n",pcy);
 		fprintf(outfp,"dbg2       dx:         %f\n",dx);
@@ -5618,8 +5617,8 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale,
 	    DWC 11/18/99 */
 
 	/* get integrated weight */
-	fa = scale * foot_a;
-	fb = scale * foot_b;
+	fa = foot_a;
+	fb = foot_b;
 /*	*weight = 0.25 * ( erfcc((pcx - dx) / fa) - erfcc((pcx + dx) / fa))
 			* ( erfcc((pcy - dy) / fb) - erfcc((pcy + dy) / fb));*/
 	*weight = 0.25 * ( mbgrid_erf((pcx + dx) / fa) - mbgrid_erf((pcx - dx) / fa))
