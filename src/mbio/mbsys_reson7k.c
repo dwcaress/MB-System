@@ -5607,17 +5607,14 @@ bathymetry->longitude,bathymetry->latitude,*navlon,*navlat); */
 			{
 			mb_io_ptr->beamwidth_xtrack = RTD * volatilesettings->receive_width;
 			mb_io_ptr->beamwidth_ltrack = RTD * volatilesettings->beamwidth_vertical;
-fprintf(stderr,"! BEAMWIDTH volatilesettings: %f %f\n",mb_io_ptr->beamwidth_xtrack,mb_io_ptr->beamwidth_ltrack);
 			}
 		else if (store->read_beamgeometry == MB_YES)
 			{
 			mb_io_ptr->beamwidth_xtrack = RTD * beamgeometry->beamwidth_acrosstrack[beamgeometry->number_beams/2];
 			mb_io_ptr->beamwidth_ltrack = RTD * beamgeometry->beamwidth_alongtrack[beamgeometry->number_beams/2];
-fprintf(stderr,"! BEAMWIDTH beamgeometry: %f %f\n",mb_io_ptr->beamwidth_xtrack,mb_io_ptr->beamwidth_ltrack);
 			}
 		mb_io_ptr->beamwidth_xtrack = MIN(mb_io_ptr->beamwidth_xtrack, 2.0);
 		mb_io_ptr->beamwidth_ltrack = MIN(mb_io_ptr->beamwidth_ltrack, 2.0);
-fprintf(stderr,"! BEAMWIDTH: %f %f\n\n",mb_io_ptr->beamwidth_xtrack,mb_io_ptr->beamwidth_ltrack);
 
 		/* read distance and depth values into storage arrays */
 		*nbath = bathymetry->number_beams;
