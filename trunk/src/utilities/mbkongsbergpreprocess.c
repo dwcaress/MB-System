@@ -2406,7 +2406,6 @@ int main (int argc, char **argv)
 	if (ofile_set == MB_NO || read_data == MB_NO)
 		{
 		status = mb_close(verbose,&ombio_ptr,&error);
-		fclose(tfp);
 
 		/* open up start and end times by two minutes */
 		start_time_d -= 120.0;
