@@ -3666,10 +3666,12 @@ and mbedit edit save files.\n";
 	/*--------------------------------------------
 	  get topography grid
 	  --------------------------------------------*/
-	if ((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+	if (((process.mbp_ampcorr_mode == MBP_AMPCORR_ON
+				|| process.mbp_ampcorr_area == MB_YES)
 			&& (process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPO
 				|| process.mbp_ampcorr_slope == MBP_AMPCORR_USETOPOSLOPE))
-		|| (process.mbp_sscorr_mode == MBP_SSCORR_ON
+		|| ((process.mbp_sscorr_mode == MBP_SSCORR_ON
+				|| process.mbp_sscorr_area == MB_YES)
 			&& (process.mbp_sscorr_slope == MBP_SSCORR_USETOPO
 				|| process.mbp_sscorr_slope == MBP_SSCORR_USETOPOSLOPE)))
 		{
