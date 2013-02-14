@@ -17365,6 +17365,9 @@ no_defs <>
 # Oblique Mercator for Alarcon Rise Survey
 <AlarconRiseObliqueMercator>
 	proj=omerc ellps=WGS84
-	lonc=-108.4969525 lat_0=23.4353813
-	alpha=31.0 k_0=1.0 units=m no_rot
-	x_0=-2972140.26 y_0=0 no_defs <>
+	lon_1=-108.628211 lat_1=23.252474
+	lon_c=-108.494979 lat_0=23.437453
+	lon_2=-108.361691 lat_2=23.622586
+	units=m no_rot no_uoff rot_conv
+	x_0=-3046491.73 y_0=0.00
+	no_defs<>

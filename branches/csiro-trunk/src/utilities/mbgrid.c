@@ -490,7 +490,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
 		char *xlab, char *ylab, char *zlab, char *titl,
 		char *projection, int argc, char **argv,
 		int *error);
-int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale,
+int mbgrid_weight(int verbose, double foot_a, double foot_b,
 		    double pcx, double pcy, double dx, double dy,
 		    double *px, double *py,
 		    double *weight, int *use, int *error);
@@ -504,10 +504,10 @@ static char rcs_id[] = "$Id$";
 char program_name[] = "mbgrid";
 char help_message[] =  "mbgrid is an utility used to grid bathymetry, amplitude, or \nsidescan data contained in a set of swath sonar data files.  \nThis program uses one of four algorithms (gaussian weighted mean, \nmedian filter, minimum filter, maximum filter) to grid regions \ncovered swaths and then fills in gaps between \nthe swaths (to the degree specified by the user) using a minimum\ncurvature algorithm.";
 char usage_message[] = "mbgrid -Ifilelist -Oroot \
--Rwest/east/south/north [-Adatatype\n\
-          -Bborder  -Cclip/mode -Dxdim/ydim -Edx/dy/units[!] -F\n\
+[-Rwest/east/south/north -Rfactor -Adatatype\n\
+          -Bborder -Cclip/mode/tension -Dxdim/ydim -Edx/dy/units[!] -F\n\
           -Ggridkind -H -Jprojection -Llonflip -M -N -Ppings -Sspeed\n\
-          -Ttension -Utime -V -Wscale -Xextend]";
+          -Utime -V -Wscale -Xextend]";
 /*--------------------------------------------------------------------*/
 
 int main (int argc, char **argv)
@@ -561,6 +561,11 @@ int main (int argc, char **argv)
 	char	units[MB_PATH_MAXLINE];
 	int	clip = 0;
 	int	clipmode = MBGRID_INTERP_NONE;
+#ifdef USESURFACE
+	double	tension = 0.35;
+#else
+	double	tension = 0.0;
+#endif
 	int	grid_mode = MBGRID_WEIGHTED_MEAN;
 	int	datatype = MBGRID_DATA_BATHYMETRY;
 	char	gridkindstring[MB_PATH_MAXLINE];
@@ -570,14 +575,10 @@ int main (int argc, char **argv)
 	double	clipvalue = NO_DATA_FLAG;
 	float	outclipvalue = NO_DATA_FLAG;
 	double	scale = 1.0;
+        double  boundsfactor = 0.0;
         int     setborder = MB_NO;
 	double	border = 0.0;
 	double	extend = 0.0;
-#ifdef USESURFACE
-	double	tension = 0.35;
-#else
-	double	tension = 0.0;
-#endif
 	int	check_time = MB_NO;
 	int	first_in_stays = MB_YES;
 	double	timediff = 300.0;
@@ -731,7 +732,7 @@ int main (int argc, char **argv)
 	ydim = 101;
 	gxdim = 0;
 	gydim = 0;
-	pid = getpid();
+ 	pid = getpid();
 
 	/* process argument list */
 	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:K:k:L:l:MmNnO:o:P:p:QqR:r:S:s:T:t:U:u:VvW:w:X:x:")) != -1)
@@ -750,7 +751,7 @@ int main (int argc, char **argv)
 			break;
 		case 'C':
 		case 'c':
-			n = sscanf (optarg,"%d/%d", &clip, &clipmode);
+			n = sscanf (optarg,"%d/%d/%lf", &clip, &clipmode,&tension);
 			if (n < 1)
 				clipmode = MBGRID_INTERP_NONE;
 			else if (n == 1 && clip > 0)
@@ -759,8 +760,16 @@ int main (int argc, char **argv)
 				clipmode = MBGRID_INTERP_NONE;
 			else if (clip > 0 && clipmode < 0)
 				clipmode = MBGRID_INTERP_GAP;
-			else if (clip > 0 && clipmode > 3)
+			else if (clipmode >= 3)
 				clipmode = MBGRID_INTERP_ALL;
+                        if (n < 3)
+                                {
+#ifdef USESURFACE
+                                tension = 0.35;
+#else
+                                tension = 0.0;
+#endif
+                                }
 			flag++;
 			break;
 		case 'D':
@@ -866,8 +875,17 @@ int main (int argc, char **argv)
 			break;
 		case 'R':
 		case 'r':
-			mb_get_bounds(optarg, gbnd);
-			gbndset = MB_YES;
+                        if (strchr(optarg,'/') == NULL)
+                            {
+                            sscanf (optarg,"%lf", &boundsfactor);
+                            if (boundsfactor <= 1.0)
+                                boundsfactor = 0.0;
+                            }
+			else
+                            {
+                            mb_get_bounds(optarg, gbnd);
+                            gbndset = MB_YES;
+                            }
 			flag++;
 			break;
 		case 'S':
@@ -971,8 +989,10 @@ int main (int argc, char **argv)
 		fprintf(outfp,"dbg2       grid bounds[1]:       %f\n",gbnd[1]);
 		fprintf(outfp,"dbg2       grid bounds[2]:       %f\n",gbnd[2]);
 		fprintf(outfp,"dbg2       grid bounds[3]:       %f\n",gbnd[3]);
+		fprintf(outfp,"dbg2       boundsfactor:         %f\n",boundsfactor);
 		fprintf(outfp,"dbg2       clipmode:             %d\n",clipmode);
 		fprintf(outfp,"dbg2       clip:                 %d\n",clip);
+		fprintf(outfp,"dbg2       tension:              %f\n",tension);
 		fprintf(outfp,"dbg2       grdraster background: %d\n",grdrasterid);
 		fprintf(outfp,"dbg2       backgroundfile:       %s\n",backgroundfile);
 		fprintf(outfp,"dbg2       more:                 %d\n",more);
@@ -987,7 +1007,6 @@ int main (int argc, char **argv)
 		fprintf(outfp,"dbg2       setborder:            %d\n",setborder);
 		fprintf(outfp,"dbg2       border:               %f\n",border);
 		fprintf(outfp,"dbg2       extend:               %f\n",extend);
-		fprintf(outfp,"dbg2       tension:              %f\n",tension);
 		fprintf(outfp,"dbg2       bathy_in_feet:        %d\n",bathy_in_feet);
 		fprintf(outfp,"dbg2       projection_pars:      %s\n",projection_pars);
 		fprintf(outfp,"dbg2       proj flag 1:          %d\n",projection_pars_f);
@@ -1024,6 +1043,17 @@ int main (int argc, char **argv)
 			strcpy(units, "meters");
 			}
 		}
+
+        /* if requested expand the grid bounds */
+        if (boundsfactor > 1.0)
+                {
+                xx1 = 0.5 * (boundsfactor - 1.0) * (gbnd[1] - gbnd[0]);
+                yy1 = 0.5 * (boundsfactor - 1.0) * (gbnd[3] - gbnd[2]);
+		gbnd[0] -= xx1;
+		gbnd[1] += xx1;
+		gbnd[2] -= yy1;
+		gbnd[3] += yy1;
+                }
 
 	/* if bounds not specified then quit */
 	if (gbnd[0] >= gbnd[1] || gbnd[2] >= gbnd[3])
@@ -1426,6 +1456,8 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 		|| clipmode == MBGRID_INTERP_NEAR)
 		&& clip > xdim && clip > ydim)
 		clipmode = MBGRID_INTERP_ALL;
+        if (clipmode == MBGRID_INTERP_ALL)
+                clip = MAX(xdim, ydim);
 
 	/* set plot label strings */
 	if (use_projection == MB_YES)
@@ -1534,7 +1566,9 @@ gbnd[0], gbnd[1], gbnd[2], gbnd[3]);*/
 			fprintf(outfp,"  Longitude: %9.4f %9.4f\n",gbnd[0],gbnd[1]);
 			fprintf(outfp,"  Latitude:  %9.4f %9.4f\n",gbnd[2],gbnd[3]);
 			}
-		fprintf(outfp,"Working grid dimensions: %d %d\n",gxdim,gydim);
+                if (boundsfactor > 1.0)
+                    fprintf(outfp,"  Grid bounds correspond to %f times actual data coverage\n",boundsfactor);
+ 		fprintf(outfp,"Working grid dimensions: %d %d\n",gxdim,gydim);
 		if (use_projection == MB_YES)
 			{
 			fprintf(outfp,"Working Grid bounds:\n");
@@ -2657,8 +2691,8 @@ ib, ix, iy, bathlon[ib], bathlat[ib], bath[ib], navlon, navlat);*/
 				if (foot_range > 0.0)
 				    {
 				    foot_theta = RTD * atan2(foot_lateral, (bath[ib] - sonardepth));
-				    foot_dtheta = 0.5 * mb_io_ptr->beamwidth_xtrack;
-				    foot_dphi = 0.5 * mb_io_ptr->beamwidth_ltrack;
+				    foot_dtheta = 0.5 * scale * mb_io_ptr->beamwidth_xtrack;
+				    foot_dphi = 0.5 * scale * mb_io_ptr->beamwidth_ltrack;
 				    if (foot_dtheta <= 0.0)
 					foot_dtheta = 1.0;
 				    if (foot_dphi <= 0.0)
@@ -2745,7 +2779,7 @@ xx0, yy0, xx1, yy1, xx2, yy2);*/
 				       pry[4] = -xx2 * foot_dyn + yy2 * foot_dxn;
 
 				       /* get weight integrated over bin */
-				       mbgrid_weight(verbose, foot_hwidth, foot_hlength, scale,
+				       mbgrid_weight(verbose, foot_hwidth, foot_hlength,
 						    prx[0], pry[0], bdx, bdy,
 						    &prx[1], &pry[1],
 						    &weight, &use_weight, &error);
@@ -5526,7 +5560,7 @@ int write_cdfgrd(int verbose, char *outfile, float *grid,
  * function mbgrid_weight calculates the integrated weight over a bin
  * given the footprint of a sounding
  */
-int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale,
+int mbgrid_weight(int verbose, double foot_a, double foot_b,
 		    double pcx, double pcy, double dx, double dy,
 		    double *px, double *py,
 		    double *weight, int *use, int *error)
@@ -5546,7 +5580,6 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale,
 		fprintf(outfp,"dbg2       verbose:    %d\n",verbose);
 		fprintf(outfp,"dbg2       foot_a:     %f\n",foot_a);
 		fprintf(outfp,"dbg2       foot_b:     %f\n",foot_b);
-		fprintf(outfp,"dbg2       scale:      %f\n",scale);
 		fprintf(outfp,"dbg2       pcx:        %f\n",pcx);
 		fprintf(outfp,"dbg2       pcy:        %f\n",pcy);
 		fprintf(outfp,"dbg2       dx:         %f\n",dx);
@@ -5584,8 +5617,8 @@ int mbgrid_weight(int verbose, double foot_a, double foot_b, double scale,
 	    DWC 11/18/99 */
 
 	/* get integrated weight */
-	fa = scale * foot_a;
-	fb = scale * foot_b;
+	fa = foot_a;
+	fb = foot_b;
 /*	*weight = 0.25 * ( erfcc((pcx - dx) / fa) - erfcc((pcx + dx) / fa))
 			* ( erfcc((pcy - dy) / fb) - erfcc((pcy + dy) / fb));*/
 	*weight = 0.25 * ( mbgrid_erf((pcx + dx) / fa) - mbgrid_erf((pcx - dx) / fa))

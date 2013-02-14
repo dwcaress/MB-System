@@ -1,4 +1,4 @@
-.TH mbclean 1 "16 August 2011" "MB-System 5.0" "MB-System 5.0"
+.TH mbclean 1 "16 October 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbclean\fP - Tool to automatically flag bad beams in swath sonar bathymetry data.
 
@@ -6,10 +6,10 @@
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope/units\fP 
-\fB-D\fImin/max\fP \fB-F\fIformat\fP 
-\fB-G\fIfraction_low/fraction_high\fP 
-\fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP 
+\fBmbclean\fP [\fB-A\fImax\fP \fB-B\fIlow/high\fP \fB-C\fIslope/units\fP
+\fB-D\fImin/max\fP \fB-F\fIformat\fP
+\fB-G\fIfraction_low/fraction_high\fP
+\fB-I\fIinfile\fP \fB-L\fIlonflip\fP \fB-O\fIoutfile\fP
 \fB-M\fImode\fP \fB-Q\fIbackup\fP \fB-R\fImaxheadingrate\fP \fB-S\fIslope/mode/units\fP
 \fB-U\fInmin\fP \fB-X\fIbeamsleft/beamsright\fP \fB-Y\fIdistanceleft/distanceright\fP \fB-V -H\fP]
 
@@ -17,13 +17,13 @@ Version 5.0
 \fBmbclean\fP identifies and flags artifacts in swath sonar bathymetry data.
 Several algorithms are available for identifying artifacts; multiple
 algorithms can be applied in a single pass.
-The most commonly used approach is to identify artifacts  
-based on excessive bathymetric slopes. 
+The most commonly used approach is to identify artifacts
+based on excessive bathymetric slopes.
 Spikes where an excessive slope occurs before and reverses after a beam
 can also be removed.
-If desired, \fBmbclean\fP will also flag beams 
+If desired, \fBmbclean\fP will also flag beams
 associated with "rails" where
-outer beams have smaller acrosstrack distances 
+outer beams have smaller acrosstrack distances
 than more inner beams (\fB-Q\fP option).
 Low and high bounds on acceptable depth values can be set; depth values
 outside the acceptable range will be flagged. The acceptable depth
@@ -35,45 +35,40 @@ A set number of outer beams can also be flagged.
 The order in which the flagging algorithms are applied is
 as follows:
 .br
- 	1. Flag specified numbers of outer beams 
+ 	1. Flag specified numbers of outer beams
  		(\fB-X\fP option).
  	2. Flag outer beams by acrosstrack distance
  		(\fB-Y\fP option).
- 	2. Flag soundings outside specified acceptable 
+ 	2. Flag soundings outside specified acceptable
  		depth range (\fB-B\fP option).
  	7. Flag pings with excessive heading change rate
 	        (\fB-Q\fP option).
  	7. Zap "rails" (\fB-Q\fP option).
- 	3. Flag soundings outside acceptable depth range 
- 		using fractions of local median depth 
+ 	3. Flag soundings outside acceptable depth range
+ 		using fractions of local median depth
  		(\fB-G\fP option).
- 	4. Flag soundings outside acceptable depth range 
- 		using deviation from local median depth 
+ 	4. Flag soundings outside acceptable depth range
+ 		using deviation from local median depth
  		(\fB-A\fP option).
  	5. Flag soundings associated with spikes (\fB-S\fP option).
- 	6. Flag soundings associated with excessive slopes 
+ 	6. Flag soundings associated with excessive slopes
  		(\fB-C\fP option or default).
  	7. Zap "rails" (\fB-Q\fP option).
- 	8. Flag all soundings in pings with too few 
+ 	8. Flag all soundings in pings with too few
  		good soundings (\fB-U\fP option).
 
-This program flags beams by outputting the flags as 
+This program flags beams by outputting the flags as
 edit events to an "edit save file", like that produced
 by \fBmbedit\fP. If an "edit save file" (named by adding
 a ".esf" suffix to the input swath filename) already
 exists, the edits are read in and applied before the
 \fBmbclean\fP flagging algorithms are used.
-Once generated, the edit events can be applied 
+Once generated, the edit events can be applied
 to the data using the program \fBmbprocess\fP, which
-outputs a processed swath data file. 
+outputs a processed swath data file.
 The \fBmbprocess\fP program is also used to merge
 edited navigation, recalculate bathymetry, and apply
-other corrections to swath bathymetry data. 
-
-The program \fBmbclean\fP that was included in \fBMB-System\fP
-version 4 distributions directly output a "cleaned"
-swath file. This functionality is currently preserved
-in the program \fBmbcleanold\fP.
+other corrections to swath bathymetry data.
 
 .SH AUTHORSHIP
 David W. Caress (caress@mbari.org)
@@ -98,7 +93,7 @@ the local median depth. The median depth is obtained from the
 current ping and the pings immediately before and after that
 ping.  If a depth value deviates from the median depth by more
 than \fImax\fP, then it
-will be flagged. No deviation from the median depth checking is 
+will be flagged. No deviation from the median depth checking is
 done if the \fB-A\fP option
 is not used.
 .TP
@@ -131,8 +126,8 @@ some of the flagging algorithms.  Both values are expressed in terms
 of fractions of the local median depth. Thus, \fB-D\fP\fI0.01/0.25\fP
 will translate, if the local median depth is 1000 meters, to a minimum
 distance of 10 meters and a maximum distance of 250 meters.
-The \fImin\fP value sets the minimum distance 
-between beams required for an excessive slope to be used 
+The \fImin\fP value sets the minimum distance
+between beams required for an excessive slope to be used
 to flag bad beams.
 The navigation and heading of the ship are used to calculate the locations
 of beams.  Ship turns often cause beams of adjacent pings to overlap, causing
@@ -151,7 +146,7 @@ Default: \fImin/max\fP = 0.01/0.25.
 Sets the data format used if the input is read from stdin
 or from a file. If \fIformat\fP < 0, then the input file specified
 with the \fB-I\fP option will actually contain a list of input swath sonar
-data files. This program uses the \fBMBIO\fP library 
+data files. This program uses the \fBMBIO\fP library
 and will read or write any swath sonar
 format supported by \fBMBIO\fP. A list of the swath sonar data formats
 currently supported by \fBMBIO\fP and their identifier values
@@ -161,14 +156,14 @@ is given in the \fBMBIO\fP manual page. Default: \fIformat\fP = 11.
 \fIfraction_low/fraction_high\fP
 .br
 This option sets the range of acceptable depth values relative to
-low and high fractions of the local median depth. 
+low and high fractions of the local median depth.
 The median depth is obtained from the
 current ping and the pings immediately before and after that
 ping.  If a depth
 value is less than \fIfraction_low\fP times the median depth
 (e.g. \fIfraction_low\fP = 0.5 means one half the median
 depth) or more than \fIfraction_high\fP times the median depth then it
-will be flagged. No fractional depth range checking is 
+will be flagged. No fractional depth range checking is
 done if the \fB-G\fP option
 is not used.
 .TP
@@ -179,11 +174,11 @@ of its operation and then exit immediately.
 .B \-I
 \fIinfile\fP
 .br
-Sets the input filename. If \fIformat\fP > 0 (set with the 
-\fB-F\fP option) then the swath sonar data contained in \fIinfile\fP 
+Sets the input filename. If \fIformat\fP > 0 (set with the
+\fB-F\fP option) then the swath sonar data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
-data files to be processed and their formats.  The program will read 
+data files to be processed and their formats.  The program will read
 and process the data in each one of these files. Each input file will
 have an associated output file with either the ".sga" or ".aga" suffix.
 In the \fIinfile\fP file, each
@@ -201,9 +196,9 @@ is given in the \fBMBIO\fP manual page. Default: \fIinfile\fP = "datalist.mb-1".
 .br
 Sets the range of the longitude values used.
 If \fIlonflip\fP=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If \fIlonflip\fP=0 
+the range from -360 to 0 degrees. If \fIlonflip\fP=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If \fIlonflip\fP=1 
+the range from -180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
@@ -230,24 +225,24 @@ and the program will exit. Default: \fImode\fP = 1.
 .br
 This flag causes \fBmbclean\fP to search for bad "rails" in the
 swath sonar swath; the "rails" refer to groups of outer beams which
-have crosstrack distances (and depths) much less than they should 
+have crosstrack distances (and depths) much less than they should
 have.  These are identified when one or more outer beams lies
-more than \fIbackup\fP meters inboard of a more inner beam; all beams 
+more than \fIbackup\fP meters inboard of a more inner beam; all beams
 meeting this criteria are flagged.
 .TP
 .B \-S
 \fIslope/mode/unit\fP
 .br
-The value \fIslope\fP is the maximum acceptable spike slope. 
+The value \fIslope\fP is the maximum acceptable spike slope.
 If the slope from the preceding beam to this beam exceeds this value,
 and the slope from this beam to subsequent beam exceeds this value but
 with an opposite sign this beam is considered a spike and
 will be flagged or removed according to the
-operational mode specified using the \fB-M\fP option. 
-Acrosstrack slopes are determined by the preceding and subsequent beams 
+operational mode specified using the \fB-M\fP option.
+Acrosstrack slopes are determined by the preceding and subsequent beams
 in the same ping. Alongtrack slopes are
-determined from the same beam in the previous and subsequent pings. 
-Alongtrack are fairly sensitive to the minimum distance \fB-D\fP option, 
+determined from the same beam in the previous and subsequent pings.
+Alongtrack are fairly sensitive to the minimum distance \fB-D\fP option,
 which will normally need to be set less to a very small value for alongtrack slopes
 to be detected. There is no test that alongtrack distances are all in the same direction.
 
@@ -274,18 +269,18 @@ flagged.
 \fIzap_beams\fP
 .br
 If this option is used, the outermost \fIzap_beams\fP at both ends
-of the swath are flagged as bad; this is useful if the outer beams 
+of the swath are flagged as bad; this is useful if the outer beams
 are known to be unreliable. Default: \fIzap_beams\fP = 0.
 .TP
 .B \-V
 Normally, \fBmbclean\fP works "silently" without outputting
 anything to the stderr stream.  If the
 \fB-V\fP flag is given, then \fBmbclean\fP works in a "verbose" mode and
-outputs the program version being used, all error status messages, 
+outputs the program version being used, all error status messages,
 and the number of beams flagged as bad.
 
 .SH EXAMPLES
-Suppose one wishes to do a first pass edit of 
+Suppose one wishes to do a first pass edit of
 six Simrad EM300 files in
 the processing format (format 57). A datalist referencing these
 six files exists as the file datalist.mb-1 and has the contents:
@@ -305,7 +300,7 @@ depth or which produce a slope greater than 3.5 (74 degrees):
  		-G0.80/1.20
 
 The program will output flagging statistics for each file and
-give totals at the end. If the \fB-V\fP option is specified, 
+give totals at the end. If the \fB-V\fP option is specified,
 \fBmbclean\fP will also output information for each beam that
 is flagged. Here is an example of the nonverbose output:
 .br
@@ -414,15 +409,15 @@ is flagged. Here is an example of the nonverbose output:
  	0 total beams zeroed
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbedit\fP(l), 
+\fBmbsystem\fP(l), \fBmbedit\fP(l),
 \fBmbinfo\fP(l) \fBmbprocess\fP(l),
 
 .SH BUGS
-The algorithms implemented in \fBmbclean\fP simply 
+The algorithms implemented in \fBmbclean\fP simply
 don't detect all bathymetric artifacts that
 are obvious to the eye on contour charts.  Although
 \fBmbclean\fP often does a credible first pass at
 flagging obvious artifacts, we strongly recommend that
-any swath bathymetry processing stream include 
+any swath bathymetry processing stream include
 interactive editing of the
 bathymetry data (e.g. \fBmbedit\fP).

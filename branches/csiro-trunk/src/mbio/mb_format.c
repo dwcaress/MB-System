@@ -3309,9 +3309,13 @@ int mb_get_format(int verbose, char *filename, char *fileroot,
 		suffix_len = 4;
 	    else if ((suffix = strstr(&filename[i],".S7K")) != NULL)
 		suffix_len = 4;
+	    else if ((suffix = strstr(&filename[i],".7k")) != NULL)
+		suffix_len = 3;
+	    else if ((suffix = strstr(&filename[i],".7K")) != NULL)
+		suffix_len = 3;
 	    else
 		suffix_len = 0;
-	    if (suffix_len == 4)
+	    if (suffix_len == 4 || suffix_len == 3)
 		{
 		if (fileroot != NULL)
 		    {

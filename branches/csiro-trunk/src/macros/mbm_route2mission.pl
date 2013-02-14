@@ -150,6 +150,7 @@ $altitudemin = 50.0;
 $altitudeabort = 25.0;
 $altitudedesired = $altitudemin;
 $altitudedesired2 = $altitudemin;
+$altitudedesired3 = $altitudemin;
 $deltadepthrestart = $altitudemin - $altitudeabort;
 
 # constant depth controls
@@ -190,6 +191,9 @@ $mb_minrangefraction = 0.2;
 $mb_pulsewidth = 0.000060;
 $resongainsetcount = 0;
 $mb_snippetmode = 1;
+
+# camera control - each sample period = 0.2 seconds so ($nsampleperiods = 10) == 2 seconds
+$nsampleperiods = 10;
 
 # behavior waypoint and waypoint_depth
 $behaviorWaypointID = 0;
@@ -248,11 +252,11 @@ if ($help) {
     print "MBgrdviz into an MBARI AUV mission script. Developed for use\r\n";
     print "in survey planning for the MBARI Mapping AUV.\r\n";
     print "Usage: mbm_route2mission -Iroutefile \r\n";
-    print "\t\t[-Aaltitudemin/altitudeabort[/altitudedesired] -Abehavior -Caborttime \r\n";
-    print "-Ddepthconstant[/depthconstant2] -Fforwarddistance -Ggpsmode \r\n";
+    print "\t\t[-Aaltitudemin/altitudeabort[/altitudedesired[/altitudedesired2[/altitudedesired3]]] \r\n";
+    print "\t\t-Bbehavior -Caborttime -Ddepthconstant[/depthconstant2] -Fforwarddistance -Ggpsmode \r\n";
     print "\t\t-Jdepthprofilefile -Lapproachdepth -M[sonarlist] -N \r\n";
     print "-Omissionfile \r\n\t\t-P[startlon/startlat | startdistance] \r\n";
-    print "\t\t-Rtransmitpower/receivegain[/rangeminfraction] \r\n";
+    print "\t\t-Rtransmitpower/receivegain[/rangeminfraction[/pulsewidth]] \r\n";
     print "\t\t-Tstarttime -Wwaypointspacing -Z -V -H]\r\n";
     exit 0;
 }
@@ -281,11 +285,18 @@ if ($behaviorarg != -1)
 	}
 if ($altitudearg)
 	{
-	if ($altitudearg =~ /^\S+\/\S+\/\S+\/\S+/)
+	if ($altitudearg =~ /^\S+\/\S+\/\S+\/\S+\/\S+/)
+		{
+		($altitudemin, $altitudeabort, $altitudedesired, $altitudedesired2, $altitudedesired3)
+			= $altitudearg =~ /^(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+		$deltadepthrestart = $altitudemin - $altitudeabort;
+		}
+	elsif ($altitudearg =~ /^\S+\/\S+\/\S+\/\S+/)
 		{
 		($altitudemin, $altitudeabort, $altitudedesired, $altitudedesired2)
 			= $altitudearg =~ /^(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 		$deltadepthrestart = $altitudemin - $altitudeabort;
+		$altitudedesired3 = $altitudedesired;
 		}
 	elsif ($altitudearg =~ /^\S+\/\S+\/\S+/)
 		{
@@ -293,6 +304,7 @@ if ($altitudearg)
 			= $altitudearg =~ /^(\S+)\/(\S+)\/(\S+)/;
 		$deltadepthrestart = $altitudemin - $altitudeabort;
 		$altitudedesired2 = $altitudedesired;
+		$altitudedesired3 = $altitudedesired;
 		}
 	elsif ($altitudearg =~ /^\S+\/\S+/)
 		{
@@ -301,6 +313,7 @@ if ($altitudearg)
 		$altitudedesired = $altitudemin;
 		$deltadepthrestart = $altitudemin - $altitudeabort;
 		$altitudedesired2 = $altitudedesired;
+		$altitudedesired3 = $altitudedesired;
 		}
 	else
 		{
@@ -310,6 +323,7 @@ if ($altitudearg)
 		$altitudedesired = $altitudemin;
 		$deltadepthrestart = $altitudemin - $altitudeabort;
 		$altitudedesired2 = $altitudedesired;
+		$altitudedesired3 = $altitudedesired;
 		}
 	}
 if ($speedarg)
@@ -407,14 +421,18 @@ elsif ($spiraldescent)
 	{
 	$spiraldescentaltitude = $altitudedesired;
 	}
-if ($multibeamsettings =~ /\S+\/\S+\/\S+/)
+if ($multibeamsettings =~ /\S+\/\S+\/\S+\/\S+/)
+	{
+	($mb_transmitgain,$mb_receivegain,$mb_minrangefraction,$pulsewidth) = $multibeamsettings =~ /(\S+)\/(\S+)\/(\S+)\/(\S+)/;
+	$mb_pulsewidth = $pulsewidth / 1000000.0;
+	}
+elsif ($multibeamsettings =~ /\S+\/\S+\/\S+/)
 	{
 	($mb_transmitgain,$mb_receivegain,$mb_minrangefraction) = $multibeamsettings =~ /(\S+)\/(\S+)\/(\S+)/;
 	}
 elsif ($multibeamsettings =~ /\S+\/\S+/)
 	{
 	($mb_transmitgain,$mb_receivegain) = $multibeamsettings =~ /(\S+)\/(\S+)/;
-	$mb_minrangefraction = 0.2;
 	}
 if ($mappingsonar && $beamdata)
 	{
@@ -702,7 +720,7 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 	# find shallowest point in look ahead distance
 	$topomax = $mtopos[$i];
 	$topomin = $mtopos[$i];
-print "TOPO $i $mtopos[$i]\n";
+# print "TOPO $i $mtopos[$i]\n";
 	if ($forwarddist)
 		{
 		for ($j = 0; $j < $npoints; $j++)
@@ -729,7 +747,7 @@ print "TOPO $i $mtopos[$i]\n";
 		}
 	push(@mtopomaxs, $topomax);
 	push(@mtopomins, $topomin);
-print "topo $topomin $topomax\n";
+# print "topo $topomin $topomax\n";
 
 	# if optimal depth profile is available get value
 	if ($ndppoints > 0)
@@ -798,10 +816,15 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 		}
 	elsif ($mmodes[$i] == 3)
 		{
+		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired3;
+#printf "DEPTHS 2 %f\n", $mmissiondepths[$i];
+		}
+	elsif ($mmodes[$i] == 4)
+		{
 		$mmissiondepths[$i] = $depthconstant;
 #printf "DEPTHS 3 %f\n", $mmissiondepths[$i];
 		}
-	elsif ($mmodes[$i] == 4)
+	elsif ($mmodes[$i] == 5)
 		{
 		$mmissiondepths[$i] = $depthconstant2;
 #printf "DEPTHS 4 %f\n", $mmissiondepths[$i];
@@ -842,9 +865,9 @@ for ($i = $nmissionpoints-1; $i > 0; $i--)
 		}
 	if ($slope > $maxslope)
 		{
-print "EXCESSIVE SLOPE: $i $slope Change vehicle depth from $mmissiondepths[$i-1] to ";
+# print "EXCESSIVE SLOPE: $i $slope Change vehicle depth from $mmissiondepths[$i-1] to ";
 		$mmissiondepths[$i-1] = $mmissiondepths[$i] + $maxslope * $distance;
-print "$mmissiondepths[$i-1]\n";
+# print "$mmissiondepths[$i-1]\n";
 		$slope = -($mmissiondepths[$i] - $mmissiondepths[$i-1])/$distance;
 		}
 	}
@@ -945,8 +968,9 @@ elsif ($verbose)
 		{
 		printf "    Mapping sonar control enabled:          \r\n";
 		printf "                               Multibeam enabled\r\n";
-		printf "                                 Multibeam receive gain:           $mb_receivegain\r\n";
-		printf "                                 Multibeam transmit gain:          $mb_transmitgain\r\n";
+		printf "                                 Multibeam receive gain:           $mb_receivegain dB\r\n";
+		printf "                                 Multibeam transmit gain:          $mb_transmitgain dB\r\n";
+		printf "                                 Multibeam pulse width:            $mb_pulsewidth usec\r\n";
 		printf "                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
 		if ($beamdata)
 			{
@@ -994,11 +1018,12 @@ elsif ($verbose)
 	printf "    Vehicle Survey Speed:       %f (m/s) %f (knots)\r\n", $survey_speed, 1.943846 * $survey_speed;
 	printf "    Vehicle Ascent Speed:       %f (m/s) %f (knots)\r\n", $ascentdescent_speed, 1.943846 * $ascentdescent_speed;
 	printf "    Vehicle Transit Speed:      %f (m/s) %f (knots)\r\n", $transit_speed, 1.943846 * $transit_speed;
-	printf "    Desired Vehicle Altitude 1: $altitudedesired (m)\r\n";
 	printf "    Minimum Vehicle Altitude 1: $altitudemin (m)\r\n";
 	printf "    Abort Vehicle Altitude 1:   $altitudeabort (m)\r\n";
 	printf "    Delta Depth Restart 1:      $deltadepthrestart (m)\r\n";
+	printf "    Desired Vehicle Altitude 1: $altitudedesired (m)\r\n";
 	printf "    Desired Vehicle Altitude 2: $altitudedesired2 (m)\r\n";
+	printf "    Desired Vehicle Altitude 3: $altitudedesired3 (m)\r\n";
 	printf "    Constant Vehicle Depth 1:   $depthconstant (m)\r\n";
 	printf "    Constant Vehicle Depth 2:   $depthconstant2 (m)\r\n";
 	printf "    Maximum Vehicle Depth:      $depthmax (m)\r\n";
@@ -1100,8 +1125,9 @@ if (!$outputoff)
 		{
 		printf MFILE "#     Mapping sonar control enabled:          \r\n";
 		printf MFILE "#                               Multibeam enabled\r\n";
-		printf MFILE "#                                 Multibeam receive gain:           $mb_receivegain\r\n";
-		printf MFILE "#                                 Multibeam transmit gain:          $mb_transmitgain\r\n";
+		printf MFILE "#                                 Multibeam receive gain:           $mb_receivegain dB\r\n";
+		printf MFILE "#                                 Multibeam transmit gain:          $mb_transmitgain dB\r\n";
+		printf MFILE "#                                 Multibeam pulse width:            $mb_pulsewidth usec\r\n";
 		printf MFILE "#                                 Multibeam minimum range fraction: $mb_minrangefraction\r\n";
 		if ($beamdata)
 			{
@@ -1149,11 +1175,12 @@ if (!$outputoff)
 	printf MFILE "#     Vehicle Survey Speed:       %f (m/s) %f (knots)\r\n", $survey_speed, 1.943846 * $survey_speed;
 	printf MFILE "#     Vehicle Ascent Speed:       %f (m/s) %f (knots)\r\n", $ascentdescent_speed, 1.943846 * $ascentdescent_speed;
 	printf MFILE "#     Vehicle Transit Speed:      %f (m/s) %f (knots)\r\n", $transit_speed, 1.943846 * $transit_speed;
-	printf MFILE "#     Desired Vehicle Altitude 1: $altitudedesired (m)\r\n";
 	printf MFILE "#     Minimum Vehicle Altitude 1: $altitudemin (m)\r\n";
 	printf MFILE "#     Abort Vehicle Altitude 1:   $altitudeabort (m)\r\n";
 	printf MFILE "#     Delta Depth Restart 1:      $deltadepthrestart (m)\r\n";
+	printf MFILE "#     Desired Vehicle Altitude 1: $altitudedesired (m)\r\n";
 	printf MFILE "#     Desired Vehicle Altitude 2: $altitudedesired2 (m)\r\n";
+	printf MFILE "#     Desired Vehicle Altitude 3: $altitudedesired3 (m)\r\n";
 	printf MFILE "#     Constant Vehicle Depth 1:   $depthconstant (m)\r\n";
 	printf MFILE "#     Constant Vehicle Depth 2:   $depthconstant2 (m)\r\n";
 	printf MFILE "#     Maximum Vehicle Depth:      $depthmax (m)\r\n";
@@ -1212,6 +1239,7 @@ if (!$outputoff)
 	printf MFILE "#define ALTITUDE_ABORT             %f\r\n", $altitudeabort;
 	printf MFILE "#define DELTA_DEPTH_RESTART        %f\r\n", $deltadepthrestart;
 	printf MFILE "#define ALTITUDE_DESIRED2          %f\r\n", $altitudedesired2;
+	printf MFILE "#define ALTITUDE_DESIRED3          %f\r\n", $altitudedesired3;
 	printf MFILE "#define DEPTH_CONSTANT             %f\r\n", $depthconstant;
 	printf MFILE "#define DEPTH_CONSTANT2            %f\r\n", $depthconstant2;
 	printf MFILE "#define GPS_DURATION               %d\r\n", $gpsduration;
@@ -1429,7 +1457,7 @@ print "Behavior: reson (start, Log_Mode = $logmode)\n";
 				if ($mstartstops[$i] == 1)
 					{
 					$camerarunlength = $cameraenddistance - $mdistances[$i];
-					# $nphotos = int (1.1 * $camerarunlength / 10.0);
+					$nphotos = int (($camerarunlength / $survey_speed) / ($nsampleperiods * 0.2));
 					$nphotos = 0;
 					print MFILE "#######################################################\r\n";
 					print MFILE "# Start taking pictures with camera.\r\n";
@@ -1439,8 +1467,8 @@ print "Behavior: reson (start, Log_Mode = $logmode)\n";
 					print MFILE "behavior startCamera \r\n";
 					print MFILE "{ \r\n";
 					print MFILE "duration  = 1; \r\n";
-					print MFILE "nPhotos = $nphotos; \r\n";
-					print MFILE "nSamplePeriods = 9; \r\n";
+					#print MFILE "nPhotos = $nphotos; \r\n";
+					print MFILE "nSamplePeriods = 10; \r\n";
 					print MFILE "} \r\n";
 					print MFILE "# \r\n";
 					print MFILE "#######################################################\r\n";
@@ -1756,8 +1784,31 @@ print "Behavior: waypoint (during line $iwaypoint) ";
 			printf MFILE "#   Minimum depth: %f meters looking forward %f meters along route\r\n", -$mtopomaxs[$i], $forwarddist;
 			printf MFILE "#   Maximum depth: %f meters looking forward %f meters along route\r\n", -$mtopomins[$i], $forwarddist;
 			printf MFILE "#   Maximum vehicle depth: %f meters\r\n", $depthmax;
-			printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired;
-			printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+			if ($mmodes[$i] == 1)
+				{
+				printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+				}
+			elsif ($mmodes[$i] == 2)
+				{
+				printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired2;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+				}
+			elsif ($mmodes[$i] == 3)
+				{
+				printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired3;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+				}
+			elsif ($mmodes[$i] == 4)
+				{
+				printf MFILE "#   Constant vehicle depth:   %f meters\r\n", $depthconstant;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+				}
+			elsif ($mmodes[$i] == 5)
+				{
+				printf MFILE "#   Constant vehicle depth:   %f meters\r\n", $depthconstant2;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+				}
 			if ($maxdepthapplied == 0)
 				{
 				printf MFILE "#   Behavior depth of %f meters set by local depth and desired altitude\r\n", $mmissiondepths[$i];
@@ -1829,8 +1880,31 @@ printf " Segment length: %.2f m ",$mlengths[$i];
 			printf MFILE "#   Minimum depth: %f meters looking forward %f meters along route\r\n", -$mtopomaxs[$i], $forwarddist;
 			printf MFILE "#   Maximum depth: %f meters looking forward %f meters along route\r\n", -$mtopomins[$i], $forwarddist;
 			printf MFILE "#   Maximum vehicle depth: %f meters\r\n", $depthmax;
-			printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired;
-			printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+			if ($mmodes[$i] == 1)
+				{
+				printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+				}
+			elsif ($mmodes[$i] == 2)
+				{
+				printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired2;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+				}
+			elsif ($mmodes[$i] == 3)
+				{
+				printf MFILE "#   Desired vehicle altitude: %f meters\r\n", $altitudedesired3;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+				}
+			elsif ($mmodes[$i] == 4)
+				{
+				printf MFILE "#   Constant vehicle depth:   %f meters\r\n", $depthconstant;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+				}
+			elsif ($mmodes[$i] == 5)
+				{
+				printf MFILE "#   Constant vehicle depth:   %f meters\r\n", $depthconstant2;
+				printf MFILE "#   Minimum vehicle altitude: %f meters\r\n", $altitudemin;
+				}
 			if ($maxdepthapplied == 0)
 				{
 				printf MFILE "#   Behavior depth of %f meters set by local depth and desired altitude\r\n", $mmissiondepths[$i];
@@ -1975,7 +2049,7 @@ print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint
 		if ($camera && $i > 0 && $mstartstops[$i-1] == 1)
 			{
 			$camerarunlength = $cameraenddistance - $mdistances[$i-1];
-			$nphotos = int (1.1 * $camerarunlength / 10.0);
+			$nphotos = int (($camerarunlength / $survey_speed) / ($nsampleperiods * 0.2));
 			# $nphotos = 0;
 			print MFILE "#######################################################\r\n";
 			print MFILE "# Start taking pictures with camera.\r\n";
@@ -1986,7 +2060,7 @@ print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint
 			print MFILE "{ \r\n";
 			print MFILE "duration  = 1; \r\n";
 			#print MFILE "nPhotos = $nphotos; \r\n";
-			print MFILE "nSamplePeriods = 9; \r\n";
+			print MFILE "nSamplePeriods = $nsampleperiods; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";

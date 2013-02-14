@@ -1,4 +1,4 @@
-.TH mbgrid 1 "4 October 2012" "MB-System 5.0" "MB-System 5.0"
+.TH mbgrid 1 "15 October 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmbgrid\fP - Grid bathymetry, amplitude, or sidescan data
 from swath sonar data files.
@@ -8,11 +8,12 @@ Version 5.0
 
 .SH SYNOPSIS
 \fBmbgrid\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP
-\fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype\fP
+[\fB-A\fIdatatype\fP
 \fB-B\fIborder\fP -C\fIclip\fP[\fI/mode\fP] \fB-D\fIxdim/ydim\fP
 \fB-E\fIdx/dy/units[!]\fP \fB-F\fImode\fP
 \fB-G\fIgridkind\fP \fB-J\fIprojection\fP \fB-K\fIbackground\fP
 \fB-L\fIlonflip\fP \fB-M -N -P\fIpings\fP \fB-Q\fP
+\fB-R\fIwest/east/south/north\fP \fB-R\fIfactor\fP
 \fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fItime\fP
 \fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP]
 
@@ -29,14 +30,21 @@ maximum filter (use maximum value in grid bin).
 The user must specify a file containing a list of the data files to
 be used and their data formats (\fB-I\fP), and a character string
 to be used as the root of the output filenames (\fB-O\fP). The user
-may specify the bounds of the region to be gridded (\fB-R\fP), and
+may specify the bounds of the region to be gridded
+(\fB-R\fP\fIwest/east/south/north\fP), and
 either the dimensions (\fB-D\fP) or node spacing \fB-E\fP of the grid,
 If the bounds and grid dimensions (or spacing) are not specified, the
 program will select the region encompassing all of the data in the
 input files and a grid spacing equivalent to 0.02 times the maximum
-sonar altitude. The user can also specify the type of the
-input data (\fB-A\fP), the width of the gaussian filter used for
-weighted average gridding (\fB-W\fP), the maximum distance from
+sonar altitude. The automatically calculated grid bounds will exactly
+correspond to the smallest rectangular region including the data unless
+the user specifies a larger region using \fB-R\fP\fIfactor\fP. The value
+\fIfactor\fP must be greater than one; if \fIfactor\fP = 1.1 then the
+grid bounds will be expanded to the east and west by an amount 0.05 times
+the data bounds east-west extend and to the north and south by an amount
+0.05 times the data bounds north-south extent. The user can also specify
+the type of the input data (\fB-A\fP), the width of the gaussian filter
+used for weighted average gridding (\fB-W\fP), the maximum distance from
 data points that the spline interpolation is used (\fB-C\fP), the
 format of the output files, and other parameters.
 
@@ -259,7 +267,7 @@ wherever no data exist, provided \fIborder\fP > 0.0.
 Default: \fIborder\fP = 0.0
 .TP
 .B \-C
-\fIclip/mode\fP
+\fIclip[/mode]\fP
 .br
 Controls the use of spline interpolation to fill grid cells not
 filled by swath data. The \fIclip\fP value sets the distance from
@@ -552,13 +560,25 @@ in feet.
 .B \-R
 \fIwest/east/south/north\fP
 .br
-Sets the longitude and latitude bounds of the output grid. If the user
-uses the \fB-E\fP option to set the grid spacing, then the dimensions
+\fIfactor\fP
+.br
+The first form sets the longitude and latitude bounds of the output grid.
+By default (if the \fB-R\fP\fIwest/east/south/north\fP
+option is not specified) the program will set
+the grid bounds to be the area encompassing all of the data in the
+input files. The second form (\fB-R\fP\fIfactor\fP) expands the automatically
+calculated bounds by the multiplicative \fIfactor\fP.The value
+\fIfactor\fP must be greater than one; if \fIfactor\fP = 1.1 then the
+grid bounds will be expanded to the east and west by an amount 0.05 times
+the data bounds east-west extend and to the north and south by an amount
+0.05 times the data bounds north-south extent.
+If the user uses the \fB-E\fP option to set the grid spacing, then the dimensions
 will be calculated from the grid bounds and spacing. In these
 circumstances rounding errors will usually require that the eastern
 and northern bounds be adjusted to fit exactly with the
 grid dimensions and spacing.
-Default: If the \fB-R\fP option is not specified, the program will set
+Default: If the \fB-R\fP\fIwest/east/south/north\fP
+option is not specified, the program will set
 the grid bounds to be the area encompassing all of the data in the
 input files.
 .TP

@@ -960,7 +960,10 @@ L3600:
 	    goto L4010;
 	}
 	dzrms = sqrt(dzrms / npg);
-	root = dzrms / dzrmsp;
+	if (dzrms > 0.0 && dzrmsp > 0.0)
+	    root = dzrms / dzrmsp;
+	else
+	    root = 0.0;
 	dzmaxf = dzmax / zrange;
 	dzrmsp = dzrms;
 	if (iter - iter / 10 * 10 - 2 != 0) {
@@ -977,7 +980,10 @@ L3715:
 	    goto L3720;
 	}
 L3720:
-	root = sqrt(sqrt(sqrt(dzrms / dzrms8)));
+	if (dzrms > 0.0 && dzrms8 > 0.0)
+	    root = sqrt(sqrt(sqrt(dzrms / dzrms8)));
+	else
+	    root = 0.0;
 	if (root - (float).9999 >= (float)0.) {
 	    fprintf(stderr,"Zgrid iteration %d convergence test skipped root: %f\n",iter,root);
 	    goto L4000;

@@ -1720,36 +1720,65 @@ and mbedit edit save files.\n";
 		    /* read the depth & sound speed pair */
 		    mm = sscanf(buffer,"%lf %lf",&depth[nsvp],&velocity[nsvp]);
 
-		    /* output some debug values */
-		    if (verbose >= 5 && mm == 2)
-			{
-			fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
-			fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-			    nsvp,depth[nsvp],nsvp,velocity[nsvp]);
-			}
+                    /* check for validity */
+                    if (mm == 2)
+                        {
+                        /* output some debug values */
+                        if (verbose >= 5)
+                            {
+                            fprintf(stderr,"\ndbg5  New velocity value read in program <%s>\n",program_name);
+                            fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
+                                nsvp,depth[nsvp],nsvp,velocity[nsvp]);
+                            }
 
-		    /* update counter */
-		    if (mm == 2)
-			nsvp++;
+                        /* set initial depth to zero if needed */
+                        if (nsvp == 0)
+                            {
+                            if (depth[0] < 0.0)
+                                {
+                                /* output some info */
+                                fprintf(stderr,"Warning:\n\tProblem with svp value read in program <%s>\n",program_name);
+                                fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f reset so that first entry has zero depth\n",
+                                        nsvp,depth[0],nsvp,velocity[0]);
 
-		    /* check for nonzero initial depth & fix it if found */
-		    if (mm == 2 && nsvp == 1 && depth[0] != 0.0)
-		    	{
-			depth[1] = depth[0];
-			velocity[1] = velocity[0];
-			depth[0] = 0.0;
-			nsvp++;
+                                depth[0] = 0.0;
+                                nsvp++;
+                                }
+                            else if (depth[0] > 0.0)
+                                {
+                                depth[1] = depth[0];
+                                depth[0] = 0.0;
+                                velocity[1] = velocity[0];
+                                nsvp += 2;
 
-			/* output some debug values */
-			if (verbose >= 5)
-			    {
-			    fprintf(stderr,"\ndbg5  Nonzero initial SVP depth fixed in program <%s>\n",program_name);
-			    fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-				0,depth[0],0,velocity[0]);
-			    fprintf(stderr,"dbg5       depth[%d]: %f  velocity[%d]: %f\n",
-				1,depth[1],1,velocity[1]);
-			    }
-			}
+                                /* output some info */
+                                 fprintf(stderr,"Warning:\n\tProblem with svp value read in program <%s>\n",program_name);
+                                fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f added so that first entry has zero depth\n",
+                                         nsvp,depth[0],nsvp,velocity[0]);
+                                fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f did not have zero depth\n",
+                                        nsvp,depth[1],nsvp,velocity[1]);
+                                }
+                            else
+                                {
+                                nsvp++;
+                                }
+                             }
+
+                        /* increment counter if all is ok */
+                        else if (depth[nsvp] > depth[nsvp-1])
+                            {
+                            nsvp++;
+                            }
+
+                        /* ignore sound speed value with duplicate or decreasing depth */
+                        else
+                            {
+                            /* output some info */
+                            fprintf(stderr,"Warning:\n\tProblem with svp value read in program <%s>\n",program_name);
+                            fprintf(stderr,"\t\tdepth[%d]: %f  velocity[%d]: %f ignored due to duplicate or decreasing depth\n",
+                                    nsvp,depth[nsvp],nsvp,velocity[nsvp]);
+                            }
+                        }
 		    }
 		}
 	    fclose(tfp);
@@ -5900,6 +5929,17 @@ bath[i]-zz); */
 			      {
 			      if (beamflag[i] != MB_FLAG_NULL)
 				{
+				/* output some debug messages */
+				if (verbose >= 5)
+				    {
+				    fprintf(stderr,"\ndbg5  Depth value to be calculated in program <%s>:\n",program_name);
+				    fprintf(stderr,"dbg5       kind:  %d\n",kind);
+				    fprintf(stderr,"dbg5       beam:  %d\n",i);
+				    fprintf(stderr,"dbg5       xtrack: %f\n",bathacrosstrack[i]);
+				    fprintf(stderr,"dbg5       ltrack: %f\n",bathalongtrack[i]);
+				    fprintf(stderr,"dbg5       depth:  %f\n",bath[i]);
+				    }
+
 				/* add heave and draft */
 				depth_offset_use = bheave[i] + draft + lever_heave;
 				depth_offset_org = bheave[i] + draft_org;
@@ -5914,10 +5954,18 @@ bath[i]-zz); */
 						* bathacrosstrack[i]
 					    + bathalongtrack[i]
 						* bathalongtrack[i]);
-				alpha = asin(bathalongtrack[i]
-					/ range);
-				beta = acos(bathacrosstrack[i]
-					/ range / cos(alpha));
+                                if (fabs(range) < 0.001)
+                                        {
+                                        alpha = 0.0;
+                                        beta = 0.5 * M_PI;
+                                        }
+                                else
+                                        {
+                                        alpha = asin(MAX(-1.0, MIN(1.0, (bathalongtrack[i] / range))));
+                                        beta = acos(MAX(-1.0, MIN(1.0, (bathacrosstrack[i] / range / cos(alpha)))));
+                                        }
+                                if (bath[i] < 0.0)
+                                        beta = 2.0 * M_PI - beta;
 
 				/* apply roll pitch corrections */
                                 if (process.mbp_nav_attitude == MBP_NAV_ON
@@ -5937,12 +5985,9 @@ bath[i]-zz); */
 			    		beta += DTR * process.mbp_rollbias_port;
 
 				/* recalculate bathymetry */
-				bath[i]
-				    = range * cos(alpha) * sin(beta);
-				bathalongtrack[i]
-				    = range * sin(alpha);
-				bathacrosstrack[i]
-				    = range * cos(alpha) * cos(beta);
+				bath[i] = range * cos(alpha) * sin(beta);
+				bathalongtrack[i] = range * sin(alpha);
+				bathacrosstrack[i] = range * cos(alpha) * cos(beta);
 
 				/* add heave and draft back in */
 				bath[i] += depth_offset_use;
@@ -7189,9 +7234,13 @@ j, i, slopeangle, angle, correction, reference_amp, amp[i]);*/
 								sscorrtableuse.amplitude,
 								angle, &correction, &error);
 						if (process.mbp_sscorr_type == MBP_SSCORR_SUBTRACTION)
-				    			ss[i] = ss[i] - correction + reference_amp;
+				    			{
+                                                        ss[i] = ss[i] - correction + reference_amp;
+                                                        }
 						else
-				    			ss[i] = ss[i] / correction * reference_amp;
+				    			{
+                                                        ss[i] = ss[i] / correction * reference_amp;
+                                                        }
 			    			}
 					}
 				}

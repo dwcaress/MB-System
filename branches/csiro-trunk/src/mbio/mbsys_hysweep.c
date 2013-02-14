@@ -778,7 +778,7 @@ int mbsys_hysweep_pingnumber(int verbose, void *mbio_ptr,
 int mbsys_hysweep_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sonartype, int *error)
 {
-	char	*function_name = "mbsys_hysweep_sidescantype";
+	char	*function_name = "mbsys_hysweep_sonartype";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_hysweep_struct *store;

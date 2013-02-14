@@ -399,6 +399,9 @@ int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->clk_1_pps_use = 0;	/* if 1 then the internal clock is synchronized
 				    to an external 1 PPS signal, if 0 then not */
 
+        /* pointer to extra parameters data structure */
+        store->extraparameters = NULL;
+
 	/* pointer to attitude data structure */
 	store->attitude = NULL;
 
@@ -770,13 +773,85 @@ int mbsys_simrad3_survey_alloc(int verbose,
 	return(status);
 }
 
+/*--------------------------------------------------------------------*/
+int mbsys_simrad3_extraparameters_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
+			int *error)
+{
+	char	*function_name = "mbsys_simrad3_extraparameters_alloc";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad3_struct *store;
+	struct mbsys_simrad3_extraparameters_struct *extraparameters;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad3_struct *) store_ptr;
+
+	/* allocate memory for data structure if needed */
+	if (store->extraparameters == NULL)
+		status = mb_mallocd(verbose,__FILE__, __LINE__,
+			sizeof(struct mbsys_simrad3_extraparameters_struct),
+			(void **)&(store->extraparameters),error);
+
+	if (status == MB_SUCCESS)
+		{
+
+		/* get data structure pointer */
+		extraparameters = (struct mbsys_simrad3_extraparameters_struct *) store->extraparameters;
+
+		/* initialize everything */
+		extraparameters->xtr_date = 0;	/* extra parameters date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+		extraparameters->xtr_msec = 0;	/* extra parameters time since midnight in msec
+				    08:12:51.234 = 29570234 */
+		extraparameters->xtr_count = 0;	/* ping counter */
+		extraparameters->xtr_serial = 0;	/* system 1 or 2 serial number */
+		extraparameters->xtr_id = 0;	        /* content identifier:
+                                    1:  Calib.txt file for angle offset
+                                    2:  Log all heights
+                                    3:  Sound velocity at transducer
+                                    4:  Sound velocity profile
+                                    5:  Multicast RX status */
+		extraparameters->xtr_data_size = 0;
+		extraparameters->xtr_nalloc = 0;
+		extraparameters->xtr_data = NULL;          /* variable array following from content identifier and record size */
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+
 
 /*--------------------------------------------------------------------*/
 int mbsys_simrad3_wc_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr,
 			int *error)
 {
-	char	*function_name = "mbsys_wc_survey_alloc";
+	char	*function_name = "mbsys_simrad3_wc_alloc";
 	int	status = MB_SUCCESS;
 	struct mb_io_struct *mb_io_ptr;
 	struct mbsys_simrad3_struct *store;
@@ -1294,6 +1369,14 @@ int mbsys_simrad3_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	/* deallocate memory for survey data structure */
 	if (store->ping != NULL)
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->ping),error);
+
+	/* deallocate memory for extraparameters data structure */
+	if (store->extraparameters != NULL)
+		{
+		if (store->extraparameters->xtr_data != NULL)
+			status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->extraparameters->xtr_data),error);
+		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&(store->extraparameters),error);
+		}
 
 	/* deallocate memory for water column data structure */
 	if (store->wc != NULL)
@@ -2903,7 +2986,7 @@ int mbsys_simrad3_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		}
 
-	/* extract data from attitude structure */
+	/* extract data from netattitude structure */
 	else if (store->type == EM3_NETATTITUDE
 		&& store->netattitude != NULL)
 		{

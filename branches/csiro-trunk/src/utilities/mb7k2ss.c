@@ -60,25 +60,6 @@
 #include "../../include/mbsys_reson7k.h"
 #include "../../include/mbsys_ldeoih.h"
 
-/* GMT include files */
-#include "gmt.h"
-
-/* get NaN detector */
-#if defined(isnanf)
-#define check_fnan(x) isnanf((x))
-#elif defined(isnan)
-#define check_fnan(x) isnan((double)(x))
-#elif HAVE_ISNANF == 1
-#define check_fnan(x) isnanf(x)
-extern int isnanf(float x);
-#elif HAVE_ISNAN == 1
-#define check_fnan(x) isnan((double)(x))
-#elif HAVE_ISNAND == 1
-#define check_fnan(x) isnand((double)(x))
-#else
-#define check_fnan(x) ((x) != (x))
-#endif
-
 /* local defines */
 #define	MB7K2SS_SS_FLAT_BOTTOM			0
 #define	MB7K2SS_SS_3D_BOTTOM			1
@@ -109,44 +90,11 @@ extern int isnanf(float x);
 #define	MB7K2SS_NUM_ANGLES			171
 #define	MB7K2SS_ANGLE_MAX			85.0
 
-struct mb7k2ss_grid_struct
-	{
-	mb_path	file;
-        mb_path projectionname;
-	int	projection_mode;
-	mb_path	projection_id;
-	float	nodatavalue;
-	int	nxy;
-	int	nx;
-	int	ny;
-	double	min;
-	double	max;
-	double	xmin;
-	double	xmax;
-	double	ymin;
-	double	ymax;
-	double	dx;
-	double	dy;
-	float	*data;
-	};
-
 int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max,
 					double navlon, double navlat, double altitude, double pitch,
-					double *table_xtrack, double *table_ltrack,
+					double *table_angle, double *table_xtrack, double *table_ltrack,
 					double *table_altitude, double *table_range,
 					int *error);
-int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double angle_max,
-					double navlon, double navlat, double heading,
-					double altitude, double sonardepth, double pitch,
-					struct mb7k2ss_grid_struct *grid,
-					double *table_xtrack, double *table_ltrack,
-					double *table_altitude, double *table_range,
-					int *error);
-int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double altitude, double sonardepth,
-					double mtodeglon, double mtodeglat,
-					double vx, double vy, double vz,
-					struct mb7k2ss_grid_struct *grid,
-					double	 *range, int *error);
 
 static char rcs_id[] = "$Id$";
 char program_name[] = "mb7k2ss";
@@ -195,7 +143,8 @@ int main (int argc, char **argv)
 	int	pixels_ss;
 
 	/* topography parameters */
-	struct mb7k2ss_grid_struct grid;
+	mb_path	topogridfile;
+	void	*topogrid_ptr = NULL;
 
 	/* MBIO read values */
 	void	*imbio_ptr = NULL;
@@ -208,7 +157,6 @@ int main (int argc, char **argv)
 	struct mbsys_ldeoih_struct *ostore = NULL;
 	int	kind;
 	int	time_i[7];
-	int	time_j[5];
 	double	time_d;
 	double	navlon;
 	double	navlat;
@@ -327,6 +275,7 @@ int main (int argc, char **argv)
 	int	nangle = MB7K2SS_NUM_ANGLES;
 	double	angle_min = -MB7K2SS_ANGLE_MAX;
 	double	angle_max = MB7K2SS_ANGLE_MAX;
+	double	table_angle[MB7K2SS_NUM_ANGLES];
 	double	table_xtrack[MB7K2SS_NUM_ANGLES];
 	double	table_ltrack[MB7K2SS_NUM_ANGLES];
 	double	table_altitude[MB7K2SS_NUM_ANGLES];
@@ -392,6 +341,7 @@ int main (int argc, char **argv)
 	int	previous, jj, interpable;
 	double	dss, dssl, fraction;
 	int	intstat, itime;
+	int	jport, jstbd;
 
 	int	read_data;
 	int	found, done;
@@ -516,7 +466,7 @@ int main (int argc, char **argv)
 			break;
 		case 'T':
 		case 't':
-			sscanf (optarg,"%s", grid.file);
+			sscanf (optarg,"%s", topogridfile);
 			sslayoutmode = MB7K2SS_SS_3D_BOTTOM;
 			flag++;
 			break;
@@ -600,9 +550,9 @@ int main (int argc, char **argv)
 		fprintf(stderr,"dbg2       gainmode:            %d\n",gainmode);
 		fprintf(stderr,"dbg2       gainfactor:          %f\n",gainfactor);
 		fprintf(stderr,"dbg2       sslayoutmode:        %d\n",sslayoutmode);
-		fprintf(stderr,"dbg2       grid.file:           %s\n",grid.file);
-		fprintf(stderr,"dbg2       timelist_file_set: %d\n",timelist_file_set);
-		fprintf(stderr,"dbg2       timelist_file:     %s\n",timelist_file);
+		fprintf(stderr,"dbg2       topogridfile:        %s\n",topogridfile);
+		fprintf(stderr,"dbg2       timelist_file_set:   %d\n",timelist_file_set);
+		fprintf(stderr,"dbg2       timelist_file:       %s\n",timelist_file);
 		fprintf(stderr,"dbg2       route_file_set:      %d\n",route_file_set);
 		fprintf(stderr,"dbg2       route_file:          %s\n",route_file);
 		fprintf(stderr,"dbg2       checkroutebearing:   %d\n",checkroutebearing);
@@ -640,7 +590,7 @@ int main (int argc, char **argv)
 		else if (bottompickmode == MB7K2SS_BOTTOMPICK_3DBATHY)
 			{
 			fprintf(stderr,"     bottompickmode:      3D Bathymetry\n");
-			fprintf(stderr,"     grid.file:           %s\n",grid.file);
+			fprintf(stderr,"     topogridfile:        %s\n",topogridfile);
 			}
 		fprintf(stderr,"     bottompickthreshold: %f\n",bottompickthreshold);
 		fprintf(stderr,"     smooth:              %d\n",smooth);
@@ -660,7 +610,7 @@ int main (int argc, char **argv)
 		else if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM)
 			{
 			fprintf(stderr,"     sslayoutmode:        3D bottom\n");
-			fprintf(stderr,"     grid.file:           %s\n",grid.file);
+			fprintf(stderr,"     topogridfile:        %s\n",topogridfile);
 			}
 		fprintf(stderr,"     interpolation bins:  %d\n",interpbins);
 		if (timelist_file_set == MB_YES)
@@ -871,63 +821,7 @@ int main (int argc, char **argv)
 	/* read topography grid if 3D bottom correction specified */
 	if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM)
 		{
-		grid.data = NULL;
-		status = mb_readgrd(verbose, grid.file, &grid.projection_mode, grid.projection_id, &grid.nodatavalue,
-					&grid.nxy, &grid.nx, &grid.ny, &grid.min, &grid.max,
-					&grid.xmin, &grid.xmax, &grid.ymin, &grid.ymax,
-					&grid.dx, &grid.dy, &grid.data, NULL, NULL, &error);
-		if (status == MB_FAILURE)
-			{
-			error = MB_ERROR_OPEN_FAIL;
-			fprintf(stderr,"\nUnable to read grd file: %s\n",
-			    grid.file);
-			fprintf(stderr,"\nProgram <%s> Terminated\n",
-			    program_name);
-			exit(error);
-			}
-
-		/* rationalize grid bounds and lonflip */
-		if (lonflip == -1)
-			{
-			if (grid.xmax > 180.0)
-				{
-				grid.xmin -= 360.0;
-				grid.xmax -= 360.0;
-				}
-			}
-		else if (lonflip == 0)
-			{
-			if (grid.xmin > 180.0)
-				{
-				grid.xmin -= 360.0;
-				grid.xmax -= 360.0;
-				}
-			else if (grid.xmax < -180.0)
-				{
-				grid.xmin += 360.0;
-				grid.xmax += 360.0;
-				}
-			}
-		else if (lonflip == 1)
-			{
-			if (grid.xmin < -180.0)
-				{
-				grid.xmin += 360.0;
-				grid.xmax += 360.0;
-				}
-			}
-		if (grid.xmax > 180.0)
-			{
-			lonflip = 1;
-			}
-		else if (grid.xmin < -180.0)
-			{
-			lonflip = -1;
-			}
-		else
-			{
-			lonflip = 0;
-			}
+		status = mb_topogrid_init(verbose, topogridfile, &lonflip, &topogrid_ptr, &error);
 		}
 
 	/* set up plotting script file */
@@ -1384,7 +1278,6 @@ istore->time_i[0],istore->time_i[1],istore->time_i[2],istore->time_i[3],istore->
 				|| kind == MB_DATA_SIDESCAN2
 				|| kind == MB_DATA_SIDESCAN3))
 			{
-			mb_get_jtime(verbose, istore->time_i, time_j);
 			intstat = mb_linear_interp(verbose,
 					dat_time_d-1, dat_lon-1,
 					ndat, time_d, &navlon, &itime,
@@ -1786,14 +1679,14 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				if (sslayoutmode == MB7K2SS_SS_FLAT_BOTTOM)
 					mb7k2ss_get_flatbottom_table(verbose, nangle, angle_min, angle_max,
 									navlon, navlat, ss_altitude, 0.0,
-									table_xtrack, table_ltrack, table_altitude,
+									table_angle, table_xtrack, table_ltrack, table_altitude,
 									table_range, &error);
 				/* else get 3D bottom layout table */
 				else
-					mb7k2ss_get_3Dbottom_table(verbose, nangle, angle_min, angle_max,
+					mb_topogrid_getangletable(verbose, topogrid_ptr, nangle, angle_min, angle_max,
 									navlon, navlat, heading,
-									ss_altitude, sonardepth, pitch, &grid,
-									table_xtrack, table_ltrack,
+									ss_altitude, sonardepth, pitch,
+									table_angle, table_xtrack, table_ltrack,
 									table_altitude, table_range, &error);
 
 				/* get swath width and pixel size */
@@ -1803,6 +1696,7 @@ routelon[activewaypoint], navlat, routelat[activewaypoint], oktowrite);*/
 				pixel_width = swath_width / (opixels_ss - 1);
 
 				/* initialize the output sidescan */
+
 				for (j=0;j<opixels_ss;j++)
 					{
 					oss[j] = 0.0;
@@ -1978,16 +1872,23 @@ i,rr,xtrack,ltrack,kangle); */
 					}
 
 				/* calculate the output sidescan */
+				jport = -1;
+				jstbd = -1;
 				for (j=0;j<opixels_ss;j++)
 					{
 					if (ossbincount[j] > 0)
 						{
 						oss[j] /= (double) ossbincount[j];
 						ossalongtrack[j] /= (double) ossbincount[j];
+						if (jport < 0)
+							jport = j;
+						jstbd = j;
 						}
 					else
 						oss[j] = MB_SIDESCAN_NULL;
 					}
+/* fprintf(stderr,"SS bounds: %d %d      %f %f   %f\n",jport,jstbd,(jport - opixels_ss/2)*pixel_width,(jstbd - opixels_ss/2)*pixel_width,
+(jport - opixels_ss/2)*pixel_width - (jstbd - opixels_ss/2)*pixel_width);*/
 /*for (j=0;j<opixels_ss;j++)
 {
 fprintf(stderr,"AAA j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalongtrack[j],oss[j]);
@@ -2151,14 +2052,14 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 				if (sslayoutmode == MB7K2SS_SS_FLAT_BOTTOM)
 					mb7k2ss_get_flatbottom_table(verbose, nangle, angle_min, angle_max,
 									navlon, navlat, ss_altitude, 0.0,
-									table_xtrack, table_ltrack, table_altitude,
+									table_angle, table_xtrack, table_ltrack, table_altitude,
 									table_range, &error);
 				/* else get 3D bottom layout table */
 				else
-					mb7k2ss_get_3Dbottom_table(verbose, nangle, angle_min, angle_max,
+					mb_topogrid_getangletable(verbose, topogrid_ptr, nangle, angle_min, angle_max,
 									navlon, navlat, heading,
-									ss_altitude, sonardepth, pitch, &grid,
-									table_xtrack, table_ltrack,
+									ss_altitude, sonardepth, pitch,
+									table_angle, table_xtrack, table_ltrack,
 									table_altitude, table_range, &error);
 
 				/* get swath width and pixel size */
@@ -2513,9 +2414,9 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&routewaypoint, &error);
 		}
 
-	/* deallocate topography grid array */
+	/* deallocate topography grid array if necessary */
 	if (sslayoutmode == MB7K2SS_SS_3D_BOTTOM)
-		status = mb_freed(verbose, __FILE__, __LINE__, (void **)&grid.data, &error);
+		status = mb_topogrid_deall(verbose, &topogrid_ptr, &error);
 
 	/* check memory */
 	if (verbose >= 4)
@@ -2536,7 +2437,7 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 /*--------------------------------------------------------------------*/
 int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, double angle_max,
 					double navlon, double navlat, double altitude, double pitch,
-					double *table_xtrack, double *table_ltrack,
+					double *table_angle, double *table_xtrack, double *table_ltrack,
 					double *table_altitude, double *table_range,
 					int *error)
 {
@@ -2569,7 +2470,7 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 	for (i=0;i<nangle;i++)
 		{
 		/* get angles in takeoff coordinates */
-		angle = angle_min + dangle * i;
+		table_angle[i] = angle_min + dangle * i;
 		beta = 90.0 - angle;
 		mb_rollpitch_to_takeoff(
 			verbose,
@@ -2596,277 +2497,8 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       Lookup tables:\n");
 		for (i=0;i<nangle;i++)
-			fprintf(stderr,"dbg2         %d %f %f %f %f\n",
-				i, table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mb7k2ss_get_3Dbottom_table(int verbose, int nangle, double angle_min, double angle_max,
-					double navlon, double navlat, double heading,
-					double altitude, double sonardepth, double pitch,
-					struct mb7k2ss_grid_struct *grid,
-					double *table_xtrack, double *table_ltrack,
-					double *table_altitude, double *table_range,
-					int *error)
-{
-	char	*function_name = "mb7k2ss_get_3Dbottom_table";
-	int	status = MB_SUCCESS;
-	double	mtodeglon, mtodeglat;
-	double	dangle, angle;
-	double	rr, xx, zz;
-	double	alpha, beta, theta, phi;
-	double	vx, vy, vz;
-	int	i;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MB7K2SS function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:               %d\n", verbose);
-		fprintf(stderr,"dbg2       nangle:                %d\n", nangle);
-		fprintf(stderr,"dbg2       angle_min:             %f\n", angle_min);
-		fprintf(stderr,"dbg2       angle_max:             %f\n", angle_max);
-		fprintf(stderr,"dbg2       navlon:                %f\n", navlon);
-		fprintf(stderr,"dbg2       navlat:                %f\n", navlat);
-		fprintf(stderr,"dbg2       heading:               %f\n", heading);
-		fprintf(stderr,"dbg2       altitude:              %f\n", altitude);
-		fprintf(stderr,"dbg2       sonardepth:            %f\n", sonardepth);
-		fprintf(stderr,"dbg2       pitch:                 %f\n", pitch);
-		fprintf(stderr,"dbg2       grid:                  %lu\n", (size_t)grid);
-		fprintf(stderr,"dbg2       grid->projectionname:  %s\n", grid->projectionname);
-		fprintf(stderr,"dbg2       grid->projection_mode: %d\n", grid->projection_mode);
-		fprintf(stderr,"dbg2       grid->projection_id:   %s\n", grid->projection_id);
-		fprintf(stderr,"dbg2       grid->nodatavalue:     %f\n", grid->nodatavalue);
-		fprintf(stderr,"dbg2       grid->nxy:             %d\n", grid->nxy);
-		fprintf(stderr,"dbg2       grid->nx:              %d\n", grid->nx);
-		fprintf(stderr,"dbg2       grid->ny:              %d\n", grid->ny);
-		fprintf(stderr,"dbg2       grid->min:             %f\n", grid->min);
-		fprintf(stderr,"dbg2       grid->max:             %f\n", grid->max);
-		fprintf(stderr,"dbg2       grid->xmin:            %f\n", grid->xmin);
-		fprintf(stderr,"dbg2       grid->xmax:            %f\n", grid->xmax);
-		fprintf(stderr,"dbg2       grid->ymin:            %f\n", grid->ymin);
-		fprintf(stderr,"dbg2       grid->ymax:            %f\n", grid->ymax);
-		fprintf(stderr,"dbg2       grid->dx:              %f\n", grid->dx);
-		fprintf(stderr,"dbg2       grid->dy               %f\n", grid->dy);
-		fprintf(stderr,"dbg2       grid->data:            %lu\n", (size_t)grid->data);
-		}
-
-	/* loop over all of the angles */
-	mb_coor_scale(verbose,navlat, &mtodeglon, &mtodeglat);
-	dangle = (angle_max - angle_min) / (nangle - 1);
-	alpha = pitch;
-	for (i=0;i<nangle;i++)
-		{
-		/* get angles in takeoff coordinates */
-		angle = angle_min + dangle * i;
-		beta = 90.0 - angle;
-		mb_rollpitch_to_takeoff(
-			verbose,
-			alpha, beta,
-			&theta, &phi,
-			error);
-
-		/* calculate unit vector relative to the vehicle */
-		vz = cos(DTR * theta);
-		vx = sin(DTR * theta) * cos(DTR * phi);
-		vy = sin(DTR * theta) * sin(DTR * phi);
-
-		/* rotate unit vector by vehicle heading */
-		vx = vx * cos(DTR * heading) + vy * sin(DTR * heading);
-		vy = -vx * sin(DTR * heading) + vy * cos(DTR * heading);
-
-		/* find the range where this vector intersects the grid */
-		status = mb7k2ss_intersect_grid(verbose, navlon, navlat, altitude, sonardepth,
-					mtodeglon, mtodeglat, vx, vy, vz,
-					grid, &rr, error);
-
-		/* get the position */
-		zz = rr * cos(DTR * theta);
-		xx = rr * sin(DTR * theta);
-		table_xtrack[i] = xx * cos(DTR * phi);
-		table_ltrack[i] = xx * sin(DTR * phi);
-		table_altitude[i] = zz;
-		table_range[i] = rr;
-		}
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MB7K2SS function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       Lookup tables:\n");
-		for (i=0;i<nangle;i++)
-			fprintf(stderr,"dbg2         %d %f %f %f %f\n",
-				i, table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
-		fprintf(stderr,"dbg2       error:           %d\n",*error);
-		fprintf(stderr,"dbg2  Return status:\n");
-		fprintf(stderr,"dbg2       status:          %d\n",status);
-		}
-
-	/* return status */
-	return(status);
-}
-/*--------------------------------------------------------------------*/
-int mb7k2ss_intersect_grid(int verbose, double navlon, double navlat, double altitude, double sonardepth,
-					double mtodeglon, double mtodeglat,
-					double vx, double vy, double vz,
-					struct mb7k2ss_grid_struct *grid,
-					double	 *range, int *error)
-{
-	char	*function_name = "mb7k2ss_intersect";
-	int	status = MB_SUCCESS;
-	int	done;
-	int	iteration;
-	int	iteration_max = 25;
-	double	topotolerance = 0.1;
-	double	dr, r, lontest, lattest;
-	double	rmin, rmax;
-	double	topotest, topo, dtopo;
-	int	nfound;
-	int	i, j, ii, jj, k;
-
-	/* print input debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MB7K2SS function <%s> called\n",
-			function_name);
-		fprintf(stderr,"dbg2  Input arguments:\n");
-		fprintf(stderr,"dbg2       verbose:               %d\n", verbose);
-		fprintf(stderr,"dbg2       navlon:                %f\n", navlon);
-		fprintf(stderr,"dbg2       navlat:                %f\n", navlat);
-		fprintf(stderr,"dbg2       altitude:              %f\n", altitude);
-		fprintf(stderr,"dbg2       sonardepth:            %f\n", sonardepth);
-		fprintf(stderr,"dbg2       mtodeglon:             %f\n", mtodeglon);
-		fprintf(stderr,"dbg2       mtodeglat:             %f\n", mtodeglat);
-		fprintf(stderr,"dbg2       vx:                    %f\n", vx);
-		fprintf(stderr,"dbg2       vy:                    %f\n", vy);
-		fprintf(stderr,"dbg2       vz:                    %f\n", vz);
-		fprintf(stderr,"dbg2       grid:                  %lu\n", (size_t)grid);
-		fprintf(stderr,"dbg2       grid->projectionname:  %s\n", grid->projectionname);
-		fprintf(stderr,"dbg2       grid->projection_mode: %d\n", grid->projection_mode);
-		fprintf(stderr,"dbg2       grid->projection_id:   %s\n", grid->projection_id);
-		fprintf(stderr,"dbg2       grid->nodatavalue:     %f\n", grid->nodatavalue);
-		fprintf(stderr,"dbg2       grid->nxy:             %d\n", grid->nxy);
-		fprintf(stderr,"dbg2       grid->nx:              %d\n", grid->nx);
-		fprintf(stderr,"dbg2       grid->ny:              %d\n", grid->ny);
-		fprintf(stderr,"dbg2       grid->min:             %f\n", grid->min);
-		fprintf(stderr,"dbg2       grid->max:             %f\n", grid->max);
-		fprintf(stderr,"dbg2       grid->xmin:            %f\n", grid->xmin);
-		fprintf(stderr,"dbg2       grid->xmax:            %f\n", grid->xmax);
-		fprintf(stderr,"dbg2       grid->ymin:            %f\n", grid->ymin);
-		fprintf(stderr,"dbg2       grid->ymax:            %f\n", grid->ymax);
-		fprintf(stderr,"dbg2       grid->dx:              %f\n", grid->dx);
-		fprintf(stderr,"dbg2       grid->dy               %f\n", grid->dy);
-		fprintf(stderr,"dbg2       grid->data:            %lu\n", (size_t)grid->data);
-		}
-
-	/* test different ranges along the vector until the grid is intersected */
-	done = MB_NO;
-	iteration = 0;
-	dr = altitude / 20;
-	r = altitude / vz - dr;
-	topo = 0.0;
-	topotest = 0.0;
-	dtopo = 0.0;
-	rmin = 0.0;
-	rmax = 4 * altitude / vz;
-	while (done == MB_NO && iteration < iteration_max)
-		{
-		/* update the range to be tested */
-		r += dr;
-
-		/* get position of range estimate projected along the vector */
-		lontest = navlon + mtodeglon * vx * r;
-		lattest = navlat + mtodeglat * vy * r;
-		topotest = -sonardepth - vz * r;
-
-		/* get topography value at that point */
-		nfound = 0;
-		topo = 0.0;
-		i = (int)((lontest - grid->xmin) / grid->dx);
-		j = (int)((lattest - grid->ymin) / grid->dy);
-		if (i >= 0 && i < grid->nx - 1
-		    && j >= 0 && j < grid->ny - 1)
-			{
-			for (ii=i;ii<=i+1;ii++)
-			for (jj=j;jj<=j+1;jj++)
-			    {
-			    k = ii * grid->ny + jj;
-			    if (grid->data[k] != grid->nodatavalue)
-				{
-				nfound++;
-				topo += grid->data[k];
-				}
-			    }
-			}
-		else
-			{
-			done = MB_YES;
-			status = MB_FAILURE;
-			*error = MB_ERROR_NOT_ENOUGH_DATA;
-			}
-		if (nfound > 0)
-			{
-			topo /= (double)nfound;
-			}
-
-		/* compare topographies at projected position */
-		if (nfound > 0)
-			{
-			dtopo = topotest - topo;
-			if (fabs(dtopo) < topotolerance)
-				{
-				done = MB_YES;
-				}
-			else
-				{
-				/* get bounds on where vector crosses the grid */
-				if (dtopo < 0.0)
-					rmax = MIN(rmax, r);
-				else if (dtopo > 0.0)
-					rmin = MIN(rmin, r);
-
-				/* estimate distance to crossing point */
-				dr = dtopo / vz;
-
-				/* make sure we don't overshoot the bounds */
-				if (r + dr >= rmax)
-					dr = 0.5 * (rmax - r);
-				if (r + dr <= rmin)
-					dr = 0.5 * (rmin - r);
-				}
-			}
-		/* keep trying */
-		else
-			{
-			}
-
-		/* keep count of iterations */
-		iteration++;
-/*fprintf(stderr,"iter:%d done:%d r:%f dr:%f topo:%f topotest:%f dtopo:%f vz:%f\n",
-iteration,done,r,dr,topo,topotest,dtopo,vz);*/
-		}
-
-	/* if success return the result */
-	*range = r;
-
-
-	/* print output debug statements */
-	if (verbose >= 2)
-		{
-		fprintf(stderr,"\ndbg2  MB7K2SS function <%s> completed\n",
-			function_name);
-		fprintf(stderr,"dbg2  Return values:\n");
-		fprintf(stderr,"dbg2       range:           %f\n",*range);
+			fprintf(stderr,"dbg2         %d %f %f %f %f %f\n",
+				i, table_angle[i], table_xtrack[i], table_ltrack[i], table_altitude[i], table_range[i]);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:          %d\n",status);
