@@ -208,6 +208,7 @@
 #define	MBSYS_SIMRAD3_MAXTILT		256
 #define	MBSYS_SIMRAD3_COMMENT_LENGTH	256
 #define	MBSYS_SIMRAD3_BUFFER_SIZE	2048
+#define	MBSYS_SIMRAD3_MAXQUALITYFACTORS 4
 
 /* datagram start and end byte */
 #define	EM3_START_BYTE		0x02
@@ -220,6 +221,7 @@
 #define	EM3_STATUS		0x0231
 #define	EM3_OFF			0x0231
 #define	EM3_ON			0x0232
+#define	EM3_EXTRAPARAMETERS	0x0233
 #define	EM3_ATTITUDE		0x0241
 #define	EM3_CLOCK		0x0243
 #define	EM3_BATH		0x0244
@@ -259,6 +261,7 @@
 #define	EM3_ID_STATUS		0x31
 #define	EM3_ID_OFF		0x31
 #define	EM3_ID_ON		0x32
+#define	EM3_ID_EXTRAPARAMETERS	0x33
 #define	EM3_ID_ATTITUDE		0x41
 #define	EM3_ID_CLOCK		0x43
 #define	EM3_ID_BATH		0x44
@@ -295,6 +298,7 @@
 
 /* datagram sizes where constant */
 #define	EM3_STATUS_SIZE			88
+#define	EM3_EXTRAPARAMETERS_HEADER_SIZE	14
 #define	EM3_RUN_PARAMETER_SIZE		52
 #define	EM3_CLOCK_SIZE			28
 #define	EM3_TIDE_SIZE			30
@@ -378,12 +382,12 @@ struct mbsys_simrad3_ping_struct
 					installation depth of either the transducer
 					or the water line. */
 
-	int	png_nbeams;	/* maximum number of beams possible */
+	int	png_nbeams;	        /* maximum number of beams possible */
 	int	png_nbeams_valid;	/* number of valid beams */
-	float	png_sample_rate; /* sampling rate (Hz) */
-	int	png_spare; /* sampling rate (Hz) */
+	float	png_sample_rate;        /* sampling rate (Hz) */
+	int	png_spare;              /* spare */
 	float	png_depth[MBSYS_SIMRAD3_MAXBEAMS];
-				/* depths relative to sonar (m)
+                                        /* depths relative to sonar (m)
 					The beam data are given re the transmit
 					transducer or sonar head depth and the
 					horizontal location (x,y) of the active
@@ -608,6 +612,60 @@ struct mbsys_simrad3_ping_struct
 	short	png_ss[MBSYS_SIMRAD3_MAXPIXELS]; 		/* the processed sidescan ordered port to starboard */
 	short	png_ssalongtrack[MBSYS_SIMRAD3_MAXPIXELS]; 	/* the processed sidescan alongtrack distances (0.01 m) */
 	};
+
+/* internal data structure for extra parameters */
+struct mbsys_simrad3_extraparameters_struct
+	{
+        int     xtr_date;	/* extra parameters date = year*10000 + month*100 + day
+				    Feb 26, 1995 = 19950226 */
+	int	xtr_msec;	/* extra parameters time since midnight in msec
+				    08:12:51.234 = 29570234 */
+	int	xtr_count;	/* ping counter */
+	int	xtr_serial;	/* system 1 or 2 serial number */
+	int	xtr_id;	        /* content identifier:
+                                    1:  Calib.txt file for angle offset
+                                    2:  Log all heights (positioning system quality factors)
+                                    3:  Sound velocity at transducer
+                                    4:  Sound velocity profile
+                                    5:  Multicast RX status */
+        int     xtr_data_size;
+        int     xtr_nalloc;
+        char    *xtr_data;          /* variable array following from content identifier and record size */
+
+        /* case xtr_id == 2: Log all heights (positioning system quality factors) */
+        int     xtr_pqf_activepositioning;  /* active positioning system (0-2) */
+        short   xtr_pqf_qfsetting[3];       /* quality factor setting for each positioning system
+                                                    0: External PU decode
+                                                    1: PU decodes Q-factor (default)
+                                                Each positioning system has its own individual setting.
+                                                Value ‘1’ indicates that the PU should decode the quality
+                                                factors in the traditional way. This is the default.
+                                                Value ‘0’ indicates that the PU should skip quality factor
+                                                decoding as this is performed externally. The PU should
+                                                always transmit the height datagram ‘h’.*/
+        int     xtr_pqf_nqualityfactors[3]; /* number of quality factors for each positioning system
+                                                Each positioning system have an independent set of
+                                                additional quality factors. The number of quality
+                                                factors for each system must be specified.
+                                                Default value is 0.*/
+                                            /* Each quality factor is described by two entries, the
+                                               quality factor itself and a limit, forming a pair.
+                                               This results in a variable number of such pairs,
+                                               depending on how many additional quality factors is set
+                                               by the operator. If no quality factors are defined,
+                                               no pairs are included. The sequence of pairs is important.
+                                               First, all pairs for positioning system 1 is listed,
+                                               if any. Next any pairs for positioning system 2 and at
+                                               the end, any pairs for positioning system 3. */
+        int     xtr_pqf_qfvalues[3][MBSYS_SIMRAD3_MAXQUALITYFACTORS];
+                                            /* A quality factor is a positive number. Currently no
+                                               upper limit is imposed. */
+         int     xtr_pqf_qflimits[3][MBSYS_SIMRAD3_MAXQUALITYFACTORS];
+                                            /* Uncertainty in position fix in cm. This uncertainty
+                                               is associated with the quality factor value.
+                                               Currently not used. */
+
+        };
 
 /* internal data structure for water column time series */
 struct mbsys_simrad3_wcbeam_struct
@@ -1049,6 +1107,9 @@ struct mbsys_simrad3_struct
 	int	clk_1_pps_use;	/* if 1 then the internal clock is synchronized
 				    to an external 1 PPS signal, if 0 then not */
 
+        /* pointer to extra parameters data structure */
+        struct mbsys_simrad3_extraparameters_struct *extraparameters;
+
 	/* pointer to attitude data structure */
 	struct mbsys_simrad3_attitude_struct *attitude;
 
@@ -1076,6 +1137,9 @@ struct mbsys_simrad3_struct
 int mbsys_simrad3_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
 int mbsys_simrad3_survey_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
+			int *error);
+int mbsys_simrad3_extraparameters_alloc(int verbose,
 			void *mbio_ptr, void *store_ptr,
 			int *error);
 int mbsys_simrad3_wc_alloc(int verbose,

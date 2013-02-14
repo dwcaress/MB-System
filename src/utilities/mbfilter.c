@@ -1425,7 +1425,7 @@ done, jbeg, jend, ndata, nhold_ping, nhold);*/
 				ping[j].roll, ping[j].pitch, ping[j].heave,
 				imb_io_ptr->beamwidth_xtrack,
 				imb_io_ptr->beamwidth_ltrack,
-				0,
+				ping[j].beams_bath,
 				0,
 				ping[j].pixels_ss,
 				ping[j].beamflag,

@@ -13,9 +13,9 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mbsys_simrad2.c contains the MBIO functions for handling data from 
+ * mbsys_simrad2.c contains the MBIO functions for handling data from
  * new (post-1997) Simrad multibeam sonars (e.g. EM120, EM300, EM3000).
- * The data formats associated with Simrad multibeams 
+ * The data formats associated with Simrad multibeams
  * (both old and new) include:
  *    MBSYS_SIMRAD formats (code in mbsys_simrad.c and mbsys_simrad.h):
  *      MBF_EMOLDRAW : MBIO ID 51 - Vendor EM1000, EM12S, EM12D, EM121
@@ -24,7 +24,7 @@
  *      MBF_EM12DARW : MBIO ID 54 - NERC EM12S
  *                   : MBIO ID 55 - aliased to 51
  *    MBSYS_SIMRAD2 formats (code in mbsys_simrad2.c and mbsys_simrad2.h):
- *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120 
+ *      MBF_EM300RAW : MBIO ID 56 - Vendor EM3000, EM300, EM120
  *      MBF_EM300MBA : MBIO ID 57 - MBARI EM3000, EM300, EM120
  *
  * Author:	D. W. Caress
@@ -164,7 +164,7 @@
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_simrad2_alloc";
@@ -244,7 +244,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->par_dsh[1] = 'N';	/* depth sensor heave (IN or NI) */
 	store->par_aps = 0;	/* active position system number */
 	store->par_p1m = 0;	/* position system 1 motion compensation (boolean) */
-	store->par_p1t = 0;	/* position system 1 time stamp used 
+	store->par_p1t = 0;	/* position system 1 time stamp used
 				    (0=system time, 1=position input time) */
 	store->par_p1z = 0.0;	/* position system 1 vertical location (m) */
 	store->par_p1x = 0.0;	/* position system 1 along location (m) */
@@ -256,7 +256,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    }
 	strcpy(store->par_p1g, "WGS_84");
 	store->par_p2m = 0;	/* position system 2 motion compensation (boolean) */
-	store->par_p2t = 0;	/* position system 2 time stamp used 
+	store->par_p2t = 0;	/* position system 2 time stamp used
 				    (0=system time, 1=position input time) */
 	store->par_p2z = 0.0;	/* position system 2 vertical location (m) */
 	store->par_p2x = 0.0;	/* position system 2 along location (m) */
@@ -267,7 +267,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->par_p2g[i] = '\0';	/* position system 2 geodetic datum */
 	    }
 	store->par_p3m = 0;	/* position system 3 motion compensation (boolean) */
-	store->par_p3t = 0;	/* position system 3 time stamp used 
+	store->par_p3t = 0;	/* position system 3 time stamp used
 				    (0=system time, 1=position input time) */
 	store->par_p3z = 0.0;	/* position system 3 vertical location (m) */
 	store->par_p3x = 0.0;	/* position system 3 along location (m) */
@@ -318,7 +318,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 					00 : off
 					01 : weak
 					10 : medium
-					11 : strong 
+					11 : strong
 				    bit 2 is set if the slope filter is on
 				    bit 3 is set if the sidelobe filter is on
 				    bit 4 is set if the range windows are expanded
@@ -379,7 +379,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->svp_depth[i] = 0;	/* depth of svp entries (according to svp_depth_res) */
 	    store->svp_vel[i] = 0;	/* sound speed of svp entries (0.1 m/sec) */
 	    }
-	    
+
 	/* position */
 	store->pos_date = 0;		/* position date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
@@ -388,10 +388,10 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	store->pos_count = 0;		/* sequential counter */
 	store->pos_serial = 0;		/* system 1 serial number */
 	store->pos_latitude = 0;	/* latitude in decimal degrees * 20000000
-				    (negative in southern hemisphere) 
+				    (negative in southern hemisphere)
 				    if valid, invalid = 0x7FFFFFFF */
 	store->pos_longitude = 0;	/* longitude in decimal degrees * 10000000
-				    (negative in western hemisphere) 
+				    (negative in western hemisphere)
 				    if valid, invalid = 0x7FFFFFFF */
 	store->pos_quality = 0;	/* measure of position fix quality (cm) */
 	store->pos_speed = 0;		/* speed over ground (cm/sec) if valid,
@@ -415,7 +415,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	    store->pos_input[i] = 0;	/* position input datagram as received, minus
 				    header and tail (such as NMEA 0183 $ and CRLF) */
 	    }
-	    
+
 	/* height */
 	store->hgt_date = 0;		/* height date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
@@ -428,7 +428,7 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 				    zero the height is derived from the GGK datagram
 				    and is the height of the water level re the
 				    vertical datum */
-	
+
 	/* tide */
 	store->tid_date = 0;		/* tide date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
@@ -440,8 +440,8 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 				    Feb 26, 1995 = 19950226 */
 	store->tid_origin_msec = 0;	/* tide input time since midnight in msec
 				    08:12:51.234 = 29570234 */
-	store->tid_tide = 0;		/* tide offset (0.01 m) */	
-	
+	store->tid_tide = 0;		/* tide offset (0.01 m) */
+
 	/* clock */
 	store->clk_date = 0;		/* system date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
@@ -491,8 +491,8 @@ int mbsys_simrad2_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 }
 
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_survey_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad2_survey_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_simrad2_survey_alloc";
@@ -530,42 +530,42 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
 
 		/* initialize everything */
-		ping->png_date = 0;	
+		ping->png_date = 0;
 				/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
-		ping->png_msec = 0;	
+		ping->png_msec = 0;
 				/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
-		ping->png_count = 0;	
+		ping->png_count = 0;
 				/* sequential counter or input identifier */
-		ping->png_serial = 0;	
+		ping->png_serial = 0;
 				/* system 1 or system 2 serial number */
 		ping->png_latitude = EM2_INVALID_INT;
 				/* latitude in decimal degrees * 20000000
-				    (negative in southern hemisphere) 
+				    (negative in southern hemisphere)
 				    if valid, invalid = 0x7FFFFFFF */
 		ping->png_longitude = EM2_INVALID_INT;
 				/* longitude in decimal degrees * 10000000
-				    (negative in western hemisphere) 
+				    (negative in western hemisphere)
 				    if valid, invalid = 0x7FFFFFFF */
 		ping->png_speed = 0;
 				/* speed over ground (cm/sec) if valid,
 				    invalid = 0xFFFF */
-		ping->png_heading = 0;	
+		ping->png_heading = 0;
 				/* heading (0.01 deg) */
-		ping->png_heave = 0;	
+		ping->png_heave = 0;
 				/* heave from interpolation (0.01 m) */
-		ping->png_roll = 0;	
+		ping->png_roll = 0;
 				/* roll from interpolation (0.01 deg) */
-		ping->png_pitch = 0;	
+		ping->png_pitch = 0;
 				/* pitch from interpolation (0.01 deg) */
-		ping->png_ssv = 0;	
+		ping->png_ssv = 0;
 				/* sound speed at transducer (0.1 m/sec) */
-		ping->png_xducer_depth = 0;   
-				/* transmit transducer depth (0.01 m) 
+		ping->png_xducer_depth = 0;
+				/* transmit transducer depth (0.01 m)
 				    - The transmit transducer depth plus the
 					depth offset multiplier times 65536 cm
-					should be added to the beam depths to 
+					should be added to the beam depths to
 					derive the depths re the water line.
 					The depth offset multiplier will usually
 					be zero, except when the EM3000 sonar
@@ -573,30 +573,30 @@ int mbsys_simrad2_survey_alloc(int verbose,
 					depth greater than about 650 m. Note that
 					the offset multiplier will be negative
 					(-1) if the actual heave is large enough
-					to bring the transmit transducer above 
+					to bring the transmit transducer above
 					the water line. This may represent a valid
-					situation,  but may also be due to an 
-					erroneously set installation depth of 
+					situation,  but may also be due to an
+					erroneously set installation depth of
 					the either transducer or the water line. */
-		ping->png_offset_multiplier = 0;	
+		ping->png_offset_multiplier = 0;
 				/* transmit transducer depth offset multiplier
-				   - see note 7 above */ 
+				   - see note 7 above */
 
 		/* beam data */
-		ping->png_nbeams_max = 0;	
+		ping->png_nbeams_max = 0;
 				/* maximum number of beams possible */
-		ping->png_nbeams = 0;	
+		ping->png_nbeams = 0;
 				/* number of valid beams */
-		ping->png_depth_res = 0;	
+		ping->png_depth_res = 0;
 				/* depth resolution (0.01 m) */
-		ping->png_distance_res = 0;	
+		ping->png_distance_res = 0;
 				/* x and y resolution (0.01 m) */
-		ping->png_sample_rate = 0;	
+		ping->png_sample_rate = 0;
 				/* sampling rate (Hz) OR depth difference between
 				    sonar heads in EM3000D - see note 9 above */
 		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
 		    {
-		    ping->png_depth[i] = 0;	
+		    ping->png_depth[i] = 0;
 				/* depths in depth resolution units */
 		    ping->png_acrosstrack[i] = 0;
 				/* acrosstrack distances in distance resolution units */
@@ -626,39 +626,39 @@ int mbsys_simrad2_survey_alloc(int verbose,
 					motion. */
 		    ping->png_range[i] = 0;
 				/* Ranges in one of two formats (see note 10 above):
-				   1: Corrected format - the ranges are one way 
-					travel times in time units defined as half 
+				   1: Corrected format - the ranges are one way
+					travel times in time units defined as half
 					the inverse sampling rate.
 				   2: Uncorrected format - the ranges are raw two
 					way travel times in time units defined as
 					half the inverse sampling rate. These values
 					have not been corrected for changes in the
 					heave during the ping cycle. */
-		    ping->png_quality[i] = 0;	
+		    ping->png_quality[i] = 0;
 				/* 0-254 */
-		    ping->png_window[i] = 0;		
+		    ping->png_window[i] = 0;
 				/* samples/4 */
-		    ping->png_amp[i] = 0;		
+		    ping->png_amp[i] = 0;
 				/* 0.5 dB */
-		    ping->png_beam_num[i] = 0;	
-				/* beam 128 is first beam on 
+		    ping->png_beam_num[i] = 0;
+				/* beam 128 is first beam on
 				    second head of EM3000D */
-		    ping->png_beamflag[i] = MB_FLAG_NULL;	
+		    ping->png_beamflag[i] = MB_FLAG_NULL;
 				/* uses standard MB-System beamflags */
 		    }
 
 		/* raw beam record */
 		ping->png_raw1_read = MB_NO;	/* flag indicating actual reading of old rawbeam record */
 		ping->png_raw2_read = MB_NO;	/* flag indicating actual reading of new rawbeam record */
-		ping->png_raw_date = 0;	
+		ping->png_raw_date = 0;
 				/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
-		ping->png_raw_msec = 0;	
+		ping->png_raw_msec = 0;
 				/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
-		ping->png_raw_count = 0;	
+		ping->png_raw_count = 0;
 				/* sequential counter or input identifier */
-		ping->png_raw_serial = 0;	
+		ping->png_raw_serial = 0;
 				/* system 1 or system 2 serial number */
 		ping->png_raw_heading = 0;	/* heading (0.01 deg) */
 		ping->png_raw_ssv = 0;		/* sound speed at transducer (0.1 m/sec) */
@@ -676,7 +676,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		ping->png_raw_obliquebackscatter = 0; /* oblique incidence backscatter (dB) (-60 to +9) */
 		ping->png_raw_fixedgain = 0;		/* fixed gain (dB) (0 to 30) */
 		ping->png_raw_txpower = 0;		/* transmit power (dB) (0, -10, or -20) */
-		ping->png_raw_mode = 0;		/* sonar mode: 
+		ping->png_raw_mode = 0;		/* sonar mode:
 							0 : very shallow
 							1 : shallow
 							2 : medium
@@ -698,27 +698,27 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
 			{
 			ping->png_raw_rxrange[i] = 0;
-				/* Ranges as raw two way travel times in time 
-					units defined as one-fourth the inverse 
-					sampling rate. These values have not 
+				/* Ranges as raw two way travel times in time
+					units defined as one-fourth the inverse
+					sampling rate. These values have not
 					been corrected for changes in the
 					heave during the ping cycle. */
 			ping->png_raw_rxquality[i] = 0;	/* beam quality flag */
 			ping->png_raw_rxwindow[i] = 0;	/* length of detection window */
 			ping->png_raw_rxamp[i] = 0;		/* 0.5 dB */
-			ping->png_raw_rxbeam_num[i] = 0;	
-				/* beam 128 is first beam on 
+			ping->png_raw_rxbeam_num[i] = 0;
+				/* beam 128 is first beam on
 				    second head of EM3000D */
 			ping->png_raw_rxpointangle[i] = 0;
 				/* Raw beam pointing angles in 0.01 degree,
-					positive to port. 
-					These values are relative to the transducer 
+					positive to port.
+					These values are relative to the transducer
 					array and have not been corrected
 					for vessel motion. */
 			ping->png_raw_rxtiltangle[i] = 0;
 				/* Raw transmit tilt angles in 0.01 degree,
-					positive forward. 
-					These values are relative to the transducer 
+					positive forward.
+					These values are relative to the transducer
 					array and have not been corrected
 					for vessel motion. */
 			ping->png_raw_rxheading[i] = 0;	/* heading (0.01 deg) */
@@ -751,7 +751,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			ping->png_raw3_txoffset[i] = 0;	/* transmit time offset (usec) */
 			ping->png_raw3_txcenter[i] = 0;	/* center frequency (Hz) */
 			ping->png_raw3_txbandwidth[i] = 0;	/* bandwidth (10 Hz) */
-			ping->png_raw3_txwaveform[i] = 0;	/* signal waveform identifier 
+			ping->png_raw3_txwaveform[i] = 0;	/* signal waveform identifier
 										0 = CW, 1 = FM */
 			ping->png_raw3_txsector[i] = 0;	/* transmit sector number (0-19) */
 			}
@@ -759,8 +759,8 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			{
 			ping->png_raw3_rxpointangle[i] = 0;;
 					/* Raw beam pointing angles in 0.01 degree,
-						positive to port. 
-						These values are relative to the transducer 
+						positive to port.
+						These values are relative to the transducer
 						array and have not been corrected
 						for vessel motion. */
 			ping->png_raw3_rxrange[i] = 0;;	/* Ranges (0.25 samples) */
@@ -768,56 +768,56 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			ping->png_raw3_rxamp[i] = 0;;		/* 0.5 dB */
 			ping->png_raw3_rxquality[i] = 0;;	/* beam quality flag */
 			ping->png_raw3_rxwindow[i] = 0;;	/* length of detection window */
-			ping->png_raw3_rxbeam_num[i] = 0;;	
-					/* beam 128 is first beam on 
+			ping->png_raw3_rxbeam_num[i] = 0;;
+					/* beam 128 is first beam on
 					    second head of EM3000D */
 			ping->png_raw3_rxspare[i] = 0;;	/* spare */
 			}
 
 		/* sidescan */
-		ping->png_ss_read = MB_NO;	
+		ping->png_ss_read = MB_NO;
 				/* flag indicating actual reading of sidescan record */
-		ping->png_ss_count = 0;	
+		ping->png_ss_count = 0;
 				/* sequential counter or input identifier */
-		ping->png_ss_serial = 0;	
+		ping->png_ss_serial = 0;
 				/* system 1 or system 2 serial number */
-		ping->png_max_range = 0;  
+		ping->png_max_range = 0;
 				/* max range of ping in number of samples */
-		ping->png_r_zero = 0;	
+		ping->png_r_zero = 0;
 				/* range to normal incidence used in TVG
 				    (R0 predicted) in samples */
 		ping->png_r_zero_corr = 0;
 				/* range to normal incidence used to correct
 				    sample amplitudes in number of samples */
-		ping->png_tvg_start = 0;	
-				/* start sample of TVG ramp if not enough 
+		ping->png_tvg_start = 0;
+				/* start sample of TVG ramp if not enough
 				    dynamic range (0 otherwise) */
 		ping->png_tvg_stop = 0;	\
-				/* stop sample of TVG ramp if not enough 
+				/* stop sample of TVG ramp if not enough
 				    dynamic range (0 otherwise) */
-		ping->png_bsn = 0;	
+		ping->png_bsn = 0;
 				/* normal incidence backscatter (BSN) in dB */
-		ping->png_bso = 0;	
+		ping->png_bso = 0;
 				/* oblique incidence backscatter (BSO) in dB */
-		ping->png_tx = 0;	
+		ping->png_tx = 0;
 				/* Tx beamwidth in 0.1 degree */
-		ping->png_tvg_crossover = 0;	
+		ping->png_tvg_crossover = 0;
 				/* TVG law crossover angle in degrees */
-		ping->png_nbeams_ss = 0;	
+		ping->png_nbeams_ss = 0;
 				/* number of beams with sidescan */
 		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
 		    {
-		    ping->png_beam_index[i] = 0;	
+		    ping->png_beam_index[i] = 0;
 				/* beam index number */
-		    ping->png_sort_direction[i] = 0;	
+		    ping->png_sort_direction[i] = 0;
 				/* sorting direction - first sample in beam has lowest
 				    range if 1, highest if -1. */
-		    ping->png_beam_samples[i] = 0;	
+		    ping->png_beam_samples[i] = 0;
 				/* number of sidescan samples derived from
 					each beam */
-		    ping->png_start_sample[i] = 0;	
+		    ping->png_start_sample[i] = 0;
 				/* start sample number */
-		    ping->png_center_sample[i] = 0;	
+		    ping->png_center_sample[i] = 0;
 				/* center sample number */
 		    }
 		for (i=0;i<MBSYS_SIMRAD2_MAXRAWPIXELS;i++)
@@ -832,7 +832,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		    ping->png_ss[i] = EM2_INVALID_AMP;
 				/* the processed sidescan ordered port to starboard */
 		    ping->png_ssalongtrack[i] = EM2_INVALID_AMP;
-				/* the processed sidescan alongtrack distances 
+				/* the processed sidescan alongtrack distances
 					in distance resolution units */
 		    }
 		}
@@ -849,42 +849,42 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
 
 			/* initialize everything */
-			ping->png_date = 0;	
+			ping->png_date = 0;
 					/* date = year*10000 + month*100 + day
 					    Feb 26, 1995 = 19950226 */
-			ping->png_msec = 0;	
+			ping->png_msec = 0;
 					/* time since midnight in msec
 					    08:12:51.234 = 29570234 */
-			ping->png_count = 0;	
+			ping->png_count = 0;
 					/* sequential counter or input identifier */
-			ping->png_serial = 0;	
+			ping->png_serial = 0;
 					/* system 1 or system 2 serial number */
 			ping->png_latitude = EM2_INVALID_INT;
 					/* latitude in decimal degrees * 20000000
-					    (negative in southern hemisphere) 
+					    (negative in southern hemisphere)
 					    if valid, invalid = 0x7FFFFFFF */
 			ping->png_longitude = EM2_INVALID_INT;
 					/* longitude in decimal degrees * 10000000
-					    (negative in western hemisphere) 
+					    (negative in western hemisphere)
 					    if valid, invalid = 0x7FFFFFFF */
 			ping->png_speed = 0;
 					/* speed over ground (cm/sec) if valid,
 					    invalid = 0xFFFF */
-			ping->png_heading = 0;	
+			ping->png_heading = 0;
 					/* heading (0.01 deg) */
-			ping->png_heave = 0;	
+			ping->png_heave = 0;
 					/* heave from interpolation (0.01 m) */
-			ping->png_roll = 0;	
+			ping->png_roll = 0;
 					/* roll from interpolation (0.01 deg) */
-			ping->png_pitch = 0;	
+			ping->png_pitch = 0;
 					/* pitch from interpolation (0.01 deg) */
-			ping->png_ssv = 0;	
+			ping->png_ssv = 0;
 					/* sound speed at transducer (0.1 m/sec) */
-			ping->png_xducer_depth = 0;   
-					/* transmit transducer depth (0.01 m) 
+			ping->png_xducer_depth = 0;
+					/* transmit transducer depth (0.01 m)
 					    - The transmit transducer depth plus the
 						depth offset multiplier times 65536 cm
-						should be added to the beam depths to 
+						should be added to the beam depths to
 						derive the depths re the water line.
 						The depth offset multiplier will usually
 						be zero, except when the EM3000 sonar
@@ -892,30 +892,30 @@ int mbsys_simrad2_survey_alloc(int verbose,
 						depth greater than about 650 m. Note that
 						the offset multiplier will be negative
 						(-1) if the actual heave is large enough
-						to bring the transmit transducer above 
+						to bring the transmit transducer above
 						the water line. This may represent a valid
-						situation,  but may also be due to an 
-						erroneously set installation depth of 
+						situation,  but may also be due to an
+						erroneously set installation depth of
 						the either transducer or the water line. */
-			ping->png_offset_multiplier = 0;	
+			ping->png_offset_multiplier = 0;
 					/* transmit transducer depth offset multiplier
-					   - see note 7 above */ 
+					   - see note 7 above */
 
 			/* beam data */
-			ping->png_nbeams_max = 0;	
+			ping->png_nbeams_max = 0;
 					/* maximum number of beams possible */
-			ping->png_nbeams = 0;	
+			ping->png_nbeams = 0;
 					/* number of valid beams */
-			ping->png_depth_res = 0;	
+			ping->png_depth_res = 0;
 					/* depth resolution (0.01 m) */
-			ping->png_distance_res = 0;	
+			ping->png_distance_res = 0;
 					/* x and y resolution (0.01 m) */
-			ping->png_sample_rate = 0;	
+			ping->png_sample_rate = 0;
 					/* sampling rate (Hz) OR depth difference between
 					    sonar heads in EM3000D - see note 9 above */
 			for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
 			    {
-			    ping->png_depth[i] = 0;	
+			    ping->png_depth[i] = 0;
 					/* depths in depth resolution units */
 			    ping->png_acrosstrack[i] = 0;
 					/* acrosstrack distances in distance resolution units */
@@ -945,39 +945,39 @@ int mbsys_simrad2_survey_alloc(int verbose,
 						motion. */
 			    ping->png_range[i] = 0;
 					/* Ranges in one of two formats (see note 10 above):
-					   1: Corrected format - the ranges are one way 
-				        	travel times in time units defined as half 
+					   1: Corrected format - the ranges are one way
+				        	travel times in time units defined as half
 						the inverse sampling rate.
 					   2: Uncorrected format - the ranges are raw two
 				        	way travel times in time units defined as
 						half the inverse sampling rate. These values
 						have not been corrected for changes in the
 						heave during the ping cycle. */
-			    ping->png_quality[i] = 0;	
+			    ping->png_quality[i] = 0;
 					/* 0-254 */
-			    ping->png_window[i] = 0;		
+			    ping->png_window[i] = 0;
 					/* samples/4 */
-			    ping->png_amp[i] = 0;		
+			    ping->png_amp[i] = 0;
 					/* 0.5 dB */
-			    ping->png_beam_num[i] = 0;	
-					/* beam 128 is first beam on 
+			    ping->png_beam_num[i] = 0;
+					/* beam 128 is first beam on
 					    second head of EM3000D */
-			    ping->png_beamflag[i] = MB_FLAG_NULL;	
+			    ping->png_beamflag[i] = MB_FLAG_NULL;
 					/* uses standard MB-System beamflags */
 			    }
 
 			/* raw beam record */
 			ping->png_raw1_read = MB_NO;	/* flag indicating actual reading of old rawbeam record */
 			ping->png_raw2_read = MB_NO;	/* flag indicating actual reading of new rawbeam record */
-			ping->png_raw_date = 0;	
+			ping->png_raw_date = 0;
 					/* date = year*10000 + month*100 + day
 					    Feb 26, 1995 = 19950226 */
-			ping->png_raw_msec = 0;	
+			ping->png_raw_msec = 0;
 					/* time since midnight in msec
 					    08:12:51.234 = 29570234 */
-			ping->png_raw_count = 0;	
+			ping->png_raw_count = 0;
 					/* sequential counter or input identifier */
-			ping->png_raw_serial = 0;	
+			ping->png_raw_serial = 0;
 					/* system 1 or system 2 serial number */
 			ping->png_raw_heading = 0;	/* heading (0.01 deg) */
 			ping->png_raw_ssv = 0;		/* sound speed at transducer (0.1 m/sec) */
@@ -995,7 +995,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			ping->png_raw_obliquebackscatter = 0; /* oblique incidence backscatter (dB) (-60 to +9) */
 			ping->png_raw_fixedgain = 0;		/* fixed gain (dB) (0 to 30) */
 			ping->png_raw_txpower = 0;		/* transmit power (dB) (0, -10, or -20) */
-			ping->png_raw_mode = 0;		/* sonar mode: 
+			ping->png_raw_mode = 0;		/* sonar mode:
 								0 : very shallow
 								1 : shallow
 								2 : medium
@@ -1017,27 +1017,27 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
 		    		{
 				ping->png_raw_rxrange[i] = 0;
-					/* Ranges as raw two way travel times in time 
-						units defined as one-fourth the inverse 
-						sampling rate. These values have not 
+					/* Ranges as raw two way travel times in time
+						units defined as one-fourth the inverse
+						sampling rate. These values have not
 						been corrected for changes in the
 						heave during the ping cycle. */
 				ping->png_raw_rxquality[i] = 0;	/* beam quality flag */
 				ping->png_raw_rxwindow[i] = 0;	/* length of detection window */
 				ping->png_raw_rxamp[i] = 0;		/* 0.5 dB */
-				ping->png_raw_rxbeam_num[i] = 0;	
-					/* beam 128 is first beam on 
+				ping->png_raw_rxbeam_num[i] = 0;
+					/* beam 128 is first beam on
 					    second head of EM3000D */
 				ping->png_raw_rxpointangle[i] = 0;
 					/* Raw beam pointing angles in 0.01 degree,
-						positive to port. 
-						These values are relative to the transducer 
+						positive to port.
+						These values are relative to the transducer
 						array and have not been corrected
 						for vessel motion. */
 				ping->png_raw_rxtiltangle[i] = 0;
 					/* Raw transmit tilt angles in 0.01 degree,
-						positive forward. 
-						These values are relative to the transducer 
+						positive forward.
+						These values are relative to the transducer
 						array and have not been corrected
 						for vessel motion. */
 				ping->png_raw_rxheading[i] = 0;	/* heading (0.01 deg) */
@@ -1070,7 +1070,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 				ping->png_raw3_txoffset[i] = 0;	/* transmit time offset (usec) */
 				ping->png_raw3_txcenter[i] = 0;	/* center frequency (Hz) */
 				ping->png_raw3_txbandwidth[i] = 0;	/* bandwidth (10 Hz) */
-				ping->png_raw3_txwaveform[i] = 0;	/* signal waveform identifier 
+				ping->png_raw3_txwaveform[i] = 0;	/* signal waveform identifier
 											0 = CW, 1 = FM */
 				ping->png_raw3_txsector[i] = 0;	/* transmit sector number (0-19) */
 		    		}
@@ -1078,8 +1078,8 @@ int mbsys_simrad2_survey_alloc(int verbose,
 		    		{
 				ping->png_raw3_rxpointangle[i] = 0;;
 						/* Raw beam pointing angles in 0.01 degree,
-							positive to port. 
-							These values are relative to the transducer 
+							positive to port.
+							These values are relative to the transducer
 							array and have not been corrected
 							for vessel motion. */
 				ping->png_raw3_rxrange[i] = 0;;	/* Ranges (0.25 samples) */
@@ -1087,56 +1087,56 @@ int mbsys_simrad2_survey_alloc(int verbose,
 				ping->png_raw3_rxamp[i] = 0;;		/* 0.5 dB */
 				ping->png_raw3_rxquality[i] = 0;;	/* beam quality flag */
 				ping->png_raw3_rxwindow[i] = 0;;	/* length of detection window */
-				ping->png_raw3_rxbeam_num[i] = 0;;	
-						/* beam 128 is first beam on 
+				ping->png_raw3_rxbeam_num[i] = 0;;
+						/* beam 128 is first beam on
 						    second head of EM3000D */
 				ping->png_raw3_rxspare[i] = 0;;	/* spare */
 		    		}
 
 			/* sidescan */
-			ping->png_ss_read = MB_NO;	
+			ping->png_ss_read = MB_NO;
 					/* flag indicating actual reading of sidescan record */
-			ping->png_ss_count = 0;	
+			ping->png_ss_count = 0;
 					/* sequential counter or input identifier */
-			ping->png_ss_serial = 0;	
+			ping->png_ss_serial = 0;
 					/* system 1 or system 2 serial number */
-			ping->png_max_range = 0;  
+			ping->png_max_range = 0;
 					/* max range of ping in number of samples */
-			ping->png_r_zero = 0;	
+			ping->png_r_zero = 0;
 					/* range to normal incidence used in TVG
 					    (R0 predicted) in samples */
 			ping->png_r_zero_corr = 0;
 					/* range to normal incidence used to correct
 					    sample amplitudes in number of samples */
-			ping->png_tvg_start = 0;	
-					/* start sample of TVG ramp if not enough 
+			ping->png_tvg_start = 0;
+					/* start sample of TVG ramp if not enough
 					    dynamic range (0 otherwise) */
 			ping->png_tvg_stop = 0;	\
-					/* stop sample of TVG ramp if not enough 
+					/* stop sample of TVG ramp if not enough
 					    dynamic range (0 otherwise) */
-			ping->png_bsn = 0;	
+			ping->png_bsn = 0;
 					/* normal incidence backscatter (BSN) in dB */
-			ping->png_bso = 0;	
+			ping->png_bso = 0;
 					/* oblique incidence backscatter (BSO) in dB */
-			ping->png_tx = 0;	
+			ping->png_tx = 0;
 					/* Tx beamwidth in 0.1 degree */
-			ping->png_tvg_crossover = 0;	
+			ping->png_tvg_crossover = 0;
 					/* TVG law crossover angle in degrees */
-			ping->png_nbeams_ss = 0;	
+			ping->png_nbeams_ss = 0;
 					/* number of beams with sidescan */
 			for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
 			    {
-			    ping->png_beam_index[i] = 0;	
+			    ping->png_beam_index[i] = 0;
 					/* beam index number */
-			    ping->png_sort_direction[i] = 0;	
+			    ping->png_sort_direction[i] = 0;
 					/* sorting direction - first sample in beam has lowest
 					    range if 1, highest if -1. */
-			    ping->png_beam_samples[i] = 0;	
+			    ping->png_beam_samples[i] = 0;
 					/* number of sidescan samples derived from
 						each beam */
-			    ping->png_start_sample[i] = 0;	
+			    ping->png_start_sample[i] = 0;
 					/* start sample number */
-			    ping->png_center_sample[i] = 0;	
+			    ping->png_center_sample[i] = 0;
 					/* center sample number */
 			    }
 			for (i=0;i<MBSYS_SIMRAD2_MAXRAWPIXELS;i++)
@@ -1151,7 +1151,7 @@ int mbsys_simrad2_survey_alloc(int verbose,
 			    ping->png_ss[i] = EM2_INVALID_AMP;
 					/* the processed sidescan ordered port to starboard */
 			    ping->png_ssalongtrack[i] = EM2_INVALID_AMP;
-					/* the processed sidescan alongtrack distances 
+					/* the processed sidescan alongtrack distances
 						in distance resolution units */
 			    }
 			}
@@ -1173,8 +1173,8 @@ int mbsys_simrad2_survey_alloc(int verbose,
 
 
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_wc_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad2_wc_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_wc_survey_alloc";
@@ -1206,7 +1206,7 @@ int mbsys_simrad2_wc_alloc(int verbose,
 		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_watercolumn_struct),
 			(void **)&(store->wc),error);
-			
+
 	if (status == MB_SUCCESS)
 		{
 
@@ -1220,7 +1220,7 @@ int mbsys_simrad2_wc_alloc(int verbose,
 				    08:12:51.234 = 29570234 */
 		wc->wtc_count = 0;	/* sequential counter or input identifier */
 		wc->wtc_serial = 0;	/* system 1 or system 2 serial number */
-		wc->wtc_ndatagrams = 0;	/* number of datagrams used to represent 
+		wc->wtc_ndatagrams = 0;	/* number of datagrams used to represent
 						the water column for this ping */
 		wc->wtc_datagram = 0;	/* number this datagram */
 		wc->wtc_ntx = 0;	/* number of transmit sectors */
@@ -1246,7 +1246,7 @@ int mbsys_simrad2_wc_alloc(int verbose,
 			wc->beam[i].wtc_beam_samples = 0;	/* number of water column samples derived from
 									each beam */
 			wc->beam[i].wtc_sector = 0;		/* transmit sector identifier */
-			wc->beam[i].wtc_beam = 0;  		/* beam 128 is first beam on 
+			wc->beam[i].wtc_beam = 0;  		/* beam 128 is first beam on
 				  	  				second head of EM3000D */
 			for (j=0;j<MBSYS_SIMRAD2_MAXRAWPIXELS;j++)
 				wc->beam[i].wtc_amp[j] = 0;	/* water column amplitude (dB) */
@@ -1268,8 +1268,8 @@ int mbsys_simrad2_wc_alloc(int verbose,
 }
 
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_attitude_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad2_attitude_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_simrad2_attitude_alloc";
@@ -1301,7 +1301,7 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_attitude_struct),
 			(void **)&(store->attitude),error);
-			
+
 	if (status == MB_SUCCESS)
 		{
 
@@ -1309,17 +1309,17 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 		attitude = (struct mbsys_simrad2_attitude_struct *) store->attitude;
 
 		/* initialize everything */
-		attitude->att_date = 0;	
+		attitude->att_date = 0;
 				/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
-		attitude->att_msec = 0;	
+		attitude->att_msec = 0;
 				/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
-		attitude->att_count = 0;	
+		attitude->att_count = 0;
 				/* sequential counter or input identifier */
-		attitude->att_serial = 0;	
+		attitude->att_serial = 0;
 				/* system 1 or system 2 serial number */
-		attitude->att_ndata = 0;	
+		attitude->att_ndata = 0;
 				/* number of attitude data */
 		for (i=0;i<MBSYS_SIMRAD2_MAXATTITUDE;i++)
 		    {
@@ -1354,8 +1354,8 @@ int mbsys_simrad2_attitude_alloc(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_heading_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad2_heading_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_simrad2_heading_alloc";
@@ -1387,7 +1387,7 @@ int mbsys_simrad2_heading_alloc(int verbose,
 		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_heading_struct),
 			(void **)&(store->heading),error);
-			
+
 	if (status == MB_SUCCESS)
 		{
 
@@ -1395,17 +1395,17 @@ int mbsys_simrad2_heading_alloc(int verbose,
 		heading = (struct mbsys_simrad2_heading_struct *) store->heading;
 
 		/* initialize everything */
-		heading->hed_date = 0;	
+		heading->hed_date = 0;
 				/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
-		heading->hed_msec = 0;	
+		heading->hed_msec = 0;
 				/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
-		heading->hed_count = 0;	
+		heading->hed_count = 0;
 				/* sequential counter or input identifier */
-		heading->hed_serial = 0;	
+		heading->hed_serial = 0;
 				/* system 1 or system 2 serial number */
-		heading->hed_ndata = 0;	
+		heading->hed_ndata = 0;
 				/* number of heading data */
 		for (i=0;i<MBSYS_SIMRAD2_MAXHEADING;i++)
 		    {
@@ -1432,8 +1432,8 @@ int mbsys_simrad2_heading_alloc(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_ssv_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad2_ssv_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_simrad2_ssv_alloc";
@@ -1465,7 +1465,7 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_ssv_struct),
 			(void **)&(store->ssv),error);
-			
+
 	if (status == MB_SUCCESS)
 		{
 
@@ -1473,17 +1473,17 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 		ssv = (struct mbsys_simrad2_ssv_struct *) store->ssv;
 
 		/* initialize everything */
-		ssv->ssv_date = 0;	
+		ssv->ssv_date = 0;
 				/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
-		ssv->ssv_msec = 0;	
+		ssv->ssv_msec = 0;
 				/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
-		ssv->ssv_count = 0;	
+		ssv->ssv_count = 0;
 				/* sequential counter or input identifier */
-		ssv->ssv_serial = 0;	
+		ssv->ssv_serial = 0;
 				/* system 1 or system 2 serial number */
-		ssv->ssv_ndata = 0;	
+		ssv->ssv_ndata = 0;
 				/* number of ssv data */
 		for (i=0;i<MBSYS_SIMRAD2_MAXTILT;i++)
 		    {
@@ -1508,8 +1508,8 @@ int mbsys_simrad2_ssv_alloc(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_tilt_alloc(int verbose, 
-			void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad2_tilt_alloc(int verbose,
+			void *mbio_ptr, void *store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_simrad2_tilt_alloc";
@@ -1541,7 +1541,7 @@ int mbsys_simrad2_tilt_alloc(int verbose,
 		status = mb_mallocd(verbose,__FILE__, __LINE__,
 			sizeof(struct mbsys_simrad2_tilt_struct),
 			(void **)&(store->tilt),error);
-			
+
 	if (status == MB_SUCCESS)
 		{
 
@@ -1549,17 +1549,17 @@ int mbsys_simrad2_tilt_alloc(int verbose,
 		tilt = (struct mbsys_simrad2_tilt_struct *) store->tilt;
 
 		/* initialize everything */
-		tilt->tlt_date = 0;	
+		tilt->tlt_date = 0;
 				/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
-		tilt->tlt_msec = 0;	
+		tilt->tlt_msec = 0;
 				/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
-		tilt->tlt_count = 0;	
+		tilt->tlt_count = 0;
 				/* sequential counter or input identifier */
-		tilt->tlt_serial = 0;	
+		tilt->tlt_serial = 0;
 				/* system 1 or system 2 serial number */
-		tilt->tlt_ndata = 0;	
+		tilt->tlt_ndata = 0;
 				/* number of tilt data */
 		for (i=0;i<MBSYS_SIMRAD2_MAXTILT;i++)
 		    {
@@ -1584,7 +1584,7 @@ int mbsys_simrad2_tilt_alloc(int verbose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_simrad2_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_simrad2_deall";
@@ -1676,55 +1676,55 @@ int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error)
 	/* initialize all sidescan stuff to zeros */
 	if (store->ping != NULL)
 		{
-		ping->png_ss_date = 0;	
+		ping->png_ss_date = 0;
 				/* date = year*10000 + month*100 + day
 				    Feb 26, 1995 = 19950226 */
-		ping->png_ss_msec = 0;	
+		ping->png_ss_msec = 0;
 				/* time since midnight in msec
 				    08:12:51.234 = 29570234 */
-		ping->png_ss_count = 0;	
+		ping->png_ss_count = 0;
 				/* sequential counter or input identifier */
-		ping->png_ss_serial = 0;	
+		ping->png_ss_serial = 0;
 				/* system 1 or system 2 serial number */
-		ping->png_max_range = 0;  
+		ping->png_max_range = 0;
 				/* max range of ping in number of samples */
-		ping->png_r_zero = 0;	
+		ping->png_r_zero = 0;
 				/* range to normal incidence used in TVG
 				    (R0 predicted) in samples */
 		ping->png_r_zero_corr = 0;
 				/* range to normal incidence used to correct
 				    sample amplitudes in number of samples */
-		ping->png_tvg_start = 0;	
-				/* start sample of TVG ramp if not enough 
+		ping->png_tvg_start = 0;
+				/* start sample of TVG ramp if not enough
 				    dynamic range (0 otherwise) */
 		ping->png_tvg_stop = 0;	\
-				/* stop sample of TVG ramp if not enough 
+				/* stop sample of TVG ramp if not enough
 				    dynamic range (0 otherwise) */
-		ping->png_bsn = 0;	
+		ping->png_bsn = 0;
 				/* normal incidence backscatter (BSN) in dB */
-		ping->png_bso = 0;	
+		ping->png_bso = 0;
 				/* oblique incidence backscatter (BSO) in dB */
-		ping->png_tx = 0;	
+		ping->png_tx = 0;
 				/* Tx beamwidth in 0.1 degree */
-		ping->png_tvg_crossover = 0;	
+		ping->png_tvg_crossover = 0;
 				/* TVG law crossover angle in degrees */
-		ping->png_nbeams_ss = 0;	
+		ping->png_nbeams_ss = 0;
 				/* number of beams with sidescan */
-		ping->png_npixels = 0;	
+		ping->png_npixels = 0;
 				/* number of pixels of sidescan */
 		for (i=0;i<MBSYS_SIMRAD2_MAXBEAMS;i++)
 		    {
-		    ping->png_beam_index[i] = 0;	
+		    ping->png_beam_index[i] = 0;
 				/* beam index number */
-		    ping->png_sort_direction[i] = 0;	
+		    ping->png_sort_direction[i] = 0;
 				/* sorting direction - first sample in beam has lowest
 				    range if 1, highest if -1. */
-		    ping->png_beam_samples[i] = 0;	
+		    ping->png_beam_samples[i] = 0;
 				/* number of sidescan samples derived from
 					each beam */
-		    ping->png_start_sample[i] = 0;	
+		    ping->png_start_sample[i] = 0;
 				/* start sample number */
-		    ping->png_center_sample[i] = 0;	
+		    ping->png_center_sample[i] = 0;
 				/* center sample number */
 		    }
 		for (i=0;i<MBSYS_SIMRAD2_MAXRAWPIXELS;i++)
@@ -1759,7 +1759,7 @@ int mbsys_simrad2_zero_ss(int verbose, void *store_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_simrad2_dimensions";
@@ -1795,7 +1795,7 @@ int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		*nbath = ping->png_nbeams_max;
 		*namp = *nbath;
 		*nss = MBSYS_SIMRAD2_MAXPIXELS;
-		
+
 		/* double it for the EM3002 */
 		if (store->sonar == MBSYS_SIMRAD2_EM3002)
 			{
@@ -1831,7 +1831,7 @@ int mbsys_simrad2_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_pingnumber(int verbose, void *mbio_ptr, 
+int mbsys_simrad2_pingnumber(int verbose, void *mbio_ptr,
 		int *pingnumber, int *error)
 {
 	char	*function_name = "mbsys_simrad2_pingnumber";
@@ -1874,12 +1874,12 @@ int mbsys_simrad2_pingnumber(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -1919,7 +1919,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get survey data structure */
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
-		
+
 		/* get time */
 		time_i[0] = ping->png_date / 10000;
 		time_i[1] = (ping->png_date % 10000) / 100;
@@ -1948,14 +1948,14 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			*speed = 0.036 * ping->png_speed;
 		else
 			*speed = 0.0;
-			
+
 		/* set beamwidths in mb_io structure */
 		if (store->run_tran_beam > 0)
-		    mb_io_ptr->beamwidth_ltrack 
+		    mb_io_ptr->beamwidth_ltrack
 			= 0.1 * store->run_tran_beam;
 		else if (ping->png_tx > 0)
 		    {
-		    mb_io_ptr->beamwidth_ltrack 
+		    mb_io_ptr->beamwidth_ltrack
 			= 0.1 * ping->png_tx;
 		    }
 		else if (store->sonar == MBSYS_SIMRAD2_EM120)
@@ -1967,14 +1967,14 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		else if (store->sonar == MBSYS_SIMRAD2_EM2000)
 		    mb_io_ptr->beamwidth_ltrack = 1.5;
 		else if (store->sonar == MBSYS_SIMRAD2_EM3000
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_1 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_2 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_3 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_4 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_5 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_7 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_8 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_1
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_2
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_3
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_4
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_5
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_6
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_7
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_8
 			|| store->sonar == MBSYS_SIMRAD2_EM3002)
 		    mb_io_ptr->beamwidth_ltrack = 1.5;
 		else if (store->sonar == MBSYS_SIMRAD2_EM1000)
@@ -1988,7 +1988,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		    }
 		if (store->run_rec_beam > 0)
 		    {
-		    mb_io_ptr->beamwidth_xtrack 
+		    mb_io_ptr->beamwidth_xtrack
 			= 0.1 * store->run_rec_beam;
 		    }
 		else if (store->sonar == MBSYS_SIMRAD2_EM120)
@@ -2000,14 +2000,14 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		else if (store->sonar == MBSYS_SIMRAD2_EM2000)
 		    mb_io_ptr->beamwidth_xtrack = 1.5;
 		else if (store->sonar == MBSYS_SIMRAD2_EM3000
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_1 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_2 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_3 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_4 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_5 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_7 
-			|| store->sonar == MBSYS_SIMRAD2_EM3000D_8 
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_1
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_2
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_3
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_4
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_5
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_6
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_7
+			|| store->sonar == MBSYS_SIMRAD2_EM3000D_8
 			|| store->sonar == MBSYS_SIMRAD2_EM3002)
 		    mb_io_ptr->beamwidth_xtrack = 1.5;
 		else if (store->sonar == MBSYS_SIMRAD2_EM1000)
@@ -2041,9 +2041,9 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			bath[j] = depthscale * ping->png_depth[i]
 				    + depthoffset;
 			beamflag[j] = ping->png_beamflag[i];
-			bathacrosstrack[j] 
+			bathacrosstrack[j]
 				= dacrscale * ping->png_acrosstrack[i];
-			bathalongtrack[j] 
+			bathalongtrack[j]
 				= daloscale * ping->png_alongtrack[i];
 			amp[j] = reflscale * ping->png_amp[i];
 			}
@@ -2056,14 +2056,14 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			if (ping->png_ss[i] != EM2_INVALID_AMP)
 				{
 				ss[i] = 0.01 * ping->png_ss[i];
-				ssacrosstrack[i] = pixel_size 
+				ssacrosstrack[i] = pixel_size
 						* (i - MBSYS_SIMRAD2_MAXPIXELS / 2);
 				ssalongtrack[i] = daloscale * ping->png_ssalongtrack[i];
 				}
 			else
 				{
 				ss[i] = MB_SIDESCAN_NULL;
-				ssacrosstrack[i] = pixel_size 
+				ssacrosstrack[i] = pixel_size
 						* (i - MBSYS_SIMRAD2_MAXPIXELS / 2);
 				ssalongtrack[i] = 0.0;
 				}
@@ -2077,7 +2077,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			/* get survey data structure */
 			ping = (struct mbsys_simrad2_ping_struct *) store->ping2;
-		
+
 			/* read distance and depth values into storage arrays */
 			depthscale = 0.01 * ping->png_depth_res;
 			depthoffset = 0.01 * ping->png_xducer_depth
@@ -2100,9 +2100,9 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				bath[j] = depthscale * ping->png_depth[i]
 					    + depthoffset;
 				beamflag[j] = ping->png_beamflag[i];
-				bathacrosstrack[j] 
+				bathacrosstrack[j]
 					= dacrscale * ping->png_acrosstrack[i];
-				bathalongtrack[j] 
+				bathalongtrack[j]
 					= daloscale * ping->png_alongtrack[i];
 				amp[j] = reflscale * ping->png_amp[i];
 				}
@@ -2115,14 +2115,14 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 				if (ping->png_ss[i] != EM2_INVALID_AMP)
 					{
 					ss[j] = 0.01 * ping->png_ss[i];
-					ssacrosstrack[j] = pixel_size 
+					ssacrosstrack[j] = pixel_size
 							* (i - MBSYS_SIMRAD2_MAXPIXELS / 2);
 					ssalongtrack[j] = daloscale * ping->png_ssalongtrack[i];
 					}
 				else
 					{
 					ss[j] = MB_SIDESCAN_NULL;
-					ssacrosstrack[j] = pixel_size 
+					ssacrosstrack[j] = pixel_size
 							* (i - MBSYS_SIMRAD2_MAXPIXELS / 2);
 					ssalongtrack[j] = 0.0;
 					}
@@ -2292,13 +2292,13 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -2314,7 +2314,7 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -2345,12 +2345,12 @@ int mbsys_simrad2_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -2398,18 +2398,18 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        beam:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -2464,7 +2464,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				store->sonar = MBSYS_SIMRAD2_EM3002;
 				}
 			}
-			
+
 		/* allocate secondary data structure for
 			survey data if needed */
 		if (store->ping == NULL)
@@ -2476,7 +2476,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get survey data structure */
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
-		
+
 		/* get time */
 		ping->png_date = 10000 * time_i[0]
 				    + 100 * time_i[1]
@@ -2487,7 +2487,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				    + 0.001 * time_i[6];
 		store->date = ping->png_date;
 		store->msec = ping->png_msec;
-		
+
 		/* get navigation */
 		if (navlon < -180.0)
 			navlon += 360.0;
@@ -2500,7 +2500,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ping->png_heading = (int) rint(heading * 100);
 
 		/* get speed  */
-		ping->png_speed = (int) rint(speed / 0.036);		
+		ping->png_speed = (int) rint(speed / 0.036);
 
 		/* get resolutions if needed  */
 		if (ping->png_depth_res == 0 || ping->png_distance_res == 0)
@@ -2516,7 +2516,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				ping->png_distance_res = 1; /* kluge */
 				}
 			}
-			
+
 		/* set initial values for resolutions */
 		depthscale = 0.01 * ping->png_depth_res;
 		depthoffset = 0.01 * ping->png_xducer_depth
@@ -2524,7 +2524,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		dacrscale  = 0.01 * ping->png_distance_res;
 		daloscale  = 0.01 * ping->png_distance_res;
 		reflscale  = 0.5;
-		
+
 		/* Figure out depth and distance scaling on
 		 * the fly. Using the existing scaling got us
 		 * into trouble with Revelle data in August-September 2001.
@@ -2544,7 +2544,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				distancemax = MAX(distancemax, fabs(bathacrosstrack[i]));
 				}
 			    }
-			    
+
 			/* figure out best scaling */
 			if (store->sonar == MBSYS_SIMRAD2_EM120
 				|| store->sonar == MBSYS_SIMRAD2_EM300)
@@ -2552,7 +2552,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			else
 				png_depth_res = (int)(depthmax / 327.68) + 1;
 			png_distance_res = (int)(distancemax / 327.68) + 1;
-				
+
 			/* Change scaling if needed */
 			if (png_depth_res > ping->png_depth_res)
 				{
@@ -2566,18 +2566,18 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				daloscale  = 0.01 * ping->png_distance_res;
 				}
 			}
-			
+
 		/* deal with data from the dual head EM3002 */
 		if (status == MB_SUCCESS && store->sonar == MBSYS_SIMRAD2_EM3002)
 			{
 			ping2 = (struct mbsys_simrad2_ping_struct *) store->ping2;
-			
+
 			ping2->png_date = ping->png_date;
 			ping2->png_msec = ping->png_msec;
 			ping2->png_longitude = ping->png_longitude;
 			ping2->png_latitude = ping->png_latitude;
 			ping2->png_heading = ping->png_heading;
-			ping2->png_speed = ping->png_speed;		
+			ping2->png_speed = ping->png_speed;
 			ping2->png_depth_res = ping->png_depth_res;
 			ping2->png_distance_res = ping->png_distance_res;
 
@@ -2594,7 +2594,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 					ping->png_beamflag[j] = beamflag[i];
 					ping->png_acrosstrack[j]
 				        	= (int) rint(bathacrosstrack[i] / dacrscale);
-					ping->png_alongtrack[j] 
+					ping->png_alongtrack[j]
 						= (int) rint(bathalongtrack[i] / daloscale);
 					ping->png_amp[j] = (int) rint(amp[i] / reflscale);
 					ping->png_nbeams++;
@@ -2613,7 +2613,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 					ping2->png_beamflag[j] = beamflag[i];
 					ping2->png_acrosstrack[j]
 				        	= (int) rint(bathacrosstrack[i] / dacrscale);
-					ping2->png_alongtrack[j] 
+					ping2->png_alongtrack[j]
 						= (int) rint(bathalongtrack[i] / daloscale);
 					ping2->png_amp[j] = (int) rint(amp[i] / reflscale);
 					ping2->png_nbeams++;
@@ -2631,25 +2631,25 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 					ping->png_beamflag[j] = beamflag[i];
 					ping->png_acrosstrack[j]
 						= (int) rint(bathacrosstrack[i] / dacrscale);
-					ping->png_alongtrack[j] 
+					ping->png_alongtrack[j]
 						= (int) rint(bathalongtrack[i] / daloscale);
 					ping->png_amp[j] = (int) rint(amp[i] / reflscale);
 					}
 				for (j=0;j<ping2->png_nbeams;j++)
 					{
-					i = ping->png_beam_num[ping->png_nbeams-1] 
+					i = ping->png_beam_num[ping->png_nbeams-1]
 						+ ping2->png_beam_num[j] - 1;
 					ping2->png_depth[j] = (int) rint((bath[i] - depthoffset)
 								/ depthscale);
 					ping2->png_beamflag[j] = beamflag[i];
 					ping2->png_acrosstrack[j]
 						= (int) rint(bathacrosstrack[i] / dacrscale);
-					ping2->png_alongtrack[j] 
+					ping2->png_alongtrack[j]
 						= (int) rint(bathalongtrack[i] / daloscale);
 					ping2->png_amp[j] = (int) rint(amp[i] / reflscale);
 					}
 				}
-				
+
 			/* handle sidescan */
 			if (ping->png_pixels_ss	+ ping2->png_pixels_ss != nss)
 				{
@@ -2728,7 +2728,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 					}
 				}
 			}
-			
+
 		/* else deal with data from all the single head sonars */
 		else if (status == MB_SUCCESS)
 			{
@@ -2744,7 +2744,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 					ping->png_beamflag[j] = beamflag[i];
 					ping->png_acrosstrack[j]
 				        	= (int) rint(bathacrosstrack[i] / dacrscale);
-					ping->png_alongtrack[j] 
+					ping->png_alongtrack[j]
 						= (int) rint(bathalongtrack[i] / daloscale);
 					ping->png_amp[j] = (int) rint(amp[i] / reflscale);
 					ping->png_nbeams++;
@@ -2761,7 +2761,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 					ping->png_beamflag[j] = beamflag[i];
 					ping->png_acrosstrack[j]
 						= (int) rint(bathacrosstrack[i] / dacrscale);
-					ping->png_alongtrack[j] 
+					ping->png_alongtrack[j]
 						= (int) rint(bathalongtrack[i] / daloscale);
 					ping->png_amp[j] = (int) rint(amp[i] / reflscale);
 					}
@@ -2799,7 +2799,7 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				    + 0.001 * time_i[6];
 		store->msec = store->pos_msec;
 		store->date = store->pos_date;
-		
+
 		/* get navigation */
 		if (navlon < -180.0)
 			navlon += 360.0;
@@ -2815,13 +2815,13 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_speed = (int) rint(speed / 0.036);
 
 		/* get roll pitch and heave */
-		
+
 		/* set "active" flag if needed */
 		if (store->kind == MB_DATA_NAV)
 		    {
 		    store->pos_system = store->pos_system | 128;
 		    }
-		
+
 		/* set secondary nav flag if needed */
 		else if (store->kind == MB_DATA_NAV1)
 		    {
@@ -2860,9 +2860,9 @@ int mbsys_simrad2_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_simrad2_ttimes";
@@ -2914,21 +2914,21 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				+ 655.36 * ping->png_offset_multiplier;
 
 		/* get travel times, angles */
-		if (store->sonar == MBSYS_SIMRAD2_EM120 
-		    || store->sonar == MBSYS_SIMRAD2_EM300 
-		    || store->sonar == MBSYS_SIMRAD2_EM1002 
-		    || store->sonar == MBSYS_SIMRAD2_EM2000 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000 
+		if (store->sonar == MBSYS_SIMRAD2_EM120
+		    || store->sonar == MBSYS_SIMRAD2_EM300
+		    || store->sonar == MBSYS_SIMRAD2_EM1002
+		    || store->sonar == MBSYS_SIMRAD2_EM2000
+		    || store->sonar == MBSYS_SIMRAD2_EM3000
 		    || store->sonar == MBSYS_SIMRAD2_EM710)
 		    ttscale = 0.5 / ping->png_sample_rate;
-		else if (store->sonar == MBSYS_SIMRAD2_EM3000D_1 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_2 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_3 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_4 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_5 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_8 
+		else if (store->sonar == MBSYS_SIMRAD2_EM3000D_1
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_2
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_3
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_4
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_5
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_6
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_8
 		    || store->sonar == MBSYS_SIMRAD2_EM3002)
 		    ttscale = 0.5 / 14000;
 		else if (store->sonar == MBSYS_SIMRAD2_EM12S
@@ -2938,12 +2938,12 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 		    {
 		    ttscale = 1.0 / ping->png_sample_rate;
 		    }
-			
+
 		/* deal with data from the dual head EM3002 */
 		if (status == MB_SUCCESS && store->sonar == MBSYS_SIMRAD2_EM3002)
 			{
 			ping2 = (struct mbsys_simrad2_ping_struct *) store->ping2;
-			
+
 			*nbeams = ping->png_nbeams_max + ping2->png_nbeams_max;
 			for (j=0;j<*nbeams;j++)
 				{
@@ -2977,7 +2977,7 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				alongtrack_offset[j] = 0.0;
 				}
 			}
-			
+
 		/* else deal with data from single head sonars */
 		else if (status == MB_SUCCESS)
 			{
@@ -2998,22 +2998,22 @@ int mbsys_simrad2_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 				angles[j] = 90.0 - 0.01 * ping->png_depression[i];
 				angles_forward[j] = 90 - 0.01 * ping->png_azimuth[i];
 				if (angles_forward[j] < 0.0) angles_forward[j] += 360.0;
-				if (store->sonar == MBSYS_SIMRAD2_EM120 
-					|| store->sonar == MBSYS_SIMRAD2_EM300 
-					|| store->sonar == MBSYS_SIMRAD2_EM2000 
+				if (store->sonar == MBSYS_SIMRAD2_EM120
+					|| store->sonar == MBSYS_SIMRAD2_EM300
+					|| store->sonar == MBSYS_SIMRAD2_EM2000
 					|| store->sonar == MBSYS_SIMRAD2_EM3000
-					|| store->sonar == MBSYS_SIMRAD2_EM3000D_1 
-					|| store->sonar == MBSYS_SIMRAD2_EM3000D_2 
-					|| store->sonar == MBSYS_SIMRAD2_EM3000D_3 
-					|| store->sonar == MBSYS_SIMRAD2_EM3000D_4 
-					|| store->sonar == MBSYS_SIMRAD2_EM3000D_5 
-					|| store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-					|| store->sonar == MBSYS_SIMRAD2_EM3000D_7 
-					|| store->sonar == MBSYS_SIMRAD2_EM3000D_8 
-					|| store->sonar == MBSYS_SIMRAD2_EM3002 
+					|| store->sonar == MBSYS_SIMRAD2_EM3000D_1
+					|| store->sonar == MBSYS_SIMRAD2_EM3000D_2
+					|| store->sonar == MBSYS_SIMRAD2_EM3000D_3
+					|| store->sonar == MBSYS_SIMRAD2_EM3000D_4
+					|| store->sonar == MBSYS_SIMRAD2_EM3000D_5
+					|| store->sonar == MBSYS_SIMRAD2_EM3000D_6
+					|| store->sonar == MBSYS_SIMRAD2_EM3000D_7
+					|| store->sonar == MBSYS_SIMRAD2_EM3000D_8
+					|| store->sonar == MBSYS_SIMRAD2_EM3002
 					|| store->sonar == MBSYS_SIMRAD2_EM710)
 				    angles_null[i] = 0.0;
-				else if (store->sonar == MBSYS_SIMRAD2_EM1000 
+				else if (store->sonar == MBSYS_SIMRAD2_EM1000
 					|| store->sonar == MBSYS_SIMRAD2_EM1002)
 				    angles_null[i] = angles[i];
 				else if (store->sonar == MBSYS_SIMRAD2_EM12S
@@ -3130,7 +3130,7 @@ int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr,
 		if (store->sonar == MBSYS_SIMRAD2_EM3002)
 			{
 			ping2 = (struct mbsys_simrad2_ping_struct *) store->ping2;
-			
+
 			*nbeams = ping->png_nbeams_max + ping2->png_nbeams_max;
 			for (j=0;j<*nbeams;j++)
 				{
@@ -3153,7 +3153,7 @@ int mbsys_simrad2_detects(int verbose, void *mbio_ptr, void *store_ptr,
 					detects[j] = MB_DETECT_AMPLITUDE;
 				}
 			}
-			
+
 		/* else deal with data from single head sonars */
 		else
 			{
@@ -3263,7 +3263,7 @@ int mbsys_simrad2_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 		if (store->sonar == MBSYS_SIMRAD2_EM3002)
 			{
 			ping2 = (struct mbsys_simrad2_ping_struct *) store->ping2;
-			
+
 			*nbeams = ping->png_nbeams_max + ping2->png_nbeams_max;
 			for (j=0;j<*nbeams;j++)
 				{
@@ -3280,7 +3280,7 @@ int mbsys_simrad2_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 				pulses[j] = MB_PULSE_CW;
 				}
 			}
-			
+
 		/* else deal with data from single head sonars */
 		else
 			{
@@ -3346,7 +3346,7 @@ int mbsys_simrad2_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_gains(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transmit_gain, double *pulse_length, 
+			int *kind, double *transmit_gain, double *pulse_length,
 			double *receive_gain, int *error)
 {
 	char	*function_name = "mbsys_simrad2_gains";
@@ -3438,7 +3438,7 @@ int mbsys_simrad2_gains(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_simrad2_extract_altitude";
@@ -3495,7 +3495,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			altitude_best = depthscale * ping->png_depth[i];
 			found = MB_YES;
 			}
-		    }		
+		    }
 		if (found == MB_NO)
 		    {
 		    xtrack_min = 99999999.9;
@@ -3508,7 +3508,7 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    altitude_best = depthscale * ping->png_depth[i];
 			    found = MB_YES;
 			    }
-			}		
+			}
 		    }
 		if (found == MB_YES)
 		    {
@@ -3558,11 +3558,258 @@ int mbsys_simrad2_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
+int mbsys_simrad2_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
+			int nmax, int *kind, int *n,
+			int *time_i, double *time_d,
+			double *navlon, double *navlat,
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
+			int *error)
+{
+	char	*function_name = "mbsys_simrad2_extract_nnav";
+	int	status = MB_SUCCESS;
+	int	interp_error = MB_ERROR_NO_ERROR;
+	struct mb_io_struct *mb_io_ptr;
+	struct mbsys_simrad2_struct *store;
+	struct mbsys_simrad2_ping_struct *ping;
+	struct mbsys_simrad2_attitude_struct *attitude;
+	double	atime_d;
+	int	atime_i[7];
+	int	i, inav;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		fprintf(stderr,"dbg2       nmax:       %d\n",nmax);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* get data structure pointer */
+	store = (struct mbsys_simrad2_struct *) store_ptr;
+
+	/* get data kind */
+	*kind = store->kind;
+
+	/* extract data from ping structure */
+	if (*kind == MB_DATA_DATA)
+		{
+		/* get survey data structure */
+		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+
+		/* just one navigation value */
+		*n = 1;
+
+		/* get time */
+		time_i[0] = ping->png_date / 10000;
+		time_i[1] = (ping->png_date % 10000) / 100;
+		time_i[2] = ping->png_date % 100;
+		time_i[3] = ping->png_msec / 3600000;
+		time_i[4] = (ping->png_msec % 3600000) / 60000;
+		time_i[5] = (ping->png_msec % 60000) / 1000;
+		time_i[6] = (ping->png_msec % 1000) * 1000;
+		mb_get_time(verbose,time_i,time_d);
+
+		/* get navigation */
+		if (ping->png_longitude != EM2_INVALID_INT)
+		    *navlon = 0.0000001 * ping->png_longitude;
+		else
+		    *navlon = 0.0;
+		if (ping->png_latitude != EM2_INVALID_INT)
+		    *navlat = 0.00000005 * ping->png_latitude;
+		else
+		    *navlat = 0.0;
+
+		/* get heading */
+		*heading = 0.01 * ping->png_heading;
+
+		/* get speed  */
+		if (ping->png_speed != EM2_INVALID_SHORT)
+			*speed = 0.036 * ping->png_speed;
+		else
+			*speed = 0.0;
+
+		/* get draft  */
+		*draft = 0.01 * ping->png_xducer_depth
+				+ 655.36 * ping->png_offset_multiplier;
+
+		/* get roll pitch and heave */
+		*roll = 0.01 * ping->png_roll;
+		*pitch = 0.01 * ping->png_pitch;
+		*heave = 0.01 * ping->png_heave;
+
+		/* done translating values */
+
+		}
+
+	/* extract data from nav structure */
+	else if (*kind == MB_DATA_NAV
+		|| *kind == MB_DATA_NAV1
+		|| *kind == MB_DATA_NAV2
+		|| *kind == MB_DATA_NAV3)
+		{
+                /* get survey data structure */
+		if (store->ping != NULL)
+                	ping = (struct mbsys_simrad2_ping_struct *) store->ping;
+
+		/* just one navigation value */
+		*n = 1;
+
+		/* get time */
+		time_i[0] = store->pos_date / 10000;
+		time_i[1] = (store->pos_date % 10000) / 100;
+		time_i[2] = store->pos_date % 100;
+		time_i[3] = store->pos_msec / 3600000;
+		time_i[4] = (store->pos_msec % 3600000) / 60000;
+		time_i[5] = (store->pos_msec % 60000) / 1000;
+		time_i[6] = (store->pos_msec % 1000) * 1000;
+		mb_get_time(verbose,time_i,time_d);
+
+		/* get navigation */
+		if (store->pos_longitude != EM2_INVALID_INT)
+		    *navlon = 0.0000001 * store->pos_longitude;
+		else
+		    *navlon = 0.0;
+		if (store->pos_latitude != EM2_INVALID_INT)
+		    *navlat = 0.00000005 * store->pos_latitude;
+		else
+		    *navlat = 0.0;
+
+		/* get heading */
+		if (store->pos_heading != EM2_INVALID_SHORT)
+			*heading = 0.01 * store->pos_heading;
+		else
+			*heading = 0.0;
+
+		/* get speed  */
+		if (store->pos_speed != EM2_INVALID_SHORT)
+			*speed = 0.036 * store->pos_speed;
+		else
+			*speed = 0.0;
+
+		/* get draft  */
+		if (store->ping != NULL)
+			*draft = 0.01 * ping->png_xducer_depth
+				+ 655.36 * ping->png_offset_multiplier;
+		else
+			*draft = 0.0;
+
+		/* get roll pitch and heave */
+		*roll = 0.01 * store->pos_roll;
+		*pitch = 0.01 * store->pos_pitch;
+		*heave = 0.01 * store->pos_heave;
+
+		/* done translating values */
+
+		}
+
+	/* extract data from attitude structure */
+	else if (store->type == EM2_ATTITUDE
+		&& store->attitude != NULL)
+		{
+                /* get attitude data structure */
+		attitude = (struct mbsys_simrad2_attitude_struct *) store->attitude;
+
+		/* get n */
+		*n = MIN(attitude->att_ndata, MB_ASYNCH_SAVE_MAX);
+
+		/* get attitude time */
+		atime_i[0] = attitude->att_date / 10000;
+		atime_i[1] = (attitude->att_date % 10000) / 100;
+		atime_i[2] = attitude->att_date % 100;
+		atime_i[3] = attitude->att_msec / 3600000;
+		atime_i[4] = (attitude->att_msec % 3600000) / 60000;
+		atime_i[5] = (attitude->att_msec % 60000) / 1000;
+		atime_i[6] = (attitude->att_msec % 1000) * 1000;
+		mb_get_time(verbose, atime_i, &atime_d);
+
+		/* loop over the data */
+		for (i=0;i<*n;i++)
+			{
+			/* get time from the data record */
+			time_d[i] = (double)(atime_d + 0.001 * attitude->att_time[i]);
+			mb_get_date(verbose,time_d[i],&(time_i[7*i]));
+
+			/* get attitude from the data record */
+			heave[i] = (double)(0.01 * attitude->att_heave[i]);
+			roll[i] = (double)(0.01 * attitude->att_roll[i]);
+			pitch[i] = (double)(0.01 * attitude->att_pitch[i]);
+
+			/* interpolate the heading */
+			mb_hedint_interp(verbose, mbio_ptr, time_d[i],
+				    		&heading[i], &interp_error);
+
+			/* interpolate the navigation */
+			mb_navint_interp(verbose, mbio_ptr, time_d[i], heading[i], 0.0,
+						&navlon[i], &navlat[i], &speed[i], &interp_error);
+
+			/* interpolate the sonar depth */
+			mb_depint_interp(verbose, mbio_ptr, time_d[i], &draft[i], &interp_error);
+			}
+
+		/* done translating values */
+
+		}
+
+
+	/* deal with comment */
+	else if (*kind == MB_DATA_COMMENT)
+		{
+		/* set status */
+		*error = MB_ERROR_COMMENT;
+		status = MB_FAILURE;
+		}
+
+	/* deal with other record type */
+	else
+		{
+		/* set status */
+		*error = MB_ERROR_OTHER;
+		status = MB_FAILURE;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
+		fprintf(stderr,"dbg2       n:          %d\n",*n);
+		for (inav=0;inav<*n;inav++)
+			{
+			for (i=0;i<7;i++)
+				fprintf(stderr,"dbg2       %d time_i[%d]:     %d\n",inav,i,time_i[inav * 7 + i]);
+			fprintf(stderr,"dbg2       %d time_d:        %f\n",inav,time_d[inav]);
+			fprintf(stderr,"dbg2       %d longitude:     %f\n",inav,navlon[inav]);
+			fprintf(stderr,"dbg2       %d latitude:      %f\n",inav,navlat[inav]);
+			fprintf(stderr,"dbg2       %d speed:         %f\n",inav,speed[inav]);
+			fprintf(stderr,"dbg2       %d heading:       %f\n",inav,heading[inav]);
+			fprintf(stderr,"dbg2       %d draft:         %f\n",inav,draft[inav]);
+			fprintf(stderr,"dbg2       %d roll:          %f\n",inav,roll[inav]);
+			fprintf(stderr,"dbg2       %d pitch:         %f\n",inav,pitch[inav]);
+			fprintf(stderr,"dbg2       %d heave:         %f\n",inav,heave[inav]);
+			}
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
 int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_simrad2_extract_nav";
@@ -3808,7 +4055,7 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -3842,7 +4089,7 @@ int mbsys_simrad2_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -3899,7 +4146,7 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get survey data structure */
 		ping = (struct mbsys_simrad2_ping_struct *) store->ping;
-		
+
 		/* get time */
 		ping->png_date = 10000 * time_i[0]
 				    + 100 * time_i[1]
@@ -3910,7 +4157,7 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 				    + 0.001 * time_i[6];
 		store->msec = ping->png_msec;
 		store->date = ping->png_date;
-		
+
 		/* get navigation */
 		if (navlon < -180.0)
 			navlon += 360.0;
@@ -3927,7 +4174,7 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get draft  */
 		ping->png_offset_multiplier = (int)floor(draft / 655.36);
-		ping->png_xducer_depth 
+		ping->png_xducer_depth
 			= 100 * (draft - 655.36 * ping->png_offset_multiplier);
 
 		/* get roll pitch and heave */
@@ -3953,7 +4200,7 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 				    + 0.001 * time_i[6];
 		store->msec = store->pos_msec;
 		store->date = store->pos_date;
-		
+
 		/* get navigation */
 		if (navlon < -180.0)
 			navlon += 360.0;
@@ -3972,13 +4219,13 @@ int mbsys_simrad2_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		store->pos_roll = (int) rint(roll / 0.01);
 		store->pos_pitch = (int) rint(pitch / 0.01);
 		store->pos_heave = (int) rint(heave / 0.01);
-		
+
 		/* set "active" flag if needed */
 		if (store->kind == MB_DATA_NAV)
 		    {
 		    store->pos_system = store->pos_system | 128;
 		    }
-		
+
 		/* set secondary nav flag if needed */
 		else if (store->kind == MB_DATA_NAV1)
 		    {
@@ -4044,7 +4291,7 @@ int mbsys_simrad2_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		*nsvp = store->svp_num;
-		
+
 		/* get profile */
 		for (i=0;i<*nsvp;i++)
 			{
@@ -4127,7 +4374,7 @@ int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get number of depth-velocity pairs */
 		store->svp_num = MIN(nsvp, MBSYS_SIMRAD2_MAXSVP);
 		store->svp_depth_res = 1;
-		
+
 		/* get profile */
 		for (i=0;i<store->svp_num;i++)
 			{
@@ -4150,7 +4397,7 @@ int mbsys_simrad2_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_simrad2_copy(int verbose, void *mbio_ptr, 
+int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -4193,9 +4440,9 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 	/* get data structure pointers */
 	store = (struct mbsys_simrad2_struct *) store_ptr;
 	copy = (struct mbsys_simrad2_struct *) copy_ptr;
-	
+
 	/* check if survey data needs to be copied */
-	if (store->kind == MB_DATA_DATA 
+	if (store->kind == MB_DATA_DATA
 		&& store->ping != NULL)
 		{
 		/* make sure a survey data structure exists to
@@ -4206,13 +4453,13 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 					verbose,mbio_ptr,
 					copy_ptr,error);
 			}
-			
+
 		/* save pointer value */
 		ping_save = (char *)copy->ping;
 		}
 	else
 		ping_save = NULL;
-	
+
 	/* check if attitude data needs to be copied */
 	if (store->attitude != NULL)
 		{
@@ -4224,11 +4471,11 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 					verbose,mbio_ptr,
 					copy_ptr,error);
 			}
-			
+
 		/* save pointer value */
 		attitude_save = (char *)copy->attitude;
 		}
-	
+
 	/* check if heading data needs to be copied */
 	if (store->heading != NULL)
 		{
@@ -4240,11 +4487,11 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 					verbose,mbio_ptr,
 					copy_ptr,error);
 			}
-			
+
 		/* save pointer value */
 		heading_save = (char *)copy->heading;
 		}
-	
+
 	/* check if ssv data needs to be copied */
 	if (store->ssv != NULL)
 		{
@@ -4256,11 +4503,11 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 					verbose,mbio_ptr,
 					copy_ptr,error);
 			}
-			
+
 		/* save pointer value */
 		ssv_save = (char *)copy->ssv;
 		}
-	
+
 	/* check if tilt data needs to be copied */
 	if (store->tilt != NULL)
 		{
@@ -4272,17 +4519,17 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 					verbose,mbio_ptr,
 					copy_ptr,error);
 			}
-			
+
 		/* save pointer value */
 		tilt_save = (char *)copy->tilt;
 		}
 
 	/* copy the main structure */
 	*copy = *store;
-	
+
 	/* if needed copy the survey data structure */
-	if (store->kind == MB_DATA_DATA 
-		&& store->ping != NULL 
+	if (store->kind == MB_DATA_DATA
+		&& store->ping != NULL
 		&& status == MB_SUCCESS)
 		{
 		copy->ping = (struct mbsys_simrad2_ping_struct *) ping_save;
@@ -4292,7 +4539,7 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 		}
 	else
 		copy->ping = NULL;
-	
+
 	/* if needed copy the attitude data structure */
 	if (store->attitude != NULL && status == MB_SUCCESS)
 		{
@@ -4301,7 +4548,7 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 		attitude_copy = (struct mbsys_simrad2_attitude_struct *) copy->attitude;
 		*attitude_copy = *attitude_store;
 		}
-	
+
 	/* if needed copy the heading data structure */
 	if (store->heading != NULL && status == MB_SUCCESS)
 		{
@@ -4310,7 +4557,7 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 		heading_copy = (struct mbsys_simrad2_heading_struct *) copy->heading;
 		*heading_copy = *heading_store;
 		}
-	
+
 	/* if needed copy the ssv data structure */
 	if (store->ssv != NULL && status == MB_SUCCESS)
 		{
@@ -4319,7 +4566,7 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 		ssv_copy = (struct mbsys_simrad2_ssv_struct *) copy->ssv;
 		*ssv_copy = *ssv_store;
 		}
-	
+
 	/* if needed copy the tilt data structure */
 	if (store->tilt != NULL && status == MB_SUCCESS)
 		{
@@ -4344,9 +4591,9 @@ int mbsys_simrad2_copy(int verbose, void *mbio_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
-		int pixel_size_set, double *pixel_size, 
-		int swath_width_set, double *swath_width, 
-		int pixel_int, 
+		int pixel_size_set, double *pixel_size,
+		int swath_width_set, double *swath_width,
+		int pixel_int,
 		int *error)
 {
 	char	*function_name = "mbsys_simrad2_makess";
@@ -4432,21 +4679,21 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    }
 
 		/* get raw pixel size */
-		if (store->sonar == MBSYS_SIMRAD2_EM120 
-		    || store->sonar == MBSYS_SIMRAD2_EM300 
-		    || store->sonar == MBSYS_SIMRAD2_EM1002 
-		    || store->sonar == MBSYS_SIMRAD2_EM2000 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000 
+		if (store->sonar == MBSYS_SIMRAD2_EM120
+		    || store->sonar == MBSYS_SIMRAD2_EM300
+		    || store->sonar == MBSYS_SIMRAD2_EM1002
+		    || store->sonar == MBSYS_SIMRAD2_EM2000
+		    || store->sonar == MBSYS_SIMRAD2_EM3000
 		    || store->sonar == MBSYS_SIMRAD2_EM710)
 		    ss_spacing = 750.0 / ping->png_sample_rate;
-		else if (store->sonar == MBSYS_SIMRAD2_EM3000D_1 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_2 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_3 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_4 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_5 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_8 
+		else if (store->sonar == MBSYS_SIMRAD2_EM3000D_1
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_2
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_3
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_4
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_5
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_6
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_8
 		    || store->sonar == MBSYS_SIMRAD2_EM3002)
 		    ss_spacing = 750.0 / 14000;
 		else if (store->sonar == MBSYS_SIMRAD2_EM12S
@@ -4473,18 +4720,18 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    {
 		    if (mb_beam_ok(ping->png_beamflag[i]))
 			{
-			bathsort[nbathsort] = depthscale 
+			bathsort[nbathsort] = depthscale
 				* ping->png_depth[i]
 				    + depthoffset;
 			nbathsort++;
 			}
 		    }
-	
+
 		/* get sidescan pixel size */
 		if (swath_width_set == MB_NO
 		    && nbathsort > 0)
 		    {
-		    (*swath_width) = 2.5 + MAX(90.0 - 0.01 * ping->png_depression[0], 
+		    (*swath_width) = 2.5 + MAX(90.0 - 0.01 * ping->png_depression[0],
 				    90.0 - 0.01 * ping->png_depression[ping->png_nbeams-1]);
 		    (*swath_width) = MAX((*swath_width), 60.0);
 		    }
@@ -4492,7 +4739,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    && nbathsort > 0)
 		    {
 		    qsort((char *)bathsort, nbathsort, sizeof(double),(void *)mb_double_compare);
-		    pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2] 
+		    pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2]
 					/ MBSYS_SIMRAD2_MAXPIXELS;
 		    pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
 		    if ((*pixel_size) <= 0.0)
@@ -4504,10 +4751,10 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    else
 			(*pixel_size) = pixel_size_calc;
 		    }
-		    
+
 		/* get pixel interpolation */
 		pixel_int_use = pixel_int + 1;
-		
+
 		/* check that sidescan can be used */
 		/* get times of bath and sidescan records */
 		time_i[0] = ping->png_date / 10000;
@@ -4533,7 +4780,7 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    ss_ok = MB_NO;
 		    if (verbose > 0)
 			    fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
-				    function_name, time_i[0], time_i[1], time_i[2], 
+				    function_name, time_i[0], time_i[1], time_i[2],
 				    time_i[3], time_i[4], time_i[5], time_i[6],
 				    ping->png_nbeams, ping->png_nbeams_ss);
 		    }
@@ -4541,21 +4788,21 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 		    {
 		    for (i=0;i<ping->png_nbeams;i++)
 			{
-			if (ping->png_beam_num[i] != 
+			if (ping->png_beam_num[i] !=
 				ping->png_beam_index[i] + 1
-			    && ping->png_beam_num[i] != 
+			    && ping->png_beam_num[i] !=
 				ping->png_beam_index[i] - 1)
 			    {
 		    	    ss_ok = MB_NO;
 			    if (verbose > 0)
 				    fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: bath and ss beam indexes don't match: : %d %d %d\n",
-					    function_name, time_i[0], time_i[1], time_i[2], 
+					    function_name, time_i[0], time_i[1], time_i[2],
 					    time_i[3], time_i[4], time_i[5], time_i[6],
 					    i, ping->png_beam_num[i], ping->png_beam_index[i]);
 			    }
 			}
 		    }
-		
+
 
 		/* loop over raw sidescan, putting each raw pixel into
 			the binning arrays */
@@ -4578,9 +4825,9 @@ int mbsys_simrad2_makess(int verbose, void *mbio_ptr, void *store_ptr,
 				    ss_spacing_use = beam_foot / ping->png_beam_samples[i];
 				else
 				    ss_spacing_use = ss_spacing / sint;
-/*fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n", 
-ss_spacing, ss_spacing_use, 
-ping->png_beam_samples[i], sint, angle, range, beam_foot, 
+/*fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
+ss_spacing, ss_spacing_use,
+ping->png_beam_samples[i], sint, angle, range, beam_foot,
 ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 				}
 			    for (k=0;k<ping->png_beam_samples[i];k++)
@@ -4592,7 +4839,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 					    {
 					    xtrackss = xtrack;
 					    }
-					else if (i == ping->png_nbeams_ss - 1 
+					else if (i == ping->png_nbeams_ss - 1
 					    || (k <= ping->png_center_sample[i]
 						&& i != 0))
 					    {
@@ -4628,12 +4875,12 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 					    }
 					xtrackss = xtrack
 						    + ss_spacing_use * (k - ping->png_center_sample[i]);
-					kk = MBSYS_SIMRAD2_MAXPIXELS / 2 
+					kk = MBSYS_SIMRAD2_MAXPIXELS / 2
 					    + (int)(xtrackss / (*pixel_size));
 					if (kk > 0 && kk < MBSYS_SIMRAD2_MAXPIXELS)
 					    {
 					    ss[kk]  += reflscale*((double)beam_ss[k]);
-					    ssalongtrack[kk] 
+					    ssalongtrack[kk]
 						    += daloscale * ping->png_alongtrack[i];
 					    ss_cnt[kk]++;
 					    }
@@ -4641,7 +4888,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 				}
 			    }
 			}
-			
+
 		/* average the sidescan */
 		first = MBSYS_SIMRAD2_MAXPIXELS;
 		last = -1;
@@ -4651,16 +4898,16 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 				{
 				ss[k] /= ss_cnt[k];
 				ssalongtrack[k] /= ss_cnt[k];
-				ssacrosstrack[k] 
+				ssacrosstrack[k]
 					= (k - MBSYS_SIMRAD2_MAXPIXELS / 2)
 						* (*pixel_size);
 				first = MIN(first, k);
 				last = k;
 				}
 			else
-				ss[k] = MB_SIDESCAN_NULL;	
+				ss[k] = MB_SIDESCAN_NULL;
 			}
-			
+
 		/* interpolate the sidescan */
 		k1 = first;
 		k2 = first;
@@ -4679,7 +4926,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 			    ss[k] = ss[k1]
 				+ (ss[k2] - ss[k1])
 				    * ((double)(k - k1)) / ((double)(k2 - k1));
-			    ssacrosstrack[k] 
+			    ssacrosstrack[k]
 				    = (k - MBSYS_SIMRAD2_MAXPIXELS / 2)
 					    * (*pixel_size);
 			    ssalongtrack[k] = ssalongtrack[k1]
@@ -4692,19 +4939,19 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 			k1 = k;
 			}
 		    }
-			
+
 		/* insert the new sidescan into store */
 		ping->png_pixel_size = (int) (100 * (*pixel_size));
 		if (last > first)
 		    ping->png_pixels_ss = MBSYS_SIMRAD2_MAXPIXELS;
-		else 
+		else
 		    ping->png_pixels_ss = 0;
 		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
 		    {
 		    if (ss[i] > MB_SIDESCAN_NULL)
 		    	{
 		    	ping->png_ss[i] = (short)(100 * ss[i]);
-		    	ping->png_ssalongtrack[i] 
+		    	ping->png_ssalongtrack[i]
 			    	= (short)(ssalongtrack[i] / daloscale);
 			}
 		    else
@@ -4779,21 +5026,21 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 		    }
 
 		/* get raw pixel size */
-		if (store->sonar == MBSYS_SIMRAD2_EM120 
-		    || store->sonar == MBSYS_SIMRAD2_EM300 
-		    || store->sonar == MBSYS_SIMRAD2_EM1002 
-		    || store->sonar == MBSYS_SIMRAD2_EM2000 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000 
+		if (store->sonar == MBSYS_SIMRAD2_EM120
+		    || store->sonar == MBSYS_SIMRAD2_EM300
+		    || store->sonar == MBSYS_SIMRAD2_EM1002
+		    || store->sonar == MBSYS_SIMRAD2_EM2000
+		    || store->sonar == MBSYS_SIMRAD2_EM3000
 		    || store->sonar == MBSYS_SIMRAD2_EM710)
 		    ss_spacing = 750.0 / ping->png_sample_rate;
-		else if (store->sonar == MBSYS_SIMRAD2_EM3000D_1 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_2 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_3 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_4 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_5 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_6 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7 
-		    || store->sonar == MBSYS_SIMRAD2_EM3000D_8 
+		else if (store->sonar == MBSYS_SIMRAD2_EM3000D_1
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_2
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_3
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_4
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_5
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_6
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_7
+		    || store->sonar == MBSYS_SIMRAD2_EM3000D_8
 		    || store->sonar == MBSYS_SIMRAD2_EM3002)
 		    ss_spacing = 750.0 / 14000;
 		else if (store->sonar == MBSYS_SIMRAD2_EM12S
@@ -4820,18 +5067,18 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 		    {
 		    if (mb_beam_ok(ping->png_beamflag[i]))
 			{
-			bathsort[nbathsort] = depthscale 
+			bathsort[nbathsort] = depthscale
 				* ping->png_depth[i]
 				    + depthoffset;
 			nbathsort++;
 			}
 		    }
-	
+
 		/* get sidescan pixel size */
 		if (swath_width_set == MB_NO
 		    && nbathsort > 0)
 		    {
-		    (*swath_width) = 2.5 + MAX(90.0 - 0.01 * ping->png_depression[0], 
+		    (*swath_width) = 2.5 + MAX(90.0 - 0.01 * ping->png_depression[0],
 				    90.0 - 0.01 * ping->png_depression[ping->png_nbeams-1]);
 		    (*swath_width) = MAX((*swath_width), 60.0);
 		    }
@@ -4839,7 +5086,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 		    && nbathsort > 0)
 		    {
 		    qsort((char *)bathsort, nbathsort, sizeof(double),(void *)mb_double_compare);
-		    pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2] 
+		    pixel_size_calc = 2 * tan(DTR * (*swath_width)) * bathsort[nbathsort/2]
 					/ MBSYS_SIMRAD2_MAXPIXELS;
 		    pixel_size_calc = MAX(pixel_size_calc, bathsort[nbathsort/2] * sin(DTR * 0.1));
 		    if ((*pixel_size) <= 0.0)
@@ -4851,10 +5098,10 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 		    else
 			(*pixel_size) = pixel_size_calc;
 		    }
-		    
+
 		/* get pixel interpolation */
 		pixel_int_use = pixel_int + 1;
-		
+
 		/* check that sidescan can be used */
 		/* get times of bath and sidescan records */
 		time_i[0] = ping->png_date / 10000;
@@ -4880,7 +5127,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 		    ss_ok = MB_NO;
 		    if (verbose > 0)
 			    fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: num bath beams != num ss beams: %d %d\n",
-				    function_name, time_i[0], time_i[1], time_i[2], 
+				    function_name, time_i[0], time_i[1], time_i[2],
 				    time_i[3], time_i[4], time_i[5], time_i[6],
 				    ping->png_nbeams, ping->png_nbeams_ss);
 		    }
@@ -4888,21 +5135,21 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 		    {
 		    for (i=0;i<ping->png_nbeams;i++)
 			{
-			if (ping->png_beam_num[i] != 
+			if (ping->png_beam_num[i] !=
 				ping->png_beam_index[i] + 1
-			    && ping->png_beam_num[i] != 
+			    && ping->png_beam_num[i] !=
 				ping->png_beam_index[i] - 1)
 			    {
 		    	    ss_ok = MB_NO;
 			    if (verbose > 0)
 				    fprintf(stderr,"%s: %4.4d/%2.2d/%2.2d %2.2d:%2.2d:%2.2d.%6.6d Sidescan ignored: bath and ss beam indexes don't match: : %d %d %d\n",
-					    function_name, time_i[0], time_i[1], time_i[2], 
+					    function_name, time_i[0], time_i[1], time_i[2],
 					    time_i[3], time_i[4], time_i[5], time_i[6],
 					    i, ping->png_beam_num[i], ping->png_beam_index[i]);
 			    }
 			}
 		    }
-		
+
 
 		/* loop over raw sidescan, putting each raw pixel into
 			the binning arrays */
@@ -4925,9 +5172,9 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 				    ss_spacing_use = beam_foot / ping->png_beam_samples[i];
 				else
 				    ss_spacing_use = ss_spacing / sint;
-/*fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n", 
-ss_spacing, ss_spacing_use, 
-ping->png_beam_samples[i], sint, angle, range, beam_foot, 
+/*fprintf(stderr, "spacing: %f %f n:%d sint:%f angle:%f range:%f foot:%f factor:%f\n",
+ss_spacing, ss_spacing_use,
+ping->png_beam_samples[i], sint, angle, range, beam_foot,
 ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 				}
 			    for (k=0;k<ping->png_beam_samples[i];k++)
@@ -4939,7 +5186,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 					    {
 					    xtrackss = xtrack;
 					    }
-					else if (i == ping->png_nbeams_ss - 1 
+					else if (i == ping->png_nbeams_ss - 1
 					    || (k <= ping->png_center_sample[i]
 						&& i != 0))
 					    {
@@ -4975,12 +5222,12 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 					    }
 					xtrackss = xtrack
 						    + ss_spacing_use * (k - ping->png_center_sample[i]);
-					kk = MBSYS_SIMRAD2_MAXPIXELS / 2 
+					kk = MBSYS_SIMRAD2_MAXPIXELS / 2
 					    + (int)(xtrackss / (*pixel_size));
 					if (kk > 0 && kk < MBSYS_SIMRAD2_MAXPIXELS)
 					    {
 					    ss[kk]  += reflscale*((double)beam_ss[k]);
-					    ssalongtrack[kk] 
+					    ssalongtrack[kk]
 						    += daloscale * ping->png_alongtrack[i];
 					    ss_cnt[kk]++;
 					    }
@@ -4988,7 +5235,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 				}
 			    }
 			}
-			
+
 		/* average the sidescan */
 		first = MBSYS_SIMRAD2_MAXPIXELS;
 		last = -1;
@@ -4998,16 +5245,16 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 				{
 				ss[k] /= ss_cnt[k];
 				ssalongtrack[k] /= ss_cnt[k];
-				ssacrosstrack[k] 
+				ssacrosstrack[k]
 					= (k - MBSYS_SIMRAD2_MAXPIXELS / 2)
 						* (*pixel_size);
 				first = MIN(first, k);
 				last = k;
 				}
 			else
-				ss[k] = MB_SIDESCAN_NULL;	
+				ss[k] = MB_SIDESCAN_NULL;
 			}
-			
+
 		/* interpolate the sidescan */
 		k1 = first;
 		k2 = first;
@@ -5026,7 +5273,7 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 			    ss[k] = ss[k1]
 				+ (ss[k2] - ss[k1])
 				    * ((double)(k - k1)) / ((double)(k2 - k1));
-			    ssacrosstrack[k] 
+			    ssacrosstrack[k]
 				    = (k - MBSYS_SIMRAD2_MAXPIXELS / 2)
 					    * (*pixel_size);
 			    ssalongtrack[k] = ssalongtrack[k1]
@@ -5039,19 +5286,19 @@ ping->png_beam_samples[i] * ss_spacing / beam_foot);*/
 			k1 = k;
 			}
 		    }
-			
+
 		/* insert the new sidescan into store */
 		ping->png_pixel_size = (int) (100 * (*pixel_size));
 		if (last > first)
 		    ping->png_pixels_ss = MBSYS_SIMRAD2_MAXPIXELS;
-		else 
+		else
 		    ping->png_pixels_ss = 0;
 		for (i=0;i<MBSYS_SIMRAD2_MAXPIXELS;i++)
 		    {
 		    if (ss[i] > MB_SIDESCAN_NULL)
 		    	{
 		    	ping->png_ss[i] = (short)(100 * ss[i]);
-		    	ping->png_ssalongtrack[i] 
+		    	ping->png_ssalongtrack[i]
 			    	= (short)(ssalongtrack[i] / daloscale);
 			}
 		    else

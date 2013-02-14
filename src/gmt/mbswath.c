@@ -355,16 +355,16 @@ unsigned char r, g, b, gray;
 
 int get_footprints(int verbose, int mode, int fp_mode,
 		double factor, double depth_def,
-		struct swath *swath, 
+		struct swath *swath,
 		double mtodeglon, double mtodeglat, int *error);
 int get_shading(int verbose, int mode, int ampshademode, struct swath *swath,
 		double mtodeglon, double mtodeglat,
 		double magnitude, double azimuth,
-		int nshadelevel, double *shadelevel, 
+		int nshadelevel, double *shadelevel,
 		int *shadelevelgray, int *error);
 int plot_data_footprint(int verbose, int mode,
 		struct swath *swath, int first, int nplot, int *error);
-int plot_data_point(int verbose, int mode, 
+int plot_data_point(int verbose, int mode,
 		struct swath *swath, int first, int nplot, int *error);
 int plot_box(int verbose, double *x, double *y, int *rgb, int *error);
 int plot_point(int verbose, double x, double y, int *rgb, int *error);
@@ -535,18 +535,18 @@ int main (int argc, char **argv)
 			  argv_gmt[argc_gmt] = argv[i];
 			  argc_gmt++;
 			  break;
-			  }    
+			  }
 		}
 	    }
 	  }
 
 	/* deal with mb options */
 	while ((c = getopt(argc, argv, "A:a:B:b:C:c:D:d:E:e:F:f:G:g:HhI:i:J:j:KkL:l:MN:n:OPp:Q:R:r:S:s:T:t:UuVvWwX:x:Y:y:Z:z:012")) != -1)
-	  switch (c) 
+	  switch (c)
 		{
 		case 'A':
 		case 'a':
-			sscanf (optarg,"%lf/%d/%lf", &rawfactor, 
+			sscanf (optarg,"%lf/%d/%lf", &rawfactor,
 				&footprint_mode, &default_depth);
 			flag++;
 			break;
@@ -669,14 +669,14 @@ int main (int argc, char **argv)
 
 	/* deal with gmt options */
 	argc = GMT_begin (argc_gmt, argv_gmt);
-	for (i = 1; i < argc_gmt; i++) 
+	for (i = 1; i < argc_gmt; i++)
 		{
-		if (argv_gmt[i][0] == '-') 
+		if (argv_gmt[i][0] == '-')
 			{
-			switch (argv_gmt[i][1]) 
+			switch (argv_gmt[i][1])
 				{
 				/* Common parameters */
-			
+
 				case 'B':
 				case 'J':
 				case 'K':
@@ -691,19 +691,19 @@ int main (int argc, char **argv)
 				case 'y':
 				case 'c':
 				case '\0':
-					errflg += GMT_get_common_args (argv_gmt[i], 
-						&borders[0], &borders[1], 
+					errflg += GMT_get_common_args (argv_gmt[i],
+						&borders[0], &borders[1],
 						&borders[2], &borders[3]);
 					break;
-				
+
 				/* Supplemental parameters */
-			
+
 				case 'C':
 					strcpy(cptfile,&argv_gmt[i][2]);
 					break;
 				case 'F':
-					if (GMT_getrgb (&argv_gmt[i][2], 
-						gmtdefs.basemap_frame_rgb)) 
+					if (GMT_getrgb (&argv_gmt[i][2],
+						gmtdefs.basemap_frame_rgb))
 						{
 #ifdef GMT_4_1_2
 						GMT_pen_syntax ('F');
@@ -802,7 +802,7 @@ int main (int argc, char **argv)
 		fprintf(stderr,"\nusage: %s\n", usage_message);
 		exit(error);
 		}
-	
+
 	/* turn on looking for filtered amp or sidescan if needed */
 	if (usefiltered == MB_YES)
 		{
@@ -831,9 +831,9 @@ int main (int argc, char **argv)
 		}
 
 	/* if borders not specified then quit */
-	if (borders_use[0] >= borders_use[1] 
+	if (borders_use[0] >= borders_use[1]
 		|| borders_use[2] >= borders_use[3]
-		|| borders_use[2] <= -90.0 
+		|| borders_use[2] <= -90.0
 		|| borders_use[3] >= 90.0)
 		{
 		fprintf(stderr,"\nRegion borders not properly specified:\n\t%f %f %f %f\n",borders[0],borders[1],borders[2],borders[3]);
@@ -842,7 +842,7 @@ int main (int argc, char **argv)
 		error = MB_ERROR_BAD_PARAMETER;
 		exit(error);
 		}
-	
+
 	/* set lonflip if possible */
 	if (lonflip_set == MB_NO)
 		{
@@ -858,15 +858,15 @@ int main (int argc, char **argv)
 
 	/* set bounds for data reading larger than
 		map borders */
-	bounds[0] = borders_use[0] 
+	bounds[0] = borders_use[0]
 		- 0.25*(borders_use[1] - borders_use[0]);
-	bounds[1] = borders_use[1] 
+	bounds[1] = borders_use[1]
 		+ 0.25*(borders_use[1] - borders_use[0]);
-	bounds[2] = borders_use[2] 
+	bounds[2] = borders_use[2]
 		- 0.25*(borders_use[3] - borders_use[2]);
-	bounds[3] = borders_use[3] 
+	bounds[3] = borders_use[3]
 		+ 0.25*(borders_use[3] - borders_use[2]);
-	
+
 	/* set up map */
 	GMT_map_setup(borders[0],borders[1],borders[2],borders[3]);
 
@@ -876,7 +876,7 @@ int main (int argc, char **argv)
 
 	/* get color palette file */
 	GMT_read_cpt(cptfile);
-	if (GMT_gray || GMT_b_and_w) 
+	if (GMT_gray || GMT_b_and_w)
 		image = MBSWATH_IMAGE_8;
 	if (GMT_n_colors <= 0)
 		{
@@ -929,17 +929,17 @@ int main (int argc, char **argv)
 		while (fgets(line,MB_PATH_MAXLINE,fp) != NULL)
 			{
 			count = sscanf(line,"%lf %d %d %d %lf %d %d %d",
-				&shadelevel[nshadelevel], &r1, &g1, &b1, 
+				&shadelevel[nshadelevel], &r1, &g1, &b1,
 				&shadelevel[nshadelevel+1], &r2, &g2, &b2);
 			shadelevelgray[nshadelevel] = (int)(r1 + g1 + b1)/3;
-			shadelevelgray[nshadelevel] = 
+			shadelevelgray[nshadelevel] =
 				MIN(255, shadelevelgray[nshadelevel]);
-			shadelevelgray[nshadelevel] = 
+			shadelevelgray[nshadelevel] =
 				MAX(0, shadelevelgray[nshadelevel]);
 			shadelevelgray[nshadelevel+1] = (int)(r2 + g2 + b2)/3;
-			shadelevelgray[nshadelevel+1] = 
+			shadelevelgray[nshadelevel+1] =
 				MIN(255, shadelevelgray[nshadelevel+1]);
-			shadelevelgray[nshadelevel+1] = 
+			shadelevelgray[nshadelevel+1] =
 				MAX(0, shadelevelgray[nshadelevel+1]);
 			if (count == 8)
 				nshadelevel++;
@@ -990,7 +990,7 @@ int main (int argc, char **argv)
 					(void **)&bitimage, &error);
 
 			/* set image to background color */
-			gray = YIQ (gmtdefs.page_rgb); 
+			gray = YIQ (gmtdefs.page_rgb);
 			for (j=0;j<nm;j++)
 				bitimage[j] = gray;
 			}
@@ -1002,7 +1002,7 @@ int main (int argc, char **argv)
 
 			/* set image to background color */
 			j = 0;
-			while (j < 3*nm) 
+			while (j < 3*nm)
 				{
 				bitimage[j++] = gmtdefs.page_rgb[0];
 				bitimage[j++] = gmtdefs.page_rgb[1];
@@ -1046,12 +1046,12 @@ int main (int argc, char **argv)
 	    }
 
 	/* loop over files in file list */
-	if (verbose == 1) 
+	if (verbose == 1)
 		fprintf(stderr,"\n");
 	while (read_data == MB_YES)
 	    {
 	    /* check for mbinfo file - get file bounds if possible */
-	    status = mb_check_info(verbose, file, lonflip, borders_use, 
+	    status = mb_check_info(verbose, file, lonflip, borders_use,
 			    &file_in_bounds, &error);
 	    if (status == MB_FAILURE)
 		    {
@@ -1069,7 +1069,7 @@ int main (int argc, char **argv)
 		    {
 		    mb_get_fbt(verbose, file, &format, &error);
 		    }
-		    
+
 		/* check for filtered amplitude or sidescan file */
 		if (filtermode == MBSWATH_FILTER_AMP)
 		    {
@@ -1097,7 +1097,7 @@ int main (int argc, char **argv)
 			exit(error);
 			}
 		    }
-	    
+
 		/* call mb_read_init() */
 		if ((status = mb_read_init(
 		    verbose,file,format,pings,lonflip,bounds,
@@ -1112,10 +1112,10 @@ int main (int argc, char **argv)
 			    program_name);
 		    exit(error);
 		    }
-    
+
 		/* get fore-aft beam_width */
-		status = mb_format_beamwidth(verbose, &format, 
-				&beamwidth_xtrack, &beamwidth_ltrack, 
+		status = mb_format_beamwidth(verbose, &format,
+				&beamwidth_xtrack, &beamwidth_ltrack,
 				&error);
 		if (beamwidth_ltrack <= 0.0)
 			beamwidth_ltrack = 2.0;
@@ -1123,14 +1123,14 @@ int main (int argc, char **argv)
 		    factor = rawfactor*pings*beamwidth_ltrack;
 		else
 		    factor = rawfactor;
-		    
+
 		/* set default depth, checking for deep-tow data */
 		if ((format == 111 || format == 112)
 		    && default_depth <= 0.0)
 		    default_depth_use = 100.0;
 		else
 		    default_depth_use = default_depth;
-    
+
 		/* allocate memory for data arrays */
 		status = mb_mallocd(verbose, __FILE__, __LINE__, sizeof(struct swath),
 				(void **)&swath_plot, &error);
@@ -1170,31 +1170,31 @@ int main (int argc, char **argv)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							    sizeof(double), (void **)&(pingcur->bathlat), &error);
 		    if (error == MB_ERROR_NO_ERROR)
-			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							    sizeof(double), (void **)&(pingcur->ss), &error);
 		    if (error == MB_ERROR_NO_ERROR)
-			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							    sizeof(double), (void **)&(pingcur->sslon), &error);
 		    if (error == MB_ERROR_NO_ERROR)
-			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							    sizeof(double), (void **)&(pingcur->sslat), &error);
 		    if (error == MB_ERROR_NO_ERROR)
-			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							    sizeof(int), (void **)&(pingcur->bathflag), &error);
 		    if (error == MB_ERROR_NO_ERROR)
-			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, 
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							    sizeof(struct footprint), (void **)&(pingcur->bathfoot), &error);
 		    if (error == MB_ERROR_NO_ERROR)
-			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							    sizeof(int), (void **)&(pingcur->ssflag), &error);
 		    if (error == MB_ERROR_NO_ERROR)
-			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN, 
+			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_SIDESCAN,
 							    sizeof(struct footprint), (void **)&(pingcur->ssfoot), &error);
 		    if (error == MB_ERROR_NO_ERROR)
 			    status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY,
 							    sizeof(double), (void **)&(pingcur->bathshade), &error);
 		    }
-    
+
 		/* if error initializing memory then quit */
 		if (error != MB_ERROR_NO_ERROR)
 		    {
@@ -1204,13 +1204,13 @@ int main (int argc, char **argv)
 			    program_name);
 		    exit(error);
 		    }
-    
+
 		/* print message */
-		if (verbose >= 2) 
+		if (verbose >= 2)
 		    fprintf(stderr,"\n");
 		if (verbose >= 1)
 		    fprintf(stderr,"processing data in %s...\n",file);
-    
+
 		/* loop over reading */
 		*npings = 0;
 		start = MB_YES;
@@ -1259,35 +1259,35 @@ int main (int argc, char **argv)
 				    status);
 			    for (i=0;i<pingcur->beams_bath;i++)
 				    {
-				    fprintf(stderr, "bath[%4d]:  %3d  %f  %f  %f\n", 
+				    fprintf(stderr, "bath[%4d]:  %3d  %f  %f  %f\n",
 					    i, beamflag[i], bath[i], bathlon[i], bathlat[i]);
 				    }
 			    for (i=0;i<pingcur->beams_amp;i++)
 				    {
-				    fprintf(stderr, "amp[%4d]:  %f  %f  %f\n", 
+				    fprintf(stderr, "amp[%4d]:  %f  %f  %f\n",
 					    i, amp[i], bathlon[i], bathlat[i]);
 				    }
 			    for (i=0;i<pingcur->pixels_ss;i++)
 				    {
-				    fprintf(stderr, "ss[%4d]:  %f  %f  %f\n", 
+				    fprintf(stderr, "ss[%4d]:  %f  %f  %f\n",
 					    i, ss[i], sslon[i], sslat[i]);
 				    }
 			    }
-			    
+
 		    /* ignore time gaps */
 		    if (error == MB_ERROR_TIME_GAP)
 		    	    {
 			    error = MB_ERROR_NO_ERROR;
 			    status = MB_SUCCESS;
 			    }
-    
+
 		    /* update bookkeeping */
 		    if (error == MB_ERROR_NO_ERROR)
 			    {
 			    nping_read += pingcur->pings;
 			    (*npings)++;
 			    }
-    
+
 		    /* scale amplitudes if necessary */
 		    if (error == MB_ERROR_NO_ERROR
 			    && (mode == MBSWATH_BATH_AMP
@@ -1324,7 +1324,7 @@ int main (int argc, char **argv)
 					}
 				    }
 			    }
-    
+
 		    /* scale bathymetry if necessary */
 		    if (error == MB_ERROR_NO_ERROR
 			    && bathy_in_feet == MB_YES)
@@ -1334,7 +1334,7 @@ int main (int argc, char **argv)
 				    bath[i] = 3.2808399 * bath[i];
 				    }
 			    }
-    
+
 		    /* scale sidescan if necessary */
 		    if (error == MB_ERROR_NO_ERROR
 			    && mode == MBSWATH_SS
@@ -1370,14 +1370,14 @@ int main (int argc, char **argv)
 					}
 				    }
 			    }
-    
-		    /* decide whether to plot, whether to 
+
+		    /* decide whether to plot, whether to
 			    save the new ping, and if done */
-		    plot = MB_NO; 
+		    plot = MB_NO;
 		    flush = MB_NO;
 		    if (*npings >= MAXPINGS)
 			    plot = MB_YES;
-		    if (*npings > 0 
+		    if (*npings > 0
 			    && (error > MB_ERROR_NO_ERROR
 			    || error == MB_ERROR_TIME_GAP
 			    || error == MB_ERROR_OUT_BOUNDS
@@ -1392,28 +1392,28 @@ int main (int argc, char **argv)
 			    save_new = MB_YES;
 		    if (error > MB_ERROR_NO_ERROR)
 			    done = MB_YES;
-    
+
 		    /* if enough pings read in, plot them */
 		    if (plot == MB_YES)
 			    {
 			    /* get footprint locations */
 			    if (footprint_mode != MBSWATH_FOOTPRINT_POINT)
 			    status = get_footprints(verbose,mode,
-				    footprint_mode,factor,default_depth_use, 
+				    footprint_mode,factor,default_depth_use,
 				    swath_plot,mtodeglon,mtodeglat,&error);
 
 
 			    /* get shading */
-			    if (mode == MBSWATH_BATH_RELIEF 
+			    if (mode == MBSWATH_BATH_RELIEF
 				    || mode == MBSWATH_BATH_AMP)
 				    status = get_shading(verbose,
 				    	    mode,ampshademode,swath_plot,
 					    mtodeglon,mtodeglat,
 					    magnitude,azimuth,
-					    nshadelevel, shadelevel, 
+					    nshadelevel, shadelevel,
 					    shadelevelgray,
 					    &error);
-    
+
 			    /* plot data */
 			    if (start == MB_YES)
 				    {
@@ -1431,7 +1431,7 @@ int main (int argc, char **argv)
 				    status = plot_data_point(verbose,
 					    mode,swath_plot,
 					    first,nplot,&error);
-			    else 
+			    else
 				    status = plot_data_footprint(verbose,
 					    mode,swath_plot,
 					    first,nplot,&error);
@@ -1458,15 +1458,15 @@ int main (int argc, char **argv)
 						    swath_plot,&error);
 				    *npings = 2;
 				    }
-    
+
 			    }
 		    }
 		status = mb_close(verbose,&mbio_ptr,&error);
-    
+
 		/* deallocate memory for data arrays */
 		mb_freed(verbose,__FILE__, __LINE__, (void **)&swath_plot, &error);
 		} /* end if file in bounds */
-		
+
 	    /* figure out whether and what to read next */
 	    if (read_datalist == MB_YES)
                 {
@@ -1499,9 +1499,9 @@ int main (int argc, char **argv)
 		{
 		GMT_color_image (0., 0., x_inch, y_inch, bitimage, nx, ny, 24);
 		}
-		
+
 	/* plot basemap if required */
-	if (frame_info.plot) 
+	if (frame_info.plot)
 		{
 		ps_setpaint (gmtdefs.basemap_frame_rgb);
 		GMT_map_basemap ();
@@ -1543,7 +1543,7 @@ int main (int argc, char **argv)
 /*--------------------------------------------------------------------*/
 int get_footprints(int verbose, int mode, int fp_mode,
 		double factor, double depth_def,
-		struct swath *swath, 
+		struct swath *swath,
 		double mtodeglon, double mtodeglat, int *error)
 {
 	char	*function_name = "get_footprints";
@@ -1675,8 +1675,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 	  {
 	  rfactor = 0.5*sin(DTR*factor);
 	  }
-	  
-	/* loop over the inner beams and get 
+
+	/* loop over the inner beams and get
 		the obvious footprint boundaries */
 	for (i=0;i<swath->npings;i++)
 		{
@@ -1701,21 +1701,21 @@ int get_footprints(int verbose, int mode, int fp_mode,
 				&& mb_beam_ok(pingcur->beamflag[j+1]))
 				{
 				setprint = MB_YES;
-				dlon1 = pingcur->bathlon[j-1] 
+				dlon1 = pingcur->bathlon[j-1]
 					- pingcur->bathlon[j];
-				dlat1 = pingcur->bathlat[j-1] 
+				dlat1 = pingcur->bathlat[j-1]
 					- pingcur->bathlat[j];
-				dlon2 = pingcur->bathlon[j+1] 
+				dlon2 = pingcur->bathlon[j+1]
 					- pingcur->bathlon[j];
-				dlat2 = pingcur->bathlat[j+1] 
+				dlat2 = pingcur->bathlat[j+1]
 					- pingcur->bathlat[j];
 				}
 			else if (mb_beam_ok(pingcur->beamflag[j-1]))
 				{
 				setprint = MB_YES;
-				dlon1 = pingcur->bathlon[j-1] 
+				dlon1 = pingcur->bathlon[j-1]
 					- pingcur->bathlon[j];
-				dlat1 = pingcur->bathlat[j-1] 
+				dlat1 = pingcur->bathlat[j-1]
 					- pingcur->bathlat[j];
 				dlon2 = -dlon1;
 				dlat2 = -dlat1;
@@ -1723,24 +1723,24 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			else if (mb_beam_ok(pingcur->beamflag[j+1]))
 				{
 				setprint = MB_YES;
-				dlon2 = pingcur->bathlon[j+1] 
+				dlon2 = pingcur->bathlon[j+1]
 					- pingcur->bathlon[j];
-				dlat2 = pingcur->bathlat[j+1] 
+				dlat2 = pingcur->bathlat[j+1]
 					- pingcur->bathlat[j];
 				dlon1 = -dlon2;
 				dlat1 = -dlat2;
 				}
 
 			/* do it using fore-aft beam width */
-			if (setprint == MB_YES 
+			if (setprint == MB_YES
 				&& fp_mode == MBSWATH_FOOTPRINT_REAL
 				&& depth_def <= 0.0)
 				{
 				print = &pingcur->bathfoot[j];
 				pingcur->bathflag[j] = MB_YES;
-				ddlonx = (pingcur->bathlon[j] 
+				ddlonx = (pingcur->bathlon[j]
 					- pingcur->navlon)/mtodeglon;
-				ddlaty = (pingcur->bathlat[j] 
+				ddlaty = (pingcur->bathlat[j]
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
@@ -1748,8 +1748,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 					dddepth = pingcur->altitude;
 				else
 					dddepth = pingcur->bath[j];
-				r = rfactor*sqrt(ddlonx*ddlonx 
-					+ ddlaty*ddlaty 
+				r = rfactor*sqrt(ddlonx*ddlonx
+					+ ddlaty*ddlaty
 					+ dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
@@ -1789,25 +1789,25 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			x = pingcur->sslon[j];
 			y = pingcur->sslat[j];
 			setprint = MB_NO;
-			if (pingcur->ss[j-1] > MB_SIDESCAN_NULL 
+			if (pingcur->ss[j-1] > MB_SIDESCAN_NULL
 				&& pingcur->ss[j+1] > MB_SIDESCAN_NULL)
 				{
 				setprint = MB_YES;
-				dlon1 = pingcur->sslon[j-1] 
+				dlon1 = pingcur->sslon[j-1]
 					- pingcur->sslon[j];
-				dlat1 = pingcur->sslat[j-1] 
+				dlat1 = pingcur->sslat[j-1]
 					- pingcur->sslat[j];
-				dlon2 = pingcur->sslon[j+1] 
+				dlon2 = pingcur->sslon[j+1]
 					- pingcur->sslon[j];
-				dlat2 = pingcur->sslat[j+1] 
+				dlat2 = pingcur->sslat[j+1]
 					- pingcur->sslat[j];
 				}
 			else if (pingcur->ss[j-1] > MB_SIDESCAN_NULL)
 				{
 				setprint = MB_YES;
-				dlon1 = pingcur->sslon[j-1] 
+				dlon1 = pingcur->sslon[j-1]
 					- pingcur->sslon[j];
-				dlat1 = pingcur->sslat[j-1] 
+				dlat1 = pingcur->sslat[j-1]
 					- pingcur->sslat[j];
 				dlon2 = -dlon1;
 				dlat2 = -dlat1;
@@ -1815,32 +1815,32 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			else if (pingcur->ss[j+1] > MB_SIDESCAN_NULL)
 				{
 				setprint = MB_YES;
-				dlon2 = pingcur->sslon[j+1] 
+				dlon2 = pingcur->sslon[j+1]
 					- pingcur->sslon[j];
-				dlat2 = pingcur->sslat[j+1] 
+				dlat2 = pingcur->sslat[j+1]
 					- pingcur->sslat[j];
 				dlon1 = -dlon2;
 				dlat1 = -dlat2;
 				}
 
 			/* do it using fore-aft beam width */
-			if (setprint == MB_YES 
+			if (setprint == MB_YES
 				&& fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
 				print = &pingcur->ssfoot[j];
 				pingcur->ssflag[j] = MB_YES;
-				ddlonx = (pingcur->sslon[j] 
+				ddlonx = (pingcur->sslon[j]
 					- pingcur->navlon)/mtodeglon;
-				ddlaty = (pingcur->sslat[j] 
+				ddlaty = (pingcur->sslat[j]
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
 				else if (pingcur->altitude > 0.0)
 					dddepth = pingcur->altitude;
-				else if (pingcur->beams_bath > 0 
+				else if (pingcur->beams_bath > 0
 					&& mb_beam_ok(pingcur->beamflag[pingcur->beams_bath/2]))
 					dddepth = pingcur->bath[pingcur->beams_bath/2];
-				r = rfactor*sqrt(ddlonx*ddlonx 
+				r = rfactor*sqrt(ddlonx*ddlonx
 					+ ddlaty*ddlaty + dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
@@ -1873,7 +1873,7 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			}
 		}
 
-	/* loop over the outer beams and get 
+	/* loop over the outer beams and get
 		the obvious footprint boundaries */
 	for (i=0;i<swath->npings;i++)
 		{
@@ -1890,14 +1890,14 @@ int get_footprints(int verbose, int mode, int fp_mode,
 		if (dobath == MB_YES && pingcur->beams_bath > 2)
 		  {
 		  j = 0;
-		  if (mb_beam_ok(pingcur->beamflag[j]) 
+		  if (mb_beam_ok(pingcur->beamflag[j])
 			&& mb_beam_ok(pingcur->beamflag[j+1]))
 			{
 			x = pingcur->bathlon[j];
 			y = pingcur->bathlat[j];
-			dlon2 = pingcur->bathlon[j+1] 
+			dlon2 = pingcur->bathlon[j+1]
 				- pingcur->bathlon[j];
-			dlat2 = pingcur->bathlat[j+1] 
+			dlat2 = pingcur->bathlat[j+1]
 				- pingcur->bathlat[j];
 			dlon1 = -dlon2;
 			dlat1 = -dlat2;
@@ -1907,9 +1907,9 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			/* using fore-aft beam width */
 			if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
-				ddlonx = (pingcur->bathlon[j] 
+				ddlonx = (pingcur->bathlon[j]
 					- pingcur->navlon)/mtodeglon;
-				ddlaty = (pingcur->bathlat[j] 
+				ddlaty = (pingcur->bathlat[j]
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
@@ -1917,8 +1917,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 					dddepth = pingcur->altitude;
 				else
 					dddepth = pingcur->bath[j];
-				r = rfactor*sqrt(ddlonx*ddlonx 
-					+ ddlaty*ddlaty 
+				r = rfactor*sqrt(ddlonx*ddlonx
+					+ ddlaty*ddlaty
 					+ dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
@@ -1936,14 +1936,14 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			print->y[3] = y + dlat1 + pingcur->latfor;
 			}
 		  j = pingcur->beams_bath-1;
-		  if (mb_beam_ok(pingcur->beamflag[j]) 
+		  if (mb_beam_ok(pingcur->beamflag[j])
 			&& mb_beam_ok(pingcur->beamflag[j-1]))
 			{
 			x = pingcur->bathlon[j];
 			y = pingcur->bathlat[j];
-			dlon1 = pingcur->bathlon[j-1] 
+			dlon1 = pingcur->bathlon[j-1]
 				- pingcur->bathlon[j];
-			dlat1 = pingcur->bathlat[j-1] 
+			dlat1 = pingcur->bathlat[j-1]
 				- pingcur->bathlat[j];
 			dlon2 = -dlon1;
 			dlat2 = -dlat1;
@@ -1953,9 +1953,9 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			/* using fore-aft beam width */
 			if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
-				ddlonx = (pingcur->bathlon[j] 
+				ddlonx = (pingcur->bathlon[j]
 					- pingcur->navlon)/mtodeglon;
-				ddlaty = (pingcur->bathlat[j] 
+				ddlaty = (pingcur->bathlat[j]
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
@@ -1963,8 +1963,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 					dddepth = pingcur->altitude;
 				else
 					dddepth = pingcur->bath[j];
-				r = rfactor*sqrt(ddlonx*ddlonx 
-					+ ddlaty*ddlaty 
+				r = rfactor*sqrt(ddlonx*ddlonx
+					+ ddlaty*ddlaty
 					+ dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
@@ -1990,9 +1990,9 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			{
 			print = &pingcur->bathfoot[0];
 			pingcur->bathflag[0] = MB_YES;
-			ddlonx = (pingcur->bathlon[0] 
+			ddlonx = (pingcur->bathlon[0]
 				- pingcur->navlon)/mtodeglon;
-			ddlaty = (pingcur->bathlat[0] 
+			ddlaty = (pingcur->bathlat[0]
 				- pingcur->navlat)/mtodeglat;
 			if (depth_def > 0.0)
 				dddepth = depth_def;
@@ -2000,8 +2000,8 @@ int get_footprints(int verbose, int mode, int fp_mode,
 				dddepth = pingcur->altitude;
 			else
 				dddepth = pingcur->bath[0];
-			r = rfactor*sqrt(ddlonx*ddlonx 
-				+ ddlaty*ddlaty 
+			r = rfactor*sqrt(ddlonx*ddlonx
+				+ ddlaty*ddlaty
 				+ dddepth*dddepth);
 
 			dlon2 = -r*headingy*mtodeglon;
@@ -2031,9 +2031,9 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			{
 			x = pingcur->sslon[j];
 			y = pingcur->sslat[j];
-			dlon2 = pingcur->sslon[j+1] 
+			dlon2 = pingcur->sslon[j+1]
 				- pingcur->sslon[j];
-			dlat2 = pingcur->sslat[j+1] 
+			dlat2 = pingcur->sslat[j+1]
 				- pingcur->sslat[j];
 			dlon1 = -dlon2;
 			dlat1 = -dlat2;
@@ -2043,18 +2043,18 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			/* using fore-aft beam width */
 			if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
-				ddlonx = (pingcur->sslon[j] 
+				ddlonx = (pingcur->sslon[j]
 					- pingcur->navlon)/mtodeglon;
-				ddlaty = (pingcur->sslat[j] 
+				ddlaty = (pingcur->sslat[j]
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
 				else if (pingcur->altitude > 0.0)
 					dddepth = pingcur->altitude;
-				else if (pingcur->beams_bath > 0 
+				else if (pingcur->beams_bath > 0
 					&& mb_beam_ok(pingcur->beamflag[pingcur->beams_bath/2]))
 					dddepth = pingcur->bath[pingcur->beams_bath/2];
-				r = rfactor*sqrt(ddlonx*ddlonx 
+				r = rfactor*sqrt(ddlonx*ddlonx
 					+ ddlaty*ddlaty + dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
@@ -2077,9 +2077,9 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			{
 			x = pingcur->sslon[j];
 			y = pingcur->sslat[j];
-			dlon1 = pingcur->sslon[j-1] 
+			dlon1 = pingcur->sslon[j-1]
 				- pingcur->sslon[j];
-			dlat1 = pingcur->sslat[j-1] 
+			dlat1 = pingcur->sslat[j-1]
 				- pingcur->sslat[j];
 			dlon2 = -dlon1;
 			dlat2 = -dlat1;
@@ -2089,18 +2089,18 @@ int get_footprints(int verbose, int mode, int fp_mode,
 			/* using fore-aft beam width */
 			if (fp_mode == MBSWATH_FOOTPRINT_REAL)
 				{
-				ddlonx = (pingcur->sslon[j] 
+				ddlonx = (pingcur->sslon[j]
 					- pingcur->navlon)/mtodeglon;
-				ddlaty = (pingcur->sslat[j] 
+				ddlaty = (pingcur->sslat[j]
 					- pingcur->navlat)/mtodeglat;
 				if (depth_def > 0.0)
 					dddepth = depth_def;
 				else if (pingcur->altitude > 0.0)
 					dddepth = pingcur->altitude;
-				else if (pingcur->beams_bath > 0 
+				else if (pingcur->beams_bath > 0
 					&& mb_beam_ok(pingcur->beamflag[pingcur->beams_bath/2]))
 					dddepth = pingcur->bath[pingcur->beams_bath/2];
-				r = rfactor*sqrt(ddlonx*ddlonx 
+				r = rfactor*sqrt(ddlonx*ddlonx
 					+ ddlaty*ddlaty + dddepth*dddepth);
 				pingcur->lonaft = -r*headingx*mtodeglon;
 				pingcur->lataft = -r*headingy*mtodeglat;
@@ -2188,7 +2188,7 @@ int get_footprints(int verbose, int mode, int fp_mode,
 int get_shading(int verbose, int mode, int ampshademode, struct swath *swath,
 		double mtodeglon, double mtodeglat,
 		double magnitude, double azimuth,
-		int nshadelevel, double *shadelevel, 
+		int nshadelevel, double *shadelevel,
 		int *shadelevelgray, int *error)
 {
 	char	*function_name = "get_shading";
@@ -2358,14 +2358,14 @@ int get_shading(int verbose, int mode, int ampshademode, struct swath *swath,
 			    graylevel = (double) shadelevelgray[0];
 			else if (ping1->amp[j] > shadelevel[nshadelevel-1])
 			    graylevel = (double) shadelevelgray[nshadelevel-1];
-			else 
+			else
 			    {
 			    for (k=0;k<nshadelevel-1;k++)
 				{
 				if (ping1->amp[j] > shadelevel[k]
 				    && ping1->amp[j] <= shadelevel[k+1])
 				    {
-				    graylevel = (double) shadelevelgray[k] 
+				    graylevel = (double) shadelevelgray[k]
 					+ (ping1->amp[j] - shadelevel[k])
 					*((double)shadelevelgray[k+1] - (double)shadelevelgray[k])
 					/(shadelevel[k+1] - shadelevel[k]);
@@ -2477,7 +2477,7 @@ int plot_data_footprint(int verbose, int mode,
 		fprintf(stderr,"dbg2       nplot:      %d\n",nplot);
 		}
 
-	if (mode == MBSWATH_BATH 
+	if (mode == MBSWATH_BATH
 		|| mode == MBSWATH_BATH_RELIEF
 		|| mode == MBSWATH_BATH_AMP)
 		{
@@ -2494,7 +2494,7 @@ int plot_data_footprint(int verbose, int mode,
 				for (k=0;k<4;k++)
 					GMT_geo_to_xy(x[k],y[k],&xx[k],&yy[k]);
 				GMT_get_rgb24(pingcur->bath[j],rgb);
-				if (mode == MBSWATH_BATH_RELIEF 
+				if (mode == MBSWATH_BATH_RELIEF
 					|| mode == MBSWATH_BATH_AMP)
 					GMT_illuminate(pingcur->bathshade[j],rgb);
 /*fprintf(stderr,"Calling plot_box ping:%d of %d   beam:%d of %d\n",
@@ -2561,7 +2561,7 @@ i,nplot,j,pingcur->beams_bath);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int plot_data_point(int verbose, int mode, 
+int plot_data_point(int verbose, int mode,
 		struct swath *swath, int first, int nplot, int *error)
 {
 	char	*function_name = "plot_data_point";
@@ -2585,7 +2585,7 @@ int plot_data_point(int verbose, int mode,
 		fprintf(stderr,"dbg2       nplot:      %d\n",nplot);
 		}
 
-	if (mode == MBSWATH_BATH 
+	if (mode == MBSWATH_BATH
 		|| mode == MBSWATH_BATH_RELIEF
 		|| mode == MBSWATH_BATH_AMP)
 		{
@@ -2596,11 +2596,11 @@ int plot_data_point(int verbose, int mode,
 			for (j=0;j<pingcur->beams_bath;j++)
 			  if (mb_beam_ok(pingcur->beamflag[j]))
 				{
-				GMT_geo_to_xy(pingcur->bathlon[j], 
-					pingcur->bathlat[j], 
+				GMT_geo_to_xy(pingcur->bathlon[j],
+					pingcur->bathlat[j],
 					&xx, &yy);
 				GMT_get_rgb24(pingcur->bath[j],rgb);
-				if (mode == MBSWATH_BATH_RELIEF 
+				if (mode == MBSWATH_BATH_RELIEF
 					|| mode == MBSWATH_BATH_AMP)
 					GMT_illuminate(pingcur->bathshade[j],
 						rgb);
@@ -2617,8 +2617,8 @@ int plot_data_point(int verbose, int mode,
 			for (j=0;j<pingcur->beams_amp;j++)
 			  if (mb_beam_ok(pingcur->beamflag[j]))
 				{
-				GMT_geo_to_xy(pingcur->bathlon[j], 
-					pingcur->bathlat[j], 
+				GMT_geo_to_xy(pingcur->bathlon[j],
+					pingcur->bathlat[j],
 					&xx, &yy);
 				GMT_get_rgb24(pingcur->amp[j],rgb);
 				status = plot_point(verbose,xx,yy,rgb,error);
@@ -2634,8 +2634,8 @@ int plot_data_point(int verbose, int mode,
 			for (j=0;j<pingcur->pixels_ss;j++)
 			  if (pingcur->ss[j] > MB_SIDESCAN_NULL)
 				{
-				GMT_geo_to_xy(pingcur->sslon[j], 
-					pingcur->sslat[j], 
+				GMT_geo_to_xy(pingcur->sslon[j],
+					pingcur->sslat[j],
 					&xx, &yy);
 				GMT_get_rgb24(pingcur->ss[j],rgb);
 				status = plot_point(verbose,xx,yy,rgb,error);
@@ -2758,7 +2758,7 @@ int plot_box(int verbose, double *x, double *y, int *rgb, int *error)
 		        ncross++;
 		        }
 		      }
-		    }		
+		    }
 
 		  /* plot lines between crossings */
 		  for (j=0;j<ncross-1;j++)
@@ -2768,12 +2768,12 @@ int plot_box(int verbose, double *x, double *y, int *rgb, int *error)
 		      ixx1 = xcross[j];
 		      ixx2 = xcross[j+1];
 		      }
-		    else 
+		    else
 		      {
 		      ixx1 = xcross[j+1];
 		      ixx2 = xcross[j];
 		      }
-		    if ((ixx1 < ixmin && ixx2 < ixmin) 
+		    if ((ixx1 < ixmin && ixx2 < ixmin)
 		      || (ixx1 > ixmax && ixx2 > ixmax))
 		      ixx2 = ixx1 - 1; /* disable plotting */
 		    else

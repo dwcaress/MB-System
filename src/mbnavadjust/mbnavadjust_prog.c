@@ -1075,12 +1075,14 @@ int mbnavadjust_write_project()
 	/* local variables */
 	char	*function_name = "mbnavadjust_write_project";
 	int	status = MB_SUCCESS;
-	FILE	*hfp;
+	FILE	*hfp, *xfp, *yfp;
 	struct mbna_file *file;
 	struct mbna_section *section;
 	struct mbna_crossing *crossing;
 	struct mbna_tie *tie;
 	char	datalist[STRING_MAX];
+	char	xoffsetfile[STRING_MAX];
+	char	yoffsetfile[STRING_MAX];
 	double	navlon1, navlon2, navlat1, navlat2;
 	int	nroute;
 	int	i, j, k, l;
@@ -1373,6 +1375,42 @@ fprintf(stderr,"Crossing %d status %d but num_ties %d....\n",i,crossing->status,
 fprintf(stderr,"Output %d fixed tie locations to %s\n",nroute,datalist);
 		}
 
+	/* output offset vectors */
+	if (project.inversion == MBNA_INVERSION_CURRENT)
+		{
+		sprintf(xoffsetfile,"%s%s_dx.txt",project.path,project.name);
+		sprintf(yoffsetfile,"%s%s_dy.txt",project.path,project.name);
+		if ((xfp = fopen(xoffsetfile,"w")) != NULL
+		    && (yfp = fopen(yoffsetfile,"w")) != NULL)
+			{
+			for (i=0;i<project.num_files;i++)
+			    {
+			    file = &project.files[i];
+			    for (j=0;j<file->num_sections;j++)
+				{
+				section = &file->sections[j];
+				for (k=0;k<section->num_snav;k++)
+				    {
+				    fprintf(xfp, "%f %f %f\n", section->snav_lon[k], section->snav_lat[k],
+								section->snav_lon_offset[k]/mbna_mtodeglon);
+				    fprintf(yfp, "%f %f %f\n", section->snav_lon[k], section->snav_lat[k],
+								section->snav_lat_offset[k]/mbna_mtodeglat);
+				    }
+				}
+			    }
+			fclose(xfp);
+			fclose(yfp);
+			}
+
+		/* else set error */
+		else
+			{
+			status = MB_FAILURE;
+			sprintf(message,"Unable to update project %s\n > Offset vector files: %s %s\n",
+				project.name, xoffsetfile, yoffsetfile);
+			do_info_add(message, MB_YES);
+			}
+		}
 
 	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -8823,18 +8861,18 @@ mbnavadjust_autosetsvsvertical()
 	char	*function_name = "mbnavadjust_autosetsvsvertical";
 	int	status = MB_SUCCESS;
 	struct mbna_file *file;
-	struct 	mbna_section *section;
 	struct 	mbna_crossing *crossing;
+	struct 	mbna_file *file1, *file2;
 	struct 	mbna_tie *tie;
-	double	*zoffsets = NULL;
-	double	zoffsetuse;
-	double	firstsonardepth1, firsttime_d1, secondsonardepth1, secondtime_d1, dsonardepth1;
-	double	firstsonardepth2, firsttime_d2, secondsonardepth2, secondtime_d2, dsonardepth2;
 	double	overlap_scale;
-	int	num_ties_block, num_surveys, nprocess;
-	int	found;
-	int	isurvey1, isurvey2;
-	int	i, j, k;
+	int	nprocess;
+	int	ntie, nfixed, ncols;
+	double	misfit_initial, perturbationsize, perturbationsizeold;
+	double	perturbationchange, convergencecriterea, misfit_ties;
+	double	offset_z_m, block_offset_avg_z;
+	double	*x, *xx;
+	int	done, iter, nc1, nc2, navg, use, reset_tie;
+	int	i, j;
 
  	/* print input debug statements */
 	if (mbna_verbose >= 2)
@@ -8843,279 +8881,429 @@ mbnavadjust_autosetsvsvertical()
 			function_name);
 		}
 
-	/* Do double loop over surveys to find the ties associated with each survey vs survey group (block)
-		- estimate the z-offset as the median of the z-offsets of the ties (if there are five or more)
-		- repick the horizontal offsets using the new z-offset */
-    	if (project.open == MB_YES
+	/* set up and solve overdetermined least squares problem for a z-offset model with
+	 * constant z-offsets within each survey using
+	 * the current z-offset ties. Then, loop over all ties to auto-repick the crossings using
+	 * the z-offset in the new model (that is, pick the best lateral offset that can be found
+	 * using the z-offset in the new model). This should replace the initial ties with ties that
+	 * have self-consistent z-offsets between surveys. Using this option only makes sense if the
+	 * bathymetry was correctly tide-corrected before import into mbnavadjust.
+	 */
+   	if (project.open == MB_YES
     		&& project.inversion != MBNA_INVERSION_NONE
 		&& project.modelplot == MB_YES)
     		{
-		/* allocate array sufficient for all ties */
-		status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, project.num_ties * sizeof(double), (void **)&zoffsets, &error);
+		/* calculate the initial misfit */
+		ntie = 0;
+		misfit_initial = 0.0;
+		for (i=0;i<project.num_crossings;i++)
+		    {
+		    crossing = &project.crossings[i];
+		    if (crossing->status == MBNA_CROSSING_STATUS_SET)
+		    	{
+			ntie += crossing->num_ties;
+			for (j=0;j<crossing->num_ties;j++)
+				{
+				tie = (struct mbna_tie *) &crossing->ties[j];
+				misfit_initial += tie->offset_z_m * tie->offset_z_m;
+				}
+			}
+		    }
+		misfit_initial = sqrt(misfit_initial) / ntie;
+		perturbationsizeold = misfit_initial;
 
-		/* count surveys and plot blocks by looping over files */
-		num_surveys = 1;
- 		for (i=0;i<project.num_files;i++)
+		/* count the number of blocks */
+		project.num_blocks = 0;
+		for (i=0;i<project.num_files;i++)
+		    {
+		    file = &project.files[i];
+		    if (i==0 || file->sections[0].continuity == MB_NO)
+		    	{
+			project.num_blocks++;
+			}
+		    file->block = project.num_blocks - 1;
+		    }
+
+		/* count the number of fixed files */
+		nfixed = 0;
+		for (i=0;i<project.num_files;i++)
+		    {
+		    file = &project.files[i];
+		    if (file->status == MBNA_FILE_FIXEDNAV)
+		    	nfixed++;
+		    }
+
+		/* if only one block just set average offsets to zero */
+		if (project.num_blocks <= 1)
+		    {
+		    block_offset_avg_z = 0.0;
+		    for (i=0;i<project.num_files;i++)
 			{
 			file = &project.files[i];
-			file->show_in_modelplot = -1;
-			for (j=0;j<file->num_sections;j++)
-				{
-				section = &file->sections[j];
-				if ((i > 0 || j > 0) && section->continuity == MB_NO)
-					num_surveys++;
-				}
+			file->block_offset_z = 0.0;
 			}
+		    }
 
-		/* loop over surveys to get list of z-offsets for each survey vs survey group (block) */
-		for (isurvey2=0;isurvey2<num_surveys;isurvey2++)
+		/* else if more than one block first invert for block offsets  */
+		else if (project.num_blocks > 1)
+		    {
+		    /* allocate space for the inverse problem */
+		    ncols = project.num_blocks;
+		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&x,&error);
+		    status = mb_mallocd(mbna_verbose, __FILE__, __LINE__, ncols * sizeof(double), (void **)&xx,&error);
+
+		    /* initialize x array */
+		    for (i=0;i<project.num_blocks;i++)
 			{
-			for (isurvey1=0;isurvey1<isurvey2;isurvey1++)
-				{
-				num_ties_block = 0;
-
-				/* if view is set to "only with selected survey" then only work
-				   with blocks that include the selected survey */
-
-				/* loop over all ties looking for ones in current plot block
-					- current plot block is for ties between
-					surveys isurvey1 and isurvey2 */
-				for (i=0;i<project.num_crossings;i++)
-					{
-					crossing = &project.crossings[i];
-					for (j=0;j<crossing->num_ties;j++)
-						{
-						tie = &crossing->ties[j];
-
-						/* check if this tie is between the desired surveys */
-						if (tie->block_1 == isurvey1 && tie->block_2 == isurvey2)
-							{
-							zoffsets[num_ties_block] = tie->offset_z_m;
-
-							/* increment num_ties_block */
-							num_ties_block++;
-							}
-						}
-					}
-
-				/* do nothing if less than five ties
-				   - also, if view is set to "only with selected survey" then only work
-				   with blocks that include the selected survey */
-				if (num_ties_block < 5
-				    && (mbna_view_mode != MBNA_VIEW_MODE_WITHSURVEY
-					|| (isurvey1 == mbna_survey_select || isurvey2 == mbna_survey_select)))
-					{
-					/* set message dialog on */
-					sprintf(message,"Not resetting vertical offset - surveys %d vs %d, %d ties...",
-						isurvey2,isurvey1,num_ties_block);
-					fprintf(stderr,"%s: %s\n",function_name,message);
-					do_message_update(message);
-					}
-
-				/* use the median z-offset if there are at least five */
-				if (num_ties_block > 4
-				    && (mbna_view_mode != MBNA_VIEW_MODE_WITHSURVEY
-					|| (isurvey1 == mbna_survey_select || isurvey2 == mbna_survey_select)))
-					{
-					/* sort the z-offsets */
-					qsort((char *)zoffsets, num_ties_block, sizeof(double), (void *)mb_double_compare);
-					zoffsetuse = zoffsets[num_ties_block / 2];
-
-					/* set message dialog on */
-					sprintf(message,"Reset vertical offset - surveys %d vs %d, %d ties, %f m",
-						isurvey2,isurvey1,num_ties_block,zoffsetuse);
-					fprintf(stderr,"%s: %s\n",function_name,message);
-					do_message_update(message);
-
-					/* loop over all ties looking for ones in current plot block
-						- load each such crossing, reset to new vertical offset and autopick horizontal */
-					for (i=0;i<project.num_crossings;i++)
-						{
-						crossing = &project.crossings[i];
-
-						/* check if this crossing is between the desired surveys */
-						if (crossing->num_ties > 0
-							&& project.files[crossing->file_id_1].block == isurvey1
-							&& project.files[crossing->file_id_2].block == isurvey2)
-							{
-							/* set the crossing */
-							mbna_current_crossing = i;
-							mbna_file_id_1 = crossing->file_id_1;
-							mbna_section_1 = crossing->section_1;
-							mbna_file_id_2 = crossing->file_id_2;
-							mbna_section_2 = crossing->section_2;
-							mbna_current_tie = 0;
-
-							/* set message dialog on */
-							sprintf(message,"Loading crossing %d...", mbna_current_crossing);
-							fprintf(stderr,"%s: %s\n",function_name,message);
-							do_message_update(message);
-
-							/* load crossing */
-							mbnavadjust_crossing_load();
-							nprocess++;
-
-							/* update status and model plot */
-							do_update_status();
-							if (project.modelplot == MB_YES)
-								{
-								do_update_modelplot_status();
-								mbnavadjust_modelplot_plot();
-								}
-
-							/* delete each tie */
-							for (j=0;j<crossing->num_ties;j++)
-								{
-								mbnavadjust_deletetie(mbna_current_crossing, j, MBNA_CROSSING_STATUS_NONE);
-								}
-
-							/* update status and model plot */
-							do_update_status();
-							if (project.modelplot == MB_YES)
-								{
-								do_update_modelplot_status();
-								mbnavadjust_modelplot_plot();
-								}
-
-							/* reset z offset */
-							mbna_offset_z = zoffsetuse;
-
-							/* get misfit */
-							mbnavadjust_get_misfit();
-
-							/* set offsets to minimum horizontal misfit */
-							mbna_offset_x = mbna_minmisfit_xh;
-							mbna_offset_y = mbna_minmisfit_yh;
-							mbna_offset_z = mbna_minmisfit_zh;
-							mbna_misfit_offset_x = mbna_offset_x;
-							mbna_misfit_offset_y = mbna_offset_y;
-							mbna_misfit_offset_z = mbna_offset_z;
-							mbnavadjust_crossing_replot();
-
-							/* get misfit */
-							mbnavadjust_get_misfit();
-
-							/* set plot bounds to overlap region */
-							mbnavadjust_crossing_overlapbounds(mbna_current_crossing,
-										mbna_offset_x, mbna_offset_y,
-										&mbna_overlap_lon_min, &mbna_overlap_lon_max,
-										&mbna_overlap_lat_min, &mbna_overlap_lat_max);
-							mbna_plot_lon_min = mbna_overlap_lon_min;
-							mbna_plot_lon_max = mbna_overlap_lon_max;
-							mbna_plot_lat_min = mbna_overlap_lat_min;
-							mbna_plot_lat_max = mbna_overlap_lat_max;
-							overlap_scale = MIN((mbna_overlap_lon_max - mbna_overlap_lon_min) / mbna_mtodeglon,
-										(mbna_overlap_lat_max - mbna_overlap_lat_min) / mbna_mtodeglat);
-
-							/* get naverr plot scaling */
-							mbnavadjust_naverr_scale();
-
-							/* get misfit */
-							mbnavadjust_get_misfit();
-
-							/* check uncertainty estimate for a good pick */
-							if (MAX(mbna_minmisfit_sr1,mbna_minmisfit_sr2) < 0.5 * overlap_scale
-								&& MIN(mbna_minmisfit_sr1,mbna_minmisfit_sr2) > 0.0)
-								{
-
-								/* set offsets to minimum horizontal misfit */
-								mbna_offset_x = mbna_minmisfit_xh;
-								mbna_offset_y = mbna_minmisfit_yh;
-								mbna_offset_z = mbna_minmisfit_zh;
-
-								/* add tie */
-								mbnavadjust_naverr_addtie();
-
-								/* deal with each tie */
-								for (j=0;j<crossing->num_ties;j++)
-									{
-									tie = &(crossing->ties[j]);
-
-									/* calculate sonardepth change rate for swath1 */
-									found = MB_NO;
-									for (k=0;k<swathraw1->npings;k++)
-									    {
-									    if (swathraw1->pingraws[k].time_d > tie->snav_1_time_d - 2.0
-										&& found == MB_NO)
-										{
-										firstsonardepth1 = swathraw1->pingraws[k].draft;
-										firsttime_d1 = swathraw1->pingraws[k].time_d;
-										found = MB_YES;
-										}
-									    if (swathraw1->pingraws[k].time_d < tie->snav_1_time_d + 2.0)
-										{
-										secondsonardepth1 = swathraw1->pingraws[k].draft;
-										secondtime_d1 = swathraw1->pingraws[k].time_d;
-										}
-									    }
-									dsonardepth1 = (secondsonardepth1 - firstsonardepth1)
-										/ (secondtime_d1 - firsttime_d1);
-
-									/* calculate sonardepth change rate for swath2 */
-									found = MB_NO;
-									for (k=0;k<swathraw2->npings;k++)
-									    {
-									    if (swathraw2->pingraws[k].time_d > tie->snav_2_time_d - 2.0
-										&& found == MB_NO)
-										{
-										firstsonardepth2 = swathraw2->pingraws[k].draft;
-										firsttime_d2 = swathraw2->pingraws[k].time_d;
-										found = MB_YES;
-										}
-									    if (swathraw2->pingraws[k].time_d < tie->snav_2_time_d + 2.0)
-										{
-										secondsonardepth2 = swathraw2->pingraws[k].draft;
-										secondtime_d2 = swathraw2->pingraws[k].time_d;
-										}
-									    }
-									dsonardepth2 = (secondsonardepth2 - firstsonardepth2)
-										/ (secondtime_d2 - firsttime_d2);
-									}
-								}
-
-							/* unload crossing */
-							mbnavadjust_crossing_unload();
-
-fprintf(stderr,"mbna_file_select:%d mbna_survey_select:%d mbna_section_select:%d\n",
-mbna_file_select,mbna_survey_select,mbna_section_select);
-
-							/* update status periodically */
-							if (nprocess % 10 == 0)
-								{
-								do_update_status();
-
-								/* update model plot */
-								if (project.modelplot == MB_YES)
-									{
-									/* update model status */
-									do_update_modelplot_status();
-
-									/* replot the model */
-									mbnavadjust_modelplot_plot();
-									}
-								}
-							}
-						}
-					}
-				}
-
-			/* update status */
-			do_update_status();
-
-			/* update model plot */
-			if (project.modelplot == MB_YES)
-				{
-				/* update model status */
-				do_update_modelplot_status();
-
-				/* replot the model */
-				mbnavadjust_modelplot_plot();
-				}
-
+			x[i] = 0.0;
 			}
 
-		/* deallocate array sufficient for all ties */
-		status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&zoffsets, &error);
+		    /* construct the inverse problem */
+		    sprintf(message,"Solving for survey z offsets...");
+		    do_message_update(message);
+
+		    done = MB_NO;
+		    iter = 0;
+		    while (done == MB_NO)
+		    	{
+			/* initialize xx array */
+			for (i=0;i<project.num_blocks;i++)
+			    {
+			    xx[i] = 0.0;
+			    }
+
+			/* loop over crossings getting set ties */
+			ntie = 0;
+			for (i=0;i<project.num_crossings;i++)
+			    {
+			    crossing = &project.crossings[i];
+
+			     /* get block id for first snav point */
+			     file1 = &project.files[crossing->file_id_1];
+			     nc1 = file1->block;
+
+			     /* get block id for second snav point */
+			     file2 = &project.files[crossing->file_id_2];
+			     nc2 = file2->block;
+
+			    /* use only set crossings */
+			    if (crossing->status == MBNA_CROSSING_STATUS_SET)
+			    for (j=0;j<crossing->num_ties;j++)
+				{
+				/* get tie */
+				tie = (struct mbna_tie *) &crossing->ties[j];
+				ntie++;
+
+				/* get current offset vector including reduction of block solution */
+				if (tie->status != MBNA_TIE_XY)
+				    {
+				    offset_z_m = tie->offset_z_m - (x[nc2] + xx[nc2] - x[nc1] - xx[nc1]);
+				    }
+				else
+				    {
+				    offset_z_m = 0.0;
+				    }
+/* fprintf(stderr,"icrossing:%d jtie:%d blocks:%d %d offsets: %f %f %f\n",
+i,j,nc1,nc2,offsetx,offsety,offset_z_m); */
+
+				/* deal with fixed or unfixed status of sections */
+				if ((file1->status == MBNA_FILE_GOODNAV && file2->status == MBNA_FILE_GOODNAV)
+					|| (file1->status == MBNA_FILE_POORNAV && file2->status == MBNA_FILE_POORNAV))
+				    {
+				    xx[nc1] += -mbna_offsetweight * 0.5 * offset_z_m;
+				    xx[nc2] +=  mbna_offsetweight * 0.5 * offset_z_m;
+				    }
+				else if (file1->status == MBNA_FILE_GOODNAV && file2->status == MBNA_FILE_POORNAV)
+				    {
+				    xx[nc1] += -mbna_offsetweight * 0.005 * offset_z_m;
+				    xx[nc2] +=  mbna_offsetweight * 0.995 * offset_z_m;
+				    }
+				else if (file1->status == MBNA_FILE_POORNAV && file2->status == MBNA_FILE_GOODNAV)
+				    {
+				    xx[nc1] += -mbna_offsetweight * 0.995 * offset_z_m;
+				    xx[nc2] +=  mbna_offsetweight * 0.005 * offset_z_m;
+				    }
+				else if (file1->status == MBNA_FILE_FIXEDNAV && file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    /*
+				    xx[nc1] +=  0.0;
+				    xx[nc2] +=  0.0;
+				    */
+				    }
+				else if (file1->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    if (file2->status == MBNA_FILE_FIXEDXYNAV)
+				    	{
+				    	/*
+					xx[nc1] +=  0.0;
+					xx[nc2] +=  0.0;
+				    	*/
+					xx[3*nc2+2] +=  offset_z_m;
+					}
+				    else if (file2->status == MBNA_FILE_FIXEDZNAV)
+				    	{
+				    	/*
+					xx[nc1] +=  0.0;
+					xx[nc2] +=  0.0;
+					*/
+					}
+				    else
+				    	{
+				    	/*
+					xx[nc1] +=  0.0;
+				    	*/
+					xx[nc2] +=  mbna_offsetweight * offset_z_m;
+					}
+				    }
+				else if (file2->status == MBNA_FILE_FIXEDNAV)
+				    {
+				    if (file1->status == MBNA_FILE_FIXEDXYNAV)
+				    	{
+					xx[nc1] +=  -mbna_offsetweight * offset_z_m;
+				    	/*
+					xx[nc2] +=  0.0;
+				    	*/
+					}
+				    else if (file1->status == MBNA_FILE_FIXEDZNAV)
+				    	{
+				    	/*
+					xx[nc1] +=  0.0;
+					xx[nc2] +=  0.0;
+				    	*/
+					}
+				    else
+				    	{
+					xx[nc1] +=  -mbna_offsetweight * offset_z_m;
+				    	/*
+					xx[nc2] +=  0.0;
+				    	*/
+					}
+				    }
+				}
+			    }
+
+			/* calculate 2-norm of perturbation */
+			perturbationsize = 0.0;
+			for (i=0;i<ncols;i++)
+			    {
+			    perturbationsize += xx[i] * xx[i];
+			    }
+			perturbationsize = sqrt(perturbationsize) / ncols;
+
+			/* apply perturbation */
+			for (i=0;i<ncols;i++)
+			    {
+			    x[i] += xx[i];
+			    }
+
+			 /* check for convergence */
+			 perturbationchange = perturbationsize - perturbationsizeold;
+			 convergencecriterea = fabs(perturbationchange) / misfit_initial;
+			 if (convergencecriterea < MBNA_CONVERGENCE || iter > MBNA_INTERATION_MAX)
+		    	     done = MB_YES;
+fprintf(stderr,"BLOCK INVERT: iter:%d ntie:%d misfit_initial:%f misfit_ties:%f perturbationsize:%g perturbationchange:%g convergencecriterea:%g done:%d\n",
+iter,ntie,misfit_initial,misfit_ties,perturbationsize,perturbationchange,convergencecriterea,done);
+
+			 if (done == MB_NO)
+		             {
+			     perturbationsizeold = perturbationsize;
+			     iter++;
+			     }
+			 }
+
+		    /* if there are no fixed blocks contributing to ties,
+		    	then get average z-offsets of blocks not flagged as bad
+			to provide a static offset to move final model to be more consistent
+			with the good blocks than the poorly navigated blocks */
+		    block_offset_avg_z = 0.0;
+		    navg = 0;
+		    if (nfixed == 0)
+		    	{
+			for (i=0;i<project.num_blocks;i++)
+			    {
+			    use = MB_YES;
+			    for (j=0;j<project.num_files;j++)
+				    {
+				    file = &project.files[j];
+				    if (file->block == i && file->status == MBNA_FILE_POORNAV)
+					    use = MB_NO;
+				    }
+			    if (use == MB_YES)
+				    {
+				    block_offset_avg_z += x[i];
+				    navg++;
+				    }
+			    }
+			if (navg > 0)
+		    	    {
+			    block_offset_avg_z /= navg;
+			    }
+			}
+
+		    /* output solution */
+		    fprintf(stderr,"\nAverage z-offsets: %f\n",block_offset_avg_z);
+		    for (i=0;i<project.num_blocks;i++)
+			{
+			fprintf(stderr, "Survey block:%d  z-offset: %f  block z-offset:%f\n", i, x[i], x[i] - block_offset_avg_z);
+			}
+
+		    /* set block offsets for each file */
+		    for (i=0;i<project.num_files;i++)
+			{
+			file = &project.files[i];
+			file->block_offset_z = x[file->block] - block_offset_avg_z;
+/* fprintf(stderr,"file:%d block: %d block offsets: %f %f %f\n",
+i,file->block,file->block_offset_x,file->block_offset_y,file->block_offset_z);*/
+			}
+
+		    /* deallocate arrays */
+		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&x,&error);
+		    status = mb_freed(mbna_verbose, __FILE__, __LINE__, (void **)&xx,&error);
+		    }
+
+		/* loop over over all crossings - reset existing ties using block z-offsets */
+		nprocess = 0;
+		for (i=0;i<project.num_crossings;i++)
+			{
+			/* set the crossing */
+			crossing = &project.crossings[i];
+			file1 = &project.files[crossing->file_id_1];
+			file2 = &project.files[crossing->file_id_2];
+			offset_z_m = file2->block_offset_z - file1->block_offset_z;
+
+			/* check if any ties exist and are inconsistent with the new survey z-offset model */
+			reset_tie = MB_NO;
+			for (j=0;j<crossing->num_ties;j++)
+				{
+				tie = &(crossing->ties[j]);
+				if (tie->offset_z_m != offset_z_m)
+					reset_tie = MB_YES;
+				}
+
+			/* if one or more ties exist and at , load crossing and reset the ties using the new z-offset */
+			if (reset_tie == MB_YES)
+				{
+				mbna_current_crossing = i;
+				mbna_file_id_1 = crossing->file_id_1;
+				mbna_section_1 = crossing->section_1;
+				mbna_file_id_2 = crossing->file_id_2;
+				mbna_section_2 = crossing->section_2;
+				mbna_current_tie = 0;
+				file1 = &project.files[mbna_file_id_1];
+				file2 = &project.files[mbna_file_id_2];
+
+				/* set message dialog on */
+				sprintf(message,"Loading crossing %d...", mbna_current_crossing);
+				fprintf(stderr,"%s: %s\n",function_name,message);
+				do_message_update(message);
+
+				/* load crossing */
+				mbnavadjust_crossing_load();
+				nprocess++;
+
+				/* update status and model plot */
+				do_update_status();
+				if (project.modelplot == MB_YES)
+					{
+					do_update_modelplot_status();
+					mbnavadjust_modelplot_plot();
+					}
+
+				/* delete each tie */
+				for (j=0;j<crossing->num_ties;j++)
+					{
+					mbnavadjust_deletetie(mbna_current_crossing, j, MBNA_CROSSING_STATUS_NONE);
+					}
+
+				/* update status and model plot */
+				do_update_status();
+				if (project.modelplot == MB_YES)
+					{
+					do_update_modelplot_status();
+					mbnavadjust_modelplot_plot();
+					}
+
+				/* reset z offset */
+				mbna_offset_z = file2->block_offset_z - file1->block_offset_z;
+
+				/* get misfit */
+				mbnavadjust_get_misfit();
+
+				/* set offsets to minimum horizontal misfit */
+				mbna_offset_x = mbna_minmisfit_xh;
+				mbna_offset_y = mbna_minmisfit_yh;
+				mbna_offset_z = mbna_minmisfit_zh;
+				mbna_misfit_offset_x = mbna_offset_x;
+				mbna_misfit_offset_y = mbna_offset_y;
+				mbna_misfit_offset_z = mbna_offset_z;
+				mbnavadjust_crossing_replot();
+
+				/* get misfit */
+				mbnavadjust_get_misfit();
+
+				/* set plot bounds to overlap region */
+				mbnavadjust_crossing_overlapbounds(mbna_current_crossing,
+							mbna_offset_x, mbna_offset_y,
+							&mbna_overlap_lon_min, &mbna_overlap_lon_max,
+							&mbna_overlap_lat_min, &mbna_overlap_lat_max);
+				mbna_plot_lon_min = mbna_overlap_lon_min;
+				mbna_plot_lon_max = mbna_overlap_lon_max;
+				mbna_plot_lat_min = mbna_overlap_lat_min;
+				mbna_plot_lat_max = mbna_overlap_lat_max;
+				overlap_scale = MIN((mbna_overlap_lon_max - mbna_overlap_lon_min) / mbna_mtodeglon,
+							(mbna_overlap_lat_max - mbna_overlap_lat_min) / mbna_mtodeglat);
+
+				/* get naverr plot scaling */
+				mbnavadjust_naverr_scale();
+
+				/* get misfit */
+				mbnavadjust_get_misfit();
+
+				/* check uncertainty estimate for a good pick */
+				if (MAX(mbna_minmisfit_sr1,mbna_minmisfit_sr2) < 0.5 * overlap_scale
+					&& MIN(mbna_minmisfit_sr1,mbna_minmisfit_sr2) > 0.0)
+					{
+
+					/* set offsets to minimum horizontal misfit */
+					mbna_offset_x = mbna_minmisfit_xh;
+					mbna_offset_y = mbna_minmisfit_yh;
+					mbna_offset_z = mbna_minmisfit_zh;
+
+					/* add tie */
+					mbnavadjust_naverr_addtie();
+					}
+				else
+					{
+					sprintf(message,"Failed to reset Tie Point %d of Crossing %d\n",
+							0, mbna_current_crossing);
+					if (mbna_verbose == 0)
+						fprintf(stderr,"%s",message);
+					do_info_add(message, MB_YES);
+					}
+
+				/* unload crossing */
+				mbnavadjust_crossing_unload();
+
+/*fprintf(stderr,"mbna_file_select:%d mbna_survey_select:%d mbna_section_select:%d\n",
+mbna_file_select,mbna_survey_select,mbna_section_select);*/
+
+				/* update status periodically */
+				if (nprocess % 10 == 0)
+					{
+					do_update_status();
+
+					/* update model plot */
+					if (project.modelplot == MB_YES)
+						{
+						/* update model status */
+						do_update_modelplot_status();
+
+						/* replot the model */
+						mbnavadjust_modelplot_plot();
+						}
+					}
+				}
+			}
 
 		/* update status */
 		do_update_status();
@@ -9130,8 +9318,6 @@ mbna_file_select,mbna_survey_select,mbna_section_select);
 			mbnavadjust_modelplot_plot();
 			}
 		}
-
-
 
  	/* print output debug statements */
 	if (mbna_verbose >= 2)
@@ -10098,6 +10284,8 @@ i,j,isnav,k,x[3*k+1],xa[3*k+1],mbna_mtodeglat,section->snav_lat_offset[isnav]); 
 				    section->snav_z_offset[isnav] = (x[3*k+2] + xa[3*k+2]);
 /* fprintf(stderr,"i:%d j:%d isnav:%d k:%d x[3*k+2]:%f xa[3*k+2]:%f section->snav_z_offset[isnav]:%f\n\n",
 i,j,isnav,k,x[3*k+2],xa[3*k+2],section->snav_z_offset[isnav]); */
+fprintf(stderr,"i:%d j:%d isnav:%d k:%d xa: %f %f %f  x: %f %f %f\n",i,j,isnav,k,
+xa[3*k],xa[3*k+1],xa[3*k+2],x[3*k],x[3*k+1],x[3*k+2]);
 				    }
 				}
 			    }
@@ -10158,8 +10346,8 @@ i,j,isnav,k,x[3*k+2],xa[3*k+2],section->snav_z_offset[isnav]); */
 				offsetx = tie->offset_x_m - (xa[3*nc2] - xa[3*nc1]);
 				offsety = tie->offset_y_m - (xa[3*nc2+1] - xa[3*nc1+1]);
 				offsetz = tie->offset_z_m - (xa[3*nc2+2] - xa[3*nc1+2]);
-/* fprintf(stderr,"STAGE 2 RESULT: icrossing:%d jtie:%d nc1:%d %d nc2:%d %d offsets: %f %f %f\n",
-icrossing,jtie,nc1,file1->status,nc2,file2->status,offsetx,offsety,offsetz); */
+fprintf(stderr,"STAGE 2 RESULT: icrossing:%d jtie:%d nc1:%d %d nc2:%d %d offsets: %f %f %f\n",
+icrossing,jtie,nc1,file1->status,nc2,file2->status,offsetx,offsety,offsetz);
 				}
 			    }
 			}

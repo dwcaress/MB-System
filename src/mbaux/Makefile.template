@@ -1,7 +1,7 @@
 #     The MB-system:	Makefile.template  9/8/00
 #	$Id$
 #
-#     Copyright (c) 2000-2009 by
+#     Copyright (c) 2000-2012 by
 #     David W. Caress (caress@mbari.org)
 #       Monterey Bay Aquarium Research Institute
 #       Moss Landing, CA 95039
@@ -60,9 +60,9 @@ INCDIR = ../../include
 # Locations of GMT and netcdf include files:
 GMTINCDIR = /ocean/mgg/gmt2/src
 NETCDFINCDIR = /ocean/mgg/netcdf/include
-# 
-# Compilers 
-CC = cc 
+#
+# Compilers
+CC = cc
 #
 # Compile and load flags:
 CFLAGS = -O2
@@ -90,7 +90,8 @@ $(LIBDIR)/libmbaux.a:	\
 		mb_delaun.o \
 		mb_track.o \
 		mb_truecont.o \
-		mb_readgrd.o
+		mb_readgrd.o \
+		mb_intersectgrid.o
 	$(ARCHIVE) $(LIBDIR)/libmbaux.a \
 		mb_spline.o \
 		mb_zgrid.o \
@@ -99,7 +100,8 @@ $(LIBDIR)/libmbaux.a:	\
 		mb_delaun.o \
 		mb_track.o \
 		mb_truecont.o \
-		mb_readgrd.o
+		mb_readgrd.o \
+		mb_intersectgrid.o
 	ranlib $(LIBDIR)/libmbaux.a
 $(LIBDIR)/libmbps.a:	\
 		mb_pslibface.o
@@ -133,6 +135,8 @@ mb_readgrd.o:	mb_readgrd.c $(INCDIR)/mb_status.h $(INCDIR)/mb_define.h $(INCDIR)
 	$(CC) -c $(CFLAGS) -I$(GMTINCDIR) -I$(NETCDFINCDIR) mb_readgrd.c
 mb_xgraphics.o:	mb_xgraphics.c $(INCDIR)/mb_status.h $(INCDIR)/mb_xgraphics.h
 	$(CC) -c $(CFLAGS) mb_xgraphics.c
+mb_intersectgrid.o:	mb_intersectgrid.c $(INCDIR)/mb_status.h $(INCDIR)/mb_aux.h
+	$(CC) -c $(CFLAGS) mb_intersectgrid.c
 
 ### copy the include files to the include file directory
 $(INCDIR)/mb_aux.h:	mb_aux.h

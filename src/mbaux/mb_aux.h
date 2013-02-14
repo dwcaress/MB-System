@@ -173,6 +173,27 @@ struct swath
 
 	};
 
+/* topography grid structure for mb_intersectgrid() */
+struct mb_topogrid_struct
+	{
+	mb_path	file;
+	int	projection_mode;
+	mb_path	projection_id;
+	float	nodatavalue;
+	int	nxy;
+	int	nx;
+	int	ny;
+	double	min;
+	double	max;
+	double	xmin;
+	double	xmax;
+	double	ymin;
+	double	ymax;
+	double	dx;
+	double	dy;
+	float	*data;
+	};
+
 /* mb_contour function prototypes */
 int mb_contour_init(
 		int	verbose,
@@ -402,3 +423,22 @@ void lspeig(
 	double	*smax,
 	double	*err,
 	double	*sup);
+
+/* mb_topogrid function prototypes */
+int mb_topogrid_init(int verbose, mb_path topogridfile, int *lonflip,
+			void **topogrid_ptr, int *error);
+int mb_topogrid_deall(int verbose, void **topogrid_ptr, int *error);
+int mb_topogrid_intersect(int verbose, void *topogrid_ptr,
+                        double navlon, double navlat,
+			double altitude, double sonardepth,
+			double mtodeglon, double mtodeglat,
+			double vx, double vy, double vz,
+			double *lon, double *lat, double *topo, double *range,
+                        int *error);
+int mb_topogrid_getangletable(int verbose, void *topogrid_ptr,
+                        int nangle, double angle_min, double angle_max,
+			double navlon, double navlat, double heading,
+			double altitude, double sonardepth, double pitch,
+			double *table_angle, double *table_xtrack,
+			double *table_ltrack, double *table_altitude,
+			double *table_range, int *error);

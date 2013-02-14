@@ -1,60 +1,70 @@
-.TH mbmosaic 1 "26 October 2009" "MB-System 5.0" "MB-System 5.0"
+.TH mbmosaic 1 "15 October 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
-\fBmbmosaic\fP - Mosaic amplitude or sidescan data 
+\fBmbmosaic\fP - Mosaic amplitude or sidescan data
 from swath mapping sonar data files.
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP 
-\fB-R\fIwest/east/south/north\fP [\fB-A\fIdatatype[F]\fP 
-\fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP 
-\fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range[/weight[/space]]\fP 
+\fBmbmosaic\fP \fB-I\fIfilelist\fP \fB-O\fIroot\fP
+[\fB-A\fIdatatype[F]\fP
+\fB-B\fIborder\fP -C\fIclip\fP \fB-D\fIxdim/ydim\fP
+\fB-E\fIdx/dy/units[!]\fP \fB-F\fIpriority_range[/weight[/space]]\fP
 \fB-G\fIgridkind\fP  \fB-J\fIprojection\fP
 \fB-H -L\fIlonflip\fP \fB-M -N -P\fIpings\fP
-\fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fIazimuth/factor\fP 
-\fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP 
+\fB-R\fIwest/east/south/north\fP \fB-R\fIfactor\fP
+\fB-S\fIspeed\fP \fB-T\fItension\fP \fB-U\fIazimuth/factor\fP
+\fB-V\fP -W\fIscale\fP \fB-X\fIextend\fP
 \fB-Y\fIpriority_source\fP \fB-Z\fIbath_default\fP]
 
 .SH DESCRIPTION
-\fBmbmosaic\fP is a utility used to mosaic amplitude or sidescan 
-data contained in a set of swath sonar data files. This program 
+\fBmbmosaic\fP is a utility used to mosaic amplitude or sidescan
+data contained in a set of swath sonar data files. This program
 allows users to prioritize data according to the associated grazing
 angle and according to look azimuth. Individual mosaic bin values
 can be either the value of the highest priority sample in the bin
-or the Gaussian weighted mean of the highest priority samples 
+or the Gaussian weighted mean of the highest priority samples
 in the neighborhood of the bin (the samples used here are those
 with priorities within a specified range of the highest priority
-sample found). Users can thus construct 
+sample found). Users can thus construct
 mosaics which are dominantly from a particular part of the swath
 (e.g. prioritize the outer swath higher than the inner swath)
 or which are dominantly from a particular look azimuth
-(e.g. construct an east-looking mosaic by specifying a 
+(e.g. construct an east-looking mosaic by specifying a
 preferred look azimuth of 90 degrees).
 
-The user must specify a file containing a list of the data files to 
-be used and their data formats (\fB-I\fP), and a character string 
-to be used as the root of the output filenames (\fB-O\fP). The user 
-may specify the bounds of the region to be gridded (\fB-R\fP), and 
-either the dimensions (\fB-D\fP) or node spacing \fB-E\fP of the grid, 
+The user must specify a file containing a list of the data files to
+be used and their data formats (\fB-I\fP), and a character string
+to be used as the root of the output filenames (\fB-O\fP). The user
+may specify the bounds of the region to be gridded (\fB-R\fP), and
+either the dimensions (\fB-D\fP) or node spacing \fB-E\fP of the grid,
 If the bounds and grid dimensions (or spacing) are not specified, the
 program will select the region encompassing all of the data in the
 input files and a grid spacing equivalent to 0.02 times the maximum
-sonar altitude. 
+sonar altitude. If the bounds and grid dimensions (or spacing) are not
+specified, the program will select the region encompassing all of the
+data in the input files and a grid spacing equivalent to 0.02 times the maximum
+sonar altitude. The automatically calculated grid bounds will exactly
+correspond to the smallest rectangular region including the data unless
+the user specifies a larger region using \fB-R\fP\fIfactor\fP. The value
+\fIfactor\fP must be greater than one; if \fIfactor\fP = 1.1 then the
+grid bounds will be expanded to the east and west by an amount 0.05 times
+the data bounds east-west extend and to the north and south by an amount
+0.05 times the data bounds north-south extent.
 The input data type (beam amplitude or sidescan) is specified using
-the \fB-A\fP option. Depending on the input datalist, the amplitude or 
+the \fB-A\fP option. Depending on the input datalist, the amplitude or
 sidescan data may be raw or corrected for variations in amplitude with
 grazing angle (see \fBmbbackangle\fP and \fBmbprocess\fP), and may be
 unfiltered or have been filtered using \fBmbfilter\fP.
-The user can also specify the range of allowable sample priorities used in 
-the mosaicing (\fB-F\fP), the preferred look azimuth (\fB-U\fP), the 
-maximum distance from data points that the spline interpolation is 
+The user can also specify the range of allowable sample priorities used in
+the mosaicing (\fB-F\fP), the preferred look azimuth (\fB-U\fP), the
+maximum distance from data points that the spline interpolation is
 used (\fB-C\fP), the format of the output files, and other parameters.
 
 By default, \fBmbmosaic\fP generates mosiacs in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
-the WGS84 horizontal datum. The \fB-J\fP option can be used to specify 
+the WGS84 horizontal datum. The \fB-J\fP option can be used to specify
 an alternate, projected coordinate system (PCS). When a PCS is used,
 position will be defined in eastings and northings (meters) relative
 to the origin of the particular PCS. Universal Transverse Mercator
@@ -67,7 +77,7 @@ an ascii file in the same directory having the same name except
 that ".inf" is appended to the end. The program assumes that this
 ascii file contains the output of the program \fBmbinfo\fP run on
 the input data file. If the ".inf" file exists, \fBmbmosaic\fP reads
-the minimum and maximum longitude and latitude bounds from the 
+the minimum and maximum longitude and latitude bounds from the
 \fBmbinfo\fP output and compares those to the working bounds
 for the grid. If the ".inf" file indicates that none of the data
 in the input file lies inside the working grid bounds, that input
@@ -76,7 +86,7 @@ of data files for use in all gridding without the performance penalty
 of \fBmbmosaic\fP reading through all the data files, even those
 with no relevent data. We recommend that users maintain a ".inf"
 file for each swath data file used for gridding or plotting. The
-programs \fBmbgrid\fP, \fBmbswath\fP, and \fBmbcontour\fP 
+programs \fBmbgrid\fP, \fBmbswath\fP, and \fBmbcontour\fP
 also use ".inf" files in the same fashion.
 
 Usually, the internal working grid has the same boundaries as the
@@ -98,7 +108,7 @@ arctan(x/z) where x is acrosstrack distance and z is depth, so
 that the center of the swath has an apparent grazing angle of
 zero, the port swath edge has a large negative angle, and the
 starboard swath edge has a large positive angle). The highest
-priority assigned should be one, and the lowest zero. 
+priority assigned should be one, and the lowest zero.
 
 The second criteria is set by using the \fB-U\fP option to specify
 a preferred look azimuth (data on the port side of the swath have
@@ -123,18 +133,18 @@ will have a zero priority).
 
 If data priorities are set using both apparent grazing angles
 and look azimuths, the priorities used in the mosaicing are
-found by multiplying the grazing angle and look azimuth 
+found by multiplying the grazing angle and look azimuth
 priorities together.
 
 The default behavior is to set each bin to the value of the highest
 priority sample found in that bin. If more than one sample has
-the same highest priority, the first such sample is used. 
-If the \fB-F\fP option is used to set a range of acceptable 
+the same highest priority, the first such sample is used.
+If the \fB-F\fP option is used to set a range of acceptable
 priorities, then the mosaicing is done using a Gaussian weighted
 mean algorithm. The samples used are those with priorities larger
 than the highest priority found minus the range value.
-In this scheme, each sample's contribution 
-to a Gaussian weighted average for each nearby grid cell 
+In this scheme, each sample's contribution
+to a Gaussian weighted average for each nearby grid cell
 is calculated using this weighting function:
  	W(r) = Aexp(r**2/a**2)
 .br
@@ -143,19 +153,19 @@ a is the distance at which the weighting function falls to 1/e of its
 maximum value, and A is a normalizing factor set so that the sum of all
 the weights adds to a value of 1.  Normally, the distance a is set to be
 half the average grid point spacing, but this can be varied using the \fB-W\fP
-option. 
+option.
 
-If the weight parameter is used on the \fB-F\fP option then 
+If the weight parameter is used on the \fB-F\fP option then
 for weight = 0 [default] the above weight is used,
 for weight = 1 the above weight is multiplied by the sample priority,
-and for weight = 2 the above weight is multiplied by the square of the sample priority. 
+and for weight = 2 the above weight is multiplied by the square of the sample priority.
 Using \fB-F1/1\fP causes the priorities to be treated as weights rather than priorities.
 
 If the \fB-C\fP option is used to set clipping to a value > 0, then a
-2D thin plate spline algorithm is applied to the successfully calculated 
+2D thin plate spline algorithm is applied to the successfully calculated
 grid values to fill in, or interpolate, gaps in the data.  New values
 are assigned only at grid points within a specified distance from
-the nearest data points (this distance is specified in terms of 
+the nearest data points (this distance is specified in terms of
 grid point spacing using the \fB-C\fP command).  Thus, small gaps
 in the data can be filled, or the whole grid can be filled in with
 a smooth interpolation.
@@ -165,7 +175,7 @@ containing no data; if the \fB-N\fP option is used then the flagging
 value used is NaN, or not-a-number.
 
 The names of the output files are based on the root character string
-specified using the \fB-O\fP option. A number of grid formats are 
+specified using the \fB-O\fP option. A number of grid formats are
 supported, including all of the grid formats supported by \fBGMT\fP.
 See the \fB-G\fP option below for a list of the available formats.
 If the grid is output in any of the \fBGMT\fP grid formats,
@@ -173,17 +183,17 @@ then its filename is "root.grd", and a shellscript
 which will allow the contents of the grid to be viewed using \fBGMT\fP programs
 is also output with the filename "root.grd.cmd".  If the
 \fB-G\fP\fI1\fP option is used to specify an ascii format grid, then the
-output grid filename will be "root.asc", but no plotting shellscript 
-will be created. 
+output grid filename will be "root.asc", but no plotting shellscript
+will be created.
 
-A datalist file containing references to all of the swath files actually 
-contibuting to the grid is also created. This file is named by adding 
+A datalist file containing references to all of the swath files actually
+contibuting to the grid is also created. This file is named by adding
 a ".mb-1" suffix to the root string.
 
 The \fB-M\fP option causes \fBmbmosaic\fP to output two additional
 grids, the first ("root_num.grd") being the number of high priority
-data points used within each bin, and the second ("root_sd.grd") 
-being the standard deviation of the data points used within each bin.  
+data points used within each bin, and the second ("root_sd.grd")
+being the standard deviation of the data points used within each bin.
 The \fB-M\fP option can only be used if Gaussian weighted mean
 mosaicing is enabled with the \fB-F\fP option.
 Plotting shellscripts
@@ -208,18 +218,18 @@ Dale N. Chayes (dale@ldeo.columbia.edu)
 .B \-A
 \fIdatatype\fP
 .br
-Sets the type of data to be read and mosaiced.  
- 	\fIdatatype\fP = 3, amplitude data will be mosaiced.  
- 	\fIdatatype\fP = 4, sidescan data will be mosaiced.  
- 	\fIdatatype\fP = 5, flat bottom grazing angle will be mosaiced.  
- 	\fIdatatype\fP = 6, acrosstrack grazing angle will be mosaiced.  
- 	\fIdatatype\fP = 7, acrosstrack slope will be mosaiced.  
+Sets the type of data to be read and mosaiced.
+ 	\fIdatatype\fP = 3, amplitude data will be mosaiced.
+ 	\fIdatatype\fP = 4, sidescan data will be mosaiced.
+ 	\fIdatatype\fP = 5, flat bottom grazing angle will be mosaiced.
+ 	\fIdatatype\fP = 6, acrosstrack grazing angle will be mosaiced.
+ 	\fIdatatype\fP = 7, acrosstrack slope will be mosaiced.
 .br
 Mosaicing of bathymetry is not supported, and so \fIdatatype\fP values of 1 (bathymetry)
 and 2 (topography) are not allowed. Bathymetry and topography should be gridded with
 \fBmbgrid\fP.
 If "F" is appended to \fIdatatype\fP, then \fBmbmosaic\fP will attempt
-to mosaic amplitude or sidescan data that have been filtered with \fBmbfilter\fP. 
+to mosaic amplitude or sidescan data that have been filtered with \fBmbfilter\fP.
 If the desired filtered data files do not exist, data input will fail and
 \fBmbmosiac\fP will exit with an error message. Filtered amplitude
 data are stored in ancilliary files ending with ".ffa", and filtered
@@ -257,47 +267,46 @@ Default:  \fIxdim\fP = \fIydim\fP = 101.
 \fIdx/dy/units[!]\fP
 .br
 Sets the grid cell spacing to \fIdx\fP in longitude and \fIdy\fP
-in latitude. If \fIunits\fP is not specified, the \fIdx\fP 
+in latitude. If \fIunits\fP is not specified, the \fIdx\fP
 and \fIdy\fP values are assumed to be in meters. Valid values
 for \fIunits\fP include "km", "meters", and "degrees".
 If not in degrees, the grid cell spacing values are converted to
-degrees using the central latitude of the grid. If 
+degrees using the central latitude of the grid. If
 \fIdy\fP = 0.0, then the latitude cell spacing will be set
 equal to the longitude cell spacing (after conversion to
 degrees, if necessary).
-By default, the grid spacing is calculated from 
+By default, the grid spacing is calculated from
 the grid bounds and the grid dimensions. When the user
 uses the \fB-E\fP option to set the cell spacings, the
 grid dimensions are calculated using the grid bounds and
 grid cell spacings. However, slight adjustments to the
 grid cell spacings are usually required to keep
-the grid bounds as specified. Appending an ! to the end of 
+the grid bounds as specified. Appending an ! to the end of
 the \fB-E\fP arguments forces \fBmbmosaic\fP to use the
-exact grid cell spacing values specified by adjusting the 
+exact grid cell spacing values specified by adjusting the
 grid bounds.
 Default: If neither the \fB-E\fP or \fB-D\fP options are specified,
-the program sets the grid cell spacing to be 0.02 times the maximum 
+the program sets the grid cell spacing to be 0.02 times the maximum
 sonar altitude in the input files.
 .TP
 .B \-F
 \fIpriority_range[/weight[/space]]\fP
 .br
-Turns on Gaussian weighted mean mosaicing. The 
+Turns on Gaussian weighted mean mosaicing. The
 \fIpriority_range\fP value determines which data points are
 used in the mosaicing. The minimum priority threshold for
-each bin is the highest priority value found among the 
+each bin is the highest priority value found among the
 samples in that bin minus the \fIpriority_range\fP value.
 Only samples with priorities greater than this threshold
 are used in the Gaussian weighted mean mosaicing.
 The default is to simply set each bin's value equal to the
 value of the highest priority sample in that bin.
-
-The \fIweight\fP value, if present, causes priorities to be 
-also used to weight values. A \fIweight\fP of 0 (the default) indicates 
-priorities are not used as weights. A \fIweight\fP of 1 
-indicates the Gaussian weight of each value is 
-multiplied by its priority to get the value weight. A \fIweight\fP of 2 
-indicates the Gaussian weight of each value is multiplied by the square of 
+The \fIweight\fP value, if present, causes priorities to be
+also used to weight values. A \fIweight\fP of 0 (the default) indicates
+priorities are not used as weights. A \fIweight\fP of 1
+indicates the Gaussian weight of each value is
+multiplied by its priority to get the value weight. A \fIweight\fP of 2
+indicates the Gaussian weight of each value is multiplied by the square of
 its priority to get the value weight. 
 Default: weight = 0.
 
@@ -371,14 +380,14 @@ with a scaling factor of 10, an offset of 32000, and a NaN value
 of 32767, then the following arguments will suffice:
 .br
  	\fB-G\fP\fI=2/10/32000/32767\fP
- 	
-If \fIgridkind\fP = 3 or \fIgridkind\fP >= 100, 
-\fBmbgrid\fP also outputs shellscripts 
+
+If \fIgridkind\fP = 3 or \fIgridkind\fP >= 100,
+\fBmbgrid\fP also outputs shellscripts
 which run \fBGMT\fP programs to provide preliminary color
-fill maps of the gridded data. These shellscripts are 
+fill maps of the gridded data. These shellscripts are
 generated using the \fBmbm_grdplot\fP macro.
 
-If \fIgridkind\fP = 4, the output grids will be in the Arc/Info ASCII 
+If \fIgridkind\fP = 4, the output grids will be in the Arc/Info ASCII
 grid format.  Arc/Info ASCII grids use "square" bins,
 meaning that the longitude and latitude grid cell spacings must
 be identical. Thus, whenever the \fIgridkind\fP = 4 option is
@@ -410,49 +419,49 @@ Default: \fIdatalist\fP = datalist.mb-1
 \fIprojection\fP
 By default, \fBmbgrid\fP generates grids in Geographic coordinates,
 meaning that position is defined in longitude and latitude using
-the WGS84 geographic coordinate system. 
-The \fB-J\fP option can be used to specify 
+the WGS84 geographic coordinate system.
+The \fB-J\fP option can be used to specify
 an alternate, projected coordinate system (PCS). When a PCS is used,
 position will be defined in eastings and northings (meters) relative
 to the origin of the particular PCS. Universal Transverse Mercator
 is the most commonly used PCS in the oceanographic community, but
-\fBmbgrid\fP supports a large number of other PCS's as well. 
+\fBmbgrid\fP supports a large number of other PCS's as well.
 The underlying projection functions derive from the \fBPROJ.4\fP library
 written by Gerald Evenden, then of the U.S. Geological Survey.
 
 The \fIprojection\fP argument for the \fB-J\fP option can be either
-a PCS identifier from the projection definition list provided at the 
+a PCS identifier from the projection definition list provided at the
 end of this manual page, or simply \fB-J\fP\fIU\fP to specify using
 UTM in whatever zone is appropriate for the grid bounds specified
 with the \fB-R\fP option.
 
-For instance, to fully specify a particular northern UTM 
+For instance, to fully specify a particular northern UTM
 zone, set \fIprojection\fP = UTMXXN where XX gives
 the UTM zone (defined from 01 to 60). As an example, a northern UTM
 zone 12 projection can be specified using \fB-J\fP\fIUTM12N\fP.
 Southern UTM zones are specified as UTMXXS. The European Petroleum
 Survey Group (EPSG) has defined a large number of PCS's used worldwide
 and assigned number id's to each; one can also specify the northern
-UTM zone 12 projection using its EPSG designation, 
+UTM zone 12 projection using its EPSG designation,
 or \fB-J\fP\fIepsg32612\fP.
 When the projected coordinate system is fully specified
 by the \fB-J\fP option, then the grid bounds may be specified using
 \fB-R\fP in either longitude and latitude or in eastings and northings.
 
 Alternatively, one may indicate a UTM projection without specifying the
-zone by using \fB-J\fP\fIU\fP. In this case, the 
-UTM zone will be inferred from the midpoint of the 
-specified longitude and latitude bounds, and then the 
-longitude and latitude bounds given with the 
+zone by using \fB-J\fP\fIU\fP. In this case, the
+UTM zone will be inferred from the midpoint of the
+specified longitude and latitude bounds, and then the
+longitude and latitude bounds given with the
 \fB-fR\fP option are translated to UTM eastings and northings.
 
-All grids and mosaics produced by \fBMB-System\fP 
+All grids and mosaics produced by \fBMB-System\fP
 programs contain identifiers that are recognized
-by the plotting macros \fBmbm_grdplot\fP, 
+by the plotting macros \fBmbm_grdplot\fP,
 \fBmbm_grd3dplot\fP, and \fBmbm_grdtiff\fP.
-These plotting macros automatically use a 
+These plotting macros automatically use a
 linear map projection whenever they
-encounter grids and mosaics that are already 
+encounter grids and mosaics that are already
 in a projected coordinate system. Also, the program \fBmbgrdtiff\fP
 automatically inserts the appropriate projection information into
 the GeoTIFF images it generates. As a result, images generated by
@@ -464,9 +473,9 @@ into GIS software.
 .br
 Sets the range of the longitude values returned.
 If \fIlonflip\fP=-1 then the longitude values will be in
-the range from -360 to 0 degrees. If \fIlonflip\fP=0 
+the range from -360 to 0 degrees. If \fIlonflip\fP=0
 then the longitude values will be in
-the range from -180 to 180 degrees. If \fIlonflip\fP=1 
+the range from -180 to 180 degrees. If \fIlonflip\fP=1
 then the longitude values will be in
 the range from 0 to 360 degrees.
 Default: \fIlonflip\fP = 0.
@@ -474,7 +483,7 @@ Default: \fIlonflip\fP = 0.
 .B \-M
 Causes two additional grids to be output. One is a grid containing
 the standard deviation of the data within each grid cell relative
-to the grid value, the other contains the number of data 
+to the grid value, the other contains the number of data
 points in each grid cell. This option is ignored unless the
 Gaussian weighted mean mosaicing is enabled with the \fP-F\fP option.
 .TP
@@ -487,12 +496,12 @@ is expected by \fBGMT\fP programs such \fBgrdview\fP.
 \fIroot\fP
 .br
 Sets the character string to be used as the root of the
-output filenames. For example, if the grid is output as a \fBGMT\fP 
-version 2 GRD format (netCDF) file (the default), 
+output filenames. For example, if the grid is output as a \fBGMT\fP
+version 2 GRD format (netCDF) file (the default),
 then its filename is "root.grd". If the
 \fB-G\fP\fI1\fP option is used to specify an ascii format grid, then the
 output grid filename will be "root.asc". If the
-\fB-G\fP\fI2\fP option is used to specify a version 1 GRD 
+\fB-G\fP\fI2\fP option is used to specify a version 1 GRD
 format (binary) grid, then the
 output grid filename will be "root.grd1". If the output grid is
 in the \fBGMT\fP version 2 GRD format, a shellscript
@@ -511,20 +520,32 @@ beam spacing. Default: \fIpings\fP = 1.
 .B \-R
 \fIwest/east/south/north\fP
 .br
-Sets the longitude and latitude bounds of the output grid. If the user
-uses the \fB-E\fP option to set the grid spacing, then the dimensions
+\fIfactor\fP
+.br
+The first form sets the longitude and latitude bounds of the output grid.
+By default (if the \fB-R\fP\fIwest/east/south/north\fP
+option is not specified) the program will set
+the grid bounds to be the area encompassing all of the data in the
+input files. The second form (\fB-R\fP\fIfactor\fP) expands the automatically
+calculated bounds by the multiplicative \fIfactor\fP.The value
+\fIfactor\fP must be greater than one; if \fIfactor\fP = 1.1 then the
+grid bounds will be expanded to the east and west by an amount 0.05 times
+the data bounds east-west extend and to the north and south by an amount
+0.05 times the data bounds north-south extent.
+If the user uses the \fB-E\fP option to set the grid spacing, then the dimensions
 will be calculated from the grid bounds and spacing. In these
 circumstances rounding errors will usually require that the eastern
-and northern bounds be adjusted to fit exactly with the 
+and northern bounds be adjusted to fit exactly with the
 grid dimensions and spacing.
-Default: If the \fB-R\fP option is not specified, the program will set
+Default: If the \fB-R\fP\fIwest/east/south/north\fP
+option is not specified, the program will set
 the grid bounds to be the area encompassing all of the data in the
 input files.
 .TP
 .B \-S
 \fIspeed\fP
 .br
-Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in
 the input data; pings associated with a smaller ship speed will not be
 output. Default: \fIspeed\fP = 0.
 .TP
@@ -533,11 +554,11 @@ output. Default: \fIspeed\fP = 0.
 .br
 Sets the \fItension\fP value used in the thin plate spline interpolation.
 A \fItension\fP of 0 gives a minimum curvature surface with free edges;
-this is a pure Laplacian solution. A nonzero \fItension\fP tends to 
+this is a pure Laplacian solution. A nonzero \fItension\fP tends to
 suppress spurious oscillations and flatten
 the interpolation toward the edges; a \fItension\fP of infinity
 yields a pure spline solution. The \fItension\fP must be zero or
-greater.  
+greater.
 Default: \fItension\fP = 1.0e10 (pure spline solution).
 .TP
 .B \-U
@@ -559,7 +580,7 @@ otherwise, where f = \fIfactor\fP, Ap = \fIazimuth\fP, and Al is the
 look azimuth of the data point.
 If \fIfactor\fP = 1.0, the priority will be 1.0
 at \fIazimuth\fP and will fall to zero for look
-azimuths more than 90 degrees away from \fIazimuth\fP. 
+azimuths more than 90 degrees away from \fIazimuth\fP.
 If \fIfactor\fP > 1.0, the range of nonzero priorities will shrink
 to azimuths closer to \fIazimuth\fP (e.g. if \fIfactor\fP = 2.0,
 nonzero priorities will be restricted to look azimuths within
@@ -570,7 +591,7 @@ will have a zero priority).
 .TP
 .B \-V
 Normally, \fBmbmosaic\fP prints out information regarding its
-controlling parameters during execution; the 
+controlling parameters during execution; the
 \fB-V\fP option causes the program to also print out statements
 indicating its progress.
 .TP
@@ -588,7 +609,7 @@ Default: \fIscale\fP = 1.0
 Extends the size of the internal grid so that the output grid is a
 subset from the center of a larger grid.   This allows data outside
 the output grid to guide the spline interpolation of data gaps which
-happen to lie at the the edge of the output grid.  The amount of 
+happen to lie at the the edge of the output grid.  The amount of
 extension is \fIextend\fP times the grid width/height to each side.
 Thus, if \fIextend\fP=1.0, then the internal grid will have dimensions
 three times the output grid.
@@ -598,15 +619,15 @@ Default: \fIextend\fP = 0.0
 \fIpriority_source\fP
 .br
 Enables priortization of data points based on their apparent
-grazing angle (this angle is arctan(x/z) where x is acrosstrack distance 
+grazing angle (this angle is arctan(x/z) where x is acrosstrack distance
 and z is sonar altitude, so
 that the center of the swath has an apparent grazing angle of
 zero, the port swath edge has a large negative angle, and the
 starboard swath edge has a large positive angle). A number of predefined
 priority tables are available and can be accessed by setting \fIpriority_source\fP
 to a number from 1 to 8. These priority tables include:
- 
- 
+
+
 \fIpriority_source\fP = 1:
 .br
       Angle (deg)  Priority
@@ -614,8 +635,8 @@ to a number from 1 to 8. These priority tables include:
  	  -60          1.0
  	    0          0.0
  	   60          1.0
- 
- 
+
+
 \fIpriority_source\fP = 2:
 .br
       Angle (deg)  Priority
@@ -623,8 +644,8 @@ to a number from 1 to 8. These priority tables include:
  	  -67          1.0
  	    0          0.0
  	   67          1.0
- 
- 
+
+
 \fIpriority_source\fP = 3:
 .br
       Angle (deg)  Priority
@@ -632,8 +653,8 @@ to a number from 1 to 8. These priority tables include:
  	  -75          1.0
  	    0          0.0
  	   75          1.0
- 
- 
+
+
 \fIpriority_source\fP = 4:
 .br
       Angle (deg)  Priority
@@ -641,8 +662,8 @@ to a number from 1 to 8. These priority tables include:
  	  -85          1.0
  	    0          0.0
  	   85          1.0
- 
- 
+
+
 \fIpriority_source\fP = 5:
 .br
       Angle (deg)  Priority
@@ -650,8 +671,8 @@ to a number from 1 to 8. These priority tables include:
  	  -60          0.0
  	    0          1.0
  	   60          0.0
- 
- 
+
+
 \fIpriority_source\fP = 6:
 .br
       Angle (deg)  Priority
@@ -659,8 +680,8 @@ to a number from 1 to 8. These priority tables include:
  	  -67          0.0
  	    0          1.0
  	   67          0.0
- 
- 
+
+
 \fIpriority_source\fP = 7:
 .br
       Angle (deg)  Priority
@@ -668,8 +689,8 @@ to a number from 1 to 8. These priority tables include:
  	  -75          0.0
  	    0          1.0
  	   75          0.0
- 
- 
+
+
 \fIpriority_source\fP = 8:
 .br
       Angle (deg)  Priority
@@ -677,12 +698,12 @@ to a number from 1 to 8. These priority tables include:
  	  -85          0.0
  	    0          1.0
  	   85          0.0
- 
- 
+
+
 Alternatively, if \fIpriority_source\fP specifies a file name, then the data
 priority table will be read from this file.
 The priority file should contain two columns: apparent grazing angles
-in degrees from vertical followed by data priority values between 0.0 
+in degrees from vertical followed by data priority values between 0.0
 and 1.0. The first line of
 the file should contain the minimum, or port-most grazing angle
 followed by the associated priority. The following lines
@@ -701,7 +722,7 @@ amplitude or sidescan values where depths are not available.
 Default: \fIscale\fP = 1000.0
 .SH EXAMPLES
 Suppose you want to mosaic some SeaBeam 2112 sidescan data
-in six data files over a region with longitude 
+in six data files over a region with longitude
 bounds of 113.4833E to 115.4333E and latitude bounds
 of 32.1166S to 31.5500S, and you would like a 100 m grid spacing.
 First, create a datalist file using a text editor which contains the
@@ -716,7 +737,7 @@ data filenames followed by the appropriate format identifier:
 
 The nadir region of the sidescan swath is generally of little
 use because it is dominated by specular reflection rather
-than backscatter. In order to allow \fBmbmosaic\fP to 
+than backscatter. In order to allow \fBmbmosaic\fP to
 preferentially use data from the outer swath, where possible,
 create another file containing a list of data priority as
 a function of apparent grazing angle:
@@ -753,9 +774,9 @@ option enables Gaussian weighted mean mosaicing and the priority
 range of 0.10 means that for each bin, all data with priorities
 within 0.1 of the highest priority will be used.
 By specifying a clipping dimension of 10 we cause small gaps in
-the mosaic to be filled in through spine interpolation . 
+the mosaic to be filled in through spine interpolation .
 The output looks like:
- 
+
  Program mbmosaic
  Version $Id$
  MB-system Version 4.5
@@ -780,7 +801,7 @@ The output looks like:
  Input data bounds:
    Longitude:  113.4833  115.4333
    Latitude:   -32.6832  -30.9834
- Mosaicing algorithm:  
+ Mosaicing algorithm:
    Average of highest weighted pixels
    Pixel weighting range: 0.100000
    Pixels weighted by look azimuth
@@ -839,7 +860,7 @@ The output looks like:
 
    Input Files:
      Data GRD File:            perth_ss.grd
-     Intensity GRD List File:   
+     Intensity GRD List File:
 
    Output Files:
      Output plot name root:    perth_ss.grd
@@ -890,9 +911,9 @@ The output looks like:
  Plot generation shellscript <perth_ss.grd.cmd> created.
 
  Instructions:
-   Execute <perth_ss.grd.cmd> to generate 
+   Execute <perth_ss.grd.cmd> to generate
         Postscript plot <perth_ss.grd.ps>.
-   Executing <perth_ss.grd.cmd> also invokes 
+   Executing <perth_ss.grd.cmd> also invokes
         xpsview to view the plot on the screen.
 
  --------------
@@ -931,8 +952,8 @@ The following is a list of the projected coordinate systems (PCS's)
 that are supported by MB-System. The full PCS definitions are
 found in the file mbsystem/share/Projections.dat. These definitions
 are in the \fBPROJ.4\fP format and derive from the \fBPROJ.4\fP
-4.6.1 distribution obtained from http://trac.osgeo.org/proj/ 
-in September 2008. The proj library source code has been 
+4.6.1 distribution obtained from http://trac.osgeo.org/proj/
+in September 2008. The proj library source code has been
 incorporated unchanged into the MB-System package.
 
 The first item on each line is the PCS identifier inside brackets, such
@@ -8106,7 +8127,7 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <RGSPM06GEO> : Saint-Pierre-et-Miquelon (2006)
  <SAT84GEO> : SAT84 (Rurutu) Iles Australes
  <SHOM84GEO> : SHOM 1984 Martinique Montagne Du Vauclin
- <STPM50GEO> : St Pierre et Miquelon 1950 
+ <STPM50GEO> : St Pierre et Miquelon 1950
  <TAHAAGEO> : Raiatea - Tahaa 51-54 (Tahaa, Base Terme Est)
  <TAHI51GEO> : Tahiti-Terme Nord 1951
  <TAHI79GEO> : IGN79 (Tahiti) Iles de la Societe
@@ -8139,7 +8160,7 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <GEOPORTALSPM> : Geoportail - Saint-Pierre et Miquelon
  <GEOPORTALWLF> : Geoportail - Wallis et Futuna
  <GUAD48UTM20> : Guadeloupe Ste Anne
- <GUADFM49U20> : Guadeloupe Fort Marigot 
+ <GUADFM49U20> : Guadeloupe Fort Marigot
  <IGN63UTM7S> : IGN 1963 - Hiva Oa, Tahuata, Mohotani - UTM fuseau 7 Sud
  <IGN72LAM> : IGN 1972 - Lambert Nouvelle Caledonie
  <IGN72UTM58S> : IGN 1972 - UTM fuseau 58 Sud
@@ -8387,7 +8408,7 @@ the \fB-J\fP option, e.g. \fB-J\fP\fIUTM10N\fP or \fB-J\fP\fIepsg32749\fP.
  <s-alger> : Sud Algerie Grid
  <s-maroc> : Sud Maroc Grid
  <s-tunis> : Sud Tunisie Grid
-     
+
  ---------------------------------------------------------
  Gauss Krueger Grids for Germany
  ---------------------------------------------------------
