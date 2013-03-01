@@ -489,44 +489,44 @@ int mb_topogrid_getangletable(int verbose, void *topogrid_ptr,
 					last = MAX(i,last);
 					}
 				}
-			}
 
-		/* apply flat bottom calculation to unset entries */
-		for (i=0;i<nangle;i++)
-			{
-			if (table_range[i] <= 0.0)
+			/* apply flat bottom calculation to unset entries */
+			for (i=0;i<nangle;i++)
 				{
-				/* get angles in takeoff coordinates */
-				table_angle[i] = angle_min + dangle * i;
-				beta = 90.0 - table_angle[i];
-				mb_rollpitch_to_takeoff(
-					verbose,
-					alpha, beta,
-					&theta, &phi,
-					error);
+				if (table_range[i] <= 0.0)
+					{
+					/* get angles in takeoff coordinates */
+					table_angle[i] = angle_min + dangle * i;
+					beta = 90.0 - table_angle[i];
+					mb_rollpitch_to_takeoff(
+						verbose,
+						alpha, beta,
+						&theta, &phi,
+						error);
 
-				if (nset == 0)
-					{
-					table_altitude[i] = altitude;
-					}
-				else if (i < first)
-					{
-					table_altitude[i] = table_altitude[first];
-					}
-				else if (i > last)
-					{
-					table_altitude[i] = table_altitude[last];
-					}
-				else
-					{
-					table_altitude[i] = 0.5 * (table_altitude[first] + table_altitude[last]);
-					}
+					if (nset == 0)
+						{
+						table_altitude[i] = altitude;
+						}
+					else if (i < first)
+						{
+						table_altitude[i] = table_altitude[first];
+						}
+					else if (i > last)
+						{
+						table_altitude[i] = table_altitude[last];
+						}
+					else
+						{
+						table_altitude[i] = 0.5 * (table_altitude[first] + table_altitude[last]);
+						}
 
-				table_range[i]  = table_altitude[first] / cos(DTR * theta);
-				xx = table_range[i] * sin(DTR * theta);
-				table_xtrack[i] = xx * cos(DTR * phi);
-				table_ltrack[i] = xx * sin(DTR * phi);
-				nset++;
+					table_range[i]  = table_altitude[first] / cos(DTR * theta);
+					xx = table_range[i] * sin(DTR * theta);
+					table_xtrack[i] = xx * cos(DTR * phi);
+					table_ltrack[i] = xx * sin(DTR * phi);
+					nset++;
+					}
 				}
 			}
 		}

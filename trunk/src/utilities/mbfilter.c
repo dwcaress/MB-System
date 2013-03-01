@@ -1146,6 +1146,11 @@ The default input and output streams are stdin and stdout.\n";
 				nreadtot++;
 				nload++;
 				}
+			if (status == MB_FAILURE && error < 0)
+				{
+				status = MB_SUCCESS;
+				error = MB_ERROR_NO_ERROR;
+				}
 			}
 		if (status == MB_FAILURE && error > 0)
 			{

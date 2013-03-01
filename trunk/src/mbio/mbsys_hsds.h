@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_hsds.h	2/16/93
  *	$Id$
  *
- *    Copyright (c) 1993-2012 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -101,10 +101,10 @@
  *        ERGNPOSI:  navigation source
  *        ERGNMESS:  across-track "survey" bathymetry
  *        ERGNEICH:  along-track "calibration" bathymetry
- *        ERGNLSZT:  travel times associated with 
+ *        ERGNLSZT:  travel times associated with
  *                   ERGNMESS or ERGNEICH records
  *        ERGNCTDS:  water sound velocity profile
- *        ERGNAMPL:  amplitudes associated with 
+ *        ERGNAMPL:  amplitudes associated with
  *                   ERGNMESS or ERGNEICH records
  *        LDEOCOMM:  comment records (an L-DEO extension)
  *   4. A single ping usually results in the following series of
@@ -118,10 +118,10 @@
  *   5. The kind value in the mbsys_hsds_struct indicates whether the
  *      mbsys_hsds_data_struct structure holds data from a ping or
  *      data from some other record:
- *        kind = 1 : data from a survey ping 
+ *        kind = 1 : data from a survey ping
  *                   (ERGNMESS + ERGNSLZT + ERGNAMPL)
  *        kind = 2 : comment (LDEOCOMM)
- *        kind = 3 : data from a calibrate ping 
+ *        kind = 3 : data from a calibrate ping
  *                   (ERGNEICH + ERGNSLZT + ERGNAMPL)
  *        kind = 4 : mean and keel velocity (ERGNHYDI)
  *        kind = 5 : water velocity profile (ERGNCTDS)
@@ -140,7 +140,7 @@
 /* number of beams for hydrosweep */
 #define MBSYS_HSDS_BEAMS 59
 
-/* angular beam spacing for Hydrosweep DS 
+/* angular beam spacing for Hydrosweep DS
 	- this is supposed to be 1.525 degrees but seems
 	to really be 1.510 degrees */
 #define MBSYS_HSDS_BEAM_SPACING 1.510
@@ -235,66 +235,65 @@ struct mbsys_hsds_struct
 	/* processed amplitude data */
 	double	back_scale;
 	int	back[MBSYS_HSDS_BEAMS];
-	};	
-	
+	};
+
 /* system specific function prototypes */
-int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_hsds_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hsds_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_hsds_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hsds_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_hsds_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_hsds_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_hsds_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_hsds_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_hsds_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
 int mbsys_hsds_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, 
-			int *nsvp, 
+			int *kind,
+			int *nsvp,
 			double *depth, double *velocity,
 			int *error);
 int mbsys_hsds_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp, 
+			int nsvp,
 			double *depth, double *velocity,
 			int *error);
-int mbsys_hsds_copy(int verbose, void *mbio_ptr, 
+int mbsys_hsds_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-
