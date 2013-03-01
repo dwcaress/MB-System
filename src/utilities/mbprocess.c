@@ -1755,7 +1755,7 @@ and mbedit edit save files.\n";
 	    if (process.mbp_nav_format == 8)
 		    nchar = 96;
 	    else
-		    nchar = 128;
+		    nchar = MBP_FILENAMESIZE-1;
 
 	    /* count the data points in the nav file */
 	    nnav = 0;
@@ -2070,6 +2070,8 @@ and mbedit edit save files.\n";
 				&nroll[nnav],&npitch[nnav],&nheave[nnav]);
 			if (nget >= 9)
 				nav_ok = MB_YES;
+                        if (nnav > 0 && ntime[nnav] <= ntime[nnav-1])
+                                nav_ok = MB_NO;
 			if (nav_ok == MB_YES)
 			    {
 			    if (process.mbp_nav_heading == MBP_NAV_ON && nget < 10)
@@ -2965,7 +2967,7 @@ and mbedit edit save files.\n";
 
 
 	    /* check for tide */
-	    if (ntide < 2)
+	    if (ntide < 1)
 		    {
 		    fprintf(stderr,"\nNo tide read from file <%s>\n",process.mbp_tidefile);
 		    fprintf(stderr,"\nProgram <%s> Terminated\n",
@@ -5798,7 +5800,7 @@ time_i[4], time_i[5], time_i[6], draft, depth_offset_change);*/
 
 			/* apply tide corrections */
 			if (process.mbp_tide_mode == MBP_TIDE_ON
-				&& ntide > 1)
+				&& ntide > 0)
 			    {
 			    /* interpolate tide */
 			    intstat = mb_linear_interp(verbose,

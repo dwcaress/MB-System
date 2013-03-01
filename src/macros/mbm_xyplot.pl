@@ -672,12 +672,11 @@ foreach $xyfile(@xyfiles){
 if (!$bounds)
 	{
 	    @sorted_xvalues = sort {$a <=> $b} @xvalues;
-	    @sorted_yvalues = sort {$a <=> $b} @yvalues;
 	    $xmin = $sorted_xvalues[0];
 	    $xmax = $sorted_xvalues[$#sorted_xvalues];
+	    @sorted_yvalues = sort {$a <=> $b} @yvalues;
 	    $ymin = $sorted_yvalues[0];
 	    $ymax = $sorted_yvalues[$#sorted_yvalues];
-
 	}
 
 # use user defined bounds

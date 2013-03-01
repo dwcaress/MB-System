@@ -28,6 +28,8 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
+* Version 5.3.2015       March 1, 2013
+* Version 5.3.2013       January 29, 2013
 * Version 5.3.2012       January 25, 2013
 * Version 5.3.2011       January 17, 2013
   Version 5.3.2010       January 14, 2013
@@ -159,7 +161,7 @@ Palisades, NY 10964
 
 MB-SYSTEM COPYRIGHT, LICENSING AND CAVEAT:
 -----------------------------------------
-MB-System Copyright (C) 1993-2012 by
+MB-System Copyright (C) 1993-2013 by
 David W. Caress (caress@mbari.org)
   Monterey Bay Aquarium Research Institute
   Moss Landing, CA 95039
@@ -229,6 +231,42 @@ that may follow from correct or incorrect use of these programs.
 ------------------------------------
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------
+
+-----> 5.3.2015 (March 1, 2013)
+
+Format 88 (mbf_reson7kr): Fixed some debugging print statements of hexadecimal
+values.
+
+Mbm_route2mission: Added command line control of multibeam sonar settings.
+
+Mbprocess: Fixed handling of tide data with just one value.
+
+Mbeditviz: Fixed calculation of corrected attitude and position for pings at
+start and end of files.Previously badly mislocated pings happened unpredictably.
+
+Mbfilter: Fixed handling of nonfatal read errors.
+
+Format 94 (mbf_l3xseraw): Made storage available for sound speed profiles much
+larger to handle some ridiculous data samples.
+
+Mbauvloglist: Added code to output readable date and time values if desired.
+
+mbm_xbt: Fixed code to more generally handle actual headers in Sippican MK12 data.
+
+mbaux/mb_spline.c: Fixed extrapolation error in linear interpolation code.
+
+Formats 162, 163, 168, 169 (xyz, yxz, xyt, yxt): Augmented code to handle text
+triples with NaN values.
+
+Mbotps: made /usr/local/otps the default location for the OSU Tidal Prediction Software (OTPS)
+
+Format 21 (mbf_hsatlraw): Fixed failure to initialize the internal storage structure.
+
+-----> 5.3.2013 (January 29, 2013)
+
+Format 94 (mbf_l3xseraw): Fixed bug causing memory faults in Linux when data
+with large svp records are encountered. SVP records can now have as many as
+8192 entries.
 
 -----> 5.3.2012 (January 25, 2013)
 

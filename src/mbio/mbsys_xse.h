@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_xse.h	3/27/2000
  *	$Id$
  *
- *    Copyright (c) 2000-2012 by
+ *    Copyright (c) 2000-2013 by
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -219,7 +219,7 @@
 #define	MBSYS_XSE_MAXBEAMS		630
 #define	MBSYS_XSE_MAXPIXELS		32768
 #define	MBSYS_XSE_MAXSAMPLES		32768
-#define	MBSYS_XSE_MAXSVP		200
+#define	MBSYS_XSE_MAXSVP		8192
 #define MBSYS_XSE_MAXDRAFT		200
 #define MBSYS_XSE_MAXPROPERTIES		6
 #define	MBSYS_XSE_COMMENT_LENGTH	200

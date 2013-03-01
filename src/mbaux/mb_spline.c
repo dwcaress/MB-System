@@ -14,15 +14,15 @@
  *--------------------------------------------------------------------*/
 /*
  * This source file includes 1D interpolation routines.
- * 
+ *
  * The 1D spline interpolation routines are modified from spline()
  * and splint() in the book:
- *   Press, W. H., S. A. Teukolsky, W. T. Vetterling, B. P. Flannery, 
- *   Numerical Recipies in C: the Art of Scientific Computing, 
+ *   Press, W. H., S. A. Teukolsky, W. T. Vetterling, B. P. Flannery,
+ *   Numerical Recipies in C: the Art of Scientific Computing,
  *   Cambridge University Press, 1988.
  * The 1D linear interpolation routine is homegrown, but mimics the
  * spline routines in usage.
- * 
+ *
  * Author:	D. W. Caress
  * Date:	October 11, 2000
  *
@@ -59,7 +59,7 @@
 static char rcs_id[]="$Id$";
 
 /*--------------------------------------------------------------------------*/
-int mb_spline_init(int verbose, double *x, double *y, 
+int mb_spline_init(int verbose, double *x, double *y,
 	int n, double yp1, double ypn, double *y2, int *error)
 {
 	char	*function_name = "mb_spline_init";
@@ -81,7 +81,7 @@ int mb_spline_init(int verbose, double *x, double *y,
 		fprintf(stderr,"dbg2       ypn:              %f\n",ypn);
 		fprintf(stderr,"dbg2       y2:               %lu\n",(size_t)y2);
 		}
-		
+
 	/* check for n > 2 */
 	if (n < 3)
 		{
@@ -92,18 +92,18 @@ int mb_spline_init(int verbose, double *x, double *y,
 	/* allocate memory for working vector */
 	if (status == MB_SUCCESS)
 		status = mb_mallocd(verbose,__FILE__,__LINE__, n * sizeof(double), (void **)&u, error);
-	
+
 	/* set up spline interpolation coefficients */
 	if (status == MB_SUCCESS)
 		{
 		if (yp1 > 0.99e30)
 			y2[1]=u[1]=0.0;
-		else 
+		else
 			{
 			y2[1] = -0.5;
 			u[1]=(3.0/(x[2]-x[1]))*((y[2]-y[1])/(x[2]-x[1])-yp1);
 			}
-		for (i=2;i<=n-1;i++) 
+		for (i=2;i<=n-1;i++)
 			{
 			sig=(x[i]-x[i-1])/(x[i+1]-x[i-1]);
 			p=sig*y2[i-1]+2.0;
@@ -113,7 +113,7 @@ int mb_spline_init(int verbose, double *x, double *y,
 			}
 		if (ypn > 0.99e30)
 			qn=un=0.0;
-		else 
+		else
 			{
 			qn=0.5;
 			un=(3.0/(x[n]-x[n-1]))*(ypn-(y[n]-y[n-1])/(x[n]-x[n-1]));
@@ -121,7 +121,7 @@ int mb_spline_init(int verbose, double *x, double *y,
 		y2[n]=(un-qn*u[n-1])/(qn*y2[n-1]+1.0);
 		for (k=n-1;k>=1;k--)
 			y2[k]=y2[k]*y2[k+1]+u[k];
-	
+
 		/* deallocate memory for vector */
 		status = mb_freed(verbose,__FILE__, __LINE__, (void **)&u, error);
 		}
@@ -160,7 +160,7 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       x:                %f\n",x);
 		}
-		
+
 	/* check for n >= 1 */
 	if (n < 1)
 		{
@@ -173,7 +173,7 @@ int mb_spline_interp(int verbose, double *xa, double *ya, double *y2a,
 		{
 		klo=1;
 		khi=n;
-		while (khi-klo > 1) 
+		while (khi-klo > 1)
 			{
 			k=(khi+klo) >> 1;
 			if (xa[k] > x) khi=k;
@@ -224,7 +224,7 @@ int mb_linear_interp(int verbose, double *xa, double *ya,
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       x:                %f\n",x);
 		}
-		
+
 	/* check for n >= 1 */
 	if (n < 1)
 		{
@@ -235,20 +235,36 @@ int mb_linear_interp(int verbose, double *xa, double *ya,
 	/* perform interpolation */
 	if (status == MB_SUCCESS)
 		{
-		klo=1;
-		khi=n;
-		while (khi-klo > 1) 
+		/* do not extrapolate before or after the model, just use the
+		 * first or last values */
+		if (x <= xa[1])
 			{
-			k=(khi+klo) >> 1;
-			if (xa[k] > x) khi=k;
-			else klo=k;
+			*y = ya[1];
+			*i = 1;
 			}
-		if (khi == 1) khi = 2;
-		if (klo == n) klo = n - 1;
-		h=xa[khi]-xa[klo];
-		b = (ya[khi] - ya[klo]) / h;
-		*y = ya[klo] + b * (x - xa[klo]);
-		*i=klo;
+		else if (x >= xa[n])
+			{
+			*y = ya[n];
+			*i = n;
+			}
+		/* in range of model so linearly interpolate */
+		else
+			{
+			klo=1;
+			khi=n;
+			while (khi-klo > 1)
+				{
+				k=(khi+klo) >> 1;
+				if (xa[k] > x) khi=k;
+				else klo=k;
+				}
+			if (khi == 1) khi = 2;
+			if (klo == n) klo = n - 1;
+			h=xa[khi]-xa[klo];
+			b = (ya[khi] - ya[klo]) / h;
+			*y = ya[klo] + b * (x - xa[klo]);
+			*i=klo;
+			}
 		}
 
 	/* print output debug statements */
@@ -262,7 +278,7 @@ int mb_linear_interp(int verbose, double *xa, double *ya,
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
-	
+
 	return(status);
 }
 /*--------------------------------------------------------------------*/
@@ -287,7 +303,7 @@ int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
 		fprintf(stderr,"dbg2       n:                %d\n",n);
 		fprintf(stderr,"dbg2       x:                %f\n",x);
 		}
-		
+
 	/* check for n >= 1 */
 	if (n < 1)
 		{
@@ -298,26 +314,42 @@ int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
 	/* perform interpolation */
 	if (status == MB_SUCCESS)
 		{
-		klo=1;
-		khi=n;
-		while (khi-klo > 1) 
+		/* do not extrapolate before or after the model, just use the
+		 * first or last values */
+		if (x <= xa[1])
 			{
-			k=(khi+klo) >> 1;
-			if (xa[k] > x) khi=k;
-			else klo=k;
+			*y = ya[1];
+			*i = 1;
 			}
-		if (khi == 1) khi = 2;
-		if (klo == n) klo = n - 1;
-		h=xa[khi]-xa[klo];
-		yahi = ya[khi];
-		yalo = ya[klo];
-		if (yahi - yalo > 180.0)
-			yahi -= 360.0;
-		else if (yahi - yalo < -180.0)
-			yahi += 360.0;
-		b = (yahi - yalo) / h;
-		*y = ya[klo] + b * (x - xa[klo]);
-		*i=klo;
+		else if (x >= xa[n])
+			{
+			*y = ya[n];
+			*i = n;
+			}
+		/* in range of model so linearly interpolate */
+		else
+			{
+			klo=1;
+			khi=n;
+			while (khi-klo > 1)
+				{
+				k=(khi+klo) >> 1;
+				if (xa[k] > x) khi=k;
+				else klo=k;
+				}
+			if (khi == 1) khi = 2;
+			if (klo == n) klo = n - 1;
+			h=xa[khi]-xa[klo];
+			yahi = ya[khi];
+			yalo = ya[klo];
+			if (yahi - yalo > 180.0)
+				yahi -= 360.0;
+			else if (yahi - yalo < -180.0)
+				yahi += 360.0;
+			b = (yahi - yalo) / h;
+			*y = ya[klo] + b * (x - xa[klo]);
+			*i=klo;
+			}
 		}
 
 	/* print output debug statements */
@@ -331,7 +363,7 @@ int mb_linear_interp_degrees(int verbose, double *xa, double *ya,
 		fprintf(stderr,"dbg2  Return status:\n");
 		fprintf(stderr,"dbg2       status:     %d\n",status);
 		}
-	
+
 	return(status);
 }
 /*--------------------------------------------------------------------*/

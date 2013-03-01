@@ -1152,8 +1152,10 @@ bathymetry->depth[i],bathymetry->acrosstrack[i],bathymetry->alongtrack[i]); */
 		else if (store->read_v2detection == MB_YES)
 			{
 			/* now loop over the detects */
-			for (i=0;i<v2detection->number_beams;i++)
+			for (j=0;j<v2detection->number_beams;j++)
 				{
+				i = j;
+
 				bathymetry->range[i] = v2detection->range[j];
 				alpha = RTD * (v2detection->angle_y[j] + bathymetry->pitch);
 				beta = 90.0 - RTD * (v2detection->angle_x[j] - bathymetry->roll);
@@ -1441,7 +1443,7 @@ description to the MB-System team \n\
 (caress@mbari.org and dale@ldeo.columbia.edu)\n\
 Have a nice day...\n");
 				fprintf(stderr,
-						"MBF_RESON7KR skipped %d bytes between records %4.4hX:%d and %4.4hX:%d\n",
+						"MBF_RESON7KR skipped %d bytes between records %4.4X:%d and %4.4X:%d\n",
 						skip, *recordidlast, *recordidlast, *recordid, *recordid);
 				(*nbadrec)++;
 			    }
@@ -1691,7 +1693,7 @@ ping_record,*last_ping,*new_ping,*current_ping,done,status,*error); */
 #ifdef MBR_RESON7KR_DEBUG
 if (status == MB_SUCCESS && done == MB_NO && *save_flag == MB_NO)
 {
-fprintf(stderr, "Reading record id: %4.4hX  %4.4d | %4.4hX  %4.4d | %4.4hX  %4.4d |",
+fprintf(stderr, "Reading record id: %4.4X  %4.4d | %4.4X  %4.4d | %4.4hX  %4.4d |",
 *recordid, *recordid, *deviceid, *deviceid, *enumerator, *enumerator);
 if (*recordid == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferencePoint %d\n",*recordid);
 if (*recordid == R7KRECID_UncalibratedSensorOffset) fprintf(stderr," R7KRECID_UncalibratedSensorOffset %d\n",*recordid);
@@ -2517,10 +2519,10 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 	fprintf(stderr, "\nChecking header in mbr_reson7kr_chk_header:\n");
 	fprintf(stderr, "Version:      %4.4hX | %d\n", version, version);
 	fprintf(stderr, "Offset:       %4.4hX | %d\n", offset, offset);
-	fprintf(stderr, "Sync:         %4.4hX | %d\n", sync, sync);
-	fprintf(stderr, "Size:         %4.4hX | %d\n", *size, *size);
-	fprintf(stderr, "Record id:    %4.4hX | %d\n", *recordid, *recordid);
-	fprintf(stderr, "Device id:    %4.4hX | %d\n", *deviceid, *deviceid);
+	fprintf(stderr, "Sync:         %4.4X | %d\n", sync, sync);
+	fprintf(stderr, "Size:         %4.4X | %d\n", *size, *size);
+	fprintf(stderr, "Record id:    %4.4X | %d\n", *recordid, *recordid);
+	fprintf(stderr, "Device id:    %4.4X | %d\n", *deviceid, *deviceid);
 	fprintf(stderr, "Reserved:     %4.4hX | %d\n", reserved, reserved);
 	fprintf(stderr, "Enumerator:   %4.4hX | %d\n", *enumerator, *enumerator);
 #endif
@@ -2607,7 +2609,7 @@ int mbr_reson7kr_chk_header(int verbose, void *mbio_ptr, char *buffer,
 #ifdef MBR_RESON7KR_DEBUG
 		if (verbose > 0)
 			{
-			fprintf(stderr, "Good record id: %4.4hX | %d", *recordid, *recordid);
+			fprintf(stderr, "Good record id: %4.4X | %d", *recordid, *recordid);
 			if (*recordid == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferencePoint\n");
 			if (*recordid == R7KRECID_UncalibratedSensorOffset) fprintf(stderr," R7KRECID_UncalibratedSensorOffset\n");
 			if (*recordid == R7KRECID_CalibratedSensorOffset) fprintf(stderr," R7KRECID_CalibratedSensorOffset\n");
@@ -9833,7 +9835,7 @@ int mbr_reson7kr_wr_data(int verbose, void *mbio_ptr, void *store_ptr, int *erro
 		&& (store->type == R7KRECID_7kFileHeader || *fileheaders == 0))
 		{
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kFileHeader, R7KRECID_7kFileHeader);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kFileHeader, R7KRECID_7kFileHeader);
 fprintf(stderr," R7KRECID_7kFileHeader\n");
 #endif
 		status = mbr_reson7kr_wr_fileheader(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9856,7 +9858,7 @@ fprintf(stderr," R7KRECID_7kFileHeader\n");
 			{
 			store->type = R7KRECID_7kVolatileSonarSettings;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kVolatileSonarSettings, R7KRECID_7kVolatileSonarSettings);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kVolatileSonarSettings, R7KRECID_7kVolatileSonarSettings);
 fprintf(stderr," R7KRECID_7kVolatileSonarSettings\n");
 #endif
 			status = mbr_reson7kr_wr_volatilesonarsettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9869,7 +9871,7 @@ fprintf(stderr," R7KRECID_7kVolatileSonarSettings\n");
 			{
 			store->type = R7KRECID_7kMatchFilter;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kMatchFilter, R7KRECID_7kMatchFilter);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kMatchFilter, R7KRECID_7kMatchFilter);
 fprintf(stderr," R7KRECID_7kMatchFilter\n");
 #endif
 			status = mbr_reson7kr_wr_matchfilter(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9883,7 +9885,7 @@ fprintf(stderr," R7KRECID_7kMatchFilter\n");
 			{
 			store->type = R7KRECID_7kBeamGeometry;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBeamGeometry, R7KRECID_7kBeamGeometry);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBeamGeometry, R7KRECID_7kBeamGeometry);
 fprintf(stderr," R7KRECID_7kBeamGeometry\n");
 #endif
 			status = mbr_reson7kr_wr_beamgeometry(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9897,7 +9899,7 @@ fprintf(stderr," R7KRECID_7kBeamGeometry\n");
 			{
 			store->type = R7KRECID_7kRemoteControlSonarSettings;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kRemoteControlSonarSettings, R7KRECID_7kRemoteControlSonarSettings);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kRemoteControlSonarSettings, R7KRECID_7kRemoteControlSonarSettings);
 fprintf(stderr," R7KRECID_7kRemoteControlSonarSettings\n");
 #endif
 			status = mbr_reson7kr_wr_remotecontrolsettings(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9911,7 +9913,7 @@ fprintf(stderr," R7KRECID_7kRemoteControlSonarSettings\n");
 			{
 				store->type = R7KRECID_7kBathymetricData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBathymetricData, R7KRECID_7kBathymetricData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBathymetricData, R7KRECID_7kBathymetricData);
 fprintf(stderr," R7KRECID_7kBathymetricData\n");
 #endif
 
@@ -9928,7 +9930,7 @@ fprintf(stderr," R7KRECID_7kBathymetricData\n");
 			{
 				store->type = R7KRECID_ProcessedSidescan;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_ProcessedSidescan, R7KRECID_ProcessedSidescan);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_ProcessedSidescan, R7KRECID_ProcessedSidescan);
 fprintf(stderr," R7KRECID_ProcessedSidescan\n");
 #endif
 
@@ -9945,7 +9947,7 @@ fprintf(stderr," R7KRECID_ProcessedSidescan\n");
 			{
 			store->type = R7KRECID_7kBackscatterImageData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBackscatterImageData, R7KRECID_7kBackscatterImageData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBackscatterImageData, R7KRECID_7kBackscatterImageData);
 fprintf(stderr," R7KRECID_7kBackscatterImageData\n");
 #endif
 			status = mbr_reson7kr_wr_backscatter(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9959,7 +9961,7 @@ fprintf(stderr," R7KRECID_7kBackscatterImageData\n");
 			{
 			store->type = R7KRECID_7kBeamData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kBeamData, R7KRECID_7kBeamData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kBeamData, R7KRECID_7kBeamData);
 fprintf(stderr," R7KRECID_7kBeamData\n");
 #endif
 			status = mbr_reson7kr_wr_beam(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9973,7 +9975,7 @@ fprintf(stderr," R7KRECID_7kBeamData\n");
 			{
 			store->type = R7KRECID_7kVerticalDepth;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kVerticalDepth, R7KRECID_7kVerticalDepth);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kVerticalDepth, R7KRECID_7kVerticalDepth);
 fprintf(stderr," R7KRECID_7kVerticalDepth\n");
 #endif
 			status = mbr_reson7kr_wr_verticaldepth(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -9987,7 +9989,7 @@ fprintf(stderr," R7KRECID_7kVerticalDepth\n");
 			{
 			store->type = R7KRECID_7kImageData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kImageData, R7KRECID_7kImageData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kImageData, R7KRECID_7kImageData);
 fprintf(stderr," R7KRECID_7kImageData\n");
 #endif
 			status = mbr_reson7kr_wr_image(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10001,7 +10003,7 @@ fprintf(stderr," R7KRECID_7kImageData\n");
 			{
 			store->type = R7KRECID_7kV2PingMotion;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2PingMotion, R7KRECID_7kV2PingMotion);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2PingMotion, R7KRECID_7kV2PingMotion);
 fprintf(stderr," R7KRECID_7kV2PingMotion\n");
 #endif
 			status = mbr_reson7kr_wr_v2pingmotion(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10015,7 +10017,7 @@ fprintf(stderr," R7KRECID_7kV2PingMotion\n");
 			{
 			store->type = R7KRECID_7kV2DetectionSetup;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2DetectionSetup, R7KRECID_7kV2DetectionSetup);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2DetectionSetup, R7KRECID_7kV2DetectionSetup);
 fprintf(stderr," R7KRECID_7kV2DetectionSetup\n");
 #endif
 			status = mbr_reson7kr_wr_v2detectionsetup(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10029,7 +10031,7 @@ fprintf(stderr," R7KRECID_7kV2DetectionSetup\n");
 			{
 			store->type = R7KRECID_7kV2BeamformedData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2BeamformedData, R7KRECID_7kV2BeamformedData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2BeamformedData, R7KRECID_7kV2BeamformedData);
 fprintf(stderr," R7KRECID_7kV2BeamformedData\n");
 #endif
 			status = mbr_reson7kr_wr_v2beamformed(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10043,7 +10045,7 @@ fprintf(stderr," R7KRECID_7kV2BeamformedData\n");
 			{
 			store->type = R7KRECID_7kV2Detection;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2Detection, R7KRECID_7kV2Detection);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2Detection, R7KRECID_7kV2Detection);
 fprintf(stderr," R7KRECID_7kV2Detection\n");
 #endif
 			status = mbr_reson7kr_wr_v2detection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10057,7 +10059,7 @@ fprintf(stderr," R7KRECID_7kV2Detection\n");
 			{
 			store->type = R7KRECID_7kV2RawDetection;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2RawDetection, R7KRECID_7kV2RawDetection);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2RawDetection, R7KRECID_7kV2RawDetection);
 fprintf(stderr," R7KRECID_7kV2RawDetection\n");
 #endif
 			status = mbr_reson7kr_wr_v2rawdetection(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10071,7 +10073,7 @@ fprintf(stderr," R7KRECID_7kV2RawDetection\n");
 			{
 			store->type = R7KRECID_7kV2SnippetData;
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", R7KRECID_7kV2SnippetData, R7KRECID_7kV2SnippetData);
+fprintf(stderr, "Writing record id: %4.4X | %d", R7KRECID_7kV2SnippetData, R7KRECID_7kV2SnippetData);
 fprintf(stderr," R7KRECID_7kV2SnippetData\n");
 #endif
 			status = mbr_reson7kr_wr_v2snippet(verbose, bufferalloc, bufferptr, store_ptr, &size, error);
@@ -10085,7 +10087,7 @@ fprintf(stderr," R7KRECID_7kV2SnippetData\n");
 	else if (status == MB_SUCCESS && store->type != R7KRECID_7kFileHeader)
 		{
 #ifdef MBR_RESON7KR_DEBUG
-fprintf(stderr, "Writing record id: %4.4hX | %d", store->type, store->type);
+fprintf(stderr, "Writing record id: %4.4X | %d", store->type, store->type);
 if (store->type == R7KRECID_ReferencePoint) fprintf(stderr," R7KRECID_ReferencePoint\n");
 if (store->type == R7KRECID_UncalibratedSensorOffset) fprintf(stderr," R7KRECID_UncalibratedSensorOffset\n");
 if (store->type == R7KRECID_CalibratedSensorOffset) fprintf(stderr," R7KRECID_CalibratedSensorOffset\n");

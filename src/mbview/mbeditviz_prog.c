@@ -630,7 +630,8 @@ int mbeditviz_load_file(int ifile)
 	mbev_status = MB_SUCCESS;
 	mbev_error = MB_ERROR_NO_ERROR;
 	if (ifile >= 0 && ifile < mbev_num_files
-		&& mbev_files[ifile].load_status == MB_NO)
+		&& mbev_files[ifile].load_status == MB_NO
+		&& mbev_files[ifile].raw_info.nrecords > 0)
 		{
 		file = &(mbev_files[ifile]);
 
@@ -699,7 +700,8 @@ int mbeditviz_load_file(int ifile)
 	/* load the file if it needs loading and has been locked */
 	if (mbev_status == MB_SUCCESS
 		&& ifile >= 0 && ifile < mbev_num_files
-		&& mbev_files[ifile].load_status == MB_NO)
+		&& mbev_files[ifile].load_status == MB_NO
+		&& mbev_files[ifile].raw_info.nrecords > 0)
 		{
 		file = &(mbev_files[ifile]);
 
@@ -708,7 +710,7 @@ int mbeditviz_load_file(int ifile)
 			{
 			file->pings = (struct mbev_ping_struct *)
 				malloc(sizeof(struct mbev_ping_struct) * (file->raw_info.nrecords + 1));
-			if (mbev_files != NULL)
+			if (file->pings != NULL)
 				{
 				file->num_pings_alloc = file->raw_info.nrecords + 1;
 				memset(file->pings,0,sizeof(struct mbev_ping_struct) * (file->num_pings_alloc));
