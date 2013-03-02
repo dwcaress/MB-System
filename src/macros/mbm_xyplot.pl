@@ -631,29 +631,42 @@ foreach $xyfile(@xyfiles){
 	    }
 
 
-	    @line = split /$delimiters[$i]/, $_;
+	@line = split /$delimiters[$i]/, $_;
 
-            # Evaluate the perl/math expressions. If there's an error,
-	    # don't quite but warn to STDIO. (should probably go to
-	    # STDERR). Divide-by-zero errors will be caught by this.
+
+        $ok2use = 1;
+
+        # Evaluate the perl/math expressions. If there's an error, don't quit
+	# but warn to STDERR. Divide-by-zero errors will be caught by this.
 	my $xval = eval $xmath[$i];
-
-	print "WARNING!!! NON-NUMERIC RESULT DETECTED: $@" if $@;
+	if ($@) {
+            $ok2use = 0;
+        }
 
 	my $yval = eval $ymath[$i];
-
-	print "WARNING!!! NON-NUMERIC RESULT DETECTED: $@" if $@;
+	if ($@) {
+            $ok2use = 0;
+        }
 
 	# Verify that we got numbers...
 	if (! ($xval =~ m/-?\d*\.?\d*|-?\.\d+/ &&
 	       $yval =~ m/-?\d*\.?\d*|-?\.\d+/)  ) {
-	    print "WARNING!!! NON-NUMERIC RESULT DETECTED! X: $xval Y: $yval Skipping...\n";
+            $ok2use = 0;
+        }
+
+	# Verify that we do not have a NaN...
+	if ($xval =~ /nan/ || $yval =~ /nan/ || $xval =~ /nan/ || $yval =~ /nan/) {
+            $ok2use = 0;
 	}
 
-	push(@xvalues, $xval);
-	push(@yvalues, $yval);
 
-	print(OUTFILE "$xval\t$yval\n");
+        if ($ok2use == 1) {
+            push(@xvalues, $xval);
+            push(@yvalues, $yval);
+            print(OUTFILE "$xval\t$yval\n");
+        } else {
+ 	    print STDERR "WARNING!!! NON-NUMERIC RESULT DETECTED! X: $xval Y: $yval Skipping...\n";
+        }
 
     }
 	$linecnt+=1;

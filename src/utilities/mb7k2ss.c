@@ -2378,13 +2378,20 @@ fprintf(stderr,"III j:%d x:%7.2f l:%7.2f s:%6.2f\n",j,ossacrosstrack[j],ossalong
 						output_file,
 						format_output,
 						&error);
-
-			/* output commands to first cut plotting script file */
-			fprintf(sfp, "# Generate swath plot of sidescan file: %s\n", output_file);
-			fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n",
-				output_file, output_file);
-			fprintf(sfp, "%s_ssrawplot.cmd\n\n", output_file);
 			}
+
+		/* output counts */
+		fprintf(stdout, "\nData records written to: %s\n", current_output_file);
+		fprintf(stdout, "     Low Sidescan:  %d\n", nwritesslo);
+		fprintf(stdout, "     High Sidescan: %d\n", nwritesshi);
+		nwritesslotot += nwritesslo;
+		nwritesshitot += nwritesshi;
+
+		/* output commands to first cut plotting script file */
+		fprintf(sfp, "# Generate swath plot of sidescan file: %s\n", current_output_file);
+		fprintf(sfp, "mbm_plot -I %s -N -G5 -S -Pb -V -O %s_ssrawplot\n",
+			current_output_file, current_output_file);
+		fprintf(sfp, "%s_ssrawplot.cmd\n\n", current_output_file);
 		}
 
 	/* close plotting script file */
@@ -2443,7 +2450,7 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 {
 	char	*function_name = "mb7k2ss_get_flatbottom_table";
 	int	status = MB_SUCCESS;
-	double	dangle, angle;
+	double	dangle;
 	double	rr, xx, zz;
 	double	alpha, beta, theta, phi;
 	int	i;
@@ -2471,7 +2478,7 @@ int mb7k2ss_get_flatbottom_table(int verbose, int nangle, double angle_min, doub
 		{
 		/* get angles in takeoff coordinates */
 		table_angle[i] = angle_min + dangle * i;
-		beta = 90.0 - angle;
+		beta = 90.0 - table_angle[i];
 		mb_rollpitch_to_takeoff(
 			verbose,
 			alpha, beta,
