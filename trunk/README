@@ -28,7 +28,7 @@ adjusting survey navigation.
 
 MB-SYSTEM VERSION 5 RELEASE DATES:
 -----------------------------------------
-* Version 5.3.2015       March 1, 2013
+* Version 5.3.2016       March 2, 2013
 * Version 5.3.2013       January 29, 2013
 * Version 5.3.2012       January 25, 2013
 * Version 5.3.2011       January 17, 2013
@@ -231,6 +231,13 @@ that may follow from correct or incorrect use of these programs.
 ------------------------------------
 MB-SYSTEM VERSION 5.3 RELEASE NOTES:
 ------------------------------------
+
+-----> 5.3.2016 (March 2, 2013)
+
+Mb7k2ss: Fixed plotting correlation functions.
+
+Mbm_xyplot: Fixed handling of NaN values in input data - no longer includes NaN
+inputs in sorting to determine min max.
 
 -----> 5.3.2015 (March 1, 2013)
 
