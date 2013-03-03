@@ -823,6 +823,14 @@ int main (int argc, char **argv)
 		{
 		status = mb_topogrid_init(verbose, topogridfile, &lonflip, &topogrid_ptr, &error);
 		}
+	if (error != MB_ERROR_NO_ERROR)
+		{
+		mb_error(verbose,error,&message);
+		fprintf(stderr,"\nMBIO Error loading topography grid: %s\n%s\n",topogridfile,message);
+		fprintf(stderr,"\nProgram <%s> Terminated\n",program_name);
+		mb_memory_clear(verbose, &error);
+		exit(error);
+		}
 
 	/* set up plotting script file */
 	if ((route_file_set == MB_YES && nroutepoint > 1) ||
