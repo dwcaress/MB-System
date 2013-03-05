@@ -5,7 +5,7 @@
 
 
 /******************************************************************************
- * $Id: pj_mutex.c 1770 2009-10-19 17:16:39Z caress $
+ * $Id: pj_mutex.c 1950 2012-05-10 16:51:51Z caress $
  *
  * Project:  PROJ.4
  * Purpose:  Mutex (thread lock) functions.
@@ -38,13 +38,15 @@
 
 #ifndef _WIN32
 #include <projects.h>
-PJ_CVSID("$Id: pj_mutex.c 1770 2009-10-19 17:16:39Z caress $");
+PJ_CVSID("$Id: pj_mutex.c 1950 2012-05-10 16:51:51Z caress $");
 #else
 #include <proj_api.h>
 #endif
 
-#ifdef _WIN32
+/* on win32 we always use win32 mutexes, even if pthreads are available */
+#if defined(_WIN32) && !defined(MUTEX_stub)
 #  define MUTEX_win32
+#  undef  MUTEX_pthread
 #endif
 
 #if !defined(MUTEX_stub) && !defined(MUTEX_pthread) && !defined(MUTEX_win32)
@@ -88,15 +90,6 @@ void pj_cleanup_lock()
 {
 }
 
-/************************************************************************/
-/*                            pj_init_lock()                            */
-/************************************************************************/
-
-static void pj_init_lock()
-
-{
-}
-
 #endif // def MUTEX_stub
 
 /************************************************************************/
@@ -109,7 +102,7 @@ static void pj_init_lock()
 
 #include "pthread.h"
 
-static pthread_mutex_t core_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t pj_core_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /************************************************************************/
 /*                          pj_acquire_lock()                           */
@@ -119,7 +112,7 @@ static pthread_mutex_t core_lock = PTHREAD_MUTEX_INITIALIZER;
 
 void pj_acquire_lock()
 {
-    pthread_mutex_lock( &core_lock);
+    pthread_mutex_lock( &pj_core_lock);
 }
 
 /************************************************************************/
@@ -130,22 +123,13 @@ void pj_acquire_lock()
 
 void pj_release_lock()
 {
-    pthread_mutex_unlock( &core_lock );
+    pthread_mutex_unlock( &pj_core_lock );
 }
 
 /************************************************************************/
 /*                          pj_cleanup_lock()                           */
 /************************************************************************/
 void pj_cleanup_lock()
-{
-}
-
-/************************************************************************/
-/*                            pj_init_lock()                            */
-/************************************************************************/
-
-static void pj_init_lock()
-
 {
 }
 
@@ -187,8 +171,8 @@ void pj_release_lock()
 {
     if( mutex_lock == NULL )
         pj_init_lock();
-
-    ReleaseMutex( mutex_lock );
+    else
+        ReleaseMutex( mutex_lock );
 }
 
 /************************************************************************/
@@ -211,7 +195,7 @@ static void pj_init_lock()
 
 {
     if( mutex_lock == NULL )
-        mutex_lock = CreateMutex( NULL, TRUE, NULL );
+        mutex_lock = CreateMutex( NULL, FALSE, NULL );
 }
 
 #endif // def MUTEX_win32

@@ -74,36 +74,37 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmbproj_la_LIBADD =
-am_libmbproj_la_OBJECTS = aasincos.lo adjlon.lo bch2bps.lo bchgen.lo \
-	biveval.lo cs2cs.lo dmstor.lo emess.lo geocent.lo jniproj.lo \
-	mk_cheby.lo nad_cvt.lo nad_init.lo nad_intr.lo PJ_aea.lo \
-	PJ_aeqd.lo PJ_airy.lo PJ_aitoff.lo pj_apply_gridshift.lo \
-	PJ_august.lo pj_auth.lo PJ_bacon.lo PJ_bipc.lo PJ_boggs.lo \
-	PJ_bonne.lo PJ_cass.lo PJ_cc.lo PJ_cea.lo PJ_chamb.lo \
-	PJ_collg.lo PJ_crast.lo pj_datums.lo pj_datum_set.lo \
-	PJ_denoy.lo pj_deriv.lo PJ_eck1.lo PJ_eck2.lo PJ_eck3.lo \
-	PJ_eck4.lo PJ_eck5.lo pj_ellps.lo pj_ell_set.lo PJ_eqc.lo \
-	PJ_eqdc.lo pj_errno.lo pj_factors.lo PJ_fahey.lo PJ_fouc_s.lo \
-	pj_fwd.lo PJ_gall.lo pj_gauss.lo pj_geocent.lo PJ_geos.lo \
-	PJ_gins8.lo PJ_gnom.lo PJ_gn_sinu.lo PJ_goode.lo \
-	pj_gridinfo.lo pj_gridlist.lo PJ_gstmerc.lo PJ_hammer.lo \
-	PJ_hatano.lo PJ_imw_p.lo pj_init.lo pj_initcache.lo pj_inv.lo \
-	PJ_krovak.lo PJ_labrd.lo PJ_laea.lo PJ_lagrng.lo PJ_larr.lo \
-	PJ_lask.lo pj_latlong.lo PJ_lcca.lo PJ_lcc.lo pj_list.lo \
-	PJ_loxim.lo PJ_lsat.lo pj_malloc.lo PJ_mbtfpp.lo PJ_mbtfpq.lo \
-	PJ_mbt_fps.lo PJ_merc.lo PJ_mill.lo pj_mlfn.lo PJ_mod_ster.lo \
-	PJ_moll.lo PJ_mpoly.lo pj_msfn.lo pj_mutex.lo PJ_nell.lo \
-	PJ_nell_h.lo PJ_nocol.lo PJ_nsper.lo PJ_nzmg.lo PJ_ob_tran.lo \
-	PJ_ocea.lo PJ_oea.lo PJ_omerc.lo pj_open_lib.lo PJ_ortho.lo \
-	pj_param.lo pj_phi2.lo PJ_poly.lo pj_pr_list.lo PJ_putp2.lo \
-	PJ_putp3.lo PJ_putp4p.lo PJ_putp5.lo PJ_putp6.lo pj_qsfn.lo \
-	pj_release.lo PJ_robin.lo PJ_rpoly.lo PJ_sconics.lo \
-	PJ_somerc.lo PJ_sterea.lo PJ_stere.lo pj_strerrno.lo PJ_sts.lo \
-	PJ_tcc.lo PJ_tcea.lo PJ_tmerc.lo PJ_tpeqd.lo pj_transform.lo \
-	pj_tsfn.lo pj_units.lo PJ_urm5.lo PJ_urmfps.lo pj_utils.lo \
-	PJ_vandg2.lo PJ_vandg4.lo PJ_vandg.lo PJ_wag2.lo PJ_wag3.lo \
-	PJ_wag7.lo PJ_wink1.lo PJ_wink2.lo pj_zpoly1.lo proj_mdist.lo \
-	proj_rouss.lo rtodms.lo strtod.lo vector1.lo
+am_libmbproj_la_OBJECTS = PJ_aea.lo PJ_aeqd.lo PJ_airy.lo PJ_aitoff.lo \
+	PJ_august.lo PJ_bacon.lo PJ_bipc.lo PJ_boggs.lo PJ_bonne.lo \
+	PJ_cass.lo PJ_cc.lo PJ_cea.lo PJ_chamb.lo PJ_collg.lo \
+	PJ_crast.lo PJ_denoy.lo PJ_eck1.lo PJ_eck2.lo PJ_eck3.lo \
+	PJ_eck4.lo PJ_eck5.lo PJ_eqc.lo PJ_eqdc.lo PJ_fahey.lo \
+	PJ_fouc_s.lo PJ_gall.lo PJ_geos.lo PJ_gins8.lo PJ_gn_sinu.lo \
+	PJ_gnom.lo PJ_goode.lo PJ_gstmerc.lo PJ_hammer.lo PJ_hatano.lo \
+	PJ_healpix.lo PJ_igh.lo PJ_imw_p.lo PJ_isea.lo PJ_krovak.lo \
+	PJ_labrd.lo PJ_laea.lo PJ_lagrng.lo PJ_larr.lo PJ_lask.lo \
+	PJ_lcc.lo PJ_lcca.lo PJ_loxim.lo PJ_lsat.lo PJ_mbt_fps.lo \
+	PJ_mbtfpp.lo PJ_mbtfpq.lo PJ_merc.lo PJ_mill.lo PJ_mod_ster.lo \
+	PJ_moll.lo PJ_natearth.lo PJ_nell.lo PJ_nell_h.lo PJ_nocol.lo \
+	PJ_nsper.lo PJ_nzmg.lo PJ_ob_tran.lo PJ_ocea.lo PJ_oea.lo \
+	PJ_omerc.lo PJ_ortho.lo PJ_poly.lo PJ_putp2.lo PJ_putp3.lo \
+	PJ_putp4p.lo PJ_putp5.lo PJ_putp6.lo PJ_robin.lo PJ_rpoly.lo \
+	PJ_sconics.lo PJ_somerc.lo PJ_stere.lo PJ_sterea.lo PJ_sts.lo \
+	PJ_tcc.lo PJ_tcea.lo PJ_tmerc.lo PJ_tpeqd.lo PJ_urm5.lo \
+	PJ_urmfps.lo PJ_vandg.lo PJ_vandg2.lo PJ_vandg4.lo PJ_wag2.lo \
+	PJ_wag3.lo PJ_wag7.lo PJ_wink1.lo PJ_wink2.lo aasincos.lo \
+	adjlon.lo bch2bps.lo bchgen.lo biveval.lo dmstor.lo emess.lo \
+	geocent.lo mk_cheby.lo nad_cvt.lo nad_init.lo nad_intr.lo \
+	pj_apply_gridshift.lo pj_apply_vgridshift.lo pj_auth.lo \
+	pj_ctx.lo pj_datum_set.lo pj_datums.lo pj_deriv.lo \
+	pj_ell_set.lo pj_ellps.lo pj_errno.lo pj_factors.lo pj_fwd.lo \
+	pj_gauss.lo pj_geocent.lo pj_gridinfo.lo pj_gridlist.lo \
+	pj_init.lo pj_initcache.lo pj_inv.lo pj_latlong.lo pj_list.lo \
+	pj_log.lo pj_malloc.lo pj_mlfn.lo pj_msfn.lo pj_mutex.lo \
+	pj_open_lib.lo pj_param.lo pj_phi2.lo pj_pr_list.lo pj_qsfn.lo \
+	pj_release.lo pj_strerrno.lo pj_transform.lo pj_tsfn.lo \
+	pj_units.lo pj_utils.lo pj_zpoly1.lo proj_etmerc.lo \
+	proj_mdist.lo proj_rouss.lo rtodms.lo vector1.lo
 libmbproj_la_OBJECTS = $(am_libmbproj_la_OBJECTS)
 libmbproj_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -288,26 +289,155 @@ geod_LDADD = libmbproj.la
 lib_LTLIBRARIES = libmbproj.la
 libmbproj_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbproj_la_SOURCES = \
-		      projects.h pj_list.h \
-aasincos.c adjlon.c bch2bps.c bchgen.c biveval.c cs2cs.c dmstor.c emess.c \
-geocent.c jniproj.c mk_cheby.c \
-nad_cvt.c nad_init.c nad_intr.c PJ_aea.c PJ_aeqd.c PJ_airy.c PJ_aitoff.c \
-pj_apply_gridshift.c PJ_august.c pj_auth.c PJ_bacon.c PJ_bipc.c PJ_boggs.c PJ_bonne.c \
-PJ_cass.c PJ_cc.c PJ_cea.c PJ_chamb.c PJ_collg.c PJ_crast.c pj_datums.c pj_datum_set.c \
-PJ_denoy.c pj_deriv.c PJ_eck1.c PJ_eck2.c PJ_eck3.c PJ_eck4.c PJ_eck5.c pj_ellps.c \
-pj_ell_set.c PJ_eqc.c PJ_eqdc.c pj_errno.c pj_factors.c PJ_fahey.c PJ_fouc_s.c pj_fwd.c \
-PJ_gall.c pj_gauss.c pj_geocent.c PJ_geos.c PJ_gins8.c PJ_gnom.c PJ_gn_sinu.c PJ_goode.c \
-pj_gridinfo.c pj_gridlist.c PJ_gstmerc.c PJ_hammer.c PJ_hatano.c PJ_imw_p.c pj_init.c \
-pj_initcache.c pj_inv.c PJ_krovak.c PJ_labrd.c PJ_laea.c PJ_lagrng.c PJ_larr.c PJ_lask.c \
-pj_latlong.c PJ_lcca.c PJ_lcc.c pj_list.c PJ_loxim.c PJ_lsat.c pj_malloc.c PJ_mbtfpp.c \
-PJ_mbtfpq.c PJ_mbt_fps.c PJ_merc.c PJ_mill.c pj_mlfn.c PJ_mod_ster.c PJ_moll.c PJ_mpoly.c \
-pj_msfn.c pj_mutex.c PJ_nell.c PJ_nell_h.c PJ_nocol.c PJ_nsper.c PJ_nzmg.c PJ_ob_tran.c PJ_ocea.c \
-PJ_oea.c PJ_omerc.c pj_open_lib.c PJ_ortho.c pj_param.c pj_phi2.c PJ_poly.c pj_pr_list.c PJ_putp2.c \
-PJ_putp3.c PJ_putp4p.c PJ_putp5.c PJ_putp6.c pj_qsfn.c pj_release.c PJ_robin.c PJ_rpoly.c PJ_sconics.c \
-PJ_somerc.c PJ_sterea.c PJ_stere.c pj_strerrno.c PJ_sts.c PJ_tcc.c PJ_tcea.c PJ_tmerc.c PJ_tpeqd.c \
-pj_transform.c pj_tsfn.c pj_units.c PJ_urm5.c PJ_urmfps.c pj_utils.c PJ_vandg2.c PJ_vandg4.c PJ_vandg.c \
-PJ_wag2.c PJ_wag3.c PJ_wag7.c PJ_wink1.c PJ_wink2.c pj_zpoly1.c proj_mdist.c proj_rouss.c \
-rtodms.c strtod.c vector1.c 
+      projects.h pj_list.h \
+PJ_aea.c \
+PJ_aeqd.c \
+PJ_airy.c \
+PJ_aitoff.c \
+PJ_august.c \
+PJ_bacon.c \
+PJ_bipc.c \
+PJ_boggs.c \
+PJ_bonne.c \
+PJ_cass.c \
+PJ_cc.c \
+PJ_cea.c \
+PJ_chamb.c \
+PJ_collg.c \
+PJ_crast.c \
+PJ_denoy.c \
+PJ_eck1.c \
+PJ_eck2.c \
+PJ_eck3.c \
+PJ_eck4.c \
+PJ_eck5.c \
+PJ_eqc.c \
+PJ_eqdc.c \
+PJ_fahey.c \
+PJ_fouc_s.c \
+PJ_gall.c \
+PJ_geos.c \
+PJ_gins8.c \
+PJ_gn_sinu.c \
+PJ_gnom.c \
+PJ_goode.c \
+PJ_gstmerc.c \
+PJ_hammer.c \
+PJ_hatano.c \
+PJ_healpix.c \
+PJ_igh.c \
+PJ_imw_p.c \
+PJ_isea.c \
+PJ_krovak.c \
+PJ_labrd.c \
+PJ_laea.c \
+PJ_lagrng.c \
+PJ_larr.c \
+PJ_lask.c \
+PJ_lcc.c \
+PJ_lcca.c \
+PJ_loxim.c \
+PJ_lsat.c \
+PJ_mbt_fps.c \
+PJ_mbtfpp.c \
+PJ_mbtfpq.c \
+PJ_merc.c \
+PJ_mill.c \
+PJ_mod_ster.c \
+PJ_moll.c \
+PJ_natearth.c \
+PJ_nell.c \
+PJ_nell_h.c \
+PJ_nocol.c \
+PJ_nsper.c \
+PJ_nzmg.c \
+PJ_ob_tran.c \
+PJ_ocea.c \
+PJ_oea.c \
+PJ_omerc.c \
+PJ_ortho.c \
+PJ_poly.c \
+PJ_putp2.c \
+PJ_putp3.c \
+PJ_putp4p.c \
+PJ_putp5.c \
+PJ_putp6.c \
+PJ_robin.c \
+PJ_rpoly.c \
+PJ_sconics.c \
+PJ_somerc.c \
+PJ_stere.c \
+PJ_sterea.c \
+PJ_sts.c \
+PJ_tcc.c \
+PJ_tcea.c \
+PJ_tmerc.c \
+PJ_tpeqd.c \
+PJ_urm5.c \
+PJ_urmfps.c \
+PJ_vandg.c \
+PJ_vandg2.c \
+PJ_vandg4.c \
+PJ_wag2.c \
+PJ_wag3.c \
+PJ_wag7.c \
+PJ_wink1.c \
+PJ_wink2.c \
+aasincos.c \
+adjlon.c \
+bch2bps.c \
+bchgen.c \
+biveval.c \
+dmstor.c \
+emess.c \
+geocent.c \
+mk_cheby.c \
+nad_cvt.c \
+nad_init.c \
+nad_intr.c \
+pj_apply_gridshift.c \
+pj_apply_vgridshift.c \
+pj_auth.c \
+pj_ctx.c \
+pj_datum_set.c \
+pj_datums.c \
+pj_deriv.c \
+pj_ell_set.c \
+pj_ellps.c \
+pj_errno.c \
+pj_factors.c \
+pj_fwd.c \
+pj_gauss.c \
+pj_geocent.c \
+pj_gridinfo.c \
+pj_gridlist.c \
+pj_init.c \
+pj_initcache.c \
+pj_inv.c \
+pj_latlong.c \
+pj_list.c \
+pj_log.c \
+pj_malloc.c \
+pj_mlfn.c \
+pj_msfn.c \
+pj_mutex.c \
+pj_open_lib.c \
+pj_param.c \
+pj_phi2.c \
+pj_pr_list.c \
+pj_qsfn.c \
+pj_release.c \
+pj_strerrno.c \
+pj_transform.c \
+pj_tsfn.c \
+pj_units.c \
+pj_utils.c \
+pj_zpoly1.c \
+proj_etmerc.c \
+proj_mdist.c \
+proj_rouss.c \
+rtodms.c \
+vector1.c
 
 all: all-am
 
@@ -466,7 +596,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_gstmerc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_hammer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_hatano.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_healpix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_igh.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_imw_p.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_isea.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_krovak.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_labrd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_laea.Plo@am__quote@
@@ -484,7 +617,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_mill.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_mod_ster.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_moll.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_mpoly.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_natearth.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_nell.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_nell_h.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PJ_nocol.Plo@am__quote@
@@ -527,7 +660,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bch2bps.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bchgen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/biveval.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cs2cs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmstor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emess.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gen_cheb.Po@am__quote@
@@ -536,14 +668,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geod_for.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geod_inv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geod_set.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jniproj.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mk_cheby.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad_cvt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad_init.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nad_intr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/p_series.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_apply_gridshift.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_apply_vgridshift.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_auth.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_ctx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_datum_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_datums.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_deriv.Plo@am__quote@
@@ -561,6 +694,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_inv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_latlong.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_list.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_log.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_malloc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_mlfn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_msfn.Plo@am__quote@
@@ -578,10 +712,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pj_zpoly1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proj.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proj_etmerc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proj_mdist.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proj_rouss.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtodms.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strtod.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector1.Plo@am__quote@
 
 .c.o:

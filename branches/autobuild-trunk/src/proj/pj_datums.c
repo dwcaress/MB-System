@@ -5,7 +5,7 @@
 
 
 /******************************************************************************
- * $Id: pj_datums.c 1770 2009-10-19 17:16:39Z caress $
+ * $Id: pj_datums.c 1950 2012-05-10 16:51:51Z caress $
  *
  * Project:  PROJ.4
  * Purpose:  Built in datum list.
@@ -54,7 +54,7 @@ C_NAMESPACE_VAR struct PJ_DATUMS pj_datums[] = {
 "NAD27",    "nadgrids=@conus,@alaska,@ntv2_0.gsb,@ntv1_can.dat",           
                                                      "clrk66", 
 				"North_American_Datum_1927",
-"potsdam",  "towgs84=606.0,23.0,413.0",  "bessel",  "Potsdam Rauenberg 1950 DHDN",
+"potsdam",  "towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7",  "bessel",  "Potsdam Rauenberg 1950 DHDN",
 "carthage",  "towgs84=-263.0,6.0,431.0",  "clark80",  "Carthage 1934 Tunisia",
 "hermannskogel", "towgs84=653.0,-212.0,449.0",  "bessel",  "Hermannskogel",
 "ire65",  "towgs84=482.530,-130.596,564.557,-1.042,-0.214,-0.631,8.15",  "mod_airy",  "Ireland 1965",

@@ -5,7 +5,7 @@
 
 
 /******************************************************************************
- * $Id: PJ_airy.c 1770 2009-10-19 17:16:39Z caress $
+ * $Id: PJ_airy.c 1950 2012-05-10 16:51:51Z caress $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of the airy (Airy) projection.
@@ -43,7 +43,7 @@
 #define PJ_LIB__
 #include <projects.h>
 
-PJ_CVSID("$Id: PJ_airy.c 1770 2009-10-19 17:16:39Z caress $");
+PJ_CVSID("$Id: PJ_airy.c 1950 2012-05-10 16:51:51Z caress $");
 
 PROJ_HEAD(airy, "Airy") "\n\tMisc Sph, no inv.\n\tno_cut lat_b=";
 
@@ -100,8 +100,8 @@ FREEUP; if (P) pj_dalloc(P); }
 ENTRY0(airy)
 	double beta;
 
-	P->no_cut = pj_param(P->params, "bno_cut").i;
-	beta = 0.5 * (HALFPI - pj_param(P->params, "rlat_b").f);
+	P->no_cut = pj_param(P->ctx, P->params, "bno_cut").i;
+	beta = 0.5 * (HALFPI - pj_param(P->ctx, P->params, "rlat_b").f);
 	if (fabs(beta) < EPS)
 		P->Cb = -0.5;
 	else {

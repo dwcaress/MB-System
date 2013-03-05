@@ -51,7 +51,7 @@ INVERSE(e_inverse); /* ellipsoid */
 	double s, rh;
 
 	rh = hypot(xy.x, xy.y = P->am1 - xy.y);
-	lp.phi = pj_inv_mlfn(P->am1 + P->m1 - rh, P->es, P->en);
+	lp.phi = pj_inv_mlfn(P->ctx, P->am1 + P->m1 - rh, P->es, P->en);
 	if ((s = fabs(lp.phi)) < HALFPI) {
 		s = sin(lp.phi);
 		lp.lam = rh * atan2(xy.x, xy.y) *
@@ -71,7 +71,7 @@ FREEUP;
 ENTRY1(bonne, en)
 	double c;
 
-	P->phi1 = pj_param(P->params, "rlat_1").f;
+	P->phi1 = pj_param(P->ctx, P->params, "rlat_1").f;
 	if (fabs(P->phi1) < EPS10) E_ERROR(-23);
 	if (P->es) {
 		P->en = pj_enfn(P->es);

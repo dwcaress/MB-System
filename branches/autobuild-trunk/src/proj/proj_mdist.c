@@ -10,7 +10,7 @@
 ** Copyright (c) 2003, 2006   Gerald I. Evenden
 */
 static const char
-LIBPROJ_ID[] = "$Id: proj_mdist.c 1770 2009-10-19 17:16:39Z caress $";
+LIBPROJ_ID[] = "$Id: proj_mdist.c 1950 2012-05-10 16:51:51Z caress $";
 /*
 ** Permission is hereby granted, free of charge, to any person obtaining
 ** a copy of this software and associated documentation files (the
@@ -108,7 +108,7 @@ proj_mdist(double phi, double sphi, double cphi, const void *b) {
 	return(D + sc * sum);
 }
 	double
-proj_inv_mdist(double dist, const void *b) {
+proj_inv_mdist(projCtx ctx, double dist, const void *b) {
 	double s, t, phi, k;
 	int i;
 
@@ -124,6 +124,6 @@ proj_inv_mdist(double dist, const void *b) {
 			return phi;
 	}
 		/* convergence failed */
-	pj_errno = -17;
+	pj_ctx_set_errno(ctx, -17);
 	return phi;
 }

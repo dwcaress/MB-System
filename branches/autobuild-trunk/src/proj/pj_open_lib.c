@@ -5,7 +5,7 @@
 
 
 /******************************************************************************
- * $Id: pj_open_lib.c 1770 2009-10-19 17:16:39Z caress $
+ * $Id: pj_open_lib.c 1950 2012-05-10 16:51:51Z caress $
  *
  * Project:  PROJ.4
  * Purpose:  Implementation of pj_open_lib(), and pj_set_finder().  These
@@ -42,7 +42,7 @@
 #include <string.h>
 #include <errno.h>
 
-PJ_CVSID("$Id: pj_open_lib.c 1770 2009-10-19 17:16:39Z caress $");
+PJ_CVSID("$Id: pj_open_lib.c 1950 2012-05-10 16:51:51Z caress $");
 
 static const char *(*pj_finder)(const char *) = NULL;
 static int path_count = 0;
@@ -105,7 +105,7 @@ void pj_set_searchpath ( int count, const char **path )
 /************************************************************************/
 
 FILE *
-pj_open_lib(char *name, char *mode) {
+pj_open_lib(projCtx ctx, char *name, char *mode) {
     char fname[MAX_PATH_FILENAME+1];
     const char *sysname;
     FILE *fid;
@@ -121,7 +121,7 @@ pj_open_lib(char *name, char *mode) {
 
     /* check if ~/name */
     if (*name == '~' && strchr(dir_chars,name[1]) )
-        if (sysname = getenv("HOME")) {
+        if ((sysname = getenv("HOME")) != NULL) {
             (void)strcpy(fname, sysname);
             fname[n = strlen(fname)] = DIR_CHAR;
             fname[++n] = '\0';
@@ -151,7 +151,7 @@ pj_open_lib(char *name, char *mode) {
     } else /* just try it bare bones */
         sysname = name;
 
-    if (fid = fopen(sysname, mode))
+    if ((fid = fopen(sysname, mode)) != NULL)
         errno = 0;
 
     /* If none of those work and we have a search path, try it */
@@ -167,10 +167,13 @@ pj_open_lib(char *name, char *mode) {
             errno = 0;
     }
 
-    if( getenv( "PROJ_DEBUG" ) != NULL )
-        fprintf( stderr, "pj_open_lib(%s): call fopen(%s) - %s\n",
-                 name, sysname,
-                 fid == NULL ? "failed" : "succeeded" );
+    if( ctx->last_errno == 0 && errno != 0 )
+        pj_ctx_set_errno( ctx, errno );
+
+    pj_log( ctx, PJ_LOG_DEBUG_MAJOR, 
+            "pj_open_lib(%s): call fopen(%s) - %s\n",
+            name, sysname,
+            fid == NULL ? "failed" : "succeeded" );
 
     return(fid);
 #else

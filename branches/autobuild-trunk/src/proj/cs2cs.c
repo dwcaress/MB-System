@@ -5,7 +5,7 @@
 
 
 /******************************************************************************
- * $Id: cs2cs.c 1770 2009-10-19 17:16:39Z caress $
+ * $Id: cs2cs.c 1950 2012-05-10 16:51:51Z caress $
  *
  * Project:  PROJ.4
  * Purpose:  Mainline program sort of like ``proj'' for converting between
@@ -122,6 +122,7 @@ static void process(FILE *fid)
             {
                 data.u = HUGE_VAL;
                 data.v = HUGE_VAL;
+                emess(-3,"pj_transform(): %s", pj_strerrno(pj_errno));
             }
         }
 
@@ -177,7 +178,7 @@ int main(int argc, char **argv)
     int from_argc=0, to_argc=0, iargc = argc, eargc = 0, c, mon = 0;
     int have_to_flag = 0, inverse = 0, i;
 
-    if (emess_dat.Prog_name = strrchr(*argv,DIR_CHAR))
+    if ((emess_dat.Prog_name = strrchr(*argv,DIR_CHAR)) != NULL)
         ++emess_dat.Prog_name;
     else emess_dat.Prog_name = *argv;
     inverse = ! strncmp(emess_dat.Prog_name, "inv", 3);
@@ -288,6 +289,10 @@ int main(int argc, char **argv)
                 continue;
               case 's': /* reverse output */
                 reverseout = 1;
+                continue;
+              case 'd': /* set debug level */
+                if (--argc <= 0) goto noargument;
+                pj_ctx_set_debug( pj_get_default_ctx(), atoi(*++argv));
                 continue;
               default:
                 emess(1, "invalid option: -%c",*arg);
