@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbeditviz</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>MBeditviz</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  29 April 2011 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>MBeditviz</B> - 3D visualization-based editing of swath bathymetry soundings.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>MBeditviz</B> [-I<I>datalist</I> <B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<P>
+<I>Overview</I>
+<P>
+<B>MBeditviz</B> is an interactive 2D/3D visualization-based tool for editing swath 
+bathymetry data. The bathymetry data from selected files are read into memory, gridded,
+and displayed in the same 2D/3D visualization environment used by <B>MBgrdviz</B>. In
+this environment, users can select arbitrary areas or regions. All of the soundings in
+the selected areas are displayed in a 3D &quot;cloud&quot; that can be rotated, zoomed, and exaggerated.
+These soundings can also be edited using the same edit mouse modes as in <B>MBedit</B>.
+<B>MBeditviz</B> operates with &quot;edit save files&quot; (*.esf) in the same fashion as <B>MBedit</B>,
+<B>mbclean</B>, and <B>mbareaclean</B>. To apply the edits in processing, simply run <B>mbprocess</B>
+on a datalist referencing the relevant files.
+<P>
+<I>Starting Up</I>
+<P>
+The initial MBeditviz display shows a list of the swath files you have identified by using 
+the &quot;File-&gt;Open Swath File&quot; menu item. The list has four columns. 
+The first (left-most) column is either blank or shows &quot;&lt;locked&gt;&quot; or &quot;&lt;loaded&gt;&quot;.
+If a file is loaded for gridding and editing by this program, it shows as &quot;&lt;loaded&gt;&quot;.
+If a file is being edited or processed by another program, it shows as
+&quot;&lt;locked&gt;&quot;. Locked files cannot be opened for editing, and any file 
+loaded for editing by <B>MBeditviz</B> will show as &quot;locked&quot; to other
+programs. The second column is either blank or shows &quot;&lt;esf&gt;&quot;. This indicates if
+a file has been previously edited so that an edit save file already
+exists. The third column indicates, if the file is loaded, whether asynchronous heading (&quot;H&quot;),
+sonar depth (&quot;S&quot;), and attitude (&quot;A&quot;) time series data have been loaded along with the 
+swath bathymetry data. These asynchronous data are required in order to use <B>MBeditviz</B>
+to assess time lag issues, but are not available for all datasets.
+The fourth and fifth columns show the filename and the <B>MBIO</B>
+format id, respectively.
+Users can select one of the files in the available list. If the &quot;Edit Selected File&quot;
+button is clicked, the selected file will be opened for editing (and any
+file already loaded will be closed first). If the &quot;Remove Selected File&quot; 
+button is selected, then the selected file will be removed from the available
+list.
+<P>
+<P>
+You can select some or all of the files in the list. 
+When you click on the &quot;View All Files&quot; or the &quot;View Selected Files&quot;, MBeditviz reads the 
+specified files, loading all of the soundings into memory. The program then brings up a 
+&quot;Grid Parameters&quot; dialog which suggests a grid cell size and shows the implied dimensions 
+of a grid enclosing all of the data. The two issues to keep in mind are that you want the 
+grid to be reasonably sized (dimensions &lt;2500 or so on my laptop) and that no interpolation 
+is applied in the gridding, so too small a grid cell size will leave gaps between soundings 
+in the map view. When you click &quot;Apply&quot;, MBeditviz grids the soundings, and then displays 
+the grid using the same 2D/3D interface as MBgrdviz, including the navigation associated with
+the selected swath files.
+<P>
+The navigation associated with the selected swath files will be displayed as well, and can
+be selected or queried by setting the mouse mode to 
+<P>
+Data files that have been previously edited with <B>MBeditviz</B>, <B>MBedit</B>, <B>mbclean</B>, 
+or <B>mbareaclean</B> will have two related ancilliary files with suffixes &quot;.esf&quot; and &quot;.par&quot;.
+The &quot;*.esf&quot; file is the edit save file containing all of the flag and unflag edit events 
+generated for soundings in a data file. The &quot;*.par&quot; file is the processing parameter file
+that contains all of the processing parameters and instructions to be applied by the program
+<B>mbprocess</B>. <B>MBeditviz</B> will read and apply the pre-existing edit events as files
+are read into memory. The initial gridded view of the bathymetry will reflect all of the
+pre-existing edit events.
+<P>
+<I>Displaying a &quot;Sounding Cloud&quot;</I>
+<P>
+Once you have an MBeditviz survey display, set the mouse mode to &quot;Pick Area&quot; and either use 
+the left button to drag a square &quot;region&quot;, or use the middle button to drag an arbitrarily 
+oriented &quot;area&quot; (also, if an area is defined the right button decreases/increases the width 
+of the area). Each time you define or change a picked region or area, MBeditviz will display 
+the point cloud of soundings located in the region or area. Since <B>MBeditviz</B> also displays
+the swath file navigation, users can also change the mouse mode to &quot;Pick Nav&quot; or &quot;Pick Nav File&quot;
+and select portions of the navigation. In this case the sounding cloud will encompass all of
+the data associated with the selected navigation. The 3Dsoundings view is manipulated
+using the middle and right mouse buttons in either rotation mode or zoom/exagerate mode.
+<P>
+You can edit the soundings in the point cloud context using the left mouse button. The 
+editing mouse modes work just like MBedit. The View menu in the 
+point cloud display lets you show, or not show, the flagged soundings (which are displayed in red).
+<P>
+<I>Applying the Bathyemtry Edits</I>
+<P>
+When you dismiss the gridded view, the esf files of the affected files will be updated just 
+as they are with MBedit. The program also modifies the <B>mbprocess</B> parameter file
+for the input file by specifying the edit save file and setting the <B>mbprocess</B> mode to 
+apply the edits when generating a processed swath output file. If no parameter file exists, 
+<B>mbeditviz</B> creates one.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>datalist</I>
+<BR>
+
+Sets an <B>MB-System</B> datalist file to be parsed on input for swath data files
+to list as available for editing. 
+This option is usually used when <B>MBeditviz</B> is started
+automatically from some other process, such as <B>MBgrdviz</B>. 
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>MBeditviz</B> outputs limited information to the stderr stream.  
+If the <B>-V</B> flag is given, then <B>MBeditviz</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used, all error status messages, 
+and a large amount of other information including all of the
+beams flagged or zeroed.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>INTERACTIVE CONTROLS</H2>
+
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>MOUSE ACTIONS</H2>
+
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>KEYBOARD ACTIONS</H2>
+
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbedit.html">mbedit</A></B>(l), <B><A HREF="mbprocess.html">mbprocess</A></B>(l) <B><A HREF="mbset.html">mbset</A></B>(l)
+<P>
+<A NAME="lbAL">&nbsp;</A>
+<H2>BUGS</H2>
+
+This program is not done, nor is it adequately documented.
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">INTERACTIVE CONTROLS</A><DD>
+<DT><A HREF="#lbAI">MOUSE ACTIONS</A><DD>
+<DT><A HREF="#lbAJ">KEYBOARD ACTIONS</A><DD>
+<DT><A HREF="#lbAK">SEE ALSO</A><DD>
+<DT><A HREF="#lbAL">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 29 April 2011</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

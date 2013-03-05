@@ -1,0 +1,432 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbauvloglist</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbauvloglist</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  11 January 2011 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbauvloglist</B> - Lists table data from an MBARI AUV mission log file.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbauvloglist</B> <B>-I</B><I>file</I> [<B>-L</B><I>lonflip</I>
+<B>-O</B><I>list</I> <B>-P -S</B> <B>-V -H</B> ]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+MBauvloglist reads an MBARI AUV mission log file and lists specified
+fields in tab-delimited text output. MBARI AUV mission logs  are binary
+files with an ascii header describing the units, name, and binary size 
+of each value in a single record. An example of a log file header is:
+<P>
+# binary fastcatlog
+<BR>
+
+# timeTag time %8.8e ,time ,UNKNOWN 
+<BR>
+
+# double conductivity %8.8e ,Calculated conductivity ,Siemens/meter 
+<BR>
+
+# double temperature %8.8e ,Calculated temperature ,Celsius 
+<BR>
+
+# double pressure %8.8e ,Calculated pressure ,Decibars 
+<BR>
+
+# double calculated_salinity %8.8e ,Calculated salinity ,Volts 
+<BR>
+
+# double cond_frequency %8.8e ,Raw Conductivity frequency ,Hertz 
+<BR>
+
+# double temp_counts %8.8e ,Raw Pressure A/D counts ,Unitless 
+<BR>
+
+# double pressure_counts %8.8e ,pressure_counts ,Unitless 
+<BR>
+
+# double pressure_temp_comp_voltage_reading %8.8e ,Raw pressure temp compensation voltage reading ,Volts 
+<BR>
+
+# double calculated_sound_velocity %8.8e ,Calculated sound velocity ,M/s 
+<BR>
+
+# begin
+<P>
+Users can extract arbitrary text lists of values in the AUV log files by using the <B>-O</B>
+option repeatedly to specify fields by name (e.g. calculated_sound_velocity)
+in the order desired. The print formatting statements (e.g. %8.8e) included in the log
+header is used by default. However, users can use the <B>-F</B> option to specify
+optional formatting for fields specified in following <B>-O</B> commands.
+<P>
+To find out the values contained in any particular log file, use the <B>-P</B> option alone
+to print out a list of the contents. Then run <B>mbauvloglist</B> again using the <B>-O</B> option
+to specify each of the desired values in the desired order of columns. The <B>-F</B> option 
+can be used to set the printing format. Otherwise, the default format specified in the
+log header will be used.
+<P>
+As of August 2009, the contents of the MBARI Mapping AUV missions logs are:
+<P>
+DropWeight.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;short&nbsp;WDTimer&nbsp;%d&nbsp;,Count&nbsp;Down&nbsp;Timer&nbsp;,Seconds&nbsp;
+<BR>&nbsp;short&nbsp;BWTimer&nbsp;%d&nbsp;,Burn&nbsp;Wire&nbsp;Timer&nbsp;,Seconds&nbsp;
+<BR>&nbsp;short&nbsp;WDClear&nbsp;%d&nbsp;,Watch&nbsp;Dog&nbsp;Clear&nbsp;,Unitless&nbsp;
+<BR>&nbsp;short&nbsp;AcommsDN&nbsp;%d&nbsp;,Acoustic&nbsp;Comms&nbsp;Drop&nbsp;Now&nbsp;,Unitless&nbsp;
+<BR>&nbsp;short&nbsp;WDStatus&nbsp;%d&nbsp;,Watch&nbsp;Dog&nbsp;Status&nbsp;,Unknown&nbsp;
+<BR>&nbsp;short&nbsp;DWout&nbsp;%d&nbsp;,Drop&nbsp;Weight&nbsp;Active&nbsp;,Unitless&nbsp;
+<BR>&nbsp;short&nbsp;GulperProxIn&nbsp;%d&nbsp;,Gulper&nbsp;Proximity&nbsp;Sensor&nbsp;,Unitless&nbsp;
+<BR>&nbsp;
+adam6017.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;chan0&nbsp;%8.8e&nbsp;,chan0&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;chan1&nbsp;%8.8e&nbsp;,chan1&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;chan2&nbsp;%8.8e&nbsp;,chan2&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;chan3&nbsp;%8.8e&nbsp;,chan3&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;chan4&nbsp;%8.8e&nbsp;,chan4&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;chan5&nbsp;%8.8e&nbsp;,chan5&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;chan6&nbsp;%8.8e&nbsp;,chan6&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;chan7&nbsp;%8.8e&nbsp;,chan7&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;
+ats.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;AtsDelta&nbsp;%8.8e&nbsp;,Last&nbsp;ms&nbsp;drift&nbsp;bt&nbsp;Reson&nbsp;and&nbsp;Auv&nbsp;clocks:&nbsp;drift&nbsp;=&nbsp;delta0&nbsp;-&nbsp;(tReson-tAuv)&nbsp;,seconds&nbsp;
+<BR>&nbsp;double&nbsp;AtsDrift&nbsp;%8.8e&nbsp;,AtsDrift&nbsp;,seconds&nbsp;
+<BR>&nbsp;
+dvl.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlBotVelx&nbsp;%8.8e&nbsp;,dvlBotVelx&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlBotVely&nbsp;%8.8e&nbsp;,dvlBotVely&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlBotVelz&nbsp;%8.8e&nbsp;,dvlBotVelz&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlBotVele&nbsp;%8.8e&nbsp;,dvlBotVele&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;short&nbsp;dvlBotVelStat&nbsp;%d&nbsp;,dvlBotVelStat&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlWatVelx&nbsp;%8.8e&nbsp;,dvlWatVelx&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlWatVely&nbsp;%8.8e&nbsp;,dvlWatVely&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlWatVelz&nbsp;%8.8e&nbsp;,dvlWatVelz&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlWatVele&nbsp;%8.8e&nbsp;,dvlWatVele&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;short&nbsp;dvlWatVelStat&nbsp;%d&nbsp;,dvlWatVelStat&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlTemp&nbsp;%8.8e&nbsp;,dvlTemp&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlPitch&nbsp;%8.8e&nbsp;,dvlPitch&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlRoll&nbsp;%8.8e&nbsp;,dvlRoll&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlHeading&nbsp;%8.8e&nbsp;,dvlHeading&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlBeam1&nbsp;%4.6f&nbsp;,dvlBeam1&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlBeam2&nbsp;%4.6f&nbsp;,dvlBeam2&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlBeam3&nbsp;%4.6f&nbsp;,dvlBeam3&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlBeam4&nbsp;%8.8e&nbsp;,dvlBeam4&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlRange&nbsp;%8.8e&nbsp;,dvlRange&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlToping&nbsp;%20.4f&nbsp;,dvlToping&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dvlSpdSnd&nbsp;%12.4f&nbsp;,dvlSpdSnd&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;
+dynamicControl.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;myTime&nbsp;%.2f&nbsp;,myTime&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;xTrackError&nbsp;%8.8e&nbsp;,xTrackError&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;cPsi&nbsp;%8.8e&nbsp;,cPsi&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;cDeltaR&nbsp;%8.8e&nbsp;,cDeltaR&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;tPsi&nbsp;%8.8e&nbsp;,tPsi&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;psiProp&nbsp;%8.8e&nbsp;,psiProp&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;psiInt&nbsp;%8.8e&nbsp;,psiInt&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;psiRate&nbsp;%8.8e&nbsp;,psiRate&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;xteIntegral&nbsp;%8.8e&nbsp;,xteIntegral&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;kxte&nbsp;%8.8e&nbsp;,kxte&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dPsi&nbsp;%8.8e&nbsp;,dPsi&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;speedCmd&nbsp;%8.8e&nbsp;,speedCmd&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;omegaCmd&nbsp;%8.8e&nbsp;,omegaCmd&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;cDepth&nbsp;%8.8e&nbsp;,cDepth&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;tDepth&nbsp;%8.8e&nbsp;,tDepth&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;DepthError&nbsp;%8.8e&nbsp;,DepthError&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;dIntegral&nbsp;%8.8e&nbsp;,dIntegral&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mDepthRateTerm&nbsp;%8.8e&nbsp;,mDepthRateTerm&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;cTheta&nbsp;%8.8e&nbsp;,cTheta&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;pitchProp&nbsp;%8.8e&nbsp;,pitchProp&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;pitchInt&nbsp;%8.8e&nbsp;,pitchInt&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;pitchRate&nbsp;%8.8e&nbsp;,pitchRate&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;pitchIntInp&nbsp;%8.8e&nbsp;,pitchIntInp&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;cDeltaEBL&nbsp;%8.8e&nbsp;,cDeltaEBL&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;cDeltaE&nbsp;%8.8e&nbsp;,cDeltaE&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;targetNorthing&nbsp;%13.2f&nbsp;,targetNorthing&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;targetEasting&nbsp;%13.2f&nbsp;,targetEasting&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;newBearing&nbsp;%8.8e&nbsp;,newBearing&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;newNorthing&nbsp;%13.2f&nbsp;,newNorthing&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;newEasting&nbsp;%13.2f&nbsp;,newEasting&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;short&nbsp;first&nbsp;%d&nbsp;,first&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;
+fastcatlog.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;conductivity&nbsp;%8.8e&nbsp;,Calculated&nbsp;conductivity&nbsp;,Siemens/meter&nbsp;
+<BR>&nbsp;double&nbsp;temperature&nbsp;%8.8e&nbsp;,Calculated&nbsp;temperature&nbsp;,Celsius&nbsp;
+<BR>&nbsp;double&nbsp;pressure&nbsp;%8.8e&nbsp;,Calculated&nbsp;pressure&nbsp;,Decibars&nbsp;
+<BR>&nbsp;double&nbsp;calculated_salinity&nbsp;%8.8e&nbsp;,Calculated&nbsp;salinity&nbsp;,Volts&nbsp;
+<BR>&nbsp;double&nbsp;cond_frequency&nbsp;%8.8e&nbsp;,Raw&nbsp;Conductivity&nbsp;frequency&nbsp;,Hertz&nbsp;
+<BR>&nbsp;double&nbsp;temp_counts&nbsp;%8.8e&nbsp;,Raw&nbsp;Pressure&nbsp;A/D&nbsp;counts&nbsp;,Unitless&nbsp;
+<BR>&nbsp;double&nbsp;pressure_counts&nbsp;%8.8e&nbsp;,pressure_counts&nbsp;,Unitless&nbsp;
+<BR>&nbsp;double&nbsp;pressure_temp_comp_voltage_reading&nbsp;%8.8e&nbsp;,Raw&nbsp;pressure&nbsp;temp&nbsp;compensation&nbsp;voltage&nbsp;reading&nbsp;,Volts&nbsp;
+<BR>&nbsp;double&nbsp;calculated_sound_velocity&nbsp;%8.8e&nbsp;,Calculated&nbsp;sound&nbsp;velocity&nbsp;,M/s&nbsp;
+<BR>&nbsp;
+gps.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;hours&nbsp;%d&nbsp;,Hours&nbsp;,Hours&nbsp;
+<BR>&nbsp;integer&nbsp;minutes&nbsp;%d&nbsp;,Minutes&nbsp;,Minutes&nbsp;
+<BR>&nbsp;integer&nbsp;seconds&nbsp;%d&nbsp;,Seconds&nbsp;,Seconds&nbsp;
+<BR>&nbsp;integer&nbsp;centiSeconds&nbsp;%d&nbsp;,CentiSeconds&nbsp;,CentiSeconds&nbsp;
+<BR>&nbsp;angle&nbsp;latitude&nbsp;%8.8e&nbsp;,Vehicle&nbsp;latitude&nbsp;,Degrees&nbsp;
+<BR>&nbsp;angle&nbsp;longitude&nbsp;%8.8e&nbsp;,Vehicle&nbsp;longitude&nbsp;,Degrees&nbsp;
+<BR>&nbsp;short&nbsp;quality&nbsp;%d&nbsp;,GPS&nbsp;quality&nbsp;code&nbsp;,Unitless&nbsp;
+<BR>&nbsp;short&nbsp;numberOfSatellites&nbsp;%d&nbsp;,Number&nbsp;of&nbsp;satellites&nbsp;visible&nbsp;,Unitless&nbsp;
+<BR>&nbsp;double&nbsp;hdop&nbsp;%8.8e&nbsp;,Horizontal&nbsp;dilution&nbsp;of&nbsp;precision&nbsp;,Unitless&nbsp;
+<BR>&nbsp;double&nbsp;antennaHeight&nbsp;%8.8e&nbsp;,Altitude&nbsp;of&nbsp;GPS&nbsp;antenna&nbsp;above&nbsp;mean&nbsp;sea&nbsp;level&nbsp;,meters&nbsp;
+<BR>&nbsp;double&nbsp;geoHeight&nbsp;%8.8e&nbsp;,Geoidal&nbsp;separation&nbsp;,meters&nbsp;
+<BR>&nbsp;short&nbsp;dgpsDataAge&nbsp;%d&nbsp;,Age&nbsp;of&nbsp;differential&nbsp;GPS&nbsp;correction&nbsp;,seconds&nbsp;
+<BR>&nbsp;short&nbsp;dgpsRSID&nbsp;%d&nbsp;,Differential&nbsp;reference&nbsp;station&nbsp;ID&nbsp;,Unitless&nbsp;
+<BR>&nbsp;
+kearfott.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;mCyclesK&nbsp;%d&nbsp;,mCyclesK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;mModeK&nbsp;%d&nbsp;,mModeK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;mMonK&nbsp;%d&nbsp;,mMonK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mLatK&nbsp;%3.8f&nbsp;,mLatK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mLonK&nbsp;%3.8f&nbsp;,mLonK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mNorthK&nbsp;%13.2f&nbsp;,mNorthK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mEastK&nbsp;%13.2f&nbsp;,mEastK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mDepthK&nbsp;%8.8e&nbsp;,mDepthK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mRollK&nbsp;%8.8e&nbsp;,mRollK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mPitchK&nbsp;%8.8e&nbsp;,mPitchK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mHeadK&nbsp;%8.8e&nbsp;,mHeadK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mVbodyxK&nbsp;%8.8e&nbsp;,mVbodyxK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mVbodyyK&nbsp;%8.8e&nbsp;,mVbodyyK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mVbodyzK&nbsp;%8.8e&nbsp;,mVbodyzK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mAccelxK&nbsp;%8.8e&nbsp;,mAccelxK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mAccelyK&nbsp;%8.8e&nbsp;,mAccelyK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mAccelzK&nbsp;%8.8e&nbsp;,mAccelzK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mPrateK&nbsp;%8.8e&nbsp;,mPrateK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mQrateK&nbsp;%8.8e&nbsp;,mQrateK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mRrateK&nbsp;%8.8e&nbsp;,mRrateK&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;utcTime&nbsp;%8.8e&nbsp;,utcTime&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;
+m3dmgx1.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;angle&nbsp;mRollCB&nbsp;%8.8e&nbsp;,Roll&nbsp;,Degrees&nbsp;
+<BR>&nbsp;angle&nbsp;mOmega_xCB&nbsp;%8.8e&nbsp;,Roll&nbsp;rate&nbsp;,Degrees/second&nbsp;
+<BR>&nbsp;angle&nbsp;mPitchCB&nbsp;%8.8e&nbsp;,Pitch&nbsp;,Degrees&nbsp;
+<BR>&nbsp;angle&nbsp;mOmega_yCB&nbsp;%8.8e&nbsp;,Pitch&nbsp;rate&nbsp;,Degrees/second&nbsp;
+<BR>&nbsp;angle&nbsp;mYawCB&nbsp;%8.8e&nbsp;,Yaw&nbsp;,Degrees&nbsp;
+<BR>&nbsp;angle&nbsp;mOmega_zCB&nbsp;%8.8e&nbsp;,Yaw&nbsp;rate&nbsp;,Degrees/second&nbsp;
+<BR>&nbsp;double&nbsp;mAccel_xCB&nbsp;%8.8e&nbsp;,Acceleration&nbsp;along&nbsp;vehicle&nbsp;x-axis&nbsp;,G&nbsp;
+<BR>&nbsp;double&nbsp;mAccel_yCB&nbsp;%8.8e&nbsp;,Acceleration&nbsp;along&nbsp;vehicle&nbsp;y-axis&nbsp;,G&nbsp;
+<BR>&nbsp;double&nbsp;mAccel_zCB&nbsp;%8.8e&nbsp;,Acceleration&nbsp;along&nbsp;vehicle&nbsp;z-axis&nbsp;,G&nbsp;
+<BR>&nbsp;double&nbsp;mMag_xCB&nbsp;%8.8e&nbsp;,Magnetic&nbsp;field&nbsp;along&nbsp;vehicle&nbsp;x-axis&nbsp;,Gauss&nbsp;
+<BR>&nbsp;double&nbsp;mMag_yCB&nbsp;%8.8e&nbsp;,Magnetic&nbsp;field&nbsp;along&nbsp;vehicle&nbsp;y-axis&nbsp;,Gauss&nbsp;
+<BR>&nbsp;double&nbsp;mMag_zCB&nbsp;%8.8e&nbsp;,Magnetic&nbsp;field&nbsp;along&nbsp;vehicle&nbsp;z-axis&nbsp;,Gauss&nbsp;
+<BR>&nbsp;double&nbsp;mTempCB&nbsp;%8.8e&nbsp;,Crossbow&nbsp;internal&nbsp;temperature&nbsp;,Celsius&nbsp;
+<BR>&nbsp;
+navigation.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mPos_x&nbsp;%13.2f&nbsp;,Vehicle&nbsp;Northing&nbsp;(WGS&nbsp;84&nbsp;Zone&nbsp;10S)&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;mPos_y&nbsp;%13.2f&nbsp;,Vehicle&nbsp;Easting&nbsp;(WGS&nbsp;84&nbsp;Zone&nbsp;10S)&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;mDepth&nbsp;%8.8e&nbsp;,Vehicle&nbsp;Depth&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;mGpsNorth&nbsp;%13.2f&nbsp;,Northing&nbsp;(WGS&nbsp;84&nbsp;Zone&nbsp;10S)&nbsp;based&nbsp;upon&nbsp;GPS&nbsp;fix&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;mGpsEast&nbsp;%13.2f&nbsp;,Easting&nbsp;(WGS&nbsp;84&nbsp;Zone&nbsp;10S)&nbsp;based&nbsp;upon&nbsp;GPS&nbsp;fix&nbsp;,Meters&nbsp;
+<BR>&nbsp;integer&nbsp;mGpsValid&nbsp;%d&nbsp;,GPS&nbsp;fix&nbsp;Status&nbsp;code&nbsp;,Unitless&nbsp;
+<BR>&nbsp;double&nbsp;mPhi&nbsp;%8.8e&nbsp;,Vehicle&nbsp;roll&nbsp;,Degrees&nbsp;
+<BR>&nbsp;double&nbsp;mTheta&nbsp;%8.8e&nbsp;,Vehicle&nbsp;pitch&nbsp;,Degrees&nbsp;
+<BR>&nbsp;double&nbsp;mPsi&nbsp;%8.8e&nbsp;,Vehicle&nbsp;yaw&nbsp;,Degrees&nbsp;
+<BR>&nbsp;double&nbsp;mOmega_x&nbsp;%8.8e&nbsp;,Vehicle&nbsp;roll&nbsp;rate&nbsp;,Degrees/second&nbsp;
+<BR>&nbsp;double&nbsp;mOmega_y&nbsp;%8.8e&nbsp;,Vehicle&nbsp;pitch&nbsp;rate&nbsp;,Degrees/second&nbsp;
+<BR>&nbsp;double&nbsp;mOmega_z&nbsp;%8.8e&nbsp;,Vehicle&nbsp;yaw&nbsp;rate&nbsp;,Degrees/second&nbsp;
+<BR>&nbsp;double&nbsp;mPsaRange&nbsp;%8.8e&nbsp;,Altimeter&nbsp;range&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;mAltitude&nbsp;%8.8e&nbsp;,Vehicle&nbsp;altitude&nbsp;above&nbsp;bottom&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;mDvlAltitude&nbsp;%8.8e&nbsp;,mDvlAltitude&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mWaterSpeed&nbsp;%8.8e&nbsp;,Current&nbsp;speed&nbsp;based&nbsp;upon&nbsp;DVL&nbsp;data&nbsp;,Meters/second&nbsp;
+<BR>&nbsp;integer&nbsp;mDvlValid&nbsp;%d&nbsp;,Dvl&nbsp;valid&nbsp;flag&nbsp;in&nbsp;Navigation&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;mDvlNewData&nbsp;%d&nbsp;,Navigation&nbsp;thinks&nbsp;the&nbsp;Dvl&nbsp;has&nbsp;new&nbsp;data&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;mDeltaT&nbsp;%8.8e&nbsp;,Time&nbsp;between&nbsp;Dvl&nbsp;updates&nbsp;,Seconds&nbsp;
+<BR>&nbsp;double&nbsp;nfix&nbsp;%13.2f&nbsp;,Northing&nbsp;(WGS&nbsp;84&nbsp;Zone&nbsp;10S)&nbsp;based&nbsp;upon&nbsp;baseline&nbsp;fix&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;efix&nbsp;%13.2f&nbsp;,Easting&nbsp;(WGS&nbsp;84&nbsp;Zone&nbsp;10S)&nbsp;based&nbsp;upon&nbsp;baseline&nbsp;fix&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;filter_north&nbsp;%13.2f&nbsp;,Kalman&nbsp;filter&nbsp;northing&nbsp;(WGS&nbsp;84&nbsp;Zone&nbsp;10S)&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;filter_east&nbsp;%13.2f&nbsp;,Kalman&nbsp;filter&nbsp;easting&nbsp;(WGS&nbsp;84&nbsp;Zone&nbsp;10S)&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;filter_depth&nbsp;%8.8e&nbsp;,Kalman&nbsp;filter&nbsp;depth&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;north_current&nbsp;%8.8e&nbsp;,Northward&nbsp;flowing&nbsp;current&nbsp;estimate&nbsp;,Meters/second&nbsp;
+<BR>&nbsp;double&nbsp;east_current&nbsp;%8.8e&nbsp;,Eastward&nbsp;flowing&nbsp;current&nbsp;estimate&nbsp;,Meters/second&nbsp;
+<BR>&nbsp;double&nbsp;speed_bias&nbsp;%8.8e&nbsp;,Speed&nbsp;bias&nbsp;based&nbsp;upon&nbsp;long&nbsp;baseline&nbsp;fixes&nbsp;,Meters/second&nbsp;
+<BR>&nbsp;double&nbsp;heading_bias&nbsp;%8.8e&nbsp;,Heading&nbsp;bias&nbsp;based&nbsp;upon&nbsp;long&nbsp;baseline&nbsp;fixes&nbsp;,Degrees&nbsp;
+<BR>&nbsp;double&nbsp;latitude&nbsp;%5.8f&nbsp;,latitude&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;longitude&nbsp;%5.8f&nbsp;,longitude&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;
+parosci.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;double&nbsp;depth&nbsp;%8.3lf&nbsp;,Depth&nbsp;,Meters&nbsp;
+<BR>&nbsp;double&nbsp;temp&nbsp;%8.8e&nbsp;,Pressure&nbsp;Sensor&nbsp;Internal&nbsp;Temp&nbsp;,Celsius&nbsp;
+<BR>&nbsp;double&nbsp;pressure&nbsp;%8.8lf&nbsp;,Pressure&nbsp;,Bars&nbsp;
+<BR>&nbsp;double&nbsp;temp_period&nbsp;%8.8lf&nbsp;,Temperature&nbsp;Period&nbsp;,Microseconds&nbsp;
+<BR>&nbsp;double&nbsp;pres_period&nbsp;%8.8lf&nbsp;,Pressure&nbsp;Period&nbsp;,Microseconds&nbsp;
+<BR>&nbsp;
+tailCone.log Contents:
+<BR>&nbsp;timeTag&nbsp;time&nbsp;%8.8e&nbsp;,time&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;status&nbsp;%d&nbsp;,status&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;elevatorCurrent&nbsp;%d&nbsp;,elevatorCurrent&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;rudderCurrent&nbsp;%d&nbsp;,rudderCurrent&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;float&nbsp;propCurrent1&nbsp;%f&nbsp;,propCurrent1&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;propCurrent2&nbsp;%d&nbsp;,propCurrent2&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;propRpm&nbsp;%d&nbsp;,propRpm&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;float&nbsp;elevatorAngle&nbsp;%f&nbsp;,elevatorAngle&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;float&nbsp;rudderAngle&nbsp;%f&nbsp;,rudderAngle&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;propPwm&nbsp;%d&nbsp;,propPwm&nbsp;,UNKNOWN&nbsp;
+<BR>&nbsp;integer&nbsp;propTemp&nbsp;%d&nbsp;,propTemp&nbsp;,UNKNOWN&nbsp;
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-F</B>
+
+<DD>
+<I>printformat</I>
+<BR>
+
+Sets the printing format (in fprintf() style) of the next value specified using
+the <B>-O</B> option.By default, <B>mbauvloglist</B> uses the print format specified
+in the log file header.
+format 
+<DT><B>-I</B>
+
+<DD>
+<I>ifile</I>
+<BR>
+
+Sets the input MBARI AUV mission log  filename. 
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values output.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0 
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1 
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <B>mbauvloglist</B> uses the user default <I>lonflip</I> set using
+<B>mbdefaults</B>.
+<DT><B>-O</B>
+
+<DD>
+<I>valuename</I>
+<BR>
+
+Causes <B>mbauvloglist</B> to output the specified value. This option can be 
+given multiple times, and the values will be output in the order specified.
+<DT><B>-P</B>
+
+<DD>
+<BR>
+
+Prints out the log file header.
+<DT><B>-S</B>
+
+<DD>
+<BR>
+
+Scales angular values to be in degrees instead of radians.
+<DT><B>-V</B>
+
+<DD>
+The <B>-V</B> option causes the program to be verbose.
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLE</H2>
+
+To extract a list of pressure and water sound speed from the CTD log of an
+AUV mission, use:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbauvloglist&nbsp;-I&nbsp;mvc_logs/2006.224.00/fastcatlog.log&nbsp;\&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-F%f&nbsp;-O&nbsp;pressure&nbsp;-O&nbsp;calculated_sound_velocity&nbsp;<BR>
+<BR>
+
+This simple list is ordered as the data were collected, following the ups
+and downs of the AUV mission. In order to construct a model of the water
+sound speed as a function of depth, one can sort the output of <B>mbauvloglist</B>
+(using the program <B>sort</B>) to be ordered with increasing pressure (depth), 
+and then resampled into uniform increments of pressure using the <B>GMT</B>
+program <B>sample1d</B>.
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbauvloglist&nbsp;-I&nbsp;mvc_logs/2006.224.00/fastcatlog.log&nbsp;\&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-F%f&nbsp;-O&nbsp;pressure&nbsp;-O&nbsp;calculated_sound_velocity&nbsp;\&nbsp;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>|&nbsp;sort&nbsp;-n&nbsp;-u&nbsp;&gt;&nbsp;auv_ssv.txt<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>sample1d&nbsp;auv_ssv.txt&nbsp;-Fl&nbsp;-H1&nbsp;-S0.0&nbsp;-I10.0&nbsp;&gt;&nbsp;auv_ssv_bin.txt<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B>sample1d</B>, <B>sort</B>.
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Indubitably.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLE</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 11 January 2011</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

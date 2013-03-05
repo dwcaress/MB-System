@@ -1,0 +1,413 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbsegygrid</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbsegygrid</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  2 May 2012 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbsegygrid</B> - Generate time vs. trace number grids of seismic data from segy files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbsegygrid</B> <B>-I</B><I>segyfile</I> <B>-O</B><I>gridfile</I>
+[<B>-A</B><I>shotscale/timescale</I> <B>-B</B><I>maxvalue/window</I> <B>-D</B><I>decimatex/decimatey</I>
+<B>-G</B><I>mode/gain[/window]</I>
+<B>-S</B><I>mode[/start/end[/schan/echan]]</I> <B>-T</B><I>sweep[/delay]</I>
+<B>-W</B><I>mode/start/end</I> <B>-H -V</B>]&quot;;
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>MBsegygrid</B> generates grids of seismic data from segy files.
+The program works by inserting trace data into a grid in
+which the y-axis is some measure of trace number, range, or distance
+along a profile, and the y-axis is time. The output files are <B>GMT</B> netCDF
+format grid files.
+<P>
+By default or with use of the <B>-A</B> option, the x-dimension of
+the grid is determined by the number of traces specified
+by the <B>-S</B> option and any decimation specified with option <B>-D</B>.
+If the <B>-R</B> option is used, then the profile will represent a line between
+specified start and end positions divided into binning cells according to a specified
+cell size, and the x-dimension of the grid will be the distance along the
+line (in meters) divided by the cell size and any decimation specified with
+option <B>-D</B>.
+<P>
+The y-dimension of the grid is determined by the sample spacing, any decimation
+specified with option <B>-D</B>, and the time sweep specified by the  <B>-T</B>
+option.
+<P>
+If the <B>-S</B> option is not specified, then all of the traces in the segy file
+will be gridded. If the time sweep and delay (if any) are not specified using
+the <B>-T</B> option, then the sweep and delay will be set so that all trace samples
+are incorporated into the grid.
+<P>
+A simple time-varying gain can be applied to the traces before gridding using
+the <B>-G</B> option. The start time for the gain may be either the start
+of the trace or the seafloor arrival time.
+<P>
+Regions of the grid without data are indicated in the output by NaN values.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>shotscale/timescale</I>
+<BR>
+
+This option causes the x-axis to be rescaled from shot number to distance in meters
+and the y-axis to be rescaled from time in seconds to depth in meters.
+The <I>shotscale</I> value represents the shot spacing in meters and the
+<I>timescale</I> value is the scaling from time to depth (typically 750 m/s
+for the water column).
+<DT><B>-B</B>
+
+<DD>
+<I>maxvalue[/window]</I>
+<BR>
+
+This option causes the application of automatic gain control (AGC). At each sample, a time interval
+<I>window</I> seconds long centered on the sample is considered. The sample value is multiplied
+by a scaling factor calculated as <I>maxvalue</I> divided by the maximum original value in the
+time interval. This approach can emphasize coherent arrivals regardless of amplitude level. If
+<I>window</I> is not specified, then the <I>window is taken to be the trace length in time so that
+the entire trace is normalized using the same scale factor, and all traces has the same maximum
+value of maxvalue</I>.
+<DT><B>-D</B>
+
+<DD>
+<I>decimatex/decimatey</I>
+<BR>
+
+Sets the decimation of traces (<I>decimatex</I>) and samples (<I>decimatey</I>) used in
+generating the output grid. The downsampling of the data is actually accomplished by averaging
+the values within each grid bin rather than omitting traces or samples.
+<DT><B>-G</B>
+
+<DD>
+<I>mode/gain[/window]</I>
+<BR>
+
+Sets the application of gain to the trace data. The <I>mode</I> value determines how
+the gain is applied. If <I>mode</I> = 0, no gain is applied.If <I>mode</I> = 1,
+the gain is applied starting from the beginning of the trace. If  <I>mode</I> = 2,
+the gain is applied starting at the seafloor (assuming that a seafloor pick has
+been defined in the segy data file). The <I>gain</I> value sets the gain applied
+as follows. If G = <I>gain</I> and t is the time in seconds since the start of
+gain application, then each sample is multiplied by a factor of (1 + (G * t)).
+The parameter <I>window</I>, if given, sets the length of the time interval
+in seconds that gain is applied. When the gain is windowed, trace values after
+the end of the gain window are zeroed.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>segyfile</I>
+<BR>
+
+Sets the filename of the input segy seismic data file to be gridded.
+<DT><B>-O</B>
+
+<DD>
+<I>gridfile</I>
+<BR>
+
+Sets the filename for the output GMT netCDF format grid.
+<DT><B>-R</B>
+
+<DD>
+<I>cellsize/startlon/endlon/startlat/endlat</I>
+<BR>
+
+If the <B>-R</B> option is used, then the profile will represent a line between
+start and end positions specified using longitude and latitude values in
+decimal degrees. This line segment is divided into binning cells according to
+<I>cellsize</I> in meters, and the x-dimension of the grid will be the distance along the
+line (in meters) divided by the cell size and any decimation specified with
+option <B>-D</B>. Effectively, the location of each trace will be projected onto the line
+segment and the segment added to the appropriate cell. Where cells have multiple traces,
+the traces will be averaged. 
+<DT><B>-S</B>
+
+<DD>
+<I>mode[/start/end[/schan/echan]]</I>
+<BR>
+
+This option sets the range of traces that are gridded, and thus determines
+the x-dimension of the output grid (also impacted by any decimation
+specified with <B>-D</B>). If <I>mode</I> = 0, then <I>start</I> and <I>end</I>
+refer to shot numbers. This typically is useful for subbottom data or seismic
+data in shot gather form. If <I>mode</I> = 1, then <I>start</I> and <I>end</I>
+refer to CMP (or RP or CDP) numbers. This typically is useful for seismic
+reflection data in stacked or CMP gather forms. If the data are multichannel
+seismic reflection or seismic refraction in either shot or CMP gathers, the
+start and end of the channels selected for gridding is set using the optional <I>schan</I>
+and <I>echan</I>, respectively. The x-dimension of the output grid is determined by
+(<I>end</I> - <I>start</I> + 1) * (<I>echan</I> - <I>schan</I> + 1) / <I>decimatex</I>.
+<DT><B>-T</B>
+
+<DD>
+<I>sweep[/delay]</I>
+<BR>
+
+Sets the time range of seismic data to be gridded. The <I>sweep</I> specifies
+the number of seconds of data comprising the y-axis of the grid. The number of
+samples follows from the sample interval of the data, and any decimation
+applied using <B>-D</B>. The optional <I>delay</I> value sets the sweep
+start time, again in seconds.
+The y-dimension of the output grid is determined by
+<I>sweep</I> / sampleinterval / <I>decimatey</I>, where the sampleinterval is
+a parameter read with the seismic data.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbsegygrid</B> prints out information regarding its
+controlling parameters during execution; the
+<B>-V</B> option causes the program to also print out statements
+indicating its progress.
+<DT><B>-W</B>
+
+<DD>
+<I>mode/start/end</I>
+<BR>
+
+This option can be used to limit the data being gridded to a particular time
+window in various ways. This option does not impact the definition of the overall
+grid bounds, but does restrict the data gridded to samples within particular times
+of interest. If <I>mode</I> = 1, then <I>start</I> and <I>end</I> are simply start and end
+times of good data in seconds. If <I>mode</I> = 2, then <I>start</I> and <I>end</I> are relative to
+the time of the bottom return. In this case <I>start</I> is often negative so that the
+grid shows data above the seafloor, and then down into the subsurface. Finally, if <I>mode</I> = 3,
+then <I>start</I> and <I>end</I> are relative to the time corresponding to the sonar
+depth.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that we have a Reson 7k format file (format 88) called 20040722_152111.s7k
+that contains subbottom profiler data. Further suppose that we
+have used <B>mbextractsegy</B> to extract the subbottom profiler data
+into a segy format file called 20040722_152111.s7k.segy. <B>MBextractsegy</B>
+also generates a &quot;sinf&quot; file containing statistics about the data in the segy
+file. In this case, the contents of the sinf file 20040722_152111.s7k.segy.sinf are:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SEGY&nbsp;Data&nbsp;File:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20040722_152111.s7k.segy<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>File&nbsp;Header&nbsp;Info:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Channels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Auxilliary&nbsp;Channels:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Sample&nbsp;Interval&nbsp;(usec):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;64<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Number&nbsp;of&nbsp;Samples&nbsp;in&nbsp;Trace:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8330<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Trace&nbsp;length&nbsp;(sec):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.533120<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Data&nbsp;Format:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IEEE&nbsp;32&nbsp;bit&nbsp;integer<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;CDP&nbsp;Fold:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Data&nbsp;Totals:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Number&nbsp;of&nbsp;Traces:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2527<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Min&nbsp;Max&nbsp;Delta:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Shot&nbsp;number:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2582&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2527<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Shot&nbsp;trace:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;RP&nbsp;number:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2582&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2527<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;RP&nbsp;trace:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Delay&nbsp;(sec):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;0.000000&nbsp;0.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Range&nbsp;(m):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;0.000000&nbsp;0.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Receiver&nbsp;Elevation&nbsp;(m):&nbsp;&nbsp;&nbsp;-224.030000&nbsp;-2.860000&nbsp;-221.170000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Source&nbsp;Elevation&nbsp;(m):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-224.030000&nbsp;-2.860000&nbsp;-221.170000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Source&nbsp;Depth&nbsp;(m):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.860000&nbsp;224.030000&nbsp;-221.170000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Receiver&nbsp;Water&nbsp;Depth&nbsp;(m):&nbsp;51.510000&nbsp;487.670000&nbsp;-436.160000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Source&nbsp;Water&nbsp;Depth&nbsp;(m):&nbsp;&nbsp;&nbsp;51.510000&nbsp;487.670000&nbsp;-436.160000<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Navigation&nbsp;Totals:<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Start&nbsp;of&nbsp;Data:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Time:&nbsp;&nbsp;07&nbsp;22&nbsp;2004&nbsp;15:20:37.029000&nbsp;&nbsp;JD204<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Lon:&nbsp;-121.8573&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lat:&nbsp;&nbsp;&nbsp;36.7755<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;End&nbsp;of&nbsp;Data:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Time:&nbsp;&nbsp;07&nbsp;22&nbsp;2004&nbsp;15:44:15.438000&nbsp;&nbsp;JD204<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;Lon:&nbsp;-121.8572&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lat:&nbsp;&nbsp;&nbsp;36.7952<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Limits:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Minimum&nbsp;Longitude:&nbsp;&nbsp;&nbsp;&nbsp;-121.8574&nbsp;&nbsp;&nbsp;Maximum&nbsp;Longitude:&nbsp;&nbsp;&nbsp;&nbsp;-121.8572<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Minimum&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.7755&nbsp;&nbsp;&nbsp;Maximum&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;36.7952<BR>
+<P>
+In order to generate a time vs. trace number grid of all traces in the
+segy file, with a column for each trace and a row for each time sample,
+one can simply invoke <B>mbsegygrid</B> without specifying a range of
+desired traces or the desired time sweep. The program automatically sizes
+the grid to include all traces and samples, taking into account trace start
+delays if necessary. The root of the output grid filename is specified with
+the <B>-O</B> option; if &quot;SubbottomGrid&quot; is specified then the output
+grid will be named SubbottomGrid.grd. The command is:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbsegygrid&nbsp;-I&nbsp;20040722_152111.s7k.segy&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;SubbottomGrid<BR>
+<BR>
+
+and the output to the terminal looks like:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MBsegygrid&nbsp;Parameters:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;segy&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20040722_152111.s7k.segy<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;fileroot:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SubbottomGrid<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;Parameters:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trace&nbsp;mode:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trace&nbsp;start:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;56<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trace&nbsp;end:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2582<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;channel&nbsp;start:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;channel&nbsp;end:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trace&nbsp;decimation:&nbsp;&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time&nbsp;sweep:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.533120&nbsp;seconds<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time&nbsp;delay:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;seconds<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sample&nbsp;interval:&nbsp;&nbsp;&nbsp;&nbsp;0.000064&nbsp;seconds<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sample&nbsp;decimation:&nbsp;&nbsp;1<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window&nbsp;mode:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window&nbsp;start:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;seconds<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;window&nbsp;end:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000&nbsp;seconds<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gain&nbsp;mode:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gain:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;Parameters:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;filename:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SubbottomGrid.grd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;grid&nbsp;dimension:&nbsp;&nbsp;&nbsp;2527<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;grid&nbsp;dimension:&nbsp;&nbsp;&nbsp;8331<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;xmin:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;55.500000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;xmax:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2582.500000<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;ymin:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-0.533152<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;grid&nbsp;ymax:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.000032<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NaN&nbsp;values&nbsp;used&nbsp;to&nbsp;flag&nbsp;regions&nbsp;with&nbsp;no&nbsp;data<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:0&nbsp;position:0&nbsp;rp:56&nbsp;channel:1&nbsp;2004/204&nbsp;15:20:37.029&nbsp;samples:8330&nbsp;interval:64&nbsp;usec&nbsp;minmax:&nbsp;0.000000&nbsp;2425.784912<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:25&nbsp;position:25&nbsp;rp:81&nbsp;channel:1&nbsp;2004/204&nbsp;15:20:51.068&nbsp;samples:8330&nbsp;interval:64&nbsp;usec&nbsp;minmax:&nbsp;0.000000&nbsp;3832.087402<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:50&nbsp;position:50&nbsp;rp:106&nbsp;channel:1&nbsp;2004/204&nbsp;15:21:05.106&nbsp;samples:8330&nbsp;interval:64&nbsp;usec&nbsp;minmax:&nbsp;0.000000&nbsp;1590.149658<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>....................<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:2475&nbsp;position:2475&nbsp;rp:2531&nbsp;channel:1&nbsp;2004/204&nbsp;15:43:46.800&nbsp;samples:8330&nbsp;interval:64&nbsp;usec&nbsp;minmax:&nbsp;0.000000&nbsp;991.466064<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:2500&nbsp;position:2500&nbsp;rp:2556&nbsp;channel:1&nbsp;2004/204&nbsp;15:44:00.838&nbsp;samples:8330&nbsp;interval:64&nbsp;usec&nbsp;minmax:&nbsp;0.000000&nbsp;838.286926<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>PROCESS&nbsp;read:2525&nbsp;position:2525&nbsp;rp:2581&nbsp;channel:1&nbsp;2004/204&nbsp;15:44:14.877&nbsp;samples:8330&nbsp;interval:64&nbsp;usec&nbsp;minmax:&nbsp;0.000000&nbsp;985.870667<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>--------------<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Plot&nbsp;generation&nbsp;shellscript&nbsp;&lt;SubbottomGrid.grd.cmd&gt;&nbsp;created.<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Instructions:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Execute&nbsp;&lt;SubbottomGrid.grd.cmd&gt;&nbsp;to&nbsp;generate&nbsp;Postscript&nbsp;plot&nbsp;&lt;SubbottomGrid.grd.ps&gt;.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;Executing&nbsp;&lt;SubbottomGrid.grd.cmd&gt;&nbsp;also&nbsp;invokes&nbsp;gv&nbsp;to&nbsp;view&nbsp;the&nbsp;plot&nbsp;on&nbsp;the&nbsp;screen.<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>--------------<BR>
+<P>
+The size of the the output grid can be checked using the <B>GMT</B> program
+<B>grdinfo</B>. The results of the command:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grdinfo&nbsp;SubbottomGrid.grd<BR>
+<BR>
+
+look like:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid.grd:&nbsp;Title:&nbsp;Seismic&nbsp;Grid&nbsp;from&nbsp;20040722_152111.s7k.segy<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid.grd:&nbsp;Command:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid.grd:&nbsp;Remark:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Projection:&nbsp;SeismicProfile<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Grid&nbsp;created&nbsp;by&nbsp;MBsegygrid<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB-system&nbsp;Version&nbsp;5.0.4<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Run&nbsp;by&nbsp;&lt;caress&gt;&nbsp;on&nbsp;&lt;hess&gt;&nbsp;at&nbsp;&lt;Thu&nbsp;Sep&nbsp;23&nbsp;16:24:39&nbsp;2004&gt;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid.grd:&nbsp;Pixel&nbsp;node&nbsp;registration&nbsp;used<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid.grd:&nbsp;grdfile&nbsp;format&nbsp;#&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid.grd:&nbsp;x_min:&nbsp;55.5&nbsp;x_max:&nbsp;2582.5&nbsp;x_inc:&nbsp;1&nbsp;units:&nbsp;Trace&nbsp;Number&nbsp;nx:&nbsp;2527<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid.grd:&nbsp;y_min:&nbsp;-0.533152&nbsp;y_max:&nbsp;3.2e-05&nbsp;y_inc:&nbsp;6.4e-05&nbsp;units:&nbsp;Time&nbsp;(seconds)&nbsp;ny:&nbsp;8331<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid.grd:&nbsp;z_min:&nbsp;0&nbsp;z_max:&nbsp;2623.34&nbsp;units:&nbsp;Trace&nbsp;Signal<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid.grd:&nbsp;scale_factor:&nbsp;1&nbsp;add_offset:&nbsp;0<BR>
+<P>
+<B>MBsegygrid</B> also uses the macro <B>mbm_grdplot</B> to generate a shellscript
+called SubbottomGrid.grd.cmd that, when executed, will use <B>GMT</B> commands
+to generate a Postscript plot of the grid.
+<P>
+In order to generate a grid of a subset of the subbottom data (for instance,
+shots 1500 - 2000 and the time sweep from 0.25 to 0.35 seconds), use the <B>-S</B>
+and <B>-T</B> options:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbsegygrid&nbsp;-I&nbsp;20040722_152111.s7k.segy&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;SubbottomGrid2&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-S0/1500/2000&nbsp;-T0.1/0.25<BR>
+<BR>
+
+This time the <B>grdinfo</B> output looks like:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid2.grd:&nbsp;Title:&nbsp;Seismic&nbsp;Grid&nbsp;from&nbsp;20040722_152111.s7k.segy<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid2.grd:&nbsp;Command:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid2.grd:&nbsp;Remark:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Projection:&nbsp;SeismicProfile<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Grid&nbsp;created&nbsp;by&nbsp;MBsegygrid<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB-system&nbsp;Version&nbsp;5.0.4<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Run&nbsp;by&nbsp;&lt;caress&gt;&nbsp;on&nbsp;&lt;hess&gt;&nbsp;at&nbsp;&lt;Thu&nbsp;Sep&nbsp;23&nbsp;16:40:34&nbsp;2004&gt;<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid2.grd:&nbsp;Pixel&nbsp;node&nbsp;registration&nbsp;used<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid2.grd:&nbsp;grdfile&nbsp;format&nbsp;#&nbsp;0<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid2.grd:&nbsp;x_min:&nbsp;1499.5&nbsp;x_max:&nbsp;2000.5&nbsp;x_inc:&nbsp;1&nbsp;units:&nbsp;Trace&nbsp;Number&nbsp;nx:&nbsp;501<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid2.grd:&nbsp;y_min:&nbsp;-0.35&nbsp;y_max:&nbsp;-0.249968&nbsp;y_inc:&nbsp;6.4e-05&nbsp;units:&nbsp;Time&nbsp;(seconds)&nbsp;ny:&nbsp;1563<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid2.grd:&nbsp;z_min:&nbsp;0&nbsp;z_max:&nbsp;558.42&nbsp;units:&nbsp;Trace&nbsp;Signal<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>SubbottomGrid2.grd:&nbsp;scale_factor:&nbsp;1&nbsp;add_offset:&nbsp;0<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbm_grdplot.html">mbm_grdplot</A></B>(l), <B><A HREF="mbmosaic.html">mbmosaic</A></B>(l), <B><A HREF="mbm_grid.html">mbm_grid</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+This tool isn't close to being complete...
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 2 May 2012</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

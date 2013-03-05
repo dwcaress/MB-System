@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbm_grdcut</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbm_grdcut</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  26 October 2009 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbm_grdcut</B> - Macro to extract a specified subarea of a
+GMT GRD grid file as another GRD file. 
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+mbm_grdcut <B>-I</B><I>infile</I> <B>-O</B><I>outfile</I> <B>-R</B><I>w/e/s/n</I> [<B>-H</B> <B>-V</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbm_grdcut</B> is a macro to painlessly cut out a region from a 
+GMT GRD grid file.
+The GMT program grdcut requires that one specify bounds which
+exactly match grid cell boundaries. Frequently, one just wants
+to extract an approximate region quickly, without calculating
+grid cell sizes and boundary locations. This macro does the
+the calculations and extracts the subregion closest to that
+specified by the user.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Sets the filename of the input GMT grid file. This file must be
+in the GMT NetCDF GRD format. 
+<DT><B>-O</B>
+
+<DD>
+<I>outfile</I>
+<BR>
+
+Sets the filename of the output GMT grid file. This file will be
+in the GMT NetCDF GRD format. 
+<DT><B>-R</B>
+
+<DD>
+<I>w/e/s/n</I>
+<BR>
+
+Sets the bounds of the area to be extracted from the input grid file. 
+<DT><B>-V</B>
+
+<DD>
+The <B>-V</B> option causes <B>mbm_grdcut</B> to print out status messages.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose that we have used <B>mbgrid</B> to obtain a
+topography grid file called KohalaA_bath.grd in the GMT NetCDF
+GRD format:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbgrid&nbsp;-Idatalist&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-OKohalaA_bath&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-155.72855/-155.31928/20.09488/20.47645&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-E30.0/0m!&nbsp;-A2&nbsp;-N&nbsp;-G3&nbsp;-C1&nbsp;-V<BR>
+<BR>
+
+Further suppose that one wishes to extract a smaller grid with
+bounds of 155 degrees 31 minutes W to 155 degrees 26 minutes W
+in longitude and 20 degrees 13 minutes N to 20 degrees 18 minutes N
+in latitude. This can be done using the <B>GMT</B> program
+<B>grdcut</B>, but <B>grdcut</B> requires that the user specify
+bounds that exactly match the grid cell boundaries in the file.
+The <B>mbm_grdcut</B> macros allows one to specify approximate
+desired bounds, calculates the exact, nearest bounds
+that <B>grdcut</B> will accept, and then executes <B>grdcut</B>.
+<P>
+To obtain the desired sub-grid, the following will suffice:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbm_grdcut&nbsp;-I&nbsp;KohalaA_bath.grd&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-O&nbsp;Kohala_plunge&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-R-155:31/-155:26/20:13/20:18&nbsp;-V<BR>
+<BR>
+
+The resulting output is:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Program&nbsp;mbm_grdcut&nbsp;status:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kohalaa.grd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;GRD&nbsp;file:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z.grd<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;Grid&nbsp;bounds:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.72855&nbsp;-155.3192906&nbsp;&nbsp;20.09488&nbsp;20.47628103<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Input&nbsp;grid&nbsp;dimensions:&nbsp;&nbsp;1426&nbsp;&nbsp;1329<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Grid&nbsp;cell&nbsp;sizes:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0002871995719&nbsp;&nbsp;0.0002871995719<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Requested&nbsp;Grid&nbsp;bounds:&nbsp;&nbsp;-155.516666666667&nbsp;-155.433333333333&nbsp;&nbsp;20.2166666666667&nbsp;20.3<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;Grid&nbsp;bounds:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.51688391551&nbsp;-155.433596039659&nbsp;&nbsp;20.2166526184856&nbsp;20.2999404943366<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Output&nbsp;grid&nbsp;dimensions:&nbsp;291&nbsp;&nbsp;291<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Running&nbsp;grdcut...<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grdcut&nbsp;kohalaa.grd&nbsp;-Gz.grd&nbsp;-R-155.51688391551/-155.433596039659/20.2166526184856/20.2999404943366&nbsp;-V<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grdcut:&nbsp;File&nbsp;spec:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>W&nbsp;E&nbsp;S&nbsp;N&nbsp;dx&nbsp;dy&nbsp;nx&nbsp;ny:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grdcut:&nbsp;Old:&nbsp;-155.729&nbsp;-155.319&nbsp;20.0949&nbsp;20.4763&nbsp;0.0002872&nbsp;0.0002872&nbsp;1426&nbsp;1329<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>grdcut:&nbsp;New:&nbsp;-155.517&nbsp;-155.434&nbsp;20.2167&nbsp;20.2999&nbsp;0.0002872&nbsp;0.0002872&nbsp;&nbsp;291&nbsp;&nbsp;291<BR>
+<P>
+<BR>&nbsp;
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbgrid.html">mbgrid</A></B>(l),
+<B><A HREF="mbmosaic.html">mbmosaic</A></B>(l), <B><A HREF="mbm_grid.html">mbm_grid</A></B>(l), <B><A HREF="mbm_grdplot.html">mbm_grdplot</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+This macro is new and hasn't been tested in serious
+usage yet - let us know what to fix, add, or
+change!.
+<P>
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 26 October 2009</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

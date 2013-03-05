@@ -1,0 +1,521 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbnavlist</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbnavlist</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  9 November 2011 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbnavlist</B> - List navigation data in swath sonar data files.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbnavlist</B> [<B>-B</B><I>yr/mo/da/hr/mn/sc</I> <B>-D</B><I>decimate</I>
+<B>-E</B><I>yr/mo/da/hr/mn/sc</I> <B>-F</B><I>format</I> 
+<B>-G</B><I>delimeter</I> <B>-H</B> <B>-I</B><I>file</I> <B>-K</B><I>kind</I>
+<B>-L</B><I>lonflip</I> <B>-N</B><I>navchannel</I>
+<B>-O</B><I>output_format</I> <B>-R</B><I>west/east/south/north</I> 
+<B>-S</B><I>speed</I> <B>-T</B><I>timegap</I> <B>-V</B> <B>-Z</B><I>segment</I>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbnavlist</B> prints the specified contents of navigation records
+in a swath sonar data file to stdout. By default, <B>mbnavlist</B> 
+produces ASCII files in
+spreadsheet style, with data columns separated by tabs. Alternatively,
+other column delimiters can be used (<B>-G</B> option), or
+the output can be binary, with each field represented 
+as a double precision float (<B>-A</B> option).  The output stream can
+be decimated using the <B>-D</B> option. The output of
+<B>mbnavlist</B> can be piped to plotting and data analysis programs. The
+option <B>-O</B><I>output_format</I> can be 
+used to control the data types that
+are sent to stdout. 
+<P>
+By default, <B>mbnavlist</B> extracts navigation from the 
+data record type listed as the &quot;navigation source&quot; for a particular
+data format. Swath data formats may contain synchronous navigation
+(navigation is included in survey data records), asynchronous navigation
+(navigation comes in records separate from and at different times
+than the survey data records), or both (survey records contain merged
+navigation while the original asynchronous navigation is preserved in
+separate navigation records). Some data formats provide for multiple
+navigation sources, so that there are more than one channel of
+asynchronous data records. In this case one channel is always designated
+as the primary or active navigation channel. The <B>-N</B> option allows
+the user to specify that <B>mbnavlist</B> outputs navigation from
+the primary asynchronous navigation (<B>-N</B><I>0</I>) or from one
+of three auxilliary navigation channels 
+(<B>-N</B><I>1</I>, <B>-N</B><I>2</I>, or <B>-N</B><I>3</I>). If the data
+format only uses asynchronous navigation, then the default
+navigation source will already be the primary asynchronous navigation
+and <B>-N</B> need not be used. If <B>-N</B> is used but the data file
+does not contain asynchronous navigation or the specified auxilliary
+navigation channels, then <B>mbnavlist</B> will output nothing. To
+determine if a datafile contains asynchronous navigation and/or auxilliary
+navigation, run <B>mbinfo</B> using its <B>-N</B> option to get counts
+of all data record types in the file.
+<P>
+Just to make things more complicated, many data formats formats pass 
+heading and attitude data in records separate from position, and often
+with different timestamps and sampling rates. If, for instance, the
+attitude data are sampled at 10 Hz but position is only sampled at
+1 Hz, extracting roll using <B>mbnavlist</B> will, by default, either
+output roll values only at the sonar ping times (if the navigation source
+is the survey data) or at the position record times (if the navigation
+source is the asynchronous position data, but not at the attitude data
+times. Moreover, the attitude data will be interpolated onto the times
+of sonar pings or position fixes. In order to extract the full attitude
+data stream, the <B>-K</B><I>kind</I> option may be used, where <I>kind</I>
+is the identifier for the record type to be used as the trigger for output.
+Any desired values not contained in the selected record will be interpolated
+onto the times of the selected record. In order to identify the records
+available in a particular data file, use <B>mbinfo</B> with the <B>-N</B>
+option. This will show if a data file contains records of type MB_DATA_ATTITUDE,
+which has a record type identifier of 18, A list of the record type
+identifiers used within <B>MB-System</B> is given below, although not
+all of the record types have time stamps or can be used to define
+<B>mbnavlist</B> output. For example, requesting <B>mbnavlist</B> output
+associated with comment records will yield nonuseful results.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>
+
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<BR>
+
+Causes the output to be binary (native double precision floating
+point) rather than ASCII. Some
+output options cannot be represented as single binary floats (e.g.
+time strings and longitude or latitude broken into degrees
+and minutes. These values are output as multiple fields as
+appropriate.
+Default: ASCII output with fields separated by tabs.
+<DT><B>-B</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the starting time for data allowed in the input data.
+The <B>-E</B> option sets the ending time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 1962/2/21/10/30/0.
+<DT><B>-D</B>
+
+<DD>
+<I>decimate</I>
+<BR>
+
+Sets the decimation of the output data. By default (i.e. <I>decimate</I>=1), 
+every available data record is output. If <I>decimate</I>&gt;1, then only 
+every &quot;<I>decimate</I>&quot;th record will be output. Default: <I>decimate</I>=1.
+<DT><B>-E</B>
+
+<DD>
+<I>yr/mo/da/hr/mn/sc</I>
+<BR>
+
+This option sets the ending time for data allowed in the input data.
+The <B>-B</B> option sets the starting time for data. If the 
+starting time is before the ending time, then any data
+with a time stamp before the starting time or after the
+ending time is ignored. If instead the starting time is
+after the ending time, then any data between the ending
+and starting time will be ignored. This scheme allows time
+windowing both inside and outside a specified interval.
+Default: <I>yr/mo/da/hr/mn/sc</I> = 2062/2/21/10/30/0.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the format for the input swath sonar data using 
+<B>MBIO</B> integer format identifiers. 
+This program uses the <B>MBIO</B> library and will read any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
+<DT><B>-G</B>
+
+<DD>
+<I>delimiter</I>
+<BR>
+
+Sets the character(s) used to separate output fields when ascii
+columns are output. Default: tabs are used as delimiters.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>file</I>
+<BR>
+
+Sets the input filename. If <I>format</I> &gt; 0 (set with the 
+<B>-F</B> option) then the swath sonar data contained in <I>file</I> 
+is read and processed. If <I>format</I> &lt; 0, then <I>file</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read 
+the data in each one of these files.
+In the <I>file</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. 
+Default: <I>file</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-K</B>
+
+<DD>
+<I>kind</I>
+<BR>
+
+This option sets the type of data record used as the trigger for
+output. By default, data are output when the record type listed as
+the &quot;navigation source&quot; for a particular data format is encountered.
+The <B>-K</B> option causes output to be keyed to data records of
+type <I>kind</I>, where <I>kind</I> may be integer values such as:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;general&nbsp;survey&nbsp;data&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_CALIBRATE<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Hydrosweep&nbsp;DS&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_MEAN_VELOCITY<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Hydrosweep&nbsp;DS&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_VELOCITY_PROFILE<TT>&nbsp;&nbsp;&nbsp;</TT>6<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;general&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>12<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEADING<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>17<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Hypack&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>18<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad,&nbsp;Hypack,&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SSV<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>19<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Simrad&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>28<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;1&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>29<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;2&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>30<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;nav&nbsp;system&nbsp;3&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_MOTION<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>32<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>37<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k,&nbsp;XTF&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>38<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k,&nbsp;XTF&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ROLL<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>40<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_PITCH<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>41<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;Reson&nbsp;7k&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_RMC<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>48<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DBT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>49<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DPT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>50<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_ZDA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>51<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GLL<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>52<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GGA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>53<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;NMEA&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE1<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>55<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;1&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;2&nbsp;*/<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>/*&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;3&nbsp;*/<BR>
+<BR>
+
+For example, using <B>-K</B><I>18</I> will cause <B>mbnavlist</B> to output
+at the times of attitude data records. One consequence will be that
+any roll, pitch, or heave values specified with the <B>-O</B> option will
+be output without modification, whereas other values (e.g. position) will
+be interpolated onto the time of the attitude record.
+This option supercedes the <B>-N</B> option.
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values returned.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0 
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1 
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <I>lonflip</I> = 0.
+<DT><B>-N</B>
+
+<DD>
+<I>navchannel</I>
+<BR>
+
+Sets <B>mbnavlist</B> to look for navigation in navigation records rather
+than the record type listed as the &quot;navigation source&quot; for a particular
+data format. Swath data formats may contain synchronous navigation
+(navigation is included in survey data records), asynchronous navigation
+(navigation comes in records separate from and at different times
+than the survey data records), or both (survey records contain merged
+navigation while the original asynchronous navigation is preserved in
+separate navigation records). Some data formats provide for multiple
+navigation sources, so that there are more than one channel of
+asynchronous data records. In this case one channel is always designated
+as the primary or active navigation channel. The <B>-N</B> option allows
+the user to specify that <B>mbnavlist</B> outputs navigation from
+the primary asynchronous navigation (<B>-N</B><I>0</I>) or from one
+of three auxilliary navigation channels 
+(<B>-N</B><I>1</I>, <B>-N</B><I>2</I>, or <B>-N</B><I>3</I>). If <B>-N</B> is
+used but the data file
+does not contain asynchronous navigation or the specified auxilliary
+navigation channels, then <B>mbnavlist</B> will output nothing. To
+determine if a datafile contains asynchronous navigation and/or auxilliary
+navigation, run <B>mbinfo</B> using its <B>-N</B> option to get counts
+of all data record types in the file. This option is superceded by the
+<B>-K</B> option.
+<DT><B>-O</B>
+
+<DD>
+<I>output_format</I>
+<BR>
+
+Determines the form of the output. <I>Output_format</I> is a string composed
+of one or more of the following characters:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>c</B>&nbsp;&nbsp;for&nbsp;sonar&nbsp;depth&nbsp;(meters)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>H</B>&nbsp;&nbsp;for&nbsp;heading&nbsp;(degrees)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>h</B>&nbsp;&nbsp;for&nbsp;course&nbsp;made&nbsp;good&nbsp;(degrees)<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>J</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;jd&nbsp;hh&nbsp;mm&nbsp;ss.ssssss)&nbsp;<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;jd&nbsp;is&nbsp;the&nbsp;julian&nbsp;day&nbsp;of&nbsp;the&nbsp;year
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>j</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;jd&nbsp;dm&nbsp;ss.ssssss)&nbsp;<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;jd&nbsp;is&nbsp;the&nbsp;julian&nbsp;day&nbsp;of&nbsp;the&nbsp;year
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;dm&nbsp;is&nbsp;the&nbsp;minute&nbsp;of&nbsp;the&nbsp;day
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>L</B>&nbsp;&nbsp;for&nbsp;cumulative&nbsp;along-track&nbsp;distance&nbsp;(km)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>l</B>&nbsp;&nbsp;for&nbsp;cumulative&nbsp;along-track&nbsp;distance&nbsp;(m)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>M</B>&nbsp;&nbsp;for&nbsp;unix&nbsp;time&nbsp;in&nbsp;decimal&nbsp;seconds&nbsp;since&nbsp;1/1/70&nbsp;00:00:00<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>m</B>&nbsp;&nbsp;for&nbsp;time&nbsp;in&nbsp;decimal&nbsp;seconds&nbsp;since&nbsp;first&nbsp;record<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>N</B>&nbsp;&nbsp;for&nbsp;ping&nbsp;count<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>P</B>&nbsp;&nbsp;for&nbsp;pitch&nbsp;in&nbsp;degrees<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>p</B>&nbsp;&nbsp;for&nbsp;draft&nbsp;in&nbsp;meters<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>R</B>&nbsp;&nbsp;for&nbsp;roll&nbsp;in&nbsp;degrees<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>r</B>&nbsp;&nbsp;for&nbsp;heave&nbsp;in&nbsp;meters<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>S</B>&nbsp;&nbsp;for&nbsp;speed&nbsp;(km/hr)<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>s</B>&nbsp;&nbsp;for&nbsp;speed&nbsp;made&nbsp;good&nbsp;(km/hr)<BR>
+<BR>&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>T</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy/mm/dd/hh/mm/ss)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>t</B>&nbsp;&nbsp;for&nbsp;a&nbsp;time&nbsp;string&nbsp;(yyyy&nbsp;mm&nbsp;dd&nbsp;hh&nbsp;mm&nbsp;ss)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>U</B>&nbsp;&nbsp;for&nbsp;unix&nbsp;time&nbsp;in&nbsp;integer&nbsp;seconds&nbsp;since&nbsp;1/1/70&nbsp;00:00:00<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>u</B>&nbsp;&nbsp;for&nbsp;time&nbsp;in&nbsp;integer&nbsp;seconds&nbsp;since&nbsp;first&nbsp;record<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>V</B>&nbsp;&nbsp;for&nbsp;ping&nbsp;interval&nbsp;(decimal&nbsp;seconds)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>X</B>&nbsp;&nbsp;for&nbsp;longitude&nbsp;(decimal&nbsp;degrees)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>x</B>&nbsp;&nbsp;for&nbsp;longitude&nbsp;(degrees&nbsp;+&nbsp;decimal&nbsp;minutes&nbsp;+&nbsp;E/W)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>Y</B>&nbsp;&nbsp;for&nbsp;latitude&nbsp;(decimal&nbsp;degrees)<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><B>y</B>&nbsp;&nbsp;for&nbsp;latitude&nbsp;(degrees&nbsp;+&nbsp;decimal&nbsp;minutes&nbsp;+&nbsp;N/S)<BR>
+<P>
+Default <I>output_format</I> = <B>tMXYHs</B> (time, unix time, latitude, 
+longitude, heading, speed).
+<DT><B>-R</B>
+
+<DD>
+<I>west/east/south/north</I>
+<BR>
+
+Sets the longitude and latitude bounds within which swath sonar 
+data will be read. Only the data which lies within these bounds will
+be read. 
+Default: <I>west</I>=-360, east<I>=360</I>, <I>south</I>=-90, <I>north</I>=90.
+<DT><B>-S</B>
+
+<DD>
+<I>speed</I>
+<BR>
+
+Sets the minimum speed in km/hr (5.5 kts ~ 10 km/hr) allowed in 
+the input data; pings associated with a smaller ship speed will not be
+copied. Default: <I>speed</I> = 0.
+<DT><B>-T</B>
+
+<DD>
+<I>timegap</I>
+<BR>
+
+Sets the maximum time gap in minutes between adjacent pings allowed before
+the data is considered to have a gap. Default: <I>timegap</I> = 1.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbnavlist</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbnavlist</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used and all error status messages.
+<DT><B>-Z</B>
+
+<DD>
+<I>segment</I>
+<BR>
+
+Causes the ascii output of different input swath files
+(e.g. when a datalist is specified with the <B>-I</B> option)
+to be separated by lines with <I>segment</I>. If <I>segment</I>
+is a single character, then the output is a multiple segment
+file of the sort accepted by the <B>GMT</B> program <B>psxy</B>.
+This option only works with ascii output, and is thus disabled
+when the <B>-A</B> option is specified. The most common usage
+is <B>-Z</B>I&gt;.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to obtain a navigation list from a Simrad EM300 data file
+in the MBARI format (MBIO id 57) called mbari_1998_107_msn.mb57. To 
+obtain a listing with time in unix second forms followed
+by longitude and latitude, the following will suffice:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbnavlist&nbsp;-F57&nbsp;-i&nbsp;mbari_1998_107_msn.mb57&nbsp;-OMXY&nbsp;|&nbsp;more<BR>
+<P>
+The output will be as follows:
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>889125106.792000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.898471&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;19.979325<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>889125108.148000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.898586&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;19.979400<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>889125109.496000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.898738&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;19.979454<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>889125110.852000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.898876&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;19.979504<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>889125112.207000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.899020&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;19.979544<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>889125113.571000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.899204&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;19.979591<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>889125114.921000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-155.899479&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;19.979485<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>.....<BR>
+<A NAME="lbAI">&nbsp;</A>
+<H2>MB-SYSTEM DATA RECORD TYPES</H2>
+
+This list gives the data record types and numerical identifiers
+used within <B>MB-System</B>. Users can specify that <B>mbnavlist</B>
+output be keyed to the time stamps of particular record types by
+using the <B>-K</B><I>kind</I> option where <I>kind</I> corresponds
+to the desired record type identifier from this table.
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_KINDS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>54<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NONE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DATA<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>general&nbsp;survey&nbsp;data<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_COMMENT<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>general&nbsp;comment<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEADER<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>general&nbsp;header<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_CALIBRATE<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Hydrosweep&nbsp;DS<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_MEAN_VELOCITY<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Hydrosweep&nbsp;DS<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_VELOCITY_PROFILE<TT>&nbsp;&nbsp;&nbsp;</TT>6<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>general<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_STANDBY<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Hydrosweep&nbsp;DS<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV_SOURCE<TT>&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>8<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Hydrosweep&nbsp;DS<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_PARAMETER<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>9<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>general<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_START<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>10<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_STOP<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>11<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>12<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad,&nbsp;Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_RUN_PARAMETER<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>13<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_CLOCK<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>14<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_TIDE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>15<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad,&nbsp;Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEIGHT<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>16<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HEADING<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>17<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad,&nbsp;Hypack<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>18<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad,&nbsp;Hypack,&nbsp;Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SSV<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>19<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ANGLE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>20<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>HSMD<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_EVENT<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>21<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>HSMD<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_HISTORY<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>22<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GSF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SUMMARY<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>23<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GSF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_PROCESSING_PARAMETERS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>24<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GSF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SENSOR_PARAMETERS<TT>&nbsp;&nbsp;</TT>25<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GSF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAVIGATION_ERROR<TT>&nbsp;&nbsp;&nbsp;</TT>26<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>GSF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_RAW_LINE<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>27<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>uninterpretable&nbsp;line&nbsp;for&nbsp;ascii&nbsp;formats<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV1<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>28<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;nav&nbsp;system&nbsp;1<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV2<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>29<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;nav&nbsp;system&nbsp;2<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NAV3<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>30<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;nav&nbsp;system&nbsp;3<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_TILT<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>31<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_MOTION<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>32<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_CTD<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>33<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SUBBOTTOM_MCS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>34<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SUBBOTTOM_CNTRBEAM<TT>&nbsp;</TT>35<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SUBBOTTOM_SUBBOTTOM<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>36<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k,&nbsp;XTF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>37<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k,&nbsp;XTF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SIDESCAN3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>38<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k,&nbsp;XTF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_IMAGE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>39<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ROLL<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>40<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_PITCH<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>41<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ABSORPTIONLOSS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>42<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SPREADINGLOSS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>43<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_INSTALLATION<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>44<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_WATER_COLUMN<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>45<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_STATUS<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>46<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Simrad,&nbsp;XTF<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_DVL<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>47<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>JSTAR<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_RMC<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>48<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DBT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>49<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_DPT<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>50<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_ZDA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>51<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GLL<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>52<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_NMEA_GGA<TT>&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>53<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>NMEA<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_SURVEY_LINE<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>54<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Reson&nbsp;7k<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE1<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>55<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;attitude&nbsp;system&nbsp;1<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE2<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>56&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ancillary&nbsp;attitude&nbsp;system&nbsp;2<BR>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MB_DATA_ATTITUDE3<TT>&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>57<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>ancillary&nbsp;attitude&nbsp;system&nbsp;3<BR>
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbinfo.html">mbinfo</A></B>(l)
+<P>
+<A NAME="lbAK">&nbsp;</A>
+<H2>BUGS</H2>
+
+<B>mbnavlist</B> is not able to list all of the navigation information 
+available in some swath data formats.
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">MB-SYSTEM DATA RECORD TYPES</A><DD>
+<DT><A HREF="#lbAJ">SEE ALSO</A><DD>
+<DT><A HREF="#lbAK">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 9 November 2011</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

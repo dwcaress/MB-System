@@ -1,0 +1,524 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbclean</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbclean</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  16 October 2012 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbclean</B> - Tool to automatically flag bad beams in swath sonar bathymetry data.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbclean</B> [<B>-A</B><I>max</I> <B>-B</B><I>low/high</I> <B>-C</B><I>slope/units</I>
+<B>-D</B><I>min/max</I> <B>-F</B><I>format</I>
+<B>-G</B><I>fraction_low/fraction_high</I>
+<B>-I</B><I>infile</I> <B>-L</B><I>lonflip</I> <B>-O</B><I>outfile</I>
+<B>-M</B><I>mode</I> <B>-Q</B><I>backup</I> <B>-R</B><I>maxheadingrate</I> <B>-S</B><I>slope/mode/units</I>
+<B>-U</B><I>nmin</I> <B>-X</B><I>beamsleft/beamsright</I> <B>-Y</B><I>distanceleft/distanceright</I> <B>-V -H</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbclean</B> identifies and flags artifacts in swath sonar bathymetry data.
+Several algorithms are available for identifying artifacts; multiple
+algorithms can be applied in a single pass.
+The most commonly used approach is to identify artifacts
+based on excessive bathymetric slopes.
+Spikes where an excessive slope occurs before and reverses after a beam
+can also be removed.
+If desired, <B>mbclean</B> will also flag beams
+associated with &quot;rails&quot; where
+outer beams have smaller acrosstrack distances
+than more inner beams (<B>-Q</B> option).
+Low and high bounds on acceptable depth values can be set; depth values
+outside the acceptable range will be flagged. The acceptable depth
+ranges can either be absolute (<B>-B</B> option), relative to
+the local median depth (<B>-A</B> option) or defined by low
+and high fractions of the local median depth (<B>-G</B> option).
+A set number of outer beams can also be flagged.
+<P>
+The order in which the flagging algorithms are applied is
+as follows:
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1.&nbsp;Flag&nbsp;specified&nbsp;numbers&nbsp;of&nbsp;outer&nbsp;beams<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-X</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2.&nbsp;Flag&nbsp;outer&nbsp;beams&nbsp;by&nbsp;acrosstrack&nbsp;distance<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-Y</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;specified&nbsp;acceptable<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>depth&nbsp;range&nbsp;(<B>-B</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7.&nbsp;Flag&nbsp;pings&nbsp;with&nbsp;excessive&nbsp;heading&nbsp;change&nbsp;rate<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>        (<B>-Q</B> option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7.&nbsp;Zap&nbsp;&quot;rails&quot;&nbsp;(<B>-Q</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>3.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>using&nbsp;fractions&nbsp;of&nbsp;local&nbsp;median&nbsp;depth<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-G</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>4.&nbsp;Flag&nbsp;soundings&nbsp;outside&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>using&nbsp;deviation&nbsp;from&nbsp;local&nbsp;median&nbsp;depth<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-A</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>5.&nbsp;Flag&nbsp;soundings&nbsp;associated&nbsp;with&nbsp;spikes&nbsp;(<B>-S</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>6.&nbsp;Flag&nbsp;soundings&nbsp;associated&nbsp;with&nbsp;excessive&nbsp;slopes<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>(<B>-C</B>&nbsp;option&nbsp;or&nbsp;default).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>7.&nbsp;Zap&nbsp;&quot;rails&quot;&nbsp;(<B>-Q</B>&nbsp;option).<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>8.&nbsp;Flag&nbsp;all&nbsp;soundings&nbsp;in&nbsp;pings&nbsp;with&nbsp;too&nbsp;few<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>good&nbsp;soundings&nbsp;(<B>-U</B>&nbsp;option).<BR>
+<P>
+This program flags beams by outputting the flags as
+edit events to an &quot;edit save file&quot;, like that produced
+by <B>mbedit</B>. If an &quot;edit save file&quot; (named by adding
+a &quot;.esf&quot; suffix to the input swath filename) already
+exists, the edits are read in and applied before the
+<B>mbclean</B> flagging algorithms are used.
+Once generated, the edit events can be applied
+to the data using the program <B>mbprocess</B>, which
+outputs a processed swath data file.
+The <B>mbprocess</B> program is also used to merge
+edited navigation, recalculate bathymetry, and apply
+other corrections to swath bathymetry data.
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<BR>
+
+Alberto Malinverno
+<BR>
+
+<BR>&nbsp;&nbsp;Schlumberger-Doll
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-A</B>
+
+<DD>
+<I>max</I>
+<BR>
+
+This option sets the range of acceptable depth values relative to
+the local median depth. The median depth is obtained from the
+current ping and the pings immediately before and after that
+ping.  If a depth value deviates from the median depth by more
+than <I>max</I>, then it
+will be flagged. No deviation from the median depth checking is
+done if the <B>-A</B> option
+is not used.
+<DT><B>-B</B>
+
+<DD>
+<I>low/high</I>
+<BR>
+
+This option sets the range of acceptable depth values.  If a depth
+value is less than <I>low</I> or more than <I>high</I> then it
+will be flagged. No depth range checking is done if the <B>-B</B> option
+is not used.
+<DT><B>-C</B>
+
+<DD>
+<I>slope/unit</I>
+<BR>
+
+The value <I>slope</I> is the maximum acceptable slope. Beams associated
+with excessive slopes will be flagged or removed according to the
+operational mode specified using the <B>-M</B> option. This method will
+be used if no other algorithms are specified; if other algorithms are
+specified but <B>-C</B> is not used then no slope checking will occur.
+<I>unit</I> is optional and specifies the unit of <I>slope</I>,
+0 (default) indicates the slope is in tangents, 1 slope is in radians,
+2 slope is in degrees.
+Default: <I>slope</I> = 1.0
+<DT><B>-D</B>
+
+<DD>
+<I>min/max</I>
+<BR>
+
+Sets the minimum and maximum allowed distances between beams used for
+some of the flagging algorithms.  Both values are expressed in terms
+of fractions of the local median depth. Thus, <B>-D</B><I>0.01/0.25</I>
+will translate, if the local median depth is 1000 meters, to a minimum
+distance of 10 meters and a maximum distance of 250 meters.
+The <I>min</I> value sets the minimum distance
+between beams required for an excessive slope to be used
+to flag bad beams.
+The navigation and heading of the ship are used to calculate the locations
+of beams.  Ship turns often cause beams of adjacent pings to overlap, causing
+the distances between these beams to become quite small.  This can, in turn,
+magnify noise in the bathymetry data to produce slope estimates which
+are excessively large. The <I>max</I> value sets the maximum distance
+between the current beam and other beams for those beams to be used
+in evaluating the current beam. For instance, only beams within the
+maximum distance are used to calculate the local median depth, and only
+beams within the maximum distance are used to check for excessive slopes.
+Default: <I>min/max</I> = 0.01/0.25.
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the data format used if the input is read from stdin
+or from a file. If <I>format</I> &lt; 0, then the input file specified
+with the <B>-I</B> option will actually contain a list of input swath sonar
+data files. This program uses the <B>MBIO</B> library
+and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
+<DT><B>-G</B>
+
+<DD>
+<I>fraction_low/fraction_high</I>
+<BR>
+
+This option sets the range of acceptable depth values relative to
+low and high fractions of the local median depth.
+The median depth is obtained from the
+current ping and the pings immediately before and after that
+ping.  If a depth
+value is less than <I>fraction_low</I> times the median depth
+(e.g. <I>fraction_low</I> = 0.5 means one half the median
+depth) or more than <I>fraction_high</I> times the median depth then it
+will be flagged. No fractional depth range checking is
+done if the <B>-G</B> option
+is not used.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>infile</I>
+<BR>
+
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-F</B> option) then the swath sonar data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath sonar
+data files to be processed and their formats.  The program will read
+and process the data in each one of these files. Each input file will
+have an associated output file with either the &quot;.sga&quot; or &quot;.aga&quot; suffix.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will read or write any swath sonar
+format supported by <B>MBIO</B>. A list of the swath sonar data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-L</B>
+
+<DD>
+<I>lonflip</I>
+<BR>
+
+Sets the range of the longitude values used.
+If <I>lonflip</I>=-1 then the longitude values will be in
+the range from -360 to 0 degrees. If <I>lonflip</I>=0
+then the longitude values will be in
+the range from -180 to 180 degrees. If <I>lonflip</I>=1
+then the longitude values will be in
+the range from 0 to 360 degrees.
+Default: <I>lonflip</I> = 0.
+<DT><B>-M</B>
+
+<DD>
+<I>mode</I>
+<BR>
+
+Sets the manner in which bad beams identified by excessive slope
+are handled.
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;1:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Flags&nbsp;one&nbsp;beam&nbsp;associated&nbsp;with&nbsp;each&nbsp;outlier&nbsp;slope.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>The&nbsp;flagged&nbsp;beam&nbsp;is&nbsp;the&nbsp;one&nbsp;furthest&nbsp;from&nbsp;the&nbsp;local<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>median&nbsp;depth.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;2:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Flags&nbsp;both&nbsp;beams&nbsp;associated&nbsp;with&nbsp;each&nbsp;outlier&nbsp;slope.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;3:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Zeros&nbsp;one&nbsp;beam&nbsp;associated&nbsp;with&nbsp;each&nbsp;outlier&nbsp;slope.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>The&nbsp;zeroed&nbsp;beam&nbsp;is&nbsp;the&nbsp;one&nbsp;furthest&nbsp;from&nbsp;the&nbsp;local<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>median&nbsp;depth.<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><I>mode</I>&nbsp;=&nbsp;4:<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Zeros&nbsp;both&nbsp;beams&nbsp;associated&nbsp;with&nbsp;each&nbsp;outlier&nbsp;slope.<BR>
+If the data format of the input file
+prohibits storage of negative depths, an error message will be output
+and the program will exit. Default: <I>mode</I> = 1.
+<DT><B>-Q</B>
+
+<DD>
+<I>backup</I>
+<BR>
+
+This flag causes <B>mbclean</B> to search for bad &quot;rails&quot; in the
+swath sonar swath; the &quot;rails&quot; refer to groups of outer beams which
+have crosstrack distances (and depths) much less than they should
+have.  These are identified when one or more outer beams lies
+more than <I>backup</I> meters inboard of a more inner beam; all beams
+meeting this criteria are flagged.
+<DT><B>-S</B>
+
+<DD>
+<I>slope/mode/unit</I>
+<BR>
+
+The value <I>slope</I> is the maximum acceptable spike slope.
+If the slope from the preceding beam to this beam exceeds this value,
+and the slope from this beam to subsequent beam exceeds this value but
+with an opposite sign this beam is considered a spike and
+will be flagged or removed according to the
+operational mode specified using the <B>-M</B> option.
+Acrosstrack slopes are determined by the preceding and subsequent beams
+in the same ping. Alongtrack slopes are
+determined from the same beam in the previous and subsequent pings.
+Alongtrack are fairly sensitive to the minimum distance <B>-D</B> option,
+which will normally need to be set less to a very small value for alongtrack slopes
+to be detected. There is no test that alongtrack distances are all in the same direction.
+<P>
+If <I>mode</I> is 1 (default) only acrosstrack spikes are detected.
+If <I>mode</I> is 2 only alongtrack spikes are detected.
+If <I>mode</I> is 3 both along track and across track slopes are checked.
+<P>
+<I>unit</I> is optional and specifies the unit of <I>slope</I>,
+0 (default) indicates the slope is in tangents, 1 slope is in radians,
+2 slope is in degrees.
+A beam is not considered a spike if either the preceding or subsequent beam
+has already been flagged.
+Default: <I>slope</I> = 1.0
+<DT><B>-U</B>
+
+<DD>
+<I>nmin</I>
+<BR>
+
+This flag causes <B>mbclean</B> to search for port or starboard
+halves of pings which contain fewer than <I>nmin</I> good bathymetry
+values. All bathymetry values in the affected half-pings are
+flagged.
+<DT><B>-X</B>
+
+<DD>
+<I>zap_beams</I>
+<BR>
+
+If this option is used, the outermost <I>zap_beams</I> at both ends
+of the swath are flagged as bad; this is useful if the outer beams
+are known to be unreliable. Default: <I>zap_beams</I> = 0.
+<DT><B>-V</B>
+
+<DD>
+Normally, <B>mbclean</B> works &quot;silently&quot; without outputting
+anything to the stderr stream.  If the
+<B>-V</B> flag is given, then <B>mbclean</B> works in a &quot;verbose&quot; mode and
+outputs the program version being used, all error status messages,
+and the number of beams flagged as bad.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose one wishes to do a first pass edit of
+six Simrad EM300 files in
+the processing format (format 57). A datalist referencing these
+six files exists as the file datalist.mb-1 and has the contents:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0001_20020424_212920.mb57&nbsp;57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0002_20020425_011607.mb57&nbsp;57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0003_20020425_022926.mb57&nbsp;57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0004_20020425_024336.mb57&nbsp;57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0005_20020425_034057.mb57&nbsp;57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0006_20020425_045013.mb57&nbsp;57<BR>
+<BR>
+
+Use the following to flag any
+beams which deviate by more than 20% from the local median
+depth or which produce a slope greater than 3.5 (74 degrees):
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbclean&nbsp;-Idatalist.mb-1&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-M1&nbsp;-C3.5&nbsp;-D0.01/0.20&nbsp;\<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G0.80/1.20<BR>
+<P>
+The program will output flagging statistics for each file and
+give totals at the end. If the <B>-V</B> option is specified,
+<B>mbclean</B> will also output information for each beam that
+is flagged. Here is an example of the nonverbose output:
+<BR>
+
+<BR>
+
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Processing&nbsp;0001_20020424_212920.mb57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>908&nbsp;bathymetry&nbsp;data&nbsp;records&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;outer&nbsp;beams&nbsp;zapped<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zapped&nbsp;for&nbsp;too&nbsp;few&nbsp;good&nbsp;beams&nbsp;in&nbsp;ping<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>64&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;fractional&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;exceed&nbsp;acceptable&nbsp;deviation&nbsp;from&nbsp;median&nbsp;depth<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;bad&nbsp;rail&nbsp;beams&nbsp;identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1601&nbsp;excessive&nbsp;slopes&nbsp;identified<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0 excessive spikes identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>1665&nbsp;beams&nbsp;flagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;unflagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zeroed<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Processing&nbsp;0002_20020425_011607.mb57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>259&nbsp;bathymetry&nbsp;data&nbsp;records&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;outer&nbsp;beams&nbsp;zapped<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zapped&nbsp;for&nbsp;too&nbsp;few&nbsp;good&nbsp;beams&nbsp;in&nbsp;ping<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;fractional&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;exceed&nbsp;acceptable&nbsp;deviation&nbsp;from&nbsp;median&nbsp;depth<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;bad&nbsp;rail&nbsp;beams&nbsp;identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>242&nbsp;excessive&nbsp;slopes&nbsp;identified<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0 excessive spikes identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>242&nbsp;beams&nbsp;flagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;unflagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zeroed<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Processing&nbsp;0003_20020425_022926.mb57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>65&nbsp;bathymetry&nbsp;data&nbsp;records&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;outer&nbsp;beams&nbsp;zapped<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zapped&nbsp;for&nbsp;too&nbsp;few&nbsp;good&nbsp;beams&nbsp;in&nbsp;ping<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>9&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;fractional&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;exceed&nbsp;acceptable&nbsp;deviation&nbsp;from&nbsp;median&nbsp;depth<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;bad&nbsp;rail&nbsp;beams&nbsp;identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>497&nbsp;excessive&nbsp;slopes&nbsp;identified<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0 excessive spikes identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>506&nbsp;beams&nbsp;flagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;unflagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zeroed<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Processing&nbsp;0004_20020425_024336.mb57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>410&nbsp;bathymetry&nbsp;data&nbsp;records&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;outer&nbsp;beams&nbsp;zapped<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zapped&nbsp;for&nbsp;too&nbsp;few&nbsp;good&nbsp;beams&nbsp;in&nbsp;ping<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;fractional&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;exceed&nbsp;acceptable&nbsp;deviation&nbsp;from&nbsp;median&nbsp;depth<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;bad&nbsp;rail&nbsp;beams&nbsp;identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>148&nbsp;excessive&nbsp;slopes&nbsp;identified<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0 excessive spikes identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>148&nbsp;beams&nbsp;flagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;unflagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zeroed<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Processing&nbsp;0005_20020425_034057.mb57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>252&nbsp;bathymetry&nbsp;data&nbsp;records&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;outer&nbsp;beams&nbsp;zapped<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zapped&nbsp;for&nbsp;too&nbsp;few&nbsp;good&nbsp;beams&nbsp;in&nbsp;ping<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;fractional&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;exceed&nbsp;acceptable&nbsp;deviation&nbsp;from&nbsp;median&nbsp;depth<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;bad&nbsp;rail&nbsp;beams&nbsp;identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>100&nbsp;excessive&nbsp;slopes&nbsp;identified<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0 excessive spikes identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>100&nbsp;beams&nbsp;flagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;unflagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zeroed<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>Processing&nbsp;0006_20020425_045013.mb57<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>562&nbsp;bathymetry&nbsp;data&nbsp;records&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;outer&nbsp;beams&nbsp;zapped<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zapped&nbsp;for&nbsp;too&nbsp;few&nbsp;good&nbsp;beams&nbsp;in&nbsp;ping<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;fractional&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;exceed&nbsp;acceptable&nbsp;deviation&nbsp;from&nbsp;median&nbsp;depth<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;bad&nbsp;rail&nbsp;beams&nbsp;identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>41&nbsp;excessive&nbsp;slopes&nbsp;identified<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0 excessive spikes identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>41&nbsp;beams&nbsp;flagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;unflagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;beams&nbsp;zeroed<BR>
+<P>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>MBclean&nbsp;Processing&nbsp;Totals:<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-------------------------<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>6&nbsp;total&nbsp;swath&nbsp;data&nbsp;files&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2456&nbsp;total&nbsp;bathymetry&nbsp;data&nbsp;records&nbsp;processed<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;beams&nbsp;flagged&nbsp;in&nbsp;old&nbsp;esf&nbsp;files<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;beams&nbsp;unflagged&nbsp;in&nbsp;old&nbsp;esf&nbsp;files<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;beams&nbsp;zeroed&nbsp;in&nbsp;old&nbsp;esf&nbsp;files<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;outer&nbsp;beams&nbsp;zapped<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;beams&nbsp;zapped&nbsp;for&nbsp;too&nbsp;few&nbsp;good&nbsp;beams&nbsp;in&nbsp;ping<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>73&nbsp;total&nbsp;beams&nbsp;out&nbsp;of&nbsp;acceptable&nbsp;fractional&nbsp;depth&nbsp;range<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;beams&nbsp;exceed&nbsp;acceptable&nbsp;deviation&nbsp;from&nbsp;median&nbsp;depth<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;bad&nbsp;rail&nbsp;beams&nbsp;identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2629&nbsp;total&nbsp;excessive&nbsp;slopes&nbsp;identified<BR>
+<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0 total excessive spikes identified<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>2702&nbsp;total&nbsp;beams&nbsp;flagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;beams&nbsp;unflagged<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>0&nbsp;total&nbsp;beams&nbsp;zeroed<BR>
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbedit.html">mbedit</A></B>(l),
+<B><A HREF="mbinfo.html">mbinfo</A></B>(l) <B><A HREF="mbprocess.html">mbprocess</A></B>(l),
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+The algorithms implemented in <B>mbclean</B> simply
+don't detect all bathymetric artifacts that
+are obvious to the eye on contour charts.  Although
+<B>mbclean</B> often does a credible first pass at
+flagging obvious artifacts, we strongly recommend that
+any swath bathymetry processing stream include
+interactive editing of the
+bathymetry data (e.g. <B>mbedit</B>).
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 16 October 2012</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>

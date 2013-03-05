@@ -1,0 +1,273 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML VERSION="2.0">
+<HEAD>
+   <TITLE>MB-System Unix Manual Page: mbroutetime</TITLE>
+<!-- WEBMAGIC VERSION NUMBER="2.0.2" -->
+<!-- WEBMAGIC TRANSLATION NAME="ServerRoot" SRC="/var/www/htdocs/" DST="/" -->
+<!-- WEBMAGIC TRANSLATION NAME="ProjectRoot" SRC="./" DST="" -->
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#336699" VLINK="#997040" ALINK="#CC9900">
+<BODY>
+<CENTER><H3><U>MB-System Unix Manual Page</U></H3></CENTER>
+<PRE>
+<H1>mbroutetime</H1>
+Section:  MB-System 5.0  (1)<BR>Updated:  5 October 2012 <BR><A HREF="#index">Index</A>
+<HR>
+
+<A NAME="lbAB">&nbsp;</A>
+<H2>NAME</H2>
+
+<B>mbroutetime</B> - Program to output a list of the times when a survey passes the waypoints
+of a planned survey route.
+<P>
+<A NAME="lbAC">&nbsp;</A>
+<H2>VERSION</H2>
+
+Version 5.0
+<P>
+<A NAME="lbAD">&nbsp;</A>
+<H2>SYNOPSIS</H2>
+
+<B>mbroutetime</B> <B>-Rroutefile [-F</B><I>format</I> <B>-I</B><I>file</I>
+<B>-O</B><I>waypointtimefile</I> <B>-U</B><I>rangethreshold</I> <B>-H -V</B>]
+<P>
+<A NAME="lbAE">&nbsp;</A>
+<H2>DESCRIPTION</H2>
+
+<B>mbroutetime</B> -
+<P>
+<A NAME="lbAF">&nbsp;</A>
+<H2>AUTHORSHIP</H2>
+
+David W. Caress (<A HREF="mailto:caress@mbari.org">caress@mbari.org</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Monterey&nbsp;Bay&nbsp;Aquarium&nbsp;Research&nbsp;Institute
+<BR>
+
+Dale N. Chayes (<A HREF="mailto:dale@ldeo.columbia.edu">dale@ldeo.columbia.edu</A>)
+<BR>
+
+<BR>&nbsp;&nbsp;Lamont-Doherty&nbsp;Earth&nbsp;Observatory
+<P>
+<A NAME="lbAG">&nbsp;</A>
+<H2>OPTIONS</H2>
+
+<DL COMPACT>
+<DT><B>-F</B>
+
+<DD>
+<I>format</I>
+<BR>
+
+Sets the format for the input swath data using
+<B>MBIO</B> integer format identifiers.
+This program uses the <B>MBIO</B> library and will read any swath
+format supported by <B>MBIO</B>. A list of the swath data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page. Default: <I>format</I> = 11.
+<DT><B>-H</B>
+
+<DD>
+This &quot;help&quot; flag cause the program to print out a description
+of its operation and then exit immediately.
+<DT><B>-I</B>
+
+<DD>
+<I>filename</I>
+<BR>
+
+Sets the input filename. If <I>format</I> &gt; 0 (set with the
+<B>-F</B> option) then the swath data contained in <I>infile</I>
+is read and processed. If <I>format</I> &lt; 0, then <I>infile</I>
+is assumed to be an ascii file containing a list of the input swath
+data files to be processed and their formats.  The program will read
+the data in each one of these files.
+In the <I>infile</I> file, each
+data file should be followed by a data format identifier, e.g.:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile1&nbsp;11<BR>
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>datafile2&nbsp;24<BR>
+<BR>
+
+This program uses the <B>MBIO</B> library and will read any swath
+format supported by <B>MBIO</B>. A list of the swath data formats
+currently supported by <B>MBIO</B> and their identifier values
+is given in the <B>MBIO</B> manual page.
+Default: <I>infile</I> = &quot;datalist.mb-1&quot;.
+<DT><B>-V</B>
+
+<DD>
+The <B>-V</B> option causes <B>mbroutetime</B> to print out status messages.
+<P>
+</DL>
+<A NAME="lbAH">&nbsp;</A>
+<H2>EXAMPLES</H2>
+
+Suppose you are going to run the MBARI Mapping AUV on the Coaxial Segment of the
+Juan de Fuca Ridge. You have created a route file called Coaxial2009_1v3.rte using
+<B>mbgrdviz</B>. In order to create an MBARI AUV mission script for mission beginning
+with a spiral descent to an altitude of 50 m, followed by a survey run at a 75 m altitude,
+the following will suffice:
+<BR>&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>mbroutetime&nbsp;-I&nbsp;Coaxial2009_1v3.rte&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-A75/30/75&nbsp;-B1&nbsp;&nbsp;<TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT>-G0&nbsp;-MSL&nbsp;-N50&nbsp;-R220/83/0.3&nbsp;&nbsp;-O&nbsp;Coaxial2009_1v3.cfg&nbsp;&nbsp;-S1.5&nbsp;-L30&nbsp;-W100&nbsp;-V<BR>
+<BR>
+
+The resulting mission script has the following header:
+<P>
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;This&nbsp;MBARI&nbsp;Mapping&nbsp;AUV&nbsp;mission&nbsp;file&nbsp;has&nbsp;been&nbsp;generated
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;by&nbsp;the&nbsp;MB-System&nbsp;program&nbsp;mbroutetime&nbsp;run&nbsp;by
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;user&nbsp;&lt;caress&gt;&nbsp;on&nbsp;cpu&nbsp;&lt;shepard&gt;&nbsp;at&nbsp;&lt;Thu&nbsp;Jul&nbsp;30&nbsp;11:36:47&nbsp;PDT&nbsp;2009&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Mission&nbsp;Summary:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route&nbsp;File:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coaxial2009_1v3.rte
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mission&nbsp;File:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Coaxial2009_1v3.cfg
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Distance:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;79501.503455&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Estimated&nbsp;Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;57203&nbsp;(s)&nbsp;&nbsp;15.890&nbsp;(hr)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Abort&nbsp;Time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;60067&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Max&nbsp;battery&nbsp;life:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;64800&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Safety&nbsp;margin:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1800&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ascend&nbsp;time:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2932&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Way&nbsp;Points:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;44
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Route&nbsp;Points:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;550
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Survey&nbsp;behavior:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;WaypointDepth
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Descent&nbsp;style:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spiral&nbsp;descent
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Mapping&nbsp;sonar&nbsp;control&nbsp;enabled:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multibeam&nbsp;enabled
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multibeam&nbsp;receive&nbsp;gain:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;83
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multibeam&nbsp;transmit&nbsp;gain:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;220
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Multibeam&nbsp;minimum&nbsp;range&nbsp;fraction:&nbsp;0.3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Subbottom&nbsp;enabled
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Low&nbsp;sidescan&nbsp;enabled
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;High&nbsp;sidescan&nbsp;disabled
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Mission&nbsp;Parameters:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vehicle&nbsp;Speed:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.500000&nbsp;(m/s)&nbsp;2.915769&nbsp;(knots)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Desired&nbsp;Vehicle&nbsp;Altitude:&nbsp;75&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Minimum&nbsp;Vehicle&nbsp;Altitude:&nbsp;75&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Abort&nbsp;Vehicle&nbsp;Altitude:&nbsp;&nbsp;&nbsp;30&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Maximum&nbsp;Vehicle&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;2525.307922&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Abort&nbsp;Vehicle&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2562.807922&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Descent&nbsp;Vehicle&nbsp;Depth:&nbsp;&nbsp;&nbsp;&nbsp;3&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spiral&nbsp;descent&nbsp;depth:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2324.917643&nbsp;m
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Spiral&nbsp;descent&nbsp;altitude:&nbsp;&nbsp;50&nbsp;m
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Forward&nbsp;Looking&nbsp;Distance:&nbsp;&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Waypoint&nbsp;Spacing:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;100&nbsp;(m)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GPS&nbsp;Duration:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;600&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Descend&nbsp;Rate:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.417&nbsp;(m/s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ascend&nbsp;Rate:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;(m/s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Initial&nbsp;descend&nbsp;Duration:&nbsp;300&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Setpoint&nbsp;Duration:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30&nbsp;(s)
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;The&nbsp;primary&nbsp;waypoints&nbsp;from&nbsp;the&nbsp;route&nbsp;file&nbsp;are:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;&lt;number&gt;&nbsp;&lt;longitude&nbsp;(deg)&gt;&nbsp;&lt;latitude&nbsp;(deg)&gt;&nbsp;&lt;topography&nbsp;(m)&gt;&nbsp;&lt;distance&nbsp;(m)&gt;&nbsp;&lt;type&gt;
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;0&nbsp;-129.588618&nbsp;46.504590&nbsp;-2384.917643&nbsp;0.000000&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;1&nbsp;-129.583151&nbsp;46.507559&nbsp;-2412.977865&nbsp;533.709482&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;2&nbsp;-129.569223&nbsp;46.503420&nbsp;-2548.389974&nbsp;1697.143568&nbsp;1
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;3&nbsp;-129.566359&nbsp;46.501080&nbsp;-2494.963053&nbsp;2037.557099&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;4&nbsp;-129.548611&nbsp;46.529852&nbsp;-2539.510864&nbsp;5512.537193&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;5&nbsp;-129.551250&nbsp;46.530628&nbsp;-2562.807922&nbsp;5732.537193&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;6&nbsp;-129.568962&nbsp;46.501924&nbsp;-2531.034424&nbsp;9199.497998&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;7&nbsp;-129.571600&nbsp;46.502699&nbsp;-2519.138489&nbsp;9419.497998&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;8&nbsp;-129.553889&nbsp;46.531404&nbsp;-2547.114624&nbsp;12886.458803&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;9&nbsp;-129.556529&nbsp;46.532180&nbsp;-2514.533569&nbsp;13106.458803&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;10&nbsp;-129.574238&nbsp;46.503475&nbsp;-2470.815735&nbsp;16573.419607&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;11&nbsp;-129.576876&nbsp;46.504250&nbsp;-2444.596313&nbsp;16793.419607&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;12&nbsp;-129.559168&nbsp;46.532956&nbsp;-2521.781921&nbsp;20260.380412&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;13&nbsp;-129.561807&nbsp;46.533732&nbsp;-2537.382141&nbsp;20480.380412&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;14&nbsp;-129.579514&nbsp;46.505026&nbsp;-2429.459961&nbsp;23947.341216&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;15&nbsp;-129.582152&nbsp;46.505801&nbsp;-2412.764343&nbsp;24167.341217&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;16&nbsp;-129.564447&nbsp;46.534508&nbsp;-2545.397705&nbsp;27634.302021&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;17&nbsp;-129.567086&nbsp;46.535284&nbsp;-2534.068665&nbsp;27854.302021&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;18&nbsp;-129.584791&nbsp;46.506576&nbsp;-2398.283020&nbsp;31321.262826&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;19&nbsp;-129.587429&nbsp;46.507352&nbsp;-2390.671509&nbsp;31541.262826&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;20&nbsp;-129.569726&nbsp;46.536059&nbsp;-2489.889282&nbsp;35008.223630&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;21&nbsp;-129.572365&nbsp;46.536835&nbsp;-2465.280823&nbsp;35228.223630&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;22&nbsp;-129.590068&nbsp;46.508127&nbsp;-2389.067017&nbsp;38695.184435&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;23&nbsp;-129.592706&nbsp;46.508902&nbsp;-2409.290771&nbsp;38915.184435&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;24&nbsp;-129.575005&nbsp;46.537610&nbsp;-2466.533142&nbsp;42382.145240&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;25&nbsp;-129.577645&nbsp;46.538386&nbsp;-2491.371094&nbsp;42602.145240&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;26&nbsp;-129.595345&nbsp;46.509677&nbsp;-2397.609253&nbsp;46069.106044&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;27&nbsp;-129.597984&nbsp;46.510452&nbsp;-2413.315918&nbsp;46289.106044&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;28&nbsp;-129.580285&nbsp;46.539161&nbsp;-2499.048889&nbsp;49756.066849&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;29&nbsp;-129.582925&nbsp;46.539937&nbsp;-2523.030640&nbsp;49976.066849&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;30&nbsp;-129.600622&nbsp;46.511227&nbsp;-2443.481018&nbsp;53443.027653&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;31&nbsp;-129.603261&nbsp;46.512002&nbsp;-2419.008240&nbsp;53663.027653&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;32&nbsp;-129.585565&nbsp;46.540712&nbsp;-2518.522400&nbsp;57129.988458&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;33&nbsp;-129.588205&nbsp;46.541487&nbsp;-2498.521301&nbsp;57349.988458&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;34&nbsp;-129.605900&nbsp;46.512777&nbsp;-2450.386536&nbsp;60816.949263&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;35&nbsp;-129.608539&nbsp;46.513552&nbsp;-2473.623230&nbsp;61036.949263&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;36&nbsp;-129.590845&nbsp;46.542262&nbsp;-2487.422180&nbsp;64503.910067&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;37&nbsp;-129.593485&nbsp;46.543038&nbsp;-2491.040466&nbsp;64723.910067&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;38&nbsp;-129.611178&nbsp;46.514327&nbsp;-2472.610657&nbsp;68190.870872&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;39&nbsp;-129.606711&nbsp;46.517999&nbsp;-2485.114583&nbsp;68723.704236&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;40&nbsp;-129.557338&nbsp;46.509809&nbsp;-2488.398743&nbsp;72619.152031&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;41&nbsp;-129.550415&nbsp;46.521262&nbsp;-2545.285828&nbsp;73998.189601&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;42&nbsp;-129.600724&nbsp;46.536447&nbsp;-2470.920736&nbsp;78209.372536&nbsp;3
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;&nbsp;&nbsp;43&nbsp;-129.606972&nbsp;46.525648&nbsp;-2443.988281&nbsp;79501.503455&nbsp;4
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;A&nbsp;total&nbsp;of&nbsp;550&nbsp;mission&nbsp;points&nbsp;have&nbsp;been&nbsp;defined.
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#&nbsp;Define&nbsp;Mission&nbsp;parameters:
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;MISSION_SPEED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.500000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;MISSION_DISTANCE&nbsp;&nbsp;&nbsp;79501.503455
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;MISSION_TIME&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;57203
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;MISSION_TIMEOUT&nbsp;&nbsp;&nbsp;&nbsp;60067
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DEPTH_MAX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2525.307922
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DEPTH_ABORT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2562.807922
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ALTITUDE_DESIRED&nbsp;&nbsp;&nbsp;75.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ALTITUDE_MIN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;75.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ALTITUDE_ABORT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;30.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;GPS_DURATION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;600
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DESCENT_DEPTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;SPIRAL_DESCENT_DEPTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2324.917643
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;SPIRAL_DESCENT_ALTITUDE&nbsp;&nbsp;&nbsp;50.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DESCEND_DURATION&nbsp;&nbsp;&nbsp;300
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;SETPOINT_DURATION&nbsp;&nbsp;30
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;GPSMINHITS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ASCENDRUDDER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ASCENDPITCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;45.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;ASCENDENDDEPTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DESCENDRUDDER&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;DESCENDPITCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-30.000000
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;MAXCROSSTRACKERROR&nbsp;30
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#define&nbsp;RESON_DURATION&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6
+<BR>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#q
+<P>
+<A NAME="lbAI">&nbsp;</A>
+<H2>SEE ALSO</H2>
+
+<B><A HREF="mbsystem.html">mbsystem</A></B>(l), <B><A HREF="mbgrdviz.html">mbgrdviz</A></B>(l)
+<P>
+<A NAME="lbAJ">&nbsp;</A>
+<H2>BUGS</H2>
+
+Perhaps.
+<P>
+<P>
+<P>
+
+<HR>
+<A NAME="index">&nbsp;</A><H2>Index</H2>
+<DL>
+<DT><A HREF="#lbAB">NAME</A><DD>
+<DT><A HREF="#lbAC">VERSION</A><DD>
+<DT><A HREF="#lbAD">SYNOPSIS</A><DD>
+<DT><A HREF="#lbAE">DESCRIPTION</A><DD>
+<DT><A HREF="#lbAF">AUTHORSHIP</A><DD>
+<DT><A HREF="#lbAG">OPTIONS</A><DD>
+<DT><A HREF="#lbAH">EXAMPLES</A><DD>
+<DT><A HREF="#lbAI">SEE ALSO</A><DD>
+<DT><A HREF="#lbAJ">BUGS</A><DD>
+</DL>
+<HR>
+</PRE>
+
+<CENTER><P><BR>
+Last Updated: 5 October 2012</P></CENTER>
+
+<HR>
+<P><A HREF="mbsystem_man_list.html">Return to list of MB-System manual pages...</A></P>
+<P><A HREF="mbsystem_home.html"><IMG SRC="mbsystem_logo_small.gif" BORDER=0 HEIGHT=55 WIDTH=158 ALIGN=BOTTOM></A><A HREF="mbsystem_home.html">Back
+to MB-System Home Page...</A></P>
+
+</BODY>
+</HTML>
