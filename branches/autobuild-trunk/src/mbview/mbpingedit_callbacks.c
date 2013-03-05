@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbpingedit_callbacks.c		11/13/2007
- *    $Id: mbpingedit_callbacks.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbpingedit_callbacks.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2007-2011 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -81,7 +81,7 @@
 
 /* local variables */
 
-static char rcs_id[]="$Id: mbpingedit_callbacks.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mbpingedit_callbacks.c 1917 2012-01-10 19:25:33Z caress $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/

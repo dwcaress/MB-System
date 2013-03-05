@@ -114,7 +114,7 @@ MB3DSiteListCreate ( MB3DSiteListDataPtr class_in, Widget parent, String name, A
     ac = 0;
     XtSetArg(args[ac], XmNresizePolicy, XmRESIZE_GROW); ac++;
     XtSetArg(args[ac], XmNx, 87); ac++;
-    XtSetArg(args[ac], XmNy, 474); ac++;
+    XtSetArg(args[ac], XmNy, 496); ac++;
     XtSetArg(args[ac], XmNwidth, 411); ac++;
     XtSetArg(args[ac], XmNheight, 286); ac++;
     class_in->MB3DSiteList = XmCreateForm(parent,

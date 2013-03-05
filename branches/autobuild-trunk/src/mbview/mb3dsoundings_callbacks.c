@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundings_callbacks.c		5/25/2007
- *    $Id: mb3dsoundings_callbacks.c 1893 2011-05-06 22:12:01Z caress $
+ *    $Id: mb3dsoundings_callbacks.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2007-2011 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -86,7 +86,7 @@ static Cardinal 	ac;
 static Arg      	args[256];
 static char		value_text[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mb3dsoundings_callbacks.c 1893 2011-05-06 22:12:01Z caress $";
+static char rcs_id[]="$Id: mb3dsoundings_callbacks.c 1917 2012-01-10 19:25:33Z caress $";
 
 /* function prototypes */
 /*------------------------------------------------------------------------------*/

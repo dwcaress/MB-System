@@ -1,3 +1,9 @@
+/* Added HAVE_CONFIG_H for autogen files */
+#ifdef HAVE_CONFIG_H
+#  include <mbsystem_config.h>
+#endif
+
+
 
 /* Begin user code block <abstract> */
 /* End user code block <abstract> */
@@ -39,10 +45,6 @@
 /*****************************************************************************
  *       INCLUDE FILES
  *****************************************************************************/
-#ifdef HAVE_CONFIG_H 
-#include <config.h> 
-#endif 
-
 #if defined(__hpux)
 #define XLIB_ILLEGAL_ACCESS
 #endif

@@ -1,3 +1,9 @@
+/* Added HAVE_CONFIG_H for autogen files */
+#ifdef HAVE_CONFIG_H
+#  include <mbsystem_config.h>
+#endif
+
+
 
 /* Begin user code block <abstract> */
 /* End user code block <abstract> */
@@ -53,7 +59,7 @@
  */
 #if defined(__cplusplus) || defined(__STDC__) || defined(__EXTENSIONS__)
 #include <stdlib.h>
-#ifdef HAVE_MALLOC_H
+#if !defined(VMS) && !defined(DARWIN)
 #include <malloc.h>
 #endif
 #endif

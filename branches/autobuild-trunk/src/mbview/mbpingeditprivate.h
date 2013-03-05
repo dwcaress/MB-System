@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb3dsoundingsprivate.h	11/19/2007
- *    $Id: mbpingeditprivate.h 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbpingeditprivate.h 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2007-2011 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

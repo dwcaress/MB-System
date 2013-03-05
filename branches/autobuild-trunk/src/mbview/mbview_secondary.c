@@ -6,9 +6,9 @@
 
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_secondary.c	9/25/2003
- *    $Id: mbview_secondary.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbview_secondary.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2003-2011 by
+ *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -109,7 +109,7 @@
 
 /* local variables */
 static char		value_text[MB_PATH_MAXLINE];
-static char rcs_id[]="$Id: mbview_secondary.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mbview_secondary.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_setsecondarygrid(int verbose, size_t instance,

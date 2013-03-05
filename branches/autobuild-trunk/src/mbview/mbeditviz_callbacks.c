@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_callbacks.c		4/27/2007
- *    $Id: mbeditviz_callbacks.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbeditviz_callbacks.c 1934 2012-02-22 07:51:16Z caress $
  *
- *    Copyright (c) 2007-2011 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -1108,6 +1108,7 @@ do_mbeditviz_viewgrid()
 	int	mbv_route_view_mode;
 	int	mbv_nav_view_mode;
 	int	mbv_navdrape_view_mode;
+	int	mbv_vector_view_mode;
 	int	mbv_primary_colortable;
 	int	mbv_primary_colortable_mode;
 	double	mbv_primary_colortable_min;
@@ -1185,6 +1186,7 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 		mbv_route_view_mode = MBV_VIEW_OFF;
 		mbv_nav_view_mode = MBV_VIEW_OFF;
 		mbv_navdrape_view_mode = MBV_VIEW_OFF;
+		mbv_vector_view_mode = MBV_VIEW_OFF;
 		mbv_primary_colortable = MBV_COLORTABLE_HAXBY;
 		mbv_primary_colortable_mode = MBV_COLORTABLE_NORMAL;
 		mbv_primary_colortable_min = mbev_grid.min;
@@ -1248,6 +1250,7 @@ fprintf(stderr,"do_mbeditviz_viewgrid\n");
 					mbv_route_view_mode,
 					mbv_nav_view_mode,
 					mbv_navdrape_view_mode,
+					mbv_vector_view_mode,
 					mbv_exageration,
 					mbv_modelelevation3d,
 					mbv_modelazimuth3d,

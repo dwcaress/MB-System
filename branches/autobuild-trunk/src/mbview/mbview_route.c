@@ -6,9 +6,9 @@
 
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_route.c	9/25/2003
- *    $Id: mbview_route.c 1903 2011-07-31 22:19:30Z caress $
+ *    $Id: mbview_route.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2003-2011 by
+ *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -140,7 +140,7 @@
 /* local variables */
 static char		value_string[MB_PATH_MAXLINE];
 
-static char rcs_id[]="$Id: mbview_route.c 1903 2011-07-31 22:19:30Z caress $";
+static char rcs_id[]="$Id: mbview_route.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_getroutecount(int verbose, size_t instance,

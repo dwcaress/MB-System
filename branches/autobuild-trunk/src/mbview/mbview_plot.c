@@ -6,9 +6,9 @@
 
 /*------------------------------------------------------------------------------
  *    The MB-system:	mbview_plot.c	9/26/2003
- *    $Id: mbview_plot.c 1893 2011-05-06 22:12:01Z caress $
+ *    $Id: mbview_plot.c 1934 2012-02-22 07:51:16Z caress $
  *
- *    Copyright (c) 2003-2011 by
+ *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -121,7 +121,7 @@
 static Cardinal 	ac;
 static Arg      	args[256];
 
-static char rcs_id[]="$Id: mbview_plot.c 1893 2011-05-06 22:12:01Z caress $";
+static char rcs_id[]="$Id: mbview_plot.c 1934 2012-02-22 07:51:16Z caress $";
 
 /*------------------------------------------------------------------------------*/
 int mbview_reset_glx(size_t instance)
@@ -610,6 +610,9 @@ mbview_glerrorcheck(instance, __FILE__, __LINE__, function_name);
 		
 	/* draw nav */
 	mbview_drawnav(instance, rez);
+		
+	/* draw vectors */
+	mbview_drawvector(instance, rez);
 
 	/* make sure depth test is off */
 	glDisable(GL_DEPTH_TEST);

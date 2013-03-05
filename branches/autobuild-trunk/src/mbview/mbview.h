@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbview.h	10/9/2002
- *    $Id: mbview.h 1903 2011-07-31 22:19:30Z caress $
+ *    $Id: mbview.h 1934 2012-02-22 07:51:16Z caress $
  *
- *    Copyright (c); 2002-2011 by
+ *    Copyright (c); 2002-2012 by
  *    David W. Caress (caress@mbari.org);
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -126,6 +126,7 @@
 #define MBV_MOUSE_ROUTE		6
 #define MBV_MOUSE_NAV		7
 #define MBV_MOUSE_NAVFILE	8
+#define MBV_MOUSE_VECTOR	9
 
 /* projection mode */
 #define	MBV_PROJECTION_GEOGRAPHIC	0
@@ -200,6 +201,7 @@
 #define MBV_PICK_SITE			5
 #define MBV_PICK_ROUTE			6
 #define MBV_PICK_NAV			7
+#define MBV_PICK_VECTOR			8
 
 /* region defines */
 #define MBV_REGION_REPICKWIDTH		2
@@ -244,6 +246,10 @@
 /* nav defines */
 #define MBV_NAV_OFF			0
 #define MBV_NAV_VIEW			1
+
+/* vector defines */
+#define MBV_VECTOR_OFF			0
+#define MBV_VECTOR_VIEW			1
 
 /* stat masks */
 #define MBV_STATMASK0	0x01
@@ -349,6 +355,13 @@ struct mbview_navpointw_struct {
 	int	line;
 	int	shot;
 	int	cdp;
+	};
+	
+struct mbview_vectorpointw_struct {
+	int	draped;
+	int	selected;
+	struct mbview_pointw_struct point;
+	double	data;
 	};
 
 struct mbview_profilepoint_struct {
@@ -458,6 +471,20 @@ struct mbview_nav_struct {
 	struct mbview_linesegmentw_struct *segments;
 	};
 
+struct mbview_vector_struct {
+	int	color;
+	int	size;
+	mb_path	name;
+	int	format;
+	int	npoints;
+	int	npoints_alloc;
+	int	nselected;
+	double	datamin;
+	double	datamax;
+	struct mbview_vectorpointw_struct *vectorpts;
+	struct mbview_linesegmentw_struct *segments;
+	};
+
 struct mbview_profile_struct {
 	int	source;
 	mb_path	source_name;
@@ -496,6 +523,14 @@ struct mbview_shareddata_struct {
 	int	nav_selected[2];
 	int	nav_point_selected[2];
 	struct mbview_nav_struct *navs;
+	
+	/* vector data */
+	int	vector_mode;
+	int	nvector;
+	int	nvector_alloc;
+	int	vector_selected;
+	int	vector_point_selected;
+	struct mbview_vector_struct *vectors;
 	};
 
 struct mbview_struct {
@@ -509,6 +544,7 @@ struct mbview_struct {
 	void (*mbview_picksite_notify)(size_t id);
 	void (*mbview_pickroute_notify)(size_t id);
 	void (*mbview_picknav_notify)(size_t id);
+	void (*mbview_pickvector_notify)(size_t id);
 	void (*mbview_sensitivity_notify)();
 	
 	/* active flag */
@@ -656,6 +692,7 @@ struct mbview_struct {
 	int	route_view_mode;
 	int	nav_view_mode;
 	int	navdrape_view_mode;
+	int	vector_view_mode;
 	int	profile_view_mode;
 	
 	};
@@ -740,6 +777,7 @@ int mbview_setviewcontrols(int verbose, size_t instance,
 			int	route_view_mode,
 			int	nav_view_mode,
 			int	navdrape_view_mode,
+			int	vector_view_mode,
 			double	exageration,
 			double	modelelevation3d,
 			double	modelazimuth3d,
@@ -985,6 +1023,47 @@ int mbview_addnav(int verbose, size_t instance,
 			int *error);
 int mbview_enableviewnavs(int verbose, size_t instance,
 			int *error);
+
+/* mbview_vector.c function prototypes */
+int mbview_getvectorcount(int verbose, size_t instance,
+			int *nvec,
+			int *error);
+int mbview_getvectorpointcount(int verbose, size_t instance,
+			int	vec,
+			int	*npoint,
+			int	*nintpoint,
+			int *error);
+int mbview_allocvectorarrays(int verbose, 
+			int	npointtotal,
+			double	**veclon,
+			double	**veclat,
+			double	**vecz,
+			double	**vecdata,
+			int 	*error);
+int mbview_freevectorarrays(int verbose,
+			double	**veclon,
+			double	**veclat,
+			double	**vecz,
+			double	**vecdata,
+			int *error);
+int mbview_addvector(int verbose, size_t instance,
+			int	npoint,
+			double	*veclon,
+			double	*veclat,
+			double	*vecz,
+			double	*vecdata,
+			int	veccolor,
+			int	vecsize,
+			mb_path	vecname,
+			double	vecdatamin,
+			double	vecdatamax,
+			int *error);
+int mbview_enableviewvectors(int verbose, size_t instance,
+			int *error);
+int mbview_pick_vec_select(size_t instance, int select, int which, int xpixel, int ypixel);
+int mbview_vector_delete(size_t instance, int ivec);
+int mbview_drawvectorpick(size_t instance);
+int mbview_drawvector(size_t instance, int rez);
 
 /* mbview_route.c function prototypes */
 int mbview_getroutecount(int verbose, size_t instance,

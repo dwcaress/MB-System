@@ -82,7 +82,8 @@ am_libmbview_la_OBJECTS = libmbview_la-MB3DView.lo \
 	libmbview_la-mbview_secondary.lo libmbview_la-mbview_pick.lo \
 	libmbview_la-mbview_profile.lo libmbview_la-mbview_site.lo \
 	libmbview_la-mbview_route.lo libmbview_la-mbview_nav.lo \
-	libmbview_la-mb_glwdrawa.lo libmbview_la-Mb3dsdg.lo \
+	libmbview_la-mbview_vector.lo libmbview_la-mb_glwdrawa.lo \
+	libmbview_la-Mb3dsdg.lo \
 	libmbview_la-mb3dsoundings_callbacks.lo \
 	libmbview_la-MBpedit.lo libmbview_la-mbpingedit_callbacks.lo
 libmbview_la_OBJECTS = $(am_libmbview_la_OBJECTS)
@@ -288,7 +289,7 @@ libmbview_la_SOURCES = \
 	MB3DView.c MB3DSiteList.c MB3DRouteList.c MB3DNavList.c \
 	mbview_callbacks.c mbview_process.c mbview_plot.c mbview_primary.c \
 	mbview_secondary.c mbview_pick.c mbview_profile.c mbview_site.c \
-	mbview_route.c mbview_nav.c mb_glwdrawa.c Mb3dsdg.c \
+	mbview_route.c mbview_nav.c mbview_vector.c mb_glwdrawa.c Mb3dsdg.c \
 	mb3dsoundings_callbacks.c MBpedit.c mbpingedit_callbacks.c
 
 libmbview_la_LIBADD = @MOTIF_LIB_DIR@ @GL_LIB_DIR@ @MOTIF_LIB@ @GL_LIB@
@@ -434,6 +435,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbview_la-mbview_route.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbview_la-mbview_secondary.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbview_la-mbview_site.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbview_la-mbview_vector.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbeditviz-mbeditviz_bxutils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbeditviz-mbeditviz_callbacks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbeditviz-mbeditviz_creation.Po@am__quote@
@@ -562,6 +564,13 @@ libmbview_la-mbview_nav.lo: mbview_nav.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbview_nav.c' object='libmbview_la-mbview_nav.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbview_la_CFLAGS) $(CFLAGS) -c -o libmbview_la-mbview_nav.lo `test -f 'mbview_nav.c' || echo '$(srcdir)/'`mbview_nav.c
+
+libmbview_la-mbview_vector.lo: mbview_vector.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbview_la_CFLAGS) $(CFLAGS) -MT libmbview_la-mbview_vector.lo -MD -MP -MF $(DEPDIR)/libmbview_la-mbview_vector.Tpo -c -o libmbview_la-mbview_vector.lo `test -f 'mbview_vector.c' || echo '$(srcdir)/'`mbview_vector.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libmbview_la-mbview_vector.Tpo $(DEPDIR)/libmbview_la-mbview_vector.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mbview_vector.c' object='libmbview_la-mbview_vector.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbview_la_CFLAGS) $(CFLAGS) -c -o libmbview_la-mbview_vector.lo `test -f 'mbview_vector.c' || echo '$(srcdir)/'`mbview_vector.c
 
 libmbview_la-mb_glwdrawa.lo: mb_glwdrawa.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbview_la_CFLAGS) $(CFLAGS) -MT libmbview_la-mb_glwdrawa.lo -MD -MP -MF $(DEPDIR)/libmbview_la-mb_glwdrawa.Tpo -c -o libmbview_la-mb_glwdrawa.lo `test -f 'mb_glwdrawa.c' || echo '$(srcdir)/'`mb_glwdrawa.c

@@ -8,9 +8,9 @@
 /* Begin user code block <abstract> */
 /*--------------------------------------------------------------------
  *    The MB-system:	mbeditviz_main.c		4/27/2007
- *    $Id: mbeditviz_main.c 1899 2011-06-24 07:52:52Z caress $
+ *    $Id: mbeditviz_main.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2007-2011 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
