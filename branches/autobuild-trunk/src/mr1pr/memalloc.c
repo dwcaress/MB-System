@@ -66,11 +66,8 @@
 #include "mem.h"
 
 #include <sys/types.h>
-#ifndef WIN32
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#endif
-
 
 /* maximum allocation size allowed (0 => no limit) */
 static unsigned long mem_maxallocsz= 0;

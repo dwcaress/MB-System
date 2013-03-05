@@ -43,9 +43,6 @@
  *	mr1pr_defines.h --
  *	Hawaii MR1 post-processing software definitions.
  */
-#ifdef HAVE_CONFIG_H
-#  include <mbsystem_config.h>
-#endif
 
 #ifndef __MR1PR_DEFINES__
 #define __MR1PR_DEFINES__
