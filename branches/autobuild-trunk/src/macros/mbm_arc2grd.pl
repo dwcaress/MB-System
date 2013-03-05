@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/21/01
-#    $Id: mbm_arc2grd.pl 1891 2011-05-04 23:46:30Z caress $
+#    $Id: mbm_arc2grd.pl 1961 2012-06-08 18:11:41Z caress $
 #
-#    Copyright (c) 2001-2011 by
+#    Copyright (c) 2001-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -20,9 +20,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   mbm_arc2grd
 #
 # Purpose:
-#   Macro to convert a ArcView ASCII grid to an GMT grid file in the 
+#   Macro to convert a ArcView ASCII grid to an GMT grid file in the
 #   GMT NetCDF grid format. This allows users to import the grid
-#   into GMT. The grid will have the same grid interval in both 
+#   into GMT. The grid will have the same grid interval in both
 #   longitude and latitude.
 #
 # Basic Usage:
@@ -37,7 +37,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the windward side of Oahu)
 #
 # Version:
-#   $Id: mbm_arc2grd.pl 1891 2011-05-04 23:46:30Z caress $
+#   $Id: mbm_arc2grd.pl 1961 2012-06-08 18:11:41Z caress $
 #
 # Revisions:
 #   $Log: mbm_arc2grd.perl,v $
@@ -84,7 +84,7 @@ $verbose =  ($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_arc2grd.pl 1891 2011-05-04 23:46:30Z caress $\n";
+	print "\nVersion: $Id: mbm_arc2grd.pl 1961 2012-06-08 18:11:41Z caress $\n";
 	print "\nMacro to convert a ArcView ASCII grid to an GMT grid file in the \n";
 	print "GMT NetCDF grid format. This allows users to import the grid\n";
 	print "into GMT. The grid will have the same grid interval in both \n";
@@ -158,7 +158,7 @@ close(INP);
 close(TMP);
 
 # tell the world we got started
-if ($verbose) 
+if ($verbose)
 	{
 	print "\nProgram $program_name status:\n";
 	print "\tInput ArcView ASCII  file: $ifile\n";
@@ -193,7 +193,6 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {

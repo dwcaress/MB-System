@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_dslnavfix.perl	8/9/96
-#    $Id: mbm_dslnavfix.pl 1891 2011-05-04 23:46:30Z caress $
+#    $Id: mbm_dslnavfix.pl 1954 2012-05-11 17:17:37Z caress $
 #
-#    Copyright (c) 1996-2011 by 
+#    Copyright (c) 1996-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -26,7 +26,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   can be merged with the DSL AMS-120 bathymetry and sidescan
 #   data using mbmerge (use the -M2 option of mbmerge).
 #
-# Basic Usage: 
+# Basic Usage:
 #   mbm_dslnavfix -Iinfile -Ooutfile -Jutm_zone [-Ddecimate -V -H]
 #
 # Author:
@@ -36,7 +36,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   August 9, 1996
 #
 # Version:
-#   $Id: mbm_dslnavfix.pl 1891 2011-05-04 23:46:30Z caress $
+#   $Id: mbm_dslnavfix.pl 1954 2012-05-11 17:17:37Z caress $
 #
 # Revisions:
 #   $Log: mbm_dslnavfix.perl,v $
@@ -93,7 +93,7 @@ $verbose =    		($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_dslnavfix.pl 1891 2011-05-04 23:46:30Z caress $\n";
+	print "\nVersion: $Id: mbm_dslnavfix.pl 1954 2012-05-11 17:17:37Z caress $\n";
 	print "\nMacro to take WHOI DSL AMS-120 processed navigation \n";
 	print "in UTM projected eastings and northings and produce \n";
 	print "navigation in longitude and latitude. The output navigation \n";
@@ -129,7 +129,7 @@ if (!$map_scale)
 	}
 
 # tell the world we got started
-if ($verbose) 
+if ($verbose)
 	{
 	print "\nRunning $program_name...\n";
 	}
@@ -142,11 +142,11 @@ $tmp_geo_navfile = "tmp_geo_$$.nav";
 $projection = "u" . "$map_scale" . "/1:1000000";
 $projection_id = "UTM Zone $map_scale";
 
-# set units of eastings and northings 
+# set units of eastings and northings
 $projection_units = "M";
 $units_meters = 1;
 
-# now set the other projection parameters 
+# now set the other projection parameters
 if ($map_scale > 0)
 	{
 	$org_lon_n = -183 + 6 * $map_scale;
@@ -175,8 +175,8 @@ else
 	$org_y_m = 100000000.0;
 	}
 
-$bounds = "$org_lon" . "/" . "$org_lat" 
-		. "/" . "$org_lon_plus1" 
+$bounds = "$org_lon" . "/" . "$org_lat"
+		. "/" . "$org_lon_plus1"
 		. "/" . "$org_lat_plus1" . "r";
 
 # set gmt defaults
@@ -214,19 +214,19 @@ if ($verbose)
 # get number of lines
 $linecountcom = "cat $infile | wc -l";
 $numberlines = `$linecountcom`;
-	
+
 # now open the raw DSL navigation data
 if (!open(INP,"<$infile"))
 	{
 	die "\nInput file $infile cannot be opened!\n$program_name aborted\n";
 	}
-	
+
 # now open the tmp projected navigation file
 if (!open(OTMP,">$tmp_proj_navfile"))
 	{
 	die "\nTmp file $tmp_proj_navfile cannot be opened!\n$program_name aborted\n";
 	}
-	
+
 # now read the raw DSL navigation data
 $daysec_old = -9999;
 $count = $decimate - 1;
@@ -235,7 +235,7 @@ while ($line = <INP>)
 	{
 	if ($format == 1)
 		{
-		if (($date, $time, $easting, $northing) 
+		if (($date, $time, $easting, $northing)
 			= $line =~ /^\S+\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+\S+\s+(\S+)\s+(\S+)/)
 			{
 			# get time stamp
@@ -256,7 +256,7 @@ while ($line = <INP>)
 				{
 				$count++;
 				}
-			if ($daysec != $daysec_old && 
+			if ($daysec != $daysec_old &&
 				($count >= $decimate || $count == $lastcount))
 				{
 				$count = 0;
@@ -267,8 +267,8 @@ while ($line = <INP>)
 				push(@nhour, $hour);
 				push(@nminute, $minute);
 				push(@nsecond, $second);
-		
-				# get projected values in desired units 
+
+				# get projected values in desired units
 				if ($units_feet)
 					{
 					$xx = 12.0 / 1000000 *($easting - $org_x_ft);
@@ -279,7 +279,7 @@ while ($line = <INP>)
 					$xx = ($easting - $org_x_m) / (0.0254 * 1000000);
 					$yy = ($northing - $org_y_m) / (0.0254 * 1000000);
 					}
-					
+
 				#print "$year $month $day $hour:$minute:$second $easting $northing\n";
 				print OTMP "$xx $yy\n";
 				}
@@ -292,7 +292,7 @@ while ($line = <INP>)
 		}
 	elsif ($format == 2)
 		{
-		if (($date, $time, $easting, $northing) 
+		if (($date, $time, $easting, $northing)
 			= $line =~ /^(\S+),(\S+),\S+,\S+,\S+,(\S+),(\S+)/)
 			{
 			# get time stamp
@@ -313,7 +313,7 @@ while ($line = <INP>)
 				{
 				$count++;
 				}
-			if ($daysec != $daysec_old && 
+			if ($daysec != $daysec_old &&
 				($count >= $decimate || $count == $lastcount))
 				{
 				$count = 0;
@@ -324,8 +324,8 @@ while ($line = <INP>)
 				push(@nhour, $hour);
 				push(@nminute, $minute);
 				push(@nsecond, $second);
-		
-				# get projected values in desired units 
+
+				# get projected values in desired units
 				if ($units_feet)
 					{
 					$xx = 12.0 / 1000000 *($easting - $org_x_ft);
@@ -336,7 +336,7 @@ while ($line = <INP>)
 					$xx = ($easting - $org_x_m) / (0.0254 * 1000000);
 					$yy = ($northing - $org_y_m) / (0.0254 * 1000000);
 					}
-					
+
 				#print "$year $month $day $hour:$minute:$second $easting $northing\n";
 				print OTMP "$xx $yy\n";
 				}
@@ -349,7 +349,7 @@ while ($line = <INP>)
 		}
 	elsif ($format == 3)
 		{
-		if (($date, $time, $easting, $northing) 
+		if (($date, $time, $easting, $northing)
 			= $line =~ /^(\S+)-(\S+) \S+ \S+ \S+ (\S+) (\S+)/)
 			{
 			# get time stamp
@@ -370,7 +370,7 @@ while ($line = <INP>)
 				{
 				$count++;
 				}
-			if ($daysec != $daysec_old && 
+			if ($daysec != $daysec_old &&
 				($count >= $decimate || $count == $lastcount))
 				{
 				$count = 0;
@@ -381,8 +381,8 @@ while ($line = <INP>)
 				push(@nhour, $hour);
 				push(@nminute, $minute);
 				push(@nsecond, $second);
-		
-				# get projected values in desired units 
+
+				# get projected values in desired units
 				if ($units_feet)
 					{
 					$xx = 12.0 / 1000000 *($easting - $org_x_ft);
@@ -393,7 +393,7 @@ while ($line = <INP>)
 					$xx = ($easting - $org_x_m) / (0.0254 * 1000000);
 					$yy = ($northing - $org_y_m) / (0.0254 * 1000000);
 					}
-					
+
 				#print "$year $month $day $hour:$minute:$second $easting $northing\n";
 				print OTMP "$xx $yy\n";
 				}
@@ -406,7 +406,7 @@ while ($line = <INP>)
 		}
 	elsif ($format == 4)
 		{
-		if (($year, $month, $day, $hour, $minute, $second, $easting, $northing) 
+		if (($year, $month, $day, $hour, $minute, $second, $easting, $northing)
 			= $line =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/)
 			{
 			$daysec = $second + 60 * ($minute + 60 * $hour);
@@ -414,7 +414,7 @@ while ($line = <INP>)
 				{
 				$count++;
 				}
-			if ($daysec != $daysec_old && 
+			if ($daysec != $daysec_old &&
 				($count >= $decimate || $count == $lastcount))
 				{
 				$count = 0;
@@ -425,8 +425,8 @@ while ($line = <INP>)
 				push(@nhour, $hour);
 				push(@nminute, $minute);
 				push(@nsecond, $second);
-		
-				# get projected values in desired units 
+
+				# get projected values in desired units
 				if ($units_feet)
 					{
 					$xx = 12.0 / 1000000 *($easting - $org_x_ft);
@@ -437,7 +437,7 @@ while ($line = <INP>)
 					$xx = ($easting - $org_x_m) / (0.0254 * 1000000);
 					$yy = ($northing - $org_y_m) / (0.0254 * 1000000);
 					}
-					
+
 				#print "$year $month $day $hour:$minute:$second $easting $northing\n";
 				print OTMP "$xx $yy\n";
 				}
@@ -479,17 +479,17 @@ if ($verbose)
 
 # reset the gmt defaults
 `gmtset D_FORMAT $d_format ELLIPSOID $ellipsoid_save`;
-	
+
 # now open the unprojected navigation data
 if (!open(INP,"<$tmp_geo_navfile"))
 	{
 	die "\nTmp file $tmp_geo_navfile cannot be opened!\n$program_name aborted\n";
 	}
-	
+
 # now read the unprojected navigation data
 while ($line = <INP>)
 	{
-	if (($lon, $lat) 
+	if (($lon, $lat)
 		= $line =~ /^(\S+)\s+(\S+)/)
 		{
 		# put lon in -180 to 180 range
@@ -501,7 +501,7 @@ while ($line = <INP>)
 			{
 			$lon = $lon - 360.0;
 			}
-			
+
 		# add to list
 		push(@nlon, $lon);
 		push(@nlat, $lat);
@@ -523,7 +523,7 @@ if ($ntime != $nnav)
 	{
 	die "\nNumber of time stamps ($ntime) disagrees with number of nav points ($nnav)!\n$program_name aborted\n";
 	}
-	
+
 # now open the final navigation file
 if (!open(OTMP,">$outfile"))
 	{
@@ -563,7 +563,7 @@ exit 0;
 # the same arg.
 #
 # Usage:
-#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
 #			    # -c does not take arg. Sets opt_* as a
 #                           # side effect.
 
@@ -571,7 +571,6 @@ sub MBGetopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
@@ -594,7 +593,7 @@ sub MBGetopts {
 		    $rest = shift(@ARGV);
 		}
 		if (eval "\$opt_$first") {
-		    eval "\$opt_$first = \$opt_$first 
+		    eval "\$opt_$first = \$opt_$first
 				. \":\" . \$rest;";
 		}
 		else {

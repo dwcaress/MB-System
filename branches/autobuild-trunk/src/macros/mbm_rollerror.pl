@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_rollover.perl	6/18/93
-#    $Id: mbm_rollerror.pl 1891 2011-05-04 23:46:30Z caress $
+#    $Id: mbm_rollerror.pl 1954 2012-05-11 17:17:37Z caress $
 #
-#    Copyright (c) 1993-2011 by 
+#    Copyright (c) 1993-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -35,7 +35,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 13, 1993
 #
 # Version:
-#   $Id: mbm_rollerror.pl 1891 2011-05-04 23:46:30Z caress $
+#   $Id: mbm_rollerror.pl 1954 2012-05-11 17:17:37Z caress $
 #
 # Revisions:
 #   $Log: mbm_rollerror.perl,v $
@@ -93,7 +93,7 @@ $format =      ($opt_F || $opt_f);
 $filterwidth = ($opt_W || $opt_w);
 
 # get format if needed
-if (!$format) 
+if (!$format)
 	{
 	$line = `mbformat -I $file -L`;
 	($format) = $line =~ /(\S+)/;
@@ -127,7 +127,7 @@ print "Running mblist...\n";
 print "Running filter1d...\n";
 `filter1d $datfile -Fc$filterwidth -E -V > $fltfile`;
 
-# Read the data and filtered data files, 
+# Read the data and filtered data files,
 # subtracting to get the high-passed signal.
 print "Processing raw and filtered data to get residual...\n";
 open(F1,"$datfile");
@@ -166,7 +166,6 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {

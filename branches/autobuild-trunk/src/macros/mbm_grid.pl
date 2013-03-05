@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grid.perl	6/11/99
-#    $Id: mbm_grid.pl 1891 2011-05-04 23:46:30Z caress $
+#    $Id: mbm_grid.pl 1961 2012-06-08 18:11:41Z caress $
 #
-#    Copyright (c) 1999-2011 by
+#    Copyright (c) 1999-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -41,7 +41,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #
 # Additional Options:
 #            [-Adatatype -Bborder -Cclip -Dxdim/ydim -Edx/dy/units
-#            -Fpriority_range -Ggridkind -H -Llonflip -Jprojection 
+#            -Fpriority_range -Ggridkind -H -Llonflip -Jprojection
 #            -M -N -Ppings
 #            -Sspeed -Ttension -U{azimuth/factor | time}
 #            -V -Wscale -Xextend
@@ -54,7 +54,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   June 11, 1999
 #
 # Version:
-#   $Id: mbm_grid.pl 1891 2011-05-04 23:46:30Z caress $
+#   $Id: mbm_grid.pl 1961 2012-06-08 18:11:41Z caress $
 #
 # Revisions:
 #   $Log: mbm_grid.perl,v $
@@ -139,7 +139,7 @@ $bathdef = 		($opt_Z || $opt_z);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_grid.pl 1891 2011-05-04 23:46:30Z caress $\n";
+	print "\nVersion: $Id: mbm_grid.pl 1961 2012-06-08 18:11:41Z caress $\n";
         print "Macro to generate a shellscript of MB-System commands \n";
         print "which, when executed, will generate a grid or mosaic of the \n";
         print "specified swath sonar data. The grid or mosaic may be of \n";
@@ -177,7 +177,7 @@ elsif (! -e $file_data)
 	}
 
 # tell the world we got started
-if ($verbose) 
+if ($verbose)
 	{
 	print "\nRunning $program_name...\n";
 	}
@@ -200,7 +200,7 @@ if (!$root)
 	}
 
 # get format if needed
-if (!$format) 
+if (!$format)
 	{
 	$line = `mbformat -I $file_data -L`;
 	($format) = $line =~ /(\S+)/;
@@ -227,7 +227,7 @@ else
 		$line = shift @mbdatalist;
 		if ($line =~ /(\S+)\s+(\S+)/)
 			{
-			($file_mb,$format_mb) = 
+			($file_mb,$format_mb) =
 				$line =~ /(\S+)\s+(\S+)/;
 			push(@files_data, $file_mb);
 			push(@formats, $format_mb);
@@ -244,7 +244,7 @@ foreach $file_mb (@files_data)
 	@mbinfo = 0;
 	if (-r $file_inf)
 		{
-		if ($verbose && !$bounds) 
+		if ($verbose && !$bounds)
 			{
 			print "Reading mbinfo output from file $file_inf...\n";
 			}
@@ -255,17 +255,17 @@ foreach $file_mb (@files_data)
 				push(@mbinfo, $line);
 				if ($line =~ /^Number of Records:\s+(\S+)/)
 					{
-					($nrec_f) = 
+					($nrec_f) =
 						$line =~ /^Number of Records:\s+(\S+)/;
 					}
 				if ($line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
 					{
-					($xmin_f,$xmax_f) = 
+					($xmin_f,$xmax_f) =
 						$line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
 					}
 				if ($line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
 					{
-					($ymin_f,$ymax_f) = 
+					($ymin_f,$ymax_f) =
 						$line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
 					}
 				}
@@ -284,9 +284,9 @@ foreach $file_mb (@files_data)
 			    $use_inf = 1;
 			    }
 			elsif ($nrec_f > 0 &&
-			    ($xmin_f < $xmin 
+			    ($xmin_f < $xmin
 				|| $xmax_f > $xmax
-				|| $ymin_f < $ymin 
+				|| $ymin_f < $ymin
 				|| $ymax_f > $ymax))
 				    {
 			    $use_inf = 0;
@@ -298,10 +298,10 @@ foreach $file_mb (@files_data)
 			}
 		}
 
-	# if .inf file not accessible or suitable run mbinfo directly 
+	# if .inf file not accessible or suitable run mbinfo directly
 	if (!$use_inf)
 		{
-		if ($verbose) 
+		if ($verbose)
 			{
 			print "Running mbinfo on file $file_mb...\n";
 			}
@@ -316,44 +316,44 @@ foreach $file_mb (@files_data)
 			}
 		}
 
-	# now parse the mbinfo output 
+	# now parse the mbinfo output
 	$nrec_f = 0;
 	while (@mbinfo)
 		{
 		$line = shift @mbinfo;
 		if ($line =~ /^Number of Records:\s+(\S+)/)
 			{
-			($nrec_f) = 
+			($nrec_f) =
 				$line =~ /^Number of Records:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/)
 			{
-			($xmin_f,$xmax_f) = 
+			($xmin_f,$xmax_f) =
 				$line =~ /^Minimum Longitude:\s+(\S+)\s+Maximum Longitude:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/)
 			{
-			($ymin_f,$ymax_f) = 
+			($ymin_f,$ymax_f) =
 				$line =~ /^Minimum Latitude:\s+(\S+)\s+Maximum Latitude:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Altitude:\s+(\S+)\s+Maximum Altitude:\s+(\S+)/)
 			{
-			($altmin_f,$altmax_f) = 
+			($altmin_f,$altmax_f) =
 				$line =~ /^Minimum Altitude:\s+(\S+)\s+Maximum Altitude:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/)
 			{
-			($zmin_f,$zmax_f) = 
+			($zmin_f,$zmax_f) =
 			$line =~ /^Minimum Depth:\s+(\S+)\s+Maximum Depth:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/)
 			{
-			($amin_f,$amax_f) = 
+			($amin_f,$amax_f) =
 			$line =~ /^Minimum Amplitude:\s+(\S+)\s+Maximum Amplitude:\s+(\S+)/;
 			}
 		if ($line =~ /^Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/)
 			{
-			($smin_f,$smax_f) = 
+			($smin_f,$smax_f) =
 			$line =~ /^Minimum Sidescan:\s+(\S+)\s+Maximum Sidescan:\s+(\S+)/;
 			}
 		}
@@ -617,7 +617,7 @@ if ($datatype > 2)
  	if ($bathdef)
  		{
  		printf FCMD "\t-Z$bathdef \\\n";
- 		}	
+ 		}
 	}
 if ($verbose)
 	{
@@ -732,7 +732,7 @@ if ($verbose)
 		if ($bathdef)
 			{
 			print "  Default Depth:  $bathdef\n";
-			}	
+			}
 		}
 	print "\n--------------\n";
 	}
@@ -762,7 +762,7 @@ sub min {
 
 	# make local variables
 	local ($min);
-	
+
 	# get the minimum of the arguments
 	if ($_[0] < $_[1])
 		{
@@ -779,7 +779,7 @@ sub max {
 
 	# make local variables
 	local ($max);
-	
+
 	# get the minimum of the arguments
 	if ($_[0] > $_[1])
 		{
@@ -817,7 +817,7 @@ sub MBparsedatalist {
         	close FILEDATA;
         	}
 
-	# loop over datalists 
+	# loop over datalists
 	foreach $datalist (@datalists)
 		{
 		MBparsedatalist($datalist);
@@ -833,25 +833,25 @@ sub GetDecimalDegrees {
 	# deal with dd:mm:ss format
 	if ($_[0] =~ /^\S+:\S+:\S+$/)
 		{
-		($degrees, $minutes, $seconds) 
+		($degrees, $minutes, $seconds)
 			= $_[0] =~ /^(\S+):(\S+):(\S+)$/;
 		if ($degrees =~ /^-\S+/)
 			{
-			$dec_degrees = $degrees 
-				- $minutes / 60.0 
+			$dec_degrees = $degrees
+				- $minutes / 60.0
 				- $seconds / 3600.0;
 			}
 		else
 			{
-			$dec_degrees = $degrees 
-				+ $minutes / 60.0 
+			$dec_degrees = $degrees
+				+ $minutes / 60.0
 				+ $seconds / 3600.0;
 			}
 		}
 	# deal with dd:mm format
 	elsif ($_[0] =~ /^\S+:\S+$/)
 		{
-		($degrees, $minutes) 
+		($degrees, $minutes)
 			= $_[0] =~ /^(\S+):(\S+)$/;
 		if ($degrees =~ /^-\S+/)
 			{
@@ -881,7 +881,7 @@ sub GetDecimalDegrees {
 # the same arg.
 #
 # Usage:
-#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
 #			    # -c does not take arg. Sets opt_* as a
 #                           # side effect.
 
@@ -889,7 +889,6 @@ sub MBGetopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
@@ -912,7 +911,7 @@ sub MBGetopts {
 		    $rest = shift(@ARGV);
 		}
 		if (eval "\$opt_$first") {
-		    eval "\$opt_$first = \$opt_$first 
+		    eval "\$opt_$first = \$opt_$first
 				. \":\" . \$rest;";
 		}
 		else {

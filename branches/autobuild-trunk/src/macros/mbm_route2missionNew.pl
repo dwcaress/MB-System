@@ -3,7 +3,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_route2mission.perl   7/18/2004
-#    $Id: mbm_route2mission.pl 2015 2013-03-01 22:33:52Z caress $
+#    $Id: mbm_route2mission.pl 2005 2013-01-01 02:20:24Z caress $
 #
 #    Copyright (c) 2004-2012 by
 #    D. W. Caress (caress@mbari.org)
@@ -37,7 +37,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Moss Landing, CA
 #
 # Version:
-# $Id: mbm_route2mission.pl 2015 2013-03-01 22:33:52Z caress $
+# $Id: mbm_route2mission.pl 2005 2013-01-01 02:20:24Z caress $
 #
 # Revisions:
 #   $Log: mbm_route2mission.perl,v $
@@ -136,7 +136,6 @@ $program_name = "mbm_route2mission";
 #     Abort time must not be greater than battery life of 8 hours = 28800 seconds
 $durationfactorwaypoint = 3.0;
 $durationfactormission = 1.3;
-$durationmax = 28800;
 $batterylife = 64800; # 18 hours
 $safetymargin = 1800;
 
@@ -148,7 +147,7 @@ $routename = "Survey";
 # altitude controls
 $altitudemin = 50.0;
 $altitudeabort = 25.0;
-$altitudedesired = $altitudemin;
+$altitudedesired1 = $altitudemin;
 $altitudedesired2 = $altitudemin;
 $altitudedesired3 = $altitudemin;
 $deltadepthrestart = $altitudemin - $altitudeabort;
@@ -189,36 +188,24 @@ $mb_transmitgain = 220.0;
 $mb_receivegain = 75.0;
 $mb_minrangefraction = 0.2;
 $mb_pulsewidth = 0.000060;
-$resongainsetcount = 0;
 $mb_snippetmode = 1;
-
-# behavior delta_t
-$deltat_duration  = RESON_DURATION;
-$deltat_receiveGain = 10;  # Range is 1 to 20dB
-$deltat_gainEq = 0;   # Gain equalization (0=Off, 1=On)
-$deltat_range = 100;  # Set sonar range (1 to 150m)
-$deltat_nBeams = 120;  # Number of sonar beams (120, 240, or 480)
-$deltat_beamWidth = 1;   # Beam width (0=Wide, 1=Normal, 2=Narrow, 3=NarrowMixed)
-$deltat_sectorSize = 120;  # Size of wedge around nadir (30, 60, 90, 120degrees)
-$deltat_averaging = 0;  # Number of shots to average (0,1=>Off, 3, 5, or 7 shots)
 
 # camera control - each sample period = 0.2 seconds so ($nsampleperiods = 10) == 2 seconds
 $nsampleperiods = 10;
 
-# behavior waypoint, waypoint_depth and waypoint_wall
-
-# Behavior defines
+# behavior waypoint and waypoint_depth
 $behaviorWaypointID = 0;
 $behaviorWaypointDepthID = 1;
 $behaviorWaypointWallID = 2;
 @behaviorNames = {"Waypoint", "WaypointDepth", "WaypointWall"};
-$$depthmax = 5900.0;
+$depthmax = 5900.0;
 $depthabort = 6000.0;
 $maxclimbslope = 0.5734;
 
 # default waypoint behavior to use
-$behavior = $behaviorWaypointID;
-$behaviorarg = -1;
+$behavior1 = $behaviorWaypointDepthID;
+$behavior2 = $behaviorWaypointDepthID;
+$behavior3 = $behaviorWaypointDepthID;
 
 # spiral descent approach depth
 $approachdepth = 50.0;
@@ -261,13 +248,13 @@ $outputoff =		($opt_Z || $opt_z);
 # print out help message if required
 if ($help) {
     print "\r\n$program_name:\r\n";
-    print "\nVersion: $Id: mbm_route2mission.pl 2015 2013-03-01 22:33:52Z caress $\n";
+    print "\nVersion: \$Id: mbm_route2mission.pl 2005 2013-01-01 02:20:24Z caress $\n";
     print "\r\nPerl shellscript to translate survey route file derived from \r\n";
     print "MBgrdviz into an MBARI AUV mission script. Developed for use\r\n";
     print "in survey planning for the MBARI Mapping AUV.\r\n";
     print "Usage: mbm_route2mission -Iroutefile \r\n";
     print "\t\t[-Aaltitudemin/altitudeabort[/altitudedesired[/altitudedesired2[/altitudedesired3]]] \r\n";
-    print "\t\t-Bbehavior -Caborttime -Ddepthconstant[/depthconstant2] -Fforwarddistance -Ggpsmode \r\n";
+    print "\t\t-Bbehavior1[/behavior2[/behavior3]] -Caborttime -Ddepthconstant[/depthconstant2] -Fforwarddistance -Ggpsmode \r\n";
     print "\t\t-Jdepthprofilefile -Lapproachdepth -M[sonarlist] -N \r\n";
     print "-Omissionfile \r\n\t\t-P[startlon/startlat | startdistance] \r\n";
     print "\t\t-Rtransmitpower/receivegain[/rangeminfraction[/pulsewidth]] \r\n";
@@ -290,54 +277,65 @@ chop $date;
 chop $host;
 
 # deal with command line values
-if ($behaviorarg != -1)
+if ($behaviorarg)
 	{
-	if ($behaviorarg =~ /^\S+/)
+	if ($behaviorarg =~ /^\S+\/\S+\/\S+/)
 		{
-		($behavior) = $behaviorarg =~ /^(\S+)/;
+		($behavior1, $behavior2, $behavior3) = $behaviorarg =~ /^(\S+)\/(\S+)\/(\S+)/;
+		}
+	elsif ($behaviorarg =~ /^\S+\/\S+/)
+		{
+		($behavior1, $behavior2) = $behaviorarg =~ /^(\S+)\/(\S+)/;
+		$behavior3 = $behavior1;
+		}
+	elsif ($behaviorarg =~ /^\S+/)
+		{
+		($behavior1) = $behaviorarg =~ /^(\S+)/;
+		$behavior2 = $behavior1;
+		$behavior3 = $behavior1;
 		}
 	}
 if ($altitudearg)
 	{
 	if ($altitudearg =~ /^\S+\/\S+\/\S+\/\S+\/\S+/)
 		{
-		($altitudemin, $altitudeabort, $altitudedesired, $altitudedesired2, $altitudedesired3)
+		($altitudemin, $altitudeabort, $altitudedesired1, $altitudedesired2, $altitudedesired3)
 			= $altitudearg =~ /^(\S+)\/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 		$deltadepthrestart = $altitudemin - $altitudeabort;
 		}
 	elsif ($altitudearg =~ /^\S+\/\S+\/\S+\/\S+/)
 		{
-		($altitudemin, $altitudeabort, $altitudedesired, $altitudedesired2)
+		($altitudemin, $altitudeabort, $altitudedesired1, $altitudedesired2)
 			= $altitudearg =~ /^(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 		$deltadepthrestart = $altitudemin - $altitudeabort;
-		$altitudedesired3 = $altitudedesired;
+		$altitudedesired3 = $altitudedesired1;
 		}
 	elsif ($altitudearg =~ /^\S+\/\S+\/\S+/)
 		{
-		($altitudemin, $altitudeabort, $altitudedesired)
+		($altitudemin, $altitudeabort, $altitudedesired1)
 			= $altitudearg =~ /^(\S+)\/(\S+)\/(\S+)/;
 		$deltadepthrestart = $altitudemin - $altitudeabort;
-		$altitudedesired2 = $altitudedesired;
-		$altitudedesired3 = $altitudedesired;
+		$altitudedesired2 = $altitudedesired1;
+		$altitudedesired3 = $altitudedesired1;
 		}
 	elsif ($altitudearg =~ /^\S+\/\S+/)
 		{
 		($altitudemin, $altitudeabort)
 			= $altitudearg =~ /^(\S+)\/(\S+)/;
-		$altitudedesired = $altitudemin;
+		$altitudedesired1 = $altitudemin;
 		$deltadepthrestart = $altitudemin - $altitudeabort;
-		$altitudedesired2 = $altitudedesired;
-		$altitudedesired3 = $altitudedesired;
+		$altitudedesired2 = $altitudedesired1;
+		$altitudedesired3 = $altitudedesired1;
 		}
 	else
 		{
 		($altitudemin)
 			= $altitudearg =~ /^(\S+)/;
 		$altitudeabort = $altitudemin / 2;
-		$altitudedesired = $altitudemin;
+		$altitudedesired1 = $altitudemin;
 		$deltadepthrestart = $altitudemin - $altitudeabort;
-		$altitudedesired2 = $altitudedesired;
-		$altitudedesired3 = $altitudedesired;
+		$altitudedesired2 = $altitudedesired1;
+		$altitudedesired3 = $altitudedesired1
 		}
 	}
 if ($speedarg)
@@ -412,9 +410,13 @@ if ($sensorarg =~ /\S*B\S*/)
 	$mappingsonar = 1;
 	$beamdata = 1;
 	}
-if ($sensorarg =~ /\S*I\S*/)
+if ($mappingsonar && $beamdata)
 	{
-	$deltat = 1;
+	$logmode = 3;
+	}
+elsif ($mappingsonar)
+	{
+	$logmode = 1;
 	}
 if ($sensor && !$sensorarg)
 	{
@@ -423,21 +425,13 @@ if ($sensor && !$sensorarg)
 	$sidescanlo = 1;
 	$sidescanhi = 1;
 	}
-if ($mappingsonar && $beamdata)
-	{
-	$logmode = 3;
-	}
-elsif ($mappingsonar || $deltat)
-	{
-	$logmode = 1;
-	}
 if ($spiraldescentarg =~ /\S+/)
 	{
 	($spiraldescentaltitude) = $spiraldescentarg =~ /(\S+)/;
 	}
 elsif ($spiraldescent)
 	{
-	$spiraldescentaltitude = $altitudedesired;
+	$spiraldescentaltitude = $altitudedesired1;
 	}
 if ($multibeamsettings =~ /\S+\/\S+\/\S+\/\S+/)
 	{
@@ -820,36 +814,43 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 	if ($ndppoints > 0)
 		{
 		$mmissiondepths[$i] = $moptimaldepths[$i];
-#printf "DEPTHS optimal:%f regular:%f\n", $moptimaldepths[$i], -$mtopomaxs[$i] - $altitudedesired;
+		$mbehaviors[$i] = $behavior1;
+#printf "DEPTHS optimal:%f regular:%f\n", $moptimaldepths[$i], -$mtopomaxs[$i] - $altitudedesired1;
 		}
 	elsif ($mmodes[$i] == 1)
 		{
-		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired;
+		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired1;
+		$mbehaviors[$i] = $behavior1;
 #printf "DEPTHS 1 %f\n", $mmissiondepths[$i];
 		}
 	elsif ($mmodes[$i] == 2)
 		{
 		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired2;
+		$mbehaviors[$i] = $behavior2;
 #printf "DEPTHS 2 %f\n", $mmissiondepths[$i];
 		}
 	elsif ($mmodes[$i] == 3)
 		{
 		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired3;
+		$mbehaviors[$i] = $behavior3;
 #printf "DEPTHS 2 %f\n", $mmissiondepths[$i];
 		}
 	elsif ($mmodes[$i] == 4)
 		{
 		$mmissiondepths[$i] = $depthconstant;
+		$mbehaviors[$i] = $behavior1;
 #printf "DEPTHS 3 %f\n", $mmissiondepths[$i];
 		}
 	elsif ($mmodes[$i] == 5)
 		{
 		$mmissiondepths[$i] = $depthconstant2;
+		$mbehaviors[$i] = $behavior1;
 #printf "DEPTHS 4 %f\n", $mmissiondepths[$i];
 		}
 	else
 		{
-		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired;
+		$mmissiondepths[$i] = -$mtopomaxs[$i] - $altitudedesired1;
+		$mbehaviors[$i] = $behavior1;
 #printf "DEPTHS 0 %f\n", $mmissiondepths[$i];
 		}
 	if ($mmissiondepths[$i] < $descentdepth)
@@ -865,7 +866,7 @@ for ($i = 0; $i < $nmissionpoints; $i++)
 		$depthabort = $mmissiondepths[$i];
 		}
 	}
-$depthabort = $depthabort + $altitudedesired;
+$depthabort = $depthabort + $altitudedesired1;
 $depthmax = $depthabort - 0.5 * $altitudemin;
 
 # calculate slopes
@@ -966,14 +967,6 @@ elsif ($verbose)
 	printf "    Ascend time:              %d (s)\r\n", $ascendtime;
 	printf "    Way Points:               $nwaypoints\r\n";
 	printf "    Route Points:             $nmissionpoints\r\n";
-	if ($behavior == $behaviorWaypointDepthID)
-		{
-		printf "    Survey behavior:          WaypointDepth\r\n";
-		}
-	else
-		{
-		printf "    Survey behavior:          Waypoint\r\n";
-		}
 	if ($spiraldescent)
 		{
 		printf "    Descent style:            Spiral descent\r\n";
@@ -1039,7 +1032,10 @@ elsif ($verbose)
 	printf "    Minimum Vehicle Altitude 1: $altitudemin (m)\r\n";
 	printf "    Abort Vehicle Altitude 1:   $altitudeabort (m)\r\n";
 	printf "    Delta Depth Restart 1:      $deltadepthrestart (m)\r\n";
-	printf "    Desired Vehicle Altitude 1: $altitudedesired (m)\r\n";
+	printf "    Survey behavior1:           $behaviorNames[$behavior1]\r\n";
+	printf "    Survey behavior2:           $behaviorNames[$behavior2]\r\n";
+	printf "    Survey behavior3:           $behaviorNames[$behavior3]\r\n";
+	printf "    Desired Vehicle Altitude 1: $altitudedesired1 (m)\r\n";
 	printf "    Desired Vehicle Altitude 2: $altitudedesired2 (m)\r\n";
 	printf "    Desired Vehicle Altitude 3: $altitudedesired3 (m)\r\n";
 	printf "    Constant Vehicle Depth 1:   $depthconstant (m)\r\n";
@@ -1123,14 +1119,6 @@ if (!$outputoff)
 	printf MFILE "#     Ascend time:              %d (s)\r\n", $ascendtime;
 	printf MFILE "#     Way Points:               $nwaypoints\r\n";
 	printf MFILE "#     Route Points:             $nmissionpoints\r\n";
-	if ($behavior == $behaviorWaypointDepthID)
-		{
-		printf MFILE "#     Survey behavior:          WaypointDepth\r\n";
-		}
-	else
-		{
-		printf MFILE "#     Survey behavior:          Waypoint\r\n";
-		}
 	if ($spiraldescent)
 		{
 		printf MFILE "#     Descent style:            Spiral descent\r\n";
@@ -1196,7 +1184,10 @@ if (!$outputoff)
 	printf MFILE "#     Minimum Vehicle Altitude 1: $altitudemin (m)\r\n";
 	printf MFILE "#     Abort Vehicle Altitude 1:   $altitudeabort (m)\r\n";
 	printf MFILE "#     Delta Depth Restart 1:      $deltadepthrestart (m)\r\n";
-	printf MFILE "#     Desired Vehicle Altitude 1: $altitudedesired (m)\r\n";
+	printf MFILE "#     Survey behavior1:           $behaviorNames[$behavior1]\r\n";
+	printf MFILE "#     Survey behavior2:           $behaviorNames[$behavior2]\r\n";
+	printf MFILE "#     Survey behavior3:           $behaviorNames[$behavior3]\r\n";
+	printf MFILE "#     Desired Vehicle Altitude 1: $altitudedesired1 (m)\r\n";
 	printf MFILE "#     Desired Vehicle Altitude 2: $altitudedesired2 (m)\r\n";
 	printf MFILE "#     Desired Vehicle Altitude 3: $altitudedesired3 (m)\r\n";
 	printf MFILE "#     Constant Vehicle Depth 1:   $depthconstant (m)\r\n";
@@ -1252,12 +1243,12 @@ if (!$outputoff)
 	printf MFILE "#define MISSION_TIMEOUT            %d\r\n", $aborttime;
 	printf MFILE "#define DEPTH_MAX                  %f\r\n", $depthmax;
 	printf MFILE "#define DEPTH_ABORT                %f\r\n", $depthabort;
-	printf MFILE "#define ALTITUDE_DESIRED           %f\r\n", $altitudedesired;
+	printf MFILE "#define ALTITUDE_DESIRED1          %f\r\n", $altitudedesired1;
+	printf MFILE "#define ALTITUDE_DESIRED2          %f\r\n", $altitudedesired2;
+	printf MFILE "#define ALTITUDE_DESIRED3          %f\r\n", $altitudedesired3;
 	printf MFILE "#define ALTITUDE_MIN               %f\r\n", $altitudemin;
 	printf MFILE "#define ALTITUDE_ABORT             %f\r\n", $altitudeabort;
 	printf MFILE "#define DELTA_DEPTH_RESTART        %f\r\n", $deltadepthrestart;
-	printf MFILE "#define ALTITUDE_DESIRED2          %f\r\n", $altitudedesired2;
-	printf MFILE "#define ALTITUDE_DESIRED3          %f\r\n", $altitudedesired3;
 	printf MFILE "#define DEPTH_CONSTANT             %f\r\n", $depthconstant;
 	printf MFILE "#define DEPTH_CONSTANT2            %f\r\n", $depthconstant2;
 	printf MFILE "#define GPS_DURATION               %d\r\n", $gpsduration;
@@ -1342,17 +1333,6 @@ print "Behavior: acousticUpdate\n";
 		print MFILE "Log_Mode  = 0; \r\n";
 		print MFILE "} \r\n";
 print "Behavior: reson (stop, Log_Mode = 0)\n";
-		}
-	if ($deltat)
-		{
-		print MFILE "# Turn off power to sonars and stop logging on the PLC \r\n";
-		print MFILE "# by setting the value of the mode attribute to 0 (used to be False). \r\n";
-		print MFILE "behavior delta_t \r\n";
-		print MFILE "{ \r\n";
-		print MFILE "duration  = RESON_DURATION; \r\n";
-		print MFILE "logMode  = 0; \r\n";
-		print MFILE "} \r\n";
-print "Behavior: delta_t (stop, logMode = 0)\n";
 		}
 	if ($camera)
 		{
@@ -1481,18 +1461,6 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$nmissionpoints-1];
 				print MFILE "#######################################################\r\n";
 print "Behavior: reson (start, Log_Mode = $logmode)\n";
 				}
-			if ($deltat)
-				{
-				print MFILE "#######################################################\r\n";
-				print MFILE "# Turn on power to sonars and restart logging on the PLC \r\n";
-				print MFILE "behavior delta_t \r\n";
-				print MFILE "{ \r\n";
-				print MFILE "logMode  = $logmode; \r\n";
-				print MFILE "duration  = RESON_DURATION; \r\n";
-				print MFILE "} \r\n";
-				print MFILE "#######################################################\r\n";
-print "Behavior: delta_t (start, logMode = $logmode)\n";
-				}
 			if ($camera)
 				{
 				if ($mstartstops[$i] == 1)
@@ -1619,19 +1587,6 @@ print "Behavior: acousticUpdate\n";
 				print MFILE "#######################################################\r\n";
 print "Behavior: reson (stop, Log_Mode = 0)\n";
 				}
-			if ($deltat)
-				{
-				print MFILE "#######################################################\r\n";
-				print MFILE "# Turn off power to sonars and stop logging on the PLC \r\n";
-				print MFILE "# by setting the value of the mode attribute to 0 (used to be False). \r\n";
-				print MFILE "behavior delta_t \r\n";
-				print MFILE "{ \r\n";
-				print MFILE "duration  = RESON_DURATION; \r\n";
-				print MFILE "logMode  = 0; \r\n";
-				print MFILE "} \r\n";
-				print MFILE "#######################################################\r\n";
-print "Behavior: delta_t (stop, logMode = 0)\n";
-				}
 			if ($camera)
 				{
 				$cameraenddistance = $mdistances[$i];
@@ -1650,10 +1605,6 @@ printf "Behavior: stopCamera (distance:%.2f m\n",$mdistances[$i];
 if ($mappingsonar)
 {
 print "mappingsonar:$mappingsonar i:$i mwaypoints[$i]:$mwaypoints[$i] iwaypoint:$iwaypoint\n";
-}
-if ($deltat)
-{
-print "deltat:$deltat i:$i mwaypoints[$i]:$mwaypoints[$i] iwaypoint:$iwaypoint\n";
 }
 		if ($mappingsonar && $mwaypoints[$i] != 0 && $iwaypoint == 0)
 			{
@@ -1722,39 +1673,15 @@ print "Behavior: reson (reset, Log_Mode = 0, line  = $iwaypoint, waypoint($i) ty
 			print MFILE "Log_Mode = 0; \r\n";
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
-			print MFILE "#######################################################\r\n";
-			}
-		if ($deltat && $mwaypoints[$i] != 0 && $iwaypoint == 0)
-			{
-			print MFILE "#######################################################\r\n";
-			print MFILE "# Turn DeltaT on and start logging.\r\n";
-			print MFILE "# \r\n";
-			print MFILE "behavior delta_t \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = RESON_DURATION; \r\n";
-			print MFILE "logMode  = $logmode; \r\n";
-			print MFILE "} \r\n";
-print "Behavior: delta_t (startup, logMode = $logmode)\n";
-			print MFILE "# Set sonar parameters \r\n";
-			print MFILE "#   Waypoint type:            $mwaypoints[$i]\n";
-			print MFILE "#   Commanded altitude:       $sonaraltitude\n";
-			print MFILE "#   Sonar parameter altitude: $sonaraltitudeuse\n";
-			print MFILE "#   Commanded vehicle depth:  $mmissiondepths[$i] \n";
-			print MFILE "#   Seafloor depth:           $mtopos[$i]\n";
-			print MFILE "# \r\n";
-			print MFILE "behavior delta_t \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = RESON_DURATION; \r\n";
-			print MFILE "logMode = 0; \r\n";
-			print MFILE "receiveGain = 10; \r\n";  # Range is 1 to 20dB
-			print MFILE "gainEq = 0; \r\n";   # Gain equalization (0=Off, 1=On)
-			print MFILE "range = 100; \r\n";  # Set sonar range (1 to 150m)
-			print MFILE "nBeams = 120; \r\n";  # Number of sonar beams (120, 240, or 480)
-			print MFILE "beamWidth = 1; \r\n";   # Beam width (0=Wide, 1=Normal, 2=Narrow, 3=NarrowMixed)
-			print MFILE "sectorSize = 120; \r\n";  # Size of wedge around nadir (30, 60, 90, 120degrees)
-			print MFILE "averaging = 0; \r\n";  # Number of shots to average (0,1=>Off, 3, 5, or 7 shots)
-			print MFILE "} \r\n";
-			print MFILE "# \r\n";
+#			print MFILE "# Acoustic update - sent status ping before start of logging \r\n";
+#			print MFILE "# \r\n";
+#			print MFILE "behavior acousticUpdate \r\n";
+#			print MFILE "{ \r\n";
+#			print MFILE "duration  = 2; \r\n";
+#			print MFILE "dummy  = 1; \r\n";
+#			print MFILE "} \r\n";
+#			print MFILE "# \r\n";
+#print "Behavior: acousticUpdate\n";
 			print MFILE "#######################################################\r\n";
 			}
 
@@ -2103,6 +2030,15 @@ print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint
 				}
 			printf MFILE "MB_Range = %.2f; \r\n", $mb_range;
 			print MFILE "MB_Rate = $mb_pingrate; \r\n";
+
+# hack to provide a gain sweep for testing
+# $mb_receivegain = 83 - int($resongainsetcount / 4);
+# if ($mb_receivegain < 40)
+# {
+# $mb_receivegain = 60;
+# }
+# $resongainsetcount++;
+
 			print MFILE "MB_Gain = $mb_receivegain; \r\n";
 			print MFILE "MB_Sound_Velocity = 0.0; \r\n";
 			printf MFILE "MB_Pulse_Width = %f; \r\n", $mb_pulsewidth;
@@ -2112,31 +2048,6 @@ print "Behavior: reson (reset, Log_Mode = $logmode, line  = $iwaypoint, waypoint
 			printf MFILE "MB_Bottom_Detect_Filter_Max_Depth = %.2f; \r\n", $mb_maxdepth;
 			print MFILE "MB_Bottom_Detect_Range_Mode = 1; \r\n";
 			print MFILE "MB_Bottom_Detect_Depth_Mode = 0; \r\n";
-			print MFILE "} \r\n";
-			print MFILE "# \r\n";
-			print MFILE "#######################################################\r\n";
-			}
-
-		if ($deltat && $iwaypoint > 0)
-			{
-			print MFILE "#######################################################\r\n";
-			print MFILE "# Reset sonar parameters \r\n";
-			print MFILE "#   Waypoint type:            $mwaypoints[$i-1]\n";
-			print MFILE "#   Commanded altitude:       $sonaraltitude\n";
-			print MFILE "#   Actual altitude:          $sonaraltitudeuse\n";
-			print MFILE "#   Commanded vehicle depth:  $mmissiondepths[$i] \n";
-			print MFILE "#   Seafloor depth:           $mtopos[$i]\n";
-			print MFILE "# \r\n";
-			print MFILE "behavior delta_t \r\n";
-			print MFILE "{ \r\n";
-			print MFILE "duration  = RESON_DURATION; \r\n";
-			print MFILE "receiveGain = 10; \r\n";  # Range is 1 to 20dB
-			print MFILE "gainEq = 0; \r\n";   # Gain equalization (0=Off, 1=On)
-			print MFILE "range = 100; \r\n";  # Set sonar range (1 to 150m)
-			print MFILE "nBeams = 120; \r\n";  # Number of sonar beams (120, 240, or 480)
-			print MFILE "beamWidth = 1; \r\n";   # Beam width (0=Wide, 1=Normal, 2=Narrow, 3=NarrowMixed)
-			print MFILE "sectorSize = 120; \r\n";  # Size of wedge around nadir (30, 60, 90, 120degrees)
-			print MFILE "averaging = 0; \r\n";  # Number of shots to average (0,1=>Off, 3, 5, or 7 shots)
 			print MFILE "} \r\n";
 			print MFILE "# \r\n";
 			print MFILE "#######################################################\r\n";
@@ -2305,48 +2216,6 @@ print "Behavior: gps\n";
 		print MFILE "# \r\n";
 		print MFILE "#######################################################\r\n";
 print "Behavior: reson (start, reset, Log_Mode = 0)\n";
-		print MFILE "#######################################################\r\n";
-		}
-
-	# output starting sonar parameters
-	if ($deltat)
-		{
-		# get starting sonar parameters assuming $altitudedesired altitude
-		#  $sslo_range & $sbp_duration calculated near start of program
-		# from ping rate
-		$sonaraltitudeuse = $altitudedesired;
-		$mb_range = 4.0 * $sonaraltitudeuse;
-		if ($mb_range > 350.0)
-			{
-			$mb_range = 350.0;
-			}
-		if ($beamdata && $mb_range > 100.0)
-			{
-			$mb_range = 100.0;
-			}
-		$mb_minrange = $mb_minrangefraction * $sonaraltitudeuse;
-		$mb_maxrange = $mb_range;
-		$mb_mindepth = 0.0;
-		$mb_maxdepth = $mb_range;
-
-		print MFILE "#######################################################\r\n";
-		print MFILE "# Set sonar parameters, turn pinging on, power zero and logging off \r\n";
-		print MFILE "# \r\n";
-		print MFILE "behavior delta_t \r\n";
-		print MFILE "{ \r\n";
-		print MFILE "duration  = RESON_DURATION; \r\n";
-		print MFILE "logMode  = 0; \r\n";
-		print MFILE "receiveGain = 10; \r\n";  # Range is 1 to 20dB
-		print MFILE "gainEq = 0; \r\n";   # Gain equalization (0=Off, 1=On)
-		print MFILE "range = 100; \r\n";  # Set sonar range (1 to 150m)
-		print MFILE "nBeams = 120; \r\n";  # Number of sonar beams (120, 240, or 480)
-		print MFILE "beamWidth = 1; \r\n";   # Beam width (0=Wide, 1=Normal, 2=Narrow, 3=NarrowMixed)
-		print MFILE "sectorSize = 120; \r\n";  # Size of wedge around nadir (30, 60, 90, 120degrees)
-		print MFILE "averaging = 0; \r\n";  # Number of shots to average (0,1=>Off, 3, 5, or 7 shots)
-		print MFILE "} \r\n";
-		print MFILE "# \r\n";
-		print MFILE "#######################################################\r\n";
-print "Behavior: delta_t (start, reset, logMode = 0)\n";
 		print MFILE "#######################################################\r\n";
 		}
 

@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_makedatalist.perl	27/1/2006
-#    $Id: mbm_makedatalist.pl 1891 2011-05-04 23:46:30Z caress $
+#    $Id: mbm_makedatalist.pl 1954 2012-05-11 17:17:37Z caress $
 #
-#    Copyright (c) 2006-2011 by
+#    Copyright (c) 2006-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -20,8 +20,8 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   mbm_makedatalist
 #
 # Purpose:
-#   Macro to generate an MB-System datalist file referencing all 
-#   identifiable swath files in the specified directory. If no directory  
+#   Macro to generate an MB-System datalist file referencing all
+#   identifiable swath files in the specified directory. If no directory
 #   is specified with the -I option, then the current directory is used.
 #   The resulting datalist will be named datalist.mb-1 by default.
 #
@@ -35,7 +35,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   January 27, 2006
 #
 # Version:
-#   $Id: mbm_makedatalist.pl 1891 2011-05-04 23:46:30Z caress $
+#   $Id: mbm_makedatalist.pl 1954 2012-05-11 17:17:37Z caress $
 #
 # Revisions:
 #   $Log: mbm_makedatalist.perl,v $
@@ -62,7 +62,7 @@ $verbose = 		($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_makedatalist.pl 1891 2011-05-04 23:46:30Z caress $\n";
+	print "\nVersion: $Id: mbm_makedatalist.pl 1954 2012-05-11 17:17:37Z caress $\n";
         print "Macro to generate an MB-System datalist file referencing all\n";
         print "identifiable swath files in the specified directory. If no directory\n";
         print "is specified with the -I option, then the current directory is used.\n";
@@ -73,11 +73,11 @@ if ($help)
 	}
 
 # tell the world we got started
-if ($verbose) 
+if ($verbose)
 	{
 	print "\nRunning $program_name...\n";
 	}
-	
+
 # get list of files in specified directory
 @filelist = `ls -1 $directory`;
 
@@ -118,7 +118,7 @@ if ($count > 0)
 		print DATALIST "$outfilelist[$i] $outformatlist[$i]\n";
 		$count++;
 		}
-	
+
 	# close datalist
 	close DATALIST;
 	}
@@ -134,7 +134,7 @@ exit 0;
 # the same arg.
 #
 # Usage:
-#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,  
+#      do Getopts('a:b+c'); # -a takes arg, -b concatenates args,
 #			    # -c does not take arg. Sets opt_* as a
 #                           # side effect.
 
@@ -142,7 +142,6 @@ sub MBGetopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
@@ -165,7 +164,7 @@ sub MBGetopts {
 		    $rest = shift(@ARGV);
 		}
 		if (eval "\$opt_$first") {
-		    eval "\$opt_$first = \$opt_$first 
+		    eval "\$opt_$first = \$opt_$first
 				. \":\" . \$rest;";
 		}
 		else {

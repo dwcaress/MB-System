@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_grd2arc.perl	6/11/99
-#    $Id: mbm_grd2arc.pl 1891 2011-05-04 23:46:30Z caress $
+#    $Id: mbm_grd2arc.pl 1961 2012-06-08 18:11:41Z caress $
 #
-#    Copyright (c) 1999-2011 by
+#    Copyright (c) 1999-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -20,11 +20,11 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   mbm_grd2arc
 #
 # Purpose:
-#   Macro to convert a GMT grid file in the GMT NetCDF grid format 
+#   Macro to convert a GMT grid file in the GMT NetCDF grid format
 #   to an ArcView ASCII grid. This allows users to import the grid
-#   into Arc/Info and ArcView. The grids must have the same grid 
+#   into Arc/Info and ArcView. The grids must have the same grid
 #   interval in both longitude and latitude. If the grid was created
-#   using mbgrid or mbmosaic, the -E option must have been used 
+#   using mbgrid or mbmosaic, the -E option must have been used
 #   with both dy = 0 and "!" appended (see the mbgrid and mbmosaic
 #   manual pages).
 #
@@ -38,7 +38,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   October 5, 1999
 #
 # Version:
-#   $Id: mbm_grd2arc.pl 1891 2011-05-04 23:46:30Z caress $
+#   $Id: mbm_grd2arc.pl 1961 2012-06-08 18:11:41Z caress $
 #
 # Revisions:
 #   $Log: mbm_grd2arc.perl,v $
@@ -82,7 +82,7 @@ $verbose =  ($opt_V || $opt_v);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_grd2arc.pl 1891 2011-05-04 23:46:30Z caress $\n";
+	print "\nVersion: $Id: mbm_grd2arc.pl 1961 2012-06-08 18:11:41Z caress $\n";
 	print "\nMacro to convert a GMT grid file in the GMT NetCDF grid format \n";
 	print "to an ArcView ASCII grid. This allows users to import the grid\n";
 	print "into Arc/Info and ArcView. The grids must have the same grid \n";
@@ -127,57 +127,57 @@ $line = `gmtdefaults -L | grep D_FORMAT`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
-	if ($line =~ 
+	if ($line =~
 		/\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+units:\s+.+\s+nx:\s+\S+/)
 		{
-		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~ 
+		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+units:\s+(.+)\s+nx:\s+(\S+)/;
 		}
-	elsif ($line =~ 
+	elsif ($line =~
 		/\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+name:\s+.+\s+nx:\s+\S+/)
 		{
-		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~ 
+		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+name:\s+(.+)\s+nx:\s+(\S+)/;
 		}
-	elsif ($line =~ 
+	elsif ($line =~
 		/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
 		{
-		($xmin_f,$xmax_f) = $line =~ 
+		($xmin_f,$xmax_f) = $line =~
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/;
 		}
 	if ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+units:\s+.+\s+ny:\s+\S+/)
 		{
-		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~ 
+		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~
 			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+units:\s+(.+)\s+ny:\s+(\S+)/;
 		}
 	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+name:\s+.+\s+ny:\s+\S+/)
 		{
-		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~ 
+		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~
 			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+name:\s+(.+)\s+ny:\s+(\S+)/;
 		}
 	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:/)
 		{
-		($ymin_f,$ymax_f) = $line =~ 
+		($ymin_f,$ymax_f) = $line =~
 			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/;
 		}
 	if ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+units:\s+\S+/)
 		{
-		($zmin_f,$zmax_f) = $line =~ 
+		($zmin_f,$zmax_f) = $line =~
 			/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:\s+\S+/;
 		}
 	elsif ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+name:\s+\S+/)
 		{
-		($zmin_f,$zmax_f) = $line =~ 
+		($zmin_f,$zmax_f) = $line =~
 			/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
 		}
 	if ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
 		{
-		($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+		($zmin_f,$zmax_f,$zunits_s) = $line =~
 			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
 		}
 	elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+name:/)
 		{
-		($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+		($zmin_f,$zmax_f,$zunits_s) = $line =~
 			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
 		}
 	elsif ($line =~ /\S+\s+Normal node registration used/)
@@ -206,7 +206,7 @@ else
 	}
 
 # tell the world we got started
-if ($verbose) 
+if ($verbose)
 	{
 	print "\nProgram $program_name status:\n";
 	print "\tInput GRD file:            $ifile\n";
@@ -309,7 +309,6 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {

@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_arc2grd.perl	4/23/01
-#    $Id: mbm_grdcut.pl 1891 2011-05-04 23:46:30Z caress $
+#    $Id: mbm_grdcut.pl 1961 2012-06-08 18:11:41Z caress $
 #
-#    Copyright (c) 2001-2011 by
+#    Copyright (c) 2001-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -40,7 +40,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    10 km off the Kohala coast of Hawaii)
 #
 # Version:
-#   $Id: mbm_grdcut.pl 1891 2011-05-04 23:46:30Z caress $
+#   $Id: mbm_grdcut.pl 1961 2012-06-08 18:11:41Z caress $
 #
 # Revisions:
 #   $Log: mbm_grdcut.perl,v $
@@ -76,10 +76,10 @@ $program_name = "mbm_grdcut";
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
-	if ($line =~ 
+	if ($line =~
 		/^grdinfo\s+(\S+)\s+\S+/)
 		{
-		($gmt_version) = $line =~ 
+		($gmt_version) = $line =~
 			/^grdinfo\s+(\S+)\s+\S+/;
 		}
 	}
@@ -99,7 +99,7 @@ $verbose += 1;
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_grdcut.pl 1891 2011-05-04 23:46:30Z caress $\n";
+	print "\nVersion: $Id: mbm_grdcut.pl 1961 2012-06-08 18:11:41Z caress $\n";
  	print "Macro to painlessly cut out a region from a GMT grd grid file.\n";
 	print "The GMT program grdcut requires that one specify bounds which\n";
 	print "exactly match grid cell boundaries. Frequently, one just wants\n";
@@ -136,7 +136,7 @@ if (!$bounds)
 # get specified output bounds
 if ($bounds =~ /^\S+\/\S+\/\S+\/\S+$/)
 	{
-	($xmin_raw,$xmax_raw,$ymin_raw,$ymax_raw) = $bounds =~ 
+	($xmin_raw,$xmax_raw,$ymin_raw,$ymax_raw) = $bounds =~
 			/(\S+)\/(\S+)\/(\S+)\/(\S+)/;
 	$xminr = &GetDecimalDegrees($xmin_raw);
 	$xmaxr = &GetDecimalDegrees($xmax_raw);
@@ -154,57 +154,57 @@ $line = `gmtdefaults -L | grep D_FORMAT`;
 while (@grdinfo)
 	{
 	$line = shift @grdinfo;
-	if ($line =~ 
+	if ($line =~
 		/\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+units:\s+.+\s+nx:\s+\S+/)
 		{
-		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~ 
+		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+units:\s+(.+)\s+nx:\s+(\S+)/;
 		}
-	elsif ($line =~ 
+	elsif ($line =~
 		/\S+\s+x_min:\s+\S+\s+x_max:\s+\S+\s+x_inc:\s+\S+\s+name:\s+.+\s+nx:\s+\S+/)
 		{
-		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~ 
+		($xmin_f,$xmax_f,$xinc_f,$xunits,$xnx_d) = $line =~
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:\s+(\S+)\s+name:\s+(.+)\s+nx:\s+(\S+)/;
 		}
-	elsif ($line =~ 
+	elsif ($line =~
 		/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/)
 		{
-		($xmin_f,$xmax_f) = $line =~ 
+		($xmin_f,$xmax_f) = $line =~
 			/\S+\s+x_min:\s+(\S+)\s+x_max:\s+(\S+)\s+x_inc:/;
 		}
 	if ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+units:\s+.+\s+ny:\s+\S+/)
 		{
-		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~ 
+		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~
 			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+units:\s+(.+)\s+ny:\s+(\S+)/;
 		}
 	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:\s+\S+\s+name:\s+.+\s+ny:\s+\S+/)
 		{
-		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~ 
+		($ymin_f,$ymax_f,$yinc_f,$yunits,$yny_d) = $line =~
 			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:\s+(\S+)\s+name:\s+(.+)\s+ny:\s+(\S+)/;
 		}
 	elsif ($line =~ /\S+\s+y_min:\s+\S+\s+y_max:\s+\S+\s+y_inc:/)
 		{
-		($ymin_f,$ymax_f) = $line =~ 
+		($ymin_f,$ymax_f) = $line =~
 			/\S+\s+y_min:\s+(\S+)\s+y_max:\s+(\S+)\s+y_inc:/;
 		}
 	if ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+units:\s+\S+/)
 		{
-		($zmin_f,$zmax_f) = $line =~ 
+		($zmin_f,$zmax_f) = $line =~
 			/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+units:\s+\S+/;
 		}
 	elsif ($line =~ /\S+\s+zmin:\s+\S+\s+zmax:\s+\S+\s+name:\s+\S+/)
 		{
-		($zmin_f,$zmax_f) = $line =~ 
+		($zmin_f,$zmax_f) = $line =~
 			/\S+\s+zmin:\s+(\S+)\s+zmax:\s+(\S+)\s+name:\s+\S+/;
 		}
 	if ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+units:/)
 		{
-		($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+		($zmin_f,$zmax_f,$zunits_s) = $line =~
 			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+units:\s+(.+)/;
 		}
 	elsif ($line =~ /\S+\s+z_min:\s+\S+\s+z_max:\s+\S+\s+name:/)
 		{
-		($zmin_f,$zmax_f,$zunits_s) = $line =~ 
+		($zmin_f,$zmax_f,$zunits_s) = $line =~
 			/\S+\s+z_min:\s+(\S+)\s+z_max:\s+(\S+)\s+name:\s+(.+)/;
 		}
 	}
@@ -221,7 +221,7 @@ $nxout = int((($xmaxout - $xminout) / $xinc_f) + 0.5) + 1;
 $nyout = int((($ymaxout - $yminout) / $yinc_f) + 0.5) + 1;
 
 # tell the world we got started
-if ($verbose) 
+if ($verbose)
 	{
 	print "\nProgram $program_name status:\n";
 	print "\tInput GRD file:         $ifile\n";
@@ -236,12 +236,12 @@ if ($verbose)
 
 # run grdcut
 $cmd = "grdcut $ifile -G$ofile -R$xminout/$xmaxout/$yminout/$ymaxout -V";
-if ($verbose) 
+if ($verbose)
 	{
 	print "\tCommand: $cmd\n";
 	}
 @grdcut = `$cmd 2>&1`;
-if ($verbose) 
+if ($verbose)
 	{
 	while (@grdcut)
 		{
@@ -264,25 +264,25 @@ sub GetDecimalDegrees {
 	# deal with dd:mm:ss format
 	if ($_[0] =~ /^\S+:\S+:\S+$/)
 		{
-		($degrees, $minutes, $seconds) 
+		($degrees, $minutes, $seconds)
 			= $_[0] =~ /^(\S+):(\S+):(\S+)$/;
 		if ($degrees =~ /^-\S+/)
 			{
-			$dec_degrees = $degrees 
-				- $minutes / 60.0 
+			$dec_degrees = $degrees
+				- $minutes / 60.0
 				- $seconds / 3600.0;
 			}
 		else
 			{
-			$dec_degrees = $degrees 
-				+ $minutes / 60.0 
+			$dec_degrees = $degrees
+				+ $minutes / 60.0
 				+ $seconds / 3600.0;
 			}
 		}
 	# deal with dd:mm format
 	elsif ($_[0] =~ /^\S+:\S+$/)
 		{
-		($degrees, $minutes) 
+		($degrees, $minutes)
 			= $_[0] =~ /^(\S+):(\S+)$/;
 		if ($degrees =~ /^-\S+/)
 			{
@@ -317,7 +317,6 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {

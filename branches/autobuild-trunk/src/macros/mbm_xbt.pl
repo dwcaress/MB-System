@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system: mbm_xbt.perl   6/18/93
-#    $Id: mbm_xbt.pl 1891 2011-05-04 23:46:30Z caress $
+#    $Id: mbm_xbt.pl 2015 2013-03-01 22:33:52Z caress $
 #
-#    Copyright (c) 1993-2011 by 
+#    Copyright (c) 1993-2013 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -13,19 +13,19 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      Lamont-Doherty Earth Observatory of Columbia University
 #      Palisades, NY  10964
 #
-#    See README file in the top level of the MB-System distribution 
+#    See README file in the top level of the MB-System distribution
 #    directory for copying and redistribution conditions.
 #--------------------------------------------------------------------
 #
 # Command:
 #   mbm_xbt
 #
-# Purpose: 
+# Purpose:
 #   Perl code to translate Sparton XBT data or Sippican (MK12 or MK21)
 #   XBT data from depth and temperature into depth and sound speed.
 #   Sound speed is computed according to DelGrosso's equations.
 #
-#   We use the DelGrosso equation because of the results presented in 
+#   We use the DelGrosso equation because of the results presented in
 #   Dusha, Brian D. Worcester, Peter F., Cornuelle, Bruce D., Howe, Bruce. M.
 #   "On equations for the speed of sound in seawater", J. Acoust. Soc. Am.
 #   Vol 93, No 1, January 1993, pp 255-275.
@@ -50,9 +50,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   The first column (after the header) is water depth (meters)
 #   The second column (after the header) is temperature (Celcius)
 #
-#   Perl program to convert Sparton XBT data and MK12 XBT data into depth 
+#   Perl program to convert Sparton XBT data and MK12 XBT data into depth
 #   and Sound Speed
-# 
+#
 # Authors:
 #   Dale N. Chayes <dale@ldeo.columbia.edu>
 #   David W. Caress
@@ -66,7 +66,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #    B. Palmer.
 #
 # Notes:
-#    Major re-write by Dale started in early August,2003, completed in 
+#    Major re-write by Dale started in early August,2003, completed in
 #    September 2004 including:
 #      - adding explicit filehandle passing for header parsing
 #      - restructure for clearer header parsing
@@ -78,10 +78,10 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #      - copy all source header info into the output file
 #      - convert to use "standard" perl getopts
 #      - move useage message to function
-#      
+#
 #
 # Version:
-# $Id: mbm_xbt.pl 1891 2011-05-04 23:46:30Z caress $
+# $Id: mbm_xbt.pl 2015 2013-03-01 22:33:52Z caress $
 #
 # Revisions:
 #   $Log: mbm_xbt.perl,v $
@@ -231,7 +231,7 @@ if ($help) {
   exit 0;
 }
 
-if (!$sal) {	# set salinity if it was defaulted 
+if (!$sal) {	# set salinity if it was defaulted
   $sal = 35;
 }
 
@@ -254,16 +254,16 @@ my $temp;		 # Temperature (Celcius)
 my $depth;		 # Water depth (meters)
 
 # Open the input and output files. Failure on either is fatal.
-open(F,$file) || die "Cannot open input file: $file\n$ProgramName 
+open(F,$file) || die "Cannot open input file: $file\n$ProgramName
 aborted.\n";
 
-open(Out,"+>".$OUTFILE) || die "Cannot open temporary file: 
+open(Out,"+>".$OUTFILE) || die "Cannot open temporary file:
 $TMPFILE\n$ProgramName aborted.\n";
 
 # Put leading comment in output file, depending on format selected
 if ($XBTtype == $SPARTON) {
     print Out "# Sparton XBT data processed using program $ProgramName\n";
-} 
+}
 elsif ($XBTtype == $MK12) {
     print Out "# Sippican MK12  XBT data processed using program $ProgramName\n";
 }
@@ -285,7 +285,7 @@ printf (Out "# %s version: %s\n",$ProgramName, $Version );
 printf (Out "# %s assumed %.2f PSU salinity \n",$ProgramName, $sal);
 printf (Out "# --end of mbm_xbt header info -----\n");
 
-# Deal with the data set header depending on the format 
+# Deal with the data set header depending on the format
 # specified on the command line.  The headder reading processes returns when
 # it has consumed all the header data. All of the input header info is
 # inserted into the output file as comments.
@@ -318,31 +318,31 @@ while ($In=<F>) {		# reading from the input
 #	elsif ($XBTtype == $MK12) {
 #	    ($depth, $temp) = split (" ", $In, 2);
 #	}
-	
- 
+
+
 # First calculate the Pressure term (P) in decibars from depth in meters
 # This conversion is from Coates, 1989, Page 4.
-	
-    my $P=1.0052405 
+
+    my $P=1.0052405
       * ( 1+ 5.28E-3 * ((sin ($latitude)) * (sin($latitude))))
 	* $depth + 2.36E-6 * ($depth * $depth);
-	
+
 # Then calculate SV according to DelGrosso
 
     my $P1      = $P * 0.1019716;   # to pressure in kg/cm**2 gauge
-    my $c0      = 1402.392;	
+    my $c0      = 1402.392;
     my $dltact  = $temp
       *( 0.501109398873E1 + $temp*(-0.550946843172E-1+ $temp
 				   *  0.221535969240E-3));
 
-    my $dltacs  = $sal*(0.132952290781E1 
+    my $dltacs  = $sal*(0.132952290781E1
 			+ $sal* 0.128955756844E-3);
-    my $dltacp  = $P1 
-      *( 0.156059257041E0 +  $P1*( 0.24499868841E-4 
+    my $dltacp  = $P1
+      *( 0.156059257041E0 +  $P1*( 0.24499868841E-4
 				   + $P1*(-0.883392332513E-8)));
 
     my $dcstp   =  $temp*(-0.127562783426E-1*$sal
-			  + $P1*( 0.635191613389E-2 
+			  + $P1*( 0.635191613389E-2
 				  + $P1*( 0.265484716608E-7*$temp +
 					  -0.159349479045E-5        +
 					  0.522116437235E-9*$P1)     +
@@ -351,7 +351,7 @@ while ($In=<F>) {		# reading from the input
 					  $temp*( 0.968403156410E-4*$temp +
 						  $P1*( 0.485639620015E-5*$sal +
 							(-0.340597039004E-3))));
-	
+
     my $velocity = $c0 + $dltact + $dltacs + $dltacp + $dcstp;
 
 				# Output the result if it's "okay"
@@ -377,9 +377,9 @@ exit 0;
 # useage();
 sub useage {
 
- 
+
     print "\nUsage: $ProgramName -Ifile \n";
-    print "\nVersion: $Id: mbm_xbt.pl 1891 2011-05-04 23:46:30Z caress $\n";
+    print "\nVersion: $Id: mbm_xbt.pl 2015 2013-03-01 22:33:52Z caress $\n";
     print "\t[-C -Ssalinity -Fformat -Llatitude -V -H -C]\n\n";
 
     print "\tPerl shellscript to translate various XBT (with -F option) \n";
@@ -416,7 +416,7 @@ sub SpartonHeader (*$*$;) {
        $In=<$InFileHandle>;
        chomp($In);			# dump the end of line stuff
        $count++;
-	
+
        if (( $count == 1 ) && ( $In !=~ "SOC BT/SV PROCESSOR")) {
 	   die "This is does not look like a SPARTON BT/SV data file $F: $!";
        }
@@ -480,8 +480,9 @@ sub MK12header(*$*$;) {
     $In=<$InFileHandle>;
     chomp($In);			# dump the end of line stuff
     printf $OutFileHandle "# %s\n", $In; # copy header info to output file
-	
-    if (substr($In,0,1) eq "\t" ) {
+
+    if (substr($In,0,1) eq "\t"
+        || $In =~' \(m\)  \(C\)') {
       $Done=1;
     }
   }
@@ -490,7 +491,7 @@ sub MK12header(*$*$;) {
 
 #---------------------------------------------------------------
 # MK21header
-# Code to parse a Sippican Mark 21 headder of and EDF file. This headder
+# Code to parse a Sippican Mark 21 headder of and EDF file. This header
 # seems to be a bit more organized than the MK12 version.....
 # It assumes that:
 #     1) the last line of the header starts with "Depth"
@@ -498,7 +499,7 @@ sub MK12header(*$*$;) {
 #     3) the next column is temperature in degress
 #     4) There may be other columns
 #
-# 
+#
 sub MK21header(*$*$;) {		# Two HANDLES required
     my $InFileHandle = shift;	# get the input file handle
     my $OutFileHandle = shift;	#  and the output file handle
@@ -519,4 +520,3 @@ sub MK21header(*$*$;) {		# Two HANDLES required
 }		# end of MK21header
 
 }				# End of this file
-

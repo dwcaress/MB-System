@@ -3,9 +3,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
                          if 0;
 #--------------------------------------------------------------------
 #    The MB-system:	mbm_fmtvel.perl	6/18/93
-#    $Id: mbm_fmtvel.pl 1891 2011-05-04 23:46:30Z caress $
+#    $Id: mbm_fmtvel.pl 1961 2012-06-08 18:11:41Z caress $
 #
-#    Copyright (c) 1993-2011 by 
+#    Copyright (c) 1993-2012 by
 #    D. W. Caress (caress@mbari.org)
 #      Monterey Bay Aquarium Research Institute
 #      Moss Landing, CA
@@ -20,7 +20,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   mbm_fmtvel
 #
 # Purpose:
-#   Perl shellscript to generate a list of the cmean (mean water 
+#   Perl shellscript to generate a list of the cmean (mean water
 #   velocity) and ckeel (surface water velocity) used by Hydrosweep
 #   in its internal processing.  This macro executes the program
 #   hsdump and then scans the output for the desired values.
@@ -38,7 +38,7 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 #   May 19, 1993
 #
 # Version:
-#   $Id: mbm_fmtvel.pl 1891 2011-05-04 23:46:30Z caress $
+#   $Id: mbm_fmtvel.pl 1961 2012-06-08 18:11:41Z caress $
 #
 # Revisions:
 #   $Log: mbm_fmtvel.perl,v $
@@ -103,7 +103,7 @@ $format =  ($opt_F || $opt_f);
 if ($help)
 	{
 	print "\n$program_name:\n";
-	print "\nVersion: $Id: mbm_fmtvel.pl 1891 2011-05-04 23:46:30Z caress $\n";
+	print "\nVersion: $Id: mbm_fmtvel.pl 1961 2012-06-08 18:11:41Z caress $\n";
 	print "\nPerl shellscript to generate a list of the C-mean (mean water velocity) \nand C-keel (surface water velocity) used by Hydrosweepin its internal \nprocessing.  This macro executes the programhsdump and then scans the \noutput for the desired values.The only allowed formats are 5 (raw \nHydrosweep data) and 8(L-DEO in-house binary Hydrosweep data).\n";
 	print "\nUsage: $program_name -Fformat -Ifile\n";
 	exit 0;
@@ -114,7 +114,7 @@ if (!$file)
 	{
 	die "No input file specified - $program_name aborted\n";
 	}
-if (!$format) 
+if (!$format)
 	{
 	$format = "24";
 	}
@@ -135,27 +135,27 @@ while (@hsdump)
 	{
 	$line = shift @hsdump;
 	if ($line =~ /^  Time: (.*)/)
-		{ 
+		{
 		@result = split(' ',$line);
 		print  @result[1],"\t", @result[2],"\t" ;
 		}
 	if ($line =~ /Longitude: (.*)/)
-		{ 
+		{
 		@result = split(' ',$line);
 		print  @result[1],"\t";
 		}
 	if ($line =~ /Latitude: (.*)/)
-		{ 
+		{
 		@result = split(' ',$line);
 		print  @result[1],"\t";
 		}
 	if ($line =~ /Mean velocity: (.*)/)
-		{ 
+		{
 		@result = split(' ',$line);
 		printf  "%6.1f\t", @result[2];
 		}
 	if ($line =~ /Keel velocity: (.*)/)
-		{ 
+		{
 		@result = split(' ',$line);
 		printf  "%6.1f\n", @result[2];
 		}
@@ -178,7 +178,6 @@ sub Getopts {
     local($argumentative) = @_;
     local(@args,$_,$first,$rest);
     local($errs) = 0;
-    local($[) = 0;
 
     @args = split( / */, $argumentative );
     while(@ARGV && ($_ = $ARGV[0]) =~ /^-(.)(.*)/) {
