@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:    mbvelocitytool.c        6/6/93
- *    $Id: mbvelocity_prog.c 1891 2011-05-04 23:46:30Z caress $ 
+ *    $Id: mbvelocity_prog.c 1917 2012-01-10 19:25:33Z caress $ 
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -222,7 +222,7 @@
 #include "mbvelocity.h"
 
 /* id variables */
-static char rcs_id[] = "$Id: mbvelocity_prog.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mbvelocity_prog.c 1917 2012-01-10 19:25:33Z caress $";
 static char program_name[] = "MBVELOCITYTOOL";
 static char help_message[] = "MBVELOCITYTOOL is an interactive water velocity profile editor  \nused to examine multiple water velocity profiles and to create  \nnew water velocity profiles which can be used for the processing  \nof multibeam sonar data.  In general, this tool is used to  \nexamine water velocity profiles obtained from XBTs, CTDs, or  \ndatabases, and to construct new profiles consistent with these  \nvarious sources of information.";
 static char usage_message[] = "mbvelocitytool [-Byr/mo/da/hr/mn/sc -Eyr/mo/da/hr/mn/sc \n\t-Fformat -Ifile -Ssvpfile -Wsvpfile -V -H]";

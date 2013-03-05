@@ -53,7 +53,7 @@
  */
 #if defined(__cplusplus) || defined(__STDC__) || defined(__EXTENSIONS__)
 #include <stdlib.h>
-#ifdef HAVE_MALLOC_H
+#if !defined(VMS) && !defined(DARWIN)
 #include <malloc.h>
 #endif
 #endif
