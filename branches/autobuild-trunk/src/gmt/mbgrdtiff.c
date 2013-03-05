@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbgrdtiff.c	5/30/93
- *    $Id: mbgrdtiff.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbgrdtiff.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1999-2011 by
+ *    Copyright (c) 1999-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -397,7 +397,7 @@ int              tiff_offset[] =
 			448       /* GeoAsciiParamsTag */
 		      };
 
-static char rcs_id[] = "$Id: mbgrdtiff.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mbgrdtiff.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 
