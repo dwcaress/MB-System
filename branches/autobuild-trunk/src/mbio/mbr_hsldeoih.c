@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_hsldeoih.c	2/11/93
- *	$Id: mbr_hsldeoih.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbr_hsldeoih.c 1940 2012-03-02 21:49:30Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -215,7 +215,7 @@ int mbr_hsldeoih_wr_calibrate(int verbose, FILE *mbfp,
 int mbr_hsldeoih_wr_comment(int verbose, FILE *mbfp, 
 		struct mbf_hsldeoih_struct *data, int *error);
 
-static char rcs_id[]="$Id: mbr_hsldeoih.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbr_hsldeoih.c 1940 2012-03-02 21:49:30Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_hsldeoih(int verbose, void *mbio_ptr, int *error)
@@ -987,8 +987,11 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error)
 	char	*data_ptr;
 	FILE	*mbfp;
 	int	label;
+	char	*labelchar;
+	int	label_test;
 	int	record_size;
 	short int	tmp;
+	int	i;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -1015,10 +1018,26 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	/* get next record type */
-	if ((status = fread(&label,1,sizeof(int),mbfp)) == sizeof(int)) 
+	if (fread(&label,1,sizeof(int),mbfp) == sizeof(int))
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
+		
+		labelchar = (char *) &label;
+		label_test = MBF_HSLDEOIH_LABEL;
+#ifdef BYTESWAPPED
+		label_test = mb_swap_int(label_test);
+#endif
+		while (label != label_test && status == MB_SUCCESS)
+			{
+			for (i=0;i<3;i++)
+				labelchar[i] = labelchar[i+1];
+			if (fread(&labelchar[3],1,1,mbfp) != 1)
+				{
+				status = MB_FAILURE;
+				*error = MB_ERROR_EOF;
+				}
+			}
 		}
 	else
 		{
@@ -1026,16 +1045,19 @@ int mbr_hsldeoih_rd_data(int verbose, void *mbio_ptr, int *error)
 		*error = MB_ERROR_EOF;
 		}
 
-	/* swap bytes if necessary */
+	/* see if we just encountered a record label */
+	if (status == MB_SUCCESS)
+		{
+		/* swap bytes if necessary */
 #ifdef BYTESWAPPED
-	label = mb_swap_int(label);
+		label = mb_swap_int(label);
 #endif
 
-	/* see if we just encountered a record label */
-	if (status == MB_SUCCESS && label != MBF_HSLDEOIH_LABEL)
-		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_UNINTELLIGIBLE;
+		if (label != MBF_HSLDEOIH_LABEL)
+			{
+			status = MB_FAILURE;
+			*error = MB_ERROR_UNINTELLIGIBLE;
+			}
 		}
 
 	/* read what size and kind of record it is */

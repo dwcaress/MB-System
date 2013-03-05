@@ -3,12 +3,11 @@
 #  include <mbsystem_config.h>
 #endif
 
-
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_hsds.c	3/2/93
- *	$Id: mbsys_hsds.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbsys_hsds.c 2015 2013-03-01 22:33:52Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2013 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,7 +19,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbsys_hsds.c contains the functions for handling the data structure
- * used by MBIO functions to store data from the 59-beam Hydrosweep DS 
+ * used by MBIO functions to store data from the 59-beam Hydrosweep DS
  * multibeam sonar systems.
  * The data formats which are commonly used to store Hydrosweep DS
  * data in files include
@@ -153,10 +152,10 @@
 #include "mb_define.h"
 #include "mbsys_hsds.h"
 
-static char rcs_id[]="$Id: mbsys_hsds.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbsys_hsds.c 2015 2013-03-01 22:33:52Z caress $";
 
 /*--------------------------------------------------------------------*/
-int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_hsds_alloc";
@@ -179,6 +178,8 @@ int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	/* allocate memory for data structure */
 	status = mb_malloc(verbose,sizeof(struct mbsys_hsds_struct),
 				store_ptr,error);
+	memset(*store_ptr, 0, sizeof(struct mbsys_hsds_struct));
+
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -196,7 +197,7 @@ int mbsys_hsds_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsds_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_hsds_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_hsds_deall";
@@ -231,7 +232,7 @@ int mbsys_hsds_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsds_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hsds_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_hsds_dimensions";
@@ -294,12 +295,12 @@ int mbsys_hsds_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -352,7 +353,7 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed (convert m/s to km/hr) */
 		*speed = 3.6*store->speed;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 2.3;
 		mb_io_ptr->beamwidth_xtrack = 2.3;
@@ -370,7 +371,7 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			    }
 			else if (store->depth[i] < 0)
 			    {
-			    beamflag[i] 
+			    beamflag[i]
 				= MB_FLAG_MANUAL + MB_FLAG_FLAG;
 			    bath[i] = -store->depth_scale*store->depth[i];
 			    }
@@ -379,7 +380,7 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			    beamflag[i] = MB_FLAG_NULL;
 			    bath[i] = store->depth_scale*store->depth[i];
 			    }
-			bathacrosstrack[i] = 
+			bathacrosstrack[i] =
 				store->depth_scale*store->distance[i];
 			bathalongtrack[i] = 0.0;
 			}
@@ -472,13 +473,13 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -494,7 +495,7 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -520,12 +521,12 @@ int mbsys_hsds_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -566,18 +567,18 @@ int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -619,7 +620,7 @@ int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get speed (convert km/hr to m/s) */
 		store->speed = 0.2777777778*speed;
 
-		/* put distance and depth values 
+		/* put distance and depth values
 			into data structure */
 		if (store->depth_scale > 0.0)
 			scalefactor = 1.0/store->depth_scale;
@@ -630,20 +631,20 @@ int mbsys_hsds_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			if (mb_beam_check_flag_null(beamflag[i]))
 			    {
 			    store->depth[i] = 0.0;
-/*fprintf(stderr, "NULL: time_d:%f i:%d flag:%d bath: %f %d\n", 
+/*fprintf(stderr, "NULL: time_d:%f i:%d flag:%d bath: %f %d\n",
 time_d, i, beamflag[i], bath[i], store->depth[i]);*/
 			    }
 			else if (mb_beam_check_flag(beamflag[i]))
 			    {
 			    store->depth[i] = -scalefactor*bath[i];
-/*fprintf(stderr, "FLAG: time_d:%f i:%d flag:%d bath: %f %d\n", 
+/*fprintf(stderr, "FLAG: time_d:%f i:%d flag:%d bath: %f %d\n",
 time_d, i, beamflag[i], bath[i], store->depth[i]);*/
 			    }
 			else
 			    {
 			    store->depth[i] = scalefactor*bath[i];
 			    }
-			store->distance[i] = 
+			store->distance[i] =
 				scalefactor*bathacrosstrack[i];
 			}
 		if (mb_beam_check_flag_null(beamflag[29]))
@@ -681,9 +682,9 @@ time_d, i, beamflag[i], bath[i], store->depth[i]);*/
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_hsds_ttimes";
@@ -719,7 +720,7 @@ int mbsys_hsds_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	*kind = store->kind;
 
 	/* extract data from structure */
-	if (*kind == MB_DATA_DATA 
+	if (*kind == MB_DATA_DATA
 		|| *kind == MB_DATA_CALIBRATE)
 		{
 		/* get nbeams */
@@ -894,7 +895,7 @@ int mbsys_hsds_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_hsds_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_hsds_extract_altitude";
@@ -928,7 +929,7 @@ int mbsys_hsds_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 	*kind = store->kind;
 
 	/* extract data from structure */
-	if (*kind == MB_DATA_DATA 
+	if (*kind == MB_DATA_DATA
 		|| *kind == MB_DATA_CALIBRATE)
 		{
 		bath_best = 0.0;
@@ -945,7 +946,7 @@ int mbsys_hsds_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    xtrack_min = fabs(store->depth_scale*store->distance[i]);
 			    bath_best = store->depth_scale*store->depth[i];
 			    }
-			}		
+			}
 		    }
 		if (bath_best <= 0.0)
 		    {
@@ -958,7 +959,7 @@ int mbsys_hsds_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 			    xtrack_min = fabs(store->depth_scale*store->distance[i]);
 			    bath_best = -store->depth_scale*store->depth[i];
 			    }
-			}		
+			}
 		    }
 		*transducer_depth = store->draught;
 		*altitude = bath_best - *transducer_depth;
@@ -1008,8 +1009,8 @@ int mbsys_hsds_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_hsds_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_hsds_extract_nav";
@@ -1140,7 +1141,7 @@ int mbsys_hsds_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1174,7 +1175,7 @@ int mbsys_hsds_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_hsds_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1298,7 +1299,7 @@ int mbsys_hsds_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		*nsvp = store->num_vel;
-		
+
 		/* get profile */
 		for (i=0;i<*nsvp;i++)
 			{
@@ -1381,7 +1382,7 @@ int mbsys_hsds_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get number of depth-velocity pairs */
 		store->num_vel = MIN(nsvp, MBSYS_HSDS_MAXVEL);
-		
+
 		/* get profile */
 		for (i=0;i<store->num_vel;i++)
 			{
@@ -1405,7 +1406,7 @@ int mbsys_hsds_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_hsds_copy(int verbose, void *mbio_ptr, 
+int mbsys_hsds_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {

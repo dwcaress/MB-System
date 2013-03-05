@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sb2100rw.c	3/3/94
- *	$Id: mbr_sb2100rw.c 1891 2011-05-04 23:46:30Z caress $
+ *	$Id: mbr_sb2100rw.c 1987 2012-09-29 06:13:00Z caress $
  *
- *    Copyright (c) 1994-2011 by
+ *    Copyright (c) 1994-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------*/
 /*
  * mbr_sb2100rw.c contains the functions for reading and writing
- * multibeam data in the SB2100RW format.  
+ * multibeam data in the SB2100RW format.
  * These functions include:
  *   mbr_alm_sb2100rw	- allocate read/write memory
  *   mbr_dem_sb2100rw	- deallocate read/write memory
@@ -203,27 +203,27 @@
 #endif
 
 /* essential function prototypes */
-int mbr_register_sb2100rw(int verbose, void *mbio_ptr, 
+int mbr_register_sb2100rw(int verbose, void *mbio_ptr,
 		int *error);
-int mbr_info_sb2100rw(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
+int mbr_info_sb2100rw(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
 			int *svp_source,
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error);
 int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error);
 int mbr_dem_sb2100rw(int verbose, void *mbio_ptr, int *error);
@@ -247,7 +247,7 @@ int mbr_sb2100rw_wr_tr(int verbose, FILE *mbfp, void *data_ptr, int *error);
 int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error);
 int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_sb2100rw.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mbr_sb2100rw.c 1987 2012-09-29 06:13:00Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
@@ -269,55 +269,55 @@ int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 
 	/* set format info parameters */
-	status = mbr_info_sb2100rw(verbose, 
-			&mb_io_ptr->system, 
-			&mb_io_ptr->beams_bath_max, 
-			&mb_io_ptr->beams_amp_max, 
-			&mb_io_ptr->pixels_ss_max, 
-			mb_io_ptr->format_name, 
-			mb_io_ptr->system_name, 
-			mb_io_ptr->format_description, 
-			&mb_io_ptr->numfile, 
-			&mb_io_ptr->filetype, 
-			&mb_io_ptr->variable_beams, 
-			&mb_io_ptr->traveltime, 
-			&mb_io_ptr->beam_flagging, 
-			&mb_io_ptr->nav_source, 
-			&mb_io_ptr->heading_source, 
-			&mb_io_ptr->vru_source, 
-			&mb_io_ptr->svp_source, 
-			&mb_io_ptr->beamwidth_xtrack, 
-			&mb_io_ptr->beamwidth_ltrack, 
+	status = mbr_info_sb2100rw(verbose,
+			&mb_io_ptr->system,
+			&mb_io_ptr->beams_bath_max,
+			&mb_io_ptr->beams_amp_max,
+			&mb_io_ptr->pixels_ss_max,
+			mb_io_ptr->format_name,
+			mb_io_ptr->system_name,
+			mb_io_ptr->format_description,
+			&mb_io_ptr->numfile,
+			&mb_io_ptr->filetype,
+			&mb_io_ptr->variable_beams,
+			&mb_io_ptr->traveltime,
+			&mb_io_ptr->beam_flagging,
+			&mb_io_ptr->nav_source,
+			&mb_io_ptr->heading_source,
+			&mb_io_ptr->vru_source,
+			&mb_io_ptr->svp_source,
+			&mb_io_ptr->beamwidth_xtrack,
+			&mb_io_ptr->beamwidth_ltrack,
 			error);
 
 	/* set format and system specific function pointers */
 	mb_io_ptr->mb_io_format_alloc = &mbr_alm_sb2100rw;
-	mb_io_ptr->mb_io_format_free = &mbr_dem_sb2100rw; 
-	mb_io_ptr->mb_io_store_alloc = &mbsys_sb2100_alloc; 
-	mb_io_ptr->mb_io_store_free = &mbsys_sb2100_deall; 
-	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2100rw; 
-	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2100rw; 
-	mb_io_ptr->mb_io_dimensions = &mbsys_sb2100_dimensions; 
-	mb_io_ptr->mb_io_extract = &mbsys_sb2100_extract; 
-	mb_io_ptr->mb_io_insert = &mbsys_sb2100_insert; 
-	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2100_extract_nav; 
-	mb_io_ptr->mb_io_insert_nav = &mbsys_sb2100_insert_nav; 
-	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb2100_extract_altitude; 
-	mb_io_ptr->mb_io_insert_altitude = NULL; 
-	mb_io_ptr->mb_io_extract_svp = &mbsys_sb2100_extract_svp; 
-	mb_io_ptr->mb_io_insert_svp = &mbsys_sb2100_insert_svp; 
-	mb_io_ptr->mb_io_ttimes = &mbsys_sb2100_ttimes; 
-	mb_io_ptr->mb_io_detects = &mbsys_sb2100_detects; 
-	mb_io_ptr->mb_io_gains = &mbsys_sb2100_gains; 
-	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2100_copy; 
-	mb_io_ptr->mb_io_extract_rawss = NULL; 
-	mb_io_ptr->mb_io_insert_rawss = NULL; 
+	mb_io_ptr->mb_io_format_free = &mbr_dem_sb2100rw;
+	mb_io_ptr->mb_io_store_alloc = &mbsys_sb2100_alloc;
+	mb_io_ptr->mb_io_store_free = &mbsys_sb2100_deall;
+	mb_io_ptr->mb_io_read_ping = &mbr_rt_sb2100rw;
+	mb_io_ptr->mb_io_write_ping = &mbr_wt_sb2100rw;
+	mb_io_ptr->mb_io_dimensions = &mbsys_sb2100_dimensions;
+	mb_io_ptr->mb_io_extract = &mbsys_sb2100_extract;
+	mb_io_ptr->mb_io_insert = &mbsys_sb2100_insert;
+	mb_io_ptr->mb_io_extract_nav = &mbsys_sb2100_extract_nav;
+	mb_io_ptr->mb_io_insert_nav = &mbsys_sb2100_insert_nav;
+	mb_io_ptr->mb_io_extract_altitude = &mbsys_sb2100_extract_altitude;
+	mb_io_ptr->mb_io_insert_altitude = NULL;
+	mb_io_ptr->mb_io_extract_svp = &mbsys_sb2100_extract_svp;
+	mb_io_ptr->mb_io_insert_svp = &mbsys_sb2100_insert_svp;
+	mb_io_ptr->mb_io_ttimes = &mbsys_sb2100_ttimes;
+	mb_io_ptr->mb_io_detects = &mbsys_sb2100_detects;
+	mb_io_ptr->mb_io_gains = &mbsys_sb2100_gains;
+	mb_io_ptr->mb_io_copyrecord = &mbsys_sb2100_copy;
+	mb_io_ptr->mb_io_extract_rawss = NULL;
+	mb_io_ptr->mb_io_insert_rawss = NULL;
 
 	/* print output debug statements */
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",mb_io_ptr->system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",mb_io_ptr->beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",mb_io_ptr->beams_amp_max);
@@ -365,25 +365,25 @@ int mbr_register_sb2100rw(int verbose, void *mbio_ptr, int *error)
 }
 
 /*--------------------------------------------------------------------*/
-int mbr_info_sb2100rw(int verbose, 
-			int *system, 
-			int *beams_bath_max, 
-			int *beams_amp_max, 
-			int *pixels_ss_max, 
-			char *format_name, 
-			char *system_name, 
-			char *format_description, 
-			int *numfile, 
-			int *filetype, 
-			int *variable_beams, 
-			int *traveltime, 
-			int *beam_flagging, 
-			int *nav_source, 
-			int *heading_source, 
-			int *vru_source, 
-			int *svp_source, 
-			double *beamwidth_xtrack, 
-			double *beamwidth_ltrack, 
+int mbr_info_sb2100rw(int verbose,
+			int *system,
+			int *beams_bath_max,
+			int *beams_amp_max,
+			int *pixels_ss_max,
+			char *format_name,
+			char *system_name,
+			char *format_description,
+			int *numfile,
+			int *filetype,
+			int *variable_beams,
+			int *traveltime,
+			int *beam_flagging,
+			int *nav_source,
+			int *heading_source,
+			int *vru_source,
+			int *svp_source,
+			double *beamwidth_xtrack,
+			double *beamwidth_ltrack,
 			int *error)
 {
 	char	*function_name = "mbr_info_sb2100rw";
@@ -424,7 +424,7 @@ int mbr_info_sb2100rw(int verbose,
 	if (verbose >= 2)
 		{
 		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
-		fprintf(stderr,"dbg2  Return values:\n");	
+		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       system:             %d\n",*system);
 		fprintf(stderr,"dbg2       beams_bath_max:     %d\n",*beams_bath_max);
 		fprintf(stderr,"dbg2       beams_amp_max:      %d\n",*beams_amp_max);
@@ -485,7 +485,7 @@ int mbr_alm_sb2100rw(int verbose, void *mbio_ptr, int *error)
 
 	/* get store structure pointer */
 	store = (struct mbsys_sb2100_struct *) mb_io_ptr->store_data;
-				
+
 	/* set comment pointer */
 	store->comment = (char *) &(store->roll_bias_port);
 
@@ -744,7 +744,7 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    store->svp[i].velocity = 0.01 * data->velocity[i];
 			    }
 		    }
-		    
+
 		/* ping data */
 		else if (data->kind == MB_DATA_DATA)
 		    {
@@ -765,7 +765,7 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    store->ssv = 0.01 * data->surface_sound_velocity;
 		    store->ssv_source = data->ssv_source;
 		    store->depth_gate_mode = data->depth_gate_mode;
-    
+
 		    /* DR header info */
 		    store->nbeams = data->num_beams;
 		    store->svp_correction = data->svp_corr_beams;
@@ -774,14 +774,14 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    store->num_algorithms = data->num_algorithms;
 		    for (i=0;i<4;i++)
 			    store->algorithm_order[i] = data->algorithm_order[i];
-     
+
 		    /* transmit parameters and navigation (DR and SS) */
 		    store->frequency = data->frequency[0];
 		    if (data->frequency[0] != 'H')
 			{
 			store->ping_gain = data->ping_gain_12khz;
 			store->ping_pulse_width = data->ping_pulse_width_12khz;
-			store->transmitter_attenuation 
+			store->transmitter_attenuation
 				= data->transmitter_attenuation_12khz;
 			store->pitch = 0.001 * data->pitch_12khz;
 			store->roll = 0.001 * data->roll_12khz;
@@ -791,13 +791,13 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			{
 			store->ping_gain = data->ping_gain_36khz;
 			store->ping_pulse_width = data->ping_pulse_width_36khz;
-			store->transmitter_attenuation 
+			store->transmitter_attenuation
 				= data->transmitter_attenuation_36khz;
 			store->pitch = 0.001 * data->pitch_36khz;
 			store->roll = 0.001 * data->roll_36khz;
 			store->heading = 0.001 * data->heading_36khz;
 			}
-    
+
 		    /* formed beam data (DR) */
 		    if (data->range_scale == 'S')
 			    scale = 0.01;
@@ -819,7 +819,7 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    store->beams[i].quality = data->quality[i];
 			    store->beams[i].source = data->source[i];
 			    }
-   
+
 		    /* SS header info */
 		    store->ss_data_length = data->ss_data_length;
 		    store->npixels = data->num_pixels;
@@ -831,7 +831,7 @@ int mbr_rt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    else
 			store->pixel_size = data->pixel_size_36khz;
 		    store->spare_ss = data->spare_ss;
-    
+
 		    /* sidescan data (SS) */
 		    for (i=0;i<MBF_SB2100RW_PIXELS;i++)
 			    {
@@ -916,7 +916,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    data->velocity[i] = 100 * store->svp[i].velocity;
 			    }
 		    }
-		    
+
 		/* ping data */
 		else if (data->kind == MB_DATA_DATA)
 		    {
@@ -936,7 +936,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    data->surface_sound_velocity = 100 * store->ssv;
 		    data->ssv_source = store->ssv_source;
 		    data->depth_gate_mode = store->depth_gate_mode;
-    
+
 		    /* DR header info */
 		    data->num_beams = store->nbeams;
 		    data->svp_corr_beams = store->svp_correction;
@@ -945,7 +945,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 		    data->num_algorithms = store->num_algorithms;
 		    for (i=0;i<4;i++)
 			    data->algorithm_order[i] = store->algorithm_order[i];
-     
+
 		    /* transmit parameters and navigation (DR and SS) */
 		    data->frequency[0] = store->frequency;
 		    data->frequency[1] = store->frequency;
@@ -962,9 +962,9 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
                                 data->frequency[1] = '0';
                                 }
 			data->ping_gain_12khz = store->ping_gain;
-			data->ping_pulse_width_12khz 
+			data->ping_pulse_width_12khz
 				= store->ping_pulse_width;
-			data->transmitter_attenuation_12khz 
+			data->transmitter_attenuation_12khz
 				= store->transmitter_attenuation;
 			data->pitch_12khz = 1000 * store->pitch;
 			data->roll_12khz = 1000 * store->roll;
@@ -987,15 +987,15 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->roll_12khz = 0;
 			data->heading_12khz = 0;
 			data->ping_gain_36khz = store->ping_gain;
-			data->ping_pulse_width_36khz 
+			data->ping_pulse_width_36khz
 				= store->ping_pulse_width;
-			data->transmitter_attenuation_36khz 
+			data->transmitter_attenuation_36khz
 				= store->transmitter_attenuation;
 			data->pitch_36khz = 1000 * store->pitch;
 			data->roll_36khz = 1000 * store->roll;
 			data->heading_36khz = 1000 * store->heading;
 			}
-    
+
 		    /* formed beam data (DR) */
 		    if (data->range_scale == 'S')
 			    scale = 0.01;
@@ -1011,7 +1011,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    along_max = 0.0;
 			    for (i=0;i<MBF_SB2100RW_BEAMS;i++)
 				{
-				if (store->beams[i].depth != 0.0 
+				if (store->beams[i].depth != 0.0
 					&& store->beams[i].quality == ' ')
 				    {
 				    depth_max = MAX(depth_max, fabs(store->beams[i].depth));
@@ -1022,19 +1022,19 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    if (depth_max > 9999.9
 				|| across_max > 9999.9
 				|| along_max > 9999.9)
-				{			    
+				{
 				scale = 1.0;
 				data->range_scale = 'D';
 				}
 			    else if (depth_max > 999.9
 				|| across_max > 999.9
 				|| along_max > 999.9)
-				{			    
+				{
 				scale = 0.1;
 				data->range_scale = 'I';
 				}
 			    else
-				{			    
+				{
 				scale = 0.01;
 				data->range_scale = 'S';
 				}
@@ -1053,7 +1053,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			    data->quality[i] = store->beams[i].quality;
 			    data->source[i] = store->beams[i].source;
 			    }
-   
+
 		    /* SS header info */
 		    data->ss_data_length = store->ss_data_length;
 		    data->num_pixels = store->npixels;
@@ -1075,7 +1075,7 @@ int mbr_wt_sb2100rw(int verbose, void *mbio_ptr, void *store_ptr, int *error)
 			data->pixel_size_36khz = store->pixel_size;
 			}
 		    store->spare_ss = data->spare_ss;
-    
+
 		    /* sidescan data (SS) */
 		    for (i=0;i<MBF_SB2100RW_PIXELS;i++)
 			    {
@@ -1143,9 +1143,9 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error)
 
 	/* initialize everything to zeros */
 	mbr_zero_sb2100rw(verbose,data_ptr,error);
-	
+
 	/* get file position at record beginning */
-	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;	
+	mb_io_ptr->file_pos = mb_io_ptr->file_bytes;
 
 	done = MB_NO;
 	expect = MBF_SB2100RW_NONE;
@@ -1157,7 +1157,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error)
 			{
 			/* save position in file */
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			
+
 			/* read the label */
 			status = mbr_sb2100rw_rd_label(verbose,mbfp,
 				raw_line,&type,error);
@@ -1232,7 +1232,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error)
 			status = mbr_sb2100rw_rd_ss(
 				verbose,mbfp,data,error);
 			mb_io_ptr->file_bytes = ftell(mbfp);
-			if (status == MB_SUCCESS 
+			if (status == MB_SUCCESS
 				&& expect == MBF_SB2100RW_SS)
 				{
 				done = MB_YES;
@@ -1271,7 +1271,7 @@ int mbr_sb2100rw_rd_data(int verbose, void *mbio_ptr, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int	mbr_sb2100rw_rd_label(int verbose, FILE *mbfp, 
+int	mbr_sb2100rw_rd_label(int verbose, FILE *mbfp,
 		char *line, int *type, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_label";
@@ -1300,11 +1300,11 @@ int	mbr_sb2100rw_rd_label(int verbose, FILE *mbfp,
 		for (i=1;i<MBF_SB2100RW_RECORDS;i++)
 			{
 			icmp = strncmp(line,mbf_sb2100rw_labels[i],8);
-			if (icmp == 0) 
+			if (icmp == 0)
 				*type = i;
 			}
 
-		/* if it looks like a raw line, check for up to 
+		/* if it looks like a raw line, check for up to
 		   four lost bytes */
 		if (*type == MBF_SB2100RW_RAW_LINE)
 		for (i=1;i<MBF_SB2100RW_RECORDS;i++)
@@ -1312,7 +1312,7 @@ int	mbr_sb2100rw_rd_label(int verbose, FILE *mbfp,
 			{
 			label = mbf_sb2100rw_labels[i];
 			icmp = strncmp(line,&label[j],8-j);
-			if (icmp == 0) 
+			if (icmp == 0)
 				*type = i;
 			}
 		}
@@ -1404,7 +1404,7 @@ int	mbr_sb2100rw_read_line(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp, 
+int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp,
 		struct mbf_sb2100rw_struct *data, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_pr";
@@ -1497,7 +1497,7 @@ int mbr_sb2100rw_rd_pr(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_tr(int verbose, FILE *mbfp, 
+int mbr_sb2100rw_rd_tr(int verbose, FILE *mbfp,
 		struct mbf_sb2100rw_struct *data, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_tr";
@@ -1548,7 +1548,7 @@ int mbr_sb2100rw_rd_tr(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp, 
+int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp,
 		struct mbf_sb2100rw_struct *data, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_dr";
@@ -1624,7 +1624,7 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp,
 		  shift = shift + 24;
 		  }
 
-		/* handle 36 kHz parameters if if in 36 kHz 
+		/* handle 36 kHz parameters if if in 36 kHz
 			or dual frequency mode */
 		else
 		  {
@@ -1717,7 +1717,7 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp,
 		- one line per beam */
 	for (i=0;i<data->num_beams;i++)
 	  {
-	  if ((status = mbr_sb2100rw_read_line(verbose,mbfp,1,line,error)) 
+	  if ((status = mbr_sb2100rw_read_line(verbose,mbfp,1,line,error))
 		== MB_SUCCESS)
 		{
 		data->source[i] = line[0];
@@ -1731,6 +1731,26 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp,
 		mb_get_int(&(data->signal_to_noise[i]),  line+37, 2);
 		mb_get_int(&(data->echo_length[i]),      line+39, 3);
 		data->quality[i] = line[42];
+		}
+	  }
+
+	/* make sure the rest of the beam arrays are null */
+	for (i=data->num_beams;i<MBSYS_SB2100_BEAMS;i++)
+	  {
+	  if ((status = mbr_sb2100rw_read_line(verbose,mbfp,1,line,error))
+		== MB_SUCCESS)
+		{
+		data->source[i] = ' ';
+		data->travel_time[i] = 0;
+		data->angle_across[i] = 0;
+		data->angle_forward[i] = 0;
+		data->depth[i] = 0;
+		data->acrosstrack_beam[i] = 0;
+		data->alongtrack_beam[i] = 0;
+		data->amplitude_beam[i] = 0;
+		data->signal_to_noise[i] = 0;
+		data->echo_length[i] = 0;
+		data->quality[i] = '0';
 		}
 	  }
 
@@ -1770,7 +1790,7 @@ int mbr_sb2100rw_rd_dr(int verbose, FILE *mbfp,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp, 
+int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp,
 		struct mbf_sb2100rw_struct *data, int *error)
 {
 	char	*function_name = "mbr_sb2100rw_rd_ss";
@@ -1855,7 +1875,7 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp,
 		  shift = shift + 32;
 		  }
 
-		/* handle 36 kHz parameters if if in 36 kHz 
+		/* handle 36 kHz parameters if if in 36 kHz
 			or dual frequency mode */
 		else
 		  {
@@ -1899,7 +1919,7 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp,
 			data->heave);
 		fprintf(stderr,"dbg5       range_scale:      %c\n",
 			data->range_scale);
-		fprintf(stderr,"dbg5       spare_ss:         %c\n", 
+		fprintf(stderr,"dbg5       spare_ss:         %c\n",
 			data->spare_ss);
 		fprintf(stderr,"dbg5       pixel_size_scale: %c\n",
 			data->pixel_size_scale);
@@ -1954,7 +1974,7 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp,
 		status = MB_FAILURE;
 		*error = MB_ERROR_EOF;
 		}
-	else 
+	else
 		{
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
@@ -1972,7 +1992,7 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp,
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
 		}
-	    
+
 	/* get the data */
 	if (status == MB_SUCCESS)
 		{
@@ -1981,9 +2001,9 @@ int mbr_sb2100rw_rd_ss(int verbose, FILE *mbfp,
 			{
 			/* deal with byte swapping if necessary */
 #ifdef BYTESWAPPED
-                        data->amplitude_ss[i] = 
+                        data->amplitude_ss[i] =
 				(int) mb_swap_short(read_ss[2*i]);
-                        data->alongtrack_ss[i] = 
+                        data->alongtrack_ss[i] =
 				(int) ((short) mb_swap_short(read_ss_ptr[2*i+1]));
 #else
 			data->amplitude_ss[i] = (int) read_ss[2*i];
@@ -2537,7 +2557,7 @@ int mbr_sb2100rw_wr_dr(int verbose, FILE *mbfp, void *data_ptr, int *error)
 		if (data->speed > 999999 || data->speed < -999999)
 			data->speed = 0;
 		status = fprintf(mbfp,"%+07d",data->speed);
-		
+
 		status = fprintf(mbfp,"%4.4d",data->num_beams);
 		status = fprintf(mbfp,"%c",data->svp_corr_beams);
 		status = fprintf(mbfp,"%c%c",
@@ -2810,7 +2830,7 @@ int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error)
 			status = fprintf(mbfp,"%+06d",data->roll_12khz);
 			status = fprintf(mbfp,"%6.6d",data->heading_12khz);
 			}
-		else 
+		else
 			{
 			status = fprintf(mbfp,"%4.4d",data->num_pixels_36khz);
 			if (data->pixel_size_36khz > 9.99)
@@ -2839,9 +2859,9 @@ int mbr_sb2100rw_wr_ss(int verbose, FILE *mbfp, void *data_ptr, int *error)
 			{
 			/* deal with byte swapping if necessary */
 #ifdef BYTESWAPPED
-			write_ss[2*i] = mb_swap_short((unsigned short) 
+			write_ss[2*i] = mb_swap_short((unsigned short)
 				data->amplitude_ss[i]);
-			write_ss_ptr[2*i+1] = mb_swap_short((short) 
+			write_ss_ptr[2*i+1] = mb_swap_short((short)
 				data->alongtrack_ss[i]);
 #else
 			write_ss[2*i] = (unsigned short) data->amplitude_ss[i];

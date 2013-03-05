@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_read_init.c	1/25/93
- *    $Id: mb_read_init.c 1898 2011-06-13 19:49:07Z caress $
+ *    $Id: mb_read_init.c 1960 2012-06-07 00:15:58Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -19,12 +19,12 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_read_init.c opens and initializes a multibeam data file 
+ * mb_read_init.c opens and initializes a multibeam data file
  * for reading with mb_read or mb_get.
  *
  * Author:	D. W. Caress
  * Date:	January 25, 1993
- * 
+ *
  * $Log: mb_read_init.c,v $
  * Revision 5.27  2009/03/13 07:05:58  caress
  * Release 5.1.2beta02
@@ -210,12 +210,38 @@
 #include <sys/stat.h>
 
 /* XDR i/o include file */
-#ifdef HAVE_RPC_RPC_H
-# include <rpc/rpc.h>
+#ifdef IRIX
+#include <rpc/rpc.h>
 #endif
-#ifdef HAVE_RPC_TYPES_H
-# include <rpc/types.h>
-# include <rpc/xdr.h>
+#ifdef IRIX64
+#include <rpc/rpc.h>
+#endif
+#ifdef SOLARIS
+#include <rpc/rpc.h>
+#endif
+#ifdef LINUX
+#include <rpc/rpc.h>
+#endif
+#ifdef LYNX
+#include <rpc/rpc.h>
+#endif
+#ifdef SUN
+#include <rpc/xdr.h>
+#endif
+#ifdef HPUX
+#include <rpc/rpc.h>
+#endif
+#ifdef DARWIN
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#endif
+#ifdef CYGWIN
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#endif
+#ifdef OTHER
+#include <rpc/types.h>
+#include <rpc/xdr.h>
 #endif
 
 /* mbio include files */
@@ -228,15 +254,15 @@
 #include "gsf.h"
 #include "netcdf.h"
 
-static char rcs_id[]="$Id: mb_read_init.c 1898 2011-06-13 19:49:07Z caress $";
+static char rcs_id[]="$Id: mb_read_init.c 1960 2012-06-07 00:15:58Z caress $";
 
 /*--------------------------------------------------------------------*/
-int mb_read_init(int verbose, char *file, 
+int mb_read_init(int verbose, char *file,
 		int format, int pings, int lonflip, double bounds[4],
-		int btime_i[7], int etime_i[7], 
+		int btime_i[7], int etime_i[7],
 		double speedmin, double timegap,
 		void **mbio_ptr, double *btime_d, double *etime_d,
-		int *beams_bath, int *beams_amp, int *pixels_ss, 
+		int *beams_bath, int *beams_amp, int *pixels_ss,
 		int *error)
 {
 	char	*function_name = "mb_read_init";
@@ -297,17 +323,17 @@ int mb_read_init(int verbose, char *file,
 		memset(*mbio_ptr, 0, sizeof(struct mb_io_struct));
 		mb_io_ptr = (struct mb_io_struct *) *mbio_ptr;
 		}
-		
+
 	/* set system byte order flag */
 	if (status == MB_SUCCESS)
 		{
 		mb_io_ptr->byteswapped = mb_swap_check();
 		}
-				
+
 	/* get format information */
 	if (status == MB_SUCCESS)
 		{
-		status = mb_format_register(verbose, &format, 
+		status = mb_format_register(verbose, &format,
 					*mbio_ptr, error);
 		}
 
@@ -377,7 +403,7 @@ int mb_read_init(int verbose, char *file,
 	mb_io_ptr->btime_d = *btime_d;
 	mb_io_ptr->etime_d = *etime_d;
 
-	/* set the number of beams and allocate storage arrays */	
+	/* set the number of beams and allocate storage arrays */
 	*beams_bath = mb_io_ptr->beams_bath_max;
 	*beams_amp = mb_io_ptr->beams_amp_max;
 	*pixels_ss = mb_io_ptr->pixels_ss_max;
@@ -418,11 +444,11 @@ int mb_read_init(int verbose, char *file,
 	mb_io_ptr->new_ss = NULL;
 	mb_io_ptr->new_ss_acrosstrack = NULL;
 	mb_io_ptr->new_ss_alongtrack = NULL;
-	
+
 	/* initialize projection parameters */
 	mb_io_ptr->projection_initialized = MB_NO;
 	mb_io_ptr->pjptr = NULL;
-	
+
 	/* initialize ancillary variables used
 		to save information in certain cases */
 	mb_io_ptr->save_flag = MB_NO;
@@ -537,7 +563,7 @@ int mb_read_init(int verbose, char *file,
 		return(status);
 		}
 
-	/* handle normal or xdr files to be opened 
+	/* handle normal or xdr files to be opened
 	   directly with fopen */
 	if (mb_io_ptr->filetype == MB_FILETYPE_NORMAL
 	    || mb_io_ptr->filetype == MB_FILETYPE_XDR)
@@ -546,25 +572,25 @@ int mb_read_init(int verbose, char *file,
 	    if (strncmp(file,stdin_string,5) == 0)
 		mb_io_ptr->mbfp = stdin;
 	    else
-		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "r")) == NULL) 
+		if ((mb_io_ptr->mbfp = fopen(mb_io_ptr->file, "r")) == NULL)
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
 		    }
-    
+
 	    /* open the second file if required */
-	    if (status == MB_SUCCESS 
+	    if (status == MB_SUCCESS
 		&& mb_io_ptr->numfile >= 2)
 		{
-		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r")) == NULL) 
+		if ((mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r")) == NULL)
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
 		    }
 		}
-    
+
 	    /* or open the second file if desired and possible */
-	    else if (status == MB_SUCCESS 
+	    else if (status == MB_SUCCESS
 		&& mb_io_ptr->numfile <= -2)
 		{
 		if ((fstat = stat(mb_io_ptr->file2, &file_status)) == 0
@@ -572,20 +598,20 @@ int mb_read_init(int verbose, char *file,
 		    && file_status.st_size > 0)
 			mb_io_ptr->mbfp2 = fopen(mb_io_ptr->file2, "r");
 		}
- 
+
 	    /* open the third file if required */
-	    if (status == MB_SUCCESS 
+	    if (status == MB_SUCCESS
 		&& mb_io_ptr->numfile >= 3)
 		{
-		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r")) == NULL) 
+		if ((mb_io_ptr->mbfp3 = fopen(mb_io_ptr->file3, "r")) == NULL)
 		    {
 		    *error = MB_ERROR_OPEN_FAIL;
 		    status = MB_FAILURE;
 		    }
 		}
- 
+
 	    /* or open the third file if desired and possible */
-	    else if (status == MB_SUCCESS 
+	    else if (status == MB_SUCCESS
 		&& mb_io_ptr->numfile <= -3)
 		{
 		if ((fstat = stat(mb_io_ptr->file2, &file_status)) == 0
@@ -595,14 +621,14 @@ int mb_read_init(int verbose, char *file,
 		}
 
 	    /* if needed, initialize XDR stream */
-	    if (status == MB_SUCCESS 
+	    if (status == MB_SUCCESS
 		&& mb_io_ptr->filetype == MB_FILETYPE_XDR)
 		{
 		status = mb_mallocd(verbose,__FILE__, __LINE__,sizeof(XDR),
 				(void **) &mb_io_ptr->xdrs,error);
 		if (status == MB_SUCCESS)
 		    {
-		    xdrstdio_create((XDR *)mb_io_ptr->xdrs, 
+		    xdrstdio_create((XDR *)mb_io_ptr->xdrs,
 			    mb_io_ptr->mbfp, XDR_DECODE);
 		    }
 		else
@@ -613,7 +639,7 @@ int mb_read_init(int verbose, char *file,
 		}
 
 	    /* if needed, initialize second XDR stream */
-	    if (status == MB_SUCCESS 
+	    if (status == MB_SUCCESS
 		&& mb_io_ptr->filetype == MB_FILETYPE_XDR
 		&& (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
 		&& mb_io_ptr->mbfp2 != NULL)
@@ -622,7 +648,7 @@ int mb_read_init(int verbose, char *file,
 				(void **) &mb_io_ptr->xdrs2,error);
 		if (status == MB_SUCCESS)
 		    {
-		    xdrstdio_create((XDR *)mb_io_ptr->xdrs2, 
+		    xdrstdio_create((XDR *)mb_io_ptr->xdrs2,
 			    mb_io_ptr->mbfp2, XDR_DECODE);
 		    }
 		else
@@ -633,7 +659,7 @@ int mb_read_init(int verbose, char *file,
 		}
 
 	    /* if needed, initialize third XDR stream */
-	    if (status == MB_SUCCESS 
+	    if (status == MB_SUCCESS
 		&& mb_io_ptr->filetype == MB_FILETYPE_XDR
 		&& (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3)
 		&& mb_io_ptr->mbfp3 != NULL)
@@ -642,7 +668,7 @@ int mb_read_init(int verbose, char *file,
 				(void **) &mb_io_ptr->xdrs3,error);
 		if (status == MB_SUCCESS)
 		    {
-		    xdrstdio_create((XDR *)mb_io_ptr->xdrs3, 
+		    xdrstdio_create((XDR *)mb_io_ptr->xdrs3,
 			    mb_io_ptr->mbfp3, XDR_DECODE);
 		    }
 		else
@@ -652,12 +678,18 @@ int mb_read_init(int verbose, char *file,
 		    }
 		}
 	    }
-	    
+
+	/* else handle single normal files to be opened with mb_fileio_open() */
+	else if (mb_io_ptr->filetype == MB_FILETYPE_SINGLE)
+	    {
+	    status = mb_fileio_open(verbose, *mbio_ptr, error);
+	    }
+
 	/* else handle gsf files to be opened with gsflib */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF)
 	    {
-	    status = gsfOpen(mb_io_ptr->file, 
-				GSF_READONLY, 
+	    status = gsfOpen(mb_io_ptr->file,
+				GSF_READONLY,
 				(int *) &(mb_io_ptr->gsfid));
 	    if (status == 0)
 		{
@@ -670,12 +702,12 @@ int mb_read_init(int verbose, char *file,
 		*error = MB_ERROR_OPEN_FAIL;
 		}
 	    }
-	    
+
 	/* else handle netcdf files to be opened with libnetcdf */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF)
 	    {
-	    status = nc_open(mb_io_ptr->file, 
-				NC_NOWRITE, 
+	    status = nc_open(mb_io_ptr->file,
+				NC_NOWRITE,
 				(int *) &(mb_io_ptr->ncid));
 	    if (status == 0)
 		{
@@ -688,7 +720,7 @@ int mb_read_init(int verbose, char *file,
 		*error = MB_ERROR_OPEN_FAIL;
 		}
 	    }
-	    
+
 	/* else handle surf files to be opened with libsapi */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_SURF)
 	    {
@@ -737,11 +769,11 @@ int mb_read_init(int verbose, char *file,
 		*error = MB_ERROR_OPEN_FAIL;
 		}
 	    }
-	    
+
 	/* else handle segy files to be opened with mb_segy */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_SEGY)
 	    {
-	    status = mb_segy_read_init(verbose, mb_io_ptr->file, 
+	    status = mb_segy_read_init(verbose, mb_io_ptr->file,
 		(void **)&(mb_io_ptr->mbfp), NULL, NULL, error);
 	    if (status != MB_SUCCESS)
 		{
@@ -875,17 +907,17 @@ int mb_read_init(int verbose, char *file,
 		mb_io_ptr->altitude_time_d[i] = 0.0;
 		mb_io_ptr->altitude_altitude[i] = 0.0;
 		}
-		
+
 	/* initialize notices */
 	for (i=0;i<MB_NOTICE_MAX;i++)
 		mb_io_ptr->notice_list[i] = 0;
-		
+
 	/* check for projection specification file */
 	sprintf(prjfile, "%s.prj", file);
 	if ((pfp = fopen(prjfile, "r")) != NULL)
 		{
 		fscanf(pfp,"%s", projection_id);
-		proj_status = mb_proj_init(verbose,projection_id, 
+		proj_status = mb_proj_init(verbose,projection_id,
 			&(mb_io_ptr->pjptr), error);
 		if (proj_status == MB_SUCCESS)
 			{
@@ -917,14 +949,14 @@ int mb_read_init(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbio_ptr:   %lu\n",(size_t)*mbio_ptr);
 		fprintf(stderr,"dbg2       ->numfile:  %d\n",mb_io_ptr->numfile);
 		fprintf(stderr,"dbg2       ->file:     %s\n",mb_io_ptr->file);
-		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2) 
+		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
 		    fprintf(stderr,"dbg2       ->file2:    %s\n",mb_io_ptr->file2);
-		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3) 
+		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3)
 		    fprintf(stderr,"dbg2       ->file3:    %s\n",mb_io_ptr->file3);
 		fprintf(stderr,"dbg2       ->mbfp:     %lu\n",(size_t)mb_io_ptr->mbfp);
-		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2) 
+		if (mb_io_ptr->numfile >= 2 || mb_io_ptr->numfile <= -2)
 		    fprintf(stderr,"dbg2       ->mbfp2:    %lu\n",(size_t)mb_io_ptr->mbfp2);
-		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3) 
+		if (mb_io_ptr->numfile >= 3 || mb_io_ptr->numfile <= -3)
 		    fprintf(stderr,"dbg2       ->mbfp3:    %lu\n",(size_t)mb_io_ptr->mbfp3);
 		fprintf(stderr,"dbg2       btime_d:    %f\n",*btime_d);
 		fprintf(stderr,"dbg2       etime_d:    %f\n",*etime_d);

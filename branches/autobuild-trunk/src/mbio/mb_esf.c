@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_esf.c	4/10/2003
- *    $Id: mb_esf.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_esf.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2003-2011 by
+ *    Copyright (c) 2003-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -87,12 +87,12 @@
 #include "mb_swap.h"
 
 /* local prototypes */
-void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t size, 
+void mb_mergesort_setup(u_char *list1, u_char *list2, size_t n, size_t size, 
 	int (*cmp) (void *, void *));
-void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size, 
+void mb_mergesort_insertionsort(u_char *a, size_t n, size_t size, 
 	int (*cmp)(void *, void *));
 
-static char rcs_id[]="$Id: mb_esf.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mb_esf.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 /* 	function mb_esf_check checks for an existing esf file. */
@@ -878,7 +878,7 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
  */
 
 #define ISIZE sizeof(int)
-#define PSIZE sizeof(mb_u_char *)
+#define PSIZE sizeof(u_char *)
 #define ICOPY_LIST(src, dst, last)				\
 	do							\
 	*(int*)dst = *(int*)src, src += ISIZE, dst += ISIZE;	\
@@ -903,9 +903,9 @@ int mb_esf_close(int verbose, struct mb_esf_struct *esf, int *error)
  * boundaries.
  */
 /* Assumption: PSIZE is a power of 2. */
-#define EVAL(p) (mb_u_char **)						\
-	((mb_u_char *)0 +							\
-	    (((mb_u_char *)p + PSIZE - 1 - (mb_u_char *) 0) & ~(PSIZE - 1)))
+#define EVAL(p) (u_char **)						\
+	((u_char *)0 +							\
+	    (((u_char *)p + PSIZE - 1 - (u_char *) 0) & ~(PSIZE - 1)))
 
 /*
  * Arguments are as for qsort.
@@ -915,8 +915,8 @@ int mb_mergesort(void *base, size_t nmemb,register size_t size,
 {
 	register int i, sense;
 	int big, iflag;
-	register mb_u_char *f1, *f2, *t, *b, *tp2, *q, *l1, *l2;
-	mb_u_char *list2, *list1, *p2, *p, *last, **p1;
+	register u_char *f1, *f2, *t, *b, *tp2, *q, *l1, *l2;
+	u_char *list2, *list1, *p2, *p, *last, **p1;
 
 	if (size < PSIZE / 2) {		/* Pointers must fit into 2 * size. */
 		/*errno = EINVAL;*/
@@ -931,7 +931,7 @@ int mb_mergesort(void *base, size_t nmemb,register size_t size,
 	if (!(size % ISIZE) && !(((char *)base - (char *)0) % ISIZE))
 		iflag = 1;
 
-	if ((list2 = (mb_u_char *) malloc(nmemb * size + PSIZE)) == NULL)
+	if ((list2 = (u_char *) malloc(nmemb * size + PSIZE)) == NULL)
 		return (-1);
 
 	list1 = base;
@@ -1066,16 +1066,16 @@ COPY:	    			b = t;
  * when THRESHOLD/2 pairs compare with same sense.  (Only used when NATURAL
  * is defined.  Otherwise simple pairwise merging is used.)
  */
-void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t size, 
+void mb_mergesort_setup(u_char *list1, u_char *list2, size_t n, size_t size, 
 	int (*cmp) (void *, void *))
 {
 	int i, length, size2, tmp, sense;
-	mb_u_char *f1, *f2, *s, *l2, *last, *p2;
+	u_char *f1, *f2, *s, *l2, *last, *p2;
 
 	size2 = size*2;
 	if (n <= 5) {
 		mb_mergesort_insertionsort(list1, n, size, cmp);
-		*EVAL(list2) = (mb_u_char*) list2 + n*size;
+		*EVAL(list2) = (u_char*) list2 + n*size;
 		return;
 	}
 	/*
@@ -1137,10 +1137,10 @@ void mb_mergesort_setup(mb_u_char *list1, mb_u_char *list2, size_t n, size_t siz
  * This is to avoid out-of-bounds addresses in sorting the
  * last 4 elements.
  */
-void mb_mergesort_insertionsort(mb_u_char *a, size_t n, size_t size, 
+void mb_mergesort_insertionsort(u_char *a, size_t n, size_t size, 
 	int (*cmp)(void *, void *))
 {
-	mb_u_char *ai, *s, *t, *u, tmp;
+	u_char *ai, *s, *t, *u, tmp;
 	int i;
 
 	for (ai = a+size; --n >= 1; ai += size)

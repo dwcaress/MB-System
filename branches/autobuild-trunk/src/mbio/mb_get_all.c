@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_get_all.c	1/26/93
- *    $Id: mb_get_all.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_get_all.c 1985 2012-09-11 08:02:53Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -23,7 +23,7 @@
  * which has been initialized by mb_read_init(). Crosstrack distances
  * are not mapped into lon and lat.  The data is not averaged, and
  * values are also read into a storage data structure including
- * all possible values output by the particular multibeam system 
+ * all possible values output by the particular multibeam system
  * associated with the specified format.
  *
  * Author:	D. W. Caress
@@ -138,13 +138,13 @@
 #include "mb_io.h"
 #include "mb_define.h"
 
-static char rcs_id[]="$Id: mb_get_all.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mb_get_all.c 1985 2012-09-11 08:02:53Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		int time_i[7], double *time_d,
-		double *navlon, double *navlat, 
-		double *speed, double *heading, 
+		double *navlon, double *navlat,
+		double *speed, double *heading,
 		double *distance, double *altitude, double *sonardepth,
 		int *nbath, int *namp, int *nss,
 		char *beamflag, double *bath, double *amp,
@@ -174,6 +174,10 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 	/* get mbio and data structure descriptors */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
 	*store_ptr = mb_io_ptr->store_data;
+
+	/* reset status */
+	status = MB_SUCCESS;
+	*error = MB_ERROR_NO_ERROR;
 
 	/* print debug statements */
 	if (verbose >= 4)
@@ -216,7 +220,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 			mb_io_ptr->ss_arrays_reallocated = MB_NO;
 			}
 		}
-	
+
 	/* if survey data read into storage array */
 	if (status == MB_SUCCESS
 		&& (*kind == MB_DATA_DATA
@@ -258,22 +262,22 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		strcpy(comment,"\0");
 
 		/* get the data */
-		status = mb_extract(verbose, 
+		status = mb_extract(verbose,
 			mbio_ptr, *store_ptr, kind,
 			time_i, time_d,
 			navlon, navlat, speed, heading,
-			nbath, namp, nss, 
-			beamflag, bath, amp, bathacrosstrack, bathalongtrack, 
-			ss, ssacrosstrack, ssalongtrack, 
+			nbath, namp, nss,
+			beamflag, bath, amp, bathacrosstrack, bathalongtrack,
+			ss, ssacrosstrack, ssalongtrack,
 			comment, error);
 		if (status == MB_SUCCESS
 			&& *kind == MB_DATA_DATA)
 			{
-			status = mb_extract_altitude(verbose, 
-				mbio_ptr, *store_ptr, 
+			status = mb_extract_altitude(verbose,
+				mbio_ptr, *store_ptr,
 				kind,
-				sonardepth, 
-				altitude, 
+				sonardepth,
+				altitude,
 				error);
 			}
 		else if (status == MB_SUCCESS
@@ -282,7 +286,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 				|| *kind == MB_DATA_NAV2
 				|| *kind == MB_DATA_NAV3))
 			{
-			status = mb_extract_nav(verbose, 
+			status = mb_extract_nav(verbose,
 				mbio_ptr, *store_ptr, kind,
 				time_i, time_d,
 				navlon, navlat, speed, heading,
@@ -316,7 +320,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		}
 
 	/* if first ping read set "old" navigation values */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& (*kind == MB_DATA_DATA
 		    || *kind == MB_DATA_NAV
 		    || *kind == MB_DATA_CALIBRATE)
@@ -328,7 +332,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		}
 
 	/* if first nav read set "old" navigation values */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& (*kind == MB_DATA_NAV)
 		&& mb_io_ptr->nav_count == 1)
 		{
@@ -475,7 +479,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 			fprintf(stderr,"dbg4       status:       %d\n",status);
 			}
 		}
-		
+
 	/* else set nav values to zero */
 	else
 		{
@@ -488,30 +492,30 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		}
 
 	/* check for out of location or time bounds */
-	if (status == MB_SUCCESS 
+	if (status == MB_SUCCESS
 		&& (*kind == MB_DATA_DATA
 		    || *kind == MB_DATA_NAV
 		    || *kind == MB_DATA_CALIBRATE))
 		{
-		if (*navlon < mb_io_ptr->bounds[0] 
-			|| *navlon > mb_io_ptr->bounds[1] 
-			|| *navlat < mb_io_ptr->bounds[2] 
+		if (*navlon < mb_io_ptr->bounds[0]
+			|| *navlon > mb_io_ptr->bounds[1]
+			|| *navlat < mb_io_ptr->bounds[2]
 			|| *navlat > mb_io_ptr->bounds[3])
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_OUT_BOUNDS;
 			}
 		else if (mb_io_ptr->etime_d > mb_io_ptr->btime_d
-			&& *time_d > MB_TIME_D_UNKNOWN 
-			&& (*time_d > mb_io_ptr->etime_d 
+			&& *time_d > MB_TIME_D_UNKNOWN
+			&& (*time_d > mb_io_ptr->etime_d
 				|| *time_d < mb_io_ptr->btime_d))
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_OUT_TIME;
 			}
 		else if (mb_io_ptr->etime_d < mb_io_ptr->btime_d
-			&& *time_d > MB_TIME_D_UNKNOWN 
-			&& (*time_d > mb_io_ptr->etime_d 
+			&& *time_d > MB_TIME_D_UNKNOWN
+			&& (*time_d > mb_io_ptr->etime_d
 				&& *time_d < mb_io_ptr->btime_d))
 			{
 			status = MB_FAILURE;
@@ -520,14 +524,14 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		}
 
 	/* check for time gap */
-	if (status == MB_SUCCESS 
-		&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN 
+	if (status == MB_SUCCESS
+		&& mb_io_ptr->new_time_d > MB_TIME_D_UNKNOWN
 		&& (*kind == MB_DATA_DATA
 		    || *kind == MB_DATA_NAV
-		    || *kind == MB_DATA_CALIBRATE) 
+		    || *kind == MB_DATA_CALIBRATE)
 		&& mb_io_ptr->ping_count > 1)
 		{
-		if ((*time_d - mb_io_ptr->old_ntime_d) 
+		if ((*time_d - mb_io_ptr->old_ntime_d)
 			> 60*mb_io_ptr->timegap)
 			{
 			status = MB_FAILURE;
@@ -536,22 +540,22 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		}
 
 	/* check for less than minimum speed */
-	if ((*error == MB_ERROR_NO_ERROR 
+	if ((*error == MB_ERROR_NO_ERROR
 		|| *error == MB_ERROR_TIME_GAP)
 		&& (((*kind == MB_DATA_DATA
-			|| *kind == MB_DATA_CALIBRATE) 
+			|| *kind == MB_DATA_CALIBRATE)
 			&& mb_io_ptr->ping_count > 1)
 		    || (*kind == MB_DATA_NAV
 			&& mb_io_ptr->nav_count > 1)))
 		{
-		if (*time_d > MB_TIME_D_UNKNOWN 
+		if (*time_d > MB_TIME_D_UNKNOWN
 			&& *speed < mb_io_ptr->speedmin)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_SPEED_TOO_SMALL;
 			}
 		}
-			
+
 	/* log errors */
 	if (*error < MB_ERROR_NO_ERROR)
 		mb_notice_log_error(verbose, mbio_ptr, *error);
@@ -577,7 +581,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		}
 
 	/* reset "old" navigation values */
-	if (*error <= MB_ERROR_NO_ERROR 
+	if (*error <= MB_ERROR_NO_ERROR
 		&& *error > MB_ERROR_COMMENT
 		&& (*kind == MB_DATA_DATA
 		    || *kind == MB_DATA_CALIBRATE))
@@ -588,7 +592,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		}
 
 	/* reset "old" navigation values */
-	if (*error <= MB_ERROR_NO_ERROR 
+	if (*error <= MB_ERROR_NO_ERROR
 		&& *error > MB_ERROR_COMMENT
 		&& *kind == MB_DATA_NAV)
 		{
@@ -605,13 +609,13 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)*store_ptr);
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -630,7 +634,7 @@ int mb_get_all(int verbose, void *mbio_ptr, void **store_ptr, int *kind,
 		fprintf(stderr,"dbg2       altitude:      %f\n",*altitude);
 		fprintf(stderr,"dbg2       sonardepth:    %f\n",*sonardepth);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",*nbath);

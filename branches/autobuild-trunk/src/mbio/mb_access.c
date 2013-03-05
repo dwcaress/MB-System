@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_access.c	11/1/00
- *    $Id: mb_access.c 1907 2011-11-10 04:33:03Z caress $
+ *    $Id: mb_access.c 2004 2012-12-13 00:49:35Z caress $
 
- *    Copyright (c) 2000-2011 by
+ *    Copyright (c) 2000-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -47,7 +47,7 @@
 #include "mb_define.h"
 #include "mb_segy.h"
 
-static char rcs_id[]="$Id: mb_access.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mb_access.c 2004 2012-12-13 00:49:35Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_alloc(int verbose, void *mbio_ptr,
@@ -185,7 +185,7 @@ int mb_get_store(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mb_dimensions";
@@ -210,7 +210,7 @@ int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	if (mb_io_ptr->mb_io_extract != NULL)
 		{
 		status = (*mb_io_ptr->mb_io_dimensions)
-				(verbose, mbio_ptr, store_ptr, 
+				(verbose, mbio_ptr, store_ptr,
 				kind, nbath, namp, nss, error);
 		}
 	else
@@ -238,7 +238,7 @@ int mb_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pingnumber(int verbose, void *mbio_ptr, 
+int mb_pingnumber(int verbose, void *mbio_ptr,
 		int *pingnumber, int *error)
 {
 	char	*function_name = "mb_pingnumber";
@@ -262,7 +262,7 @@ int mb_pingnumber(int verbose, void *mbio_ptr,
 	if (mb_io_ptr->mb_io_pingnumber != NULL)
 		{
 		status = (*mb_io_ptr->mb_io_pingnumber)
-				(verbose, mbio_ptr, 
+				(verbose, mbio_ptr,
 				pingnumber, error);
 		}
 	else
@@ -288,7 +288,7 @@ int mb_pingnumber(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_segynumber(int verbose, void *mbio_ptr, 
+int mb_segynumber(int verbose, void *mbio_ptr,
 		int *line, int *shot, int *cdp, int *error)
 {
 	char	*function_name = "mb_segynumber";
@@ -312,7 +312,7 @@ int mb_segynumber(int verbose, void *mbio_ptr,
 	if (mb_io_ptr->mb_io_segynumber != NULL)
 		{
 		status = (*mb_io_ptr->mb_io_segynumber)
-				(verbose, mbio_ptr, 
+				(verbose, mbio_ptr,
 				line, shot, cdp, error);
 		}
 	else
@@ -342,7 +342,7 @@ int mb_segynumber(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_beamwidths(int verbose, void *mbio_ptr, 
+int mb_beamwidths(int verbose, void *mbio_ptr,
 		double *beamwidth_xtrack, double *beamwidth_ltrack, int *error)
 {
 	char	*function_name = "mb_beamwidths";
@@ -385,7 +385,109 @@ int mb_beamwidths(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error)
+{
+	char	*function_name = "mb_sonartype";
+	int	status = MB_SUCCESS;
+	struct mb_io_struct *mb_io_ptr;
+
+	/* print input debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> called\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Input arguments:\n");
+		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
+		fprintf(stderr,"dbg2       mb_ptr:     %lu\n",(size_t)mbio_ptr);
+		fprintf(stderr,"dbg2       store_ptr:  %lu\n",(size_t)store_ptr);
+		}
+
+	/* get mbio descriptor */
+	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
+
+	/* call the appropriate mbsys_ sonartype routine
+			mb_io_ptr->system == MB_SYS_LDEOIH
+			mb_io_ptr->system == MB_SYS_GSF
+			mb_io_ptr->system == MB_SYS_HDCS
+			mb_io_ptr->system == MB_SYS_HYSWEEP */
+	if (mb_io_ptr->mb_io_sonartype != NULL)
+		{
+		if (store_ptr == NULL)
+			store_ptr = (void *) mb_io_ptr->store_data;
+		status = (*mb_io_ptr->mb_io_sonartype)
+				(verbose, mbio_ptr, store_ptr, sonartype, error);
+		}
+
+	/* Some systems are definitively echosounders */
+	else if (mb_io_ptr->system == MB_SYS_SINGLEBEAM)
+		{
+		*sonartype = MB_SONARTYPE_ECHOSOUNDER;
+		}
+
+	/* Some systems are definitively multibeams */
+	else if (mb_io_ptr->system == MB_SYS_SB
+			|| mb_io_ptr->system == MB_SYS_HSDS
+			|| mb_io_ptr->system == MB_SYS_SB2000
+			|| mb_io_ptr->system == MB_SYS_SB2100
+			|| mb_io_ptr->system == MB_SYS_SIMRAD
+			|| mb_io_ptr->system == MB_SYS_SIMRAD2
+			|| mb_io_ptr->system == MB_SYS_SIMRAD3
+			|| mb_io_ptr->system == MB_SYS_RESON
+			|| mb_io_ptr->system == MB_SYS_RESON8K
+			|| mb_io_ptr->system == MB_SYS_ELAC
+			|| mb_io_ptr->system == MB_SYS_ELACMK2
+			|| mb_io_ptr->system == MB_SYS_HSMD
+			|| mb_io_ptr->system == MB_SYS_XSE
+			|| mb_io_ptr->system == MB_SYS_NETCDF
+			|| mb_io_ptr->system == MB_SYS_HS10
+			|| mb_io_ptr->system == MB_SYS_ATLAS
+			|| mb_io_ptr->system == MB_SYS_SURF
+			|| mb_io_ptr->system == MB_SYS_RESON7K)
+		{
+		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		}
+
+	/* Some systems are definitively sidescans */
+	else if (mb_io_ptr->system == MB_SYS_MSTIFF
+			|| mb_io_ptr->system == MB_SYS_JSTAR
+			|| mb_io_ptr->system == MB_SYS_BENTHOS
+			|| mb_io_ptr->system == MB_SYS_IMAGE83P)
+		{
+		*sonartype = MB_SONARTYPE_SIDESCAN;
+		}
+
+	/* Some systems are definitively interferometric sonars */
+	else if (mb_io_ptr->system == MB_SYS_MR1
+			|| mb_io_ptr->system == MB_SYS_MR1B
+			|| mb_io_ptr->system == MB_SYS_MR1V2001
+			|| mb_io_ptr->system == MB_SYS_DSL
+			|| mb_io_ptr->system == MB_SYS_OIC)
+		{
+		*sonartype = MB_SONARTYPE_MULTIBEAM;
+		}
+	else
+		{
+		*sonartype = MB_SONARTYPE_UNKNOWN;
+		}
+
+	/* print output debug statements */
+	if (verbose >= 2)
+		{
+		fprintf(stderr,"\ndbg2  MBIO function <%s> completed\n",function_name);
+		fprintf(stderr,"dbg2  Revision id: %s\n",rcs_id);
+		fprintf(stderr,"dbg2  Return values:\n");
+		fprintf(stderr,"dbg2       sonartype:  %d\n",*sonartype);
+		fprintf(stderr,"dbg2       error:      %d\n",*error);
+		fprintf(stderr,"dbg2  Return status:\n");
+		fprintf(stderr,"dbg2       status:     %d\n",status);
+		}
+
+	/* return status */
+	return(status);
+}
+/*--------------------------------------------------------------------*/
+int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error)
 {
 	char	*function_name = "mb_sidescantype";
@@ -436,12 +538,12 @@ int mb_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -470,12 +572,12 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	if (mb_io_ptr->mb_io_extract != NULL)
 		{
 		status = (*mb_io_ptr->mb_io_extract)
-				(verbose, mbio_ptr, store_ptr, 
+				(verbose, mbio_ptr, store_ptr,
 				kind, time_i, time_d,
 				navlon, navlat,
 				speed, heading,
 				nbath, namp, nss,
-				beamflag, bath, amp, 
+				beamflag, bath, amp,
 				bathacrosstrack, bathalongtrack,
 				ss, ssacrosstrack, ssalongtrack,
 				comment, error);
@@ -485,7 +587,7 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
 		}
-		
+
 	/* apply projection and lonflip if necessary */
 	if (status == MB_SUCCESS)
 		{
@@ -494,30 +596,30 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			{
 			easting = *navlon;
 			northing = *navlat;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr, 
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr,
 							easting, northing,
 							navlon, navlat,
 							error);
 			}
-		
+
 		/* apply lonflip */
 		if (mb_io_ptr->lonflip < 0)
 			{
-			if (*navlon > 0.) 
+			if (*navlon > 0.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < -360.)
 				*navlon = *navlon + 360.;
 			}
 		else if (mb_io_ptr->lonflip == 0)
 			{
-			if (*navlon > 180.) 
+			if (*navlon > 180.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < -180.)
 				*navlon = *navlon + 360.;
 			}
 		else
 			{
-			if (*navlon > 360.) 
+			if (*navlon > 360.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < 0.)
 				*navlon = *navlon + 360.;
@@ -532,13 +634,13 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -554,7 +656,7 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",
@@ -585,12 +687,12 @@ int mb_extract(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -630,18 +732,18 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && kind == MB_DATA_DATA)
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%d  flag:%3d  bath:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        beam:%d   amp:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,amp[i],bathacrosstrack[i],bathalongtrack[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        pixel:%d   ss:%f  acrosstrack:%f  alongtrack:%f\n",
 			i,ss[i],ssacrosstrack[i],ssalongtrack[i]);
@@ -654,7 +756,7 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-	
+
 	/* check that io arrays are large enough, allocate larger arrays if necessary */
 	if (nbath > mb_io_ptr->beams_bath_alloc
 		|| namp > mb_io_ptr->beams_amp_alloc
@@ -666,11 +768,11 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	mb_io_ptr->beams_bath_max = MAX(mb_io_ptr->beams_bath_max, nbath);
 	mb_io_ptr->beams_amp_max = MAX(mb_io_ptr->beams_amp_max, namp);
 	mb_io_ptr->pixels_ss_max = MAX(mb_io_ptr->pixels_ss_max, nss);
-		
+
 	/* apply inverse projection if required */
 	if (mb_io_ptr->projection_initialized == MB_YES)
 		{
-		mb_proj_forward(verbose, mb_io_ptr->pjptr, 
+		mb_proj_forward(verbose, mb_io_ptr->pjptr,
 						navlon, navlat,
 						&easting, &northing,
 						error);
@@ -682,12 +784,12 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (mb_io_ptr->mb_io_insert != NULL)
 		{
 		status = (*mb_io_ptr->mb_io_insert)
-				(verbose, mbio_ptr, store_ptr, 
+				(verbose, mbio_ptr, store_ptr,
 				kind, time_i, time_d,
 				navlon, navlat,
 				speed, heading,
 				nbath, namp, nss,
-				beamflag, bath, amp, 
+				beamflag, bath, amp,
 				bathacrosstrack, bathalongtrack,
 				ss, ssacrosstrack, ssalongtrack,
 				comment, error);
@@ -714,10 +816,10 @@ int mb_insert(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
-	int time_i[7], double *time_d, 
+	int time_i[7], double *time_d,
 	double *navlon, double *navlat,
-	double *speed, double *heading, double *draft, 
-	double *roll, double *pitch, double *heave, 
+	double *speed, double *heading, double *draft,
+	double *roll, double *pitch, double *heave,
 	int *error)
 {
 	char	*function_name = "mb_extract_nav";
@@ -747,7 +849,7 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 				kind,time_i,time_d,
 				navlon,navlat,
 				speed,heading,draft,
-				roll,pitch,heave, 
+				roll,pitch,heave,
 				error);
 		}
 	else
@@ -755,7 +857,7 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
 		}
-		
+
 	/* apply projection and lonflip if necessary */
 	if (status == MB_SUCCESS)
 		{
@@ -764,30 +866,30 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 			{
 			easting = *navlon;
 			northing = *navlat;
-			mb_proj_inverse(verbose, mb_io_ptr->pjptr, 
+			mb_proj_inverse(verbose, mb_io_ptr->pjptr,
 							easting, northing,
 							navlon, navlat,
 							error);
 			}
-		
+
 		/* apply lonflip */
 		if (mb_io_ptr->lonflip < 0)
 			{
-			if (*navlon > 0.) 
+			if (*navlon > 0.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < -360.)
 				*navlon = *navlon + 360.;
 			}
 		else if (mb_io_ptr->lonflip == 0)
 			{
-			if (*navlon > 180.) 
+			if (*navlon > 180.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < -180.)
 				*navlon = *navlon + 360.;
 			}
 		else
 			{
-			if (*navlon > 360.) 
+			if (*navlon > 360.)
 				*navlon = *navlon - 360.;
 			else if (*navlon < 0.)
 				*navlon = *navlon + 360.;
@@ -826,12 +928,12 @@ int mb_extract_nav(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr, 
+int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 	int nmax, int *kind, int *n,
-	int *time_i, double *time_d, 
+	int *time_i, double *time_d,
 	double *navlon, double *navlat,
-	double *speed, double *heading, double *draft, 
-	double *roll, double *pitch, double *heave, 
+	double *speed, double *heading, double *draft,
+	double *roll, double *pitch, double *heave,
 	int *error)
 {
 	char	*function_name = "mb_extract_nnav";
@@ -863,7 +965,7 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 				time_i,time_d,
 				navlon,navlat,
 				speed,heading,draft,
-				roll,pitch,heave, 
+				roll,pitch,heave,
 				error);
 		}
 	else if (mb_io_ptr->mb_io_extract_nav != NULL)
@@ -873,7 +975,7 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 				kind,time_i,time_d,
 				navlon,navlat,
 				speed,heading,draft,
-				roll,pitch,heave, 
+				roll,pitch,heave,
 				error);
 		if (status == MB_SUCCESS)
 			*n = 1;
@@ -886,16 +988,16 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		status = MB_FAILURE;
 		*error = MB_ERROR_BAD_SYSTEM;
 		}
-		
+
 	/* if call was made for an unsupported record type ("kind") then try to get the
-		values out of the asynchronous data interpolation buffers 
+		values out of the asynchronous data interpolation buffers
 		The time stamp must be sensible for this to work. */
 	if (status == MB_FAILURE && *error == MB_ERROR_OTHER && *time_d > 0.0)
 		{
 		/* reset status */
 		status = MB_SUCCESS;
 		*error = MB_ERROR_NO_ERROR;
-		
+
 		/* get number of available navigation values */
 		*n = 1;
 
@@ -905,25 +1007,25 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get longitude, latitude, and speed */
 		*speed = 0.0;
 		if (status == MB_SUCCESS)
-		status = mb_navint_interp(verbose, mbio_ptr, *time_d, *heading, *speed, 
+		status = mb_navint_interp(verbose, mbio_ptr, *time_d, *heading, *speed,
 				   navlon, navlat, speed, error);
 
 		/* get roll pitch and heave */
 		if (status == MB_SUCCESS)
-		status = mb_attint_interp(verbose, mbio_ptr, *time_d,  
+		status = mb_attint_interp(verbose, mbio_ptr, *time_d,
 				    &(heave[0]), &(roll[0]), &(pitch[0]), error);
 
 		/* get draft  */
 		if (status == MB_SUCCESS)
-		status = mb_depint_interp(verbose, mbio_ptr, *time_d,  
+		status = mb_depint_interp(verbose, mbio_ptr, *time_d,
 				    draft, error);
 
 		/* get roll pitch and heave */
 		if (status == MB_SUCCESS)
-		status = mb_attint_interp(verbose, mbio_ptr, *time_d,  
+		status = mb_attint_interp(verbose, mbio_ptr, *time_d,
 				    heave, roll, pitch, error);
 		}
-		
+
 	/* apply projection and lonflip if necessary */
 	if (status == MB_SUCCESS)
 		{
@@ -934,7 +1036,7 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 				{
 				easting = navlon[inav];
 				northing = navlat[inav];
-				mb_proj_inverse(verbose, mb_io_ptr->pjptr, 
+				mb_proj_inverse(verbose, mb_io_ptr->pjptr,
 								easting, northing,
 								&(navlon[inav]), &(navlat[inav]),
 								error);
@@ -943,21 +1045,21 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 			/* apply lonflip */
 			if (mb_io_ptr->lonflip < 0)
 				{
-				if (navlon[inav] > 0.) 
+				if (navlon[inav] > 0.)
 					navlon[inav] = navlon[inav] - 360.;
 				else if (navlon[inav] < -360.)
 					navlon[inav] = navlon[inav] + 360.;
 				}
 			else if (mb_io_ptr->lonflip == 0)
 				{
-				if (navlon[inav] > 180.) 
+				if (navlon[inav] > 180.)
 					navlon[inav] = navlon[inav] - 360.;
 				else if (navlon[inav] < -180.)
 					navlon[inav] = navlon[inav] + 360.;
 				}
 			else
 				{
-				if (navlon[inav] > 360.) 
+				if (navlon[inav] > 360.)
 					navlon[inav] = navlon[inav] - 360.;
 				else if (navlon[inav] < 0.)
 					navlon[inav] = navlon[inav] + 360.;
@@ -997,10 +1099,10 @@ int mb_extract_nnav(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
-	int time_i[7], double time_d, 
+	int time_i[7], double time_d,
 	double navlon, double navlat,
-	double speed, double heading, double draft, 
-	double roll, double pitch, double heave, 
+	double speed, double heading, double draft,
+	double roll, double pitch, double heave,
 	int *error)
 {
 	char	*function_name = "mb_insert_nav";
@@ -1037,11 +1139,11 @@ int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 	/* get mbio descriptor */
 	mb_io_ptr = (struct mb_io_struct *) mbio_ptr;
-		
+
 	/* apply inverse projection if required */
 	if (mb_io_ptr->projection_initialized == MB_YES)
 		{
-		mb_proj_forward(verbose, mb_io_ptr->pjptr, 
+		mb_proj_forward(verbose, mb_io_ptr->pjptr,
 						navlon, navlat,
 						&easting, &northing,
 						error);
@@ -1057,7 +1159,7 @@ int mb_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 				time_i,time_d,
 				navlon,navlat,
 				speed,heading,draft,
-				roll,pitch,heave, 
+				roll,pitch,heave,
 				error);
 		}
 	else
@@ -1300,34 +1402,34 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 /*
- * mb_ttimes() calls the appropriate mbsys_ routine for 
+ * mb_ttimes() calls the appropriate mbsys_ routine for
  * extracting travel times and  beam angles from
  * a stored survey data ping.
- * 
+ *
  * The coordinates of the beam angles can be a bit confusing.
  * The angles are returned in "takeoff angle coordinates"
  * appropriate for raytracing. The array angles contains the
  * angle from vertical (theta below) and the array angles_forward
- * contains the angle from acrosstrack (phi below). This 
+ * contains the angle from acrosstrack (phi below). This
  * coordinate system is distinct from the roll-pitch coordinates
  * appropriate for correcting roll and pitch values. The following
  * is a description of these relevent coordinate systems:
- * 
+ *
  * Notes on Coordinate Systems used in MB-System
- * 
+ *
  * David W. Caress
  * April 22, 1996
  * R/V Maurice Ewing, EW9602
- * 
+ *
  * I. Introduction
  * ---------------
  * The coordinate systems described below are used
  * within MB-System for calculations involving
  * the location in space of depth, amplitude, or
  * sidescan data. In all cases the origin of the
- * coordinate system is at the center of the sonar 
+ * coordinate system is at the center of the sonar
  * transducers.
- * 
+ *
  * II. Cartesian Coordinates
  * -------------------------
  * The cartesian coordinate system used in MB-System
@@ -1339,22 +1441,22 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
  * (to the right if facing forward), the y-axis is
  * fore-aft with positive forward, and the z-axis is
  * positive down.
- * 
+ *
  * III. Spherical Coordinates
  * --------------------------
- * There are two non-traditional spherical coordinate 
- * systems used in MB-System. The first, referred to here 
+ * There are two non-traditional spherical coordinate
+ * systems used in MB-System. The first, referred to here
  * as takeoff angle coordinates, is useful for raytracing.
- * The second, referred to here as roll-pitch 
- * coordinates, is useful for taking account of 
+ * The second, referred to here as roll-pitch
+ * coordinates, is useful for taking account of
  * corrections to roll and pitch angles.
- * 
+ *
  * 1. Takeoff Angle Coordinates
  * ----------------------------
  * The three parameters are r, theta, and phi, where
  * r is the distance from the origin, theta is the
- * angle from vertical down (that is, from the 
- * positive z-axis), and phi is the angle from 
+ * angle from vertical down (that is, from the
+ * positive z-axis), and phi is the angle from
  * acrosstrack (the positive x-axis) in the x-y plane.
  * Note that theta is always positive; the direction
  * in the x-y plane is given by phi.
@@ -1362,14 +1464,14 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
  * the ray takeoff angle is just theta. However,
  * applying roll or pitch corrections is complicated because
  * roll and pitch have components in both theta and phi.
- * 
+ *
  * 	0 <= theta <= PI/2
  * 	-PI/2 <= phi <= 3*PI/2
- * 
- * 	x = r * SIN(theta) * COS(phi) 
+ *
+ * 	x = r * SIN(theta) * COS(phi)
  * 	y = r * SIN(theta) * SIN(phi)
- * 	z = r * COS(theta) 
- * 	
+ * 	z = r * COS(theta)
+ *
  * 	theta = 0    ---> vertical, along positive z-axis
  * 	theta = PI/2 ---> horizontal, in x-y plane
  * 	phi = -PI/2  ---> aft, in y-z plane with y negative
@@ -1377,102 +1479,102 @@ int mb_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
  * 	phi = PI/2   ---> forward, in y-z plane with y positive
  * 	phi = PI     ---> starboard, in x-z plane with x negative
  * 	phi = 3*PI/2 ---> aft, in y-z plane with y negative
- * 
+ *
  * 2. Roll-Pitch Coordinates
  * -------------------------
  * The three parameters are r, alpha, and beta, where
- * r is the distance from the origin, alpha is the angle 
+ * r is the distance from the origin, alpha is the angle
  * forward (effectively pitch angle), and beta is the
  * angle from horizontal in the x-z plane (effectively
- * roll angle). Applying a roll or pitch correction is 
- * simple in these coordinates because pitch is just alpha 
- * and roll is just beta. However, raytracing is complicated 
- * because deflection from vertical has components in both 
+ * roll angle). Applying a roll or pitch correction is
+ * simple in these coordinates because pitch is just alpha
+ * and roll is just beta. However, raytracing is complicated
+ * because deflection from vertical has components in both
  * alpha and beta.
- * 
+ *
  * 	-PI/2 <= alpha <= PI/2
  * 	0 <= beta <= PI
- * 	
- * 	x = r * COS(alpha) * COS(beta) 
+ *
+ * 	x = r * COS(alpha) * COS(beta)
  * 	y = r * SIN(alpha)
- * 	z = r * COS(alpha) * SIN(beta) 
- * 	
+ * 	z = r * COS(alpha) * SIN(beta)
+ *
  * 	alpha = -PI/2 ---> horizontal, in x-y plane with y negative
  * 	alpha = 0     ---> ship level, zero pitch, in x-z plane
  * 	alpha = PI/2  ---> horizontal, in x-y plane with y positive
  * 	beta = 0      ---> starboard, along positive x-axis
  * 	beta = PI/2   ---> in y-z plane rotated by alpha
  * 	beta = PI     ---> port, along negative x-axis
- * 
+ *
  * IV. SeaBeam Coordinates
  * ----------------------
  * The per-beam parameters in the SB2100 data format include
  * angle-from-vertical and angle-forward. Angle-from-vertical
  * is the same as theta except that it is signed based on
- * the acrosstrack direction (positive to starboard, negative 
- * to port). The angle-forward values are also defined 
- * slightly differently from phi, in that angle-forward is 
- * signed differently on the port and starboard sides. The 
- * SeaBeam 2100 External Interface Specifications document 
- * includes both discussion and figures illustrating the 
+ * the acrosstrack direction (positive to starboard, negative
+ * to port). The angle-forward values are also defined
+ * slightly differently from phi, in that angle-forward is
+ * signed differently on the port and starboard sides. The
+ * SeaBeam 2100 External Interface Specifications document
+ * includes both discussion and figures illustrating the
  * angle-forward value. To summarize:
- * 
+ *
  *     Port:
- *     
+ *
  * 	theta = absolute value of angle-from-vertical
- * 	
- * 	-PI/2 <= phi <= PI/2  
- * 	is equivalent to 
+ *
+ * 	-PI/2 <= phi <= PI/2
+ * 	is equivalent to
  * 	-PI/2 <= angle-forward <= PI/2
- * 	
+ *
  * 	phi = -PI/2 ---> angle-forward = -PI/2 (aft)
  * 	phi = 0     ---> angle-forward = 0     (starboard)
  * 	phi = PI/2  ---> angle-forward = PI/2  (forward)
- * 
+ *
  *     Starboard:
- * 	
+ *
  * 	theta = angle-from-vertical
- *     
- * 	PI/2 <= phi <= 3*PI/2 
- * 	is equivalent to 
+ *
+ * 	PI/2 <= phi <= 3*PI/2
+ * 	is equivalent to
  * 	-PI/2 <= angle-forward <= PI/2
- * 	
+ *
  * 	phi = PI/2   ---> angle-forward = -PI/2 (forward)
  * 	phi = PI     ---> angle-forward = 0     (port)
  * 	phi = 3*PI/2 ---> angle-forward = PI/2  (aft)
- * 
+ *
  * V. Usage of Coordinate Systems in MB-System
  * ------------------------------------------
  * Some sonar data formats provide angle values along with
- * travel times. The angles are converted to takoff-angle 
- * coordinates regardless of the  storage form of the 
+ * travel times. The angles are converted to takoff-angle
+ * coordinates regardless of the  storage form of the
  * particular data format. Currently, most data formats
  * do not contain an alongtrack component to the position
  * values; in these cases the conversion is trivial since
- * phi = beta = 0 and theta = alpha. The angle and travel time 
+ * phi = beta = 0 and theta = alpha. The angle and travel time
  * values can be accessed using the MBIO function mb_ttimes.
  * All angle values passed by MB-System functions are in
  * degrees rather than radians.
- * 
+ *
  * The programs mbbath and mbvelocitytool use angles in
  * take-off angle coordinates to do the raytracing. If roll
  * and/or pitch corrections are to be made, the angles are
  * converted to roll-pitch coordinates, corrected, and then
  * converted back prior to raytracing.
- * 
+ *
  * The SeaBeam patch test tool SeaPatch calculates angles
  * in roll-pitch coordinates from the initial bathymetry
  * and then applies whatever roll and pitch corrections are
  * set interactively by the user.
- * 
+ *
 *
  */
 /*--------------------------------------------------------------------*/
 int mb_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double	*angles, 
+	double *ttimes, double	*angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mb_ttimes";
@@ -1663,7 +1765,7 @@ int mb_pulses(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_gains(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transmit_gain, double *pulse_length, 
+	int *kind, double *transmit_gain, double *pulse_length,
 	double *receive_gain, int *error)
 {
 	char	*function_name = "mb_gains";
@@ -1725,9 +1827,9 @@ int mb_gains(int verbose, void *mbio_ptr, void *store_ptr,
 int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
 		int *nrawss,
-		double *rawss, 
-		double *rawssacrosstrack, 
-		double *rawssalongtrack, 
+		double *rawss,
+		double *rawssacrosstrack,
+		double *rawssalongtrack,
 		int *error)
 {
 	char	*function_name = "mb_extract_rawss";
@@ -1786,9 +1888,9 @@ int mb_extract_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 		int nrawss,
-		double *rawss, 
-		double *rawssacrosstrack, 
-		double *rawssalongtrack, 
+		double *rawss,
+		double *rawssacrosstrack,
+		double *rawssalongtrack,
 		int *error)
 {
 	char	*function_name = "mb_insert_rawss";
@@ -1846,7 +1948,7 @@ int mb_insert_rawss(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
-		void *segytraceheader_ptr, 
+		void *segytraceheader_ptr,
 		int *error)
 {
 	char	*function_name = "mb_extract_segytraceheader";
@@ -1953,10 +2055,10 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy2:            %f\n",mb_segytraceheader_ptr->dummy2);
 		fprintf(stderr,"dbg2       dummy3:            %f\n",mb_segytraceheader_ptr->dummy3);
 		fprintf(stderr,"dbg2       dummy4:            %f\n",mb_segytraceheader_ptr->dummy4);
-		fprintf(stderr,"dbg2       dummy5:            %f\n",mb_segytraceheader_ptr->dummy5);
-		fprintf(stderr,"dbg2       dummy6:            %f\n",mb_segytraceheader_ptr->dummy6);
-		fprintf(stderr,"dbg2       dummy7:            %f\n",mb_segytraceheader_ptr->dummy7);
-		fprintf(stderr,"dbg2       dummy8:            %f\n",mb_segytraceheader_ptr->dummy8);
+		fprintf(stderr,"dbg2       soundspeed:        %f\n",mb_segytraceheader_ptr->soundspeed);
+		fprintf(stderr,"dbg2       distance:          %f\n",mb_segytraceheader_ptr->distance);
+		fprintf(stderr,"dbg2       dummy7:            %f\n",mb_segytraceheader_ptr->roll);
+		fprintf(stderr,"dbg2       dummy8:            %f\n",mb_segytraceheader_ptr->pitch);
 		fprintf(stderr,"dbg2       heading:           %f\n",mb_segytraceheader_ptr->heading);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -1970,8 +2072,8 @@ int mb_extract_segytraceheader(int verbose, void *mbio_ptr, void *store_ptr,
 int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sampleformat,
 		int *kind,
-		void *segytraceheader_ptr, 
-		float *segydata, 
+		void *segytraceheader_ptr,
+		float *segydata,
 		int *error)
 {
 	char	*function_name = "mb_extract_segy";
@@ -2080,10 +2182,10 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy2:         %f\n",mb_segytraceheader_ptr->dummy2);
 		fprintf(stderr,"dbg2       dummy3:         %f\n",mb_segytraceheader_ptr->dummy3);
 		fprintf(stderr,"dbg2       dummy4:         %f\n",mb_segytraceheader_ptr->dummy4);
-		fprintf(stderr,"dbg2       dummy5:         %f\n",mb_segytraceheader_ptr->dummy5);
-		fprintf(stderr,"dbg2       dummy6:         %f\n",mb_segytraceheader_ptr->dummy6);
-		fprintf(stderr,"dbg2       dummy7:         %f\n",mb_segytraceheader_ptr->dummy7);
-		fprintf(stderr,"dbg2       dummy8:         %f\n",mb_segytraceheader_ptr->dummy8);
+		fprintf(stderr,"dbg2       soundspeed:     %f\n",mb_segytraceheader_ptr->soundspeed);
+		fprintf(stderr,"dbg2       distance:       %f\n",mb_segytraceheader_ptr->distance);
+		fprintf(stderr,"dbg2       dummy7:         %f\n",mb_segytraceheader_ptr->roll);
+		fprintf(stderr,"dbg2       dummy8:         %f\n",mb_segytraceheader_ptr->pitch);
 		fprintf(stderr,"dbg2       heading:        %f\n",mb_segytraceheader_ptr->heading);
 		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
 		    fprintf(stderr,"dbg2       sample:%d  data:%f\n", i, segydata[i]);
@@ -2098,8 +2200,8 @@ int mb_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind,
-		void *segytraceheader_ptr, 
-		float *segydata, 
+		void *segytraceheader_ptr,
+		float *segydata,
 		int *error)
 {
 	char	*function_name = "mb_insert_segy";
@@ -2180,10 +2282,10 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy2:         %f\n",mb_segytraceheader_ptr->dummy2);
 		fprintf(stderr,"dbg2       dummy3:         %f\n",mb_segytraceheader_ptr->dummy3);
 		fprintf(stderr,"dbg2       dummy4:         %f\n",mb_segytraceheader_ptr->dummy4);
-		fprintf(stderr,"dbg2       dummy5:         %f\n",mb_segytraceheader_ptr->dummy5);
-		fprintf(stderr,"dbg2       dummy6:         %f\n",mb_segytraceheader_ptr->dummy6);
-		fprintf(stderr,"dbg2       dummy7:         %f\n",mb_segytraceheader_ptr->dummy7);
-		fprintf(stderr,"dbg2       dummy8:         %f\n",mb_segytraceheader_ptr->dummy8);
+		fprintf(stderr,"dbg2       soundspeed:     %f\n",mb_segytraceheader_ptr->soundspeed);
+		fprintf(stderr,"dbg2       distance:       %f\n",mb_segytraceheader_ptr->distance);
+		fprintf(stderr,"dbg2       roll:           %f\n",mb_segytraceheader_ptr->roll);
+		fprintf(stderr,"dbg2       pitch:          %f\n",mb_segytraceheader_ptr->pitch);
 		fprintf(stderr,"dbg2       heading:        %f\n",mb_segytraceheader_ptr->heading);
 		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
 		    fprintf(stderr,"dbg2       sample:%d  data:%f\n", i, segydata[i]);
@@ -2223,8 +2325,8 @@ int mb_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, int *nctd, double *time_d, 
-	double *conductivity, double *temperature, 
+	int *kind, int *nctd, double *time_d,
+	double *conductivity, double *temperature,
 	double *depth, double *salinity, double *soundspeed, int *error)
 {
 	char	*function_name = "mb_ctd";
@@ -2295,12 +2397,12 @@ int mb_ctd(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, int *nsensor, double *time_d, 
-	double *sensor1, double *sensor2, double *sensor3, 
-	double *sensor4, double *sensor5, double *sensor6, 
+	int *kind, int *nsensor, double *time_d,
+	double *sensor1, double *sensor2, double *sensor3,
+	double *sensor4, double *sensor5, double *sensor6,
 	double *sensor7, double *sensor8, int *error)
 {
-	char	*function_name = "mb_ctd";
+	char	*function_name = "mb_ancilliarysensor";
 	int	status;
 	struct mb_io_struct *mb_io_ptr;
 	int	i;
@@ -2332,8 +2434,7 @@ int mb_ancilliarysensor(int verbose, void *mbio_ptr, void *store_ptr,
 		}
 	else
 		{
-		status = MB_FAILURE;
-		*error = MB_ERROR_BAD_SYSTEM;
+		*nsensor = 0;
 		}
 
 	/* print output debug statements */

@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_segy.c	5/25/2004
- *    $Id: mb_segy.c 1901 2011-07-15 08:26:03Z caress $
+ *    $Id: mb_segy.c 1942 2012-03-16 19:20:44Z caress $
  *
- *    Copyright (c) 2004-2011 by
+ *    Copyright (c) 2004-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -67,12 +67,12 @@
 #include "mb_segy.h"
 #include "mb_swap.h"
 
-static char rcs_id[]="$Id: mb_segy.c 1901 2011-07-15 08:26:03Z caress $";
+static char rcs_id[]="$Id: mb_segy.c 1942 2012-03-16 19:20:44Z caress $";
 
 /*--------------------------------------------------------------------*/
-/* 	function mb_segy_read_init opens an existing segy file for 
+/* 	function mb_segy_read_init opens an existing segy file for
 	reading. The file headers are returned */
-int mb_segy_read_init(int verbose, char *segyfile, 
+int mb_segy_read_init(int verbose, char *segyfile,
 		void **mbsegyio_ptr,
 		struct mb_segyasciiheader_struct *segyasciiheader,
 		struct mb_segyfileheader_struct *segyfileheader,
@@ -109,7 +109,7 @@ int mb_segy_read_init(int verbose, char *segyfile,
 
 		/* zero the structure */
 		memset(mb_segyio_ptr, 0, sizeof(struct mb_segyio_struct));
-		
+
 		/* allocate buffer memory */
 		status = mb_mallocd(verbose,__FILE__, __LINE__, MB_SEGY_FILEHEADER_LENGTH,
 				(void **)&(mb_segyio_ptr->buffer),error);
@@ -117,7 +117,7 @@ int mb_segy_read_init(int verbose, char *segyfile,
 			mb_segyio_ptr->bufferalloc = MB_SEGY_FILEHEADER_LENGTH;
 		else
 			mb_segyio_ptr->bufferalloc = 0;
-			
+
 		/* set local pointers */
 		asciiheader = &(mb_segyio_ptr->asciiheader);
 		fileheader = &(mb_segyio_ptr->fileheader);
@@ -134,7 +134,7 @@ int mb_segy_read_init(int verbose, char *segyfile,
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open segy file %s\n", mb_segyio_ptr->segyfile);
 			}
-			
+
 		/* set asciiheader and fileheader flags */
 		mb_segyio_ptr->asciiheader_set = MB_NO;
 		mb_segyio_ptr->fileheader_set = MB_NO;
@@ -144,7 +144,7 @@ int mb_segy_read_init(int verbose, char *segyfile,
 	if (status == MB_SUCCESS)
 		{
 		/* read ascii header */
-		if (fread((char *) asciiheader,1,MB_SEGY_ASCIIHEADER_LENGTH,mb_segyio_ptr->fp) 
+		if (fread((char *) asciiheader,1,MB_SEGY_ASCIIHEADER_LENGTH,mb_segyio_ptr->fp)
 					!= MB_SEGY_ASCIIHEADER_LENGTH)
 			{
 			status = MB_FAILURE;
@@ -154,7 +154,7 @@ int mb_segy_read_init(int verbose, char *segyfile,
 			mb_segyio_ptr->asciiheader_set = MB_YES;
 
 		/* read file header */
-		if (fread(mb_segyio_ptr->buffer,1,MB_SEGY_FILEHEADER_LENGTH,mb_segyio_ptr->fp) 
+		if (fread(mb_segyio_ptr->buffer,1,MB_SEGY_FILEHEADER_LENGTH,mb_segyio_ptr->fp)
 					!= MB_SEGY_FILEHEADER_LENGTH)
 			{
 			status = MB_FAILURE;
@@ -277,9 +277,9 @@ int mb_segy_read_init(int verbose, char *segyfile,
 }
 
 /*--------------------------------------------------------------------*/
-/* 	function mb_segy_write_init opens a new segy file for 
+/* 	function mb_segy_write_init opens a new segy file for
 	writing. The file headers are inserted. */
-int mb_segy_write_init(int verbose, char *segyfile, 
+int mb_segy_write_init(int verbose, char *segyfile,
 		struct mb_segyasciiheader_struct *asciiheader,
 		struct mb_segyfileheader_struct *fileheader,
 		void **mbsegyio_ptr,
@@ -355,7 +355,7 @@ int mb_segy_write_init(int verbose, char *segyfile,
 
 		/* zero the structure */
 		memset(mb_segyio_ptr, 0, sizeof(struct mb_segyio_struct));
-		
+
 		/* allocate buffer memory */
 		status = mb_mallocd(verbose,__FILE__, __LINE__, MB_SEGY_FILEHEADER_LENGTH,
 				(void **)&(mb_segyio_ptr->buffer),error);
@@ -376,7 +376,7 @@ int mb_segy_write_init(int verbose, char *segyfile,
 			status = MB_FAILURE;
 			fprintf(stderr, "\nUnable to open segy file %s\n", mb_segyio_ptr->segyfile);
 			}
-			
+
 		/* set asciiheader and fileheader flags */
 		mb_segyio_ptr->asciiheader_set = MB_NO;
 		mb_segyio_ptr->fileheader_set = MB_NO;
@@ -389,7 +389,7 @@ int mb_segy_write_init(int verbose, char *segyfile,
 		mb_segyio_ptr->asciiheader = *asciiheader;
 
 		/* if ok then write ascii header */
-		if (fwrite(asciiheader,1,MB_SEGY_ASCIIHEADER_LENGTH,mb_segyio_ptr->fp) 
+		if (fwrite(asciiheader,1,MB_SEGY_ASCIIHEADER_LENGTH,mb_segyio_ptr->fp)
 					!= MB_SEGY_ASCIIHEADER_LENGTH)
 			{
 			status = MB_FAILURE;
@@ -442,7 +442,7 @@ int mb_segy_write_init(int verbose, char *segyfile,
 			}
 
 		/* write file header */
-		if (fwrite(buffer,1,MB_SEGY_FILEHEADER_LENGTH,mb_segyio_ptr->fp) 
+		if (fwrite(buffer,1,MB_SEGY_FILEHEADER_LENGTH,mb_segyio_ptr->fp)
 					!= MB_SEGY_FILEHEADER_LENGTH)
 			{
 			status = MB_FAILURE;
@@ -468,7 +468,7 @@ int mb_segy_write_init(int verbose, char *segyfile,
 }
 
 /*--------------------------------------------------------------------*/
-/* 	function mb_segy_close closes a segy file that was opened 
+/* 	function mb_segy_close closes a segy file that was opened
 	for either reading or writing. */
 int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error)
 {
@@ -488,7 +488,7 @@ int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error)
 
 	/* get pointer to segyio structure */
 	mb_segyio_ptr = (struct mb_segyio_struct *) *mbsegyio_ptr;
-	
+
 	/* deallocate memory */
 	if (mb_segyio_ptr->bufferalloc > 0)
 		mb_freed(verbose,__FILE__, __LINE__,(void **)&(mb_segyio_ptr->buffer), error);
@@ -518,9 +518,9 @@ int mb_segy_close(int verbose,void **mbsegyio_ptr, int *error)
 /*--------------------------------------------------------------------*/
 /* 	function mb_segy_read_trace reads a trace header and the trace
 	data from an open segy file. The trace data array is passed
-	in as a handle along with the allocated memory so that 
+	in as a handle along with the allocated memory so that
 	additional memory can be allocated if necessary */
-int mb_segy_read_trace(int verbose, void *mbsegyio_ptr, 
+int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		struct mb_segytraceheader_struct *traceheaderptr,
 		float **traceptr,
 		int *error)
@@ -555,7 +555,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 	mb_segyio_ptr = (struct mb_segyio_struct *) mbsegyio_ptr;
 	fileheader = (struct mb_segyfileheader_struct *) &(mb_segyio_ptr->fileheader);
 	traceheader = (struct mb_segytraceheader_struct *) &(mb_segyio_ptr->traceheader);
-	
+
 	/* make sure there is adequate memory in the buffer */
 	if (mb_segyio_ptr->bufferalloc < MB_SEGY_TRACEHEADER_LENGTH)
 		{
@@ -567,12 +567,12 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		else
 			mb_segyio_ptr->bufferalloc = 0;
 		}
-	
+
 	/* read trace header */
 	if (status == MB_SUCCESS)
 		{
 		buffer = (char *) mb_segyio_ptr->buffer;
-		if (fread(buffer,1,MB_SEGY_TRACEHEADER_LENGTH,mb_segyio_ptr->fp) 
+		if (fread(buffer,1,MB_SEGY_TRACEHEADER_LENGTH,mb_segyio_ptr->fp)
 					!= MB_SEGY_TRACEHEADER_LENGTH)
 			{
 			status = MB_FAILURE;
@@ -648,13 +648,13 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
         	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy2)); index += 4;
         	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy3)); index += 4;
         	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy4)); index += 4;
-        	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy5)); index += 4;
-        	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy6)); index += 4;
-        	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy7)); index += 4;
-        	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->dummy8)); index += 4;
+        	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->soundspeed)); index += 4;
+        	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->distance)); index += 4;
+        	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->roll)); index += 4;
+        	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->pitch)); index += 4;
         	mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(traceheader->heading)); index += 4;
 		}
-	
+
 	/* make sure there is adequate memory */
 	if (status == MB_SUCCESS)
 		{
@@ -704,19 +704,19 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 				mb_segyio_ptr->tracealloc = 0;
 			}
 		}
-	
+
 	/* read trace */
 	if (status == MB_SUCCESS)
 		{
 		buffer = mb_segyio_ptr->buffer;
-		if (fread(buffer, 1, bytes_per_sample * traceheader->nsamps, mb_segyio_ptr->fp) 
+		if (fread(buffer, 1, bytes_per_sample * traceheader->nsamps, mb_segyio_ptr->fp)
 					!= bytes_per_sample * traceheader->nsamps)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
 		}
-	
+
 	/* extract trace data */
 	if (status == MB_SUCCESS)
 		{
@@ -726,34 +726,34 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 			{
  			if (fileheader->format == 5 || fileheader->format == 6 || fileheader->format == 1)
        				{
-				mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(trace[i])); 
+				mb_get_binary_float(MB_NO, (void *) &(buffer[index]), &(trace[i]));
 				index += bytes_per_sample;
 				}
  			else if (fileheader->format == 11)
        				{
-				mb_get_binary_float(MB_YES, (void *) &(buffer[index]), &(trace[i])); 
+				mb_get_binary_float(MB_YES, (void *) &(buffer[index]), &(trace[i]));
 				index += bytes_per_sample;
 				}
  			else if (fileheader->format == 2)
        				{
-				mb_get_binary_int(MB_NO, (void *) &(buffer[index]), &(intval)); 
+				mb_get_binary_int(MB_NO, (void *) &(buffer[index]), &(intval));
 				trace[i] = (float) intval;
 				index += bytes_per_sample;
 				}
  			else if (fileheader->format == 3)
        				{
-				mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(shortval)); 
+				mb_get_binary_short(MB_NO, (void *) &(buffer[index]), &(shortval));
 				trace[i] = (float) shortval;
 				index += bytes_per_sample;
 				}
  			else if (fileheader->format == 8)
        				{
-				trace[i] = (float) buffer[i]; 
+				trace[i] = (float) buffer[i];
 				index++;
 				}
 			}
 		}
-		
+
 	/* set return pointers */
 	if (status == MB_SUCCESS)
 		{
@@ -825,10 +825,10 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2       dummy2:        %f\n",traceheader->dummy2);
 		fprintf(stderr,"dbg2       dummy3:        %f\n",traceheader->dummy3);
 		fprintf(stderr,"dbg2       dummy4:        %f\n",traceheader->dummy4);
-		fprintf(stderr,"dbg2       dummy5:        %f\n",traceheader->dummy5);
-		fprintf(stderr,"dbg2       dummy6:        %f\n",traceheader->dummy6);
-		fprintf(stderr,"dbg2       dummy7:        %f\n",traceheader->dummy7);
-		fprintf(stderr,"dbg2       dummy8:        %f\n",traceheader->dummy8);
+		fprintf(stderr,"dbg2       soundspeed:    %f\n",traceheader->soundspeed);
+		fprintf(stderr,"dbg2       distance:      %f\n",traceheader->distance);
+		fprintf(stderr,"dbg2       roll:          %f\n",traceheader->roll);
+		fprintf(stderr,"dbg2       pitch:         %f\n",traceheader->pitch);
 		fprintf(stderr,"dbg2       heading:       %f\n",traceheader->heading);
 		for (i=0;i<traceheader->nsamps;i++)
 			fprintf(stderr,"dbg2       trace[%d]:%f\n",i,trace[i]);
@@ -844,7 +844,7 @@ int mb_segy_read_trace(int verbose, void *mbsegyio_ptr,
 /* 	function mb_segy_write_trace writes a trace header and the trace
 	data to an open segy file. The trace data array is passed
 	in as a pointer */
-int mb_segy_write_trace(int verbose, void *mbsegyio_ptr, 
+int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		struct mb_segytraceheader_struct *traceheader,
 		float *trace,
 		int *error)
@@ -933,19 +933,19 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		fprintf(stderr,"dbg2       dummy2:        %f\n",traceheader->dummy2);
 		fprintf(stderr,"dbg2       dummy3:        %f\n",traceheader->dummy3);
 		fprintf(stderr,"dbg2       dummy4:        %f\n",traceheader->dummy4);
-		fprintf(stderr,"dbg2       dummy5:        %f\n",traceheader->dummy5);
-		fprintf(stderr,"dbg2       dummy6:        %f\n",traceheader->dummy6);
-		fprintf(stderr,"dbg2       dummy7:        %f\n",traceheader->dummy7);
-		fprintf(stderr,"dbg2       dummy8:        %f\n",traceheader->dummy8);
+		fprintf(stderr,"dbg2       soundspeed:    %f\n",traceheader->soundspeed);
+		fprintf(stderr,"dbg2       distance:      %f\n",traceheader->distance);
+		fprintf(stderr,"dbg2       roll:          %f\n",traceheader->roll);
+		fprintf(stderr,"dbg2       pitch:         %f\n",traceheader->pitch);
 		fprintf(stderr,"dbg2       heading:       %f\n",traceheader->heading);
 		for (i=0;i<traceheader->nsamps;i++)
 			fprintf(stderr,"dbg2       trace[%d]:%f\n",i,trace[i]);
 		}
-		
+
 	/* if asciiheader has not yet been written, write it */
 	if (mb_segyio_ptr->asciiheader_set == MB_NO)
 		{
-		if (fwrite(asciiheader,1,MB_SEGY_ASCIIHEADER_LENGTH,mb_segyio_ptr->fp) 
+		if (fwrite(asciiheader,1,MB_SEGY_ASCIIHEADER_LENGTH,mb_segyio_ptr->fp)
 					!= MB_SEGY_ASCIIHEADER_LENGTH)
 			{
 			status = MB_FAILURE;
@@ -954,7 +954,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		else
 			mb_segyio_ptr->asciiheader_set = MB_YES;
 		}
-		
+
 	/* if fileheader has not yet been written, write it */
 	if (mb_segyio_ptr->fileheader_set == MB_NO)
 		{
@@ -1004,7 +1004,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 			{
 			buffer[index] = fileheader->extra[i]; index++;
 			}
-		if (fwrite(buffer,1,MB_SEGY_FILEHEADER_LENGTH,mb_segyio_ptr->fp) 
+		if (fwrite(buffer,1,MB_SEGY_FILEHEADER_LENGTH,mb_segyio_ptr->fp)
 					!= MB_SEGY_FILEHEADER_LENGTH)
 			{
 			status = MB_FAILURE;
@@ -1013,7 +1013,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		else
 			mb_segyio_ptr->fileheader_set = MB_YES;
 		}
-	
+
 	/* make sure there is adequate memory in the buffer */
 	if (mb_segyio_ptr->bufferalloc < MB_SEGY_TRACEHEADER_LENGTH)
 		{
@@ -1025,7 +1025,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 		else
 			mb_segyio_ptr->bufferalloc = 0;
 		}
-	
+
 	/* make sure there is adequate memory */
 	if (status == MB_SUCCESS)
 		{
@@ -1129,21 +1129,21 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
         	mb_put_binary_float(MB_NO, traceheader->dummy2, (void *) &buffer[index]); index += 4;
         	mb_put_binary_float(MB_NO, traceheader->dummy3, (void *) &buffer[index]); index += 4;
         	mb_put_binary_float(MB_NO, traceheader->dummy4, (void *) &buffer[index]); index += 4;
-        	mb_put_binary_float(MB_NO, traceheader->dummy5, (void *) &buffer[index]); index += 4;
-        	mb_put_binary_float(MB_NO, traceheader->dummy6, (void *) &buffer[index]); index += 4;
-        	mb_put_binary_float(MB_NO, traceheader->dummy7, (void *) &buffer[index]); index += 4;
-        	mb_put_binary_float(MB_NO, traceheader->dummy8, (void *) &buffer[index]); index += 4;
+        	mb_put_binary_float(MB_NO, traceheader->soundspeed, (void *) &buffer[index]); index += 4;
+        	mb_put_binary_float(MB_NO, traceheader->distance, (void *) &buffer[index]); index += 4;
+        	mb_put_binary_float(MB_NO, traceheader->roll, (void *) &buffer[index]); index += 4;
+        	mb_put_binary_float(MB_NO, traceheader->pitch, (void *) &buffer[index]); index += 4;
         	mb_put_binary_float(MB_NO, traceheader->heading, (void *) &buffer[index]); index += 4;
-	
+
 		/* write trace header */
-		if (fwrite(buffer,1,MB_SEGY_TRACEHEADER_LENGTH,mb_segyio_ptr->fp) 
+		if (fwrite(buffer,1,MB_SEGY_TRACEHEADER_LENGTH,mb_segyio_ptr->fp)
 					!= MB_SEGY_TRACEHEADER_LENGTH)
 			{
 			status = MB_FAILURE;
 			*error = MB_ERROR_EOF;
 			}
 		}
-	
+
 	/* insert trace data */
 	if (status == MB_SUCCESS)
 		{
@@ -1153,29 +1153,29 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 			{
  			if (fileheader->format == 5 || fileheader->format == 6)
        				{
-        			mb_put_binary_float(MB_NO, trace[i], (void *) &buffer[index]);  
+        			mb_put_binary_float(MB_NO, trace[i], (void *) &buffer[index]);
 				index += bytes_per_sample;
 				}
  			else if (fileheader->format == 11)
        				{
-        			mb_put_binary_float(MB_YES, trace[i], (void *) &buffer[index]);  
+        			mb_put_binary_float(MB_YES, trace[i], (void *) &buffer[index]);
 				index += bytes_per_sample;
 				}
  			else if (fileheader->format == 2)
        				{
 				intval = (int) trace[i];
-				mb_put_binary_int(MB_NO, intval, (void *) &buffer[index]); 
+				mb_put_binary_int(MB_NO, intval, (void *) &buffer[index]);
 				index += bytes_per_sample;
 				}
  			else if (fileheader->format == 3)
        				{
 				shortval = (short) trace[i];
-				mb_put_binary_short(MB_NO, shortval, (void *) &buffer[index]);  
+				mb_put_binary_short(MB_NO, shortval, (void *) &buffer[index]);
 				index += bytes_per_sample;
 				}
  			else if (fileheader->format == 8)
        				{
-				buffer[i] = (char) trace[i]; 
+				buffer[i] = (char) trace[i];
 				index++;
 				}
 			}
@@ -1183,7 +1183,7 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 
 	/* write trace */
 	if (status == MB_SUCCESS
-		&& fwrite(buffer, 1, bytes_per_sample + traceheader->nsamps, mb_segyio_ptr->fp) 
+		&& fwrite(buffer, 1, bytes_per_sample + traceheader->nsamps, mb_segyio_ptr->fp)
 				!= bytes_per_sample + traceheader->nsamps)
 		{
 		status = MB_FAILURE;
@@ -1208,10 +1208,10 @@ int mb_segy_write_trace(int verbose, void *mbsegyio_ptr,
 /* Code for numerical Hilbert Transform taken from web pages of
 	Per Stoltze:
 		http://www.aue.auc.dk/~stoltze/tools/hilbert/hilbert.htm
-	on 18 August 2004 
-   Usage: The input data are in delta and the call 
-		hilbert(n, delta, kappa) 
-	will return the Hilbert transform of delta in 
+	on 18 August 2004
+   Usage: The input data are in delta and the call
+		hilbert(n, delta, kappa)
+	will return the Hilbert transform of delta in
 	kappa. The values of n and delta are not modified.*/
 void hilbert(int n, double delta[], double kappa[])
 {
@@ -1238,13 +1238,13 @@ void hilbert(int n, double delta[], double kappa[])
 /* Code for numerical Hilbert Transform modified from web pages of
 	Per Stoltze:
 		http://www.aue.auc.dk/~stoltze/tools/hilbert/hilbert.htm
-	on 18 August 2004 
-   Usage: The input data are in even elements of data 
+	on 18 August 2004
+   Usage: The input data are in even elements of data
    		(data[0], data[2], ...data[n-2])
-	and the call 
-		hilbert2(n, data) 
-	will return the Hilbert transform of delta in 
-	the odd elements of data: 
+	and the call
+		hilbert2(n, data)
+	will return the Hilbert transform of delta in
+	the odd elements of data:
    		(data[1], data[3], ...data[n-1])
 	The values of n and even elements of data are not modified.*/
 void hilbert2(int n, double data[])
@@ -1269,4 +1269,3 @@ void hilbert2(int n, double data[])
 }
 
 /*--------------------------------------------------------------------*/
-

@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_dsl120sf.c	8/6/96
- *	$Id: mbr_dsl120sf.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbr_dsl120sf.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1996-2011 by
+ *    Copyright (c) 1996-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -138,7 +138,7 @@ int mbr_dsl120sf_wr_bathamp(int verbose, void *mbio_ptr, FILE *mbfp, int *error)
 int mbr_dsl120sf_wr_amp(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
 int mbr_dsl120sf_wr_comment(int verbose, void *mbio_ptr, FILE *mbfp, int *error);
 
-static char rcs_id[]="$Id: mbr_dsl120sf.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbr_dsl120sf.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_dsl120sf(int verbose, void *mbio_ptr, int *error)

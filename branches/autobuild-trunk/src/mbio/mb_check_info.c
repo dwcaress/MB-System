@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_check_info.c	1/25/93
- *    $Id: mb_check_info.c 1899 2011-06-24 07:52:52Z caress $
+ *    $Id: mb_check_info.c 1945 2012-05-02 19:11:42Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,11 +24,11 @@
  * output must be in an ascii file with a name consisting of the
  * data file name followed by a ".inf" suffix. If the ".inf" file
  * does not exist then the file is assumed to have data within the
- * specified bounds. 
+ * specified bounds.
  *
  * Author:	D. W. Caress
  * Date:	September 3, 1996
- * 
+ *
  * $Log: mb_check_info.c,v $
  * Revision 5.22  2009/03/02 18:51:52  caress
  * Fixed problems with formats 58 and 59, and also updated copyright dates in several source files.
@@ -136,7 +136,7 @@
 #include "mb_format.h"
 #include "mb_info.h"
 
-static char rcs_id[]="$Id: mb_check_info.c 1899 2011-06-24 07:52:52Z caress $";
+static char rcs_id[]="$Id: mb_check_info.c 1945 2012-05-02 19:11:42Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *file_in_bounds, int *error)
@@ -177,21 +177,21 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 	if (strncmp(file,stdin_string,5) == 0)
 		{
 		*file_in_bounds = MB_YES;
-		
+
 		/*print debug statements */
 		if (verbose >= 4)
 			{
 			fprintf(stderr,"dbg4  Cannot check bounds if input is stdin...\n");
 			}
 		}
-		
+
 	/* check for inf file */
 	else
 		{
 		/* get info file path */
 		strcpy(file_inf, file);
 		strcat(file_inf, ".inf");
-		
+
 		/* open if possible */
 		if ((fp = fopen(file_inf,"r")) != NULL)
 		    {
@@ -203,22 +203,22 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 		    lat_max = 0.0;
 		    mask_nx = 0;
 		    mask_ny = 0;
-		    
+
 		    /* read the inf file */
 		    while (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
 			{
 			if (strncmp(line, "Number of Records:", 18) == 0)
 			    {
-			    nscan = sscanf(line, "Number of Records: %d", 
+			    nscan = sscanf(line, "Number of Records: %d",
 					    &nrecords_read);
 			    if (nscan == 1)
 				nrecords = nrecords_read;
 			    }
 			else if (strncmp(line, "Minimum Longitude:", 18) == 0)
-			    sscanf(line, "Minimum Longitude: %lf Maximum Longitude: %lf", 
+			    sscanf(line, "Minimum Longitude: %lf Maximum Longitude: %lf",
 				    &lon_min, &lon_max);
 			else if (strncmp(line, "Minimum Latitude:", 17) == 0)
-			    sscanf(line, "Minimum Latitude: %lf Maximum Latitude: %lf", 
+			    sscanf(line, "Minimum Latitude: %lf Maximum Latitude: %lf",
 				    &lat_min, &lat_max);
 			else if (strncmp(line, "CM dimensions:", 14) == 0)
 			    {
@@ -240,12 +240,12 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 				}
 			    }
 			}
-			
+
 		    /* check bounds if there is data */
 		    if (nrecords > 0)
 			{
 			/* set lon lat min max according to lonflip */
-			if (lonflip == -1 
+			if (lonflip == -1
 			    && lon_min > 0.0)
 			    {
 			    lon_min -= 360.0;
@@ -269,11 +269,11 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 			    lon_min += 360.0;
 			    lon_max += 360.0;
 			    }
-			    
+
 			/* check for lonflip conflict with bounds */
 			if (lon_min > lon_max || lat_min > lat_max)
 			    *file_in_bounds = MB_YES;
-			    
+
 			/* else check mask against desired input bounds */
 			else if (mask_nx > 0 && mask_ny > 0)
 			    {
@@ -295,7 +295,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 				    }
 			    mb_freed(verbose,__FILE__, __LINE__,(void **) &mask, error);
 			    }
-			    
+
 			/* else check whole file against desired input bounds */
 			else
 			    {
@@ -316,33 +316,33 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
                             fprintf(stderr,"dbg4      lat_max: %f\n", lat_max);
 			    }
 			}
-			
-		    /* else if no data records in inf file 
+
+		    /* else if no data records in inf file
 			treat file as out of bounds */
 		    else if (nrecords == 0)
 			{
 			*file_in_bounds = MB_NO;
-      
+
              		/*print debug statements */
                     	if (verbose >= 4)
                         	fprintf(stderr,"dbg4  The inf file shows zero records so out of bounds...\n");
 			}
-			
+
 		    /* else if no data assume inf file is botched so
 			assume file has data in bounds */
 		    else
 			{
 			*file_in_bounds = MB_YES;
-      
+
              		/*print debug statements */
                     	if (verbose >= 4)
                         	fprintf(stderr,"dbg4  No data listed in inf file so cannot check bounds...\n");
 			}
-		    
+
 		    /* close the file */
 		    fclose(fp);
 		    }
-			
+
 		/* if no inf file assume file has data in bounds */
 		else
 		    {
@@ -351,7 +351,7 @@ int mb_check_info(int verbose, char *file, int lonflip, double bounds[4], int *f
 		    /*print debug statements */
 		    if (verbose >= 4)
                         fprintf(stderr,"dbg4  Cannot open inf file so cannot check bounds...\n");
-		    }	
+		    }
 		}
 
 	/* set error and status (if you got here you succeeded */
@@ -419,108 +419,108 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 			{
 			fprintf(stderr,"dbg2  Cannot open requested inf file: %s\n", file_inf);
 			}
-			
+
 		/* return in disgrace */
 		return(status);
 		}
-		
+
 	/* load information from inf file */
 	else
 		{
 		/* set file name */
 		strcpy(mb_info->file, file);
-		
+
 		/* read the inf file */
 		while (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
 			{
 			if (strncmp(line, "Number of Records:", 18) == 0)
 			    {
-			    nscan = sscanf(line, "Number of Records: %d", 
+			    nscan = sscanf(line, "Number of Records: %d",
 					    &mb_info->nrecords);
 			    }
 			else if (strncmp(line, "Number of Subbottom Records:", 28) == 0)
 			    {
-			    nscan = sscanf(line, "Number of Subbottom Records: %d", 
+			    nscan = sscanf(line, "Number of Subbottom Records: %d",
 					    &mb_info->nrecords_sbp);
 			    }
 			else if (strncmp(line, "Number of Secondary Sidescan Records:", 37) == 0)
 			    {
-			    nscan = sscanf(line, "Number of Secondary Sidescan Records: %d", 
+			    nscan = sscanf(line, "Number of Secondary Sidescan Records: %d",
 					    &mb_info->nrecords_ss1);
 			    }
 			else if (strncmp(line, "Number of Tertiary Sidescan Records:", 36) == 0)
 			    {
-			    nscan = sscanf(line, "Number of Tertiary Sidescan Records: %d", 
+			    nscan = sscanf(line, "Number of Tertiary Sidescan Records: %d",
 					    &mb_info->nrecords_ss2);
 			    }
 
 			else if (strncmp(line, "Bathymetry Data (", 17) == 0)
 			    {
-			    nscan = sscanf(line, "Bathymetry Data (%d beams):", 
+			    nscan = sscanf(line, "Bathymetry Data (%d beams):",
 					    &mb_info->nbeams_bath);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Beams: %d", 
+			    nscan = sscanf(line, "  Number of Beams: %d",
 					    &mb_info->nbeams_bath_total);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Good Beams: %d", 
+			    nscan = sscanf(line, "  Number of Good Beams: %d",
 					    &mb_info->nbeams_bath_good);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Zero Beams: %d", 
+			    nscan = sscanf(line, "  Number of Zero Beams: %d",
 					    &mb_info->nbeams_bath_zero);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Flagged Beams: %d", 
+			    nscan = sscanf(line, "  Number of Flagged Beams: %d",
 					    &mb_info->nbeams_bath_flagged);
 			    }
 
 			else if (strncmp(line, "Amplitude Data (", 17) == 0)
 			    {
-			    nscan = sscanf(line, "Amplitude Data (%d beams):", 
+			    nscan = sscanf(line, "Amplitude Data (%d beams):",
 					    &mb_info->nbeams_amp);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Beams: %d", 
+			    nscan = sscanf(line, "  Number of Beams: %d",
 					    &mb_info->nbeams_amp_total);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Good Beams: %d", 
+			    nscan = sscanf(line, "  Number of Good Beams: %d",
 					    &mb_info->nbeams_amp_good);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Zero Beams: %d", 
+			    nscan = sscanf(line, "  Number of Zero Beams: %d",
 					    &mb_info->nbeams_amp_zero);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Flagged Beams: %d", 
+			    nscan = sscanf(line, "  Number of Flagged Beams: %d",
 					    &mb_info->nbeams_amp_flagged);
 			    }
 
 			else if (strncmp(line, "Sidescan Data (", 15) == 0)
 			    {
-			    nscan = sscanf(line, "Sidescan Data (%d pixels):", 
+			    nscan = sscanf(line, "Sidescan Data (%d pixels):",
 					    &mb_info->npixels_ss);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Pixels: %d", 
+			    nscan = sscanf(line, "  Number of Pixels: %d",
 					    &mb_info->npixels_ss_total);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Good Pixels: %d", 
+			    nscan = sscanf(line, "  Number of Good Pixels: %d",
 					    &mb_info->npixels_ss_good);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Zero Pixels: %d", 
+			    nscan = sscanf(line, "  Number of Zero Pixels: %d",
 					    &mb_info->npixels_ss_zero);
 			    if (fgets(line, MB_PATH_MAXLINE, fp) != NULL)
-			    nscan = sscanf(line, "  Number of Flagged Pixels: %d", 
+			    nscan = sscanf(line, "  Number of Flagged Pixels: %d",
 					    &mb_info->npixels_ss_flagged);
 			    }
 
 			else if (strncmp(line, "Total Time:", 11) == 0)
 			    {
-			    nscan = sscanf(line, "Total Time: %lf hours", 
+			    nscan = sscanf(line, "Total Time: %lf hours",
 					    &mb_info->time_total);
 			    }
 			else if (strncmp(line, "Total Track Length:", 19) == 0)
 			    {
-			    nscan = sscanf(line, "Total Track Length: %lf km", 
+			    nscan = sscanf(line, "Total Track Length: %lf km",
 					    &mb_info->dist_total);
 			    }
 			else if (strncmp(line, "Average Speed:", 14) == 0)
 			    {
-			    nscan = sscanf(line, "Average Speed: %lf km/hr", 
+			    nscan = sscanf(line, "Average Speed: %lf km/hr",
 					    &mb_info->speed_avg);
 			    }
 
@@ -528,25 +528,25 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 			    {
 			    if ((startptr = fgets(line, 128, fp)) != NULL)
 				{
-			    	nscan = sscanf(line, "Time:  %d %d %d %d:%d:%d.%d  JD", 
-					    &time_i[1], &time_i[2], &time_i[0], 
+			    	nscan = sscanf(line, "Time:  %d %d %d %d:%d:%d.%d  JD",
+					    &time_i[1], &time_i[2], &time_i[0],
 					    &time_i[3], &time_i[4], &time_i[5], &time_i[6]);
 				if (nscan == 7)
 					mb_get_time(verbose, time_i, &(mb_info->time_start));
 				}
 			    if ((startptr = fgets(line, 128, fp)) != NULL)
 				{
-			    	nscan = sscanf(line, "Lon: %lf	 Lat: %lf Depth: %lf meters", 
+			    	nscan = sscanf(line, "Lon: %lf	 Lat: %lf Depth: %lf meters",
 					    &mb_info->lon_start, &mb_info->lat_start, &mb_info->depth_start);
 				}
 			    if ((startptr = fgets(line, 128, fp)) != NULL)
 				{
-			    	nscan = sscanf(line, "Speed: %lf km/hr ( %lf knots)  Heading: %lf degrees", 
+			    	nscan = sscanf(line, "Speed: %lf km/hr ( %lf knots)  Heading: %lf degrees",
 					    &mb_info->speed_start, &speedkts, &mb_info->heading_start);
 				}
 			    if ((startptr = fgets(line, 128, fp)) != NULL)
 				{
-			    	nscan = sscanf(line, "Sonar Depth:  %lf m  Sonar Altitude:   %lf m", 
+			    	nscan = sscanf(line, "Sonar Depth:  %lf m  Sonar Altitude:   %lf m",
 					    &mb_info->sonardepth_start, &mb_info->sonaraltitude_start);
 				}
 			    }
@@ -555,59 +555,59 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 			    {
 			    if ((startptr = fgets(line, 128, fp)) != NULL)
 				{
-			    	nscan = sscanf(line, "Time:  %d %d %d %d:%d:%d.%d  JD", 
-					    &time_i[1], &time_i[2], &time_i[0], 
+			    	nscan = sscanf(line, "Time:  %d %d %d %d:%d:%d.%d  JD",
+					    &time_i[1], &time_i[2], &time_i[0],
 					    &time_i[3], &time_i[4], &time_i[5], &time_i[6]);
 				if (nscan == 7)
 					mb_get_time(verbose, time_i, &(mb_info->time_end));
 				}
 			    if ((startptr = fgets(line, 128, fp)) != NULL)
 				{
-			    	nscan = sscanf(line, "Lon: %lf	 Lat: %lf Depth: %lf meters", 
+			    	nscan = sscanf(line, "Lon: %lf	 Lat: %lf Depth: %lf meters",
 					    &mb_info->lon_end, &mb_info->lat_end, &mb_info->depth_end);
 				}
 			    if ((startptr = fgets(line, 128, fp)) != NULL)
 				{
-			    	nscan = sscanf(line, "Speed: %lf km/hr ( %lf knots)  Heading: %lf degrees", 
+			    	nscan = sscanf(line, "Speed: %lf km/hr ( %lf knots)  Heading: %lf degrees",
 					    &mb_info->speed_end, &speedkts, &mb_info->heading_end);
 				}
 			    if ((startptr = fgets(line, 128, fp)) != NULL)
 				{
-			    	nscan = sscanf(line, "Sonar Depth:  %lf m  Sonar Altitude:   %lf m", 
+			    	nscan = sscanf(line, "Sonar Depth:  %lf m  Sonar Altitude:   %lf m",
 					    &mb_info->sonardepth_end, &mb_info->sonaraltitude_end);
 				}
 			    }
 
 			else if (strncmp(line, "Minimum Longitude:", 18) == 0)
-			    sscanf(line, "Minimum Longitude: %lf Maximum Longitude: %lf", 
+			    sscanf(line, "Minimum Longitude: %lf Maximum Longitude: %lf",
 				    &mb_info->lon_min, &mb_info->lon_max);
 			else if (strncmp(line, "Minimum Latitude:", 17) == 0)
-			    sscanf(line, "Minimum Latitude: %lf Maximum Latitude: %lf", 
+			    sscanf(line, "Minimum Latitude: %lf Maximum Latitude: %lf",
 				    &mb_info->lat_min, &mb_info->lat_max);
 
 			else if (strncmp(line, "Minimum Sonar Depth:", 20) == 0)
-			    sscanf(line, "Minimum Sonar Depth: %lf Maximum Sonar Depth: %lf", 
+			    sscanf(line, "Minimum Sonar Depth: %lf Maximum Sonar Depth: %lf",
 				    &mb_info->sonardepth_min, &mb_info->sonardepth_max);
 
 			else if (strncmp(line, "Minimum Altitude:", 17) == 0)
-			    sscanf(line, "Minimum Altitude: %lf Maximum Altitude: %lf", 
+			    sscanf(line, "Minimum Altitude: %lf Maximum Altitude: %lf",
 				    &mb_info->altitude_min, &mb_info->altitude_max);
 
 			else if (strncmp(line, "Minimum Depth:", 14) == 0)
-			    sscanf(line, "Minimum Depth: %lf Maximum Depth: %lf", 
+			    sscanf(line, "Minimum Depth: %lf Maximum Depth: %lf",
 				    &mb_info->depth_min, &mb_info->depth_max);
 
 			else if (strncmp(line, "Minimum Amplitude:", 18) == 0)
-			    sscanf(line, "Minimum Amplitude: %lf Maximum Amplitude: %lf", 
+			    sscanf(line, "Minimum Amplitude: %lf Maximum Amplitude: %lf",
 				    &mb_info->amp_min, &mb_info->amp_max);
 
 			else if (strncmp(line, "Minimum Sidescan:", 17) == 0)
-			    sscanf(line, "Minimum Sidescan: %lf Maximum Sidescan: %lf", 
+			    sscanf(line, "Minimum Sidescan: %lf Maximum Sidescan: %lf",
 				    &mb_info->ss_min, &mb_info->ss_max);
 
 			else if (strncmp(line, "PN:", 3) == 0)
 			    {
-			    sscanf(line, "PN: %d DATA PROBLEM (ID=%d):", 
+			    sscanf(line, "PN: %d DATA PROBLEM (ID=%d):",
 				    &nproblem,&problemid);
 			    if (problemid == MB_PROBLEM_NO_DATA)
 				mb_info->problem_nodata += nproblem;
@@ -622,7 +622,7 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 			    else if (problemid == MB_PROBLEM_BAD_DATAGRAM)
 				mb_info->problem_baddatagram += nproblem;
 			    }
-			    
+
 			else if (strncmp(line, "CM dimensions:", 14) == 0)
 			    {
 			    sscanf(line, "CM dimensions: %d %d", &mb_info->mask_nx, &mb_info->mask_ny);
@@ -643,12 +643,12 @@ int mb_get_info(int verbose, char *file, struct mb_info_struct *mb_info, int lon
 				}
 			    }
 			}
-		    
+
 		/* close the file */
 		fclose(fp);
-		
+
 		/* apply lonflip if needed */
-		if (lonflip == -1 
+		if (lonflip == -1
 		    && mb_info->lon_min > 0.0)
 		    {
 		    mb_info->lon_min -= 360.0;
@@ -803,7 +803,7 @@ int mb_make_info(int verbose, int force,
 		fprintf(stderr,"dbg2       file:       %s\n",file);
 		fprintf(stderr,"dbg2       format:     %d\n",format);
 		}
-		
+
 	/* check for existing ancillary files */
 	sprintf(inffile, "%s.inf", file);
 	sprintf(fbtfile, "%s.fbt", file);
@@ -831,23 +831,23 @@ int mb_make_info(int verbose, int force,
 		{
 		fnvmodtime = file_status.st_mtime;
 		}
-		
+
 	/* make new inf file if not there or out of date */
 	if (force == MB_YES
 		|| (datmodtime > 0 && datmodtime > infmodtime))
 		{
 		if (verbose >= 1)
 			fprintf(stderr,"\nGenerating inf file for %s\n",file);
-		sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10", 
+		sprintf(command, "mbinfo -F %d -I %s -G -N -O -M10/10",
 			format, file);
 		if (verbose >= 2)
 			fprintf(stderr,"\t%s\n",command);
 		system(command);
 		}
-		
+
 	/* make new fbt file if not there or out of date */
-	if ((force 
-		|| (datmodtime > 0 
+	if ((force
+		|| (datmodtime > 0
 	    	&& datmodtime > fbtmodtime))
 	    && format != MBF_SBSIOMRG
 	    && format != MBF_SBSIOCEN
@@ -876,14 +876,14 @@ int mb_make_info(int verbose, int force,
 		{
 		if (verbose >= 1)
 			fprintf(stderr,"Generating fbt file for %s\n",file);
-		sprintf(command, "mbcopy -F %d/71 -I %s -D -O %s.fbt", 
+		sprintf(command, "mbcopy -F %d/71 -I %s -D -O %s.fbt",
 			format, file, file);
 		system(command);
 		}
-		
+
 	/* make new fnv file if not there or out of date */
 	if ((force
-		|| (datmodtime > 0 
+		|| (datmodtime > 0
 	    		&& datmodtime > fnvmodtime))
 	    && format != MBF_ASCIIXYZ
 	    && format != MBF_ASCIIYXZ
@@ -899,7 +899,7 @@ int mb_make_info(int verbose, int force,
 		{
 		if (verbose >= 1)
 			fprintf(stderr,"Generating fnv file for %s\n",file);
-		sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN > %s.fnv", 
+		sprintf(command, "mblist -F %d -I %s -O tMXYHScRPr=X=Y+X+Y -UN > %s.fnv",
 			format, file, file);
 		system(command);
 		}
@@ -939,7 +939,7 @@ int mb_get_fbt(int verbose, char *file, int *format, int *error)
 		fprintf(stderr,"dbg2       file:       %s\n",file);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
-		
+
 	/* check for existing fbt file */
 	sprintf(fbtfile, "%s.fbt", file);
 	if ((fstat = stat(file, &file_status)) == 0
@@ -952,7 +952,7 @@ int mb_get_fbt(int verbose, char *file, int *format, int *error)
 		{
 		fbtmodtime = file_status.st_mtime;
 		}
-		
+
 	/* replace file with fbt file if fbt file exists */
 	if (datmodtime > 0 && fbtmodtime > 0)
 	    {
@@ -997,7 +997,7 @@ int mb_get_fnv(int verbose, char *file, int *format, int *error)
 		fprintf(stderr,"dbg2       file:       %s\n",file);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
-		
+
 	/* check for existing fnv file */
 	sprintf(fnvfile, "%s.fnv", file);
 	if ((fstat = stat(file, &file_status)) == 0
@@ -1010,7 +1010,7 @@ int mb_get_fnv(int verbose, char *file, int *format, int *error)
 		{
 		fnvmodtime = file_status.st_mtime;
 		}
-		
+
 	/* replace file with fnv file if fnv file exists */
 	if (datmodtime > 0 && fnvmodtime > 0)
 	    {
@@ -1055,7 +1055,7 @@ int mb_get_ffa(int verbose, char *file, int *format, int *error)
 		fprintf(stderr,"dbg2       file:       %s\n",file);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
-		
+
 	/* check for existing ffa file */
 	sprintf(ffafile, "%s.ffa", file);
 	if ((fstat = stat(file, &file_status)) == 0
@@ -1068,7 +1068,7 @@ int mb_get_ffa(int verbose, char *file, int *format, int *error)
 		{
 		ffamodtime = file_status.st_mtime;
 		}
-		
+
 	/* replace file with ffa file if ffa file exists */
 	if (datmodtime > 0 && ffamodtime > 0)
 	    {
@@ -1118,7 +1118,7 @@ int mb_get_ffs(int verbose, char *file, int *format, int *error)
 		fprintf(stderr,"dbg2       file:       %s\n",file);
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		}
-		
+
 	/* check for existing ffs file */
 	sprintf(ffsfile, "%s.ffs", file);
 	if ((fstat = stat(file, &file_status)) == 0
@@ -1131,7 +1131,7 @@ int mb_get_ffs(int verbose, char *file, int *format, int *error)
 		{
 		ffsmodtime = file_status.st_mtime;
 		}
-		
+
 	/* replace file with ffs file if ffs file exists */
 	if (datmodtime > 0 && ffsmodtime > 0)
 	    {
@@ -1162,9 +1162,9 @@ int mb_get_ffs(int verbose, char *file, int *format, int *error)
 }
 /*--------------------------------------------------------------------*/
 int mb_swathbounds(int verbose, int checkgood,
-			double navlon, double navlat, double heading, 
+			double navlon, double navlat, double heading,
 			int nbath, int nss,
-			char *beamflag, double *bath, 
+			char *beamflag, double *bath,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			int *ibeamport,
@@ -1213,12 +1213,12 @@ int mb_swathbounds(int verbose, int checkgood,
 			ssacrosstrack[i],ssalongtrack[i]);
 		  }
 		}
-		
+
 	/* get coordinate scaling */
 	mb_coor_scale(verbose,navlat,&mtodeglon,&mtodeglat);
 	headingx = sin(heading * DTR);
 	headingy = cos(heading * DTR);
-	
+
 	/* set starting values */
 	*ibeamport = 0;
 	*ibeamcntr = 0;
@@ -1226,7 +1226,7 @@ int mb_swathbounds(int verbose, int checkgood,
 	*ipixelport = 0;
 	*ipixelcntr = 0;
 	*ipixelstbd = 0;
-	
+
 	/* get min max of non-null beams */
 	xtrackmin = 0.0;
 	xtrackmax = 0.0;
@@ -1246,7 +1246,7 @@ int mb_swathbounds(int verbose, int checkgood,
 				xtrackmax = bathacrosstrack[i];
 				found = MB_YES;
 				}
-			else 
+			else
 				{
 				if (fabs(bathacrosstrack[i]) < distmin)
 					{
@@ -1266,7 +1266,7 @@ int mb_swathbounds(int verbose, int checkgood,
 				}
 			}
 		}
-	
+
 	/* get min max of non-null pixels */
 	xtrackmin = 0.0;
 	xtrackmax = 0.0;
@@ -1286,7 +1286,7 @@ int mb_swathbounds(int verbose, int checkgood,
 				xtrackmax = ssacrosstrack[i];
 				found = MB_YES;
 				}
-			else 
+			else
 				{
 				if (fabs(ssacrosstrack[i]) < distmin)
 					{
@@ -1343,7 +1343,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       mb_info:    %lu\n",(size_t)mb_info);
 		}
-		
+
 	/* initialize mb_info_struct */
 	mb_info->loaded = MB_NO;
 	mb_info->file[0] = '\0';;
@@ -1366,11 +1366,11 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 	mb_info->npixels_ss_good = 0;
 	mb_info->npixels_ss_zero = 0;
 	mb_info->npixels_ss_flagged = 0;
-	
+
 	mb_info->time_total = 0.0;
 	mb_info->dist_total = 0.0;
 	mb_info->speed_avg = 0.0;
-	
+
 	mb_info->time_start = 0.0;
 	mb_info->lon_start = 0.0;
 	mb_info->lat_start = 0.0;
@@ -1379,7 +1379,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 	mb_info->speed_start = 0.0;
 	mb_info->sonardepth_start = 0.0;
 	mb_info->sonaraltitude_start = 0.0;
-	
+
 	mb_info->time_end = 0.0;
 	mb_info->lon_end = 0.0;
 	mb_info->lat_end = 0.0;
@@ -1388,7 +1388,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 	mb_info->speed_end = 0.0;
 	mb_info->sonardepth_end = 0.0;
 	mb_info->sonaraltitude_end = 0.0;
-	
+
 	mb_info->lon_min = 0.0;
 	mb_info->lon_max = 0.0;
 	mb_info->lat_min = 0.0;
@@ -1403,14 +1403,14 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 	mb_info->amp_max = 0.0;
 	mb_info->ss_min = 0.0;
 	mb_info->ss_max = 0.0;
-	
+
 	mb_info->problem_nodata = 0;
 	mb_info->problem_zeronav = 0;
 	mb_info->problem_toofast = 0;
 	mb_info->problem_avgtoofast = 0;
 	mb_info->problem_toodeep = 0;
 	mb_info->problem_baddatagram = 0;
-	
+
 	mb_info->mask_nx = 0;
 	mb_info->mask_ny = 0;
 	mb_info->mask_dx = 0;
@@ -1435,7 +1435,7 @@ int mb_info_init(int verbose, struct mb_info_struct *mb_info, int *error)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_get_info_datalist(int verbose, char *read_file, int *format, 
+int mb_get_info_datalist(int verbose, char *read_file, int *format,
 			struct mb_info_struct *mb_info, int lonflip, int *error)
 {
 	char	*function_name = "mb_get_info_datalist";
@@ -1461,7 +1461,7 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
 		fprintf(stderr,"dbg2       format:     %d\n",*format);
 		fprintf(stderr,"dbg2       lonflip:    %d\n",lonflip);
 		}
-		
+
 	/* initialize mb_info_struct */
 	mb_info_init(verbose, mb_info, error);
 	strcpy(mb_info->file, read_file);
@@ -1506,11 +1506,11 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
 		{
 		/* read inf file */
 		status = mb_get_info(verbose, swathfile, &mb_info_file, lonflip, error);
-		
+
 		/* only use if there are data */
 		if (mb_info_file.nrecords > 0)
 			{
-		
+
 			/* add in the results */
                 	mb_info->nrecords += mb_info_file.nrecords;
                 	mb_info->nrecords_ss1 += mb_info_file.nrecords_ss1;
@@ -1576,21 +1576,21 @@ int mb_get_info_datalist(int verbose, char *read_file, int *format,
 				}
 			else
 				{
-				if (mb_info->lon_min == 0.0) 
+				if (mb_info->lon_min == 0.0)
 					mb_info->lon_min = mb_info_file.lon_min;
-                		else 
+                		else
 					mb_info->lon_min = MIN(mb_info_file.lon_min, mb_info->lon_min);
-                		if (mb_info->lon_max == 0.0) 
+                		if (mb_info->lon_max == 0.0)
 					mb_info->lon_max = mb_info_file.lon_max;
-                		else 
+                		else
 					mb_info->lon_max = MAX(mb_info_file.lon_max, mb_info->lon_max);
-                		if (mb_info->lat_min == 0.0) 
+                		if (mb_info->lat_min == 0.0)
 					mb_info->lat_min = mb_info_file.lat_min;
-                		else 
+                		else
 					mb_info->lat_min = MIN(mb_info_file.lat_min, mb_info->lat_min);
-                		if (mb_info->lat_max == 0.0) 
+                		if (mb_info->lat_max == 0.0)
 					mb_info->lat_max = mb_info_file.lat_max;
-                		else 
+                		else
 					mb_info->lat_max = MAX(mb_info_file.lat_max, mb_info->lat_max);
                 		mb_info->sonardepth_min = MIN(mb_info_file.sonardepth_min, mb_info->sonardepth_min);
                 		mb_info->sonardepth_max = MAX(mb_info_file.sonardepth_max, mb_info->sonardepth_max);

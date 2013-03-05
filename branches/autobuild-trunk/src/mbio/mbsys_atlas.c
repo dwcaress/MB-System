@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_atlas.c	3.00	6/25/01
- *	$Id: mbsys_atlas.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbsys_atlas.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2001-2011 by
+ *    Copyright (c) 2001-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -88,7 +88,7 @@
 #define MBSYS_ATLAS_C
 #include "mbsys_atlas.h"
 
-static char rcs_id[]="$Id: mbsys_atlas.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbsys_atlas.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_atlas_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

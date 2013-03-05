@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sburivax.c	2/2/93
- *	$Id: mbr_sburivax.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbr_sburivax.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -148,7 +148,7 @@ int mbr_dem_sburivax(int verbose, void *mbio_ptr, int *error);
 int mbr_rt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_wt_sburivax(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_sburivax.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbr_sburivax.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sburivax(int verbose, void *mbio_ptr, int *error)

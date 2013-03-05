@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_close.c	1/25/93
- *	$Id: mb_close.c 1891 2011-05-04 23:46:30Z caress $
+ *	$Id: mb_close.c 1960 2012-06-07 00:15:58Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -24,7 +24,7 @@
  *
  * Author:	D. W. Caress
  * Date:	January 25, 1993
- *	
+ *
  * $Log: mb_close.c,v $
  * Revision 5.13  2008/07/10 06:43:40  caress
  * Preparing for 5.1.1beta20
@@ -135,12 +135,38 @@
 #include <string.h>
 
 /* XDR i/o include file */
-#ifdef HAVE_RPC_RPC_H
-# include <rpc/rpc.h>
+#ifdef IRIX
+#include <rpc/rpc.h>
 #endif
-#ifdef HAVE_RPC_TYPES_H
-# include <rpc/types.h>
-# include <rpc/xdr.h>
+#ifdef IRIX64
+#include <rpc/rpc.h>
+#endif
+#ifdef SOLARIS
+#include <rpc/rpc.h>
+#endif
+#ifdef LINUX
+#include <rpc/rpc.h>
+#endif
+#ifdef LYNX
+#include <rpc/rpc.h>
+#endif
+#ifdef SUN
+#include <rpc/xdr.h>
+#endif
+#ifdef HPUX
+#include <rpc/rpc.h>
+#endif
+#ifdef DARWIN
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#endif
+#ifdef CYGWIN
+#include <rpc/types.h>
+#include <rpc/xdr.h>
+#endif
+#ifdef OTHER
+#include <rpc/types.h>
+#include <rpc/xdr.h>
 #endif
 
 /* mbio include files */
@@ -153,7 +179,7 @@
 #include "gsf.h"
 #include "netcdf.h"
 
-static	char	rcs_id[]="$Id: mb_close.c 1891 2011-05-04 23:46:30Z caress $";
+static	char	rcs_id[]="$Id: mb_close.c 1960 2012-06-07 00:15:58Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_close(int verbose, void **mbio_ptr, int *error)
@@ -207,13 +233,19 @@ int mb_close(int verbose, void **mbio_ptr, int *error)
 	    if (mb_io_ptr->mbfp3 != NULL)
 		    fclose(mb_io_ptr->mbfp3);
 	    }
-	
+
+	/* else handle single normal files to be closed with mb_fileio_close() */
+	else if (mb_io_ptr->filetype == MB_FILETYPE_SINGLE)
+	    {
+	    status = mb_fileio_close(verbose, *mbio_ptr, error);
+	    }
+
 	/* else if gsf then use gsfClose */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_GSF)
 	    {
 	    gsfClose((int) mb_io_ptr->gsfid);
 	    }
-	
+
 	/* else if netcdf then use nc_close */
 	else if (mb_io_ptr->filetype == MB_FILETYPE_NETCDF)
 	    {

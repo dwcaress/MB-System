@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarrov2.c	10/3/2006
- *	$Id: mbr_mbarrov2.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbr_mbarrov2.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2006-2011 by
+ *    Copyright (c) 2006-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -84,7 +84,7 @@ int mbr_mbarrov2_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 
 static char header[] = "RovName,DiveNumber,DateTime24,EpochSecs,Latitude,Longitude,Pressure,Depth,Altitude,Heading,Pitch,Roll,ShipLatitude,ShipLongitude,ShipHeading,QCFlag\n";
 
-static char rcs_id[]="$Id: mbr_mbarrov2.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbr_mbarrov2.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbarrov2(int verbose, void *mbio_ptr, int *error)

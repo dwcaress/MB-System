@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_swap.c	7/6/94
- *    $Id: mb_swap.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_swap.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -101,7 +101,7 @@
 #include "mb_swap.h"
 #include "mb_define.h"
 
-/* static	char	rcs_id[]="$Id: mb_swap.c 1891 2011-05-04 23:46:30Z caress $"; */
+/* static	char	rcs_id[]="$Id: mb_swap.c 1917 2012-01-10 19:25:33Z caress $"; */
 
 /*--------------------------------------------------------------------*/
 /* function mb_swap_check determines if the cpu is byteswapped */

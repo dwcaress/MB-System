@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_buffer.c	2/25/93
- *    $Id: mb_buffer.c 1906 2011-09-27 19:27:33Z caress $
+ *    $Id: mb_buffer.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -191,7 +191,7 @@
 #include "mb_io.h"
 #include "mb_define.h"
 
-static char rcs_id[]="$Id: mb_buffer.c 1906 2011-09-27 19:27:33Z caress $";
+static char rcs_id[]="$Id: mb_buffer.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_buffer_init(int verbose, void **buff_ptr, int *error)

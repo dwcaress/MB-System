@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_proj.c	7/16/2002
- *    $Id: mb_proj.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_proj.c 1985 2012-09-11 08:02:53Z caress $
  *
- *    Copyright (c) 2002-2011 by
+ *    Copyright (c) 2002-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,21 +20,21 @@
  *--------------------------------------------------------------------*/
 /*
  * mb_proj.c includes the "mb_" functions used to initialize
- * projections, and then to do forward (mb_proj_forward()) 
+ * projections, and then to do forward (mb_proj_forward())
  * and inverse (mb_proj_inverse()) projections
  * between geographic coordinates (longitude and latitude) and
  * projected coordinates (e.g. eastings and northings in meters).
  * One can also tranlate between coordinate systems using mb_proj_transform().
  * This code uses libproj. The code in libproj derives without modification
- * from the PROJ.4 distribution. PROJ was originally developed by 
+ * from the PROJ.4 distribution. PROJ was originally developed by
  * Gerard Evandim, and is now maintained and distributed by
  * Frank Warmerdam, <warmerdam@pobox.com>
- * 
+ *
  * David W. Caress
  * July 16, 2002
  * RVIB Nathaniel B. Palmer
  * Somewhere west of Conception, Chile
- * 
+ *
  * Author:	D. W. Caress
  * Date:	July 16, 2002
  *
@@ -79,7 +79,7 @@
 #include "proj_api.h"
 #include "projections.h"
 
-static char rcs_id[]="$Id: mb_proj.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mb_proj.c 1985 2012-09-11 08:02:53Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_proj_init(int verbose,
@@ -92,7 +92,7 @@ int mb_proj_init(int verbose,
 	char 	pj_init_args[MB_PATH_MAXLINE];
 	projPJ 	pj;
 	struct stat file_status;
-	int	fstat;	
+	int	fstat;
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -103,7 +103,7 @@ int mb_proj_init(int verbose,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       projection: %s\n",projection);
 		}
-		
+
 	/* check the existence of the projection database */
 	if ((fstat = stat(projectionfile, &file_status)) == 0
 		&& (file_status.st_mode & S_IFMT) != S_IFDIR)
@@ -159,7 +159,6 @@ int mb_proj_free(int verbose,
 	char	*function_name = "mb_proj_free";
 	int	status = MB_SUCCESS;
 	projPJ 	pj;
-	
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -170,7 +169,7 @@ int mb_proj_free(int verbose,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       pjptr:      %lu\n",(size_t)*pjptr);
 		}
-		
+
 	/* free the projection */
 	if (pjptr != NULL)
 		{
@@ -210,7 +209,6 @@ int mb_proj_forward(int verbose,
 	projPJ 	pj;
 	projUV	pjxy;
 	projUV	pjll;
-	
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -223,7 +221,7 @@ int mb_proj_forward(int verbose,
 		fprintf(stderr,"dbg2       lon:        %f\n",lon);
 		fprintf(stderr,"dbg2       lat:        %f\n",lat);
 		}
-		
+
 	/* do forward projection */
 	if (pjptr != NULL)
 		{
@@ -267,7 +265,6 @@ int mb_proj_inverse(int verbose,
 	projPJ 	pj;
 	projUV	pjxy;
 	projUV	pjll;
-	
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -280,7 +277,7 @@ int mb_proj_inverse(int verbose,
 		fprintf(stderr,"dbg2       easting:    %f\n",easting);
 		fprintf(stderr,"dbg2       northing:   %f\n",northing);
 		}
-		
+
 	/* do forward projection */
 	if (pjptr != NULL)
 		{
@@ -323,7 +320,7 @@ int mb_proj_transform(int verbose,
 	char	*function_name = "mb_proj_transform";
 	int	status = MB_SUCCESS;
 	int	i;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -338,7 +335,7 @@ int mb_proj_transform(int verbose,
 		for (i=0;i<npoint;i++)
 			fprintf(stderr,"dbg2       point[%d]:  x:%f y:%f z:%f\n", i, x[i], y[i], z[i]);
 		}
-		
+
 	/* do transform */
 	if (pjsrcptr != NULL && pjdstptr != NULL)
 		{

@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_cbat9001.c	8/8/94
- *	$Id: mbr_cbat9001.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbr_cbat9001.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1994-2011 by
+ *    Copyright (c) 1994-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -180,7 +180,7 @@ int mbr_cbat9001_wr_nav(int verbose, FILE *mbfp, int swap, void *data_ptr, int *
 int mbr_cbat9001_wr_svp(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error);
 int mbr_cbat9001_wr_bath(int verbose, FILE *mbfp, int swap, void *data_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_cbat9001.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbr_cbat9001.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_cbat9001(int verbose, void *mbio_ptr, int *error)

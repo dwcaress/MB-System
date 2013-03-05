@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_process.c	9/11/00
- *    $Id: mb_process.c 1895 2011-05-17 07:02:04Z caress $
+ *    $Id: mb_process.c 1965 2012-06-26 16:04:09Z caress $
  *
- *    Copyright (c) 2000-2011 by
+ *    Copyright (c) 2000-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -21,12 +21,12 @@
 /*
  * mb_process.c contains functions for reading and writing
  * mbprocess parameter files. The mb_process structure is defined
- * in mb_process.h. A description of mbprocess parameters and 
+ * in mb_process.h. A description of mbprocess parameters and
  * parameter file keywords is found in mb_process.h
  *
  * Author:	D. W. Caress
  * Date:	September 11, 2000
- * 
+ *
  * $Log: mb_process.c,v $
  * Revision 5.40  2009/03/09 16:58:31  caress
  * Release 5.1.2beta01
@@ -180,16 +180,11 @@
 #include "mb_format.h"
 #include "mb_process.h"
 
-#ifdef WIN32
-#include <winsock2.h>
-#endif
-
-
-static char rcs_id[]="$Id: mb_process.c 1895 2011-05-17 07:02:04Z caress $";
+static char rcs_id[]="$Id: mb_process.c 1965 2012-06-26 16:04:09Z caress $";
 
 /*--------------------------------------------------------------------*/
-int mb_pr_checkstatus(int verbose, char *file, 
-			int *prstatus, int *error) 
+int mb_pr_checkstatus(int verbose, char *file,
+			int *prstatus, int *error)
 {
 	char	*function_name = "mb_pr_checkstatus";
 	int	status = MB_SUCCESS;
@@ -216,7 +211,7 @@ int mb_pr_checkstatus(int verbose, char *file,
 		fprintf(stderr,"dbg2       verbose:   %d\n",verbose);
 		fprintf(stderr,"dbg2       file:      %s\n",file);
 		}
-		
+
 	/* get started */
 	*prstatus = MB_PR_FILE_NEEDS_PROCESSING;
 	*error = MB_ERROR_NO_ERROR;
@@ -232,7 +227,7 @@ int mb_pr_checkstatus(int verbose, char *file,
 		{
 		*prstatus = MB_PR_FILE_NOT_EXIST;
 		}
-	
+
 	/* check for existing parameter file */
 	if (*prstatus == MB_PR_FILE_NEEDS_PROCESSING)
 		{
@@ -253,7 +248,7 @@ int mb_pr_checkstatus(int verbose, char *file,
 		{
 		/* read the parameter file */
 		mb_pr_readpar(verbose, file, MB_NO, &process, error);
-		
+
 		/* get mod time for the output file */
 		if ((fstat = stat(process.mbp_ofile, &file_status)) == 0
 			&& (file_status.st_mode & S_IFMT) != S_IFDIR)
@@ -340,8 +335,8 @@ int mb_pr_checkstatus(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_readpar(int verbose, char *file, int lookforfiles, 
-			struct mb_process_struct *process, 
+int mb_pr_readpar(int verbose, char *file, int lookforfiles,
+			struct mb_process_struct *process,
 			int *error)
 {
 	char	*function_name = "mb_pr_readpar";
@@ -370,7 +365,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* get expected process parameter file name */
 	strcpy(parfile, file);
 	strcat(parfile, ".par");
-	
+
 	/* initialize process parameter structure */
 
 	/* general parameters */
@@ -381,7 +376,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_ofile[0] = '\0';
 	process->mbp_format_specified = MB_NO;
 	process->mbp_format = 0;
-	
+
 	/* navigation merging */
 	process->mbp_nav_mode = MBP_NAV_OFF;
 	process->mbp_navfile[0] = '\0';
@@ -398,17 +393,17 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_nav_offsetz = 0.0;
 	process->mbp_nav_shiftlon = 0.0;
 	process->mbp_nav_shiftlat = 0.0;
-	
+
 	/* adjusted navigation merging */
 	process->mbp_navadj_mode = MBP_NAV_OFF;
 	process->mbp_navadjfile[0] = '\0';
 	process->mbp_navadj_algorithm = MBP_NAV_LINEAR;
-	
+
 	/* attitude merging */
 	process->mbp_attitude_mode = 0;
 	process->mbp_attitudefile[0] = '\0';
 	process->mbp_attitude_format = 1;
-	
+
 	/* sonardepth merging */
 	process->mbp_sonardepth_mode = 0;
 	process->mbp_sonardepthfile[0] = '\0';
@@ -427,7 +422,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	/* bathymetry editing */
 	process->mbp_edit_mode = MBP_EDIT_OFF;
 	process->mbp_editfile[0] = '\0';
-	
+
 	/* bathymetry recalculation */
 	process->mbp_bathrecalc_mode = MBP_BATHRECALC_OFF;
 	process->mbp_svp_mode = MBP_SVP_OFF;
@@ -440,18 +435,18 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_corrected = MB_YES;
 	process->mbp_static_mode = MBP_STATIC_OFF;
 	process->mbp_staticfile[0] = '\0';
-	
+
 	/* draft correction */
 	process->mbp_draft_mode = MBP_DRAFT_OFF;
 	process->mbp_draft = 0.0;
 	process->mbp_draft_offset = 0.0;
 	process->mbp_draft_mult = 1.0;
-	
+
 	/* heave correction */
 	process->mbp_heave_mode = MBP_HEAVE_OFF;
 	process->mbp_heave = 0.0;
 	process->mbp_heave_mult = 1.0;
-	
+
 	/* lever correction */
 	process->mbp_lever_mode = MBP_LEVER_OFF;
 	process->mbp_vru_offsetx = 0.0;
@@ -460,26 +455,26 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_sonar_offsetx = 0.0;
 	process->mbp_sonar_offsety = 0.0;
 	process->mbp_sonar_offsetz = 0.0;
-	
+
 	/* roll correction */
 	process->mbp_rollbias_mode = MBP_ROLLBIAS_OFF;
 	process->mbp_rollbias = 0.0;
 	process->mbp_rollbias_port = 0.0;
 	process->mbp_rollbias_stbd = 0.0;
-	
+
 	/* pitch correction */
 	process->mbp_pitchbias_mode = MBP_PITCHBIAS_OFF;
 	process->mbp_pitchbias = 0.0;
-	
+
 	/* heading correction */
 	process->mbp_heading_mode = MBP_HEADING_OFF;
 	process->mbp_headingbias = 0.0;
-	
+
 	/* tide correction */
 	process->mbp_tide_mode = MBP_TIDE_OFF;
 	process->mbp_tidefile[0] = '\0';
 	process->mbp_tide_format = 1;
-	
+
 	/* amplitude correction */
 	process->mbp_ampcorr_mode = MBP_AMPCORR_OFF;
 	process->mbp_ampcorrfile[0] = '\0';
@@ -487,7 +482,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_ampcorr_symmetry = MBP_AMPCORR_SYMMETRIC,
 	process->mbp_ampcorr_angle = 30.0;
 	process->mbp_ampcorr_slope = MBP_AMPCORR_IGNORESLOPE;
-	
+
 	/* sidescan correction */
 	process->mbp_sscorr_mode = MBP_SSCORR_OFF;
 	process->mbp_sscorrfile[0] = '\0';
@@ -495,10 +490,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_sscorr_symmetry = MBP_SSCORR_SYMMETRIC,
 	process->mbp_sscorr_angle = 30.0;
 	process->mbp_sscorr_slope = MBP_SSCORR_IGNORESLOPE;
-	
+
 	/* amplitude and sidescan correction */
 	process->mbp_ampsscorr_topofile[0] = '\0';
-	
+
 	/* sidescan recalculation */
 	process->mbp_ssrecalc_mode = MBP_SSRECALC_OFF;
 	process->mbp_ssrecalc_pixelsize = 0.0;
@@ -538,7 +533,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	process->mbp_kluge010 = MB_NO;
 
 	/* open and read parameter file */
-	if ((fp = fopen(parfile, "r")) != NULL) 
+	if ((fp = fopen(parfile, "r")) != NULL)
 	    {
 	    while ((result = fgets(buffer,MBP_FILENAMESIZE,fp)) == buffer)
 		{
@@ -573,7 +568,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			sscanf(buffer, "%s %d", dummy, &process->mbp_format);
 			process->mbp_format_specified = MB_YES;
 			}
-			
+
 		    /* navigation merging */
 		    else if (strncmp(buffer, "NAVMODE", 7) == 0)
 			{
@@ -619,7 +614,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_nav_timeshift);
 			}
-			
+
 		    /* navigation offsets and shifts */
 		    else if (strncmp(buffer, "NAVOFFSETX", 10) == 0)
 			{
@@ -663,7 +658,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_navadj_algorithm);
 			}
-	
+
 		    /* attitude merging */
 		    else if (strncmp(buffer, "ATTITUDEMODE", 12) == 0)
 			{
@@ -681,7 +676,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_attitude_format);
 			}
-	
+
 		    /* sonardepth merging */
 		    else if (strncmp(buffer, "SONARDEPTHMODE", 12) == 0)
 			{
@@ -709,7 +704,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(buffer, "%s %d %d %lf %lf", dummy, 
+				sscanf(buffer, "%s %d %d %lf %lf", dummy,
 					&process->mbp_cut_kind[process->mbp_cut_num],
 					&process->mbp_cut_mode[process->mbp_cut_num],
 					&process->mbp_cut_min[process->mbp_cut_num],
@@ -721,11 +716,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(buffer, "%s %lf %lf", dummy, 
+				sscanf(buffer, "%s %lf %lf", dummy,
 					&process->mbp_cut_min[process->mbp_cut_num],
 					&process->mbp_cut_max[process->mbp_cut_num]);
-				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_BATH; 
-				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_BATH;
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_NUMBER;
 				process->mbp_cut_num++;
 				}
 			}
@@ -733,11 +728,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(buffer, "%s %lf %lf", dummy, 
+				sscanf(buffer, "%s %lf %lf", dummy,
 					&process->mbp_cut_min[process->mbp_cut_num],
 					&process->mbp_cut_max[process->mbp_cut_num]);
-				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_BATH; 
-				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_BATH;
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_DISTANCE;
 				process->mbp_cut_num++;
 				}
 			}
@@ -745,11 +740,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(buffer, "%s %lf %lf", dummy, 
+				sscanf(buffer, "%s %lf %lf", dummy,
 					&process->mbp_cut_min[process->mbp_cut_num],
 					&process->mbp_cut_max[process->mbp_cut_num]);
-				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_BATH; 
-				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_SPEED; 
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_BATH;
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_SPEED;
 				process->mbp_cut_num++;
 				}
 			}
@@ -757,11 +752,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(buffer, "%s %lf %lf", dummy, 
+				sscanf(buffer, "%s %lf %lf", dummy,
 					&process->mbp_cut_min[process->mbp_cut_num],
 					&process->mbp_cut_max[process->mbp_cut_num]);
-				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_AMP; 
-				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_AMP;
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_NUMBER;
 				process->mbp_cut_num++;
 				}
 			}
@@ -769,11 +764,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(buffer, "%s %lf %lf", dummy, 
+				sscanf(buffer, "%s %lf %lf", dummy,
 					&process->mbp_cut_min[process->mbp_cut_num],
 					&process->mbp_cut_max[process->mbp_cut_num]);
-				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_AMP; 
-				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_AMP;
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_DISTANCE;
 				process->mbp_cut_num++;
 				}
 			}
@@ -781,11 +776,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(buffer, "%s %lf %lf", dummy, 
+				sscanf(buffer, "%s %lf %lf", dummy,
 					&process->mbp_cut_min[process->mbp_cut_num],
 					&process->mbp_cut_max[process->mbp_cut_num]);
-				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_AMP; 
-				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_SPEED; 
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_AMP;
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_SPEED;
 				process->mbp_cut_num++;
 				}
 			}
@@ -793,11 +788,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(buffer, "%s %lf %lf", dummy, 
+				sscanf(buffer, "%s %lf %lf", dummy,
 					&process->mbp_cut_min[process->mbp_cut_num],
 					&process->mbp_cut_max[process->mbp_cut_num]);
-				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_SS; 
-				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_NUMBER; 
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_SS;
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_NUMBER;
 				process->mbp_cut_num++;
 				}
 			}
@@ -805,11 +800,11 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(buffer, "%s %lf %lf", dummy, 
+				sscanf(buffer, "%s %lf %lf", dummy,
 					&process->mbp_cut_min[process->mbp_cut_num],
 					&process->mbp_cut_max[process->mbp_cut_num]);
-				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_SS; 
-				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_DISTANCE; 
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_SS;
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_DISTANCE;
 				process->mbp_cut_num++;
 				}
 			}
@@ -817,15 +812,15 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			if (process->mbp_cut_num < MBP_CUT_NUM_MAX)
 				{
-				sscanf(buffer, "%s %lf %lf", dummy, 
+				sscanf(buffer, "%s %lf %lf", dummy,
 					&process->mbp_cut_min[process->mbp_cut_num],
 					&process->mbp_cut_max[process->mbp_cut_num]);
-				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_SS; 
-				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_SPEED; 
+				process->mbp_cut_kind[process->mbp_cut_num] = MBP_CUT_DATA_SS;
+				process->mbp_cut_mode[process->mbp_cut_num] = MBP_CUT_MODE_SPEED;
 				process->mbp_cut_num++;
 				}
 			}
-	
+
 		    /* bathymetry editing */
 		    else if (strncmp(buffer, "EDITSAVEMODE", 12) == 0)
 			{
@@ -839,7 +834,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			    process->mbp_edit_mode = MBP_EDIT_ON;
 			    }
 			}
-	
+
 		    /* bathymetry recalculation */
 		    else if (strncmp(buffer, "RAYTRACE", 8) == 0)
 			{
@@ -893,7 +888,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_corrected);
 			}
-		    
+
 		    /* static beam bathymetry correction */
 		    else if (strncmp(buffer, "STATICMODE", 10) == 0)
 			{
@@ -907,7 +902,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			    process->mbp_static_mode = MBP_SVP_ON;
 			    }
 			}
-	
+
 		    /* draft correction */
 		    else if (strncmp(buffer, "DRAFTMODE", 9) == 0)
 			{
@@ -925,7 +920,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_draft);
 			}
-	
+
 		    /* heave correction */
 		    else if (strncmp(buffer, "HEAVEMODE", 9) == 0)
 			{
@@ -939,7 +934,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_heave_mult);
 			}
-	
+
 		    /* lever correction */
 		    else if (strncmp(buffer, "LEVERMODE", 9) == 0)
 			{
@@ -969,7 +964,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_sonar_offsetz);
 			}
-	
+
 		    /* roll correction */
 		    else if (strncmp(buffer, "ROLLBIASMODE", 12) == 0)
 			{
@@ -987,7 +982,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_rollbias);
 			}
-	
+
 		    /* pitch correction */
 		    else if (strncmp(buffer, "PITCHBIASMODE", 13) == 0)
 			{
@@ -997,7 +992,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_pitchbias);
 			}
-	
+
 		    /* heading correction */
 		    else if (strncmp(buffer, "HEADINGMODE", 11) == 0)
 			{
@@ -1007,7 +1002,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %lf", dummy, &process->mbp_headingbias);
 			}
-	
+
 		    /* tide correction */
 		    else if (strncmp(buffer, "TIDEMODE", 8) == 0)
 			{
@@ -1025,7 +1020,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_tide_format);
 			}
-	
+
 		    /* amplitude correction */
 		    else if (strncmp(buffer, "AMPCORRMODE", 11) == 0)
 			{
@@ -1055,7 +1050,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_ampcorr_slope);
 			}
-	
+
 		    /* sidescan correction */
 		    else if (strncmp(buffer, "SSCORRMODE", 10) == 0)
 			{
@@ -1085,13 +1080,13 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_sscorr_slope);
 			}
-	
+
 		    /* amplitude/sidescan topography correction */
 		    else if (strncmp(buffer, "AMPSSCORRTOPOFILE", 17) == 0)
 			{
 			sscanf(buffer, "%s %s", dummy, process->mbp_ampsscorr_topofile);
 			}
-	
+
 		    /* sidescan recalculation */
 		    else if (strncmp(buffer, "SSRECALCMODE", 12) == 0)
 			{
@@ -1109,7 +1104,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "%s %d", dummy, &process->mbp_ssrecalc_interpolate);
 			}
-	
+
 		    /* metadata strings */
 		    else if (strncmp(buffer, "METAVESSEL", 10) == 0)
 			{
@@ -1183,7 +1178,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 			{
 			sscanf(buffer, "METADRAFT %lf", &process->mbp_meta_draft);
 			}
-	
+
 		    /* processing kluges */
 		    else if (strncmp(buffer, "KLUGE001", 8) == 0)
 			{
@@ -1204,35 +1199,35 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    else if (strncmp(buffer, "KLUGE005", 8) == 0)
 			{
 			process->mbp_kluge005 = MB_YES;
-			}			
+			}
 		    else if (strncmp(buffer, "KLUGE006", 8) == 0)
 			{
 			process->mbp_kluge006 = MB_YES;
-			}			
+			}
 		    else if (strncmp(buffer, "KLUGE007", 8) == 0)
 			{
 			process->mbp_kluge007 = MB_YES;
-			}			
+			}
 		    else if (strncmp(buffer, "KLUGE008", 8) == 0)
 			{
 			process->mbp_kluge008 = MB_YES;
-			}			
+			}
 		    else if (strncmp(buffer, "KLUGE009", 8) == 0)
 			{
 			process->mbp_kluge009 = MB_YES;
-			}			
+			}
 		    else if (strncmp(buffer, "KLUGE010", 8) == 0)
 			{
 			process->mbp_kluge010 = MB_YES;
-			}			
+			}
 		    }
 		}
-		
+
 	    /* close file */
 	    fclose(fp);
-	    
+
 	    }
-	    
+
 	/* Now make input file global if local */
 	process->mbp_ifile_specified = MB_YES;
 	if (file[0] != '/')
@@ -1244,14 +1239,14 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	else
 	    strcpy(process->mbp_ifile, file);
 	mb_get_shortest_path(verbose, process->mbp_ifile, error);
-	    
+
 	/* figure out data format or output filename if required */
 	if (process->mbp_format_specified == MB_NO
 	    || process->mbp_ofile_specified == MB_NO)
 	    {
 	    mb_pr_default_output(verbose, process, error);
 	    }
-	    
+
 	/* Make output file global if local */
 	if (process->mbp_ofile[0] != '/')
 	    {
@@ -1265,7 +1260,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		strcat(process->mbp_ofile, dummy);
 		}
 	    }
-	    
+
 	/* look for nav and other bath edit files if not specified */
 	if (lookforfiles == 1 || lookforfiles == 2)
 	    {
@@ -1326,7 +1321,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    }
 		}
 	     }
-	    
+
 	/* look for svp files if not specified */
 	if (lookforfiles == 2)
 	    {
@@ -1354,7 +1349,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		    }
 		}
 	    }
-	    
+
 	/* reset all output files to local path if possible */
 	if (lookforfiles > 2)
 	    {
@@ -1442,7 +1437,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 		strcpy(process->mbp_ampsscorr_topofile, dummy);
 		}
 	    }
-	    
+
 	/* Now make filenames global if local */
 	lastslash = strrchr(process->mbp_ifile, '/');
 	len = lastslash - process->mbp_ifile + 1;
@@ -1567,7 +1562,7 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	    process->mbp_ampsscorr_topofile[len] = '\0';
 	    strcat(process->mbp_ampsscorr_topofile, dummy);
 	    }
-	    
+
 	/* make sure all global paths are as short as possible */
 	mb_get_shortest_path(verbose, process->mbp_navadjfile, error);
 	mb_get_shortest_path(verbose, process->mbp_navfile, error);
@@ -1580,10 +1575,10 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	mb_get_shortest_path(verbose, process->mbp_ampcorrfile, error);
 	mb_get_shortest_path(verbose, process->mbp_sscorrfile, error);
 	mb_get_shortest_path(verbose, process->mbp_ampsscorr_topofile, error);
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, process, error);
-	    
+
 	/* check for error */
 	if (process->mbp_ifile_specified == MB_NO
 	    || process->mbp_ofile_specified == MB_NO
@@ -1729,8 +1724,8 @@ int mb_pr_readpar(int verbose, char *file, int lookforfiles,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_writepar(int verbose, char *file, 
-			struct mb_process_struct *process, 
+int mb_pr_writepar(int verbose, char *file,
+			struct mb_process_struct *process,
 			int *error)
 {
 	char	*function_name = "mb_pr_writepar";
@@ -1877,7 +1872,7 @@ int mb_pr_writepar(int verbose, char *file,
 		fprintf(stderr,"dbg2       mbp_kluge009:           %d\n",process->mbp_kluge009);
 		fprintf(stderr,"dbg2       mbp_kluge010:           %d\n",process->mbp_kluge010);
 		}
-		
+
 	/* try to avoid absolute pathnames - get pwd */
 	lastslash = strrchr(file, '/');
 	if (file[0] == '/')
@@ -1897,13 +1892,13 @@ int mb_pr_writepar(int verbose, char *file,
 		}
 	    }
 	mb_get_shortest_path(verbose, pwd, error);
-	
+
 	/* get expected process parameter file name */
 	strcpy(parfile, file);
 	strcat(parfile, ".par");
 
 	/* open parameter file */
-	if ((fp = fopen(parfile, "w")) != NULL) 
+	if ((fp = fopen(parfile, "w")) != NULL)
 	    {
 	    fprintf(fp,"## MB-System processing parameter file\n");
 	    fprintf(fp,"## Written by %s version %s\n", function_name, rcs_id);
@@ -1953,7 +1948,7 @@ int mb_pr_writepar(int verbose, char *file,
 		{
 		fprintf(fp, "## OUTFILE outfile\n");
 		}
-	    
+
 	    /* navigation merging */
 	    fprintf(fp, "##\n## Navigation Merging:\n");
 	    fprintf(fp, "NAVMODE %d\n", process->mbp_nav_mode);
@@ -1967,7 +1962,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "NAVATTITUDE %d\n", process->mbp_nav_attitude);
 	    fprintf(fp, "NAVINTERP %d\n", process->mbp_nav_algorithm);
 	    fprintf(fp, "NAVTIMESHIFT %f\n", process->mbp_nav_timeshift);
-	    
+
 	    /* navigation offsets and shifts */
 	    fprintf(fp, "##\n## Navigation Offsets and Shifts:\n");
 	    fprintf(fp, "NAVSHIFT %d\n", process->mbp_nav_shift);
@@ -1976,7 +1971,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "NAVOFFSETZ %f\n", process->mbp_nav_offsetz);
 	    fprintf(fp, "NAVSHIFTLON %f\n", process->mbp_nav_shiftlon);
 	    fprintf(fp, "NAVSHIFTLAT %f\n", process->mbp_nav_shiftlat);
-	    
+
 	    /* adjusted navigation merging */
 	    fprintf(fp, "##\n## Adjusted Navigation Merging:\n");
 	    fprintf(fp, "NAVADJMODE %d\n", process->mbp_navadj_mode);
@@ -1984,7 +1979,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
 	    fprintf(fp, "NAVADJFILE %s\n", relative_path);
 	    fprintf(fp, "NAVADJINTERP %d\n", process->mbp_navadj_algorithm);
-	    
+
 	    /* attitude merging */
 	    fprintf(fp, "##\n## Attitude Merging:\n");
 	    fprintf(fp, "ATTITUDEMODE %d\n", process->mbp_attitude_mode);
@@ -1992,7 +1987,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
 	    fprintf(fp, "ATTITUDEFILE %s\n", relative_path);
 	    fprintf(fp, "ATTITUDEFORMAT %d\n", process->mbp_attitude_format);
-	    
+
 	    /* sonardepth merging */
 	    fprintf(fp, "##\n## Sonardepth Merging:\n");
 	    fprintf(fp, "SONARDEPTHMODE %d\n", process->mbp_sonardepth_mode);
@@ -2008,20 +2003,20 @@ int mb_pr_writepar(int verbose, char *file,
 	    else
 		{
 		for (i=0;i<process->mbp_cut_num;i++)
-	    		fprintf(fp, "DATACUT %d %d %f %f\n", 
+	    		fprintf(fp, "DATACUT %d %d %f %f\n",
 				process->mbp_cut_kind[i],
 				process->mbp_cut_mode[i],
 				process->mbp_cut_min[i],
 				process->mbp_cut_max[i]);
 		}
-	    
+
 	    /* bathymetry editing */
 	    fprintf(fp, "##\n## Bathymetry Flagging:\n");
 	    fprintf(fp, "EDITSAVEMODE %d\n", process->mbp_edit_mode);
 	    strcpy(relative_path, process->mbp_editfile);
 	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
 	    fprintf(fp, "EDITSAVEFILE %s\n", relative_path);
-	    
+
 	    /* bathymetry recalculation */
 	    fprintf(fp, "##\n## Bathymetry Recalculation:\n");
 	    fprintf(fp, "SVPMODE %d\n", process->mbp_svp_mode);
@@ -2038,20 +2033,20 @@ int mb_pr_writepar(int verbose, char *file,
 	    strcpy(relative_path, process->mbp_staticfile);
 	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
 	    fprintf(fp, "STATICFILE %s\n", relative_path);
-	    
+
 	    /* draft correction */
 	    fprintf(fp, "##\n## Draft Correction:\n");
 	    fprintf(fp, "DRAFTMODE %d\n", process->mbp_draft_mode);
 	    fprintf(fp, "DRAFT %f\n", process->mbp_draft);
 	    fprintf(fp, "DRAFTOFFSET %f\n", process->mbp_draft_offset);
 	    fprintf(fp, "DRAFTMULTIPLY %f\n", process->mbp_draft_mult);
-	    
+
 	    /* heave correction */
 	    fprintf(fp, "##\n## Heave Correction:\n");
 	    fprintf(fp, "HEAVEMODE %d\n", process->mbp_heave_mode);
 	    fprintf(fp, "HEAVEOFFSET %f\n", process->mbp_heave);
 	    fprintf(fp, "HEAVEMULTIPLY %f\n", process->mbp_heave_mult);
-	    
+
 	    /* lever correction */
 	    fprintf(fp, "##\n## Lever Correction:\n");
 	    fprintf(fp, "LEVERMODE %d\n", process->mbp_lever_mode);
@@ -2061,24 +2056,24 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "SONAROFFSETX %f\n", process->mbp_sonar_offsetx);
 	    fprintf(fp, "SONAROFFSETY %f\n", process->mbp_sonar_offsety);
 	    fprintf(fp, "SONAROFFSETZ %f\n", process->mbp_sonar_offsetz);
-	    
+
 	    /* roll correction */
 	    fprintf(fp, "##\n## Roll Correction:\n");
 	    fprintf(fp, "ROLLBIASMODE %d\n", process->mbp_rollbias_mode);
 	    fprintf(fp, "ROLLBIAS %f\n", process->mbp_rollbias);
 	    fprintf(fp, "ROLLBIASPORT %f\n", process->mbp_rollbias_port);
 	    fprintf(fp, "ROLLBIASSTBD %f\n", process->mbp_rollbias_stbd);
-	    
+
 	    /* pitch correction */
 	    fprintf(fp, "##\n## Pitch Correction:\n");
 	    fprintf(fp, "PITCHBIASMODE %d\n", process->mbp_pitchbias_mode);
 	    fprintf(fp, "PITCHBIAS %f\n", process->mbp_pitchbias);
-	    
+
 	    /* heading correction */
 	    fprintf(fp, "##\n## Heading Correction:\n");
 	    fprintf(fp, "HEADINGMODE %d\n", process->mbp_heading_mode);
 	    fprintf(fp, "HEADINGOFFSET %f\n", process->mbp_headingbias);
-	    
+
 	    /* tide correction */
 	    fprintf(fp, "##\n## Tide Correction:\n");
 	    fprintf(fp, "TIDEMODE %d\n", process->mbp_tide_mode);
@@ -2086,7 +2081,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
 	    fprintf(fp, "TIDEFILE %s\n", relative_path);
 	    fprintf(fp, "TIDEFORMAT %d\n", process->mbp_tide_format);
-	    
+
 	    /* amplitude correction */
 	    fprintf(fp, "##\n## Amplitude Correction:\n");
 	    fprintf(fp, "AMPCORRMODE %d\n", process->mbp_ampcorr_mode);
@@ -2097,7 +2092,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "AMPCORRSYMMETRY %d\n", process->mbp_ampcorr_symmetry);
 	    fprintf(fp, "AMPCORRANGLE %f\n", process->mbp_ampcorr_angle);
 	    fprintf(fp, "AMPCORRSLOPE %d\n", process->mbp_ampcorr_slope);
-	    
+
 	    /* sidescan correction */
 	    fprintf(fp, "##\n## Sidescan Correction:\n");
 	    fprintf(fp, "SSCORRMODE %d\n", process->mbp_sscorr_mode);
@@ -2108,19 +2103,19 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "SSCORRSYMMETRY %d\n", process->mbp_sscorr_symmetry);
 	    fprintf(fp, "SSCORRANGLE %f\n", process->mbp_sscorr_angle);
 	    fprintf(fp, "SSCORRSLOPE %d\n", process->mbp_sscorr_slope);
-	    
+
 	    /* amplitude/sidescan topography correction */
 	    strcpy(relative_path, process->mbp_ampsscorr_topofile);
 	    status = mb_get_relative_path(verbose, relative_path, pwd, error);
 	    fprintf(fp, "AMPSSCORRTOPOFILE %s\n", relative_path);
-	    
+
 	    /* sidescan recalculation */
 	    fprintf(fp, "##\n## Sidescan Recalculation:\n");
 	    fprintf(fp, "SSRECALCMODE %d\n", process->mbp_ssrecalc_mode);
 	    fprintf(fp, "SSPIXELSIZE %f\n", process->mbp_ssrecalc_pixelsize);
 	    fprintf(fp, "SSSWATHWIDTH %f\n", process->mbp_ssrecalc_swathwidth);
 	    fprintf(fp, "SSINTERPOLATE %d\n", process->mbp_ssrecalc_interpolate);
-	    
+
 	    /* metadata insertion */
 	    fprintf(fp, "##\n## Metadata Insertion:\n");
 	    fprintf(fp, "METAVESSEL %s\n", process->mbp_meta_vessel);
@@ -2141,7 +2136,7 @@ int mb_pr_writepar(int verbose, char *file,
 	    fprintf(fp, "METAPITCHBIAS %f\n", process->mbp_meta_pitchbias);
 	    fprintf(fp, "METAHEADINGBIAS %f\n", process->mbp_meta_headingbias);
 	    fprintf(fp, "METADRAFT %f\n", process->mbp_meta_draft);
-	    
+
 	    /* processing kluges */
 	    fprintf(fp, "##\n## Processing Kluges:\n");
 	    if (process->mbp_kluge001 == MB_YES)
@@ -2164,11 +2159,11 @@ int mb_pr_writepar(int verbose, char *file,
 	    	fprintf(fp, "KLUGE009\n");
 	    if (process->mbp_kluge010 == MB_YES)
 	    	fprintf(fp, "KLUGE010\n");
-  	
+
 	    /* close file */
 	    fclose(fp);
 	    }
-		
+
 	/* set error */
 	else
 	    {
@@ -2193,7 +2188,7 @@ int mb_pr_writepar(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_bathmode(int verbose, struct mb_process_struct *process, 
+int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 			int *error)
 {
 	char	*function_name = "mb_pr_bathmode";
@@ -2242,7 +2237,7 @@ int mb_pr_bathmode(int verbose, struct mb_process_struct *process,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_default_output(int verbose, struct mb_process_struct *process, 
+int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 			int *error)
 {
 	char	*function_name = "mb_pr_default_output";
@@ -2263,11 +2258,11 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 		fprintf(stderr,"dbg2       mbp_format_specified:%d\n",process->mbp_format_specified);
 		fprintf(stderr,"dbg2       mbp_format:          %d\n",process->mbp_format);
 		}
-   
+
 	/* figure out data format and fileroot if possible */
-	status = mb_get_format(verbose, process->mbp_ifile, 
+	status = mb_get_format(verbose, process->mbp_ifile,
 					fileroot, &format, error);
-				
+
 	/* deal with format */
 	if (status == MB_SUCCESS && format > 0)
 	    {
@@ -2277,18 +2272,18 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 		process->mbp_format = format;
 		process->mbp_format_specified = MB_YES;
 		}
-		
+
 	    /* set output file if needed */
 	    if (process->mbp_ofile_specified == MB_NO
 		&& process->mbp_format_specified == MB_YES)
 		{
 		/* use .txt suffix if MBARI ROV navigation */
 		if (process->mbp_format == MBF_MBARIROV)
-		    sprintf(process->mbp_ofile, "%sedited.txt", 
+		    sprintf(process->mbp_ofile, "%sedited.txt",
 			    fileroot);
 		/* else use standard .mbXXX suffix */
 		else
-		    sprintf(process->mbp_ofile, "%sp.mb%d", 
+		    sprintf(process->mbp_ofile, "%sp.mb%d",
 			    fileroot, process->mbp_format);
 		process->mbp_ofile_specified = MB_YES;
 		}
@@ -2301,7 +2296,7 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 	    strcpy(fileroot, process->mbp_ifile);
 	    if (strncmp(&process->mbp_ifile[strlen(process->mbp_ifile)-4], ".txt", 4) == 0)
 	    	fileroot[strlen(process->mbp_ifile)-4] = '\0';
-	    sprintf(process->mbp_ofile, "%sp.mb%d", 
+	    sprintf(process->mbp_ofile, "%sp.mb%d",
 			fileroot, process->mbp_format);
 	    process->mbp_ofile_specified = MB_YES;
 	    }
@@ -2325,8 +2320,8 @@ int mb_pr_default_output(int verbose, struct mb_process_struct *process,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_output(int verbose, int *format, 
-			char *ifile, char *ofile, 
+int mb_pr_get_output(int verbose, int *format,
+			char *ifile, char *ofile,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_output";
@@ -2344,43 +2339,43 @@ int mb_pr_get_output(int verbose, int *format,
 		fprintf(stderr,"dbg2       format:	%d\n",*format);
 		fprintf(stderr,"dbg2       ifile:	%s\n",ifile);
 		}
-   
+
 	/* figure out data format and fileroot if possible */
-	status = mb_get_format(verbose, ifile, 
+	status = mb_get_format(verbose, ifile,
 					fileroot, &tformat, error);
-				
+
 	/* use fileroot if possible */
 	if (status == MB_SUCCESS)
 	    {
 	    /* set format if needed */
 	    if (*format <= 0)
 		*format = tformat;
-		
+
 	    /* use .txt suffix if MBARI ROV navigation */
 	    if (*format == MBF_MBARIROV)
-		sprintf(ofile, "%sedited.txt", 
+		sprintf(ofile, "%sedited.txt",
 			fileroot);
-			
+
 	    /* else use standard .mbXXX suffix */
 	    else
-		sprintf(ofile, "%sp.mb%d", 
+		sprintf(ofile, "%sp.mb%d",
 			fileroot, *format);
 	    }
-	    
+
 	/* else just add suffix */
 	else if (*format > 0)
 	    {
-	    sprintf(ofile, "%sp.mb%d", 
+	    sprintf(ofile, "%sp.mb%d",
 			ifile, *format);
 	    status = MB_SUCCESS;
 	    *error = MB_ERROR_NO_ERROR;
 	    }
-	    
+
 	/* else failure */
 	else
 	    {
-	    sprintf(ofile, "%s.proc", 
-		    ifile);	    
+	    sprintf(ofile, "%s.proc",
+		    ifile);
 	    }
 
 	/* print output debug statements */
@@ -2400,9 +2395,9 @@ int mb_pr_get_output(int verbose, int *format,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_check(int verbose, char *ifile, 
-			int *nparproblem, 	
-			int *ndataproblem, 	
+int mb_pr_check(int verbose, char *ifile,
+			int *nparproblem,
+			int *ndataproblem,
 			int *error)
 {
 	char	*function_name = "mb_pr_check";
@@ -2424,7 +2419,7 @@ int mb_pr_check(int verbose, char *ifile,
 	int	missing_editfile = MB_NO;
 	int	missing_tidefile = MB_NO;
 	struct	stat statbuf;
-	
+
 	/* output stream for basic stuff (stdout if verbose <= 1,
 		output if verbose > 1) */
 	FILE	*output;
@@ -2444,7 +2439,7 @@ int mb_pr_check(int verbose, char *ifile,
 		output = stdout;
 	else
 		output = stderr;
-		
+
 	/* set no problem */
 	*nparproblem = 0;
 	*ndataproblem = 0;
@@ -2459,14 +2454,14 @@ int mb_pr_check(int verbose, char *ifile,
 	missing_svpfile = MB_NO;
 	missing_editfile = MB_NO;
 	missing_tidefile = MB_NO;
-	    
+
 	/* check if input exists */
 	if (stat(ifile, &statbuf) != 0)
 	    {
 	    missing_ifile = MB_YES;
 	    (*nparproblem)++;
 	    }
-	
+
 	/* only check parameter file if parameter file exists */
 	sprintf(ofile, "%s.par", ifile);
 	if (stat(ofile, &statbuf) == 0)
@@ -2474,26 +2469,26 @@ int mb_pr_check(int verbose, char *ifile,
 
 	    /* get known process parameters */
 	    status = mb_pr_readpar(verbose, ifile, MB_NO, &process, error);
-       
+
 	    /* get default data format and output file */
 	    format = 0;
-	    status = mb_pr_get_output(verbose, &format, process.mbp_ifile, 
+	    status = mb_pr_get_output(verbose, &format, process.mbp_ifile,
 					    ofile, error);
-    
+
 	    /* check data format */
-	    if (status == MB_SUCCESS 
+	    if (status == MB_SUCCESS
 		&& process.mbp_format_specified == MB_YES
 		&& format != 0
 		&& process.mbp_format != format)
 		{
 		unexpected_format = MB_YES;
 		(*nparproblem)++;
-		
+
 		/* get output file with specified format */
-		status = mb_pr_get_output(verbose, &process.mbp_format, process.mbp_ifile, 
-					    ofile, error);	    
+		status = mb_pr_get_output(verbose, &process.mbp_format, process.mbp_ifile,
+					    ofile, error);
 		}
-		
+
 	    /* check output file */
 	    if (status == MB_SUCCESS
 		&& process.mbp_ofile_specified == MB_YES
@@ -2505,7 +2500,7 @@ int mb_pr_check(int verbose, char *ifile,
 		    (*nparproblem)++;
 		    }
 		}
-    
+
 	    /* check if output file specified but does not exist */
 	    if (process.mbp_ofile_specified == MB_YES
 		&& stat(process.mbp_ofile, &statbuf) != 0)
@@ -2513,7 +2508,7 @@ int mb_pr_check(int verbose, char *ifile,
 		missing_ofile = MB_YES;
 		(*nparproblem)++;
 		}
-    
+
 	    /* check if nav file specified but does not exist */
 	    if (process.mbp_nav_mode == MBP_NAV_ON
 		&& stat(process.mbp_navfile, &statbuf) != 0)
@@ -2521,7 +2516,7 @@ int mb_pr_check(int verbose, char *ifile,
 		missing_navfile = MB_YES;
 		(*nparproblem)++;
 		}
-    
+
 	    /* check if navadj file specified but does not exist */
 	    if (process.mbp_navadj_mode == MBP_NAV_ON
 		&& stat(process.mbp_navadjfile, &statbuf) != 0)
@@ -2529,7 +2524,7 @@ int mb_pr_check(int verbose, char *ifile,
 		missing_navadjfile = MB_YES;
 		(*nparproblem)++;
 		}
-   
+
 	    /* check if attitude file specified but does not exist */
 	    if (process.mbp_attitude_mode == MBP_ATTITUDE_ON
 		&& stat(process.mbp_attitudefile, &statbuf) != 0)
@@ -2537,7 +2532,7 @@ int mb_pr_check(int verbose, char *ifile,
 		missing_attitudefile = MB_YES;
 		(*nparproblem)++;
 		}
-   
+
 	    /* check if sonardepth file specified but does not exist */
 	    if (process.mbp_sonardepth_mode == MBP_SONARDEPTH_ON
 		&& stat(process.mbp_sonardepthfile, &statbuf) != 0)
@@ -2545,7 +2540,7 @@ int mb_pr_check(int verbose, char *ifile,
 		missing_sonardepthfile = MB_YES;
 		(*nparproblem)++;
 		}
-    
+
 	    /* check if svp file specified but does not exist */
 	    if (process.mbp_svp_mode == MBP_SVP_ON
 		&& stat(process.mbp_svpfile, &statbuf) != 0)
@@ -2553,7 +2548,7 @@ int mb_pr_check(int verbose, char *ifile,
 		missing_svpfile = MB_YES;
 		(*nparproblem)++;
 		}
-    
+
 	    /* check if edit file specified but does not exist */
 	    if (process.mbp_edit_mode == MBP_EDIT_ON
 		&& stat(process.mbp_editfile, &statbuf) != 0)
@@ -2561,7 +2556,7 @@ int mb_pr_check(int verbose, char *ifile,
 		missing_editfile = MB_YES;
 		(*nparproblem)++;
 		}
-    
+
 	    /* check if tide file specified but does not exist */
 	    if (process.mbp_tide_mode == MBP_TIDE_ON
 		&& stat(process.mbp_tidefile, &statbuf) != 0)
@@ -2570,7 +2565,7 @@ int mb_pr_check(int verbose, char *ifile,
 		(*nparproblem)++;
 		}
 	    }
-	
+
 	/* only check inf file if inf file exists */
 	sprintf(ofile, "%s.inf", ifile);
 	if (stat(ofile, &statbuf) == 0)
@@ -2592,79 +2587,79 @@ int mb_pr_check(int verbose, char *ifile,
 		    }
 	    }
 
-	    
+
 	/* output results */
 	if (*nparproblem > 0 && verbose > 0)
 	    {
 	    fprintf(output, "\nParameter File Problems: %s\n", ifile);
 	    if (unexpected_format == MB_YES)
-		fprintf(output, "\tUnexpected format: %d instead of %d\n", 
+		fprintf(output, "\tUnexpected format: %d instead of %d\n",
 			process.mbp_format, format);
 	    if (unexpected_output == MB_YES)
-		fprintf(output, "\tUnexpected output: %s instead of %s\n", 
+		fprintf(output, "\tUnexpected output: %s instead of %s\n",
 			process.mbp_ofile, ofile);
 	    if (missing_ifile == MB_YES)
-		fprintf(output, "\tMissing input file: %s does not exist\n", 
+		fprintf(output, "\tMissing input file: %s does not exist\n",
 			process.mbp_ifile);
 	    if (missing_ofile == MB_YES)
-		fprintf(output, "\tMissing output file: %s does not exist\n", 
+		fprintf(output, "\tMissing output file: %s does not exist\n",
 			process.mbp_ofile);
 	    if (missing_navfile == MB_YES)
-		fprintf(output, "\tMissing nav file: %s does not exist\n", 
+		fprintf(output, "\tMissing nav file: %s does not exist\n",
 			process.mbp_navfile);
 	    if (missing_navadjfile == MB_YES)
-		fprintf(output, "\tMissing navadj file: %s does not exist\n", 
+		fprintf(output, "\tMissing navadj file: %s does not exist\n",
 			process.mbp_navadjfile);
 	    if (missing_attitudefile == MB_YES)
-		fprintf(output, "\tMissing attitude file: %s does not exist\n", 
+		fprintf(output, "\tMissing attitude file: %s does not exist\n",
 			process.mbp_attitudefile);
 	    if (missing_sonardepthfile == MB_YES)
-		fprintf(output, "\tMissing sonardepth file: %s does not exist\n", 
+		fprintf(output, "\tMissing sonardepth file: %s does not exist\n",
 			process.mbp_sonardepthfile);
 	    if (missing_svpfile == MB_YES)
-		fprintf(output, "\tMissing svp file: %s does not exist\n", 
+		fprintf(output, "\tMissing svp file: %s does not exist\n",
 			process.mbp_svpfile);
 	    if (missing_editfile == MB_YES)
-		fprintf(output, "\tMissing edit file: %s does not exist\n", 
+		fprintf(output, "\tMissing edit file: %s does not exist\n",
 			process.mbp_editfile);
 	    if (missing_tidefile == MB_YES)
-		fprintf(output, "\tMissing tide file: %s does not exist\n", 
+		fprintf(output, "\tMissing tide file: %s does not exist\n",
 			process.mbp_tidefile);
 	    }
 	else if (*nparproblem > 0)
 	    {
 	    if (unexpected_format == MB_YES)
-		fprintf(output, "%s : Unexpected format : %d\n", 
+		fprintf(output, "%s : Unexpected format : %d\n",
 			process.mbp_ifile, process.mbp_format);
 	    if (unexpected_output == MB_YES)
-		fprintf(output, "%s : Unexpected output : %s\n", 
+		fprintf(output, "%s : Unexpected output : %s\n",
 			process.mbp_ifile, process.mbp_ofile);
 	    if (missing_ifile == MB_YES)
-		fprintf(output, "%s : Missing input file : %s\n", 
+		fprintf(output, "%s : Missing input file : %s\n",
 			process.mbp_ifile, process.mbp_ifile);
 	    if (missing_ofile == MB_YES)
-		fprintf(output, "%s : Missing output file : %s\n", 
+		fprintf(output, "%s : Missing output file : %s\n",
 			process.mbp_ifile, process.mbp_ofile);
 	    if (missing_navfile == MB_YES)
-		fprintf(output, "%s : Missing nav file : %s\n", 
+		fprintf(output, "%s : Missing nav file : %s\n",
 			process.mbp_ifile, process.mbp_navfile);
 	    if (missing_navadjfile == MB_YES)
-		fprintf(output, "%s : Missing navadj file : %s\n", 
+		fprintf(output, "%s : Missing navadj file : %s\n",
 			process.mbp_ifile, process.mbp_navadjfile);
 	    if (missing_attitudefile == MB_YES)
-		fprintf(output, "%s : Missing attitude file : %s\n", 
+		fprintf(output, "%s : Missing attitude file : %s\n",
 			process.mbp_ifile, process.mbp_attitudefile);
 	    if (missing_sonardepthfile == MB_YES)
-		fprintf(output, "%s : Missing sonardepth file : %s\n", 
+		fprintf(output, "%s : Missing sonardepth file : %s\n",
 			process.mbp_ifile, process.mbp_sonardepthfile);
 	    if (missing_svpfile == MB_YES)
-		fprintf(output, "%s : Missing svp file : %s\n", 
+		fprintf(output, "%s : Missing svp file : %s\n",
 			process.mbp_ifile, process.mbp_svpfile);
 	    if (missing_editfile == MB_YES)
-		fprintf(output, "%s : Missing edit file : %s\n", 
+		fprintf(output, "%s : Missing edit file : %s\n",
 			process.mbp_ifile, process.mbp_editfile);
 	    if (missing_tidefile == MB_YES)
-		fprintf(output, "%s : Missing tide file : %s\n", 
+		fprintf(output, "%s : Missing tide file : %s\n",
 			process.mbp_ifile, process.mbp_tidefile);
 	    }
 
@@ -2685,9 +2680,9 @@ int mb_pr_check(int verbose, char *ifile,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_ofile(int verbose, char *file, 
-			int	mbp_ofile_specified, 
-			char	*mbp_ofile, 
+int mb_pr_update_ofile(int verbose, char *file,
+			int	mbp_ofile_specified,
+			char	*mbp_ofile,
 			int	*error)
 {
 	char	*function_name = "mb_pr_update_ofile";
@@ -2739,9 +2734,9 @@ int mb_pr_update_ofile(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_format(int verbose, char *file, 
-			int mbp_format_specified, 
-			int mbp_format, 
+int mb_pr_update_format(int verbose, char *file,
+			int mbp_format_specified,
+			int mbp_format,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_format";
@@ -2785,11 +2780,11 @@ int mb_pr_update_format(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_rollbias(int verbose, char *file, 
-			int	mbp_rollbias_mode, 
-			double	mbp_rollbias, 
-			double	mbp_rollbias_port, 
-			double	mbp_rollbias_stbd, 
+int mb_pr_update_rollbias(int verbose, char *file,
+			int	mbp_rollbias_mode,
+			double	mbp_rollbias,
+			double	mbp_rollbias_port,
+			double	mbp_rollbias_stbd,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_rollbias";
@@ -2818,7 +2813,7 @@ int mb_pr_update_rollbias(int verbose, char *file,
 	process.mbp_rollbias = mbp_rollbias;
 	process.mbp_rollbias_port = mbp_rollbias_port;
 	process.mbp_rollbias_stbd = mbp_rollbias_stbd;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -2840,9 +2835,9 @@ int mb_pr_update_rollbias(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_pitchbias(int verbose, char *file, 
-			int	mbp_pitchbias_mode, 
-			double	mbp_pitchbias, 
+int mb_pr_update_pitchbias(int verbose, char *file,
+			int	mbp_pitchbias_mode,
+			double	mbp_pitchbias,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_pitchbias";
@@ -2867,7 +2862,7 @@ int mb_pr_update_pitchbias(int verbose, char *file,
 	/* set pitchbias values */
 	process.mbp_pitchbias_mode = mbp_pitchbias_mode;
 	process.mbp_pitchbias = mbp_pitchbias;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -2889,11 +2884,11 @@ int mb_pr_update_pitchbias(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_draft(int verbose, char *file, 
-			int	mbp_draft_mode, 
-			double	mbp_draft, 
-			double	mbp_draft_offset, 
-			double	mbp_draft_mult, 
+int mb_pr_update_draft(int verbose, char *file,
+			int	mbp_draft_mode,
+			double	mbp_draft,
+			double	mbp_draft_offset,
+			double	mbp_draft_mult,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_draft";
@@ -2922,7 +2917,7 @@ int mb_pr_update_draft(int verbose, char *file,
 	process.mbp_draft = mbp_draft;
 	process.mbp_draft_offset = mbp_draft_offset;
 	process.mbp_draft_mult = mbp_draft_mult;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -2944,10 +2939,10 @@ int mb_pr_update_draft(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_heave(int verbose, char *file, 
-			int	mbp_heave_mode, 
-			double	mbp_heave, 
-			double	mbp_heave_mult, 
+int mb_pr_update_heave(int verbose, char *file,
+			int	mbp_heave_mode,
+			double	mbp_heave,
+			double	mbp_heave_mult,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_heave";
@@ -2974,7 +2969,7 @@ int mb_pr_update_heave(int verbose, char *file,
 	process.mbp_heave_mode = mbp_heave_mode;
 	process.mbp_heave = mbp_heave;
 	process.mbp_heave_mult = mbp_heave_mult;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -2996,14 +2991,14 @@ int mb_pr_update_heave(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_lever(int verbose, char *file, 
-			int	mbp_lever_mode, 
-			double	mbp_vru_offsetx, 
-			double	mbp_vru_offsety, 
-			double	mbp_vru_offsetz, 
-			double	mbp_sonar_offsetx, 
-			double	mbp_sonar_offsety, 
-			double	mbp_sonar_offsetz, 
+int mb_pr_update_lever(int verbose, char *file,
+			int	mbp_lever_mode,
+			double	mbp_vru_offsetx,
+			double	mbp_vru_offsety,
+			double	mbp_vru_offsetz,
+			double	mbp_sonar_offsetx,
+			double	mbp_sonar_offsety,
+			double	mbp_sonar_offsetz,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_lever";
@@ -3038,7 +3033,7 @@ int mb_pr_update_lever(int verbose, char *file,
 	process.mbp_sonar_offsetx = mbp_sonar_offsetx;
 	process.mbp_sonar_offsety = mbp_sonar_offsety;
 	process.mbp_sonar_offsetz = mbp_sonar_offsetz;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -3060,10 +3055,10 @@ int mb_pr_update_lever(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_tide(int verbose, char *file, 
-			int	mbp_tide_mode, 
-			char *mbp_tidefile, 
-			int	mbp_tide_format, 
+int mb_pr_update_tide(int verbose, char *file,
+			int	mbp_tide_mode,
+			char *mbp_tidefile,
+			int	mbp_tide_format,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_tide";
@@ -3091,7 +3086,7 @@ int mb_pr_update_tide(int verbose, char *file,
 	if (mbp_tidefile != NULL)
 		strcpy(process.mbp_tidefile,mbp_tidefile);
 	process.mbp_tide_format = mbp_tide_format;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -3113,9 +3108,9 @@ int mb_pr_update_tide(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_tt(int verbose, char *file, 
-			int	mbp_tt_mode, 
-			double	mbp_tt_mult, 
+int mb_pr_update_tt(int verbose, char *file,
+			int	mbp_tt_mode,
+			double	mbp_tt_mult,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_tt";
@@ -3140,7 +3135,7 @@ int mb_pr_update_tt(int verbose, char *file,
 	/* set tt values */
 	process.mbp_tt_mode = mbp_tt_mode;
 	process.mbp_tt_mult = mbp_tt_mult;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -3162,9 +3157,9 @@ int mb_pr_update_tt(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_ssv(int verbose, char *file, 
-			int	mbp_ssv_mode, 
-			double	mbp_ssv, 
+int mb_pr_update_ssv(int verbose, char *file,
+			int	mbp_ssv_mode,
+			double	mbp_ssv,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_ssv";
@@ -3189,7 +3184,7 @@ int mb_pr_update_ssv(int verbose, char *file,
 	/* set ssv values */
 	process.mbp_ssv_mode = mbp_ssv_mode;
 	process.mbp_ssv = mbp_ssv;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -3211,11 +3206,11 @@ int mb_pr_update_ssv(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_svp(int verbose, char *file, 
-			int	mbp_svp_mode, 
-			char	*mbp_svpfile, 
-			int	mbp_angle_mode, 
-			int	mbp_corrected, 
+int mb_pr_update_svp(int verbose, char *file,
+			int	mbp_svp_mode,
+			char	*mbp_svpfile,
+			int	mbp_angle_mode,
+			int	mbp_corrected,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_svp";
@@ -3245,7 +3240,7 @@ int mb_pr_update_svp(int verbose, char *file,
 	    strcpy(process.mbp_svpfile, mbp_svpfile);
 	process.mbp_angle_mode = mbp_angle_mode;
 	process.mbp_corrected = mbp_corrected;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -3267,9 +3262,9 @@ int mb_pr_update_svp(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_static(int verbose, char *file, 
-			int	mbp_static_mode, 
-			char	*mbp_staticfile, 
+int mb_pr_update_static(int verbose, char *file,
+			int	mbp_static_mode,
+			char	*mbp_staticfile,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_static";
@@ -3314,10 +3309,10 @@ int mb_pr_update_static(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_navadj(int verbose, char *file, 
-			int	mbp_navadj_mode, 
-			char	*mbp_navadjfile, 
-			int	mbp_navadj_algorithm, 
+int mb_pr_update_navadj(int verbose, char *file,
+			int	mbp_navadj_mode,
+			char	*mbp_navadjfile,
+			int	mbp_navadj_algorithm,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_navadj";
@@ -3366,10 +3361,10 @@ int mb_pr_update_navadj(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_attitude(int verbose, char *file, 
-			int	mbp_attitude_mode, 
-			char *mbp_attitudefile, 
-			int	mbp_attitude_format, 
+int mb_pr_update_attitude(int verbose, char *file,
+			int	mbp_attitude_mode,
+			char *mbp_attitudefile,
+			int	mbp_attitude_format,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_attitude";
@@ -3397,7 +3392,7 @@ int mb_pr_update_attitude(int verbose, char *file,
 	if (mbp_attitudefile != NULL)
 		strcpy(process.mbp_attitudefile,mbp_attitudefile);
 	process.mbp_attitude_format = mbp_attitude_format;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -3419,10 +3414,10 @@ int mb_pr_update_attitude(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_sonardepth(int verbose, char *file, 
-			int	mbp_sonardepth_mode, 
-			char *mbp_sonardepthfile, 
-			int	mbp_sonardepth_format, 
+int mb_pr_update_sonardepth(int verbose, char *file,
+			int	mbp_sonardepth_mode,
+			char *mbp_sonardepthfile,
+			int	mbp_sonardepth_format,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_sonardepth";
@@ -3450,7 +3445,7 @@ int mb_pr_update_sonardepth(int verbose, char *file,
 	if (mbp_sonardepthfile != NULL)
 		strcpy(process.mbp_sonardepthfile,mbp_sonardepthfile);
 	process.mbp_sonardepth_format = mbp_sonardepth_format;
-	    
+
 	/* update bathymetry recalculation mode */
 	mb_pr_bathmode(verbose, &process, error);
 
@@ -3472,15 +3467,15 @@ int mb_pr_update_sonardepth(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_nav(int verbose, char *file, 
-			int	mbp_nav_mode, 
-			char	*mbp_navfile, 
-			int	mbp_nav_format, 
-			int	mbp_nav_heading, 
-			int	mbp_nav_speed, 
-			int	mbp_nav_draft, 
-			int	mbp_nav_attitude, 
-			int	mbp_nav_algorithm, 
+int mb_pr_update_nav(int verbose, char *file,
+			int	mbp_nav_mode,
+			char	*mbp_navfile,
+			int	mbp_nav_format,
+			int	mbp_nav_heading,
+			int	mbp_nav_speed,
+			int	mbp_nav_draft,
+			int	mbp_nav_attitude,
+			int	mbp_nav_algorithm,
 			double mbp_nav_timeshift,
 			int *error)
 {
@@ -3540,13 +3535,13 @@ int mb_pr_update_nav(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_navshift(int verbose, char *file, 
-			int	mbp_nav_shift, 
-			double	mbp_nav_offsetx, 
-			double	mbp_nav_offsety, 
-			double	mbp_nav_offsetz, 
-			double	mbp_nav_shiftlon, 
-			double	mbp_nav_shiftlat, 
+int mb_pr_update_navshift(int verbose, char *file,
+			int	mbp_nav_shift,
+			double	mbp_nav_offsetx,
+			double	mbp_nav_offsety,
+			double	mbp_nav_offsetz,
+			double	mbp_nav_shiftlon,
+			double	mbp_nav_shiftlat,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_navshift";
@@ -3598,9 +3593,9 @@ int mb_pr_update_navshift(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_heading(int verbose, char *file, 
-			int	mbp_heading_mode, 
-			double	mbp_headingbias, 
+int mb_pr_update_heading(int verbose, char *file,
+			int	mbp_heading_mode,
+			double	mbp_headingbias,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_heading";
@@ -3644,7 +3639,7 @@ int mb_pr_update_heading(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_datacut(int verbose, char *file, 
+int mb_pr_update_datacut(int verbose, char *file,
 			int	mbp_cut_num,
 			int	*mbp_cut_kind,
 			int	*mbp_cut_mode,
@@ -3706,9 +3701,9 @@ int mb_pr_update_datacut(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_edit(int verbose, char *file, 
-			int	mbp_edit_mode, 
-			char	*mbp_editfile, 
+int mb_pr_update_edit(int verbose, char *file,
+			int	mbp_edit_mode,
+			char	*mbp_editfile,
 			int *error)
 {
 	char	*function_name = "mb_pr_update_edit";
@@ -3753,7 +3748,7 @@ int mb_pr_update_edit(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_ampcorr(int verbose, char *file, 
+int mb_pr_update_ampcorr(int verbose, char *file,
 			int	mbp_ampcorr_mode,
 			char	*mbp_ampcorrfile,
 			int	mbp_ampcorr_type,
@@ -3816,7 +3811,7 @@ int mb_pr_update_ampcorr(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_sscorr(int verbose, char *file, 
+int mb_pr_update_sscorr(int verbose, char *file,
 			int	mbp_sscorr_mode,
 			char	*mbp_sscorrfile,
 			int	mbp_sscorr_type,
@@ -3879,7 +3874,7 @@ int mb_pr_update_sscorr(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_ssrecalc(int verbose, char *file, 
+int mb_pr_update_ssrecalc(int verbose, char *file,
 			int		mbp_ssrecalc_mode,
 			double	mbp_ssrecalc_pixelsize,
 			double	mbp_ssrecalc_swathwidth,
@@ -3931,7 +3926,7 @@ int mb_pr_update_ssrecalc(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_metadata(int verbose, char *file, 
+int mb_pr_update_metadata(int verbose, char *file,
 			char	*mbp_meta_vessel,
 			char	*mbp_meta_institution,
 			char	*mbp_meta_platform,
@@ -4006,7 +4001,7 @@ int mb_pr_update_metadata(int verbose, char *file,
         process.mbp_meta_pitchbias = mbp_meta_pitchbias;
         process.mbp_meta_headingbias = mbp_meta_headingbias;
         process.mbp_meta_draft = mbp_meta_draft;
- 
+
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
@@ -4025,7 +4020,7 @@ int mb_pr_update_metadata(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_update_kluges(int verbose, char *file, 
+int mb_pr_update_kluges(int verbose, char *file,
 			int	mbp_kluge001,
 			int	mbp_kluge002,
 			int	mbp_kluge003,
@@ -4076,7 +4071,7 @@ int mb_pr_update_kluges(int verbose, char *file,
         process.mbp_kluge008 = mbp_kluge008;
         process.mbp_kluge009 = mbp_kluge009;
         process.mbp_kluge010 = mbp_kluge010;
- 
+
 	/* write new process parameter file */
 	status = mb_pr_writepar(verbose, file, &process, error);
 
@@ -4095,9 +4090,9 @@ int mb_pr_update_kluges(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_ofile(int verbose, char *file, 
-			int	*mbp_ofile_specified, 
-			char	*mbp_ofile, 
+int mb_pr_get_ofile(int verbose, char *file,
+			int	*mbp_ofile_specified,
+			char	*mbp_ofile,
 			int	*error)
 {
 	char	*function_name = "mb_pr_get_ofile";
@@ -4115,7 +4110,7 @@ int mb_pr_get_ofile(int verbose, char *file,
 		fprintf(stderr,"dbg2       verbose:             %d\n",verbose);
 		fprintf(stderr,"dbg2       file:                %s\n",file);
 		}
-		
+
 	/* this function looks for the output filename directly
 	 * rather than by calling mb_pr_readpar() in order to
 	 * speed up mbgrid and other programs that parse large
@@ -4130,7 +4125,7 @@ int mb_pr_get_ofile(int verbose, char *file,
 	*mbp_ofile_specified = MB_NO;
 	if (mbp_ofile != NULL)
 	    mbp_ofile[0] = '\0';
-	if ((fp = fopen(parfile, "r")) != NULL) 
+	if ((fp = fopen(parfile, "r")) != NULL)
 	    {
 	    while ((result = fgets(buffer,MBP_FILENAMESIZE,fp)) == buffer
 		&& *mbp_ofile_specified == MB_NO)
@@ -4141,7 +4136,7 @@ int mb_pr_get_ofile(int verbose, char *file,
 		    *mbp_ofile_specified = MB_YES;
 		    }
 		}
-		
+
 	    /* close file */
 	    fclose(fp);
 	    }
@@ -4163,9 +4158,9 @@ int mb_pr_get_ofile(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_format(int verbose, char *file, 
-			int *mbp_format_specified, 
-			int *mbp_format, 
+int mb_pr_get_format(int verbose, char *file,
+			int *mbp_format_specified,
+			int *mbp_format,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_format";
@@ -4206,11 +4201,11 @@ int mb_pr_get_format(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_rollbias(int verbose, char *file, 
-			int	*mbp_rollbias_mode, 
-			double	*mbp_rollbias, 
-			double	*mbp_rollbias_port, 
-			double	*mbp_rollbias_stbd, 
+int mb_pr_get_rollbias(int verbose, char *file,
+			int	*mbp_rollbias_mode,
+			double	*mbp_rollbias,
+			double	*mbp_rollbias_port,
+			double	*mbp_rollbias_stbd,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_rollbias";
@@ -4255,9 +4250,9 @@ int mb_pr_get_rollbias(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_pitchbias(int verbose, char *file, 
-			int	*mbp_pitchbias_mode, 
-			double	*mbp_pitchbias, 
+int mb_pr_get_pitchbias(int verbose, char *file,
+			int	*mbp_pitchbias_mode,
+			double	*mbp_pitchbias,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_pitchbias";
@@ -4298,11 +4293,11 @@ int mb_pr_get_pitchbias(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_draft(int verbose, char *file, 
-			int	*mbp_draft_mode, 
-			double	*mbp_draft, 
-			double	*mbp_draft_offset, 
-			double	*mbp_draft_mult, 
+int mb_pr_get_draft(int verbose, char *file,
+			int	*mbp_draft_mode,
+			double	*mbp_draft,
+			double	*mbp_draft_offset,
+			double	*mbp_draft_mult,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_draft";
@@ -4347,10 +4342,10 @@ int mb_pr_get_draft(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_heave(int verbose, char *file, 
-			int	*mbp_heave_mode, 
-			double	*mbp_heave, 
-			double	*mbp_heave_mult, 
+int mb_pr_get_heave(int verbose, char *file,
+			int	*mbp_heave_mode,
+			double	*mbp_heave,
+			double	*mbp_heave_mult,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_heave";
@@ -4393,14 +4388,14 @@ int mb_pr_get_heave(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_lever(int verbose, char *file, 
-			int	*mbp_lever_mode, 
-			double	*mbp_vru_offsetx, 
-			double	*mbp_vru_offsety, 
-			double	*mbp_vru_offsetz, 
-			double	*mbp_sonar_offsetx, 
-			double	*mbp_sonar_offsety, 
-			double	*mbp_sonar_offsetz, 
+int mb_pr_get_lever(int verbose, char *file,
+			int	*mbp_lever_mode,
+			double	*mbp_vru_offsetx,
+			double	*mbp_vru_offsety,
+			double	*mbp_vru_offsetz,
+			double	*mbp_sonar_offsetx,
+			double	*mbp_sonar_offsety,
+			double	*mbp_sonar_offsetz,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_lever";
@@ -4451,10 +4446,10 @@ int mb_pr_get_lever(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_tide(int verbose, char *file, 
-			int	*mbp_tide_mode, 
-			char *mbp_tidefile, 
-			int	*mbp_tide_format, 
+int mb_pr_get_tide(int verbose, char *file,
+			int	*mbp_tide_mode,
+			char *mbp_tidefile,
+			int	*mbp_tide_format,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_tide";
@@ -4498,9 +4493,9 @@ int mb_pr_get_tide(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_tt(int verbose, char *file, 
-			int	*mbp_tt_mode, 
-			double	*mbp_tt_mult, 
+int mb_pr_get_tt(int verbose, char *file,
+			int	*mbp_tt_mode,
+			double	*mbp_tt_mult,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_tt";
@@ -4541,9 +4536,9 @@ int mb_pr_get_tt(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_ssv(int verbose, char *file, 
-			int	*mbp_ssv_mode, 
-			double	*mbp_ssv, 
+int mb_pr_get_ssv(int verbose, char *file,
+			int	*mbp_ssv_mode,
+			double	*mbp_ssv,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_ssv";
@@ -4584,11 +4579,11 @@ int mb_pr_get_ssv(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_svp(int verbose, char *file, 
-			int	*mbp_svp_mode, 
-			char	*mbp_svpfile, 
-			int	*mbp_angle_mode, 
-			int	*mbp_corrected, 
+int mb_pr_get_svp(int verbose, char *file,
+			int	*mbp_svp_mode,
+			char	*mbp_svpfile,
+			int	*mbp_angle_mode,
+			int	*mbp_corrected,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_svp";
@@ -4634,9 +4629,9 @@ int mb_pr_get_svp(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_static(int verbose, char *file, 
-			int	*mbp_static_mode, 
-			char	*mbp_staticfile, 
+int mb_pr_get_static(int verbose, char *file,
+			int	*mbp_static_mode,
+			char	*mbp_staticfile,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_static";
@@ -4678,10 +4673,10 @@ int mb_pr_get_static(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_navadj(int verbose, char *file, 
-			int	*mbp_navadj_mode, 
-			char	*mbp_navadjfile, 
-			int	*mbp_navadj_algorithm, 
+int mb_pr_get_navadj(int verbose, char *file,
+			int	*mbp_navadj_mode,
+			char	*mbp_navadjfile,
+			int	*mbp_navadj_algorithm,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_navadj";
@@ -4728,10 +4723,10 @@ int mb_pr_get_navadj(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_attitude(int verbose, char *file, 
-			int	*mbp_attitude_mode, 
-			char *mbp_attitudefile, 
-			int	*mbp_attitude_format, 
+int mb_pr_get_attitude(int verbose, char *file,
+			int	*mbp_attitude_mode,
+			char *mbp_attitudefile,
+			int	*mbp_attitude_format,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_attitude";
@@ -4775,10 +4770,10 @@ int mb_pr_get_attitude(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_sonardepth(int verbose, char *file, 
-			int	*mbp_sonardepth_mode, 
-			char *mbp_sonardepthfile, 
-			int	*mbp_sonardepth_format, 
+int mb_pr_get_sonardepth(int verbose, char *file,
+			int	*mbp_sonardepth_mode,
+			char *mbp_sonardepthfile,
+			int	*mbp_sonardepth_format,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_sonardepth";
@@ -4822,15 +4817,15 @@ int mb_pr_get_sonardepth(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_nav(int verbose, char *file, 
-			int	*mbp_nav_mode, 
-			char	*mbp_navfile, 
-			int	*mbp_nav_format, 
-			int	*mbp_nav_heading, 
-			int	*mbp_nav_speed, 
-			int	*mbp_nav_draft, 
-			int	*mbp_nav_attitude, 
-			int	*mbp_nav_algorithm, 
+int mb_pr_get_nav(int verbose, char *file,
+			int	*mbp_nav_mode,
+			char	*mbp_navfile,
+			int	*mbp_nav_format,
+			int	*mbp_nav_heading,
+			int	*mbp_nav_speed,
+			int	*mbp_nav_draft,
+			int	*mbp_nav_attitude,
+			int	*mbp_nav_algorithm,
 			double *mbp_nav_timeshift,
 			int *error)
 {
@@ -4887,13 +4882,13 @@ int mb_pr_get_nav(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_navshift(int verbose, char *file, 
-			int	*mbp_nav_shift, 
-			double	*mbp_nav_offsetx, 
-			double	*mbp_nav_offsety, 
-			double	*mbp_nav_offsetz, 
-			double	*mbp_nav_shiftlon, 
-			double	*mbp_nav_shiftlat, 
+int mb_pr_get_navshift(int verbose, char *file,
+			int	*mbp_nav_shift,
+			double	*mbp_nav_offsetx,
+			double	*mbp_nav_offsety,
+			double	*mbp_nav_offsetz,
+			double	*mbp_nav_shiftlon,
+			double	*mbp_nav_shiftlat,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_navshift";
@@ -4941,9 +4936,9 @@ int mb_pr_get_navshift(int verbose, char *file,
 	/* return status */
 	return(status);
 }/*--------------------------------------------------------------------*/
-int mb_pr_get_heading(int verbose, char *file, 
-			int	*mbp_heading_mode, 
-			double	*mbp_headingbias, 
+int mb_pr_get_heading(int verbose, char *file,
+			int	*mbp_heading_mode,
+			double	*mbp_headingbias,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_heading";
@@ -4984,7 +4979,7 @@ int mb_pr_get_heading(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_datacut(int verbose, char *file, 
+int mb_pr_get_datacut(int verbose, char *file,
 			int	*mbp_cut_num,
 			int	*mbp_cut_kind,
 			int	*mbp_cut_mode,
@@ -5043,9 +5038,9 @@ int mb_pr_get_datacut(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_edit(int verbose, char *file, 
-			int	*mbp_edit_mode, 
-			char	*mbp_editfile, 
+int mb_pr_get_edit(int verbose, char *file,
+			int	*mbp_edit_mode,
+			char	*mbp_editfile,
 			int *error)
 {
 	char	*function_name = "mb_pr_get_edit";
@@ -5087,7 +5082,7 @@ int mb_pr_get_edit(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_ampcorr(int verbose, char *file, 
+int mb_pr_get_ampcorr(int verbose, char *file,
 			int	*mbp_ampcorr_mode,
 			char	*mbp_ampcorrfile,
 			int	*mbp_ampcorr_type,
@@ -5147,7 +5142,7 @@ int mb_pr_get_ampcorr(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_sscorr(int verbose, char *file, 
+int mb_pr_get_sscorr(int verbose, char *file,
 			int	*mbp_sscorr_mode,
 			char	*mbp_sscorrfile,
 			int	*mbp_sscorr_type,
@@ -5207,7 +5202,7 @@ int mb_pr_get_sscorr(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_ssrecalc(int verbose, char *file, 
+int mb_pr_get_ssrecalc(int verbose, char *file,
 			int	*mbp_ssrecalc_mode,
 			double	*mbp_ssrecalc_pixelsize,
 			double	*mbp_ssrecalc_swathwidth,
@@ -5256,7 +5251,7 @@ int mb_pr_get_ssrecalc(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_metadata(int verbose, char *file, 
+int mb_pr_get_metadata(int verbose, char *file,
 			char	*mbp_meta_vessel,
 			char	*mbp_meta_institution,
 			char	*mbp_meta_platform,
@@ -5313,7 +5308,7 @@ int mb_pr_get_metadata(int verbose, char *file,
         *mbp_meta_pitchbias = process.mbp_meta_pitchbias;
         *mbp_meta_headingbias = process.mbp_meta_headingbias;
         *mbp_meta_draft = process.mbp_meta_draft;
- 
+
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -5348,7 +5343,7 @@ int mb_pr_get_metadata(int verbose, char *file,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_get_kluges(int verbose, char *file, 
+int mb_pr_get_kluges(int verbose, char *file,
 			int	*mbp_kluge001,
 			int	*mbp_kluge002,
 			int	*mbp_kluge003,
@@ -5389,7 +5384,7 @@ int mb_pr_get_kluges(int verbose, char *file,
         *mbp_kluge008 = process.mbp_kluge008;
         *mbp_kluge009 = process.mbp_kluge009;
         *mbp_kluge010 = process.mbp_kluge010;
- 
+
 
 	/* print output debug statements */
 	if (verbose >= 2)
@@ -5417,11 +5412,11 @@ int mb_pr_get_kluges(int verbose, char *file,
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_set_bathyslopenew(int verbose,
-	int nsmooth, 
+	int nsmooth,
 	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int *ndepths, double *depths, double *depthacrosstrack, 
-	int *nslopes, double *slopes, double *slopeacrosstrack, 
-	double *depthsmooth, 
+	int *ndepths, double *depths, double *depthacrosstrack,
+	int *nslopes, double *slopes, double *slopeacrosstrack,
+	double *depthsmooth,
 	int *error)
 {
 	char	*function_name = "mb_pr_set_bathyslopenew";
@@ -5445,7 +5440,7 @@ int mb_pr_set_bathyslopenew(int verbose,
 		fprintf(stderr,"dbg2       bathacrosstrack: %lu\n",(size_t)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2         %d  %d  %f %f\n", 
+			fprintf(stderr,"dbg2         %d  %d  %f %f\n",
 				i, beamflag[i], bath[i], bathacrosstrack[i]);
 		fprintf(stderr,"dbg2       depths:           %lu\n",(size_t)depths);
 		fprintf(stderr,"dbg2       depthacrosstrack: %lu\n",(size_t)depthacrosstrack);
@@ -5460,7 +5455,7 @@ int mb_pr_set_bathyslopenew(int verbose,
 		depths[i] = 0.0;
 		depthacrosstrack[i] = 0.0;
 		}
-		
+
 	/* decimate by nsmooth, averaging the values used */
 	for (i=0;i<=nbath/nsmooth;i++)
 		{
@@ -5499,7 +5494,7 @@ int mb_pr_set_bathyslopenew(int verbose,
 			if (dxtrack > 0.0)
 				slopes[i] = (depths[i] - depths[i-1])
 					/ dxtrack;
-			else 
+			else
 				slopes[i] = 0.0;
 /*fprintf(stderr,"SLOPECALC: i:%d depths: %f %f  xtrack: %f %f  slope:%f\n",
 i,depths[i-1],depths[i],depthacrosstrack[i-1],depthacrosstrack[i],slopes[i]);*/
@@ -5517,13 +5512,13 @@ i,depths[i-1],depths[i],depthacrosstrack[i-1],depthacrosstrack[i],slopes[i]);*/
 			*ndepths);
 		fprintf(stderr,"dbg2       depths:\n");
 		for (i=0;i<*ndepths;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr,"dbg2       nslopes:         %d\n",
 			*nslopes);
 		fprintf(stderr,"dbg2       slopes:\n");
 		for (i=0;i<*nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, slopes[i], slopeacrosstrack[i]);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5535,11 +5530,11 @@ i,depths[i-1],depths[i],depthacrosstrack[i-1],depthacrosstrack[i],slopes[i]);*/
 }
 /*--------------------------------------------------------------------*/
 int mb_pr_set_bathyslope(int verbose,
-	int nsmooth, 
+	int nsmooth,
 	int nbath, char *beamflag, double *bath, double *bathacrosstrack,
-	int *ndepths, double *depths, double *depthacrosstrack, 
-	int *nslopes, double *slopes, double *slopeacrosstrack, 
-	double *depthsmooth, 
+	int *ndepths, double *depths, double *depthacrosstrack,
+	int *nslopes, double *slopes, double *slopeacrosstrack,
+	double *depthsmooth,
 	int *error)
 {
 	char	*function_name = "mb_pr_set_bathyslope";
@@ -5565,7 +5560,7 @@ int mb_pr_set_bathyslope(int verbose,
 		fprintf(stderr,"dbg2       bathacrosstrack: %lu\n",(size_t)bathacrosstrack);
 		fprintf(stderr,"dbg2       bath:\n");
 		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2         %d  %d  %f %f\n", 
+			fprintf(stderr,"dbg2         %d  %d  %f %f\n",
 				i, beamflag[i], bath[i], bathacrosstrack[i]);
 		fprintf(stderr,"dbg2       depths:           %lu\n",(size_t)depths);
 		fprintf(stderr,"dbg2       depthacrosstrack: %lu\n",(size_t)depthacrosstrack);
@@ -5621,9 +5616,9 @@ int mb_pr_set_bathyslope(int verbose,
 					{
 					factor = ((double)(j - i))
 							/ ((double)(next - i));
-					depths[j] = bath[i] + 
+					depths[j] = bath[i] +
 						factor * (bath[next] - bath[i]);
-					depthacrosstrack[j] = bathacrosstrack[i] + 
+					depthacrosstrack[j] = bathacrosstrack[i] +
 						factor * (bathacrosstrack[next] - bathacrosstrack[i]);
 					}
 				}
@@ -5660,22 +5655,22 @@ int mb_pr_set_bathyslope(int verbose,
 		{
 		*ndepths = nbath;
 		if (last - first > 0)
-			dacrosstrack = 
-				(depthacrosstrack[last] 
-				- depthacrosstrack[first]) 
+			dacrosstrack =
+				(depthacrosstrack[last]
+				- depthacrosstrack[first])
 				/ (last - first);
-		else 
+		else
 			dacrosstrack = 1.0;
 		for (i=0;i<first;i++)
 			{
 			depths[i] = depths[first];
-			depthacrosstrack[i] = depthacrosstrack[first] 
+			depthacrosstrack[i] = depthacrosstrack[first]
 				+ dacrosstrack * (i - first);
 			}
 		for (i=last+1;i<nbath;i++)
 			{
 			depths[i] = depths[last];
-			depthacrosstrack[i] = depthacrosstrack[last] 
+			depthacrosstrack[i] = depthacrosstrack[last]
 				+ dacrosstrack * (i - last);
 			}
 		}
@@ -5688,7 +5683,7 @@ int mb_pr_set_bathyslope(int verbose,
 			{
 			slopes[i+1] = (depths[i+1] - depths[i])
 				/(depthacrosstrack[i+1] - depthacrosstrack[i]);
-			slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1] 
+			slopeacrosstrack[i+1] = 0.5*(depthacrosstrack[i+1]
 				+ depthacrosstrack[i]);
 /*fprintf(stderr,"SLOPECALC: i:%d depths: %f %f  xtrack: %f %f  slope:%f\n",
 i,depths[i],depths[i+1],depthacrosstrack[i],depthacrosstrack[i+1],slopes[i+1]);*/
@@ -5708,13 +5703,13 @@ i,depths[i],depths[i+1],depthacrosstrack[i],depthacrosstrack[i+1],slopes[i+1]);*
 			*ndepths);
 		fprintf(stderr,"dbg2       depths:\n");
 		for (i=0;i<nbath;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr,"dbg2       nslopes:         %d\n",
 			*nslopes);
 		fprintf(stderr,"dbg2       slopes:\n");
 		for (i=0;i<*nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, slopes[i], slopeacrosstrack[i]);
 		fprintf(stderr,"dbg2       error:           %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -5727,7 +5722,7 @@ i,depths[i],depths[i+1],depthacrosstrack[i],depthacrosstrack[i+1],slopes[i+1]);*
 /*--------------------------------------------------------------------*/
 int mb_pr_get_bathyslope(int verbose,
 	int ndepths, double *depths, double *depthacrosstrack,
-	int nslopes, double *slopes, double *slopeacrosstrack, 
+	int nslopes, double *slopes, double *slopeacrosstrack,
 	double acrosstrack, double *depth, double *slope,
 	int *error)
 {
@@ -5736,7 +5731,7 @@ int mb_pr_get_bathyslope(int verbose,
 	int	found_depth, found_slope;
 	int	idepth, islope;
 	int	i;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -5748,13 +5743,13 @@ int mb_pr_get_bathyslope(int verbose,
 			ndepths);
 		fprintf(stderr,"dbg2       depths:\n");
 		for (i=0;i<ndepths;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, depths[i], depthacrosstrack[i]);
 		fprintf(stderr,"dbg2       nslopes:         %d\n",
 			nslopes);
 		fprintf(stderr,"dbg2       slopes:\n");
 		for (i=0;i<nslopes;i++)
-			fprintf(stderr,"dbg2         %d %f %f\n", 
+			fprintf(stderr,"dbg2         %d %f %f\n",
 				i, slopes[i], slopeacrosstrack[i]);
 		fprintf(stderr,"dbg2       acrosstrack:     %f\n",acrosstrack);
 		}
@@ -5764,7 +5759,7 @@ int mb_pr_get_bathyslope(int verbose,
 	found_slope = MB_NO;
 	if (ndepths > 1)
 	    {
-	    
+
 	    if (acrosstrack < depthacrosstrack[0])
 		{
 		*depth = depths[0];
@@ -5780,11 +5775,11 @@ int mb_pr_get_bathyslope(int verbose,
 		found_depth = MB_YES;
 		found_slope = MB_YES;
 		}
-    
+
 	    else if (acrosstrack >= depthacrosstrack[0]
 		    && acrosstrack <= depthacrosstrack[ndepths-1])
 		{
-    
+
 		/* look for depth */
 		idepth = -1;
 		while (found_depth == MB_NO && idepth < ndepths - 2)
@@ -5793,16 +5788,16 @@ int mb_pr_get_bathyslope(int verbose,
 		    if (acrosstrack >= depthacrosstrack[idepth]
 			&& acrosstrack <= depthacrosstrack[idepth+1])
 			{
-			*depth = depths[idepth] 
+			*depth = depths[idepth]
 				+ (acrosstrack - depthacrosstrack[idepth])
-				/(depthacrosstrack[idepth+1] 
+				/(depthacrosstrack[idepth+1]
 				- depthacrosstrack[idepth])
 				*(depths[idepth+1] - depths[idepth]);
 			found_depth = MB_YES;
 			*error = MB_ERROR_NO_ERROR;
 			}
 		    }
-    
+
 		/* look for slope */
 		islope = -1;
 		while (found_slope == MB_NO && islope < nslopes - 2)
@@ -5811,9 +5806,9 @@ int mb_pr_get_bathyslope(int verbose,
 		    if (acrosstrack >= slopeacrosstrack[islope]
 			&& acrosstrack <= slopeacrosstrack[islope+1])
 			{
-			*slope = slopes[islope] 
+			*slope = slopes[islope]
 				+ (acrosstrack - slopeacrosstrack[islope])
-				/(slopeacrosstrack[islope+1] 
+				/(slopeacrosstrack[islope+1]
 				- slopeacrosstrack[islope])
 				*(slopes[islope+1] - slopes[islope]);
 			found_slope = MB_YES;
@@ -5855,7 +5850,7 @@ int mb_pr_point_in_quad(int verbose,
 	int	inside = MB_YES;
 	double	ax, ay, bx, by;
 	double	z1, z2, z3, z4, z;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -5871,11 +5866,11 @@ int mb_pr_point_in_quad(int verbose,
 		fprintf(stderr,"dbg2       x[3]: %f   y[3]: %f\n",x[3],y[3]);
 		}
 
-	/* check if point is inside defined quadrilateral 
+	/* check if point is inside defined quadrilateral
 		- the quad should be defined by four points
 		in counterclockwise order
 		- this is accomplished by calculating the
-		z component of the cross product of the vector from 
+		z component of the cross product of the vector from
 		each quad point to the next with the vector from the
 		quad point to the candidate point - if all four cross
 		product z components are positive, the point is inside
@@ -5905,7 +5900,7 @@ int mb_pr_point_in_quad(int verbose,
 	bx = px - x[3];
 	by = py - y[3];
 	z4 = ax * by - ay * bx;
-	
+
 	z = z1 * z2 * z3 *z4;
 	if (z <= 0.0)
 		inside = MB_NO;
@@ -5924,15 +5919,15 @@ int mb_pr_point_in_quad(int verbose,
 	return(inside);
 }
 /*--------------------------------------------------------------------*/
-	
-int mb_pr_lockswathfile(int verbose, char *file, int purpose, 
+
+int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 			char *program, int *error)
 {
 	char	*function_name = "mb_pr_lockswathfile";
 	int	status = MB_SUCCESS;
 	mb_path	lockfile;
 	FILE	*fp;
-	
+
 	/* file status variables */
 	struct stat file_status;
 	int	fstat;
@@ -5940,7 +5935,7 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 	/* time, user, host variables */
 	time_t	right_now;
 	char	date[25], user[MBP_FILENAMESIZE], *user_ptr, host[MBP_FILENAMESIZE];
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -6017,9 +6012,9 @@ int mb_pr_lockswathfile(int verbose, char *file, int purpose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-	
+
 int mb_pr_lockinfo(int verbose, char *file, int *locked,
-			int *purpose, char *program, char *user, char *cpu, 
+			int *purpose, char *program, char *user, char *cpu,
 			char *date, int *error)
 {
 	char	*function_name = "mb_pr_lockinfo";
@@ -6027,7 +6022,7 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked,
 	mb_path	lockfile;
 	FILE	*fp;
 	mb_path	line;
-	
+
 	/* file status variables */
 	struct stat file_status;
 	int	fstat;
@@ -6041,7 +6036,7 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked,
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       file:       %s\n",file);
 		}
-	
+
 	/* initialize return parameters */
 	*locked = MB_NO;
 	*purpose = 0;
@@ -6049,7 +6044,7 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked,
 	user[0] = '\0';
 	cpu[0] = '\0';
 	date[0] = '\0';
-	
+
 
 	/* check if lock file exists */
 	sprintf(lockfile, "%s.lck", file);
@@ -6120,7 +6115,7 @@ int mb_pr_lockinfo(int verbose, char *file, int *locked,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_pr_unlockswathfile(int verbose, char *file, int purpose, 
+int mb_pr_unlockswathfile(int verbose, char *file, int purpose,
 			char *program, int *error)
 {
 	char	*function_name = "mb_pr_unlockswathfile";
@@ -6136,7 +6131,7 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose,
 
 	/* user, host variables */
 	char	user[MBP_FILENAMESIZE], *user_ptr;
-	
+
 	/* file status variables */
 	struct stat file_status;
 	int	fstat;
@@ -6168,7 +6163,7 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose,
 			strcpy(user,user_ptr);
 		else
 			strcpy(user, "unknown");
-					
+
 		/* if locked and everything matches remove lock file */
 		if (locked == MB_YES
 			&& strncmp(program, lock_program,strlen(program)) == 0
@@ -6207,4 +6202,3 @@ int mb_pr_unlockswathfile(int verbose, char *file, int purpose,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-

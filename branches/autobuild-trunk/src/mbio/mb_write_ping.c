@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_write_ping.c	2/3/93
- *	$Id: mb_write_ping.c 1891 2011-05-04 23:46:30Z caress $
+ *	$Id: mb_write_ping.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -142,7 +142,7 @@
 #include "mb_io.h"
 #include "mb_define.h"
 
-static char rcs_id[]="$Id: mb_write_ping.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mb_write_ping.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_write_ping(int verbose, void *mbio_ptr, void *store_ptr, int *error)

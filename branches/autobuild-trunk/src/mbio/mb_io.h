@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_io.h	1/19/93
- *    $Id: mb_io.h 1892 2011-05-04 23:54:50Z caress $
+ *    $Id: mb_io.h 1985 2012-09-11 08:02:53Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -13,7 +13,7 @@
  *    See README file for copying and redistribution conditions.
  *--------------------------------------------------------------------*/
 /*
- * mb_io.h defines data structures used by MBIO "mb_" functions 
+ * mb_io.h defines data structures used by MBIO "mb_" functions
  * to store parameters relating to reading data from or writing
  * data to a single multibeam data file.
  *
@@ -238,7 +238,7 @@ struct mb_io_struct
 	char	system_name[MB_NAME_LENGTH];
 	char	format_description[MB_DESCRIPTION_LENGTH];
 	int	numfile;	/* the number of parallel files required for i/o */
-	int	filetype;	/* type of files used (normal, xdr, or gsf) */
+	int	filetype;	/* type of files used (normal, single normal, xdr, or gsf) */
 	int	filemode;	/* file mode (read or write) */
 	int	variable_beams; /* if true then number of beams variable */
 	int	traveltime;	/* if true then traveltime and angle data supported */
@@ -256,9 +256,9 @@ struct mb_io_struct
 	double	bounds[4];	/* locations bounds of acceptable data */
 	int	btime_i[7];	/* beginning time of acceptable data */
 	int	etime_i[7];	/* ending time of acceptable data */
-	double	btime_d;	/* beginning time of acceptable data 
+	double	btime_d;	/* beginning time of acceptable data
 					in "_d" format (unix seconds) */
-	double	etime_d;	/* ending time of acceptable data 
+	double	etime_d;	/* ending time of acceptable data
 					in "_d" format (unix seconds) */
 	double	speedmin;	/* minimum ship speed of acceptable data
 					in km/hr */
@@ -271,6 +271,7 @@ struct mb_io_struct
 	long	file_pos;	/* file position at start of
 				    last record read */
 	long	file_bytes;	/* number of bytes read from file */
+        char    *file_iobuffer;  /* file i/o buffer for fread() and fwrite() calls */
 	FILE	*mbfp2;		/* file descriptor #2 */
 	char	file2[MB_PATH_MAXLINE];	/* file name #2 */
 	long	file2_pos;	/* file position #2 at start of
@@ -298,10 +299,10 @@ struct mb_io_struct
 					for formats using a single
 					comment string in a file header */
 	int	irecord_count;	/* counting variable used for VMS derived
-					data formats to remove extra 
+					data formats to remove extra
 					bytes (e.g. sburivax format) */
 	int	orecord_count;	/* counting variable used for VMS derived
-					data formats to insert extra 
+					data formats to insert extra
 					bytes (e.g. sburivax format) */
 
 	/* pointer to structure containing raw data (could be any format) */
@@ -370,12 +371,12 @@ struct mb_io_struct
 	double	*new_ss;
 	double	*new_ss_acrosstrack;
 	double	*new_ss_alongtrack;
-	
+
 	/* variables for projections to and from projected coordinates */
 	int	projection_initialized;
 	void 	*pjptr;
 
-	/* variables for interpolating/extrapolating navigation 
+	/* variables for interpolating/extrapolating navigation
 		for formats containing nav as asynchronous
 		position records separate from ping data */
 	int nfix;
@@ -412,10 +413,10 @@ struct mb_io_struct
 	int naltitude;
 	double altitude_time_d[MB_ASYNCH_SAVE_MAX];
 	double altitude_altitude[MB_ASYNCH_SAVE_MAX];
-	
+
 	/* variables for accumulating MBIO notices */
 	int	notice_list[MB_NOTICE_MAX];
-	
+
 	/* variable for registering and maintaining application i/o arrays */
 	int	bath_arrays_reallocated;
 	int	amp_arrays_reallocated;
@@ -462,58 +463,60 @@ struct mb_io_struct
 		void **store_ptr, int *error);
 	int (*mb_io_store_free)(int verbose, void *mbio_ptr,
 		void **store_ptr, int *error);
-	
+
 	/* function pointers for reading and writing records */
-	int (*mb_io_read_ping)(int verbose, void *mbio_ptr, 
+	int (*mb_io_read_ping)(int verbose, void *mbio_ptr,
 		void *store_ptr, int *error);
-	int (*mb_io_write_ping)(int verbose, void *mbio_ptr, 
+	int (*mb_io_write_ping)(int verbose, void *mbio_ptr,
 		void *store_ptr, int *error);
-		
+
 	/* function pointers for extracting and inserting data */
-	int (*mb_io_dimensions)(int verbose, void *mbio_ptr, void *store_ptr, 
+	int (*mb_io_dimensions)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error);
-	int (*mb_io_pingnumber)(int verbose, void *mbio_ptr, 
+	int (*mb_io_pingnumber)(int verbose, void *mbio_ptr,
 		int *pingnumber, int *error);
-	int (*mb_io_segynumber)(int verbose, void *mbio_ptr, 
+	int (*mb_io_segynumber)(int verbose, void *mbio_ptr,
 		int *line, int *shot, int *cdp, int *error);
-	int (*mb_io_sidescantype)(int verbose, void *mbio_ptr, void *store_ptr, 
+	int (*mb_io_sonartype)(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error);
+	int (*mb_io_sidescantype)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
-	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr, 
+	int (*mb_io_extract)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error);
-	int (*mb_io_insert)(int verbose, void *mbio_ptr, void *store_ptr, 
+	int (*mb_io_insert)(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error);
 	int (*mb_io_extract_nav)(int verbose, void *mbio_ptr, void *store_ptr, int *kind,
-		int time_i[7], double *time_d, 
+		int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error);
-	int (*mb_io_extract_nnav)(int verbose, void *mbio_ptr, void *store_ptr, 
+	int (*mb_io_extract_nnav)(int verbose, void *mbio_ptr, void *store_ptr,
 		int nmax, int *kind, int *n,
-		int *time_i, double *time_d, 
+		int *time_i, double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error);
 	int (*mb_io_insert_nav)(int verbose, void *mbio_ptr, void *store_ptr,
-		int time_i[7], double time_d, 
+		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
-		double roll, double pitch, double heave, 
+		double speed, double heading, double draft,
+		double roll, double pitch, double heave,
 		int *error);
 	int (*mb_io_extract_altitude)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
@@ -533,52 +536,52 @@ struct mb_io_struct
 		int *error);
 	int (*mb_io_ttimes)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbeams,
-		double *ttimes, double	*angles, 
+		double *ttimes, double	*angles,
 		double *angles_forward, double *angles_null,
-		double *heave, double *alongtrack_offset, 
+		double *heave, double *alongtrack_offset,
 		double *draft, double *ssv, int *error);
 	int (*mb_io_detects)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbeams, int *detects, int *error);
 	int (*mb_io_pulses)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbeams, int *pulses, int *error);
 	int (*mb_io_gains)(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, double *transmit_gain, double *pulse_length, 
+		int *kind, double *transmit_gain, double *pulse_length,
 		double *receive_gain, int *error);
 	int (*mb_io_extract_rawss)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nrawss,
-		double *rawss, 
-		double *rawssacrosstrack, 
-		double *rawssalongtrack, 
+		double *rawss,
+		double *rawssacrosstrack,
+		double *rawssalongtrack,
 		int *error);
 	int (*mb_io_insert_rawss)(int verbose, void *mbio_ptr, void *store_ptr,
 		int nrawss,
-		double *rawss, 
-		double *rawssacrosstrack, 
-		double *rawssalongtrack, 
+		double *rawss,
+		double *rawssacrosstrack,
+		double *rawssalongtrack,
 		int *error);
 	int (*mb_io_extract_segytraceheader)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind,
-		void *segytraceheader_ptr, 
+		void *segytraceheader_ptr,
 		int *error);
 	int (*mb_io_extract_segy)(int verbose, void *mbio_ptr, void *store_ptr,
 		int *sampleformat,
 		int *kind,
-		void *segytraceheader_ptr, 
-		float *segydata, 
+		void *segytraceheader_ptr,
+		float *segydata,
 		int *error);
 	int (*mb_io_insert_segy)(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind,
-		void *segytraceheader_ptr, 
-		float *segydata, 
+		void *segytraceheader_ptr,
+		float *segydata,
 		int *error);
 	int (*mb_io_ctd)(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, int *nctd, double *time_d, 
-		double *conductivity, double *temperature, 
+		int *kind, int *nctd, double *time_d,
+		double *conductivity, double *temperature,
 		double *depth, double *salinity, double *soundspeed, int *error);
 	int (*mb_io_ancilliarysensor)(int verbose, void *mbio_ptr, void *store_ptr,
-		int *kind, int *nsensor, double *time_d, 
-		double *sensor1, double *sensor2, double *sensor3, 
-		double *sensor4, double *sensor5, double *sensor6, 
+		int *kind, int *nsensor, double *time_d,
+		double *sensor1, double *sensor2, double *sensor3,
+		double *sensor4, double *sensor5, double *sensor6,
 		double *sensor7, double *sensor8, int *error);
 	int (*mb_io_copyrecord)(int verbose, void *mbio_ptr,
 		void *store_ptr, void *copy_ptr, int *error);

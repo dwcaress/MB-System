@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_error.c	2/2/93
- *    $Id: mb_error.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_error.c 1975 2012-07-11 19:16:56Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -106,7 +106,7 @@
 #include "mb_define.h"
 #include "mb_io.h"
 
-static char rcs_id[]="$Id: mb_error.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mb_error.c 1975 2012-07-11 19:16:56Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_error(int verbose, int error, char **message)
@@ -160,7 +160,7 @@ int mb_error(int verbose, int error, char **message)
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_notice_log_datatype(int verbose, void *mbio_ptr, 
+int mb_notice_log_datatype(int verbose, void *mbio_ptr,
 				int data_id)
 {
 	char	*function_name = "mb_notice_log_datatype";
@@ -205,7 +205,7 @@ int mb_notice_log_datatype(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_notice_log_error(int verbose, void *mbio_ptr, 
+int mb_notice_log_error(int verbose, void *mbio_ptr,
 				int error_id)
 {
 	char	*function_name = "mb_notice_log_error";
@@ -250,7 +250,7 @@ int mb_notice_log_error(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_notice_log_problem(int verbose, void *mbio_ptr, 
+int mb_notice_log_problem(int verbose, void *mbio_ptr,
 				int problem_id)
 {
 	char	*function_name = "mb_notice_log_problem";
@@ -295,7 +295,7 @@ int mb_notice_log_problem(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mb_notice_get_list(int verbose, void *mbio_ptr, 
+int mb_notice_get_list(int verbose, void *mbio_ptr,
 				int *notice_list)
 {
 	char	*function_name = "mb_notice_get_list";

@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mbarirov.c	5/20/99
- *	$Id: mbr_mbarirov.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbr_mbarirov.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1999-2011 by
+ *    Copyright (c) 1999-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -128,7 +128,7 @@ int mbr_mbarirov_wr_data(int verbose, void *mbio_ptr, void *data_ptr, int *error
 
 static char header[] = "Year,Day,Time,Usec,Lat,Lon,East,North,Pres,Head,Alti,Pitch,Roll,PosFlag,PresFlag,HeadFlag,AltiFlag,AttitFlag\n";
 
-static char rcs_id[]="$Id: mbr_mbarirov.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbr_mbarirov.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mbarirov(int verbose, void *mbio_ptr, int *error)

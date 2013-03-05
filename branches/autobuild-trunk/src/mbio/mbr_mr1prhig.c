@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_mr1prhig.c	3/3/94
- *	$Id: mbr_mr1prhig.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbr_mr1prhig.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1994-2011 by
+ *    Copyright (c) 1994-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -173,7 +173,7 @@ int mbr_mr1prhig_wr_hdr(int verbose, XDR *xdrs,
 		struct mbf_mr1prhig_struct *data, char **hdr_comment, int *error);
 int mbr_mr1prhig_wr_ping(int verbose, XDR *xdrs, struct mbf_mr1prhig_struct *data, int *error);
 
-static char rcs_id[]="$Id: mbr_mr1prhig.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbr_mr1prhig.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_mr1prhig(int verbose, void *mbio_ptr, int *error)

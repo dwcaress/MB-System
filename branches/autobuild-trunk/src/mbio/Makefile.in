@@ -74,10 +74,10 @@ am__DEPENDENCIES_1 =
 libmbio_la_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_libmbio_la_OBJECTS = mb_format.lo mb_error.lo mb_swap.lo \
 	mb_compare.lo mb_navint.lo mb_read_init.lo mb_write_init.lo \
-	mb_close.lo mb_mem.lo mb_coor_scale.lo mb_check_info.lo \
-	mb_time.lo mb_angle.lo mb_absorption.lo mb_proj.lo \
-	mb_get_value.lo mb_defaults.lo mb_process.lo mb_esf.lo \
-	mb_get.lo mb_get_all.lo mb_read.lo mb_put_all.lo \
+	mb_close.lo mb_fileio.lo mb_mem.lo mb_coor_scale.lo \
+	mb_check_info.lo mb_time.lo mb_angle.lo mb_absorption.lo \
+	mb_proj.lo mb_get_value.lo mb_defaults.lo mb_process.lo \
+	mb_esf.lo mb_get.lo mb_get_all.lo mb_read.lo mb_put_all.lo \
 	mb_put_comment.lo mb_buffer.lo mb_read_ping.lo \
 	mb_write_ping.lo mb_access.lo mb_segy.lo mb_rt.lo mbsys_sb.lo \
 	mbsys_hsds.lo mbsys_sb2100.lo mbsys_simrad.lo mbsys_simrad2.lo \
@@ -88,28 +88,29 @@ am_libmbio_la_OBJECTS = mb_format.lo mb_error.lo mb_swap.lo \
 	mbsys_xse.lo mbsys_hs10.lo mbsys_atlas.lo mbsys_surf.lo \
 	mbsys_reson8k.lo mbsys_netcdf.lo mbsys_navnetcdf.lo \
 	mbsys_reson7k.lo mbsys_jstar.lo mbsys_image83p.lo \
-	mbr_sbsiomrg.lo mbr_sbsiocen.lo mbr_sbsiolsi.lo \
-	mbr_sburicen.lo mbr_sburivax.lo mbr_sbifremr.lo \
-	mbr_hsatlraw.lo mbr_hsldedmb.lo mbr_hsuricen.lo \
-	mbr_hsurivax.lo mbr_hsldeoih.lo mbr_hsunknwn.lo \
-	mbr_sb2100rw.lo mbr_sb2100bi.lo mbr_emoldraw.lo \
-	mbr_em12darw.lo mbr_em12ifrm.lo mbr_em300raw.lo \
-	mbr_em300mba.lo mbr_em710raw.lo mbr_em710mba.lo \
-	mbr_mr1prhig.lo mbr_mr1aldeo.lo mbr_mr1bldeo.lo \
-	mbr_mr1prvr2.lo mbr_mbldeoih.lo mbr_cbat9001.lo \
-	mbr_cbat8101.lo mbr_hypc8101.lo mbr_bchrtunb.lo \
-	mbr_elmk2unb.lo mbr_bchrxunb.lo mbr_l3xseraw.lo \
-	mbr_sbsioswb.lo mbr_sb2000sb.lo mbr_sb2000ss.lo \
-	mbr_hsmdaraw.lo mbr_hsmdldih.lo mbr_dsl120pf.lo \
-	mbr_dsl120sf.lo mbr_gsfgenmb.lo mbr_mstiffss.lo \
-	mbr_oicgeoda.lo mbr_oicmbari.lo mbr_omghdcsj.lo \
-	mbr_mgd77dat.lo mbr_asciixyz.lo mbr_hydrob93.lo \
-	mbr_mbarirov.lo mbr_mbarrov2.lo mbr_mbpronav.lo \
-	mbr_hs10jams.lo mbr_hsds2raw.lo mbr_hsds2lam.lo \
-	mbr_xtfr8101.lo mbr_mbnetcdf.lo mbr_nvnetcdf.lo \
-	mbr_samesurf.lo mbr_reson7kr.lo mbr_edgjstar.lo \
-	mbr_segysegy.lo mbr_image83p.lo mbr_imagemba.lo \
-	mbr_hir2rnav.lo
+	mbsys_hysweep.lo mbsys_benthos.lo mbr_sbsiomrg.lo \
+	mbr_sbsiocen.lo mbr_sbsiolsi.lo mbr_sburicen.lo \
+	mbr_sburivax.lo mbr_sbifremr.lo mbr_hsatlraw.lo \
+	mbr_hsldedmb.lo mbr_hsuricen.lo mbr_hsurivax.lo \
+	mbr_hsldeoih.lo mbr_hsunknwn.lo mbr_sb2100rw.lo \
+	mbr_sb2100bi.lo mbr_emoldraw.lo mbr_em12darw.lo \
+	mbr_em12ifrm.lo mbr_em300raw.lo mbr_em300mba.lo \
+	mbr_em710raw.lo mbr_em710mba.lo mbr_mr1prhig.lo \
+	mbr_mr1aldeo.lo mbr_mr1bldeo.lo mbr_mr1prvr2.lo \
+	mbr_mbldeoih.lo mbr_cbat9001.lo mbr_cbat8101.lo \
+	mbr_hypc8101.lo mbr_bchrtunb.lo mbr_elmk2unb.lo \
+	mbr_bchrxunb.lo mbr_l3xseraw.lo mbr_sbsioswb.lo \
+	mbr_sb2000sb.lo mbr_sb2000ss.lo mbr_hsmdaraw.lo \
+	mbr_hsmdldih.lo mbr_dsl120pf.lo mbr_dsl120sf.lo \
+	mbr_gsfgenmb.lo mbr_mstiffss.lo mbr_oicgeoda.lo \
+	mbr_oicmbari.lo mbr_omghdcsj.lo mbr_mgd77dat.lo \
+	mbr_asciixyz.lo mbr_hydrob93.lo mbr_mbarirov.lo \
+	mbr_mbarrov2.lo mbr_mbpronav.lo mbr_hs10jams.lo \
+	mbr_hsds2raw.lo mbr_hsds2lam.lo mbr_xtfr8101.lo \
+	mbr_mbnetcdf.lo mbr_nvnetcdf.lo mbr_samesurf.lo \
+	mbr_reson7kr.lo mbr_edgjstar.lo mbr_segysegy.lo \
+	mbr_image83p.lo mbr_imagemba.lo mbr_hir2rnav.lo \
+	mbr_hysweep1.lo mbr_xtfb1624.lo
 nodist_libmbio_la_OBJECTS =
 libmbio_la_OBJECTS = $(am_libmbio_la_OBJECTS) \
 	$(nodist_libmbio_la_OBJECTS)
@@ -281,21 +282,47 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 INCLUDES = -I.. -I../gsf -I../proj -I../mr1pr -I../surf @CDF_INC_DIR@ @GMT_INC_DIR@
 AM_CFLAGS = ${libnetcdf_CFLAGS} ${libgmt_CFLAGS} -L../gsf -L../surf -L../mr1pr -L../proj
-include_HEADERS = mb_format.h mb_status.h mb_io.h mb_swap.h mb_define.h mb_process.h \
-		  mb_segy.h mb_info.h mbsys_sb.h mbsys_hsds.h mbsys_sb2100.h mbsys_simrad.h \
-		  mbsys_simrad2.h mbsys_simrad3.h mbsys_mr1.h mbsys_mr1b.h mbsys_mr1v2001.h \
-		  mbsys_ldeoih.h mbsys_reson.h mbsys_sb2000.h mbsys_hsmd.h mbsys_dsl.h \
-		  mbsys_gsf.h mbsys_mstiff.h mbsys_oic.h mbsys_hdcs.h mbsys_singlebeam.h \
-		  mbsys_xse.h mbsys_hs10.h mbsys_atlas.h mbsys_surf.h mbsys_reson8k.h \
-		  mbsys_netcdf.h mbsys_navnetcdf.h mbsys_reson7k.h mbsys_jstar.h \
-		  mbf_sbsiomrg.h mbf_sbsiocen.h mbf_sbsiolsi.h mbf_sburicen.h mbf_sbifremr.h \
-		  mbf_hsatlraw.h mbf_hsldedmb.h mbf_hsuricen.h mbf_hsldeoih.h mbf_sb2100rw.h \
-		  mbf_em12darw.h mbf_em12ifrm.h mbf_mr1prhig.h mbf_mr1aldeo.h mbf_mr1bldeo.h \
-		  mbf_cbat9001.h mbf_cbat8101.h mbf_hypc8101.h mbf_bchrtunb.h mbf_elmk2unb.h \
-		  mbf_bchrxunb.h mbf_sbsioswb.h mbf_hsmdaraw.h mbf_hsmdldih.h mbf_dsl120pf.h \
-		  mbf_dsl120sf.h mbf_gsfgenmb.h mbf_mstiffss.h mbf_oicgeoda.h  mbf_oicmbari.h \
-		  mbf_omghdcsj.h mbf_mgd77dat.h mbf_mbarirov.h mbf_mbarrov2.h mbf_mbpronav.h \
-		  mbf_xtfr8101.h
+include_HEADERS = mb_format.h mb_status.h \
+        mb_io.h mb_swap.h \
+        mb_define.h mb_process.h \
+        mb_segy.h mb_info.h \
+        mbsys_sb.h mbsys_hsds.h \
+        mbsys_sb2100.h mbsys_simrad.h \
+        mbsys_simrad2.h mbsys_simrad3.h \
+        mbsys_mr1.h mbsys_mr1b.h mbsys_mr1v2001.h \
+        mbsys_ldeoih.h \
+        mbsys_reson.h mbsys_sb2000.h \
+        mbsys_hsmd.h mbsys_dsl.h \
+        mbsys_gsf.h mbsys_mstiff.h \
+        mbsys_oic.h mbsys_hdcs.h \
+        mbsys_singlebeam.h mbsys_xse.h \
+        mbsys_hs10.h \
+        mbsys_atlas.h mbsys_surf.h \
+        mbsys_reson8k.h \
+        mbsys_netcdf.h mbsys_navnetcdf.h \
+        mbsys_reson7k.h mbsys_jstar.h \
+        mbsys_image83p.h mbsys_hysweep.h \
+        mbsys_benthos.h \
+        mbf_sbsiomrg.h mbf_sbsiocen.h \
+        mbf_sbsiolsi.h mbf_sburicen.h \
+        mbf_sbifremr.h mbf_hsatlraw.h \
+        mbf_hsldedmb.h mbf_hsuricen.h \
+        mbf_hsldeoih.h \
+        mbf_sb2100rw.h \
+        mbf_em12darw.h mbf_em12ifrm.h \
+        mbf_mr1prhig.h mbf_mr1aldeo.h \
+        mbf_mr1bldeo.h mbf_cbat9001.h \
+        mbf_cbat8101.h mbf_hypc8101.h \
+        mbf_bchrtunb.h mbf_elmk2unb.h \
+        mbf_bchrxunb.h \
+        mbf_sbsioswb.h \
+        mbf_hsmdaraw.h mbf_hsmdldih.h \
+        mbf_dsl120pf.h mbf_dsl120sf.h \
+        mbf_gsfgenmb.h mbf_mstiffss.h \
+        mbf_oicgeoda.h mbf_oicmbari.h \
+        mbf_omghdcsj.h mbf_mgd77dat.h \
+        mbf_mbarirov.h mbf_mbarrov2.h \
+        mbf_mbpronav.h mbf_xtfr8101.h
 
 lib_LTLIBRARIES = libmbio.la
 libmbio_la_LDFLAGS = -no-undefined -version-info 0:0:0 
@@ -303,7 +330,7 @@ libmbio_la_SOURCES = \
 		mb_format.c mb_error.c \
                 mb_swap.c mb_compare.c mb_navint.c \
                 mb_read_init.c mb_write_init.c mb_close.c \
-                mb_mem.c \
+                mb_fileio.c mb_mem.c \
                 mb_coor_scale.c mb_check_info.c \
                 mb_time.c mb_angle.c \
                 mb_absorption.c mb_proj.c \
@@ -324,11 +351,12 @@ libmbio_la_SOURCES = \
                 mbsys_gsf.c mbsys_mstiff.c \
                 mbsys_oic.c mbsys_hdcs.c \
                 mbsys_singlebeam.c mbsys_xse.c \
-                mbsys_hs10.c  mbsys_atlas.c \
+                mbsys_hs10.c mbsys_atlas.c \
                 mbsys_surf.c mbsys_reson8k.c \
-                mbsys_netcdf.c mbsys_navnetcdf.c  \
+                mbsys_netcdf.c mbsys_navnetcdf.c \
                 mbsys_reson7k.c mbsys_jstar.c \
-                mbsys_image83p.c \
+                mbsys_image83p.c mbsys_hysweep.c \
+                mbsys_benthos.c \
                 mbr_sbsiomrg.c mbr_sbsiocen.c \
                 mbr_sbsiolsi.c mbr_sburicen.c \
                 mbr_sburivax.c mbr_sbifremr.c \
@@ -340,7 +368,7 @@ libmbio_la_SOURCES = \
                 mbr_em12ifrm.c \
                 mbr_em300raw.c mbr_em300mba.c \
                 mbr_em710raw.c mbr_em710mba.c \
-		mbr_mr1prhig.c mbr_mr1aldeo.c \
+                mbr_mr1prhig.c mbr_mr1aldeo.c \
                 mbr_mr1bldeo.c mbr_mr1prvr2.c \
                 mbr_mbldeoih.c mbr_cbat9001.c \
                 mbr_cbat8101.c mbr_hypc8101.c \
@@ -362,7 +390,8 @@ libmbio_la_SOURCES = \
                 mbr_samesurf.c mbr_reson7kr.c \
                 mbr_edgjstar.c mbr_segysegy.c \
                 mbr_image83p.c mbr_imagemba.c \
-                mbr_hir2rnav.c
+                mbr_hir2rnav.c mbr_hysweep1.c \
+                mbr_xtfb1624.c
 
 libmbio_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} @XDR_LIB@ \
 		   -lmbgsf -lmbmr1pr -lmbsapi -lmbproj 
@@ -457,6 +486,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_defaults.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_esf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_fileio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_format.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_get.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mb_get_all.Plo@am__quote@
@@ -507,6 +537,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_hsurivax.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_hydrob93.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_hypc8101.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_hysweep1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_image83p.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_imagemba.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_l3xseraw.Plo@am__quote@
@@ -539,8 +570,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_sburicen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_sburivax.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_segysegy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_xtfb1624.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbr_xtfr8101.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_atlas.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_benthos.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_dsl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_elac.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_elacmk2.Plo@am__quote@
@@ -549,6 +582,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_hs10.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_hsds.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_hsmd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_hysweep.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_image83p.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_jstar.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mbsys_ldeoih.Plo@am__quote@

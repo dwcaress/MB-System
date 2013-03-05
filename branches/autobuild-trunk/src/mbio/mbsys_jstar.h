@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.h	2/21/2005
- *	$Id: mbsys_jstar.h 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbsys_jstar.h 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2005-2011 by
+ *    Copyright (c) 2005-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039

@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_coor_scale.c	1/21/93
- *    $Id: mb_coor_scale.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_coor_scale.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -118,7 +118,7 @@
 #define C6 1.175
 #define C7 0.0023
 
-static char rcs_id[]="$Id: mb_coor_scale.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mb_coor_scale.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_coor_scale(int verbose, double latitude, 

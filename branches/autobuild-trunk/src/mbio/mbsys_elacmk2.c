@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_elac.c	3.00	8/20/94
- *	$Id: mbsys_elacmk2.c 1891 2011-05-04 23:46:30Z caress $
+ *	$Id: mbsys_elacmk2.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1994-2011 by
+ *    Copyright (c) 1994-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -137,7 +137,7 @@
 #include "mb_define.h"
 #include "mbsys_elacmk2.h"
 
- static char rcs_id[]="$Id: mbsys_elacmk2.c 1891 2011-05-04 23:46:30Z caress $";
+ static char rcs_id[]="$Id: mbsys_elacmk2.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_elacmk2_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

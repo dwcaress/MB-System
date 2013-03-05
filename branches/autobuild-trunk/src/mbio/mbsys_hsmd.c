@@ -8,7 +8,7 @@
  *    The MB-system:	mbsys_hsmd.c	Aug 10, 1995
  *	$Header: /system/link/server/cvs/root/mbsystem/src/mbio/mbsys_hsmd.c,v 5.6 2005/11/05 00:48:03 caress Exp $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -120,7 +120,7 @@
 #include "mb_define.h"
 #include "mbsys_hsmd.h"
 
-static char rcs_id[]="$Id: mbsys_hsmd.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbsys_hsmd.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_hsmd_alloc(int verbose, void *mbio_ptr, void **store_ptr, 

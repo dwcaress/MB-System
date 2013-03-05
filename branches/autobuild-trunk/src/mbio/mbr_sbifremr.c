@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_sbifremr.c	3/29/96
- *	$Id: mbr_sbifremr.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbr_sbifremr.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1996-2011 by
+ *    Copyright (c) 1996-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -143,7 +143,7 @@ int mbr_wt_sbifremr(int verbose, void *mbio_ptr, void *store_ptr, int *error);
 int mbr_sbifremr_rd_data(int verbose, void *mbio_ptr, int *error);
 int mbr_sbifremr_wr_data(int verbose, void *mbio_ptr, int *error);
 
-static char rcs_id[]="$Id: mbr_sbifremr.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbr_sbifremr.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_sbifremr(int verbose, void *mbio_ptr, int *error)

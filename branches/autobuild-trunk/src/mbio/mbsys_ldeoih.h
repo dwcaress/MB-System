@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_ldeoih.h	3/2/93
- *	$Id: mbsys_ldeoih.h 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbsys_ldeoih.h 1989 2012-10-04 21:36:53Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -100,6 +100,86 @@ struct mbsys_ldeoih_struct
 	int	kind;
 
 	/* time stamp */
+	double	time_d;		/* decimal seconds since start of 1970 */
+
+	/* position */
+	double	longitude;	/* longitude (degrees 0-360) */
+	double	latitude;	/* latitude (degrees 0-360) */
+
+	/* sonar depth and altitude */
+	double	sonardepth;	/* meters (sonar depth for bathymetry calculation,
+					already corrected for heave if needed,
+						sonardepth = transducer_depth
+						bath = altitude + sonardepth
+						sonardepth = draft - heave
+						draft = sonardepth + heave */
+	double	altitude;	/* meters */
+
+	/* heading and speed */
+	float	heading;	/* heading (degrees 0-360) */
+	float	speed;		/* km/hour */
+
+	/* attitude */
+	float	roll;		/* degrees */
+	float	pitch;		/* degrees */
+	float	heave;		/* meters */
+
+	/* beam widths */
+	float	beam_xwidth;	/* degrees */
+	float	beam_lwidth;	/* degrees */
+
+	/* numbers of beams */
+	short	beams_bath;	/* number of depth values */
+	short	beams_amp;	/* number of amplitude values */
+	short	pixels_ss;	/* number of sidescan pixels */
+	short	spare1;
+	short	beams_bath_alloc;	/* number of depth values allocated */
+	short	beams_amp_alloc;	/* number of amplitude values allocated */
+	short	pixels_ss_alloc;	/* number of sidescan pixels allocated */
+
+	/* scaling */
+	float	depth_scale;	/* depth[i] = (bath[i] * depth_scale) + transducer_depth */
+	float	distance_scale;	/* acrosstrackdistance[i] = acrosstrack[i] * distance_scale
+					alongtrackdistance[i] = alongtrack[i] * distance_scale */
+
+	/* sidescan type */
+        mb_s_char       ss_scalepower;  /* gives scaling factor for sidescan values in powers of 10:
+                                 *      ss_scalepower = 0: ss = ss_stored * 1
+                                 *      ss_scalepower = 1: ss = ss_stored * 10
+                                 *      ss_scalepower = 2: ss = ss_stored * 100
+                                 *      ss_scalepower = 3: ss = ss_stored * 1000 */
+	mb_u_char	ss_type;	/* indicates if sidescan values are logarithmic or linear
+					ss_type = 0: logarithmic (dB)
+					ss_type = 1: linear (voltage) */
+	mb_u_char	spare3;
+	mb_u_char	sonartype;      /* indicates type of sonar from which data originated:
+                                        0	MB_SONARTYPE_NONE
+                                        1	MB_SONARTYPE_ECHOSOUNDER
+                                        2	MB_SONARTYPE_MULTIBEAM
+                                        3	MB_SONARTYPE_SIDESCAN
+                                        4	MB_SONARTYPE_INTERFEROMETRIC */
+
+
+	/* pointers to arrays */
+	unsigned char *beamflag;
+	short	*bath;
+	short	*amp;
+	short	*bath_acrosstrack;
+	short	*bath_alongtrack;
+	short	*ss;
+	short	*ss_acrosstrack;
+	short	*ss_alongtrack;
+
+	/* comment */
+	char	comment[MBSYS_LDEOIH_MAXLINE];
+	};
+
+struct mbsys_ldeoih_old_struct
+	{
+	/* type of data record */
+	int	kind;
+
+	/* time stamp */
 	short	year;		/* year (4 digits) */
 	short	day;		/* julian day (1-366) */
 	short	min;		/* minutes from beginning of day (0-1439) */
@@ -128,7 +208,7 @@ struct mbsys_ldeoih_struct
 	short	beams_bath_alloc;	/* number of depth values allocated */
 	short	beams_amp_alloc;	/* number of amplitude values allocated */
 	short	pixels_ss_alloc;	/* number of sidescan pixels allocated */
-	
+
 	/* obsolete scaling */
 /* 	short	depth_scale;*/	/* 1000 X scale where depth = bath X scale */
 /* 	short	distance_scale;*//* 1000 X scale where distance = dist X scale */
@@ -139,7 +219,7 @@ struct mbsys_ldeoih_struct
 /* 	short	ss_type;*/	/* indicates if sidescan values are logarithmic or linear
 					ss_type = 0: logarithmic (dB)
 					ss_type = 1: linear (voltage) */
-	
+
 	/* scaling */
 	short	depth_scale;	/* 1000*scale where depth = bath*scale + transducer_depth / 1000 */
 	short	distance_scale;	/* 1000*scale where distance = dist*scale */
@@ -164,61 +244,62 @@ struct mbsys_ldeoih_struct
 	/* comment */
 	char	comment[MBSYS_LDEOIH_MAXLINE];
 	};
-	
+
 /* system specific function prototypes */
-int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_ldeoih_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_ldeoih_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_ldeoih_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_ldeoih_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_ldeoih_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_ldeoih_sidescantype(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_ldeoih_sonartype(int verbose, void *mbio_ptr, void *store_ptr,
+		int *sonartype, int *error);
+int mbsys_ldeoih_sidescantype(int verbose, void *mbio_ptr, void *store_ptr,
 		int *ss_type, int *error);
-int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_ldeoih_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_ldeoih_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_ldeoih_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_ldeoih_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_ldeoih_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_ldeoih_insert_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			double transducer_depth, double altitude, 
+			double transducer_depth, double altitude,
 			int *error);
 int mbsys_ldeoih_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_ldeoih_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
-int mbsys_ldeoih_copy(int verbose, void *mbio_ptr, 
+int mbsys_ldeoih_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

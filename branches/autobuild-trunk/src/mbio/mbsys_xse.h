@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_xse.h	3/27/2000
- *	$Id: mbsys_xse.h 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbsys_xse.h 2015 2013-03-01 22:33:52Z caress $
  *
- *    Copyright (c) 2000-2011 by 
+ *    Copyright (c) 2000-2013 by
  *    D. W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -79,15 +79,15 @@
 /*
  * Notes on the MBSYS_XSE (XSE) data format:
  *   1. L3 Communications introduced a new format called XSE in 1999.
- *      SeaBeam Instruments (maker of SeaBeam multibeam sonars)  
- *      and Elac Nautik (make of Bottomchart multibeam sonars) 
+ *      SeaBeam Instruments (maker of SeaBeam multibeam sonars)
+ *      and Elac Nautik (make of Bottomchart multibeam sonars)
  *      are both divisions of L3 Communications.
  *      This "Data Exchange Format" is associated with the new
  *      version of "Hydrostar ONLINE" and represents the intended
  *      data format for both ELAC Bottomchart Compact MK II sonars
  *      (50 kHz and/or 180 kHz) and SeaBeam 2100 series sonars
  *      (12 kHz, 20 kHz, 36 kHz). This follows the purchase of
- *      SeaBeam Instruments by L3 Communications, the parent 
+ *      SeaBeam Instruments by L3 Communications, the parent
  *      company of ELAC Nautik.
  *   2. The XSE format implements a well defined binary format
  *      structure in which each data record is represented as
@@ -120,63 +120,63 @@
  *   2. The valid frames include:
  *        Frame Name    Id   Groups w/ group id's in ()
  *        ---------------------------------------------------------
- *        Navigation      1  General(1), Position(2), Accuracy(3), 
- *                           MotionGroundTruth(4), MotionThroughWater(5), 
- *                           CurrentTrack(6), HeaveRollPitch(7), Heave(8), 
- *			     Roll(9), Pitch(10), Heading(11), Log(12), 
+ *        Navigation      1  General(1), Position(2), Accuracy(3),
+ *                           MotionGroundTruth(4), MotionThroughWater(5),
+ *                           CurrentTrack(6), HeaveRollPitch(7), Heave(8),
+ *			     Roll(9), Pitch(10), Heading(11), Log(12),
  *                           GPS(13)
- *        Sound Velocity  2  General(1), 
- *                           Depth(2), Velocity(3), 
- *                           Conductivity(4), Salinity (5), Temperature(6), 
+ *        Sound Velocity  2  General(1),
+ *                           Depth(2), Velocity(3),
+ *                           Conductivity(4), Salinity (5), Temperature(6),
  *                           Pressure(7), SSV(8), Position(9)
- *        Tide            3  General(1), Position(2), 
+ *        Tide            3  General(1), Position(2),
  *                           Time(3), Tide(4)
- *        Ship            4  General(1), Attitude(2), 
- *                           Position(3), Dynamics(4), Motion(5), 
- *                           Geometry(6), Description(7), 
+ *        Ship            4  General(1), Attitude(2),
+ *                           Position(3), Dynamics(4), Motion(5),
+ *                           Geometry(6), Description(7),
  *                           Parameter(8), NavigationAndMotion(9),
  *                           Transducer(10), TransducerExtended(11)
- *        Sidescan        5  General(1), AmplitudeVsTravelTime(2), 
- *                           PhaseVsTravelTime(3), 
+ *        Sidescan        5  General(1), AmplitudeVsTravelTime(2),
+ *                           PhaseVsTravelTime(3),
  *                           Amplitude(4), Phase(5), Signal(6), PingType(7)
  *                           ComplexSignal(8), Weighting(9)
- *        Multibeam       6  General(1), Beam(2), 
- *                           Traveltime(3), Quality(4), 
- *                           Amplitude(5), Delay(6), Lateral(7), 
- *                           Along(8), Depth(9), Angle(10),  
+ *        Multibeam       6  General(1), Beam(2),
+ *                           Traveltime(3), Quality(4),
+ *                           Amplitude(5), Delay(6), Lateral(7),
+ *                           Along(8), Depth(9), Angle(10),
  *                           Heave(11), Roll(12), Pitch(13),
- *                           Gates(14), Noise(15), EchoLength(16), 
+ *                           Gates(14), Noise(15), EchoLength(16),
  *                           Hits(17), HeaveReceive(18), Azimuth(19),
  *                           MBsystemNavigation(99)
  *        Single Beam     7  General(1)
- *        Control         8  Request(1), Insert(2), Change(3),  
+ *        Control         8  Request(1), Insert(2), Change(3),
  *                           Add(4), Delete(5), Action(6), Reply(7)
  *        Bathymetry      9  General(1), Position(2), Depth(3)
  *        Project        10  General(1), Server(2), Status(3), Sources(4)
- *        Native         11  General(1), RWCollectable(2), UNB(3),  
+ *        Native         11  General(1), RWCollectable(2), UNB(3),
  *                           Raw(4), ELAC(5)
- *        Geodetic       12  General(1), Ellipsoid(2), Datum(3),  
+ *        Geodetic       12  General(1), Ellipsoid(2), Datum(3),
  *                           Projection(4), System(5), Alias(6)
- *        SeaBeam        13  Properties(1), HeaveRollPitch(2), Setup(3),  
- *                           MotionReferenceUnit(4), Settings(5), 
- *                           Beams(6), Gates(7), Raw(8), Center(9), 
- *                           Sidescan, Shutdown(), Ping(), Calibrate(), 
- *                           Collect(), Surface(), Hydrophone(), 
- *                           Projector(17), Calibration(18), Acknowledge(19), 
+ *        SeaBeam        13  Properties(1), HeaveRollPitch(2), Setup(3),
+ *                           MotionReferenceUnit(4), Settings(5),
+ *                           Beams(6), Gates(7), Raw(8), Center(9),
+ *                           Sidescan, Shutdown(), Ping(), Calibrate(),
+ *                           Collect(), Surface(), Hydrophone(),
+ *                           Projector(17), Calibration(18), Acknowledge(19),
  *                           Warning(20), Message(21), Error(22)
  *        Comment        99  General(1) **MB-System ONLY!!!!**
  *   3. Not all of these frames are directly supported by this MB-System
  *      i/o module. Unsupported frames are read and passed
  *      through MB-System as MB_DATA_OTHER type data records.
- *   4. SeaBeam Instruments 2120 12 kHz and 20 KHz multibeam sonar 
- *      systems output both bathymetry and amplitude 
+ *   4. SeaBeam Instruments 2120 12 kHz and 20 KHz multibeam sonar
+ *      systems output both bathymetry and amplitude
  *      information for up to 151 beams per multibeam frame.
  *      Each ping produces a variable number of beams.
- *   5. Elac Bottomchart MkII  50 KHz and 180 kHz sonar systems 
- *      output both bathymetry and amplitude information 
+ *   5. Elac Bottomchart MkII  50 KHz and 180 kHz sonar systems
+ *      output both bathymetry and amplitude information
  *      for up to 126 beams per multibeam frame.
  *      Each ping produces a variable number of beams.
- *   6. The raw XSE format provides asynchronous navigation only; navigation 
+ *   6. The raw XSE format provides asynchronous navigation only; navigation
  *      is not included in the multibeam or sidescan pings.
  *      MB-System adds MBsystemNavigation(99) groups to the multibeam
  *      frames so that processed navigation can be directly associated
@@ -207,7 +207,7 @@
  *                                                      and group end
  *          Id         4     ulong    1               Group id - see below
  *          N          4     long             bytes   Length of null terminated
- *                                                      comment string, padded 
+ *                                                      comment string, padded
  *                                                      to a multiple of 4
  *          Comment    N     char             chars   Comment string
  *          End        4     ulong    #HSG            Group end
@@ -217,14 +217,15 @@
 
 /* maximum number of beams and pixels */
 #define	MBSYS_XSE_MAXBEAMS		630
-#define	MBSYS_XSE_MAXPIXELS		4096
-#define	MBSYS_XSE_MAXSAMPLES		8192
-#define	MBSYS_XSE_MAXSVP		200
+#define	MBSYS_XSE_MAXPIXELS		32768
+#define	MBSYS_XSE_MAXSAMPLES		32768
+#define	MBSYS_XSE_MAXSVP		8192
 #define MBSYS_XSE_MAXDRAFT		200
+#define MBSYS_XSE_MAXPROPERTIES		6
 #define	MBSYS_XSE_COMMENT_LENGTH	200
 #define	MBSYS_XSE_DESCRIPTION_LENGTH	64
 #define	MBSYS_XSE_TIME_OFFSET		2177452800.0
-#define	MBSYS_XSE_BUFFER_SIZE		32000
+#define	MBSYS_XSE_BUFFER_SIZE		131072
 #define	MBSYS_XSE_MAX_SIZE		200
 #define	MBSYS_XSE_MAX_SENSORS		16
 #define	MBSYS_XSE_MAX_TRANSDUCERS	512
@@ -308,6 +309,8 @@
 #define MBSYS_XSE_MBM_GROUP_HITS		17
 #define MBSYS_XSE_MBM_GROUP_HEAVERECEIVE	18
 #define MBSYS_XSE_MBM_GROUP_AZIMUTH		19
+#define MBSYS_XSE_MBM_GROUP_PROPERTIES		20
+#define MBSYS_XSE_MBM_GROUP_NORMAMP		21
 #define MBSYS_XSE_MBM_GROUP_MBSYSTEMNAV		99
 
 #define MBSYS_XSE_SNG_FRAME			7
@@ -325,9 +328,22 @@
 #define MBSYS_XSE_SBM_GROUP_SETTINGS		5
 #define MBSYS_XSE_SBM_GROUP_BEAMS		6
 #define MBSYS_XSE_SBM_GROUP_GATES		7
-#define MBSYS_XSE_SBM_GROUP_RAW			8
-#define MBSYS_XSE_SBM_GROUP_CENTER		9
+#define MBSYS_XSE_SBM_GROUP_SLICE		8
+#define MBSYS_XSE_SBM_GROUP_SIGNAL		9
+#define MBSYS_XSE_SBM_GROUP_SIDESCAN		10
+#define MBSYS_XSE_SBM_GROUP_SHUTDOWN		11
+#define MBSYS_XSE_SBM_GROUP_PING		12
+#define MBSYS_XSE_SBM_GROUP_CALIBRATE		13
+#define MBSYS_XSE_SBM_GROUP_COLLECT		14
+#define MBSYS_XSE_SBM_GROUP_SURFACE		15
+#define MBSYS_XSE_SBM_GROUP_HYDROPHONE		16
+#define MBSYS_XSE_SBM_GROUP_PROJECTOR		17
+#define MBSYS_XSE_SBM_GROUP_BIAS		18
+#define MBSYS_XSE_SBM_GROUP_ACKNOWLEDGE		19
+#define MBSYS_XSE_SBM_GROUP_WARNING		20
 #define MBSYS_XSE_SBM_GROUP_MESSAGE		21
+#define MBSYS_XSE_SBM_GROUP_SWEEPSEGMENTS	40
+#define MBSYS_XSE_SBM_GROUP_SPACINGMODE		50
 
 #define MBSYS_XSE_MSG_FRAME			14
 #define MBSYS_XSE_ATT_FRAME			15
@@ -357,13 +373,15 @@ struct mbsys_xse_beam_struct
 	unsigned int hits;
 	double      heavereceive;
 	double      azimuth;
+        short       normamp;
+        float       frequency;
 	};
 
 struct mbsys_xse_struct
 	{
 	/* type of data record */
 	int	kind;			/* Survey, nav, Comment */
-	
+
 	/* parameter (ship frames) */
 	int	par_source;		/* sensor id */
 	unsigned int	par_sec;	/* sec since 1/1/1901 00:00 */
@@ -376,20 +394,20 @@ struct mbsys_xse_struct
 	double  par_ship_height;	/* vessel maximum height, meters */
 	double  par_ship_displacement;	/* vessel maximum displacement, cubic meters */
 	double  par_ship_weight;	/* vessel maximum weight, kg */
-	
+
 	int	par_ship_nsensor;					/* number of sensors */
 	int	par_ship_sensor_id[MBSYS_XSE_MAX_SENSORS];		/* sensor id array */
-	int	par_ship_sensor_type[MBSYS_XSE_MAX_SENSORS];		/* sensor type array 
+	int	par_ship_sensor_type[MBSYS_XSE_MAX_SENSORS];		/* sensor type array
 										1000 : SeaBeam 1000
 										2000 : SeaBeam 2100
 										2001 : SeaBeam 2100 V-shaped
-										3000 : SeaBeam 3000 
+										3000 : SeaBeam 3000
 										4000 : single beam
 										8000 : Edgetech sidescan
-										9000 : 
+										9000 :
 										9001 : SSV */
 	int	par_ship_sensor_frequency[MBSYS_XSE_MAX_SENSORS];	/* sensor frequency array (kHz) */
-	
+
 	int	par_parameter;		/* boolean flag for parameter group */
 	float	par_roll_bias;		/* radians */
 	float	par_pitch_bias;		/* radians */
@@ -409,7 +427,7 @@ struct mbsys_xse_struct
 	float	par_hrp_x;		/* motion sensor x position, meters */
 	float	par_hrp_y;		/* motion sensor y position, meters */
 	float	par_hrp_z;		/* motion sensor z position, meters */
-	
+
 	int	par_navigationandmotion;/* boolean flag for navigationandmotion group */
 	double	par_nam_roll_bias;	/* roll bias, radians */
 	double	par_nam_pitch_bias;	/* pitch bias, radians */
@@ -449,7 +467,7 @@ struct mbsys_xse_struct
 	double	par_xdr_z[MBSYS_XSE_MAX_TRANSDUCERS];	/* transducer center vertical offset (m) */
 	double	par_xdr_roll[MBSYS_XSE_MAX_TRANSDUCERS];	/* beamforming roll bias (radians - port up positive) */
 	double	par_xdr_pitch[MBSYS_XSE_MAX_TRANSDUCERS];	/* beamforming pitch bias (radians - bow up positive) */
-	double	par_xdr_azimuth[MBSYS_XSE_MAX_TRANSDUCERS];	/* beamforming azimuth bias (radians 
+	double	par_xdr_azimuth[MBSYS_XSE_MAX_TRANSDUCERS];	/* beamforming azimuth bias (radians
 									- projector axis clockwise with
 									respect to compass positive) */
 	int	par_xdx_num_transducer; 			/* number of transducers */
@@ -470,6 +488,8 @@ struct mbsys_xse_struct
 	double	svp_temperature[MBSYS_XSE_MAXSVP];	/* degree celcius */
 	double	svp_pressure[MBSYS_XSE_MAXSVP];	/* bar */
 	double	svp_ssv;		/* m/s */
+        double  svp_ssv_depth;          /* m */
+        char    svp_ssv_depthflag;      /* 0 = invalid depth, otherwise depth valid */
 
 	/* position (navigation frames) */
 	int	nav_group_general;	/* boolean flag */
@@ -484,7 +504,7 @@ struct mbsys_xse_struct
 	int	nav_group_pitch;	/* boolean flag */
 	int	nav_group_heading;	/* boolean flag */
 	int	nav_group_log;		/* boolean flag */
-	int	nav_group_gps;		/* boolean flag */	
+	int	nav_group_gps;		/* boolean flag */
 	int	nav_source;		/* sensor id */
 	unsigned int	nav_sec;	/* sec since 1/1/1901 00:00 */
 	unsigned int	nav_usec;	/* microseconds */
@@ -492,11 +512,11 @@ struct mbsys_xse_struct
 	int	nav_status;
 	int	nav_description_len;
 	char	nav_description[MBSYS_XSE_DESCRIPTION_LENGTH];
-	double	nav_x;			/* eastings (m) or 
+	double	nav_x;			/* eastings (m) or
 					    longitude (radians) */
-	double	nav_y;			/* northings (m) or 
+	double	nav_y;			/* northings (m) or
 					    latitude (radians) */
-	double	nav_z;			/* height (m) or 
+	double	nav_z;			/* height (m) or
 					    ellipsoidal height (m) */
 	short	nav_acc_quality;	/* GPS quality:
 						0: invalid
@@ -535,7 +555,7 @@ struct mbsys_xse_struct
 	float	nav_gps_geoidalseparation;	/* difference between WGS84 ellipsoid and geoid (m)
 							(positive means sea level geoid is above
 							ellipsoid) */
-	
+
 	/* survey depth (multibeam frames) */
 	int	mul_frame;		/* boolean flag - multibeam frame read */
 	int	mul_group_beam;		/* boolean flag - beam group read */
@@ -556,6 +576,8 @@ struct mbsys_xse_struct
 	int	mul_group_hits;		/* boolean flag - hits group read */
 	int	mul_group_heavereceive;	/* boolean flag - heavereceive group read */
 	int	mul_group_azimuth;	/* boolean flag - azimuth group read */
+	int	mul_group_properties;	/* boolean flag - properties group read */
+	int	mul_group_normamp;	/* boolean flag - normalized amplitude group read */
 	int	mul_group_mbsystemnav;	/* boolean flag - mbsystemnav group read */
 	int	mul_source;		/* sensor id */
 	unsigned int	mul_sec;	/* sec since 1/1/1901 00:00 */
@@ -573,7 +595,27 @@ struct mbsys_xse_struct
 	double	mul_heading;		/* heading (radians) */
 	double	mul_speed;		/* speed (m/s) */
 	struct mbsys_xse_beam_struct beams[MBSYS_XSE_MAXBEAMS];
-	
+        int     mul_num_properties;     /* number of properties */
+        unsigned short mul_properties_type[MBSYS_XSE_MAXPROPERTIES];
+        double  mul_properties_value[MBSYS_XSE_MAXPROPERTIES];
+        char    mul_properties_reserved[40];
+        int     mul_normamp_num_beams;  /* number of beams */
+        int     mul_normamp_flags;      /* multi-frequency flag:
+                                            0=one frequency is written,
+                                            1=one frequency is written for each beam */
+        float   mul_normamp_along_beamwidth;    /* along track beam width for center beam (radians) */
+        float   mul_normamp_across_beamwidth;   /* across track beam width for center beam (radians) */
+        short   mul_normamp_amp[MBSYS_XSE_MAXBEAMS];
+                                        /* Normalized Amplitude of Bottom Echo per Beam.
+                                            All System Gain Values (Receiver Gain, Source
+                                            Level, etc.) have been removed from this value.
+                                            System independent losses are not part of
+                                            the normalization! (Beam Order is the same as
+                                            in the Angle Group (Id 10) ) */
+        float   mul_normamp_frequency[MBSYS_XSE_MAXBEAMS];
+                                        /* System Frequency (Number of Values depends on
+                                            Multi-Frequency- Flag, see above) */
+
 	/* survey sidescan (sidescan frames) */
 	int	sid_frame;		/* boolean flag - sidescan frame read */
 	int	sid_group_avt;		/* boolean flag - amp vs time group read */
@@ -629,20 +671,22 @@ struct mbsys_xse_struct
 	int	sid_cmp_num_samples;	/* number of samples */
 	short	sid_cmp_real[MBSYS_XSE_MAXPIXELS]; /* real sidescan signal */
 	short	sid_cmp_imaginary[MBSYS_XSE_MAXPIXELS]; /* imaginary sidescan signal */
-	short	sid_wgt_factorleft;		/* weighting factor for block floating 
-						point expansion  -- 
+	short	sid_wgt_factorleft;		/* weighting factor for block floating
+						point expansion  --
 						defined as 2^(-N) volts for lsb */
 	unsigned int sid_wgt_samplesleft;	/* number of left samples */
-	short	sid_wgt_factorright;		/* weighting factor for block floating 
-						point expansion  -- 
+	short	sid_wgt_factorright;		/* weighting factor for block floating
+						point expansion  --
 						defined as 2^(-N) volts for lsb */
 	unsigned int sid_wgt_samplesright;	/* number of right samples */
-	
-	
+
+
 	/* seabeam (seabeam frames) */
 	int	sbm_properties;		/* boolean flag - sbm properties group read */
 	int	sbm_hrp;		/* boolean flag - sbm hrp group read */
-	int	sbm_center;		/* boolean flag - sbm center group read */
+	int	sbm_signal;		/* boolean flag - sbm signal group read */
+	int	sbm_sweepsegments;	/* boolean flag - sbm sweep segments group read */
+	int	sbm_spacingmode;	/* boolean flag - sbm spacing mode group read */
 	int	sbm_source;		/* sensor id */
 	int	sbm_message;		/* sensor id */
 	unsigned int	sbm_sec;	/* sec since 1/1/1901 00:00 */
@@ -662,83 +706,98 @@ struct mbsys_xse_struct
 	double	sbm_heave;		/* heave (m) */
 	double	sbm_roll;		/* roll (radians) */
 	double	sbm_pitch;		/* pitch (radians) */
-	int	sbm_center_beam;	/* beam number for center beam profile */
-	int	sbm_center_count;	/* number of samples in center beam profile */
-	float	sbm_center_amp[MBSYS_XSE_MAXSAMPLES];	/* center beam profile values */
+	int	sbm_signal_beam;	/* beam number for signal */
+	int	sbm_signal_count;	/* number of samples in signal */
+	float	sbm_signal_amp[MBSYS_XSE_MAXSAMPLES];	/* signal values */
 	int	sbm_message_id;		/* seabeam message id */
 	int	sbm_message_len;	/* seabeam message length */
 	char	sbm_message_txt[MBSYS_XSE_COMMENT_LENGTH]; /* seabeam message */
+        char    sbm_sweep_direction;    /* sweep direction 0=static, 1=port, 2=starboard */
+        float   sbm_sweep_azimuth;      /* effective azimuth (radians) */
+        unsigned int    sbm_sweep_segments;     /* number of segments */
+        unsigned int    sbm_sweep_seconds;      /* seconds since start of ping and end of sweep segment */
+        unsigned int    sbm_sweep_micro;        /* microseconds of seconds */
+        float   sbm_sweep_extrapolateazimuth;   /* extrapolated azimuth at center of sweep segment (radians) */
+        float   sbm_sweep_interpolatedazimuth;  /* interpolated azimuth at center of sweep segment (radians) */
+        float   sbm_sweep_extrapolatepitch;     /* extrapolated pitch at center of sweep segment (radians) */
+        float   sbm_sweep_interpolatedpitch;    /* interpolated pitch at center of sweep segment (radians) */
+        float   sbm_sweep_extrapolateroll;      /* extrapolated roll at center of sweep segment (radians) */
+        float   sbm_sweep_interpolatedroll;     /* interpolated roll at center of sweep segment (radians) */
+        float   sbm_sweep_stabilizedangle;      /* sweep segment stabilized angle (radians) */
+        char    sbm_spacing_mode;               /* spacing mode: 0=equiangle, 1=equidistant */
+        float   sbm_spacing_equidistance;       /* equidistance (percentage of center depth) */
+        float   sbm_spacing_equidistance_min;   /* equidistance minimum value (percentage of center depth) */
+        float   sbm_spacing_equidistance_max;   /* equidistance maximum value (percentage of center depth) */
 
 	/* comment */
 	int	com_source;		/* sensor id */
 	unsigned int	com_sec;	/* sec since 1/1/1901 00:00 */
-	unsigned int	com_usec;	/* microseconds */	
+	unsigned int	com_usec;	/* microseconds */
 	char	comment[MBSYS_XSE_COMMENT_LENGTH];
-	
+
 	/* unsupported frames */
 	int	rawsize;		/* size of unknown frame in bytes */
 	char	raw[MBSYS_XSE_BUFFER_SIZE];
 	};
 
-	
+
 /* system specific function prototypes */
-int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_xse_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_xse_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_xse_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error);
-int mbsys_xse_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_xse_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbath, int *namp, int *nss, int *error);
-int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_xse_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
 			double *speed, double *heading,
 			int *nbath, int *namp, int *nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
-int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_xse_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			int kind, int time_i[7], double time_d,
 			double navlon, double navlat,
 			double speed, double heading,
 			int nbath, int namp, int nss,
-			char *beamflag, double *bath, double *amp, 
+			char *beamflag, double *bath, double *amp,
 			double *bathacrosstrack, double *bathalongtrack,
 			double *ss, double *ssacrosstrack, double *ssalongtrack,
 			char *comment, int *error);
 int mbsys_xse_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams,
-			double *ttimes, double *angles, 
+			double *ttimes, double *angles,
 			double *angles_forward, double *angles_null,
-			double *heave, double *alongtrack_offset, 
+			double *heave, double *alongtrack_offset,
 			double *draft, double *ssv, int *error);
 int mbsys_xse_detects(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int *nbeams, int *detects, int *error);
 int mbsys_xse_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, double *transducer_depth, double *altitude, 
+			int *kind, double *transducer_depth, double *altitude,
 			int *error);
 int mbsys_xse_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int *kind, int time_i[7], double *time_d,
 			double *navlon, double *navlat,
-			double *speed, double *heading, double *draft, 
-			double *roll, double *pitch, double *heave, 
+			double *speed, double *heading, double *draft,
+			double *roll, double *pitch, double *heave,
 			int *error);
 int mbsys_xse_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			int time_i[7], double time_d,
 			double navlon, double navlat,
-			double speed, double heading, double draft, 
+			double speed, double heading, double draft,
 			double roll, double pitch, double heave,
 			int *error);
 int mbsys_xse_extract_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int *kind, 
-			int *nsvp, 
+			int *kind,
+			int *nsvp,
 			double *depth, double *velocity,
 			int *error);
 int mbsys_xse_insert_svp(int verbose, void *mbio_ptr, void *store_ptr,
-			int nsvp, 
+			int nsvp,
 			double *depth, double *velocity,
 			int *error);
-int mbsys_xse_copy(int verbose, void *mbio_ptr, 
+int mbsys_xse_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error);
-

@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_jstar.c	10/4/94
- *	$Id: mbsys_jstar.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbsys_jstar.c 1942 2012-03-16 19:20:44Z caress $
  *
- *    Copyright (c) 2005-2011 by
+ *    Copyright (c) 2005-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -67,10 +67,10 @@
 #include "mb_segy.h"
 #include "mbsys_jstar.h"
 
-static char rcs_id[]="$Id: mbsys_jstar.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbsys_jstar.c 1942 2012-03-16 19:20:44Z caress $";
 
 /*--------------------------------------------------------------------*/
-int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_jstar_alloc";
@@ -121,7 +121,7 @@ int mbsys_jstar_alloc(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr, 
+int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr,
 			int *error)
 {
 	char	*function_name = "mbsys_jstar_deall";
@@ -178,7 +178,7 @@ int mbsys_jstar_deall(int verbose, void *mbio_ptr, void **store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int *nbath, int *namp, int *nss, int *error)
 {
 	char	*function_name = "mbsys_jstar_dimensions";
@@ -255,7 +255,7 @@ int mbsys_jstar_dimensions(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr, 
+int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr,
 		int *pingnumber, int *error)
 {
 	char	*function_name = "mbsys_jstar_pingnumber";
@@ -319,12 +319,12 @@ int mbsys_jstar_pingnumber(int verbose, void *mbio_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
 		double *speed, double *heading,
 		int *nbath, int *namp, int *nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -369,13 +369,13 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get channel */
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
-		
+
 		/* get time */
 		time_j[0] = sbp->year;
 		time_j[1] = sbp->day;
 		time_j[2] = 60 * sbp->hour + sbp->minute;
 		time_j[3] = sbp->second;
-		time_j[4] = (int)1000 * (sbp->millisecondsToday 
+		time_j[4] = (int)1000 * (sbp->millisecondsToday
 				- 1000 * floor(0.001 * ((double)sbp->millisecondsToday)));
 		mb_get_itime(verbose,time_j,time_i);
 		mb_get_time(verbose,time_i,time_d);
@@ -389,7 +389,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		*speed = 0.0;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 20.0;
 		mb_io_ptr->beamwidth_xtrack = 20.0;
@@ -398,7 +398,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		*nbath = 1;
 		*namp = 0;
 		*nss = 0;
-		
+
 		/* get nadir depth */
 		if (ssport->depth > 0)
 			{
@@ -466,7 +466,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* done translating values */
 
 		}
-		
+
 	/* extract sidescan data from structure */
 	else if (*kind == MB_DATA_DATA
 		|| *kind == MB_DATA_SIDESCAN2)
@@ -474,13 +474,13 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get channels */
 		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
 		ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
-		
+
 		/* get time */
 		time_j[0] = ssport->year;
 		time_j[1] = ssport->day;
 		time_j[2] = 60 * ssport->hour + ssport->minute;
 		time_j[3] = ssport->second;
-		time_j[4] = (int)1000 * (ssport->millisecondsToday 
+		time_j[4] = (int)1000 * (ssport->millisecondsToday
 				- 1000 * floor(0.001 * ((double)ssport->millisecondsToday)));
 		mb_get_itime(verbose,time_j,time_i);
 		mb_get_time(verbose,time_i,time_d);
@@ -494,7 +494,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		*speed = 0.0;
-			
+
 		/* set beamwidths in mb_io structure */
 		mb_io_ptr->beamwidth_ltrack = 1.5;
 		mb_io_ptr->beamwidth_xtrack = 0.1;
@@ -507,7 +507,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			*nss = MBSYS_JSTAR_PIXELS_MAX;
 		else
 			*nss = ssport->samples + ssstbd->samples;
-		
+
 		/* get nadir depth */
 		if (ssport->depth > 0)
 			{
@@ -524,18 +524,18 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			bath[0] = 0.0;
 			beamflag[0] = MB_FLAG_NULL;
 			}
-		
+
 		/* get pixel sizes and bottom arrival */
 		rawpixelsize = ssport->sampleInterval * 0.00000075;
 		if ((ssport->samples + ssstbd->samples) > *nss)
-			pixelsize = rawpixelsize 
-					* ((double)(ssport->samples + ssstbd->samples)) 
+			pixelsize = rawpixelsize
+					* ((double)(ssport->samples + ssstbd->samples))
 				 	/ ((double)(*nss));
 		else
 			pixelsize = rawpixelsize;
 		altitude = 0.001 * ssport->sonaraltitude;
 /*fprintf(stderr,"rawpixelsize:%f pixelsize:%f altitude:%f\n", rawpixelsize,pixelsize,altitude);*/
-		
+
 		/* zero the array */
 		for (i=0;i<*nss;i++)
 			{
@@ -547,7 +547,7 @@ int mbsys_jstar_extract(int verbose, void *mbio_ptr, void *store_ptr,
 			ssalongtrack[i] = 0.0;
 /*fprintf(stderr,"i:%d range:%f altitude:%f xtrack:%f\n",i,range,altitude,ssacrosstrack[i]);*/
 			}
-		
+
 		/* bin the data */
 		istart = (int)(altitude / rawpixelsize);
 /*fprintf(stderr,"istart:%d altitude:%f rawpixelsize:%f startDepth:%d\n",
@@ -576,7 +576,7 @@ istart,altitude,rawpixelsize,ssport->startDepth);*/
 			ssalongtrack[j] += 1.0;
 /*fprintf(stderr,"Binning Stbd: i:%d j:%d ss:%f\n",i,j,ss[j]/ssalongtrack[j]);*/
 			}
-		
+
 		/* average the data in the bins */
 		for (i=0;i<*nss;i++)
 			{
@@ -672,13 +672,13 @@ istart,altitude,rawpixelsize,ssport->startDepth);*/
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind == MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       comment:     \ndbg2       %s\n",
 			comment);
 		}
-	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	else if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -694,7 +694,7 @@ istart,altitude,rawpixelsize,ssport->startDepth);*/
 		fprintf(stderr,"dbg2       speed:         %f\n",*speed);
 		fprintf(stderr,"dbg2       heading:       %f\n",*heading);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& (*kind == MB_DATA_DATA
 		|| *kind == MB_DATA_SIDESCAN2))
 		{
@@ -715,12 +715,12 @@ istart,altitude,rawpixelsize,ssport->startDepth);*/
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr, 
+int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		int kind, int time_i[7], double time_d,
 		double navlon, double navlat,
 		double speed, double heading,
 		int nbath, int namp, int nss,
-		char *beamflag, double *bath, double *amp, 
+		char *beamflag, double *bath, double *amp,
 		double *bathacrosstrack, double *bathalongtrack,
 		double *ss, double *ssacrosstrack, double *ssalongtrack,
 		char *comment, int *error)
@@ -768,18 +768,18 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 	if (verbose >= 2 && (kind == MB_DATA_DATA || kind == MB_DATA_SIDESCAN2))
 		{
 		fprintf(stderr,"dbg2       nbath:      %d\n",nbath);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nbath;i++)
 		  fprintf(stderr,"dbg3       beam:%4d  flag:%3d  bath:%f  bathdist:%f\n",
 			i,beamflag[i],bath[i],
 			bathacrosstrack[i]);
 		fprintf(stderr,"dbg2       namp:       %d\n",namp);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<namp;i++)
 		  fprintf(stderr,"dbg3        amp[%d]: %f\n",
 			i,amp[i]);
 		fprintf(stderr,"dbg2        nss:       %d\n",nss);
-		if (verbose >= 3) 
+		if (verbose >= 3)
 		 for (i=0;i<nss;i++)
 		  fprintf(stderr,"dbg3        ss[%d]: %f    ssdist[%d]: %f\n",
 			i,ss[i],i,ssacrosstrack[i]);
@@ -804,7 +804,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get channel */
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
-		
+
 		/* set kind and subsystem */
 		store->kind = MB_DATA_SUBBOTTOM_SUBBOTTOM;
 		store->subsystem = MBSYS_JSTAR_SUBSYSTEM_SBP;
@@ -817,8 +817,8 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp->minute = time_i[4];
 		sbp->second = time_i[5];
 		sbp->millisecondsToday = 0.001 * time_i[6]
-					+ 1000 * (time_i[5] 
-						+ 60.0 * (time_i[4] 
+					+ 1000 * (time_i[5]
+						+ 60.0 * (time_i[4]
 							+ 60.0 * time_i[3]));
 
 		/* get navigation */
@@ -833,16 +833,16 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp->heading = (short) (100.0 * heading);
 
 		/* read distance and depth values into storage arrays */
-		
+
 		}
-		
+
 	/* insert data in structure */
 	else if (store->kind == MB_DATA_DATA || store->kind == MB_DATA_SIDESCAN2)
 		{
 		/* get channels */
 		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
 		ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
-		
+
 		/* set kind and subsystem */
 		if (ssport->message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW
 			&& ssstbd->message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW)
@@ -889,7 +889,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			ssport->message.subsystem = MBSYS_JSTAR_SUBSYSTEM_SSHIGH;
 			ssstbd->message.subsystem = MBSYS_JSTAR_SUBSYSTEM_SSHIGH;
 			}
-		
+
 		/* get time */
 		mb_get_jtime(verbose,time_i,time_j);
 		ssport->year = time_i[0];
@@ -898,8 +898,8 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ssport->minute = time_i[4];
 		ssport->second = time_i[5];
 		ssport->millisecondsToday = 0.001 * time_i[6]
-					+ 1000 * (time_i[5] 
-						+ 60.0 * (time_i[4] 
+					+ 1000 * (time_i[5]
+						+ 60.0 * (time_i[4]
 							+ 60.0 * time_i[3]));
 		ssstbd->year = time_i[0];
 		ssstbd->day = time_j[1];
@@ -907,8 +907,8 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ssstbd->minute = time_i[4];
 		ssstbd->second = time_i[5];
 		ssstbd->millisecondsToday = 0.001 * time_i[6]
-					+ 1000 * (time_i[5] 
-						+ 60.0 * (time_i[4] 
+					+ 1000 * (time_i[5]
+						+ 60.0 * (time_i[4]
 							+ 60.0 * time_i[3]));
 
 		/* get navigation */
@@ -927,9 +927,9 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 		ssport->heading = (short) (100.0 * heading);
 		ssstbd->heading = (short) (100.0 * heading);
 
-		/* put distance and depth values 
+		/* put distance and depth values
 			into data structure */
-		
+
 		/* get nadir depth */
 		if (nbath > 0)
 			{
@@ -939,7 +939,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			else if (mb_beam_check_flag(beamflag[nbath/2]))
 				ssport->depth = -ssport->depth;
 			}
-			
+
 		/* get lateral pixel size */
 		altitude = 0.001 * ssport->sonaraltitude;
 		xtrackmax = 0.0;
@@ -962,7 +962,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 			status = MB_FAILURE;
 			*error = MB_ERROR_UNINTELLIGIBLE;
 			}
-					
+
 		/* allocate memory for the trace */
 		if (status == MB_SUCCESS)
 			{
@@ -988,20 +988,20 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				}
 			}
 
-		/* put sidescan values 
+		/* put sidescan values
 			into data structure */
 		if (status == MB_SUCCESS)
 			{
 			/* reset sample interval */
 			ssport->sampleInterval = (int)(1000000000.0 * pixelsize / 750.0);
-			ssport->startDepth = (int)((0.001 * ssport->sonardepth) 
-							/ pixelsize); 
+			ssport->startDepth = (int)((0.001 * ssport->sonardepth)
+							/ pixelsize);
 			ssport->samples = nsamples;
 			ssstbd->sampleInterval = (int)(1000000000.0 * pixelsize / 750.0);
-			ssstbd->startDepth = (int)((0.001 * ssstbd->sonardepth) 
-							/ pixelsize); 
+			ssstbd->startDepth = (int)((0.001 * ssstbd->sonardepth)
+							/ pixelsize);
 			ssstbd->samples = nsamples;
-			
+
 
 			/* zero trace before bottom arrival */
 			istart = (int)(altitude / pixelsize);
@@ -1010,7 +1010,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				ssport->trace[i] = 0;
 				ssstbd->trace[i] = 0;
 				}
-				
+
 			/* get maximum value to determine scaling */
 			ssmax = 0.0;
 			for (i=0;i<nss;i++)
@@ -1021,7 +1021,7 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 				ssport->weightingFactor = log(weight) / MB_LN_2;
 				ssstbd->weightingFactor = ssport->weightingFactor;
 				}
-				
+
 			/* insert port and starboard traces from sidescan swath */
 			jstart = nss / 2 - 1;
 			weight = exp(MB_LN_2 * ((double)ssport->weightingFactor));
@@ -1062,9 +1062,9 @@ int mbsys_jstar_insert(int verbose, void *mbio_ptr, void *store_ptr,
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_ttimes(int verbose, void *mbio_ptr, void *store_ptr,
 	int *kind, int *nbeams,
-	double *ttimes, double *angles, 
+	double *ttimes, double *angles,
 	double *angles_forward, double *angles_null,
-	double *heave, double *alongtrack_offset, 
+	double *heave, double *alongtrack_offset,
 	double *draft, double *ssv, int *error)
 {
 	char	*function_name = "mbsys_jstar_ttimes";
@@ -1240,7 +1240,7 @@ int mbsys_jstar_detects(int verbose, void *mbio_ptr, void *store_ptr,
 }
 /*--------------------------------------------------------------------*/
 int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
-	int *kind, double *transducer_depth, double *altitude, 
+	int *kind, double *transducer_depth, double *altitude,
 	int *error)
 {
 	char	*function_name = "mbsys_jstar_extract_altitude";
@@ -1275,30 +1275,30 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get channel */
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
-		
+
 		/* get transducer_depth */
 		if (sbp->sonardepth > 0)
 			*transducer_depth = 0.001 * sbp->sonardepth
 						+ sbp->heaveCompensation * sbp->sampleInterval * 0.00000075;
 		else
 			*transducer_depth = sbp->startDepth * sbp->sampleInterval * 0.00000075
-						+ sbp->heaveCompensation * sbp->sampleInterval * 0.00000075; 
+						+ sbp->heaveCompensation * sbp->sampleInterval * 0.00000075;
 		*altitude = 0.001 * sbp->sonaraltitude;
 		}
-		
+
 	else if (*kind == MB_DATA_DATA
 		|| *kind == MB_DATA_SIDESCAN2)
 		{
 		/* get channel */
 		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
-		
+
 		/* get transducer_depth */
 		if (ssport->sonardepth > 0)
 			*transducer_depth = 0.001 * ssport->sonardepth
 						+ ssport->heaveCompensation * ssport->sampleInterval * 0.00000075;
 		else
 			*transducer_depth = ssport->startDepth * ssport->sampleInterval * 0.00000075
-						+ ssport->heaveCompensation * ssport->sampleInterval * 0.00000075; 
+						+ ssport->heaveCompensation * ssport->sampleInterval * 0.00000075;
 		*altitude = 0.001 * ssport->sonaraltitude;
 
 		/* set status */
@@ -1345,8 +1345,8 @@ int mbsys_jstar_extract_altitude(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int *kind, int time_i[7], double *time_d,
 		double *navlon, double *navlat,
-		double *speed, double *heading, double *draft, 
-		double *roll, double *pitch, double *heave, 
+		double *speed, double *heading, double *draft,
+		double *roll, double *pitch, double *heave,
 		int *error)
 {
 	char	*function_name = "mbsys_jstar_extract_nav";
@@ -1382,13 +1382,13 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get channel */
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
-		
+
 		/* get time */
 		time_j[0] = sbp->year;
 		time_j[1] = sbp->day;
 		time_j[2] = 60 * sbp->hour + sbp->minute;
 		time_j[3] = sbp->second;
-		time_j[4] = (int)1000 * (sbp->millisecondsToday 
+		time_j[4] = (int)1000 * (sbp->millisecondsToday
 				- 1000 * floor(0.001 * ((double)sbp->millisecondsToday)));
 		mb_get_itime(verbose,time_j,time_i);
 		mb_get_time(verbose,time_i,time_d);
@@ -1402,19 +1402,19 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		*speed = 0.0;
-		
+
 		/* get draft */
 		if (sbp->sonardepth > 0)
 			*draft = 0.001 * sbp->sonardepth;
 		else
-			*draft = sbp->startDepth 
-				* sbp->sampleInterval * 0.00000075; 
-		
+			*draft = sbp->startDepth
+				* sbp->sampleInterval * 0.00000075;
+
 		/* get attitude */
-		*roll = 180.0 / 32768.0 * (double)sbp->roll; 
-		*pitch = 180.0 / 32768.0 * (double)sbp->pitch; 
-		*heave = sbp->heaveCompensation 
-				* sbp->sampleInterval * 0.00000075; 
+		*roll = 180.0 / 32768.0 * (double)sbp->roll;
+		*pitch = 180.0 / 32768.0 * (double)sbp->pitch;
+		*heave = sbp->heaveCompensation
+				* sbp->sampleInterval * 0.00000075;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1463,7 +1463,7 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* done translating values */
 
 		}
-		
+
 
 	/* extract data from structure */
 	else if (*kind == MB_DATA_DATA
@@ -1471,13 +1471,13 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get channel */
 		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
-		
+
 		/* get time */
 		time_j[0] = ssport->year;
 		time_j[1] = ssport->day;
 		time_j[2] = 60 * ssport->hour + ssport->minute;
 		time_j[3] = ssport->second;
-		time_j[4] = (int)1000 * (ssport->millisecondsToday 
+		time_j[4] = (int)1000 * (ssport->millisecondsToday
 				- 1000 * floor(0.001 * ((double)ssport->millisecondsToday)));
 		mb_get_itime(verbose,time_j,time_i);
 		mb_get_time(verbose,time_i,time_d);
@@ -1491,19 +1491,19 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get speed */
 		*speed = 0.0;
-		
+
 		/* get draft */
 		if (ssport->sonardepth > 0)
 			*draft = 0.001 * ssport->sonardepth;
 		else
-			*draft = ssport->startDepth 
-				* ssport->sampleInterval * 0.00000075; 
-		
+			*draft = ssport->startDepth
+				* ssport->sampleInterval * 0.00000075;
+
 		/* get attitude */
-		*roll = 180.0 / 32768.0 * (double)ssport->roll; 
-		*pitch = 180.0 / 32768.0 * (double)ssport->pitch; 
-		*heave = ssport->heaveCompensation 
-				* ssport->sampleInterval * 0.00000075; 
+		*roll = 180.0 / 32768.0 * (double)ssport->roll;
+		*pitch = 180.0 / 32768.0 * (double)ssport->pitch;
+		*heave = ssport->heaveCompensation
+				* ssport->sampleInterval * 0.00000075;
 
 		/* print debug statements */
 		if (verbose >= 5)
@@ -1576,7 +1576,7 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2  Return values:\n");
 		fprintf(stderr,"dbg2       kind:       %d\n",*kind);
 		}
-	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR 
+	if (verbose >= 2 && *error <= MB_ERROR_NO_ERROR
 		&& *kind != MB_DATA_COMMENT)
 		{
 		fprintf(stderr,"dbg2       time_i[0]:     %d\n",time_i[0]);
@@ -1610,7 +1610,7 @@ int mbsys_jstar_extract_nav(int verbose, void *mbio_ptr, void *store_ptr,
 int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		int time_i[7], double time_d,
 		double navlon, double navlat,
-		double speed, double heading, double draft, 
+		double speed, double heading, double draft,
 		double roll, double pitch, double heave,
 		int *error)
 {
@@ -1662,7 +1662,7 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		{
 		/* get channel */
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
-		
+
 		/* set kind and subsystem */
 		store->kind = MB_DATA_SUBBOTTOM_SUBBOTTOM;
 		store->subsystem = MBSYS_JSTAR_SUBSYSTEM_SBP;
@@ -1675,8 +1675,8 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp->minute = time_i[4];
 		sbp->second = time_i[5];
 		sbp->millisecondsToday = 0.001 * time_i[6]
-					+ 1000 * (time_i[5] 
-						+ 60.0 * (time_i[4] 
+					+ 1000 * (time_i[5]
+						+ 60.0 * (time_i[4]
 							+ 60.0 * time_i[3]));
 
 		/* get navigation */
@@ -1689,18 +1689,18 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 
 		/* get heading */
 		sbp->heading = (short) (100.0 * heading);
-	
+
 		/* get draft */
 		sbp->startDepth = draft /
-				sbp->sampleInterval / 0.00000075; 
+				sbp->sampleInterval / 0.00000075;
 		sbp->sonardepth = 1000 * draft;
 
 		/* get attitude */
-		sbp->roll = 32768 * roll / 180.0; 
-		sbp->pitch = 32768 * pitch / 180.0; 
+		sbp->roll = 32768 * roll / 180.0;
+		sbp->pitch = 32768 * pitch / 180.0;
 		sbp->heaveCompensation = heave /
-				sbp->sampleInterval / 0.00000075; 
-		
+				sbp->sampleInterval / 0.00000075;
+
 		}
 
 	/* insert data in structure */
@@ -1709,8 +1709,8 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get channels */
 		ssport = (struct mbsys_jstar_channel_struct *) &(store->ssport);
 		ssstbd = (struct mbsys_jstar_channel_struct *) &(store->ssstbd);
-		
-		
+
+
 		/* set kind and subsystem */
 		store->kind = MB_DATA_DATA;
 		if (ssport->message.subsystem == MBSYS_JSTAR_SUBSYSTEM_SSLOW
@@ -1734,7 +1734,7 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 			ssport->message.subsystem = MBSYS_JSTAR_SUBSYSTEM_SSHIGH;
 			ssstbd->message.subsystem = MBSYS_JSTAR_SUBSYSTEM_SSHIGH;
 			}
-		
+
 		/* get time */
 		mb_get_jtime(verbose,time_i,time_j);
 		ssport->year = time_i[0];
@@ -1743,8 +1743,8 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		ssport->minute = time_i[4];
 		ssport->second = time_i[5];
 		ssport->millisecondsToday = 0.001 * time_i[6]
-					+ 1000 * (time_i[5] 
-						+ 60.0 * (time_i[4] 
+					+ 1000 * (time_i[5]
+						+ 60.0 * (time_i[4]
 							+ 60.0 * time_i[3]));
 		ssstbd->year = time_i[0];
 		ssstbd->day = time_j[1];
@@ -1752,8 +1752,8 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		ssstbd->minute = time_i[4];
 		ssstbd->second = time_i[5];
 		ssstbd->millisecondsToday = 0.001 * time_i[6]
-					+ 1000 * (time_i[5] 
-						+ 60.0 * (time_i[4] 
+					+ 1000 * (time_i[5]
+						+ 60.0 * (time_i[4]
 							+ 60.0 * time_i[3]));
 
 		/* get navigation */
@@ -1771,24 +1771,24 @@ int mbsys_jstar_insert_nav(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get heading and speed */
 		ssport->heading = (short) (100.0 * heading);
 		ssstbd->heading = (short) (100.0 * heading);
-	
+
 		/* get draft */
 		ssport->startDepth = draft /
-				ssport->sampleInterval / 0.00000075; 
+				ssport->sampleInterval / 0.00000075;
 		ssstbd->startDepth = draft /
-				ssstbd->sampleInterval / 0.00000075; 
+				ssstbd->sampleInterval / 0.00000075;
 		ssport->sonardepth = 1000 * draft;
 		ssstbd->sonardepth = 1000 * draft;
-		
+
 		/* get attitude */
-		ssport->roll = 32768 * roll / 180.0; 
-		ssport->pitch = 32768 * pitch / 180.0; 
+		ssport->roll = 32768 * roll / 180.0;
+		ssport->pitch = 32768 * pitch / 180.0;
 		ssport->heaveCompensation = heave /
-				ssport->sampleInterval / 0.00000075; 
-		ssstbd->roll = 32768 * roll / 180.0; 
-		ssstbd->pitch = 32768 * pitch / 180.0; 
+				ssport->sampleInterval / 0.00000075;
+		ssstbd->roll = 32768 * roll / 180.0;
+		ssstbd->pitch = 32768 * pitch / 180.0;
 		ssstbd->heaveCompensation = heave /
-				ssstbd->sampleInterval / 0.00000075; 
+				ssstbd->sampleInterval / 0.00000075;
 		}
 
 	/* print output debug statements */
@@ -1856,10 +1856,10 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		time_j[1] = sbp->day;
 		time_j[2] = 60 * sbp->hour + sbp->minute;
 		time_j[3] = sbp->second;
-		time_j[4] = (int)1000 * (sbp->millisecondsToday 
+		time_j[4] = (int)1000 * (sbp->millisecondsToday
 				- 1000 * floor(0.001 * ((double)sbp->millisecondsToday)));
 		mb_get_itime(verbose,time_j,time_i);
-		
+
 		/* get needed values */
 		/* get transducer_depth */
 		if (sbp->sonardepth > 0)
@@ -1867,7 +1867,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 						+ sbp->heaveCompensation * sbp->sampleInterval * 0.00000075;
 		else
 			dsonardepth = sbp->startDepth * sbp->sampleInterval * 0.00000075
-						+ sbp->heaveCompensation * sbp->sampleInterval * 0.00000075; 
+						+ sbp->heaveCompensation * sbp->sampleInterval * 0.00000075;
 		dsonaraltitude = 0.001 * sbp->sonaraltitude;
 		if (sbp->depth > 0)
 			dwaterdepth = 0.001 * sbp->depth;
@@ -1881,7 +1881,7 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		/* get navigation */
 		longitude = sbp->groupCoordX / 600000.0;
 		latitude = sbp->groupCoordY / 600000.0;
-			
+
 		/* extract the data */
 		mb_segytraceheader_ptr->seq_num 	= sbp->pingNum;
 		mb_segytraceheader_ptr->seq_reel 	= sbp->pingNum;
@@ -1944,12 +1944,12 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		mb_segytraceheader_ptr->dummy2		= 0.0;
 		mb_segytraceheader_ptr->dummy3		= 0.0;
 		mb_segytraceheader_ptr->dummy4		= 0.0;
-		mb_segytraceheader_ptr->dummy5		= 0.0;
-		mb_segytraceheader_ptr->dummy6		= 0.0;
-		mb_segytraceheader_ptr->dummy7		= 0.0;
-		mb_segytraceheader_ptr->dummy8		= 0.0;
+		mb_segytraceheader_ptr->soundspeed		= watersoundspeed;
+		mb_segytraceheader_ptr->distance		= 0.0;
+		mb_segytraceheader_ptr->roll		= 180.0 / 32768.0 * (double)sbp->roll;
+		mb_segytraceheader_ptr->pitch		= 180.0 / 32768.0 * (double)sbp->pitch;
 		mb_segytraceheader_ptr->heading		= sbp->heading / 60.0;
-		
+
 		/* done translating values */
 
 		}
@@ -2036,10 +2036,10 @@ int mbsys_jstar_extract_segytraceheader(int verbose, void *mbio_ptr, void *store
 		fprintf(stderr,"dbg2       dummy2:            %f\n",mb_segytraceheader_ptr->dummy2);
 		fprintf(stderr,"dbg2       dummy3:            %f\n",mb_segytraceheader_ptr->dummy3);
 		fprintf(stderr,"dbg2       dummy4:            %f\n",mb_segytraceheader_ptr->dummy4);
-		fprintf(stderr,"dbg2       dummy5:            %f\n",mb_segytraceheader_ptr->dummy5);
-		fprintf(stderr,"dbg2       dummy6:            %f\n",mb_segytraceheader_ptr->dummy6);
-		fprintf(stderr,"dbg2       dummy7:            %f\n",mb_segytraceheader_ptr->dummy7);
-		fprintf(stderr,"dbg2       dummy8:            %f\n",mb_segytraceheader_ptr->dummy8);
+		fprintf(stderr,"dbg2       soundspeed:        %f\n",mb_segytraceheader_ptr->soundspeed);
+		fprintf(stderr,"dbg2       distance:          %f\n",mb_segytraceheader_ptr->distance);
+		fprintf(stderr,"dbg2       roll:              %f\n",mb_segytraceheader_ptr->roll);
+		fprintf(stderr,"dbg2       pitch:             %f\n",mb_segytraceheader_ptr->pitch);
 		fprintf(stderr,"dbg2       heading:           %f\n",mb_segytraceheader_ptr->heading);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2095,11 +2095,11 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
 		shortptr = (short *) sbp->trace;
 		ushortptr = (unsigned short *) sbp->trace;
-			
+
 		/* extract segy header */
 		status = mbsys_jstar_extract_segytraceheader(verbose, mbio_ptr, store_ptr,
 								kind, segyheader_ptr, error);
-								
+
 		/* get the trace weight */
 		weight = exp(MB_LN_2 * ((double)sbp->weightingFactor));
 /*fprintf(stderr, "Subsystem: %d Weight: %d %f\n",sbp->message.subsystem,sbp->weightingFactor,weight);*/
@@ -2118,18 +2118,18 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 			/* if no format specified do envelope by default */
 			if (*sampleformat == MB_SEGY_SAMPLEFORMAT_NONE)
 				*sampleformat = MB_SEGY_SAMPLEFORMAT_ENVELOPE;
-			
+
 			/* convert analytic data to desired envelope */
 			if (*sampleformat == MB_SEGY_SAMPLEFORMAT_ENVELOPE)
 				{
 				for (i=0;i<sbp->samples;i++)
 					{
-					segydata[i] = (float) (sqrt((double) (shortptr[2*i] * shortptr[2*i] 
+					segydata[i] = (float) (sqrt((double) (shortptr[2*i] * shortptr[2*i]
 								+ shortptr[2*i+1] * shortptr[2*i+1]))
 								/ weight);
 					}
 				}
-			
+
 			/* else extract desired analytic data */
 			else if (*sampleformat == MB_SEGY_SAMPLEFORMAT_ANALYTIC)
 				{
@@ -2139,7 +2139,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 					segydata[2*i+1] = (float) (((double)shortptr[2*i+1]) / weight);
 					}
 				}
-			
+
 			/* else extract desired real trace from analytic data */
 			else if (*sampleformat == MB_SEGY_SAMPLEFORMAT_TRACE)
 				{
@@ -2173,7 +2173,7 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 				segydata[i] = (float) (((double)ushortptr[i]) / weight);
 				}
 			}
-		
+
 		/* done translating values */
 
 		}
@@ -2261,10 +2261,10 @@ int mbsys_jstar_extract_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy2:            %f\n",mb_segytraceheader_ptr->dummy2);
 		fprintf(stderr,"dbg2       dummy3:            %f\n",mb_segytraceheader_ptr->dummy3);
 		fprintf(stderr,"dbg2       dummy4:            %f\n",mb_segytraceheader_ptr->dummy4);
-		fprintf(stderr,"dbg2       dummy5:            %f\n",mb_segytraceheader_ptr->dummy5);
-		fprintf(stderr,"dbg2       dummy6:            %f\n",mb_segytraceheader_ptr->dummy6);
-		fprintf(stderr,"dbg2       dummy7:            %f\n",mb_segytraceheader_ptr->dummy7);
-		fprintf(stderr,"dbg2       dummy8:            %f\n",mb_segytraceheader_ptr->dummy8);
+		fprintf(stderr,"dbg2       soundspeed:        %f\n",mb_segytraceheader_ptr->soundspeed);
+		fprintf(stderr,"dbg2       distance:          %f\n",mb_segytraceheader_ptr->distance);
+		fprintf(stderr,"dbg2       roll:              %f\n",mb_segytraceheader_ptr->roll);
+		fprintf(stderr,"dbg2       pitch:             %f\n",mb_segytraceheader_ptr->pitch);
 		fprintf(stderr,"dbg2       heading:           %f\n",mb_segytraceheader_ptr->heading);
 		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
 			fprintf(stderr,"dbg2       segydata[%d]:      %f\n",i,segydata[i]);
@@ -2324,7 +2324,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		/* get channel */
 		sbp = (struct mbsys_jstar_channel_struct *) &(store->sbp);
 		shortptr = (short *) sbp->trace;
-			
+
 		/* extract the data */
 		if (mb_segytraceheader_ptr->shot_num != 0)
 			sbp->pingNum = mb_segytraceheader_ptr->shot_num;
@@ -2373,8 +2373,8 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp->hour = time_i[3];
 		sbp->minute = time_i[4];
 		sbp->millisecondsToday = 0.001 * time_i[6]
-					+ 1000 * (time_i[5] 
-						+ 60.0 * (time_i[4] 
+					+ 1000 * (time_i[5]
+						+ 60.0 * (time_i[4]
 							+ 60.0 * time_i[3]));
 
 		sbp->depth = 1000 * waterdepth;
@@ -2382,7 +2382,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		sbp->sonaraltitude = 1000 * (waterdepth - sonardepth);
 		if (sbp->sonaraltitude < 0)
 			sbp->sonaraltitude = 0;
-		
+
 		/* get max data value */
 		datamax = 0.0;
 		for (i=0;i<mb_segytraceheader_ptr->nsamps;i++)
@@ -2397,7 +2397,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		else
 			sbp->weightingFactor = 0;
 		weight = pow(2.0, (double)sbp->weightingFactor);
-		
+
 		/* make sure enough memory is allocated for channel data */
 		data_size = sizeof(short) * sbp->samples;
 		if (sbp->trace_alloc < data_size)
@@ -2423,7 +2423,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 				shortptr[i] = (short) (segydata[i] * weight);
 				}
 			}
-		
+
 		/* done translating values */
 
 		}
@@ -2509,10 +2509,10 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 		fprintf(stderr,"dbg2       dummy2:            %f\n",mb_segytraceheader_ptr->dummy2);
 		fprintf(stderr,"dbg2       dummy3:            %f\n",mb_segytraceheader_ptr->dummy3);
 		fprintf(stderr,"dbg2       dummy4:            %f\n",mb_segytraceheader_ptr->dummy4);
-		fprintf(stderr,"dbg2       dummy5:            %f\n",mb_segytraceheader_ptr->dummy5);
-		fprintf(stderr,"dbg2       dummy6:            %f\n",mb_segytraceheader_ptr->dummy6);
-		fprintf(stderr,"dbg2       dummy7:            %f\n",mb_segytraceheader_ptr->dummy7);
-		fprintf(stderr,"dbg2       dummy8:            %f\n",mb_segytraceheader_ptr->dummy8);
+		fprintf(stderr,"dbg2       soundspeed:        %f\n",mb_segytraceheader_ptr->soundspeed);
+		fprintf(stderr,"dbg2       distance:          %f\n",mb_segytraceheader_ptr->distance);
+		fprintf(stderr,"dbg2       roll:              %f\n",mb_segytraceheader_ptr->roll);
+		fprintf(stderr,"dbg2       pitch:             %f\n",mb_segytraceheader_ptr->pitch);
 		fprintf(stderr,"dbg2       heading:           %f\n",mb_segytraceheader_ptr->heading);
 		fprintf(stderr,"dbg2       error:             %d\n",*error);
 		fprintf(stderr,"dbg2  Return status:\n");
@@ -2523,7 +2523,7 @@ int mbsys_jstar_insert_segy(int verbose, void *mbio_ptr, void *store_ptr,
 	return(status);
 }
 /*--------------------------------------------------------------------*/
-int mbsys_jstar_copy(int verbose, void *mbio_ptr, 
+int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 			void *store_ptr, void *copy_ptr,
 			int *error)
 {
@@ -2541,7 +2541,7 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 	int	shortspersample;
 	int	trace_size;
 	int	i;
-	
+
 
 	/* print input debug statements */
 	if (verbose >= 2)
@@ -2561,7 +2561,7 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 	/* get data structure pointers */
 	store = (struct mbsys_jstar_struct *) store_ptr;
 	copy = (struct mbsys_jstar_struct *) copy_ptr;
-	
+
 	/* save existing trace pointers in copy */
 	sbp_trace_alloc = copy->sbp.trace_alloc;
 	sbp_trace = copy->sbp.trace;
@@ -2572,7 +2572,7 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 
 	/* copy the data */
 	*copy = *store;
-	
+
 	/* restore the original trace pointers */
 	copy->sbp.trace_alloc = sbp_trace_alloc;
 	copy->sbp.trace = sbp_trace;
@@ -2580,9 +2580,9 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 	copy->ssport.trace = ssport_trace;
 	copy->ssstbd.trace_alloc = ssstbd_trace_alloc;
 	copy->ssstbd.trace = ssstbd_trace;
-	
+
 	/* allocate memory and copy each trace */
-					
+
 	/* allocate memory for the subbottom trace */
 	if (copy->sbp.dataFormat == 1)
 		shortspersample = 2;
@@ -2604,7 +2604,7 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 			copy->sbp.trace[i] = store->sbp.trace[i];
 			}
 		}
-					
+
 	/* allocate memory for the port sidescan trace */
 	if (copy->ssport.dataFormat == 1)
 		shortspersample = 2;
@@ -2626,7 +2626,7 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 			copy->ssport.trace[i] = store->ssport.trace[i];
 			}
 		}
-					
+
 	/* allocate memory for the starboard sidescan trace */
 	if (copy->ssstbd.dataFormat == 1)
 		shortspersample = 2;
@@ -2648,7 +2648,7 @@ int mbsys_jstar_copy(int verbose, void *mbio_ptr,
 			copy->ssstbd.trace[i] = store->ssstbd.trace[i];
 			}
 		}
-			
+
 
 
 	/* print output debug statements */

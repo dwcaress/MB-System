@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.h	6/13/02
- *	$Id: mbsys_surf.h 1891 2011-05-04 23:46:30Z caress $
+ *	$Id: mbsys_surf.h 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2002-2011 by
+ *    Copyright (c) 2002-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -81,7 +81,7 @@
 
 /* include mb_define.h */
 #ifndef MB_DEFINE_DEF
-#include "../../include/mb_define.h"
+#include "mb_define.h"
 #endif
 
 /* include SAPI header file */
@@ -147,7 +147,7 @@ struct mbsys_surf_struct
 	SurfTxParameter			MultibeamTransmitterParameters;
 	TxSets				reserved4[MBSYS_SURF_MAXTXSETS - 1];
 	SurfSidescanData		SidescanData;
-	mb_u_char				reserved5[MBSYS_SURF_MAXPIXELS - 1];
+	u_char				reserved5[MBSYS_SURF_MAXPIXELS - 1];
 	};
 
 /* system specific function prototypes */

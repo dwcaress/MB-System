@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_angle.c	1/21/93
- *    $Id: mb_angle.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_angle.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1998-2011 by
+ *    Copyright (c) 1998-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -237,7 +237,7 @@
 #include "mb_status.h"
 #include "mb_define.h"
 
-static char rcs_id[]="$Id: mb_angle.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mb_angle.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mb_takeoff_to_rollpitch(int verbose,
@@ -478,6 +478,8 @@ int mb_lever(int verbose,
 	    {
 	    /* get initial angles */
 	    roll = RTD * acos(xx / r );
+	    if (zz < 0.0)
+	    	roll = -roll;
 	    if (sin(DTR * roll) != 0.0)
 		pitch = RTD * asin(yy / (r * sin(DTR * roll)));
 	    else

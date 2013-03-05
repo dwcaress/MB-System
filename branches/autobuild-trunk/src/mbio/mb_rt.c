@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_rt.c	11/14/94
- *    $Id: mb_rt.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_rt.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1994-2011 by
+ *    Copyright (c) 1994-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -148,7 +148,7 @@ int mb_rt_plot_circular(int verbose, int *error);
 int mb_rt_line(int verbose, int *error);
 int mb_rt_vertical(int verbose, int *error);
 
-static char rcs_id[]="$Id: mb_rt.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mb_rt.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------------*/
 int mb_rt_init(int verbose, int number_node, 

@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbr_emoldraw.c	3/4/2001
- *	$Id: mbr_emoldraw.c 1907 2011-11-10 04:33:03Z caress $
+ *	$Id: mbr_emoldraw.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2001-2011 by
+ *    Copyright (c) 2001-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -165,7 +165,7 @@ int mbr_emoldraw_wr_ss(int verbose, FILE *mbfp,
 int mbr_emoldraw_wr_ssp(int verbose, FILE *mbfp,  
 				struct mbsys_simrad_struct *store, int *error);
 
-static char rcs_id[]="$Id: mbr_emoldraw.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[]="$Id: mbr_emoldraw.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbr_register_emoldraw(int verbose, void *mbio_ptr, int *error)

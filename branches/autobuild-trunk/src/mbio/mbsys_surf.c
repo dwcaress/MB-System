@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbsys_surf.c	3.00	6/25/01
- *	$Id: mbsys_surf.c 1891 2011-05-04 23:46:30Z caress $
+ *	$Id: mbsys_surf.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2001-2011 by
+ *    Copyright (c) 2001-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -79,7 +79,7 @@ double mbsys_get_depth(	SurfMultiBeamDepth* 			MultiBeamDepth,
 						float	heave,
 						int		n );
 
-static char rcs_id[]="$Id: mbsys_surf.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mbsys_surf.c 1917 2012-01-10 19:25:33Z caress $";
 
 /*--------------------------------------------------------------------*/
 int mbsys_surf_alloc(int verbose, void *mbio_ptr, void **store_ptr,

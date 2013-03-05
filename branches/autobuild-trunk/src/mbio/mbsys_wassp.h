@@ -2,7 +2,7 @@
  *    The MB-system:	mbsys_wassp.h	1/25/2011
  *	$Id: mbsys_wassp.h 1770 2009-10-19 17:16:39Z caress $
  *
- *    Copyright (c) 2011 by
+ *    Copyright (c) 2011-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
