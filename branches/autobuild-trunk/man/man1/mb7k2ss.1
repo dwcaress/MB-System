@@ -1,44 +1,44 @@
-.TH mb7k2ss 1 "13 September 2010" "MB-System 5.0" "MB-System 5.0"
+.TH mb7k2ss 1 "4 October 2012" "MB-System 5.0" "MB-System 5.0"
 .SH NAME
 \fBmb7k2ss\fP - extracts sidescan sonar
 data from Reson 7k format data, bins and lays the sidescan
-onto the seafloor, and outputs files in the MBF_MBLDEOIH 
+onto the seafloor, and outputs files in the MBF_MBLDEOIH
 formst (MBIO format id 71).
 
 .SH VERSION
 Version 5.0
 
 .SH SYNOPSIS
-\fBmb7k2ss\fP [\fB-A\fItype\fP 
+\fBmb7k2ss\fP [\fB-A\fItype\fP
 \fB-B\fP\fIbottompickmode/bottompickthreshold\fP \fB-C\fP \fB-D\fP\fIinterpbins\fP
-\fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-L\fP\fIstartline/lineroot\fP 
-\fB-M -O\fP\fIoutfile\fP \fB-R\fP\fIroutefile\fP 
+\fB-F\fP\fIformat\fP \fB-I\fP\fIfile\fP \fB-L\fP\fIstartline/lineroot\fP
+\fB-M -O\fP\fIoutfile\fP \fB-Q\fP\fIroutetimefile\fP \fB-R\fP\fIroutefile\fP
 \fB-T\fP\fItopogridfile\fP \fB-U\fP\fIrangethreshold\fP \fB-X -H -V\fP]
 
 .SH DESCRIPTION
-\fBmb7k2ss\fP is a utility that extracts Edgetech sidescan data from 
-Reson 7k format (MBIO format 88) data and outputs in the MBF_MBLDEOIH 
-format (MBIO format 71). Edgetech sonar systems may include dual 
-frequency sidescans and a subbottom profiler. Users may use the \fB-A\fP 
-option to specify whether low frequency or high frequency sidescan data 
+\fBmb7k2ss\fP is a utility that extracts Edgetech sidescan data from
+Reson 7k format (MBIO format 88) data and outputs in the MBF_MBLDEOIH
+format (MBIO format 71). Edgetech sonar systems may include dual
+frequency sidescans and a subbottom profiler. Users may use the \fB-A\fP
+option to specify whether low frequency or high frequency sidescan data
 are extracted. By default, low frequency sidescan is extracted.
-\fBMB7k2ss\fP can operate on a single input file or on a datalist 
-referencing many input files. 
+\fBMB7k2ss\fP can operate on a single input file or on a datalist
+referencing many input files.
 
 The raw sidescan consists of port and starboard channels, each with
 thousands of samples ordered uniformly in time from the sonar ping.
 \fBMB7k2ss\fP outputs a lower resolution single sidescan swath laid
 out onto the seafloor and ordered in pixels with uniform spacing in
-acrosstrack distance. Typically the output swath will have 4001 
-sidescan pixels, each representing an average of several raw samples. 
+acrosstrack distance. Typically the output swath will have 4001
+sidescan pixels, each representing an average of several raw samples.
 To achieve this result, the program calculates the location
 of each raw sample, and bins the samples into the output swath.
 By default, the program uses the sonar altitude and a flat bottom
 assumption to calculate the sample positions. If a topography grid
 covering the survey area is input using the \fB-T\fP option, then
-the sample positions will be calculated using that topography and 
-the resulting sidescan will be properly located on the seafloor 
-(that is, if the topography is accurate...). 
+the sample positions will be calculated using that topography and
+the resulting sidescan will be properly located on the seafloor
+(that is, if the topography is accurate...).
 
 The method used to determine the sonar altitude is controlled using the
 \fB-B\fP option. By default, the program will use the altitude value
@@ -47,20 +47,24 @@ of nadir bathymetry from co-recorded multibeam bathymetry, or the
 altitude can be picked from the first arrival observed in the sidescan
 data itself.
 
-The extracted sidescan data file(s) can be organized three ways.By 
-default there will be a separate output file for every input file. 
-If the \fB-O\fP option is used to specify a single output file, then 
-all of the specified sidescan data will be output to that file. If 
-the \fB-R\fP option is used to specify a survey route file that 
-includes the waypoints covered while collecting the data file(s) 
-referenced by \fB-I\fP\fIfile\fP, then the output sidescan data will 
-be broken up by the sequential lines defined by the waypoints. In this 
-case each output Jstar file will be named using the  line root name 
+The extracted sidescan data file(s) can be organized three ways.By
+default there will be a separate output file for every input file.
+If the \fB-O\fP option is used to specify a single output file, then
+all of the specified sidescan data will be output to that file. If
+the \fB-Q\fP or \fB-R\fP option is used to specify a survey route file
+that includes the waypoints covered while collecting the data file(s)
+referenced by \fB-I\fP\fIfile\fP, then the output sidescan data will
+be broken up by the sequential lines defined by the waypoints. The
+\fB-R\fP option requires a route file of the form exported by \fBMBgrdviz\fP.
+The \fB-Q\fP option requires a route file that includes the time
+at which each waypoint is reached in the data; this can be generated
+from a regular route file using \fBmbroutetime\fP. In either of these
+cases each output file will be named using the  line root name
 specified by \fB-L\fP\fIstartline/lineroot\fP with a sequential line
-number starting from \fIstartline\fP. All output files will have a 
+number starting from \fIstartline\fP. All output files will have a
 ".mb71" suffix.
 
-The program \fBmbextractsegy\fP is available to extract subbottom profiler 
+The program \fBmbextractsegy\fP is available to extract subbottom profiler
 data from Reson 7k data.
 
 .SH AUTHORSHIP
@@ -89,9 +93,9 @@ Default: Low frequency sidescan records are extracted.
 This option sets the source of the sonar first arrival time used for
 laying out sidescan on the seafloor. If \fIbottompickmode\fP = 1,
 then \fBmb7k2ss\fP will use the altitude value associated with
-platform navigation. If \fIbottompickmode\fP = 2, then \fBmb7k2ss\fP 
+platform navigation. If \fIbottompickmode\fP = 2, then \fBmb7k2ss\fP
 will extract the first arrival time from multibeam bathymetry in the
-7k data stream. If \fIbottompickmode\fP = 3, then \fBmb7k2ss\fP 
+7k data stream. If \fIbottompickmode\fP = 3, then \fBmb7k2ss\fP
 will pick the first arrival time in the sidescan sonar data by looking
 for the first sample with an amplitude > \fIbottompickthreshold\fP times the
 maximum amplitude in the trace. The altitude used will be the average of
@@ -126,11 +130,11 @@ of its operation and then exit immediately.
 .B \-I
 \fIinfile\fP
 .br
-Sets the input file path. If \fIformat\fP > 0 (set with the 
-\fB-f\fP option or \fBmbdefaults\fP) then the swath sonar data contained in \fIinfile\fP 
+Sets the input file path. If \fIformat\fP > 0 (set with the
+\fB-f\fP option or \fBmbdefaults\fP) then the swath sonar data contained in \fIinfile\fP
 is read and processed. If \fIformat\fP < 0, then \fIinfile\fP
 is assumed to be an ascii file containing a list of the input swath sonar
-data files to be processed and their formats.  The program will read 
+data files to be processed and their formats.  The program will read
 the data in each one of these files.
 In the \fIinfile\fP file, each
 data file should be followed by a data format identifier, e.g.:
@@ -156,22 +160,43 @@ within 15 degrees of the next survey line's bearing.
 .TP
 .B \-O
 .br
-This option sets the output MBF_LDEOIH (\fBMBIO\fP format 71) format file path. 
-If \fB-O\fP is not invoked, the output filename (or filenames if a datalist 
-is being processed) will be the input swath filename with the ".s7k" or ".mb88" 
-suffix replaced by a ".mb71) suffix. The record types to be extracted are set 
+This option sets the output MBF_LDEOIH (\fBMBIO\fP format 71) format file path.
+If \fB-O\fP is not invoked, the output filename (or filenames if a datalist
+is being processed) will be the input swath filename with the ".s7k" or ".mb88"
+suffix replaced by a ".mb71) suffix. The record types to be extracted are set
 using the \fB-A\fP option.
+.TP
+.B \-Q
+\fIroutetimefile\fP
+.br
+This option specifies a file containing the times that the survey reached
+the intended waypoints. This text file consists of lines of the form:
+ 	count waypoint longitude latitude heading time_d
+.br
+where count is just an integer counter starting at 0, waypoint is the waypoint
+number starting at 0, longitude and latitude are the waypoint position in
+decimal degrees, heading is the heading in decimal degrees, and time_d is
+the unix or epoch time (time since 00:00:00 January 1, 1970) in decimal
+seconds that the survey reached this waypoint. This file can be generated from
+an \fBmbgrdviz\fP route file and survey data using the program \fBmbroutetime\fP.
+If \fIroutetimefile\fP is specified, \fBmb7k2ss\fP
+will output data in files corresponding to the planned survey lines.
+The output file names will be based on \fIlineroot\fP and will include
+the line number starting with \fIstarline\fP, both of which are specified
+using the \fB-L\fP options.  If none of \fB-O\fP, \fB-Q\fP, or \fB-R\fP are
+invoked, the output filename (or files if a datalist is being processed) will
+be the input swath filename with an ".mb71" suffix appended.
 .TP
 .B \-R
 \fIroutefile\fP
 .br
 This option specifies an \fBmbgrdviz\fP route file containing the intended
 waypoints of the survey. If \fIroutefile\fP is specified, \fBmb7k2ss\fP
-will output sidescan data in files corresponding to the planned survey lines. 
-The output file names will be based on \fIlineroot\fP and will include 
+will output sidescan data in files corresponding to the planned survey lines.
+The output file names will be based on \fIlineroot\fP and will include
 the line number starting with \fIstarline\fP, both of which are specified
-using the \fB-L\fP options.  If neither \fB-O\fP nore \fB-R\fP are invoked,
-the output filename (or files if a datalist is being processed) will
+using the \fB-L\fP options.  If none of \fB-O\fP, \fB-Q\fP, or \fB-R\fP are
+invoked, the output filename (or files if a datalist is being processed) will
 be the input swath filename with an ".mb71" suffix appended.
 .TP
 .B \-T
@@ -180,7 +205,7 @@ be the input swath filename with an ".mb71" suffix appended.
 This option specifies a GMT grid file containing a topography model of the
 survey area. When available, \fBmb7k2ss\fP, uses the topography to calculate
 the position of each raw sidescan sample on the seafloor prior to binning
-the sample into the swath data. This method is considerable improvement over the 
+the sample into the swath data. This method is considerable improvement over the
 flat bottom assumption used when topography is unavailable. The grid file
 must contain topography (positive up) rather than bathymetry (positive down).
 .TP
@@ -192,7 +217,7 @@ output into files corresponding to survey lines specified in a route file.
 This option sets the threshold distance in meters used to determine when
 a waypoint along the route has been reached; the program considers the
 next waypoint reached when the range to the waypoint becomes smaller
-than \fIrangethreshold\fP and then ceases to decrease. 
+than \fIrangethreshold\fP and then ceases to decrease.
 Default: \fIrangethreshold\fP = 50 m.
 .TP
 .B \-V
@@ -209,21 +234,21 @@ in the original data.
 This option switches port and starboard sidescan channels.
 
 .SH EXAMPLES
-Suppose that we have collected two Reson 7k datafiles incorporating 
+Suppose that we have collected two Reson 7k datafiles incorporating
 multibeam sonar data, sidescan data, and subbottom profiler data, and
 that the filenames are:
         20070809_173212.s7k
         20070809_175133.s7k
-After running \fBmb7kpreprocess\fP on these files to fix issues and 
+After running \fBmb7kpreprocess\fP on these files to fix issues and
 prepare the data for processing, we will have two additional files named:
         20070809_173212.mb88
         20070809_175133.mb88
-After editing the bathymetry in the ".mb88" files with \fBmbedit\fP, 
+After editing the bathymetry in the ".mb88" files with \fBmbedit\fP,
 and running \fBmbprocess\fP to apply the edits, we will have two processed
 files that are, among other uses, suitable for sidescan extraction:
         20070809_173212p.mb88
         20070809_175133p.mb88
-If we have two datalist files, one called datalist.mb-1 referencing the ".mb88" 
+If we have two datalist files, one called datalist.mb-1 referencing the ".mb88"
 files with the following contents:
         20070809_173212p.mb88 88
         20070809_175133p.mb88 88
@@ -242,7 +267,7 @@ output filenames will be sequentially numbered. The \fB-T\fP option specifies a
 topography grid that is used by \fBmb7k2ss\fP to lay out the sidescan on
 the seafloor. The output appears as follows:
         Program mb7k2ss
- 	Version $Id: mb7k2ss.1 1866 2010-09-15 05:19:29Z caress $
+ 	Version $Id: mb7k2ss.1 1989 2012-10-04 21:36:53Z caress $
  	MB-system Version 5.1.1beta5
 
  	Data records to extract:
@@ -322,7 +347,7 @@ the seafloor. The output appears as follows:
  	      High Sidescan: 0
 
 .SH SEE ALSO
-\fBmbsystem\fP(l), \fBmbformat\fP(l), \fBmbinfo\fP(l), \fBmb7kpreprocess\fP(l), 
+\fBmbsystem\fP(l), \fBmbformat\fP(l), \fBmbinfo\fP(l), \fBmb7kpreprocess\fP(l),
 \fBmb7k2jstar\fP(l), \fBmbextractsegy\fP(l), \fBmbbackangle\fP(l), \fBmbprocess\fP(l)
 
 .SH BUGS
