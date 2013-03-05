@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbnavadjust.h	6/24/95
- *    $Id: mbnavadjust.h 1906 2011-09-27 19:27:33Z caress $
+ *    $Id: mbnavadjust.h 1985 2012-09-11 08:02:53Z caress $
  *
- *    Copyright (c) 2000-2011 by
+ *    Copyright (c) 2000-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -91,7 +91,7 @@
 #define ALLOC_NUM			10
 #define MBNA_SNAV_NUM			11
 #define	MBNA_STATUS_GUI			0
-#define	MBNA_STATUS_MAKECONTOUR		1
+#define	MBNA_STATUS_AUTOPICK		1
 #define	MBNA_STATUS_NAVERR		2
 #define	MBNA_STATUS_NAVSOLVE		3
 #define	MBNA_INVERSION_NONE		0
@@ -193,6 +193,8 @@ struct mbna_section {
 	double	snav_lon_offset_int[MBNA_SNAV_NUM];
 	double	snav_lat_offset_int[MBNA_SNAV_NUM];
 	double	snav_z_offset_int[MBNA_SNAV_NUM];
+	int	show_in_modelplot;
+	int	modelplot_start_count;
 	int	contoursuptodate;
 };
 struct mbna_file {
@@ -210,6 +212,7 @@ struct mbna_file {
 	double	block_offset_x;
 	double	block_offset_y;
 	double	block_offset_z;
+	int	show_in_modelplot;
 	int	num_snavs;
 	int	num_pings;
 	int	num_beams;
@@ -291,7 +294,7 @@ struct mbna_project {
 	int	modelplot_style;
 	FILE	*logfp;
 };
-struct mbna_plot_vector 
+struct mbna_plot_vector
     {
     int	    command;
     int	    color;
@@ -351,6 +354,9 @@ EXTERNAL int	mbna_contour_algorithm;
 EXTERNAL int	mbna_ncolor;
 EXTERNAL double	mbna_ox;
 EXTERNAL double	mbna_oy;
+EXTERNAL int    mbna_bin_beams_bath;
+EXTERNAL double mbna_bin_swathwidth;
+EXTERNAL double mbna_bin_pseudobeamwidth;
 EXTERNAL double	mbna_plot_lon_min;
 EXTERNAL double	mbna_plot_lon_max;
 EXTERNAL double	mbna_plot_lat_min;
@@ -403,6 +409,9 @@ EXTERNAL struct mbna_contour_vector mbna_contour2;
 EXTERNAL int	mbna_modelplot_width;
 EXTERNAL int	mbna_modelplot_height;
 EXTERNAL int	mbna_modelplot;
+EXTERNAL int	mbna_modelplot_count;
+EXTERNAL int	mbna_modelplot_start;
+EXTERNAL int	mbna_modelplot_end;
 EXTERNAL int	mbna_modelplot_xo;
 EXTERNAL int	mbna_modelplot_yo_lon;
 EXTERNAL int	mbna_modelplot_yo_lat;
@@ -412,11 +421,20 @@ EXTERNAL double	mbna_modelplot_yscale;
 EXTERNAL double	mbna_modelplot_yzscale;
 EXTERNAL int	mbna_modelplot_zoom_x1;
 EXTERNAL int	mbna_modelplot_zoom_x2;
-EXTERNAL int	mbna_modelplot_pingstart;
-EXTERNAL int	mbna_modelplot_pingend;
+EXTERNAL int	mbna_modelplot_zoom;
+EXTERNAL int	mbna_modelplot_startzoom;
+EXTERNAL int	mbna_modelplot_endzoom;
+EXTERNAL int	mbna_num_ties_plot;
+EXTERNAL int	mbna_modelplot_tiestart;
+EXTERNAL int	mbna_modelplot_tieend;
+EXTERNAL int	mbna_modelplot_tiezoom;
+EXTERNAL int	mbna_modelplot_tiestartzoom;
+EXTERNAL int	mbna_modelplot_tieendzoom;
 EXTERNAL int	mbna_modelplot_pickfile;
 EXTERNAL int	mbna_modelplot_picksection;
 EXTERNAL int	mbna_modelplot_picksnav;
+EXTERNAL int	mbna_modelplot_blocksurvey1;
+EXTERNAL int	mbna_modelplot_blocksurvey2;
 
 /* mbnavadjust global project parameters */
 EXTERNAL struct	mbna_project project;
@@ -428,6 +446,7 @@ EXTERNAL int	mbna_reset_crossings;
 void	do_mbnavadjust_init(int argc, char **argv);
 void	do_set_controls();
 void	do_update_status();
+void	do_update_modelplot_status();
 void	do_naverr_init();
 void	do_update_naverr();
 void	do_naverr_offsetlabel();
@@ -449,7 +468,7 @@ int	mbnavadjust_close_project();
 int	mbnavadjust_write_project();
 int	mbnavadjust_read_project();
 int	mbnavadjust_import_data(char *path, int format);
-int	mbnavadjust_import_file(char *path, int format);
+int	mbnavadjust_import_file(char *path, int format, int firstfile);
 int	mbnavadjust_findcrossings();
 int	mbnavadjust_findcrossingsfile(int ifile);
 int	mbnavadjust_poornav_file();
@@ -479,15 +498,15 @@ int	mbnavadjust_crossing_unload();
 int	mbnavadjust_crossing_replot();
 int	mbnavadjust_section_load(int file_id, int section_id, void **swathraw_ptr, void **swath_ptr, int num_pings);
 int	mbnavadjust_section_translate(int file_id, void *swathraw_ptr, void *swath_ptr, double zoffset);
-int	mbnavadjust_section_contour(int fileid, int sectionid, 
+int	mbnavadjust_section_contour(int fileid, int sectionid,
 				struct swath *swath,
 				struct mbna_contour_vector *contour);
 int	mbnavadjust_naverr_snavpoints(int ix, int iy);
 int	mbnavadjust_sections_intersect(int crossing_id);
 int	mbnavadjust_crossing_overlap(int crossing_id);
-int	mbnavadjust_crossing_overlapbounds(int crossing_id, 
+int	mbnavadjust_crossing_overlapbounds(int crossing_id,
 				double offset_x, double offset_y,
-				double *lonmin, double *lonmax, 
+				double *lonmin, double *lonmax,
 				double *latmin, double *latmax);
 int	mbnavadjust_get_misfit();
 int	mbnavadjust_get_misfitxy();
@@ -498,6 +517,7 @@ void 	plot_string(double x, double y, double hgt, double angle, char *label);
 void	mbnavadjust_naverr_scale();
 void	mbnavadjust_naverr_plot(int plotmode);
 int	mbnavadjust_autopick(int do_vertical);
+int	mbnavadjust_autosetsvsvertical();
 int	mbnavadjust_zerozoffsets();
 int	mbnavadjust_invertnav();
 int	mbnavadjust_applynav();
@@ -556,6 +576,7 @@ void	do_view_showselectedfile( Widget w, XtPointer client_data, XtPointer call_d
 void	do_view_showselectedsection( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_autopick( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_autopickhorizontal( Widget w, XtPointer client_data, XtPointer call_data);
+void	do_action_autosetsvsvertical( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_analyzecrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_checknewcrossings( Widget w, XtPointer client_data, XtPointer call_data);
 void	do_action_invertnav( Widget w, XtPointer client_data, XtPointer call_data);
