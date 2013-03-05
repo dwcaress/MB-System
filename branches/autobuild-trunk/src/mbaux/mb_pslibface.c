@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_pslibface.c	5/15/94
- *    $Id: mb_pslibface.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_pslibface.c 1940 2012-03-02 21:49:30Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -20,7 +20,7 @@
  *--------------------------------------------------------------------*/
 /*
  * MB_PSLIBFACE is a set of functions which provide an interface
- * between the program MBCONTOUR and the PSLIB Postscript plotting 
+ * between the program MBCONTOUR and the PSLIB Postscript plotting
  * library from GMT.  This code is separated from MBCONTOUR so that
  * a similar set of interface functions for pen plotting can be linked
  * to the same source code.
@@ -131,16 +131,16 @@ int	*green;
 int	*blue;
 int	rgb[3];
 
-static char rcs_id[]="$Id: mb_pslibface.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[]="$Id: mb_pslibface.c 1940 2012-03-02 21:49:30Z caress $";
 
 /*--------------------------------------------------------------------------*/
 /* 	function plot_init initializes the GMT plotting. */
-int plot_init(	int	verbose, 
-		int	argc, 
-		char	**argv, 
-		double	*bounds_use, 
-		double	*scale, 
-		double	*inch2lon, 
+int plot_init(	int	verbose,
+		int	argc,
+		char	**argv,
+		double	*bounds_use,
+		double	*scale,
+		double	*inch2lon,
 		int	*error)
 {
 	char	*function_name = "plot_init";
@@ -172,14 +172,14 @@ int plot_init(	int	verbose,
 
 	/* deal with gmt options */
 	GMT_begin (argc, argv);
-	for (i = 1; i < argc; i++) 
+	for (i = 1; i < argc; i++)
 		{
-		if (argv[i][0] == '-') 
+		if (argv[i][0] == '-')
 			{
-			switch (argv[i][1]) 
+			switch (argv[i][1])
 				{
 				/* Common parameters */
-			
+
 				case 'B':
 				case 'J':
 				case 'K':
@@ -194,13 +194,13 @@ int plot_init(	int	verbose,
 				case 'y':
 				case 'c':
 				case '\0':
-					errflg += GMT_get_common_args (argv[i], 
-						&bounds[0], &bounds[1], 
+					errflg += GMT_get_common_args (argv[i],
+						&bounds[0], &bounds[1],
 						&bounds[2], &bounds[3]);
 					break;
-				
+
 				/* Supplemental parameters */
-			
+
 				case 'F':
 					sscanf (&argv[i][2], "%d/%d/%d",
 						&gmtdefs.basemap_frame_rgb[0],
@@ -294,7 +294,7 @@ int plot_end(int verbose, int *error)
 	ps_clipoff();
 
 	/* plot basemap if required */
-	if (frame_info.plot) 
+	if (frame_info.plot)
 		{
 		ps_setpaint (gmtdefs.basemap_frame_rgb);
 		GMT_map_basemap ();
@@ -325,7 +325,7 @@ int plot_exit(int argc, char **argv)
 	int	status = MB_SUCCESS;
 
 	GMT_end(argc, argv);
-	
+
 	return(status);
 }
 

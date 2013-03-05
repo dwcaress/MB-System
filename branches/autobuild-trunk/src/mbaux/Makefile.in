@@ -77,7 +77,7 @@ am_libmbaux_la_OBJECTS = libmbaux_la-mb_spline.lo \
 	libmbaux_la-mb_zgrid.lo libmbaux_la-mb_surface.lo \
 	libmbaux_la-mb_cheb.lo libmbaux_la-mb_delaun.lo \
 	libmbaux_la-mb_track.lo libmbaux_la-mb_truecont.lo \
-	libmbaux_la-mb_readgrd.lo
+	libmbaux_la-mb_readgrd.lo libmbaux_la-mb_intersectgrid.lo
 libmbaux_la_OBJECTS = $(am_libmbaux_la_OBJECTS)
 libmbaux_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(libmbaux_la_CFLAGS) \
@@ -275,7 +275,8 @@ libmbps_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} -lpsl -lgmtps
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbaux_la_SOURCES = \
 		      mb_spline.c mb_zgrid.c mb_surface.c mb_cheb.c \
-		      mb_delaun.c mb_track.c mb_truecont.c mb_readgrd.c
+		      mb_delaun.c mb_track.c mb_truecont.c mb_readgrd.c \
+		      mb_intersectgrid.c
 
 libmbaux_la_CFLAGS = -L../mbio
 libmbaux_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} -lpsl libmbps.la -lmbio
@@ -362,6 +363,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbaux_la-mb_cheb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbaux_la-mb_delaun.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbaux_la-mb_intersectgrid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbaux_la-mb_readgrd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbaux_la-mb_spline.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmbaux_la-mb_surface.Plo@am__quote@
@@ -447,6 +449,13 @@ libmbaux_la-mb_readgrd.lo: mb_readgrd.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mb_readgrd.c' object='libmbaux_la-mb_readgrd.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbaux_la_CFLAGS) $(CFLAGS) -c -o libmbaux_la-mb_readgrd.lo `test -f 'mb_readgrd.c' || echo '$(srcdir)/'`mb_readgrd.c
+
+libmbaux_la-mb_intersectgrid.lo: mb_intersectgrid.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbaux_la_CFLAGS) $(CFLAGS) -MT libmbaux_la-mb_intersectgrid.lo -MD -MP -MF $(DEPDIR)/libmbaux_la-mb_intersectgrid.Tpo -c -o libmbaux_la-mb_intersectgrid.lo `test -f 'mb_intersectgrid.c' || echo '$(srcdir)/'`mb_intersectgrid.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libmbaux_la-mb_intersectgrid.Tpo $(DEPDIR)/libmbaux_la-mb_intersectgrid.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mb_intersectgrid.c' object='libmbaux_la-mb_intersectgrid.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libmbaux_la_CFLAGS) $(CFLAGS) -c -o libmbaux_la-mb_intersectgrid.lo `test -f 'mb_intersectgrid.c' || echo '$(srcdir)/'`mb_intersectgrid.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

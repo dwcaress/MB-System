@@ -6,10 +6,10 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_surface.c	5/2/94
- *    $Id: mb_surface.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_surface.c 1917 2012-01-10 19:25:33Z caress $
  *
  *    Inclusion in MB-System:
- *    Copyright (c) 1994-2011 by
+ *    Copyright (c) 1994-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -208,7 +208,7 @@ double	guess_surface_time(int nx, int ny);
 int	get_prime_factors(int n, int f[]);
 int	gcd_euclid(int a,int b);
 
-static char rcs_id[] = "$Id: mb_surface.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mb_surface.c 1917 2012-01-10 19:25:33Z caress $";
 
 int mb_surface(int verbose, int ndat, float *xdat, float *ydat, float *zdat,
 		double xxmin, double xxmax, double yymin, double yymax, double xxinc, double yyinc,

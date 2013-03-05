@@ -19,7 +19,8 @@ libmbps_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} -lpsl -lgmtps
 libmbaux_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbaux_la_SOURCES = \
 		      mb_spline.c mb_zgrid.c mb_surface.c mb_cheb.c \
-		      mb_delaun.c mb_track.c mb_truecont.c mb_readgrd.c
+		      mb_delaun.c mb_track.c mb_truecont.c mb_readgrd.c \
+		      mb_intersectgrid.c
 libmbaux_la_CFLAGS = -L../mbio
 libmbaux_la_LIBADD = ${libnetcdf_LIBS} ${libgmt_LIBS} -lpsl libmbps.la -lmbio
 

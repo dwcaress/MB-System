@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mb_readgrd.c	12/10/2007
- *    $Id: mb_readgrd.c 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mb_readgrd.c 1998 2012-11-06 06:50:52Z caress $
  *
- *    Copyright (c) 2007-2011 by
+ *    Copyright (c) 2007-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -72,7 +72,7 @@ extern int isnanf(float x);
 /* default no data value define */
 #define	DEFAULT_NODATA		-9999999.9
 
-static char rcs_id[] = "$Id: mb_readgrd.c 1891 2011-05-04 23:46:30Z caress $";
+static char rcs_id[] = "$Id: mb_readgrd.c 1998 2012-11-06 06:50:52Z caress $";
 
 /* global variables */
 static char program_name[] = "mb_readgrd";
@@ -121,7 +121,7 @@ int mb_readgrd(int verbose, char *grdfile,
 	double	ddx, ddy;
 	int	kx0, kx2, ky0, ky2;
 	int	i, j, k, ii, jj, kk;
-	
+
 	/* print input debug statements */
 	if (verbose >= 2)
 		{
@@ -131,7 +131,7 @@ int mb_readgrd(int verbose, char *grdfile,
 		fprintf(stderr,"dbg2       verbose:         %d\n", verbose);
 		fprintf(stderr,"dbg2       grdfile:         %s\n", grdfile);
 		}
-	
+
 	/* do required initialization */
 /*	GMT_begin (pargc, pargv);
 	GMT_put_history(pargc, pargv);
@@ -144,14 +144,14 @@ int mb_readgrd(int verbose, char *grdfile,
 	GMT_grdio_init ();
 	GMT_make_fnan (GMT_f_NaN);
 	GMT_make_dnan (GMT_d_NaN);
-	
+
 	/* read input grd file header */
-	if (GMT_read_grd_info (grdfile, &header)) 
+	if (GMT_read_grd_info (grdfile, &header))
 		{
 		*error = MB_ERROR_OPEN_FAIL;
 		status = MB_FAILURE;
 		}
-	    
+
 	/* proceed if ok */
 	if (status == MB_SUCCESS)
 		{
@@ -208,42 +208,42 @@ int mb_readgrd(int verbose, char *grdfile,
 			project_info.degree[0] = TRUE;
 			GMT_io.in_col_type[0] = GMT_IS_LON;
 			GMT_io.in_col_type[1] = GMT_IS_LAT;
-			}	
+			}
 
 		/* set up internal arrays */
     		*nodatavalue = MIN(DEFAULT_NODATA, header.z_min - 10 * (header.z_max - header.z_min));
     		*nxy = header.nx * header.ny;
     		*nx = header.nx;
     		*ny = header.ny;
-    		*xmin = header.x_min; 
-    		*xmax = header.x_max; 
-    		*ymin = header.y_min; 
-    		*ymax = header.y_max; 
+    		*xmin = header.x_min;
+    		*xmax = header.x_max;
+    		*ymin = header.y_min;
+    		*ymax = header.y_max;
     		*dx = header.x_inc;
     		*dy = header.y_inc;
-    		*min = header.z_min; 
-    		*max = header.z_max; 
+    		*min = header.z_min;
+    		*max = header.z_max;
 
-    		status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy), 
+    		status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
     					(void **)&rawdata, error);
     		if (status == MB_SUCCESS)
-		status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy), 
+		status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
     					(void **)&usedata, error);
 		*data = usedata;
     		if (status == MB_SUCCESS && data_dzdx != NULL)
 			{
-			status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy), 
+			status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
     					(void **)&usedata, error);
 			*data_dzdx = usedata;
 			}
     		if (status == MB_SUCCESS && data_dzdy != NULL)
 			{
-			status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy), 
+			status = mb_mallocd(verbose, __FILE__,__LINE__, sizeof(float) * (*nxy),
     					(void **)&usedata, error);
 			*data_dzdy = usedata;
 			}
 		}
-	    
+
 	/* proceed if ok */
 	if (status == MB_SUCCESS)
 		{
@@ -261,8 +261,8 @@ int mb_readgrd(int verbose, char *grdfile,
 		pad[1] = 0;
 		pad[2] = 0;
 		pad[3] = 0;
-		if (GMT_read_grd (grdfile, &header, rawdata, 
-				    *xmin, *xmax, *ymin, *ymax, 
+		if (GMT_read_grd (grdfile, &header, rawdata,
+				    *xmin, *xmax, *ymin, *ymax,
 				    pad, FALSE))
 			{
 			*error = MB_ERROR_OPEN_FAIL;
@@ -274,7 +274,7 @@ int mb_readgrd(int verbose, char *grdfile,
 		GMT_free ((void *)GMT_io.in_col_type);
 		GMT_free ((void *)GMT_io.out_col_type);
 		}
-	    
+
 	/* reorder grid to internal convention */
 	if (status == MB_SUCCESS)
 		{
@@ -290,7 +290,7 @@ int mb_readgrd(int verbose, char *grdfile,
 			}
 		mb_freed(verbose,__FILE__, __LINE__, (void **)&rawdata, error);
 		}
-	    
+
 	/* calculate derivatives */
 	if (status == MB_SUCCESS && data_dzdx != NULL && data_dzdy != NULL)
 		{
@@ -346,7 +346,7 @@ int mb_readgrd(int verbose, char *grdfile,
 	/* print debug info */
 	if (verbose > 0)
 		{
-		fprintf(stderr,"Grid read:\n");
+		fprintf(stderr,"\nGrid read:\n");
 		fprintf(stderr,"  Dimensions: %d %d\n", header.nx, header.ny);
 		if (modeltype == ModelTypeProjected)
 			{
@@ -366,9 +366,9 @@ int mb_readgrd(int verbose, char *grdfile,
 			fprintf(stderr,"  Latitude:   %f %f  %f\n",
 				header.y_min, header.y_max, header.y_inc);
 			}
-		fprintf(stderr,"  Internal Grid Projection Mode:         %d\n", 
+		fprintf(stderr,"  Internal Grid Projection Mode:         %d\n",
 	    			*grid_projection_mode);
-		fprintf(stderr,"  Internal Grid Projection ID:           %s\n", 
+		fprintf(stderr,"  Internal Grid Projection ID:           %s\n",
 	    			grid_projection_id);
 
 		fprintf(stderr,"Data Read:\n");
