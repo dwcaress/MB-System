@@ -6,4 +6,4 @@ endif
 if BUILD_GL
   XBUILD_SUB_GL = mbview
 endif
-SUBDIRS = gsf surf mr1pr proj mbio mbaux utilities gmt macros $(XBUILD_SUB) otps $(XBUILD_SUB_GL)
+SUBDIRS = gsf html surf mr1pr proj mbio mbaux utilities gmt macros $(XBUILD_SUB) otps $(XBUILD_SUB_GL)
