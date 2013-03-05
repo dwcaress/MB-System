@@ -6,9 +6,9 @@
 
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.c	4/8/93
- *    $Id: mbedit_prog.c 1907 2011-11-10 04:33:03Z caress $
+ *    $Id: mbedit_prog.c 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 1993-2011 by
+ *    Copyright (c) 1993-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
@@ -434,7 +434,7 @@ struct mbedit_ping_struct
 	};
 
 /* id variables */
-static char rcs_id[] = "$Id: mbedit_prog.c 1907 2011-11-10 04:33:03Z caress $";
+static char rcs_id[] = "$Id: mbedit_prog.c 1917 2012-01-10 19:25:33Z caress $";
 static char program_name[] = "MBedit";
 static char help_message[] =  
 "MBedit is an interactive editor used to identify and flag\n\
@@ -490,7 +490,7 @@ static int	*editcount = NULL;
 static char	comment[MB_COMMENT_MAXLINE];
 
 /* buffer control variables */
-#define	MBEDIT_BUFFER_SIZE	25000
+#define	MBEDIT_BUFFER_SIZE	30000
 static int	file_open = MB_NO;
 static int	buff_size = MBEDIT_BUFFER_SIZE;
 static int	buff_size_max = MBEDIT_BUFFER_SIZE;
@@ -5368,6 +5368,7 @@ int mbedit_load_data(int buffer_size,
 	/* load data */
 	do
 		{
+		error = MB_ERROR_NO_ERROR;
 		status = mb_get_all(verbose,imbio_ptr,&store_ptr,&kind,
 				ping[nbuff].time_i,
 				&ping[nbuff].time_d,

@@ -1,8 +1,8 @@
 /*--------------------------------------------------------------------
  *    The MB-system:	mbedit.h	10/14/2009
- *    $Id: mbedit.h 1891 2011-05-04 23:46:30Z caress $
+ *    $Id: mbedit.h 1917 2012-01-10 19:25:33Z caress $
  *
- *    Copyright (c) 2009-2011 by
+ *    Copyright (c) 2009-2012 by
  *    David W. Caress (caress@mbari.org)
  *      Monterey Bay Aquarium Research Institute
  *      Moss Landing, CA 95039
