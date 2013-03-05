@@ -72,7 +72,7 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libmbgsf_la_LIBADD =
 am_libmbgsf_la_OBJECTS = dump_gsf.lo gsf.lo gsf_dec.lo gsf_enc.lo \
-	gsf_indx.lo
+	gsf_indx.lo gsf_info.lo
 libmbgsf_la_OBJECTS = $(am_libmbgsf_la_OBJECTS)
 libmbgsf_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -245,7 +245,7 @@ include_HEADERS = gsf.h
 lib_LTLIBRARIES = libmbgsf.la
 libmbgsf_la_LDFLAGS = -no-undefined -version-info 0:0:0
 libmbgsf_la_SOURCES = \
-dump_gsf.c  gsf.c  gsf_dec.c  gsf_enc.c  gsf_indx.c
+dump_gsf.c  gsf.c  gsf_dec.c  gsf_enc.c  gsf_indx.c gsf_info.c
 
 all: all-am
 
@@ -326,6 +326,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gsf_dec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gsf_enc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gsf_indx.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gsf_info.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -118,6 +118,15 @@
  *                new subrecord definition for EM2000.  Bug fixes in gsfOpen and gsfPercent. 
  * mab 06-11-09  Moved GSF_MAX_RECORD_SIZE from 256KB to 512KB to accomodate Reson7125 imagery.
  * jsb 01-14-10  Added new function prototypes to return various status information about the opened GSF file. 
+ * clb 04-21-11  Changed version from 03.02 to 03.03
+ * clb 05-11-11  Changed the value of GSF_NULL_DEPTH_CORRECTOR (STR 19142)
+ * clb 05-11-11  Added depth sensor and receiver array offsets to gsfMBOffsets structure
+ * clb 05-27-11  Added __MINGW64__ references
+ * clb 06-21-11  Added t_gsfEM12Specific structure
+ * clb 09-20-11  Added R2Sonic support
+ * clb 10-04-11  Added GSF_PARTIAL_RECORD_AT_END_OF_FILE error code
+ * clb 11-09-11  Added gsfInitializeMBParams() prototype
+ * clb 11-10-aa  Changed value of GSF_NULL_DEPTH_CORRECTOR back to 99.99 for backwards compatibility
  *
  * Classification : Unclassified
  *
@@ -153,7 +162,7 @@ extern          "C"
 #endif
 
 /* Define this version of the GSF library */
-#define GSF_VERSION       "GSF-v03.02"
+#define GSF_VERSION       "GSF-v03.04"
 
 /* Define largest ever expected record size */
 #define GSF_MAX_RECORD_SIZE    524288
@@ -184,7 +193,7 @@ typedef int            gsfsLong;       /* a signed 32 bit integer */
 #define GSF_LONG_SIZE  4
 
 /* redefine gsfError for MINGW applications using gsf.dll, harmless for other compilers */
-#ifdef __MINGW32__
+#if defined (__MINGW32__) || defined (__MINGW64__)
   #if __GNUC__ < 3
      #ifdef gsf_USE_DLL
       #define gsfError *__imp_gsfError
@@ -319,6 +328,8 @@ gsfDataID;
 #define GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_RAW_SPECIFIC   (unsigned)148
 #define GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC           (unsigned)149
 #define GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC          (unsigned)150
+#define GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC     (unsigned)151
+#define GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC     (unsigned)152
 
 #define GSF_SINGLE_BEAM_SUBRECORD_UNKNOWN                   (unsigned)  0
 #define GSF_SINGLE_BEAM_SUBRECORD_ECHOTRAC_SPECIFIC         (unsigned)201
@@ -376,7 +387,8 @@ gsfDataID;
 #define GSF_BEAM_WIDTH_UNKNOWN        -1.0
 
 /* define Posix.4 proposed structure for internal storage of time */
-#if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined))
+/* timespec is defined in __MINGW64__ but it appears that they don't set a macro for it.  JCD  */
+#if (!defined (_STRUCT_TIMESPEC_) && !defined (_TIMESPEC_T) && !defined (_STRUCT_TIMESPEC) && !defined (_SYS_TIMESPEC_H) && !defined (__timespec_defined) && !defined (__MINGW64__))
 #define _STRUCT_TIMESPEC_
 #define _TIMESPEC_T
 #define _STRUCT_TIMESPEC
@@ -387,13 +399,12 @@ gsfDataID;
 /* compiled with Apple's gcc on OSX and other third party compilers, so we use it to */
 /* insure the definition below does not conflict. */
  #ifndef __APPLE__
- #ifndef WIN32
+
     struct timespec
     {
         time_t          tv_sec;
         long            tv_nsec;
     };
- #endif
  #endif
 #endif
 
@@ -1109,7 +1120,7 @@ typedef struct t_gsfKlein5410BssSpecific
 }
 t_gsfKlein5410BssSpecific;
 
-/* Define the Imagenex Delta T sensor specific dada structure */
+/* Define the Imagenex Delta T sensor specific data structure */
 typedef struct t_gsfDeltaTSpecific 
 {
     char            decode_file_type[4];     /* contains the decoded files extension. */
@@ -1144,6 +1155,55 @@ typedef struct t_gsfDeltaTSpecific
 }
 t_gsfDeltaTSpecific;
 
+/* Define sensor specific data structures for the EM12 */
+typedef struct t_gsfEM12Specific
+{
+    int              ping_number;          /* 0 to 65535 */
+    int              resolution;           /* 1 = high, 2 = low */
+    int              ping_quality;         /* 21 to 81; number of beams with accepted bottom detections */
+    double           sound_velocity;       /* m/s */
+    int              mode;                 /* 1 to 8; shallow, deep, type of beam spacing */
+    unsigned char    spare[32];            /* room to grow */
+} t_gsfEM12Specific;
+
+/* Define the R2Sonic sensor specific data structure */
+typedef struct t_gsfR2SonicSpecific
+{
+    unsigned char   model_number[12];   /* Model number, e.g. "2024".  Unused chars are nulls */
+    unsigned char   serial_number[12];  /* Serial number, e.g. "100017".  Unused chars are nulls */
+    struct timespec dg_time;            /* Ping time, re 00:00:00, Jan 1, 1970 ("Unix time") */
+    unsigned int    ping_number;        /* Sequential ping counter relative to power up or reboot */
+    double          ping_period;        /* Time interval between two most recent pings, seconds */
+    double          sound_speed;        /* Sound speed at transducer face, m/s */
+    double          frequency;          /* Sonar center frequency (Hz) */
+    double          tx_power;           /* TX source level, dB re 1uPa at 1 meter */
+    double          tx_pulse_width;     /* pulse width, seconds */
+    double          tx_beamwidth_vert;  /* fore-aft beamwidth, degrees */
+    double          tx_beamwidth_horiz; /* athwartship beamwidth, degrees */
+    double          tx_steering_vert;   /* fore-aft beam steering angle, degrees */
+    double          tx_steering_horiz;  /* athwartship beam steering angle, degrees */
+    unsigned int    tx_misc_info;       /* reserved for future use */
+    double          rx_bandwidth;       /* receiver bandwidth, Hz */
+    double          rx_sample_rate;     /* receiver sample rate, Hz */
+    double          rx_range;           /* receiver range setting, seconds in docs but I think it's meters  */
+    double          rx_gain;            /* receiver gain setting, 2dB increments between steps */
+    double          rx_spreading;       /* TVG spreading law coefficient, e.g. 20log10(range) */
+    double          rx_absorption;      /* TVG absorption coefficient, dB/km */
+    double          rx_mount_tilt;      /* degrees */
+    unsigned int    rx_misc_info;       /* reserved for future use */
+    unsigned short  reserved;           /* reserved for future use */
+    unsigned short  num_beams;          /* number of beams in this ping */
+
+    /* These fields are from the BTH0 packet only */
+    double          A0_more_info[6];     /* Additional fields associated with equi-angular mode; first element of array is roll  */
+    double          A2_more_info[6];     /* Additional fields associated with equi-distant mode; first element of array is roll */
+    double          G0_depth_gate_min;   /* global minimum gate in seconds (twtt) */
+    double          G0_depth_gate_max;   /* global maximum gate in seconds (twtt) */
+    double          G0_depth_gate_slope; /* slope of depth gate, degrees */
+    unsigned char   spare[32];           /* saved for future expansion */
+}
+t_gsfR2SonicSpecific;
+
 /* Define a union of the known sensor specific ping subrecords */
 typedef union t_gsfSensorSpecific
 {
@@ -1177,6 +1237,8 @@ typedef union t_gsfSensorSpecific
     t_gsfGeoSwathPlusSpecific gsfGeoSwathPlusSpecific; /* DHG 2006/09/27 Use for GeoSwath+ interferometer */
     t_gsfKlein5410BssSpecific gsfKlein5410BssSpecific; /* Use for Klein 5410 Bathy Sidescan. */
     t_gsfDeltaTSpecific       gsfDeltaTSpecific;
+    t_gsfEM12Specific         gsfEM12Specific;
+    t_gsfR2SonicSpecific      gsfR2SonicSpecific;
 
         /* Single beam sensors added */
     t_gsfSBEchotracSpecific   gsfSBEchotracSpecific;
@@ -1371,6 +1433,38 @@ typedef struct t_gsfKlein5410BssImagerySpecific
     unsigned char  spare[4];            /* spare sensor specific subrecord space, reserved for future expansion */
 } t_gsfKlein5410BssImagerySpecific;
 
+/* Define the R2Sonic sensor imagery data structure.  Very similar to gsfR2SonicSpecific structure */
+typedef struct t_gsfR2SonicImagerySpecific
+{
+    unsigned char   model_number[12];   /* Model number, e.g. "2024".  Unused chars are nulls */
+    unsigned char   serial_number[12];  /* Serial number, e.g. "100017".  Unused chars are nulls */
+    struct timespec dg_time;            /* Ping time, re 00:00:00, Jan 1, 1970 ("Unix time") */
+    unsigned int    ping_number;        /* Sequential ping counter relative to power up or reboot */
+    double          ping_period;        /* Time interval between two most recent pings, seconds */
+    double          sound_speed;        /* Sound speed at transducer face, m/s */
+    double          frequency;          /* Sonar center frequency (Hz) */
+    double          tx_power;           /* TX source level, dB re 1uPa at 1 meter */
+    double          tx_pulse_width;     /* pulse width, seconds */
+    double          tx_beamwidth_vert;  /* fore-aft beamwidth, degrees */
+    double          tx_beamwidth_horiz; /* athwartship beamwidth, degreess */
+    double          tx_steering_vert;   /* fore-aft beam steering angle, degrees */
+    double          tx_steering_horiz;  /* athwartship beam steering angle, degrees */
+    unsigned int    tx_misc_info;       /* reserved for future use */
+    double          rx_bandwidth;       /* receiver bandwidth, Hz */
+    double          rx_sample_rate;     /* receiver sample rate, Hz */
+    double          rx_range;           /* receiver range setting, seconds in docs but I think it's meters  */
+    double          rx_gain;            /* receiver gain setting, 2dB increments between steps */
+    double          rx_spreading;       /* TVG spreading law coefficient, e.g. 20log10(range) */
+    double          rx_absorption;      /* TVG absorption coefficient, dB/km */
+    double          rx_mount_tilt;      /* degrees */
+    unsigned int    rx_misc_info;       /* reserved for future use */
+    unsigned short  reserved;           /* reserved for future use */
+    unsigned short  num_beams;          /* number of beams in this ping */
+    double          more_info[6];       /* reserved for future use, from SNI0 datagram */
+    unsigned char   spare[32];          /* saved for future expansion */
+}
+t_gsfR2SonicImagerySpecific;
+
 typedef union t_gsfSensorImagery
 {
     t_gsfEM3ImagerySpecific          gsfEM3ImagerySpecific;          /* used for EM120, EM300, EM1002, EM3000 */
@@ -1378,6 +1472,7 @@ typedef union t_gsfSensorImagery
     t_gsfReson8100ImagerySpecific    gsfReson8100ImagerySpecific;    /* For Reson 81P "snippet" imagery */
     t_gsfEM4ImagerySpecific          gsfEM4ImagerySpecific;          /* used for EM122, EM302, EM710 */
     t_gsfKlein5410BssImagerySpecific gsfKlein5410BssImagerySpecific; /* used for Klein 5410 Bathy Sidescan */
+    t_gsfR2SonicImagerySpecific      gsfR2SonicImagerySpecific;      /* used for R2Sonic */
 } gsfSensorImagery;
 
 typedef struct gsfTimeSeriesIntensity
@@ -1576,6 +1671,18 @@ gsfHVNavigationError;
 #define GSF_POS_TYPE_GPPP "GPPP"               /* Post Processing - Precise Point Positioning */
 #define GPS_POS_TYPE_GPPK "GPPK"               /* Post Processing - Post Processed Kinematic */
 
+#define GSF_POS_TYPE_INUA "INUA"   /* Inertial measurements only, unaided */
+#define GSF_POS_TYPE_INVA "INVA"   /* Inertial measurements with absolute velocity aiding */
+#define GSF_POS_TYPE_INWA "INWA"   /* Inertial measurements with water-relative velocity aiding */
+#define GSF_POS_TYPE_LBLN "LBLN"   /* One or more long-baseline acoustic navigation lines of position */
+#define GSF_POS_TYPE_USBL "USBL"   /* ultra-short baseline acoustic navigation */
+
+#define GSF_POS_TYPE_PIUA "PIUA"   /* Post-processed inertial measurements only, unaided */
+#define GSF_POS_TYPE_PIVA "PIVA"   /* Post-processed Inertial measurements with absolute velocity aiding */
+#define GSF_POS_TYPE_PIWA "PIWA"   /* Post-processed Inertial measurements with water-relative velocity aiding */
+#define GSF_POS_TYPE_PLBL "PLBL"   /* Post-processed One or more long-baseline acoustic navigation lines of position */
+#define GSF_POS_TYPE_PSBL "PSBL"   /* Post-processed ultra-short baseline acoustic navigation */
+
 /* Define the data structure for a ping from a swath bathymetric system */
 typedef struct t_gsfAttitude
 {
@@ -1659,6 +1766,15 @@ typedef struct t_gsfMBOffsets
     double           position_latency;                           /* seconds */
     double           attitude_latency;                           /* seconds */
     double           depth_sensor_latency;                       /* seconds */
+    double           depth_sensor_x_offset;                      /* for subsurface vehicles; distance of pressure sensor from MRP in meters */
+    double           depth_sensor_y_offset;                      /* for subsurface vehicles; distance of pressure sensor from MRP in meters */
+    double           depth_sensor_z_offset;                      /* for subsurface vehicles; distance of pressure sensor from MRP in meters */
+    double           rx_transducer_x_offset[GSF_MAX_OFFSETS];      /* If the receive array is in a different location than   */
+    double           rx_transducer_y_offset[GSF_MAX_OFFSETS];      /* the transmit array these "rx" offsets will be used for */
+    double           rx_transducer_z_offset[GSF_MAX_OFFSETS];      /* the receive array and the transducer offsets defined   */ 
+    double           rx_transducer_pitch_offset[GSF_MAX_OFFSETS];  /* above will be used for the transmit array              */
+    double           rx_transducer_roll_offset[GSF_MAX_OFFSETS];
+    double           rx_transducer_heading_offset[GSF_MAX_OFFSETS];
 } gsfMBOffsets;
 
 /* Define a data structure to hold multibeam sonar processing parameters */
@@ -1832,9 +1948,17 @@ typedef struct t_gsfMBParams
 #define GSF_ATTITUDE_RECORD_ENCODE_FAILED        -49
 #define GSF_ATTITUDE_RECORD_DECODE_FAILED        -50
 #define GSF_OPEN_TEMP_FILE_FAILED                -51
+#define GSF_PARTIAL_RECORD_AT_END_OF_FILE        -52
+#define GSF_QUALITY_FLAGS_DECODE_ERROR           -53
+
+/* Global external data defined in this module */
 
 /* The following are the function protoytpes for all functions intended
  * to be exported by the library.
+ 
+	Fugro modification - Mitch Ames - 2012-02-15
+    The original exported functions did not use const pointers everywhere that they could or should. 
+    I've added const where appropriate.  
  */
 
 int OPTLK       gsfOpen(const char *filename, const int mode, int *handle);
@@ -2132,7 +2256,19 @@ void OPTLK      gsfPrintError(FILE * fp);
  * Error Conditions : none
  */
 
-char *gsfStringError(void);
+int gsfIntError(void);
+/* Description : This function is used to return the most recent
+ *  error encountered.  This function need only be called if
+ *  a -1 is returned from one of the gsf functions.
+ *
+ * Inputs : none
+ *
+ * Returns : constant integer value representing the most recent error
+ *
+ * Error Conditions : none
+ */
+
+const char *gsfStringError(void);
 /* Description : This function is used to return a short message describing
  *  the most recent error encountered.  This function need only be called if
  *  a -1 is returned from one of the gsf functions.
@@ -2205,7 +2341,7 @@ int OPTLK       gsfGetNumberRecords (int handle, int desiredRecord);
  *  GSF_BAD_ACCESS_MODE
  */
 
-int OPTLK       gsfCopyRecords (gsfRecords *target, gsfRecords *source);
+int OPTLK       gsfCopyRecords (gsfRecords *target, const gsfRecords *source);
 /* Description : This function will copy all of the data contained in the
  *  source gsfRecords data structure to the target gsfRecords data
  *  structure. The target MUST be memset to zero before the first call to
@@ -2228,7 +2364,7 @@ int OPTLK       gsfCopyRecords (gsfRecords *target, gsfRecords *source);
  *  GSF_MEMORY_ALLOCATION_FAILED
  */
 
-int OPTLK       gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int numArrays);
+int OPTLK       gsfPutMBParams(const gsfMBParams *p, gsfRecords *rec, int handle, int numArrays);
 /* Description : This function moves swath bathymetry sonar processing
  *    parameters from internal form to "KEYWORD=VALUE" form.  The internal
  *    form parameters are read from an MB_PARAMETERS data structure maintained
@@ -2255,7 +2391,7 @@ int OPTLK       gsfPutMBParams(gsfMBParams *p, gsfRecords *rec, int handle, int 
  *     GSF_PARAM_SIZE_FIXED
  */
 
-int OPTLK       gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays);
+int OPTLK       gsfGetMBParams(const gsfRecords *rec, gsfMBParams *p, int *numArrays);
 /* Description : This function moves swath bathymetry sonar processing
  *    parameters from external, form to internal form.  The external
  *    "KEYWORD=VALUE" format parameters are read from a processing_params
@@ -2263,7 +2399,8 @@ int OPTLK       gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays);
  *    The internal form parameters are written into a gsfMBParams data
  *    structure maintained by the caller. Parameters for up to two pairs of
  *    transmit/receive arrays are supported, for systems such as Reson SeaBat
- *    9002.
+ *    9002.  Any parameter not described in a "KEYWORD=VALUE" format will
+ *    be set to "GSF_UNKNOWN_PARAM_VALUE".
  *
  * Inputs :
  *     rec = a pointer to the gsfRecords data structure from which the
@@ -2279,7 +2416,7 @@ int OPTLK       gsfGetMBParams(gsfRecords *rec, gsfMBParams *p, int *numArrays);
  *  none.
  */
 
-int OPTLK       gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, double *athwartship);
+int OPTLK       gsfGetSwathBathyBeamWidths(const gsfRecords *data, double *fore_aft, double *athwartship);
 /* Description : This function returns to the caller the fore-aft and
  *    the port-starboard beam widths in degrees for a swath bathymetry
  *    multibeam sonar, given a gsfRecords data structure which contains
@@ -2301,7 +2438,7 @@ int OPTLK       gsfGetSwathBathyBeamWidths(gsfRecords *data, double *fore_aft, d
  * Error Conditions : unrecognized sonar id or mode.
  */
 
-int OPTLK gsfIsStarboardPing(gsfRecords *data);
+int OPTLK gsfIsStarboardPing(const gsfRecords *data);
 /* Description : This function uses the sonar specific data union
  *     of a gsfSwathBathymetry ping structure to determine if the ping
  *     is from the starboard arrays of a multibeam installation with
@@ -2353,7 +2490,7 @@ int OPTLK gsfLoadDepthScaleFactorAutoOffset(gsfSwathBathyPing *ping, int subreco
  *
  */
 
-int OPTLK gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, double *min_value, double *max_value);
+int OPTLK gsfGetSwathBathyArrayMinMax(const gsfSwathBathyPing *ping, int subrecordID, double *min_value, double *max_value);
 /* Description : This function may be used to obtain the minimum and maximum
  *  supportable values for each of the swath bathymetry arrays.  The minimum
  *  and maximum values are determined based on the scale factors and the array
@@ -2380,7 +2517,7 @@ int OPTLK gsfGetSwathBathyArrayMinMax(gsfSwathBathyPing *ping, int subrecordID, 
  *    GSF_ILLEGAL_SCALE_FACTOR_MULTIPLIER
  */
 
-char *gsfGetSonarTextName(gsfSwathBathyPing *ping);
+const char *gsfGetSonarTextName(const gsfSwathBathyPing *ping);
 /* Description : This function is used to return the text of the sonar name.
  *
  * Inputs : The GSF ping
@@ -2590,7 +2727,7 @@ int gsfFileContainsMBImagery(int handle, int *status);
  *  GSF_NAV_ERROR_RECORD_DECODE_FAILED
  */
 
-int gsfIsNewSurveyLine(int handle, gsfRecords *rec, double azimuth_change, double *last_heading);
+int gsfIsNewSurveyLine(int handle, const gsfRecords *rec, double azimuth_change, double *last_heading);
 /* Function Name : gsfIsNewSurveyLine
  *
  * Description : This function provides an approach for calling applications
@@ -2622,6 +2759,25 @@ int gsfIsNewSurveyLine(int handle, gsfRecords *rec, double azimuth_change, doubl
  * Error Conditions :
  *  none
  */
+
+void gsfInitializeMBParams (gsfMBParams *p);
+/********************************************************************
+ *
+ * Function Name : gsfInitializeMBParams
+ *
+ * Description : This function provides a way to initialize all the
+ *    sonar processing parameters to "unknown"
+ *
+ * Inputs :
+ *    p = a pointer to the gsfMBParams data structure that needs initializing
+ *
+ * Returns :
+ *    None
+ *
+ * Error Conditions :
+ *    None
+ *
+ ********************************************************************/
 
 #ifdef __cplusplus
 }

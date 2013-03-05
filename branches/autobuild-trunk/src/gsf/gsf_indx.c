@@ -68,6 +68,7 @@
  *                 writing to the index file, as an alternative to the
  *                 DISPLAY_SPINNER printouts.  Replaced references to long types
  *                 with int types, for compilation on 64-bit architectures.
+ * clb  05/27/11   added reference to __MINGW64__
  *
  *
  * Classification : Unclassified
@@ -86,7 +87,7 @@
 #include <string.h>
 #if defined(OS2) || defined(WIN32)
     #include <process.h>
-    #if defined (__MINGW32__)
+    #if defined (__MINGW32__) || defined (__MINGW64__)
         #include <unistd.h>
     #endif
     #if defined (__BORLANDC__)
@@ -877,7 +878,7 @@ gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         }
         else
         {
-            if (gsfError != GSF_READ_TO_END_OF_FILE)
+            if (gsfError != GSF_READ_TO_END_OF_FILE && gsfError != GSF_PARTIAL_RECORD_AT_END_OF_FILE)
             {
                 return(-1);
             }
@@ -1652,7 +1653,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
         }
         else
         {
-            if (gsfError != GSF_READ_TO_END_OF_FILE)
+            if (gsfError != GSF_READ_TO_END_OF_FILE && gsfError != GSF_PARTIAL_RECORD_AT_END_OF_FILE)
             {
                 /*  Get rid of the temp files.  */
                 for (i = 0; i < NUM_REC_TYPES; i++)
